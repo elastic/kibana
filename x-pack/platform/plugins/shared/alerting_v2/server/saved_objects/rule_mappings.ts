@@ -13,29 +13,43 @@ import type { SavedObjectsTypeMappingDefinition } from '@kbn/core-saved-objects-
 export const ruleMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
-    name: { type: 'text' },
     kind: { type: 'keyword' },
-    tags: { type: 'keyword' },
-    enabled: { type: 'boolean' },
+    metadata: {
+      properties: {
+        name: { type: 'text' },
+        owner: { type: 'keyword' },
+        labels: { type: 'keyword' },
+      },
+    },
+    time_field: { type: 'keyword' },
     schedule: {
       properties: {
-        custom: { type: 'keyword' },
+        every: { type: 'keyword' },
+        lookback: { type: 'keyword' },
       },
     },
-    query: { type: 'text' },
-    timeField: { type: 'keyword' },
-    lookbackWindow: { type: 'keyword' },
-    groupingKey: { type: 'keyword' },
-    stateTransition: {
+    evaluation: {
       properties: {
-        pendingOperator: { type: 'keyword' },
-        pendingCount: { type: 'unsigned_long' },
-        pendingTimeframe: { type: 'keyword' },
-        recoveringOperator: { type: 'keyword' },
-        recoveringCount: { type: 'unsigned_long' },
-        recoveringTimeframe: { type: 'keyword' },
+        query: {
+          properties: {
+            base: { type: 'text' },
+            condition: { type: 'text' },
+          },
+        },
       },
     },
+    // Objects that don't need to be searched/filtered are stored opaque.
+    recovery_policy: { type: 'object', enabled: false },
+    state_transition: { type: 'object', enabled: false },
+    grouping: {
+      properties: {
+        fields: { type: 'keyword' },
+      },
+    },
+    no_data: { type: 'object', enabled: false },
+    notification_policies: { type: 'object', enabled: false },
+
+    enabled: { type: 'boolean' },
     createdBy: { type: 'keyword' },
     createdAt: { type: 'date' },
     updatedBy: { type: 'keyword' },

@@ -6,7 +6,6 @@
  */
 
 import { injectable } from 'inversify';
-import type { StateTransition } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '../../../resources/alert_events';
 import { alertEpisodeStatus } from '../../../resources/alert_events';
 import type { RuleResponse } from '../../rules_client/types';
@@ -105,12 +104,12 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
   override readonly name = 'count_timeframe';
 
   override canHandle(rule: RuleResponse): boolean {
-    return rule.stateTransition != null;
+    return rule.state_transition != null;
   }
 
   override getNextState(ctx: StateTransitionContext): StateTransitionResult {
     const { rule, previousEpisode, alertEvent } = ctx;
-    const stateTransition = rule.stateTransition;
+    const stateTransition = rule.state_transition;
     const currentEpisodeStatus = previousEpisode?.last_episode_status;
     const currentStatusCount = this.getCurrentStatusCount(previousEpisode);
     const currentEpisodeTimestamp = previousEpisode?.last_episode_timestamp;
@@ -140,10 +139,10 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
       return this.getNextStateTransition({
         currentStatusCount,
         elapsedMs,
-        operator: stateTransition.pendingOperator ?? 'OR',
-        count: stateTransition.pendingCount,
-        timeframeMs: stateTransition.pendingTimeframe
-          ? parseDurationToMs(stateTransition.pendingTimeframe)
+        operator: stateTransition.pending_operator ?? 'OR',
+        count: stateTransition.pending_count,
+        timeframeMs: stateTransition.pending_timeframe
+          ? parseDurationToMs(stateTransition.pending_timeframe)
           : undefined,
         successStatus: alertEpisodeStatus.active,
         stayStatus: alertEpisodeStatus.pending,
@@ -155,10 +154,10 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
       return this.getNextStateTransition({
         currentStatusCount,
         elapsedMs,
-        operator: stateTransition.recoveringOperator ?? 'OR',
-        count: stateTransition.recoveringCount,
-        timeframeMs: stateTransition.recoveringTimeframe
-          ? parseDurationToMs(stateTransition.recoveringTimeframe)
+        operator: stateTransition.recovering_operator ?? 'OR',
+        count: stateTransition.recovering_count,
+        timeframeMs: stateTransition.recovering_timeframe
+          ? parseDurationToMs(stateTransition.recovering_timeframe)
           : undefined,
         successStatus: alertEpisodeStatus.inactive,
         stayStatus: alertEpisodeStatus.recovering,
@@ -191,17 +190,17 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
   }
 
   private shouldSkipPending(
-    stateTransition: NonNullable<StateTransition>,
+    stateTransition: NonNullable<RuleResponse['state_transition']>,
     nextStatus: AlertEpisodeStatus
   ): boolean {
-    return stateTransition.pendingCount === 0 && nextStatus === alertEpisodeStatus.pending;
+    return stateTransition.pending_count === 0 && nextStatus === alertEpisodeStatus.pending;
   }
 
   private shouldSkipRecovering(
-    stateTransition: NonNullable<StateTransition>,
+    stateTransition: NonNullable<RuleResponse['state_transition']>,
     nextStatus: AlertEpisodeStatus
   ): boolean {
-    return stateTransition.recoveringCount === 0 && nextStatus === alertEpisodeStatus.recovering;
+    return stateTransition.recovering_count === 0 && nextStatus === alertEpisodeStatus.recovering;
   }
 
   private isPendingToActiveTransition(

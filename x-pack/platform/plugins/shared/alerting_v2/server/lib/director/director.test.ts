@@ -366,7 +366,7 @@ describe('DirectorService', () => {
 
     it('includes status_count in episode when strategy returns one', async () => {
       const ruleWithTransition = createRuleResponse({
-        stateTransition: { pendingCount: 3 },
+        state_transition: { pending_count: 3 },
       });
 
       const alertEvent = createAlertEvent({
@@ -402,7 +402,7 @@ describe('DirectorService', () => {
 
     it('transitions to active when count threshold is met', async () => {
       const ruleWithTransition = createRuleResponse({
-        stateTransition: { pendingCount: 3 },
+        state_transition: { pending_count: 3 },
       });
 
       const alertEvent = createAlertEvent({

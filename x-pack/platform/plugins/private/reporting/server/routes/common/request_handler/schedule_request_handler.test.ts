@@ -25,7 +25,7 @@ import {
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../test_helpers';
-import type { ReportingRequestHandlerContext, ReportingSetup } from '../../../types';
+import type { ReportingRequestHandlerContext, ReportingSetup, ReportingUser } from '../../../types';
 import { ScheduleRequestHandler } from './schedule_request_handler';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -141,7 +141,7 @@ describe('Handle request to schedule', () => {
 
     requestHandler = new ScheduleRequestHandler({
       reporting: reportingCore,
-      user: { username: 'testymcgee' },
+      user: { username: 'testymcgee' } as ReportingUser,
       context: mockContext,
       path: '/api/reporting/test/generate/pdf',
       // @ts-ignore
@@ -797,7 +797,7 @@ describe('Handle request to schedule', () => {
     test('disallows invalid browser timezone', async () => {
       const handler = new ScheduleRequestHandler({
         reporting: reportingCore,
-        user: { username: 'testymcgee' },
+        user: { username: 'testymcgee' } as ReportingUser,
         context: mockContext,
         path: '/api/reporting/test/generate/pdf',
         req: {
@@ -833,10 +833,10 @@ describe('Handle request to schedule', () => {
       }
     });
 
-    test('disallows scheduling when user is "false"', async () => {
+    test('disallows scheduling when user is undefined', async () => {
       requestHandler = new ScheduleRequestHandler({
         reporting: reportingCore,
-        user: false,
+        user: undefined,
         context: mockContext,
         path: '/api/reporting/test/generate/pdf',
         // @ts-ignore

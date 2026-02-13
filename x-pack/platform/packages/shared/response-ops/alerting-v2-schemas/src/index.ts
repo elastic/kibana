@@ -6,4 +6,5 @@
  */
 
 export * from './rule_data_schema';
+export type { RuleResponse } from './rule_response';
 export { validateDuration, validateEsqlQuery } from './validation';

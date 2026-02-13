@@ -24,9 +24,9 @@ describe('BasicTransitionStrategy', () => {
   describe('canHandle', () => {
     it('returns true for any rule (acts as fallback)', () => {
       expect(strategy.canHandle(createRuleResponse())).toBe(true);
-      expect(strategy.canHandle(createRuleResponse({ stateTransition: { pendingCount: 3 } }))).toBe(
-        true
-      );
+      expect(
+        strategy.canHandle(createRuleResponse({ state_transition: { pending_count: 3 } }))
+      ).toBe(true);
     });
   });
 

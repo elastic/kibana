@@ -13,6 +13,7 @@ import type { IndicesMetadataConfiguration } from './indices_metadata.types';
 import { ArtifactNotFoundError, ManifestNotFoundError } from './artifact.errors';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { CdnConfig } from './artifact.types';
+import { createMockTelemetryConfigProvider } from '../__mocks__';
 
 jest.mock('./artifact');
 
@@ -20,6 +21,7 @@ describe('ConfigurationService', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let configurationService: ConfigurationService;
   let artifactService: jest.Mocked<ArtifactService>;
+  const telemetryConfigProvider = createMockTelemetryConfigProvider();
 
   const defaultConfiguration: IndicesMetadataConfiguration = {
     indices_threshold: 100,
@@ -88,7 +90,7 @@ describe('ConfigurationService', () => {
 
     it.each(initializationCases)('$name', ({ startService, expectThrow, expectedError }) => {
       if (startService) {
-        configurationService.start(artifactService, defaultConfiguration);
+        configurationService.start(artifactService, defaultConfiguration, telemetryConfigProvider);
       }
 
       if (expectThrow) {
@@ -103,7 +105,7 @@ describe('ConfigurationService', () => {
 
   describe('getIndicesMetadataConfiguration$', () => {
     it('should return an observable with the default configuration initially', async () => {
-      configurationService.start(artifactService, defaultConfiguration);
+      configurationService.start(artifactService, defaultConfiguration, telemetryConfigProvider);
       const config$ = configurationService.getIndicesMetadataConfiguration$();
       const config = await firstValueFrom(config$);
       expect(config).toEqual(defaultConfiguration);
@@ -134,7 +136,7 @@ describe('ConfigurationService', () => {
           modified: true,
         });
 
-      configurationService.start(artifactService, defaultConfiguration);
+      configurationService.start(artifactService, defaultConfiguration, telemetryConfigProvider);
 
       let config: IndicesMetadataConfiguration | undefined;
       configurationService.getIndicesMetadataConfiguration$().subscribe((c) => {
@@ -151,6 +153,34 @@ describe('ConfigurationService', () => {
 
       await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
       expect(config).toEqual(updatedConfigTwo);
+    });
+  });
+
+  describe('telemetry opt-out', () => {
+    it('should skip configuration retrieval when telemetry is opted out', async () => {
+      const optedOutProvider = createMockTelemetryConfigProvider(false);
+
+      jest.spyOn(artifactService, 'getArtifact').mockResolvedValue({
+        data: { ...defaultConfiguration, indices_threshold: 200 },
+        modified: true,
+      });
+
+      configurationService.start(artifactService, defaultConfiguration, optedOutProvider);
+
+      let config: IndicesMetadataConfiguration | undefined;
+      configurationService.getIndicesMetadataConfiguration$().subscribe((c) => {
+        config = c;
+      });
+
+      expect(config).toEqual(defaultConfiguration);
+
+      await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
+
+      expect(config).toEqual(defaultConfiguration);
+      expect(artifactService.getArtifact).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Skipping configuration retrieval, telemetry opted out'
+      );
     });
   });
 
@@ -193,7 +223,11 @@ describe('ConfigurationService', () => {
             })
             .mockRejectedValue(error);
 
-          configurationService.start(artifactService, defaultConfiguration);
+          configurationService.start(
+            artifactService,
+            defaultConfiguration,
+            telemetryConfigProvider
+          );
           const config$ = configurationService.getIndicesMetadataConfiguration$();
 
           let config: IndicesMetadataConfiguration | undefined;
@@ -273,7 +307,11 @@ describe('ConfigurationService', () => {
 
           jest.spyOn(artifactService, 'getArtifact').mockRejectedValue(error);
 
-          configurationService.start(artifactService, defaultConfiguration);
+          configurationService.start(
+            artifactService,
+            defaultConfiguration,
+            telemetryConfigProvider
+          );
           configurationService.getIndicesMetadataConfiguration$().subscribe();
 
           await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);

@@ -307,13 +307,23 @@
       "createdBy": {
         "type": "keyword"
       },
-      "name": {
-        "type": "text",
-        "fields": { "keyword": { "type": "keyword", "ignore_above": 256 } }
-      },
       "description": {
-        "type": "text",
-        "fields": { "keyword": { "type": "keyword", "ignore_above": 256 } }
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "name": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
       },
       "updatedAt": {
         "type": "date"
@@ -338,54 +348,70 @@
       "enabled": {
         "type": "boolean"
       },
-      "groupingKey": {
-        "type": "keyword"
+      "evaluation": {
+        "properties": {
+          "query": {
+            "properties": {
+              "base": {
+                "type": "text"
+              },
+              "condition": {
+                "type": "text"
+              }
+            }
+          }
+        }
+      },
+      "grouping": {
+        "properties": {
+          "fields": {
+            "type": "keyword"
+          }
+        }
       },
       "kind": {
         "type": "keyword"
       },
-      "lookbackWindow": {
-        "type": "keyword"
+      "metadata": {
+        "properties": {
+          "labels": {
+            "type": "keyword"
+          },
+          "name": {
+            "type": "text"
+          },
+          "owner": {
+            "type": "keyword"
+          }
+        }
       },
-      "name": {
-        "type": "text"
+      "no_data": {
+        "enabled": false,
+        "type": "object"
       },
-      "query": {
-        "type": "text"
+      "notification_policies": {
+        "enabled": false,
+        "type": "object"
+      },
+      "recovery_policy": {
+        "enabled": false,
+        "type": "object"
       },
       "schedule": {
         "properties": {
-          "custom": {
+          "every": {
+            "type": "keyword"
+          },
+          "lookback": {
             "type": "keyword"
           }
         }
       },
-      "stateTransition": {
-        "properties": {
-          "pendingCount": {
-            "type": "unsigned_long"
-          },
-          "pendingOperator": {
-            "type": "keyword"
-          },
-          "pendingTimeframe": {
-            "type": "keyword"
-          },
-          "recoveringCount": {
-            "type": "unsigned_long"
-          },
-          "recoveringOperator": {
-            "type": "keyword"
-          },
-          "recoveringTimeframe": {
-            "type": "keyword"
-          }
-        }
+      "state_transition": {
+        "enabled": false,
+        "type": "object"
       },
-      "tags": {
-        "type": "keyword"
-      },
-      "timeField": {
+      "time_field": {
         "type": "keyword"
       },
       "updatedAt": {
@@ -2882,6 +2908,9 @@
             "type": "boolean"
           }
         }
+      },
+      "download_source_auth_secret_storage_requirements_met": {
+        "type": "boolean"
       },
       "fleet_server_hosts": {
         "type": "keyword"

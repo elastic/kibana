@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StateTransition } from '@kbn/alerting-v2-schemas';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus, AlertEventStatus } from '../../resources/alert_events';
 import { createAlertEvent } from '../rule_executor/test_utils';
 import { createRuleResponse } from '../test_utils';
@@ -46,11 +46,11 @@ export const buildStrategyStateTransitionContext = ({
   previousEpisode,
 }: {
   eventStatus: AlertEventStatus;
-  stateTransition?: StateTransition;
+  stateTransition?: RuleResponse['state_transition'];
   eventTimestamp?: string;
   previousEpisode?: LatestAlertEventState;
 }): StateTransitionContext => ({
-  rule: createRuleResponse({ stateTransition }),
+  rule: createRuleResponse({ state_transition: stateTransition }),
   alertEvent: createAlertEvent({
     status: eventStatus,
     '@timestamp': eventTimestamp ?? DEFAULT_TIMESTAMP,

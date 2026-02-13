@@ -8,11 +8,10 @@
 import { createRuleDataSchema, updateRuleDataSchema } from './rule_data_schema';
 
 const validCreateData = {
-  name: 'test rule',
   kind: 'alert',
-  schedule: { custom: '5m' },
-  query: 'FROM logs-* | LIMIT 1',
-  lookbackWindow: '5m',
+  metadata: { name: 'test rule' },
+  schedule: { every: '5m' },
+  evaluation: { query: { base: 'FROM logs-* | LIMIT 1', condition: 'count > 0' } },
 };
 
 describe('createRuleDataSchema', () => {
@@ -21,54 +20,52 @@ describe('createRuleDataSchema', () => {
       const result = createRuleDataSchema.parse(validCreateData);
 
       expect(result).toEqual({
-        name: 'test rule',
         kind: 'alert',
-        tags: [],
-        schedule: { custom: '5m' },
-        enabled: true,
-        query: 'FROM logs-* | LIMIT 1',
-        timeField: '@timestamp',
-        lookbackWindow: '5m',
-        groupingKey: [],
+        metadata: { name: 'test rule' },
+        time_field: '@timestamp',
+        schedule: { every: '5m' },
+        evaluation: { query: { base: 'FROM logs-* | LIMIT 1', condition: 'count > 0' } },
       });
     });
 
     it('accepts a full payload with all optional fields', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
-        tags: ['tag-1', 'tag-2'],
-        enabled: false,
-        timeField: 'event.created',
-        groupingKey: ['host.name'],
-        stateTransition: {
-          pendingOperator: 'AND',
-          pendingCount: 3,
-          pendingTimeframe: '10m',
-          recoveringOperator: 'OR',
-          recoveringCount: 5,
-          recoveringTimeframe: '15m',
+        metadata: { name: 'test rule', owner: 'team-a', labels: ['label-1', 'label-2'] },
+        time_field: 'event.created',
+        schedule: { every: '5m', lookback: '10m' },
+        grouping: { fields: ['host.name'] },
+        recovery_policy: { type: 'no_breach' },
+        no_data: { behavior: 'recover', timeframe: '15m' },
+        state_transition: {
+          pending_operator: 'AND',
+          pending_count: 3,
+          pending_timeframe: '10m',
+          recovering_operator: 'OR',
+          recovering_count: 5,
+          recovering_timeframe: '15m',
         },
       });
 
       expect(result).toEqual(
         expect.objectContaining({
-          tags: ['tag-1', 'tag-2'],
-          enabled: false,
-          timeField: 'event.created',
-          groupingKey: ['host.name'],
-          stateTransition: {
-            pendingOperator: 'AND',
-            pendingCount: 3,
-            pendingTimeframe: '10m',
-            recoveringOperator: 'OR',
-            recoveringCount: 5,
-            recoveringTimeframe: '15m',
+          metadata: { name: 'test rule', owner: 'team-a', labels: ['label-1', 'label-2'] },
+          time_field: 'event.created',
+          schedule: { every: '5m', lookback: '10m' },
+          grouping: { fields: ['host.name'] },
+          state_transition: {
+            pending_operator: 'AND',
+            pending_count: 3,
+            pending_timeframe: '10m',
+            recovering_operator: 'OR',
+            recovering_count: 5,
+            recovering_timeframe: '15m',
           },
         })
       );
     });
 
-    it('accepts kind "signal" without stateTransition', () => {
+    it('accepts kind "signal" without state_transition', () => {
       const result = createRuleDataSchema.parse({ ...validCreateData, kind: 'signal' });
       expect(result.kind).toBe('signal');
     });
@@ -83,16 +80,19 @@ describe('createRuleDataSchema', () => {
     });
   });
 
-  describe('name', () => {
+  describe('metadata.name', () => {
     it('rejects an empty name', () => {
-      const result = createRuleDataSchema.safeParse({ ...validCreateData, name: '' });
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: '' },
+      });
       expect(result.success).toBe(false);
     });
 
-    it('rejects a name exceeding 64 characters', () => {
+    it('rejects a name exceeding 256 characters', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        name: 'a'.repeat(65),
+        metadata: { name: 'a'.repeat(257) },
       });
 
       expect(result.success).toBe(false);
@@ -106,20 +106,23 @@ describe('createRuleDataSchema', () => {
     });
   });
 
-  describe('tags', () => {
-    it('rejects tags exceeding 100 items', () => {
+  describe('metadata.labels', () => {
+    it('rejects labels exceeding 100 items', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        tags: Array.from({ length: 101 }, (_, i) => `tag-${i}`),
+        metadata: {
+          name: 'test rule',
+          labels: Array.from({ length: 101 }, (_, i) => `label-${i}`),
+        },
       });
 
       expect(result.success).toBe(false);
     });
 
-    it('rejects a tag exceeding 64 characters', () => {
+    it('rejects a label exceeding 64 characters', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        tags: ['a'.repeat(65)],
+        metadata: { name: 'test rule', labels: ['a'.repeat(65)] },
       });
 
       expect(result.success).toBe(false);
@@ -130,7 +133,7 @@ describe('createRuleDataSchema', () => {
     it('rejects an invalid duration', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        schedule: { custom: 'bad' },
+        schedule: { every: 'bad' },
       });
 
       expect(result.success).toBe(false);
@@ -139,191 +142,201 @@ describe('createRuleDataSchema', () => {
     it('rejects unknown keys inside schedule', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        schedule: { custom: '1m', extra: true },
+        schedule: { every: '1m', extra: true },
       });
 
       expect(result.success).toBe(false);
     });
   });
 
-  describe('query', () => {
+  describe('evaluation.query.base', () => {
     it('rejects an empty query', () => {
-      const result = createRuleDataSchema.safeParse({ ...validCreateData, query: '' });
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        evaluation: { query: { base: '', condition: 'count > 0' } },
+      });
       expect(result.success).toBe(false);
     });
 
     it('rejects an invalid ES|QL query', () => {
-      const result = createRuleDataSchema.safeParse({ ...validCreateData, query: 'FROM |' });
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        evaluation: { query: { base: 'FROM |', condition: 'count > 0' } },
+      });
       expect(result.success).toBe(false);
     });
   });
 
-  describe('lookbackWindow', () => {
+  describe('schedule.lookback', () => {
     it('rejects an invalid duration', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        lookbackWindow: 'invalid',
+        schedule: { every: '5m', lookback: 'invalid' },
       });
 
       expect(result.success).toBe(false);
     });
   });
 
-  describe('groupingKey', () => {
+  describe('grouping.fields', () => {
     it('rejects more than 16 keys', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        groupingKey: Array.from({ length: 17 }, (_, i) => `field-${i}`),
+        grouping: { fields: Array.from({ length: 17 }, (_, i) => `field-${i}`) },
       });
 
       expect(result.success).toBe(false);
     });
   });
 
-  describe('stateTransition', () => {
-    it('accepts an empty stateTransition object', () => {
+  describe('state_transition', () => {
+    it('accepts an empty state_transition object', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
-        stateTransition: {},
+        state_transition: {},
       });
 
-      expect(result.stateTransition).toEqual({});
+      expect(result.state_transition).toEqual({});
     });
 
-    it('accepts stateTransition with only pending fields', () => {
+    it('accepts state_transition with only pending fields', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
-        stateTransition: { pendingOperator: 'AND', pendingCount: 2, pendingTimeframe: '10m' },
-      });
-
-      expect(result.stateTransition).toEqual({
-        pendingOperator: 'AND',
-        pendingCount: 2,
-        pendingTimeframe: '10m',
-      });
-    });
-
-    it('accepts stateTransition with only recovering fields', () => {
-      const result = createRuleDataSchema.parse({
-        ...validCreateData,
-        stateTransition: {
-          recoveringOperator: 'OR',
-          recoveringCount: 5,
-          recoveringTimeframe: '15m',
+        state_transition: {
+          pending_operator: 'AND',
+          pending_count: 2,
+          pending_timeframe: '10m',
         },
       });
 
-      expect(result.stateTransition).toEqual({
-        recoveringOperator: 'OR',
-        recoveringCount: 5,
-        recoveringTimeframe: '15m',
+      expect(result.state_transition).toEqual({
+        pending_operator: 'AND',
+        pending_count: 2,
+        pending_timeframe: '10m',
       });
     });
 
-    it('accepts pendingCount of 0', () => {
+    it('accepts state_transition with only recovering fields', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
-        stateTransition: { pendingCount: 0 },
+        state_transition: {
+          recovering_operator: 'OR',
+          recovering_count: 5,
+          recovering_timeframe: '15m',
+        },
       });
 
-      expect(result.stateTransition?.pendingCount).toBe(0);
+      expect(result.state_transition).toEqual({
+        recovering_operator: 'OR',
+        recovering_count: 5,
+        recovering_timeframe: '15m',
+      });
     });
 
-    it('accepts recoveringCount of 0', () => {
+    it('accepts pending_count of 0', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
-        stateTransition: { recoveringCount: 0 },
+        state_transition: { pending_count: 0 },
       });
 
-      expect(result.stateTransition?.recoveringCount).toBe(0);
+      expect(result.state_transition?.pending_count).toBe(0);
     });
 
-    it('rejects a negative pendingCount', () => {
+    it('accepts recovering_count of 0', () => {
+      const result = createRuleDataSchema.parse({
+        ...validCreateData,
+        state_transition: { recovering_count: 0 },
+      });
+
+      expect(result.state_transition?.recovering_count).toBe(0);
+    });
+
+    it('rejects a negative pending_count', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        stateTransition: { pendingCount: -1 },
+        state_transition: { pending_count: -1 },
       });
 
       expect(result.success).toBe(false);
     });
 
-    it('rejects a non-integer pendingCount', () => {
+    it('rejects a non-integer pending_count', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        stateTransition: { pendingCount: 1.5 },
+        state_transition: { pending_count: 1.5 },
       });
 
       expect(result.success).toBe(false);
     });
 
-    it('rejects a negative recoveringCount', () => {
+    it('rejects a negative recovering_count', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        stateTransition: { recoveringCount: -1 },
+        state_transition: { recovering_count: -1 },
       });
 
       expect(result.success).toBe(false);
     });
 
-    it('rejects a non-integer recoveringCount', () => {
+    it('rejects a non-integer recovering_count', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        stateTransition: { recoveringCount: 2.5 },
+        state_transition: { recovering_count: 2.5 },
       });
 
       expect(result.success).toBe(false);
     });
 
-    it('rejects an invalid pendingOperator', () => {
+    it('rejects an invalid pending_operator', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        stateTransition: { pendingOperator: 'XOR' },
+        state_transition: { pending_operator: 'XOR' },
       });
 
       expect(result.success).toBe(false);
     });
 
-    it('rejects an invalid recoveringOperator', () => {
+    it('rejects an invalid recovering_operator', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        stateTransition: { recoveringOperator: 'NOT' },
+        state_transition: { recovering_operator: 'NOT' },
       });
 
       expect(result.success).toBe(false);
     });
 
-    it('rejects an invalid pendingTimeframe duration', () => {
+    it('rejects an invalid pending_timeframe duration', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        stateTransition: { pendingTimeframe: 'bad' },
+        state_transition: { pending_timeframe: 'bad' },
       });
 
       expect(result.success).toBe(false);
     });
 
-    it('rejects an invalid recoveringTimeframe duration', () => {
+    it('rejects an invalid recovering_timeframe duration', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        stateTransition: { recoveringTimeframe: 'bad' },
+        state_transition: { recovering_timeframe: 'bad' },
       });
 
       expect(result.success).toBe(false);
     });
 
-    it('rejects unknown keys inside stateTransition (strict)', () => {
+    it('rejects unknown keys inside state_transition (strict)', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        stateTransition: { unknownKey: true },
+        state_transition: { unknownKey: true },
       });
 
       expect(result.success).toBe(false);
     });
 
-    it('rejects stateTransition when kind is "signal"', () => {
+    it('rejects state_transition when kind is "signal"', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         kind: 'signal',
-        stateTransition: { pendingCount: 1 },
+        state_transition: { pending_count: 1 },
       });
 
       expect(result.success).toBe(false);
@@ -332,7 +345,7 @@ describe('createRuleDataSchema', () => {
   });
 
   describe('required fields', () => {
-    it.each(['name', 'kind', 'schedule', 'query', 'lookbackWindow'] as const)(
+    it.each(['kind', 'metadata', 'schedule', 'evaluation'] as const)(
       'rejects when required field "%s" is missing',
       (field) => {
         const { [field]: _, ...data } = validCreateData;
@@ -350,21 +363,21 @@ describe('updateRuleDataSchema', () => {
   });
 
   it('accepts partial updates', () => {
-    const result = updateRuleDataSchema.parse({ name: 'updated name' });
-    expect(result).toEqual({ name: 'updated name' });
+    const result = updateRuleDataSchema.parse({ metadata: { name: 'updated name' } });
+    expect(result).toEqual({ metadata: { name: 'updated name' } });
   });
 
-  it('accepts a stateTransition object', () => {
+  it('accepts a state_transition object', () => {
     const result = updateRuleDataSchema.parse({
-      stateTransition: { pendingCount: 3, recoveringCount: 5 },
+      state_transition: { pending_count: 3, recovering_count: 5 },
     });
 
-    expect(result.stateTransition).toEqual({ pendingCount: 3, recoveringCount: 5 });
+    expect(result.state_transition).toEqual({ pending_count: 3, recovering_count: 5 });
   });
 
-  it('accepts stateTransition set to null (removal)', () => {
-    const result = updateRuleDataSchema.parse({ stateTransition: null });
-    expect(result.stateTransition).toBeNull();
+  it('accepts state_transition set to null (removal)', () => {
+    const result = updateRuleDataSchema.parse({ state_transition: null });
+    expect(result.state_transition).toBeNull();
   });
 
   it('strips unknown properties', () => {
@@ -374,75 +387,79 @@ describe('updateRuleDataSchema', () => {
 
   describe('field constraints', () => {
     it('rejects an empty name', () => {
-      const result = updateRuleDataSchema.safeParse({ name: '' });
+      const result = updateRuleDataSchema.safeParse({ metadata: { name: '' } });
       expect(result.success).toBe(false);
     });
 
-    it('rejects a name exceeding 64 characters', () => {
-      const result = updateRuleDataSchema.safeParse({ name: 'a'.repeat(65) });
+    it('rejects a name exceeding 256 characters', () => {
+      const result = updateRuleDataSchema.safeParse({
+        metadata: { name: 'a'.repeat(257) },
+      });
       expect(result.success).toBe(false);
     });
 
     it('rejects an invalid schedule duration', () => {
-      const result = updateRuleDataSchema.safeParse({ schedule: { custom: 'bad' } });
+      const result = updateRuleDataSchema.safeParse({ schedule: { every: 'bad' } });
       expect(result.success).toBe(false);
     });
 
-    it('rejects an invalid lookbackWindow duration', () => {
-      const result = updateRuleDataSchema.safeParse({ lookbackWindow: 'bad' });
+    it('rejects an invalid lookback duration', () => {
+      const result = updateRuleDataSchema.safeParse({ schedule: { lookback: 'bad' } });
       expect(result.success).toBe(false);
     });
 
     it('rejects an invalid ES|QL query', () => {
-      const result = updateRuleDataSchema.safeParse({ query: 'FROM |' });
+      const result = updateRuleDataSchema.safeParse({
+        evaluation: { query: { base: 'FROM |' } },
+      });
       expect(result.success).toBe(false);
     });
 
-    it('rejects more than 100 tags', () => {
+    it('rejects more than 100 labels', () => {
       const result = updateRuleDataSchema.safeParse({
-        tags: Array.from({ length: 101 }, (_, i) => `tag-${i}`),
+        metadata: { labels: Array.from({ length: 101 }, (_, i) => `label-${i}`) },
       });
 
       expect(result.success).toBe(false);
     });
 
-    it('rejects more than 16 groupingKey entries', () => {
+    it('rejects more than 16 grouping fields', () => {
       const result = updateRuleDataSchema.safeParse({
-        groupingKey: Array.from({ length: 17 }, (_, i) => `field-${i}`),
+        grouping: { fields: Array.from({ length: 17 }, (_, i) => `field-${i}`) },
       });
 
       expect(result.success).toBe(false);
     });
   });
 
-  describe('stateTransition constraints', () => {
-    it('rejects an invalid pendingOperator', () => {
+  describe('state_transition constraints', () => {
+    it('rejects an invalid pending_operator', () => {
       const result = updateRuleDataSchema.safeParse({
-        stateTransition: { pendingOperator: 'XOR' },
+        state_transition: { pending_operator: 'XOR' },
       });
 
       expect(result.success).toBe(false);
     });
 
-    it('rejects a non-integer pendingCount', () => {
+    it('rejects a non-integer pending_count', () => {
       const result = updateRuleDataSchema.safeParse({
-        stateTransition: { pendingCount: 1.5 },
+        state_transition: { pending_count: 1.5 },
       });
 
       expect(result.success).toBe(false);
     });
 
-    it('rejects an invalid pendingTimeframe duration', () => {
+    it('rejects an invalid pending_timeframe duration', () => {
       const result = updateRuleDataSchema.safeParse({
-        stateTransition: { pendingTimeframe: 'bad' },
+        state_transition: { pending_timeframe: 'bad' },
       });
 
       expect(result.success).toBe(false);
     });
 
-    it('rejects unknown keys inside stateTransition (strict)', () => {
+    it('rejects unknown keys inside state_transition (strict)', () => {
       const result = updateRuleDataSchema.safeParse({
-        stateTransition: { unknownKey: true },
+        state_transition: { unknownKey: true },
       });
 
       expect(result.success).toBe(false);
