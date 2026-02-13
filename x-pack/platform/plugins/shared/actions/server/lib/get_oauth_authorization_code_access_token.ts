@@ -8,7 +8,7 @@
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
-import type { ConnectorToken, ConnectorTokenClientContract } from '../types';
+import type { ConnectorTokenClientContract } from '../types';
 import { requestOAuthRefreshToken } from './request_oauth_refresh_token';
 
 // Per-connector locks to prevent concurrent token refreshes for the same connector
@@ -98,20 +98,18 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
       return null;
     }
 
-    const token = connectorToken as ConnectorToken;
-
     // Check if access token is still valid (may have been refreshed by another request)
     const now = Date.now();
-    const expiresAt = token.expiresAt ? Date.parse(token.expiresAt) : Infinity;
+    const expiresAt = connectorToken.expiresAt ? Date.parse(connectorToken.expiresAt) : Infinity;
 
     if (!forceRefresh && expiresAt > now) {
       // Token still valid
       logger.debug(`Using stored access token for connectorId: ${connectorId}`);
-      return token.token;
+      return connectorToken.token;
     }
 
-    const refreshToken = typeof token.refreshToken === 'string' ? token.refreshToken : undefined;
-    if (!refreshToken) {
+    // Access token expired - attempt refresh
+    if (!connectorToken.refreshToken) {
       logger.warn(
         `Access token expired and no refresh token available for connectorId: ${connectorId}. User must re-authorize.`
       );
@@ -119,7 +117,10 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
     }
 
     // Check if the refresh token is expired
-    if (token.refreshTokenExpiresAt && Date.parse(token.refreshTokenExpiresAt) <= now) {
+    if (
+      connectorToken.refreshTokenExpiresAt &&
+      Date.parse(connectorToken.refreshTokenExpiresAt) <= now
+    ) {
       logger.warn(`Refresh token expired for connectorId: ${connectorId}. User must re-authorize.`);
       return null;
     }
@@ -131,7 +132,7 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
         tokenUrl,
         logger,
         {
-          refreshToken,
+          refreshToken: connectorToken.refreshToken,
           clientId,
           clientSecret,
           scope,
@@ -143,13 +144,11 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
 
       const newAccessToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
 
-      const updatedRefreshToken: string | undefined = tokenResult.refreshToken ?? refreshToken;
-
       // Update stored token
       await connectorTokenClient.updateWithRefreshToken({
-        id: token.id!,
+        id: connectorToken.id!,
         token: newAccessToken,
-        refreshToken: updatedRefreshToken,
+        refreshToken: tokenResult.refreshToken || connectorToken.refreshToken,
         expiresIn: tokenResult.expiresIn,
         refreshTokenExpiresIn: tokenResult.refreshTokenExpiresIn,
         tokenType: 'access_token',

@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { escape } from 'lodash';
 import type { ActionsPluginsStart } from '../plugin';
 import type { ILicenseState } from '../lib';
 import { BASE_ACTION_API_PATH } from '../../common';
@@ -105,10 +104,6 @@ function generateOAuthCallbackPage({
 }): string {
   const iconColor = isSuccess ? '#00BFB3' : '#BD271E';
   const icon = isSuccess ? '✓' : '✕';
-  const sanitisedTitle = escape(title);
-  const sanitisedHeading = escape(heading);
-  const sanitisedMessage = escape(message);
-  const sanitisedDetails = details ? escape(details) : '';
 
   return `
     <!DOCTYPE html>
@@ -116,7 +111,7 @@ function generateOAuthCallbackPage({
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>${sanitisedTitle}</title>
+        <title>${title}</title>
         <style>
           * {
             margin: 0;
@@ -196,9 +191,9 @@ function generateOAuthCallbackPage({
       <body>
         <div class="container">
           <div class="icon">${icon}</div>
-          <h1>${sanitisedHeading}</h1>
-          <p>${sanitisedMessage}</p>
-          ${sanitisedDetails ? `<div class="details">${sanitisedDetails}</div>` : ''}
+          <h1>${heading}</h1>
+          <p>${message}</p>
+          ${details ? `<div class="details">${details}</div>` : ''}
           ${
             autoClose
               ? '<p style="display: none; margin-top: 16px;" class="auto-close-message">This window will close automatically, or you can close it manually.</p>'
@@ -317,7 +312,7 @@ export const oauthCallbackRoute = (
         }
 
         try {
-          const [, { encryptedSavedObjects, spaces }] = await coreSetup.getStartServices();
+          const [, { encryptedSavedObjects }] = await coreSetup.getStartServices();
 
           // Retrieve and validate state
           const oauthStateClient = new OAuthStateClient({
@@ -344,20 +339,16 @@ export const oauthCallbackRoute = (
             });
           }
 
-          // Get connector with decrypted secrets using the spaceId from the OAuth state
+          // Get connector with decrypted secrets
           const connectorEncryptedClient = encryptedSavedObjects.getClient({
             includedHiddenTypes: ['action'],
           });
-          const namespace =
-            spaces && oauthState.spaceId
-              ? spaces.spacesService.spaceIdToNamespace(oauthState.spaceId)
-              : undefined;
           const rawAction = await connectorEncryptedClient.getDecryptedAsInternalUser<{
             actionTypeId: string;
             name: string;
             config: OAuthConnectorConfig;
             secrets: OAuthConnectorSecrets;
-          }>('action', oauthState.connectorId, { namespace });
+          }>('action', oauthState.connectorId);
 
           const config = rawAction.attributes.config;
           const secrets = rawAction.attributes.secrets;
@@ -393,10 +384,10 @@ export const oauthCallbackRoute = (
           // Store tokens - first delete any existing tokens for this connector then create a new token record
           const connectorTokenClient = new ConnectorTokenClient({
             encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
-              includedHiddenTypes: ['connector_token', 'user_connector_token'],
+              includedHiddenTypes: ['connector_token'],
             }),
             unsecuredSavedObjectsClient: core.savedObjects.getClient({
-              includedHiddenTypes: ['connector_token', 'user_connector_token'],
+              includedHiddenTypes: ['connector_token'],
             }),
             logger: routeLogger,
           });

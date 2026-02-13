@@ -20,12 +20,12 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type * as z3 from '@kbn/zod';
 import type * as z4 from '@kbn/zod/v4';
-import type { ConnectorTokenClient } from './lib/connector_token_client';
 import type { ActionTypeExecutorResult, SubFeature, ActionTypeSource } from '../common';
 import type { ActionTypeRegistry } from './action_type_registry';
 import type { ActionsClient } from './actions_client';
 import type { ActionsConfigurationUtilities } from './actions_config';
 import type { TaskInfo } from './lib/action_executor';
+import type { ConnectorTokenClient } from './lib/connector_token_client';
 import type { PluginSetupContract, PluginStartContract } from './plugin';
 import type { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import type { ServiceParams } from './sub_action_framework/types';
@@ -306,28 +306,6 @@ export interface ConnectorToken extends SavedObjectAttributes {
   updatedAt?: string;
   refreshToken?: string;
   refreshTokenExpiresAt?: string;
-}
-
-export interface UserConnectorToken extends SavedObjectAttributes {
-  id?: string;
-  profileUid: string;
-  connectorId: string;
-  credentialType: string;
-  credentials: SavedObjectAttributes;
-  expiresAt?: string;
-  refreshTokenExpiresAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export type OAuthPersonalCredentials = SavedObjectAttributes & {
-  accessToken: string;
-  refreshToken?: string;
-};
-
-export interface UserConnectorOAuthToken extends UserConnectorToken {
-  credentialType: 'oauth';
-  credentials: OAuthPersonalCredentials;
 }
 
 // This unallowlist should only contain connector types that require a request or API key for
