@@ -14,7 +14,8 @@ import ReactMarkdown from 'react-markdown';
 import { coreMock } from '@kbn/core/public/mocks';
 import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 
-import { LoginForm, MessageType, PageMode } from './login_form';
+import { LoginForm, PageMode } from './login_form';
+import { MessageType } from '../../../components';
 
 function expectPageMode(wrapper: ReactWrapper, mode: PageMode) {
   const assertions: Array<[string, boolean]> =
