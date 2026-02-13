@@ -2,7 +2,7 @@
 
 Retrieves trace data (APM transactions/spans/errors) plus logs for one or more traces.
 
-This tool is KQL-driven: it finds one or more seed documents (logs or APM events) within the time range, extracts one or more `trace.id` values from those documents, then fetches APM events and logs for each trace.
+This tool finds traces: documents grouped  by `trace.id` within a given time range and for a given kql filter. 
 
 If a matching document does not contain `trace.id`, it cannot be used to fetch a trace.
 

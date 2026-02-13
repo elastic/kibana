@@ -33,13 +33,13 @@ const getTracesSchema = z.object({
     .number()
     .optional()
     .default(10)
-    .describe('Maximum number of unique `trace.id` values to discover and return. Defaults to 10.'),
+    .describe('Maximum number of traces to return. Defaults to 10.'),
   maxDocsPerTrace: z
     .number()
     .optional()
     .default(DEFAULT_MAX_TRACES)
     .describe(
-      'Maximum number of documents (APM events + logs) to return for each trace.id. Defaults to 100.'
+      'Maximum number of documents to return per trace. Defaults to 100.'
     ),
 
   fields: z
