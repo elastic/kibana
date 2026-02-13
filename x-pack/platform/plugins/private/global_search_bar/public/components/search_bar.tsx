@@ -116,6 +116,8 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     [useEuiMinBreakpoint('xl')]: {
       width: mathWithUnits(euiTheme.size.xxl, (x) => x * 15),
     },
+    marginRight: euiTheme.size.s,
+    maxWidth: '320px',
   });
   // Initialize searchableTypes data
   useEffect(() => {
@@ -350,6 +352,9 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         onClick={() => {
           setIsVisible(true);
         }}
+        css={css`
+          margin-right: 8px;
+        `}
       >
         <EuiIcon type="search" size="m" />
       </EuiHeaderSectionItemButton>
@@ -358,18 +363,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   const getAppendForChromeStyle = () => {
     if (chromeStyle === 'project') {
-      return (
-        <EuiButtonIcon
-          aria-label={i18nStrings.closeSearchAriaText}
-          color="text"
-          data-test-subj="nav-search-conceal"
-          iconType="cross"
-          onClick={() => {
-            reportEvent.searchBlur();
-            setIsVisible(false);
-          }}
-        />
-      );
+      return null;
     }
 
     if (showAppend) {
@@ -431,7 +425,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         panelClassName: 'navSearch__panel',
         repositionOnScroll: true,
         popoverRef: setButtonRef,
-        panelStyle: { marginTop: '6px' },
+        anchorPosition: 'downRight',
       }}
       popoverButton={
         <EuiHeaderSectionItemButton aria-label={i18nStrings.popoverButton}>
