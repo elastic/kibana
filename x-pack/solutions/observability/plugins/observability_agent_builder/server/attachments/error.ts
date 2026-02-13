@@ -13,10 +13,11 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID } from '../../common';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
+import { observabilityAttachmentDataSchema } from './observability_attachment_data_schema';
 
 const GET_ERROR_DETAILS_TOOL_ID = 'get_error_details';
 
-const errorDataSchema = z.object({
+const errorDataSchema = observabilityAttachmentDataSchema.extend({
   errorId: z.string(),
   serviceName: z.string().optional(),
   environment: z.string().nullable().optional(),

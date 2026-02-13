@@ -13,10 +13,10 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import dedent from 'dedent';
 import { OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID } from '../../common/constants';
 import type { ObservabilityAgentBuilderCoreSetup } from '../types';
+import { observabilityAttachmentDataSchema } from './observability_attachment_data_schema';
 
-const alertDataSchema = z.object({
+const alertDataSchema = observabilityAttachmentDataSchema.extend({
   alertId: z.string(),
-  attachmentLabel: z.string().optional(),
 });
 
 export type AlertAttachmentData = z.infer<typeof alertDataSchema>;
