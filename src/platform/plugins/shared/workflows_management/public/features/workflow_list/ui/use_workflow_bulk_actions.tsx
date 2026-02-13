@@ -17,7 +17,9 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
-import { areSimilarResults } from '@kbn/workflows-management-plugin/public/shared/utils/workflow_utils';
+import {
+  areSimilarResults,
+} from '../../../shared/utils/workflow_utils';
 
 interface UseWorkflowBulkActionsProps {
   selectedWorkflows: WorkflowListItemDto[];
@@ -109,7 +111,7 @@ export const useWorkflowBulkActions = ({
             onSuccessWhenSimilar: ({ previousData, freshData, updatedWorkflowId }) => {
               // resort the freshData to the same order as the previousData
               const previousDataIndexById = new Map(previousData.results.map((r, i) => [r.id, i]));
-  
+
               freshData.results.sort(
                 (a, b) =>
                   (previousDataIndexById.get(a.id) ?? -1) - (previousDataIndexById.get(b.id) ?? -1)
