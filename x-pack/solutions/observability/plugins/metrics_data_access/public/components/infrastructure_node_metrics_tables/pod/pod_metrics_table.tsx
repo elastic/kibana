@@ -27,7 +27,7 @@ import type { DataSchemaFormat } from '../../../../common';
 import {
   SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
   SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
-} from './constants';
+} from '../shared/constants';
 import type { PodNodeMetricsRow } from './use_pod_metrics_table';
 
 export interface PodMetricsTableProps {

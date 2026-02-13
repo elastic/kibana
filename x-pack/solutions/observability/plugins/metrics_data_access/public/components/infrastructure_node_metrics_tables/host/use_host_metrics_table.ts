@@ -28,7 +28,7 @@ import {
   SYSTEM_CPU_TOTAL_NORM_PCT,
   SYSTEM_MEMORY_TOTAL,
   SYSTEM_MEMORY_USED_PCT,
-} from './constants';
+} from '../shared/constants';
 
 type HostMetricsField =
   | typeof SYSTEM_CPU_CORES

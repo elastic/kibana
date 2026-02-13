@@ -26,7 +26,7 @@ import {
   MEMORY_LIMIT_UTILIZATION,
   SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
   SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
-} from './constants';
+} from '../shared/constants';
 
 type PodMetricsField = typeof ECS_POD_CPU_USAGE_LIMIT_PCT | typeof MEMORY_LIMIT_UTILIZATION;
 

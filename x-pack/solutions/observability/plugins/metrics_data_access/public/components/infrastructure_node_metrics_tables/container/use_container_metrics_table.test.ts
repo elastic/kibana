@@ -12,7 +12,7 @@ import {
   SEMCONV_DOCKER_CONTAINER_MEMORY_USAGE_TOTAL,
   SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION,
   SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION,
-} from './constants';
+} from '../shared/constants';
 import { useContainerMetricsTable } from './use_container_metrics_table';
 import { useInfrastructureNodeMetrics } from '../shared';
 import { renderHook } from '@testing-library/react';

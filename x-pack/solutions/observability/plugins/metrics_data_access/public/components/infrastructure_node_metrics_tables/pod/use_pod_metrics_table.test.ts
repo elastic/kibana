@@ -9,7 +9,7 @@ import {
   ECS_POD_CPU_USAGE_LIMIT_PCT,
   MEMORY_LIMIT_UTILIZATION,
   SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
-} from './constants';
+} from '../shared/constants';
 import { usePodMetricsTable } from './use_pod_metrics_table';
 import { useInfrastructureNodeMetrics } from '../shared';
 import { renderHook } from '@testing-library/react';

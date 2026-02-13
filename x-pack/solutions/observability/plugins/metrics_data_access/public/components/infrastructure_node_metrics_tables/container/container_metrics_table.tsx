@@ -28,7 +28,7 @@ import type { ContainerSemconvRuntime } from './container_metrics_configs';
 import {
   SEMCONV_CONTAINER_CPU_LIMIT_UTILIZATION_DISPLAY,
   SEMCONV_CONTAINER_MEMORY_LIMIT_UTILIZATION_DISPLAY,
-} from './constants';
+} from '../shared/constants';
 import type { ContainerNodeMetricsRow } from './use_container_metrics_table';
 
 export interface ContainerMetricsTableProps {

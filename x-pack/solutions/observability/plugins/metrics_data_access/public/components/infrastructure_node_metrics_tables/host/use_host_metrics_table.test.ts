@@ -14,7 +14,7 @@ import {
   SYSTEM_CPU_TOTAL_NORM_PCT,
   SYSTEM_MEMORY_TOTAL,
   SYSTEM_MEMORY_USED_PCT,
-} from './constants';
+} from '../shared/constants';
 import { useHostMetricsTable } from './use_host_metrics_table';
 import { useInfrastructureNodeMetrics } from '../shared';
 import { renderHook } from '@testing-library/react';

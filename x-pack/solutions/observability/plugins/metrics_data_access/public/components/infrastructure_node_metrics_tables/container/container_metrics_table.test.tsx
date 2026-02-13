@@ -13,7 +13,10 @@ import { createStartServicesAccessorMock, createMetricsClientMock } from '../tes
 import { ContainerMetricsTable } from './container_metrics_table';
 import { createLazyContainerMetricsTable } from './create_lazy_container_metrics_table';
 import IntegratedContainerMetricsTable from './integrated_container_metrics_table';
-import { ECS_CONTAINER_CPU_USAGE_LIMIT_PCT, ECS_CONTAINER_MEMORY_USAGE_BYTES } from './constants';
+import {
+  ECS_CONTAINER_CPU_USAGE_LIMIT_PCT,
+  ECS_CONTAINER_MEMORY_USAGE_BYTES,
+} from '../shared/constants';
 import { metricByField } from './use_container_metrics_table';
 
 jest.mock('../../../pages/link_to/use_asset_details_redirect', () => ({

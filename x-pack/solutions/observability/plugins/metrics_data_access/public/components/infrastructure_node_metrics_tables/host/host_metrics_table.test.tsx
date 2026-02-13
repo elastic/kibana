@@ -18,7 +18,7 @@ import {
   SYSTEM_CPU_TOTAL_NORM_PCT,
   SYSTEM_MEMORY_TOTAL,
   SYSTEM_MEMORY_USED_PCT,
-} from './constants';
+} from '../shared/constants';
 import { metricByField } from './use_host_metrics_table';
 
 jest.mock('../../../pages/link_to/use_asset_details_redirect', () => ({
