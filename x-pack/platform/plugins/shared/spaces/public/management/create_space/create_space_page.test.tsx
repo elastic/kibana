@@ -17,18 +17,10 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { CreateSpacePage } from './create_space_page';
-import type { SolutionView, Space } from '../../../common/types/latest';
+import type { SolutionView, Space } from '../../../common';
 import { EventTracker } from '../../analytics';
 import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
-
-// To be resolved by EUI team.
-// https://github.com/elastic/eui/issues/3712
-jest.mock('@elastic/eui/lib/components/overlay_mask', () => {
-  return {
-    EuiOverlayMask: (props: any) => <div>{props.children}</div>,
-  };
-});
 
 const space: Space = {
   id: 'my-space',

@@ -290,7 +290,7 @@ describe('PUT /api/spaces/space', () => {
       );
     });
 
-    it('returns 403 when CPS is enabled and user does not have permission to update NPRE', async () => {
+    it('does not update NPRE when CPS is enabled and user does not have permission to update NPRE', async () => {
       const payload = {
         id: 'a-space',
         name: 'my updated space',
@@ -317,8 +317,8 @@ describe('PUT /api/spaces/space', () => {
 
       const { status } = response;
 
-      expect(status).toEqual(403);
-      expect(savedObjectsRepositoryMock.update).not.toHaveBeenCalled();
+      expect(status).toEqual(200);
+      expect(savedObjectsRepositoryMock.update).toHaveBeenCalled();
       expect(npreClient.canPutNpre).toHaveBeenCalled();
       expect(npreClient.putNpre).not.toHaveBeenCalled();
     });

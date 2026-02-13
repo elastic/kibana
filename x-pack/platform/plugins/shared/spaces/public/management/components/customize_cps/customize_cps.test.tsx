@@ -94,8 +94,7 @@ describe('CustomizeCps', () => {
 
       expect(
         await screen.findByText(
-          'Search across this project and any linked projects from a single location with cross-project search. ' +
-            'Use these settings to limit the space default scope to a specific subset of projects.'
+          'Cross-project search allows searching across this project and any linked projects. Use this setting to define which projects to search by default when running queries from this space.'
         )
       ).toBeInTheDocument();
       expect(await screen.findByText('Cross-project search default scope')).toBeInTheDocument();
