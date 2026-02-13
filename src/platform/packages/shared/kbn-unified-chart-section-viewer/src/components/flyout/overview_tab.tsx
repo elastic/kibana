@@ -92,7 +92,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
           <EuiFlexItem
             grow={false}
             css={css`
-              min-width: 190px;
+              min-width: 180px;
             `}
           >
             <EuiText size="xs">
