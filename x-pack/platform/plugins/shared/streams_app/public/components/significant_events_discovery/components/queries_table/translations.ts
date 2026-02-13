@@ -32,10 +32,10 @@ export const STREAM_COLUMN = i18n.translate(
   }
 );
 
-export const SYSTEMS_COLUMN = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queriesTable.systemsColumn',
+export const BACKED_STATUS_COLUMN = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.backedStatusColumn',
   {
-    defaultMessage: 'Systems',
+    defaultMessage: 'Status',
   }
 );
 
@@ -63,6 +63,34 @@ export const OCCURRENCES_COLUMN = i18n.translate(
 export const OCCURRENCES_TOOLTIP_NAME = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.occurrencesTooltipName',
   { defaultMessage: 'Occurrences' }
+);
+
+export const PROMOTED_BADGE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.promotedBadgeLabel',
+  {
+    defaultMessage: 'Scanning',
+  }
+);
+
+export const NOT_PROMOTED_BADGE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.notPromotedBadgeLabel',
+  {
+    defaultMessage: 'Not scanning',
+  }
+);
+
+export const PROMOTED_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.promotedTooltipContent',
+  {
+    defaultMessage: 'This query is used to scan for significant events in the background',
+  }
+);
+
+export const NOT_PROMOTED_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.notPromotedTooltipContent',
+  {
+    defaultMessage: 'This query is not used to scan for significant events in the background',
+  }
 );
 
 export const getPromoteAllCalloutTitle = (count: number) =>
@@ -122,7 +150,47 @@ export const NO_ITEMS_MESSAGE = i18n.translate(
   }
 );
 
-export const SEARCH_ARIA_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queriesTable.searchAriaLabel',
-  { defaultMessage: 'Search queries by name' }
+export const UNABLE_TO_LOAD_QUERIES_TITLE = i18n.translate(
+  'xpack.streams.queriesTable.loadingError.title',
+  { defaultMessage: 'Unable to load queries' }
 );
+
+export const UNABLE_TO_LOAD_QUERIES_BODY = i18n.translate(
+  'xpack.streams.queriesTable.loadingError.body',
+  {
+    defaultMessage: "Try refreshing the page or contact support if error doesn't go away",
+  }
+);
+
+export const ACTIONS_COLUMN_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.actionsColumnTitle',
+  { defaultMessage: 'Actions' }
+);
+
+export const OPEN_IN_DISCOVER_ACTION_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.openInDiscoverActionTitle',
+  { defaultMessage: 'Open in Discover' }
+);
+
+export const OPEN_IN_DISCOVER_ACTION_DESCRIPTION = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.openInDiscoverActionDescription',
+  { defaultMessage: 'Open query in Discover' }
+);
+
+export const PROMOTE_QUERY_ACTION_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.promoteQueryActionTitle',
+  { defaultMessage: 'Promote' }
+);
+
+export const PROMOTE_QUERY_ACTION_DESCRIPTION = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.promoteQueryActionDescription',
+  {
+    defaultMessage: 'Start scanning this query in the background for significant events',
+  }
+);
+
+export const getPromoteQuerySuccessToast = (queryTitle: string) =>
+  i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.promoteQuerySuccess', {
+    defaultMessage: 'Promoted "{queryTitle}". It moved to the Scanning section.',
+    values: { queryTitle },
+  });

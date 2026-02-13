@@ -8,6 +8,7 @@
 import { ServerSentEventError } from '@kbn/sse-utils';
 import { AgentExecutionErrorCode } from '../agents/execution_errors';
 import type { ExecutionErrorMetaOf } from '../agents/execution_errors';
+import type { HookExecutionMode, HookLifecycle } from '../hooks/lifecycle';
 
 /**
  * Code to identify agentBuilder errors
@@ -20,6 +21,7 @@ export enum AgentBuilderErrorCode {
   conversationNotFound = 'conversationNotFound',
   agentExecutionError = 'agentExecutionError',
   requestAborted = 'requestAborted',
+  hookExecutionError = 'hookExecutionError',
 }
 
 const AgentBuilderError = ServerSentEventError;
@@ -238,6 +240,34 @@ export const isContextLengthExceededAgentError = (
 };
 
 /**
+ * Represents an error related to hook execution
+ */
+export type AgentBuilderHooksExecutionError =
+  AgentBuilderError<AgentBuilderErrorCode.hookExecutionError>;
+
+export const createHooksExecutionError = (
+  message: string,
+  hookLifecycle: HookLifecycle,
+  hookId: string,
+  hookMode: HookExecutionMode,
+  meta: Record<string, any> = {}
+): AgentBuilderHooksExecutionError => {
+  return new AgentBuilderError(AgentBuilderErrorCode.hookExecutionError, message, {
+    ...meta,
+    hookLifecycle,
+    hookId,
+    hookMode,
+  });
+};
+
+/**
+ * Checks if the given error is a {@link AgentBuilderHooksExecutionError}
+ */
+export const isHooksExecutionError = (err: unknown): err is AgentBuilderHooksExecutionError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.hookExecutionError;
+};
+
+/**
  * Global utility exposing all error utilities from a single export.
  */
 export const AgentBuilderErrorUtils = {
@@ -253,4 +283,5 @@ export const AgentBuilderErrorUtils = {
   createAgentNotFoundError,
   createConversationNotFoundError,
   createAgentExecutionError,
+  isHooksExecutionError,
 };

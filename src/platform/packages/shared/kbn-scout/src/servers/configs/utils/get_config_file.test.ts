@@ -10,58 +10,56 @@
 import { join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getConfigFilePath } from './get_config_file';
+import { ScoutTestTarget } from '@kbn/scout-info';
 
 // Not mocking to validate the actual path to the config file
-const CONFIG_ROOT = join(REPO_ROOT, 'src/platform/packages/shared/kbn-scout/src/servers/configs');
+const CONFIG_SETS_ROOT = join(
+  REPO_ROOT,
+  'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets'
+);
 
 describe('getConfigFilePath', () => {
   it('should return the correct path for stateful config', () => {
-    const configRootDir = join(CONFIG_ROOT, 'default', 'stateful');
-    const mode = 'stateful';
-    const expectedPath = join(CONFIG_ROOT, 'default', 'stateful', 'stateful.config.ts');
+    const configRootDir = join(CONFIG_SETS_ROOT, 'default', 'stateful');
+    const testTarget = new ScoutTestTarget('local', 'stateful', 'classic');
+    const expectedPath = join(
+      CONFIG_SETS_ROOT,
+      'default',
+      'stateful',
+      'classic.stateful.config.ts'
+    );
 
-    const result = getConfigFilePath(configRootDir, mode);
+    const result = getConfigFilePath(configRootDir, testTarget);
 
     expect(result).toBe(expectedPath);
   });
 
   it('should return the correct path for serverless config with a valid type', () => {
-    const configRootDir = join(CONFIG_ROOT, 'default', 'serverless');
-    const mode = 'serverless=oblt';
-    const expectedPath = join(CONFIG_ROOT, 'default', 'serverless', 'oblt.serverless.config.ts');
-
-    const result = getConfigFilePath(configRootDir, mode);
-
-    expect(result).toBe(expectedPath);
-  });
-
-  it('should convert hyphens to underscores in serverless type', () => {
-    const configRootDir = join(CONFIG_ROOT, 'default', 'serverless');
-    const mode = 'serverless=oblt-logs-essentials';
+    const configRootDir = join(CONFIG_SETS_ROOT, 'default', 'serverless');
+    const testTarget = new ScoutTestTarget('local', 'serverless', 'observability_complete');
     const expectedPath = join(
-      CONFIG_ROOT,
+      CONFIG_SETS_ROOT,
       'default',
       'serverless',
-      'oblt_logs_essentials.serverless.config.ts'
+      'observability_complete.serverless.config.ts'
     );
 
-    const result = getConfigFilePath(configRootDir, mode);
+    const result = getConfigFilePath(configRootDir, testTarget);
 
     expect(result).toBe(expectedPath);
   });
 
   it('should return the correct path for custom config', () => {
-    const configRootDir = join(CONFIG_ROOT, 'custom', 'uiam_local', 'serverless');
-    const mode = 'serverless=es';
+    const configRootDir = join(CONFIG_SETS_ROOT, 'uiam_local', 'serverless');
+    const testTarget = new ScoutTestTarget('local', 'serverless', 'search');
     const expectedPath = join(
-      CONFIG_ROOT,
-      'custom',
+      CONFIG_SETS_ROOT,
       'uiam_local',
       'serverless',
-      'es.serverless.config.ts'
+      'search.serverless.config.ts'
     );
 
-    const result = getConfigFilePath(configRootDir, mode);
+    const result = getConfigFilePath(configRootDir, testTarget);
 
     expect(result).toBe(expectedPath);
   });
