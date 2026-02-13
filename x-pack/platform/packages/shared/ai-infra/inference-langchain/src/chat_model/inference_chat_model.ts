@@ -193,11 +193,12 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       functionCalling: options.functionCallingMode ?? this.functionCallingMode,
       modelName: options.model ?? this.model,
       temperature: options.temperature ?? this.temperature,
-      // Some providers (notably Anthropic via OpenAI-compatible gateways) reject `tool_choice`
-      // and/or empty tools lists. Only forward tool params when we actually have tools.
+      // OpenAI tool-calling params are only valid when tools are present. Many OpenAI-compatible
+      // endpoints reject `tool_choice` when no tools are provided and/or reject empty tools lists.
+      // Only forward tool params when we actually have tools.
       tools: hasTools ? inferredTools : undefined,
-      // Default to `auto` when tools are present so adapters/providers that require an explicit
-      // tool choice (e.g. Bedrock Converse) can still accept the request.
+      // Default to `auto` when tools are present so OpenAI-compatible endpoints that require an
+      // explicit tool choice can still accept the request.
       toolChoice: hasTools ? toolChoiceToInference(resolvedToolChoice) : undefined,
       abortSignal: options.signal ?? this.signal,
       maxRetries: this.maxRetries,
