@@ -141,10 +141,17 @@ export function generateTypedEvalCasts(fields: PreludeField[]): ESQLAstCommand[]
       castType: castOperator,
     });
 
+    // Wrap in COALESCE(null, cast) to work around INSIST_🐔 bug
+    // Without this, the cast fails when INSIST_🐔 adds a null-valued field
+    const coalesceExpression = Builder.expression.func.call('coalesce', [
+      Builder.expression.literal.nil(),
+      castExpression,
+    ]);
+
     commands.push(
       Builder.command({
         name: 'eval',
-        args: [Builder.expression.func.binary('=', [column, castExpression])],
+        args: [Builder.expression.func.binary('=', [column, coalesceExpression])],
       })
     );
   }
@@ -171,8 +178,8 @@ export function generateTypedEvalCasts(fields: PreludeField[]): ESQLAstCommand[]
  * // Returns commands for:
  * // | INSIST_🐔 `attributes.count`
  * // | INSIST_🐔 `attributes.status`
- * // | EVAL `attributes.count` = `attributes.count`::integer
- * // | EVAL `attributes.status` = `attributes.status`::string
+ * // | EVAL `attributes.count` = COALESCE(null, `attributes.count`::integer)
+ * // | EVAL `attributes.status` = COALESCE(null, `attributes.status`::string)
  * ```
  *
  * @param options - Prelude generation options

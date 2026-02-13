@@ -67,8 +67,8 @@ describe('ESQL Prelude', () => {
       const formatted = BasicPrettyPrinter.multiline(query, { pipeTab: '' });
 
       expect(formatted).toMatchInlineSnapshot(`
-        "EVAL count = count::INTEGER
-        | EVAL name = name::STRING"
+        "EVAL count = COALESCE(NULL, count::INTEGER)
+        | EVAL name = COALESCE(NULL, name::STRING)"
       `);
     });
 
@@ -85,7 +85,9 @@ describe('ESQL Prelude', () => {
       const query = Builder.expression.query(commands);
       const formatted = BasicPrettyPrinter.multiline(query, { pipeTab: '' });
 
-      expect(formatted).toMatchInlineSnapshot(`"EVAL typed_field = typed_field::LONG"`);
+      expect(formatted).toMatchInlineSnapshot(
+        `"EVAL typed_field = COALESCE(NULL, typed_field::LONG)"`
+      );
     });
 
     it('sorts fields alphabetically for deterministic output', () => {
@@ -100,8 +102,8 @@ describe('ESQL Prelude', () => {
       const formatted = BasicPrettyPrinter.multiline(query, { pipeTab: '' });
 
       expect(formatted).toMatchInlineSnapshot(`
-        "EVAL a_field = a_field::DOUBLE
-        | EVAL z_field = z_field::BOOLEAN"
+        "EVAL a_field = COALESCE(NULL, a_field::DOUBLE)
+        | EVAL z_field = COALESCE(NULL, z_field::BOOLEAN)"
       `);
     });
 
@@ -132,23 +134,23 @@ describe('ESQL Prelude', () => {
       const formatted = BasicPrettyPrinter.multiline(query, { pipeTab: '' });
 
       expect(formatted).toMatchInlineSnapshot(`
-        "EVAL field_boolean = field_boolean::BOOLEAN
-        | EVAL field_byte = field_byte::INTEGER
-        | EVAL field_date = field_date::DATETIME
-        | EVAL field_date_nanos = field_date_nanos::DATETIME
-        | EVAL field_double = field_double::DOUBLE
-        | EVAL field_float = field_float::DOUBLE
-        | EVAL field_geo_point = field_geo_point::GEO_POINT
-        | EVAL field_half_float = field_half_float::DOUBLE
-        | EVAL field_integer = field_integer::INTEGER
-        | EVAL field_ip = field_ip::IP
-        | EVAL field_keyword = field_keyword::STRING
-        | EVAL field_long = field_long::LONG
-        | EVAL field_match_only_text = field_match_only_text::STRING
-        | EVAL field_short = field_short::INTEGER
-        | EVAL field_text = field_text::STRING
-        | EVAL field_unsigned_long = field_unsigned_long::UNSIGNED_LONG
-        | EVAL field_version = field_version::VERSION"
+        "EVAL field_boolean = COALESCE(NULL, field_boolean::BOOLEAN)
+        | EVAL field_byte = COALESCE(NULL, field_byte::INTEGER)
+        | EVAL field_date = COALESCE(NULL, field_date::DATETIME)
+        | EVAL field_date_nanos = COALESCE(NULL, field_date_nanos::DATETIME)
+        | EVAL field_double = COALESCE(NULL, field_double::DOUBLE)
+        | EVAL field_float = COALESCE(NULL, field_float::DOUBLE)
+        | EVAL field_geo_point = COALESCE(NULL, field_geo_point::GEO_POINT)
+        | EVAL field_half_float = COALESCE(NULL, field_half_float::DOUBLE)
+        | EVAL field_integer = COALESCE(NULL, field_integer::INTEGER)
+        | EVAL field_ip = COALESCE(NULL, field_ip::IP)
+        | EVAL field_keyword = COALESCE(NULL, field_keyword::STRING)
+        | EVAL field_long = COALESCE(NULL, field_long::LONG)
+        | EVAL field_match_only_text = COALESCE(NULL, field_match_only_text::STRING)
+        | EVAL field_short = COALESCE(NULL, field_short::INTEGER)
+        | EVAL field_text = COALESCE(NULL, field_text::STRING)
+        | EVAL field_unsigned_long = COALESCE(NULL, field_unsigned_long::UNSIGNED_LONG)
+        | EVAL field_version = COALESCE(NULL, field_version::VERSION)"
       `);
     });
 
@@ -161,7 +163,7 @@ describe('ESQL Prelude', () => {
       const formatted = BasicPrettyPrinter.multiline(query, { pipeTab: '' });
 
       expect(formatted).toMatchInlineSnapshot(
-        `"EVAL \`attributes.count\` = \`attributes.count\`::INTEGER"`
+        `"EVAL \`attributes.count\` = COALESCE(NULL, \`attributes.count\`::INTEGER)"`
       );
     });
 
@@ -184,8 +186,8 @@ describe('ESQL Prelude', () => {
       expect(result.query).toMatchInlineSnapshot(`
         "INSIST_🐔 \`attributes.count\`
           | INSIST_🐔 \`attributes.status\`
-          | EVAL \`attributes.count\` = \`attributes.count\`::INTEGER
-          | EVAL \`attributes.status\` = \`attributes.status\`::STRING"
+          | EVAL \`attributes.count\` = COALESCE(NULL, \`attributes.count\`::INTEGER)
+          | EVAL \`attributes.status\` = COALESCE(NULL, \`attributes.status\`::STRING)"
       `);
     });
 
@@ -231,9 +233,9 @@ describe('ESQL Prelude', () => {
         "INSIST_🐔 a_field
           | INSIST_🐔 m_field
           | INSIST_🐔 z_field
-          | EVAL a_field = a_field::STRING
-          | EVAL m_field = m_field::BOOLEAN
-          | EVAL z_field = z_field::LONG"
+          | EVAL a_field = COALESCE(NULL, a_field::STRING)
+          | EVAL m_field = COALESCE(NULL, m_field::BOOLEAN)
+          | EVAL z_field = COALESCE(NULL, z_field::LONG)"
       `);
     });
 
@@ -246,7 +248,7 @@ describe('ESQL Prelude', () => {
       expect(result.query).toMatchInlineSnapshot(`
         "INSIST_🐔 typed_field
           | INSIST_🐔 untyped_field
-          | EVAL typed_field = typed_field::INTEGER"
+          | EVAL typed_field = COALESCE(NULL, typed_field::INTEGER)"
       `);
     });
   });

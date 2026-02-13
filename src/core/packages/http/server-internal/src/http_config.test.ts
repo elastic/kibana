@@ -549,6 +549,24 @@ describe('restrictInternalApis', () => {
   });
 });
 
+describe('excludeRoutes', () => {
+  it('defaults to empty array', () => {
+    expect(config.schema.validate({}).excludeRoutes).toEqual([]);
+  });
+
+  it('accepts a list of paths', () => {
+    expect(config.schema.validate({ excludeRoutes: ['/api/status'] })).toMatchObject({
+      excludeRoutes: ['/api/status'],
+    });
+  });
+
+  it('rejects entries without a leading slash', () => {
+    expect(() => config.schema.validate({ excludeRoutes: ['api/status'] })).toThrow(
+      'must start with a slash'
+    );
+  });
+});
+
 describe('cdn', () => {
   it('allows correct URL', () => {
     expect(config.schema.validate({ cdn: { url: 'https://cdn.example.com' } })).toMatchObject({
