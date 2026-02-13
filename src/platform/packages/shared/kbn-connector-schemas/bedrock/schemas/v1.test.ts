@@ -241,12 +241,20 @@ describe('Bedrock Schema', () => {
       expect(() => InvokeAIActionParamsSchema.parse({})).toThrow();
     });
 
-    it('throws when messages is empty array', () => {
+    it('doest not throw when messages is empty array', () => {
       expect(() =>
         InvokeAIActionParamsSchema.parse({
           messages: [],
         })
       ).not.toThrow();
+    });
+
+    it('throws when messages is undefined ', () => {
+      expect(() =>
+        InvokeAIActionParamsSchema.parse({
+          messages: undefined,
+        })
+      ).toThrow();
     });
 
     it('coerces temperature to number', () => {

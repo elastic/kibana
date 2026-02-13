@@ -130,7 +130,7 @@ describe('OpenAI Schema', () => {
       ).not.toThrow();
     });
 
-    it('throws on empty apiKey for first variant', () => {
+    it('does not throw on empty apiKey for first variant', () => {
       expect(() =>
         SecretsSchema.parse({
           apiKey: '',

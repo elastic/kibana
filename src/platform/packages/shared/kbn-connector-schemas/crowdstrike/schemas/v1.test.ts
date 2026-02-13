@@ -39,12 +39,20 @@ describe('Crowdstrike Schema', () => {
       ).toThrow();
     });
 
-    it('throws on empty url', () => {
+    it('does not throw on empty url', () => {
       expect(() =>
         CrowdstrikeConfigSchema.parse({
           url: '',
         })
       ).not.toThrow();
+    });
+
+    it('throws on undefined url', () => {
+      expect(() =>
+        CrowdstrikeConfigSchema.parse({
+          url: undefined,
+        })
+      ).toThrow();
     });
   });
 
@@ -127,13 +135,22 @@ describe('Crowdstrike Schema', () => {
       ).toThrow();
     });
 
-    it('throws when ids is empty array', () => {
+    it('does not throw when ids is empty array', () => {
       expect(() =>
         CrowdstrikeHostActionsParamsSchema.parse({
           command: 'contain',
           ids: [],
         })
       ).not.toThrow();
+    });
+
+    it('throws when ids is undefined', () => {
+      expect(() =>
+        CrowdstrikeHostActionsParamsSchema.parse({
+          command: 'contain',
+          ids: undefined,
+        })
+      ).toThrow();
     });
   });
 
