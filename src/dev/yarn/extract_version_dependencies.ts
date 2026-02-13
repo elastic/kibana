@@ -9,10 +9,11 @@
 
 import type { RunOptions } from '@kbn/dev-cli-runner';
 import path from 'path';
-import fs from 'fs/promises';
+import fs from 'fs';
 
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { parseYarnLockFile } from './yarn_lock_v1';
 
 const options: RunOptions = {
@@ -26,25 +27,29 @@ const options: RunOptions = {
 };
 
 export async function runCli() {
-  return run(async ({ flagsReader }) => {
+  return run(async ({ flagsReader, log }) => {
     const outputFilePath = flagsReader.getPositionals()[0];
     const dependencies = flagsReader.arrayOfStrings('collect');
     if (typeof dependencies === 'undefined') {
       throw new Error('--collect flag is required and must specify at least one package name.');
     }
 
-    await collectDependenciesAndWriteFile(dependencies, outputFilePath);
+    await collectDependenciesAndWriteFile(dependencies, outputFilePath, log);
 
     return;
   }, options);
 }
 
-async function collectDependenciesAndWriteFile(dependencies: string[], outputFilePath: string) {
+async function collectDependenciesAndWriteFile(
+  dependencies: string[],
+  outputFilePath: string,
+  log: ToolingLog
+) {
   const resolvedDependencyMap = new Map<string, string>();
   const rootPackageJson = path.join(REPO_ROOT, 'package.json');
   const yarnLockPath = path.join(REPO_ROOT, 'yarn.lock');
 
-  const pkgJson = await fs.readFile(rootPackageJson, 'utf-8').then((data) => JSON.parse(data));
+  const pkgJson = JSON.parse(fs.readFileSync(rootPackageJson, 'utf-8'));
   const yarnLockContent = parseYarnLockFile(yarnLockPath, dependencies);
   const yarnLockEntries = Object.values(yarnLockContent);
 
@@ -65,5 +70,11 @@ async function collectDependenciesAndWriteFile(dependencies: string[], outputFil
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([name, version]) => `${name}@${version}`);
 
-  await fs.writeFile(outputFilePath, outputLines.join('\n') + '\n', 'utf-8');
+  const outputDir = path.dirname(outputFilePath);
+  if (!fs.existsSync(outputDir)) {
+    log.info(`Output directory ${outputDir} does not exist. Creating it...`);
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  fs.writeFileSync(outputFilePath, outputLines.join('\n') + '\n', 'utf-8');
 }
