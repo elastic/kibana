@@ -36,6 +36,10 @@ import {
 } from './discover_features';
 import { StreamsTelemetryService } from './telemetry/service';
 import { StreamsAppLocatorDefinition } from '../common/locators';
+import {
+  ADD_STREAM_METRICS_PANEL_ACTION_ID,
+  STREAM_METRICS_EMBEDDABLE_ID,
+} from '../common/embeddable';
 
 const StreamsApplication = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.StreamsApplication }))
@@ -96,9 +100,19 @@ export class StreamsAppPlugin
     this.logger = context.logger.get();
     this.version = context.env.packageInfo.version;
   }
-  setup(coreSetup: CoreSetup<StreamsAppStartDependencies>): StreamsAppPublicSetup {
+  setup(
+    coreSetup: CoreSetup<StreamsAppStartDependencies>,
+    { embeddable }: StreamsAppSetupDependencies
+  ): StreamsAppPublicSetup {
     this.telemetry.setup(coreSetup.analytics);
     const startServicesPromise = coreSetup.getStartServices();
+
+    // Register the stream metrics embeddable factory
+    embeddable.registerReactEmbeddableFactory(STREAM_METRICS_EMBEDDABLE_ID, async () => {
+      const { getStreamMetricsEmbeddableFactory } = await import('./embeddable');
+      const [coreStart, pluginsStart] = await startServicesPromise;
+      return getStreamMetricsEmbeddableFactory({ coreStart, pluginsStart });
+    });
 
     coreSetup.application.register({
       id: 'streams',
@@ -158,7 +172,7 @@ export class StreamsAppPlugin
     return {};
   }
 
-  start(_coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
+  start(coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
     const locator = pluginsStart.share.url.locators.create(new StreamsAppLocatorDefinition());
     pluginsStart.streams.navigationStatus$.subscribe((status) => {
       if (status.status !== 'enabled') return;
@@ -176,6 +190,27 @@ export class StreamsAppPlugin
       });
     });
 
+    // Register the ADD_PANEL_TRIGGER action for adding stream metrics panels to dashboards
+    this.registerAddPanelAction(coreStart, pluginsStart);
+
     return {};
+  }
+
+  private registerAddPanelAction(
+    coreStart: CoreStart,
+    pluginsStart: StreamsAppStartDependencies
+  ): void {
+    const { uiActions } = pluginsStart;
+    // Dynamic import from ui-actions-plugin to avoid static dependency on ADD_PANEL_TRIGGER
+    import('@kbn/ui-actions-plugin/common/trigger_ids').then(({ ADD_PANEL_TRIGGER }) => {
+      uiActions.addTriggerActionAsync(
+        ADD_PANEL_TRIGGER,
+        ADD_STREAM_METRICS_PANEL_ACTION_ID,
+        async () => {
+          const { createAddStreamMetricsPanelAction } = await import('./actions');
+          return createAddStreamMetricsPanelAction(coreStart, pluginsStart);
+        }
+      );
+    });
   }
 }

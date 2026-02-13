@@ -15,6 +15,7 @@ import type {
   DiscoverSharedPublicSetup,
   DiscoverSharedPublicStart,
 } from '@kbn/discover-shared-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
 import type { IndexLifecycleManagementPluginStart } from '@kbn/index-lifecycle-management-common-shared';
@@ -24,6 +25,7 @@ import type { NavigationPublicStart } from '@kbn/navigation-plugin/public/types'
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { SharePublicSetup, SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
@@ -46,7 +48,9 @@ export interface StreamsAppSetupDependencies {
   data: DataPublicPluginSetup;
   dataViews: DataViewsPublicPluginSetup;
   discoverShared: DiscoverSharedPublicSetup;
+  embeddable: EmbeddableSetup;
   share: SharePublicSetup;
+  uiActions: UiActionsSetup;
   unifiedSearch: {};
 }
 
@@ -56,6 +60,7 @@ export interface StreamsAppStartDependencies {
   datasetQuality: DatasetQualityPluginStart;
   dataViews: DataViewsPublicPluginStart;
   discoverShared: DiscoverSharedPublicStart;
+  embeddable: EmbeddableStart;
   fieldFormats: FieldFormatsStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   indexLifecycleManagement?: IndexLifecycleManagementPluginStart;
@@ -66,6 +71,7 @@ export interface StreamsAppStartDependencies {
   savedObjectsTagging: SavedObjectTaggingPluginStart;
   share: SharePublicStart;
   streams: StreamsPluginStart;
+  uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   unifiedDocViewer: UnifiedDocViewerStart;
   dashboard: DashboardStart;
