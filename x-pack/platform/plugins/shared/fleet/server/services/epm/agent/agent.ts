@@ -83,6 +83,19 @@ export function compileTemplate(
   }
 
   compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
+
+  // Normalize multi-line double-quoted YAML scalars. The yaml package (unlike
+  // js-yaml) rejects literal newlines inside double-quoted strings. Values that
+  // were JSON-stringified and then had parameters resolved may contain actual
+  // newlines (doubled by handleMultilineStringFormatter). Apply YAML double-quoted
+  // folding semantics: N consecutive newlines become N-1 \n escape sequences,
+  // matching the output that js-yaml.load produced from the multi-line format.
+  compiledTemplate = compiledTemplate.replace(/"[^"]*"/gs, (match) =>
+    match.includes('\n')
+      ? match.replace(/\n+/g, (newlines) => '\\n'.repeat(newlines.length - 1))
+      : match
+  );
+
   try {
     const yamlFromCompiledTemplate = parse(compiledTemplate);
 
@@ -185,7 +198,9 @@ function buildTemplateVariables(
     if (recordEntry.type && recordEntry.type === 'yaml') {
       const yamlKeyPlaceholder = `##${key}##`;
       varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
-      yamlValues[yamlKeyPlaceholder] = recordEntry.value ? parse(recordEntry.value) : null;
+      // Coerce to string before parsing to match the behavior of js-yaml.load,
+      // which internally calls String(input). The yaml package requires a string.
+      yamlValues[yamlKeyPlaceholder] = recordEntry.value ? parse(String(recordEntry.value)) : null;
     } else if (recordEntry.value && recordEntry.value.isSecretRef) {
       if (recordEntry.value.ids) {
         varPart[lastKeyPart] = recordEntry.value.ids.map((id: string) => toCompiledSecretRef(id));
@@ -299,6 +314,12 @@ function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yaml
       val ? stringify(val) : ''
     );
   });
+
+  // Fix flow-style values (e.g. [] or {}) at column 1 that immediately follow a
+  // mapping key on the preceding line. The yaml package (unlike js-yaml) rejects
+  // this pattern because the value is not indented under its key. Placing the
+  // value on the same line as the key resolves the ambiguity.
+  patchedTemplate = patchedTemplate.replace(/^(\S[^\n]*:)\s*\n(\[.*\]|\{.*\})\s*$/gm, '$1 $2');
 
   return patchedTemplate;
 }
