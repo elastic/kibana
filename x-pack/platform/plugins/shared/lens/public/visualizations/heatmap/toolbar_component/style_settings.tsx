@@ -19,6 +19,7 @@ import {
 } from '../../../shared_components';
 import type { Orientation } from '../../../shared_components';
 import type { HeatmapVisualizationState } from '../types';
+import { AxisSortOrder } from './sort_order';
 
 export function HeatmapStyleSettings(props: VisualizationToolbarProps<HeatmapVisualizationState>) {
   return (
@@ -110,6 +111,8 @@ export function HeatmapVerticalAxisSettings({
         }}
         isAxisLabelVisible={state?.gridConfig.isYAxisLabelVisible}
       />
+
+      <AxisSortOrder axis="y" state={state} setState={setState} />
     </>
   );
 }
@@ -167,6 +170,7 @@ export function HeatmapHorizontalAxisSettings({
           }}
         />
       )}
+      <AxisSortOrder axis="x" state={state} setState={setState} />
     </>
   );
 }

@@ -741,8 +741,14 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               valueAccessor={valueAccessor}
               valueFormatter={valueFormatter}
               xScale={xScale}
-              ySortPredicate={yAxisColumn ? getSortPredicate(yAxisColumn) : 'dataIndex'}
-              xSortPredicate={xAxisColumn ? getSortPredicate(xAxisColumn) : 'dataIndex'}
+              xSortPredicate={
+                xAxisColumn &&
+                getSortPredicate(xAxisColumn, args.gridConfig.xSortPredicate ?? 'none')
+              }
+              ySortPredicate={
+                yAxisColumn &&
+                getSortPredicate(yAxisColumn, args.gridConfig.ySortPredicate ?? 'none')
+              }
               xAxisLabelName={xAxisColumn?.name || ''}
               yAxisLabelName={yAxisColumn?.name || ''}
               xAxisTitle={args.gridConfig.isXAxisTitleVisible ? xAxisTitle : undefined}
