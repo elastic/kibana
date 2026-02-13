@@ -10,6 +10,8 @@
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
+const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
+
 const defaultExporters = JSON.stringify([
   {
     http: {
@@ -41,6 +43,13 @@ const exporters = tracingExporters ?? defaultExporters;
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
+  esTestCluster: {
+    ...defaultConfig.esTestCluster,
+    serverArgs: [
+      ...defaultConfig.esTestCluster.serverArgs,
+      `xpack.inference.elastic.url=${EIS_QA_URL}`,
+    ],
+  },
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
     env: {
