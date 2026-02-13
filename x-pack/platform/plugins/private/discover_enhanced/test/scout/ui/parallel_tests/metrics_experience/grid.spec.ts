@@ -49,10 +49,11 @@ spaceTest.describe(
     });
 
     spaceTest('should render grid with WHERE filter', async ({ pageObjects }) => {
-      await pageObjects.metricsExperience.runEsqlQuery(
+      const { metricsExperience } = pageObjects;
+      await metricsExperience.runEsqlQuery(
         `${testData.ESQL_QUERIES.TS_TSDB_LOGS} | WHERE @timestamp > "${testData.TSDB_LOGS_DEFAULT_END_TIME}" - 100 DAYS`
       );
-      await expect(pageObjects.metricsExperience.grid).toBeVisible();
+      await expect(metricsExperience.grid).toBeVisible();
     });
 
     spaceTest('should render grid with LIMIT', async ({ pageObjects }) => {
