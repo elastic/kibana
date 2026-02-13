@@ -8,6 +8,7 @@
 import { createLazyPageObject, type KibanaUrl, type ScoutPage } from '@kbn/scout-oblt';
 import { testData } from '../..';
 import { DependenciesTab } from './dependencies_tab';
+import { BIGGER_TIMEOUT } from '../../constants';
 
 export class ServiceDetailsPage {
   public readonly SERVICE_NAME = 'opbeans-java';
@@ -34,6 +35,6 @@ export class ServiceDetailsPage {
         rangeTo: overrides.rangeTo ?? testData.OPBEANS_END_DATE,
       })}`
     );
-    await this.page.getByRole('tablist').waitFor();
+    await this.page.getByRole('tablist').waitFor({ timeout: BIGGER_TIMEOUT });
   }
 }

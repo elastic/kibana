@@ -15,11 +15,11 @@ test.describe('Service overview - header filters', { tag: ['@ess', '@svlOblt'] }
 
   test('Filtering by transaction type - changes url when selecting different value', async ({
     page,
-    pageObjects: { dependencyDetailsPage },
+    pageObjects: { serviceDetailsPage, dependencyDetailsPage },
   }) => {
     await test.step('Navigate to service overview', async () => {
-      await dependencyDetailsPage.overviewTab.goToTab({
-        serviceName: dependencyDetailsPage.DEPENDENCY_NAME,
+      await serviceDetailsPage.goToPage({
+        serviceName: 'opbeans-java',
       });
     });
 
@@ -44,18 +44,16 @@ test.describe('Service overview - header filters', { tag: ['@ess', '@svlOblt'] }
 
   test('Filtering by searchbar - filters by transaction.name', async ({
     page,
-    pageObjects: { dependencyDetailsPage },
+    pageObjects: { serviceDetailsPage },
   }) => {
     await test.step('Navigate to opbeans-java service overview', async () => {
-      await dependencyDetailsPage.overviewTab.goToTab({
-        serviceName: dependencyDetailsPage.DEPENDENCY_NAME,
+      await serviceDetailsPage.dependenciesTab.goToTab({
+        serviceName: 'opbeans-java',
       });
     });
 
     await test.step('Verify service name is visible', async () => {
-      await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(
-        dependencyDetailsPage.DEPENDENCY_NAME
-      );
+      await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText('opbeans-java');
     });
 
     await test.step('Type transaction.n in searchbar and select autocomplete', async () => {

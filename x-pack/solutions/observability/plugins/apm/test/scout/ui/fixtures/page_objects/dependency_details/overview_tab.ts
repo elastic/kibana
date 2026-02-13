@@ -10,6 +10,7 @@ import capitalize from 'lodash/capitalize';
 import type { DependencyDetailsPageTabName } from './dependency_details_tab';
 import { DependencyDetailsTab } from './dependency_details_tab';
 import { waitForChartToLoad, waitForTableToLoad } from '../utils';
+import { BIGGER_TIMEOUT } from '../../constants';
 
 export class OverviewTab extends DependencyDetailsTab {
   public readonly tabName: DependencyDetailsPageTabName = 'overview';
@@ -52,6 +53,7 @@ export class OverviewTab extends DependencyDetailsTab {
   }
 
   async selectTransactionType(type: string) {
+    await this.getTransactionTypeFilter().waitFor({ timeout: BIGGER_TIMEOUT });
     await this.getTransactionTypeFilter().selectOption(type);
   }
 
