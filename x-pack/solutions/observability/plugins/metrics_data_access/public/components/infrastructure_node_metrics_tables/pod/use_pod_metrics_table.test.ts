@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  ECS_POD_CPU_USAGE_LIMIT_PCT,
+  MEMORY_LIMIT_UTILIZATION,
+  SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
+} from './constants';
 import { usePodMetricsTable } from './use_pod_metrics_table';
 import { useInfrastructureNodeMetrics } from '../shared';
 import { renderHook } from '@testing-library/react';
@@ -27,6 +32,7 @@ describe('usePodMetricsTable hook', () => {
     useInfrastructureNodeMetricsMock.mockReturnValue({
       isLoading: true,
       data: { state: 'empty-indices' },
+      metricIndices: 'test-index',
     });
 
     renderHook(() =>
@@ -37,7 +43,7 @@ describe('usePodMetricsTable hook', () => {
       })
     );
 
-    const kueryWithEventModuleFilter = `event.dataset: "kubernetes.pod" AND ${kuery}`;
+    const kueryWithEventModuleFilter = `event.dataset: "kubernetes.pod" AND (${kuery})`;
 
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -55,6 +61,7 @@ describe('usePodMetricsTable hook', () => {
     useInfrastructureNodeMetricsMock.mockReturnValue({
       isLoading: true,
       data: { state: 'empty-indices' },
+      metricIndices: 'test-index',
     });
 
     renderHook(() =>
@@ -69,10 +76,10 @@ describe('usePodMetricsTable hook', () => {
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
-          kuery,
+          kuery: `(${kuery})`,
           metrics: expect.arrayContaining([
-            expect.objectContaining({ field: 'metrics.k8s.pod.cpu_limit_utilization' }),
-            expect.objectContaining({ field: 'memory_limit_utilization' }),
+            expect.objectContaining({ field: SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION }),
+            expect.objectContaining({ field: MEMORY_LIMIT_UTILIZATION }),
           ]),
         }),
       })
@@ -86,26 +93,27 @@ describe('usePodMetricsTable hook', () => {
     useInfrastructureNodeMetricsMock.mockReturnValue({
       isLoading: true,
       data: { state: 'empty-indices' },
+      metricIndices: 'test-index',
     });
 
     renderHook(() =>
       usePodMetricsTable({
         timerange: { from: 'now-30d', to: 'now' },
-        kuery,
+        kuery: `(${kuery})`,
         metricsClient: createMetricsClientMock({}),
         schema: 'ecs',
       })
     );
 
-    const kueryWithEventDatasetFilter = `event.dataset: "kubernetes.pod" AND ${kuery}`;
+    const kueryWithEventDatasetFilter = `event.dataset: "kubernetes.pod" AND (${kuery})`;
 
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
           kuery: kueryWithEventDatasetFilter,
           metrics: expect.arrayContaining([
-            expect.objectContaining({ field: 'kubernetes.pod.cpu.usage.limit.pct' }),
-            expect.objectContaining({ field: 'memory_limit_utilization' }),
+            expect.objectContaining({ field: ECS_POD_CPU_USAGE_LIMIT_PCT }),
+            expect.objectContaining({ field: MEMORY_LIMIT_UTILIZATION }),
           ]),
         }),
       })

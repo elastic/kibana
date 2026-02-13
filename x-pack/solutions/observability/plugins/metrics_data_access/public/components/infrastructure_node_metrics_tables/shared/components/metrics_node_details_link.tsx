@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { parse } from '@kbn/datemath';
 import { EuiLink } from '@elastic/eui';
-import { esql } from '@kbn/esql-language';
+import { type ComposerQuery, esql } from '@kbn/esql-language';
 import type {
   DataSchemaFormat,
   InventoryItemType,
@@ -39,15 +39,15 @@ function getDiscoverEsqlQueryForNode(
   nodeType: NodeTypeForLink,
   entityId: string,
   indexPattern: string
-): string {
+): ComposerQuery {
   const from = indexPattern || DEFAULT_METRICS_INDEX;
   switch (nodeType) {
     case 'container':
-      return esql`FROM ${from} | WHERE container.id == "${entityId}"`.toString();
+      return esql`TS ${from} | WHERE container.id == ${entityId}`;
     case 'pod':
-      return esql`TS ${from} | WHERE k8s.pod.uid == "${entityId}"`.toString();
+      return esql`TS ${from} | WHERE k8s.pod.uid == ${entityId}`;
     default:
-      return esql`TS ${from}`.toString();
+      return esql`TS ${from}`;
   }
 }
 
@@ -67,10 +67,15 @@ export const MetricsNodeDetailsLink = ({
   const linkProps = useMemo(() => {
     if (redirectToDiscover) {
       const discoverLocator = share?.url?.locators?.get(DISCOVER_APP_LOCATOR_ID);
+      const esqlQuery = getDiscoverEsqlQueryForNode(
+        nodeType,
+        id,
+        metricsIndices ?? DEFAULT_METRICS_INDEX
+      );
       const discoverParams = {
         timeRange: { from: timerange.from, to: timerange.to },
         query: {
-          esql: getDiscoverEsqlQueryForNode(nodeType, id, metricsIndices ?? DEFAULT_METRICS_INDEX),
+          esql: esqlQuery.toRequest().query,
         },
       };
       const href = discoverLocator?.getRedirectUrl(discoverParams) ?? '#';

@@ -19,56 +19,65 @@ import {
   scaleUpPercentage,
   useInfrastructureNodeMetrics,
 } from '../shared';
+import {
+  SEMCONV_SYSTEM_CPU_LOGICAL_COUNT,
+  SEMCONV_SYSTEM_CPU_UTILIZATION,
+  SEMCONV_SYSTEM_MEMORY_LIMIT,
+  SEMCONV_SYSTEM_MEMORY_UTILIZATION,
+  SYSTEM_CPU_CORES,
+  SYSTEM_CPU_TOTAL_NORM_PCT,
+  SYSTEM_MEMORY_TOTAL,
+  SYSTEM_MEMORY_USED_PCT,
+} from './constants';
 
 type HostMetricsField =
-  | 'system.cpu.cores'
-  | 'system.cpu.total.norm.pct'
-  | 'system.memory.total'
-  | 'system.memory.used.pct';
-// | 'metrics.system.cpu.logical.count';
+  | typeof SYSTEM_CPU_CORES
+  | typeof SYSTEM_CPU_TOTAL_NORM_PCT
+  | typeof SYSTEM_MEMORY_TOTAL
+  | typeof SYSTEM_MEMORY_USED_PCT;
 
 const hostsMetricsQueryConfig: MetricsQueryOptions<HostMetricsField> = {
   sourceFilter: 'event.module: "system"',
   groupByField: 'host.name',
   metricsMap: {
-    'system.cpu.cores': { aggregation: 'max', field: 'system.cpu.cores' },
-    'system.cpu.total.norm.pct': {
+    [SYSTEM_CPU_CORES]: { aggregation: 'max', field: SYSTEM_CPU_CORES },
+    [SYSTEM_CPU_TOTAL_NORM_PCT]: {
       aggregation: 'avg',
-      field: 'system.cpu.total.norm.pct',
+      field: SYSTEM_CPU_TOTAL_NORM_PCT,
     },
-    'system.memory.total': { aggregation: 'max', field: 'system.memory.total' },
-    'system.memory.used.pct': {
+    [SYSTEM_MEMORY_TOTAL]: { aggregation: 'max', field: SYSTEM_MEMORY_TOTAL },
+    [SYSTEM_MEMORY_USED_PCT]: {
       aggregation: 'avg',
-      field: 'system.memory.used.pct',
+      field: SYSTEM_MEMORY_USED_PCT,
     },
   },
 };
 
 type HostMetricsFieldsOtel =
-  | 'metrics.system.cpu.logical.count'
-  | 'metrics.system.cpu.utilization'
-  | 'metrics.system.memory.limit'
-  | 'metrics.system.memory.utilization';
+  | typeof SEMCONV_SYSTEM_CPU_LOGICAL_COUNT
+  | typeof SEMCONV_SYSTEM_CPU_UTILIZATION
+  | typeof SEMCONV_SYSTEM_MEMORY_LIMIT
+  | typeof SEMCONV_SYSTEM_MEMORY_UTILIZATION;
 
 const hostsMetricsQueryConfigOtel: MetricsQueryOptions<HostMetricsFieldsOtel> = {
   sourceFilter: '', // todo: does this make sense?
   groupByField: 'host.name',
   metricsMap: {
-    'metrics.system.cpu.logical.count': {
+    [SEMCONV_SYSTEM_CPU_LOGICAL_COUNT]: {
       aggregation: 'max',
-      field: 'metrics.system.cpu.logical.count',
+      field: SEMCONV_SYSTEM_CPU_LOGICAL_COUNT,
     },
-    'metrics.system.cpu.utilization': {
+    [SEMCONV_SYSTEM_CPU_UTILIZATION]: {
       aggregation: 'avg',
-      field: 'metrics.system.cpu.utilization',
+      field: SEMCONV_SYSTEM_CPU_UTILIZATION,
     },
-    'metrics.system.memory.limit': {
+    [SEMCONV_SYSTEM_MEMORY_LIMIT]: {
       aggregation: 'max',
-      field: 'metrics.system.memory.limit',
+      field: SEMCONV_SYSTEM_MEMORY_LIMIT,
     },
-    'metrics.system.memory.utilization': {
+    [SEMCONV_SYSTEM_MEMORY_UTILIZATION]: {
       aggregation: 'avg',
-      field: 'metrics.system.memory.utilization',
+      field: SEMCONV_SYSTEM_MEMORY_UTILIZATION,
     },
   },
 };
@@ -220,9 +229,9 @@ function collectMetricValues(rows: MetricsExplorerRow[]) {
 
 function unpackMetrics(row: MetricsExplorerRow): Omit<HostNodeMetricsRow, 'name'> {
   return {
-    cpuCount: unpackMetric(row, 'system.cpu.cores'),
-    averageCpuUsagePercent: unpackMetric(row, 'system.cpu.total.norm.pct'),
-    totalMemoryMegabytes: unpackMetric(row, 'system.memory.total'),
-    averageMemoryUsagePercent: unpackMetric(row, 'system.memory.used.pct'),
+    cpuCount: unpackMetric(row, SYSTEM_CPU_CORES),
+    averageCpuUsagePercent: unpackMetric(row, SYSTEM_CPU_TOTAL_NORM_PCT),
+    totalMemoryMegabytes: unpackMetric(row, SYSTEM_MEMORY_TOTAL),
+    averageMemoryUsagePercent: unpackMetric(row, SYSTEM_MEMORY_USED_PCT),
   };
 }

@@ -91,7 +91,7 @@ describe('MetricsNodeDetailsLink', () => {
 
       expect(discoverLocator.getRedirectUrl).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: { esql: 'TS metrics-* | WHERE container.id == "abc-123"' },
+          query: { esql: 'TS "metrics-*" | WHERE container.id == "abc-123"' },
           timeRange: { from: 'now-15m', to: 'now' },
         })
       );
@@ -114,7 +114,8 @@ describe('MetricsNodeDetailsLink', () => {
 
       expect(discoverLocator.getRedirectUrl).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: { esql: 'TS metrics-* | WHERE k8s.pod.uid == "pod-uid-456"' },
+          query: { esql: 'TS "metrics-*" | WHERE k8s.pod.uid == "pod-uid-456"' },
+          timeRange: { from: 'now-15m', to: 'now' },
         })
       );
       expect(mockGetAssetDetailUrl).not.toHaveBeenCalled();
@@ -130,14 +131,15 @@ describe('MetricsNodeDetailsLink', () => {
           schema="semconv"
           nodeType="container"
           id="abc-123"
-          metricIndices="my-metrics-*"
+          metricsIndices="my-metrics-*"
         />,
         { wrapper: Wrapper }
       );
 
       expect(discoverLocator.getRedirectUrl).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: { esql: 'TS my-metrics-* | WHERE container.id == "abc-123"' },
+          query: { esql: 'TS "my-metrics-*" | WHERE container.id == "abc-123"' },
+          timeRange: { from: 'now-15m', to: 'now' },
         })
       );
     });
@@ -153,7 +155,8 @@ describe('MetricsNodeDetailsLink', () => {
 
       expect(discoverLocator.getRedirectUrl).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: { esql: 'TS metrics-* | WHERE container.id == "x"' },
+          query: { esql: 'TS "metrics-*" | WHERE container.id == "x"' },
+          timeRange: { from: 'now-15m', to: 'now' },
         })
       );
     });
@@ -175,8 +178,9 @@ describe('MetricsNodeDetailsLink', () => {
       expect(discoverLocator.getRedirectUrl).toHaveBeenCalledWith(
         expect.objectContaining({
           query: {
-            esql: 'TS metrics-* | WHERE container.id == "id-with-\\"quote\\""',
+            esql: 'TS "metrics-*" | WHERE container.id == "id-with-\\"quote\\""',
           },
+          timeRange: { from: 'now-15m', to: 'now' },
         })
       );
     });

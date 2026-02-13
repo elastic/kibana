@@ -19,30 +19,38 @@ import {
   scaleUpPercentage,
   useInfrastructureNodeMetrics,
 } from '../shared';
+import {
+  ECS_POD_CPU_USAGE_LIMIT_PCT,
+  KUBERNETES_NODE_MEMORY_ALLOCATABLE_BYTES,
+  KUBERNETES_NODE_MEMORY_USAGE_BYTES,
+  MEMORY_LIMIT_UTILIZATION,
+  SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
+  SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
+} from './constants';
 
-type PodMetricsField = 'kubernetes.pod.cpu.usage.limit.pct' | 'memory_limit_utilization';
+type PodMetricsField = typeof ECS_POD_CPU_USAGE_LIMIT_PCT | typeof MEMORY_LIMIT_UTILIZATION;
 
 const podMetricsQueryConfig: MetricsQueryOptions<PodMetricsField> = {
   sourceFilter: `event.dataset: "kubernetes.pod"`,
   groupByField: ['kubernetes.pod.uid', 'kubernetes.pod.name'],
   metricsMap: {
-    'kubernetes.pod.cpu.usage.limit.pct': {
+    [ECS_POD_CPU_USAGE_LIMIT_PCT]: {
       aggregation: 'avg',
-      field: 'kubernetes.pod.cpu.usage.limit.pct',
+      field: ECS_POD_CPU_USAGE_LIMIT_PCT,
     },
-    memory_limit_utilization: {
+    [MEMORY_LIMIT_UTILIZATION]: {
       aggregation: 'custom',
-      field: 'memory_limit_utilization',
+      field: MEMORY_LIMIT_UTILIZATION,
       custom_metrics: [
         {
           name: 'A',
           aggregation: 'max',
-          field: 'kubernetes.node.memory.allocatable.bytes',
+          field: KUBERNETES_NODE_MEMORY_ALLOCATABLE_BYTES,
         },
         {
           name: 'B',
           aggregation: 'avg',
-          field: 'kubernetes.node.memory.usage.bytes',
+          field: KUBERNETES_NODE_MEMORY_USAGE_BYTES,
         },
       ],
       equation: 'B / A',
@@ -50,7 +58,9 @@ const podMetricsQueryConfig: MetricsQueryOptions<PodMetricsField> = {
   },
 };
 
-type PodMetricsFieldsOtel = 'metrics.k8s.pod.cpu_limit_utilization' | 'memory_limit_utilization';
+type PodMetricsFieldsOtel =
+  | typeof SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION
+  | typeof MEMORY_LIMIT_UTILIZATION;
 
 const podMetricsQueryConfigOtel: MetricsQueryOptions<PodMetricsFieldsOtel> = {
   sourceFilter: '',
@@ -58,18 +68,18 @@ const podMetricsQueryConfigOtel: MetricsQueryOptions<PodMetricsFieldsOtel> = {
   metricsMap: {
     // this is an optional field and wont populate unless specifically enabled in kubeletstatreceiver.
     // There are not pod metrics that can derive this value.
-    'metrics.k8s.pod.cpu_limit_utilization': {
+    [SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION]: {
       aggregation: 'avg',
-      field: 'metrics.k8s.pod.cpu_limit_utilization', // this is an opt-in field.
+      field: SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION, // this is an opt-in field.
     },
-    memory_limit_utilization: {
-      field: 'memory_limit_utilization',
+    [MEMORY_LIMIT_UTILIZATION]: {
+      field: MEMORY_LIMIT_UTILIZATION,
       aggregation: 'custom',
       custom_metrics: [
         {
           name: 'A',
           aggregation: 'avg',
-          field: 'metrics.k8s.pod.memory_limit_utilization',
+          field: SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
         },
       ],
       equation: 'A',
@@ -195,7 +205,7 @@ function collectMetricValues(rows: MetricsExplorerRow[]) {
 
 function unpackMetrics(row: MetricsExplorerRow): Omit<PodNodeMetricsRow, 'id' | 'name'> {
   return {
-    averageCpuUsagePercent: unpackMetric(row, 'kubernetes.pod.cpu.usage.limit.pct'),
-    averageMemoryUsagePercent: unpackMetric(row, 'memory_limit_utilization'),
+    averageCpuUsagePercent: unpackMetric(row, ECS_POD_CPU_USAGE_LIMIT_PCT),
+    averageMemoryUsagePercent: unpackMetric(row, MEMORY_LIMIT_UTILIZATION),
   };
 }

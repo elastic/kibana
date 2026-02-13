@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+import {
+  SEMCONV_SYSTEM_CPU_LOGICAL_COUNT,
+  SEMCONV_SYSTEM_CPU_UTILIZATION,
+  SEMCONV_SYSTEM_MEMORY_LIMIT,
+  SEMCONV_SYSTEM_MEMORY_UTILIZATION,
+  SYSTEM_CPU_CORES,
+  SYSTEM_CPU_TOTAL_NORM_PCT,
+  SYSTEM_MEMORY_TOTAL,
+  SYSTEM_MEMORY_USED_PCT,
+} from './constants';
 import { useHostMetricsTable } from './use_host_metrics_table';
 import { useInfrastructureNodeMetrics } from '../shared';
 import { renderHook } from '@testing-library/react';
@@ -27,6 +37,7 @@ describe('useHostMetricsTable hook', () => {
     useInfrastructureNodeMetricsMock.mockReturnValue({
       isLoading: true,
       data: { state: 'empty-indices' },
+      metricIndices: 'test-index',
     });
 
     renderHook(() =>
@@ -37,7 +48,7 @@ describe('useHostMetricsTable hook', () => {
       })
     );
 
-    const kueryWithEventModuleFilter = `event.module: "system" AND ${kuery}`;
+    const kueryWithEventModuleFilter = `event.module: "system" AND (${kuery})`;
 
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -55,6 +66,7 @@ describe('useHostMetricsTable hook', () => {
     useInfrastructureNodeMetricsMock.mockReturnValue({
       isLoading: true,
       data: { state: 'empty-indices' },
+      metricIndices: 'test-index',
     });
 
     renderHook(() =>
@@ -69,12 +81,12 @@ describe('useHostMetricsTable hook', () => {
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
-          kuery,
+          kuery: `(${kuery})`,
           metrics: expect.arrayContaining([
-            expect.objectContaining({ field: 'metrics.system.cpu.logical.count' }),
-            expect.objectContaining({ field: 'metrics.system.cpu.utilization' }),
-            expect.objectContaining({ field: 'metrics.system.memory.limit' }),
-            expect.objectContaining({ field: 'metrics.system.memory.utilization' }),
+            expect.objectContaining({ field: SEMCONV_SYSTEM_CPU_LOGICAL_COUNT }),
+            expect.objectContaining({ field: SEMCONV_SYSTEM_CPU_UTILIZATION }),
+            expect.objectContaining({ field: SEMCONV_SYSTEM_MEMORY_LIMIT }),
+            expect.objectContaining({ field: SEMCONV_SYSTEM_MEMORY_UTILIZATION }),
           ]),
         }),
       })
@@ -88,6 +100,7 @@ describe('useHostMetricsTable hook', () => {
     useInfrastructureNodeMetricsMock.mockReturnValue({
       isLoading: true,
       data: { state: 'empty-indices' },
+      metricIndices: 'test-index',
     });
 
     renderHook(() =>
@@ -99,17 +112,17 @@ describe('useHostMetricsTable hook', () => {
       })
     );
 
-    const kueryWithEventModuleFilter = `event.module: "system" AND ${kuery}`;
+    const kueryWithEventModuleFilter = `event.module: "system" AND (${kuery})`;
 
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
           kuery: kueryWithEventModuleFilter,
           metrics: expect.arrayContaining([
-            expect.objectContaining({ field: 'system.cpu.cores' }),
-            expect.objectContaining({ field: 'system.cpu.total.norm.pct' }),
-            expect.objectContaining({ field: 'system.memory.total' }),
-            expect.objectContaining({ field: 'system.memory.used.pct' }),
+            expect.objectContaining({ field: SYSTEM_CPU_CORES }),
+            expect.objectContaining({ field: SYSTEM_CPU_TOTAL_NORM_PCT }),
+            expect.objectContaining({ field: SYSTEM_MEMORY_TOTAL }),
+            expect.objectContaining({ field: SYSTEM_MEMORY_USED_PCT }),
           ]),
         }),
       })

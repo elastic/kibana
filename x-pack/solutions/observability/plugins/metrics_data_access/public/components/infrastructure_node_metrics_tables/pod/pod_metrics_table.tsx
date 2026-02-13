@@ -24,6 +24,10 @@ import {
   StepwisePagination,
 } from '../shared';
 import type { DataSchemaFormat } from '../../../../common';
+import {
+  SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
+  SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
+} from './constants';
 import type { PodNodeMetricsRow } from './use_pod_metrics_table';
 
 export interface PodMetricsTableProps {
@@ -168,7 +172,7 @@ function podNodeColumns(
                     defaultMessage:
                       '{metricName} is optional and may not appear for all pods. Visibility depends on your Kubernetes metrics collection setup.',
                     values: {
-                      metricName: 'metrics.k8s.pod.cpu_limit_utilization',
+                      metricName: SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
                     },
                   }
                 )}
@@ -203,7 +207,7 @@ function podNodeColumns(
                     defaultMessage:
                       '{metricName} is optional and may not appear for all pods. Visibility depends on your Kubernetes metrics collection setup.',
                     values: {
-                      metricName: 'metrics.k8s.pod.memory_limit_utilization',
+                      metricName: SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
                     },
                   }
                 )}
