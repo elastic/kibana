@@ -162,7 +162,7 @@ describe('AiInsight', () => {
       fireEvent.click(toggle!);
 
       const startConversationButton = container.querySelector(
-        '[data-test-subj="obsAgentBuilder-log-startConversationButton"]'
+        '[data-test-subj="observabilityAgentBuilderLogStartConversationButton"]'
       );
 
       expect(startConversationButton).toBeTruthy();
@@ -191,7 +191,7 @@ describe('AiInsight', () => {
       fireEvent.click(toggle!);
 
       const startConversationButton = container.querySelector(
-        '[data-test-subj="obsAgentBuilder-log-startConversationButton"]'
+        '[data-test-subj="observabilityAgentBuilderLogStartConversationButton"]'
       );
       fireEvent.click(startConversationButton!);
 
