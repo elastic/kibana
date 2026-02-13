@@ -7,11 +7,15 @@
 
 import React from 'react';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
-import { isContextLengthExceededAgentError } from '@kbn/agent-builder-common';
+import {
+  isContextLengthExceededAgentError,
+  isWorkflowAbortedError,
+} from '@kbn/agent-builder-common';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { ContextExceededRoundError } from './context_exceeded_round_error';
+import { WorkflowAbortedRoundError } from './workflow_aborted_round_error';
 import { GenericRoundError } from './generic_round_error';
 import { RoundErrorThinkingPanel } from './round_error_thinking_panel';
 import { RoundSteps } from '../round_thinking/steps/round_steps';
@@ -34,8 +38,11 @@ const labels = {
 export const RoundError: React.FC<RoundErrorProps> = ({ error, errorSteps, onRetry }) => {
   const { euiTheme } = useEuiTheme();
 
+  const isWorkflowAborted = isWorkflowAbortedError(error);
   const errorContent = isContextLengthExceededAgentError(error) ? (
     <ContextExceededRoundError />
+  ) : isWorkflowAborted ? (
+    <WorkflowAbortedRoundError error={error} />
   ) : (
     <GenericRoundError error={error} />
   );
@@ -47,10 +54,14 @@ export const RoundError: React.FC<RoundErrorProps> = ({ error, errorSteps, onRet
       responsive={false}
       data-test-subj="agentBuilderRoundError"
     >
-      <RoundErrorThinkingPanel>
-        <RoundSteps isLoading={false} steps={errorSteps} />
-        {errorContent}
-      </RoundErrorThinkingPanel>
+      {isWorkflowAborted ? (
+        errorContent
+      ) : (
+        <RoundErrorThinkingPanel>
+          <RoundSteps isLoading={false} steps={errorSteps} />
+          {errorContent}
+        </RoundErrorThinkingPanel>
+      )}
 
       <EuiFlexGroup direction="row" justifyContent="flexEnd" responsive={false}>
         <EuiFlexItem grow={false}>

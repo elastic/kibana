@@ -20,4 +20,3 @@ export {
 } from './conversations';
 export { convertErrors } from './convert_errors';
 export { resolveServices } from './resolve_services';
-export { createAbortedRoundCompleteEvent } from './create_workflow_aborted_round_event';

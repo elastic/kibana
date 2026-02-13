@@ -15,10 +15,8 @@ import type {
   AgentConfigurationOverrides,
   ConversationAction,
 } from '@kbn/agent-builder-common';
-import { isWorkflowAbortedError } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { AgentsServiceStart } from '../../agents';
-import { createWorkflowAbortedRoundCompleteEvent } from './create_workflow_aborted_round_event';
 
 export const executeAgent$ = ({
   agentId,
@@ -75,19 +73,7 @@ export const executeAgent$ = ({
           observer.complete();
         },
         (error) => {
-          if (isWorkflowAbortedError(error)) {
-            observer.next(
-              createWorkflowAbortedRoundCompleteEvent({
-                nextInput,
-                message: error.message,
-                connectorId: defaultConnectorId ?? '',
-                workflowName: error.meta?.workflow,
-              })
-            );
-            observer.complete();
-          } else {
-            observer.error(error);
-          }
+          observer.error(error);
         }
       );
 
