@@ -104,6 +104,28 @@ describe('formatters', () => {
       ).toEqual(null);
     });
 
+    it('returns null for invalid timeouts', () => {
+      expect(
+        privateTimeoutFormatter(
+          {
+            [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
+            [ConfigKey.TIMEOUT]: 's35',
+          },
+          ConfigKey.TIMEOUT
+        )
+      ).toEqual(null);
+
+      expect(
+        privateTimeoutFormatter(
+          {
+            [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
+            [ConfigKey.TIMEOUT]: HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS.toString(),
+          },
+          ConfigKey.TIMEOUT
+        )
+      ).toEqual(null);
+    });
+
     it('returns raw timeout for non-browser monitors', () => {
       expect(
         privateTimeoutFormatter(
