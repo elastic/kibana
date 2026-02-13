@@ -7,26 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AggregateQuery, Query } from '@kbn/es-query';
-import { isOfAggregateQueryType, type Filter } from '@kbn/es-query';
+import { type Filter } from '@kbn/es-query';
 import {
-  apiHasSerializableState,
-  apiHasType,
-  apiHasUniqueId,
   type HasParentApi,
   type PublishesSavedObjectId,
   type PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
-import { getESQLQueryVariables } from '@kbn/esql-utils';
-import { ESQL_CONTROL } from '@kbn/controls-constants';
-import type { ESQLControlState } from '@kbn/esql-types';
-import type { Serializable, SerializableRecord } from '@kbn/utility-types';
-import { isControlGroupRendererApi, type ControlPanelsState } from '@kbn/control-group-renderer';
-import type { PresentationContainer } from '@kbn/presentation-containers';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { omit } from 'lodash';
-import { type PublishesSavedSearch } from '../types';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { getEsqlControls } from '@kbn/esql-utils';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DiscoverAppLocatorParams } from '../../../common';
+import { type PublishesSavedSearch } from '../types';
 
 export const getDiscoverLocatorParams = (
   api: PublishesSavedSearch &
@@ -47,7 +40,10 @@ export const getDiscoverLocatorParams = (
         dataViewId: dataView?.id,
         dataViewSpec: dataView?.toMinimalSpec(),
         esqlControls: presentationContainer
-          ? getEsqlControls(presentationContainer, query)
+          ? (getEsqlControls(
+              presentationContainer,
+              query
+            ) as ControlPanelsState<OptionsListESQLControlState> & SerializableRecord)
           : undefined,
         timeRange: savedSearch?.timeRange,
         refreshInterval: savedSearch?.refreshInterval,
@@ -61,52 +57,3 @@ export const getDiscoverLocatorParams = (
 
   return locatorParams;
 };
-
-function getEsqlControls(
-  presentationContainer: PresentationContainer,
-  query: AggregateQuery | Query | undefined
-) {
-  if (!isOfAggregateQueryType(query)) return;
-
-  const usedVariables = getESQLQueryVariables(query.esql);
-  const controlsLayout = isControlGroupRendererApi(presentationContainer)
-    ? presentationContainer.getControls()
-    : {};
-
-  const esqlControlState = Object.values(presentationContainer.children$.getValue()).reduce(
-    (acc: { [uuid: string]: Serializable }, api, index) => {
-      if (
-        !(
-          apiHasType(api) &&
-          api.type === ESQL_CONTROL &&
-          apiHasUniqueId(api) &&
-          apiHasSerializableState(api)
-        )
-      ) {
-        return acc;
-      }
-
-      const controlState = api.serializeState() as ESQLControlState;
-      const variableName = 'variableName' in controlState && (controlState.variableName as string);
-      if (!variableName) return acc;
-      const isUsed = usedVariables.includes(variableName);
-      if (!isUsed) return acc;
-
-      return {
-        ...acc,
-        [api.uuid]: {
-          type: api.type,
-          ...controlState,
-          ...(controlsLayout[api.uuid]
-            ? {
-                ...omit(controlsLayout[api.uuid], 'type'),
-              }
-            : { order: index }),
-        },
-      };
-    },
-    {}
-  );
-
-  return esqlControlState as ControlPanelsState<ESQLControlState> & SerializableRecord;
-}
