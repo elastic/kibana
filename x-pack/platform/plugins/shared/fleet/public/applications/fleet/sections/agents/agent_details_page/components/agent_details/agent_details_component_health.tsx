@@ -19,6 +19,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { capitalize } from 'lodash';
+
 import type { ComponentHealth } from '../../../../../types';
 
 const getHealthColor = (health: ComponentHealth) => {
@@ -57,6 +59,12 @@ const getOverallStatusLabel = (health: ComponentHealth) => {
   return getStatusLabel(health);
 };
 
+const getComponentLabel = (componentName: string) => {
+  const [componentType, name] = componentName.split(':');
+  const componentTypeLabel = capitalize(componentType);
+  return name ? `${componentTypeLabel}: ${name}` : componentTypeLabel;
+};
+
 const buildTreeItems = (
   healthMap: ComponentHealth['component_health_map'],
   parentId: string
@@ -75,7 +83,7 @@ const buildTreeItems = (
             <EuiFlexItem grow={false}>
               <EuiHealth color={getHealthColor(health)} />
             </EuiFlexItem>
-            <EuiFlexItem>{name}</EuiFlexItem>
+            <EuiFlexItem>{getComponentLabel(name)}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         {!health.healthy && (health.status || health.last_error) && (
@@ -166,7 +174,7 @@ export const AgentDetailsComponentHealth: React.FunctionComponent<{
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiText size="s">
-                        <strong>{componentName}</strong>
+                        <strong>{getComponentLabel(componentName)}</strong>
                       </EuiText>
                     </EuiFlexItem>
                   </EuiFlexGroup>

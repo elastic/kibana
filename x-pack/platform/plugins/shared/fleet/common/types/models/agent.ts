@@ -129,7 +129,6 @@ interface AgentBase {
   unhealthy_reason?: UnhealthyReason[];
   namespaces?: string[];
   upgrade?: AgentUpgrade;
-  // TODO .fleet-agents mappings to be searchable
   identifying_attributes?: {
     [key: string]: string | number;
   };
