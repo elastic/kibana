@@ -14,6 +14,7 @@ globalSetupHook('Ingest data to Elasticsearch', async ({ esArchiver, log }) => {
     testData.ES_ARCHIVES.LOGSTASH,
     testData.ES_ARCHIVES.NO_TIME_FIELD,
     testData.ES_ARCHIVES.ECOMMERCE,
+    testData.ES_ARCHIVES.TSDB_LOGS,
   ];
 
   log.debug('[setup] loading test data (only if indexes do not exist)...');
