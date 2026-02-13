@@ -10,7 +10,6 @@ import { z } from '@kbn/zod';
 import type { StreamQuery } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
 import { WiredIngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest/wired';
-import type { ClassicIngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest/classic';
 import { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
 import { ClassicIngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest/classic';
 import type { AttachmentClient } from '../../../lib/streams/attachments/attachment_client';
