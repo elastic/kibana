@@ -26,7 +26,7 @@ export function applyTransform(
   value: unknown
 ): unknown {
   let ret = value;
-  if (transform != null && isPlainObject(transform)) {
+  if (isPlainObject(transform)) {
     if (transform.pick !== null) {
       ret = applyPick(ret, transform.pick);
     }
