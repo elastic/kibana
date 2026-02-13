@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
-
 import type { Location } from 'history';
 import { type Observable, debounceTime, map } from 'rxjs';
 
@@ -17,10 +15,6 @@ import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
-
-const LazyIconAgents = lazy(() =>
-  import('@kbn/search-shared-ui/src/v2_icons/robot').then((m) => ({ default: m.iconRobot }))
-);
 
 export interface DynamicSideNavItems {
   collections?: Array<EuiSideNavItemType<unknown>>;
@@ -79,15 +73,17 @@ export const getNavigationTreeDefinition = ({
             },
             {
               link: 'discover',
+              icon: 'productDiscover',
             },
             {
               getIsActive: ({ pathNameSerialized, prepend, location }) =>
                 pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
                 isEditingFromDashboard(location, pathNameSerialized, prepend),
               link: 'dashboards',
+              icon: 'productDashboard',
             },
             {
-              icon: LazyIconAgents,
+              icon: 'productAgent',
               link: 'agent_builder',
             },
             {
@@ -149,7 +145,7 @@ export const getNavigationTreeDefinition = ({
                   ),
                 },
               ],
-              icon: 'machineLearningApp',
+              icon: 'productML',
               id: 'machine_learning',
               renderAs: 'panelOpener',
               title: i18n.translate('xpack.enterpriseSearch.searchNav.machineLearning', {

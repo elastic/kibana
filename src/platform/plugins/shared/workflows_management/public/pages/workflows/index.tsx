@@ -126,6 +126,7 @@ export function WorkflowsPage() {
                   size="m"
                   fill
                   onClick={navigateToCreateWorkflow}
+                  data-test-subj="createWorkflowButton"
                 >
                   <FormattedMessage
                     id="workflows.createWorkflowButton"

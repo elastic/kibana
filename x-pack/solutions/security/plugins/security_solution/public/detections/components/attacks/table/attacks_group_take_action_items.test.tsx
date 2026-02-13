@@ -14,6 +14,13 @@ import { useAttacksPrivileges } from '../../../hooks/attacks/bulk_actions/use_at
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 
 jest.mock('../../../hooks/attacks/bulk_actions/use_attacks_privileges');
+jest.mock('../../../../common/components/user_privileges', () => ({
+  useUserPrivileges: () => ({
+    timelinePrivileges: { read: true },
+    detectionEnginePrivileges: { loading: false },
+    rulesPrivileges: { rules: { read: true, edit: true } },
+  }),
+}));
 jest.mock('../../../../common/hooks/use_license', () => ({
   useLicense: () => ({
     isPlatinumPlus: () => true,
@@ -108,6 +115,13 @@ describe('AttacksGroupTakeActionItems', () => {
     it('should render the `apply tags` action item', async () => {
       const { findByText } = renderAttack(mockAttack);
       expect(await findByText('Apply alert tags')).toBeInTheDocument();
+    });
+  });
+
+  describe('investigate in timeline', () => {
+    it('should render the `Investigate in timeline` action item', async () => {
+      const { findByText } = renderAttack(mockAttack);
+      expect(await findByText('Investigate in timeline')).toBeInTheDocument();
     });
   });
 });

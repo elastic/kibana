@@ -10,8 +10,7 @@
 import moment from 'moment';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { tagsByMode } from '../tags';
-import type { CliSupportedServerModes } from '../../types';
+import { testTargets, type ScoutTestTarget } from '@kbn/scout-info';
 
 export const execPromise = promisify(exec);
 
@@ -23,32 +22,14 @@ export function formatTime(date: string, fmt: string = 'MMM D, YYYY @ HH:mm:ss.S
   return moment.utc(date, fmt).format();
 }
 
-const getServerlessTag = (projectType: string): string => {
-  if (!projectType) {
-    throw new Error(`'projectType' is required to determine tags for 'serverless' mode.`);
-  }
-  const tag =
-    tagsByMode.serverless[
-      projectType as
-        | 'security'
-        | 'security-essentials'
-        | 'security-ease'
-        | 'es'
-        | 'oblt'
-        | 'oblt-logs-essentials'
-    ];
-  if (!tag) {
-    throw new Error(`No tags found for projectType: '${projectType}'.`);
-  }
-  return tag;
-};
+export const getPlaywrightGrepTag = (testTarget: ScoutTestTarget): string => {
+  const matchingTarget = testTargets.all.find(
+    (potentiallyMatchingTarget) => potentiallyMatchingTarget.tag === testTarget.tag
+  );
 
-export const getPlaywrightGrepTag = (mode: CliSupportedServerModes): string => {
-  const [distro, projectType] = mode.split('=');
-
-  if (distro === 'serverless') {
-    return getServerlessTag(projectType);
+  if (!matchingTarget) {
+    throw new Error(`No Playwright tags found for test target '${testTarget.tag}'`);
   }
 
-  return tagsByMode.stateful;
+  return matchingTarget.playwrightTag;
 };

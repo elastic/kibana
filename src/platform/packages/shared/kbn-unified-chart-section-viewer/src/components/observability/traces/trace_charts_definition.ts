@@ -41,16 +41,23 @@ function getWhereClauses(filters: string[]) {
   ].map((filter) => where(filter));
 }
 
+function getMetadataDirective(metadataFields: string[]) {
+  return metadataFields.length ? `METADATA ${metadataFields}` : undefined;
+}
+
 export function getErrorRateChart({
   indexes,
   filters,
+  metadataFields,
 }: {
   indexes: string;
   filters: string[];
+  metadataFields: string[];
 }): TraceChart | null {
   try {
     const whereClauses = getWhereClauses(filters);
-    const esqlQuery = from(indexes)
+    const metadataDirective = getMetadataDirective(metadataFields);
+    const esqlQuery = from(metadataDirective ? `${indexes} ${metadataDirective}` : indexes)
       .pipe(
         ...whereClauses,
         stats(
@@ -80,13 +87,16 @@ export function getErrorRateChart({
 export function getLatencyChart({
   indexes,
   filters,
+  metadataFields,
 }: {
   indexes: string;
   filters: string[];
+  metadataFields: string[];
 }): TraceChart | null {
   try {
     const whereClauses = getWhereClauses(filters);
-    const esqlQuery = from(indexes)
+    const metadataDirective = getMetadataDirective(metadataFields);
+    const esqlQuery = from(metadataDirective ? `${indexes} ${metadataDirective}` : indexes)
       .pipe(
         ...whereClauses,
         evaluate(`duration_ms_ecs = ROUND(${TRANSACTION_DURATION})/1000`), // apm duration is in us
@@ -114,13 +124,16 @@ export function getLatencyChart({
 export function getThroughputChart({
   indexes,
   filters,
+  metadataFields,
 }: {
   indexes: string;
   filters: string[];
+  metadataFields: string[];
 }): TraceChart | null {
   try {
     const whereClauses = getWhereClauses(filters);
-    const esqlQuery = from(indexes)
+    const metadataDirective = getMetadataDirective(metadataFields);
+    const esqlQuery = from(metadataDirective ? `${indexes} ${metadataDirective}` : indexes)
       .pipe(
         ...whereClauses,
         evaluate(`id = COALESCE(${TRANSACTION_ID}, ${SPAN_ID})`),
