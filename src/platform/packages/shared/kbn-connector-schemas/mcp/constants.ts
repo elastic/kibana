@@ -22,6 +22,12 @@ export const MCP_CLIENT_VERSION = '1.0.0';
 export const MAX_RETRIES = 2; // Three total attempts (1 initial + 2 retries)
 
 /**
+ * Placeholder used in serverUrl templates (e.g. Firecrawl) that require the API key in the path.
+ * When present, the MCP form serializer substitutes it with the value from the token field on save.
+ */
+export const API_KEY_URL_PLACEHOLDER = '{{apiKey}}';
+
+/**
  * Sub-actions supported by the MCP connector.
  * Values must match the registered sub-action names in the backend.
  */

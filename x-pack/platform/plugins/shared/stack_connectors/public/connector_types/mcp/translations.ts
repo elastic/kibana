@@ -13,6 +13,11 @@ export const mcpFieldStrings = {
       defaultMessage: 'Server URL',
     }),
   },
+  apiKey: {
+    label: i18n.translate('xpack.stackConnectors.components.mcp.apiKeyLabel', {
+      defaultMessage: 'API key',
+    }),
+  },
   additionalSettings: {
     label: i18n.translate('xpack.stackConnectors.components.mcp.additionalSettingsLabel', {
       defaultMessage: 'Additional settings',

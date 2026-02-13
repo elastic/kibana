@@ -16,7 +16,11 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ActionConnectorFieldsProps } from '@kbn/alerts-ui-shared';
-import { HiddenField, TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import {
+  HiddenField,
+  PasswordField,
+  TextField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
 import {
   UseField as Field,
   useFormContext,
@@ -25,6 +29,7 @@ import {
 import React, { useEffect } from 'react';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import useToggle from 'react-use/lib/useToggle';
+import { MCPAuthType } from '@kbn/connector-schemas/mcp';
 import { HeaderFields } from '../../common/auth/header_fields';
 import { mcpErrorStrings, mcpFieldStrings } from './translations';
 import { useSecretHeaders } from '../../common/auth/use_secret_headers';
@@ -43,9 +48,10 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
 
   const form = useFormContext();
   const { getFormData, updateFieldValues, getFieldDefaultValue } = form;
-  const [{ id: connectorId }] = useFormData({
-    watch: ['id'],
+  const [{ id: connectorId, config }] = useFormData({
+    watch: ['id', 'config.authType'],
   });
+  const isApiKeyInUrlAuth = config?.authType === MCPAuthType.ApiKeyInUrl;
 
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
 
@@ -76,6 +82,8 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
+      {/* Hidden field so config.authType is in form state (e.g. preload sets ApiKeyInUrl). */}
+      <Field path="config.authType" component={HiddenField} />
       <Field
         path="config.serverUrl"
         component={TextField}
@@ -85,12 +93,37 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
             {
               validator: emptyField(mcpErrorStrings.required(mcpFieldStrings.serverUrl.label)),
             },
-            {
-              validator: urlField(mcpErrorStrings.invalid(mcpFieldStrings.serverUrl.label)),
-            },
+            ...(isApiKeyInUrlAuth ? [] : [{ validator: urlField(mcpErrorStrings.invalid(mcpFieldStrings.serverUrl.label)) }]),
           ],
         }}
+        componentProps={{
+          euiFieldProps: {
+            readOnly: isApiKeyInUrlAuth,
+          },
+        }}
       />
+      {isApiKeyInUrlAuth && (
+        <>
+          <EuiSpacer size="m" />
+          <Field
+            path="secrets.token"
+            component={PasswordField}
+            config={{
+              label: mcpFieldStrings.apiKey.label,
+              validations: [
+                {
+                  validator: emptyField(mcpErrorStrings.required(mcpFieldStrings.apiKey.label)),
+                },
+              ],
+            }}
+            componentProps={{
+              euiFieldProps: {
+                'data-test-subj': 'secrets.token-input',
+              },
+            }}
+          />
+        </>
+      )}
       <EuiAccordion
         id={additionalSettingsId}
         arrowDisplay="right"

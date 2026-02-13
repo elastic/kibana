@@ -26,6 +26,7 @@ const transformDataSourceType = (dataSources: DataSource): Connector => {
     type: connectorType,
     iconType: dataSources.iconType,
     category: 'popular',
+    preloadUrl: dataSources.stackConnectors?.[0]?.preloadUrl,
   };
 };
 

@@ -34,6 +34,7 @@ export const DataSourcesView: React.FC = () => {
 
   const { openFlyout, flyout } = useAddConnectorFlyout({
     dataSourceType: selectedConnector?.id,
+    preloadUrl: selectedConnector?.preloadUrl,
   });
 
   const paginatedConnectors = useMemo(() => {

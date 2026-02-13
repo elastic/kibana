@@ -52,6 +52,10 @@ export function buildHeadersFromSecrets(
       }
       break;
 
+    case MCPAuthType.ApiKeyInUrl:
+      // Credential is in the URL; serializer substitutes on save. No auth headers.
+      break;
+
     default:
       // No specific auth type configured - this is valid when hasAuth is false
       break;
