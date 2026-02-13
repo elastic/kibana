@@ -11,10 +11,12 @@ import type { DataSourceProfileProvider } from '../../../../profiles';
 
 /**
  * Returns default app state for the metrics grid view.
- * The data table is collapsed by default so the metrics grid gets full focus.
+ * The chart is shown and the data table is collapsed by default
+ * so the metrics grid gets full focus.
  */
 export const getDefaultAppState: DataSourceProfileProvider['profile']['getDefaultAppState'] =
   (prev) => (params) => ({
     ...prev(params),
+    hideChart: false,
     hideDataTable: true,
   });
