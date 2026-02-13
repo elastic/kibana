@@ -6,7 +6,7 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { IngestStreamSettings } from '@kbn/streams-schema';
+import { isRecord, type IngestStreamSettings } from '@kbn/streams-schema';
 import { errors } from '@elastic/elasticsearch';
 import { formatSettings } from './helpers';
 import type { ValidationResult } from '../stream_active_record/stream_active_record';
@@ -20,9 +20,6 @@ interface DataStreamSettingsResponse {
 }
 
 const SERVERLESS_SETTINGS_ALLOWLIST: (keyof IngestStreamSettings)[] = ['index.refresh_interval'];
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
 
 export function validateSettings({
   settings,

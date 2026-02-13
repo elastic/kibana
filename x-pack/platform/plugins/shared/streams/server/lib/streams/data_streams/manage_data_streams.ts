@@ -59,6 +59,10 @@ interface UpdateDefaultIngestPipelineOptions {
 }
 
 export async function upsertDataStream({ esClient, name, logger }: DataStreamManagementOptions) {
+  const dataStreamExists = await esClient.indices.exists({ index: name });
+  if (dataStreamExists) {
+    return;
+  }
   try {
     await retryTransientEsErrors(() => esClient.indices.createDataStream({ name }), { logger });
     logger.debug(() => `Installed data stream: ${name}`);

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
+import { isRecord } from '@kbn/streams-schema';
 
 const getBodyMessage = (body: unknown): string | undefined => {
   if (typeof body === 'string') return body;

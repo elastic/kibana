@@ -6,7 +6,7 @@
  */
 
 import { groupBy } from 'lodash';
-import { getSegments } from '@kbn/streams-schema';
+import { getSegments, isRecord } from '@kbn/streams-schema';
 import type { SecurityHasPrivilegesRequest } from '@elastic/elasticsearch/lib/api/types';
 import { errors } from '@elastic/elasticsearch';
 import { StatusError } from '../../errors/status_error';
@@ -62,9 +62,6 @@ import type {
   UpdateFailureStoreAction,
   UnlinkFeaturesAction,
 } from './types';
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
 
 const extractNameFromReason = (reason: string): string | undefined => {
   const match = reason.match(/no such index \[([^\]]+)\]/);
