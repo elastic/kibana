@@ -8,7 +8,8 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
-import { apiTest, expect } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import { APPROVED_TRIGGER_DEFINITIONS } from '../fixtures/approved_trigger_definitions';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
