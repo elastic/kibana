@@ -19,10 +19,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type MlEntityFieldOperation, ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
 
+import { SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { useMlKibana } from '../../contexts/kibana';
 import type { MlEntity, SingleMetricViewerEmbeddableApi } from '../../../embeddables/types';
 import { TimeSeriesExplorerHelpPopover } from '../timeseriesexplorer_help_popover';
-import { SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../../ui_actions/triggers';
 
 const FilterButton: FC<{
   api: SingleMetricViewerEmbeddableApi;
@@ -35,8 +35,7 @@ const FilterButton: FC<{
   const isAddFilter = operation === ML_ENTITY_FIELD_OPERATIONS.ADD;
 
   const onClick = useCallback(() => {
-    const trigger = uiActions.getTrigger(SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER);
-    trigger.exec({
+    uiActions.executeTriggerActions(SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER, {
       embeddable: api,
       data: [
         {
