@@ -95,99 +95,55 @@ pivot:
     Search: "Team:Search"
     Sharing: "Feature:Embedding, Feature:SharingURLs"
 
-# Block configuration - combined create and publish blockers
-block:
-  # Global labels that block changelog creation for all products (comma-separated string)
-  # create: ">non-issue, >test"
+# Rules configuration — controls which PRs create changelogs and which changelogs are published.
+#
+# Global match default for multi-valued fields (labels, areas).
+#   any (default) = match if ANY item matches the list
+#   all           = match only if ALL items match the list
+# Inherited by create, publish, and all product overrides.
+rules:
+  # match: any
 
-  # Block changelog entries from publishing based on entry type or area
-  # publish:
-  #   types:
+  # Create — controls which PRs generate changelogs.
+  #   exclude: block PRs with these labels (comma-separated)
+  #   include: only create changelogs for PRs with these labels
+  # Cannot specify both.
+  #
+  create:
+    exclude: "release_note:skip, reverted, backport"
+  #   # match: any
+    # products:
+      # 'kibana':
+        # exclude: ">test"
+      # 'cloud-serverless':
+        # exclude: "ILM"
+
+  # Publish — controls which changelogs appear in rendered output.
+  #   exclude_types / include_types
+  #   exclude_areas / include_areas
+  # Cannot mix exclude_ and include_ for the same field.
+  #
+  # match_areas inherits from rules.match if not specified.
+  #
+  publish:
+  #   # match_areas: any
+  #   exclude_types:
   #     - deprecation
   #     - known-issue
-  #   areas:
+  #   exclude_areas:
   #     - "Internal"
-  # Product-specific overrides (override global blockers, don't merge)
-  # Dictionary key can be a single product ID or comma-separated product IDs
-  product:
-    'kibana':
-      create: "release_note:skip, reverted, backport"
-      publish:
-        types:
+    products:
+      'kibana':
+        exclude_types:
           - docs
-        areas:
-         - "Elastic Observability solution"
-         - "Elastic Security solution"
-    'cloud-serverless':
-      create: "release_note:skip, reverted, backport"
-      publish:
-        # TBD: Are there areas to block?
-        # areas:
-        #   - Monitoring
-        types:
-          - docs
-    'observability':
-      create: "release_note:skip, reverted, backport"
-      publish:
-        types:
-          - docs
-        areas:
-        # Block every area except the observability solution
-          - Alerting
-          - "Beats management"
-          - Canvas
-          - "Dashboards and Visualizations"
-          - "Data ingestion and Fleet"
-          - Discover
-          - "ES|QL"
-          # - "Elastic Observability solution"
-          - "Elastic Security solution"
-          - "Kibana platform"
-          - "Kibana security"
-          - "Kibana UI"
-          - Logstash
-          - "Machine learning"
-          - Management
-          - Maps
-          - Monitoring
-          - Operations
-          - Platform
-          - QA  
-          - "Querying and filtering"
-          - Reporting
-          - Search
-          - Sharing
-    'security':
-      create: "release_note:skip, reverted, backport"
-      publish:
-        types:
-          - docs
-        areas:
-          # Block every area except the security solution
-          - Alerting
-          - "Beats management"
-          - Canvas
-          - "Dashboards and Visualizations"
-          - "Data ingestion and Fleet"
-          - Discover
-          - "ES|QL"
+  # Exclude any changelogs that have only one or both of the following areas:
+        exclude_areas:
           - "Elastic Observability solution"
-          # - "Elastic Security solution"
-          - "Kibana platform"
-          - "Kibana security"
-          - "Kibana UI"
-          - Logstash
-          - "Machine learning"
-          - Management
-          - Maps
-          - Monitoring
-          - Operations
-          - Platform
-          - QA  
-          - "Querying and filtering"
-          - Reporting
-          - Search
-          - Sharing
+          - "Elastic Security solution"
+        match_areas: all
+      'cloud-serverless':
+          exclude_types:
+          - docs
 
 # Bundle configuration (profiles and defaults)
 bundle:
