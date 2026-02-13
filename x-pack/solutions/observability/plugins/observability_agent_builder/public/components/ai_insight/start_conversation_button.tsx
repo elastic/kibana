@@ -8,7 +8,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
-o;
 import type { InsightType } from '../../analytics';
 
 type StartConversationButtonProps = React.ComponentProps<typeof EuiButton> & {
