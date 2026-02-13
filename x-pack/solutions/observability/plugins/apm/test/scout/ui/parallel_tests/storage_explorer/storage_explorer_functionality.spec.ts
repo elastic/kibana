@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
@@ -15,7 +16,7 @@ const timeRange = {
   rangeTo: testData.END_DATE,
 };
 
-test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {
+test.describe('Storage Explorer - Admin User', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     // Use privileged user (admin) to ensure we have all necessary permissions
     await browserAuth.loginAsAdmin();

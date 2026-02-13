@@ -12,6 +12,10 @@ import { EuiLink } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { get } from 'lodash/fp';
 
+import {
+  SECURITY_CELL_ACTIONS_ALERTS_COUNT,
+  SECURITY_CELL_ACTIONS_DEFAULT,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { EntityDetailsLink } from '../../../common/components/links';
@@ -33,7 +37,6 @@ import { FormattedCount } from '../../../common/components/formatted_number';
 import {
   SecurityCellActions,
   CellActionsMode,
-  SecurityCellActionsTrigger,
   SecurityCellActionType,
 } from '../../../common/components/cell_actions';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
@@ -86,7 +89,7 @@ export const getRiskScoreColumns = <E extends EntityType>(
                   value: entityName,
                   field: fieldName,
                 }}
-                triggerId={SecurityCellActionsTrigger.DEFAULT}
+                triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
                 mode={CellActionsMode.INLINE}
                 visibleCellActions={2}
                 disabledActionTypes={[
@@ -170,7 +173,7 @@ export const getRiskScoreColumns = <E extends EntityType>(
               field: fieldName,
             }}
             mode={CellActionsMode.INLINE}
-            triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            triggerId={SECURITY_CELL_ACTIONS_ALERTS_COUNT}
             metadata={{
               andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
             }}

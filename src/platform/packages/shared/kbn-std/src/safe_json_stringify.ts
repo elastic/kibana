@@ -7,16 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { configure } from 'safe-stable-stringify';
+
+// Configure stringify to:
+// - NOT sort keys (deterministic: false) to match JSON.stringify behavior
+// - Omit circular references by setting their value to undefined
+const stringify = configure({ deterministic: false, circularValue: undefined });
+
 const noop = (): string | undefined => {
   return undefined;
 };
 
 /**
- * Safely stringifies a value to JSON. If the value cannot be stringified,
- * for instance if it contains circular references, it will return `undefined`.
- * If `handleError` is defined, it will be called with the error, and the
- * response will be returned. This allows consumers to wrap the JSON.stringify
- * error.
+ * Safely stringifies a value to JSON. Handles circular references by omitting
+ * them from the output (treating them as `undefined`).
+ *
+ * If an unexpected error occurs during stringification, `handleError` will be
+ * called if provided, otherwise `undefined` is returned.
  *
  * @param value         The value to stringify.
  * @param handleError   Optional callback that is called when an error occurs during
@@ -29,7 +36,7 @@ export function safeJsonStringify(
   handleError: (error: Error) => string | undefined = noop
 ): string | undefined {
   try {
-    return JSON.stringify(value);
+    return stringify(value);
   } catch (error) {
     return handleError(error);
   }

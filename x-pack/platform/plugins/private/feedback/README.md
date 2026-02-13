@@ -4,9 +4,9 @@ Universal way of giving feedback about Elastic in Kibana.
 
 ## Features
 
-Feedback plugin registers a button in the Chrome global header area which is shown when all of those criteria all met:
+Feedback plugin registers a button in the Chrome global header area which is shown when all of these criteria are met:
 
-- feedback is globaly enabled (`core.notifications.feedback.isEnabled()`)
+- feedback is globally enabled (`core.notifications.feedback.isEnabled()`)
 - telemetry is enabled (`telemetry.telemetryService.canSendTelemetry()`)
 - telemetry is opted in (`telemetry.telemetryService.getIsOptedIn()`)
 

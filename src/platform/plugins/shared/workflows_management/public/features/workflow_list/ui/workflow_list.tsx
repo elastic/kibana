@@ -188,6 +188,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
                       display: block;
                       max-width: 100%;
                     `}
+                    title={name}
+                    data-test-subj="workflowNameLink"
                   >
                     {name}
                   </Link>
@@ -267,6 +269,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
                   }
                 >
                   <EuiSwitch
+                    data-test-subj={`workflowToggleSwitch-${item.id}`}
                     disabled={!canUpdateWorkflow || !item.valid}
                     checked={item.enabled}
                     onChange={() => handleToggleWorkflow(item)}
@@ -305,6 +308,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             name: i18n.translate('workflows.workflowList.run', {
               defaultMessage: 'Run',
             }),
+            'data-test-subj': 'runWorkflowAction',
             icon: 'play',
             description: (item: WorkflowListItemDto) =>
               getRunTooltipContent({
@@ -327,6 +331,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             name: i18n.translate('workflows.workflowList.edit', {
               defaultMessage: 'Edit',
             }),
+            'data-test-subj': 'editWorkflowAction',
             icon: 'pencil',
             description: i18n.translate('workflows.workflowList.edit', {
               defaultMessage: 'Edit workflow',
@@ -340,6 +345,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             name: i18n.translate('workflows.workflowList.clone', {
               defaultMessage: 'Clone',
             }),
+            'data-test-subj': 'cloneWorkflowAction',
             icon: 'copy',
             description: i18n.translate('workflows.workflowList.clone', {
               defaultMessage: 'Clone workflow',
@@ -355,6 +361,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             name: i18n.translate('workflows.workflowList.export', {
               defaultMessage: 'Export',
             }),
+            'data-test-subj': 'exportWorkflowAction',
             icon: 'export',
             description: i18n.translate('workflows.workflowList.export', {
               defaultMessage: 'Export workflow',
@@ -367,6 +374,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             name: i18n.translate('workflows.workflowList.delete', {
               defaultMessage: 'Delete',
             }),
+            'data-test-subj': 'deleteWorkflowAction',
             icon: 'trash',
             description: i18n.translate('workflows.workflowList.delete', {
               defaultMessage: 'Delete workflow',
@@ -449,6 +457,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         showEnd={showEnd}
       />
       <EuiBasicTable
+        data-test-subj="workflowListTable"
         css={css`
           .euiBasicTableAction-showOnHover {
             opacity: 1 !important;
