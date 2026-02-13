@@ -21,7 +21,11 @@ import {
   streamEnrichmentMachine,
   createStreamEnrichmentMachineImplementations,
 } from './stream_enrichment_state_machine';
-import type { StreamEnrichmentInput, StreamEnrichmentServiceDependencies } from './types';
+import type {
+  StreamEnrichmentActorSnapshot,
+  StreamEnrichmentInput,
+  StreamEnrichmentServiceDependencies,
+} from './types';
 import type {
   PreviewDocsFilterOption,
   SimulationActorSnapshot,
@@ -35,7 +39,11 @@ const consoleInspector = createConsoleInspector();
 
 const StreamEnrichmentContext = createActorContext(streamEnrichmentMachine);
 
-export const useStreamEnrichmentSelector = StreamEnrichmentContext.useSelector;
+export const useStreamEnrichmentSelector = <T,>(
+  selector: (state: StreamEnrichmentActorSnapshot) => T
+): T => {
+  return StreamEnrichmentContext.useSelector(selector as (snapshot: unknown) => T);
+};
 
 export type StreamEnrichmentEvents = ReturnType<typeof useStreamEnrichmentEvents>;
 

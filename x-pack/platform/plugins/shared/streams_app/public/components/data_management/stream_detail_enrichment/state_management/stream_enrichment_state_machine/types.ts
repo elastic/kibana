@@ -34,12 +34,14 @@ import type { YamlModeActorRef } from '../yaml_mode_machine';
 
 /**
  * Manually defined snapshot type for the StreamEnrichmentMachine.
- * This is needed because the machine uses AnyStateMachine to avoid TS7056 error.
+ * This is needed because the machine uses AnyStateMachine to avoid TS7056 error,
+ * since the internal type got too complex to serialize.
  */
 export interface StreamEnrichmentActorSnapshot {
   context: StreamEnrichmentContextType;
   value: StateValue;
   matches: (stateValue: StateValue) => boolean;
+  can: (event: StreamEnrichmentEvent) => boolean;
 }
 
 export interface StreamPrivileges {
