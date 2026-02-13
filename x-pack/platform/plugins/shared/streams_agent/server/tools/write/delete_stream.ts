@@ -6,12 +6,11 @@
  */
 
 import { z } from '@kbn/zod';
-import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { StreamsAgentCoreSetup } from '../types';
-import { getScopedStreamsClients } from './get_scoped_clients';
+import type { StreamsAgentCoreSetup } from '../../types';
+import { getScopedStreamsClients } from '../get_scoped_clients';
 
 export const STREAMS_DELETE_STREAM_TOOL_ID = 'streams.delete_stream';
 
@@ -21,10 +20,8 @@ const deleteStreamSchema = z.object({
 
 export function createDeleteStreamTool({
   core,
-  logger,
 }: {
   core: StreamsAgentCoreSetup;
-  logger: Logger;
 }): StaticToolRegistration<typeof deleteStreamSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof deleteStreamSchema> = {
     id: STREAMS_DELETE_STREAM_TOOL_ID,
@@ -35,7 +32,7 @@ export function createDeleteStreamTool({
     schema: deleteStreamSchema,
     handler: async (toolParams, context) => {
       const { name } = toolParams;
-      const { request } = context;
+      const { request, logger } = context;
       try {
         const { streamsClient } = await getScopedStreamsClients({ core, request });
         await streamsClient.deleteStream(name);

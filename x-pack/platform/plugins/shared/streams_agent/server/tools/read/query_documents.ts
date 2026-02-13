@@ -6,12 +6,11 @@
  */
 
 import { z } from '@kbn/zod';
-import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { StreamsAgentCoreSetup } from '../types';
-import { getScopedStreamsClients } from './get_scoped_clients';
+import type { StreamsAgentCoreSetup } from '../../types';
+import { getScopedStreamsClients } from '../get_scoped_clients';
 
 export const STREAMS_QUERY_DOCUMENTS_TOOL_ID = 'streams.query_documents';
 
@@ -65,10 +64,8 @@ function flattenDocument(doc: Record<string, unknown>, prefix = ''): Record<stri
 
 export function createQueryDocumentsTool({
   core,
-  logger,
 }: {
   core: StreamsAgentCoreSetup;
-  logger: Logger;
 }): StaticToolRegistration<typeof queryDocumentsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof queryDocumentsSchema> = {
     id: STREAMS_QUERY_DOCUMENTS_TOOL_ID,
@@ -79,7 +76,7 @@ export function createQueryDocumentsTool({
     schema: queryDocumentsSchema,
     handler: async (toolParams, context) => {
       const { name, count, startMs, endMs } = toolParams;
-      const { request } = context;
+      const { request, logger } = context;
       try {
         const { streamsClient, scopedClusterClient } = await getScopedStreamsClients({
           core,

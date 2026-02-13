@@ -6,14 +6,13 @@
  */
 
 import { z } from '@kbn/zod';
-import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { Streams } from '@kbn/streams-schema';
 import type { FieldDefinition, FieldDefinitionConfig } from '@kbn/streams-schema';
-import type { StreamsAgentCoreSetup } from '../types';
-import { getScopedStreamsClients } from './get_scoped_clients';
+import type { StreamsAgentCoreSetup } from '../../types';
+import { getScopedStreamsClients } from '../get_scoped_clients';
 import { buildIngestUpsertRequest } from './build_upsert_request';
 
 export const STREAMS_MAP_FIELDS_TOOL_ID = 'streams.map_fields';
@@ -32,10 +31,8 @@ const mapFieldsSchema = z.object({
 
 export function createMapFieldsTool({
   core,
-  logger,
 }: {
   core: StreamsAgentCoreSetup;
-  logger: Logger;
 }): StaticToolRegistration<typeof mapFieldsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof mapFieldsSchema> = {
     id: STREAMS_MAP_FIELDS_TOOL_ID,
@@ -46,7 +43,7 @@ export function createMapFieldsTool({
     schema: mapFieldsSchema,
     handler: async (toolParams, context) => {
       const { name, fields } = toolParams;
-      const { request } = context;
+      const { request, logger } = context;
       try {
         const { streamsClient } = await getScopedStreamsClients({ core, request });
 

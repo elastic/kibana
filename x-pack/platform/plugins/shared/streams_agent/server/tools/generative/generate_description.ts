@@ -6,18 +6,17 @@
  */
 
 import { z } from '@kbn/zod';
-import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { identifySystems } from '@kbn/streams-ai';
-import type { StreamsAgentCoreSetup } from '../types';
-import { getScopedStreamsClients } from './get_scoped_clients';
+import { generateStreamDescription } from '@kbn/streams-ai';
+import type { StreamsAgentCoreSetup } from '../../types';
+import { getScopedStreamsClients } from '../get_scoped_clients';
 
-export const STREAMS_IDENTIFY_SYSTEMS_TOOL_ID = 'streams.identify_systems';
+export const STREAMS_GENERATE_DESCRIPTION_TOOL_ID = 'streams.generate_description';
 
-const identifySystemsSchema = z.object({
-  name: z.string().min(1).describe('The name of the stream to identify systems for'),
+const generateDescriptionSchema = z.object({
+  name: z.string().min(1).describe('The name of the stream to generate a description for'),
   startMs: z
     .number()
     .optional()
@@ -28,25 +27,23 @@ const identifySystemsSchema = z.object({
     .describe('End of the time range to analyze, as Unix timestamp in milliseconds. Defaults to now.'),
 });
 
-export function createIdentifySystemsTool({
+export function createGenerateDescriptionTool({
   core,
-  logger,
 }: {
   core: StreamsAgentCoreSetup;
-  logger: Logger;
-}): StaticToolRegistration<typeof identifySystemsSchema> {
-  const toolDefinition: BuiltinToolDefinition<typeof identifySystemsSchema> = {
-    id: STREAMS_IDENTIFY_SYSTEMS_TOOL_ID,
+}): StaticToolRegistration<typeof generateDescriptionSchema> {
+  const toolDefinition: BuiltinToolDefinition<typeof generateDescriptionSchema> = {
+    id: STREAMS_GENERATE_DESCRIPTION_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Uses AI to identify the software systems and services sending data to a stream. Analyzes log patterns to determine which applications, infrastructure, and services are represented. This may take some time as it involves LLM reasoning.',
+      'Uses AI to generate a human-readable description for a stream based on sample data. Analyzes document patterns to produce a meaningful description. This may take some time as it involves LLM reasoning.',
     tags: ['streams', 'ai'],
-    schema: identifySystemsSchema,
+    schema: generateDescriptionSchema,
     handler: async (toolParams, context) => {
       const { name, startMs, endMs } = toolParams;
-      const { request, modelProvider } = context;
+      const { request, modelProvider, logger } = context;
       try {
-        const { streamsClient, inferenceClient, scopedClusterClient, systemClient } =
+        const { streamsClient, inferenceClient, scopedClusterClient } =
           await getScopedStreamsClients({ core, request });
 
         const { connector } = await modelProvider.getDefaultModel();
@@ -57,24 +54,17 @@ export function createIdentifySystemsTool({
         const resolvedStartMs = startMs ?? resolvedEndMs - 24 * 60 * 60 * 1000;
 
         const stream = await streamsClient.getStream(name);
-
-        // Get existing systems for the stream
-        const { systems: existingSystems } = await systemClient.getSystems(name);
-
         const abortController = new AbortController();
-        const result = await identifySystems({
+
+        const result = await generateStreamDescription({
           stream,
-          systems: existingSystems,
           start: resolvedStartMs,
           end: resolvedEndMs,
           esClient: scopedClusterClient.asCurrentUser,
           inferenceClient: inferenceClient.bindTo({ connectorId: resolvedConnectorId }),
-          logger,
           signal: abortController.signal,
-          maxSteps: 3,
-          dropUnmapped: false,
-          descriptionPrompt: '',
-          systemsPrompt: '',
+          logger,
+          systemPrompt: '',
         });
 
         return {
@@ -82,21 +72,21 @@ export function createIdentifySystemsTool({
             {
               type: ToolResultType.other,
               data: {
-                message: `Identified ${result.systems.length} system(s) in stream "${name}"`,
+                message: `Generated description for stream "${name}"`,
                 stream: name,
-                systems: result.systems,
+                description: result.description,
               },
             },
           ],
         };
       } catch (error) {
-        logger.error(`streams.identify_systems tool error: ${error}`);
+        logger.error(`streams.generate_description tool error: ${error}`);
         return {
           results: [
             {
               type: ToolResultType.error,
               data: {
-                message: `Failed to identify systems for "${name}": ${error.message}`,
+                message: `Failed to generate description for "${name}": ${error.message}`,
               },
             },
           ],

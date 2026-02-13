@@ -6,13 +6,12 @@
  */
 
 import { z } from '@kbn/zod';
-import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { Streams } from '@kbn/streams-schema';
-import type { StreamsAgentCoreSetup } from '../types';
-import { getScopedStreamsClients } from './get_scoped_clients';
+import type { StreamsAgentCoreSetup } from '../../types';
+import { getScopedStreamsClients } from '../get_scoped_clients';
 import { buildUpsertRequest } from './build_upsert_request';
 
 export const STREAMS_UPDATE_SETTINGS_TOOL_ID = 'streams.update_settings';
@@ -24,10 +23,8 @@ const updateSettingsSchema = z.object({
 
 export function createUpdateSettingsTool({
   core,
-  logger,
 }: {
   core: StreamsAgentCoreSetup;
-  logger: Logger;
 }): StaticToolRegistration<typeof updateSettingsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof updateSettingsSchema> = {
     id: STREAMS_UPDATE_SETTINGS_TOOL_ID,
@@ -38,7 +35,7 @@ export function createUpdateSettingsTool({
     schema: updateSettingsSchema,
     handler: async (toolParams, context) => {
       const { name, description } = toolParams;
-      const { request } = context;
+      const { request, logger } = context;
       try {
         const { streamsClient } = await getScopedStreamsClients({ core, request });
 

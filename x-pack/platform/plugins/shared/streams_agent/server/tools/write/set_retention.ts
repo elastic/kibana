@@ -6,14 +6,13 @@
  */
 
 import { z } from '@kbn/zod';
-import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
-import type { StreamsAgentCoreSetup } from '../types';
-import { getScopedStreamsClients } from './get_scoped_clients';
+import type { StreamsAgentCoreSetup } from '../../types';
+import { getScopedStreamsClients } from '../get_scoped_clients';
 import { buildIngestUpsertRequest } from './build_upsert_request';
 
 export const STREAMS_SET_RETENTION_TOOL_ID = 'streams.set_retention';
@@ -37,10 +36,8 @@ const setRetentionSchema = z.object({
 
 export function createSetRetentionTool({
   core,
-  logger,
 }: {
   core: StreamsAgentCoreSetup;
-  logger: Logger;
 }): StaticToolRegistration<typeof setRetentionSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof setRetentionSchema> = {
     id: STREAMS_SET_RETENTION_TOOL_ID,
@@ -51,7 +48,7 @@ export function createSetRetentionTool({
     schema: setRetentionSchema,
     handler: async (toolParams, context) => {
       const { name, retentionDays, ilmPolicy, inherit } = toolParams;
-      const { request } = context;
+      const { request, logger } = context;
       try {
         const { streamsClient } = await getScopedStreamsClients({ core, request });
 

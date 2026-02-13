@@ -6,14 +6,13 @@
  */
 
 import { z } from '@kbn/zod';
-import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { partitionStream } from '@kbn/streams-ai';
 import { Streams } from '@kbn/streams-schema';
-import type { StreamsAgentCoreSetup } from '../types';
-import { getScopedStreamsClients } from './get_scoped_clients';
+import type { StreamsAgentCoreSetup } from '../../types';
+import { getScopedStreamsClients } from '../get_scoped_clients';
 
 export const STREAMS_SUGGEST_PARTITIONS_TOOL_ID = 'streams.suggest_partitions';
 
@@ -37,10 +36,8 @@ const suggestPartitionsSchema = z.object({
 
 export function createSuggestPartitionsTool({
   core,
-  logger,
 }: {
   core: StreamsAgentCoreSetup;
-  logger: Logger;
 }): StaticToolRegistration<typeof suggestPartitionsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof suggestPartitionsSchema> = {
     id: STREAMS_SUGGEST_PARTITIONS_TOOL_ID,
@@ -51,7 +48,7 @@ export function createSuggestPartitionsTool({
     schema: suggestPartitionsSchema,
     handler: async (toolParams, context) => {
       const { name, startMs, endMs, userPrompt } = toolParams;
-      const { request, modelProvider } = context;
+      const { request, modelProvider, logger } = context;
       try {
         const { streamsClient, inferenceClient, scopedClusterClient } =
           await getScopedStreamsClients({ core, request });

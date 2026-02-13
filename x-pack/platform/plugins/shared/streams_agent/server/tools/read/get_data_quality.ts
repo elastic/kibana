@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod';
-import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -16,8 +15,8 @@ import {
   isDisabledFailureStore,
   isInheritFailureStore,
 } from '@kbn/streams-schema';
-import type { StreamsAgentCoreSetup } from '../types';
-import { getScopedStreamsClients } from './get_scoped_clients';
+import type { StreamsAgentCoreSetup } from '../../types';
+import { getScopedStreamsClients } from '../get_scoped_clients';
 
 export const STREAMS_GET_DATA_QUALITY_TOOL_ID = 'streams.get_data_quality';
 
@@ -27,10 +26,8 @@ const getDataQualitySchema = z.object({
 
 export function createGetDataQualityTool({
   core,
-  logger,
 }: {
   core: StreamsAgentCoreSetup;
-  logger: Logger;
 }): StaticToolRegistration<typeof getDataQualitySchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getDataQualitySchema> = {
     id: STREAMS_GET_DATA_QUALITY_TOOL_ID,
@@ -41,7 +38,7 @@ export function createGetDataQualityTool({
     schema: getDataQualitySchema,
     handler: async (toolParams, context) => {
       const { name } = toolParams;
-      const { request } = context;
+      const { request, logger } = context;
       try {
         const { streamsClient, scopedClusterClient } = await getScopedStreamsClients({
           core,

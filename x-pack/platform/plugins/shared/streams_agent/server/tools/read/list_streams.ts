@@ -6,12 +6,11 @@
  */
 
 import { z } from '@kbn/zod';
-import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { StreamsAgentCoreSetup } from '../types';
-import { getScopedStreamsClients } from './get_scoped_clients';
+import type { StreamsAgentCoreSetup } from '../../types';
+import { getScopedStreamsClients } from '../get_scoped_clients';
 
 export const STREAMS_LIST_STREAMS_TOOL_ID = 'streams.list_streams';
 
@@ -19,10 +18,8 @@ const listStreamsSchema = z.object({});
 
 export function createListStreamsTool({
   core,
-  logger,
 }: {
   core: StreamsAgentCoreSetup;
-  logger: Logger;
 }): StaticToolRegistration<typeof listStreamsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof listStreamsSchema> = {
     id: STREAMS_LIST_STREAMS_TOOL_ID,
@@ -32,7 +29,7 @@ export function createListStreamsTool({
     tags: ['streams'],
     schema: listStreamsSchema,
     handler: async (_toolParams, context) => {
-      const { request } = context;
+      const { request, logger } = context;
       try {
         const { streamsClient } = await getScopedStreamsClients({ core, request });
         const streams = await streamsClient.listStreams();

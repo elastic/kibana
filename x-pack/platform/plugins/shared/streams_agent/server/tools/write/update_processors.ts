@@ -6,14 +6,13 @@
  */
 
 import { z } from '@kbn/zod';
-import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { Streams } from '@kbn/streams-schema';
 import type { StreamlangDSL } from '@kbn/streamlang';
-import type { StreamsAgentCoreSetup } from '../types';
-import { getScopedStreamsClients } from './get_scoped_clients';
+import type { StreamsAgentCoreSetup } from '../../types';
+import { getScopedStreamsClients } from '../get_scoped_clients';
 import { buildIngestUpsertRequest } from './build_upsert_request';
 
 export const STREAMS_UPDATE_PROCESSORS_TOOL_ID = 'streams.update_processors';
@@ -39,10 +38,8 @@ const updateProcessorsSchema = z.object({
 
 export function createUpdateProcessorsTool({
   core,
-  logger,
 }: {
   core: StreamsAgentCoreSetup;
-  logger: Logger;
 }): StaticToolRegistration<typeof updateProcessorsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof updateProcessorsSchema> = {
     id: STREAMS_UPDATE_PROCESSORS_TOOL_ID,
@@ -53,7 +50,7 @@ export function createUpdateProcessorsTool({
     schema: updateProcessorsSchema,
     handler: async (toolParams, context) => {
       const { name, processors } = toolParams;
-      const { request } = context;
+      const { request, logger } = context;
       try {
         const { streamsClient } = await getScopedStreamsClients({ core, request });
 

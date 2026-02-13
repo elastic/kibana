@@ -56,11 +56,15 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.streams}.map_fields`,
   `${internalNamespaces.streams}.enable_failure_store`,
   `${internalNamespaces.streams}.update_settings`,
-  // Streams – AI orchestration tools
+  // Streams – generative tools (LLM-powered analysis)
   `${internalNamespaces.streams}.suggest_partitions`,
   `${internalNamespaces.streams}.generate_description`,
   `${internalNamespaces.streams}.identify_features`,
   `${internalNamespaces.streams}.identify_systems`,
+  // Streams – advisory tools (composite assessment tools)
+  `${internalNamespaces.streams}.assess_stream_health`,
+  `${internalNamespaces.streams}.diagnose_data_quality`,
+  `${internalNamespaces.streams}.overview_streams`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];

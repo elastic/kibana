@@ -6,13 +6,12 @@
  */
 
 import { z } from '@kbn/zod';
-import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { identifyFeatures } from '@kbn/streams-ai';
-import type { StreamsAgentCoreSetup } from '../types';
-import { getScopedStreamsClients } from './get_scoped_clients';
+import type { StreamsAgentCoreSetup } from '../../types';
+import { getScopedStreamsClients } from '../get_scoped_clients';
 
 export const STREAMS_IDENTIFY_FEATURES_TOOL_ID = 'streams.identify_features';
 
@@ -32,10 +31,8 @@ const identifyFeaturesSchema = z.object({
 
 export function createIdentifyFeaturesTool({
   core,
-  logger,
 }: {
   core: StreamsAgentCoreSetup;
-  logger: Logger;
 }): StaticToolRegistration<typeof identifyFeaturesSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof identifyFeaturesSchema> = {
     id: STREAMS_IDENTIFY_FEATURES_TOOL_ID,
@@ -46,7 +43,7 @@ export function createIdentifyFeaturesTool({
     schema: identifyFeaturesSchema,
     handler: async (toolParams, context) => {
       const { name, startMs, endMs } = toolParams;
-      const { request, modelProvider } = context;
+      const { request, modelProvider, logger } = context;
       try {
         const { streamsClient, inferenceClient, scopedClusterClient } =
           await getScopedStreamsClients({ core, request });
