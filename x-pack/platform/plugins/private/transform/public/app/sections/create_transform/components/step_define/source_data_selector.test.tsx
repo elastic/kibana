@@ -76,4 +76,3 @@ describe('Transform: <SourceDataSelector />', () => {
     expect(onSelectSavedObjectId).toHaveBeenCalledWith('ss-1');
   });
 });
-

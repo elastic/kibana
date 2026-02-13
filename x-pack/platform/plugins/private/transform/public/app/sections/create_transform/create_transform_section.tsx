@@ -29,9 +29,11 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
 
   const { esTransform } = useDocumentationLinks();
 
-  const { error: searchItemsError, searchItems, setSavedObjectId } = useSearchItems(
-    match.params.savedObjectId
-  );
+  const {
+    error: searchItemsError,
+    searchItems,
+    setSavedObjectId,
+  } = useSearchItems(match.params.savedObjectId);
 
   const docsLink = (
     <EuiButtonEmpty
