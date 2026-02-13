@@ -27,7 +27,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2d-standard-2
+      machineType: n2d-highcpu-8
       diskSizeGb: 95
 
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
