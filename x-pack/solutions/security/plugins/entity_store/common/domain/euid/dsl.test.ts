@@ -24,12 +24,39 @@ describe('getEuidDslFilterBasedOnDocument', () => {
         },
       });
     });
+
+    it('unwraps _source when doc is an Elasticsearch hit', () => {
+      const result = getEuidDslFilterBasedOnDocument('generic', {
+        _source: { entity: { id: 'e-123' } },
+      });
+
+      expect(result).toEqual({
+        bool: {
+          filter: [{ term: { 'entity.id': 'e-123' } }],
+        },
+      });
+    });
   });
 
   describe('host', () => {
     it('returns filter with term on host.entity.id when present', () => {
       const result = getEuidDslFilterBasedOnDocument('host', {
         host: { name: 'to-be-ignored', entity: { id: 'host-entity-1' } },
+      });
+
+      expect(result).toEqual({
+        bool: {
+          filter: [{ term: { 'host.entity.id': 'host-entity-1' } }],
+        },
+      });
+    });
+
+    it('returns filter with term on host.entity.id when present (with flattened source)', () => {
+      const result = getEuidDslFilterBasedOnDocument('host', {
+        _source: {
+          'host.name': 'to-be-ignored',
+          'host.entity.id': 'host-entity-1',
+        },
       });
 
       expect(result).toEqual({
