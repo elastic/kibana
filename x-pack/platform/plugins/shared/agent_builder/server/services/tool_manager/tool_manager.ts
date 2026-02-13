@@ -9,6 +9,7 @@ import type { StructuredTool } from '@langchain/core/tools';
 import { createToolIdMappings, toolToLangchain } from '@kbn/agent-builder-genai-utils/langchain';
 import { reverseMap } from '@kbn/agent-builder-genai-utils/langchain/tools';
 import { LRUCache } from 'lru-cache';
+import type { AgentEventEmitterFn } from '@kbn/agent-builder-server';
 import type {
   ToolManager as IToolManager,
   ToolManagerParams,
@@ -35,12 +36,17 @@ export class ToolManager implements IToolManager {
   private staticTools: Map<ToolName, StructuredTool> = new Map<ToolName, StructuredTool>();
   private dynamicTools: LRUCache<ToolName, StructuredTool>;
   private toolIdMappings: Map<string, string>;
+  private eventEmitter?: AgentEventEmitterFn;
 
   constructor(params: ToolManagerParams) {
     this.dynamicTools = new LRUCache<ToolName, StructuredTool>({
       max: params.dynamicToolCapacity,
     });
     this.toolIdMappings = new Map<string, string>();
+  }
+
+  public setEventEmitter(eventEmitter: AgentEventEmitterFn): void {
+    this.eventEmitter = eventEmitter;
   }
 
   public async addTools(input: AddToolInput, options: AddToolOptions = {}): Promise<void> {
@@ -58,7 +64,7 @@ export class ToolManager implements IToolManager {
           toolToLangchain({
             tool,
             logger: input.logger,
-            sendEvent: input.eventEmitter,
+            sendEvent: this.eventEmitter,
             toolId: toolIdMapping.get(tool.id),
           })
         )
