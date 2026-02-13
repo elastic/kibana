@@ -20,6 +20,9 @@ import { isActionGroup, isActionOption } from '../types';
 jest.mock('../../../../common/schema', () => ({
   getAllConnectors: jest.fn(),
 }));
+jest.mock('../../../../common/trigger_schemas', () => ({
+  triggerSchemas: { getTriggerDefinitions: jest.fn(() => []) },
+}));
 jest.mock('@kbn/workflows', () => ({
   isDynamicConnector: jest.fn(),
 }));

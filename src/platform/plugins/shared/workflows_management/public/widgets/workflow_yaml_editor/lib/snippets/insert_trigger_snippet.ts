@@ -10,7 +10,6 @@
 import { type Document, isNode, parseDocument, type Range } from 'yaml';
 import { isMap, isPair, isScalar, isSeq } from 'yaml';
 import { monaco } from '@kbn/monaco';
-import type { TriggerType } from '@kbn/workflows';
 import { generateTriggerSnippet } from './generate_trigger_snippet';
 import { getTriggerNodes, getTriggersPair } from '../../../../../common/lib/yaml';
 import { getIndentLevelFromLineNumber } from '../get_indent_level';
@@ -257,7 +256,7 @@ function findFirstEmptyItem(
 export function insertTriggerSnippet(
   model: monaco.editor.ITextModel,
   yamlDocument: Document | null,
-  triggerType: TriggerType,
+  triggerType: string,
   editor?: monaco.editor.IStandaloneCodeEditor
 ) {
   let document: Document;

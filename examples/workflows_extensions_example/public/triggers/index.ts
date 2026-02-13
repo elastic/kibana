@@ -9,9 +9,11 @@
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { customTriggerPublicDefinition } from './custom_trigger';
+import { entityUpdatedTriggerPublicDefinition } from './entity_updated_trigger';
 
 export const registerTriggerDefinitions = (
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ) => {
   workflowsExtensions.registerTriggerDefinition(customTriggerPublicDefinition);
+  workflowsExtensions.registerTriggerDefinition(entityUpdatedTriggerPublicDefinition);
 };

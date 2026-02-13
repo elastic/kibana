@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-import { customTriggerDefinition } from './custom_trigger';
-import { entityUpdatedTriggerDefinition } from './entity_updated_trigger';
+import { z } from '@kbn/zod/v4';
 
-export const registerTriggers = (workflowsExtensions: WorkflowsExtensionsServerPluginSetup) => {
-  workflowsExtensions.registerTrigger(customTriggerDefinition);
-  workflowsExtensions.registerTrigger(entityUpdatedTriggerDefinition);
-};
+export const ENTITY_UPDATED_TRIGGER_ID = 'entity.updated' as const;
+
+export const entityUpdatedTriggerEventSchema = z.object({
+  message: z.string(),
+  source: z.string().optional(),
+});
+
+export type EntityUpdatedTriggerEvent = z.infer<typeof entityUpdatedTriggerEventSchema>;

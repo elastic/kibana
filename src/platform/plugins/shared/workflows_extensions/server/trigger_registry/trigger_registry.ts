@@ -39,7 +39,7 @@ function validateDefinition(definition: ServerTriggerDefinition): void {
 }
 
 /**
- * Registry for workflow trigger definitions (server contract: id + eventSchema only).
+ * Registry for workflow trigger definitions.
  */
 export class TriggerRegistry {
   private readonly registry = new Map<string, ServerTriggerDefinition>();

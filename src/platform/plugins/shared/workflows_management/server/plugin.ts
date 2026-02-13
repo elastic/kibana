@@ -38,6 +38,7 @@ import { defineRoutes } from './workflows_management/routes';
 import { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
 import { WorkflowsService } from './workflows_management/workflows_management_service';
 import { stepSchemas } from '../common/step_schemas';
+import { triggerSchemas } from '../common/trigger_schemas';
 // Import the workflows connector
 
 export class WorkflowsPlugin
@@ -192,6 +193,7 @@ export class WorkflowsPlugin
     this.logger.debug('Workflows Management: Start');
 
     stepSchemas.initialize(plugins.workflowsExtensions);
+    triggerSchemas.initialize(plugins.workflowsExtensions);
 
     // Initialize workflow task scheduler with the start contract
     this.workflowTaskScheduler = new WorkflowTaskScheduler(this.logger, plugins.taskManager);

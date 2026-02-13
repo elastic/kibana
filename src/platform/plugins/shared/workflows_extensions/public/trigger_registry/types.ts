@@ -30,12 +30,6 @@ export interface PublicTriggerDefinition<EventSchema extends z.ZodType = z.ZodTy
   description: string;
 
   /**
-   * Optional example event payloads for authoring help; each must validate against eventSchema.
-   */
-  examples?: z.infer<EventSchema>[];
-
-  /**
-   * Icon type from EUI icon library.
    * Used to visually represent this trigger in the UI.
    */
   icon?: React.ComponentType;

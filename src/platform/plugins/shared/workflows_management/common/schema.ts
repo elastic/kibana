@@ -31,6 +31,7 @@ import {
 } from './connector_action_schema';
 // Import the singleton instance of StepSchemas
 import { stepSchemas } from './step_schemas';
+import { triggerSchemas } from './trigger_schemas';
 
 /**
  * Get parameter schema for a specific sub-action
@@ -203,7 +204,11 @@ export type WorkflowZodSchemaLooseType = z.infer<ReturnType<typeof getWorkflowZo
 // Legacy exports for backward compatibility - these will be deprecated
 // TODO: Remove these once all consumers are updated to use the lazy-loaded versions
 export const WORKFLOW_ZOD_SCHEMA = generateYamlSchemaFromConnectors(staticConnectors);
-export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(staticConnectors, true);
+export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(
+  staticConnectors,
+  [],
+  true
+);
 
 /**
  * Combine static connectors with dynamic Elasticsearch and Kibana connectors
@@ -359,14 +364,15 @@ export const getWorkflowZodSchema = (
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo>
 ): z.ZodType => {
   const allConnectors = getAllConnectorsWithDynamicInternal(dynamicConnectorTypes);
-  return generateYamlSchemaFromConnectors(allConnectors);
+  const registeredTriggers = triggerSchemas.getTriggerDefinitions().map((t) => t.id);
+  return generateYamlSchemaFromConnectors(allConnectors, registeredTriggers);
 };
 
 export const getWorkflowZodSchemaLoose = (
-  dynamicConnectorTypes: Record<string, ConnectorTypeInfo>
+  dynamicConnectorTypes: Record<string, ConnectorTypeInfo> = {}
 ): z.ZodType => {
   const allConnectors = getAllConnectorsWithDynamicInternal(dynamicConnectorTypes);
-  return generateYamlSchemaFromConnectors(allConnectors, true);
+  return generateYamlSchemaFromConnectors(allConnectors, [], true);
 };
 
 export const getPropertyHandler = (

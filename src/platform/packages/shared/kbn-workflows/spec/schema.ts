@@ -134,6 +134,23 @@ export const TriggerSchema = z.discriminatedUnion('type', [
   ManualTriggerSchema,
 ]);
 
+/**
+ * Returns a trigger schema that includes built-in types plus optional registered trigger ids.
+ * Used by the YAML editor so custom trigger types (e.g. example.custom_trigger) pass validation.
+ */
+export function getTriggerSchema(customTriggerIds: string[] = []): z.ZodType {
+  if (customTriggerIds.length === 0) {
+    return TriggerSchema;
+  }
+  const customSchemas = customTriggerIds.map((id) => z.object({ type: z.literal(id) }));
+  return z.discriminatedUnion('type', [
+    AlertRuleTriggerSchema,
+    ScheduledTriggerSchema,
+    ManualTriggerSchema,
+    ...customSchemas,
+  ]);
+}
+
 export const TriggerTypes = [
   AlertRuleTriggerSchema.shape.type.value,
   ScheduledTriggerSchema.shape.type.value,

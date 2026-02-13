@@ -18,7 +18,6 @@ const defaultDefinition: PublicTriggerDefinition<typeof eventSchema> = {
   title: 'Test Trigger',
   description: 'A trigger for testing',
   eventSchema,
-  examples: [{ message: 'hello' }],
 };
 
 describe('PublicTriggerRegistry', () => {

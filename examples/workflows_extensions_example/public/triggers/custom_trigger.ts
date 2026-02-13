@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import { i18n } from '@kbn/i18n';
+import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
+import React from 'react';
 import { CUSTOM_TRIGGER_ID, customTriggerEventSchema } from '../../common/triggers/custom_trigger';
 
 export const customTriggerPublicDefinition: PublicTriggerDefinition<
@@ -22,9 +23,8 @@ export const customTriggerPublicDefinition: PublicTriggerDefinition<
     defaultMessage:
       'Emitted when a custom event occurs. Used by the workflows extensions example plugin.',
   }),
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/star').then(({ icon }) => ({ default: icon }))
+  ),
   eventSchema: customTriggerEventSchema,
-  examples: [
-    { message: 'Hello from the example plugin' },
-    { message: 'Demo event', source: 'workflows_extensions_example' },
-  ],
 };
