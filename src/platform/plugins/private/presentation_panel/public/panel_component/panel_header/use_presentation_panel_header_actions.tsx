@@ -11,13 +11,9 @@ import { EuiBadge, EuiNotificationBadge, EuiToolTip, useEuiTheme } from '@elasti
 import React, { useEffect, useMemo, useState } from 'react';
 import { Subscription, switchMap } from 'rxjs';
 
+import { i18n } from '@kbn/i18n';
 import { uiActions } from '../../kibana_services';
-import {
-  PANEL_BADGE_TRIGGER,
-  PANEL_NOTIFICATION_TRIGGER,
-  panelBadgeTrigger,
-  panelNotificationTrigger,
-} from '../../panel_actions';
+import { PANEL_NOTIFICATION_TRIGGER, panelNotificationTrigger } from '../../panel_actions';
 import type { AnyApiAction } from '../../panel_actions/types';
 import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 
@@ -31,7 +27,6 @@ export const usePresentationPanelHeaderActions = <
   api: ApiType,
   getActions: PresentationPanelInternalProps['getActions']
 ) => {
-  const [badges, setBadges] = useState<AnyApiAction[]>([]);
   const [notifications, setNotifications] = useState<AnyApiAction[]>([]);
 
   const { euiTheme } = useEuiTheme();
@@ -60,8 +55,9 @@ export const usePresentationPanelHeaderActions = <
       isCompatible: boolean,
       action: AnyApiAction
     ) => {
+      if (type === 'badge') console.log(type, isCompatible, action);
       if (canceled) return;
-      (type === 'badge' ? setBadges : setNotifications)((currentActions) => {
+      setNotifications((currentActions) => {
         const newActions = currentActions?.filter((current) => current.id !== action.id);
         if (isCompatible) return [...newActions, action];
         return newActions;
@@ -69,38 +65,13 @@ export const usePresentationPanelHeaderActions = <
     };
 
     (async () => {
-      const [initialBadges, initialNotifications] = await Promise.all([
-        getActionsForTrigger(PANEL_BADGE_TRIGGER),
+      const [initialNotifications] = await Promise.all([
         getActionsForTrigger(PANEL_NOTIFICATION_TRIGGER),
       ]);
       if (canceled) return;
-      setBadges(initialBadges);
       setNotifications(initialNotifications);
 
       const apiContext = { embeddable: api };
-
-      // subscribe to any frequently changing badge actions
-      const frequentlyChangingBadges = await uiActions.getFrequentlyChangingActionsForTrigger(
-        PANEL_BADGE_TRIGGER,
-        apiContext
-      );
-      if (canceled) return;
-      for (const badge of frequentlyChangingBadges) {
-        const compatibilitySubject = badge
-          .getCompatibilityChangesSubject(apiContext)
-          ?.pipe(
-            switchMap(async () => {
-              return await badge.isCompatible({
-                ...apiContext,
-                trigger: panelBadgeTrigger,
-              });
-            })
-          )
-          .subscribe(async (isCompatible) => {
-            handleActionCompatibilityChange('badge', isCompatible, badge as AnyApiAction);
-          });
-        subscriptions.add(compatibilitySubject);
-      }
 
       // subscribe to any frequently changing notification actions
       const frequentlyChangingNotifications =
@@ -143,40 +114,27 @@ export const usePresentationPanelHeaderActions = <
 
   const badgeElements = useMemo(() => {
     if (!showBadges) return [];
-    return badges?.map((badge) => {
-      const tooltipText = badge.getDisplayNameTooltip?.({
-        embeddable: api,
-        trigger: panelBadgeTrigger,
-      });
-      const badgeElement = (
+    const tooltipText = i18n.translate(
+      'inputControl.deprecationBadgeAction.deprecationWarningDescription',
+      {
+        defaultMessage:
+          'Input controls are deprecated and will be removed in a future release. Use the new Controls to filter and interact with your dashboard data.',
+      }
+    );
+    return (
+      <EuiToolTip content={tooltipText}>
         <EuiBadge
-          key={badge.id}
-          iconType={badge.getIconType({ embeddable: api, trigger: panelBadgeTrigger })}
-          onClick={() => badge.execute({ embeddable: api, trigger: panelBadgeTrigger })}
-          onClickAriaLabel={badge.getDisplayName({ embeddable: api, trigger: panelBadgeTrigger })}
-          data-test-subj={`embeddablePanelBadge-${badge.id}`}
-          {...(tooltipText ? { 'aria-label': tooltipText } : {})}
+          iconType="warning"
+          data-test-subj="embeddablePanelBadge-deprecated"
+          aria-label={tooltipText}
         >
-          {badge.MenuItem
-            ? React.createElement(badge.MenuItem, {
-                context: {
-                  embeddable: api,
-                  trigger: panelBadgeTrigger,
-                },
-              })
-            : badge.getDisplayName({ embeddable: api, trigger: panelBadgeTrigger })}
+          {i18n.translate('inputControl.deprecationBadgeAction.deprecationBadgeLabel', {
+            defaultMessage: 'Deprecated',
+          })}
         </EuiBadge>
-      );
-
-      return tooltipText ? (
-        <EuiToolTip key={badge.id} content={tooltipText}>
-          {badgeElement}
-        </EuiToolTip>
-      ) : (
-        badgeElement
-      );
-    });
-  }, [api, badges, showBadges]);
+      </EuiToolTip>
+    );
+  }, [showBadges]);
 
   const notificationElements = useMemo(() => {
     if (!showNotifications) return [];
