@@ -23,7 +23,7 @@ export const transformWorkpadIn = (
       if (!element.expression.includes('embeddable')) {
         return element;
       }
-      const ast = fromExpression(element.expression); // ensure the expression is valid before encoding
+      const ast = fromExpression(element.expression);
       ast.chain = ast.chain.map((fn) => {
         if (fn.function === 'embeddable') {
           const embeddableConfig = decode(fn.arguments.config[0] as string);
