@@ -19,6 +19,7 @@ project:
     sourceRoot: src/platform/packages/private/kbn-scout-info
 dependsOn:
   - '@kbn/repo-info'
+  - '@kbn/zod'
 tags:
   - shared-common
   - package

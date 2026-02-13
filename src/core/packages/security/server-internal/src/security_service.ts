@@ -46,7 +46,7 @@ export class SecurityService
 
   public setup(): InternalSecurityServiceSetup {
     const config = this.getConfig();
-    const securityConfig: SecurityServiceConfigType = config.get(['xpack', 'security']);
+    const securityConfig: SecurityServiceConfigType | undefined = config.get(['xpack', 'security']);
     const elasticsearchConfig: PKCS12ConfigType = config.get(['elasticsearch']);
     const serverConfig: PKCS12ConfigType = config.get(['server']);
 
@@ -62,6 +62,9 @@ export class SecurityService
       fips: {
         isEnabled: () => isFipsEnabled(securityConfig),
       },
+      uiam: securityConfig?.uiam?.enabled
+        ? Object.freeze({ sharedSecret: securityConfig.uiam.sharedSecret })
+        : null,
     };
   }
 

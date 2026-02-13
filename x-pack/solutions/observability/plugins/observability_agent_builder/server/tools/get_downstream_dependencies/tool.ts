@@ -24,7 +24,7 @@ const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
 const getDownstreamDependenciesToolSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   serviceName: z.string().min(1).describe('The name of the service'),
-  serviceEnvironment: z
+  environment: z
     .string()
     .optional()
     .describe(
@@ -65,7 +65,7 @@ When to use:
       },
     },
     handler: async (toolParams, context) => {
-      const { serviceName, serviceEnvironment, start, end } = toolParams;
+      const { serviceName, environment, start, end } = toolParams;
       const { request } = context;
 
       try {
@@ -73,7 +73,7 @@ When to use:
           request,
           dataRegistry,
           serviceName,
-          serviceEnvironment,
+          serviceEnvironment: environment,
           start,
           end,
         });

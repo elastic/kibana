@@ -9,6 +9,7 @@
 
 import type { EuiThemeComputed, UseEuiTheme } from '@elastic/eui';
 import {
+  EuiAvatar,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -44,11 +45,13 @@ interface WorkflowExecutionListItemProps {
   isTestRun: boolean;
   startedAt: Date | null;
   duration: number | null;
+  executedBy?: string;
+  triggeredBy?: string;
   selected?: boolean;
   onClick?: () => void;
 }
 export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemProps>(
-  ({ status, isTestRun, startedAt, duration, selected, onClick }) => {
+  ({ status, isTestRun, startedAt, duration, executedBy, triggeredBy, selected, onClick }) => {
     const { euiTheme } = useEuiTheme();
     const styles = useMemoCss(componentStyles);
     const getFormattedDate = useGetFormattedDateTime();
@@ -70,7 +73,14 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
     }, [selected, onClick, styles]);
 
     return (
-      <EuiPanel onClick={onClick} hasShadow={false} paddingSize="m" hasBorder css={panelCss}>
+      <EuiPanel
+        onClick={onClick}
+        hasShadow={false}
+        paddingSize="m"
+        hasBorder
+        css={panelCss}
+        data-test-subj="workflowExecutionListItem"
+      >
         <EuiFlexGroup
           gutterSize="m"
           alignItems="center"
@@ -106,34 +116,59 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {formattedDuration && (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" wrap>
-                {isTestRun && (
-                  <EuiFlexItem>
-                    <EuiIconTip
-                      type="flask"
-                      color={euiTheme.colors.backgroundFilledText}
-                      title={i18n.translate(
-                        'workflows.workflowExecutionListItem.testRunIconTitle',
-                        {
-                          defaultMessage: 'Test Run',
-                        }
-                      )}
-                    />
-                  </EuiFlexItem>
+          <EuiFlexItem grow={false} css={styles.metadataContainer}>
+            <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" wrap={false}>
+              {isTestRun && (
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    type="flask"
+                    color={euiTheme.colors.backgroundFilledText}
+                    title={i18n.translate('workflows.workflowExecutionListItem.testRunIconTitle', {
+                      defaultMessage: 'Test Run',
+                    })}
+                  />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false} css={styles.executedByContainer}>
+                {executedBy && (
+                  <EuiFlexGroup
+                    alignItems="center"
+                    justifyContent="flexEnd"
+                    gutterSize="xs"
+                    wrap={false}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiAvatar name={executedBy} size="s" />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {executedBy}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 )}
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="clock" color="subdued" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {formattedDuration}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} css={styles.durationContainer} justifyContent="flexEnd">
+                {formattedDuration && (
+                  <EuiFlexGroup
+                    alignItems="center"
+                    justifyContent="flexEnd"
+                    gutterSize="xs"
+                    wrap={false}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="clock" color="subdued" />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {formattedDuration}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
     );
@@ -155,4 +190,15 @@ const componentStyles = {
         transform: 'none',
       },
     }),
+  metadataContainer: css({
+    minWidth: '200px',
+  }),
+  executedByContainer: css({
+    minWidth: '80px',
+    justifyContent: 'flex-end',
+  }),
+  durationContainer: css({
+    minWidth: '70px',
+    justifyContent: 'flex-end',
+  }),
 };

@@ -8,6 +8,11 @@
 import type { AuthenticatedUser, ElasticsearchClient } from '@kbn/core/server';
 import type { InputType } from '../../common';
 
+export interface LangSmithOptions {
+  projectName: string;
+  apiKey: string;
+}
+
 export interface CreateUpdateIntegrationParams {
   integrationParams: IntegrationParams;
   authenticatedUser: AuthenticatedUser;
@@ -31,6 +36,10 @@ export interface CreateDataStreamParams {
    * Inference connector to use when the background task runs.
    */
   connectorId: string;
+  /**
+   * Optional LangSmith tracing options to propagate to background tasks.
+   */
+  langSmithOptions?: LangSmithOptions;
   /**
    * Minimal set of auth headers required to reconstruct a scoped client
    * as the original user inside the Task Manager runner.

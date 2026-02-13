@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/fields-metadata-plugin'
   - '@kbn/apm-utils'
   - '@kbn/i18n'
+  - '@kbn/traced-es-client'
 tags:
   - shared-server
   - package

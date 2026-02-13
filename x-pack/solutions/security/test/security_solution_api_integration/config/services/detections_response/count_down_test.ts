@@ -33,8 +33,9 @@ export const countDownTest = async <T>(
     try {
       const testReturn = await functionToTest();
       if (!testReturn.passed) {
-        const error = testReturn.errorMessage != null ? ` error: ${testReturn.errorMessage},` : '';
-        log.error(`Failure trying to ${name},${error} retries left are: ${retryCount - 1}`);
+        log.error(`Failure trying to ${name}, retries left: ${retryCount - 1}`);
+        log.error(`Error message returned: "${testReturn.errorMessage}"`);
+
         // retry, counting down, and delay a bit before
         await new Promise((resolve) => setTimeout(resolve, timeoutWait));
         const returnValue = await countDownTest(
@@ -53,11 +54,9 @@ export const countDownTest = async <T>(
       if (ignoreThrow) {
         throw err;
       } else {
-        log.error(
-          `Failure trying to ${name}, with exception message of: ${
-            err.message
-          }, retries left are: ${retryCount - 1}`
-        );
+        log.error(`Failure trying to ${name}, retries left: ${retryCount - 1}`);
+        log.error(err);
+
         // retry, counting down, and delay a bit before
         await new Promise((resolve) => setTimeout(resolve, timeoutWait));
         const returnValue = await countDownTest(

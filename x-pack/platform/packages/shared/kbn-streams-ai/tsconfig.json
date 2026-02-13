@@ -28,5 +28,6 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/apm-utils",
     "@kbn/i18n",
+    "@kbn/traced-es-client",
   ]
 }

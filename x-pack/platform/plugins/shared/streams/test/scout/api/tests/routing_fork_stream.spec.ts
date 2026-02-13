@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import { streamsApiTest as apiTest } from '../fixtures';
 import { PUBLIC_API_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
   'Stream data routing - fork stream API (CRUD)',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     // Stream names must be exactly one level deep when forking from 'logs'
     // Format: logs.<name> where name uses hyphens, not dots
@@ -40,7 +41,7 @@ apiTest.describe(
         });
 
         expect(statusCode).toBe(200);
-        expect(body).toHaveProperty('acknowledged', true);
+        expect(body.acknowledged).toBe(true);
 
         // Verify the stream was created
         const { statusCode: getStatus, body: getBody } = await apiClient.get(
@@ -52,7 +53,7 @@ apiTest.describe(
         );
 
         expect(getStatus).toBe(200);
-        expect(getBody.stream).toHaveProperty('name', childStreamName);
+        expect(getBody.stream.name).toBe(childStreamName);
       }
     );
 
@@ -71,7 +72,7 @@ apiTest.describe(
       });
 
       expect(statusCode).toBe(200);
-      expect(body).toHaveProperty('acknowledged', true);
+      expect(body.acknowledged).toBe(true);
     });
 
     apiTest(
@@ -91,7 +92,7 @@ apiTest.describe(
         });
 
         expect(statusCode).toBe(200);
-        expect(body).toHaveProperty('acknowledged', true);
+        expect(body.acknowledged).toBe(true);
       }
     );
 
@@ -112,7 +113,7 @@ apiTest.describe(
         });
 
         expect(statusCode).toBe(200);
-        expect(body).toHaveProperty('acknowledged', true);
+        expect(body.acknowledged).toBe(true);
       }
     );
 
@@ -133,7 +134,7 @@ apiTest.describe(
         });
 
         expect(statusCode).toBe(200);
-        expect(body).toHaveProperty('acknowledged', true);
+        expect(body.acknowledged).toBe(true);
       }
     );
 
@@ -154,7 +155,7 @@ apiTest.describe(
         });
 
         expect(statusCode).toBe(200);
-        expect(body).toHaveProperty('acknowledged', true);
+        expect(body.acknowledged).toBe(true);
       }
     );
 
@@ -380,7 +381,7 @@ apiTest.describe(
       });
 
       expect(statusCode).toBe(200);
-      expect(body).toHaveProperty('acknowledged', true);
+      expect(body.acknowledged).toBe(true);
     });
 
     apiTest('should support OR condition', async ({ apiClient, samlAuth }) => {
@@ -403,7 +404,7 @@ apiTest.describe(
       });
 
       expect(statusCode).toBe(200);
-      expect(body).toHaveProperty('acknowledged', true);
+      expect(body.acknowledged).toBe(true);
     });
 
     apiTest('should support NOT condition', async ({ apiClient, samlAuth }) => {
@@ -423,7 +424,7 @@ apiTest.describe(
       });
 
       expect(statusCode).toBe(200);
-      expect(body).toHaveProperty('acknowledged', true);
+      expect(body.acknowledged).toBe(true);
     });
 
     apiTest('should support nested AND/OR conditions', async ({ apiClient, samlAuth }) => {
@@ -451,7 +452,7 @@ apiTest.describe(
       });
 
       expect(statusCode).toBe(200);
-      expect(body).toHaveProperty('acknowledged', true);
+      expect(body.acknowledged).toBe(true);
     });
 
     apiTest('should support always condition', async ({ apiClient, samlAuth }) => {
@@ -469,7 +470,7 @@ apiTest.describe(
       });
 
       expect(statusCode).toBe(200);
-      expect(body).toHaveProperty('acknowledged', true);
+      expect(body.acknowledged).toBe(true);
     });
 
     apiTest('should support never condition (auto-disables)', async ({ apiClient, samlAuth }) => {
@@ -519,7 +520,7 @@ apiTest.describe(
       });
 
       expect(statusCode).toBe(200);
-      expect(body).toHaveProperty('acknowledged', true);
+      expect(body.acknowledged).toBe(true);
     });
 
     // Error handling
@@ -620,5 +621,307 @@ apiTest.describe(
 
       expect(statusCode).toBe(400);
     });
+
+    // Routing rule update tests
+    apiTest('should update routing rule condition', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asStreamsAdmin();
+      const childStreamName = `${streamNamePrefix}-update-cond`;
+
+      // Create stream first
+      const { statusCode: createStatus } = await apiClient.post('api/streams/logs/_fork', {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        body: {
+          stream: { name: childStreamName },
+          where: { field: 'service.name', eq: 'original-service' },
+          status: 'enabled',
+        },
+        responseType: 'json',
+      });
+      expect(createStatus).toBe(200);
+
+      // Get the parent stream to get current routing rules
+      const { body: parentBody } = await apiClient.get('api/streams/logs', {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+
+      // Find and update the routing rule
+      const updatedRouting = parentBody.stream.ingest.wired.routing.map(
+        (rule: { destination: string; where: any; status: string }) => {
+          if (rule.destination === childStreamName) {
+            return {
+              ...rule,
+              where: { field: 'service.name', eq: 'updated-service' },
+            };
+          }
+          return rule;
+        }
+      );
+
+      // Update parent stream with new routing
+      const { updated_at: _, ...processingWithoutUpdatedAt } =
+        parentBody.stream.ingest.processing || {};
+      const updateResponse = await apiClient.put('api/streams/logs/_ingest', {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        body: {
+          ingest: {
+            ...parentBody.stream.ingest,
+            processing: processingWithoutUpdatedAt,
+            wired: {
+              ...parentBody.stream.ingest.wired,
+              routing: updatedRouting,
+            },
+          },
+        },
+        responseType: 'json',
+      });
+
+      expect(updateResponse.statusCode).toBe(200);
+
+      // Verify the routing rule was updated
+      const { body: verifyBody } = await apiClient.get('api/streams/logs', {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+
+      const updatedRule = verifyBody.stream.ingest.wired.routing.find(
+        (r: { destination: string }) => r.destination === childStreamName
+      );
+      expect(updatedRule).toBeDefined();
+      expect(updatedRule.where.eq).toBe('updated-service');
+    });
+
+    apiTest(
+      'should update routing rule status from enabled to disabled',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const childStreamName = `${streamNamePrefix}-toggle-status`;
+
+        // Create stream with enabled status
+        await apiClient.post('api/streams/logs/_fork', {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            stream: { name: childStreamName },
+            where: { field: 'service.name', eq: 'toggle-test' },
+            status: 'enabled',
+          },
+          responseType: 'json',
+        });
+
+        // Get parent stream
+        const { body: parentBody } = await apiClient.get('api/streams/logs', {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+
+        // Update status to disabled
+        const updatedRouting = parentBody.stream.ingest.wired.routing.map(
+          (rule: { destination: string; where: any; status: string }) => {
+            if (rule.destination === childStreamName) {
+              return { ...rule, status: 'disabled' };
+            }
+            return rule;
+          }
+        );
+
+        const { updated_at: _, ...processingWithoutUpdatedAt } =
+          parentBody.stream.ingest.processing || {};
+        const updateResponse = await apiClient.put('api/streams/logs/_ingest', {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            ingest: {
+              ...parentBody.stream.ingest,
+              processing: processingWithoutUpdatedAt,
+              wired: {
+                ...parentBody.stream.ingest.wired,
+                routing: updatedRouting,
+              },
+            },
+          },
+          responseType: 'json',
+        });
+
+        expect(updateResponse.statusCode).toBe(200);
+
+        // Verify status was updated
+        const { body: verifyBody } = await apiClient.get('api/streams/logs', {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+
+        const updatedRule = verifyBody.stream.ingest.wired.routing.find(
+          (r: { destination: string }) => r.destination === childStreamName
+        );
+        expect(updatedRule.status).toBe('disabled');
+      }
+    );
+
+    apiTest('should reorder routing rules', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asStreamsAdmin();
+      const stream1 = `${streamNamePrefix}-reorder1`;
+      const stream2 = `${streamNamePrefix}-reorder2`;
+      const stream3 = `${streamNamePrefix}-reorder3`;
+
+      // Create three streams in order
+      for (const [streamName, serviceName] of [
+        [stream1, 'service-1'],
+        [stream2, 'service-2'],
+        [stream3, 'service-3'],
+      ]) {
+        await apiClient.post('api/streams/logs/_fork', {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            stream: { name: streamName },
+            where: { field: 'service.name', eq: serviceName },
+            status: 'enabled',
+          },
+          responseType: 'json',
+        });
+      }
+
+      // Get parent stream
+      const { body: parentBody } = await apiClient.get('api/streams/logs', {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+
+      // Reorder: move stream3 to first position among our test streams
+      const testStreamRoutes = parentBody.stream.ingest.wired.routing.filter(
+        (r: { destination: string }) =>
+          r.destination === stream1 || r.destination === stream2 || r.destination === stream3
+      );
+
+      const otherRoutes = parentBody.stream.ingest.wired.routing.filter(
+        (r: { destination: string }) =>
+          r.destination !== stream1 && r.destination !== stream2 && r.destination !== stream3
+      );
+
+      // Reorder test routes: stream3, stream1, stream2
+      const reorderedTestRoutes = [
+        testStreamRoutes.find((r: { destination: string }) => r.destination === stream3),
+        testStreamRoutes.find((r: { destination: string }) => r.destination === stream1),
+        testStreamRoutes.find((r: { destination: string }) => r.destination === stream2),
+      ];
+
+      const reorderedRouting = [...otherRoutes, ...reorderedTestRoutes];
+
+      const { updated_at: _, ...processingWithoutUpdatedAt } =
+        parentBody.stream.ingest.processing || {};
+      const updateResponse = await apiClient.put('api/streams/logs/_ingest', {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        body: {
+          ingest: {
+            ...parentBody.stream.ingest,
+            processing: processingWithoutUpdatedAt,
+            wired: {
+              ...parentBody.stream.ingest.wired,
+              routing: reorderedRouting,
+            },
+          },
+        },
+        responseType: 'json',
+      });
+
+      expect(updateResponse.statusCode).toBe(200);
+
+      // Verify the order was updated
+      const { body: verifyBody } = await apiClient.get('api/streams/logs', {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+
+      const testRoutes = verifyBody.stream.ingest.wired.routing.filter(
+        (r: { destination: string }) =>
+          r.destination === stream1 || r.destination === stream2 || r.destination === stream3
+      );
+
+      // stream3 should come before stream1 and stream2
+      const stream3Index = testRoutes.findIndex(
+        (r: { destination: string }) => r.destination === stream3
+      );
+      const stream1Index = testRoutes.findIndex(
+        (r: { destination: string }) => r.destination === stream1
+      );
+      const stream2Index = testRoutes.findIndex(
+        (r: { destination: string }) => r.destination === stream2
+      );
+
+      expect(stream3Index).toBeLessThan(stream1Index);
+      expect(stream1Index).toBeLessThan(stream2Index);
+    });
+
+    apiTest(
+      'should update routing rule to use complex condition',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const childStreamName = `${streamNamePrefix}-complex-upd`;
+
+        // Create stream with simple condition
+        await apiClient.post('api/streams/logs/_fork', {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            stream: { name: childStreamName },
+            where: { field: 'service.name', eq: 'simple' },
+            status: 'enabled',
+          },
+          responseType: 'json',
+        });
+
+        // Get parent stream
+        const { body: parentBody } = await apiClient.get('api/streams/logs', {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+
+        // Update to complex AND condition
+        const updatedRouting = parentBody.stream.ingest.wired.routing.map(
+          (rule: { destination: string; where: any; status: string }) => {
+            if (rule.destination === childStreamName) {
+              return {
+                ...rule,
+                where: {
+                  and: [
+                    { field: 'service.name', eq: 'api-gateway' },
+                    { field: 'log.level', eq: 'error' },
+                  ],
+                },
+              };
+            }
+            return rule;
+          }
+        );
+
+        const { updated_at: _, ...processingWithoutUpdatedAt } =
+          parentBody.stream.ingest.processing || {};
+        const updateResponse = await apiClient.put('api/streams/logs/_ingest', {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            ingest: {
+              ...parentBody.stream.ingest,
+              processing: processingWithoutUpdatedAt,
+              wired: {
+                ...parentBody.stream.ingest.wired,
+                routing: updatedRouting,
+              },
+            },
+          },
+          responseType: 'json',
+        });
+
+        expect(updateResponse.statusCode).toBe(200);
+
+        // Verify the complex condition was saved
+        const { body: verifyBody } = await apiClient.get('api/streams/logs', {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+
+        const updatedRule = verifyBody.stream.ingest.wired.routing.find(
+          (r: { destination: string }) => r.destination === childStreamName
+        );
+        expect(updatedRule.where.and).toBeDefined();
+        expect(updatedRule.where.and).toHaveLength(2);
+      }
+    );
   }
 );

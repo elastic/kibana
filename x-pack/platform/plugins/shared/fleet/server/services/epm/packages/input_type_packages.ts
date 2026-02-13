@@ -241,7 +241,8 @@ async function installAssetsForDataStreamType(opts: {
       logger,
       onlyForDataStreams: [dataStream],
     });
-    // Upate ES index patterns
+
+    // Update ES index patterns
     await optimisticallyAddEsAssetReferences(
       soClient,
       installedPkgWithAssets.installation.name,

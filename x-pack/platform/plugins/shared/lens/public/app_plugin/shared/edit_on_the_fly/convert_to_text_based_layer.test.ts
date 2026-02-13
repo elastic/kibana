@@ -13,7 +13,7 @@ import type {
 } from '@kbn/lens-common';
 import { createMockFramePublicAPI } from '../../../mocks';
 import { convertFormBasedToTextBasedLayer } from './convert_to_text_based_layer';
-import type { ConvertibleLayer, EsqlConversionData } from './convert_to_esql_modal';
+import type { ConvertibleLayer, EsqlConversionData } from './esql_conversion_types';
 
 describe('convertFormBasedToTextBasedLayer', () => {
   const layerId = 'layer1';

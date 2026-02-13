@@ -8,7 +8,7 @@
  */
 
 import { EsqlQuery } from '../../composer/query';
-import { printAst } from '../../shared/debug';
+import { printAst } from '../../debug';
 import type { ESQLAstPromqlCommand } from '../../types';
 
 /**
@@ -118,7 +118,7 @@ describe('invalid query', () => {
 
     expect(query.errors.length > 0).toBe(true);
     expect('\n' + printAst(query.ast.commands[0])).toBe(`
-command 0-19 "promql" INCOMPLETE
+command 0-19 "promql"
 └─ query 7-19 INCOMPLETE
    └─ selector 7-19 "bytes_in" INCOMPLETE
       ├─ identifier 7-14 "bytes_in"
