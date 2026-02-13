@@ -19,7 +19,6 @@ import type {
   ChromeNavLink,
   ChromeProjectNavigationNode,
   NavigationTreeDefinitionUI,
-  SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type { RecentlyAccessedHistoryItem } from '@kbn/recently-accessed';
@@ -27,6 +26,7 @@ import { Header, LoadingIndicator, ProjectHeader, Sidebar } from '.';
 import { HeaderTopBanner } from './header/header_top_banner';
 import { AppMenuBar } from './project/app_menu';
 import { GridLayoutProjectSideNav } from './project/sidenav/grid_layout_sidenav';
+import { SideNavUserMenu } from './project/sidenav/side_nav_user_menu';
 import type { NavigationProps } from './project/sidenav/types';
 import type { ChromeState } from '../state/chrome_state';
 
@@ -47,11 +47,9 @@ interface NavControlsObservables {
 interface ProjectNavigationObservables {
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   homeHref$: Observable<string>;
-  navigation$: Observable<{
-    solutionId: SolutionId;
-    navigationTree: NavigationTreeDefinitionUI;
-    activeNodes: ChromeProjectNavigationNode[][];
-  }>;
+  navigationTree$: Observable<NavigationTreeDefinitionUI>;
+  activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
+  activeDataTestSubj$?: Observable<string | undefined>;
 }
 
 export interface ChromeComponentsDeps {
@@ -144,15 +142,19 @@ export const createChromeComponents = ({
     const navProps: NavigationProps = {
       basePath,
       application,
-      navigation$: projectNavigation.navigation$,
+      navigationTree$: projectNavigation.navigationTree$,
+      activeNodes$: projectNavigation.activeNodes$,
       navLinks$,
+      dataTestSubj$: projectNavigation.activeDataTestSubj$,
+      feedbackUrlParams$: state.feedback.urlParams$,
       onToggleCollapsed: state.sideNav.collapsed.set,
+      isFeedbackEnabled$: state.feedback.isEnabled$,
+      footerActions: <SideNavUserMenu />,
     };
 
     return (
       <GridLayoutProjectSideNav
-        isCollapsed$={state.sideNav.collapsed.$}
-        initialIsCollapsed={state.sideNav.collapsed.get()}
+        isCollapsed$={state.sideNav.collapsed.subject$}
         navProps={navProps}
       />
     );

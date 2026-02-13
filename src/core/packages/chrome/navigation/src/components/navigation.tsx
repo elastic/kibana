@@ -71,6 +71,10 @@ export interface NavigationProps {
    */
   sidePanelFooter?: ReactNode;
   /**
+   * (optional) Content to display in the side nav footer above the collapse button (e.g. user menu).
+   */
+  footerActions?: ReactNode;
+  /**
    * (optional) data-test-subj attribute for testing purposes.
    */
   'data-test-subj'?: string;
@@ -85,6 +89,7 @@ export const Navigation = ({
   onToggleCollapsed,
   setWidth,
   sidePanelFooter,
+  footerActions,
   ...rest
 }: NavigationProps) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
@@ -340,7 +345,11 @@ export const Navigation = ({
           )}
         </SideNav.PrimaryMenu>
 
-        <SideNav.Footer isCollapsed={isCollapsed} collapseButton={collapseButton}>
+        <SideNav.Footer
+          isCollapsed={isCollapsed}
+          collapseButton={collapseButton}
+          actionsAboveCollapse={footerActions}
+        >
           {({ footerNavigationInstructionsId }) => (
             <>
               {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item, index) => {

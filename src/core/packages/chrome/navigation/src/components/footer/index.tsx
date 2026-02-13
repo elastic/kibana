@@ -60,6 +60,10 @@ export interface FooterProps {
   children: FooterChildren;
   isCollapsed: boolean;
   collapseButton?: ReactNode;
+  /**
+   * Optional content rendered above the collapse button (e.g. user menu).
+   */
+  actionsAboveCollapse?: ReactNode;
 }
 
 interface FooterComponent
@@ -68,7 +72,7 @@ interface FooterComponent
 }
 
 const FooterBase = forwardRef<HTMLElement, FooterProps>(
-  ({ children, isCollapsed, collapseButton }, ref) => {
+  ({ children, isCollapsed, collapseButton, actionsAboveCollapse }, ref) => {
     const euiThemeContext = useEuiTheme();
     const isSmall = useIsWithinBreakpoints(['xs', 's']);
     const footerNavigationInstructionsId = useGeneratedHtmlId({
@@ -124,6 +128,7 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(
           {renderChildren()}
           {!isSmall && (
             <>
+              {actionsAboveCollapse}
               <EuiHorizontalRule margin="xs" css={wrapperStyles.collapseDivider} />
               {collapseButton}
             </>
