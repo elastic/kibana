@@ -145,6 +145,10 @@ export function createChromeApi({
     getGlobalHeaderAppActions$: () => state.globalHeaderAppActions.$,
     setGlobalHeaderAppActions: state.globalHeaderAppActions.set,
 
+    // Header app actions config (overflow + New/Share/Save buttons; same pattern as help extension)
+    getHeaderAppActionsConfig$: () => state.headerAppActionsConfig.$,
+    setHeaderAppActionsConfig: state.headerAppActionsConfig.set,
+
     // Help
     getHelpExtension$: () => state.help.extension.$,
     setHelpExtension: state.help.extension.set,

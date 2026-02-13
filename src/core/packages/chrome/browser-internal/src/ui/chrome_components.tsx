@@ -136,6 +136,7 @@ export const createChromeComponents = ({
       docLinks={docLinks}
       kibanaVersion={config.kibanaVersion}
       prependBasePath={prependBasePath}
+      headerAppActionsConfig$={state.headerAppActionsConfig.$}
     />
   );
 

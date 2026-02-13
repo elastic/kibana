@@ -36,6 +36,7 @@ describe('Header', () => {
     customBranding$: Rx.of({}),
     prependBasePath: (str) => `hello/world/${str}`,
     isServerless: false,
+    headerAppActionsConfig$: Rx.of(undefined),
   };
 
   it('renders', async () => {

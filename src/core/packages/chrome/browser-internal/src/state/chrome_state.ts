@@ -18,6 +18,7 @@ import type {
   ChromeBreadcrumbsAppendExtension,
   ChromeBreadcrumbsBadge,
   ChromeGlobalHelpExtensionMenuLink,
+  ChromeHeaderAppActionsConfig,
   ChromeHelpExtension,
   ChromeNavLink,
   ChromeUserBanner,
@@ -65,6 +66,8 @@ export interface ChromeState {
   appMenu: State<AppMenuConfig | undefined>;
   /** Global header app-defined actions (e.g. New, Share, Overflow, Save). Cleared on app unmount. */
   globalHeaderAppActions: State<MountPoint<HTMLDivElement> | undefined>;
+  /** Header app actions config (overflow + New/Share/Save). Set by app via setHeaderAppActionsConfig; cleared on app change. */
+  headerAppActionsConfig: State<ChromeHeaderAppActionsConfig | undefined>;
 
   /** Help system */
   help: {
@@ -105,6 +108,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const badge = createState<ChromeBadge | undefined>(undefined);
   const appMenu = createState<AppMenuConfig | undefined>(undefined);
   const globalHeaderAppActions = createState<MountPoint<HTMLDivElement> | undefined>(undefined);
+  const headerAppActionsConfig = createState<ChromeHeaderAppActionsConfig | undefined>(undefined);
 
   // UI Elements (not reset on app change)
   const globalFooter = createState<ReactNode>(null);
@@ -133,6 +137,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     customNavLink,
     appMenu,
     globalHeaderAppActions,
+    headerAppActionsConfig,
     help: {
       extension: helpExtension,
       supportUrl: helpSupportUrl,

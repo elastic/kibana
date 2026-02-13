@@ -13,6 +13,7 @@ import { useInternalStateSelector } from '../../state_management/redux';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { DiscoverLayout } from '../layout';
 import { addHelpMenuToAppChrome } from '../../../../components/help_menu/help_menu_util';
+import { getDiscoverHeaderAppActionsConfig } from '../../../../components/header_app_actions/header_app_actions_config';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useSavedSearchAliasMatchRedirect } from '../../../../hooks/saved_search_alias_match_redirect';
 import { useAdHocDataViews } from '../../hooks/use_adhoc_data_views';
@@ -40,6 +41,11 @@ export function DiscoverMainApp({ stateContainer }: DiscoverMainProps) {
   useEffect(() => {
     addHelpMenuToAppChrome(chrome, docLinks);
   }, [chrome, docLinks]);
+
+  // POC: Push header app actions (overflow, New, Share, Save) into global header (same pattern as help menu)
+  useEffect(() => {
+    chrome.setHeaderAppActionsConfig(getDiscoverHeaderAppActionsConfig());
+  }, [chrome]);
 
   // TODO: Move this higher up in the component tree
   useSavedSearchAliasMatchRedirect({ discoverSession, spaces, history });

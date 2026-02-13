@@ -16,11 +16,7 @@ import {
   EuiHeaderLogo,
   EuiHeaderSection,
   EuiHeaderSectionItem,
-  EuiHorizontalRule,
-  EuiIcon,
   EuiImage,
-  EuiKeyPadMenu,
-  EuiKeyPadMenuItem,
   EuiLoadingSpinner,
   EuiPopover,
   EuiSplitButton,
@@ -31,6 +27,7 @@ import type { InternalApplicationStart } from '@kbn/core-application-browser-int
 import type {
   ChromeBreadcrumb,
   ChromeGlobalHelpExtensionMenuLink,
+  ChromeHeaderAppActionsConfig,
   ChromeHelpExtension,
   ChromeHelpMenuLink,
   ChromeNavControl,
@@ -93,19 +90,6 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
 
 type HeaderCss = ReturnType<typeof getHeaderCss>;
 
-/** Override EuiKeyPadMenuItem to compact size (72×48) in the overflow popover */
-const overflowKeyPadCss = css`
-  justify-content: center;
-  padding-block: 8px;
-`;
-
-const overflowKeyPadItemCss = css`
-  width: 72px;
-  height: 64px;
-  min-width: 72px;
-  min-height: 48px;
-`;
-
 const overflowMenuCss = css`
   width: 240px;
 `;
@@ -114,109 +98,12 @@ const saveOverflowMenuCss = css`
   width: 160px;
 `;
 
-const noop = () => {};
-
-const ALERTS_PANEL_ID = 1;
-const EXPORT_PANEL_ID = 2;
-
-const OverflowKeyPadSection: React.FC = () => (
-  <>
-    <EuiKeyPadMenu css={overflowKeyPadCss}>
-      <EuiKeyPadMenuItem
-        label="New"
-        onClick={noop}
-        css={overflowKeyPadItemCss}
-        data-test-subj="headerGlobalNav-overflowNew"
-      >
-        <EuiIcon type="plusInCircle" size="m" />
-      </EuiKeyPadMenuItem>
-      <EuiKeyPadMenuItem
-        label="Favorite"
-        onClick={noop}
-        css={overflowKeyPadItemCss}
-        data-test-subj="headerGlobalNav-overflowFavorite"
-      >
-        <EuiIcon type="star" size="m" />
-      </EuiKeyPadMenuItem>
-      <EuiKeyPadMenuItem
-        label="Share"
-        onClick={noop}
-        css={overflowKeyPadItemCss}
-        data-test-subj="headerGlobalNav-overflowShare"
-      >
-        <EuiIcon type="share" size="m" />
-      </EuiKeyPadMenuItem>
-    </EuiKeyPadMenu>
-    <EuiHorizontalRule margin="none" />
-  </>
-);
-
-const OVERFLOW_PANELS: Array<
-  | {
-      id: number;
-      title: string;
-      content?: never;
-      items: Array<
-        | { name: string; icon: string; onClick: () => void; panel?: number }
-        | { isSeparator: true; key: string }
-        | { renderItem: () => React.ReactNode; key?: string }
-      >;
-    }
-  | { id: number; title: string; items: Array<{ name: string; icon: string; onClick: () => void }> }
-> = [
-  {
-    id: 0,
-    title: '',
-    items: [
-      { renderItem: () => <OverflowKeyPadSection />, key: 'keypad' },
-      // { isSeparator: true as const, key: 'sep1' },
-      { name: 'Open', icon: 'folderOpen', onClick: noop },
-      { name: 'Inspect', icon: 'inspect', onClick: noop },
-      { name: 'Data sets', icon: 'indexOpen', onClick: noop },
-      { name: 'Background searches', icon: 'search', onClick: noop },
-      { isSeparator: true as const, key: 'sep2' },
-      { name: 'Alerts', icon: 'bell', onClick: noop, panel: ALERTS_PANEL_ID },
-      { name: 'Export', icon: 'exportAction', onClick: noop, panel: EXPORT_PANEL_ID },
-      { isSeparator: true as const, key: 'sep3' },
-      { name: 'Rename', icon: 'pencil', onClick: noop },
-      { name: 'Settings', icon: 'gear', onClick: noop },
-      { isSeparator: true as const, key: 'sep4' },
-      { name: 'Docs', icon: 'documentation', onClick: noop },
-      { name: 'Feedback', icon: 'editorComment', onClick: noop },
-    ],
-  },
-  {
-    id: ALERTS_PANEL_ID,
-    title: 'Alerts',
-    items: [
-      { name: 'Create search threshold rule', icon: 'bell', onClick: noop },
-      { name: 'Manage rules and connectors', icon: 'document', onClick: noop },
-    ],
-  },
-  {
-    id: EXPORT_PANEL_ID,
-    title: 'Export',
-    items: [
-      { name: 'CSV', icon: 'calendar', onClick: noop },
-      { name: 'Schedule export', icon: 'calendar', onClick: noop },
-    ],
-  },
-];
-
-const GlobalHeaderAppActionsDumb: React.FC = () => {
+const GlobalHeaderAppActionsFromConfig: React.FC<{ config: ChromeHeaderAppActionsConfig }> = ({
+  config,
+}) => {
   const [isOverflowOpen, setIsOverflowOpen] = useState(false);
   const [isSavePopoverOpen, setIsSavePopoverOpen] = useState(false);
   const closeSavePopover = () => setIsSavePopoverOpen(false);
-  const savePopoverPanels = [
-    {
-      id: 0,
-      title: '',
-      items: [
-        { name: 'Save as', icon: 'save', onClick: closeSavePopover },
-        { name: 'Reset changes', icon: 'editorUndo', onClick: closeSavePopover },
-      ],
-    },
-  ];
   const overflowButton = (
     <EuiButtonIcon
       color="text"
@@ -235,7 +122,12 @@ const GlobalHeaderAppActionsDumb: React.FC = () => {
         anchorPosition="downLeft"
         panelPaddingSize="none"
       >
-        <EuiContextMenu css={overflowMenuCss} size="s" panels={OVERFLOW_PANELS} initialPanelId={0} />
+        <EuiContextMenu
+          css={overflowMenuCss}
+          size="s"
+          panels={config.overflowPanels as ComponentProps<typeof EuiContextMenu>['panels']}
+          initialPanelId={0}
+        />
       </EuiPopover>
       <EuiButtonIcon size="xs" color="text" iconType="plusInCircle" data-test-subj="headerGlobalNav-appActionsNewButton">
         New
@@ -275,7 +167,11 @@ const GlobalHeaderAppActionsDumb: React.FC = () => {
           anchorPosition="downLeft"
           panelPaddingSize="none"
         >
-          <EuiContextMenu css={saveOverflowMenuCss} panels={savePopoverPanels} initialPanelId={0} />
+          <EuiContextMenu
+            css={saveOverflowMenuCss}
+            panels={config.savePopoverPanels as ComponentProps<typeof EuiContextMenu>['panels']}
+            initialPanelId={0}
+          />
         </EuiPopover>
       </EuiSplitButton>
     </EuiHeaderLinks>
@@ -312,6 +208,7 @@ export interface Props extends Pick<ComponentProps<typeof HeaderHelpMenu>, 'isSe
   navControlsCenter$: Observable<ChromeNavControl[]>;
   navControlsRight$: Observable<ChromeNavControl[]>;
   prependBasePath: (url: string) => string;
+  headerAppActionsConfig$: Observable<ChromeHeaderAppActionsConfig | undefined>;
 }
 
 const LOADING_DEBOUNCE_TIME = 80;
@@ -412,6 +309,7 @@ export const ProjectHeader = ({
   const { euiTheme } = useEuiTheme();
   const headerCss = getHeaderCss(euiTheme);
   const { logo: logoCss } = headerCss;
+  const headerAppActionsConfig = useObservable(observables.headerAppActionsConfig$, undefined);
 
   const topBarStyles = () => css`
     box-shadow: none !important;
@@ -458,11 +356,13 @@ export const ProjectHeader = ({
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
 
-            <EuiHeaderSection grow={false}>
-              <EuiHeaderSectionItem>
-                <GlobalHeaderAppActionsDumb />
-              </EuiHeaderSectionItem>
-            </EuiHeaderSection>
+            {headerAppActionsConfig && (
+              <EuiHeaderSection grow={false}>
+                <EuiHeaderSectionItem>
+                  <GlobalHeaderAppActionsFromConfig config={headerAppActionsConfig} />
+                </EuiHeaderSectionItem>
+              </EuiHeaderSection>
+            )}
 
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem>
