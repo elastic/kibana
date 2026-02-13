@@ -17,7 +17,7 @@ import {
 export const getCaseByIdStepDefinition: PublicStepDefinition = {
   ...getCaseByIdStepCommonDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/folder_open').then(({ icon }) => ({
+    import('@elastic/eui/es/components/icon/assets/magnify').then(({ icon }) => ({
       default: icon,
     }))
   ),

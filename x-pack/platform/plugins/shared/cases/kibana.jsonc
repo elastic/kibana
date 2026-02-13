@@ -26,17 +26,10 @@
       "ruleRegistry",
       "files",
       "contentManagement",
-      "uiActions"
-    ],
-    "optionalPlugins": [
-      "cloud",
-      "home",
-      "taskManager",
-      "usageCollection",
-      "spaces",
-      "serverless",
+      "uiActions",
       "workflowsExtensions"
     ],
+    "optionalPlugins": ["cloud", "home", "taskManager", "usageCollection", "spaces", "serverless"],
     "requiredBundles": ["esUiShared", "kibanaReact", "kibanaUtils", "savedObjectsFinder"],
     "extraPublicDirs": ["common"]
   }

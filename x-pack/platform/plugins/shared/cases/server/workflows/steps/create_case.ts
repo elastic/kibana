@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
   createCaseStepCommonDefinition,
-  type CreateCaseStepInput,
   type CreateCaseStepOutput,
-} from '../../common/workflows/steps/create_case';
-import type { CasesServerStartDependencies } from '../types';
-import type { CasesClient } from '../client';
+} from '../../../common/workflows/steps/create_case';
+import type { CasesClient } from '../../client';
 
 import { createCasesStepHandler } from './utils';
+import {
+  getInitialCaseValue,
+  type GetInitialCaseValueArgs,
+} from '../../../common/utils/get_initial_case_value';
 
 export const createCaseStepDefinition = (
-  coreSetup: CoreSetup<CasesServerStartDependencies>,
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
 ) =>
   createServerStepDefinition({
     ...createCaseStepCommonDefinition,
-    handler: createCasesStepHandler(getCasesClient, async (client, input: CreateCaseStepInput) => {
-      const createdCase = await client.cases.create(
-        input as unknown as Parameters<typeof client.cases.create>[0]
-      );
+    handler: createCasesStepHandler(getCasesClient, async (client, input) => {
+      const enrichedInput = getInitialCaseValue(input as unknown as GetInitialCaseValueArgs);
+      const createdCase = await client.cases.create(enrichedInput);
       return createdCase as unknown as CreateCaseStepOutput['case'];
     }),
   });

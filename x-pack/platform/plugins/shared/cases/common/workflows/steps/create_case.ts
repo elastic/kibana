@@ -14,31 +14,27 @@ import {
 
 export const CreateCaseStepTypeId = 'cases.createCase';
 
-export const InputSchema = CreateCaseRequestSchema;
+export const InputSchema = CreateCaseRequestSchema.partial({
+  connector: true,
+  tags: true,
+  settings: true,
+});
 
 export const OutputSchema = z.object({
   case: CaseResponsePropertiesSchema,
 });
 
-export const ConfigSchema = z.object({
-  id: z.string(),
-});
-
 export type CreateCaseStepInputSchema = typeof InputSchema;
 export type CreateCaseStepOutputSchema = typeof OutputSchema;
-export type CreateCaseStepConfigSchema = typeof ConfigSchema;
 
 export type CreateCaseStepInput = z.infer<typeof InputSchema>;
 export type CreateCaseStepOutput = z.infer<typeof OutputSchema>;
-export type CreateCaseStepConfig = z.infer<typeof ConfigSchema>;
 
 export const createCaseStepCommonDefinition: CommonStepDefinition<
   CreateCaseStepInputSchema,
-  CreateCaseStepOutputSchema,
-  CreateCaseStepConfigSchema
+  CreateCaseStepOutputSchema
 > = {
   id: CreateCaseStepTypeId,
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
-  configSchema: ConfigSchema,
 };

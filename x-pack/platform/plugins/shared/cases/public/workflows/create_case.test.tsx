@@ -26,16 +26,15 @@ describe('createCreateCaseStepDefinition', () => {
     const definition = createCreateCaseStepDefinition(core);
     const inputHandlers = (definition.editorHandlers?.input ?? {}) as Record<string, any>;
     const connectorSelection = inputHandlers['connector.id']?.selection;
+    const ownerSelection = inputHandlers.owner?.selection;
 
-    return { core, http, definition, connectorSelection };
+    return { core, http, definition, connectorSelection, ownerSelection };
   };
 
   it('returns a public step definition with expected metadata', () => {
     const { definition } = setup();
 
     expect(definition.id).toBe('cases.createCase');
-    expect(definition.label).toBe('Create case');
-    expect(definition.description).toBe('Creates a new case with the specified attributes');
     expect(definition.actionsMenuGroup).toBe('kibana');
     expect(definition.documentation?.examples?.length).toBeGreaterThan(0);
   });
@@ -103,5 +102,35 @@ describe('createCreateCaseStepDefinition', () => {
 
     expect(resolvedDetails.message).toContain('available for case workflows');
     expect(unresolvedDetails.message).toContain('was not found');
+  });
+
+  it('supports owner autocomplete with allowed values', async () => {
+    const { ownerSelection } = setup();
+
+    const searchResults = await ownerSelection!.search('sec', {
+      stepType: 'cases.createCase',
+      scope: 'input',
+      propertyKey: 'owner',
+    });
+    const resolved = await ownerSelection!.resolve('securitySolution', {
+      stepType: 'cases.createCase',
+      scope: 'input',
+      propertyKey: 'owner',
+    });
+    const unresolved = await ownerSelection!.resolve('invalid-owner', {
+      stepType: 'cases.createCase',
+      scope: 'input',
+      propertyKey: 'owner',
+    });
+    const unresolvedDetails = await ownerSelection!.getDetails(
+      'invalid-owner',
+      { stepType: 'cases.createCase', scope: 'input', propertyKey: 'owner' },
+      null
+    );
+
+    expect(searchResults).toEqual([{ value: 'securitySolution', label: 'securitySolution' }]);
+    expect(resolved).toEqual({ value: 'securitySolution', label: 'securitySolution' });
+    expect(unresolved).toBeNull();
+    expect(unresolvedDetails.message).toContain('Allowed values');
   });
 });

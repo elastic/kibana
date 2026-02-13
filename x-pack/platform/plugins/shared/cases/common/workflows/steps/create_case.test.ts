@@ -6,7 +6,6 @@
  */
 
 import {
-  ConfigSchema,
   CreateCaseStepTypeId,
   InputSchema,
   OutputSchema,
@@ -15,16 +14,27 @@ import {
 import { createCaseRequestFixture, createCaseResponseFixture } from '../../fixtures/create_case';
 
 describe('create_case common step definition', () => {
-  it('exposes the expected step id and schemas', () => {
-    expect(CreateCaseStepTypeId).toBe('cases.createCase');
+  it('exposes the expected step id', () => {
     expect(createCaseStepCommonDefinition.id).toBe(CreateCaseStepTypeId);
-    expect(createCaseStepCommonDefinition.inputSchema).toBe(InputSchema);
-    expect(createCaseStepCommonDefinition.outputSchema).toBe(OutputSchema);
-    expect(createCaseStepCommonDefinition.configSchema).toBe(ConfigSchema);
   });
 
   it('accepts valid create case input', () => {
     expect(InputSchema.safeParse(createCaseRequestFixture).success).toBe(true);
+  });
+
+  it('accepts create case input without connector', () => {
+    const { connector: _connector, ...inputWithoutConnector } = createCaseRequestFixture;
+    expect(InputSchema.safeParse(inputWithoutConnector).success).toBe(true);
+  });
+
+  it('accepts create case input without tags', () => {
+    const { tags: _tags, ...inputWithoutTags } = createCaseRequestFixture;
+    expect(InputSchema.safeParse(inputWithoutTags).success).toBe(true);
+  });
+
+  it('accepts create case input without settings', () => {
+    const { settings: _settings, ...inputWithoutSettings } = createCaseRequestFixture;
+    expect(InputSchema.safeParse(inputWithoutSettings).success).toBe(true);
   });
 
   it('rejects invalid create case input', () => {
@@ -49,10 +59,5 @@ describe('create_case common step definition', () => {
     };
 
     expect(OutputSchema.safeParse(invalidOutput).success).toBe(false);
-  });
-
-  it('validates config schema', () => {
-    expect(ConfigSchema.safeParse({ id: 'step-1' }).success).toBe(true);
-    expect(ConfigSchema.safeParse({}).success).toBe(false);
   });
 });

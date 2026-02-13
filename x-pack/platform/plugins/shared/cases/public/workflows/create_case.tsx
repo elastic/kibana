@@ -10,6 +10,7 @@ import type { CoreSetup, HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { ActionsMenuGroup, createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { getAllConnectorsUrl } from '../../common/utils/connectors_api';
+import { OwnerEnum } from '../../docs/openapi/bundled-types.gen';
 import {
   createCaseStepCommonDefinition,
   CreateCaseStepTypeId,
@@ -21,15 +22,10 @@ interface ConnectorOption {
   actionTypeId?: string;
 }
 
-function CreateCaseIcon() {
-  return (
-    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-      <path d="M3 2h7l3 3v9H3V2zm7 1.5V6h2.5L10 3.5zM5 8h6v1H5V8zm0 2h6v1H5v-1z" />
-    </svg>
-  );
-}
-
-CreateCaseIcon.displayName = 'CreateCaseIcon';
+const ownerOptions = Object.values(OwnerEnum).map((owner) => ({
+  value: owner,
+  label: owner,
+}));
 
 export const createCreateCaseStepDefinition = (core: CoreSetup) => {
   let httpPromise: Promise<HttpStart> | null = null;
@@ -48,7 +44,11 @@ export const createCreateCaseStepDefinition = (core: CoreSetup) => {
 
   return createPublicStepDefinition({
     ...createCaseStepCommonDefinition,
-    icon: CreateCaseIcon,
+    icon: React.lazy(() =>
+      import('@elastic/eui/es/components/icon/assets/plus_circle').then(({ icon }) => ({
+        default: icon,
+      }))
+    ),
     label: i18n.translate('xpack.cases.workflowSteps.createCase.label', {
       defaultMessage: 'Create case',
     }),
@@ -157,6 +157,37 @@ export const createCreateCaseStepDefinition = (core: CoreSetup) => {
     actionsMenuGroup: ActionsMenuGroup.kibana,
     editorHandlers: {
       input: {
+        owner: {
+          selection: {
+            search: async (input: string) => {
+              const query = input.trim().toLowerCase();
+              return query
+                ? ownerOptions.filter((owner) => owner.label.toLowerCase().includes(query))
+                : ownerOptions;
+            },
+            resolve: async (value: string) => {
+              return ownerOptions.find((owner) => owner.value === value) ?? null;
+            },
+            getDetails: async (
+              value: string,
+              _context: unknown,
+              option: { value: string; label: string } | null
+            ) => {
+              console.log({ value, option });
+              if (option) {
+                return {
+                  message: `Owner "${option.label}" is valid for case workflows.`,
+                };
+              }
+
+              return {
+                message: `Owner "${value}" is not supported. Allowed values: ${ownerOptions
+                  .map((owner) => owner.value)
+                  .join(', ')}.`,
+              };
+            },
+          },
+        },
         // TODO: add assignees selection support when array item paths are supported in editor handlers.
         'connector.id': {
           selection: {

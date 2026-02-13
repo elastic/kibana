@@ -15,7 +15,6 @@ export function registerCasesSteps(
   workflowsExtensions: CasesPublicSetupDependencies['workflowsExtensions']
 ) {
   if (!workflowsExtensions) {
-    console.error('workflowsExtensions is not defined');
     return;
   }
   workflowsExtensions.registerStepDefinition(getCaseByIdStepDefinition);

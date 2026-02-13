@@ -10,9 +10,9 @@ import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import {
   createCaseRequestFixture,
   createCaseResponseFixture,
-} from '../../common/fixtures/create_case';
+} from '../../../common/fixtures/create_case';
 import { createCaseStepDefinition } from './create_case';
-import type { CasesClient } from '../client';
+import type { CasesClient } from '../../client';
 
 const createContext = (input: unknown): StepHandlerContext =>
   ({
@@ -34,11 +34,9 @@ const createContext = (input: unknown): StepHandlerContext =>
   } as unknown as StepHandlerContext);
 
 describe('createCaseStepDefinition', () => {
-  const coreSetupMock = {} as Parameters<typeof createCaseStepDefinition>[0];
-
   it('creates expected step definition structure', () => {
     const getCasesClient = jest.fn();
-    const definition = createCaseStepDefinition(coreSetupMock, getCasesClient);
+    const definition = createCaseStepDefinition(getCasesClient);
 
     expect(definition.id).toBe('cases.createCase');
     expect(typeof definition.handler).toBe('function');
@@ -50,7 +48,7 @@ describe('createCaseStepDefinition', () => {
     const getCasesClient = jest
       .fn()
       .mockResolvedValue({ cases: { create } } as unknown as CasesClient);
-    const definition = createCaseStepDefinition(coreSetupMock, getCasesClient);
+    const definition = createCaseStepDefinition(getCasesClient);
     const context = createContext(createCaseRequestFixture);
 
     const result = await definition.handler(context);
@@ -70,7 +68,7 @@ describe('createCaseStepDefinition', () => {
     const getCasesClient = jest
       .fn()
       .mockResolvedValue({ cases: { create } } as unknown as CasesClient);
-    const definition = createCaseStepDefinition(coreSetupMock, getCasesClient);
+    const definition = createCaseStepDefinition(getCasesClient);
 
     const result = await definition.handler(createContext(createCaseRequestFixture));
 
