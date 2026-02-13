@@ -81,13 +81,16 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
         ];
 
         setFetchedSources(allOptions);
-        if (!currentSources.length && allOptions.length > 0) {
-          onChangeSources([allOptions[0].label]);
-        }
       }
     }
     fetchSources();
-  }, [core, currentSources.length, getLicense, isMounted, onChangeSources]);
+  }, [core, getLicense, isMounted]);
+
+  useEffect(() => {
+    if (!currentSources.length && fetchedSources.length > 0) {
+      onChangeSources([fetchedSources[0].label]);
+    }
+  }, [currentSources.length, fetchedSources, onChangeSources]);
 
   const sourcesOptions = useMemo(() => {
     const existingLabels = new Set(fetchedSources.map((option) => option.label));
