@@ -10,10 +10,11 @@ import {
   EuiHeaderSectionItem,
 } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, matchPath } from 'react-router-dom';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { ALERTS_PATH } from '../../../../common/constants';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../common/lib/kibana';
@@ -28,6 +29,7 @@ import {
   showSourcererByPath,
 } from '../../../sourcerer/containers/sourcerer_paths';
 import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
+import { getAlertsHeaderAppActionsConfig } from '../header_app_actions/header_app_actions_config';
 
 // Commented out so the app menu is not dominated by a single "Add integrations" item
 // const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
@@ -45,8 +47,11 @@ export const GlobalHeader = React.memo(() => {
     theme,
     setHeaderActionMenu,
     i18n: kibanaServiceI18n,
+    chrome,
   } = useKibana().services;
   const { pathname } = useLocation();
+
+  const isOnAlertsPage = Boolean(matchPath(pathname, { path: ALERTS_PATH, exact: true }));
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const showTimeline = useShallowEqualSelector(
@@ -61,6 +66,19 @@ export const GlobalHeader = React.memo(() => {
   // On Alerts with the new data view picker, the picker lives in the Unified Search bar; don't show it in the app menu.
   const showDataViewPickerInAppMenu =
     hasHeaderContent && !(newDataViewPickerEnabled && sourcererScope === PageScope.alerts);
+
+  useEffect(() => {
+    if (chrome?.setHeaderAppActionsConfig) {
+      if (isOnAlertsPage) {
+        chrome.setHeaderAppActionsConfig(getAlertsHeaderAppActionsConfig());
+      } else {
+        chrome.setHeaderAppActionsConfig(undefined);
+      }
+      return () => {
+        chrome.setHeaderAppActionsConfig(undefined);
+      };
+    }
+  }, [chrome, isOnAlertsPage]);
 
   useEffect(() => {
     if (!setHeaderActionMenu) return;
