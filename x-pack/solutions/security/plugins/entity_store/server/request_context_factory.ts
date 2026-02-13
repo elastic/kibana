@@ -52,12 +52,12 @@ export async function createRequestHandlerContext({
     logger
   );
 
-  const entityManager = new CRUDClient({
+  const crudClient = new CRUDClient({
     logger,
     esClient: core.elasticsearch.client.asCurrentUser,
     namespace,
   });
-  
+
   const logsExtractionClient = new LogsExtractionClient(
     logger,
     namespace,
@@ -78,7 +78,7 @@ export async function createRequestHandlerContext({
       isServerless,
       logsExtractionClient,
     }),
-    entityManager,
+    crudClient,
     featureFlags: new FeatureFlags(core.uiSettings.client),
     logsExtractionClient,
   };

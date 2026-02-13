@@ -7,17 +7,19 @@
 
 import { BooleanFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { z } from '@kbn/zod';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import { EntityStoreNotInstalledError } from '../../domain/errors';
+import { BadCRUDRequestError, EntityStoreNotInstalledError } from '../../domain/errors';
 import { Entity } from '../../../common/domain/definitions/entity.gen';
-import { z } from '@kbn/zod';
-import { EntityType } from '@kbn/entity-store/common/domain/definitions/entity_schema';
+import { EntityType } from '../../../common/domain/definitions/entity_schema';
 
-const paramsSchema = z.object({
-  entityType: EntityType,
-}).required();
+const paramsSchema = z
+  .object({
+    entityType: EntityType,
+  })
+  .required();
 
 const querySchema = z.object({
   force: BooleanFromString.optional().default(false),
@@ -46,7 +48,7 @@ export function registerCRUDUpsert(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManager, entityManager } = entityStoreCtx;
+        const { logger, assetManager, crudClient } = entityStoreCtx;
 
         logger.debug('CRUD Upsert api called');
         if (!(await assetManager.isInstalled())) {
@@ -54,8 +56,12 @@ export function registerCRUDUpsert(router: EntityStorePluginRouter) {
         }
 
         try {
-          await entityManager.upsertEntity(req.params.entityType, req.body, req.query.force);
+          await crudClient.upsertEntity(req.params.entityType, req.body, req.query.force);
         } catch (error) {
+          if (error instanceof BadCRUDRequestError) {
+            return res.badRequest({ body: error as BadCRUDRequestError });
+          }
+
           logger.error(error);
           throw error;
         }

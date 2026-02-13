@@ -46,7 +46,7 @@ export interface EntityStoreApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   logger: Logger;
   assetManager: AssetManager;
-  entityManager: CRUDClient;
+  crudClient: CRUDClient;
   featureFlags: FeatureFlags;
   logsExtractionClient: LogsExtractionClient;
 }

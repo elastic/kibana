@@ -11,11 +11,7 @@ import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import {
-  DocumentVersionConflictError,
-  EntityNotFoundError,
-  EntityStoreNotInstalledError,
-} from '../../domain/errors';
+import { EntityNotFoundError, EntityStoreNotInstalledError } from '../../domain/errors';
 
 const paramsSchema = z.object({
   id: z.string(),
@@ -42,7 +38,7 @@ export function registerCRUDDelete(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManager, entityManager } = entityStoreCtx;
+        const { logger, assetManager, crudClient } = entityStoreCtx;
 
         logger.debug('CRUD Delete api called');
         if (!(await assetManager.isInstalled())) {
@@ -50,14 +46,8 @@ export function registerCRUDDelete(router: EntityStorePluginRouter) {
         }
 
         try {
-          await entityManager.deleteEntity(req.params.id);
+          await crudClient.deleteEntity(req.params.id);
         } catch (error) {
-          if (error instanceof DocumentVersionConflictError) {
-            return res.customError({
-              statusCode: 409,
-              body: error as DocumentVersionConflictError,
-            });
-          }
           if (error instanceof EntityNotFoundError) {
             return res.customError({
               statusCode: 404,
@@ -68,7 +58,7 @@ export function registerCRUDDelete(router: EntityStorePluginRouter) {
           throw error;
         }
 
-        return res.ok();
+        return res.ok({ body: { deleted: true } });
       })
     );
 }

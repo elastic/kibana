@@ -9,14 +9,18 @@ import type { Logger } from '@kbn/logging';
 import type { Result } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { createHash } from 'crypto';
-import { getLatestEntitiesIndexName } from './assets/latest_index';
-import { BadCRUDRequestError, DocumentVersionConflictError, EntityNotFoundError } from './errors';
-import type { Entity } from '../../common/domain/definitions/entity.gen';
+import { unset } from 'lodash';
 import { getFlattenedObject } from '@kbn/std';
-import { getEntityDefinition } from '@kbn/entity-store/common/domain/definitions/registry';
-import { EntityType } from '@kbn/entity-store/common';
-import { EntityField, ManagedEntityDefinition } from '@kbn/entity-store/common/domain/definitions/entity_schema';
-import { getEuidFromObject } from '@kbn/entity-store/common/domain/euid';
+import { getLatestEntitiesIndexName } from './assets/latest_index';
+import { BadCRUDRequestError, EntityNotFoundError } from './errors';
+import type { Entity } from '../../common/domain/definitions/entity.gen';
+import { getEntityDefinition } from '../../common/domain/definitions/registry';
+import type { EntityType } from '../../common';
+import type {
+  EntityField,
+  ManagedEntityDefinition,
+} from '../../common/domain/definitions/entity_schema';
+import { getEuidFromObject } from '../../common/domain/euid';
 
 interface EntityManagerDependencies {
   logger: Logger;
@@ -25,8 +29,8 @@ interface EntityManagerDependencies {
 }
 
 interface BulkObject {
-    type: EntityType,
-    document: Entity,
+  type: EntityType;
+  document: Entity;
 }
 
 export class CRUDClient {
@@ -40,47 +44,63 @@ export class CRUDClient {
     this.namespace = deps.namespace;
   }
 
-  private getEntityId(entityType: EntityType, document: Entity): string {
-    const id = getEuidFromObject(entityType, document);
-    if (id === undefined) {
+  public async upsertEntity(
+    entityType: EntityType,
+    document: Entity,
+    force: boolean
+  ): Promise<void> {
+    const rawId = getEuidFromObject(entityType, document);
+    if (rawId === undefined) {
       throw new BadCRUDRequestError('', `Could not derive entity EUID from document`);
     }
-    return id;
-  }
-
-  public async upsertEntity(entityType: EntityType, document: Entity, force: boolean): Promise<void> {
-    const rawId = this.getEntityId(entityType, document);
+    // EUID generation uses MD5. It is not a security-related feature.
+    // eslint-disable-next-line @kbn/eslint/no_unsafe_hash
     const id: string = createHash('md5').update(rawId).digest('hex');
     this.logger.info(`Upserting entity ID ${id}`);
-    
     if (!document.entity.id) {
       document.entity.id = id;
     }
-    if (document.entity.id !== id) {
-      throw new BadCRUDRequestError(id, `Entity ID ${document.entity.id} does not match calculated ID ${id}`);
-    }
 
+    // TODO:
+    // - reimplement ID logic to follow Romulo discussion
+    // - extract checks and ID fixes to a single function (for bulk as well)
+    // - update bulk to actually use esClient.bulk() and create all docs in updates index
+    // - add buildDocumentToUpdate() to format the docs
+
+    const definition = getEntityDefinition(entityType, this.namespace);
     if (!force) {
       const flat = getFlattenedObject(document);
-      const definition = getEntityDefinition(entityType, this.namespace);
       const fieldDescriptions = getFieldDescriptions(id, flat, definition);
       assertOnlyNonForcedAttributesInReq(id, fieldDescriptions);
     }
+    prepareDocumentForUpsert(entityType, document);
 
+    try {
+      await this.esClient.create({
+        index: getLatestEntitiesIndexName(this.namespace),
+        id,
+        document,
+        refresh: 'wait_for',
+      });
+      this.logger.info(`Created entity ID ${id}`);
+      return;
+    } catch (error) {
+      if (error.statusCode !== 409) {
+        throw error;
+      }
+    }
+
+    removeEUIDFields(definition, document);
     const { result } = await this.esClient.update({
       index: getLatestEntitiesIndexName(this.namespace),
       id,
       doc: document,
-      doc_as_upsert: true,
     });
 
     switch (result as Result) {
       case 'deleted':
       case 'not_found':
         throw new Error(`Could not upsert entity ID ${id}`);
-      case 'created':
-        this.logger.info(`Entity ID ${id} created`);
-        break;
       case 'updated':
         this.logger.info(`Entity ID ${id} updated`);
         break;
@@ -90,30 +110,23 @@ export class CRUDClient {
     }
   }
 
-    public async upsertEntitiesBulk(objects: BulkObject[], force: boolean) {
+  public async upsertEntitiesBulk(objects: BulkObject[], force: boolean) {
     await Promise.all(objects.map((obj) => this.upsertEntity(obj.type, obj.document, force)));
   }
 
   public async deleteEntity(id: string) {
-    const resp = await this.esClient.deleteByQuery({
-      index: getLatestEntitiesIndexName(this.namespace),
-      query: {
-        term: {
-          'entity.id': id,
-        },
-      },
-      conflicts: 'proceed',
-    });
-
-    if (resp.failures !== undefined && resp.failures.length > 0) {
-      throw new Error(`Failed to delete entity ID ${id}`);
+    try {
+      await this.esClient.delete({
+        index: getLatestEntitiesIndexName(this.namespace),
+        id,
+      });
+    } catch (error) {
+      if (error.statusCode === 404) {
+        throw new EntityNotFoundError(id);
+      }
+      throw error;
     }
-    if (resp.version_conflicts) {
-      throw new DocumentVersionConflictError();
-    }
-    if (!resp.deleted) {
-      throw new EntityNotFoundError(id);
-    }
+    return { deleted: true };
   }
 }
 
@@ -132,7 +145,6 @@ function getFieldDescriptions(
 
   for (const [key, value] of Object.entries(flatProps)) {
     if (description.identityField.requiresOneOfFields.includes(key)) {
-      // eslint-disable-next-line no-continue
       continue;
     }
 
@@ -171,9 +183,48 @@ function assertOnlyNonForcedAttributesInReq(id: string, fields: Record<string, E
   if (notAllowedProps.length > 0) {
     const notAllowedPropsString = notAllowedProps.join(', ');
     throw new BadCRUDRequestError(
-      id, 
+      id,
       `The following attributes are not allowed to be ` +
         `updated without forcing it (?force=true): ${notAllowedPropsString}`
     );
+  }
+}
+
+function prepareDocumentForUpsert(type: EntityType, data: Partial<Entity>) {
+  const now = new Date().toISOString();
+
+  if (type === 'generic') {
+    return {
+      '@timestamp': now,
+      ...data,
+    };
+  }
+
+  // Get host, user, service field
+  const typeData = (data[type as keyof typeof data] || {}) as Record<string, unknown>;
+
+  // Force name to be picked by the store
+  typeData.name = data.entity?.id;
+  // Nest entity under type data
+  typeData.entity = data.entity;
+
+  const doc: Record<string, unknown> = {
+    '@timestamp': now,
+    ...data,
+  };
+
+  // Remove entity from root
+  delete doc.entity;
+
+  // override the host, user service
+  // field with the built value
+  doc[type as keyof typeof doc] = typeData;
+
+  return doc;
+}
+
+function removeEUIDFields(definition: ManagedEntityDefinition, document: Entity) {
+  for (const euidField of definition.identityField.requiresOneOfFields) {
+    unset(document, euidField);
   }
 }
