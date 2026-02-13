@@ -210,6 +210,62 @@ describe('extractDashboardState', () => {
         },
       ]);
     });
+
+    test.only('should filter out null values that should be undefined', () => {
+      const dashboardState = extractDashboardState({
+        controlGroupInput: {
+          ignoreParentSettings: {
+            ignoreValidations: true,
+          },
+          controls: [
+            {
+              controlConfig: {
+                dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                fieldName: 'machine.os.keyword',
+                title: 'machine os',
+                exclude: null,
+                existsSelected: null,
+                selectedOptions: [],
+                searchTechnique: 'prefix',
+                singleSelect: true,
+                runPastTimeout: null,
+                sort: {
+                  by: '_count',
+                  direction: 'desc',
+                },
+                placeholder: null,
+                hideActionBar: null,
+                hideExclude: null,
+                hideExists: null,
+                hideSort: null,
+              },
+              type: 'optionsListControl',
+            },
+          ],
+        },
+      });
+      expect(dashboardState.pinned_panels).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "config": Object {
+              "dataViewId": "90943e30-9a47-11e8-b64d-95841ca0b247",
+              "fieldName": "machine.os.keyword",
+              "ignoreValidations": true,
+              "searchTechnique": "prefix",
+              "selectedOptions": Array [],
+              "singleSelect": true,
+              "sort": Object {
+                "by": "_count",
+                "direction": "desc",
+              },
+              "title": "machine os",
+              "useGlobalFilters": true,
+            },
+            "type": "optionsListControl",
+          },
+        ]
+      `);
+    });
   });
 
   describe('>= 8.16 to < 8.19 state', () => {
