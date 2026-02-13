@@ -25,7 +25,6 @@
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
     "@kbn/esql-utils",
-    "@kbn/esql-language",
     "@kbn/react-query",
     "@kbn/search-types",
     "@kbn/alerting-v2-schemas",
