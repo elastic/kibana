@@ -12,12 +12,20 @@ import { buildPhrasesFilter, buildExistsFilter, buildPhraseFilter } from '@kbn/e
 import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import type { IBucketAggConfig } from '../bucket_agg_type';
 
-export const createFilterTerms = (aggConfig: IBucketAggConfig, key: string, params: any) => {
+interface CreateFilterTermsParams {
+  terms?: string[];
+}
+
+export const createFilterTerms = (
+  aggConfig: IBucketAggConfig,
+  key: string,
+  params: CreateFilterTermsParams
+) => {
   const field = aggConfig.params.field;
   const indexPattern = aggConfig.aggConfigs.indexPattern;
 
   if (key === '__other__') {
-    const terms = params.terms;
+    const terms = params.terms ?? [];
 
     const phraseFilter = buildPhrasesFilter(field, terms, indexPattern);
     phraseFilter.meta.negate = true;

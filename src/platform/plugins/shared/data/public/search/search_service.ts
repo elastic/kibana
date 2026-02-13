@@ -287,7 +287,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             const requestResponder = requestAdapter.start(requestName, {
               id: request.id,
             });
-            requestResponder.json(request.body);
+            requestResponder.json(request.body ?? {});
             requestResponder.ok({ json: response });
           }
 

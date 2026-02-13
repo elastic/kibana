@@ -61,11 +61,11 @@ export function getEsQueryFromSavedSearch({
   if (savedSearchSource && savedSearchSource.getParent() !== undefined && userQuery) {
     // Flattened query from search source may contain a clause that narrows the time range
     // which might interfere with global time pickers so we need to remove
-    const savedQuery =
+    const savedQuery: QueryDslQueryContainer =
       cloneDeep(savedSearch.searchSource.getSearchRequestBody()?.query) ?? getDefaultDSLQuery();
     const timeField = savedSearch.searchSource.getField('index')?.timeFieldName;
 
-    if (Array.isArray(savedQuery.bool.filter) && timeField !== undefined) {
+    if (savedQuery.bool && Array.isArray(savedQuery.bool.filter) && timeField !== undefined) {
       savedQuery.bool.filter = savedQuery.bool.filter.filter(
         (c: QueryDslQueryContainer) =>
           !(Object.hasOwn(c, 'range') && Object.hasOwn(c.range ?? {}, timeField))
