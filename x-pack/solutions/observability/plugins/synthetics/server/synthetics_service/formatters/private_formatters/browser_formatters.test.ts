@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
+import { HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS } from '../../../../common/constants/monitor_defaults';
 import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
 import { throttlingFormatter } from './browser_formatters';
 import { privateTimeoutFormatter } from './formatting_utils';
