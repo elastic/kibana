@@ -8,6 +8,7 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import { useQueryColumns } from './use_query_columns';
 
@@ -15,7 +16,7 @@ jest.mock('@kbn/esql-utils');
 
 const mockGetESQLQueryColumnsRaw = jest.mocked(getESQLQueryColumnsRaw);
 
-const createMockSearch = () => jest.fn() as any;
+const createMockSearch = () => dataPluginMock.createStartContract().search.search;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({

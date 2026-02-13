@@ -8,6 +8,8 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { useDataFields } from './use_data_fields';
 
@@ -15,9 +17,6 @@ jest.mock('@kbn/esql-utils');
 jest.mock('../../flyout/utils');
 
 const mockGetESQLAdHocDataview = jest.mocked(getESQLAdHocDataview);
-
-const createMockHttp = () => ({} as any);
-const createMockDataViews = () => ({} as any);
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -54,8 +53,8 @@ describe('useDataFields', () => {
 
     mockGetESQLAdHocDataview.mockResolvedValue(mockDataView as any);
 
-    const http = createMockHttp();
-    const dataViews = createMockDataViews();
+    const http = httpServiceMock.createStartContract();
+    const dataViews = dataViewPluginMocks.createStartContract();
 
     const { result } = renderHook(
       () =>
@@ -81,8 +80,8 @@ describe('useDataFields', () => {
   it('returns empty fields when dataView is null', async () => {
     mockGetESQLAdHocDataview.mockResolvedValue(null as any);
 
-    const http = createMockHttp();
-    const dataViews = createMockDataViews();
+    const http = httpServiceMock.createStartContract();
+    const dataViews = dataViewPluginMocks.createStartContract();
 
     const { result } = renderHook(
       () =>
@@ -106,8 +105,8 @@ describe('useDataFields', () => {
     const testError = new Error('Failed to fetch data view');
     mockGetESQLAdHocDataview.mockRejectedValue(testError);
 
-    const http = createMockHttp();
-    const dataViews = createMockDataViews();
+    const http = httpServiceMock.createStartContract();
+    const dataViews = dataViewPluginMocks.createStartContract();
 
     const { result } = renderHook(
       () =>
@@ -140,8 +139,8 @@ describe('useDataFields', () => {
     };
     mockGetESQLAdHocDataview.mockResolvedValue(mockDataView as any);
 
-    const http = createMockHttp();
-    const dataViews = createMockDataViews();
+    const http = httpServiceMock.createStartContract();
+    const dataViews = dataViewPluginMocks.createStartContract();
     const wrapper = createWrapper();
 
     const { result, rerender } = renderHook(

@@ -8,20 +8,10 @@
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { HttpStart, NotificationsStart } from '@kbn/core/public';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { useCreateRule } from './use_create_rule';
 import type { FormValues } from '../types';
-
-const createMockHttp = (response: unknown = { id: 'rule-123', name: 'Test Rule' }) => ({
-  post: jest.fn().mockResolvedValue(response),
-});
-
-const createMockNotifications = () => ({
-  toasts: {
-    addSuccess: jest.fn(),
-    addDanger: jest.fn(),
-  },
-});
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -54,15 +44,17 @@ describe('useCreateRule', () => {
   };
 
   it('calls the correct API endpoint', async () => {
-    const http = createMockHttp();
-    const notifications = createMockNotifications();
+    const http = httpServiceMock.createStartContract();
+    const notifications = notificationServiceMock.createStartContract();
     const onSuccess = jest.fn();
+
+    http.post.mockResolvedValue({ id: 'rule-123', name: 'Test Rule' });
 
     const { result } = renderHook(
       () =>
         useCreateRule({
-          http: http as unknown as HttpStart,
-          notifications: notifications as unknown as NotificationsStart,
+          http,
+          notifications,
           onSuccess,
         }),
       { wrapper: createWrapper() }
@@ -78,15 +70,17 @@ describe('useCreateRule', () => {
   });
 
   it('sends the form data as JSON in the request body', async () => {
-    const http = createMockHttp();
-    const notifications = createMockNotifications();
+    const http = httpServiceMock.createStartContract();
+    const notifications = notificationServiceMock.createStartContract();
     const onSuccess = jest.fn();
+
+    http.post.mockResolvedValue({ id: 'rule-123', name: 'Test Rule' });
 
     const { result } = renderHook(
       () =>
         useCreateRule({
-          http: http as unknown as HttpStart,
-          notifications: notifications as unknown as NotificationsStart,
+          http,
+          notifications,
           onSuccess,
         }),
       { wrapper: createWrapper() }
@@ -114,15 +108,17 @@ describe('useCreateRule', () => {
   });
 
   it('shows success toast and calls onSuccess callback on successful creation', async () => {
-    const http = createMockHttp({ id: 'rule-123', name: 'My New Rule' });
-    const notifications = createMockNotifications();
+    const http = httpServiceMock.createStartContract();
+    const notifications = notificationServiceMock.createStartContract();
     const onSuccess = jest.fn();
+
+    http.post.mockResolvedValue({ id: 'rule-123', name: 'My New Rule' });
 
     const { result } = renderHook(
       () =>
         useCreateRule({
-          http: http as unknown as HttpStart,
-          notifications: notifications as unknown as NotificationsStart,
+          http,
+          notifications,
           onSuccess,
         }),
       { wrapper: createWrapper() }
@@ -142,20 +138,20 @@ describe('useCreateRule', () => {
 
   it('shows error toast on failure', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    const http = {
-      post: jest.fn().mockRejectedValue({
-        body: { message: 'Network error' },
-        message: 'Network error',
-      }),
-    };
-    const notifications = createMockNotifications();
+    const http = httpServiceMock.createStartContract();
+    const notifications = notificationServiceMock.createStartContract();
     const onSuccess = jest.fn();
+
+    http.post.mockRejectedValue({
+      body: { message: 'Network error' },
+      message: 'Network error',
+    });
 
     const { result } = renderHook(
       () =>
         useCreateRule({
-          http: http as unknown as HttpStart,
-          notifications: notifications as unknown as NotificationsStart,
+          http,
+          notifications,
           onSuccess,
         }),
       { wrapper: createWrapper() }
@@ -175,15 +171,17 @@ describe('useCreateRule', () => {
   });
 
   it('includes all form fields in the request payload', async () => {
-    const http = createMockHttp();
-    const notifications = createMockNotifications();
+    const http = httpServiceMock.createStartContract();
+    const notifications = notificationServiceMock.createStartContract();
     const onSuccess = jest.fn();
+
+    http.post.mockResolvedValue({ id: 'rule-456', name: 'Complex Rule' });
 
     const { result } = renderHook(
       () =>
         useCreateRule({
-          http: http as unknown as HttpStart,
-          notifications: notifications as unknown as NotificationsStart,
+          http,
+          notifications,
           onSuccess,
         }),
       { wrapper: createWrapper() }
@@ -207,17 +205,18 @@ describe('useCreateRule', () => {
     });
 
     await waitFor(() => {
-      const callBody = JSON.parse(http.post.mock.calls[0][1].body);
-      expect(callBody).toEqual({
-        kind: 'signal',
-        name: 'Complex Rule',
-        tags: ['production', 'critical'],
-        schedule: { custom: '1m' },
-        enabled: false,
-        query: 'FROM metrics | WHERE cpu > 90',
-        timeField: 'event.timestamp',
-        lookbackWindow: '30m',
-        groupingKey: ['host.name', 'service.name'],
+      expect(http.post).toHaveBeenCalledWith('/internal/alerting/v2/rule', {
+        body: JSON.stringify({
+          kind: 'signal',
+          name: 'Complex Rule',
+          tags: ['production', 'critical'],
+          schedule: { custom: '1m' },
+          enabled: false,
+          query: 'FROM metrics | WHERE cpu > 90',
+          timeField: 'event.timestamp',
+          lookbackWindow: '30m',
+          groupingKey: ['host.name', 'service.name'],
+        }),
       });
     });
   });

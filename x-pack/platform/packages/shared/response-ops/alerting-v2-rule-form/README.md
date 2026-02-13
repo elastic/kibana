@@ -2,59 +2,142 @@
 
 This package provides UI components for creating and editing v2 alerting rules with queries.
 
-## Exports
+## Quick Start
 
-- `RuleFormFlyout` - A complete flyout component with form handling and rule creation
-- `RuleFields` - Form field components for embedding in your own form
-- `FormValues` - TypeScript type for the form data
+### For Discover Integration
 
-## Usage
-
-### RuleFormFlyout
-
-Use this when you want a complete flyout experience with built-in form handling and rule creation.
+Use `DynamicRuleFormFlyout` when the form needs to react to external query changes:
 
 ```tsx
-import React from 'react';
-import { RuleFormFlyout } from '@kbn/alerting-v2-rule-form';
+import { DynamicRuleFormFlyout } from '@kbn/alerting-v2-rule-form';
 
-function MyComponent({ services, query, onClose }) {
+function MyComponent({ services, query, isQueryInvalid, onClose }) {
   return (
-    <RuleFormFlyout
-      services={{
-        http: services.http,
-        data: services.data,
-        dataViews: services.dataViews,
-        notifications: services.notifications,
-      }}
+    <DynamicRuleFormFlyout
+      services={services}
       query={query}
       defaultTimeField="@timestamp"
+      isQueryInvalid={isQueryInvalid}
       onClose={onClose}
-      isQueryInvalid={false}
-      push={true} // Use push flyout (default) or overlay
     />
   );
 }
 ```
 
-### RuleFields
+### For Plugin Integration
 
-Use this when you want to embed the rule fields in your own form with custom form handling.
+Use `StandaloneRuleFormFlyout` for a classic flyout where the user controls everything:
 
 ```tsx
-import React from 'react';
-import { useForm } from 'react-hook-form';
+import { StandaloneRuleFormFlyout } from '@kbn/alerting-v2-rule-form';
+
+function MyComponent({ services, initialQuery, onClose }) {
+  return (
+    <StandaloneRuleFormFlyout
+      services={services}
+      query={initialQuery}
+      defaultTimeField="@timestamp"
+      onClose={onClose}
+    />
+  );
+}
+```
+
+## Architecture
+
+The package uses a composable architecture with multiple layers:
+
+| Export | Use Case |
+|--------|----------|
+| `DynamicRuleFormFlyout` | Complete flyout that syncs with external query changes (Discover) |
+| `StandaloneRuleFormFlyout` | Complete flyout with static initialization (plugins) |
+| `RuleFormFlyout` + `DynamicRuleForm` | Composable pattern for custom flyout behavior |
+| `RuleFormFlyout` + `StandaloneRuleForm` | Composable pattern for custom flyout behavior |
+| `RuleFields` | Low-level fields for fully custom form implementations |
+
+## Composable Pattern
+
+For advanced customization, use the composable pattern with the base `RuleFormFlyout`:
+
+### Dynamic Form (Syncs with Props)
+
+```tsx
+import { RuleFormFlyout, DynamicRuleForm } from '@kbn/alerting-v2-rule-form';
+
+function DiscoverRuleFlyout({ services, query, isQueryInvalid, onClose }) {
+  return (
+    <RuleFormFlyout
+      services={{
+        http: services.http,
+        notifications: services.notifications,
+      }}
+      onClose={onClose}
+      push={true}
+    >
+      <DynamicRuleForm
+        query={query}
+        defaultTimeField="@timestamp"
+        isQueryInvalid={isQueryInvalid}
+        services={{
+          http: services.http,
+          data: services.data,
+          dataViews: services.dataViews,
+        }}
+      />
+    </RuleFormFlyout>
+  );
+}
+```
+
+The `DynamicRuleForm` uses react-hook-form's `values` prop with `resetOptions: { keepDirtyValues: true }` to:
+- Automatically sync form state when `query` prop changes
+- Preserve user-modified fields (dirty values) during sync
+
+### Standalone Form (Static Initialization)
+
+```tsx
+import { RuleFormFlyout, StandaloneRuleForm } from '@kbn/alerting-v2-rule-form';
+
+function PluginRuleFlyout({ services, initialQuery, onClose }) {
+  return (
+    <RuleFormFlyout
+      services={{
+        http: services.http,
+        notifications: services.notifications,
+      }}
+      onClose={onClose}
+      push={true}
+    >
+      <StandaloneRuleForm
+        query={initialQuery}
+        defaultTimeField="@timestamp"
+        services={{
+          http: services.http,
+          data: services.data,
+          dataViews: services.dataViews,
+        }}
+      />
+    </RuleFormFlyout>
+  );
+}
+```
+
+The `StandaloneRuleForm` uses react-hook-form's `defaultValues` for static initialization - prop changes after mount are ignored.
+
+## Custom Form Implementation
+
+For advanced use cases where you need complete control over form handling, use `RuleFields` directly:
+
+```tsx
+import { useForm, FormProvider } from 'react-hook-form';
 import { RuleFields, type FormValues } from '@kbn/alerting-v2-rule-form';
 
 function MyCustomForm({ services, query }) {
-  const {
-    control,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm<FormValues>({
+  const methods = useForm<FormValues>({
     defaultValues: {
+      kind: 'alert',
       name: '',
+      description: '',
       tags: [],
       schedule: { custom: '5m' },
       enabled: true,
@@ -66,25 +149,23 @@ function MyCustomForm({ services, query }) {
   });
 
   const onSubmit = (data: FormValues) => {
-    // Handle form submission
     console.log(data);
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <RuleFields
-        control={control}
-        errors={errors}
-        setValue={setValue}
-        services={{
-          http: services.http,
-          data: services.data,
-          dataViews: services.dataViews,
-        }}
-        query={query}
-      />
-      <button type="submit">Save Rule</button>
-    </form>
+    <FormProvider {...methods}>
+      <form onSubmit={methods.handleSubmit(onSubmit)}>
+        <RuleFields
+          services={{
+            http: services.http,
+            data: services.data,
+            dataViews: services.dataViews,
+          }}
+          query={methods.watch('query')}
+        />
+        <button type="submit">Save Rule</button>
+      </form>
+    </FormProvider>
   );
 }
 ```
@@ -93,13 +174,15 @@ function MyCustomForm({ services, query }) {
 
 ```typescript
 interface FormValues {
+  kind: 'signal' | 'alert';
   name: string;
+  description: string;
   tags: string[];
   schedule: {
     custom: string; // Duration string like '5m', '1h'
   };
   enabled: boolean;
-  query: string; // Query string
+  query: string;
   timeField: string;
   lookbackWindow: string; // Duration string
   groupingKey: string[]; // Columns to group alerts by
@@ -108,22 +191,20 @@ interface FormValues {
 
 ## Required Services
 
-Both components require the following Kibana services:
+All flyout components require:
 
 | Service | Description |
 |---------|-------------|
-| `http` | Core HTTP service for API calls |
+| `http` | Core HTTP service for rule creation API |
 | `data` | Data plugin for query column fetching |
 | `dataViews` | Data views plugin for time field options |
-| `notifications` | (Flyout only) For success/error toasts |
+| `notifications` | For success/error toasts |
 
 ## Development
 
 ### Storybook
 
 This package includes Storybook stories for visual development and testing.
-
-To run Storybook:
 
 ```bash
 yarn storybook alerting_v2_rule_form

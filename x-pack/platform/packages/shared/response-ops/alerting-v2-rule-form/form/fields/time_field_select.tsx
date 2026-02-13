@@ -33,7 +33,7 @@ export const TimeFieldSelect: React.FC<TimeFieldSelectProps> = ({ services }) =>
     setTimeFieldOptions([firstFieldOption, ...newTimeFieldOptions]);
   }, []);
 
-  useDataFields({
+  const { isLoading } = useDataFields({
     query,
     http: services.http,
     dataViews: services.dataViews,
@@ -73,6 +73,7 @@ export const TimeFieldSelect: React.FC<TimeFieldSelectProps> = ({ services }) =>
               })}
               inputRef={ref}
               isInvalid={!!error}
+              isLoading={isLoading}
             />
           </EuiFormRow>
         );

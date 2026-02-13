@@ -5,11 +5,23 @@
  * 2.0.
  */
 
-// Flyout component (lazy loaded)
-export { RuleFormFlyout } from './flyout';
+// Pre-composed flyouts (lazy loaded) - recommended for most use cases
+export { DynamicRuleFormFlyout, StandaloneRuleFormFlyout } from './flyout';
 
-// Form components (lazy loaded)
-export { RuleFields } from './form';
+// Form components (lazy loaded) - for embedding in custom forms
+export { RuleFields, DynamicRuleForm, StandaloneRuleForm } from './form';
 
 // Types
-export type { FormValues } from './form';
+export type {
+  FormValues,
+  DynamicRuleFormProps,
+  StandaloneRuleFormProps,
+  RuleFormServices,
+} from './form';
+
+export type {
+  RuleFormFlyoutProps,
+  RuleFormFlyoutServices,
+  DynamicRuleFormFlyoutProps,
+  StandaloneRuleFormFlyoutProps,
+} from './flyout';

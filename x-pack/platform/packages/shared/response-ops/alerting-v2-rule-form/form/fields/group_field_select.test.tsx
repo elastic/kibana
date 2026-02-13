@@ -10,6 +10,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useForm, FormProvider } from 'react-hook-form';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { GroupFieldSelect } from './group_field_select';
 import type { FormValues } from '../types';
 import { useQueryColumns } from '../hooks/use_query_columns';
@@ -19,11 +20,7 @@ jest.mock('../hooks/use_query_columns');
 const mockUseQueryColumns = jest.mocked(useQueryColumns);
 
 const createMockServices = () => ({
-  data: {
-    search: {
-      search: jest.fn(),
-    },
-  },
+  data: dataPluginMock.createStartContract(),
 });
 
 const createWrapper = (defaultValues: Partial<FormValues> = {}) => {
@@ -86,7 +83,7 @@ describe('GroupFieldSelect', () => {
 
     render(
       <Wrapper>
-        <GroupFieldSelect services={services as any} />
+        <GroupFieldSelect services={services} />
       </Wrapper>
     );
 
@@ -113,7 +110,7 @@ describe('GroupFieldSelect', () => {
 
     render(
       <Wrapper>
-        <GroupFieldSelect services={services as any} />
+        <GroupFieldSelect services={services} />
       </Wrapper>
     );
 
@@ -148,7 +145,7 @@ describe('GroupFieldSelect', () => {
 
     render(
       <Wrapper>
-        <GroupFieldSelect services={services as any} />
+        <GroupFieldSelect services={services} />
       </Wrapper>
     );
 
@@ -162,7 +159,7 @@ describe('GroupFieldSelect', () => {
 
     render(
       <Wrapper>
-        <GroupFieldSelect services={services as any} />
+        <GroupFieldSelect services={services} />
       </Wrapper>
     );
 
@@ -192,7 +189,7 @@ describe('GroupFieldSelect', () => {
 
     render(
       <Wrapper>
-        <GroupFieldSelect services={services as any} />
+        <GroupFieldSelect services={services} />
       </Wrapper>
     );
 
@@ -232,7 +229,7 @@ describe('GroupFieldSelect', () => {
 
     render(
       <Wrapper>
-        <GroupFieldSelect services={services as any} />
+        <GroupFieldSelect services={services} />
       </Wrapper>
     );
 

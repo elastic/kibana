@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import type { NotificationsStart } from '@kbn/core/public';
-import React, { useEffect, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
+import type { NotificationsStart, HttpStart } from '@kbn/core/public';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiButton,
-  EuiForm,
   EuiFlyoutHeader,
   EuiTitle,
   EuiFlyoutFooter,
@@ -24,48 +20,38 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { useForm, FormProvider } from 'react-hook-form';
-import type { HttpStart } from '@kbn/core/public';
 import type { FormValues } from '../form/types';
-import { ErrorCallOut } from './error_callout';
 import { useCreateRule } from '../form/hooks/use_create_rule';
-import { useFormDefaults } from '../form/hooks/use_form_defaults';
-import { RuleFields } from '../form/rule_fields';
+
+export interface RuleFormFlyoutServices {
+  http: HttpStart;
+  notifications: NotificationsStart;
+}
 
 export interface RuleFormFlyoutProps {
+  /** Whether to use push flyout or overlay */
   push?: boolean;
+  /** Callback when flyout is closed */
   onClose?: () => void;
-  services: {
-    http: HttpStart;
-    data: DataPublicPluginStart;
-    dataViews: DataViewsPublicPluginStart;
-    notifications: NotificationsStart;
-  };
-  query: string;
-  defaultTimeField?: string;
-  isQueryInvalid?: boolean;
+  /** Services required for rule creation */
+  services: RuleFormFlyoutServices;
+  /** The form component (DynamicRuleForm or StandaloneRuleForm) */
+  children: React.ReactElement<{
+    formId: string;
+    onSubmit: (values: FormValues) => void;
+  }>;
 }
+
+const FORM_ID = 'ruleV2Form';
+const FLYOUT_TITLE_ID = 'ruleV2FormFlyoutTitle';
 
 const RuleFormFlyoutComponent: React.FC<RuleFormFlyoutProps> = ({
   push = true,
   onClose,
-  query,
-  defaultTimeField,
   services,
-  isQueryInvalid,
+  children,
 }) => {
-  // Compute all default values upfront from the query
-  const defaultValues = useFormDefaults({ query, defaultTimeField });
-
-  const form = useForm<FormValues>({
-    mode: 'onBlur',
-    defaultValues,
-  });
-  const { setValue, setError, clearErrors, handleSubmit } = form;
   const { http, notifications } = services;
-
-  const flyoutTitleId = 'ruleV2FormFlyoutTitle';
-  const formId = 'ruleV2Form';
 
   const handleClose = () => {
     if (onClose) {
@@ -83,78 +69,56 @@ const RuleFormFlyoutComponent: React.FC<RuleFormFlyoutProps> = ({
     createRule(values);
   };
 
-  // Sync query prop to form when it changes after initialization
-  // (groupingKey is only set on init via useFormDefaults to preserve user customization)
-  useEffect(() => {
-    setValue('query', query);
-  }, [query, setValue]);
-
-  // Handle query validation errors from the parent (e.g., Discover)
-  useEffect(() => {
-    if (isQueryInvalid) {
-      setError('query', {
-        type: 'manual',
-        message: i18n.translate('xpack.alertingV2.ruleForm.invalidQueryError', {
-          defaultMessage:
-            'The query resulted in an error. Please review the query before saving the rule.',
-        }),
-      });
-    } else {
-      clearErrors('query');
-    }
-  }, [isQueryInvalid, setError, clearErrors]);
+  // Clone child to inject formId and onSubmit
+  const childWithProps = React.cloneElement(children, {
+    formId: FORM_ID,
+    onSubmit,
+  });
 
   return (
-    <FormProvider {...form}>
-      <EuiForm id={formId} component="form" onSubmit={handleSubmit(onSubmit)}>
-        <EuiFlyout
-          session="start"
-          flyoutMenuProps={{
-            title: 'Create Alert Rule',
-            hideTitle: true,
-          }}
-          type={push ? 'push' : 'overlay'}
-          onClose={handleClose}
-          aria-labelledby={flyoutTitleId}
-          size="s"
-        >
-          <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="m" id={flyoutTitleId}>
-              <h2>
-                <FormattedMessage
-                  id="xpack.alertingV2.ruleForm.flyoutTitle"
-                  defaultMessage="Create Alert Rule"
-                />
-              </h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <ErrorCallOut />
-            <RuleFields query={query} services={services} />
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={onClose} isLoading={isLoading}>
-                  <FormattedMessage
-                    id="xpack.alertingV2.ruleForm.cancelButtonLabel"
-                    defaultMessage="Cancel"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton fill isLoading={isLoading} form={formId} type="submit">
-                  <FormattedMessage
-                    id="xpack.alertingV2.ruleForm.saveButtonLabel"
-                    defaultMessage="Save"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
-        </EuiFlyout>
-      </EuiForm>
-    </FormProvider>
+    <EuiFlyout
+      session="start"
+      flyoutMenuProps={{
+        title: 'Create Alert Rule',
+        hideTitle: true,
+      }}
+      type={push ? 'push' : 'overlay'}
+      onClose={handleClose}
+      aria-labelledby={FLYOUT_TITLE_ID}
+      size="s"
+    >
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m" id={FLYOUT_TITLE_ID}>
+          <h2>
+            <FormattedMessage
+              id="xpack.alertingV2.ruleForm.flyoutTitle"
+              defaultMessage="Create Alert Rule"
+            />
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>{childWithProps}</EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={onClose} isLoading={isLoading}>
+              <FormattedMessage
+                id="xpack.alertingV2.ruleForm.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton fill isLoading={isLoading} form={FORM_ID} type="submit">
+              <FormattedMessage
+                id="xpack.alertingV2.ruleForm.saveButtonLabel"
+                defaultMessage="Save"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
   );
 };
 

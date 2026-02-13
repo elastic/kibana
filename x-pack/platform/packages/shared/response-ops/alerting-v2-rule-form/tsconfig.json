@@ -20,6 +20,8 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/core",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-notifications-browser-mocks",
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
     "@kbn/esql-utils",

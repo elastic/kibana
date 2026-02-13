@@ -5,15 +5,27 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
+import { DynamicRuleFormFlyout } from '../dynamic_rule_form_flyout';
+import { StandaloneRuleFormFlyout } from '../standalone_rule_form_flyout';
 import { RuleFormFlyout } from '../rule_form_flyout';
+import { DynamicRuleForm } from '../../form/dynamic_rule_form';
+import { StandaloneRuleForm } from '../../form/standalone_rule_form';
+import type { RuleFormServices } from '../../form/rule_form';
 
 const mockServices = {
   http: {
     post: async (path: string, options: any) => {
       action('http.post')(path, options);
       return { id: 'mock-rule-id', name: 'Mock Rule' };
+    },
+  } as any,
+  notifications: {
+    toasts: {
+      addSuccess: action('toast.success'),
+      addDanger: action('toast.danger'),
     },
   } as any,
   data: {
@@ -40,50 +52,134 @@ const mockServices = {
       timeFieldName: '@timestamp',
     }),
   } as any,
-  notifications: {
-    toasts: {
-      addSuccess: action('toast.success'),
-      addDanger: action('toast.danger'),
-    },
-  } as any,
 };
 
-const meta: Meta<typeof RuleFormFlyout> = {
-  title: 'Alerting V2/RuleFormFlyout',
-  component: RuleFormFlyout,
+const mockFlyoutServices = {
+  http: mockServices.http,
+  notifications: mockServices.notifications,
+};
+
+const mockFormServices: RuleFormServices = {
+  http: mockServices.http,
+  data: mockServices.data,
+  dataViews: mockServices.dataViews,
+};
+
+// =============================================================================
+// Pre-composed Flyouts (Recommended)
+// =============================================================================
+
+const dynamicMeta: Meta<typeof DynamicRuleFormFlyout> = {
+  title: 'Alerting V2/Pre-composed Flyouts',
+  component: DynamicRuleFormFlyout,
   parameters: {
     layout: 'fullscreen',
   },
-  argTypes: {
-    push: {
-      control: 'boolean',
-      description: 'Whether to use a push flyout or overlay',
-    },
-    query: {
-      control: 'text',
-      description: 'The query',
-    },
-    defaultTimeField: {
-      control: 'text',
-      description: 'Default time field for the rule',
-    },
-    isQueryInvalid: {
-      control: 'boolean',
-      description: 'Whether the query has validation errors',
-    },
+};
+
+export default dynamicMeta;
+
+type DynamicStory = StoryObj<typeof DynamicRuleFormFlyout>;
+type StandaloneStory = StoryObj<typeof StandaloneRuleFormFlyout>;
+
+/**
+ * DynamicRuleFormFlyout - For Discover integration
+ * Syncs with external query changes while preserving user input
+ */
+export const Dynamic: DynamicStory = {
+  args: {
+    services: mockServices,
+    query: 'FROM logs-* | WHERE @timestamp > NOW() - 5m | STATS count = COUNT(*) BY host.name',
+    defaultTimeField: '@timestamp',
+    isQueryInvalid: false,
+    push: true,
+    onClose: action('onClose'),
   },
 };
 
-export default meta;
-type Story = StoryObj<typeof RuleFormFlyout>;
+/**
+ * StandaloneRuleFormFlyout - For plugin integration
+ * Static initialization, ignores prop changes after mount
+ */
+export const Standalone: StandaloneStory = {
+  render: (args) => (
+    <StandaloneRuleFormFlyout
+      services={mockServices}
+      query="FROM metrics-* | STATS avg_cpu = AVG(system.cpu.usage)"
+      defaultTimeField="@timestamp"
+      push={true}
+      onClose={action('onClose')}
+    />
+  ),
+};
 
-export const Default: Story = {
+/**
+ * Dynamic flyout with invalid query error
+ */
+export const WithInvalidQuery: DynamicStory = {
   args: {
     services: mockServices,
-    query: 'FROM logs-* | WHERE @timestamp > NOW() - 5m | STATS count = COUNT(*)',
+    query: 'INVALID QUERY',
     defaultTimeField: '@timestamp',
+    isQueryInvalid: true,
     push: true,
-    isQueryInvalid: false,
     onClose: action('onClose'),
   },
+};
+
+// =============================================================================
+// Composable Pattern (Advanced)
+// =============================================================================
+
+type ComposableStory = StoryObj<typeof RuleFormFlyout>;
+
+/**
+ * Composable: Dynamic form with custom flyout wrapper
+ */
+export const ComposableDynamic: ComposableStory = {
+  render: () => (
+    <RuleFormFlyout services={mockFlyoutServices} push={true} onClose={action('onClose')}>
+      <DynamicRuleForm
+        formId=""
+        onSubmit={() => {}}
+        query="FROM logs-* | STATS count = COUNT(*) BY host.name"
+        defaultTimeField="@timestamp"
+        isQueryInvalid={false}
+        services={mockFormServices}
+      />
+    </RuleFormFlyout>
+  ),
+};
+
+/**
+ * Composable: Standalone form with custom flyout wrapper
+ */
+export const ComposableStandalone: ComposableStory = {
+  render: () => (
+    <RuleFormFlyout services={mockFlyoutServices} push={true} onClose={action('onClose')}>
+      <StandaloneRuleForm
+        formId=""
+        onSubmit={() => {}}
+        query="FROM metrics-*"
+        defaultTimeField="@timestamp"
+        services={mockFormServices}
+      />
+    </RuleFormFlyout>
+  ),
+};
+
+/**
+ * Overlay mode (non-push flyout)
+ */
+export const OverlayMode: ComposableStory = {
+  render: () => (
+    <RuleFormFlyout services={mockFlyoutServices} push={false} onClose={action('onClose')}>
+      <StandaloneRuleForm
+        formId=""
+        onSubmit={() => {}}
+        query="FROM logs-*"
+        services={mockFormServices}
+      />
+    </RuleFormFlyout>
+  ),
 };

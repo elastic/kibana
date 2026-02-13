@@ -22,7 +22,10 @@ interface GroupBySelectProps {
 export const GroupFieldSelect: React.FC<GroupBySelectProps> = ({ services }) => {
   const { control, setValue, watch } = useFormContext<FormValues>();
   const query = watch('query');
-  const { data: columns } = useQueryColumns({ query, search: services.data.search.search });
+  const { data: columns, isLoading } = useQueryColumns({
+    query,
+    search: services.data.search.search,
+  });
   const options = useMemo(
     () => columns.map((col) => ({ label: col.name, value: col.name })),
     [columns]
@@ -69,6 +72,7 @@ export const GroupFieldSelect: React.FC<GroupBySelectProps> = ({ services }) => 
               }}
               isClearable={true}
               isInvalid={!!error}
+              isLoading={isLoading}
             />
           </EuiFormRow>
         );
