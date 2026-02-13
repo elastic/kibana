@@ -336,7 +336,7 @@ function validateSortBy({
 
   if (column_type === 'transposed_metric') {
     if (!split_metrics_by || split_metrics_by.length === 0) {
-      return `Cannot sort by 'split_metrics_by' when no split_metrics_by columns are defined.`;
+      return `Cannot sort by 'transposed_metric' when no split_metrics_by columns are defined.`;
     }
 
     if (index == null || index >= metrics.length) {
