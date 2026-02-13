@@ -16,6 +16,8 @@ interface BaseLifecyclePhase {
   downsample?: DownsampleStep;
   grow: EuiFlexItemProps['grow'];
   isReadOnly?: boolean;
+  isRemoveDisabled?: boolean;
+  removeDisabledReason?: string;
   label: string;
   min_age?: string;
   name: string;

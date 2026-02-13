@@ -19,9 +19,11 @@ describe('transformInternalMaintenanceWindowToExternal', () => {
         updatedAt: '2021-03-07T00:00:00.000Z',
         updatedBy: 'me',
         enabled: false,
-        scopedQuery: {
-          filters: [],
-          kql: "_id: '1234'",
+        scope: {
+          alerting: {
+            filters: [],
+            kql: "_id: '1234'",
+          },
         },
         categoryIds: ['observability'],
         duration: 864000000,
@@ -35,6 +37,18 @@ describe('transformInternalMaintenanceWindowToExternal', () => {
           bymonth: undefined,
           count: undefined,
           bymonthday: undefined,
+        },
+        schedule: {
+          custom: {
+            duration: '10d',
+            start: '2021-03-07T00:00:00.000Z',
+            timezone: 'UTC',
+            recurring: {
+              every: '1d',
+              end: '2022-05-17T05:05:00.000Z',
+              onWeekDay: ['MO', 'FR'],
+            },
+          },
         },
         events: [],
         eventStartTime: '',
@@ -72,7 +86,7 @@ describe('transformInternalMaintenanceWindowToExternal', () => {
     });
   });
 
-  it('transforms does not return scope if scopedQuery is missing', () => {
+  it('transforms does not return scope if scope is missing', () => {
     expect(
       transformInternalMaintenanceWindowToExternal({
         title: 'test-maintenance-window',
@@ -95,6 +109,18 @@ describe('transformInternalMaintenanceWindowToExternal', () => {
           bymonth: undefined,
           count: undefined,
           bymonthday: undefined,
+        },
+        schedule: {
+          custom: {
+            duration: '10d',
+            start: '2021-03-07T00:00:00.000Z',
+            timezone: 'UTC',
+            recurring: {
+              every: '1d',
+              end: '2022-05-17T05:05:00.000Z',
+              onWeekDay: ['MO', 'FR'],
+            },
+          },
         },
         events: [],
         eventStartTime: '',

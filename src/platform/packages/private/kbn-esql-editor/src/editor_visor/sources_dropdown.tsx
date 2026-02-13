@@ -81,10 +81,13 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
         ];
 
         setFetchedSources(allOptions);
+        if (!currentSources.length && allOptions.length > 0) {
+          onChangeSources([allOptions[0].label]);
+        }
       }
     }
     fetchSources();
-  }, [core, getLicense, isMounted]);
+  }, [core, currentSources.length, getLicense, isMounted, onChangeSources]);
 
   const sourcesOptions = useMemo(() => {
     const existingLabels = new Set(fetchedSources.map((option) => option.label));

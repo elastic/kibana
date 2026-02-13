@@ -1,14 +1,16 @@
 {
-  "lastModified": "2026-01-30T09:08:30.782Z",
-  "sha1": "a4d3504d6d07ff4ad32e276fcf00fe9ce1b6cd3a",
+  "lastModified": "2026-02-06T14:35:32.876Z",
+  "sha1": "b1913fd60fafdaaba55379bc242987d75b64aa6c",
   "tests": [
     {
       "id": "f3ddbbb53c28ebe-f2cd2d3cdc77643",
       "title": "Ingest data to Elasticsearch",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/global.setup.ts",
@@ -21,13 +23,15 @@
       "title": "Alert Details Page should show an error when the alert does not exist",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 60,
-        "column": 7
+        "line": 64,
+        "column": 9
       }
     },
     {
@@ -35,13 +39,15 @@
       "title": "Alert Details Page should show a tabbed view",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 65,
-        "column": 7
+        "line": 69,
+        "column": 9
       }
     },
     {
@@ -49,13 +55,15 @@
       "title": "Alert Details Page should show a Threshold Alert Overview section",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 76,
-        "column": 7
+        "line": 80,
+        "column": 9
       }
     },
     {
@@ -63,13 +71,15 @@
       "title": "Alert Details Page should show an Alerts History section",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 83,
-        "column": 7
+        "line": 87,
+        "column": 9
       }
     },
     {
@@ -77,13 +87,15 @@
       "title": "Alert Details Page should show Metadata tab panel when Metadata tab is clicked",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 90,
-        "column": 7
+        "line": 94,
+        "column": 9
       }
     },
     {
@@ -91,13 +103,15 @@
       "title": "Alert Details Page should show an empty prompt in the Investigation Guide tab when no guide is set",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 101,
-        "column": 7
+        "line": 105,
+        "column": 9
       }
     },
     {
@@ -105,13 +119,15 @@
       "title": "Alert Details Page should show a Related Alerts table when Related Alerts tab is clicked",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 112,
-        "column": 7
+        "line": 116,
+        "column": 9
       }
     },
     {
@@ -119,13 +135,15 @@
       "title": "Alert Details Page should show a Related Dashboard component when Related Dashboards tab is clicked",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 123,
-        "column": 7
+        "line": 127,
+        "column": 9
       }
     },
     {
@@ -133,13 +151,15 @@
       "title": "Observability Landing Page redirects to page specified in defaultRoute uiSetting",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 29,
-        "column": 7
+        "line": 33,
+        "column": 9
       }
     },
     {
@@ -147,13 +167,15 @@
       "title": "Observability Landing Page redirects to Discover logs when logs data exists",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 52,
-        "column": 7
+        "line": 56,
+        "column": 9
       }
     },
     {
@@ -161,13 +183,15 @@
       "title": "Observability Landing Page redirects to APM services when only APM data exists",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 71,
-        "column": 7
+        "line": 75,
+        "column": 9
       }
     },
     {
@@ -175,13 +199,15 @@
       "title": "Observability Landing Page redirects to Discover logs when both logs and APM data exist (logs priority)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 90,
-        "column": 7
+        "line": 94,
+        "column": 9
       }
     },
     {
@@ -189,13 +215,15 @@
       "title": "Observability Landing Page redirects to onboarding when no data exists",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 116,
-        "column": 7
+        "line": 120,
+        "column": 9
       }
     },
     {
@@ -203,13 +231,15 @@
       "title": "Observability Landing Page redirects to onboarding when log data that should be ignored exists",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 124,
-        "column": 7
+        "line": 128,
+        "column": 9
       }
     },
     {
@@ -217,13 +247,15 @@
       "title": "Custom Threshold Rule - Ad-hoc Data View should create a custom threshold rule with an ad-hoc data view",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/ad_hoc_data_view.spec.ts",
-        "line": 52,
-        "column": 7
+        "line": 56,
+        "column": 9
       }
     },
     {
@@ -231,13 +263,15 @@
       "title": "Custom threshold preview chart should render the empty chart only once at bootstrap",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/custom_threshold_preview_chart.spec.ts",
-        "line": 23,
-        "column": 7
+        "line": 27,
+        "column": 9
       }
     },
     {
@@ -245,13 +279,15 @@
       "title": "Custom threshold preview chart should handle the error message correctly",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/custom_threshold_preview_chart.spec.ts",
-        "line": 28,
-        "column": 7
+        "line": 32,
+        "column": 9
       }
     },
     {
@@ -259,12 +295,14 @@
       "title": "Custom Threshold Rule - KQL Filter Autocomplete should show KQL autocomplete suggestions when typing in the filter field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/kql_filter_autocomplete.spec.ts",
-        "line": 24,
+        "line": 25,
         "column": 9
       }
     },
@@ -273,13 +311,15 @@
       "title": "Rule Details Page - Admin should navigate from rules table to rule details and display page correctly",
       "expectedStatus": "skipped",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 30,
-        "column": 7
+        "line": 34,
+        "column": 9
       }
     },
     {
@@ -287,13 +327,15 @@
       "title": "Rule Details Page - Admin should load rule details page directly by URL",
       "expectedStatus": "skipped",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 57,
-        "column": 7
+        "line": 61,
+        "column": 9
       }
     },
     {
@@ -301,13 +343,15 @@
       "title": "Rule Details Page - Admin should display alert summary widget on the page",
       "expectedStatus": "skipped",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 66,
-        "column": 7
+        "line": 70,
+        "column": 9
       }
     },
     {
@@ -315,13 +359,15 @@
       "title": "Rule Details Page - Admin should navigate to alerts tab with active filter when clicking active alerts",
       "expectedStatus": "skipped",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 74,
-        "column": 7
+        "line": 78,
+        "column": 9
       }
     },
     {
@@ -329,13 +375,15 @@
       "title": "Rule Details Page - Admin should navigate to alerts tab with all statuses when clicking total alerts",
       "expectedStatus": "skipped",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 92,
-        "column": 7
+        "line": 96,
+        "column": 9
       }
     },
     {
@@ -343,13 +391,15 @@
       "title": "Rule Details Page - Admin should show edit and delete actions for admin user",
       "expectedStatus": "skipped",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 111,
-        "column": 7
+        "line": 115,
+        "column": 9
       }
     },
     {
@@ -357,13 +407,15 @@
       "title": "Rule Details Page - Admin should close actions popover when clicking actions button again",
       "expectedStatus": "skipped",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 127,
-        "column": 7
+        "line": 131,
+        "column": 9
       }
     },
     {
@@ -371,13 +423,15 @@
       "title": "Rule Details Page - Admin should display dashboard options in related dashboards dropdown when editing rule",
       "expectedStatus": "skipped",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.admin.spec.ts",
-        "line": 147,
-        "column": 7
+        "line": 151,
+        "column": 9
       }
     },
     {
@@ -385,13 +439,15 @@
       "title": "Rule Details Page - Viewer should navigate to rule details page and display page correctly",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.viewer.spec.ts",
-        "line": 29,
-        "column": 7
+        "line": 33,
+        "column": 9
       }
     },
     {
@@ -399,13 +455,15 @@
       "title": "Rule Details Page - Viewer should display alert summary widget on the page",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.viewer.spec.ts",
-        "line": 49,
-        "column": 7
+        "line": 53,
+        "column": 9
       }
     },
     {
@@ -413,13 +471,15 @@
       "title": "Rule Details Page - Viewer should navigate to alerts tab when clicking active alerts",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.viewer.spec.ts",
-        "line": 57,
-        "column": 7
+        "line": 61,
+        "column": 9
       }
     },
     {
@@ -427,13 +487,15 @@
       "title": "Rule Details Page - Viewer should navigate to alerts tab when clicking total alerts",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.viewer.spec.ts",
-        "line": 73,
-        "column": 7
+        "line": 77,
+        "column": 9
       }
     },
     {
@@ -441,13 +503,15 @@
       "title": "Rule Details Page - Viewer should not show actions button for viewer user",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rule_details_page/rule_details_page.viewer.spec.ts",
-        "line": 89,
-        "column": 7
+        "line": 93,
+        "column": 9
       }
     },
     {
@@ -455,13 +519,15 @@
       "title": "Rules Page - Header should filter rule types using search and close modal",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_header/rules_page_header.admin.spec.ts",
-        "line": 20,
-        "column": 7
+        "line": 24,
+        "column": 9
       }
     },
     {
@@ -469,13 +535,15 @@
       "title": "Rules Page - Header should open settings flyout, verify buttons state, and close successfully",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_header/rules_page_header.viewer.spec.ts",
-        "line": 20,
-        "column": 7
+        "line": 24,
+        "column": 9
       }
     },
     {
@@ -483,13 +551,15 @@
       "title": "Rules Page - Logs Tab should navigate to logs tab and display event log table",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_logs_tab/rules_page_logs_tab.viewer.spec.ts",
-        "line": 21,
-        "column": 7
+        "line": 25,
+        "column": 9
       }
     },
     {
@@ -497,13 +567,15 @@
       "title": "Rules Page - Logs Tab should load logs tab content when navigating directly via URL",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_logs_tab/rules_page_logs_tab.viewer.spec.ts",
-        "line": 32,
-        "column": 7
+        "line": 36,
+        "column": 9
       }
     },
     {
@@ -511,13 +583,15 @@
       "title": "Rules Page - Logs Tab should persist logs tab selection in URL",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_logs_tab/rules_page_logs_tab.viewer.spec.ts",
-        "line": 40,
-        "column": 7
+        "line": 46,
+        "column": 9
       }
     },
     {
@@ -525,13 +599,15 @@
       "title": "Rules Page - Logs Tab should navigate to rule details when clicking on a rule in event logs",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_logs_tab/rules_page_logs_tab.viewer.spec.ts",
-        "line": 49,
-        "column": 7
+        "line": 55,
+        "column": 9
       }
     },
     {
@@ -539,13 +615,15 @@
       "title": "Rules Page - Rules Tab should see the Rules Table container",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_rules_tab/rules_page_rules_tab.admin.spec.ts",
-        "line": 19,
-        "column": 7
+        "line": 23,
+        "column": 9
       }
     },
     {
@@ -553,13 +631,15 @@
       "title": "Rules Page - Rules Tab should see an editable rule in the Rules Table",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_rules_tab/rules_page_rules_tab.admin.spec.ts",
-        "line": 23,
-        "column": 7
+        "line": 27,
+        "column": 9
       }
     },
     {
@@ -567,13 +647,15 @@
       "title": "Rules Page - Rules Tab should show the edit action button for an editable rule & open the edit rule flyout",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_rules_tab/rules_page_rules_tab.admin.spec.ts",
-        "line": 29,
-        "column": 7
+        "line": 33,
+        "column": 9
       }
     },
     {
@@ -581,13 +663,15 @@
       "title": "Rules Page - Rules Tab changes the rule status to \"disabled\"",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_rules_tab/rules_page_rules_tab.admin.spec.ts",
-        "line": 61,
-        "column": 7
+        "line": 65,
+        "column": 9
       }
     },
     {
@@ -595,13 +679,15 @@
       "title": "Rules Page - Rules Tab should see the Rules Table container",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_rules_tab/rules_page_rules_tab.viewer.spec.ts",
-        "line": 19,
-        "column": 7
+        "line": 23,
+        "column": 9
       }
     },
     {
@@ -609,13 +695,15 @@
       "title": "Rules Page - Rules Tab should see a non-editable rule in the Rules Table",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_rules_tab/rules_page_rules_tab.viewer.spec.ts",
-        "line": 23,
-        "column": 7
+        "line": 27,
+        "column": 9
       }
     },
     {
@@ -623,13 +711,15 @@
       "title": "Rules Page - Rules Tab should not show the edit action button for a rule when logged in as viewer",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_rules_tab/rules_page_rules_tab.viewer.spec.ts",
-        "line": 28,
-        "column": 7
+        "line": 32,
+        "column": 9
       }
     }
   ]

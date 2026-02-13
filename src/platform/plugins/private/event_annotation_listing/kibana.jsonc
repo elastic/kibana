@@ -20,11 +20,14 @@
       "dataViews",
       "kql",
       "kibanaUtils",
-      "contentManagement"
+      "contentManagement",
+      "embeddable",
+      "uiActions"
     ],
     "optionalPlugins": [
       "savedObjectsTagging",
-      "lens"
+      "lens",
+      "dashboard"
     ],
     "requiredBundles": [],
     "extraPublicDirs": []

@@ -529,5 +529,15 @@ describe('Search service', () => {
         expect(options).toHaveProperty('strategy', ENHANCED_ES_SEARCH_STRATEGY);
       });
     });
+
+    describe('updateSessionStatuses', () => {
+      it('calls updateSessionStatuses on the session client', async () => {
+        mockSessionClient.updateStatuses = jest.fn().mockResolvedValue(undefined);
+
+        await mockScopedClient.updateSessionStatuses(['id1', 'id2']);
+
+        expect(mockSessionClient.updateStatuses).toHaveBeenCalledWith(['id1', 'id2']);
+      });
+    });
   });
 });

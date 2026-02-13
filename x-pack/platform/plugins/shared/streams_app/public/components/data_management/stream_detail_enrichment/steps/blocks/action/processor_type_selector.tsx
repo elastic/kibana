@@ -14,6 +14,7 @@ import { useController, useFormContext, useWatch } from 'react-hook-form';
 import type { DocLinksStart } from '@kbn/core/public';
 import type { ProcessorType } from '@kbn/streamlang';
 import { Streams } from '@kbn/streams-schema';
+import { useGrokCollection } from '@kbn/grok-ui';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import { getDefaultFormStateByType } from '../../../utils';
 import type { ProcessorFormState } from '../../../types';
@@ -56,7 +57,7 @@ export const ProcessorTypeSelector = ({ disabled = false }: { disabled?: boolean
     return stepUnderEdit ? stepUnderEdit.getSnapshot().context.step.parentId !== null : false;
   });
 
-  const grokCollection = useStreamEnrichmentSelector((state) => state.context.grokCollection);
+  const { grokCollection } = useGrokCollection();
 
   // To make it possible to clear the selection to enter a new value,
   // keep track of local empty state. As soon as field.value is set, switch back to highlighting
@@ -78,7 +79,7 @@ export const ProcessorTypeSelector = ({ disabled = false }: { disabled?: boolean
     const formState = getDefaultFormStateByType(
       type,
       selectPreviewRecords(getEnrichmentState().context.simulatorRef.getSnapshot().context),
-      { grokCollection }
+      { grokCollection: grokCollection! }
     );
     reset(formState);
   };
@@ -273,6 +274,37 @@ const getAvailableProcessors: (
               >
                 {i18n.translate('xpack.streams.availableProcessors.replaceLinkLabel', {
                   defaultMessage: 'Replaces parts of a string field.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
+  redact: {
+    type: 'redact' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.redactInputDisplay',
+      {
+        defaultMessage: 'Redact',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.redactHelpText"
+          defaultMessage="{redactLink} Uses Grok patterns to identify and mask sensitive information like IP addresses, emails, and other PII."
+          values={{
+            redactLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsRedactLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.redact}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.redactLinkLabel', {
+                  defaultMessage: 'Masks sensitive data in a field.',
                 })}
               </EuiLink>
             ),
@@ -522,6 +554,7 @@ const PROCESSOR_GROUP_MAP: Record<
   convert: 'convert',
   date: 'convert',
   replace: 'convert',
+  redact: 'convert',
   append: 'set',
   set: 'set',
   rename: 'set',

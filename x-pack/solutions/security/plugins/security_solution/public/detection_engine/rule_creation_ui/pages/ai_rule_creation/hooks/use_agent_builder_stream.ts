@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { isToolProgressEvent, isToolResultEvent } from '@kbn/agent-builder-common';
+import { isErrorResult, isOtherResult } from '@kbn/agent-builder-common/tools';
 import { getKibanaDefaultAgentCapabilities } from '@kbn/agent-builder-common/agents';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import {
@@ -149,12 +150,17 @@ export const useAgentBuilderStream = () => {
               event.data?.tool_id === SECURITY_CREATE_DETECTION_RULE_TOOL_ID
             ) {
               const result = event.data?.results?.[0];
-              if (result?.type === 'error') {
+              if (result && isErrorResult(result)) {
                 cancelRuleCreation();
                 showErrorToast(
                   new Error(result.data?.message ?? 'Unknown error during rule creation.')
                 );
-              } else if (result?.type === 'other' && result.data?.success && result.data?.rule) {
+              } else if (
+                result &&
+                isOtherResult(result) &&
+                result.data?.success &&
+                result.data?.rule
+              ) {
                 const parseResult = parseRuleResponse(result.data.rule);
                 if (parseResult.success) {
                   setRule(parseResult.data);

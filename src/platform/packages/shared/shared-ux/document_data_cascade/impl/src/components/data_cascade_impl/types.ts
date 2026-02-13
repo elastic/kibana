@@ -60,6 +60,18 @@ export interface CascadeRowCellNestedVirtualizationAnchorProps<G extends GroupNo
   extends Pick<CascadeVirtualizerProps<G>, 'getScrollElement'> {
   getScrollOffset: () => number;
   getScrollMargin: () => number;
+  /**
+   * Function used to signal to the parent virtualizer that this row's size changes should not be propagated to it.
+   * This is only required if the nested virtualization implementation used here measures its rows.
+   */
+  preventSizeChangePropagation: () => () => void;
+}
+
+export interface CascadeRowCellRendererProps<G extends GroupNode, L extends LeafNode>
+  extends CascadeRowCellNestedVirtualizationAnchorProps<G> {
+  data: L[] | null;
+  cellId: string;
+  nodePath: string[];
 }
 
 export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends LeafNode>
@@ -80,13 +92,7 @@ export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends Lea
   /**
    * Render prop function that provides the leaf node data when available, which can be used to render the content we'd to display with the data received.
    */
-  children: (
-    args: {
-      data: L[] | null;
-      cellId: string;
-      nodePath: string[];
-    } & CascadeRowCellNestedVirtualizationAnchorProps<G>
-  ) => React.ReactNode;
+  children: (args: CascadeRowCellRendererProps<G, L>) => React.ReactNode;
 }
 
 type OnCascadeGroupNodeExpandedArgs<G extends GroupNode> = CascadeGroupNodeUIInteraction<G>;

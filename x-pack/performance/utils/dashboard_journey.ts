@@ -6,14 +6,13 @@
  */
 
 import type { KibanaServer } from '@kbn/ftr-common-functional-services';
-import { Journey } from '@kbn/journeys';
+import type { Journey } from '@kbn/journeys';
 import type { KibanaPage } from '@kbn/journeys/services/page/kibana_page';
 import { subj } from '@kbn/test-subj-selector';
 import type { Page } from 'playwright';
 
 interface DashboardJourneyConfig {
-  esArchives: string[];
-  kbnArchives: string[];
+  journey: Journey<{}>;
   dashboardName: string;
   dashboardLinkSubj: string;
   setup?: (kibanaServer: KibanaServer) => Promise<void>;
@@ -21,7 +20,7 @@ interface DashboardJourneyConfig {
   loadCompleteAwaiter?: (page: Page, kibanaPage: KibanaPage) => Promise<void>;
 }
 
-export function createDashboardJourney(config: DashboardJourneyConfig): Journey<{}> {
+export function setupDashboardJourney(config: DashboardJourneyConfig): Journey<{}> {
   const waitForDashboardLoad = async (page: Page, kibanaPage: KibanaPage) => {
     if (config.visualizationCount) {
       await kibanaPage.waitForVisualizations({ count: config.visualizationCount });
@@ -34,18 +33,13 @@ export function createDashboardJourney(config: DashboardJourneyConfig): Journey<
     }
   };
 
-  const journey = new Journey({
-    esArchives: config.esArchives,
-    kbnArchives: config.kbnArchives,
-  });
-
   if (config.setup) {
-    journey.step('Setup', async ({ kibanaServer }) => {
+    config.journey.step('Setup', async ({ kibanaServer }) => {
       await config.setup!(kibanaServer);
     });
   }
 
-  return journey
+  return config.journey
     .step('Go to Dashboards Page', async ({ page, kbnUrl, kibanaPage }) => {
       await page.goto(kbnUrl.get(`/app/dashboards`));
       await kibanaPage.waitForListViewTable();

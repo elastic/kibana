@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Streams } from '@kbn/streams-schema';
 
 /**
@@ -16,6 +16,7 @@ export interface ComputedFeatureGeneratorOptions {
   start: number;
   end: number;
   esClient: ElasticsearchClient;
+  logger: Logger;
 }
 
 /**
