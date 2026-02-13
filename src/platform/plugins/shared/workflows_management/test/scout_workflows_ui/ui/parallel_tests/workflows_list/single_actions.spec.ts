@@ -184,17 +184,12 @@ test.describe('WorkflowsList/SingleActions', { tag: [...tags.stateful.classic] }
     await apiServices.workflows.create(scoutSpace.id, getListTestWorkflowYaml(workflow));
     await pageObjects.workflowList.navigate();
 
-    // Set up dialog handler to accept the confirmation dialog
-    page.once('dialog', async (dialog) => {
-      expect(dialog.message()).toContain('Are you sure you want to delete');
-      await dialog.accept();
-    });
-
     const deleteAction = await pageObjects.workflowList.getThreeDotsMenuAction(
       workflow.name,
       'deleteWorkflowAction'
     );
     await deleteAction.click();
+    await page.testSubj.click('confirmModalConfirmButton');
 
     // Verify the workflow is removed from the list
     await expect(pageObjects.workflowList.getWorkflowRow(workflow.name)).toBeHidden();
