@@ -170,7 +170,7 @@ export const AllTemplatesPage: React.FC = () => {
           <EuiBasicTable
             columns={columns}
             data-test-subj="templates-table"
-            itemId="key"
+            itemId="templateId"
             items={data?.templates ?? []}
             loading={isLoading}
             tableCaption={i18n.TEMPLATE_TITLE}
