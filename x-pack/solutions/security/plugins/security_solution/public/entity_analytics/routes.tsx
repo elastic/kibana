@@ -232,6 +232,13 @@ export const routes = [
     ),
   },
   {
+    path: ENTITY_ANALYTICS_WATCHLISTS_PATH,
+    component: withSecurityRoutePageWrapper(
+      EntityAnalyticsWatchlistsContainer,
+      SecurityPageName.entityAnalyticsWatchlists
+    ),
+  },
+  {
     path: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
     component: withSecurityRoutePageWrapper(
       EntityAnalyticsPrivilegedUserMonitoringContainer,

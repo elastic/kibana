@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { HeaderPage } from '@kbn/cases-plugin/public/components/header_page';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { HeaderPage } from '../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 
@@ -21,9 +22,12 @@ const PAGE_TITLE = i18n.translate(
 
 export const EntityAnalyticsWatchlistsManagementPage = () => {
   return (
-    <SecuritySolutionPageWrapper>
-      <HeaderPage title={PAGE_TITLE} />
+    <>
+      <SecuritySolutionPageWrapper>
+        <HeaderPage title={PAGE_TITLE} />
+        <EuiFlexGroup direction="column" gutterSize="l" />
+      </SecuritySolutionPageWrapper>
       <SpyRoute pageName={SecurityPageName.entityAnalyticsWatchlists} />
-    </SecuritySolutionPageWrapper>
+    </>
   );
 };

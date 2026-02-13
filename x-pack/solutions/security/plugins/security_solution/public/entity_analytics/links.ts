@@ -13,6 +13,7 @@ import {
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_OVERVIEW_PATH,
   ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
+  ENTITY_ANALYTICS_WATCHLISTS_PATH,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 import {
@@ -53,11 +54,10 @@ const watchlistsLinks: LinkItem = {
     defaultMessage:
       'Provides entity-level monitoring for manually tagging and tracking high-risk entities with configurable statuses and risk score adjustments.',
   }),
-  landingImage: privilegedUserMonitoringPageImg,
-  path: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
+  path: ENTITY_ANALYTICS_WATCHLISTS_PATH,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.watchlists', {
-      defaultMessage: 'Watchlists',
+      defaultMessage: 'Watchlists Management',
     }),
   ],
   hideTimeline: false,
