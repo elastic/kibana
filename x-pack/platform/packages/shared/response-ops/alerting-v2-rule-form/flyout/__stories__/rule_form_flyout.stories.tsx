@@ -7,7 +7,7 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { ESQLRuleFormFlyout } from '../esql_rule_form_flyout';
+import { RuleFormFlyout } from '../rule_form_flyout';
 
 const mockServices = {
   http: {
@@ -48,9 +48,9 @@ const mockServices = {
   } as any,
 };
 
-const meta: Meta<typeof ESQLRuleFormFlyout> = {
-  title: 'Alerting V2/ESQLRuleFormFlyout',
-  component: ESQLRuleFormFlyout,
+const meta: Meta<typeof RuleFormFlyout> = {
+  title: 'Alerting V2/RuleFormFlyout',
+  component: RuleFormFlyout,
   parameters: {
     layout: 'fullscreen',
   },
@@ -61,7 +61,7 @@ const meta: Meta<typeof ESQLRuleFormFlyout> = {
     },
     query: {
       control: 'text',
-      description: 'The ES|QL query',
+      description: 'The query',
     },
     defaultTimeField: {
       control: 'text',
@@ -75,7 +75,7 @@ const meta: Meta<typeof ESQLRuleFormFlyout> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof ESQLRuleFormFlyout>;
+type Story = StoryObj<typeof RuleFormFlyout>;
 
 export const Default: Story = {
   args: {

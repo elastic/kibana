@@ -7,17 +7,17 @@
 
 import React, { Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { ESQLRuleFormFlyoutProps } from './esql_rule_form_flyout';
+import type { RuleFormFlyoutProps } from './rule_form_flyout';
 
-const LazyESQLRuleFormFlyout = React.lazy(() =>
-  import('./esql_rule_form_flyout').then((module) => ({
-    default: module.ESQLRuleFormFlyout,
+const LazyRuleFormFlyout = React.lazy(() =>
+  import('./rule_form_flyout').then((module) => ({
+    default: module.RuleFormFlyout,
   }))
 );
 
-export const ESQLRuleFormFlyout: React.FC<ESQLRuleFormFlyoutProps> = (props) => (
+export const RuleFormFlyout: React.FC<RuleFormFlyoutProps> = (props) => (
   <Suspense fallback={<EuiLoadingSpinner size="m" />}>
-    <LazyESQLRuleFormFlyout {...props} />
+    <LazyRuleFormFlyout {...props} />
   </Suspense>
 );
 

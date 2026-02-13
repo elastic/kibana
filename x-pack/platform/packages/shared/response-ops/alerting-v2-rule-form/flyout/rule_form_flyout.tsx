@@ -32,7 +32,7 @@ import { useCreateRule } from '../form/hooks/use_create_rule';
 import { useFormDefaults } from '../form/hooks/use_form_defaults';
 import { RuleFields } from '../form/rule_fields';
 
-export interface ESQLRuleFormFlyoutProps {
+export interface RuleFormFlyoutProps {
   push?: boolean;
   onClose?: () => void;
   services: {
@@ -46,7 +46,7 @@ export interface ESQLRuleFormFlyoutProps {
   isQueryInvalid?: boolean;
 }
 
-const ESQLRuleFormFlyoutComponent: React.FC<ESQLRuleFormFlyoutProps> = ({
+const RuleFormFlyoutComponent: React.FC<RuleFormFlyoutProps> = ({
   push = true,
   onClose,
   query,
@@ -96,7 +96,7 @@ const ESQLRuleFormFlyoutComponent: React.FC<ESQLRuleFormFlyoutProps> = ({
         type: 'manual',
         message: i18n.translate('xpack.alertingV2.ruleForm.invalidQueryError', {
           defaultMessage:
-            'The ESQL query resulted in an error. Please review the query before saving the rule.',
+            'The query resulted in an error. Please review the query before saving the rule.',
         }),
       });
     } else {
@@ -158,11 +158,11 @@ const ESQLRuleFormFlyoutComponent: React.FC<ESQLRuleFormFlyoutProps> = ({
   );
 };
 
-export const ESQLRuleFormFlyout: React.FC<ESQLRuleFormFlyoutProps> = (props) => {
+export const RuleFormFlyout: React.FC<RuleFormFlyoutProps> = (props) => {
   const queryClient = useMemo(() => new QueryClient(), []);
   return (
     <QueryClientProvider client={queryClient}>
-      <ESQLRuleFormFlyoutComponent {...props} />
+      <RuleFormFlyoutComponent {...props} />
     </QueryClientProvider>
   );
 };

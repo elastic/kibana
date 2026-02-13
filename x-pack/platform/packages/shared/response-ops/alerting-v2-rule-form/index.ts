@@ -6,7 +6,7 @@
  */
 
 // Flyout component (lazy loaded)
-export { ESQLRuleFormFlyout } from './flyout';
+export { RuleFormFlyout } from './flyout';
 
 // Form components (lazy loaded)
 export { RuleFields } from './form';

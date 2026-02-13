@@ -17,7 +17,7 @@ interface UseCreateRuleProps {
 }
 
 export const useCreateRule = ({ http, notifications, onSuccess }: UseCreateRuleProps) => {
-  const { mutate, isLoading } = useMutation(
+  const mutation = useMutation(
     (formValues: FormValues) => {
       const ruleData: CreateRuleData = {
         kind: formValues.kind,
@@ -46,5 +46,8 @@ export const useCreateRule = ({ http, notifications, onSuccess }: UseCreateRuleP
     }
   );
 
-  return { createRule: mutate, isLoading };
+  return {
+    ...mutation,
+    createRule: mutation.mutate,
+  };
 };

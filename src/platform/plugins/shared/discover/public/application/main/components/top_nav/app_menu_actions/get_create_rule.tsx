@@ -12,7 +12,7 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
 import { AppMenuActionId } from '@kbn/discover-utils';
-import { ESQLRuleFormFlyout } from '@kbn/alerting-v2-rule-form';
+import { RuleFormFlyout } from '@kbn/alerting-v2-rule-form';
 import { type Observable, type BehaviorSubject, filter, map, pairwise, startWith } from 'rxjs';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
@@ -80,7 +80,7 @@ export function CreateESQLRuleFlyout({
   }, [appState$, stateContainer.dataState.data$.main$, history]);
 
   return (
-    <ESQLRuleFormFlyout
+    <RuleFormFlyout
       defaultTimeField={timeField}
       services={{
         http,
