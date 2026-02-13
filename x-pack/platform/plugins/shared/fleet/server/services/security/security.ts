@@ -154,6 +154,10 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
       kibanaPrivileges: privileges.kibana,
       prefix: `${PLUGIN_ID}-settings-read`,
     });
+    const fleetGenerateReportsAllAuth = getAuthorizationFromPrivileges({
+      kibanaPrivileges: privileges.kibana,
+      prefix: `${PLUGIN_ID}-generate-report`,
+    });
 
     return {
       ...calculateAuthz({
@@ -173,12 +177,14 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
             read: fleetSettingsReadAuth,
             all: fleetSettingsAllAuth,
           },
+          generateReports: {
+            all: fleetGenerateReportsAllAuth,
+          },
         },
         integrations: {
           all: intAllAuth,
           read: intReadAuth,
         },
-        subfeatureEnabled: true,
       }),
       packagePrivileges: calculatePackagePrivilegesFromKibanaPrivileges(privileges.kibana),
       endpointExceptionsPrivileges: calculateEndpointExceptionsPrivilegesFromKibanaPrivileges(
@@ -193,7 +199,6 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
       all: false,
       read: false,
     },
-    subfeatureEnabled: true,
   });
 }
 

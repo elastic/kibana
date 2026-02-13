@@ -23,11 +23,6 @@ describe('Differences Transforms', () => {
     label: 'Sum of Total Sales',
     empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
   };
-  const testRef: { id: string; field: string; label: string } = {
-    id: 'sumId',
-    label: apiColumnRef.label!,
-    field: apiColumnRef.field!,
-  };
 
   describe('fromDifferencesAPItoLensState', () => {
     it('should transform basic differences configuration', () => {
@@ -38,7 +33,7 @@ describe('Differences Transforms', () => {
 
       const expected: DerivativeIndexPatternColumn = {
         operationType: 'differences',
-        references: [testRef.id],
+        references: [],
         label: '',
         customLabel: false,
         isBucketed: false,
@@ -48,7 +43,7 @@ describe('Differences Transforms', () => {
         params: {},
       };
 
-      expect(fromDifferencesAPItoLensState(input, testRef)).toEqual(expected);
+      expect(fromDifferencesAPItoLensState(input)).toEqual(expected);
     });
 
     it('should handle custom label', () => {
@@ -58,24 +53,19 @@ describe('Differences Transforms', () => {
         of: apiColumnRef,
       };
 
-      const result = fromDifferencesAPItoLensState(input, testRef);
+      const result = fromDifferencesAPItoLensState(input);
       expect(result.label).toBe('Sales Change');
       expect(result.customLabel).toBe(true);
-    });
-
-    it('should handle missing reference label', () => {
-      const input: LensApiDifferencesOperation = {
-        operation: 'differences',
-        of: apiColumnRef,
-      };
-
-      const emptyRef = { ...testRef, label: '' };
-      const result = fromDifferencesAPItoLensState(input, emptyRef);
-      expect(result.label).toBe('');
     });
   });
 
   describe('fromDifferencesLensStateToAPI', () => {
+    const testRef: { id: string; field: string; label: string } = {
+      id: 'sumId',
+      label: apiColumnRef.label!,
+      field: apiColumnRef.field!,
+    };
+
     it('should transform basic differences configuration', () => {
       const input: DerivativeIndexPatternColumn = {
         operationType: 'differences',

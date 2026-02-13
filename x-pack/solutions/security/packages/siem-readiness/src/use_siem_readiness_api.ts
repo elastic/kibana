@@ -13,16 +13,19 @@ import type {
   SiemReadinessPackageInfo,
   RelatedIntegrationRuleResponse,
   DataQualityResultDocument,
+  PipelineStats,
   RetentionResponse,
 } from './types';
 import {
   GET_SIEM_READINESS_CATEGORIES_API_PATH,
+  GET_SIEM_READINESS_PIPELINES_API_PATH,
   GET_SIEM_READINESS_RETENTION_API_PATH,
   GET_INDEX_RESULTS_LATEST_API_PATH,
 } from './constants';
 
 const GET_READINESS_CATEGORIES_QUERY_KEY = ['readiness-categories'] as const;
 const GET_READINESS_RETENTION_QUERY_KEY = ['readiness-retention'] as const;
+const GET_READINESS_PIPELINES_QUERY_KEY = ['readiness-pipelines'] as const;
 const GET_DETECTION_RULES_QUERY_KEY = ['detection-rules'] as const;
 const GET_INTEGRATIONS_QUERY_KEY = ['fleet-integrations-packages'] as const;
 const GET_INDEX_RESULTS_LATEST_QUERY_KEY = ['index-results-latest'] as const;
@@ -66,18 +69,25 @@ export const useSiemReadinessApi = () => {
     },
   });
 
+  const getReadinessPipelines = useQuery({
+    queryKey: GET_READINESS_PIPELINES_QUERY_KEY,
+    queryFn: () => {
+      return http.get<PipelineStats[]>(GET_SIEM_READINESS_PIPELINES_API_PATH);
+    },
+  });
+
   const getReadinessRetention = useQuery({
     queryKey: GET_READINESS_RETENTION_QUERY_KEY,
     queryFn: () => {
       return http.get<RetentionResponse>(GET_SIEM_READINESS_RETENTION_API_PATH);
     },
   });
-
   return {
     getReadinessCategories,
     getIntegrations,
     getDetectionRules,
     getIndexQualityResultsLatest,
     getReadinessRetention,
+    getReadinessPipelines,
   };
 };
