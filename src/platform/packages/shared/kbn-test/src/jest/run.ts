@@ -70,10 +70,18 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
 
   // Buildkite checkpoint resume: skip this config if it already passed on a previous attempt.
   if (isInBuildkite() && resolvedConfigPath) {
-    log.info(`[jest-checkpoint] Checking prior completion for ${resolvedConfigPath} (step=${process.env.BUILDKITE_STEP_ID || ''}, job=${process.env.BUILDKITE_PARALLEL_JOB || '0'}, retry=${process.env.BUILDKITE_RETRY_COUNT || '0'})`);
+    log.info(
+      `[jest-checkpoint] Checking prior completion for ${resolvedConfigPath} (step=${
+        process.env.BUILDKITE_STEP_ID || ''
+      }, job=${process.env.BUILDKITE_PARALLEL_JOB || '0'}, retry=${
+        process.env.BUILDKITE_RETRY_COUNT || '0'
+      })`
+    );
     const alreadyCompleted = await isConfigCompleted(resolvedConfigPath);
     if (alreadyCompleted) {
-      log.info(`[jest-checkpoint] Skipping ${resolvedConfigPath} (already completed on previous attempt)`);
+      log.info(
+        `[jest-checkpoint] Skipping ${resolvedConfigPath} (already completed on previous attempt)`
+      );
       process.exit(0);
     }
     log.info(`[jest-checkpoint] Config not yet completed, proceeding`);

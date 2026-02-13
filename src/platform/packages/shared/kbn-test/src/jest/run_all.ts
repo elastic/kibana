@@ -167,7 +167,13 @@ async function runConfigs(
 
   // In Buildkite, skip configs already completed on a previous attempt (checkpoint resume)
   if (isInBuildkite()) {
-    log.info(`[jest-checkpoint] Checking ${allConfigs.length} configs for prior completion (step=${process.env.BUILDKITE_STEP_ID || ''}, job=${process.env.BUILDKITE_PARALLEL_JOB || '0'}, retry=${process.env.BUILDKITE_RETRY_COUNT || '0'})`);
+    log.info(
+      `[jest-checkpoint] Checking ${allConfigs.length} configs for prior completion (step=${
+        process.env.BUILDKITE_STEP_ID || ''
+      }, job=${process.env.BUILDKITE_PARALLEL_JOB || '0'}, retry=${
+        process.env.BUILDKITE_RETRY_COUNT || '0'
+      })`
+    );
 
     const completionStatus = await Promise.all(
       allConfigs.map(async (config) => {
