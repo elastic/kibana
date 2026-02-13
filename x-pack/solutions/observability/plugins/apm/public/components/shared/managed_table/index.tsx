@@ -118,7 +118,7 @@ function ActionsCell<T extends object>({
     let subPanelId = 1;
 
     for (const [groupIndex, group] of actions.entries()) {
-      // Add group header
+      // Add group header if it exists
       if (group.groupLabel) {
         mainPanelItems.push({
           name: group.groupLabel,
