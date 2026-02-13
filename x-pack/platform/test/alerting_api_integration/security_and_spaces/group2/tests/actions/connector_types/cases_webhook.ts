@@ -206,7 +206,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 expect(resp.body).to.eql({
                   statusCode: 400,
                   error: 'Bad Request',
-                  message: `error validating connector type config: Field \"${field}\": Required`,
+                  message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at ${field}`,
                 });
               });
           });

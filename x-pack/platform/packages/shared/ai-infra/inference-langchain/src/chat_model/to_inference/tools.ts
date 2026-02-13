@@ -7,6 +7,7 @@
 
 import { pick } from 'lodash';
 import type { ZodSchema } from '@kbn/zod';
+import { z as z4 } from '@kbn/zod/v4';
 import { zodToJsonSchema, type JsonSchema7Type } from 'zod-to-json-schema';
 import { type BindToolsInput } from '@langchain/core/language_models/chat_models';
 import type { ToolDefinition } from '@langchain/core/language_models/base';
@@ -65,7 +66,18 @@ function isToolDefinition(def: BindToolsInput): def is ToolDefinition {
   return 'type' in def && def.type === 'function' && 'function' in def && typeof def === 'object';
 }
 
+function isZodV4(schema: unknown): boolean {
+  return schema != null && typeof schema === 'object' && '_zod' in schema;
+}
+
 function zodSchemaToInference(schema: ZodSchema): ToolSchema {
+  if (isZodV4(schema)) {
+    return pick(z4.toJSONSchema(schema as unknown as z4.ZodType), [
+      'type',
+      'properties',
+      'required',
+    ]) as ToolSchema;
+  }
   return pick(zodToJsonSchema(schema), ['type', 'properties', 'required']) as ToolSchema;
 }
 
