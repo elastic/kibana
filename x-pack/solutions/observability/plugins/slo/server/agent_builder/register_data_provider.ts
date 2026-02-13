@@ -8,13 +8,7 @@
 import type { GetSLOParams } from '@kbn/slo-schema';
 import type { CoreSetup, Logger, KibanaRequest } from '@kbn/core/server';
 import type { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../types';
-import {
-  DefaultBurnRatesClient,
-  DefaultSLODefinitionRepository,
-  DefaultSummaryClient,
-  GetSLO,
-  SLODefinitionClient,
-} from '../services';
+import { getSloClientWithRequest } from '../client';
 
 export function registerDataProviders({
   core,
@@ -47,24 +41,16 @@ export function registerDataProviders({
       const spaceId =
         (await pluginStart.spaces?.spacesService.getActiveSpace(request))?.id ?? 'default';
 
-      const soClient = coreStart.savedObjects.getScopedClient(request);
-      const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
+      const sloClient = getSloClientWithRequest({
+        request,
+        soClient: coreStart.savedObjects.getScopedClient(request),
+        esClient: coreStart.elasticsearch.client.asInternalUser,
+        scopedClusterClient: coreStart.elasticsearch.client.asScoped(request),
+        spaceId,
+        logger,
+      });
 
-      const repository = new DefaultSLODefinitionRepository(soClient, logger);
-      const burnRatesClient = new DefaultBurnRatesClient(scopedClusterClient.asCurrentUser);
-      const summaryClient = new DefaultSummaryClient(
-        scopedClusterClient.asCurrentUser,
-        burnRatesClient
-      );
-      const definitionClient = new SLODefinitionClient(
-        repository,
-        scopedClusterClient.asCurrentUser,
-        logger
-      );
-
-      const getSlo = new GetSLO(definitionClient, summaryClient);
-
-      return getSlo.execute(sloId, spaceId, { instanceId: sloInstanceId, remoteName });
+      return sloClient.getSlo(sloId, { instanceId: sloInstanceId, remoteName });
     }
   );
 }

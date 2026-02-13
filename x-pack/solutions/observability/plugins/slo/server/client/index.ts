@@ -16,6 +16,8 @@ import type {
   FindSLOResponse,
   GetSLOGroupedStatsParams,
   GetSLOGroupedStatsResponse,
+  GetSLOParams,
+  GetSLOResponse,
 } from '@kbn/slo-schema';
 import { once } from 'lodash';
 import { FindSLO } from '../services/find_slo';
@@ -24,11 +26,18 @@ import { DefaultSLODefinitionRepository } from '../services/slo_definition_repos
 import { DefaultSLOSettingsRepository } from '../services/slo_settings_repository';
 import { DefaultSummarySearchClient } from '../services/summary_search_client/summary_search_client';
 import { getSummaryIndices } from '../services/utils/get_summary_indices';
+import {
+  DefaultBurnRatesClient,
+  DefaultSummaryClient,
+  GetSLO,
+  SLODefinitionClient,
+} from '../services';
 
 export interface SloClient {
   getSummaryIndices(): Promise<string[]>;
   getGroupedStats(params: GetSLOGroupedStatsParams): Promise<GetSLOGroupedStatsResponse>;
   findSlos(params: FindSLOParams): Promise<FindSLOResponse>;
+  getSlo(sloId: string, params?: GetSLOParams): Promise<GetSLOResponse>;
 }
 
 export function getSloClientWithRequest({
@@ -76,6 +85,22 @@ export function getSloClientWithRequest({
       );
       const findSLO = new FindSLO(repository, summarySearchClient);
       return await findSLO.execute(params);
+    },
+
+    getSlo: async (sloId: string, params: GetSLOParams = {}) => {
+      const repository = new DefaultSLODefinitionRepository(soClient, logger);
+      const burnRatesClient = new DefaultBurnRatesClient(scopedClusterClient.asCurrentUser);
+      const summaryClient = new DefaultSummaryClient(
+        scopedClusterClient.asCurrentUser,
+        burnRatesClient
+      );
+      const definitionClient = new SLODefinitionClient(
+        repository,
+        scopedClusterClient.asCurrentUser,
+        logger
+      );
+      const getSloService = new GetSLO(definitionClient, summaryClient);
+      return getSloService.execute(sloId, spaceId, params);
     },
   };
 }
