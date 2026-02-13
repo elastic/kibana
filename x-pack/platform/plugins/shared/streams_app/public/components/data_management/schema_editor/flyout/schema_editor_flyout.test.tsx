@@ -73,16 +73,37 @@ const createMockWiredStream = (name: string) =>
     },
   } as unknown as Streams.ingest.all.Definition);
 
+const createMockClassicStream = (name: string) =>
+  ({
+    name,
+    description: '',
+    updated_at: '2024-01-01T00:00:00.000Z',
+    ingest: {
+      lifecycle: { inherit: {} },
+      processing: { steps: [], updated_at: '2024-01-01T00:00:00.000Z' },
+      settings: {},
+      failure_store: { inherit: {} },
+      classic: {
+        field_overrides: {},
+      },
+    },
+  } as unknown as Streams.ingest.all.Definition);
+
 const renderFlyout = ({
   field,
   streamName = 'logs.test',
   onStage = jest.fn(),
+  streamType = 'wired' as 'wired' | 'classic',
 }: {
   field: SchemaField;
   streamName?: string;
   onStage?: jest.Mock;
+  streamType?: 'wired' | 'classic';
 }) => {
-  const stream = createMockWiredStream(streamName);
+  const stream =
+    streamType === 'classic'
+      ? createMockClassicStream(streamName)
+      : createMockWiredStream(streamName);
 
   let unmountFlyout = () => {};
   const onClose = jest.fn(() => {
@@ -107,79 +128,137 @@ const renderFlyout = ({
 };
 
 describe('SchemaEditorFlyout (description-only restrictions)', () => {
-  it('allows only editing description for inherited fields, and disables staging until description changes', async () => {
-    const inheritedField: SchemaField = {
-      name: 'attributes.inherited_date',
-      parent: 'logs',
-      status: 'inherited',
-      type: 'date',
-      format: 'epoch_millis',
-      description: 'original description',
-    };
+  describe('wired streams', () => {
+    it('allows only editing description for inherited fields, and disables staging until description changes', async () => {
+      const inheritedField: SchemaField = {
+        name: 'attributes.inherited_date',
+        parent: 'logs',
+        status: 'inherited',
+        type: 'date',
+        format: 'epoch_millis',
+        description: 'original description',
+      };
 
-    const { onStage, stream } = renderFlyout({ field: inheritedField });
+      const { onStage, stream } = renderFlyout({ field: inheritedField });
 
-    // Mapping controls should be read-only/hidden (no type selector, no format combo box)
-    expect(screen.queryByTestId('streamsAppFieldFormTypeSelect')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('streamsAppSchemaEditorFieldFormFormat')).not.toBeInTheDocument();
+      // Mapping controls should be read-only/hidden (no type selector, no format combo box)
+      expect(screen.queryByTestId('streamsAppFieldFormTypeSelect')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('streamsAppSchemaEditorFieldFormFormat')).not.toBeInTheDocument();
 
-    // Description should be editable
-    const descriptionTextArea = screen.getByTestId('streamsAppFieldSummaryDescriptionTextArea');
-    expect(descriptionTextArea).toBeInTheDocument();
+      // Description should be editable
+      const descriptionTextArea = screen.getByTestId('streamsAppFieldSummaryDescriptionTextArea');
+      expect(descriptionTextArea).toBeInTheDocument();
 
-    const stageButton = screen.getByTestId('streamsAppSchemaEditorFieldStageButton');
-    expect(stageButton).toBeDisabled();
+      const stageButton = screen.getByTestId('streamsAppSchemaEditorFieldStageButton');
+      expect(stageButton).toBeDisabled();
 
-    await user.clear(descriptionTextArea);
-    await user.type(descriptionTextArea, 'updated description');
+      await user.clear(descriptionTextArea);
+      await user.type(descriptionTextArea, 'updated description');
 
-    expect(stageButton).toBeEnabled();
-    await user.click(stageButton);
+      expect(stageButton).toBeEnabled();
+      await user.click(stageButton);
 
-    expect(onStage).toHaveBeenCalledTimes(1);
-    expect(onStage).toHaveBeenCalledWith({
-      ...inheritedField,
-      description: 'updated description',
-      parent: stream.name,
-      status: 'unmapped',
+      expect(onStage).toHaveBeenCalledTimes(1);
+      expect(onStage).toHaveBeenCalledWith({
+        ...inheritedField,
+        description: 'updated description',
+        parent: stream.name,
+        status: 'unmapped',
+      });
+    });
+
+    it('allows only editing description for documentation-only fields (type: unmapped) and stages a minimal payload', async () => {
+      const documentationOnlyField = {
+        name: 'attributes.documented_only',
+        parent: 'logs.test',
+        status: 'mapped',
+        type: 'unmapped',
+        description: 'original description',
+        // Extra properties should not leak into the staged payload in description-only mode
+        format: 'epoch_millis',
+        additionalParameters: { ignore_above: 256 },
+      } as unknown as SchemaField;
+
+      const { onStage, stream } = renderFlyout({ field: documentationOnlyField });
+
+      // Mapping controls should be read-only/hidden (no type selector)
+      expect(screen.queryByTestId('streamsAppFieldFormTypeSelect')).not.toBeInTheDocument();
+
+      const descriptionTextArea = screen.getByTestId('streamsAppFieldSummaryDescriptionTextArea');
+      await user.clear(descriptionTextArea);
+      await user.type(descriptionTextArea, 'updated description');
+
+      const stageButton = screen.getByTestId('streamsAppSchemaEditorFieldStageButton');
+      expect(stageButton).toBeEnabled();
+      await user.click(stageButton);
+
+      expect(onStage).toHaveBeenCalledTimes(1);
+      const stagedField = onStage.mock.calls[0][0] as SchemaField;
+
+      expect(stagedField).toEqual({
+        name: documentationOnlyField.name,
+        parent: stream.name,
+        status: 'unmapped',
+        description: 'updated description',
+      });
+      expect(stagedField).not.toHaveProperty('format');
+      expect(stagedField).not.toHaveProperty('additionalParameters');
     });
   });
 
-  it('allows only editing description for documentation-only fields (type: unmapped) and stages a minimal payload', async () => {
-    const documentationOnlyField = {
-      name: 'attributes.documented_only',
-      parent: 'logs.test',
-      status: 'mapped',
-      type: 'unmapped',
-      description: 'original description',
-      // Extra properties should not leak into the staged payload in description-only mode
-      format: 'epoch_millis',
-      additionalParameters: { ignore_above: 256 },
-    } as unknown as SchemaField;
+  describe('classic streams', () => {
+    it('does NOT allow description-only editing for unmapped fields - type selector must be shown', async () => {
+      // Classic streams do not support description-only overrides.
+      // Users must specify a type to add a description.
+      const unmappedField: SchemaField = {
+        name: 'attributes.dynamic_field',
+        parent: 'logs-test-default',
+        status: 'unmapped',
+      };
 
-    const { onStage, stream } = renderFlyout({ field: documentationOnlyField });
+      renderFlyout({ field: unmappedField, streamType: 'classic' });
 
-    // Mapping controls should be read-only/hidden (no type selector)
-    expect(screen.queryByTestId('streamsAppFieldFormTypeSelect')).not.toBeInTheDocument();
-
-    const descriptionTextArea = screen.getByTestId('streamsAppFieldSummaryDescriptionTextArea');
-    await user.clear(descriptionTextArea);
-    await user.type(descriptionTextArea, 'updated description');
-
-    const stageButton = screen.getByTestId('streamsAppSchemaEditorFieldStageButton');
-    expect(stageButton).toBeEnabled();
-    await user.click(stageButton);
-
-    expect(onStage).toHaveBeenCalledTimes(1);
-    const stagedField = onStage.mock.calls[0][0] as SchemaField;
-
-    expect(stagedField).toEqual({
-      name: documentationOnlyField.name,
-      parent: stream.name,
-      status: 'unmapped',
-      description: 'updated description',
+      // Type selector should be visible for classic streams (unlike wired streams)
+      expect(screen.getByTestId('streamsAppFieldFormTypeSelect')).toBeInTheDocument();
     });
-    expect(stagedField).not.toHaveProperty('format');
-    expect(stagedField).not.toHaveProperty('additionalParameters');
+
+    it('requires a type to be selected before staging changes with a description', async () => {
+      const unmappedField: SchemaField = {
+        name: 'attributes.dynamic_field',
+        parent: 'logs-test-default',
+        status: 'unmapped',
+      };
+
+      const { onStage, stream } = renderFlyout({ field: unmappedField, streamType: 'classic' });
+
+      // Add a description
+      const descriptionTextArea = screen.getByTestId('streamsAppFieldSummaryDescriptionTextArea');
+      await user.type(descriptionTextArea, 'my field description');
+
+      // Stage button should be disabled because no type is selected
+      const stageButton = screen.getByTestId('streamsAppSchemaEditorFieldStageButton');
+      expect(stageButton).toBeDisabled();
+
+      // Select a type
+      const typeSelect = screen.getByTestId('streamsAppFieldFormTypeSelect');
+      await user.click(typeSelect);
+      const keywordOption = screen.getByTestId('option-type-keyword');
+      await user.click(keywordOption);
+
+      // Stage button should now be enabled
+      expect(stageButton).toBeEnabled();
+      await user.click(stageButton);
+
+      // Verify the staged field has both type and description
+      expect(onStage).toHaveBeenCalledTimes(1);
+      const stagedField = onStage.mock.calls[0][0] as SchemaField;
+      expect(stagedField).toMatchObject({
+        name: 'attributes.dynamic_field',
+        parent: stream.name,
+        status: 'mapped',
+        type: 'keyword',
+        description: 'my field description',
+      });
+    });
   });
 });
