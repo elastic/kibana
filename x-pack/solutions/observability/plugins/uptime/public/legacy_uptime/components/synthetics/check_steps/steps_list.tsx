@@ -236,6 +236,9 @@ export const StepsList = ({
       <EuiBasicTable
         compressed={compactView}
         loading={loading}
+        tableCaption={i18n.translate('xpack.uptime.synthetics.stepsList.tableCaption', {
+          defaultMessage: 'Journey step details',
+        })}
         columns={columns}
         error={error?.message}
         items={steps}
