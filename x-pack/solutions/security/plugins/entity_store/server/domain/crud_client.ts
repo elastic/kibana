@@ -56,7 +56,7 @@ export class CRUDClient {
   ): Promise<void> {
     const rawId = getEuidFromObject(entityType, document);
     if (rawId === undefined) {
-      throw new BadCRUDRequestError('', `Could not derive entity EUID from document`);
+      throw new BadCRUDRequestError(`Could not derive entity EUID from document`);
     }
     // EUID generation uses MD5. It is not a security-related feature.
     // eslint-disable-next-line @kbn/eslint/no_unsafe_hash
@@ -69,8 +69,8 @@ export class CRUDClient {
     const definition = getEntityDefinition(entityType, this.namespace);
     if (!force) {
       const flat = getFlattenedObject(document);
-      const fieldDescriptions = getFieldDescriptions(id, flat, definition);
-      assertOnlyNonForcedAttributesInReq(id, fieldDescriptions);
+      const fieldDescriptions = getFieldDescriptions(flat, definition);
+      assertOnlyNonForcedAttributesInReq(fieldDescriptions);
     }
     const preparedDoc = prepareDocumentForUpsert(entityType, document);
 
@@ -116,9 +116,8 @@ export class CRUDClient {
       const definition = getEntityDefinition(entityType, this.namespace);
       if (!force) {
         const flat = getFlattenedObject(document);
-        // TODO: make these two throw regular Errors and try-catch this block as BadCRUDRequest.
-        const fieldDescriptions = getFieldDescriptions('', flat, definition);
-        assertOnlyNonForcedAttributesInReq('', fieldDescriptions);
+        const fieldDescriptions = getFieldDescriptions(flat, definition);
+        assertOnlyNonForcedAttributesInReq(fieldDescriptions);
       }
       const preparedDoc = prepareDocumentForUpsert(entityType, document);
 
@@ -148,7 +147,6 @@ export class CRUDClient {
 }
 
 function getFieldDescriptions(
-  id: string,
   flatProps: Record<string, unknown>,
   description: ManagedEntityDefinition
 ): Record<string, EntityField & { value: unknown }> {
@@ -180,7 +178,6 @@ function getFieldDescriptions(
   if (invalid.length > 0) {
     const invalidString = invalid.join(', ');
     throw new BadCRUDRequestError(
-      id,
       `The following attributes are not allowed to be updated: [${invalidString}]`
     );
   }
@@ -188,7 +185,7 @@ function getFieldDescriptions(
   return descriptions;
 }
 
-function assertOnlyNonForcedAttributesInReq(id: string, fields: Record<string, EntityField>) {
+function assertOnlyNonForcedAttributesInReq(fields: Record<string, EntityField>) {
   const notAllowedProps = [];
 
   for (const [name, description] of Object.entries(fields)) {
@@ -200,7 +197,6 @@ function assertOnlyNonForcedAttributesInReq(id: string, fields: Record<string, E
   if (notAllowedProps.length > 0) {
     const notAllowedPropsString = notAllowedProps.join(', ');
     throw new BadCRUDRequestError(
-      id,
       `The following attributes are not allowed to be ` +
         `updated without forcing it (?force=true): ${notAllowedPropsString}`
     );
