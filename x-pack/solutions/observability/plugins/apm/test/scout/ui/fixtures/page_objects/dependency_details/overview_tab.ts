@@ -45,4 +45,42 @@ export class OverviewTab extends DependencyDetailsTab {
   public async clickServiceInUpstreamServicesTable(serviceName: string) {
     await this.getServiceInUpstreamServicesTable(serviceName).click();
   }
+
+  // #region Header Filters
+  getTransactionTypeFilter() {
+    return this.page.getByTestId('headerFilterTransactionType');
+  }
+
+  async selectTransactionType(type: string) {
+    await this.getTransactionTypeFilter().selectOption(type);
+  }
+
+  getEnvironmentFilter() {
+    return this.page.getByTestId('environmentFilter');
+  }
+
+  async selectEnvironment(environment: string) {
+    const environmentFilter = this.getEnvironmentFilter();
+    await environmentFilter.locator('input').click();
+    const optionToSelect = this.page.getByRole('option', { name: environment });
+    await optionToSelect.waitFor({ state: 'visible' });
+    await optionToSelect.click();
+  }
+
+  getComparisonSelect() {
+    return this.page.getByTestId('comparisonSelect');
+  }
+
+  async selectComparison(offset: string) {
+    await this.getComparisonSelect().selectOption(offset);
+  }
+
+  getRefreshButton() {
+    return this.page.getByRole('button', { name: 'Refresh' });
+  }
+
+  async clickRefreshButton() {
+    await this.getRefreshButton().click();
+  }
+  // #endregion
 }
