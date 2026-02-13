@@ -11,6 +11,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiPortal,
   EuiTitle,
   isDOMNode,
   keys,
@@ -78,42 +79,44 @@ export const MetricInsightsFlyout = ({ metric, esqlQuery, onClose }: MetricInsig
   const maxWidth = euiTheme.breakpoint.xl;
 
   return (
-    <EuiFlyout
-      session="start"
-      flyoutMenuProps={{
-        title: metricFlyoutTitle,
-      }}
-      onClose={onClose}
-      type="push"
-      pushMinBreakpoint="xl"
-      size={flyoutWidthRef.current}
-      data-test-subj="metricsExperienceFlyout"
-      aria-labelledby={metricFlyoutTitleId}
-      onKeyDown={onKeyDown}
-      ownFocus={false} // TODO: Workaround to avoid EuiFlyout emotion bug
-      minWidth={minWidth}
-      maxWidth={maxWidth}
-      resizable={true}
-      onResize={setFlyoutWidth}
-      css={{
-        maxWidth: `${isXlScreen ? `calc(100vw - ${defaultWidth}px)` : '90vw'} !important`,
-      }}
-      paddingSize="m"
-      {...a11yProps}
-    >
-      {screenReaderDescription}
-      <EuiFlyoutHeader>
-        <EuiTitle size="xs" data-test-subj="metricsExperienceFlyoutRowDetailsTitle">
-          <h2 id={metricFlyoutTitleId}>{metricFlyoutTitle}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <MetricFlyoutBody
-          metric={metric}
-          esqlQuery={esqlQuery}
-          description={fieldsMetadata[metric.name]?.description}
-        />
-      </EuiFlyoutBody>
-    </EuiFlyout>
+    <EuiPortal>
+      <EuiFlyout
+        session="start"
+        flyoutMenuProps={{
+          title: metricFlyoutTitle,
+        }}
+        onClose={onClose}
+        type="push"
+        pushMinBreakpoint="xl"
+        size={flyoutWidthRef.current}
+        data-test-subj="metricsExperienceFlyout"
+        aria-labelledby={metricFlyoutTitleId}
+        onKeyDown={onKeyDown}
+        ownFocus={false} // TODO: Workaround to avoid EuiFlyout emotion bug
+        minWidth={minWidth}
+        maxWidth={maxWidth}
+        resizable={true}
+        onResize={setFlyoutWidth}
+        css={{
+          maxWidth: `${isXlScreen ? `calc(100vw - ${defaultWidth}px)` : '90vw'} !important`,
+        }}
+        paddingSize="m"
+        {...a11yProps}
+      >
+        {screenReaderDescription}
+        <EuiFlyoutHeader>
+          <EuiTitle size="xs" data-test-subj="metricsExperienceFlyoutRowDetailsTitle">
+            <h2 id={metricFlyoutTitleId}>{metricFlyoutTitle}</h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <MetricFlyoutBody
+            metric={metric}
+            esqlQuery={esqlQuery}
+            description={fieldsMetadata[metric.name]?.description}
+          />
+        </EuiFlyoutBody>
+      </EuiFlyout>
+    </EuiPortal>
   );
 };
