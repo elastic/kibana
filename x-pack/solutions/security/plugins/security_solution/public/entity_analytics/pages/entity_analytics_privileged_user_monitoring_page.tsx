@@ -329,7 +329,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
                   />
                 </EuiButtonEmpty>,
                 ...(watchlistFilterFlag
-                  ? [<WatchlistFilter defaultSelectedId="prebuilt-priv" />]
+                  ? [<WatchlistFilter />]
                   : []),
               ]}
             />

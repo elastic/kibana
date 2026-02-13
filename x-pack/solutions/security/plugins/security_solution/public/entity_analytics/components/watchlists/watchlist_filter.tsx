@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiIcon, EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { parse, stringify } from 'query-string';
@@ -21,10 +21,7 @@ import type { WatchlistItem, WatchlistOption } from './types';
 
 interface WatchlistFilterProps {
   onChangeSelectedId?: (id: string) => void;
-  defaultSelectedId?: string;
 }
-
-const WATCHLIST_QUERY_PARAM = 'watchlist_id';
 
 // Demo atm, replacing with real data with crud
 const WATCHLIST_OPTIONS: WatchlistOption[] = [
@@ -53,26 +50,23 @@ const WATCHLIST_OPTIONS: WatchlistOption[] = [
   { id: 'custom-3', label: WATCHLIST_I18N.customWatchlist3 },
 ];
 
+const WATCHLIST_ROUTE_MAP: Record<string, string> = {
+  'prebuilt-priv': ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
+};
+
+const ROUTE_TO_WATCHLIST_MAP: Record<string, string> = Object.fromEntries(
+  Object.entries(WATCHLIST_ROUTE_MAP).map(([id, path]) => [path, id])
+) as Record<string, string>;
+
 export const WatchlistFilter = ({
   onChangeSelectedId,
-  defaultSelectedId,
 }: WatchlistFilterProps) => {
   // hook this up to real data
   const options = WATCHLIST_OPTIONS;
-  const [selected, setSelected] = useState<WatchlistItem | null>(null);
 
-  const { search } = useLocation();
+  const { pathname } = useLocation();
 
   const { navigateTo } = useNavigation();
-
-  const selectedIdFromUrl = useMemo(() => {
-    const params = parse(search);
-    const value = params[WATCHLIST_QUERY_PARAM];
-    if (Array.isArray(value)) {
-      return value[0];
-    }
-    return value ?? undefined;
-  }, [search]);
 
   const getItemById = useCallback(
     (id?: string) =>
@@ -82,41 +76,29 @@ export const WatchlistFilter = ({
     [options]
   );
 
-  const selectedFromUrl = useMemo(() => {
-    if (!selectedIdFromUrl) {
-      return null;
-    }
-    return getItemById(selectedIdFromUrl);
-  }, [getItemById, selectedIdFromUrl]);
+  const selectedIdFromRoute = useMemo(
+    () => ROUTE_TO_WATCHLIST_MAP[pathname],
+    [pathname]
+  );
 
-  useEffect(() => {
-    setSelected(selectedFromUrl);
-  }, [selectedFromUrl]);
+  const selected = useMemo(
+    () => (selectedIdFromRoute ? getItemById(selectedIdFromRoute) : null),
+    [getItemById, selectedIdFromRoute]
+  );
 
   const navigateToWatchlist = useCallback(
     (watchlistId?: string) => {
       const isCleared = !watchlistId || watchlistId === 'none' || watchlistId === 'clear-selection';
-      const nextPath = isCleared
-        ? ENTITY_ANALYTICS_THREAT_HUNTING_PATH
-        : ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH;
-      const query = isCleared ? '' : stringify({ [WATCHLIST_QUERY_PARAM]: watchlistId });
+      const mappedPath = watchlistId ? WATCHLIST_ROUTE_MAP[watchlistId] : undefined;
+      const nextPath =
+        !isCleared && mappedPath ? mappedPath : ENTITY_ANALYTICS_THREAT_HUNTING_PATH;
 
       navigateTo({
-        path: query ? `${nextPath}?${query}` : nextPath,
+        path: nextPath,
       });
     },
     [navigateTo]
   );
-
-  useEffect(() => {
-    if (!selectedIdFromUrl && defaultSelectedId) {
-      const defaultSelection = getItemById(defaultSelectedId);
-      if (defaultSelection) {
-        setSelected(defaultSelection);
-        navigateToWatchlist(defaultSelectedId);
-      }
-    }
-  }, [defaultSelectedId, getItemById, selectedIdFromUrl, navigateToWatchlist]);
 
   const onChangeComboBox = useCallback(
     (nextOptions: EuiComboBoxOptionOption<WatchlistOption>[]) => {
@@ -126,10 +108,8 @@ export const WatchlistFilter = ({
 
       if (newlySelected?.id) {
         onChangeSelectedId?.(newlySelected.id);
-        setSelected(newlySelected);
         navigateToWatchlist(newlySelected.id);
       } else {
-        setSelected(null);
         navigateToWatchlist('none');
       }
     },
