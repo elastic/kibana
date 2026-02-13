@@ -42,6 +42,8 @@ export interface InfrastructureDashboardProps {
   podNames?: string[];
   containerNames?: string[];
   hostNames?: string[];
+  deploymentNames?: string[];
+  nodeNames?: string[];
   timeRange?: { from: string; to: string };
 }
 
@@ -224,11 +226,11 @@ export async function loadDashboardDefinition(
  * Uses buildCombinedFilter with OR relation for multiple values.
  */
 export function buildInfrastructureFilters(props: InfrastructureDashboardProps): Filter[] {
-  const { dataView, podNames, containerNames, hostNames } = props;
+  const { dataView, podNames, containerNames, hostNames, deploymentNames, nodeNames } = props;
   const filters: Filter[] = [];
 
   if (podNames && podNames.length > 0) {
-    const podField = dataView.getFieldByName('kubernetes.pod.name');
+    const podField = dataView.getFieldByName('k8s.pod.name');
     if (podField) {
       const podFilters = podNames.map((name) => buildPhraseFilter(podField, name, dataView));
       filters.push(buildCombinedFilter(BooleanRelation.OR, podFilters, dataView));
@@ -257,6 +259,32 @@ export function buildInfrastructureFilters(props: InfrastructureDashboardProps):
     if (hostField) {
       const hostFilters = hostNames.map((name) => buildPhraseFilter(hostField, name, dataView));
       filters.push(buildCombinedFilter(BooleanRelation.OR, hostFilters, dataView));
+    }
+  }
+
+  if (deploymentNames && deploymentNames.length > 0) {
+    const deploymentField = dataView.getFieldByName('k8s.deployment.name');
+    if (deploymentField) {
+      const deploymentFilters = deploymentNames.map((name) =>
+        buildPhraseFilter(deploymentField, name, dataView)
+      );
+      filters.push(buildCombinedFilter(BooleanRelation.OR, deploymentFilters, dataView));
+    }
+  }
+
+  if (nodeNames && nodeNames.length > 0) {
+    const nodeField = dataView.getFieldByName('k8s.node.name');
+    const hostField = dataView.getFieldByName('host.name');
+
+    const nodeFilters: Filter[] = [];
+    if (nodeField) {
+      nodeFilters.push(...nodeNames.map((name) => buildPhraseFilter(nodeField, name, dataView)));
+    }
+    if (hostField) {
+      nodeFilters.push(...nodeNames.map((name) => buildPhraseFilter(hostField, name, dataView)));
+    }
+    if (nodeFilters.length > 0) {
+      filters.push(buildCombinedFilter(BooleanRelation.OR, nodeFilters, dataView));
     }
   }
 

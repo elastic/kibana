@@ -353,7 +353,7 @@ export const serviceDetailRoute = {
           query: t.partial({
             detailTab: t.union([
               t.literal(InfraTab.containers),
-              t.literal(InfraTab.pods),
+              t.literal(InfraTab.deployments),
               t.literal(InfraTab.hosts),
             ]),
           }),

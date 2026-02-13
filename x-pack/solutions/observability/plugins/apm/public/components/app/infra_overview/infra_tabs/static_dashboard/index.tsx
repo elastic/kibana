@@ -24,6 +24,8 @@ export interface InfrastructureDashboardComponentProps {
   podNames?: string[];
   containerNames?: string[];
   hostNames?: string[];
+  deploymentNames?: string[];
+  nodeNames?: string[];
   timeRange: { from: string; to: string };
   notifications: NotificationsStart;
 }
@@ -35,6 +37,8 @@ export function InfrastructureDashboard({
   podNames,
   containerNames,
   hostNames,
+  deploymentNames,
+  nodeNames,
   timeRange,
   notifications,
 }: InfrastructureDashboardComponentProps) {
@@ -47,6 +51,8 @@ export function InfrastructureDashboard({
     podNames,
     containerNames,
     hostNames,
+    deploymentNames,
+    nodeNames,
     timeRange,
   };
 

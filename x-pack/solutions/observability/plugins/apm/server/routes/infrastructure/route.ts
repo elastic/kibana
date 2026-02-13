@@ -10,7 +10,9 @@ import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { getInfrastructureData } from './get_infrastructure_data';
 import { getContainerHostNames } from './get_host_names';
+import { getK8sInfraNames } from './get_k8s_infra_names';
 import { createInfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
+import { hasOpenTelemetryPrefix } from '../../../common/agent_name';
 
 const infrastructureRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/infrastructure_attributes',
@@ -18,7 +20,7 @@ const infrastructureRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([kueryRt, rangeRt, environmentRt]),
+    query: t.intersection([kueryRt, rangeRt, environmentRt, t.partial({ agentName: t.string })]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
@@ -27,6 +29,8 @@ const infrastructureRoute = createApmServerRoute({
     containerIds: string[];
     hostNames: string[];
     podNames: string[];
+    deploymentNames: string[];
+    nodeNames: string[];
   }> => {
     const apmEventClient = await getApmEventClient(resources);
     const infraMetricsClient = createInfraMetricsClient(resources);
@@ -34,26 +38,39 @@ const infrastructureRoute = createApmServerRoute({
 
     const {
       path: { serviceName },
-      query: { environment, kuery, start, end },
+      query: { environment, kuery, start, end, agentName },
     } = params;
+
+    const isSemconv = hasOpenTelemetryPrefix(agentName);
 
     const infrastructureData = await getInfrastructureData({
       apmEventClient,
       serviceName,
+      isSemconv,
       environment,
       kuery,
       start,
       end,
     });
 
-    const containerIds = infrastructureData.containerIds;
-    // due some limitations on the data we get from apm-metrics indices, if we have a service running in a container we want to query, to get the host.name, filtering by container.id
-    const containerHostNames = await getContainerHostNames({
-      containerIds,
-      infraMetricsClient,
-      start,
-      end,
-    });
+    const { containerIds, podNames } = infrastructureData;
+
+    // Resolve host names from container IDs and K8s deployment/node names
+    // from pod names in parallel, both querying metrics indices.
+    const [containerHostNames, k8sInfraNames] = await Promise.all([
+      getContainerHostNames({
+        containerIds,
+        infraMetricsClient,
+        start,
+        end,
+      }),
+      getK8sInfraNames({
+        podNames,
+        infraMetricsClient,
+        start,
+        end,
+      }),
+    ]);
 
     return {
       containerIds,
@@ -61,7 +78,9 @@ const infrastructureRoute = createApmServerRoute({
         containerIds.length > 0 // if we have container ids we rely on the hosts fetched filtering by container.id
           ? containerHostNames
           : infrastructureData.hostNames,
-      podNames: infrastructureData.podNames,
+      podNames,
+      deploymentNames: k8sInfraNames.deploymentNames,
+      nodeNames: k8sInfraNames.nodeNames,
     };
   },
 });

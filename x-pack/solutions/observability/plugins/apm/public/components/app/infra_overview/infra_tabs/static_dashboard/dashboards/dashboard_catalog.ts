@@ -5,20 +5,31 @@
  * 2.0.
  */
 
-export type InfrastructureDashboardType = 'k8s_otel' | 'otel_on_host' | 'otel_containers';
+export type InfrastructureDashboardType =
+  | 'k8s_deployments_otel'
+  | 'k8s_nodes_otel'
+  | 'otel_on_host'
+  | 'otel_containers';
 
 export const existingDashboardFileNames = new Set<InfrastructureDashboardType>([
-  'k8s_otel',
+  'k8s_deployments_otel',
+  'k8s_nodes_otel',
   'otel_on_host',
   'otel_containers',
 ]);
 
 export async function loadDashboardFile(filename: InfrastructureDashboardType) {
   switch (filename) {
-    case 'k8s_otel': {
+    case 'k8s_deployments_otel': {
       return import(
-        /* webpackChunkName: "lazyK8sOtelDashboard" */
-        './k8s_otel.json'
+        /* webpackChunkName: "lazyK8sDeploymentsOtelDashboard" */
+        './k8s_deployments_otel.json'
+      );
+    }
+    case 'k8s_nodes_otel': {
+      return import(
+        /* webpackChunkName: "lazyK8sNodesOtelDashboard" */
+        './k8s_nodes_otel.json'
       );
     }
     case 'otel_on_host': {
