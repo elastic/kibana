@@ -49,8 +49,11 @@ export const useContentListItemsQuery = (
   );
 
   // React Query for data fetching.
+  // `keepPreviousData` retains the previous results while a new query loads,
+  // preventing the table from flashing empty when filters or search text change.
   const query = useQuery({
     queryKey: contentListKeys.items(queryKeyScope, queryParams),
+    keepPreviousData: true,
     queryFn: async ({ signal }) => {
       const result = await dataSource.findItems({ ...queryParams, signal });
 
@@ -83,7 +86,8 @@ export const useContentListItemsQuery = (
   return {
     items: query.data?.items ?? [],
     totalItems: query.data?.total ?? 0,
-    isLoading: query.isLoading || query.isFetching,
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
     error,
     refetch: query.refetch,
   };

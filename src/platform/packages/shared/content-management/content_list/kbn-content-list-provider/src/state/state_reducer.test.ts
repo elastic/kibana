@@ -68,6 +68,48 @@ describe('state_reducer', () => {
     });
   });
 
+  describe('SET_SEARCH', () => {
+    it('sets search text', () => {
+      const initialState = createInitialState();
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
+        payload: { search: 'dashboard' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters.search).toBe('dashboard');
+    });
+
+    it('clears search when set to empty string', () => {
+      const initialState = createInitialState({
+        filters: { search: 'existing search' },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
+        payload: { search: '' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters.search).toBeUndefined();
+    });
+
+    it('preserves sort when setting search', () => {
+      const initialState = createInitialState({
+        sort: { field: 'title', direction: 'asc' },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
+        payload: { search: 'test query' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.sort).toEqual({ field: 'title', direction: 'asc' });
+    });
+  });
+
   describe('unknown action', () => {
     it('returns current state for unknown action types', () => {
       const initialState = createInitialState();
@@ -103,6 +145,30 @@ describe('state_reducer', () => {
       });
 
       expect(initialState.sort).toBe(originalSort);
+      expect(initialState.filters).toBe(originalFilters);
+    });
+
+    it('returns a new state object for SET_SEARCH', () => {
+      const initialState = createInitialState();
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
+        payload: { search: 'test' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState).not.toBe(initialState);
+    });
+
+    it('does not mutate the original filters on SET_SEARCH', () => {
+      const initialState = createInitialState();
+      const originalFilters = initialState.filters;
+
+      reducer(initialState, {
+        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
+        payload: { search: 'test' },
+      });
+
       expect(initialState.filters).toBe(originalFilters);
     });
   });

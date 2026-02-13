@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Feature types.
-export type { ContentListFeatures, ContentListSupports } from './types';
-export { isSortingConfig, isSearchConfig } from './types';
-
-// Sorting feature.
-export type { SortField, SortOption, SortingConfig, UseContentListSortReturn } from './sorting';
-export { useContentListSort } from './sorting';
-
-// Search feature.
-export type { SearchConfig, UseContentListSearchReturn } from './search';
-export { useContentListSearch } from './search';
+/**
+ * Search configuration.
+ *
+ * Controls the search input behavior in the toolbar.
+ */
+export interface SearchConfig {
+  /** Initial search text to populate on mount. */
+  initialSearch?: string;
+}

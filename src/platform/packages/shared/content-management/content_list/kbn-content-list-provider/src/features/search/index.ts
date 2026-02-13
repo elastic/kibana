@@ -7,14 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Feature types.
-export type { ContentListFeatures, ContentListSupports } from './types';
-export { isSortingConfig, isSearchConfig } from './types';
-
-// Sorting feature.
-export type { SortField, SortOption, SortingConfig, UseContentListSortReturn } from './sorting';
-export { useContentListSort } from './sorting';
-
-// Search feature.
-export type { SearchConfig, UseContentListSearchReturn } from './search';
-export { useContentListSearch } from './search';
+export type { SearchConfig } from './types';
+export { useContentListSearch } from './use_content_list_search';
+export type { UseContentListSearchReturn } from './use_content_list_search';
