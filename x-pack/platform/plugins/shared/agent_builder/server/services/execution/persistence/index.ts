@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { createChatService } from './chat_service';
-export type { ChatService, ChatConverseParams } from './types';
+export {
+  createAgentExecutionClient,
+  type AgentExecutionClient,
+  type ExecutionPeek,
+} from './agent_execution_client';
