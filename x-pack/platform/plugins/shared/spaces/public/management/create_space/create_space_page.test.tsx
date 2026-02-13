@@ -510,7 +510,7 @@ async function updateSpace(updateFeature = true, solution?: SolutionView) {
   if (solution) {
     const solutionSelectButton = screen.getByTestId('solutionViewSelect');
     await userEvent.click(solutionSelectButton);
-    const solutionOption = screen.getByTestId(
+    const solutionOption = await screen.findByTestId(
       `solutionView${capitalizeFirstLetter(solution)}Option`
     );
     await userEvent.click(solutionOption);
