@@ -143,6 +143,10 @@ const stateSchemaV6 = stateSchemaV5.extends({
   total_filled_gap_duration_ms: schema.number(),
 });
 
+const stateSchemaV7 = stateSchemaV6.extends({
+  count_rules_with_api_key_created_by_user: schema.number(),
+});
+
 export const stateSchemaByVersion = {
   1: {
     // A task that was created < 8.10 will go through this "up" migration
@@ -276,9 +280,16 @@ export const stateSchemaByVersion = {
     }),
     schema: stateSchemaV6,
   },
+  7: {
+    up: (state: Record<string, unknown>) => ({
+      ...stateSchemaByVersion[6].up(state),
+      count_rules_with_api_key_created_by_user: state.count_rules_with_api_key_created_by_user || 0,
+    }),
+    schema: stateSchemaV7,
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[6].schema;
+const latestTaskStateSchema = stateSchemaByVersion[7].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {
@@ -367,4 +378,5 @@ export const emptyState: LatestTaskStateSchema = {
   count_ignored_fields_by_rule_type: {},
   count_rules_with_linked_dashboards: 0,
   count_rules_with_investigation_guide: 0,
+  count_rules_with_api_key_created_by_user: 0,
 };
