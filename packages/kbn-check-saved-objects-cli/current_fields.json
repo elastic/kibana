@@ -911,6 +911,11 @@
     "uiStateJSON",
     "version"
   ],
+  "markdown": [
+    "content",
+    "description",
+    "title"
+  ],
   "metrics-data-source": [],
   "metrics-explorer-view": [],
   "ml-job": [
