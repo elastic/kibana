@@ -16,7 +16,8 @@ import type { LatestAlertEventState } from '../queries';
 
 const DEFAULT_STATUS_COUNT = 1;
 
-type Operator = 'AND' | 'OR';
+type Operator = NonNullable<NonNullable<RuleResponse['state_transition']>['pending_operator']>;
+const DEFAULT_OPERATOR: Operator = 'OR';
 
 interface ThresholdConfig {
   operator: Operator;
@@ -104,7 +105,7 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
   override readonly name = 'count_timeframe';
 
   override canHandle(rule: RuleResponse): boolean {
-    return rule.state_transition != null;
+    return rule.state_transition != null && Object.keys(rule.state_transition).length > 0;
   }
 
   override getNextState(ctx: StateTransitionContext): StateTransitionResult {
@@ -139,11 +140,9 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
       return this.getNextStateTransition({
         currentStatusCount,
         elapsedMs,
-        operator: stateTransition.pending_operator ?? 'OR',
+        operator: stateTransition.pending_operator ?? DEFAULT_OPERATOR,
         count: stateTransition.pending_count,
-        timeframeMs: stateTransition.pending_timeframe
-          ? parseDurationToMs(stateTransition.pending_timeframe)
-          : undefined,
+        timeframeMs: this.safeParseDurationToMs(stateTransition.pending_timeframe),
         successStatus: alertEpisodeStatus.active,
         stayStatus: alertEpisodeStatus.pending,
       });
@@ -154,11 +153,9 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
       return this.getNextStateTransition({
         currentStatusCount,
         elapsedMs,
-        operator: stateTransition.recovering_operator ?? 'OR',
+        operator: stateTransition.recovering_operator ?? DEFAULT_OPERATOR,
         count: stateTransition.recovering_count,
-        timeframeMs: stateTransition.recovering_timeframe
-          ? parseDurationToMs(stateTransition.recovering_timeframe)
-          : undefined,
+        timeframeMs: this.safeParseDurationToMs(stateTransition.recovering_timeframe),
         successStatus: alertEpisodeStatus.inactive,
         stayStatus: alertEpisodeStatus.recovering,
       });
@@ -252,6 +249,24 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     }
 
     return { status: stayStatus, statusCount: nextCount };
+  }
+
+  /**
+   * Safely parses a duration string to milliseconds.
+   * Returns `undefined` when the value is malformed so that
+   * the timeframe dimension is simply ignored instead of
+   * blowing up the entire state transition evaluation.
+   */
+  private safeParseDurationToMs(value?: string): number | undefined {
+    if (!value) {
+      return undefined;
+    }
+
+    try {
+      return parseDurationToMs(value);
+    } catch {
+      return undefined;
+    }
   }
 
   private getElapsedMs(currentTimestamp?: string, previousTimestamp?: string | null): number {

@@ -35,10 +35,10 @@ describe('TransitionStrategyFactory', () => {
       expect(resolved.name).toBe('count_timeframe');
     });
 
-    it('returns the count_timeframe strategy when stateTransition is an empty object', () => {
+    it('returns the basic (fallback) strategy when stateTransition is an empty object', () => {
       const rule = createRuleResponse({ state_transition: {} });
       const resolved = factory.getStrategy(rule);
-      expect(resolved.name).toBe('count_timeframe');
+      expect(resolved.name).toBe('basic');
     });
   });
 

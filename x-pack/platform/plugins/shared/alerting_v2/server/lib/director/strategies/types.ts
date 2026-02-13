@@ -21,8 +21,20 @@ export interface StateTransitionResult {
 }
 
 export interface ITransitionStrategy {
+  /** Unique identifier for this strategy, used for logging and debugging. */
   name: string;
+
+  /**
+   * Determines whether this strategy is applicable for the given rule.
+   * The {@link TransitionStrategyFactory} iterates registered strategies
+   * and selects the first one whose `canHandle` returns `true`.
+   */
   canHandle(rule: RuleResponse): boolean;
+
+  /**
+   * Computes the next episode status (and optional status count) for an
+   * alert event, given the rule configuration and the previous episode state.
+   */
   getNextState(ctx: StateTransitionContext): StateTransitionResult;
 }
 
