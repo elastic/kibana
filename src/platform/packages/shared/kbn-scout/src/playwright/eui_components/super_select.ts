@@ -99,4 +99,37 @@ export class EuiSuperSelectWrapper {
   async isDisabled(): Promise<boolean> {
     return await this.button.isDisabled();
   }
+
+  /**
+   * Get all option values in display order from the dropdown.
+   * Opens the dropdown if not already open and closes it afterward.
+   * The value is extracted from the data-test-subj attribute (e.g., "option-type-boolean" -> "boolean").
+   * @param testSubjPrefix - Optional prefix to strip from test-subj to get the value (default: "option-type-")
+   * @returns Array of option value strings in display order
+   */
+  async getOptionValues(testSubjPrefix: string = 'option-type-'): Promise<string[]> {
+    const wasOpened = await this.getIsDropdownOpened();
+    if (!wasOpened) {
+      await this.toggleDropdown();
+    }
+
+    const options = await this.dropdown.locator('[role="option"]').all();
+    const values = await Promise.all(
+      options.map(async (option, index) => {
+        // Get the value from data-test-subj attribute
+        const testSubj = await option.getAttribute('data-test-subj');
+        const value = testSubj?.replace(testSubjPrefix, '') || '';
+        return { index, value };
+      })
+    );
+
+    // Close dropdown if we opened it
+    if (!wasOpened) {
+      await this.toggleDropdown();
+      await this.dropdown.waitFor({ state: 'detached' });
+    }
+
+    // Sort by index to ensure we return in display order
+    return values.sort((a, b) => a.index - b.index).map((v) => v.value);
+  }
 }
