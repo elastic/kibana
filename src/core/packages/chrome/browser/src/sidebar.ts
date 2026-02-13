@@ -9,6 +9,7 @@
 
 export type {
   SidebarApp,
+  SidebarAppConfig,
   SidebarAppDefinition,
   SidebarSetup,
   SidebarStart,

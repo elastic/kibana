@@ -6,14 +6,16 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
+import { AGENT_POLICY_VERSION_SEPARATOR } from '../../../common/constants';
 import { AGENTS_INDEX } from '../../../common';
 
 /**
- * Given a list of Agent Policy IDs, an object will be returned with the agent policy id as the key
- * and the number of active agents using that agent policy.
+ * Given a list of Agent Policy IDs (parent policy ids), returns the count of active agents
+ * assigned to each policy or any of its version-specific policies (e.g. policy1 and policy1#9.3).
  * @param esClient
- * @param agentPolicyIds
+ * @param agentPolicyIds parent agent policy ids
  */
 export const getAgentCountForAgentPolicies = async (
   esClient: ElasticsearchClient,
@@ -23,9 +25,22 @@ export const getAgentCountForAgentPolicies = async (
     return {};
   }
 
+  const filters: Record<string, QueryDslQueryContainer> = {};
+  for (const policyId of agentPolicyIds) {
+    filters[policyId] = {
+      bool: {
+        should: [
+          { term: { policy_id: policyId } },
+          { prefix: { policy_id: `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}` } },
+        ],
+        minimum_should_match: 1,
+      },
+    };
+  }
+
   const searchPromise = esClient.search<
     unknown,
-    Record<'agent_counts', { buckets: Array<{ key: string; doc_count: number }> }>
+    Record<'agent_counts', { buckets: Record<string, { doc_count: number }> }>
   >({
     index: AGENTS_INDEX,
     ignore_unavailable: true,
@@ -37,19 +52,13 @@ export const getAgentCountForAgentPolicies = async (
               active: 'true',
             },
           },
-          {
-            terms: {
-              policy_id: agentPolicyIds,
-            },
-          },
         ],
       },
     },
     aggs: {
       agent_counts: {
-        terms: {
-          field: 'policy_id',
-          size: agentPolicyIds.length,
+        filters: {
+          filters,
         },
       },
     },
@@ -69,8 +78,8 @@ export const getAgentCountForAgentPolicies = async (
   if (searchResponse.aggregations?.agent_counts.buckets) {
     const buckets = searchResponse.aggregations?.agent_counts.buckets;
 
-    for (const { key: agentPolicyId, doc_count: count } of buckets) {
-      response[agentPolicyId] = count;
+    for (const [agentPolicyId, bucket] of Object.entries(buckets)) {
+      response[agentPolicyId] = bucket.doc_count;
     }
   }
 

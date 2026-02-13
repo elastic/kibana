@@ -13,66 +13,25 @@ import type {
   SecretReference,
   SOSecretPath,
 } from '../../../common/types';
-import { appContextService } from '../app_context';
-import { settingsService } from '..';
-import { checkFleetServerVersionsForSecretsStorage } from '../fleet_server';
 import { ACTION_SECRETS_MINIMUM_FLEET_SERVER_VERSION } from '../../constants';
 
-import { deleteSOSecrets, extractAndWriteSOSecrets } from './common';
+import {
+  deleteSOSecrets,
+  extractAndWriteSOSecrets,
+  isSecretStorageEnabledForFeature,
+} from './common';
 
-/**
- * Check if action secret storage is enabled.
- * Returns true if fleet server is standalone (serverless).
- * Otherwise, checks if the minimum fleet server version requirement has been met.
- * If the requirement has been met, updates the settings to enable action secret storage.
- */
 export async function isActionSecretStorageEnabled(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract
 ): Promise<boolean> {
-  const logger = appContextService.getLogger();
-
-  // if serverless then action secrets will always be supported
-  const isFleetServerStandalone =
-    appContextService.getConfig()?.internal?.fleetServerStandalone ?? false;
-
-  if (isFleetServerStandalone) {
-    logger.trace('Action secrets storage is enabled as fleet server is standalone');
-    return true;
-  }
-
-  // now check the flag in settings to see if the fleet server requirement has already been met
-  // once the requirement has been met, action secrets are always on
-  const settings = await settingsService.getSettingsOrUndefined(soClient);
-
-  if (settings && settings.action_secret_storage_requirements_met) {
-    logger.debug('Action secrets storage requirements already met, turned on in settings');
-    return true;
-  }
-
-  // otherwise check if we have the minimum fleet server version and enable secrets if so
-  if (
-    await checkFleetServerVersionsForSecretsStorage(
-      esClient,
-      soClient,
-      ACTION_SECRETS_MINIMUM_FLEET_SERVER_VERSION
-    )
-  ) {
-    logger.debug('Enabling action secrets storage as minimum fleet server version has been met');
-    try {
-      await settingsService.saveSettings(soClient, {
-        action_secret_storage_requirements_met: true,
-      });
-    } catch (err) {
-      // we can suppress this error as it will be retried on the next function call
-      logger.warn(`Failed to save settings after enabling action secrets storage: ${err.message}`);
-    }
-
-    return true;
-  }
-
-  logger.info('Secrets storage is disabled as minimum fleet server version has not been met');
-  return false;
+  return isSecretStorageEnabledForFeature({
+    esClient,
+    soClient,
+    featureName: 'Action secrets',
+    minimumFleetServerVersion: ACTION_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+    settingKey: 'action_secret_storage_requirements_met',
+  });
 }
 
 /**

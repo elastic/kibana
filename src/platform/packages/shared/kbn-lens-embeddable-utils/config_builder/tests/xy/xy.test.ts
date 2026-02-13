@@ -24,7 +24,11 @@ import {
 } from './basicXY.mock';
 import { dualReferenceLineXY, referenceLineXY } from './referenceLines.mock';
 import { annotationXY } from './annotations.mock';
-import { esqlChart } from './esqlXY.mock';
+import {
+  esqlChart,
+  esqlChartWithBreakdownColorMapping,
+  esqlXYWithCollapseByBreakdown,
+} from './esqlXY.mock';
 
 function setSeriesType(attributes: LensAttributes, seriesType: 'bar' | 'line' | 'area') {
   return {
@@ -82,6 +86,10 @@ describe('XY', () => {
           xyStateSchema
         );
       });
+
+      it('should convert an esql xy with collapse by breakdown', () => {
+        validateConverter(esqlXYWithCollapseByBreakdown, xyStateSchema);
+      });
     });
 
     describe('Reference lines', () => {
@@ -108,6 +116,12 @@ describe('XY', () => {
       for (const type of ['bar', 'line', 'area'] as const) {
         it(`should work for an annotation with a ${type} chart`, () => {
           validateConverter(setSeriesType(esqlChart, type), xyStateSchema);
+        });
+      }
+
+      for (const type of ['bar', 'line', 'area'] as const) {
+        it(`should work for an ES|QL ${type} chart with breakdown and color mapping`, () => {
+          validateConverter(setSeriesType(esqlChartWithBreakdownColorMapping, type), xyStateSchema);
         });
       }
     });
@@ -173,6 +187,73 @@ describe('XY', () => {
       );
     });
 
+    it.each(anyType)(
+      'should work for ES|QL mode for a %s chart with breakdown and collapse_by',
+      (type) => {
+        validateAPIConverter(
+          {
+            type: 'xy',
+            title: `${type} Chart with collapse`,
+            layers: [
+              {
+                dataset: {
+                  type: 'esql',
+                  query: 'FROM kibana_sample_data_logs',
+                },
+                type,
+                ignore_global_filters: false,
+                sampling: 1,
+                x: { operation: 'value', column: '@timestamp' },
+                y: [{ operation: 'value', column: 'bytes' }],
+                breakdown_by: { operation: 'value', column: 'agent', collapse_by: 'max' },
+              },
+            ],
+          },
+          xyStateSchema
+        );
+      }
+    );
+
+    it.each(anyType)(
+      'should work for ES|QL mode for %s chart with breakdown and categorical color mapping',
+      (type) => {
+        validateAPIConverter(
+          {
+            type: 'xy',
+            title: `${type} Chart with Color Mapping`,
+            layers: [
+              {
+                dataset: {
+                  type: 'esql',
+                  query:
+                    'FROM kibana_sample_data | STATS count = count() BY category, buckets = BUCKET(3 hours, order_date)',
+                },
+                type,
+                ignore_global_filters: false,
+                sampling: 1,
+                x: { operation: 'value', column: 'buckets' },
+                y: [{ operation: 'value', column: 'count' }],
+                breakdown_by: {
+                  operation: 'value',
+                  column: 'category',
+                  color: {
+                    mode: 'categorical',
+                    palette: 'default',
+                    mapping: [
+                      {
+                        values: ['Clothing'],
+                        color: { type: 'colorCode', value: '#ff0000' },
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+          xyStateSchema
+        );
+      }
+    );
     it.each(anyType.map((type) => anyType.map((anotherType) => [type, anotherType])).flat(1))(
       'should handle multiple metric in multiple layers %s + %s with reference lines and annotations with mixed datasets',
       (type1, type2) => {

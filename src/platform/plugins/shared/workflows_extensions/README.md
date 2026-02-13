@@ -880,7 +880,7 @@ When registering a new step, you must:
 1. **Run the test locally** to get the step ID and handler hash:
 
    ```bash
-   node scripts/scout.js run-tests --stateful \
+   node scripts/scout.js run-tests --arch stateful --domain classic \
      --config src/platform/plugins/shared/workflows_extensions/test/scout/api/playwright.config.ts
    ```
 
@@ -913,10 +913,10 @@ To run the test locally:
 
 ```bash
 # Start servers and run tests
-node scripts/scout.js run-tests --stateful --config src/platform/plugins/shared/workflows_extensions/test/scout/api/playwright.config.ts
+node scripts/scout.js run-tests --arch stateful --domain classic --config src/platform/plugins/shared/workflows_extensions/test/scout/api/playwright.config.ts
 
 # Or start servers separately, then run tests
-node scripts/scout.js start-server --stateful
+node scripts/scout.js start-server --arch stateful --domain classic
 npx playwright test --config src/platform/plugins/shared/workflows_extensions/test/scout/api/playwright.config.ts --project local
 ```
 

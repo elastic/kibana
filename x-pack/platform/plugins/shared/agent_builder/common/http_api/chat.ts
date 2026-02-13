@@ -6,6 +6,7 @@
  */
 
 import type {
+  ConversationAction,
   ConversationRound,
   AgentCapabilities,
   AssistantResponse,
@@ -28,6 +29,9 @@ export interface ChatRequestBodyPayload {
   prompts?: Record<string, PromptResponse>;
   browser_api_tools?: BrowserApiToolMetadata[];
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
+  action?: ConversationAction;
+  /** Force a specific execution mode. When omitted, the server auto-detects. */
+  _execution_mode?: 'local' | 'task_manager';
 }
 
 export type ChatResponse = Omit<
