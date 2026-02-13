@@ -727,7 +727,12 @@ describe('run_all.ts', () => {
         );
         expect(setCalls.length).toBe(1);
         expect(setCalls[0][1]).toEqual(
-          expect.arrayContaining(['meta-data', 'set', expect.stringContaining('jest_ckpt_'), 'done'])
+          expect.arrayContaining([
+            'meta-data',
+            'set',
+            expect.stringContaining('jest_ckpt_'),
+            'done',
+          ])
         );
       });
 
