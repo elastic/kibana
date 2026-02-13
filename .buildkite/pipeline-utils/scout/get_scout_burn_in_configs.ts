@@ -13,6 +13,7 @@ import path from 'path';
 import { load as loadYaml } from 'js-yaml';
 import type { ModuleDiscoveryInfo } from './pick_scout_test_group_run_order';
 import { getKibanaDir } from '../utils';
+import { getPrChanges } from '../github/github';
 
 /**
  * Inclusive patterns for source files that could affect Scout test behavior.
@@ -80,15 +81,37 @@ function readMoonYml(filePath: string): MoonProject | null {
   }
 }
 
-// ─── Git Change Detection ────────────────────────────────────────────────────
+// ─── Change Detection ────────────────────────────────────────────────────────
 
 /**
- * Get the list of files changed in the PR compared to the target branch.
- * Uses the pre-computed GITHUB_PR_MERGE_BASE env var (set by Kibana's bootstrap)
- * to diff against the merge-base, avoiding issues with shallow clones in CI.
+ * Get the list of files changed in the PR using the GitHub API.
+ * This is the most reliable method as GitHub correctly computes the diff
+ * regardless of branch history, merge commits, or shallow clones.
+ *
+ * Falls back to git diff when GitHub API is not available (e.g., local dev).
  */
-function getChangedFiles(): string[] {
-  // Prefer the merge-base already computed by Kibana's bootstrap (set_git_merge_base in util.sh)
+async function getChangedFiles(): Promise<string[]> {
+  // Primary: use GitHub API (handles merge commits, rebases, and complex histories correctly)
+  if (process.env.GITHUB_PR_NUMBER) {
+    try {
+      const prFiles = await getPrChanges();
+      const filenames = prFiles.map((f: { filename: string }) => f.filename);
+      console.error(`scout burn-in: Retrieved ${filenames.length} changed file(s) from GitHub API`);
+      return filenames;
+    } catch (ex) {
+      console.error(`scout burn-in: GitHub API failed, falling back to git diff: ${ex}`);
+    }
+  }
+
+  // Fallback: git diff (for local development or when GitHub API is unavailable)
+  return getChangedFilesFromGit();
+}
+
+/**
+ * Get changed files using git diff against the target branch.
+ * Uses GITHUB_PR_MERGE_BASE when available, with fallbacks for various CI scenarios.
+ */
+function getChangedFilesFromGit(): string[] {
   const mergeBase = process.env.GITHUB_PR_MERGE_BASE;
 
   if (mergeBase) {
@@ -103,7 +126,6 @@ function getChangedFiles(): string[] {
     }
   }
 
-  // Fallback: compute merge-base manually (works outside CI or when env var is missing)
   const baseBranch = process.env.GITHUB_PR_TARGET_BRANCH || 'main';
 
   try {
@@ -128,7 +150,6 @@ function getChangedFiles(): string[] {
 
     return output.trim().split('\n').filter(Boolean);
   } catch {
-    // Last resort fallback: three-dot diff syntax
     try {
       const output = execSync(`git diff --name-only origin/${baseBranch}...HEAD`, {
         encoding: 'utf-8',
@@ -270,6 +291,10 @@ function findDependentModules(
  *    dependency in another Scout test module's moon.yml dependsOn, the dependent
  *    module is also affected.
  *
+ * Change detection uses the GitHub API (primary) with git diff as fallback.
+ * The GitHub API correctly computes the PR diff regardless of branch history,
+ * merge commits, or shallow clones.
+ *
  * File filtering uses inclusive patterns (only source files like .ts, .tsx, .js, etc.)
  * rather than an exclusion list, so new non-source file types won't accidentally
  * trigger burn-in.
@@ -277,8 +302,10 @@ function findDependentModules(
  * @param allModules - The complete list of discovered Scout modules with configs
  * @returns Filtered list containing only modules affected by PR changes
  */
-export function getChangedScoutModules(allModules: ModuleDiscoveryInfo[]): ModuleDiscoveryInfo[] {
-  const changedFiles = getChangedFiles();
+export async function getChangedScoutModules(
+  allModules: ModuleDiscoveryInfo[]
+): Promise<ModuleDiscoveryInfo[]> {
+  const changedFiles = await getChangedFiles();
 
   if (changedFiles.length === 0) {
     console.error('scout burn-in: No changed files detected');

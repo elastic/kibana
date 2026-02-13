@@ -46,7 +46,7 @@ export async function pickScoutBurnInRunOrder(scoutConfigsPath: string) {
   }
 
   // Filter to only modules affected by PR changes
-  const affectedModules = getChangedScoutModules(allModules);
+  const affectedModules = await getChangedScoutModules(allModules);
 
   if (affectedModules.length === 0) {
     console.error('scout burn-in: No affected modules found, skipping burn-in step generation');
