@@ -9,7 +9,6 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenu,
   EuiHeader,
@@ -20,6 +19,7 @@ import {
   EuiImage,
   EuiLoadingSpinner,
   EuiPopover,
+  EuiSplitButton,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -124,8 +124,21 @@ const OVERFLOW_PANELS = [
 
 const GlobalHeaderAppActionsDumb: React.FC = () => {
   const [isOverflowOpen, setIsOverflowOpen] = useState(false);
+  const [isSavePopoverOpen, setIsSavePopoverOpen] = useState(false);
+  const closeSavePopover = () => setIsSavePopoverOpen(false);
+  const savePopoverPanels = [
+    {
+      id: 0,
+      title: '',
+      items: [
+        { name: 'Save as', icon: 'save', onClick: closeSavePopover },
+        { name: 'Reset changes', icon: 'editorUndo', onClick: closeSavePopover },
+      ],
+    },
+  ];
   const overflowButton = (
     <EuiButtonIcon
+      color="text"
       iconType="boxesVertical"
       aria-label="More actions"
       onClick={() => setIsOverflowOpen(!isOverflowOpen)}
@@ -133,30 +146,57 @@ const GlobalHeaderAppActionsDumb: React.FC = () => {
     />
   );
   return (
-    <EuiHeaderLinks gutterSize="xs" popoverBreakpoints="none">
-      <EuiButtonEmpty size="s" iconType="plusInCircle" data-test-subj="headerGlobalNav-appActionsNewButton">
-        New
-      </EuiButtonEmpty>
-      <EuiButtonEmpty size="s" iconType="share" data-test-subj="headerGlobalNav-appActionsShareButton">
-        Share
-      </EuiButtonEmpty>
+    <EuiHeaderLinks gutterSize="xxs" popoverBreakpoints="none">
       <EuiPopover
         button={overflowButton}
         isOpen={isOverflowOpen}
         closePopover={() => setIsOverflowOpen(false)}
-        anchorPosition="downRight"
+        anchorPosition="downLeft"
         panelPaddingSize="none"
       >
         <EuiContextMenu panels={OVERFLOW_PANELS} initialPanelId={0} />
       </EuiPopover>
-      <EuiButtonEmpty size="s" iconType="save" data-test-subj="headerGlobalNav-appActionsSaveButton">
-        Save
-      </EuiButtonEmpty>
-      <EuiButtonIcon
-        iconType="arrowDown"
-        aria-label="Save options"
-        data-test-subj="headerGlobalNav-appActionsSaveDropdown"
-      />
+      <EuiButtonIcon size="xs" color="text" iconType="plusInCircle" data-test-subj="headerGlobalNav-appActionsNewButton">
+        New
+      </EuiButtonIcon>
+      <EuiButtonIcon size="xs" color="text" iconType="share" data-test-subj="headerGlobalNav-appActionsShareButton">
+        Share
+      </EuiButtonIcon>
+      <EuiSplitButton
+        size="s"
+        color="text"
+        fill={false}
+        data-test-subj="headerGlobalNav-appActionsSaveSplitButton"
+        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.saveAriaLabel', {
+          defaultMessage: 'Save',
+        })}
+      >
+        <EuiSplitButton.ActionPrimary
+          iconType="save"
+          data-test-subj="headerGlobalNav-appActionsSaveButton"
+          minWidth={false}
+        >
+          Save
+        </EuiSplitButton.ActionPrimary>
+        <EuiPopover
+          button={React.cloneElement(
+            <EuiSplitButton.ActionSecondary
+              iconType="arrowDown"
+              aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.saveOptionsAriaLabel', {
+                defaultMessage: 'Save options',
+              })}
+              data-test-subj="headerGlobalNav-appActionsSaveDropdown"
+            />,
+            { onClick: () => setIsSavePopoverOpen(true) }
+          )}
+          isOpen={isSavePopoverOpen}
+          closePopover={closeSavePopover}
+          anchorPosition="downLeft"
+          panelPaddingSize="none"
+        >
+          <EuiContextMenu panels={savePopoverPanels} initialPanelId={0} />
+        </EuiPopover>
+      </EuiSplitButton>
     </EuiHeaderLinks>
   );
 };
