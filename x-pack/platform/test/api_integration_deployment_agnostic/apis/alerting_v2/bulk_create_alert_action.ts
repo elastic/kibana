@@ -28,11 +28,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       // Create alert events for two different group hashes
       const alertEvent1 = createAlertEvent({
         group_hash: 'group-1',
-        episode: { id: 'episode-1', status: 'active' },
+        episode: { id: 'group-1-episode-1', status: 'active' },
       });
       const alertEvent2 = createAlertEvent({
         group_hash: 'group-2',
-        episode: { id: 'episode-2', status: 'active' },
+        episode: { id: 'group-2-episode-1', status: 'active' },
       });
 
       await Promise.all([
@@ -73,6 +73,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         query: { match_all: {} },
         refresh: true,
         wait_for_completion: true,
+        conflicts: 'proceed',
       });
     });
 
@@ -101,7 +102,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(BULK_ALERT_ACTION_API_PATH)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send([{ group_hash: 'group-1', action_type: 'ack', episode_id: 'episode-1' }]);
+        .send([{ group_hash: 'group-1', action_type: 'ack', episode_id: 'group-1-episode-1' }]);
 
       expect(response.status).to.be(200);
       expect(response.body).to.eql({ processed: 1, total: 1 });
@@ -118,7 +119,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send([
-          { group_hash: 'group-1', action_type: 'ack', episode_id: 'episode-1' },
+          { group_hash: 'group-1', action_type: 'ack', episode_id: 'group-1-episode-1' },
           { group_hash: 'group-2', action_type: 'snooze' },
         ]);
 
@@ -141,9 +142,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send([
-          { group_hash: 'group-1', action_type: 'ack', episode_id: 'episode-1' },
-          { group_hash: 'unknown-group', action_type: 'ack', episode_id: 'episode-1' },
-          { group_hash: 'group-2', action_type: 'unack', episode_id: 'episode-2' },
+          { group_hash: 'group-1', action_type: 'ack', episode_id: 'group-1-episode-1' },
+          {
+            group_hash: 'unknown-group',
+            action_type: 'ack',
+            episode_id: 'unknown-group-episode-1',
+          },
+          { group_hash: 'group-2', action_type: 'unack', episode_id: 'group-2-episode-1' },
         ]);
 
       expect(response.status).to.be(200);
@@ -164,7 +169,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send([
-          { group_hash: 'unknown-1', action_type: 'ack', episode_id: 'episode-1' },
+          { group_hash: 'unknown-1', action_type: 'ack', episode_id: 'unknown-1-episode-1' },
           { group_hash: 'unknown-2', action_type: 'snooze' },
         ]);
 
@@ -181,7 +186,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send([
-          { group_hash: 'group-1', action_type: 'ack', episode_id: 'episode-1' },
+          { group_hash: 'group-1', action_type: 'ack', episode_id: 'group-1-episode-1' },
           { group_hash: 'group-1', action_type: 'tag', tags: ['important', 'reviewed'] },
           { group_hash: 'group-2', action_type: 'snooze' },
           { group_hash: 'group-2', action_type: 'activate', reason: 'needs attention' },
