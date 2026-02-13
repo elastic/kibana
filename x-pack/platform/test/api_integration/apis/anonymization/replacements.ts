@@ -110,7 +110,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(status).to.be(404);
       });
-
     });
 
     describe('space isolation', () => {

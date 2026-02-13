@@ -166,7 +166,7 @@ export class AnonymizationPlugin
     };
 
     // Ensure a default alerts data view profile exists in the default space at startup.
-    (async () => {
+    void (async () => {
       try {
         await ensureProfilesIndexReady();
         await ensureAlertsDataViewProfile({
