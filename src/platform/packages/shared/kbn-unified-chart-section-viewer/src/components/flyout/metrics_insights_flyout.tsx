@@ -92,7 +92,7 @@ export const MetricInsightsFlyout = ({ metric, esqlQuery, onClose }: MetricInsig
         data-test-subj="metricsExperienceFlyout"
         aria-labelledby={metricFlyoutTitleId}
         onKeyDown={onKeyDown}
-        ownFocus
+        ownFocus={false} // Workaround: avoids Emotion insertBefore error when flyout unmounts inside react-reverse-portal
         minWidth={minWidth}
         maxWidth={maxWidth}
         resizable={true}
