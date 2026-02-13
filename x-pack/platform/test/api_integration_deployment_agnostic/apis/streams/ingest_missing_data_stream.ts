@@ -14,6 +14,7 @@ import {
   deleteStream,
   disableStreams,
   enableStreams,
+  getStream,
   putStream,
   restoreDataStream,
 } from './helpers/requests';
@@ -23,44 +24,83 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
 
   let apiClient: StreamsSupertestRepositoryClient;
-  const streamName = 'logs.missing_ds_restore';
 
-  describe('Restore data stream', function () {
+  describe('Orphaned wired stream', function () {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
-
-      // Create a wired stream
-      await putStream(apiClient, streamName, {
-        ...emptyAssets,
-        stream: {
-          description: '',
-          ingest: {
-            settings: {},
-            processing: { steps: [] },
-            lifecycle: { inherit: {} },
-            wired: { fields: {}, routing: [] },
-            failure_store: { inherit: {} },
-          },
-        },
-      });
-
-      // Simulate a corrupted/out-of-sync setup: stream definition exists but backing ES data stream is missing
-      await esClient.indices.deleteDataStream({ name: streamName });
     });
 
     after(async () => {
-      // Cleanup should tolerate the missing data stream.
-      await deleteStream(apiClient, streamName);
       await disableStreams(apiClient);
     });
 
-    it('can restore the stream by recreating only the backing Elasticsearch data stream', async () => {
-      await restoreDataStream(apiClient, streamName);
+    describe('restoring', () => {
+      const restoreStreamName = 'logs.orphaned_wired_restore';
 
-      const dsResponse = await esClient.indices.getDataStream({ name: streamName });
-      expect(dsResponse.data_streams).to.have.length(1);
-      expect(dsResponse.data_streams[0].name).to.be(streamName);
+      before(async () => {
+        // Create a wired stream
+        await putStream(apiClient, restoreStreamName, {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              settings: {},
+              processing: { steps: [] },
+              lifecycle: { inherit: {} },
+              wired: { fields: {}, routing: [] },
+              failure_store: { inherit: {} },
+            },
+          },
+        });
+
+        // Simulate orphaned state: delete the backing ES data stream
+        await esClient.indices.deleteDataStream({ name: restoreStreamName });
+      });
+
+      after(async () => {
+        await deleteStream(apiClient, restoreStreamName);
+      });
+
+      it('can restore the stream by recreating only the backing Elasticsearch data stream', async () => {
+        await restoreDataStream(apiClient, restoreStreamName);
+
+        const dsResponse = await esClient.indices.getDataStream({ name: restoreStreamName });
+        expect(dsResponse.data_streams).to.have.length(1);
+        expect(dsResponse.data_streams[0].name).to.be(restoreStreamName);
+      });
+    });
+
+    describe('deleting', () => {
+      const deleteStreamName = 'logs.orphaned_wired_delete';
+
+      before(async () => {
+        // Create a wired stream
+        await putStream(apiClient, deleteStreamName, {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              settings: {},
+              processing: { steps: [] },
+              lifecycle: { inherit: {} },
+              wired: { fields: {}, routing: [] },
+              failure_store: { inherit: {} },
+            },
+          },
+        });
+
+        // Simulate orphaned state: delete the backing ES data stream
+        await esClient.indices.deleteDataStream({ name: deleteStreamName });
+      });
+
+      it('can delete an orphaned wired stream when the backing data stream is missing', async () => {
+        const response = await deleteStream(apiClient, deleteStreamName);
+        expect(response).to.have.property('acknowledged', true);
+
+        // Verify stream is actually deleted
+        await getStream(apiClient, deleteStreamName, 404);
+      });
     });
   });
 }
