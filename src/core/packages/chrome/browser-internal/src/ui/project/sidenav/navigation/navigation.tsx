@@ -15,7 +15,6 @@ import classnames from 'classnames';
 import type {
   ChromeNavLink,
   ChromeProjectNavigationNode,
-  ChromeRecentlyAccessedHistoryItem,
   NavigationTreeDefinitionUI,
 } from '@kbn/core-chrome-browser';
 import type { IBasePath as BasePath } from '@kbn/core-http-browser';
@@ -35,24 +34,21 @@ export interface ChromeNavigationProps {
   // kibana deps
   basePath: BasePath;
   application: Pick<ApplicationStart, 'navigateToUrl' | 'currentAppId$'>;
-  reportEvent: (eventType: string, eventData: object) => void;
 
   // nav state
   navigationTree$: Observable<NavigationTreeDefinitionUI>;
   navLinks$: Observable<Readonly<ChromeNavLink[]>>;
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
 
-  // other state that might be needed later
-  recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
-  loadingCount$: Observable<number>;
-  dataTestSubj$?: Observable<string | undefined>;
-
-  isFeedbackBtnVisible$: Observable<boolean>;
+  // feedback
   isFeedbackEnabled$: Observable<boolean>;
   feedbackUrlParams$: Observable<URLSearchParams | undefined>;
 
   // collapse toggle callback
   onToggleCollapsed: (isCollapsed: boolean) => void;
+
+  // other
+  dataTestSubj$?: Observable<string | undefined>;
 }
 
 export const Navigation = (props: ChromeNavigationProps) => {

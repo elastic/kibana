@@ -17,8 +17,10 @@ import { nonNullable, unescapeColumn } from './helpers';
 import { firstItem, lastItem, resolveItem, singleItems } from '../../ast/visitor/utils';
 import { type AstNodeParserFields, Builder } from '../../ast/builder';
 import { type ArithmeticUnaryContext } from '../antlr/esql_parser';
+import { PromQLParser } from '../../embedded_languages/promql/parser/parser';
 import type { AstNodeTemplate } from '../../ast/builder';
 import type { Parser } from './parser';
+import type { PromQLAstQueryExpression } from '../../embedded_languages/promql/types';
 
 const textExistsAndIsValid = (text: string | undefined): text is string =>
   !!(text && !/<missing /.test(text));
@@ -504,6 +506,12 @@ export class CstToAstConverter {
 
     if (forkCommandCtx) {
       return this.fromForkCommand(forkCommandCtx);
+    }
+
+    const mmrCommand = ctx.mmrCommand();
+
+    if (mmrCommand) {
+      return this.fromMmrCommand(mmrCommand);
     }
 
     // throw new Error(`Unknown processing command: ${this.getSrc(ctx)}`;
@@ -1506,14 +1514,14 @@ export class CstToAstConverter {
     command: ast.ESQLAstRerankCommand
   ): void {
     const onToken = ctx.ON();
-    const rerankFieldsCtx = ctx.rerankFields();
+    const fieldsCtx = ctx.fields();
 
-    if (!onToken || !rerankFieldsCtx) {
+    if (!onToken || !fieldsCtx) {
       return;
     }
 
-    const onOption = this.toOption(onToken.getText().toLowerCase(), rerankFieldsCtx);
-    const fields = this.fromRerankFields(rerankFieldsCtx);
+    const onOption = this.toOption(onToken.getText().toLowerCase(), fieldsCtx);
+    const fields = this.fromFields(fieldsCtx);
 
     onOption.args.push(...fields);
     onOption.location.min = onToken.symbol.start;
@@ -1572,97 +1580,6 @@ export class CstToAstConverter {
         command.inferenceId.incomplete = inferenceIdParam.valueUnquoted?.length === 0;
       }
     }
-  }
-
-  /**
-   * Collects all ON fields for RERANK.
-   *
-   * - Accepts simple columns (e.g. `title`).
-   * - Accepts assignments (e.g. `title = X(title, 2)`).
-   * - Accepts expressions after a qualified name (e.g. `field < 10`).
-   */
-  private fromRerankFields(ctx: cst.RerankFieldsContext | undefined): ast.ESQLAstField[] {
-    const fields: ast.ESQLAstField[] = [];
-    if (!ctx) {
-      return fields;
-    }
-
-    try {
-      for (const fieldCtx of ctx.rerankField_list()) {
-        const field = this.fromRerankField(fieldCtx);
-
-        if (field) {
-          fields.push(field);
-        }
-      }
-    } catch (e) {
-      // do nothing
-    }
-    return fields;
-  }
-
-  /**
-   * Parses a single RERANK field entry.
-   *
-   * Supports three forms:
-   * 1) Assignment: qualifiedName '=' booleanExpression
-   * 2) Column only: qualifiedName
-   */
-  private fromRerankField(ctx: cst.RerankFieldContext): ast.ESQLAstField | undefined {
-    try {
-      const qualifiedNameCtx = ctx.qualifiedName();
-
-      if (!qualifiedNameCtx) {
-        return undefined;
-      }
-
-      // 1) field assignment: <col> = <booleanExpression>
-      if (ctx.ASSIGN()) {
-        const left = this.toColumn(qualifiedNameCtx);
-        const assignment = this.toFunction(
-          ctx.ASSIGN().getText(),
-          ctx,
-          undefined,
-          'binary-expression'
-        ) as ast.ESQLBinaryExpression;
-
-        if (ctx.booleanExpression()) {
-          const right = this.fromBooleanExpression(ctx.booleanExpression());
-          const hasIncompleteItem = !!right?.incomplete;
-          const hasException = !!ctx.booleanExpression()?.exception;
-
-          if (!right || hasIncompleteItem || hasException) {
-            assignment.incomplete = true;
-          }
-
-          assignment.args.push(left);
-
-          if (right) {
-            assignment.args.push(right);
-          }
-
-          assignment.location = this.extendLocationToArgs(assignment);
-        } else {
-          // User typed something like `ON col0 =` and stopped.
-          // Build an assignment with only the left operand, mark it as incomplete,
-          assignment.args.push(left, []);
-          assignment.incomplete = true;
-          assignment.location = {
-            min: left.location.min,
-            max: ctx.ASSIGN()!.symbol.stop,
-          };
-        }
-
-        return assignment;
-      }
-
-      // 2) simple column reference
-      return this.toColumn(qualifiedNameCtx);
-    } catch (e) {
-      // do nothing
-    }
-
-    return undefined;
   }
 
   // --------------------------------------------------------------------- FUSE
@@ -1779,7 +1696,6 @@ export class CstToAstConverter {
     const command = this.createCommand('promql', ctx) as ast.ESQLAstPromqlCommand;
     const args: ast.ESQLAstExpression[] = command.args;
     const paramCtxs = ctx.promqlParam_list();
-    const query = this.toPromqlCommandQuery(ctx);
 
     // PromQL params: (key = value) pairs
     if (paramCtxs.length > 0) {
@@ -1789,11 +1705,12 @@ export class CstToAstConverter {
       command.incomplete ||= params.incomplete;
     }
 
+    const query = this.toPromqlCommandQuery(ctx);
+
     // PromQL query
     if (query) {
       command.query = query;
       args.push(query);
-      command.incomplete ||= query.incomplete;
     } else {
       command.incomplete = true;
     }
@@ -2077,7 +1994,11 @@ export class CstToAstConverter {
     const valueNameCtx = ctx.valueName();
     let node: ast.ESQLAstPromqlCommandQuery | undefined = this.fromPromqlQueryParts(queryPartCtxs);
 
-    // No parenthesis: ( promqlQueryPart+ )
+    if (!node) {
+      return undefined;
+    }
+
+    // No parenthesis
     if (!lp) {
       return node;
     }
@@ -2091,7 +2012,7 @@ export class CstToAstConverter {
       incomplete: !hasCloseParen || node.incomplete,
     });
 
-    // There's a "name = ( query )"" assignment
+    // There's a "name = ( query )" assignment
     if (valueNameCtx) {
       const valueNameId = this.fromIdentifier(valueNameCtx);
       node = Builder.expression.func.binary(
@@ -2109,36 +2030,29 @@ export class CstToAstConverter {
   }
 
   /**
-   * Converts promql query parts to an "unknown" node.
-   * The detailed parsing of PromQL query will be done later.
+   * Parses promql query parts into a PromQL AST node.
    */
-  private fromPromqlQueryParts(queryPartCtxs: cst.PromqlQueryPartContext[]): ast.ESQLUnknownItem {
+  private fromPromqlQueryParts(
+    queryPartCtxs: cst.PromqlQueryPartContext[]
+  ): PromQLAstQueryExpression | undefined {
     if (queryPartCtxs.length === 0) {
-      return {
-        type: 'unknown',
-        name: 'unknown',
-        text: '',
-        location: { min: 0, max: 0 },
-        incomplete: true,
-      };
+      return undefined;
     }
 
     const firstPart = queryPartCtxs[0];
     const lastPart = queryPartCtxs[queryPartCtxs.length - 1];
     const location = getPosition(firstPart.start, lastPart.stop);
     const text = this.parser.src.slice(location.min, location.max + 1);
-
-    // If the text is empty, only whitespace, or only empty parens like "()", mark as incomplete
     const trimmedText = text.trim();
     const isEmpty = !trimmedText || trimmedText === '()';
 
-    return {
-      type: 'unknown',
-      name: 'unknown',
-      text,
-      location,
-      incomplete: isEmpty,
-    };
+    if (isEmpty) {
+      return undefined;
+    }
+
+    const parsed = PromQLParser.parse(text, { offset: location.min });
+
+    return parsed.root;
   }
 
   // --------------------------------------------------------------------- FORK
@@ -2199,6 +2113,105 @@ export class CstToAstConverter {
         hasCloseParen ? closeParen.symbol : ctx.stop
       ),
     });
+  }
+
+  // --------------------------------------------------------------------- MMR
+
+  private fromMmrCommand(ctx: cst.MmrCommandContext): ast.ESQLCommand<'mmr'> {
+    const args: ast.ESQLAstItem[] = [];
+
+    const queryVector = this.fromMmrQueryVectorParam(ctx.mmrQueryVectorParams());
+    if (queryVector) args.push(queryVector);
+
+    const onOption = this.fromMmrOnOption(ctx);
+    args.push(onOption);
+    const diversifyField = onOption.args[0]
+      ? (onOption.args[0] as ast.ESQLColumn).args[0]
+      : undefined;
+
+    const limitOption = this.fromMmrLimitOption(ctx);
+    args.push(limitOption);
+    const limit = limitOption.args[0] as ast.ESQLLiteral;
+
+    const withOption = this.fromMmrWithOption(ctx.commandNamedParameters());
+    if (withOption) args.push(withOption);
+    const namedParameters = withOption ? (withOption.args[0] as ast.ESQLMap) : undefined;
+
+    const command = this.createCommand<'mmr', ast.ESQLAstMmrCommand>('mmr', ctx, {
+      args,
+      queryVector,
+      diversifyField,
+      limit,
+      namedParameters,
+    });
+    command.incomplete ||= limitOption.incomplete;
+    command.incomplete ||= withOption?.incomplete ?? false;
+
+    return command;
+  }
+
+  private fromMmrQueryVectorParam(
+    queryVectorContext: cst.MmrQueryVectorParamsContext
+  ): ast.ESQLAstExpression | ast.ESQLParam | undefined {
+    if (!queryVectorContext || queryVectorContext.children === null) {
+      return;
+    }
+
+    const childContext = queryVectorContext.children[0];
+    let queryVector: ast.ESQLAstExpression | ast.ESQLParam | undefined;
+
+    if (childContext instanceof cst.PrimaryExpressionContext) {
+      queryVector = this.fromPrimaryExpression(childContext);
+    } else if (childContext instanceof cst.ParameterContext) {
+      queryVector = this.fromParameter(childContext);
+    }
+
+    return queryVector;
+  }
+
+  private fromMmrOnOption(ctx: cst.MmrCommandContext): ast.ESQLCommandOption {
+    const onToken = ctx.ON();
+    const diversifyFieldCtx = ctx.qualifiedName();
+
+    const diversifyField = this.toColumn(diversifyFieldCtx);
+    const onOption = this.toOption(onToken.getText().toLowerCase(), diversifyFieldCtx);
+
+    onOption.args.push(diversifyField);
+    onOption.location.min = onToken.symbol.start;
+    onOption.location.max = diversifyField.location.max;
+
+    return onOption;
+  }
+
+  private fromMmrLimitOption(ctx: cst.MmrCommandContext): ast.ESQLCommandOption {
+    const limitToken = ctx.MMR_LIMIT();
+    const limitValueCtx = ctx.integerValue();
+
+    const limitOption = this.toOption(limitToken.getText().toLowerCase(), limitValueCtx);
+
+    limitOption.args.push(this.fromConstantToArray(limitValueCtx));
+    limitOption.location.min = limitToken.symbol.start;
+    limitOption.location.max = limitValueCtx.stop?.stop ?? limitToken.symbol.stop;
+
+    return limitOption;
+  }
+
+  private fromMmrWithOption(
+    namedParametersCtx: cst.CommandNamedParametersContext
+  ): ast.ESQLCommandOption | undefined {
+    const withOption = this.fromCommandNamedParameters(namedParametersCtx);
+
+    const mapArg = withOption.args[0] as ast.ESQLMap | undefined;
+
+    if (mapArg) {
+      const incomplete =
+        mapArg.entries.some((entry) => entry.incomplete) || mapArg.entries.length === 0;
+
+      mapArg.incomplete = incomplete;
+      withOption.incomplete = incomplete;
+
+      return withOption;
+    }
   }
 
   // -------------------------------------------------------------- expressions
@@ -2433,7 +2446,7 @@ export class CstToAstConverter {
     const value = this.fromPrimaryExpressionStrict(ctx.primaryExpression());
 
     return Builder.expression.inlineCast(
-      { castType: ctx.dataType().getText().toLowerCase() as ast.InlineCastingType, value },
+      { castType: ctx.dataType().getText().toLowerCase(), value },
       this.getParserFields(ctx)
     );
   }
@@ -2688,7 +2701,7 @@ export class CstToAstConverter {
     if (dataTypeCtx) {
       expression = Builder.expression.inlineCast(
         {
-          castType: dataTypeCtx.getText().toLowerCase() as ast.InlineCastingType,
+          castType: dataTypeCtx.getText().toLowerCase(),
           value: expression,
         },
         {
@@ -3276,6 +3289,8 @@ export class CstToAstConverter {
       return this.toNumericLiteral(ctx.decimalValue(), 'double');
     } else if (ctx instanceof cst.IntegerLiteralContext) {
       return this.toNumericLiteral(ctx.integerValue(), 'integer');
+    } else if (ctx instanceof cst.IntegerValueContext) {
+      return this.toNumericLiteral(ctx, 'integer');
     } else if (ctx instanceof cst.BooleanLiteralContext) {
       return this.getBooleanValue(ctx);
     } else if (ctx instanceof cst.StringLiteralContext) {

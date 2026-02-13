@@ -55,6 +55,19 @@ const validateDefaultValueType = (
         );
       }
       break;
+    case 'array':
+      if (!Array.isArray(defaultValue)) {
+        throw createBadRequestError(
+          `Parameter '${paramName}' has type '${type}' but defaultValue is not an array`
+        );
+      }
+      // Validate array elements are strings or numbers
+      if (!defaultValue.every((item) => typeof item === 'string' || typeof item === 'number')) {
+        throw createBadRequestError(
+          `Parameter '${paramName}' has type '${type}' but defaultValue contains invalid elements (must be strings or numbers)`
+        );
+      }
+      break;
   }
 };
 

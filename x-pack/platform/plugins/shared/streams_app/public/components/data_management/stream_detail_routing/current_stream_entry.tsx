@@ -33,11 +33,13 @@ export function CurrentStreamEntry({
   return (
     <EuiFlexItem grow={false}>
       <EuiPanel
+        color="subdued"
         hasShadow={false}
-        hasBorder
+        hasBorder={false}
         paddingSize="m"
         className={css`
           overflow: hidden;
+          border: ${euiTheme.border.thin};
           border-radius: ${euiTheme.size.s};
         `}
       >

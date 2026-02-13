@@ -22,7 +22,8 @@ import {
   shallowWithIntl,
 } from '@kbn/test-jest-helpers';
 
-import { LoginForm, MessageType, PageMode } from './login_form';
+import { LoginForm, PageMode } from './login_form';
+import { MessageType } from '../../../components';
 
 function getPageModeAssertions(mode: PageMode): Array<[string, boolean]> {
   return mode === PageMode.Form

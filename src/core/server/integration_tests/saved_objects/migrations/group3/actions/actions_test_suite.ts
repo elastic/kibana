@@ -47,6 +47,7 @@ import {
   createBulkIndexOperationTuple,
   checkClusterRoutingAllocationEnabled,
 } from '@kbn/core-saved-objects-migration-server-internal';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 interface EsServer {
   stop: () => Promise<void>;
@@ -1379,15 +1380,63 @@ export const runActionTestSuite = ({
   });
 
   describe('closePit', () => {
-    // temporarily skipped, see https://elastic.slack.com/archives/C5TQ33ND8/p1769442067974589
-    it.skip('closes PointInTime', async () => {
+    it('closes PointInTime', async () => {
       const openPitTask = openPit({ client, index: 'existing_index_with_docs' });
       const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
 
       const pitId = pitResponse.right.pitId;
       await closePit({ client, pitId })();
 
-      const searchTask = client.search({ pit: { id: pitId } });
+      await client.bulk({
+        refresh: 'wait_for',
+        operations: [
+          { index: { _index: 'existing_index_with_docs', _id: 'pit-invalidation-doc' } },
+          { type: 'test', value: 1 },
+        ],
+      });
+
+      let response: SearchResponse;
+      try {
+        response = await client.search({ pit: { id: pitId } });
+      } catch (err: unknown) {
+        // if the search call throws, we're likely on a non-serverless environment
+        // where the PIT simply became invalid
+        const message = err instanceof Error ? err.message : String(err);
+        expect(message).toContain('search_phase_execution_exception');
+        return;
+      }
+
+      // at this point, we're likely on a serverless environment
+      // the call succeeded but it contains failures
+      expect(response._shards?.failed).toBeGreaterThanOrEqual(1);
+      const failureReason =
+        response._shards?.failures?.[0]?.reason?.reason ??
+        response._shards?.failures?.[0]?.reason?.type ??
+        '';
+      expect(failureReason).toMatch(
+        /No search context found for id|search_context_missing_exception/
+      );
+    });
+
+    it('rejects search with closed PIT when allow_partial_search_results is false', async () => {
+      const openPitTask = openPit({ client, index: 'existing_index_with_docs' });
+      const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
+
+      const pitId = pitResponse.right.pitId;
+      await closePit({ client, pitId })();
+
+      await client.bulk({
+        refresh: 'wait_for',
+        operations: [
+          { index: { _index: 'existing_index_with_docs', _id: 'pit-invalidation-doc-2' } },
+          { type: 'test', value: 2 },
+        ],
+      });
+
+      const searchTask = client.search({
+        pit: { id: pitId },
+        allow_partial_search_results: false,
+      });
 
       await expect(searchTask).rejects.toThrow('search_phase_execution_exception');
     });

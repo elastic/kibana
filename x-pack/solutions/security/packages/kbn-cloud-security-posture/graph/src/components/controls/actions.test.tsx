@@ -19,6 +19,24 @@ import {
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn().mockReturnValue([false, jest.fn()]));
 const SEARCH_BAR_TOUR_TITLE = 'Refine your view with search';
 
+const mockToursIsEnabled = jest.fn(() => true);
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const { notificationServiceMock } = jest.requireActual('@kbn/core/public/mocks');
+
+  return {
+    useKibana: () => ({
+      services: {
+        notifications: {
+          ...notificationServiceMock.createStartContract(),
+          tours: {
+            isEnabled: mockToursIsEnabled,
+          },
+        },
+      },
+    }),
+  };
+});
+
 const defaultProps: ActionsProps = {
   showToggleSearch: true,
   showInvestigateInTimeline: true,
@@ -26,6 +44,10 @@ const defaultProps: ActionsProps = {
   onInvestigateInTimeline: jest.fn(),
   searchFilterCounter: 0,
 };
+
+beforeEach(() => {
+  mockToursIsEnabled.mockReturnValue(true);
+});
 
 const renderWithProviders = (props: ActionsProps = defaultProps) => {
   return render(
@@ -186,6 +208,25 @@ describe('Actions component', () => {
       expect(defaultProps.onSearchToggle).toHaveBeenCalledWith(true);
       expect(setShouldShowSearchBarButtonTourMock).toBeCalled();
       expect(setShouldShowSearchBarButtonTourMock).toBeCalledWith(false);
+    });
+
+    it('should not show the tour if tours is disabled', () => {
+      mockToursIsEnabled.mockReturnValue(false);
+      let shouldShowSearchBarButtonTour = true;
+      const setShouldShowSearchBarButtonTourMock = jest.fn(
+        (value: boolean) => (shouldShowSearchBarButtonTour = value)
+      );
+      (useLocalStorage as jest.Mock).mockImplementation(() => [
+        shouldShowSearchBarButtonTour,
+        setShouldShowSearchBarButtonTourMock,
+      ]);
+      const { queryByText } = renderWithProviders({
+        ...defaultProps,
+        searchFilterCounter: 3,
+      });
+
+      expect(queryByText(SEARCH_BAR_TOUR_TITLE)).not.toBeInTheDocument();
+      expect(setShouldShowSearchBarButtonTourMock).not.toHaveBeenCalled();
     });
 
     it('closes the search bar tour when the search toggle button is clicked', async () => {

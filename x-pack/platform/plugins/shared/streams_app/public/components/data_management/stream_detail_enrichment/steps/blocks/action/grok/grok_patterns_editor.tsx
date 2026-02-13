@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { FieldArrayWithId } from 'react-hook-form';
 import { useFormContext, useFieldArray } from 'react-hook-form';
 import type { DragDropContextProps, EuiButtonEmptyProps } from '@elastic/eui';
 import {
@@ -21,16 +20,14 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { GrokCollection } from '@kbn/grok-ui';
-import { DraftGrokExpression } from '@kbn/grok-ui';
-import { Expression } from '@kbn/grok-ui';
+import { Expression, type GrokCollection } from '@kbn/grok-ui';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
-import { useStreamEnrichmentSelector } from '../../../../state_management/stream_enrichment_state_machine';
+import { useGrokCollection } from '@kbn/grok-ui';
 import { SortableList } from '../../../../sortable_list';
-import type { GrokFormState } from '../../../../types';
 import { useAIFeatures } from '../../../../../../../hooks/use_ai_features';
+import type { GrokFormState } from '../../../../types';
 
 const GrokPatternAISuggestions = dynamic(() =>
   import('./grok_pattern_suggestion').then((mod) => ({ default: mod.GrokPatternAISuggestions }))
@@ -40,22 +37,22 @@ export const GrokPatternsEditor = () => {
   const {
     formState: { errors },
     setValue,
-  } = useFormContext();
+    control,
+  } = useFormContext<GrokFormState>();
 
   const { euiTheme } = useEuiTheme();
 
   const aiFeatures = useAIFeatures();
 
-  const grokCollection = useStreamEnrichmentSelector(
-    (machineState) => machineState.context.grokCollection
-  );
+  const { grokCollection } = useGrokCollection();
 
-  const { fields, append, remove, move } = useFieldArray<Pick<GrokFormState, 'patterns'>>({
+  const { fields, append, remove, move } = useFieldArray({
+    control,
     name: 'patterns',
     rules: {
       minLength: 1,
-      validate: (expressions) => {
-        if (expressions.every((expression) => isEmpty(expression.getExpression()))) {
+      validate: (patterns) => {
+        if (patterns.every((p) => isEmpty(p.value?.trim()))) {
           return i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditorRequiredError',
             { defaultMessage: 'Empty patterns are not allowed.' }
@@ -67,21 +64,22 @@ export const GrokPatternsEditor = () => {
   });
 
   const handlePatternDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
-    if (source && destination) {
+    if (source && destination && source.index !== destination.index) {
       move(source.index, destination.index);
     }
   };
 
   const handleAddPattern = () => {
-    append(new DraftGrokExpression(grokCollection, ''));
+    append({ value: '' });
   };
 
-  const getRemovePatternHandler = (id: number) => (fields.length > 1 ? () => remove(id) : null);
+  const getRemovePatternHandler = (idx: number) => {
+    if (fields.length <= 1) return null;
+    return () => remove(idx);
+  };
 
-  const handlePatternChange = (expression: DraftGrokExpression, idx: number) => {
-    setValue(`patterns.${idx}`, expression, {
-      shouldValidate: true,
-    });
+  const handlePatternChange = (newPattern: string, idx: number) => {
+    setValue(`patterns.${idx}.value`, newPattern, { shouldValidate: true });
   };
 
   return (
@@ -102,11 +100,12 @@ export const GrokPatternsEditor = () => {
             {fields.map((field, idx) => (
               <DraggablePatternInput
                 key={field.id}
-                draftGrokExpression={field}
+                draggableId={field.id}
+                pattern={field.value}
                 idx={idx}
                 onRemove={getRemovePatternHandler(idx)}
-                grokCollection={grokCollection}
-                onChange={(expression) => handlePatternChange(expression, idx)}
+                grokCollection={grokCollection!}
+                onChange={(newPattern) => handlePatternChange(newPattern, idx)}
               />
             ))}
           </SortableList>
@@ -115,7 +114,7 @@ export const GrokPatternsEditor = () => {
       {aiFeatures ? (
         <GrokPatternAISuggestions
           aiFeatures={aiFeatures}
-          grokCollection={grokCollection}
+          grokCollection={grokCollection!}
           setValue={setValue}
           onAddPattern={handleAddPattern}
         />
@@ -143,15 +142,17 @@ const AddPatternButton = (props: EuiButtonEmptyProps) => {
 };
 
 interface DraggablePatternInputProps {
-  draftGrokExpression: FieldArrayWithId<Pick<GrokFormState, 'patterns'>, 'patterns', 'id'>;
+  draggableId: string;
+  pattern: string;
   idx: number;
   grokCollection: GrokCollection;
-  onChange: (expression: DraftGrokExpression) => void;
-  onRemove: ((idx: number) => void) | null;
+  onChange: (pattern: string) => void;
+  onRemove: (() => void) | null;
 }
 
 const DraggablePatternInput = ({
-  draftGrokExpression,
+  draggableId,
+  pattern,
   idx,
   grokCollection,
   onChange,
@@ -161,7 +162,7 @@ const DraggablePatternInput = ({
     <EuiDraggable
       index={idx}
       spacing="m"
-      draggableId={draftGrokExpression.id}
+      draggableId={draggableId}
       hasInteractiveChildren
       customDragHandle
     >
@@ -183,7 +184,7 @@ const DraggablePatternInput = ({
             </EuiFlexItem>
             <EuiFlexItem style={{ minWidth: 0 }}>
               <Expression
-                draftGrokExpression={draftGrokExpression}
+                pattern={pattern}
                 grokCollection={grokCollection}
                 dataTestSubj="streamsAppPatternExpression"
                 onChange={onChange}
@@ -194,7 +195,7 @@ const DraggablePatternInput = ({
                 data-test-subj="streamsAppDraggablePatternInputButton"
                 iconType="minusInCircle"
                 color="danger"
-                onClick={() => onRemove(idx)}
+                onClick={onRemove}
                 aria-label={i18n.translate(
                   'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditor.removePattern',
                   { defaultMessage: 'Remove grok pattern' }

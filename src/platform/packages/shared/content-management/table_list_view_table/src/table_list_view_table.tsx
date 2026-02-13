@@ -101,6 +101,7 @@ export interface TableListViewTableProps<
     refs?: {
       references?: SavedObjectsFindOptionsReference[];
       referencesToExclude?: SavedObjectsFindOptionsReference[];
+      tabId?: string;
     }
   ): Promise<{ total: number; hits: T[] }>;
   /** Handler to set the item title "href" value. If it returns undefined there won't be a link for this item. */

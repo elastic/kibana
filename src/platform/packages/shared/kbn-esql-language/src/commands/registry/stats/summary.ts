@@ -90,7 +90,6 @@ const collectInColumns = (
   const newColumn = {
     field: getColumnName(column),
     arg: column,
-    definition: column,
   };
   if (!isInByClause) {
     newColumns.push(newColumn.field);
@@ -113,7 +112,6 @@ const collectInLiterals = (
     const newColumn = {
       field: literal.text,
       arg: literal,
-      definition: literal,
     };
     if (!isInByClause) {
       aggregates.push(newColumn);
@@ -135,15 +133,12 @@ const collectInFunctions = (
 
   // Assignment expression, STATS var=AVG(field)
   if (isAssignment(expression) && isColumn(expression.args[0])) {
-    // From the asignment, we extract:
-    // * The left side (fisrt argument) as the new column
-    // * The right side (second argument) as the definition of that column
-    const [column, definition] = singleItems(expression.args);
+    // From the asignment, we extract the left side (fisrt argument) as the new column
+    const [column] = singleItems(expression.args);
 
     const newColumn = {
       field: getColumnName(column as ESQLColumn),
       arg: expression,
-      definition,
     };
 
     newColumns.push(newColumn.field);
@@ -170,7 +165,6 @@ const collectInFunctions = (
   const newColumn = {
     field: name,
     arg: expression,
-    definition: expression,
   };
   if (isInByClause) {
     grouping.push(newColumn);

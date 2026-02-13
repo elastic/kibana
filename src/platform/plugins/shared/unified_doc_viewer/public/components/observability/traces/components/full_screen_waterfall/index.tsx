@@ -17,13 +17,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
-import type { logsFlyoutId as logsFlyoutIdType } from './waterfall_flyout/logs_flyout';
-import { LogsFlyout, logsFlyoutId } from './waterfall_flyout/logs_flyout';
-import type { spanFlyoutId as spanFlyoutIdType } from './waterfall_flyout/span_flyout';
-import { SpanFlyout, spanFlyoutId } from './waterfall_flyout/span_flyout';
+import { spanFlyoutId } from './waterfall_flyout/span_flyout';
+import { logsFlyoutId } from './waterfall_flyout/logs_flyout';
+import { DocumentDetailFlyout, type DocumentType } from './waterfall_flyout/document_detail_flyout';
 
 export const EUI_FLYOUT_BODY_OVERFLOW_CLASS = 'euiFlyoutBody__overflow';
 
@@ -49,11 +48,43 @@ export const FullScreenWaterfall = ({
     'observability-full-trace-waterfall'
   )?.render;
   const { euiTheme } = useEuiTheme();
+
+  /*
+   * Temporary workaround: add a native <style> tag to fix the z-index of EuiDataGrid cell popovers
+   * rendered inside nested flyouts.
+   *
+   * EuiDataGrid popovers use EuiPortal, which inserts content at the document root. When nested
+   * flyouts unmount, Emotion's style cleanup can target portals that have already been removed
+   * from the DOM, resulting in a white screen crash.
+   *
+   * By injecting a plain <style> element into document.head, we bypass Emotion entirely,
+   * avoiding the cleanup race condition while still ensuring the popover renders
+   * above the flyout layers.
+   *
+   * TODO: Remove this workaround once EUI provides a proper fix for popover z-index handling
+   * inside nested flyouts (see: https://github.com/elastic/eui/issues/8801).
+   */
+
+  useEffect(() => {
+    const style = document.createElement('style');
+
+    style.id = 'flyout-datagrid-popover-z-index-fix';
+    style.textContent = `
+      .euiDataGridRowCell__popover {
+        z-index: ${euiTheme.levels.menu} !important;
+      }
+    `;
+
+    document.head.appendChild(style);
+
+    return () => {
+      style.remove();
+    };
+  }, [euiTheme.levels.menu]);
+
   const [docId, setDocId] = useState<string | null>(null);
   const [docIndex, setDocIndex] = useState<string | undefined>(undefined);
-  const [activeFlyoutId, setActiveFlyoutId] = useState<
-    typeof spanFlyoutIdType | typeof logsFlyoutIdType | null
-  >(null);
+  const [activeFlyoutType, setActiveFlyoutType] = useState<DocumentType | null>(null);
   const [activeSection, setActiveSection] = useState<TraceOverviewSections | undefined>();
   const [scrollElement, setScrollElement] = useState<Element | null>(null);
 
@@ -88,7 +119,7 @@ export const FullScreenWaterfall = ({
   }, []);
 
   function handleCloseFlyout() {
-    setActiveFlyoutId(null);
+    setActiveFlyoutType(null);
     setActiveSection(undefined);
     setDocId(null);
     setDocIndex(undefined);
@@ -98,7 +129,7 @@ export const FullScreenWaterfall = ({
     setActiveSection(undefined);
     setDocId(nodeSpanId);
     setDocIndex(undefined);
-    setActiveFlyoutId(spanFlyoutId);
+    setActiveFlyoutType(spanFlyoutId);
   }
 
   function handleErrorClick(params: {
@@ -109,12 +140,12 @@ export const FullScreenWaterfall = ({
     docIndex?: string;
   }) {
     if (params.errorCount > 1) {
-      setActiveFlyoutId(spanFlyoutId);
+      setActiveFlyoutType(spanFlyoutId);
       setActiveSection('errors-table');
       setDocId(params.docId);
       setDocIndex(undefined);
     } else if (params.errorDocId) {
-      setActiveFlyoutId(logsFlyoutId);
+      setActiveFlyoutType(logsFlyoutId);
       setDocId(params.errorDocId);
       setDocIndex(params.docIndex);
     }
@@ -163,23 +194,16 @@ export const FullScreenWaterfall = ({
         </div>
       </EuiFlyoutBody>
 
-      {docId && activeFlyoutId ? (
-        activeFlyoutId === spanFlyoutId ? (
-          <SpanFlyout
-            traceId={traceId}
-            spanId={docId}
-            dataView={dataView}
-            onCloseFlyout={handleCloseFlyout}
-            activeSection={activeSection}
-          />
-        ) : (
-          <LogsFlyout
-            onCloseFlyout={handleCloseFlyout}
-            id={docId}
-            index={docIndex}
-            dataView={dataView}
-          />
-        )
+      {docId && activeFlyoutType ? (
+        <DocumentDetailFlyout
+          type={activeFlyoutType}
+          docId={docId}
+          docIndex={docIndex}
+          traceId={traceId}
+          dataView={dataView}
+          onCloseFlyout={handleCloseFlyout}
+          activeSection={activeSection}
+        />
       ) : null}
     </EuiFlyout>
   );

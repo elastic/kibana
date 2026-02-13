@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import type { ReauthorizeTransformsRequestSchema } from '../../../../common';
 import { generateTransformConfig, generateDestIndex } from '../helpers/transform_config';
@@ -18,7 +19,7 @@ import { COMMON_HEADERS } from '../constants';
 
 // If transform was created with sufficient permissions -> should create and start
 // If transform was created with insufficient permissions -> should create but not start
-apiTest.describe('/internal/transform/reauthorize_transforms', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('/internal/transform/reauthorize_transforms', { tag: tags.stateful.all }, () => {
   let transformViewerUserApiCredentials: RoleApiCredentials;
 
   const transformCreatedByViewerId = getTransformIdByUser('transform_viewer');
@@ -171,7 +172,7 @@ apiTest.describe('/internal/transform/reauthorize_transforms', { tag: tags.ESS_O
       );
       expect(statusCode).toBe(200);
       expect(body[invalidTransformId].success).toBe(false);
-      expect(body[invalidTransformId]).toHaveProperty('error');
+      expect(body[invalidTransformId].error).toBeDefined();
     }
   );
 });

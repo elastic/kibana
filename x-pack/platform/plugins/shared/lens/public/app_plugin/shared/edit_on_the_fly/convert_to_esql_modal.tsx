@@ -11,7 +11,6 @@ import type {
   EuiBasicTableColumn,
   EuiConfirmModalProps,
   EuiTableSelectionType,
-  IconType,
 } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -29,29 +28,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { LensLayerType } from '@kbn/lens-common';
-import type { OriginalColumn } from '../../../../common/types';
 import { layerTypes } from '../../..';
-
-type LayerType = Exclude<LensLayerType, 'metricTrendline'>;
-
-/**
- * Conversion data from generateEsqlQuery.
- */
-export interface EsqlConversionData {
-  esAggsIdMap: Record<string, OriginalColumn[]>;
-  partialRows: boolean;
-}
-
-export interface ConvertibleLayer {
-  id: string;
-  icon: IconType;
-  name: string;
-  type: LayerType;
-  query: string;
-  isConvertibleToEsql: boolean;
-  conversionData: EsqlConversionData;
-}
+import type { ConvertibleLayer, LayerType } from './esql_conversion_types';
 
 const typeLabels: Record<LayerType, (count: number) => string> = {
   data: (count: number) =>
@@ -210,10 +188,10 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
   return (
     <EuiConfirmModal
       aria-label={i18n.translate('xpack.lens.config.switchToQueryModeAriaLabel', {
-        defaultMessage: 'Switch to Query mode',
+        defaultMessage: 'Switch to query mode',
       })}
       title={i18n.translate('xpack.lens.config.switchToQueryModeTitle', {
-        defaultMessage: 'Switch to Query mode',
+        defaultMessage: 'Switch to query mode',
       })}
       onCancel={onCancel}
       cancelButtonText={i18n.translate('xpack.lens.config.cancelButtonTextButtonLabel', {
@@ -224,6 +202,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
         defaultMessage: 'Switch to query mode',
       })}
       confirmButtonDisabled={!isConfirmButtonEnabled}
+      data-test-subj="lnsConvertToEsqlModal"
     >
       <p>
         {i18n.translate('xpack.lens.config.queryModeDescription', {
@@ -242,7 +221,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
         iconType="warning"
         size="s"
         title={i18n.translate('xpack.lens.config.queryModeWarningDescription', {
-          defaultMessage: 'Once query mode is activated you cannot switch back to visual mode.',
+          defaultMessage: `Once you save the chart after switching to query mode, you can't switch back.`,
         })}
       />
 

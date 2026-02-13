@@ -31,7 +31,7 @@ export const ALERTS_PAGE_LOADING_TEST_ID = 'alerts-page-loading';
  */
 export const AlertsPage = memo(() => {
   const [{ loading: userInfoLoading, isAuthenticated, hasIndexRead }] = useUserData();
-  const canReadAlerts = useUserPrivileges().rulesPrivileges.read;
+  const canReadAlerts = useUserPrivileges().rulesPrivileges.rules.read;
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
   const { signalIndexNeedsInit } = useSignalHelpers();

@@ -39,6 +39,7 @@ import {
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { userProfileMock } from '../../common/model/user_profile.mock';
+import { LogoutReason } from '../../common/types';
 import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
@@ -274,31 +275,53 @@ describe('Authenticator', () => {
         );
       });
 
-      it('points to a custom URL if `customLogoutURL` is specified', () => {
-        const authenticationProviderMock =
-          jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
-        authenticationProviderMock.mockClear();
-        new Authenticator(
-          getMockOptions({
-            selector: { enabled: false },
-            providers: { saml: { saml1: { order: 0, realm: 'realm' } } },
-            customLogoutURL: 'https://some-logout-origin/logout',
-          })
-        );
-        const getLoggedOutURL = authenticationProviderMock.mock.calls[0][0].urls.loggedOut;
-
-        expect(getLoggedOutURL(httpServerMock.createKibanaRequest())).toBe(
-          'https://some-logout-origin/logout'
-        );
-
-        // We don't forward any Kibana specific query string parameters to the external logout URL.
-        expect(
-          getLoggedOutURL(
-            httpServerMock.createKibanaRequest({
-              query: { next: '/app/ml/encode me', msg: 'SESSION_EXPIRED' },
+      describe('custom URL', () => {
+        it('points to a custom URL if `customLogoutURL` is specified and logout reason is not SESSION_EXPIRED', () => {
+          const authenticationProviderMock =
+            jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
+          authenticationProviderMock.mockClear();
+          new Authenticator(
+            getMockOptions({
+              selector: { enabled: false },
+              providers: { saml: { saml1: { order: 0, realm: 'realm' } } },
+              customLogoutURL: 'https://some-logout-origin/logout',
             })
-          )
-        ).toBe('https://some-logout-origin/logout');
+          );
+          const getLoggedOutURL = authenticationProviderMock.mock.calls[0][0].urls.loggedOut;
+
+          expect(getLoggedOutURL(httpServerMock.createKibanaRequest())).toBe(
+            'https://some-logout-origin/logout'
+          );
+
+          // We don't forward any Kibana specific query string parameters to the external logout URL.
+          expect(
+            getLoggedOutURL(
+              httpServerMock.createKibanaRequest({
+                query: { next: '/app/ml/encode me', msg: LogoutReason.LOGGED_OUT },
+              })
+            )
+          ).toBe('https://some-logout-origin/logout');
+        });
+
+        it('does not point to a custom URL if `customLogoutURL` is specified and logout reason is SESSION_EXPIRED', () => {
+          const authenticationProviderMock =
+            jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
+          authenticationProviderMock.mockClear();
+          new Authenticator(
+            getMockOptions({
+              selector: { enabled: false },
+              providers: { saml: { saml1: { order: 0, realm: 'realm' } } },
+              customLogoutURL: 'https://some-logout-origin/logout',
+            })
+          );
+          const getLoggedOutURL = authenticationProviderMock.mock.calls[0][0].urls.loggedOut;
+
+          expect(
+            getLoggedOutURL(
+              httpServerMock.createKibanaRequest({ query: { msg: LogoutReason.SESSION_EXPIRED } })
+            )
+          ).toBe('/mock-server-basepath/security/logged_out?msg=SESSION_EXPIRED');
+        });
       });
     });
 
@@ -635,11 +658,16 @@ describe('Authenticator', () => {
       ).resolves.toEqual(AuthenticationResult.succeeded(user, { state: { authorization } }));
 
       expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.create).toHaveBeenCalledWith(request, {
-        username: user.username,
-        provider: mockSessVal.provider,
-        state: { authorization },
-      });
+      expect(mockOptions.session.create).toHaveBeenCalledWith(
+        request,
+        {
+          username: user.username,
+          userProfileId: undefined,
+          provider: mockSessVal.provider,
+          state: { authorization },
+        },
+        undefined
+      );
       expectAuditEvents({ action: 'user_login', outcome: 'success' });
       expect(mockOptions.userProfileService.activate).not.toHaveBeenCalled();
     });
@@ -665,12 +693,16 @@ describe('Authenticator', () => {
       );
 
       expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.create).toHaveBeenCalledWith(request, {
-        username: user.username,
-        userProfileId: 'some-profile-uid',
-        provider: mockSessVal.provider,
-        state: { authorization },
-      });
+      expect(mockOptions.session.create).toHaveBeenCalledWith(
+        request,
+        {
+          username: user.username,
+          userProfileId: 'some-profile-uid',
+          provider: mockSessVal.provider,
+          state: { authorization },
+        },
+        undefined
+      );
       expectAuditEvents({ action: 'user_login', outcome: 'success' });
       expect(mockOptions.userProfileService.activate).toHaveBeenCalledTimes(1);
       expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(userProfileGrant);
@@ -697,12 +729,16 @@ describe('Authenticator', () => {
       );
 
       expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.create).toHaveBeenCalledWith(request, {
-        userProfileId: 'some-profile-uid',
-        username: user.username,
-        provider: mockSessVal.provider,
-        state: { authorization },
-      });
+      expect(mockOptions.session.create).toHaveBeenCalledWith(
+        request,
+        {
+          userProfileId: 'some-profile-uid',
+          username: user.username,
+          provider: mockSessVal.provider,
+          state: { authorization },
+        },
+        undefined
+      );
       expectAuditEvents({ action: 'user_login', outcome: 'success' });
       expect(mockOptions.userProfileService.activate).toHaveBeenCalledTimes(1);
       expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(userProfileGrant);
@@ -779,11 +815,16 @@ describe('Authenticator', () => {
         );
 
         expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
-        expect(mockOptions.session.create).toHaveBeenCalledWith(request, {
-          username: user.username,
-          provider: { type: 'saml', name: 'saml2' },
-          state: { token: 'access-token' },
-        });
+        expect(mockOptions.session.create).toHaveBeenCalledWith(
+          request,
+          {
+            username: user.username,
+            userProfileId: undefined,
+            provider: { type: 'saml', name: 'saml2' },
+            state: { token: 'access-token' },
+          },
+          undefined
+        );
 
         expect(mockBasicAuthenticationProvider.login).not.toHaveBeenCalled();
         expect(mockSAMLAuthenticationProvider1.login).not.toHaveBeenCalled();
@@ -827,16 +868,26 @@ describe('Authenticator', () => {
         }
 
         expect(mockOptions.session.create).toHaveBeenCalledTimes(2);
-        expect(mockOptions.session.create).toHaveBeenCalledWith(request, {
-          username: user.username,
-          provider: { type: 'saml', name: 'saml1' },
-          state: { result: '200' },
-        });
-        expect(mockOptions.session.create).toHaveBeenCalledWith(request, {
-          username: undefined,
-          provider: { type: 'saml', name: 'saml1' },
-          state: { result: '302' },
-        });
+        expect(mockOptions.session.create).toHaveBeenCalledWith(
+          request,
+          {
+            username: user.username,
+            userProfileId: undefined,
+            provider: { type: 'saml', name: 'saml1' },
+            state: { result: '200' },
+          },
+          undefined
+        );
+        expect(mockOptions.session.create).toHaveBeenCalledWith(
+          request,
+          {
+            username: undefined,
+            userProfileId: undefined,
+            provider: { type: 'saml', name: 'saml1' },
+            state: { result: '302' },
+          },
+          undefined
+        );
 
         expect(mockBasicAuthenticationProvider.login).not.toHaveBeenCalled();
         expect(mockSAMLAuthenticationProvider2.login).not.toHaveBeenCalled();
@@ -845,6 +896,42 @@ describe('Authenticator', () => {
           { action: 'user_login', outcome: 'failure' },
           { action: 'user_login', outcome: 'success' }
         );
+      });
+
+      it('passes stateCookieOptions to session.create when provider returns custom cookie options', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const customCookieOptions = { sameSite: 'None' as const, isSecure: true };
+
+        mockSAMLAuthenticationProvider1.login.mockResolvedValue(
+          AuthenticationResult.redirectTo('/some/url', {
+            state: { result: '302' },
+            stateCookieOptions: customCookieOptions,
+          })
+        );
+
+        await expect(
+          authenticator.login(request, { provider: { type: 'saml' }, value: {} })
+        ).resolves.toEqual(
+          AuthenticationResult.redirectTo('/some/url', {
+            state: { result: '302' },
+            stateCookieOptions: customCookieOptions,
+          })
+        );
+
+        expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
+        expect(mockOptions.session.create).toHaveBeenCalledWith(
+          request,
+          {
+            username: undefined,
+            userProfileId: undefined,
+            provider: { type: 'saml', name: 'saml1' },
+            state: { result: '302' },
+          },
+          customCookieOptions
+        );
+
+        expect(mockSAMLAuthenticationProvider1.login).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).not.toHaveBeenCalled();
       });
 
       it('provides session only if provider name matches', async () => {
@@ -1535,12 +1622,16 @@ describe('Authenticator', () => {
         // When intermediate session still needs to exist (due to pending request IDs),
         // a new session is created instead of updating the existing one
         expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
-        expect(mockOptions.session.create).toHaveBeenCalledWith(request, {
-          username: user.username,
-          userProfileId: 'some-profile-uid',
-          provider: { type: 'saml', name: 'saml1' },
-          state: samlState,
-        });
+        expect(mockOptions.session.create).toHaveBeenCalledWith(
+          request,
+          {
+            username: user.username,
+            userProfileId: 'some-profile-uid',
+            provider: { type: 'saml', name: 'saml1' },
+            state: samlState,
+          },
+          undefined
+        );
       });
 
       it('does invalidate intermediate session if there are no requestIds in the state', async () => {
@@ -1585,12 +1676,16 @@ describe('Authenticator', () => {
         expect(mockOptions.session.invalidate).toHaveBeenCalled();
 
         expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
-        expect(mockOptions.session.create).toHaveBeenCalledWith(request, {
-          username: user.username,
-          userProfileId: 'some-profile-uid',
-          provider: { type: 'saml', name: 'saml1' },
-          state: samlState,
-        });
+        expect(mockOptions.session.create).toHaveBeenCalledWith(
+          request,
+          {
+            username: user.username,
+            userProfileId: 'some-profile-uid',
+            provider: { type: 'saml', name: 'saml1' },
+            state: samlState,
+          },
+          undefined
+        );
       });
     });
   });
@@ -1791,11 +1886,15 @@ describe('Authenticator', () => {
       );
 
       expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.create).toHaveBeenCalledWith(request, {
-        username: user.username,
-        provider: mockSessVal.provider,
-        state: { authorization },
-      });
+      expect(mockOptions.session.create).toHaveBeenCalledWith(
+        request,
+        {
+          username: user.username,
+          provider: mockSessVal.provider,
+          state: { authorization },
+        },
+        undefined
+      );
       expectAuditEvents({ action: 'user_login', outcome: 'success' });
       expect(mockOptions.userProfileService.activate).not.toHaveBeenCalled();
     });
@@ -1816,11 +1915,15 @@ describe('Authenticator', () => {
       );
 
       expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.create).toHaveBeenCalledWith(request, {
-        username: user.username,
-        provider: mockSessVal.provider,
-        state: { authorization },
-      });
+      expect(mockOptions.session.create).toHaveBeenCalledWith(
+        request,
+        {
+          username: user.username,
+          provider: mockSessVal.provider,
+          state: { authorization },
+        },
+        undefined
+      );
       expectAuditEvents({ action: 'user_login', outcome: 'success' });
       expect(mockOptions.userProfileService.activate).not.toHaveBeenCalled();
     });
@@ -1846,12 +1949,16 @@ describe('Authenticator', () => {
       );
 
       expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.create).toHaveBeenCalledWith(request, {
-        username: user.username,
-        userProfileId: 'some-profile-uid',
-        provider: mockSessVal.provider,
-        state: { authorization },
-      });
+      expect(mockOptions.session.create).toHaveBeenCalledWith(
+        request,
+        {
+          username: user.username,
+          userProfileId: 'some-profile-uid',
+          provider: mockSessVal.provider,
+          state: { authorization },
+        },
+        undefined
+      );
       expectAuditEvents({ action: 'user_login', outcome: 'success' });
       expect(mockOptions.userProfileService.activate).toHaveBeenCalledTimes(1);
       expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(userProfileGrant);

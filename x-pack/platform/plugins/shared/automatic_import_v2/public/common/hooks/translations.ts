@@ -54,3 +54,31 @@ export const LOAD_CONNECTORS_ERROR_MESSAGE = i18n.translate(
     defaultMessage: 'Failed to load connectors',
   }
 );
+
+export const UPLOAD_SAMPLES_SUCCESS = i18n.translate(
+  'xpack.automaticImportV2.hooks.uploadSamples.success',
+  {
+    defaultMessage: 'Samples uploaded successfully',
+  }
+);
+
+export const UPLOAD_SAMPLES_ERROR = i18n.translate(
+  'xpack.automaticImportV2.hooks.uploadSamples.error',
+  {
+    defaultMessage: 'Failed to upload samples',
+  }
+);
+
+export const DELETE_DATA_STREAM_SUCCESS = i18n.translate(
+  'xpack.automaticImportV2.hooks.deleteDataStream.success',
+  {
+    defaultMessage: 'Data stream deleted successfully',
+  }
+);
+
+export const DELETE_DATA_STREAM_ERROR = i18n.translate(
+  'xpack.automaticImportV2.hooks.deleteDataStream.error',
+  {
+    defaultMessage: 'Failed to delete data stream',
+  }
+);

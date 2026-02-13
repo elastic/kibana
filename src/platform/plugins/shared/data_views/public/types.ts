@@ -13,6 +13,7 @@ import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DataViewsServicePublicMethods } from './data_views';
 import type { HasDataService } from '../common';
 
@@ -105,6 +106,10 @@ export interface DataViewsPublicStartDependencies {
    * Content management
    */
   contentManagement: ContentManagementPublicStart;
+  /**
+   * CPS plugin (optional)
+   */
+  cps?: CPSPluginStart;
 }
 
 /**
@@ -121,6 +126,7 @@ export interface DataViewsServicePublic extends DataViewsServicePublicMethods {
     pattern: string;
     showAllIndices?: boolean;
     isRollupIndex: (indexName: string) => boolean;
+    projectRouting?: string;
   }) => Promise<MatchedItem[]>;
   getRollupsEnabled: () => boolean;
   scriptedFieldsEnabled: boolean;

@@ -7,30 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useContext } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import React from 'react';
 import type { DiscoverStateContainer } from './discover_state';
 import { InternalStateProvider } from './redux';
 
 function createStateHelpers() {
   const context = React.createContext<DiscoverStateContainer | null>(null);
-  const useContainer = () => useContext(context);
-  const useSavedSearch = () => {
-    const container = useContainer();
-    return useObservable<SavedSearch>(
-      container!.savedSearchState.getCurrent$(),
-      container!.savedSearchState.getCurrent$().getValue()
-    );
-  };
 
   return {
     Provider: context.Provider,
-    useSavedSearch,
   };
 }
 
-export const { Provider: DiscoverStateProvider, useSavedSearch } = createStateHelpers();
+export const { Provider: DiscoverStateProvider } = createStateHelpers();
 
 export const DiscoverMainProvider = ({
   value,

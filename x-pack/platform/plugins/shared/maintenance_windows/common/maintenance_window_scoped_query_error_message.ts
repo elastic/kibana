@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-const errorMessageIdentifier = 'invalid scoped query';
+const errorMessageIdentifier = 'invalid scope';
 
 export const getScopedQueryErrorMessage = (errorMessage: string) => {
   return `${errorMessageIdentifier} - ${errorMessage}`;

@@ -246,6 +246,12 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
       <EuiBasicTable<Record<string, unknown>>
         data-test-subj={`${dataTestSubj}Table`}
         loading={loading || alertsLoading}
+        tableCaption={i18n.translate(
+          'xpack.securitySolution.flyout.left.insights.correlations.correlatedAlertsCaption',
+          {
+            defaultMessage: 'Correlated alerts',
+          }
+        )}
         items={mappedData}
         columns={columns}
         pagination={paginationConfig}

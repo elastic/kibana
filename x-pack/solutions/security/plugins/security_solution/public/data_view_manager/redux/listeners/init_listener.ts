@@ -33,7 +33,7 @@ import { createExploreDataView } from '../../utils/create_explore_data_view';
  * and that state is not reset for slices that already have selections.
  *
  * @param dependencies - Core and plugin services required for data view creation and retrieval.
- * @param attacksAlertsAlignmentEnabled - Prevent attacks dataview creation if feature flag is not enabled.
+ * @param enableAlertsAndAttacksAlignment - Prevent attacks dataview creation if feature flag is not enabled.
  * @returns An object with the actionCreator and effect for Redux listener middleware.
  */
 export const createInitListener = (
@@ -46,7 +46,7 @@ export const createInitListener = (
     storage: Storage;
     logger: Logger;
   },
-  attacksAlertsAlignmentEnabled: boolean
+  enableAlertsAndAttacksAlignment: boolean
 ) => {
   return {
     actionCreator: sharedDataViewManagerSlice.actions.init,
@@ -63,14 +63,14 @@ export const createInitListener = (
           spaces: dependencies.spaces,
           application: dependencies.application,
           http: dependencies.http,
-          attacksAlertsAlignmentEnabled,
+          enableAlertsAndAttacksAlignment,
         });
 
-        logger.debug(`Default data views created: 
-          - Default Data View: ${defaultDataView.title} (ID: ${defaultDataView.id}) 
-          - Alert Data View: ${alertDataView.title} (ID: ${alertDataView.id}) 
+        logger.debug(`Default data views created:
+          - Default Data View: ${defaultDataView.title} (ID: ${defaultDataView.id})
+          - Alert Data View: ${alertDataView.title} (ID: ${alertDataView.id})
           ${
-            attacksAlertsAlignmentEnabled
+            enableAlertsAndAttacksAlignment
               ? `- Attack Data View: ${attackDataView.title} (ID: ${attackDataView.id})`
               : ''
           }`);
@@ -84,7 +84,7 @@ export const createInitListener = (
           alertDataView.title
         );
 
-        logger.debug(`Explore Data View created: 
+        logger.debug(`Explore Data View created:
           - Explore Data View: ${exploreDataView.title} (ID: ${exploreDataView.id})`);
 
         // Store the created data views in the Redux state

@@ -13,14 +13,9 @@ import type {
   ESQLAstAllCommands,
   ESQLCommandOption,
 } from '../../../types';
-import { isAssignment } from '../../../ast/is';
-import { getAssignmentExpressionRoot } from '../../definitions/utils/expressions';
 
-export interface RerankPosition {
-  position: CaretPosition;
-  context?: {
-    expressionRoot?: ESQLSingleAstItem;
-  };
+export interface PositionContext {
+  expressionRoot?: ESQLSingleAstItem;
 }
 
 export enum CaretPosition {
@@ -28,8 +23,6 @@ export enum CaretPosition {
   RERANK_AFTER_TARGET_FIELD, // After potential target field: suggest assignment operator
   RERANK_AFTER_TARGET_ASSIGNMENT, // After "target_field ="
   ON_KEYWORD, // Should suggest "ON"
-  ON_WITHIN_FIELD_LIST, // After "ON": suggest field names
-  ON_KEEP_SUGGESTIONS_AFTER_TRAILING_SPACE, // Special case: After a complete field with space, suggest next actions or assignment
   ON_EXPRESSION, // After "ON": handle all field list expressions like EVAL
   AFTER_WITH_KEYWORD, // After "WITH " but before opening brace: suggest opening braces with params
   WITHIN_MAP_EXPRESSION, // After "WITH": suggest a json of params
@@ -39,61 +32,46 @@ export enum CaretPosition {
 /**
  * Determines caret position in RERANK command
  */
-export function getPosition(query: string, command: ESQLAstAllCommands): RerankPosition {
+export function getPosition(query: string, command: ESQLAstAllCommands): CaretPosition {
   const rerankCommand = command as ESQLAstRerankCommand;
   const innerText = query.substring(rerankCommand.location.min);
-  const onMap = rerankCommand.args[1];
+  const onArg = rerankCommand.args[1];
   const withArg = rerankCommand.args[2];
 
   if (withArg && 'type' in withArg && withArg.type === 'option') {
     const withMap = (withArg as ESQLCommandOption).args[0] as ESQLMap | undefined;
 
     if (!withMap || (withMap.incomplete && !withMap.text)) {
-      return { position: CaretPosition.AFTER_WITH_KEYWORD };
+      return CaretPosition.AFTER_WITH_KEYWORD;
     }
 
     if (withMap.text && withMap.incomplete) {
-      return { position: CaretPosition.WITHIN_MAP_EXPRESSION };
+      return CaretPosition.WITHIN_MAP_EXPRESSION;
     }
 
     if (!withMap.incomplete) {
-      return { position: CaretPosition.AFTER_COMMAND };
+      return CaretPosition.AFTER_COMMAND;
     }
   }
 
-  if (onMap) {
-    const lastField = rerankCommand.fields?.[rerankCommand.fields.length - 1];
-
-    if (lastField && isAssignment(lastField)) {
-      return {
-        position: CaretPosition.ON_EXPRESSION,
-        context: {
-          expressionRoot: getAssignmentExpressionRoot(lastField),
-        },
-      };
-    }
-
-    if (!lastField.incomplete && isAfterCompleteFieldWithSpace(innerText)) {
-      return { position: CaretPosition.ON_KEEP_SUGGESTIONS_AFTER_TRAILING_SPACE };
-    }
-
-    return { position: CaretPosition.ON_WITHIN_FIELD_LIST };
+  if (onArg) {
+    return CaretPosition.ON_EXPRESSION;
   }
 
   if (!!(rerankCommand.query && !rerankCommand.query.incomplete)) {
-    return { position: CaretPosition.ON_KEYWORD };
+    return CaretPosition.ON_KEYWORD;
   }
 
   // Check targetField (only if query is not complete)
   if (rerankCommand.targetField && !rerankCommand.targetField.incomplete) {
-    return { position: CaretPosition.RERANK_AFTER_TARGET_ASSIGNMENT };
+    return CaretPosition.RERANK_AFTER_TARGET_ASSIGNMENT;
   }
 
   if (isAfterPotentialTargetFieldWithSpace(innerText)) {
-    return { position: CaretPosition.RERANK_AFTER_TARGET_FIELD };
+    return CaretPosition.RERANK_AFTER_TARGET_FIELD;
   }
 
-  return { position: CaretPosition.RERANK_KEYWORD };
+  return CaretPosition.RERANK_KEYWORD;
 }
 
 export function isAfterPotentialTargetFieldWithSpace(innerText: string): boolean {
@@ -101,12 +79,4 @@ export function isAfterPotentialTargetFieldWithSpace(innerText: string): boolean
   // !commandText.includes('"') is covered by 'withinQuotes' function in autocomplete.ts
   // However, we keep this extra safety check if it will be accidentally removed
   return innerText.endsWith(' ') && !innerText.includes('"') && /rerank\s+\w+\s+$/i.test(innerText);
-}
-
-function isAfterCompleteFieldWithSpace(innerText: string): boolean {
-  // Matches "ON" followed by any content ending with non-comma/non-space character + space
-  const completeWithSpace = /\bon\s+.*[^,\s]\s+$/i;
-  const endsWithCommaSpace = /,\s+$/i;
-
-  return completeWithSpace.test(innerText) && !endsWithCommaSpace.test(innerText);
 }

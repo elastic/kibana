@@ -88,7 +88,7 @@ const getApproximateCompletionItems = (
 ): ISuggestionItem[] => {
   if (isMap(settingRightSide)) {
     const approximateSetting = settings.find(
-      (s) => s.name === Settings.APPROXIMATE
+      (s) => s.name === Settings.APPROXIMATION
     ) as ApproximateSetting;
     const parsedParameters = parseMapParams(approximateSetting?.mapParams || '');
     const availableParameters: MapParameters = { ...parsedParameters };
@@ -145,7 +145,7 @@ const getApproximateCompletionItems = (
 const COMPLETIONS_BY_SETTING_NAME: Record<string, Function> = {
   [Settings.PROJECT_ROUTING]: getProjectRoutingCommonCompletionItems,
   [Settings.UNMAPPED_FIELDS]: getUnmappedFieldsCompletionItems,
-  [Settings.APPROXIMATE]: getApproximateCompletionItems,
+  [Settings.APPROXIMATION]: getApproximateCompletionItems,
 };
 
 export const getCompletionItemsBySettingName: (

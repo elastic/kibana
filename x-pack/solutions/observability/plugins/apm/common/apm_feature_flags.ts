@@ -14,7 +14,6 @@ export enum ApmFeatureFlagName {
   InfrastructureTabAvailable = 'infrastructureTabAvailable',
   InfraUiAvailable = 'infraUiAvailable',
   MigrationToFleetAvailable = 'migrationToFleetAvailable',
-  ServiceMapUseReactFlow = 'serviceMapUseReactFlow',
   SourcemapApiAvailable = 'sourcemapApiAvailable',
   StorageExplorerAvailable = 'storageExplorerAvailable',
   RuleFormV2Enabled = 'ruleFormV2Enabled',
@@ -39,10 +38,6 @@ const apmFeatureFlagMap = {
   },
   [ApmFeatureFlagName.MigrationToFleetAvailable]: {
     default: true,
-    type: t.boolean,
-  },
-  [ApmFeatureFlagName.ServiceMapUseReactFlow]: {
-    default: false,
     type: t.boolean,
   },
   [ApmFeatureFlagName.SourcemapApiAvailable]: {
@@ -72,3 +67,8 @@ export type ValueOfApmFeatureFlag<TApmFeatureFlagName extends ApmFeatureFlagName
 export function getApmFeatureFlags(): ApmFeatureFlags {
   return mapValues(apmFeatureFlagMap, (value, key) => value.default);
 }
+
+/**
+ * The constants below are for feature flags defined using the [Feature Flag Service](https://github.com/elastic/kibana/tree/main/src/core/packages/feature-flags#readme)
+ */
+export const APM_SERVICE_MAP_USE_REACT_FLOW_FEATURE_FLAG_KEY = 'apm.serviceMapUseReactFlow';

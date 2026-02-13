@@ -13,7 +13,7 @@ import type {
   PersistedIndexPatternLayer,
 } from '@kbn/lens-common';
 import type { DatatableState, DatatableStateESQL, DatatableStateNoESQL } from '../../../../schema';
-import { DEFAULT_LAYER_ID } from '../../../../types';
+import { DEFAULT_LAYER_ID } from '../../../../constants';
 import { fromMetricAPItoLensState } from '../../../columns/metric';
 import { getValueColumn } from '../../../columns/esql_column';
 import { addLayerColumn, generateLayer } from '../../../utils';

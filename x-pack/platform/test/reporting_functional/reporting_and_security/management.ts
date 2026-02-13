@@ -73,8 +73,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
     });
 
-    // TODO: see https://github.com/elastic/kibana/pull/243499
-    describe.skip('Schedules', () => {
+    describe('Schedules', () => {
       const dashboardTitle = 'Ecom Dashboard';
       it('does allow user with reporting privileges to navigate to the Schedules tab', async () => {
         await retry.try(async () => {
@@ -91,7 +90,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         await PageObjects.exports.clickExportTopNavButton();
         await (await testSubjects.find('scheduleExport')).click();
-        await testSubjects.existOrFail('exportItemDetailsFlyout');
+        await testSubjects.existOrFail('exportDerivativeFlyout-scheduledReports');
 
         await retry.try(async () => {
           await (await testSubjects.find('scheduleExportSubmitButton')).click();
@@ -114,13 +113,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       it('allows user to view schedule config in flyout', async () => {
         await testSubjects.existOrFail('reportSchedulesTable');
         await (await testSubjects.findAll('euiCollapsedItemActionsButton'))[0].click();
-        const viewConfigButton = await find.byCssSelector(`[data-test-subj*="reportViewConfig-"]`);
+        const viewConfigButton = await find.byCssSelector(`[data-test-subj*="reportEditConfig-"]`);
 
         await viewConfigButton.click();
 
-        await testSubjects.existOrFail('scheduledReportFlyout');
+        await testSubjects.existOrFail('editScheduledReportFlyout');
         await testSubjects.click('euiFlyoutCloseButton');
-        await testSubjects.missingOrFail('scheduledReportFlyout');
+        await testSubjects.missingOrFail('editScheduledReportFlyout');
       });
 
       it('allows user to disable schedule', async () => {

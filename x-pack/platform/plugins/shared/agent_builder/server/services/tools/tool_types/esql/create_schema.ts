@@ -29,6 +29,9 @@ export function createSchemaFromParams(params: EsqlToolConfig['params']): z.ZodO
       case 'date':
         field = z.string().datetime();
         break;
+      case 'array':
+        field = z.array(z.union([z.string(), z.number()]));
+        break;
     }
 
     if (param.optional) {

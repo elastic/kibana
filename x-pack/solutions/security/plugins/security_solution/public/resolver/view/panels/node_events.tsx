@@ -118,7 +118,19 @@ const EventCategoryLinks = memo(function ({
     ],
     [nodeID, id]
   );
-  return <EuiInMemoryTable<EventCountsTableView> items={rows} columns={columns} sorting />;
+  return (
+    <EuiInMemoryTable<EventCountsTableView>
+      items={rows}
+      columns={columns}
+      sorting
+      tableCaption={i18n.translate(
+        'xpack.securitySolution.endpoint.resolver.panel.nodeEvents.relatedEventCountsCaption',
+        {
+          defaultMessage: 'Related event counts',
+        }
+      )}
+    />
+  );
 });
 
 // eslint-disable-next-line react/display-name

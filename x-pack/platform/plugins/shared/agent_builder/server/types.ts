@@ -10,6 +10,10 @@ import type { RunToolFn, RunAgentFn } from '@kbn/agent-builder-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -20,9 +24,11 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
+import type { HooksServiceSetup } from '@kbn/agent-builder-server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
 import type { AttachmentServiceSetup } from './services/attachments';
+import type { SkillServiceSetup } from './services/skills';
 
 export interface AgentBuilderSetupDependencies {
   cloud?: CloudSetup;
@@ -32,6 +38,7 @@ export interface AgentBuilderSetupDependencies {
   spaces?: SpacesPluginSetup;
   features: FeaturesPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  taskManager: TaskManagerSetupContract;
   actions: ActionsPluginSetup;
   home: HomeServerPluginSetup;
 }
@@ -42,6 +49,7 @@ export interface AgentBuilderStartDependencies {
   cloud?: CloudStart;
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface AttachmentsSetup {
@@ -49,6 +57,13 @@ export interface AttachmentsSetup {
    * Register an attachment type to be available in agentBuilder.
    */
   registerType: AttachmentServiceSetup['registerType'];
+}
+
+export interface SkillsSetup {
+  /**
+   * Register a skill to be available in agentBuilder.
+   */
+  register: SkillServiceSetup['registerSkill'];
 }
 
 /**
@@ -98,6 +113,14 @@ export interface AgentBuilderPluginSetup {
    * Attachments setup contract, which can be used to register attachment types.
    */
   attachments: AttachmentsSetup;
+  /**
+   * Hooks setup contract, which can be used to register lifecycle event hooks.
+   */
+  hooks: HooksServiceSetup;
+  /**
+   * Skills setup contract, which can be used to register skills.
+   */
+  skills: SkillsSetup;
 }
 
 /**

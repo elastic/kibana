@@ -1,0 +1,21 @@
+# TO_GEOHEX
+
+Converts an input value to a `geohex` value. A string will only be successfully converted if it follows the `geohex` format, as described for the geohex grid aggregation.
+
+## Syntax
+
+`TO_GEOHEX(field)`
+
+### Parameters
+
+#### field
+
+Input value to be converted. The input can be a single- or multi-valued column or an expression.
+
+## Examples
+
+Converts a string column containing a geohex value into a geohex type.
+```esql
+ROW string = "841f059ffffffff"
+| EVAL geohex = TO_GEOHEX(string)
+```

@@ -236,7 +236,6 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
           ...createParams,
           r_rule: {
             ...createParams.r_rule,
-            count: 1,
             until: moment.utc().add(1, 'week').toISOString(),
           },
           category_ids: ['management'],

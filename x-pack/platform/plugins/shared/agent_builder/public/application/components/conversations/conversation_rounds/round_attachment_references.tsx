@@ -87,12 +87,17 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
   justifyContent = 'flexStart',
 }) => {
   const resolvedReferences = useMemo((): ResolvedReference[] => {
-    const effectiveAttachments =
-      conversationAttachments?.length && conversationAttachments.length > 0
-        ? conversationAttachments
-        : fallbackAttachments?.length
-        ? buildFallbackVersionedAttachments(fallbackAttachments)
-        : [];
+    const fallbackVersioned = fallbackAttachments?.length
+      ? buildFallbackVersionedAttachments(fallbackAttachments)
+      : [];
+    const effectiveAttachments = conversationAttachments?.length
+      ? [
+          ...conversationAttachments,
+          ...fallbackVersioned.filter((attachment) =>
+            conversationAttachments.every((existing) => existing.id !== attachment.id)
+          ),
+        ]
+      : fallbackVersioned;
 
     const refs =
       attachmentRefs?.length || !fallbackAttachments?.length

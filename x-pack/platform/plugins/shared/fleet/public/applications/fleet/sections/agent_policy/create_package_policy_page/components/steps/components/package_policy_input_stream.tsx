@@ -32,12 +32,14 @@ import { useQuery } from '@kbn/react-query';
 import {
   DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
+  OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../../../../../../../../common/constants';
 
 import { sendGetDataStreams, useStartServices } from '../../../../../../../../hooks';
 
 import {
   getRegistryDataStreamAssetBaseName,
+  isInputOnlyPolicyTemplate,
   mapPackageReleaseToIntegrationCardRelease,
 } from '../../../../../../../../../common/services';
 
@@ -56,6 +58,7 @@ import { useAgentless } from '../../../single_page_layout/hooks/setup_technology
 
 import { useIndexTemplateExists } from '../../datastream_hooks';
 
+import type { RegistryPolicyInputOnlyTemplate } from '../../../../../../../../../common/types/models/epm';
 import { shouldShowVar, isVarRequiredByVarGroup } from '../../../services/var_group_helpers';
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
@@ -111,8 +114,27 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     const customDatasetVarValue = customDatasetVar?.value?.dataset || customDatasetVar?.value;
 
     const customDataStreamTypeVar = packagePolicyInputStream.vars?.[DATA_STREAM_TYPE_VAR_NAME];
+
+    // Check if package uses dynamic_signal_types
+    const dynamicSignalTypes = useMemo(() => {
+      const inputOnlyTemplate = packageInfo?.policy_templates?.find(
+        (template) =>
+          isInputOnlyPolicyTemplate(template) && template.input === OTEL_COLLECTOR_INPUT_TYPE
+      ) as RegistryPolicyInputOnlyTemplate | undefined;
+
+      return inputOnlyTemplate?.dynamic_signal_types === true;
+    }, [packageInfo?.policy_templates]);
+
     const customDataStreamTypeVarValue =
       customDataStreamTypeVar?.value || packagePolicyInputStream.data_stream.type || 'logs';
+
+    const dataStreamTypeOptions = useMemo(() => {
+      return [
+        { id: 'logs', label: 'Logs' },
+        { id: 'metrics', label: 'Metrics' },
+        { id: 'traces', label: 'Traces' },
+      ];
+    }, []);
 
     const { exists: indexTemplateExists, isLoading: isLoadingIndexTemplate } =
       useIndexTemplateExists(
@@ -393,7 +415,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                   </EuiFlexItem>
                   {isShowingAdvanced ? (
                     <>
-                      {packageInfo.type === 'input' && (
+                      {packageInfo.type === 'input' && !dynamicSignalTypes && (
                         <EuiFlexItem>
                           <EuiFormRow
                             label={
@@ -433,20 +455,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                               data-test-subj="packagePolicyDataStreamType"
                               disabled={isEditPage}
                               idSelected={customDataStreamTypeVarValue}
-                              options={[
-                                {
-                                  id: 'logs',
-                                  label: 'Logs',
-                                },
-                                {
-                                  id: 'metrics',
-                                  label: 'Metrics',
-                                },
-                                {
-                                  id: 'traces',
-                                  label: 'Traces',
-                                },
-                              ]}
+                              options={dataStreamTypeOptions}
                               onChange={(type: string) => {
                                 updatePackagePolicyInputStream({
                                   vars: {

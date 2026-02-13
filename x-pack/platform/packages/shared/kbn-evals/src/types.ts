@@ -10,13 +10,12 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { EsClient, ScoutWorkerFixtures } from '@kbn/scout';
 import type { EvaluationCriterion } from './evaluators/criteria';
-import type { EvaluationAnalysisService } from './utils/analysis';
 import { type EvaluationReporter } from './utils/reporting/evaluation_reporter';
 import type {
   EvaluatorDisplayOptions,
   EvaluatorDisplayGroup,
 } from './utils/reporting/report_table';
-import type { DatasetScoreWithStats } from './utils/evaluation_stats';
+import type { EvaluatorStats } from './utils/score_repository';
 
 export interface EvaluationDataset<TExample extends Example = Example> {
   name: string;
@@ -69,7 +68,7 @@ export interface EvaluatorParams<TExample extends Example, TTaskOutput extends T
 export interface EvaluationResult {
   score?: number | null;
   label?: string | null;
-  explanation?: string;
+  explanation?: string | null;
   reasoning?: string;
   details?: unknown;
   metadata?: Record<string, unknown> | undefined;
@@ -138,26 +137,31 @@ export interface ExampleWithId extends Example {
   id: string;
 }
 
+export interface TaskRun {
+  exampleIndex: number;
+  repetition: number;
+  input: Example['input'];
+  expected: Example['output'];
+  metadata: Example['metadata'];
+  output: TaskOutput;
+  traceId?: string | null;
+}
+
+export interface EvaluationRun {
+  name: string;
+  result?: EvaluationResult;
+  experimentRunId: string;
+  traceId?: string | null;
+  exampleId?: string;
+}
+
 export interface RanExperiment {
   id: string;
   datasetId: string;
   datasetName: string;
   datasetDescription?: string;
-  runs: Record<
-    string,
-    {
-      exampleIndex: number;
-      repetition: number;
-      input: Example['input'];
-      expected: Example['output'];
-      metadata: Example['metadata'];
-      output: TaskOutput;
-    }
-  >;
-  evaluationRuns: Array<{
-    name: string;
-    result?: EvaluationResult;
-  }>;
+  runs: Record<string, TaskRun>;
+  evaluationRuns: EvaluationRun[];
   experimentMetadata?: Record<string, unknown>;
 }
 
@@ -175,7 +179,7 @@ export interface ReportDisplayOptions {
   evaluatorDisplayGroups: EvaluatorDisplayGroup[];
 }
 export interface EvaluationReport {
-  datasetScoresWithStats: DatasetScoreWithStats[];
+  stats: EvaluatorStats[];
   model: Model;
   evaluatorModel: Model;
   repetitions: number;
@@ -197,7 +201,6 @@ export interface EvaluationSpecificWorkerFixtures {
   connector: AvailableConnectorWithId;
   evaluationConnector: AvailableConnectorWithId;
   repetitions: number;
-  evaluationAnalysisService: EvaluationAnalysisService;
   reportDisplayOptions: ReportDisplayOptions;
   reportModelScore: EvaluationReporter;
   traceEsClient: EsClient;
@@ -218,5 +221,4 @@ export interface EvaluationWorkerFixtures extends ScoutWorkerFixtures {
   connector: AvailableConnectorWithId;
   evaluationConnector: AvailableConnectorWithId;
   repetitions: number;
-  evaluationAnalysisService: EvaluationAnalysisService;
 }

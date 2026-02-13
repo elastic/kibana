@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { uniqBy } from 'lodash';
+import type { Logger } from '@kbn/core/server';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
-import { type BaseFeature, type Streams, baseFeatureSchema } from '@kbn/streams-schema';
+import { type BaseFeature, baseFeatureSchema } from '@kbn/streams-schema';
 import { withSpan } from '@kbn/apm-utils';
 import { createIdentifyFeaturesPrompt } from './prompt';
 import { sumTokens } from '../helpers/sum_tokens';
 
 export interface IdentifyFeaturesOptions {
-  stream: Streams.all.Definition;
-  start: number;
-  end: number;
-  esClient: ElasticsearchClient;
+  streamName: string;
+  sampleDocuments: Array<Record<string, any>>;
   inferenceClient: BoundInferenceClient;
   systemPrompt: string;
   logger: Logger;
@@ -25,27 +23,17 @@ export interface IdentifyFeaturesOptions {
 }
 
 export async function identifyFeatures({
-  stream,
+  streamName,
+  sampleDocuments,
   systemPrompt,
   inferenceClient,
   logger,
-  start,
-  end,
-  esClient,
   signal,
 }: IdentifyFeaturesOptions): Promise<{
   features: BaseFeature[];
   tokensUsed: ChatCompletionTokenCount;
 }> {
-  logger.debug(`Identifying features for stream ${stream.name}`);
-
-  const { hits: sampleDocuments } = await getSampleDocuments({
-    esClient,
-    index: stream.name,
-    start,
-    end,
-    size: 20,
-  });
+  logger.debug(`Identifying features from ${sampleDocuments.length} sample documents`);
 
   const response = await withSpan('invoke_prompt', () =>
     inferenceClient.prompt({
@@ -60,12 +48,19 @@ export async function identifyFeatures({
     })
   );
 
-  const features = response.toolCalls
-    .flatMap((toolCall) => toolCall.function.arguments.features)
-    .filter((feature) => {
-      const result = baseFeatureSchema.safeParse(feature);
-      return result.success;
-    });
+  const features = uniqBy(
+    response.toolCalls
+      .flatMap((toolCall) => toolCall.function.arguments.features)
+      .map((feature) => ({
+        ...feature,
+        stream_name: streamName,
+      }))
+      .filter((feature) => {
+        const result = baseFeatureSchema.safeParse(feature);
+        return result.success;
+      }),
+    (feature) => feature.id
+  );
 
   return {
     features,

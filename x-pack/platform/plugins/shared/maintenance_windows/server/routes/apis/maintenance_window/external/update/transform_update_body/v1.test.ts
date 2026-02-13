@@ -47,6 +47,19 @@ describe('transformUpdateBody', () => {
         filters: [],
         kql: "_id: '1234'",
       },
+      schedule: {
+        custom: {
+          duration: '10d',
+          start: '2021-03-07T00:00:00.000Z',
+          recurring: { every: '1d', end: '2022-05-17T05:05:00.000Z', onWeekDay: ['MO', 'FR'] },
+        },
+      },
+      scope: {
+        alerting: {
+          kql: "_id: '1234'",
+          filters: [],
+        },
+      },
     });
   });
 

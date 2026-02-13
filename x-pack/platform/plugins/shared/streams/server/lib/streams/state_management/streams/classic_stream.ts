@@ -16,6 +16,7 @@ import type {
   IngestStreamSettings,
 } from '@kbn/streams-schema';
 import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
+import { validateStreamlang } from '@kbn/streamlang';
 import { isMappingProperties } from '@kbn/streams-schema/src/fields';
 import {
   isDisabledLifecycleFailureStore,
@@ -38,7 +39,7 @@ import type {
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import type { StateDependencies, StreamChange } from '../types';
-import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
+import { formatSettings, settingsUpdateRequiresRollover, validateQueryStreams } from './helpers';
 import { validateSettings, validateSettingsWithDryRun } from './validate_settings';
 
 interface ClassicStreamChanges extends StreamChanges {
@@ -47,6 +48,7 @@ interface ClassicStreamChanges extends StreamChanges {
   failure_store: boolean;
   lifecycle: boolean;
   settings: boolean;
+  query_streams: boolean;
 }
 
 export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Definition> {
@@ -56,6 +58,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     lifecycle: false,
     failure_store: false,
     settings: false,
+    query_streams: false,
   };
 
   private _effectiveSettings?: IngestStreamSettings;
@@ -121,6 +124,13 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         startingStateStreamDefinition.ingest.failure_store
       );
 
+    this._changes.query_streams =
+      !startingStateStreamDefinition ||
+      !_.isEqual(
+        this._definition.query_streams ?? [],
+        startingStateStreamDefinition.query_streams ?? []
+      );
+
     // The newly upserted definition will always have a new updated_at timestamp. But, if processing didn't change,
     // we should keep the existing updated_at as processing wasn't touched.
     if (startingStateStreamDefinition && !this._changes.processing) {
@@ -140,7 +150,18 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       return { cascadingChanges: [], changeStatus: this.changeStatus };
     }
 
-    return { cascadingChanges: [], changeStatus: 'deleted' };
+    const cascadingChanges: StreamChange[] = [];
+
+    // Cascade delete to all child query streams
+    const childQueryStreams = this._definition.query_streams ?? [];
+    for (const childRef of childQueryStreams) {
+      cascadingChanges.push({
+        type: 'delete',
+        name: childRef.name,
+      });
+    }
+
+    return { cascadingChanges, changeStatus: 'deleted' };
   }
 
   protected async doValidateUpsertion(
@@ -232,6 +253,23 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     validateClassicFields(this._definition);
     validateBracketsInFieldNames(this._definition);
 
+    // Validate Streamlang processing
+    if (this._definition.ingest.processing.steps.length > 0) {
+      const validationResult = validateStreamlang(this._definition.ingest.processing, {
+        reservedFields: [],
+        streamType: 'classic',
+      });
+
+      if (!validationResult.isValid) {
+        return {
+          isValid: false,
+          errors: validationResult.errors.map(
+            (error) => new Error(`${error.message} (field: ${error.field})`)
+          ),
+        };
+      }
+    }
+
     const allowlistValidation = validateSettings({
       settings: this._definition.ingest.settings,
       isServerless: this.dependencies.isServerless,
@@ -250,6 +288,16 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       }),
       validateSimulation(this._definition, this.dependencies.scopedClusterClient),
     ]);
+
+    const queryStreamsValidation = validateQueryStreams({
+      desiredState,
+      name: this._definition.name,
+      queryStreams: this._definition.query_streams ?? [],
+    });
+
+    if (queryStreamsValidation) {
+      return queryStreamsValidation;
+    }
 
     return { isValid: true, errors: [] };
   }

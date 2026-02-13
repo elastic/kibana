@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { getResearchAgentPrompt } from './research_agent';
-export { getAnswerAgentPrompt, getStructuredAnswerPrompt } from './answer_agent';
+export type { PromptFactoryParams, PromptFactory } from './types';
+export { createPromptFactory } from './prompt_factory';

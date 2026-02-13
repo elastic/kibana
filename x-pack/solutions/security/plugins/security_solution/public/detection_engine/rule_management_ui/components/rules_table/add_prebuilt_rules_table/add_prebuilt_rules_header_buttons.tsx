@@ -32,7 +32,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
     },
     actions: { installAllRules, installSelectedRules },
   } = useAddPrebuiltRulesTableContext();
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
 
   const numberOfSelectedRules = selectedRules.length ?? 0;
   const shouldDisplayInstallSelectedRulesButton = numberOfSelectedRules > 0;

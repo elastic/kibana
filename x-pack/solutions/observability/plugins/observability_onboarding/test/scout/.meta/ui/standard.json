@@ -1,108 +1,94 @@
 {
-  "lastModified": "2025-12-03T19:03:52.851Z",
-  "sha1": "177cf203c38bada6044e3cafaac912f2988d1228",
+  "lastModified": "2026-02-09T18:40:24.680Z",
+  "sha1": "a9a52816a7abff7332d8573055a61fea68f97904",
   "tests": [
     {
       "id": "bd77233fbb28a70-b95459eaf733782",
       "title": "Onboarding UI Validation validates main page structure and navigation",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt",
-        "@svlLogsEssentials"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 20,
+        "line": 21,
         "column": 7
       }
     },
     {
-      "id": "bd77233fbb28a70-695767ca8777609",
-      "title": "Onboarding UI Validation completes Host onboarding flow",
+      "id": "bd77233fbb28a70-2d3f3cfafbdcb6b",
+      "title": "Onboarding UI Validation navigates correctly within Host Auto-Detect flow",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt",
-        "@svlLogsEssentials"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 52,
+        "line": 91,
         "column": 7
       }
     },
     {
-      "id": "bd77233fbb28a70-73e0d6347f10e9d",
-      "title": "Onboarding UI Validation completes Host OTel integration navigation",
+      "id": "bd77233fbb28a70-4ba70b686a845a9",
+      "title": "Onboarding UI Validation navigates correctly within Host OTel flow",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt",
-        "@svlLogsEssentials"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 81,
+        "line": 107,
         "column": 7
       }
     },
     {
-      "id": "bd77233fbb28a70-d387a4fb8535ded",
-      "title": "Onboarding UI Validation completes Kubernetes onboarding flow",
+      "id": "bd77233fbb28a70-44dc6eb47e723c0",
+      "title": "Onboarding UI Validation navigates correctly within Kubernetes Host flow",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt",
-        "@svlLogsEssentials"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 100,
+        "line": 125,
         "column": 7
       }
     },
     {
-      "id": "bd77233fbb28a70-b3ddfca777e40b8",
-      "title": "Onboarding UI Validation completes Kubernetes onboarding flow with the keyboard only",
+      "id": "bd77233fbb28a70-4ab634c0d169c88",
+      "title": "Onboarding UI Validation Navigates correctly within Kubernetes Host flow using the keyboard only",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt",
-        "@svlLogsEssentials"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 124,
-        "column": 7
-      }
-    },
-    {
-      "id": "bd77233fbb28a70-9f3cdcd52e2e897",
-      "title": "Onboarding UI Validation completes Cloud onboarding flow",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt",
-        "@svlLogsEssentials"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 157,
-        "column": 7
-      }
-    },
-    {
-      "id": "bd77233fbb28a70-2293012f3ea6874",
-      "title": "Onboarding UI Validation completes Application onboarding flow in complete tier",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess",
-        "@svlOblt"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 180,
+        "line": 145,
         "column": 7
       }
     },
@@ -111,11 +97,12 @@
       "title": "Onboarding UI Validation validates logs-essentials tier restrictions",
       "expectedStatus": "passed",
       "tags": [
-        "@svlLogsEssentials"
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 202,
+        "line": 184,
         "column": 7
       }
     }

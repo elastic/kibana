@@ -18,8 +18,7 @@ import type { Environment } from '../../../../common/environment_rt';
 import { getServiceMapNodes, getPaths, transformToReactFlow } from '../../../../common/service_map';
 import type { GroupResourceNodesResponse } from '../../../../common/service_map';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useApmFeatureFlag } from '../../../hooks/use_apm_feature_flag';
-import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
+import { APM_SERVICE_MAP_USE_REACT_FLOW_FEATURE_FLAG_KEY } from '../../../../common/apm_feature_flags';
 
 // Cytoscape format state (legacy)
 type CytoscapeServiceMapState = GroupResourceNodesResponse &
@@ -84,8 +83,14 @@ export const useServiceMap = ({
   serviceName?: string;
 }): UseServiceMapResult => {
   const license = useLicenseContext();
-  const { config } = useApmPluginContext();
-  const useReactFlow = useApmFeatureFlag(ApmFeatureFlagName.ServiceMapUseReactFlow);
+  const {
+    config,
+    core: { featureFlags },
+  } = useApmPluginContext();
+  const useReactFlow = featureFlags.getBooleanValue(
+    APM_SERVICE_MAP_USE_REACT_FLOW_FEATURE_FLAG_KEY,
+    false
+  );
 
   const initialState = useReactFlow ? INITIAL_REACT_FLOW_STATE : INITIAL_CYTOSCAPE_STATE;
 

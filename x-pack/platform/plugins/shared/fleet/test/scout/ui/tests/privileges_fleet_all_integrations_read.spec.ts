@@ -5,43 +5,36 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
 import { getFleetAllIntegrationsReadRole } from '../fixtures/services/privileges';
 
 test.describe(
   'When the user has All privilege for Fleet but Read for integrations',
-  { tag: ['@ess'] },
+  { tag: tags.stateful.classic },
   () => {
-    test.beforeAll(async ({ kbnClient }) => {
+    const agentPolicyName = 'Test Agent Policy';
+    let policyId: string;
+
+    test.beforeAll(async ({ apiServices }) => {
       // Create an agent policy via API
-      await kbnClient.request({
-        method: 'POST',
-        path: '/api/fleet/agent_policies?sys_monitoring=true',
-        body: {
-          name: 'Test Agent Policy',
-          namespace: 'default',
+      const response = await apiServices.fleet.agent_policies.create({
+        policyName: agentPolicyName,
+        policyNamespace: 'default',
+        sysMonitoring: true,
+        params: {
           monitoring_enabled: ['logs', 'metrics'],
         },
       });
+      policyId = response.data.item.id;
     });
 
-    test.afterAll(async ({ kbnClient }) => {
-      // Cleanup: delete all agent policies
-      const response = await kbnClient.request<{ items: Array<{ id: string }> }>({
-        method: 'GET',
-        path: '/api/fleet/agent_policies',
-      });
-      for (const policy of response.data.items) {
-        await kbnClient.request({
-          method: 'POST',
-          path: `/api/fleet/agent_policies/delete`,
-          body: {
-            agentPolicyId: policy.id,
-          },
-        });
-      }
+    test.afterAll(async ({ apiServices }) => {
+      // Cleanup: delete pre-created agent policy
+      const response = await apiServices.fleet.agent_policies.delete(policyId);
+      expect(response.status).toBe(200);
     });
 
     test('Some elements in the Fleet UI are not enabled', async ({ browserAuth, pageObjects }) => {
@@ -53,7 +46,7 @@ test.describe(
       await fleetHome.navigateToAgentPoliciesTab();
 
       // Click on the agent policy name link
-      await fleetHome.getAgentPolicyNameLink().click();
+      await fleetHome.getAgentPolicyNameLink(agentPolicyName).click();
 
       // Verify Add Package Policy button is disabled
       await expect(fleetHome.getAddPackagePolicyButton()).toBeDisabled();
