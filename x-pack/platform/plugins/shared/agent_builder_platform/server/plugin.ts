@@ -50,7 +50,7 @@ export class AgentBuilderPlatformPlugin
     });
 
     // Register built-in skills
-    setupDeps.agentBuilder.skill.registerSkill(dataExplorationSkill).catch((err) => {
+    setupDeps.agentBuilder.skills.register(dataExplorationSkill).catch((err) => {
       this.logger.error(`Failed to register built-in data-exploration skill: ${err.message}`);
     });
 

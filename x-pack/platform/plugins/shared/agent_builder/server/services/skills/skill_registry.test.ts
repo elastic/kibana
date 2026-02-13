@@ -58,7 +58,7 @@ const createMockPersistedProvider = (
       readonly: false,
       getAllowedTools: () => update.tool_ids ?? [],
     })),
-    delete: jest.fn(async () => true),
+    delete: jest.fn(async (_skillId: string) => true),
   };
 };
 
@@ -71,11 +71,6 @@ describe('createSkillRegistry', () => {
   const builtinSkill1 = createMockInternalSkillDefinition({
     id: 'builtin-skill-1',
     name: 'builtin-skill-1-name',
-    readonly: true,
-  });
-  const builtinSkill2 = createMockInternalSkillDefinition({
-    id: 'builtin-skill-2',
-    name: 'builtin-skill-2-name',
     readonly: true,
   });
   const persistedSkill1 = createMockInternalSkillDefinition({

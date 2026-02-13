@@ -6,7 +6,8 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import type { SkillBoundedTool, ReferencedContent } from './type_definition';
+import type { SkillBoundedTool } from './tools';
+import type { ReferencedContent } from './type_definition';
 
 /**
  * Internal generic representation for a skill definition.

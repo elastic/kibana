@@ -11,5 +11,5 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
  * Registers all security agent builder skills with the agentBuilder plugin
  */
 export const registerSkills = async (agentBuilder: AgentBuilderPluginSetup): Promise<void> => {
-  // await agentBuilder.skill.registerSkill(alertAnalysisSampleSkill);
+  // await agentBuilder.skills.register(alertAnalysisSampleSkill);
 };

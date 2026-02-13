@@ -48,7 +48,7 @@ describe('createBuiltinSkillProvider', () => {
   });
 
   describe('get', () => {
-    it('returns converted InternalSkillDefinition for an existing skill', () => {
+    it('returns converted InternalSkillDefinition for an existing skill', async () => {
       const skill = createMockSkillDefinition({
         id: 'skill-1',
         name: 'my-skill' as any,
@@ -56,7 +56,7 @@ describe('createBuiltinSkillProvider', () => {
       });
       const provider = createBuiltinSkillProvider([skill]);
 
-      const result = provider.get('skill-1');
+      const result = await provider.get('skill-1');
 
       expect(result).toBeDefined();
       expect(result!.id).toBe('skill-1');
@@ -65,32 +65,32 @@ describe('createBuiltinSkillProvider', () => {
       expect(result!.readonly).toBe(true);
     });
 
-    it('returns undefined for a non-existent skill', () => {
+    it('returns undefined for a non-existent skill', async () => {
       const provider = createBuiltinSkillProvider([createMockSkillDefinition({ id: 'skill-1' })]);
 
-      expect(provider.get('non-existent')).toBeUndefined();
+      expect(await provider.get('non-existent')).toBeUndefined();
     });
   });
 
   describe('list', () => {
-    it('returns all skills as InternalSkillDefinitions', () => {
+    it('returns all skills as InternalSkillDefinitions', async () => {
       const skills = [
         createMockSkillDefinition({ id: 'skill-1' }),
         createMockSkillDefinition({ id: 'skill-2' }),
       ];
       const provider = createBuiltinSkillProvider(skills);
 
-      const result = provider.list();
+      const result = await provider.list();
 
       expect(result).toHaveLength(2);
-      expect(result.map((s) => s.id)).toEqual(['skill-1', 'skill-2']);
-      result.forEach((s) => expect(s.readonly).toBe(true));
+      expect(result.map((s: { id: string }) => s.id)).toEqual(['skill-1', 'skill-2']);
+      result.forEach((s: { readonly: boolean }) => expect(s.readonly).toBe(true));
     });
 
-    it('returns empty array when no skills are registered', () => {
+    it('returns empty array when no skills are registered', async () => {
       const provider = createBuiltinSkillProvider([]);
 
-      expect(provider.list()).toEqual([]);
+      expect(await provider.list()).toEqual([]);
     });
   });
 });
