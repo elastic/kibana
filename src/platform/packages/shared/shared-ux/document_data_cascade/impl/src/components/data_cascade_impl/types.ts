@@ -13,6 +13,7 @@ import type { Table, CellContext, Row } from '@tanstack/react-table';
 import type { VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode, LeafNode } from '../../store_provider';
 import type { CascadeVirtualizerProps, useCascadeVirtualizer } from '../../lib/core/virtualizer';
+import type { DataCascadeImplRef } from '../../lib/core/api';
 import type { SelectionDropdownProps } from './data_cascade_header/group_selection_combobox/selection_dropdown';
 
 /**
@@ -257,6 +258,7 @@ interface DataCascadeImplBaseProps<G extends GroupNode, L extends LeafNode>
    */
   allowMultipleRowToggle?: boolean;
   children: React.ReactElement<DataCascadeRowProps<G, L>>;
+  cascadeRef: React.ForwardedRef<DataCascadeImplRef<G, L>>;
 }
 
 export type DataCascadeImplProps<
