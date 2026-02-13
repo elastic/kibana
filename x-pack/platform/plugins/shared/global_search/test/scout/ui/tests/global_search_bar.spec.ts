@@ -38,6 +38,7 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
 
   test('redirects to the correct page', async ({ page, pageObjects }) => {
     await pageObjects.globalSearch.searchFor('type:application discover');
+    await expect(pageObjects.globalSearch.resultLabels).not.toHaveCount(0);
     await pageObjects.globalSearch.clickOnOption(0);
 
     expect(page.url()).toContain('discover');
@@ -45,20 +46,16 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
 
   test('shows a suggestion when searching for a term matching a type', async ({ pageObjects }) => {
     await pageObjects.globalSearch.searchFor('dashboard');
-
-    let results = await pageObjects.globalSearch.getDisplayedResults();
-    expect(results.length).toBeGreaterThan(0);
-    expect(results[0].label).toBe('type: dashboard');
+    await expect(
+      pageObjects.globalSearch.resultLabels.filter({ hasText: 'type: dashboard' })
+    ).toBeVisible();
 
     await pageObjects.globalSearch.clickOnOption(0);
-    await pageObjects.globalSearch.waitForResultsLoaded();
 
     const searchTerm = await pageObjects.globalSearch.getFieldValue();
     expect(searchTerm).toBe('type:dashboard');
 
-    results = await pageObjects.globalSearch.getDisplayedResults();
-    const labels = results.map((result) => result.label);
-    expect(labels).toStrictEqual([
+    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
       'dashboard 1 (tag-2)',
       'dashboard 2 (tag-3)',
       'dashboard 3 (tag-1 and tag-3)',
@@ -70,19 +67,16 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
     pageObjects,
   }) => {
     await pageObjects.globalSearch.searchFor('tag-1');
-
-    let results = await pageObjects.globalSearch.getDisplayedResults();
-    expect(results[0].label).toBe('tag: tag-1');
+    await expect(
+      pageObjects.globalSearch.resultLabels.filter({ hasText: 'tag: tag-1' })
+    ).toBeVisible();
 
     await pageObjects.globalSearch.clickOnOption(0);
-    await pageObjects.globalSearch.waitForResultsLoaded();
 
     const searchTerm = await pageObjects.globalSearch.getFieldValue();
     expect(searchTerm).toBe('tag:tag-1');
 
-    results = await pageObjects.globalSearch.getDisplayedResults();
-    const labels = results.map((result) => result.label);
-    expect(labels).toStrictEqual([
+    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
       'Visualization 1 (tag-1)',
       'Visualization 3 (tag-1 + tag-3)',
       'dashboard 3 (tag-1 and tag-3)',
@@ -93,10 +87,7 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
     await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('type:dashboard');
 
-    const results = await pageObjects.globalSearch.getDisplayedResults();
-    const labels = results.map((result) => result.label);
-
-    expect(labels).toStrictEqual([
+    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
       'dashboard 1 (tag-2)',
       'dashboard 2 (tag-3)',
       'dashboard 3 (tag-1 and tag-3)',
@@ -107,10 +98,7 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
   test('allows to filter by multiple types', async ({ pageObjects }) => {
     await pageObjects.globalSearch.searchFor('type:(dashboard OR visualization)');
 
-    const results = await pageObjects.globalSearch.getDisplayedResults();
-    const labels = results.map((result) => result.label);
-
-    expect(labels).toStrictEqual([
+    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
       'Visualization 1 (tag-1)',
       'Visualization 2 (tag-2)',
       'Visualization 3 (tag-1 + tag-3)',
@@ -126,10 +114,7 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
   test('allows to filter by tag', async ({ pageObjects }) => {
     await pageObjects.globalSearch.searchFor('tag:tag-1');
 
-    const results = await pageObjects.globalSearch.getDisplayedResults();
-    const labels = results.map((result) => result.label);
-
-    expect(labels).toStrictEqual([
+    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
       'Visualization 1 (tag-1)',
       'Visualization 3 (tag-1 + tag-3)',
       'dashboard 3 (tag-1 and tag-3)',
@@ -139,10 +124,7 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
   test('allows to filter by multiple tags', async ({ pageObjects }) => {
     await pageObjects.globalSearch.searchFor('tag:tag-1 tag:tag-3');
 
-    const results = await pageObjects.globalSearch.getDisplayedResults();
-    const labels = results.map((result) => result.label);
-
-    expect(labels).toStrictEqual([
+    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
       'Visualization 1 (tag-1)',
       'Visualization 3 (tag-1 + tag-3)',
       'dashboard 2 (tag-3)',
@@ -154,10 +136,10 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
     await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('type:dashboard tag:tag-3');
 
-    const results = await pageObjects.globalSearch.getDisplayedResults();
-    const labels = results.map((result) => result.label);
-
-    expect(labels).toStrictEqual(['dashboard 2 (tag-3)', 'dashboard 3 (tag-1 and tag-3)']);
+    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
+      'dashboard 2 (tag-3)',
+      'dashboard 3 (tag-1 and tag-3)',
+    ]);
   });
 
   test('allows to filter by multiple types and tags', async ({ pageObjects }) => {
@@ -165,10 +147,7 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
       'type:(dashboard OR visualization) tag:(tag-1 OR tag-3)'
     );
 
-    const results = await pageObjects.globalSearch.getDisplayedResults();
-    const labels = results.map((result) => result.label);
-
-    expect(labels).toStrictEqual([
+    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
       'Visualization 1 (tag-1)',
       'Visualization 3 (tag-1 + tag-3)',
       'dashboard 2 (tag-3)',
@@ -179,38 +158,31 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
   test('allows to filter by term and type', async ({ pageObjects }) => {
     await pageObjects.globalSearch.searchFor('type:visualization awesome');
 
-    const results = await pageObjects.globalSearch.getDisplayedResults();
-    const labels = results.map((result) => result.label);
-
-    expect(labels).toStrictEqual(['My awesome vis (tag-4)']);
+    await expect(pageObjects.globalSearch.resultLabels).toHaveText(['My awesome vis (tag-4)']);
   });
 
   test('allows to filter by term and tag', async ({ pageObjects }) => {
     await pageObjects.globalSearch.searchFor('tag:tag-4 awesome');
 
-    const results = await pageObjects.globalSearch.getDisplayedResults();
-    const labels = results.map((result) => result.label);
-
-    expect(labels).toStrictEqual(['My awesome vis (tag-4)']);
+    await expect(pageObjects.globalSearch.resultLabels).toHaveText(['My awesome vis (tag-4)']);
   });
 
   test('allows to filter by tags containing special characters', async ({ pageObjects }) => {
     await pageObjects.globalSearch.searchFor('tag:"my%tag"');
 
-    const results = await pageObjects.globalSearch.getDisplayedResults();
-    const labels = results.map((result) => result.label);
-
-    expect(labels).toStrictEqual(['dashboard 4 (tag-special-chars)']);
+    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
+      'dashboard 4 (tag-special-chars)',
+    ]);
   });
 
   test('returns no results when searching for an unknown tag', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.searchFor('tag:unknown', { wait: false });
+    await pageObjects.globalSearch.searchFor('tag:unknown');
 
     expect(await pageObjects.globalSearch.isNoResultsPlaceholderDisplayed()).toBe(true);
   });
 
   test('returns no results when searching for an unknown type', async ({ pageObjects }) => {
-    await pageObjects.globalSearch.searchFor('type:unknown', { wait: false });
+    await pageObjects.globalSearch.searchFor('type:unknown');
 
     expect(await pageObjects.globalSearch.isNoResultsPlaceholderDisplayed()).toBe(true);
   });
