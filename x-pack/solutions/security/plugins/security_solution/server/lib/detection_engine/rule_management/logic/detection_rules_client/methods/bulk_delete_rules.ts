@@ -10,6 +10,9 @@ import type { RulesClient, BulkOperationError } from '@kbn/alerting-plugin/serve
 import type { RuleObjectId } from '../../../../../../../common/api/detection_engine';
 import type { RuleAlertType } from '../../../../rule_schema';
 
+// The `rulesClient.bulkDeleteRules` method converts IDs into a KQL "OR" query,
+// which is limited by Elasticsearch's `max_clause_count` (default 1024). The alerting
+// schema enforces a maxSize of 1000 per call to stay within that limit.
 const CHUNK_SIZE = 1000;
 
 interface BulkDeleteRulesParams {
