@@ -5,24 +5,55 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type { AnalyticsServiceStart, AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import {
   insightFailedEventSchema,
   insightFeedbackEventSchema,
-  insightOpenedEventSchema,
+  insightResponseGeneratedEventSchema,
 } from './schemas/insight_feedback';
+import type {
+  InsightFailedEvent,
+  InsightFeedbackEvent,
+  InsightResponseGeneratedEvent,
+} from './schemas/insight_feedback';
+import type { ObservabilityAgentBuilderTelemetryEventType } from './telemetry_event_type';
 
 export const registerTelemetryEventTypes = (analytics: AnalyticsServiceSetup) => {
-  analytics.registerEventType(insightOpenedEventSchema);
+  analytics.registerEventType(insightResponseGeneratedEventSchema);
   analytics.registerEventType(insightFailedEventSchema);
   analytics.registerEventType(insightFeedbackEventSchema);
 };
+
+export type TelemetryEvent =
+  | {
+      type: ObservabilityAgentBuilderTelemetryEventType.AiInsightResponseGenerated;
+      payload: InsightResponseGeneratedEvent;
+    }
+  | {
+      type: ObservabilityAgentBuilderTelemetryEventType.AiInsightFailed;
+      payload: InsightFailedEvent;
+    }
+  | {
+      type: ObservabilityAgentBuilderTelemetryEventType.AiInsightFeedback;
+      payload: InsightFeedbackEvent;
+    };
+
+export function reportTelemetryEvent(
+  analytics: AnalyticsServiceStart,
+  event: TelemetryEvent
+): void {
+  try {
+    analytics.reportEvent(event.type, event.payload);
+  } catch {
+    // do nothing
+  }
+}
 
 export { ObservabilityAgentBuilderTelemetryEventType } from './telemetry_event_type';
 export type {
   ConnectorInfo,
   InsightFailedEvent,
   InsightFeedbackEvent,
-  InsightOpenedEvent,
+  InsightResponseGeneratedEvent,
   InsightType,
 } from './schemas/insight_feedback';

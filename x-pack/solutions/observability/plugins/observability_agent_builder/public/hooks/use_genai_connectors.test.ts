@@ -15,7 +15,6 @@ jest.mock('./use_kibana');
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockGetConnectors = jest.fn();
-const mockUiSettingsGet = jest.fn();
 
 const mockConnectors: InferenceConnector[] = [
   {
@@ -37,14 +36,10 @@ const mockConnectors: InferenceConnector[] = [
 describe('useGenAIConnectors', () => {
   beforeEach(() => {
     mockGetConnectors.mockReset();
-    mockUiSettingsGet.mockReset();
     mockUseKibana.mockReturnValue({
       services: {
         inference: {
           getConnectors: mockGetConnectors,
-        },
-        uiSettings: {
-          get: mockUiSettingsGet,
         },
       },
     });

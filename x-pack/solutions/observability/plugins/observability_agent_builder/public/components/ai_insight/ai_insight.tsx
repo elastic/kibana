@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   EuiIcon,
   EuiAccordion,
@@ -23,7 +23,6 @@ import { i18n } from '@kbn/i18n';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { getConnectorFamily, getConnectorProvider, getConnectorModel } from '@kbn/inference-common';
 import type { Observable } from 'rxjs';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
@@ -37,7 +36,11 @@ import { AiInsightErrorBanner } from './ai_insight_error_banner';
 import { LoadingCursor } from './loading_cursor';
 import { FeedbackButtons, type Feedback } from './feedback_buttons';
 import { OBSERVABILITY_AGENT_ID } from '../../../common/constants';
-import { ObservabilityAgentBuilderTelemetryEventType, type InsightType } from '../../analytics';
+import {
+  ObservabilityAgentBuilderTelemetryEventType,
+  reportTelemetryEvent,
+  type InsightType,
+} from '../../analytics';
 
 export interface AiInsightResponse {
   summary: string;
@@ -71,25 +74,26 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
   const [chatExperience] = useUiSetting$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
   const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
 
-  const { hasConnectors, selectedConnector } = useGenAIConnectors();
+  const { hasConnectors } = useGenAIConnectors();
 
   const hasEnterpriseLicense = license?.hasAtLeast('enterprise');
   const hasAgentBuilderAccess = application?.capabilities.agentBuilder?.show === true;
 
-  const { isLoading, error, summary, context, wasStopped, fetch, stop, regenerate } =
+  const { isLoading, error, summary, context, connectorInfo, wasStopped, fetch, stop, regenerate } =
     useStreamingAiInsight(createStream);
 
-  const connectorInfo = useMemo(() => {
-    if (!selectedConnector) return undefined;
-    return {
-      connectorId: selectedConnector.connectorId,
-      name: selectedConnector.name,
-      type: selectedConnector.type,
-      modelFamily: getConnectorFamily(selectedConnector),
-      modelProvider: getConnectorProvider(selectedConnector),
-      modelId: getConnectorModel(selectedConnector),
-    };
-  }, [selectedConnector]);
+  // Report the response generated event when the stream finishes (completely or stopped)
+  useEffect(() => {
+    const hasContent = Boolean(summary && summary.trim());
+    const hasGeneratedInsight = !isLoading && hasContent && !error;
+
+    if (hasGeneratedInsight && connectorInfo) {
+      reportTelemetryEvent(analytics, {
+        type: ObservabilityAgentBuilderTelemetryEventType.AiInsightResponseGenerated,
+        payload: { insightType, connector: connectorInfo },
+      });
+    }
+  }, [analytics, connectorInfo, error, insightType, isLoading, summary]);
 
   const handleStartConversation = useCallback(() => {
     if (!agentBuilder?.openConversationFlyout) return;
@@ -103,33 +107,20 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
 
   const handleFeedback = useCallback(
     (feedback: Feedback) => {
-      if (!connectorInfo) return;
-      try {
-        analytics?.reportEvent(ObservabilityAgentBuilderTelemetryEventType.AiInsightFeedback, {
-          feedback,
-          insightType,
-          connector: connectorInfo,
-        });
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.debug('Failed to report AI insight feedback event', e);
-      }
+      reportTelemetryEvent(analytics, {
+        type: ObservabilityAgentBuilderTelemetryEventType.AiInsightFeedback,
+        payload: { feedback, insightType, connector: connectorInfo! },
+      });
     },
     [analytics, connectorInfo, insightType]
   );
 
   useEffect(() => {
-    if (error) {
-      try {
-        analytics?.reportEvent(ObservabilityAgentBuilderTelemetryEventType.AiInsightFailed, {
-          insightType,
-          errorMessage: error,
-          connector: connectorInfo,
-        });
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.debug('Failed to report AI insight failed event', e);
-      }
+    if (error && connectorInfo) {
+      reportTelemetryEvent(analytics, {
+        type: ObservabilityAgentBuilderTelemetryEventType.AiInsightFailed,
+        payload: { insightType, errorMessage: error, connector: connectorInfo },
+      });
     }
   }, [analytics, connectorInfo, error, insightType]);
 
@@ -184,15 +175,6 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
         onToggle={(open) => {
           setIsOpen(open);
           if (open && !error && !summary && !isLoading) {
-            try {
-              analytics?.reportEvent(ObservabilityAgentBuilderTelemetryEventType.AiInsightOpened, {
-                insightType,
-                connector: connectorInfo,
-              });
-            } catch (e) {
-              // eslint-disable-next-line no-console
-              console.debug('Failed to report AI insight opened event', e);
-            }
             fetch();
           }
         }}

@@ -20,7 +20,7 @@ export interface ConnectorInfo {
   modelId: string;
 }
 
-export interface InsightOpenedEvent {
+export interface InsightResponseGeneratedEvent {
   insightType: InsightType;
   connector: ConnectorInfo;
 }
@@ -88,8 +88,8 @@ const connectorSchema = {
   },
 };
 
-export const insightOpenedEventSchema: EventTypeOpts<InsightOpenedEvent> = {
-  eventType: ObservabilityAgentBuilderTelemetryEventType.AiInsightOpened,
+export const insightResponseGeneratedEventSchema: EventTypeOpts<InsightResponseGeneratedEvent> = {
+  eventType: ObservabilityAgentBuilderTelemetryEventType.AiInsightResponseGenerated,
   schema: {
     insightType: insightTypeSchema,
     connector: connectorSchema,
