@@ -83,6 +83,11 @@ export const privateTimeoutFormatter: FormatterFn = (fields) => {
   // Clamp to 0 to guard against negative values if validation is bypassed.
   if (fields[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER) {
     const timeoutSeconds = parseInt(value, 10);
+    
+    if (isNaN(timeoutSeconds)) {
+      return null;
+    }
+    
     const adjustedTimeout = Math.max(
       0,
       timeoutSeconds - HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS

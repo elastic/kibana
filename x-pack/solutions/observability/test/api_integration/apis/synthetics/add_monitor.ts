@@ -231,7 +231,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(apiResponse.body.warnings).to.have.length(1);
       const [warning] = apiResponse.body.warnings;
-      expect(warning.id).eql(apiResponse.body.id);
+      expect(warning.monitorId).eql(apiResponse.body.id);
       expect(warning.message).to.contain('timeout');
       expect(warning.message).to.contain('no private locations');
 
