@@ -8,7 +8,6 @@
 import React, { useMemo, useCallback } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiIcon, EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { parse, stringify } from 'query-string';
 import { useLocation } from 'react-router-dom';
 
 import { useNavigation } from '../../../common/lib/kibana';
@@ -58,9 +57,7 @@ const ROUTE_TO_WATCHLIST_MAP: Record<string, string> = Object.fromEntries(
   Object.entries(WATCHLIST_ROUTE_MAP).map(([id, path]) => [path, id])
 ) as Record<string, string>;
 
-export const WatchlistFilter = ({
-  onChangeSelectedId,
-}: WatchlistFilterProps) => {
+export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) => {
   // hook this up to real data
   const options = WATCHLIST_OPTIONS;
 
@@ -76,10 +73,7 @@ export const WatchlistFilter = ({
     [options]
   );
 
-  const selectedIdFromRoute = useMemo(
-    () => ROUTE_TO_WATCHLIST_MAP[pathname],
-    [pathname]
-  );
+  const selectedIdFromRoute = useMemo(() => ROUTE_TO_WATCHLIST_MAP[pathname], [pathname]);
 
   const selected = useMemo(
     () => (selectedIdFromRoute ? getItemById(selectedIdFromRoute) : null),
@@ -90,8 +84,7 @@ export const WatchlistFilter = ({
     (watchlistId?: string) => {
       const isCleared = !watchlistId || watchlistId === 'none' || watchlistId === 'clear-selection';
       const mappedPath = watchlistId ? WATCHLIST_ROUTE_MAP[watchlistId] : undefined;
-      const nextPath =
-        !isCleared && mappedPath ? mappedPath : ENTITY_ANALYTICS_THREAT_HUNTING_PATH;
+      const nextPath = !isCleared && mappedPath ? mappedPath : ENTITY_ANALYTICS_THREAT_HUNTING_PATH;
 
       navigateTo({
         path: nextPath,
