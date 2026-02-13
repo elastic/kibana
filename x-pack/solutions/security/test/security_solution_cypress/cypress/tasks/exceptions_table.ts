@@ -218,6 +218,9 @@ export const editExceptionLisDetails = ({
         'have.value',
         description.updated
       );
+    } else {
+      cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT).clear({ force: true });
+      cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT).should('have.value', '');
     }
   }
 
@@ -239,16 +242,19 @@ export const saveLinkedRules = () => {
 
 export const validateSharedListLinkedRules = (
   numberOfRules: number,
-  linkedRulesNames: string[]
+  linkedRulesNames?: string[]
 ) => {
   cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU).should(
     'have.text',
     `Linked to ${numberOfRules} rules`
   );
-  cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU).click();
-  linkedRulesNames.forEach((ruleName) => {
-    cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM).contains('a', ruleName);
-  });
+
+  if (linkedRulesNames && linkedRulesNames.length) {
+    cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU).click();
+    linkedRulesNames.forEach((ruleName) => {
+      cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM).contains('a', ruleName);
+    });
+  }
 };
 
 export const addExceptionListFromSharedExceptionListHeaderMenu = () => {
