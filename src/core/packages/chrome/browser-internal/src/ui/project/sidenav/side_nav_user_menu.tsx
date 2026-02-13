@@ -9,13 +9,15 @@
 
 import React, { useState, useMemo } from 'react';
 import {
-  EuiButtonIcon,
+  EuiAvatar,
+  EuiButton,
   EuiContextMenu,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiIcon,
   EuiPopover,
   useEuiTheme,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -41,7 +43,9 @@ export const SideNavUserMenu: React.FC = () => {
         min-width: ${euiTheme.size.xxl};
       `,
       button: css`
-        &.euiButtonIcon:hover {
+        min-width: 0;
+        padding: ${euiTheme.size.xs};
+        &.euiButton:hover {
           transform: none;
         }
       `,
@@ -51,12 +55,11 @@ export const SideNavUserMenu: React.FC = () => {
 
   const button = (
     <div css={wrapperStyles.wrapper}>
-      <EuiButtonIcon
+      <EuiButtonEmpty
         data-test-subj="sideNavUserMenuButton"
         css={wrapperStyles.button}
         size="s"
         color="text"
-        iconType="user"
         aria-controls={SIDE_NAV_USER_MENU_ID}
         aria-expanded={isPopoverOpen}
         aria-haspopup="true"
@@ -65,7 +68,9 @@ export const SideNavUserMenu: React.FC = () => {
           { defaultMessage: 'Account menu' }
         )}
         onClick={() => setIsPopoverOpen((v) => !v)}
-      />
+      >
+        <EuiAvatar name="User" initials="R" size="s" color="#0077CC" />
+      </EuiButtonEmpty>
     </div>
   );
 
@@ -116,7 +121,7 @@ export const SideNavUserMenu: React.FC = () => {
       ownFocus
       button={button}
       isOpen={isPopoverOpen}
-      anchorPosition="rightUp"
+      anchorPosition="rightDown"
       repositionOnScroll
       closePopover={() => setIsPopoverOpen(false)}
       panelPaddingSize="none"
