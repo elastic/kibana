@@ -6,6 +6,7 @@
  */
 
 import type { AuthenticatedUser } from '@kbn/core/server';
+import { DEFAULT_ALERT_CLOSE_REASONS_KEY } from '../../../../../common/constants';
 
 import {
   typicalSetStatusSignalByIdsPayload,
@@ -25,6 +26,7 @@ describe('set workflow status handler', () => {
     context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResponse(
       getSuccessfulSignalUpdateResponse()
     );
+    context.core.uiSettings.client.get.mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -108,6 +110,9 @@ describe('set workflow status handler', () => {
       const response = responseAdapter(mockedResponse);
 
       expect(response.status).toEqual(200);
+      expect(context.core.uiSettings.client.get).toHaveBeenCalledWith(
+        DEFAULT_ALERT_CLOSE_REASONS_KEY
+      );
       expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalled();
       const call = context.core.elasticsearch.client.asCurrentUser.updateByQuery.mock.calls[0][0];
       expect(
@@ -269,6 +274,62 @@ describe('set workflow status handler', () => {
           ignore_unavailable: true,
         })
       );
+    });
+
+    test('allows custom closing reason from ui settings', async () => {
+      context.core.uiSettings.client.get.mockResolvedValue(['custom_close_reason']);
+      const mockedResponse = responseMock.create();
+      const request = requestMock.create({
+        method: 'post',
+        body: {
+          signal_ids: ['somefakeid1'],
+          status: 'closed',
+          reason: 'custom_close_reason',
+        },
+      });
+
+      await setWorkflowStatusHandler({
+        context: requestContextMock.convertContext(context),
+        request,
+        response: mockedResponse,
+        getIndexPattern: () => Promise.resolve('.alerts-security.alerts-default'),
+      });
+      const response = responseAdapter(mockedResponse);
+
+      expect(response.status).toEqual(200);
+      const call = context.core.elasticsearch.client.asCurrentUser.updateByQuery.mock.calls[0][0];
+      expect(
+        call.script && typeof call.script === 'object' && 'source' in call.script
+          ? call.script.source
+          : ''
+      ).toContain("'custom_close_reason'");
+    });
+
+    test('returns 400 when closing reason is invalid', async () => {
+      const mockedResponse = responseMock.create();
+      const request = requestMock.create({
+        method: 'post',
+        body: {
+          signal_ids: ['somefakeid1'],
+          status: 'closed',
+          reason: 'not_valid',
+        },
+      });
+
+      await setWorkflowStatusHandler({
+        context: requestContextMock.convertContext(context),
+        request,
+        response: mockedResponse,
+        getIndexPattern: () => Promise.resolve('.alerts-security.alerts-default'),
+      });
+      const response = responseAdapter(mockedResponse);
+
+      expect(response.status).toEqual(400);
+      expect(response.body).toEqual({
+        message: 'not_valid is an invalid closing reason.',
+        status_code: 400,
+      });
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).not.toHaveBeenCalled();
     });
   });
 });

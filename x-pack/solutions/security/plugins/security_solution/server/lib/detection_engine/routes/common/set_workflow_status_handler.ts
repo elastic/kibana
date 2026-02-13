@@ -15,6 +15,7 @@ import {
   ALERT_WORKFLOW_REASON,
 } from '@kbn/rule-data-utils';
 
+import { DEFAULT_ALERT_CLOSE_REASONS_KEY } from '../../../../../common/constants';
 import { AlertStatusEnum } from '../../../../../common/api/model';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import {
@@ -22,6 +23,8 @@ import {
   type SetAlertsStatusRequestBody,
 } from '../../../../../common/api/detection_engine/signals';
 import { buildSiemResponse } from '../utils';
+import { DefaultClosingReasonSchema } from '../../../../../common/types';
+import { ALERT_CLOSING_REASON_VALIDATION_ERROR } from '../signals/translations';
 
 interface SetWorkflowStatusProps {
   context: SecuritySolutionRequestHandlerContext;
@@ -36,19 +39,28 @@ export const setWorkflowStatusHandler = async ({
   response,
   getIndexPattern,
 }: SetWorkflowStatusProps) => {
-  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
   const siemResponse = buildSiemResponse(response);
 
   const body = SetAlertsStatusByIds.parse(request.body);
   const { status, signal_ids: signalIds } = body;
   let reason: string | undefined;
 
-  if (status === AlertStatusEnum.closed && 'reason' in body) {
-    reason = body.reason;
-  }
-
   const core = await context.core;
   const user = core.security.authc.getCurrentUser();
+  const esClient = core.elasticsearch.client.asCurrentUser;
+
+  if (status === AlertStatusEnum.closed) {
+    const customReasons = await core.uiSettings.client.get(DEFAULT_ALERT_CLOSE_REASONS_KEY);
+    const validReasons = new Set([...DefaultClosingReasonSchema.options, ...customReasons]);
+    if (body.reason === undefined || validReasons.has(body.reason)) {
+      reason = body.reason;
+    } else {
+      return siemResponse.error({
+        body: ALERT_CLOSING_REASON_VALIDATION_ERROR(body.reason),
+        statusCode: 400,
+      });
+    }
+  }
 
   try {
     const indexPattern = await getIndexPattern();
