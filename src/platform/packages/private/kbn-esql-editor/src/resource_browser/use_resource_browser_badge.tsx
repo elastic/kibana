@@ -36,20 +36,17 @@ export const useSourcesBadge = ({
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      padding-block: 2px;
-      padding-inline: ${euiTheme.size.xxs};
+      padding: ${euiTheme.size.xs} ${euiTheme.size.s};
       max-inline-size: 100%;
       font-size: ${euiTheme.font.scale.s};
+      font-weight: ${euiTheme.font.weight.medium} !important;
       line-height: 1;
-      font-weight: ${euiTheme.font.weight.medium};
       white-space: nowrap;
       text-decoration: none;
-      border-radius: ${euiTheme.border.radius.small};
+      border-radius: ${euiTheme.size.xl};
       text-align: start;
-      border-width: ${euiTheme.border.width.thin};
-      border-style: solid;
-      color: ${euiTheme.colors.plainLight} !important;
-      background-color: ${euiTheme.colors.primary};
+      color: ${euiTheme.colors.primary} !important;
+      background-color: ${euiTheme.colors.backgroundBasePrimary} !important;
       box-sizing: border-box;
     }
   `;
