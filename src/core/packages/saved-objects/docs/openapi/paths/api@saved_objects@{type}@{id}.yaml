@@ -36,6 +36,8 @@ post:
 
     WARNING: This API is intended to be removed in a future Elastic stack version.
     Consider using the import API for your use case.
+
+    NOTE: For forward compatibility, include `coreMigrationVersion` and `typeMigrationVersion` when creating saved objects outside of Kibana or when persisting raw saved objects outside of Kibana.
   deprecated: true
   tags:
     - saved objects
@@ -59,10 +61,20 @@ post:
           properties:
             attributes:
               $ref: '../components/schemas/attributes.yaml'
+            coreMigrationVersion:
+              description: >
+                The Kibana version that last migrated this document.
+                When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.
+              type: string
+            typeMigrationVersion:
+              description: >
+                The type version that last migrated this document.
+                When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.
+              type: string
             initialNamespaces:
               $ref: '../components/schemas/initial_namespaces.yaml'
             references:
-              $ref: '../components/schemas/initial_namespaces.yaml'
+              $ref: '../components/schemas/references.yaml'
   responses:
     '200':
       description: Indicates a successful call.
