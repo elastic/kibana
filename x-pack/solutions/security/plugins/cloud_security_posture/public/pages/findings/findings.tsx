@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Redirect, useHistory, useLocation, matchPath } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
@@ -95,13 +95,7 @@ export const Findings = () => {
     <>
       {showHeader && (
         <>
-          <EuiTitle size="l">
-            <h1>
-              <FormattedMessage id="xpack.csp.findings.title" defaultMessage="Findings" />
-            </h1>
-          </EuiTitle>
-          <EuiSpacer />
-          <EuiTabs size="l">
+          <EuiTabs>
             <EuiTab
               key="configurations"
               onClick={navigateToConfigurationsTab}
@@ -123,6 +117,7 @@ export const Findings = () => {
               />
             </EuiTab>
           </EuiTabs>
+          <EuiSpacer />
         </>
       )}
       <Routes>

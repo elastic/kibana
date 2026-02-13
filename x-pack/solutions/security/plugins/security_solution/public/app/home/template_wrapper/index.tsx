@@ -64,6 +64,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
     );
     const [routeProps] = useRouteSpy();
     const isPreview = routeProps?.pageName === SecurityPageName.rulesCreate;
+    const isFindingsPage = routeProps?.pageName === SecurityPageName.cloudSecurityPostureFindings;
 
     // The bottomBar by default has a set 'dark' colorMode that doesn't match the global colorMode from the Advanced Settings
     // To keep the mode in sync, we pass in the globalColorMode to the bottom bar here
@@ -94,10 +95,13 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
             <KibanaPageTemplate.Section
               className="securityPageWrapper"
               data-test-subj="pageContainer"
-              paddingSize='m'
+              paddingSize="m"
               alignment="top"
               component="div"
               grow={true}
+              contentProps={
+                isFindingsPage ? { css: { paddingBlock: 0 } } : undefined
+              }
             >
               <AlertsContextProvider>
                 <ExpandableFlyoutProvider urlKey={isPreview ? undefined : URL_PARAM_KEY.flyout}>
