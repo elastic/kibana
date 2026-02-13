@@ -8,5 +8,8 @@
 import { withSpan } from '@kbn/apm-utils';
 
 export async function withDispatcherSpan<T>(name: string, cb: () => Promise<T>): Promise<T> {
-  return withSpan({ name, type: 'dispatcher', labels: { plugin: 'alerting_v2' } }, cb);
+  return withSpan(
+    { name: `dispatcher:${name}`, type: 'dispatcher', labels: { plugin: 'alerting_v2' } },
+    cb
+  );
 }
