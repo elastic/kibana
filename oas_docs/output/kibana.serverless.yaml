@@ -1833,12 +1833,14 @@ paths:
                 id:
                   description: Optional custom ID for the attachment.
                   type: string
+                origin: {}
                 type:
-                  description: The type of the attachment (e.g., text, json, visualization_ref).
+                  description: The type of the attachment (e.g., text, esql, visualization).
                   type: string
               required:
                 - type
                 - data
+                - origin
       responses:
         '200':
           content:
@@ -2183,6 +2185,12 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                _execution_mode:
+                  description: '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)'
+                  enum:
+                    - local
+                    - task_manager
+                  type: string
                 action:
                   description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
                   enum:
@@ -2526,6 +2534,12 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                _execution_mode:
+                  description: '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)'
+                  enum:
+                    - local
+                    - task_manager
+                  type: string
                 action:
                   description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
                   enum:
@@ -55745,6 +55759,8 @@ paths:
 
         Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
 
+        NOTE: The exported saved objects include `coreMigrationVersion` and `typeMigrationVersion` metadata. If you store exported saved objects outside of Kibana (for example in NDJSON files) or generate them yourself, you must preserve or include these fields to retain forward compatibility across Kibana versions.
+
         NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.
       operationId: post-saved-objects-export
       parameters:
@@ -55901,6 +55917,8 @@ paths:
         Create sets of Kibana saved objects from a file created by the export API. Saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Tampering with exported data risks introducing unspecified errors and data loss.
 
         Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
+
+        NOTE: The exported saved objects include `coreMigrationVersion` and `typeMigrationVersion` metadata. If you store exported saved objects outside of Kibana (for example in NDJSON files) or generate them yourself, you must preserve or include these fields to retain forwards compatibility across Kibana versions.
       operationId: post-saved-objects-import
       parameters:
         - description: A required header to protect against CSRF attacks

@@ -1904,12 +1904,14 @@ paths:
                 id:
                   description: Optional custom ID for the attachment.
                   type: string
+                origin: {}
                 type:
-                  description: The type of the attachment (e.g., text, json, visualization_ref).
+                  description: The type of the attachment (e.g., text, esql, visualization).
                   type: string
               required:
                 - type
                 - data
+                - origin
       responses:
         '200':
           content:
@@ -2254,6 +2256,12 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                _execution_mode:
+                  description: '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)'
+                  enum:
+                    - local
+                    - task_manager
+                  type: string
                 action:
                   description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
                   enum:
@@ -2597,6 +2605,12 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                _execution_mode:
+                  description: '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)'
+                  enum:
+                    - local
+                    - task_manager
+                  type: string
                 action:
                   description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
                   enum:
@@ -58873,6 +58887,7 @@ paths:
         Create multiple Kibana saved objects.
 
         WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.
+        NOTE: For forward compatibility, include `coreMigrationVersion` and `typeMigrationVersion` when creating saved objects outside of Kibana or when persisting raw saved objects outside of Kibana.
       operationId: bulkCreateSavedObjects
       parameters:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
@@ -58887,6 +58902,15 @@ paths:
             schema:
               items:
                 type: object
+                properties:
+                  coreMigrationVersion:
+                    description: |
+                      The Kibana version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.
+                    type: string
+                  typeMigrationVersion:
+                    description: |
+                      The type version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.
+                    type: string
               type: array
         required: true
       responses:
@@ -59101,6 +59125,8 @@ paths:
         Retrieve sets of saved objects that you want to import into Kibana. You must include `type` or `objects` in the request body. The output of exporting saved objects must be treated as opaque. Tampering with exported data risks introducing unspecified errors and data loss.
 
         Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
+
+        NOTE: The exported saved objects include `coreMigrationVersion` and `typeMigrationVersion` metadata. If you store exported saved objects outside of Kibana (for example in NDJSON files) or generate them yourself, you must preserve or include these fields to retain forward compatibility across Kibana versions.
 
         NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.
       operationId: post-saved-objects-export
@@ -59372,6 +59398,8 @@ paths:
         Create sets of Kibana saved objects from a file created by the export API. Saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Tampering with exported data risks introducing unspecified errors and data loss.
 
         Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
+
+        NOTE: The exported saved objects include `coreMigrationVersion` and `typeMigrationVersion` metadata. If you store exported saved objects outside of Kibana (for example in NDJSON files) or generate them yourself, you must preserve or include these fields to retain forwards compatibility across Kibana versions.
       operationId: post-saved-objects-import
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -59650,6 +59678,7 @@ paths:
         Create a Kibana saved object with a randomly generated identifier.
 
         WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.
+        NOTE: For forward compatibility, include `coreMigrationVersion` and `typeMigrationVersion` when creating saved objects outside of Kibana or when persisting raw saved objects outside of Kibana.
       operationId: createSavedObject
       parameters:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
@@ -59667,10 +59696,18 @@ paths:
               properties:
                 attributes:
                   $ref: '#/components/schemas/Saved_objects_attributes'
+                coreMigrationVersion:
+                  description: |
+                    The Kibana version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.
+                  type: string
                 initialNamespaces:
                   $ref: '#/components/schemas/Saved_objects_initial_namespaces'
                 references:
                   $ref: '#/components/schemas/Saved_objects_references'
+                typeMigrationVersion:
+                  description: |
+                    The type version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.
+                  type: string
               required:
                 - attributes
         required: true
@@ -59741,6 +59778,7 @@ paths:
         Create a Kibana saved object and specify its identifier instead of using a randomly generated ID.
 
         WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.
+        NOTE: For forward compatibility, include `coreMigrationVersion` and `typeMigrationVersion` when creating saved objects outside of Kibana or when persisting raw saved objects outside of Kibana.
       operationId: createSavedObjectId
       parameters:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
@@ -59759,10 +59797,18 @@ paths:
               properties:
                 attributes:
                   $ref: '#/components/schemas/Saved_objects_attributes'
+                coreMigrationVersion:
+                  description: |
+                    The Kibana version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.
+                  type: string
                 initialNamespaces:
                   $ref: '#/components/schemas/Saved_objects_initial_namespaces'
                 references:
-                  $ref: '#/components/schemas/Saved_objects_initial_namespaces'
+                  $ref: '#/components/schemas/Saved_objects_references'
+                typeMigrationVersion:
+                  description: |
+                    The type version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.
+                  type: string
               required:
                 - attributes
         required: true
@@ -78724,7 +78770,7 @@ components:
         - statusCode
     Saved_objects_attributes:
       description: |
-        The data that you want to create. WARNING: When you create saved objects, attributes are not validated, which allows you to pass arbitrary and ill-formed data into the API that can break Kibana. Make sure any data that you send to the API is properly formed.
+        The data that you want to create. WARNING: Attributes may be validated depending on the saved object type. Supplying malformed data can cause errors or break Kibana. When creating or persisting raw saved objects outside of Kibana, preserve `coreMigrationVersion` and `typeMigrationVersion` (and related migration metadata) to retain forward compatibility across Kibana versions.
       type: object
     Saved_objects_initial_namespaces:
       description: |

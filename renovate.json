@@ -1829,7 +1829,7 @@
     {
       "groupName": "p-limit",
       "matchDepNames": ["p-limit"],
-      "reviewers": ["team:fleet", "team:obs-ux-management-team", "team:security-solution"],
+      "reviewers": ["team:fleet", "team:actionable-obs-team", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "labels": ["backport:all-open", "release_note:skip"],
       "allowedVersions": "<4.0.0",
@@ -1839,7 +1839,7 @@
     {
       "groupName": "p-map - ESM Required",
       "matchDepNames": ["p-map"],
-      "reviewers": ["team:fleet", "team:obs-ux-management-team", "team:security-solution"],
+      "reviewers": ["team:fleet", "team:actionable-obs-team", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "labels": ["backport:all-open", "release_note:skip", "effort:low", "blocked"],
       "minimumReleaseAge": "14 days",
@@ -1848,7 +1848,7 @@
     {
       "groupName": "p-retry - ESM Required",
       "matchDepNames": ["p-retry"],
-      "reviewers": ["team:fleet", "team:obs-ux-management-team", "team:security-solution"],
+      "reviewers": ["team:fleet", "team:actionable-obs-team", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "labels": ["backport:all-open", "release_note:skip", "blocked", "effort:low"],
       "minimumReleaseAge": "14 days",
@@ -1857,7 +1857,7 @@
     {
       "groupName": "redux-actions",
       "matchDepNames": ["redux-actions", "@types/redux-actions"],
-      "reviewers": ["team:kibana-management", "team:obs-ux-management-team"],
+      "reviewers": ["team:kibana-management", "team:actionable-obs-team"],
       "matchBaseBranches": ["main"],
       "labels": ["backport:all-open", "release_note:skip"],
       "minimumReleaseAge": "14 days",
@@ -2073,7 +2073,7 @@
     {
       "groupName": "react-hook-form",
       "matchDepNames": ["react-hook-form"],
-      "reviewers": ["team:obs-ux-management-team"],
+      "reviewers": ["team:actionable-obs-team"],
       "matchBaseBranches": ["main"],
       "labels": [
         "release_note:skip",
@@ -2087,7 +2087,7 @@
     {
       "groupName": "react-window-infinite-loader",
       "matchDepNames": ["react-window-infinite-loader", "@types/react-window-infinite-loader"],
-      "reviewers": ["team:obs-ux-management-team"],
+      "reviewers": ["team:actionable-obs-team"],
       "matchBaseBranches": ["main"],
       "labels": [
         "release_note:skip",
@@ -2101,7 +2101,7 @@
     {
       "groupName": "redux-saga-testing",
       "matchDepNames": ["redux-saga-testing"],
-      "reviewers": ["team:obs-ux-management-team"],
+      "reviewers": ["team:actionable-obs-team"],
       "matchBaseBranches": ["main"],
       "labels": [
         "release_note:skip",
@@ -2115,7 +2115,7 @@
     {
       "groupName": "form-data",
       "matchDepNames": ["form-data"],
-      "reviewers": ["team:obs-ux-management-team"],
+      "reviewers": ["team:actionable-obs-team"],
       "matchBaseBranches": ["main"],
       "labels": [
         "release_note:skip",
@@ -2129,7 +2129,7 @@
     {
       "groupName": "@faker-js/faker",
       "matchDepNames": ["@faker-js/faker"],
-      "reviewers": ["team:obs-ux-management-team"],
+      "reviewers": ["team:actionable-obs-team"],
       "matchBaseBranches": ["main"],
       "labels": [
         "release_note:skip",
@@ -2143,7 +2143,7 @@
     {
       "groupName": "@elastic/synthetics",
       "matchDepNames": ["@elastic/synthetics"],
-      "reviewers": ["team:obs-ux-management-team"],
+      "reviewers": ["team:actionable-obs-team"],
       "matchBaseBranches": ["main"],
       "labels": [
         "release_note:skip",
@@ -2166,7 +2166,7 @@
     {
       "groupName": "redux-saga",
       "matchDepNames": ["redux-saga"],
-      "reviewers": ["team:obs-ux-management-team"],
+      "reviewers": ["team:actionable-obs-team"],
       "matchBaseBranches": ["main"],
       "labels": [
         "release_note:skip",

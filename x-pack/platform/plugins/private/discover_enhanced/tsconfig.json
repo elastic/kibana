@@ -6,7 +6,6 @@
   "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*", "test/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/data-plugin",
     "@kbn/discover-plugin",
     "@kbn/share-plugin",
     "@kbn/kibana-utils-plugin",
