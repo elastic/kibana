@@ -43,7 +43,7 @@ const edgeTypes = {
 };
 
 const meta: Meta = {
-  title: 'app/ServiceMap/ReactFlow/Edges',
+  title: 'app/ServiceMap/Edges',
   decorators: [
     (Story) => (
       <MockApmPluginStorybook routePath="/service-map?rangeFrom=now-15m&rangeTo=now">

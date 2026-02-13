@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type cytoscape from 'cytoscape';
 import type { AgentName } from '@kbn/apm-types/src/es_schemas/ui/fields';
 import type { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '@kbn/apm-types';
 import type { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_SUBTYPE, SPAN_TYPE } from '@kbn/apm-types';
@@ -66,13 +65,13 @@ export interface ServicesResponse {
   [SERVICE_ENVIRONMENT]: string | null;
 }
 
-export type ServiceConnectionNode = cytoscape.NodeDataDefinition &
-  ServicesResponse & {
-    id: string;
-    serviceAnomalyStats?: ServiceAnomalyStats;
-    label?: string;
-  };
-export interface ExternalConnectionNode extends cytoscape.NodeDataDefinition {
+export interface ServiceConnectionNode extends ServicesResponse {
+  id: string;
+  serviceAnomalyStats?: ServiceAnomalyStats;
+  label?: string;
+}
+
+export interface ExternalConnectionNode {
   id: string;
   [SPAN_DESTINATION_SERVICE_RESOURCE]: string;
   [SPAN_TYPE]: string;

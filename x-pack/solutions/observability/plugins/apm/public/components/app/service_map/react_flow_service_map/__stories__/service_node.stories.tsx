@@ -23,7 +23,7 @@ const LabelText = ({ children }: { children: React.ReactNode }) => {
 };
 
 const meta: Meta<typeof ServiceNode> = {
-  title: 'app/ServiceMap/ReactFlow/ServiceNode',
+  title: 'app/ServiceMap/ServiceNode',
   component: ServiceNode,
   decorators: [
     (Story) => (

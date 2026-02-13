@@ -12,31 +12,43 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import React, { Fragment } from 'react';
-import styled from '@emotion/styled';
-import type { NodeDataDefinition } from 'cytoscape';
-import type { ContentsProps } from '.';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import type { ServiceMapNode } from '../../../../../common/service_map';
+import type { ContentsProps } from './popover_content';
 import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_TYPE,
   SPAN_SUBTYPE,
 } from '../../../../../common/es_fields/apm';
-import type { ExternalConnectionNode } from '../../../../../common/service_map';
+import { isEdge } from './popover_content';
+import { isGroupedNodeData, type GroupedConnectionInfo } from '../../../../../common/service_map';
 
-const ExternalResourcesList = styled.section`
+const externalResourcesListCss = css`
   max-height: 360px;
   overflow: auto;
 `;
 
-export function ExternalsListContents({ elementData }: ContentsProps) {
-  const nodeData = elementData as NodeDataDefinition;
+export function ExternalsListContents({ selection }: Pick<ContentsProps, 'selection'>) {
+  if (isEdge(selection)) {
+    return null;
+  }
+  const node = selection as ServiceMapNode;
+  if (!isGroupedNodeData(node.data)) {
+    return null;
+  }
+  const groupedConnections = node.data.groupedConnections;
   return (
     <EuiFlexItem>
-      <ExternalResourcesList>
+      <section
+        css={externalResourcesListCss}
+        aria-label={i18n.translate('xpack.apm.serviceMap.externalResourcesList.ariaLabel', {
+          defaultMessage: 'External resources',
+        })}
+      >
         <EuiDescriptionList>
-          {nodeData.groupedConnections.map((resource: ExternalConnectionNode) => {
-            const title = resource.label || resource[SPAN_DESTINATION_SERVICE_RESOURCE];
-            // Support both Cytoscape (span.type/span.subtype) and React Flow (spanType/spanSubtype) formats
-            // To be refactored when the Cytoscape is replaced.
+          {groupedConnections.map((resource: GroupedConnectionInfo) => {
+            const title = resource.label || (resource[SPAN_DESTINATION_SERVICE_RESOURCE] ?? '');
             const spanType = resource[SPAN_TYPE] ?? resource.spanType;
             const spanSubtype = resource[SPAN_SUBTYPE] ?? resource.spanSubtype;
             const desc = spanType && spanSubtype ? `${spanType} (${spanSubtype})` : '';
@@ -54,7 +66,7 @@ export function ExternalsListContents({ elementData }: ContentsProps) {
             );
           })}
         </EuiDescriptionList>
-      </ExternalResourcesList>
+      </section>
     </EuiFlexItem>
   );
 }

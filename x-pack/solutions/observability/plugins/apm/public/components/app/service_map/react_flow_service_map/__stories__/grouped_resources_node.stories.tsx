@@ -21,7 +21,7 @@ const LabelText = ({ children }: { children: React.ReactNode }) => {
 };
 
 const meta: Meta<typeof GroupedResourcesNode> = {
-  title: 'app/ServiceMap/ReactFlow/GroupedResourcesNode',
+  title: 'app/ServiceMap/GroupedResourcesNode',
   component: GroupedResourcesNode,
   decorators: [
     (Story) => (
