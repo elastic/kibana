@@ -18,26 +18,17 @@ export async function read(
   id: string
 ): Promise<DashboardReadResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
-  const {
-    saved_object: savedObject,
-    outcome,
-
-    alias_purpose,
-
-    alias_target_id,
-  } = await core.savedObjects.client.resolve<DashboardSavedObjectAttributes>(
-    DASHBOARD_SAVED_OBJECT_TYPE,
-    id
-  );
+  const { saved_object: savedObject } =
+    await core.savedObjects.client.resolve<DashboardSavedObjectAttributes>(
+      DASHBOARD_SAVED_OBJECT_TYPE,
+      id
+    );
 
   const response = getDashboardCRUResponseBody(savedObject, 'read');
   return {
     ...response,
     meta: {
       ...response.meta,
-      alias_target_id,
-      alias_purpose,
-      outcome,
     },
   };
 }

@@ -18,26 +18,11 @@ export async function read(
   id: string
 ): Promise<MarkdownReadResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
-  const {
-    saved_object: savedObject,
-    outcome,
+  const { saved_object: savedObject } =
+    await core.savedObjects.client.resolve<MarkdownSavedObjectAttributes>(
+      MARKDOWN_SAVED_OBJECT_TYPE,
+      id
+    );
 
-    alias_purpose,
-
-    alias_target_id,
-  } = await core.savedObjects.client.resolve<MarkdownSavedObjectAttributes>(
-    MARKDOWN_SAVED_OBJECT_TYPE,
-    id
-  );
-
-  const response = getMarkdownCRUResponseBody(savedObject, 'read');
-  return {
-    ...response,
-    meta: {
-      ...response.meta,
-      alias_target_id,
-      alias_purpose,
-      outcome,
-    },
-  };
+  return getMarkdownCRUResponseBody(savedObject, 'read');
 }
