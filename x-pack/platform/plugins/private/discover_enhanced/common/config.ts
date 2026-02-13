@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// TODO: REVERT BEFORE MERGE — trigger burn-in for discover_enhanced
 export interface Config {
   actions: {
     exploreDataInChart: { enabled: boolean };
