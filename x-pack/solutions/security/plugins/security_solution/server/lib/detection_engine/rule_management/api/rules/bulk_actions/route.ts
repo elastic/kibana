@@ -271,27 +271,16 @@ export const performBulkActionRoute = (
               break;
             }
             case BulkActionTypeEnum.delete: {
-              const bulkActionOutcome = await initPromisePool({
-                concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
-                items: rules,
-                executor: async (rule) => {
-                  // during dry run return early for delete, as no validations needed for this action
-                  if (isDryRun) {
-                    return null;
-                  }
+              // during dry run return early for delete, as no validations needed for this action
+              if (isDryRun) {
+                break;
+              }
 
-                  await detectionRulesClient.deleteRule({
-                    ruleId: rule.id,
-                  });
+              const ruleIds = rules.map((rule) => rule.id);
+              const bulkDeleteResult = await detectionRulesClient.bulkDeleteRules({ ruleIds });
 
-                  return null;
-                },
-                abortSignal: abortController.signal,
-              });
-              errors.push(...bulkActionOutcome.errors);
-              deleted = bulkActionOutcome.results
-                .map(({ item }) => item)
-                .filter((rule): rule is RuleAlertType => rule !== null);
+              errors.push(...bulkDeleteResult.errors);
+              deleted = bulkDeleteResult.rules;
               break;
             }
             case BulkActionTypeEnum.duplicate: {
