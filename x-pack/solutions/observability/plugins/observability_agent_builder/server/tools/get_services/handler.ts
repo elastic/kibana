@@ -7,6 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { kqlQuery } from '@kbn/observability-plugin/server';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import type { ServicesItemsItem } from '../../data_registry/data_registry_types';
 import type {
@@ -32,6 +33,7 @@ async function getServicesFromLogsAndMetricsIndices({
   start,
   end,
   environment,
+  kqlFilter,
   logger,
 }: {
   esClient: IScopedClusterClient;
@@ -40,6 +42,7 @@ async function getServicesFromLogsAndMetricsIndices({
   start: number;
   end: number;
   environment?: string;
+  kqlFilter?: string;
   logger: Logger;
 }): Promise<ServiceFromIndex[]> {
   const allIndices = [...logsIndices, ...metricsIndices];
@@ -60,6 +63,7 @@ async function getServicesFromLogsAndMetricsIndices({
             { range: { '@timestamp': { gte: start, lte: end } } },
             { exists: { field: 'service.name' } },
             ...(environment ? [{ term: { 'service.environment': environment } }] : []),
+            ...kqlQuery(kqlFilter),
           ],
         },
       },
@@ -170,6 +174,7 @@ export async function getToolHandler({
       start: startMs,
       end: endMs,
       environment,
+      kqlFilter,
       logger,
     }),
   ]);
