@@ -41,7 +41,7 @@ export function useTransactionActions({
         id: 'discover',
         actions: [
           {
-            id: 'openInDiscover',
+            id: 'transactionsTable-openInDiscover',
             name: i18n.translate('xpack.apm.transactionsTable.openInDiscover', {
               defaultMessage: 'Open in Discover',
             }),
