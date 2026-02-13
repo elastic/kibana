@@ -20,6 +20,9 @@ const createSymbolizerPolicyState = (installed: boolean): PartialCloudSetupState
 const createProfilingInApmPolicyState = (profilingEnabled: boolean): PartialCloudSetupState => ({
   policies: { apm: { profilingEnabled } },
 });
+const createProfilingState = (enabled: boolean): PartialCloudSetupState => ({
+  profiling: { enabled },
+});
 
 function createResourceState({
   enabled,
@@ -113,6 +116,7 @@ describe('Merging partial state operations', () => {
       createProfilingInApmPolicyState(false),
       createResourceState({ enabled: true, created: true }),
       createSettingsState(true),
+      createProfilingState(true),
     ]);
 
     expect(areCloudResourcesSetup(mergedState)).toBeTruthy();
