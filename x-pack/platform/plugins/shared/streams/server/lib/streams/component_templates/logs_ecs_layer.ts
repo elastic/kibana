@@ -32,7 +32,16 @@ export const ecsBaseFields: FieldDefinition = {
   'stream.name': {
     type: 'system',
   },
+  'scope.name': {
+    type: 'keyword',
+  },
   'host.name': {
+    type: 'keyword',
+  },
+  'trace.id': {
+    type: 'keyword',
+  },
+  'span.id': {
     type: 'keyword',
   },
   'service.name': {
