@@ -34,24 +34,52 @@ describe('getGroupByColumnsFromQuery', () => {
   it('extracts columns from the last STATS BY clause when multiple exist', () => {
     const query = 'FROM logs-* | STATS count() BY host.name | STATS sum(count) BY region';
     const result = getGroupByColumnsFromQuery(query);
-    expect(result).toContain('region');
+
+    // Should only contain columns from the LAST stats command
+    expect(result).toEqual(['region']);
+    // Should NOT contain columns from the first stats command
+    expect(result).not.toContain('host.name');
+  });
+
+  it('targets the last STATS command with multiple columns', () => {
+    const query =
+      'FROM logs-* | STATS count() BY first_field, second_field | STATS avg(count) BY last_field_a, last_field_b';
+    const result = getGroupByColumnsFromQuery(query);
+
+    // Should contain only columns from the last STATS command
+    expect(result).toEqual(['last_field_a', 'last_field_b']);
+    // Should NOT contain columns from the first STATS command
+    expect(result).not.toContain('first_field');
+    expect(result).not.toContain('second_field');
+  });
+
+  it('handles three or more STATS commands and targets the last one', () => {
+    const query =
+      'FROM logs-* | STATS count() BY a | STATS sum(count) BY b | STATS max(sum) BY final_group';
+    const result = getGroupByColumnsFromQuery(query);
+
+    expect(result).toEqual(['final_group']);
+    expect(result).not.toContain('a');
+    expect(result).not.toContain('b');
   });
 
   it('returns empty array for invalid query', () => {
     expect(getGroupByColumnsFromQuery('INVALID QUERY SYNTAX')).toEqual([]);
   });
 
-  it('handles query with BUCKET function in BY clause', () => {
+  // Note: BUCKET function is not supported by getESQLStatsQueryMeta (cascade-specific limitation)
+  // Queries with BUCKET in the BY clause return empty arrays
+  it('returns empty array for query with BUCKET function in BY clause', () => {
     const query = 'FROM logs-* | STATS count() BY BUCKET(@timestamp, 1h)';
     const result = getGroupByColumnsFromQuery(query);
-    expect(result.length).toBeGreaterThan(0);
+    expect(result).toEqual([]);
   });
 
-  it('handles mixed columns and functions in BY clause', () => {
+  it('returns empty array when BY clause contains BUCKET function mixed with columns', () => {
     const query = 'FROM logs-* | STATS count() BY host.name, BUCKET(@timestamp, 1h)';
     const result = getGroupByColumnsFromQuery(query);
-    expect(result).toContain('host.name');
-    expect(result.length).toBeGreaterThanOrEqual(2);
+    // BUCKET invalidates the entire grouping for the cascade experience
+    expect(result).toEqual([]);
   });
 });
 
