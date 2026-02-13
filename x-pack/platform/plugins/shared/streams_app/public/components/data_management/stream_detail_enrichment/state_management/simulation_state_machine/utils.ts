@@ -23,7 +23,12 @@ import { isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
 import { collectDescendantStepIds } from '../utils';
 import type { PreviewDocsFilterOption } from './simulation_documents_search';
-import type { DetectedField, Simulation, SimulationContext } from './types';
+import type {
+  DetectedField,
+  SampleDocumentWithUIAttributes,
+  Simulation,
+  SimulationContext,
+} from './types';
 
 export function getSourceField(
   processor: StreamlangProcessorDefinitionWithUIAttributes
