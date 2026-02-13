@@ -299,6 +299,12 @@ export function AlertDetails() {
     isAlertDetailsEnabledPerApp(alertDetail.formatted, config) ? (
       <>
         <EuiSpacer size="m" />
+        {/* commented for now, need to add the condition when to show the callout 
+        <OrphanedAlert
+          alert={alertDetail.formatted}
+          alertStatus={alertStatus}
+          onUntrackAlert={onUntrackAlert}
+        /> */}
         <StaleAlert
           alert={alertDetail.formatted}
           alertStatus={alertStatus}
