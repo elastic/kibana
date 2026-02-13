@@ -56,10 +56,7 @@ export function WorkflowsPage() {
 
   // Update search: sync query/page/size to URL, keep filters in state
   const setSearch = useCallback(
-    (updater: WorkflowsSearchParams | ((prev: WorkflowsSearchParams) => WorkflowsSearchParams)) => {
-      const currentSearch = search;
-      const newSearch = typeof updater === 'function' ? updater(currentSearch) : updater;
-
+    (newSearch: WorkflowsSearchParams) => {
       // Extract URL params and filter params
       const { query, page, size, ...restFilters } = newSearch;
 
@@ -85,7 +82,7 @@ export function WorkflowsPage() {
       // Update local filter state
       setFilters(restFilters);
     },
-    [history, search]
+    [history]
   );
 
   const navigateToCreateWorkflow = useCallback(() => {
@@ -148,11 +145,7 @@ export function WorkflowsPage() {
               <EuiFlexItem>
                 <WorkflowSearchField
                   initialValue={search.query || ''}
-                  onSearch={(query) =>
-                    setSearch((prevState) => {
-                      return { ...prevState, query };
-                    })
-                  }
+                  onSearch={(query) => setSearch({ ...search, query })}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -163,9 +156,7 @@ export function WorkflowsPage() {
                     values={filtersData?.enabled || []}
                     selectedValues={search.enabled || []}
                     onSelectedValuesChanged={(newValues) => {
-                      setSearch((prevState) => {
-                        return { ...prevState, enabled: newValues };
-                      });
+                      setSearch({ ...search, enabled: newValues });
                     }}
                   />
                 </EuiFilterGroup>
@@ -178,9 +169,7 @@ export function WorkflowsPage() {
                     values={filtersData?.createdBy || []}
                     selectedValues={search.createdBy || []}
                     onSelectedValuesChanged={(newValues) => {
-                      setSearch((prevState) => {
-                        return { ...prevState, createdBy: newValues };
-                      });
+                      setSearch({ ...search, createdBy: newValues });
                     }}
                   />
                 </EuiFilterGroup>
@@ -193,9 +182,7 @@ export function WorkflowsPage() {
                     values={filtersData?.tags || []}
                     selectedValues={search.tags || []}
                     onSelectedValuesChanged={(newValues) => {
-                      setSearch((prevState) => {
-                        return { ...prevState, tags: newValues };
-                      });
+                      setSearch({ ...search, tags: newValues });
                     }}
                   />
                 </EuiFilterGroup>
