@@ -110,6 +110,10 @@ const overflowMenuCss = css`
   width: 240px;
 `;
 
+const saveOverflowMenuCss = css`
+  width: 160px;
+`;
+
 const noop = () => {};
 
 const ALERTS_PANEL_ID = 1;
@@ -165,7 +169,7 @@ const OVERFLOW_PANELS: Array<
     title: '',
     items: [
       { renderItem: () => <OverflowKeyPadSection />, key: 'keypad' },
-      { isSeparator: true as const, key: 'sep1' },
+      // { isSeparator: true as const, key: 'sep1' },
       { name: 'Open', icon: 'folderOpen', onClick: noop },
       { name: 'Inspect', icon: 'inspect', onClick: noop },
       { name: 'Data sets', icon: 'indexOpen', onClick: noop },
@@ -271,7 +275,7 @@ const GlobalHeaderAppActionsDumb: React.FC = () => {
           anchorPosition="downLeft"
           panelPaddingSize="none"
         >
-          <EuiContextMenu panels={savePopoverPanels} initialPanelId={0} />
+          <EuiContextMenu css={saveOverflowMenuCss} panels={savePopoverPanels} initialPanelId={0} />
         </EuiPopover>
       </EuiSplitButton>
     </EuiHeaderLinks>
