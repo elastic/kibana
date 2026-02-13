@@ -1176,7 +1176,7 @@ describe('FormBasedDimensionEditor', () => {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
                 timeScale: 's',
-                operationType: 'sum',
+                operationType: 'count',
               }),
             },
           },
@@ -1243,8 +1243,9 @@ describe('FormBasedDimensionEditor', () => {
     });
 
     it('should allow to change time scaling', () => {
-      const props = getProps({ timeScale: 's', operationType: 'sum' });
+      const props = getProps({ timeScale: 's' });
       wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
+
       act(() => {
         findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
       });
@@ -1267,7 +1268,6 @@ describe('FormBasedDimensionEditor', () => {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
                 timeScale: 'h',
-                operationType: 'sum',
               }),
             },
           },
