@@ -94,62 +94,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it('updates settings when backing data stream is missing', async () => {
-        const name = 'logs.missing-ds-settings';
-        await putStream(apiClient, name, {
-          ...emptyAssets,
-          stream: {
-            description: '',
-            ingest: {
-              settings: {},
-              processing: { steps: [] },
-              lifecycle: { inherit: {} },
-              wired: { fields: {}, routing: [] },
-              failure_store: { inherit: {} },
-            },
-          },
-        });
-
-        try {
-          await esClient.indices.deleteDataStream({ name });
-
-          const definition = Streams.WiredStream.GetResponse.parse(await getStream(apiClient, name));
-          expect(definition.data_stream_exists).to.be(false);
-
-          const response = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
-            params: {
-              path: { name },
-              body: {
-                ...emptyAssets,
-                stream: {
-                  description: '',
-                  ingest: {
-                    ...definition.stream.ingest,
-                    processing: omit(definition.stream.ingest.processing, 'updated_at'),
-                    settings: {
-                      'index.refresh_interval': { value: '15s' },
-                    },
-                  },
-                },
-              } as Streams.ingest.all.UpsertRequest,
-            },
-          });
-
-          if (response.status !== 404) {
-            throw new Error(
-              `Expected 404 but got ${response.status}. Body: ${JSON.stringify(response.body)}`
-            );
-          }
-
-          expect(response.body).to.have.property('statusCode', 404);
-          expect(response.body).to.have.property('error', 'Not Found');
-          expect(response.body.message).to.contain(`Elasticsearch data stream "${name}" does not exist`);
-          expect(response.body.message).to.contain('resync API');
-        } finally {
-          await deleteStream(apiClient, name);
-        }
-      });
-
       it('inherits settings', async () => {
         await putStream(apiClient, 'logs.foo.bar', {
           ...emptyAssets,

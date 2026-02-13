@@ -6,8 +6,7 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { isRecord, type IngestStreamSettings } from '@kbn/streams-schema';
-import { errors } from '@elastic/elasticsearch';
+import type { IngestStreamSettings } from '@kbn/streams-schema';
 import { formatSettings } from './helpers';
 import type { ValidationResult } from '../stream_active_record/stream_active_record';
 
@@ -66,48 +65,14 @@ export async function validateSettingsWithDryRun({
     return;
   }
 
-  // When the backing Elasticsearch data stream is missing, the dry-run validation cannot run.
-  // In this case we skip validation and let the real update path return the user-actionable 404.
-  let response: DataStreamSettingsResponse;
-  try {
-    response = (await scopedClusterClient.asCurrentUser.indices.putDataStreamSettings({
-      name: streamName,
-      settings: settingsToValidate,
-      dry_run: true,
-    })) as DataStreamSettingsResponse;
-  } catch (error) {
-    let esErrorType = '';
-    if (error instanceof errors.ResponseError) {
-      const body = error.meta?.body;
-      if (isRecord(body) && isRecord(body.error) && typeof body.error.type === 'string') {
-        esErrorType = body.error.type;
-      }
-    }
-    if (
-      error instanceof errors.ResponseError &&
-      error.statusCode === 404 &&
-      (esErrorType === 'index_not_found_exception' ||
-        esErrorType === 'resource_not_found_exception')
-    ) {
-      return;
-    }
-    throw error;
-  }
+  const response = (await scopedClusterClient.asCurrentUser.indices.putDataStreamSettings({
+    name: streamName,
+    settings: settingsToValidate,
+    dry_run: true,
+  })) as DataStreamSettingsResponse;
 
-  if (!response.data_streams || response.data_streams.length === 0) {
-    // Backing data stream is missing (inconsistent state) - skip dry-run validation.
-    return;
-  }
-
-  const error = response.data_streams.find(({ error: err }) => Boolean(err))?.error;
+  const error = response.data_streams?.find(({ error: err }) => Boolean(err))?.error;
   if (error) {
-    if (
-      error.includes('index_not_found_exception') ||
-      error.includes('resource_not_found_exception') ||
-      error.includes('no such index')
-    ) {
-      return;
-    }
     throw new Error(`Invalid stream settings: ${error}`);
   }
 }
