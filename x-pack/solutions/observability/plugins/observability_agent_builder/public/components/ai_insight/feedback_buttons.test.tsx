@@ -15,6 +15,7 @@ jest.mock('../../hooks/use_kibana');
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockAddSuccess = jest.fn();
+const mockIsEnabled = jest.fn();
 
 const POSITIVE_BUTTON_SELECTOR =
   '[data-test-subj="observabilityAgentBuilderFeedbackPositiveButton"]';
@@ -37,18 +38,36 @@ describe('FeedbackButtons', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    mockIsEnabled.mockReturnValue(true);
     mockUseKibana.mockReturnValue({
       services: {
         notifications: {
           toasts: {
             addSuccess: mockAddSuccess,
           },
+          feedback: {
+            isEnabled: mockIsEnabled,
+          },
         },
       },
     });
   });
 
-  it('renders the feedback buttons', () => {
+  it('does not render when feedback is disabled', () => {
+    mockIsEnabled.mockReturnValue(false);
+
+    const onClickFeedback = jest.fn();
+    const { container, unmount } = renderComponent(onClickFeedback);
+
+    const { positiveButton, negativeButton } = getButtons(container);
+
+    expect(positiveButton).toBeNull();
+    expect(negativeButton).toBeNull();
+
+    unmount();
+  });
+
+  it('renders the feedback buttons when feedback is enabled', () => {
     const onClickFeedback = jest.fn();
     const { getByText, container, unmount } = renderComponent(onClickFeedback);
 
