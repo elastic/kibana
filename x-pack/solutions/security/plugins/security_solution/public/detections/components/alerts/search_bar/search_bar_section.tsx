@@ -6,11 +6,16 @@
  */
 
 import React, { memo } from 'react';
+import { useLocation } from 'react-router-dom';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { useSignalHelpers } from '../../../../sourcerer/containers/use_signal_helpers';
+import { getScopeFromPath } from '../../../../sourcerer/containers/sourcerer_paths';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { PageScope } from '../../../../data_view_manager/constants';
+import { DataViewPicker } from '../../../../data_view_manager/components/data_view_picker';
 
 export const SEARCH_BAR_TEST_ID = 'alerts-page-search-bar';
 
@@ -31,12 +36,21 @@ export interface SearchBarSectionProps {
 export const SearchBarSection = memo(
   ({ dataView, sourcererDataViewSpec }: SearchBarSectionProps) => {
     const { pollForSignalIndex } = useSignalHelpers();
+    const { pathname } = useLocation();
+    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+    const scope = getScopeFromPath(pathname, newDataViewPickerEnabled);
+
+    const dataViewPickerOverride =
+      newDataViewPickerEnabled ? (
+        <DataViewPicker scope={scope} disabled={scope === PageScope.alerts} />
+      ) : undefined;
 
     return (
       <FiltersGlobal>
         <SiemSearchBar
           dataTestSubj={SEARCH_BAR_TEST_ID}
           dataView={dataView}
+          dataViewPickerOverride={dataViewPickerOverride}
           id={InputsModelId.global}
           pollForSignalIndex={pollForSignalIndex}
           sourcererDataViewSpec={sourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag

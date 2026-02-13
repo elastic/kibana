@@ -57,11 +57,16 @@ interface SiemSearchBarProps {
    * Allows to hide the query menu button displayed to the left of the query input.
    */
   hideQueryMenu?: boolean;
+  /**
+   * Optional node to render in place of the Unified Search bar's data view picker (e.g. Security DataViewPicker for POC).
+   */
+  dataViewPickerOverride?: React.ReactNode;
 }
 
 export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
   ({
     dataView,
+    dataViewPickerOverride,
     end,
     filterQuery,
     fromStr,
@@ -355,6 +360,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           showQueryMenu={!hideQueryMenu}
           allowSavingQueries
           dataTestSubj={dataTestSubj}
+          dataViewPickerOverride={dataViewPickerOverride}
         />
       </div>
     ) : null;
@@ -373,6 +379,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     prevProps.toStr === nextProps.toStr &&
     prevProps.updateSearch === nextProps.updateSearch &&
     prevProps.dataTestSubj === nextProps.dataTestSubj &&
+    prevProps.dataViewPickerOverride === nextProps.dataViewPickerOverride &&
     deepEqual(prevProps.queries, nextProps.queries)
 );
 

@@ -68,57 +68,14 @@ describe('global header', () => {
     });
   });
 
-  it('has add data link', () => {
-    const { getByText } = render(
-      <TestProviders store={store}>
-        <GlobalHeader />
-      </TestProviders>
-    );
-    expect(getByText('Add integrations')).toBeInTheDocument();
-  });
-
-  it('points to the default Add data URL', () => {
-    const { queryByTestId } = render(
-      <TestProviders store={store}>
-        <GlobalHeader />
-      </TestProviders>
-    );
-    const link = queryByTestId('add-data');
-    expect(link?.getAttribute('href')).toBe(ADD_DATA_PATH);
-  });
-
-  it('does not show the default Add data URL when hasSearchAILakeConfigurations', () => {
-    (useKibana as jest.Mock).mockReturnValue({
-      ...mockUseKibana(),
-      services: {
-        ...mockUseKibana().services,
-        application: {
-          capabilities: {
-            [SECURITY_FEATURE_ID]: {
-              configurations: true,
-            },
-            fleet: { read: true },
-          },
-        },
-      },
-    });
-    const { queryByTestId } = render(
+  it('does not show Add integrations link (commented out so app menu is not dominated by a single item)', () => {
+    const { queryByTestId, queryByText } = render(
       <TestProviders store={store}>
         <GlobalHeader />
       </TestProviders>
     );
     expect(queryByTestId('add-data')).not.toBeInTheDocument();
-  });
-
-  it('points to the threat_intel Add data URL for threat_intelligence url', () => {
-    (useLocation as jest.Mock).mockReturnValue({ pathname: THREAT_INTELLIGENCE_PATH });
-    const { queryByTestId } = render(
-      <TestProviders store={store}>
-        <GlobalHeader />
-      </TestProviders>
-    );
-    const link = queryByTestId('add-data');
-    expect(link?.getAttribute('href')).toBe(ADD_THREAT_INTELLIGENCE_DATA_PATH);
+    expect(queryByText('Add integrations')).not.toBeInTheDocument();
   });
 
   // TODO: Skipping until feature flag is enabled https://github.com/elastic/security-team/issues/11959 by default
