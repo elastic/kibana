@@ -31,7 +31,6 @@ dependsOn:
   - '@kbn/kibana-utils-plugin'
   - '@kbn/content-management-plugin'
   - '@kbn/content-management-utils'
-  - '@kbn/usage-collection-plugin'
   - '@kbn/core-http-server'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/core-saved-objects-server'
