@@ -74,6 +74,8 @@ export const SchemaEditorFlyout = ({
     });
   }, [enableGeoPointSuggestions, field.name, fields, stream]);
 
+  const streamType = Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic';
+
   const initialField = useMemo(() => {
     if (applyGeoPointSuggestionProp && geoPointSuggestion) {
       return {
@@ -83,8 +85,16 @@ export const SchemaEditorFlyout = ({
         parent: field.parent,
       };
     }
+    // For wired streams, doc-only overrides are stored without a type.
+    // Default to 'unmapped' so the type dropdown shows the correct selection.
+    if (streamType === 'wired' && field.status === 'unmapped' && !field.type) {
+      return {
+        ...field,
+        type: 'unmapped' as const,
+      };
+    }
     return field;
-  }, [applyGeoPointSuggestionProp, geoPointSuggestion, field]);
+  }, [applyGeoPointSuggestionProp, geoPointSuggestion, field, streamType]);
 
   const [nextField, setNextField] = useReducer(
     (prev: SchemaField, updated: Partial<SchemaField>) =>
@@ -95,7 +105,6 @@ export const SchemaEditorFlyout = ({
     initialField
   );
 
-  const streamType = Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic';
   const hasValidFieldType = nextField.type !== undefined;
   // Description-only editing is only allowed for wired streams.
   // Classic streams require a type to be specified to add a description.

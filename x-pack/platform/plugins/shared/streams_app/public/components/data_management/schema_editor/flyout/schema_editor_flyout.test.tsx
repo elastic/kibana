@@ -204,6 +204,48 @@ describe('SchemaEditorFlyout (description-only restrictions)', () => {
       expect(stagedField).not.toHaveProperty('format');
       expect(stagedField).not.toHaveProperty('additionalParameters');
     });
+
+    it('defaults to "unmapped" type when editing a doc-only field saved without type', async () => {
+      // This tests the scenario where:
+      // 1. User edits a field, sets it to unmapped, adds description, saves
+      // 2. The field is stored as { status: 'unmapped', description: '...' } without a type
+      // 3. When re-editing, the type dropdown should show "Unmapped" selected (not empty)
+      const docOnlyFieldWithoutType: SchemaField = {
+        name: 'attributes.documented_field',
+        parent: 'logs.test',
+        status: 'unmapped',
+        description: 'A description for this field',
+        // No type property - this is how doc-only overrides are stored
+      };
+
+      const { onStage, stream } = renderFlyout({ field: docOnlyFieldWithoutType });
+
+      // The type selector should NOT be shown (description-only mode)
+      expect(screen.queryByTestId('streamsAppFieldFormTypeSelect')).not.toBeInTheDocument();
+
+      // Description should be editable and show the existing description
+      const descriptionTextArea = screen.getByTestId('streamsAppFieldSummaryDescriptionTextArea');
+      expect(descriptionTextArea).toHaveValue('A description for this field');
+
+      // Update description and stage
+      await user.clear(descriptionTextArea);
+      await user.type(descriptionTextArea, 'Updated description');
+
+      const stageButton = screen.getByTestId('streamsAppSchemaEditorFieldStageButton');
+      expect(stageButton).toBeEnabled();
+      await user.click(stageButton);
+
+      expect(onStage).toHaveBeenCalledTimes(1);
+      const stagedField = onStage.mock.calls[0][0] as SchemaField;
+
+      // The staged field should maintain the doc-only format
+      expect(stagedField).toEqual({
+        name: docOnlyFieldWithoutType.name,
+        parent: stream.name,
+        status: 'unmapped',
+        description: 'Updated description',
+      });
+    });
   });
 
   describe('classic streams', () => {
