@@ -5,29 +5,12 @@
  * 2.0.
  */
 
-import type { TriggerDefinition } from './types';
 import { matchTrigger, getTextBeforeCursor } from './trigger_matcher';
-import { createTriggerRegistry } from './trigger_registry';
-
-const mentionTrigger: TriggerDefinition = {
-  id: 'mention',
-  kind: 'mention',
-  sequence: '@',
-};
-
-const commandTrigger: TriggerDefinition = {
-  id: 'command-prompt',
-  kind: 'command',
-  sequence: '/p',
-  params: { subCommand: 'prompt' },
-};
-
-const triggers = createTriggerRegistry([mentionTrigger, commandTrigger]);
 
 describe('matchTrigger', () => {
   describe('single-character triggers', () => {
     it('matches "@" at start of input', () => {
-      const result = matchTrigger('@', triggers);
+      const result = matchTrigger('@');
       expect(result.isActive).toBe(true);
       expect(result.activeTrigger?.trigger.id).toBe('mention');
       expect(result.activeTrigger?.query).toBe('');
@@ -35,31 +18,31 @@ describe('matchTrigger', () => {
     });
 
     it('matches "@" after whitespace', () => {
-      const result = matchTrigger('hello @', triggers);
+      const result = matchTrigger('hello @');
       expect(result.isActive).toBe(true);
       expect(result.activeTrigger?.trigger.id).toBe('mention');
       expect(result.activeTrigger?.query).toBe('');
     });
 
     it('does not match "@" mid-word', () => {
-      const result = matchTrigger('email@example', triggers);
+      const result = matchTrigger('email@example');
       expect(result.isActive).toBe(false);
     });
 
     it('captures query text after trigger', () => {
-      const result = matchTrigger('@joh', triggers);
+      const result = matchTrigger('@joh');
       expect(result.isActive).toBe(true);
       expect(result.activeTrigger?.query).toBe('joh');
     });
 
     it('includes trailing space in query', () => {
-      const result = matchTrigger('@john ', triggers);
+      const result = matchTrigger('@john ');
       expect(result.isActive).toBe(true);
       expect(result.activeTrigger?.query).toBe('john ');
     });
 
     it('includes spaces within query', () => {
-      const result = matchTrigger('@john doe', triggers);
+      const result = matchTrigger('@john doe');
       expect(result.isActive).toBe(true);
       expect(result.activeTrigger?.query).toBe('john doe');
     });
@@ -67,65 +50,58 @@ describe('matchTrigger', () => {
 
   describe('multi-character triggers', () => {
     it('matches "/p" at start of input', () => {
-      const result = matchTrigger('/p', triggers);
+      const result = matchTrigger('/p');
       expect(result.isActive).toBe(true);
       expect(result.activeTrigger?.trigger.id).toBe('command-prompt');
       expect(result.activeTrigger?.query).toBe('');
     });
 
     it('matches "/p" after whitespace', () => {
-      const result = matchTrigger('hello /p', triggers);
+      const result = matchTrigger('hello /p');
       expect(result.isActive).toBe(true);
       expect(result.activeTrigger?.trigger.id).toBe('command-prompt');
     });
 
     it('does not match "/p" mid-word', () => {
-      const result = matchTrigger('foo/p', triggers);
+      const result = matchTrigger('foo/p');
       expect(result.isActive).toBe(false);
     });
 
     it('captures query after multi-char trigger', () => {
-      const result = matchTrigger('/pprompt', triggers);
+      const result = matchTrigger('/pprompt');
       expect(result.isActive).toBe(true);
       expect(result.activeTrigger?.query).toBe('prompt');
     });
 
     it('preserves trigger params', () => {
-      const result = matchTrigger('/p', triggers);
+      const result = matchTrigger('/p');
       expect(result.activeTrigger?.trigger.params).toEqual({ subCommand: 'prompt' });
     });
   });
 
   describe('trigger priority', () => {
-    it('longer trigger takes precedence over shorter', () => {
-      const shortTrigger: TriggerDefinition = { id: 'slash', kind: 'command', sequence: '/' };
-      const longTrigger: TriggerDefinition = { id: 'slash-p', kind: 'command', sequence: '/p' };
-      const registry = createTriggerRegistry([shortTrigger, longTrigger]);
-
-      const result = matchTrigger('/p', registry);
-      expect(result.activeTrigger?.trigger.id).toBe('slash-p');
+    it('longer trigger "/p" takes precedence over shorter "@"', () => {
+      // "/p" is longer than "@", so it should match first when both could match
+      const result = matchTrigger('/p');
+      expect(result.activeTrigger?.trigger.id).toBe('command-prompt');
     });
 
-    it('shorter trigger matches when longer does not', () => {
-      const shortTrigger: TriggerDefinition = { id: 'slash', kind: 'command', sequence: '/' };
-      const longTrigger: TriggerDefinition = { id: 'slash-p', kind: 'command', sequence: '/p' };
-      const registry = createTriggerRegistry([shortTrigger, longTrigger]);
-
-      const result = matchTrigger('/X', registry);
-      expect(result.activeTrigger?.trigger.id).toBe('slash');
-      expect(result.activeTrigger?.query).toBe('X');
+    it('shorter trigger matches when longer does not apply', () => {
+      // "@" matches because "/p" is not present
+      const result = matchTrigger('@hello');
+      expect(result.activeTrigger?.trigger.id).toBe('mention');
     });
   });
 
   describe('multiple trigger instances in text', () => {
     it('matches the last occurrence', () => {
-      const result = matchTrigger('hello @alice hey @bob', triggers);
+      const result = matchTrigger('hello @alice hey @bob');
       expect(result.isActive).toBe(true);
       expect(result.activeTrigger?.query).toBe('bob');
     });
 
     it('matches last trigger when earlier one was deactivated by space', () => {
-      const result = matchTrigger('@alice hello @bob', triggers);
+      const result = matchTrigger('@alice hello @bob');
       expect(result.isActive).toBe(true);
       expect(result.activeTrigger?.query).toBe('bob');
     });
@@ -133,28 +109,23 @@ describe('matchTrigger', () => {
 
   describe('edge cases', () => {
     it('returns inactive for empty input', () => {
-      const result = matchTrigger('', triggers);
+      const result = matchTrigger('');
       expect(result.isActive).toBe(false);
     });
 
     it('returns inactive for input with no triggers', () => {
-      const result = matchTrigger('hello world', triggers);
-      expect(result.isActive).toBe(false);
-    });
-
-    it('returns inactive for empty trigger list', () => {
-      const result = matchTrigger('@hello', []);
+      const result = matchTrigger('hello world');
       expect(result.isActive).toBe(false);
     });
 
     it('matches trigger after newline', () => {
-      const result = matchTrigger('hello\n@bob', triggers);
+      const result = matchTrigger('hello\n@bob');
       expect(result.isActive).toBe(true);
       expect(result.activeTrigger?.query).toBe('bob');
     });
 
     it('matches trigger after tab', () => {
-      const result = matchTrigger('hello\t@bob', triggers);
+      const result = matchTrigger('hello\t@bob');
       expect(result.isActive).toBe(true);
       expect(result.activeTrigger?.query).toBe('bob');
     });

@@ -7,6 +7,16 @@
 
 import type { TriggerDefinition, TriggerMatchResult, ActiveTrigger } from './types';
 
+const TRIGGER_DEFINITIONS: readonly TriggerDefinition[] = [
+  { id: 'mention', kind: 'mention', sequence: '@' },
+  { id: 'command-prompt', kind: 'command', sequence: '/p', params: { subCommand: 'prompt' } },
+];
+
+// Sorted once at module load — longest sequence first for greedy matching
+const TRIGGERS: readonly TriggerDefinition[] = [...TRIGGER_DEFINITIONS].sort(
+  (a, b) => b.sequence.length - a.sequence.length
+);
+
 /**
  * Determines if the character at the given position is at a word boundary.
  * A word boundary is the start of the string or immediately after whitespace.
@@ -33,11 +43,8 @@ const INACTIVE_RESULT: TriggerMatchResult = {
  * 1. Finds the last occurrence of the sequence in the text
  * 2. Checks that the sequence starts at a word boundary
  */
-export const matchTrigger = (
-  textBeforeCursor: string,
-  triggers: readonly TriggerDefinition[]
-): TriggerMatchResult => {
-  for (const trigger of triggers) {
+export const matchTrigger = (textBeforeCursor: string): TriggerMatchResult => {
+  for (const trigger of TRIGGERS) {
     const { sequence } = trigger;
     const lastIndex = textBeforeCursor.lastIndexOf(sequence);
 

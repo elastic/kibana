@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { useState, useCallback, useMemo } from 'react';
-import type { TriggerDefinition, TriggerMatchResult } from './types';
+import { useState, useCallback } from 'react';
+import type { TriggerMatchResult } from './types';
 import { matchTrigger, getTextBeforeCursor } from './trigger_matcher';
-import { createTriggerRegistry } from './trigger_registry';
 
 export interface InlineActionTriggerState {
   /** Current trigger match result */
@@ -20,8 +19,6 @@ export interface InlineActionTriggerState {
 }
 
 interface UseInlineActionTriggerOptions {
-  /** Custom trigger definitions. Uses defaults if not provided. */
-  readonly triggers?: readonly TriggerDefinition[];
   /** Whether trigger detection is enabled. Defaults to true. */
   readonly enabled?: boolean;
 }
@@ -40,9 +37,7 @@ const INACTIVE_MATCH: TriggerMatchResult = {
 export const useInlineActionTrigger = (
   options: UseInlineActionTriggerOptions = {}
 ): InlineActionTriggerState => {
-  const { triggers: customTriggers, enabled = true } = options;
-
-  const registry = useMemo(() => createTriggerRegistry(customTriggers), [customTriggers]);
+  const { enabled = true } = options;
 
   const [match, setMatch] = useState<TriggerMatchResult>(INACTIVE_MATCH);
 
@@ -54,9 +49,9 @@ export const useInlineActionTrigger = (
       }
 
       const textBeforeCursor = getTextBeforeCursor(element);
-      setMatch(matchTrigger(textBeforeCursor, registry));
+      setMatch(matchTrigger(textBeforeCursor));
     },
-    [enabled, registry]
+    [enabled]
   );
 
   const dismiss = useCallback(() => {

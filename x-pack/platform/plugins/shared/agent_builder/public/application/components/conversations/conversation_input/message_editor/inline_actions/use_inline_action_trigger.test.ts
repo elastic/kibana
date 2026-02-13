@@ -124,19 +124,4 @@ describe('useInlineActionTrigger', () => {
     });
     expect(result.current.match.isActive).toBe(false);
   });
-
-  it('uses custom triggers when provided', () => {
-    const customTrigger = { id: 'custom', kind: 'mention' as const, sequence: '#' };
-    mockGetTextBeforeCursor.mockReturnValue('#tag');
-
-    const { result } = renderHook(() => useInlineActionTrigger({ triggers: [customTrigger] }));
-
-    act(() => {
-      result.current.handleInput(mockElement);
-    });
-
-    expect(result.current.match.isActive).toBe(true);
-    expect(result.current.match.activeTrigger?.trigger.id).toBe('custom');
-    expect(result.current.match.activeTrigger?.query).toBe('tag');
-  });
 });
