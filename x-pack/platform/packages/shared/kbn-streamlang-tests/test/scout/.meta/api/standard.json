@@ -1,19 +1,21 @@
 {
-  "lastModified": "2025-12-08T16:58:32.285Z",
-  "sha1": "f807bf5831e2ff18c1f1ff10507788d06789ff72",
+  "lastModified": "2026-02-12T10:41:42.870Z",
+  "sha1": "132e7b0a92023d4031fba3b082bb8f7a6c7e8e8f",
   "tests": [
     {
       "id": "7a50a1b508e10f4-3be34281d1d9c2c",
       "title": "Cross-compatibility - Append Processor should append a value to an existing array",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/append.spec.ts",
-        "line": 15,
-        "column": 10
+        "line": 18,
+        "column": 12
       }
     },
     {
@@ -21,13 +23,15 @@
       "title": "Cross-compatibility - Append Processor should append multiple values to a non-existent field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/append.spec.ts",
-        "line": 40,
-        "column": 10
+        "line": 43,
+        "column": 12
       }
     },
     {
@@ -35,13 +39,15 @@
       "title": "Cross-compatibility - Append Processor should consistently reject {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/append.spec.ts",
-        "line": 79,
-        "column": 12
+        "line": 82,
+        "column": 14
       }
     },
     {
@@ -49,13 +55,15 @@
       "title": "Cross-compatibility - Append Processor should consistently reject {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/append.spec.ts",
-        "line": 79,
-        "column": 12
+        "line": 82,
+        "column": 14
       }
     },
     {
@@ -63,13 +71,15 @@
       "title": "Cross-compatibility - Append Processor should result in an array in ingest, but a scalar in ES|QL for a single value",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/append.spec.ts",
-        "line": 106,
-        "column": 10
+        "line": 109,
+        "column": 12
       }
     },
     {
@@ -77,13 +87,15 @@
       "title": "Cross-compatibility - Append Processor should result in an array in ingest, but a scalar in ES|QL when deduplicating to a single value",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/append.spec.ts",
-        "line": 135,
-        "column": 10
+        "line": 138,
+        "column": 12
       }
     },
     {
@@ -91,13 +103,15 @@
       "title": "Cross-compatibility - Convert Processor should convert a field to a different type",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/convert.spec.ts",
-        "line": 15,
-        "column": 10
+        "line": 18,
+        "column": 12
       }
     },
     {
@@ -105,13 +119,15 @@
       "title": "Cross-compatibility - Convert Processor should convert a field to a different type into a the target field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/convert.spec.ts",
-        "line": 42,
-        "column": 10
+        "line": 45,
+        "column": 12
       }
     },
     {
@@ -119,13 +135,15 @@
       "title": "Cross-compatibility - Convert Processor should convert a field to a different type into a the target field with a where condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/convert.spec.ts",
-        "line": 77,
-        "column": 10
+        "line": 80,
+        "column": 12
       }
     },
     {
@@ -133,13 +151,15 @@
       "title": "Cross-compatibility - Convert Processor should consistently reject {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/convert.spec.ts",
-        "line": 131,
-        "column": 12
+        "line": 137,
+        "column": 14
       }
     },
     {
@@ -147,13 +167,15 @@
       "title": "Cross-compatibility - Convert Processor should consistently reject {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/convert.spec.ts",
-        "line": 131,
-        "column": 12
+        "line": 137,
+        "column": 14
       }
     },
     {
@@ -161,8 +183,10 @@
       "title": "Cross-compatibility - Date Processor should parse a date with a single format",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
@@ -175,7 +199,8 @@
       "title": "Cross-compatibility - Date Processor should parse a date with multiple formats",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
@@ -188,8 +213,10 @@
       "title": "Cross-compatibility - Date Processor should use a different output format",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
@@ -202,8 +229,10 @@
       "title": "Cross-compatibility - Date Processor should consistently reject {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
@@ -216,8 +245,10 @@
       "title": "Cross-compatibility - Date Processor should consistently reject {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
@@ -230,7 +261,8 @@
       "title": "Cross-compatibility - Date Processor should parse the first matching among a list of input formats",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
@@ -243,8 +275,10 @@
       "title": "Cross-compatibility - Date Processor should add error in ingest, but ES|QL ignores the document when parsing fails",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
@@ -257,8 +291,10 @@
       "title": "Cross-compatibility - Date Processor should parse a date with locale and timezone",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
@@ -271,13 +307,15 @@
       "title": "Cross-compatibility - Dissect Processor should correctly parse a log line with the dissect processor",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/dissect.spec.ts",
-        "line": 15,
-        "column": 10
+        "line": 18,
+        "column": 12
       }
     },
     {
@@ -285,13 +323,15 @@
       "title": "Cross-compatibility - Dissect Processor should support append_separator in ingest as well as in ES|QL",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/dissect.spec.ts",
-        "line": 47,
-        "column": 10
+        "line": 50,
+        "column": 12
       }
     },
     {
@@ -299,13 +339,15 @@
       "title": "Cross-compatibility - Dissect Processor should consistently reject {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/dissect.spec.ts",
-        "line": 94,
-        "column": 12
+        "line": 97,
+        "column": 14
       }
     },
     {
@@ -313,13 +355,15 @@
       "title": "Cross-compatibility - Dissect Processor should consistently reject {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/dissect.spec.ts",
-        "line": 94,
-        "column": 12
+        "line": 97,
+        "column": 14
       }
     },
     {
@@ -327,13 +371,15 @@
       "title": "Cross-compatibility - Dissect Processor should leave the source field intact if source field name is not present in pattern",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/dissect.spec.ts",
-        "line": 118,
-        "column": 10
+        "line": 121,
+        "column": 12
       }
     },
     {
@@ -341,13 +387,15 @@
       "title": "Cross-compatibility - Dissect Processor should override the source field if source field name is present in pattern",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/dissect.spec.ts",
-        "line": 167,
-        "column": 10
+        "line": 168,
+        "column": 12
       }
     },
     {
@@ -355,13 +403,15 @@
       "title": "Cross-compatibility - Dissect Processor shout not process/output the document when source field is missing and ignore_missing is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/dissect.spec.ts",
-        "line": 215,
-        "column": 10
+        "line": 216,
+        "column": 12
       }
     },
     {
@@ -369,13 +419,15 @@
       "title": "Cross-compatibility - Dissect Processor should support where clause both in ingest as well as in ES|QL",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/dissect.spec.ts",
-        "line": 246,
-        "column": 10
+        "line": 247,
+        "column": 12
       }
     },
     {
@@ -383,13 +435,15 @@
       "title": "Cross-compatibility - Dissect Processor should handle pattern matching failures differently - ingest throws errors while ES|QL returns null columns for dissected fields",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/dissect.spec.ts",
-        "line": 295,
-        "column": 10
+        "line": 296,
+        "column": 12
       }
     },
     {
@@ -397,13 +451,15 @@
       "title": "Cross-compatibility - Dissect Processor should handle complete pattern mismatches differently - ingest throws errors while ES|QL returns null columns for dissected fields",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/dissect.spec.ts",
-        "line": 350,
-        "column": 10
+        "line": 351,
+        "column": 12
       }
     },
     {
@@ -411,13 +467,15 @@
       "title": "Cross-compatibility - Dissect Processor should handle explicitly null source field values differently between transpilers (ignore_missing=true)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/dissect.spec.ts",
-        "line": 405,
-        "column": 10
+        "line": 406,
+        "column": 12
       }
     },
     {
@@ -425,8 +483,10 @@
       "title": "Cross-compatibility - Drop Document Processor should drop documents matching where condition in both ingest pipeline and ES|QL",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/drop_document.spec.ts",
@@ -439,12 +499,14 @@
       "title": "Cross-compatibility - Drop Document Processor should raise a runtime error when where is omitted",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/drop_document.spec.ts",
-        "line": 72,
+        "line": 70,
         "column": 12
       }
     },
@@ -453,13 +515,15 @@
       "title": "Cross-compatibility - Filter Conditions should handle eq (equals) filter condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 14,
-        "column": 10
+        "line": 17,
+        "column": 12
       }
     },
     {
@@ -467,13 +531,15 @@
       "title": "Cross-compatibility - Filter Conditions should handle neq (not equals) filter condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 66,
-        "column": 10
+        "line": 69,
+        "column": 12
       }
     },
     {
@@ -481,13 +547,15 @@
       "title": "Cross-compatibility - Filter Conditions should handle gt (greater than) filter condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 119,
-        "column": 10
+        "line": 122,
+        "column": 12
       }
     },
     {
@@ -495,13 +563,15 @@
       "title": "Cross-compatibility - Filter Conditions should handle gte (greater than or equal) filter condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 174,
-        "column": 10
+        "line": 177,
+        "column": 12
       }
     },
     {
@@ -509,13 +579,15 @@
       "title": "Cross-compatibility - Filter Conditions should handle lt (less than) filter condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 227,
-        "column": 10
+        "line": 230,
+        "column": 12
       }
     },
     {
@@ -523,13 +595,15 @@
       "title": "Cross-compatibility - Filter Conditions should handle lte (less than or equal) filter condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 282,
-        "column": 10
+        "line": 285,
+        "column": 12
       }
     },
     {
@@ -537,13 +611,15 @@
       "title": "Cross-compatibility - Filter Conditions should handle exists filter condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 332,
-        "column": 10
+        "line": 338,
+        "column": 12
       }
     },
     {
@@ -551,13 +627,15 @@
       "title": "Cross-compatibility - Filter Conditions should handle range filter condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 388,
-        "column": 10
+        "line": 396,
+        "column": 12
       }
     },
     {
@@ -565,13 +643,15 @@
       "title": "Cross-compatibility - Filter Conditions should handle contains filter condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 451,
-        "column": 10
+        "line": 459,
+        "column": 12
       }
     },
     {
@@ -579,13 +659,15 @@
       "title": "Cross-compatibility - Filter Conditions should handle startsWith filter condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 557,
-        "column": 10
+        "line": 565,
+        "column": 12
       }
     },
     {
@@ -593,13 +675,15 @@
       "title": "Cross-compatibility - Filter Conditions should handle endsWith filter condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 624,
-        "column": 10
+        "line": 632,
+        "column": 12
       }
     },
     {
@@ -607,13 +691,15 @@
       "title": "Cross-compatibility - Filter Conditions should handle multiple filter conditions with AND",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 691,
-        "column": 10
+        "line": 699,
+        "column": 12
       }
     },
     {
@@ -621,13 +707,15 @@
       "title": "Cross-compatibility - Filter Conditions should handle NOT condition with contains filter",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 768,
-        "column": 10
+        "line": 779,
+        "column": 12
       }
     },
     {
@@ -635,13 +723,15 @@
       "title": "Cross-compatibility - Filter Conditions should handle OR condition with multiple patterns",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 834,
-        "column": 10
+        "line": 845,
+        "column": 12
       }
     },
     {
@@ -649,13 +739,15 @@
       "title": "Cross-compatibility - Filter Conditions should handle special characters in patterns",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 906,
-        "column": 10
+        "line": 917,
+        "column": 12
       }
     },
     {
@@ -663,13 +755,15 @@
       "title": "Cross-compatibility - Grok Processor should correctly parse a log line with the grok processor",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
-        "line": 15,
-        "column": 10
+        "line": 18,
+        "column": 12
       }
     },
     {
@@ -677,13 +771,15 @@
       "title": "Cross-compatibility - Grok Processor should support where clause both in ingest as wel as in ES|QL",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
-        "line": 44,
-        "column": 10
+        "line": 47,
+        "column": 12
       }
     },
     {
@@ -691,13 +787,15 @@
       "title": "Cross-compatibility - Grok Processor should consistently reject {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
-        "line": 103,
-        "column": 12
+        "line": 106,
+        "column": 14
       }
     },
     {
@@ -705,13 +803,15 @@
       "title": "Cross-compatibility - Grok Processor should consistently reject {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
-        "line": 103,
-        "column": 12
+        "line": 106,
+        "column": 14
       }
     },
     {
@@ -719,13 +819,15 @@
       "title": "Cross-compatibility - Grok Processor should handle custom oniguruma patterns in both ingest and ES|QL",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
-        "line": 127,
-        "column": 10
+        "line": 130,
+        "column": 12
       }
     },
     {
@@ -733,13 +835,15 @@
       "title": "Cross-compatibility - Grok Processor should handle same field captured multiple times in both ingest and ES|QL",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
-        "line": 175,
-        "column": 10
+        "line": 178,
+        "column": 12
       }
     },
     {
@@ -747,13 +851,15 @@
       "title": "Cross-compatibility - Grok Processor should support special character in grok regex patterns in both ingest and ES|QL",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
-        "line": 204,
-        "column": 10
+        "line": 207,
+        "column": 12
       }
     },
     {
@@ -761,13 +867,15 @@
       "title": "Cross-compatibility - Grok Processor should leave the source field intact if source field name is not present in pattern",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
-        "line": 238,
-        "column": 10
+        "line": 241,
+        "column": 12
       }
     },
     {
@@ -775,13 +883,15 @@
       "title": "Cross-compatibility - Grok Processor should override the source field if source field name is present in pattern",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
-        "line": 271,
-        "column": 10
+        "line": 274,
+        "column": 12
       }
     },
     {
@@ -789,13 +899,15 @@
       "title": "Cross-compatibility - Grok Processor should coerce int/float values to int/float when mapped type is different than the extracted type",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
-        "line": 307,
-        "column": 10
+        "line": 310,
+        "column": 12
       }
     },
     {
@@ -803,13 +915,15 @@
       "title": "Cross-compatibility - Grok Processor should maintain order of documents consistently when using where clause with ignore_missing: true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
-        "line": 382,
-        "column": 10
+        "line": 385,
+        "column": 12
       }
     },
     {
@@ -817,13 +931,15 @@
       "title": "Cross-compatibility - Grok Processor should filter out the document in ingest as well as in ES|QL when ignore_missing is false and the field is missing",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
-        "line": 426,
-        "column": 10
+        "line": 431,
+        "column": 12
       }
     },
     {
@@ -831,13 +947,15 @@
       "title": "Cross-compatibility - Grok Processor should nullify ungroked fields in the doc when only partial groking is possible",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
-        "line": 459,
-        "column": 10
+        "line": 464,
+        "column": 12
       }
     },
     {
@@ -845,13 +963,15 @@
       "title": "Cross-compatibility - Grok Processor should nullify ungroked fields when no groking is possible",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
-        "line": 502,
-        "column": 10
+        "line": 507,
+        "column": 12
       }
     },
     {
@@ -859,15 +979,19 @@
       "title": "Cross-compatibility - Grok Processor should inline pattern definitions",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt",
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
-        "line": 535,
-        "column": 10
+        "line": 540,
+        "column": 12
       }
     },
     {
@@ -875,15 +999,19 @@
       "title": "Cross-compatibility - Grok Processor should inline nested pattern definitions",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt",
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
-        "line": 568,
-        "column": 10
+        "line": 575,
+        "column": 12
       }
     },
     {
@@ -891,15 +1019,195 @@
       "title": "Cross-compatibility - Grok Processor should inline pattern definitions with regex",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt",
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/grok.spec.ts",
-        "line": 604,
-        "column": 10
+        "line": 611,
+        "column": 12
+      }
+    },
+    {
+      "id": "a50399d58840835-93db52c07b658b3",
+      "title": "Cross-compatibility - Math Processor should compute multiplication of fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/math.spec.ts",
+        "line": 19,
+        "column": 12
+      }
+    },
+    {
+      "id": "a50399d58840835-933193ef8d062eb",
+      "title": "Cross-compatibility - Math Processor should compute with nested field paths",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/math.spec.ts",
+        "line": 44,
+        "column": 12
+      }
+    },
+    {
+      "id": "a50399d58840835-392a91b346d9b32",
+      "title": "Cross-compatibility - Math Processor integer division - both engines truncate for integer-typed fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/math.spec.ts",
+        "line": 74,
+        "column": 12
+      }
+    },
+    {
+      "id": "a50399d58840835-5829cb3a8c35cc8",
+      "title": "Cross-compatibility - Math Processor should compute log (natural log) consistently",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/math.spec.ts",
+        "line": 113,
+        "column": 12
+      }
+    },
+    {
+      "id": "a50399d58840835-21e74481b9e9cd3",
+      "title": "Cross-compatibility - Math Processor should compute neq (not equal) consistently",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/math.spec.ts",
+        "line": 146,
+        "column": 12
+      }
+    },
+    {
+      "id": "a50399d58840835-d4ecd8c6776df7c",
+      "title": "Cross-compatibility - Math Processor should compute gt (greater than) consistently",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/math.spec.ts",
+        "line": 180,
+        "column": 12
+      }
+    },
+    {
+      "id": "a50399d58840835-32f7638a198f45c",
+      "title": "Cross-compatibility - Math Processor should compute eq (equality) consistently",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/math.spec.ts",
+        "line": 214,
+        "column": 12
+      }
+    },
+    {
+      "id": "a50399d58840835-dd2729d603d77e3",
+      "title": "Cross-compatibility - Math Processor should validate all supported functions are available in both transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/math.spec.ts",
+        "line": 251,
+        "column": 12
+      }
+    },
+    {
+      "id": "a50399d58840835-afdbb84c8bf71cd",
+      "title": "Cross-compatibility - Math Processor should consistently reject unsupported functions and invalid syntax in both transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/math.spec.ts",
+        "line": 324,
+        "column": 12
+      }
+    },
+    {
+      "id": "a50399d58840835-cd8de644351dd46",
+      "title": "Cross-compatibility - Math Processor INCOMPATIBLE: division by zero - Painless throws error, ES|QL returns null (Infinity)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/math.spec.ts",
+        "line": 355,
+        "column": 12
+      }
+    },
+    {
+      "id": "a50399d58840835-93a3bf60486ee27",
+      "title": "Cross-compatibility - Math Processor INCOMPATIBLE: log of zero - Painless returns \"-Infinity\" string, ES|QL returns null",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/math.spec.ts",
+        "line": 405,
+        "column": 12
       }
     },
     {
@@ -907,12 +1215,14 @@
       "title": "Cross-compatibility - Multi-Step Pipeline with Operator Coverage should process web server access logs with comprehensive operator and processor coverage",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/multi_step.spec.ts",
-        "line": 27,
+        "line": 28,
         "column": 12
       }
     },
@@ -921,13 +1231,15 @@
       "title": "Cross-compatibility - Operator Coercion eq boolean (strict): true matches boolean true, not string \"true\"",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/operator_coercions.spec.ts",
-        "line": 15,
-        "column": 10
+        "line": 18,
+        "column": 12
       }
     },
     {
@@ -935,13 +1247,15 @@
       "title": "Cross-compatibility - Operator Coercion eq numeric vs string against string doc: both 450 and \"450\" match",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/operator_coercions.spec.ts",
-        "line": 52,
-        "column": 10
+        "line": 55,
+        "column": 12
       }
     },
     {
@@ -949,13 +1263,15 @@
       "title": "Cross-compatibility - Operator Coercion eq numeric vs string against numeric doc: both 450 and \"450\" match",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/operator_coercions.spec.ts",
-        "line": 96,
-        "column": 10
+        "line": 99,
+        "column": 12
       }
     },
     {
@@ -963,13 +1279,15 @@
       "title": "Cross-compatibility - Operator Coercion contains(\"450\") matches both string and numeric 450",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/operator_coercions.spec.ts",
-        "line": 141,
-        "column": 10
+        "line": 144,
+        "column": 12
       }
     },
     {
@@ -977,13 +1295,15 @@
       "title": "Cross-compatibility - Operator Coercion range (string bounds) matches both numeric 8500 and string '8500'",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/operator_coercions.spec.ts",
-        "line": 177,
-        "column": 10
+        "line": 180,
+        "column": 12
       }
     },
     {
@@ -991,13 +1311,15 @@
       "title": "Cross-compatibility - Operator Coercion range (numeric bounds) matches both numeric 8500 and string \"8500\"",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/operator_coercions.spec.ts",
-        "line": 216,
-        "column": 10
+        "line": 219,
+        "column": 12
       }
     },
     {
@@ -1005,8 +1327,10 @@
       "title": "Cross-compatibility - RemoveByPrefix Processor should remove nested fields in both ingest pipeline and ES|QL",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/remove_by_prefix.spec.ts",
@@ -1019,8 +1343,10 @@
       "title": "Cross-compatibility - RemoveByPrefix Processor should handle flattened field structure in both transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/remove_by_prefix.spec.ts",
@@ -1033,8 +1359,10 @@
       "title": "Cross-compatibility - RemoveByPrefix Processor should consistently reject {{ }} template syntax in both transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/remove_by_prefix.spec.ts",
@@ -1047,8 +1375,10 @@
       "title": "Cross-compatibility - RemoveByPrefix Processor should consistently reject {{{ }}} template syntax in both transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/remove_by_prefix.spec.ts",
@@ -1061,8 +1391,10 @@
       "title": "Cross-compatibility - RemoveByPrefix Processor should consistently remove parent field and nested fields",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/remove_by_prefix.spec.ts",
@@ -1075,13 +1407,15 @@
       "title": "Cross-compatibility - Rename Processor should rename a field when override is true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/rename.spec.ts",
-        "line": 15,
-        "column": 10
+        "line": 18,
+        "column": 12
       }
     },
     {
@@ -1089,13 +1423,15 @@
       "title": "Cross-compatibility - Rename Processor should not process the document when override is false and target field exists",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/rename.spec.ts",
-        "line": 46,
-        "column": 10
+        "line": 49,
+        "column": 12
       }
     },
     {
@@ -1103,13 +1439,15 @@
       "title": "Cross-compatibility - Rename Processor should consistently reject {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/rename.spec.ts",
-        "line": 91,
-        "column": 12
+        "line": 94,
+        "column": 14
       }
     },
     {
@@ -1117,13 +1455,15 @@
       "title": "Cross-compatibility - Rename Processor should consistently reject {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/rename.spec.ts",
-        "line": 91,
-        "column": 12
+        "line": 94,
+        "column": 14
       }
     },
     {
@@ -1131,13 +1471,15 @@
       "title": "Cross-compatibility - Rename Processor should be handled by both ingest and ES|QL when field is missing and ignore_missing is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/rename.spec.ts",
-        "line": 115,
-        "column": 10
+        "line": 118,
+        "column": 12
       }
     },
     {
@@ -1145,13 +1487,15 @@
       "title": "Cross-compatibility - Replace Processor should correctly replace a literal string in both Ingest Pipeline and ES|QL (in-place)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
-        "line": 15,
-        "column": 10
+        "line": 18,
+        "column": 12
       }
     },
     {
@@ -1159,13 +1503,15 @@
       "title": "Cross-compatibility - Replace Processor should correctly replace a literal string to target field in both Ingest Pipeline and ES|QL",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
-        "line": 44,
-        "column": 10
+        "line": 47,
+        "column": 12
       }
     },
     {
@@ -1173,13 +1519,15 @@
       "title": "Cross-compatibility - Replace Processor should correctly replace using regex pattern in both Ingest Pipeline and ES|QL",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
-        "line": 75,
-        "column": 10
+        "line": 78,
+        "column": 12
       }
     },
     {
@@ -1187,13 +1535,15 @@
       "title": "Cross-compatibility - Replace Processor should correctly replace using regex with capture groups in both Ingest Pipeline and ES|QL",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
-        "line": 104,
-        "column": 10
+        "line": 107,
+        "column": 12
       }
     },
     {
@@ -1201,13 +1551,15 @@
       "title": "Cross-compatibility - Replace Processor should support conditional replacement with where clause in both Ingest Pipeline and ES|QL",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
-        "line": 133,
-        "column": 10
+        "line": 136,
+        "column": 12
       }
     },
     {
@@ -1215,13 +1567,15 @@
       "title": "Cross-compatibility - Replace Processor should fail when source field is of non-string type (e.g., numeric) in both Ingest Pipeline and ES|QL",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
-        "line": 184,
-        "column": 10
+        "line": 187,
+        "column": 12
       }
     },
     {
@@ -1229,13 +1583,15 @@
       "title": "Cross-compatibility - Replace Processor should successfully overwrite non-string target field (e.g., numeric) in both Ingest Pipeline and ES|QL",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
-        "line": 222,
-        "column": 10
+        "line": 225,
+        "column": 12
       }
     },
     {
@@ -1243,13 +1599,15 @@
       "title": "Cross-compatibility - Replace Processor should consistently reject {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
-        "line": 269,
-        "column": 12
+        "line": 272,
+        "column": 14
       }
     },
     {
@@ -1257,13 +1615,15 @@
       "title": "Cross-compatibility - Replace Processor should consistently reject {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
-        "line": 269,
-        "column": 12
+        "line": 272,
+        "column": 14
       }
     },
     {
@@ -1271,13 +1631,15 @@
       "title": "Cross-compatibility - Replace Processor should document multi-value array limitation: Ingest Pipeline supports arrays, ES|QL does not",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
-        "line": 298,
-        "column": 10
+        "line": 301,
+        "column": 12
       }
     },
     {
@@ -1285,13 +1647,15 @@
       "title": "Cross-compatibility - Set Processor should set a field using a value",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/set.spec.ts",
-        "line": 15,
-        "column": 10
+        "line": 18,
+        "column": 12
       }
     },
     {
@@ -1299,13 +1663,15 @@
       "title": "Cross-compatibility - Set Processor should set a field by copying from another field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/set.spec.ts",
-        "line": 42,
-        "column": 10
+        "line": 45,
+        "column": 12
       }
     },
     {
@@ -1313,13 +1679,15 @@
       "title": "Cross-compatibility - Set Processor should override an existing field when override is true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/set.spec.ts",
-        "line": 69,
-        "column": 10
+        "line": 72,
+        "column": 12
       }
     },
     {
@@ -1327,13 +1695,15 @@
       "title": "Cross-compatibility - Set Processor should not override in ingest as well as in ES|QL when override is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/set.spec.ts",
-        "line": 97,
-        "column": 10
+        "line": 103,
+        "column": 12
       }
     },
     {
@@ -1341,13 +1711,15 @@
       "title": "Cross-compatibility - Set Processor should consistently reject {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/set.spec.ts",
-        "line": 141,
-        "column": 12
+        "line": 147,
+        "column": 14
       }
     },
     {
@@ -1355,13 +1727,15 @@
       "title": "Cross-compatibility - Set Processor should consistently reject {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/set.spec.ts",
-        "line": 141,
-        "column": 12
+        "line": 147,
+        "column": 14
       }
     },
     {
@@ -1369,13 +1743,15 @@
       "title": "Streamlang to ES|QL - Append Processor should append a value to an existing field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/append.spec.ts",
-        "line": 15,
-        "column": 10
+        "line": 18,
+        "column": 12
       }
     },
     {
@@ -1383,13 +1759,15 @@
       "title": "Streamlang to ES|QL - Append Processor should append a value to a non-existent field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/append.spec.ts",
-        "line": 34,
-        "column": 10
+        "line": 37,
+        "column": 12
       }
     },
     {
@@ -1397,13 +1775,15 @@
       "title": "Streamlang to ES|QL - Append Processor should not append duplicate values when allow_duplicates is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/append.spec.ts",
-        "line": 53,
-        "column": 10
+        "line": 56,
+        "column": 12
       }
     },
     {
@@ -1411,13 +1791,15 @@
       "title": "Streamlang to ES|QL - Append Processor should append duplicate values when allow_duplicates is true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/append.spec.ts",
-        "line": 75,
-        "column": 10
+        "line": 78,
+        "column": 12
       }
     },
     {
@@ -1425,13 +1807,15 @@
       "title": "Streamlang to ES|QL - Append Processor should not append a value when where is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/append.spec.ts",
-        "line": 97,
-        "column": 10
+        "line": 100,
+        "column": 12
       }
     },
     {
@@ -1439,13 +1823,15 @@
       "title": "Streamlang to ES|QL - Append Processor results in a scalar (single value) when dedupe outputs a single value",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/append.spec.ts",
-        "line": 126,
-        "column": 10
+        "line": 129,
+        "column": 12
       }
     },
     {
@@ -1453,13 +1839,15 @@
       "title": "Streamlang to ES|QL - Append Processor should support nested where with not",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/append.spec.ts",
-        "line": 150,
-        "column": 10
+        "line": 153,
+        "column": 12
       }
     },
     {
@@ -1467,13 +1855,15 @@
       "title": "Streamlang to ES|QL - Append Processor should reject Mustache template syntax {{ and {{{",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/append.spec.ts",
-        "line": 182,
-        "column": 10
+        "line": 185,
+        "column": 12
       }
     },
     {
@@ -1481,13 +1871,15 @@
       "title": "Streamlang to ES|QL - Convert Processor should convert a field to a different type",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/convert.spec.ts",
-        "line": 14,
-        "column": 10
+        "line": 17,
+        "column": 12
       }
     },
     {
@@ -1495,13 +1887,15 @@
       "title": "Streamlang to ES|QL - Convert Processor should reject Mustache template syntax {{ and {{{",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/convert.spec.ts",
-        "line": 41,
-        "column": 10
+        "line": 44,
+        "column": 12
       }
     },
     {
@@ -1509,13 +1903,15 @@
       "title": "Streamlang to ES|QL - Convert Processor should convert a field to a different type into a the target field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/convert.spec.ts",
-        "line": 59,
-        "column": 10
+        "line": 62,
+        "column": 12
       }
     },
     {
@@ -1523,13 +1919,15 @@
       "title": "Streamlang to ES|QL - Convert Processor should throw error if to and where are present but from is the same as to",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/convert.spec.ts",
-        "line": 90,
-        "column": 10
+        "line": 93,
+        "column": 12
       }
     },
     {
@@ -1538,8 +1936,10 @@
       "expectedStatus": "passed",
       "tags": [
         "@timestamp",
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/date.spec.ts",
@@ -1552,7 +1952,8 @@
       "title": "Streamlang to ES|QL - Date Processor should parse a date with multiple formats",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/date.spec.ts",
@@ -1565,8 +1966,10 @@
       "title": "Streamlang to ES|QL - Date Processor should use a different to field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/date.spec.ts",
@@ -1579,8 +1982,10 @@
       "title": "Streamlang to ES|QL - Date Processor should use a different output format",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/date.spec.ts",
@@ -1593,8 +1998,10 @@
       "title": "Streamlang to ES|QL - Date Processor should not parse a date when where is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/date.spec.ts",
@@ -1607,8 +2014,10 @@
       "title": "Streamlang to ES|QL - Date Processor should leave source unchanged in case of error",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/date.spec.ts",
@@ -1621,8 +2030,10 @@
       "title": "Streamlang to ES|QL - Date Processor should reject Mustache template syntax {{ and {{{",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/date.spec.ts",
@@ -1635,8 +2046,10 @@
       "title": "Streamlang to ES|QL - Dissect Processor should correctly parse a log line with the dissect processor",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/dissect.spec.ts",
@@ -1649,8 +2062,10 @@
       "title": "Streamlang to ES|QL - Dissect Processor should ignore dissected fields when ignore_missing is true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/dissect.spec.ts",
@@ -1663,8 +2078,10 @@
       "title": "Streamlang to ES|QL - Dissect Processor should filter the document out when ignore_missing is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/dissect.spec.ts",
@@ -1677,8 +2094,10 @@
       "title": "Streamlang to ES|QL - Dissect Processor should use append_separator",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/dissect.spec.ts",
@@ -1691,8 +2110,10 @@
       "title": "Streamlang to ES|QL - Dissect Processor should not dissect when where is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/dissect.spec.ts",
@@ -1705,8 +2126,10 @@
       "title": "Streamlang to ES|QL - Dissect Processor should handle field type mismatches gracefully",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/dissect.spec.ts",
@@ -1719,7 +2142,8 @@
       "title": "Streamlang to ES|QL - Dissect Processor should dissect only when both ignore_missing and where conditions match",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/dissect.spec.ts",
@@ -1732,8 +2156,10 @@
       "title": "Streamlang to ES|QL - Dissect Processor should handle an exhaustive dissect pattern with modifiers and mixed documents",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/dissect.spec.ts",
@@ -1746,8 +2172,10 @@
       "title": "Streamlang to ES|QL - Dissect Processor should not be able to retain ingested precision if field is mapped as long",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/dissect.spec.ts",
@@ -1760,8 +2188,10 @@
       "title": "Streamlang to ES|QL - Dissect Processor should reject Mustache template syntax {{ and {{{",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/dissect.spec.ts",
@@ -1774,8 +2204,10 @@
       "title": "Streamlang to ES|QL - Drop Document Processor should drop a document matching where condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/drop_document.spec.ts",
@@ -1788,8 +2220,10 @@
       "title": "Streamlang to ES|QL - Grok Processor should correctly parse a log line with the grok processor",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
@@ -1802,8 +2236,10 @@
       "title": "Streamlang to ES|QL - Grok Processor should creates a multi-valued column if filed is repeated in a pattern",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
@@ -1816,8 +2252,10 @@
       "title": "Streamlang to ES|QL - Grok Processor should produce a column when grok pattern does not match",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
@@ -1830,8 +2268,10 @@
       "title": "Streamlang to ES|QL - Grok Processor should grok an alias-only pattern",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
@@ -1844,8 +2284,10 @@
       "title": "Streamlang to ES|QL - Grok Processor should ignore missing field when ignore_missing is true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
@@ -1858,8 +2300,10 @@
       "title": "Streamlang to ES|QL - Grok Processor should fail if field is missing and ignore_missing is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
@@ -1872,8 +2316,10 @@
       "title": "Streamlang to ES|QL - Grok Processor should not grok when where is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
@@ -1886,8 +2332,10 @@
       "title": "Streamlang to ES|QL - Grok Processor should handle field type mismatches gracefully (pre-existing numeric vs GROK string output)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
@@ -1900,8 +2348,10 @@
       "title": "Streamlang to ES|QL - Grok Processor should grok only when both ignore_missing and where conditions match (fork logic)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
@@ -1914,7 +2364,8 @@
       "title": "Streamlang to ES|QL - Grok Processor should handle exhaustive pattern with mixed overrides, intact values, typed fields, and skip branches without type conflicts",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
@@ -1927,8 +2378,10 @@
       "title": "Streamlang to ES|QL - Grok Processor should not be able to retain ingested precision if field is mapped as long",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
@@ -1941,8 +2394,10 @@
       "title": "Streamlang to ES|QL - Grok Processor should reject Mustache template syntax {{ and {{{",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
@@ -1955,8 +2410,10 @@
       "title": "Streamlang to ES|QL - Grok Processor should parse Android log line with regex pattern containing escaped dot",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
@@ -1969,8 +2426,10 @@
       "title": "Streamlang to ES|QL - Manual Ingest Pipeline Processor (Not Supported) should handle manual_ingest_pipeline by showing warning message",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/manual_ingest_pipeline.spec.ts",
@@ -1983,8 +2442,10 @@
       "title": "Streamlang to ES|QL - Manual Ingest Pipeline Processor (Not Supported) should handle manual_ingest_pipeline with where condition (condition ignored)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/manual_ingest_pipeline.spec.ts",
@@ -1997,8 +2458,10 @@
       "title": "Streamlang to ES|QL - Manual Ingest Pipeline Processor (Not Supported) should generate valid ES|QL when mixed with supported processors",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/manual_ingest_pipeline.spec.ts",
@@ -2007,12 +2470,222 @@
       }
     },
     {
+      "id": "f7b6fcfc5da7342-447c259c3944356",
+      "title": "Streamlang to ES|QL - Math Processor should compute multiplication of fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 18,
+        "column": 12
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-4f3aed0cfc82a69",
+      "title": "Streamlang to ES|QL - Math Processor should compute addition of fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 44,
+        "column": 12
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-4562bde17c41331",
+      "title": "Streamlang to ES|QL - Math Processor should compute subtraction of fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 70,
+        "column": 12
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-ed29ca177a120f0",
+      "title": "Streamlang to ES|QL - Math Processor should compute division of fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 96,
+        "column": 12
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-1c2e74ab0ad27ae",
+      "title": "Streamlang to ES|QL - Math Processor should compute with nested field paths",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 123,
+        "column": 12
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-0393a6fee979d37",
+      "title": "Streamlang to ES|QL - Math Processor should compute log (natural log)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 150,
+        "column": 12
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-44d16920d63d200",
+      "title": "Streamlang to ES|QL - Math Processor should compute neq (not equal) comparison",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 176,
+        "column": 12
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-004b9ad17239967",
+      "title": "Streamlang to ES|QL - Math Processor should compute gt (greater than) comparison",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 210,
+        "column": 12
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-0d9fdf062c24a3a",
+      "title": "Streamlang to ES|QL - Math Processor should compute lt (less than) comparison",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 240,
+        "column": 12
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-168e7718e21ae74",
+      "title": "Streamlang to ES|QL - Math Processor should compute eq (equality) comparison",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 270,
+        "column": 12
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-bdfedd9a18e6f20",
+      "title": "Streamlang to ES|QL - Math Processor should only apply math when where condition is met",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 301,
+        "column": 12
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-3d15672dff64a9d",
+      "title": "Streamlang to ES|QL - Math Processor should skip calculation when ignore_missing is true and field is null",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 344,
+        "column": 12
+      }
+    },
+    {
+      "id": "f7b6fcfc5da7342-4a23853681940f8",
+      "title": "Streamlang to ES|QL - Math Processor should throw errors for unsupported functions and invalid syntax",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/math.spec.ts",
+        "line": 387,
+        "column": 12
+      }
+    },
+    {
       "id": "7e7f95f940131ba-a4103e9784a7b80",
       "title": "Streamlang to ES|QL - RemoveByPrefix Processor should keep the parent field when it has no nested fields",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/remove_by_prefix.spec.ts",
@@ -2025,8 +2698,10 @@
       "title": "Streamlang to ES|QL - RemoveByPrefix Processor should remove nested fields (parent field removed too)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/remove_by_prefix.spec.ts",
@@ -2039,8 +2714,10 @@
       "title": "Streamlang to ES|QL - RemoveByPrefix Processor should work with dotted field names (flattened structure)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/remove_by_prefix.spec.ts",
@@ -2053,8 +2730,10 @@
       "title": "Streamlang to ES|QL - RemoveByPrefix Processor should reject Mustache template syntax {{ and {{{ in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/remove_by_prefix.spec.ts",
@@ -2067,13 +2746,15 @@
       "title": "Streamlang to ES|QL - Remove Processor should remove a field with DROP",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/remove.spec.ts",
-        "line": 14,
-        "column": 10
+        "line": 17,
+        "column": 12
       }
     },
     {
@@ -2081,13 +2762,15 @@
       "title": "Streamlang to ES|QL - Remove Processor should handle ignore_missing: false (default) with DROP",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/remove.spec.ts",
-        "line": 39,
-        "column": 10
+        "line": 42,
+        "column": 12
       }
     },
     {
@@ -2095,13 +2778,15 @@
       "title": "Streamlang to ES|QL - Remove Processor should handle ignore_missing: true with DROP",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/remove.spec.ts",
-        "line": 65,
-        "column": 10
+        "line": 71,
+        "column": 12
       }
     },
     {
@@ -2109,13 +2794,15 @@
       "title": "Streamlang to ES|QL - Remove Processor should remove field conditionally with EVAL CASE",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/remove.spec.ts",
-        "line": 94,
-        "column": 10
+        "line": 100,
+        "column": 12
       }
     },
     {
@@ -2123,13 +2810,15 @@
       "title": "Streamlang to ES|QL - Remove Processor should reject Mustache template syntax {{ and {{{ in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/remove.spec.ts",
-        "line": 133,
-        "column": 10
+        "line": 139,
+        "column": 12
       }
     },
     {
@@ -2137,13 +2826,15 @@
       "title": "Streamlang to ES|QL - Rename Processor should rename a field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/rename.spec.ts",
-        "line": 14,
-        "column": 10
+        "line": 17,
+        "column": 12
       }
     },
     {
@@ -2151,13 +2842,15 @@
       "title": "Streamlang to ES|QL - Rename Processor should handle ignore_missing: false, override: false (default options)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/rename.spec.ts",
-        "line": 40,
-        "column": 10
+        "line": 43,
+        "column": 12
       }
     },
     {
@@ -2165,13 +2858,15 @@
       "title": "Streamlang to ES|QL - Rename Processor should handle ignore_missing: true, override: false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/rename.spec.ts",
-        "line": 73,
-        "column": 10
+        "line": 76,
+        "column": 12
       }
     },
     {
@@ -2179,13 +2874,15 @@
       "title": "Streamlang to ES|QL - Rename Processor should handle ignore_missing: false, override: true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/rename.spec.ts",
-        "line": 104,
-        "column": 10
+        "line": 112,
+        "column": 12
       }
     },
     {
@@ -2193,13 +2890,15 @@
       "title": "Streamlang to ES|QL - Rename Processor should reject Mustache template syntax {{ and {{{ in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/rename.spec.ts",
-        "line": 134,
-        "column": 10
+        "line": 147,
+        "column": 12
       }
     },
     {
@@ -2207,13 +2906,15 @@
       "title": "Streamlang to ES|QL - Replace Processor should replace a literal string with EVAL replace() (in-place)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/replace.spec.ts",
-        "line": 14,
-        "column": 10
+        "line": 17,
+        "column": 12
       }
     },
     {
@@ -2221,13 +2922,15 @@
       "title": "Streamlang to ES|QL - Replace Processor should replace a literal string to target field with EVAL replace()",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/replace.spec.ts",
-        "line": 41,
-        "column": 10
+        "line": 44,
+        "column": 12
       }
     },
     {
@@ -2235,13 +2938,15 @@
       "title": "Streamlang to ES|QL - Replace Processor should replace using regex pattern",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/replace.spec.ts",
-        "line": 70,
-        "column": 10
+        "line": 73,
+        "column": 12
       }
     },
     {
@@ -2249,13 +2954,15 @@
       "title": "Streamlang to ES|QL - Replace Processor should replace literal dot with escaped dot pattern",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/replace.spec.ts",
-        "line": 94,
-        "column": 10
+        "line": 97,
+        "column": 12
       }
     },
     {
@@ -2263,13 +2970,15 @@
       "title": "Streamlang to ES|QL - Replace Processor should replace using regex with capture groups",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/replace.spec.ts",
-        "line": 118,
-        "column": 10
+        "line": 121,
+        "column": 12
       }
     },
     {
@@ -2277,13 +2986,15 @@
       "title": "Streamlang to ES|QL - Replace Processor should handle ignore_missing: false (default) with WHERE filter",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/replace.spec.ts",
-        "line": 142,
-        "column": 10
+        "line": 145,
+        "column": 12
       }
     },
     {
@@ -2291,13 +3002,15 @@
       "title": "Streamlang to ES|QL - Replace Processor should handle ignore_missing: true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/replace.spec.ts",
-        "line": 173,
-        "column": 10
+        "line": 176,
+        "column": 12
       }
     },
     {
@@ -2305,13 +3018,15 @@
       "title": "Streamlang to ES|QL - Replace Processor should replace field conditionally with EVAL CASE",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/replace.spec.ts",
-        "line": 204,
-        "column": 10
+        "line": 207,
+        "column": 12
       }
     },
     {
@@ -2319,13 +3034,15 @@
       "title": "Streamlang to ES|QL - Replace Processor should replace to target field conditionally with EVAL CASE",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/replace.spec.ts",
-        "line": 244,
-        "column": 10
+        "line": 247,
+        "column": 12
       }
     },
     {
@@ -2333,13 +3050,15 @@
       "title": "Streamlang to ES|QL - Replace Processor should reject Mustache template syntax {{ and {{{ in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/replace.spec.ts",
-        "line": 300,
-        "column": 10
+        "line": 303,
+        "column": 12
       }
     },
     {
@@ -2347,13 +3066,15 @@
       "title": "Streamlang to ES|QL - Set Processor should set a field using a value",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/set.spec.ts",
-        "line": 14,
-        "column": 10
+        "line": 17,
+        "column": 12
       }
     },
     {
@@ -2361,13 +3082,15 @@
       "title": "Streamlang to ES|QL - Set Processor should reject Mustache template syntax {{ and {{{",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/set.spec.ts",
-        "line": 41,
-        "column": 10
+        "line": 44,
+        "column": 12
       }
     },
     {
@@ -2375,13 +3098,15 @@
       "title": "Streamlang to ES|QL - Set Processor should not set a field when where is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/set.spec.ts",
-        "line": 58,
-        "column": 10
+        "line": 61,
+        "column": 12
       }
     },
     {
@@ -2389,13 +3114,15 @@
       "title": "Streamlang to ES|QL - Set Processor should set a field by copying from another field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/set.spec.ts",
-        "line": 107,
-        "column": 10
+        "line": 110,
+        "column": 12
       }
     },
     {
@@ -2403,13 +3130,15 @@
       "title": "Streamlang to ES|QL - Set Processor should not override an existing field when override is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/set.spec.ts",
-        "line": 132,
-        "column": 10
+        "line": 135,
+        "column": 12
       }
     },
     {
@@ -2417,13 +3146,15 @@
       "title": "Streamlang to ES|QL - Set Processor should override an existing field when override is true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/set.spec.ts",
-        "line": 168,
-        "column": 10
+        "line": 171,
+        "column": 12
       }
     },
     {
@@ -2431,13 +3162,15 @@
       "title": "Streamlang to ES|QL - Set Processor should throw error if value and copy_from are missing",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/set.spec.ts",
-        "line": 193,
-        "column": 10
+        "line": 199,
+        "column": 12
       }
     },
     {
@@ -2445,13 +3178,15 @@
       "title": "Streamlang to ES|QL - Set Processor should throw error if value and copy_from are both present",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/set.spec.ts",
-        "line": 218,
-        "column": 10
+        "line": 224,
+        "column": 12
       }
     },
     {
@@ -2459,8 +3194,10 @@
       "title": "Streamlang to Ingest Pipeline - Append Processor should append values to a field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/append.spec.ts",
@@ -2473,8 +3210,10 @@
       "title": "Streamlang to Ingest Pipeline - Append Processor should append values to a non-existent field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/append.spec.ts",
@@ -2487,8 +3226,10 @@
       "title": "Streamlang to Ingest Pipeline - Append Processor should not append duplicate values when allow_duplicates is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/append.spec.ts",
@@ -2501,8 +3242,10 @@
       "title": "Streamlang to Ingest Pipeline - Append Processor should append duplicate values when allow_duplicates is true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/append.spec.ts",
@@ -2515,8 +3258,10 @@
       "title": "Streamlang to Ingest Pipeline - Append Processor should reject {{ }} template syntax",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/append.spec.ts",
@@ -2529,8 +3274,10 @@
       "title": "Streamlang to Ingest Pipeline - Append Processor should reject {{{ }}} template syntax",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/append.spec.ts",
@@ -2543,8 +3290,10 @@
       "title": "Streamlang to Ingest Pipeline - Convert Processor should convert a field to a different type",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/convert.spec.ts",
@@ -2557,8 +3306,10 @@
       "title": "Streamlang to Ingest Pipeline - Convert Processor should reject {{ }} template syntax",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/convert.spec.ts",
@@ -2571,8 +3322,10 @@
       "title": "Streamlang to Ingest Pipeline - Convert Processor should reject {{ }} template syntax in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/convert.spec.ts",
@@ -2585,8 +3338,10 @@
       "title": "Streamlang to Ingest Pipeline - Convert Processor should reject {{ }} template syntax in values",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/convert.spec.ts",
@@ -2599,8 +3354,10 @@
       "title": "Streamlang to Ingest Pipeline - Convert Processor should reject {{{ }}} template syntax",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/convert.spec.ts",
@@ -2613,8 +3370,10 @@
       "title": "Streamlang to Ingest Pipeline - Convert Processor should convert a field to a different type into a the target field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/convert.spec.ts",
@@ -2627,8 +3386,10 @@
       "title": "Streamlang to Ingest Pipeline - Convert Processor should convert a field to a different type into a the target field with a where condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/convert.spec.ts",
@@ -2642,8 +3403,10 @@
       "expectedStatus": "passed",
       "tags": [
         "@timestamp",
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
@@ -2656,8 +3419,10 @@
       "title": "Streamlang to Ingest Pipeline - Date Processor should override the field if from and to are same",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
@@ -2670,8 +3435,10 @@
       "title": "Streamlang to Ingest Pipeline - Date Processor should parse a date with a specific format",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
@@ -2684,7 +3451,8 @@
       "title": "Streamlang to Ingest Pipeline - Date Processor should handle multiple formats",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
@@ -2697,8 +3465,10 @@
       "title": "Streamlang to Ingest Pipeline - Date Processor should parse a date with a specific output format",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
@@ -2711,8 +3481,10 @@
       "title": "Streamlang to Ingest Pipeline - Date Processor should fail when date format is incorrect",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
@@ -2725,8 +3497,10 @@
       "title": "Streamlang to Ingest Pipeline - Date Processor should reject {{ }} template syntax in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
@@ -2739,8 +3513,10 @@
       "title": "Streamlang to Ingest Pipeline - Date Processor should reject {{{ }}} template syntax in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
@@ -2753,12 +3529,14 @@
       "title": "Streamlang to Ingest Pipeline - Date Processor should parse a date with a specific locale and timezone",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
-        "line": 211,
+        "line": 215,
         "column": 10
       }
     },
@@ -2767,12 +3545,14 @@
       "title": "Streamlang to Ingest Pipeline - Date Processor should fail when locale is not valid",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
-        "line": 242,
+        "line": 246,
         "column": 10
       }
     },
@@ -2781,12 +3561,14 @@
       "title": "Streamlang to Ingest Pipeline - Date Processor should fail when timezone is not valid",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
-        "line": 272,
+        "line": 276,
         "column": 10
       }
     },
@@ -2795,8 +3577,10 @@
       "title": "Streamlang to Ingest Pipeline - Dissect Processor should correctly parse a log line with the dissect processor",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/dissect.spec.ts",
@@ -2809,8 +3593,10 @@
       "title": "Streamlang to Ingest Pipeline - Dissect Processor should ignore missing field when ignore_missing is true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/dissect.spec.ts",
@@ -2823,8 +3609,10 @@
       "title": "Streamlang to Ingest Pipeline - Dissect Processor should fail if field is missing and ignore_missing is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/dissect.spec.ts",
@@ -2837,8 +3625,10 @@
       "title": "Streamlang to Ingest Pipeline - Dissect Processor should use append_separator",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/dissect.spec.ts",
@@ -2851,8 +3641,10 @@
       "title": "Streamlang to Ingest Pipeline - Dissect Processor should reject {{ }} template syntax in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/dissect.spec.ts",
@@ -2865,8 +3657,10 @@
       "title": "Streamlang to Ingest Pipeline - Dissect Processor should reject {{{ }}} template syntax in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/dissect.spec.ts",
@@ -2879,8 +3673,10 @@
       "title": "Streamlang to Ingest Pipeline - Drop Document Processor should drop a document matching where condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/drop_document.spec.ts",
@@ -2893,8 +3689,10 @@
       "title": "Streamlang to Ingest Pipeline - Grok Processor should correctly parse a log line with the grok processor",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/grok.spec.ts",
@@ -2907,8 +3705,10 @@
       "title": "Streamlang to Ingest Pipeline - Grok Processor should ignore missing field when ignore_missing is true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/grok.spec.ts",
@@ -2921,8 +3721,10 @@
       "title": "Streamlang to Ingest Pipeline - Grok Processor should fail if field is missing and ignore_missing is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/grok.spec.ts",
@@ -2935,8 +3737,10 @@
       "title": "Streamlang to Ingest Pipeline - Grok Processor should fail when grok pattern does not match",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/grok.spec.ts",
@@ -2949,8 +3753,10 @@
       "title": "Streamlang to Ingest Pipeline - Grok Processor should reject {{ }} template syntax in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/grok.spec.ts",
@@ -2963,8 +3769,10 @@
       "title": "Streamlang to Ingest Pipeline - Grok Processor should reject {{{ }}} template syntax in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/grok.spec.ts",
@@ -2977,8 +3785,10 @@
       "title": "Streamlang to Ingest Pipeline - Manual Ingest Pipeline Processor should process basic manual ingest pipeline with set processor",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/manual_ingest_pipeline.spec.ts",
@@ -2991,8 +3801,10 @@
       "title": "Streamlang to Ingest Pipeline - Manual Ingest Pipeline Processor should process manual ingest pipeline with multiple processors",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/manual_ingest_pipeline.spec.ts",
@@ -3005,8 +3817,10 @@
       "title": "Streamlang to Ingest Pipeline - Manual Ingest Pipeline Processor should process manual ingest pipeline with conditional where clause",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/manual_ingest_pipeline.spec.ts",
@@ -3019,8 +3833,10 @@
       "title": "Streamlang to Ingest Pipeline - Manual Ingest Pipeline Processor should handle manual ingest pipeline with tag",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/manual_ingest_pipeline.spec.ts",
@@ -3033,8 +3849,10 @@
       "title": "Streamlang to Ingest Pipeline - Manual Ingest Pipeline Processor should handle complex manual ingest pipeline with grok processor",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/manual_ingest_pipeline.spec.ts",
@@ -3043,12 +3861,222 @@
       }
     },
     {
+      "id": "75e9e3eed72da39-4cefd9fbeb1a516",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should compute multiplication of fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 18,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-c1ecdcf0918f311",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should compute addition of fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 40,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-286d4f1ebec108e",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should compute subtraction of fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 62,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-df5c2f33a314bd4",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should compute division of fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 84,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-7495f9eb603c2eb",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should compute with nested field paths",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 107,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-2417ed2dac28904",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should compute log (natural log)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 131,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-6b3f0eb07e9a700",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should compute neq (not equal) comparison",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 156,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-7075d986a9e0924",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should compute gt (greater than) comparison",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 182,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-69b389df6fe393e",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should compute lt (less than) comparison",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 208,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-5fd02b27fcc4260",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should compute eq (equality) comparison",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 234,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-7744cd79ca67e8a",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should only apply math when where condition is met",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 261,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-2367302632b0cc8",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should skip calculation when ignore_missing is true and field is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 294,
+        "column": 12
+      }
+    },
+    {
+      "id": "75e9e3eed72da39-cf4970532085ddc",
+      "title": "Streamlang to Ingest Pipeline - Math Processor should report errors for unsupported functions via simulation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
+        "line": 329,
+        "column": 12
+      }
+    },
+    {
       "id": "2dc8292cad1f6c3-f8f60a0c0f584e3",
       "title": "Streamlang to Ingest Pipeline - RemoveByPrefix Processor should remove a field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
@@ -3061,8 +4089,10 @@
       "title": "Streamlang to Ingest Pipeline - RemoveByPrefix Processor should remove a field and all nested fields (subobjects)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
@@ -3075,8 +4105,10 @@
       "title": "Streamlang to Ingest Pipeline - RemoveByPrefix Processor should remove flattened fields with prefix",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
@@ -3089,8 +4121,10 @@
       "title": "Streamlang to Ingest Pipeline - RemoveByPrefix Processor should remove the parent field itself when using dotted notation",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
@@ -3103,8 +4137,10 @@
       "title": "Streamlang to Ingest Pipeline - RemoveByPrefix Processor should remove the parent field itself when using subobjects",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
@@ -3117,8 +4153,10 @@
       "title": "Streamlang to Ingest Pipeline - RemoveByPrefix Processor should remove flattened fields within a nested subobject",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
@@ -3131,8 +4169,10 @@
       "title": "Streamlang to Ingest Pipeline - RemoveByPrefix Processor should remove flattened fields within a deeply nested subobject",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
@@ -3145,8 +4185,10 @@
       "title": "Streamlang to Ingest Pipeline - RemoveByPrefix Processor should reject {{ }} template syntax in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
@@ -3159,8 +4201,10 @@
       "title": "Streamlang to Ingest Pipeline - RemoveByPrefix Processor should reject {{{ }}} template syntax in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
@@ -3173,8 +4217,10 @@
       "title": "Streamlang to Ingest Pipeline - Remove Processor should remove a field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove.spec.ts",
@@ -3187,8 +4233,10 @@
       "title": "Streamlang to Ingest Pipeline - Remove Processor should ignore missing field when ignore_missing is true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove.spec.ts",
@@ -3201,8 +4249,10 @@
       "title": "Streamlang to Ingest Pipeline - Remove Processor should fail if field is missing and ignore_missing is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove.spec.ts",
@@ -3215,8 +4265,10 @@
       "title": "Streamlang to Ingest Pipeline - Remove Processor should remove field conditionally with where condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove.spec.ts",
@@ -3229,8 +4281,10 @@
       "title": "Streamlang to Ingest Pipeline - Remove Processor default value of ignore_missing (false)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove.spec.ts",
@@ -3243,8 +4297,10 @@
       "title": "Streamlang to Ingest Pipeline - Remove Processor should reject {{ }} template syntax in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove.spec.ts",
@@ -3257,8 +4313,10 @@
       "title": "Streamlang to Ingest Pipeline - Remove Processor should reject {{{ }}} template syntax in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove.spec.ts",
@@ -3271,8 +4329,10 @@
       "title": "Streamlang to Ingest Pipeline - Rename Processor should rename a field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
@@ -3285,8 +4345,10 @@
       "title": "Streamlang to Ingest Pipeline - Rename Processor should reject {{ }} template syntax in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
@@ -3299,8 +4361,10 @@
       "title": "Streamlang to Ingest Pipeline - Rename Processor should reject {{{ }}} template syntax in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
@@ -3313,8 +4377,10 @@
       "title": "Streamlang to Ingest Pipeline - Rename Processor should ignore missing field when ignore_missing is true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
@@ -3327,8 +4393,10 @@
       "title": "Streamlang to Ingest Pipeline - Rename Processor should fail if field is missing and ignore_missing is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
@@ -3341,8 +4409,10 @@
       "title": "Streamlang to Ingest Pipeline - Rename Processor should override existing field when override is true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
@@ -3355,8 +4425,10 @@
       "title": "Streamlang to Ingest Pipeline - Rename Processor should fail if target field exists and override is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
@@ -3369,8 +4441,10 @@
       "title": "Streamlang to Ingest Pipeline - Rename Processor default values of ignore_missing and override (ignore_missing: false, override: false)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
@@ -3383,8 +4457,10 @@
       "title": "Streamlang to Ingest Pipeline - Replace Processor should replace a literal string (in-place)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
@@ -3397,8 +4473,10 @@
       "title": "Streamlang to Ingest Pipeline - Replace Processor should replace a literal string to target field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
@@ -3411,8 +4489,10 @@
       "title": "Streamlang to Ingest Pipeline - Replace Processor should replace using regex pattern",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
@@ -3425,8 +4505,10 @@
       "title": "Streamlang to Ingest Pipeline - Replace Processor should replace using regex with capture groups",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
@@ -3439,8 +4521,10 @@
       "title": "Streamlang to Ingest Pipeline - Replace Processor should fail if field is missing (default value) and ignore_missing is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
@@ -3453,8 +4537,10 @@
       "title": "Streamlang to Ingest Pipeline - Replace Processor should ignore missing field when ignore_missing is true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
@@ -3467,8 +4553,10 @@
       "title": "Streamlang to Ingest Pipeline - Replace Processor should replace field conditionally with where condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
@@ -3481,8 +4569,10 @@
       "title": "Streamlang to Ingest Pipeline - Replace Processor should replace to target field conditionally with where condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
@@ -3495,8 +4585,10 @@
       "title": "Streamlang to Ingest Pipeline - Replace Processor should reject {{ }} template syntax in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
@@ -3509,8 +4601,10 @@
       "title": "Streamlang to Ingest Pipeline - Replace Processor should reject {{{ }}} template syntax in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
@@ -3523,8 +4617,10 @@
       "title": "Streamlang to Ingest Pipeline - Set Processor should set a field using a value",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
@@ -3537,8 +4633,10 @@
       "title": "Streamlang to Ingest Pipeline - Set Processor should reject {{ }} template syntax",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
@@ -3551,8 +4649,10 @@
       "title": "Streamlang to Ingest Pipeline - Set Processor should reject {{ }} template syntax in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
@@ -3565,8 +4665,10 @@
       "title": "Streamlang to Ingest Pipeline - Set Processor should reject {{ }} template syntax in values",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
@@ -3579,8 +4681,10 @@
       "title": "Streamlang to Ingest Pipeline - Set Processor should reject {{{ }}} template syntax",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
@@ -3593,8 +4697,10 @@
       "title": "Streamlang to Ingest Pipeline - Set Processor should set a field by copying from another field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
@@ -3607,8 +4713,10 @@
       "title": "Streamlang to Ingest Pipeline - Set Processor should not override an existing field when override is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
@@ -3621,8 +4729,10 @@
       "title": "Streamlang to Ingest Pipeline - Set Processor should override an existing field when override is true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
@@ -3635,8 +4745,10 @@
       "title": "Streamlang to Ingest Pipeline - Set Processor should throw error if value and copy_from are missing",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
@@ -3649,8 +4761,10 @@
       "title": "Streamlang to Ingest Pipeline - Set Processor should throw error if value and copy_from are both present",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",

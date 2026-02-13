@@ -6,82 +6,90 @@
  */
 
 import { expect } from '@kbn/scout-oblt/ui';
+import { tags } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 
 const SERVICE_NAME = 'opbeans-java';
 
-test.describe('Dependency Overview Tab', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsViewer();
-  });
-
-  test("Is the default tab when navigating to a dependency's details page", async ({
-    page,
-    pageObjects: { dependencyDetailsPage },
-  }) => {
-    await test.step('Land on dependency details page', async () => {
-      await dependencyDetailsPage.goToPage();
+test.describe(
+  'Dependency Overview Tab',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginAsViewer();
     });
 
-    await test.step('Verify overview tab is selected', async () => {
-      await expect(dependencyDetailsPage.getOverviewTab()).toBeVisible();
-      await expect(dependencyDetailsPage.getOverviewTab()).toHaveAttribute('aria-selected', 'true');
+    test("Is the default tab when navigating to a dependency's details page", async ({
+      page,
+      pageObjects: { dependencyDetailsPage },
+    }) => {
+      await test.step('land on dependency details page', async () => {
+        await dependencyDetailsPage.goToPage();
+      });
 
-      const url = new URL(page.url());
-      expect(url.pathname).toContain(`/dependencies/overview`);
-    });
-  });
+      await test.step('verify overview tab is selected', async () => {
+        await expect(dependencyDetailsPage.overviewTab.tab).toBeVisible();
+        await expect(dependencyDetailsPage.overviewTab.tab).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
 
-  test('Renders expected content', async ({ pageObjects: { dependencyDetailsPage } }) => {
-    await test.step('Land on overview tab', async () => {
-      await dependencyDetailsPage.goToOverviewTab();
-    });
-
-    await test.step('Renders overview content', async () => {
-      await expect(dependencyDetailsPage.latencyChart).toBeVisible();
-      await expect(dependencyDetailsPage.throughputChart).toBeVisible();
-      await expect(dependencyDetailsPage.failedTransactionRateChart).toBeVisible();
-      await expect(dependencyDetailsPage.upstreamServicesTable).toBeVisible();
-      await expect(
-        dependencyDetailsPage.upstreamServicesTable.getByRole('heading', {
-          name: 'Upstream services',
-        })
-      ).toBeVisible();
-      await expect(
-        dependencyDetailsPage.getServiceInUpstreamServicesTable(SERVICE_NAME)
-      ).toBeVisible();
-    });
-  });
-
-  test('Links to service overview when clicking on a service in upstream services table', async ({
-    page,
-    pageObjects: { dependencyDetailsPage },
-  }) => {
-    await test.step('Land on overview tab', async () => {
-      await dependencyDetailsPage.goToOverviewTab();
+        const url = new URL(page.url());
+        expect(url.pathname).toContain(`/dependencies/overview`);
+      });
     });
 
-    await test.step('Click on a service in upstream services table', async () => {
-      await dependencyDetailsPage.clickServiceInUpstreamServicesTable(SERVICE_NAME);
+    test('Renders expected content', async ({ pageObjects: { dependencyDetailsPage } }) => {
+      await test.step('land on overview tab', async () => {
+        await dependencyDetailsPage.overviewTab.goToTab();
+      });
+
+      await test.step('renders overview content', async () => {
+        await expect(dependencyDetailsPage.overviewTab.latencyChart).toBeVisible();
+        await expect(dependencyDetailsPage.overviewTab.throughputChart).toBeVisible();
+        await expect(dependencyDetailsPage.overviewTab.failedTransactionRateChart).toBeVisible();
+        await expect(dependencyDetailsPage.overviewTab.upstreamServicesTable).toBeVisible();
+        await expect(
+          dependencyDetailsPage.overviewTab.upstreamServicesTable.getByRole('heading', {
+            name: 'Upstream services',
+          })
+        ).toBeVisible();
+        await expect(
+          dependencyDetailsPage.overviewTab.getServiceInUpstreamServicesTable(SERVICE_NAME)
+        ).toBeVisible();
+      });
     });
 
-    await test.step('Lands on the service overview page', async () => {
-      const url = new URL(page.url());
-      expect(url.pathname).toContain(`/services/${SERVICE_NAME}/overview`);
-    });
-  });
+    test('Links to service overview when clicking on a service in upstream services table', async ({
+      page,
+      pageObjects: { dependencyDetailsPage },
+    }) => {
+      await test.step('land on overview tab', async () => {
+        await dependencyDetailsPage.overviewTab.goToTab();
+      });
 
-  test('Has no detectable a11y violations on load', async ({
-    page,
-    pageObjects: { dependencyDetailsPage },
-  }) => {
-    await test.step('Land on dependencies tab', async () => {
-      await dependencyDetailsPage.goToOverviewTab();
+      await test.step('click on a service in upstream services table', async () => {
+        await dependencyDetailsPage.overviewTab.clickServiceInUpstreamServicesTable(SERVICE_NAME);
+      });
+
+      await test.step('lands on the service overview page', async () => {
+        const url = new URL(page.url());
+        expect(url.pathname).toContain(`/services/${SERVICE_NAME}/overview`);
+      });
     });
 
-    await test.step('Check a11y', async () => {
-      const { violations } = await page.checkA11y({ include: ['main'] });
-      expect(violations).toHaveLength(0);
+    test('Has no detectable a11y violations on load', async ({
+      page,
+      pageObjects: { dependencyDetailsPage },
+    }) => {
+      await test.step('land on dependencies tab', async () => {
+        await dependencyDetailsPage.overviewTab.goToTab();
+      });
+
+      await test.step('check a11y', async () => {
+        const { violations } = await page.checkA11y({ include: ['main'] });
+        expect(violations).toHaveLength(0);
+      });
     });
-  });
-});
+  }
+);

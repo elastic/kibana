@@ -9,7 +9,7 @@
 
 import { apiTest, expect, tags } from '../../../../../src/playwright';
 
-apiTest.describe(`SAML Auth fixture`, { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+apiTest.describe(`SAML Auth fixture`, { tag: tags.deploymentAgnostic }, () => {
   apiTest(`should create a session for 'admin' role`, async ({ samlAuth }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     expect(credentials.cookieValue).toBeDefined();

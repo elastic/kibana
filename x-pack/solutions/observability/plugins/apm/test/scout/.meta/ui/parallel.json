@@ -1,19 +1,419 @@
 {
-  "lastModified": "2025-12-11T13:02:25.994Z",
-  "sha1": "c37509b7c77fcf8e6690753c5954b1f5df51db15",
+  "lastModified": "2026-02-12T16:25:57.837Z",
+  "sha1": "b73bca51c1b9fb65f74863fd796703cc8c87c09f",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
       "title": "Ingest data to Elasticsearch",
       "expectedStatus": "passed",
       "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 16,
+        "column": 16
+      }
+    },
+    {
+      "id": "46d5bf3a83bad53-38155892fd0d2dd",
+      "title": "Service Dependencies Tab Renders expected content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependencies_inventory.spec.ts",
+        "line": 23,
+        "column": 9
+      }
+    },
+    {
+      "id": "46d5bf3a83bad53-2331752fe58ccdf",
+      "title": "Service Dependencies Tab Links to dependency overview when clicking on a dependency in dependencies table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependencies_inventory.spec.ts",
+        "line": 31,
+        "column": 9
+      }
+    },
+    {
+      "id": "46d5bf3a83bad53-687b33005f642a9",
+      "title": "Service Dependencies Tab Has no detectable a11y violations on load",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependencies_inventory.spec.ts",
+        "line": 42,
+        "column": 9
+      }
+    },
+    {
+      "id": "715f0d1ddbfcb97-85d448363fd9129",
+      "title": "Dependency Operation Detail Page Renders expected content",
+      "expectedStatus": "passed",
+      "tags": [
         "@ess",
         "@svlOblt"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 14,
-        "column": 16
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
+        "line": 17,
+        "column": 7
+      }
+    },
+    {
+      "id": "715f0d1ddbfcb97-f7b0d96dece645a",
+      "title": "Dependency Operation Detail Page Links back to dependency operations list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
+        "line": 34,
+        "column": 7
+      }
+    },
+    {
+      "id": "715f0d1ddbfcb97-06d232cd9fc2cc2",
+      "title": "Dependency Operation Detail Page Investigate trace popup opens when clicking 'Investigate trace' button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    },
+    {
+      "id": "715f0d1ddbfcb97-34dbdca01ee3f92",
+      "title": "Dependency Operation Detail Page Span link flyout opens when clicking 'Span links' button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
+        "line": 67,
+        "column": 7
+      }
+    },
+    {
+      "id": "715f0d1ddbfcb97-fe96886a2c0edec",
+      "title": "Dependency Operation Detail Page Has no detectable a11y violations on load",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
+        "line": 83,
+        "column": 7
+      }
+    },
+    {
+      "id": "75905db3a2fb127-fd427b8f21c8b2a",
+      "title": "Dependency Operations Tab Is accessible from the default tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operations.spec.ts",
+        "line": 18,
+        "column": 7
+      }
+    },
+    {
+      "id": "75905db3a2fb127-9b8afb3ac2292a8",
+      "title": "Dependency Operations Tab Renders expected content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operations.spec.ts",
+        "line": 40,
+        "column": 7
+      }
+    },
+    {
+      "id": "75905db3a2fb127-c622def3e60d938",
+      "title": "Dependency Operations Tab Links to dependency operation detail when clicking on an operation in operations table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operations.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    },
+    {
+      "id": "75905db3a2fb127-1b95674ff2d0e64",
+      "title": "Dependency Operations Tab Has no a11y violations on load",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operations.spec.ts",
+        "line": 72,
+        "column": 7
+      }
+    },
+    {
+      "id": "62b2db8d856f987-971a688a3ab1268",
+      "title": "Dependency Overview Tab Is the default tab when navigating to a dependency's details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_overview.spec.ts",
+        "line": 22,
+        "column": 9
+      }
+    },
+    {
+      "id": "62b2db8d856f987-e756ae6bd9bdfe8",
+      "title": "Dependency Overview Tab Renders expected content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_overview.spec.ts",
+        "line": 42,
+        "column": 9
+      }
+    },
+    {
+      "id": "62b2db8d856f987-cd07a9c0a873dbe",
+      "title": "Dependency Overview Tab Links to service overview when clicking on a service in upstream services table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_overview.spec.ts",
+        "line": 63,
+        "column": 9
+      }
+    },
+    {
+      "id": "62b2db8d856f987-5b70f29e776bf09",
+      "title": "Dependency Overview Tab Has no detectable a11y violations on load",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_overview.spec.ts",
+        "line": 81,
+        "column": 9
+      }
+    },
+    {
+      "id": "6aea55e0d666272-0a78a9a7b06133d",
+      "title": "Service Dependencies Tab Is accessible from the default tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/service_dependencies.spec.ts",
+        "line": 22,
+        "column": 9
+      }
+    },
+    {
+      "id": "6aea55e0d666272-38155892fd0d2dd",
+      "title": "Service Dependencies Tab Renders expected content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/service_dependencies.spec.ts",
+        "line": 45,
+        "column": 9
+      }
+    },
+    {
+      "id": "6aea55e0d666272-2331752fe58ccdf",
+      "title": "Service Dependencies Tab Links to dependency overview when clicking on a dependency in dependencies table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/service_dependencies.spec.ts",
+        "line": 59,
+        "column": 9
+      }
+    },
+    {
+      "id": "6aea55e0d666272-687b33005f642a9",
+      "title": "Service Dependencies Tab Has no detectable a11y violations on load",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/service_dependencies.spec.ts",
+        "line": 80,
+        "column": 9
+      }
+    },
+    {
+      "id": "af825f933b77021-1da22281c743a19",
+      "title": "Errors shows \"No errors found\" message when a service has no errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
+        "line": 28,
+        "column": 9
+      }
+    },
+    {
+      "id": "af825f933b77021-999ed6267f6f416",
+      "title": "Errors shows errors charts and table when a service has errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
+        "line": 46,
+        "column": 9
+      }
+    },
+    {
+      "id": "af825f933b77021-c863a598422ad69",
+      "title": "Errors shows error details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
+        "line": 102,
+        "column": 9
+      }
+    },
+    {
+      "id": "af825f933b77021-a156737805534f0",
+      "title": "Errors shows zero occurrences for non-existent error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
+        "line": 141,
+        "column": 9
+      }
+    },
+    {
+      "id": "af825f933b77021-fdc7cc5a95a02a5",
+      "title": "Errors redirects to error details page when clicking on an error in the list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
+        "line": 159,
+        "column": 9
+      }
+    },
+    {
+      "id": "af825f933b77021-3cb67ca73e9c74d",
+      "title": "Errors filters errors table results when typing in the search input",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
+        "line": 178,
+        "column": 9
       }
     },
     {
@@ -21,13 +421,15 @@
       "title": "Service Groups When navigating to service groups",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_groups/service_groups.spec.ts",
-        "line": 19,
-        "column": 7
+        "line": 24,
+        "column": 9
       }
     },
     {
@@ -35,13 +437,15 @@
       "title": "Service inventory renders page with selected date range",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 19,
-        "column": 7
+        "line": 23,
+        "column": 9
       }
     },
     {
@@ -49,13 +453,15 @@
       "title": "Service inventory loads the service overview for a service when clicking on it",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 39,
-        "column": 7
+        "line": 43,
+        "column": 9
       }
     },
     {
@@ -63,13 +469,15 @@
       "title": "Service inventory shows the correct environment when changing the environment",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 45,
-        "column": 7
+        "line": 49,
+        "column": 9
       }
     },
     {
@@ -77,13 +485,15 @@
       "title": "Service inventory shows the filtered services when using the service name fast filter",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 54,
-        "column": 7
+        "line": 58,
+        "column": 9
       }
     },
     {
@@ -91,11 +501,12 @@
       "title": "Agent Configuration Viewer should not be able to modify settings",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_configuration.spec.ts",
-        "line": 12,
+        "line": 13,
         "column": 7
       }
     },
@@ -104,11 +515,12 @@
       "title": "Agent Configuration APM All Privileges Without Write Settings should not be able to modify settings",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_configuration.spec.ts",
-        "line": 22,
+        "line": 23,
         "column": 7
       }
     },
@@ -117,11 +529,12 @@
       "title": "Agent Configuration Privileged user should be able to configure, create and delete an agent configuration with all services and production environment",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_configuration.spec.ts",
-        "line": 32,
+        "line": 33,
         "column": 7
       }
     },
@@ -130,11 +543,12 @@
       "title": "Agent Explorer Viewer should be able to view the agent list",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_explorer.spec.ts",
-        "line": 12,
+        "line": 13,
         "column": 7
       }
     },
@@ -143,11 +557,12 @@
       "title": "Agent Explorer Editor should be able to access agent explorer",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_explorer.spec.ts",
-        "line": 26,
+        "line": 27,
         "column": 7
       }
     },
@@ -156,11 +571,12 @@
       "title": "Agent Explorer APM Read Privileges With Write Settings should be able to access agent explorer",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_explorer.spec.ts",
-        "line": 41,
+        "line": 42,
         "column": 7
       }
     },
@@ -169,11 +585,12 @@
       "title": "Agent Explorer APM All Privileges Without Write Settings should be able to view agent explorer but with limited functionality",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_explorer.spec.ts",
-        "line": 60,
+        "line": 61,
         "column": 7
       }
     },
@@ -182,13 +599,15 @@
       "title": "Agent Keys Viewer should see missing privileges message",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_keys.spec.ts",
-        "line": 12,
-        "column": 7
+        "line": 16,
+        "column": 9
       }
     },
     {
@@ -196,13 +615,15 @@
       "title": "Agent Keys Admin User should be able to modify settings",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_keys.spec.ts",
-        "line": 22,
-        "column": 7
+        "line": 26,
+        "column": 9
       }
     },
     {
@@ -210,13 +631,15 @@
       "title": "Anomaly Detection Viewer should not be able to modify settings",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts",
-        "line": 12,
-        "column": 7
+        "line": 16,
+        "column": 9
       }
     },
     {
@@ -224,13 +647,15 @@
       "title": "Anomaly Detection Privileged User should be able to modify settings",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts",
-        "line": 22,
-        "column": 7
+        "line": 26,
+        "column": 9
       }
     },
     {
@@ -238,13 +663,15 @@
       "title": "Anomaly Detection Admin should be able to modify settings",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts",
-        "line": 42,
-        "column": 7
+        "line": 46,
+        "column": 9
       }
     },
     {
@@ -252,13 +679,15 @@
       "title": "Anomaly Detection APM Read Privileges With Write Settings should be able to modify settings",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts",
-        "line": 60,
-        "column": 7
+        "line": 64,
+        "column": 9
       }
     },
     {
@@ -266,13 +695,15 @@
       "title": "Anomaly Detection APM All Privileges Without Write Settings should not be able to modify settings",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts",
-        "line": 78,
-        "column": 7
+        "line": 89,
+        "column": 9
       }
     },
     {
@@ -280,13 +711,15 @@
       "title": "Custom links Viewer should show disabled create button and no edit button",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links.spec.ts",
-        "line": 12,
-        "column": 7
+        "line": 18,
+        "column": 9
       }
     },
     {
@@ -294,13 +727,15 @@
       "title": "Custom links Privileged User should be able to create custom link and delete the created custom link",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links.spec.ts",
-        "line": 26,
-        "column": 7
+        "line": 32,
+        "column": 9
       }
     },
     {
@@ -308,13 +743,15 @@
       "title": "General Settings Viewer should not be able to modify settings",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/general_settings.spec.ts",
-        "line": 12,
-        "column": 7
+        "line": 16,
+        "column": 9
       }
     },
     {
@@ -322,13 +759,15 @@
       "title": "General Settings Privileged User should be able to modify settings",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/general_settings.spec.ts",
-        "line": 26,
-        "column": 7
+        "line": 30,
+        "column": 9
       }
     },
     {
@@ -336,11 +775,12 @@
       "title": "Indices Viewer should not be able to modify settings",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/indices.spec.ts",
-        "line": 12,
+        "line": 14,
         "column": 7
       }
     },
@@ -349,11 +789,12 @@
       "title": "Indices Privileged user should be able to modify settings",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/indices.spec.ts",
-        "line": 26,
+        "line": 28,
         "column": 7
       }
     },
@@ -362,11 +803,12 @@
       "title": "Settings - Serverless Privileged User: The indices settings page is not available in serverless",
       "expectedStatus": "passed",
       "tags": [
-        "@svlOblt"
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/serverless_settings.spec.ts",
-        "line": 16,
+        "line": 17,
         "column": 7
       }
     },
@@ -375,11 +817,12 @@
       "title": "Settings - Serverless Viewer: The agent configuration settings page is not available in serverless",
       "expectedStatus": "passed",
       "tags": [
-        "@svlOblt"
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/serverless_settings.spec.ts",
-        "line": 25,
+        "line": 26,
         "column": 7
       }
     },
@@ -388,11 +831,12 @@
       "title": "Settings - Serverless Privileged User: The agent configuration settings page is not available in serverless",
       "expectedStatus": "passed",
       "tags": [
-        "@svlOblt"
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/serverless_settings.spec.ts",
-        "line": 37,
+        "line": 38,
         "column": 7
       }
     },
@@ -401,13 +845,15 @@
       "title": "Service map renders page with selected date range",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/sevice_map/service_map.spec.ts",
-        "line": 16,
-        "column": 7
+        "line": 20,
+        "column": 9
       }
     },
     {
@@ -415,13 +861,15 @@
       "title": "Service map shows a detailed service map",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/sevice_map/service_map.spec.ts",
-        "line": 31,
-        "column": 7
+        "line": 35,
+        "column": 9
       }
     },
     {
@@ -429,13 +877,15 @@
       "title": "Service map shows empty state when there is no data",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/sevice_map/service_map.spec.ts",
-        "line": 44,
-        "column": 7
+        "line": 48,
+        "column": 9
       }
     },
     {
@@ -443,11 +893,12 @@
       "title": "Storage Explorer - Admin User user navigates and explores storage explorer functionality",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/storage_explorer/storage_explorer_functionality.spec.ts",
-        "line": 22,
+        "line": 24,
         "column": 7
       }
     },
@@ -456,13 +907,15 @@
       "title": "Storage Explorer - Viewer (No Permissions) displays permission denied message",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/storage_explorer/storage_explorer_permissions.spec.ts",
-        "line": 16,
-        "column": 7
+        "line": 20,
+        "column": 9
       }
     },
     {
@@ -470,13 +923,15 @@
       "title": "Transaction details Renders the page with expected content",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
-        "line": 25,
-        "column": 7
+        "line": 29,
+        "column": 9
       }
     },
     {
@@ -484,13 +939,15 @@
       "title": "Transaction details Trace samples navigation persists across page reloads",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
-        "line": 48,
-        "column": 7
+        "line": 52,
+        "column": 9
       }
     },
     {
@@ -498,13 +955,47 @@
       "title": "Transaction details Trace samples waterfall should not become stuck on loading state after page reload with empty data",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
-        "line": 70,
-        "column": 7
+        "line": 74,
+        "column": 9
+      }
+    },
+    {
+      "id": "0eb20a2c37ad5a7-34b642bb4b6141b",
+      "title": "Transactions Overview Viewer: Page has no detectable a11y violations on load",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transactions_overview/transactions_overview.spec.ts",
+        "line": 21,
+        "column": 9
+      }
+    },
+    {
+      "id": "0eb20a2c37ad5a7-85fcfc102dcd123",
+      "title": "Transactions Overview Viewer: Persists transaction type selected when navigating to Overview tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transactions_overview/transactions_overview.spec.ts",
+        "line": 39,
+        "column": 9
       }
     }
   ]
