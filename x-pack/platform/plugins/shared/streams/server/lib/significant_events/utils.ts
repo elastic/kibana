@@ -16,7 +16,7 @@ export function sortForQueriesTable(
 ): SignificantEventsResponse[] {
   return orderBy(
     queries,
-    ['rule_backed', (query) => query.severity_score, (query) => query.title],
+    ['rule_backed', (query) => query.severity_score ?? 0, (query) => query.title],
     ['asc', 'desc', 'asc']
   );
 }
