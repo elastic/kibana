@@ -185,6 +185,7 @@ export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
   metrics: [],
   observables: { enabled: true, autoExtract: false },
   events: { enabled: false },
+  templates: { enabled: false },
 });
 
 /**
@@ -257,6 +258,7 @@ export const LOCAL_STORAGE_KEYS = {
   casesTableColumns: 'cases.list.tableColumns',
   casesTableFiltersConfig: 'cases.list.tableFiltersConfig',
   casesTableState: 'cases.list.state',
+  templatesTableState: 'templates.list.state',
 };
 
 /**

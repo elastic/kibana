@@ -68,6 +68,7 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
                 is_connector_type_deprecated: false,
                 is_missing_secrets: false,
                 name: 'My Connector',
+                auth_mode: 'shared',
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
                 },
@@ -155,6 +156,7 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
                 is_system_action: false,
                 is_deprecated: false,
                 is_connector_type_deprecated: false,
+                auth_mode: 'shared',
               });
               break;
             default:

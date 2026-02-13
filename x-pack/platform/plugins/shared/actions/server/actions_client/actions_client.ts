@@ -37,6 +37,7 @@ import type {
   IExecutionLogResult,
 } from '../../common';
 import type { ActionTypeRegistry } from '../action_type_registry';
+import type { AuthTypeRegistry } from '../auth_types/auth_type_registry';
 import type { ActionExecutorContract } from '../lib';
 import { parseDate } from '../lib';
 import type {
@@ -98,6 +99,7 @@ export interface ConstructorOptions {
   kibanaIndices: string[];
   scopedClusterClient: IScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
+  authTypeRegistry: AuthTypeRegistry;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   inMemoryConnectors: InMemoryConnector[];
@@ -127,6 +129,7 @@ export interface ActionsClientContext {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   actionTypeRegistry: ActionTypeRegistry;
+  authTypeRegistry: AuthTypeRegistry;
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
   request: KibanaRequest;
@@ -150,6 +153,7 @@ export class ActionsClient {
   constructor({
     logger,
     actionTypeRegistry,
+    authTypeRegistry,
     kibanaIndices,
     scopedClusterClient,
     encryptedSavedObjectsClient,
@@ -171,6 +175,7 @@ export class ActionsClient {
     this.context = {
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       encryptedSavedObjectsClient,
       unsecuredSavedObjectsClient,
       scopedClusterClient,

@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type OmitIndexProp<T> = Omit<T, 'index'>;
+require('@kbn/setup-node-env');
+require('@kbn/test-suites-xpack-platform/agent_builder/scripts/discover_eis_models');

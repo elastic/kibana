@@ -7,7 +7,7 @@
 
 import qs from 'query-string';
 import axios from 'axios';
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 import type { Logger } from '@kbn/core/server';
 import type { RefreshTokenOAuthRequestParams } from './request_oauth_refresh_token';
 import type { JWTOAuthRequestParams } from './request_oauth_jwt_token';
@@ -80,7 +80,7 @@ export async function requestOAuthToken<T>(
       refreshTokenExpiresIn: res.data.refresh_token_expires_in,
     };
   } else {
-    const errString = stringify(res.data);
+    const errString = stableStringify(res.data);
     logger.warn(`error thrown getting the access token from ${tokenUrl}: ${errString}`);
     throw new Error(errString);
   }
