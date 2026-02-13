@@ -12,26 +12,26 @@ interface FieldValue {
   [key: string]: string;
 }
 
+/**
+ * Assumes the document has previously been validated
+ * to not be null or undefined.
+ */
 export function getDocument(doc: any): any {
-  if (
-    doc != null &&
-    typeof doc === 'object' &&
-    doc._source != null &&
-    typeof doc._source === 'object'
-  ) {
+  if (doc._source && typeof doc._source === 'object') {
     return doc._source;
   }
   return doc;
 }
 
-export function getFieldValue(doc: any, field: string): string | undefined {
-  const flattenedValue =
-    doc != null && Object.prototype.hasOwnProperty.call(doc, field) && doc[field] !== undefined
-      ? doc[field]
-      : undefined;
-  const fieldInObject = flattenedValue !== undefined ? flattenedValue : get(doc, field);
+function isEmpty(value: any): boolean {
+  return value === undefined || value === null || value === '';
+}
 
-  if (fieldInObject === undefined || fieldInObject === null || fieldInObject === '') {
+export function getFieldValue(doc: any, field: string): string | undefined {
+  const flattenedValue = doc[field];
+  const fieldInObject = isEmpty(flattenedValue) ? get(doc, field) : flattenedValue;
+
+  if (isEmpty(fieldInObject)) {
     return undefined;
   }
 

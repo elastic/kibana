@@ -23,11 +23,6 @@ describe('getDocument', () => {
     const doc = { _source: null, user: { id: '123' } };
     expect(getDocument(doc)).toBe(doc);
   });
-
-  it('returns doc as-is when doc is null or undefined', () => {
-    expect(getDocument(null)).toBe(null);
-    expect(getDocument(undefined)).toBe(undefined);
-  });
 });
 
 describe('getFieldValue', () => {
