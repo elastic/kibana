@@ -516,7 +516,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
                 };
               }
 
-              await getUiActions().getTrigger(triggerId).exec(context);
+              await getUiActions().executeTriggerActions(triggerId, context);
             }
           })
         )

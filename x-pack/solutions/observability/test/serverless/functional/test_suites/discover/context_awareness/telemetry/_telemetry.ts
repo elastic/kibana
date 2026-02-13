@@ -242,7 +242,8 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
       });
     });
 
-    describe('events', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/252799
+    describe.skip('events', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');
         await header.waitUntilLoadingHasFinished();
