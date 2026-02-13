@@ -55,6 +55,7 @@ export function createGetStatusService(params: RegisterServicesParams) {
 
       return {
         type,
+        profiling_enabled: setupState.profiling.enabled,
         has_setup: hasSetup,
         has_data: setupState.data.available,
         pre_8_9_1_data: setupState.resources.pre_8_9_1_data,
@@ -66,6 +67,7 @@ export function createGetStatusService(params: RegisterServicesParams) {
       // is needed to call the profiling ES plugin for example.
       if (error?.meta?.statusCode === 403 || error?.originalError?.meta?.statusCode === 403) {
         return {
+          profiling_enabled: true,
           has_setup: true,
           pre_8_9_1_data: false,
           has_data: true,

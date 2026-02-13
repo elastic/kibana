@@ -65,7 +65,12 @@ export function createDefaultSetupState(): SetupState {
 }
 
 export function areResourcesSetup(state: SetupState): boolean {
-  return state.resource_management.enabled && state.resources.created && state.settings.configured;
+  return (
+    state.profiling.enabled &&
+    state.resource_management.enabled &&
+    state.resources.created &&
+    state.settings.configured
+  );
 }
 
 function mergeRecursivePartial<T>(base: T, partial: RecursivePartial<T>): T {
