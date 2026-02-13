@@ -8,9 +8,10 @@
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import { getFlattenedObject } from '@kbn/std';
 import type { FieldDefinition, FieldDefinitionConfig } from '@kbn/streams-schema';
-import { getParentId, Streams } from '@kbn/streams-schema';
+import { getEsqlViewName, getParentId, Streams } from '@kbn/streams-schema';
 import { FIELD_DEFINITION_TYPES, type FieldDefinitionType } from '@kbn/streams-schema/src/fields';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import type { StreamsClient } from '../client';
@@ -100,17 +101,48 @@ export class MappingSuggestionEngine {
     const existingFields = await this.getStreamFields(stream);
 
     // 3. Sample documents and track field occurrences
-    const { hits } = await this.sampleDocuments(indexSourceStreamName, start, end, sampleSize);
+    // For draft streams, we sample from both the raw parent data AND the ESQL view
+    // The ESQL view applies the draft stream's processing steps, showing post-processing fields
+    const { hits: rawHits } = await this.sampleDocuments(
+      indexSourceStreamName,
+      start,
+      end,
+      sampleSize
+    );
 
-    if (hits.length === 0) {
+    // For draft streams, also sample via ESQL view to see post-processing fields
+    let viewHits: Array<Record<string, unknown>> = [];
+    if (isDraftStream) {
+      viewHits = await this.sampleDocumentsViaEsql(streamName, start, end, sampleSize);
+    }
+
+    // Combine hits from both sources for total doc count calculation
+    const totalRawDocs = rawHits.length;
+    const totalViewDocs = viewHits.length;
+    const totalDocs = Math.max(totalRawDocs, totalViewDocs);
+
+    if (totalDocs === 0) {
       return this.createEmptyResult(streamName, false);
     }
 
-    // 4. Calculate field occurrences
-    const fieldOccurrences = this.calculateFieldOccurrences(hits);
+    // 4. Calculate field occurrences from both sources
+    // Raw hits show pre-processing fields, view hits show post-processing fields
+    const rawFieldOccurrences = this.calculateFieldOccurrences(rawHits);
+    const viewFieldOccurrences = isDraftStream
+      ? this.calculateFieldOccurrencesFromRecords(viewHits)
+      : new Map<string, FieldOccurrence>();
+
+    // Merge occurrences: fields from view take precedence for draft streams
+    // as they represent the actual field structure after processing
+    const fieldOccurrences = this.mergeFieldOccurrences(
+      rawFieldOccurrences,
+      viewFieldOccurrences,
+      totalRawDocs,
+      totalViewDocs
+    );
 
     // 5. Get field candidates with occurrence rates
-    const fieldCandidates = this.getFieldCandidates(fieldOccurrences, hits.length, existingFields);
+    const fieldCandidates = this.getFieldCandidates(fieldOccurrences, totalDocs, existingFields);
 
     // 6. Enrich with metadata (ECS/OTEL types)
     const enrichedCandidates = await this.enrichWithMetadata(fieldCandidates);
@@ -294,6 +326,155 @@ export class MappingSuggestionEngine {
       }
       throw error;
     }
+  }
+
+  /**
+   * Sample documents via ESQL view for draft streams.
+   * The ESQL view applies the draft stream's processing steps, allowing us to see
+   * the field structure after transformations (renames, additions, removals).
+   *
+   * @param streamName - Name of the draft stream (used to get the ESQL view name)
+   * @param start - Start time in epoch ms
+   * @param end - End time in epoch ms
+   * @param size - Number of documents to sample
+   * @returns Array of document records from the ESQL view
+   */
+  private async sampleDocumentsViaEsql(
+    streamName: string,
+    start: number,
+    end: number,
+    size: number
+  ): Promise<Array<Record<string, unknown>>> {
+    try {
+      const viewName = getEsqlViewName(streamName);
+      const startIso = new Date(start).toISOString();
+      const endIso = new Date(end).toISOString();
+
+      // Query the ESQL view with a time range filter and limit
+      // The view name is in format "$.stream.name" which applies the draft stream's processing
+      const query = `FROM ${viewName} | WHERE @timestamp >= "${startIso}" AND @timestamp <= "${endIso}" | LIMIT ${size}`;
+
+      const response = (await this.deps.scopedClusterClient.asCurrentUser.esql.query({
+        query,
+        format: 'json',
+        drop_null_columns: true,
+      })) as unknown as ESQLSearchResponse;
+
+      const { columns, values } = response;
+
+      if (!columns || !values || values.length === 0) {
+        return [];
+      }
+
+      // Convert ESQL columnar response to array of records
+      const records: Array<Record<string, unknown>> = values.map((row) => {
+        const record: Record<string, unknown> = {};
+        for (let i = 0; i < columns.length; i++) {
+          const colName = columns[i].name;
+          // Skip internal metadata columns
+          if (!colName.startsWith('_')) {
+            record[colName] = row[i];
+          }
+        }
+        return record;
+      });
+
+      this.deps.logger.debug(
+        `Sampled ${records.length} documents via ESQL view for draft stream ${streamName}`
+      );
+
+      return records;
+    } catch (error) {
+      // If the view doesn't exist or query fails, log and return empty
+      // This allows the engine to fall back to raw data only
+      this.deps.logger.debug(
+        `Failed to sample documents via ESQL view for stream ${streamName}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return [];
+    }
+  }
+
+  /**
+   * Calculate field occurrence counts from ESQL view records.
+   * Similar to calculateFieldOccurrences but works with plain records instead of SearchHits.
+   */
+  private calculateFieldOccurrencesFromRecords(
+    records: Array<Record<string, unknown>>
+  ): Map<string, FieldOccurrence> {
+    const occurrences = new Map<string, FieldOccurrence>();
+
+    for (const record of records) {
+      const flattenedDoc = getFlattenedObject(record);
+
+      for (const fieldName of Object.keys(flattenedDoc)) {
+        const existing = occurrences.get(fieldName);
+        if (existing) {
+          existing.count++;
+          if (existing.sampleValues && existing.sampleValues.length < 5) {
+            existing.sampleValues.push(flattenedDoc[fieldName]);
+          }
+        } else {
+          occurrences.set(fieldName, {
+            name: fieldName,
+            count: 1,
+            sampleValues: [flattenedDoc[fieldName]],
+          });
+        }
+      }
+    }
+
+    return occurrences;
+  }
+
+  /**
+   * Merge field occurrences from raw data and ESQL view.
+   *
+   * For draft streams, we want to consider fields from both sources:
+   * - Raw data shows pre-processing fields (what exists in the parent stream)
+   * - View data shows post-processing fields (what will exist after draft stream's processing)
+   *
+   * The merge strategy:
+   * - Include all fields from both sources
+   * - For fields present in both, use the higher occurrence rate
+   * - Mark fields that only appear in view (new fields from processing)
+   */
+  private mergeFieldOccurrences(
+    rawOccurrences: Map<string, FieldOccurrence>,
+    viewOccurrences: Map<string, FieldOccurrence>,
+    totalRawDocs: number,
+    totalViewDocs: number
+  ): Map<string, FieldOccurrence> {
+    const merged = new Map<string, FieldOccurrence>();
+
+    // Add all raw occurrences first
+    for (const [name, occurrence] of rawOccurrences) {
+      merged.set(name, { ...occurrence });
+    }
+
+    // Merge view occurrences
+    for (const [name, viewOccurrence] of viewOccurrences) {
+      const rawOccurrence = merged.get(name);
+
+      if (rawOccurrence) {
+        // Field exists in both: use the higher occurrence count
+        // Normalize by total docs to compare rates fairly
+        const rawRate = totalRawDocs > 0 ? rawOccurrence.count / totalRawDocs : 0;
+        const viewRate = totalViewDocs > 0 ? viewOccurrence.count / totalViewDocs : 0;
+
+        if (viewRate > rawRate) {
+          // Use view data if it has higher occurrence rate
+          merged.set(name, { ...viewOccurrence });
+        }
+        // Otherwise keep raw data
+      } else {
+        // Field only exists in view (created by processing steps)
+        merged.set(name, { ...viewOccurrence });
+      }
+    }
+
+    return merged;
   }
 
   /**

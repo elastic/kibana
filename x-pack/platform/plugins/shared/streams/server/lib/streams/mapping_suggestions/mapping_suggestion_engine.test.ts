@@ -8,6 +8,7 @@
 import type { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { FieldDefinition, Streams } from '@kbn/streams-schema';
 import type { StreamsClient } from '../client';
 import { MappingSuggestionEngine } from './mapping_suggestion_engine';
@@ -25,16 +26,28 @@ const createMockLogger = (): jest.Mocked<Logger> =>
     isLevelEnabled: jest.fn(),
   } as unknown as jest.Mocked<Logger>);
 
+const createMockEsqlResponse = (
+  columns: Array<{ name: string; type: string }>,
+  values: unknown[][]
+): ESQLSearchResponse => ({
+  columns,
+  values,
+});
+
 const createMockScopedClusterClient = (
   searchResponse: Partial<SearchResponse> = {
     hits: { hits: [], total: { value: 0, relation: 'eq' } },
   },
-  fieldCapsResponse: Record<string, Record<string, unknown>> = {}
+  fieldCapsResponse: Record<string, Record<string, unknown>> = {},
+  esqlResponse?: ESQLSearchResponse
 ): jest.Mocked<IScopedClusterClient> =>
   ({
     asCurrentUser: {
       search: jest.fn().mockResolvedValue(searchResponse),
       fieldCaps: jest.fn().mockResolvedValue({ fields: fieldCapsResponse }),
+      esql: {
+        query: jest.fn().mockResolvedValue(esqlResponse ?? { columns: [], values: [] }),
+      },
     },
     asInternalUser: {},
   } as unknown as jest.Mocked<IScopedClusterClient>);
@@ -525,6 +538,236 @@ describe('MappingSuggestionEngine', () => {
         await expect(engine.suggestMappings('logs')).rejects.toThrow(
           'Draft stream logs must have a parent stream'
         );
+      });
+
+      it('samples via ESQL view for draft streams to see post-processing fields', async () => {
+        const draftStreamDefinition = createWiredStreamDefinition('logs.draft', { draft: true });
+        const parentDefinition = createWiredStreamDefinition('logs');
+
+        // Raw data has original fields
+        const rawHits = [createSearchHit({ original_field: 'value' })];
+
+        // ESQL view shows fields after processing (e.g., a rename processor changed the field name)
+        const esqlResponse = createMockEsqlResponse(
+          [
+            { name: 'renamed_field', type: 'keyword' },
+            { name: '@timestamp', type: 'date' },
+          ],
+          [
+            ['value', '2024-01-01T00:00:00Z'],
+            ['value2', '2024-01-01T00:00:01Z'],
+          ]
+        );
+
+        const mockScopedClusterClient = createMockScopedClusterClient(
+          createSearchResponse(rawHits),
+          {
+            original_field: { keyword: {} },
+            renamed_field: { keyword: {} },
+          },
+          esqlResponse
+        );
+
+        const mockStreamsClient = createMockStreamsClient(draftStreamDefinition, [
+          parentDefinition,
+        ]);
+
+        const engine = new MappingSuggestionEngine({
+          scopedClusterClient: mockScopedClusterClient,
+          streamsClient: mockStreamsClient,
+          fieldsMetadataClient: createMockFieldsMetadataClient({
+            original_field: { type: 'keyword', source: 'ecs' },
+            renamed_field: { type: 'keyword', source: 'ecs' },
+          }),
+          logger: mockLogger,
+        });
+
+        const result = await engine.suggestMappings('logs.draft');
+
+        // Should have called ESQL query for the draft stream's view
+        expect(mockScopedClusterClient.asCurrentUser.esql.query).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.stringContaining('$.logs.draft'),
+          })
+        );
+
+        // Should include fields from both raw data AND ESQL view
+        const originalFieldResult = result.fields.find((f) => f.name === 'original_field');
+        expect(originalFieldResult).toBeDefined();
+
+        const renamedFieldResult = result.fields.find((f) => f.name === 'renamed_field');
+        expect(renamedFieldResult).toBeDefined();
+        expect(renamedFieldResult?.status).toBe('mapped');
+      });
+
+      it('handles ESQL view failure gracefully and falls back to raw data only', async () => {
+        const draftStreamDefinition = createWiredStreamDefinition('logs.draft', { draft: true });
+        const parentDefinition = createWiredStreamDefinition('logs');
+
+        const rawHits = [createSearchHit({ field_a: 'value' })];
+
+        const mockScopedClusterClient = createMockScopedClusterClient(
+          createSearchResponse(rawHits),
+          { field_a: { keyword: {} } }
+        );
+
+        // Make ESQL query fail
+        (mockScopedClusterClient.asCurrentUser.esql.query as jest.Mock).mockRejectedValue(
+          new Error('ESQL view not found')
+        );
+
+        const mockStreamsClient = createMockStreamsClient(draftStreamDefinition, [
+          parentDefinition,
+        ]);
+
+        const engine = new MappingSuggestionEngine({
+          scopedClusterClient: mockScopedClusterClient,
+          streamsClient: mockStreamsClient,
+          fieldsMetadataClient: createMockFieldsMetadataClient({
+            field_a: { type: 'keyword', source: 'ecs' },
+          }),
+          logger: mockLogger,
+        });
+
+        // Should not throw, should still return results from raw data
+        const result = await engine.suggestMappings('logs.draft');
+
+        expect(result.fields).toHaveLength(1);
+        expect(result.fields[0].name).toBe('field_a');
+        expect(result.fields[0].status).toBe('mapped');
+
+        // Should have logged the failure
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+          expect.stringContaining('Failed to sample documents via ESQL view')
+        );
+      });
+
+      it('does not call ESQL query for non-draft streams', async () => {
+        const streamDefinition = createWiredStreamDefinition('logs.materialized');
+        const hits = [createSearchHit({ field_a: 'value' })];
+
+        const mockScopedClusterClient = createMockScopedClusterClient(
+          createSearchResponse(hits),
+          { field_a: { keyword: {} } }
+        );
+
+        const engine = new MappingSuggestionEngine({
+          scopedClusterClient: mockScopedClusterClient,
+          streamsClient: createMockStreamsClient(streamDefinition),
+          fieldsMetadataClient: createMockFieldsMetadataClient({
+            field_a: { type: 'keyword', source: 'ecs' },
+          }),
+          logger: mockLogger,
+        });
+
+        await engine.suggestMappings('logs.materialized');
+
+        // ESQL query should NOT be called for non-draft streams
+        expect(mockScopedClusterClient.asCurrentUser.esql.query).not.toHaveBeenCalled();
+      });
+
+      it('merges field occurrences from both raw and view sources preferring higher occurrence rate', async () => {
+        const draftStreamDefinition = createWiredStreamDefinition('logs.draft', { draft: true });
+        const parentDefinition = createWiredStreamDefinition('logs');
+
+        // Raw data: field_a appears in 1/2 docs (50%)
+        const rawHits = [
+          createSearchHit({ field_a: 'value1', field_b: 'value2' }),
+          createSearchHit({ field_b: 'value3' }),
+        ];
+
+        // ESQL view: field_a appears in 3/3 docs (100%) after processing
+        const esqlResponse = createMockEsqlResponse(
+          [
+            { name: 'field_a', type: 'keyword' },
+            { name: 'field_b', type: 'keyword' },
+          ],
+          [
+            ['a1', 'b1'],
+            ['a2', 'b2'],
+            ['a3', 'b3'],
+          ]
+        );
+
+        const mockScopedClusterClient = createMockScopedClusterClient(
+          createSearchResponse(rawHits),
+          {
+            field_a: { keyword: {} },
+            field_b: { keyword: {} },
+          },
+          esqlResponse
+        );
+
+        const mockStreamsClient = createMockStreamsClient(draftStreamDefinition, [
+          parentDefinition,
+        ]);
+
+        const engine = new MappingSuggestionEngine({
+          scopedClusterClient: mockScopedClusterClient,
+          streamsClient: mockStreamsClient,
+          fieldsMetadataClient: createMockFieldsMetadataClient({
+            field_a: { type: 'keyword', source: 'ecs' },
+            field_b: { type: 'keyword', source: 'ecs' },
+          }),
+          logger: mockLogger,
+        });
+
+        const result = await engine.suggestMappings('logs.draft');
+
+        // field_a should use the higher occurrence rate from view (100%) not raw (50%)
+        const fieldAResult = result.fields.find((f) => f.name === 'field_a');
+        expect(fieldAResult?.occurrenceRate).toBe(1); // 100% from view
+      });
+
+      it('includes fields that only exist in ESQL view (created by processing)', async () => {
+        const draftStreamDefinition = createWiredStreamDefinition('logs.draft', { draft: true });
+        const parentDefinition = createWiredStreamDefinition('logs');
+
+        // Raw data has no fields (or different fields)
+        const rawHits = [createSearchHit({ raw_field: 'value' })];
+
+        // ESQL view has a field that was created by processing (e.g., from a dissect/grok)
+        const esqlResponse = createMockEsqlResponse(
+          [
+            { name: 'extracted_field', type: 'keyword' },
+            { name: '@timestamp', type: 'date' },
+          ],
+          [['extracted_value', '2024-01-01T00:00:00Z']]
+        );
+
+        const mockScopedClusterClient = createMockScopedClusterClient(
+          createSearchResponse(rawHits),
+          {
+            raw_field: { keyword: {} },
+            extracted_field: { keyword: {} },
+          },
+          esqlResponse
+        );
+
+        const mockStreamsClient = createMockStreamsClient(draftStreamDefinition, [
+          parentDefinition,
+        ]);
+
+        const engine = new MappingSuggestionEngine({
+          scopedClusterClient: mockScopedClusterClient,
+          streamsClient: mockStreamsClient,
+          fieldsMetadataClient: createMockFieldsMetadataClient({
+            raw_field: { type: 'keyword', source: 'ecs' },
+            extracted_field: { type: 'keyword', source: 'ecs' },
+          }),
+          logger: mockLogger,
+        });
+
+        const result = await engine.suggestMappings('logs.draft');
+
+        // Should include the field that only exists in ESQL view
+        const extractedFieldResult = result.fields.find((f) => f.name === 'extracted_field');
+        expect(extractedFieldResult).toBeDefined();
+        expect(extractedFieldResult?.status).toBe('mapped');
+
+        // Should also include the raw field
+        const rawFieldResult = result.fields.find((f) => f.name === 'raw_field');
+        expect(rawFieldResult).toBeDefined();
       });
     });
 
