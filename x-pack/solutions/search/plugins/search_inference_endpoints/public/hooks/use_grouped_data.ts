@@ -38,9 +38,7 @@ const UNKNOWN_MODEL_LABEL_FALLBACK = i18n.translate(
 
 export const GroupByModelReducer = (
   acc: Record<string, GroupedInferenceEndpointsData>,
-  endpoint: InferenceAPIConfigResponse,
-  _index: number,
-  _array: InferenceAPIConfigResponse[]
+  endpoint: InferenceAPIConfigResponse
 ): Record<string, GroupedInferenceEndpointsData> => {
   const modelId = getModelId(endpoint) ?? UNKNOWN_MODEL_ID_FALLBACK;
 
