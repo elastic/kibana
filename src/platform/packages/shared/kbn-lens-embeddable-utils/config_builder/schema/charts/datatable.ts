@@ -340,7 +340,7 @@ function validateSortBy({
     }
 
     if (index == null || index >= metrics.length) {
-      return `The 'sort_by.metric_index' (${index}) is out of bounds. The 'metrics' array has ${metrics.length} item(s).`;
+      return `The 'sort_by.index' (${index}) is out of bounds. The 'metrics' array has ${metrics.length} item(s).`;
     }
 
     if (values == null || values.length !== split_metrics_by.length) {
