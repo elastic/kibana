@@ -142,8 +142,15 @@ export class Session {
    */
   private readonly randomBytes = promisify(randomBytes);
 
+  /**
+   * Sessions cache (DECRYPTED) for the requests that explicitly opt-in to use it.
+   * @private
+   */
+  private readonly sessionCache: Map<string, Readonly<SessionValue>>;
+
   constructor(private readonly options: Readonly<SessionOptions>) {
     this.crypto = nodeCrypto({ encryptionKey: this.options.config.encryptionKey });
+    this.sessionCache = new Map();
   }
 
   /**
@@ -178,6 +185,23 @@ export class Session {
       sessionLogger.debug('Session has expired and will be invalidated.');
       await this.invalidate(request, { match: 'current' });
       return { error: new SessionExpiredError(), value: null };
+    }
+
+    // We use cache for the requests that explicitly opt-in to use it.
+    const sessionCacheTimeout =
+      request.route.options.security?.authc?.enabled !== false
+        ? request.route.options.security?.authc?.sessionCache?.asMilliseconds()
+        : undefined;
+    if (sessionCacheTimeout) {
+      const cachedSessionValue = this.sessionCache.get(sessionCookieValue.sid);
+      if (cachedSessionValue) {
+        sessionLogger.debug(`The session value is retrieved from cache.`);
+        return { error: null, value: cachedSessionValue };
+      }
+
+      sessionLogger.debug(
+        `The session value is not found in cache, and will be fetched from Elasticsearch.`
+      );
     }
 
     const sessionIndexValue = await this.options.sessionIndex.get(sessionCookieValue.sid);
@@ -222,14 +246,30 @@ export class Session {
       return { error: new SessionConcurrencyLimitError(), value: null };
     }
 
-    return {
-      error: null,
-      value: {
-        ...Session.sessionIndexValueToSessionValue(sessionIndexValue, decryptedContent),
-        // Unlike session index, session cookie contains the most up-to-date idle timeout expiration.
-        idleTimeoutExpiration: sessionCookieValue.idleTimeoutExpiration,
-      },
+    const sessionValue = {
+      ...Session.sessionIndexValueToSessionValue(sessionIndexValue, decryptedContent),
+      // Unlike session index, session cookie contains the most up-to-date idle timeout expiration.
+      idleTimeoutExpiration: sessionCookieValue.idleTimeoutExpiration,
     };
+
+    if (sessionCacheTimeout) {
+      sessionLogger.debug(
+        `The session value is requested to be cached for ${sessionCacheTimeout} ms.`
+      );
+      this.sessionCache.set(sessionValue.sid, sessionValue);
+
+      // TODO: It should be a single periodic task that clears expired sessions from the cache.
+      // The session should be removed from the cache after the timeout, even if it's being actively
+      // used, to ensure we don't use a potentially stale session value for a long period of time.
+      setTimeout(() => {
+        sessionLogger.debug(
+          `The session value cache expired after ${sessionCacheTimeout} ms and will be removed.`
+        );
+        this.sessionCache.delete(sessionValue.sid);
+      }, sessionCacheTimeout);
+    }
+
+    return { error: null, value: sessionValue };
   }
 
   /**
@@ -469,9 +509,11 @@ export class Session {
       sessionLogger.debug('Invalidating current session.');
       await this.options.sessionCookie.clear(request);
       invalidateIndexValueFilter = { match: 'sid' as 'sid', sid: sessionCookieValue.sid };
+      this.sessionCache.delete(sessionCookieValue.sid);
     } else if (filter.match === 'all') {
       sessionLogger.debug('Invalidating all sessions.');
       invalidateIndexValueFilter = filter;
+      this.sessionCache.clear();
     } else {
       sessionLogger.debug(
         () =>
@@ -488,6 +530,8 @@ export class Session {
             },
           }
         : filter;
+      // TODO: We should keep more info in the cache to be able to handle custom invalidate
+      // session queries as well.
     }
 
     const invalidatedCount = await this.options.sessionIndex.invalidate(invalidateIndexValueFilter);

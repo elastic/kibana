@@ -136,7 +136,36 @@ export abstract class BaseAuthenticationProvider {
    * @param request Request instance.
    * @param [authHeaders] Optional `Headers` dictionary to send with the request.
    */
-  protected async getUser(request: KibanaRequest, authHeaders: Headers = {}) {
+  protected async getUser(
+    request: KibanaRequest,
+    authHeaders: Headers = {}
+  ): Promise<AuthenticatedUser> {
+    // For "minimal" authentication, we don't need to call the `_authenticate` endpoint and can just
+    // return a static user object. The caveat here is that we don't validate credentials, but it
+    // will be done by the Elasticsearch itself anyway.
+    if (request.route.options.security?.authc?.enabled === 'minimal') {
+      this.logger.debug(`Performing "minimal" authentication for request ${request.url.pathname}.`);
+
+      // TODO: If we keep some properties with stub values, we should wrap this object with `Proxy`
+      // to throw an error if someone tries to access such a property. Some of the properties we can
+      // derive from the session, but not all unless we decide to store more information in the session.
+      return deepFreeze({
+        enabled: true,
+        authentication_provider: { type: this.type, name: this.options.name },
+
+        // These properties can be retrieved from the session, but we don't have it here yet.
+        username: 'unknown',
+        elastic_cloud_user: this.options.isElasticCloudDeployment() && this.type === 'saml',
+
+        // These properties are required currently, but we're considering to remove them in the
+        // future to make the `AuthenticatedUser` interface.
+        authentication_realm: { type: this.type, name: this.options.name },
+        lookup_realm: { type: this.type, name: this.options.name },
+        authentication_type: 'unknown',
+        roles: [],
+      });
+    }
+
     return this.authenticationInfoToAuthenticatedUser(
       // @ts-expect-error Metadata is defined as Record<string, any>
       await this.options.client
