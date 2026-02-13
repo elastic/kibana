@@ -19,8 +19,7 @@ import type { ProfilesManager, ScopedProfilesManager } from '../../../../context
 import type { TabState } from './types';
 import type { DiscoverEBTManager, ScopedDiscoverEBTManager } from '../../../../ebt_manager';
 import type { DiscoverServices } from '../../../../build_services';
-import { selectTab } from './selectors';
-import { createSearchSource } from '../utils/create_search_source';
+import { selectTab, selectTabSearchSource } from './selectors';
 
 interface DiscoverRuntimeState {
   adHocDataViews: DataView[];
@@ -129,16 +128,9 @@ export const selectTabRuntimeInternalState = (
     return undefined;
   }
 
-  const tabState = selectTab(stateContainer.internalState.getState(), tabId);
-  const { dataRequestParams } = tabState;
-  const currentDataView = tabRuntimeState.currentDataView$.getValue();
-
-  const searchSource = createSearchSource({
-    dataView: currentDataView,
-    appState: tabState.appState,
-    globalState: tabState.globalState,
-    services,
-  });
+  const state = stateContainer.internalState.getState();
+  const { dataRequestParams } = selectTab(state, tabId);
+  const searchSource = selectTabSearchSource(state, tabId, { runtimeStateManager, services });
 
   return {
     serializedSearchSource: searchSource.getSerializedFields(),
