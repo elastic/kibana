@@ -53,7 +53,7 @@
       "_cat/circuit_breaker",
       "_cat/circuit_breaker/{circuit_breaker_patterns}"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch#TODO",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-circuit-breaker",
     "availability": {
       "stack": true,
       "serverless": false

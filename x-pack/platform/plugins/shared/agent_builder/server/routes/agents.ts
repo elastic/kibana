@@ -18,6 +18,7 @@ import type {
   DeleteAgentResponse,
   ListAgentResponse,
 } from '../../common/http_api/agents';
+import { asError } from '../utils/as_error';
 
 const TOOL_SELECTION_SCHEMA = schema.arrayOf(
   schema.object(
@@ -200,14 +201,28 @@ export function registerAgentRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { agents } = getInternalServices();
+        const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
-        const profile = await service.create(request.body);
-        analyticsService?.reportAgentCreated({
-          agentId: request.body.id,
-          toolSelection: request.body.configuration.tools,
-        });
-        return response.ok<CreateAgentResponse>({ body: profile });
+
+        try {
+          const profile = await service.create(request.body);
+          analyticsService?.reportAgentCreated({
+            agentId: request.body.id,
+            toolSelection: request.body.configuration.tools,
+          });
+          auditLogService.logAgentCreated(request, {
+            agentId: profile.id,
+            agentName: profile.name,
+          });
+          return response.ok<CreateAgentResponse>({ body: profile });
+        } catch (error) {
+          auditLogService.logAgentCreated(request, {
+            agentId: request.body.id,
+            agentName: request.body.name,
+            error: asError(error),
+          });
+          throw error;
+        }
       })
     );
 
@@ -296,14 +311,27 @@ export function registerAgentRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { agents } = getInternalServices();
+        const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
-        const profile = await service.update(request.params.id, request.body);
-        analyticsService?.reportAgentUpdated({
-          agentId: profile.id,
-          toolSelection: profile.configuration.tools,
-        });
-        return response.ok<UpdateAgentResponse>({ body: profile });
+
+        try {
+          const profile = await service.update(request.params.id, request.body);
+          analyticsService?.reportAgentUpdated({
+            agentId: profile.id,
+            toolSelection: profile.configuration.tools,
+          });
+          auditLogService.logAgentUpdated(request, {
+            agentId: profile.id,
+            agentName: profile.name,
+          });
+          return response.ok<UpdateAgentResponse>({ body: profile });
+        } catch (error) {
+          auditLogService.logAgentUpdated(request, {
+            agentId: request.params.id,
+            error: asError(error),
+          });
+          throw error;
+        }
       })
     );
 
@@ -342,15 +370,31 @@ export function registerAgentRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { agents } = getInternalServices();
+        const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
 
-        const result = await service.delete({ id: request.params.id });
-        return response.ok<DeleteAgentResponse>({
-          body: {
-            success: result,
-          },
-        });
+        try {
+          const result = await service.delete({ id: request.params.id });
+          if (result) {
+            auditLogService.logAgentDeleted(request, { agentId: request.params.id });
+          } else {
+            auditLogService.logAgentDeleted(request, {
+              agentId: request.params.id,
+              error: new Error('Agent delete returned false'),
+            });
+          }
+          return response.ok<DeleteAgentResponse>({
+            body: {
+              success: result,
+            },
+          });
+        } catch (error) {
+          auditLogService.logAgentDeleted(request, {
+            agentId: request.params.id,
+            error: asError(error),
+          });
+          throw error;
+        }
       })
     );
 }

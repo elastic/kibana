@@ -32,6 +32,7 @@ import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { schema } from '@kbn/config-schema';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import type { TaskRunnerContext } from './types';
+import { ApiKeyType } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
@@ -132,6 +133,7 @@ describe('Task Runner Factory', () => {
     usageCounter: mockUsageCounter,
     isServerless: false,
     getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
+    apiKeyType: ApiKeyType.ES,
   };
 
   beforeEach(() => {

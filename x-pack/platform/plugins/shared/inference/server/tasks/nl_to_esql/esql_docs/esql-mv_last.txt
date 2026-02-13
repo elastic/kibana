@@ -1,8 +1,6 @@
 # MV_LAST
 
-Converts a multivalue expression into a single-valued column containing the last value. This is particularly useful when working with functions that produce multivalued columns in a known order, such as `SPLIT`.
-
-The order in which multivalued fields are read from underlying storage is not guaranteed. While it is often ascending, this behavior should not be relied upon. If you need the maximum value, use `MV_MAX` instead of `MV_LAST`. `MV_MAX` is optimized for sorted values and does not offer a performance advantage over `MV_LAST`.
+The MV_LAST function converts a multivalue expression into a single-valued column containing the last value. This is especially useful when working with functions that produce multivalued columns in a known order, such as `SPLIT`. The order in which multivalued fields are read from storage is not guaranteed and is frequently ascending, but you should not rely on this. If you need the maximum value, use `MV_MAX` instead, as it is optimized for sorted values and offers better performance.
 
 ## Syntax
 
@@ -10,17 +8,16 @@ The order in which multivalued fields are read from underlying storage is not gu
 
 ### Parameters
 
-#### `field`
+#### field
 
-A multivalue expression.
+A multivalue expression to be reduced to its last value.
 
 ## Examples
 
-Extracting the last value from a multivalued column
+Extracts the last value from a semicolon-separated string in column `a` and assigns it to a new column `last_a`.
 
 ```esql
 ROW a="foo;bar;baz"
 | EVAL last_a = MV_LAST(SPLIT(a, ";"))
 ```
-
-This example splits the string `a` into multiple values using the `SPLIT` function and then extracts the last value, resulting in `last_a = "baz"`.
+This example splits the string in column `a` by semicolons and returns the last value, which is `baz`.

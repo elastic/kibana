@@ -177,6 +177,7 @@ export type DashboardApi = CanExpandPanels &
     highlightPanel: (panelRef: HTMLDivElement) => void;
     highlightPanelId$: PublishingSubject<string | undefined>;
     isEmbeddedExternally: boolean;
+    isEditableByUser: boolean;
     isManaged: boolean;
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
     runInteractiveSave: () => Promise<SaveDashboardReturn | undefined>;

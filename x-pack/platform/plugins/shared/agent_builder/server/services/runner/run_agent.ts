@@ -9,7 +9,9 @@ import type {
   AgentHandlerContext,
   ScopedRunnerRunAgentParams,
   RunAgentReturn,
+  ExperimentalFeatures,
 } from '@kbn/agent-builder-server';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { withAgentSpan } from '../../tracing';
 import { createAgentHandler } from '../agents/modes/create_handler';
@@ -18,6 +20,7 @@ import {
   forkContextForAgentRun,
   createAttachmentsService,
   createToolProvider,
+  createSkillsService,
 } from './utils';
 import type { RunnerManager } from './runner';
 
@@ -34,6 +37,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     spaces,
     elasticsearch,
     savedObjects,
+    uiSettings,
     modelProvider,
     toolsService,
     attachmentsService,
@@ -43,10 +47,23 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     promptManager,
     stateManager,
     filestore,
+    skillServiceStart,
+    toolManager,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
   const toolRegistry = await toolsService.getRegistry({ request });
+
+  // fetch experimental features setting to build experimental feature list
+  const soClient = savedObjects.getScopedClient(request);
+  const uiSettingsClient = uiSettings.asScopedToClient(soClient);
+  const experimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
+    AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+  );
+  const experimentalFeatures: ExperimentalFeatures = {
+    filestore: experimentalFeaturesEnabled,
+    skills: experimentalFeaturesEnabled,
+  };
 
   return {
     request,
@@ -74,7 +91,17 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       spaceId,
       runner: manager.getRunner(),
     }),
+    skills: createSkillsService({
+      skillServiceStart,
+      toolsServiceStart: toolsService,
+      request,
+      spaceId,
+      runner: manager.getRunner(),
+    }),
+    toolManager,
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
+    hooks: manager.deps.hooks,
+    experimentalFeatures,
   };
 };
 
@@ -85,10 +112,10 @@ export const runAgent = async ({
   agentExecutionParams: ScopedRunnerRunAgentParams;
   parentManager: RunnerManager;
 }): Promise<RunAgentReturn> => {
-  const { agentId, agentParams, abortSignal } = agentExecutionParams;
+  const { agentId, agentParams } = agentExecutionParams;
 
-  const context = forkContextForAgentRun({ parentContext: parentManager.context, agentId });
-  const manager = parentManager.createChild(context);
+  const forkedContext = forkContextForAgentRun({ parentContext: parentManager.context, agentId });
+  const manager = parentManager.createChild(forkedContext);
 
   const { agentsService, request } = manager.deps;
   const agentRegistry = await agentsService.getRegistry({ request });
@@ -101,7 +128,7 @@ export const runAgent = async ({
       {
         runId: manager.context.runId,
         agentParams,
-        abortSignal,
+        abortSignal: manager.deps.abortSignal,
       },
       agentHandlerContext
     );

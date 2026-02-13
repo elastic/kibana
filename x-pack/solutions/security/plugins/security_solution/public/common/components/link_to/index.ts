@@ -65,9 +65,9 @@ export type GetSecuritySolutionUrl = (param: {
   skipSearch?: boolean;
 }) => string;
 
-export const useGetSecuritySolutionUrl = () => {
+export const useGetSecuritySolutionUrl = (override?: Record<string, unknown>) => {
   const getLinkUrl = useGetLinkUrl();
-  const getUrlStateQueryParams = useGetUrlStateQueryParams();
+  const getUrlStateQueryParams = useGetUrlStateQueryParams(override);
 
   const getSecuritySolutionUrl = useCallback<GetSecuritySolutionUrl>(
     ({ deepLinkId, path = '', absolute = false, skipSearch = false }) => {

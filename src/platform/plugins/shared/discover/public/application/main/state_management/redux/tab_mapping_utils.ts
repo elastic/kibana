@@ -16,6 +16,7 @@ import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState, TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { DEFAULT_TAB_STATE } from './constants';
+import { parseControlGroupJson } from './utils';
 
 export const fromSavedObjectTabToTabState = ({
   tab,
@@ -55,16 +56,22 @@ export const fromSavedObjectTabToTabState = ({
     label: tab.label,
     initialInternalState: {
       serializedSearchSource: tab.serializedSearchSource,
-      visContext: tab.visContext,
-      controlGroupJson: tab.controlGroupJson,
     },
     appState,
     previousAppState: existingTab?.appState ?? appState,
     globalState: {
       timeRange: tab.timeRestore ? tab.timeRange : existingTab?.globalState.timeRange,
-      refreshInterval: tab.timeRange
+      refreshInterval: tab.timeRestore
         ? tab.refreshInterval
         : existingTab?.globalState.refreshInterval,
+    },
+    attributes: {
+      ...DEFAULT_TAB_STATE.attributes,
+      timeRestore: tab.timeRestore ?? false,
+      visContext: tab.visContext,
+      controlGroupState: tab.controlGroupJson
+        ? parseControlGroupJson(tab.controlGroupJson)
+        : undefined,
     },
   };
 };
@@ -96,28 +103,29 @@ export const fromSavedObjectTabToSavedSearch = async ({
   hideAggregatedPreview: tab.hideAggregatedPreview,
   rowHeight: tab.rowHeight,
   headerRowHeight: tab.headerRowHeight,
-  timeRestore: tab.timeRestore,
-  timeRange: tab.timeRange,
-  refreshInterval: tab.refreshInterval,
+  timeRestore: tab.timeRestore, // managed via Redux state now
+  timeRange: tab.timeRange, // managed via Redux state now
+  refreshInterval: tab.refreshInterval, // managed via Redux state now
   rowsPerPage: tab.rowsPerPage,
   sampleSize: tab.sampleSize,
   breakdownField: tab.breakdownField,
   chartInterval: tab.chartInterval,
   density: tab.density,
-  visContext: tab.visContext,
-  controlGroupJson: tab.controlGroupJson,
+  visContext: tab.visContext, // managed via Redux state now
+  controlGroupJson: tab.controlGroupJson, // managed via Redux state now
 });
 
 export const fromTabStateToSavedObjectTab = ({
   tab,
-  timeRestore,
+  overridenTimeRestore,
   services,
 }: {
   tab: TabState;
-  timeRestore: boolean;
+  overridenTimeRestore?: boolean;
   services: DiscoverServices;
 }): DiscoverSessionTab => {
   const allowedSampleSize = getAllowedSampleSize(tab.appState.sampleSize, services.uiSettings);
+  const timeRestore = overridenTimeRestore ?? tab.attributes.timeRestore ?? false;
 
   return {
     id: tab.id,
@@ -144,8 +152,10 @@ export const fromTabStateToSavedObjectTab = ({
     breakdownField: tab.appState.breakdownField,
     chartInterval: tab.appState.interval,
     density: tab.appState.density,
-    visContext: tab.initialInternalState?.visContext,
-    controlGroupJson: tab.initialInternalState?.controlGroupJson,
+    visContext: tab.attributes.visContext,
+    controlGroupJson: tab.attributes.controlGroupState
+      ? JSON.stringify(tab.attributes.controlGroupState)
+      : undefined,
   };
 };
 
@@ -154,7 +164,10 @@ export const fromSavedSearchToSavedObjectTab = ({
   savedSearch,
   services,
 }: {
-  tab: Pick<TabState, 'id' | 'label'>;
+  tab: Pick<TabState, 'id' | 'label'> & {
+    attributes?: TabState['attributes'];
+    globalState?: TabState['globalState'];
+  };
   savedSearch: SavedSearch;
   services: DiscoverServices;
 }): DiscoverSessionTab => {
@@ -174,9 +187,17 @@ export const fromSavedSearchToSavedObjectTab = ({
     hideAggregatedPreview: savedSearch.hideAggregatedPreview,
     rowHeight: savedSearch.rowHeight,
     headerRowHeight: savedSearch.headerRowHeight,
-    timeRestore: savedSearch.timeRestore,
-    timeRange: savedSearch.timeRange,
-    refreshInterval: savedSearch.refreshInterval,
+    timeRestore: (tab.attributes ? tab.attributes.timeRestore : savedSearch.timeRestore) ?? false,
+    timeRange: tab.attributes
+      ? tab.attributes.timeRestore
+        ? tab.globalState?.timeRange
+        : undefined
+      : savedSearch.timeRange,
+    refreshInterval: tab.attributes
+      ? tab.attributes.timeRestore
+        ? tab.globalState?.refreshInterval
+        : undefined
+      : savedSearch.refreshInterval,
     rowsPerPage: savedSearch.rowsPerPage,
     sampleSize:
       savedSearch.sampleSize && savedSearch.sampleSize === allowedSampleSize
@@ -185,7 +206,11 @@ export const fromSavedSearchToSavedObjectTab = ({
     breakdownField: savedSearch.breakdownField,
     chartInterval: savedSearch.chartInterval,
     density: savedSearch.density,
-    visContext: savedSearch.visContext,
-    controlGroupJson: savedSearch.controlGroupJson,
+    visContext: tab.attributes ? tab.attributes?.visContext : savedSearch.visContext,
+    controlGroupJson: tab.attributes
+      ? tab.attributes?.controlGroupState
+        ? JSON.stringify(tab.attributes.controlGroupState)
+        : undefined
+      : savedSearch.controlGroupJson,
   };
 };

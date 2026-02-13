@@ -1,0 +1,10 @@
+{
+  "name": "one-navigation-example",
+  "version": "1.0.0",
+  "private": true,
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "description": "Example application demonstrating OneNavigation usage. Uses dependencies from Kibana root.",
+  "scripts": {
+    "start": "./start.sh"
+  }
+}

@@ -23,11 +23,11 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import type {
   IngestStreamLifecycle,
   IngestStreamLifecycleAll,
   IngestStreamLifecycleDSL,
+  IlmPolicy,
 } from '@kbn/streams-schema';
 import {
   Streams,
@@ -50,7 +50,7 @@ export type LifecycleEditAction = 'ilm' | 'custom' | 'indefinite';
 interface Props {
   closeModal: () => void;
   updateLifecycle: (lifecycle: IngestStreamLifecycle) => void;
-  getIlmPolicies: () => Promise<PolicyFromES[]>;
+  getIlmPolicies: () => Promise<IlmPolicy[]>;
   definition: Streams.ingest.all.GetResponse;
   updateInProgress: boolean;
 }

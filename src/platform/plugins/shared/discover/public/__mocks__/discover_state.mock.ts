@@ -477,7 +477,6 @@ export function getDiscoverStateMock({
       updateSavedSearch({
         savedSearch: finalSavedSearch,
         dataView,
-        initialInternalState: undefined,
         appState: currentTab.appState,
         globalState: currentTab.globalState,
         services,

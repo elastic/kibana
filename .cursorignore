@@ -1,0 +1,3 @@
+# Cursor already respects .gitignore.
+# We tried adding .cursorignore rules for binary files (e.g. images, zip archives, fonts);
+# index size was unchanged, so this file is left without those rules.

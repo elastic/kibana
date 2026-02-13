@@ -34,10 +34,6 @@ export const performMatchSearch = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<PerformMatchSearchResponse> => {
-  const textFields = fields.filter((field) => field.type === 'text');
-  const semanticTextFields = fields.filter((field) => field.type === 'semantic_text');
-  const allSearchableFields = [...textFields, ...semanticTextFields];
-
   // should replace `any` with `SearchRequest` type when the simplified retriever syntax is supported in @elastic/elasticsearch`
   const searchRequest: any = {
     index,
@@ -46,7 +42,7 @@ export const performMatchSearch = async ({
       rrf: {
         rank_window_size: size * 2,
         query: term,
-        fields: allSearchableFields.map((field) => field.path),
+        fields: fields.map((field) => field.path),
       },
     },
     highlight: {

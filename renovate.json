@@ -19,7 +19,6 @@
     "main",
     "9.3",
     "9.2",
-    "9.1",
     "8.19"
   ],
   "prConcurrentLimit": 0,
@@ -185,8 +184,7 @@
         "cache-manager",
         "cache-manager-fs-hash",
         "keyv",
-        "@types/cache-manager-fs-hash",
-        "@arizeai/phoenix-client"
+        "@types/cache-manager-fs-hash"
       ],
       "reviewers": [
         "team:appex-ai-infra"
@@ -196,6 +194,26 @@
       ],
       "labels": [
         "Team:AI Infra",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "14 days"
+    },
+    {
+      "groupName": "@elastic/obs-ai-team dependencies",
+      "matchDepNames": [
+        "@arizeai/phoenix-client",
+        "simple-statistics"
+      ],
+      "reviewers": [
+        "team:obs-ai-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:obs-ai-team",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -670,7 +688,8 @@
       "groupName": "monaco",
       "matchDepNames": [
         "monaco-yaml",
-        "monaco-editor"
+        "monaco-editor",
+        "monaco-promql"
       ],
       "reviewers": [
         "team:appex-sharedux"
@@ -905,6 +924,25 @@
         "@formatjs/intl",
         "@formatjs/intl-utils",
         "@formatjs/ts-transformer"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Core",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "14 days"
+    },
+    {
+      "groupName": "safe-stable-stringify",
+      "matchDepNames": [
+        "safe-stable-stringify"
       ],
       "reviewers": [
         "team:kibana-core"
@@ -1606,26 +1644,6 @@
       "enabled": false
     },
     {
-      "groupName": "json-stable-stringify",
-      "matchDepNames": [
-        "json-stable-stringify",
-        "@types/json-stable-stringify"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Operations",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "jsdom",
       "matchDepNames": [
         "jsdom",
@@ -2236,25 +2254,6 @@
       "labels": [
         "Team:Visualizations",
         "backport:all-open"
-      ],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "json-stringify-pretty-compact",
-      "matchDepNames": [
-        "json-stringify-pretty-compact"
-      ],
-      "reviewers": [
-        "team:kibana-visualizations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Feature:Vega",
-        "Team:Visualizations",
-        "release_note:skip"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -3459,7 +3458,7 @@
       ],
       "reviewers": [
         "team:fleet",
-        "team:obs-ux-management-team",
+        "team:actionable-obs-team",
         "team:security-solution"
       ],
       "matchBaseBranches": [
@@ -3480,7 +3479,7 @@
       ],
       "reviewers": [
         "team:fleet",
-        "team:obs-ux-management-team",
+        "team:actionable-obs-team",
         "team:security-solution"
       ],
       "matchBaseBranches": [
@@ -3502,7 +3501,7 @@
       ],
       "reviewers": [
         "team:fleet",
-        "team:obs-ux-management-team",
+        "team:actionable-obs-team",
         "team:security-solution"
       ],
       "matchBaseBranches": [
@@ -3525,7 +3524,7 @@
       ],
       "reviewers": [
         "team:kibana-management",
-        "team:obs-ux-management-team"
+        "team:actionable-obs-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -3892,7 +3891,7 @@
         "react-hook-form"
       ],
       "reviewers": [
-        "team:obs-ux-management-team"
+        "team:actionable-obs-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -3913,7 +3912,7 @@
         "@types/react-window-infinite-loader"
       ],
       "reviewers": [
-        "team:obs-ux-management-team"
+        "team:actionable-obs-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -3933,7 +3932,7 @@
         "redux-saga-testing"
       ],
       "reviewers": [
-        "team:obs-ux-management-team"
+        "team:actionable-obs-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -3953,7 +3952,7 @@
         "form-data"
       ],
       "reviewers": [
-        "team:obs-ux-management-team"
+        "team:actionable-obs-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -3973,7 +3972,7 @@
         "@faker-js/faker"
       ],
       "reviewers": [
-        "team:obs-ux-management-team"
+        "team:actionable-obs-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -3993,7 +3992,7 @@
         "@elastic/synthetics"
       ],
       "reviewers": [
-        "team:obs-ux-management-team"
+        "team:actionable-obs-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -4031,7 +4030,7 @@
         "redux-saga"
       ],
       "reviewers": [
-        "team:obs-ux-management-team"
+        "team:actionable-obs-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -4562,7 +4561,6 @@
         "@types/stats-lite",
         "@types/textarea-caret",
         "email-addresses",
-        "json-stringify-safe",
         "murmurhash",
         "stats-lite",
         "textarea-caret"
