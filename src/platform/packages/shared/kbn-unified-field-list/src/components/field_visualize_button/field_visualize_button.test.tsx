@@ -9,16 +9,14 @@
 
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { ActionInternal } from '@kbn/ui-actions-plugin/public';
+import { ACTION_VISUALIZE_LENS_FIELD, ActionInternal } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { getFieldVisualizeButton } from './field_visualize_button';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import {
-  ACTION_VISUALIZE_LENS_FIELD,
   VISUALIZE_FIELD_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
-} from '@kbn/ui-actions-plugin/public';
-import type { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -42,11 +40,6 @@ const visualizeAction = new ActionInternal({
 jest
   .spyOn(uiActions, 'getTriggerCompatibleActions')
   .mockResolvedValue([visualizeAction as ActionInternal<object>]);
-
-jest.spyOn(uiActions, 'getTrigger').mockReturnValue({
-  id: ACTION_VISUALIZE_LENS_FIELD,
-  exec: mockExecuteAction,
-} as unknown as TriggerContract<object>);
 
 describe('UnifiedFieldList <FieldVisualizeButton />', () => {
   it('should render correctly', async () => {
@@ -85,7 +78,7 @@ describe('UnifiedFieldList <FieldVisualizeButton />', () => {
 
     await user.click(visualizeLink);
 
-    expect(mockExecuteAction).toHaveBeenCalledWith({
+    expect(uiActions.executeTriggerActions).toHaveBeenCalledWith(VISUALIZE_FIELD_TRIGGER, {
       contextualFields,
       dataViewSpec: dataView.toSpec(false),
       fieldName: FIELD_NAME_KEYWORD,
@@ -124,7 +117,7 @@ describe('UnifiedFieldList <FieldVisualizeButton />', () => {
 
     await user.click(visualizeLink);
 
-    expect(mockExecuteAction).toHaveBeenCalledWith({
+    expect(uiActions.executeTriggerActions).toHaveBeenCalledWith(VISUALIZE_GEO_FIELD_TRIGGER, {
       contextualFields: [],
       dataViewSpec: dataView.toSpec(false),
       fieldName: FIELD_NAME,
