@@ -9,10 +9,39 @@ Array [
     },
   },
   Object {
-    "set": Object {
-      "field": "entity.name",
-      "override": false,
-      "value": "{{entity.id}}",
+    "script": Object {
+      "lang": "painless",
+      "params": Object {
+        "template": "{{entity.id}}",
+      },
+      "source": "
+          // Extract the display name field from the template
+          String template = params.template;
+          // Remove {{ and }} to get the field path
+          String fieldPath = template.substring(2, template.length() - 2);
+          
+          // Navigate to the field value
+          def value = ctx;
+          for (String part : fieldPath.splitOnToken('.')) {
+            if (value == null) break;
+            value = value[part];
+          }
+          
+          // Handle collected values (arrays/maps) by taking the first element
+          if (value instanceof List && !value.isEmpty()) {
+            value = value[0];
+          } else if (value instanceof Map && !value.isEmpty()) {
+            // Get first value from map (collected values might be in map format)
+            value = value.values().toArray()[0];
+          }
+          
+          // Set entity.name to the extracted value, or use the identity field as fallback
+          if (value != null && value != '') {
+            ctx.entity.name = value;
+          } else {
+            ctx.entity.name = ctx['entity.id'];
+          }
+        ",
     },
   },
   Object {

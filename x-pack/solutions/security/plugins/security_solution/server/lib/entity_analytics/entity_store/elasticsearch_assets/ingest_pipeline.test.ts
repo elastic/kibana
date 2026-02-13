@@ -75,6 +75,7 @@ describe('ingest_pipeline', () => {
         esClient: mockEsClient,
         description: baseDescription,
         options,
+        displayNameTemplate: '{{entity.id}}',
       });
 
       expect(mockEsClient.ingest.putPipeline).toHaveBeenCalledTimes(1);
@@ -95,6 +96,7 @@ describe('ingest_pipeline', () => {
         description: baseDescription,
         options,
         debugMode: true,
+        displayNameTemplate: '{{entity.id}}',
       });
 
       expect(mockEsClient.ingest.putPipeline).toHaveBeenCalledTimes(1);
@@ -138,6 +140,7 @@ describe('ingest_pipeline', () => {
         esClient: mockEsClient,
         description: baseDescription, // dynamic: false
         options,
+        displayNameTemplate: '{{entity.id}}',
       });
       const nonDynamicPipelineCall = (mockEsClient.ingest.putPipeline as jest.Mock).mock
         .calls[0][0];
@@ -156,6 +159,7 @@ describe('ingest_pipeline', () => {
         esClient: mockEsClient,
         description: descriptionDynamic,
         options,
+        displayNameTemplate: '{{entity.id}}',
       });
 
       expect(mockEsClient.ingest.putPipeline).toHaveBeenCalledTimes(1);
@@ -179,6 +183,7 @@ describe('ingest_pipeline', () => {
         esClient: mockEsClient,
         description: descriptionWithCustomPipeline,
         options,
+        displayNameTemplate: '{{entity.id}}',
       });
 
       expect(customPipelineFn).toHaveBeenCalledTimes(1);
@@ -201,6 +206,7 @@ describe('ingest_pipeline', () => {
         esClient: mockEsClient,
         description: descriptionWithCustom,
         options,
+        displayNameTemplate: '{{entity.id}}',
       });
 
       expect(mockEsClient.ingest.putPipeline).toHaveBeenCalledTimes(1);
