@@ -98,7 +98,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
             titlesManager.reinitializeState(updatedState);
           };
           try {
-            await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
+            await uiActionsService.executeTriggerActions('ESQL_CONTROL_TRIGGER', {
               queryString: nextState.esqlQuery,
               variableType: nextState.variableType,
               controlType: nextState.controlType,

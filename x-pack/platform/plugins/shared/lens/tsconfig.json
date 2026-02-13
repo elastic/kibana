@@ -140,7 +140,6 @@
     "@kbn/esql-language",
     "@kbn/cps",
     "@kbn/kql",
-    "@kbn/controls-constants",
     "@kbn/core-base-browser-mocks",
     "@kbn/react-kibana-context-env",
     "@kbn/scout"

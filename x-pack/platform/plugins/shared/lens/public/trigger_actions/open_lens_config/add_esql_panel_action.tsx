@@ -67,7 +67,6 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
         }
         return embeddable.getEditPanel?.({
           closeFlyout,
-          showOnly: true,
         });
       },
       options: { uuid },

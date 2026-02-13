@@ -469,7 +469,6 @@ export const staticConnectors: BaseConnectorContract[] = [
   {
     type: 'elasticsearch.request',
     summary: 'Elasticsearch Request',
-    connectorIdRequired: false,
     paramsSchema: z.object({
       method: z.string(),
       path: z.string(),
@@ -485,7 +484,6 @@ export const staticConnectors: BaseConnectorContract[] = [
   {
     type: 'kibana.request',
     summary: 'Kibana Request',
-    connectorIdRequired: false,
     paramsSchema: z.object({
       method: z.string(),
       path: z.string(),

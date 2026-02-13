@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { apiTest } from '../../common/fixtures';
 import { esArchiversPath, esResourcesEndpoint } from '../../common/fixtures/constants';
 
-apiTest.describe('Profiling is setup and data is loaded', { tag: ['@ess'] }, () => {
+apiTest.describe('Profiling is setup and data is loaded', { tag: tags.stateful.classic }, () => {
   let viewerApiCreditials: RoleApiCredentials;
   let adminApiCreditials: RoleApiCredentials;
   apiTest.beforeAll(async ({ requestAuth, profilingSetup }) => {
