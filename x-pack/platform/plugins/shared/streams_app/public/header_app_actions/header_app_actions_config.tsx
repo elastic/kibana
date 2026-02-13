@@ -55,3 +55,49 @@ export function getStreamsHeaderAppActionsConfig(
     ],
   };
 }
+
+export interface StreamDetailHeaderAppActionsConfigDeps {
+  onFeedback?: () => void;
+  onPrimaryAction?: () => void;
+}
+
+/**
+ * Header app actions config for the Stream detail view: overflow (Feedback)
+ * and primary action button with Discover app icon.
+ */
+export function getStreamDetailHeaderAppActionsConfig(
+  deps: StreamDetailHeaderAppActionsConfigDeps = {}
+): ChromeHeaderAppActionsConfig {
+  const { onFeedback = () => {}, onPrimaryAction = () => {} } = deps;
+
+  return {
+    overflowPanels: [
+      {
+        id: 0,
+        title: '',
+        items: [
+          {
+            name: i18n.translate('xpack.streams.streamDetailHeaderAppActions.feedback', {
+              defaultMessage: 'Feedback',
+            }),
+            icon: 'editorComment',
+            onClick: onFeedback,
+          },
+        ],
+      },
+    ],
+    primaryActions: [
+      <EuiButtonIcon
+        key="stream-detail-discover"
+        size="xs"
+        color="text"
+        iconType="discoverApp"
+        onClick={onPrimaryAction}
+        data-test-subj="headerGlobalNav-appActionsStreamDetailDiscoverButton"
+        aria-label={i18n.translate('xpack.streams.streamDetailHeaderAppActions.discoverAriaLabel', {
+          defaultMessage: 'Discover',
+        })}
+      />,
+    ],
+  };
+}
