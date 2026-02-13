@@ -184,10 +184,12 @@ describe('DimensionsSelector', () => {
       expect(button).toHaveTextContent(String(MAX_DIMENSIONS_SELECTIONS));
 
       expect(button).toHaveAttribute('data-tooltip-content', 'true');
-    
-      const tooltip = screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}ButtonTooltip`);
+
+      const tooltip = screen.getByTestId(
+        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}ButtonTooltip`
+      );
       expect(tooltip).toBeInTheDocument();
-      
+
       const tooltipText = tooltip.textContent || '';
       expect(tooltipText).toContain('Maximum');
       expect(tooltipText).toContain(String(MAX_DIMENSIONS_SELECTIONS));
