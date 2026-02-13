@@ -112,7 +112,11 @@ describe('MissingDataStreamCallout', () => {
     const user = userEvent.setup();
     render(
       <I18nProvider>
-        <MissingDataStreamCallout streamName="logs-test" canManage={true} refreshDefinition={jest.fn()} />
+        <MissingDataStreamCallout
+          streamName="logs-test"
+          canManage={true}
+          refreshDefinition={jest.fn()}
+        />
       </I18nProvider>
     );
 
@@ -125,4 +129,3 @@ describe('MissingDataStreamCallout', () => {
     expect(mockNavigateToApp).not.toHaveBeenCalled();
   });
 });
-

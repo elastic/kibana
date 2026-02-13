@@ -25,7 +25,12 @@ export const restoreDataStreamRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
   }),
-  handler: async ({ params, request, getScopedClients, logger }): Promise<{ acknowledged: true }> => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    logger,
+  }): Promise<{ acknowledged: true }> => {
     const { streamsClient, scopedClusterClient } = await getScopedClients({ request });
 
     const stream = await streamsClient.getStream(params.path.name);
@@ -42,4 +47,3 @@ export const restoreDataStreamRoute = createServerRoute({
     return { acknowledged: true };
   },
 });
-
