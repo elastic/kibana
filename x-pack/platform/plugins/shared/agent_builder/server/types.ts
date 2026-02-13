@@ -10,6 +10,10 @@ import type { RunToolFn, RunAgentFn } from '@kbn/agent-builder-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -34,6 +38,7 @@ export interface AgentBuilderSetupDependencies {
   spaces?: SpacesPluginSetup;
   features: FeaturesPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  taskManager: TaskManagerSetupContract;
   actions: ActionsPluginSetup;
   home: HomeServerPluginSetup;
 }
@@ -44,6 +49,7 @@ export interface AgentBuilderStartDependencies {
   cloud?: CloudStart;
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface AttachmentsSetup {
