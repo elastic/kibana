@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/deeplinks-analytics'
   - '@kbn/dashboard-markdown'
+  - '@kbn/spaces-plugin'
 tags:
   - plugin
   - prod
