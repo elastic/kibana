@@ -136,7 +136,7 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     mutedInstanceIds: {
       type: 'keyword',
     },
-    mutedAlerts: {
+    snoozedAlerts: {
       type: 'nested',
       properties: {
         alertInstanceId: { type: 'keyword' },

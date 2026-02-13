@@ -9,8 +9,8 @@ import sinon from 'sinon';
 import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuditLogger } from '@kbn/core-security-server';
-import type { MutedAlertInstance } from '@kbn/alerting-types';
-import { clearExpiredMutedAlerts } from './clear_expired_muted_alerts';
+import type { SnoozedAlertInstance } from '@kbn/alerting-types';
+import { clearExpiredSnoozedAlerts } from './clear_expired_snoozed_alerts';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 let clock: sinon.SinonFakeTimers;
@@ -24,7 +24,7 @@ const mockAuditLogger: jest.Mocked<AuditLogger> = {
   includeSavedObjectNames: false,
 };
 
-describe('clearExpiredMutedAlerts()', () => {
+describe('clearExpiredSnoozedAlerts()', () => {
   beforeAll(() => {
     clock = sinon.useFakeTimers(NOW);
   });
@@ -37,23 +37,23 @@ describe('clearExpiredMutedAlerts()', () => {
   });
 
   test('clears expired entries and leaves unexpired ones', async () => {
-    const expiredEntry: MutedAlertInstance = {
+    const expiredEntry: SnoozedAlertInstance = {
       alertInstanceId: 'alert-expired',
       mutedAt: '2025-06-15T11:00:00.000Z',
       expiresAt: '2025-06-15T11:30:00.000Z', // 30 min ago
     };
-    const unexpiredEntry: MutedAlertInstance = {
+    const unexpiredEntry: SnoozedAlertInstance = {
       alertInstanceId: 'alert-active',
       mutedAt: '2025-06-15T11:50:00.000Z',
       expiresAt: '2025-06-15T13:00:00.000Z', // 1 hour from now
     };
 
     const rule = getRule({
-      mutedAlerts: [expiredEntry, unexpiredEntry],
+      snoozedAlerts: [expiredEntry, unexpiredEntry],
       mutedInstanceIds: ['alert-expired', 'alert-active'],
     });
 
-    await clearExpiredMutedAlerts({ esClient, logger: mockLogger, rule });
+    await clearExpiredSnoozedAlerts({ esClient, logger: mockLogger, rule });
 
     expect(esClient.update).toHaveBeenCalledTimes(1);
     expect(esClient.update).toHaveBeenCalledWith(
@@ -62,7 +62,7 @@ describe('clearExpiredMutedAlerts()', () => {
         index: ALERTING_CASES_SAVED_OBJECT_INDEX,
         doc: {
           alert: {
-            mutedAlerts: [unexpiredEntry],
+            snoozedAlerts: [unexpiredEntry],
             mutedInstanceIds: ['alert-active'],
           },
         },
@@ -74,30 +74,30 @@ describe('clearExpiredMutedAlerts()', () => {
   });
 
   test('clears expired entries and leaves indefinite (no expiresAt) ones', async () => {
-    const expiredEntry: MutedAlertInstance = {
+    const expiredEntry: SnoozedAlertInstance = {
       alertInstanceId: 'alert-expired',
       mutedAt: '2025-06-15T11:00:00.000Z',
       expiresAt: '2025-06-15T11:30:00.000Z',
     };
-    const indefiniteEntry: MutedAlertInstance = {
+    const indefiniteEntry: SnoozedAlertInstance = {
       alertInstanceId: 'alert-indefinite',
       mutedAt: '2025-06-15T10:00:00.000Z',
       // no expiresAt -- indefinite mute
     };
 
     const rule = getRule({
-      mutedAlerts: [expiredEntry, indefiniteEntry],
+      snoozedAlerts: [expiredEntry, indefiniteEntry],
       mutedInstanceIds: ['alert-expired', 'alert-indefinite'],
     });
 
-    await clearExpiredMutedAlerts({ esClient, logger: mockLogger, rule });
+    await clearExpiredSnoozedAlerts({ esClient, logger: mockLogger, rule });
 
     expect(esClient.update).toHaveBeenCalledTimes(1);
     expect(esClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
         doc: {
           alert: {
-            mutedAlerts: [indefiniteEntry],
+            snoozedAlerts: [indefiniteEntry],
             mutedInstanceIds: ['alert-indefinite'],
           },
         },
@@ -106,7 +106,7 @@ describe('clearExpiredMutedAlerts()', () => {
   });
 
   test('clears expired entry that also has conditions', async () => {
-    const expiredWithConditions: MutedAlertInstance = {
+    const expiredWithConditions: SnoozedAlertInstance = {
       alertInstanceId: 'alert-cond',
       mutedAt: '2025-06-15T11:00:00.000Z',
       expiresAt: '2025-06-15T11:30:00.000Z', // expired
@@ -117,18 +117,18 @@ describe('clearExpiredMutedAlerts()', () => {
     };
 
     const rule = getRule({
-      mutedAlerts: [expiredWithConditions],
+      snoozedAlerts: [expiredWithConditions],
       mutedInstanceIds: ['alert-cond'],
     });
 
-    await clearExpiredMutedAlerts({ esClient, logger: mockLogger, rule });
+    await clearExpiredSnoozedAlerts({ esClient, logger: mockLogger, rule });
 
     expect(esClient.update).toHaveBeenCalledTimes(1);
     expect(esClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
         doc: {
           alert: {
-            mutedAlerts: [],
+            snoozedAlerts: [],
             mutedInstanceIds: [],
           },
         },
@@ -137,51 +137,51 @@ describe('clearExpiredMutedAlerts()', () => {
   });
 
   test('does nothing when no entries are expired', async () => {
-    const futureEntry: MutedAlertInstance = {
+    const futureEntry: SnoozedAlertInstance = {
       alertInstanceId: 'alert-future',
       mutedAt: '2025-06-15T11:50:00.000Z',
       expiresAt: '2025-06-15T13:00:00.000Z', // 1 hour from now
     };
 
     const rule = getRule({
-      mutedAlerts: [futureEntry],
+      snoozedAlerts: [futureEntry],
       mutedInstanceIds: ['alert-future'],
     });
 
-    await clearExpiredMutedAlerts({ esClient, logger: mockLogger, rule });
+    await clearExpiredSnoozedAlerts({ esClient, logger: mockLogger, rule });
 
     expect(esClient.update).not.toHaveBeenCalled();
   });
 
-  test('does nothing when mutedAlerts is empty', async () => {
-    const rule = getRule({ mutedAlerts: [], mutedInstanceIds: [] });
+  test('does nothing when snoozedAlerts is empty', async () => {
+    const rule = getRule({ snoozedAlerts: [], mutedInstanceIds: [] });
 
-    await clearExpiredMutedAlerts({ esClient, logger: mockLogger, rule });
+    await clearExpiredSnoozedAlerts({ esClient, logger: mockLogger, rule });
 
     expect(esClient.update).not.toHaveBeenCalled();
   });
 
-  test('does nothing when mutedAlerts is undefined', async () => {
-    const rule = getRule({ mutedAlerts: undefined, mutedInstanceIds: [] });
+  test('does nothing when snoozedAlerts is undefined', async () => {
+    const rule = getRule({ snoozedAlerts: undefined, mutedInstanceIds: [] });
 
-    await clearExpiredMutedAlerts({ esClient, logger: mockLogger, rule });
+    await clearExpiredSnoozedAlerts({ esClient, logger: mockLogger, rule });
 
     expect(esClient.update).not.toHaveBeenCalled();
   });
 
   test('passes version for optimistic concurrency', async () => {
-    const expiredEntry: MutedAlertInstance = {
+    const expiredEntry: SnoozedAlertInstance = {
       alertInstanceId: 'alert-expired',
       mutedAt: '2025-06-15T11:00:00.000Z',
       expiresAt: '2025-06-15T11:30:00.000Z',
     };
 
     const rule = getRule({
-      mutedAlerts: [expiredEntry],
+      snoozedAlerts: [expiredEntry],
       mutedInstanceIds: ['alert-expired'],
     });
 
-    await clearExpiredMutedAlerts({
+    await clearExpiredSnoozedAlerts({
       esClient,
       logger: mockLogger,
       rule,
@@ -196,7 +196,7 @@ describe('clearExpiredMutedAlerts()', () => {
         if_primary_term: 1,
         doc: {
           alert: {
-            mutedAlerts: [],
+            snoozedAlerts: [],
             mutedInstanceIds: [],
           },
         },
@@ -204,26 +204,26 @@ describe('clearExpiredMutedAlerts()', () => {
     );
   });
 
-  test('leaves mutedInstanceIds entries that have no corresponding mutedAlerts entry', async () => {
-    const expiredEntry: MutedAlertInstance = {
+  test('leaves mutedInstanceIds entries that have no corresponding snoozedAlerts entry', async () => {
+    const expiredEntry: SnoozedAlertInstance = {
       alertInstanceId: 'alert-expired',
       mutedAt: '2025-06-15T11:00:00.000Z',
       expiresAt: '2025-06-15T11:30:00.000Z',
     };
 
     const rule = getRule({
-      mutedAlerts: [expiredEntry],
-      // 'legacy-muted' is in mutedInstanceIds but has no mutedAlerts entry
+      snoozedAlerts: [expiredEntry],
+      // 'legacy-muted' is in mutedInstanceIds but has no snoozedAlerts entry
       mutedInstanceIds: ['alert-expired', 'legacy-muted'],
     });
 
-    await clearExpiredMutedAlerts({ esClient, logger: mockLogger, rule });
+    await clearExpiredSnoozedAlerts({ esClient, logger: mockLogger, rule });
 
     expect(esClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
         doc: {
           alert: {
-            mutedAlerts: [],
+            snoozedAlerts: [],
             mutedInstanceIds: ['legacy-muted'],
           },
         },
@@ -232,35 +232,35 @@ describe('clearExpiredMutedAlerts()', () => {
   });
 
   test('handles multiple expired entries', async () => {
-    const expired1: MutedAlertInstance = {
+    const expired1: SnoozedAlertInstance = {
       alertInstanceId: 'alert-1',
       mutedAt: '2025-06-15T10:00:00.000Z',
       expiresAt: '2025-06-15T10:30:00.000Z',
     };
-    const expired2: MutedAlertInstance = {
+    const expired2: SnoozedAlertInstance = {
       alertInstanceId: 'alert-2',
       mutedAt: '2025-06-15T10:00:00.000Z',
       expiresAt: '2025-06-15T11:00:00.000Z',
     };
-    const active: MutedAlertInstance = {
+    const active: SnoozedAlertInstance = {
       alertInstanceId: 'alert-3',
       mutedAt: '2025-06-15T11:50:00.000Z',
       expiresAt: '2025-06-15T14:00:00.000Z',
     };
 
     const rule = getRule({
-      mutedAlerts: [expired1, expired2, active],
+      snoozedAlerts: [expired1, expired2, active],
       mutedInstanceIds: ['alert-1', 'alert-2', 'alert-3'],
     });
 
-    await clearExpiredMutedAlerts({ esClient, logger: mockLogger, rule });
+    await clearExpiredSnoozedAlerts({ esClient, logger: mockLogger, rule });
 
     expect(esClient.update).toHaveBeenCalledTimes(1);
     expect(esClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
         doc: {
           alert: {
-            mutedAlerts: [active],
+            snoozedAlerts: [active],
             mutedInstanceIds: ['alert-3'],
           },
         },
@@ -270,18 +270,18 @@ describe('clearExpiredMutedAlerts()', () => {
   });
 
   test('emits audit event for each expired entry when auditLogger is provided', async () => {
-    const expiredEntry: MutedAlertInstance = {
+    const expiredEntry: SnoozedAlertInstance = {
       alertInstanceId: 'alert-expired',
       mutedAt: '2025-06-15T11:00:00.000Z',
       expiresAt: '2025-06-15T11:30:00.000Z',
     };
 
     const rule = getRule({
-      mutedAlerts: [expiredEntry],
+      snoozedAlerts: [expiredEntry],
       mutedInstanceIds: ['alert-expired'],
     });
 
-    await clearExpiredMutedAlerts({
+    await clearExpiredSnoozedAlerts({
       esClient,
       logger: mockLogger,
       rule,
@@ -302,35 +302,35 @@ describe('clearExpiredMutedAlerts()', () => {
   });
 
   test('does not emit audit event when auditLogger is not provided', async () => {
-    const expiredEntry: MutedAlertInstance = {
+    const expiredEntry: SnoozedAlertInstance = {
       alertInstanceId: 'alert-expired',
       mutedAt: '2025-06-15T11:00:00.000Z',
       expiresAt: '2025-06-15T11:30:00.000Z',
     };
 
     const rule = getRule({
-      mutedAlerts: [expiredEntry],
+      snoozedAlerts: [expiredEntry],
       mutedInstanceIds: ['alert-expired'],
     });
 
-    await clearExpiredMutedAlerts({ esClient, logger: mockLogger, rule });
+    await clearExpiredSnoozedAlerts({ esClient, logger: mockLogger, rule });
 
     expect(mockAuditLogger.log).not.toHaveBeenCalled();
   });
 
   test('does not emit audit event when nothing expired', async () => {
-    const futureEntry: MutedAlertInstance = {
+    const futureEntry: SnoozedAlertInstance = {
       alertInstanceId: 'alert-future',
       mutedAt: '2025-06-15T11:50:00.000Z',
       expiresAt: '2025-06-15T13:00:00.000Z',
     };
 
     const rule = getRule({
-      mutedAlerts: [futureEntry],
+      snoozedAlerts: [futureEntry],
       mutedInstanceIds: ['alert-future'],
     });
 
-    await clearExpiredMutedAlerts({
+    await clearExpiredSnoozedAlerts({
       esClient,
       logger: mockLogger,
       rule,
@@ -342,14 +342,14 @@ describe('clearExpiredMutedAlerts()', () => {
 });
 
 const getRule = ({
-  mutedAlerts,
+  snoozedAlerts,
   mutedInstanceIds,
 }: {
-  mutedAlerts: MutedAlertInstance[] | undefined;
+  snoozedAlerts: SnoozedAlertInstance[] | undefined;
   mutedInstanceIds: string[];
 }) => ({
   id: 'rule-1',
   name: 'Test Rule',
-  mutedAlerts,
+  snoozedAlerts,
   mutedInstanceIds,
 });

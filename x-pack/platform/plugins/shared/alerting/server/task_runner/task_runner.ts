@@ -65,7 +65,7 @@ import {
   withAlertingSpan,
   processRunResults,
   clearExpiredSnoozes,
-  clearExpiredMutedAlerts,
+  clearExpiredSnoozedAlerts,
   getSchedule,
   getState,
   getTaskRunError,
@@ -442,13 +442,13 @@ export class TaskRunner<
         const updatedMutedInstanceIds = (rule.mutedInstanceIds ?? []).filter(
           (id: string) => !idsToUnmute.has(id)
         );
-        const updatedMutedAlerts = (rule.mutedAlerts ?? []).filter(
+        const updatedSnoozedAlerts = (rule.snoozedAlerts ?? []).filter(
           (entry) => !idsToUnmute.has(entry.alertInstanceId)
         );
 
         await partiallyUpdateRuleWithEs(this.context.elasticsearch.client.asInternalUser, ruleId, {
           mutedInstanceIds: updatedMutedInstanceIds,
-          mutedAlerts: updatedMutedAlerts,
+          snoozedAlerts: updatedSnoozedAlerts,
           updatedAt: new Date().toISOString(),
         });
 
@@ -632,7 +632,7 @@ export class TaskRunner<
 
       (async () => {
         try {
-          await clearExpiredMutedAlerts({
+          await clearExpiredSnoozedAlerts({
             esClient: this.context.elasticsearch.client.asInternalUser,
             logger: this.logger,
             rule: runRuleParams.rule,

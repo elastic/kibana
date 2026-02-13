@@ -1,0 +1,6 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        snoozeAlertRequest:
+          $ref: './examples_snooze_alert.request.yaml'

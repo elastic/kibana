@@ -19,7 +19,7 @@ const muteConditionSchema = schema.object({
   snapshotValue: schema.maybe(schema.string()),
 });
 
-const mutedAlertInstanceSchema = schema.object({
+const snoozedAlertInstanceSchema = schema.object({
   alertInstanceId: schema.string(),
   mutedAt: schema.string(),
   mutedBy: schema.maybe(schema.string()),
@@ -29,5 +29,5 @@ const mutedAlertInstanceSchema = schema.object({
 });
 
 export const rawRuleSchema = rawRuleSchemaV8.extends({
-  mutedAlerts: schema.maybe(schema.arrayOf(mutedAlertInstanceSchema)),
+  snoozedAlerts: schema.maybe(schema.arrayOf(snoozedAlertInstanceSchema)),
 });

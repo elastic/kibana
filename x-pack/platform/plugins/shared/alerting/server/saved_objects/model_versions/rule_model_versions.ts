@@ -110,7 +110,7 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
       {
         type: 'mappings_addition',
         addedMappings: {
-          mutedAlerts: {
+          snoozedAlerts: {
             type: 'nested',
             properties: {
               alertInstanceId: { type: 'keyword' },

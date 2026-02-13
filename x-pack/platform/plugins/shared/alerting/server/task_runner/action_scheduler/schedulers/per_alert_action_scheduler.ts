@@ -6,10 +6,10 @@
  */
 
 import type { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
-import type { RuleAction, RuleTypeParams, MutedAlertInstance } from '@kbn/alerting-types';
+import type { RuleAction, RuleTypeParams, SnoozedAlertInstance } from '@kbn/alerting-types';
 import { RuleNotifyWhen } from '@kbn/alerting-types';
 import { compact } from 'lodash';
-import { evaluateMuteConditions } from '../../../lib/mute';
+import { evaluateSnoozeConditions } from '../../../lib/snooze';
 import type { RuleTypeState, RuleAlertData } from '../../../../common';
 import { parseDuration } from '../../../../common';
 import type { GetSummarizedAlertsParams } from '../../../alerts_client/types';
@@ -59,8 +59,8 @@ export class PerAlertActionScheduler<
 > implements IActionScheduler<State, Context, ActionGroupIds, RecoveryActionGroupId>
 {
   private actions: RuleAction[] = [];
-  private mutedAlertIdsSet: Set<string> = new Set();
-  private mutedAlertsMap: Map<string, MutedAlertInstance> = new Map();
+  private snoozedAlertIdsSet: Set<string> = new Set();
+  private snoozedAlertsMap: Map<string, SnoozedAlertInstance> = new Map();
   private ruleTypeActionGroups?: Map<ActionGroupIds | RecoveryActionGroupId, string>;
   private skippedAlerts: { [key: string]: { reason: string } } = {};
 
@@ -82,13 +82,13 @@ export class PerAlertActionScheduler<
     this.ruleTypeActionGroups = new Map(
       context.ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
     );
-    this.mutedAlertIdsSet = new Set(context.rule.mutedInstanceIds);
+    this.snoozedAlertIdsSet = new Set(context.rule.mutedInstanceIds);
 
-    // Build a lookup map for conditional muted alerts
-    const mutedAlerts = context.rule.mutedAlerts;
-    if (mutedAlerts) {
-      for (const entry of mutedAlerts) {
-        this.mutedAlertsMap.set(entry.alertInstanceId, entry);
+    // Build a lookup map for conditional snoozed alerts
+    const snoozedAlerts = context.rule.snoozedAlerts;
+    if (snoozedAlerts) {
+      for (const entry of snoozedAlerts) {
+        this.snoozedAlertsMap.set(entry.alertInstanceId, entry);
       }
     }
 
@@ -379,12 +379,12 @@ export class PerAlertActionScheduler<
   ) {
     const alertId = alert.getId();
 
-    // 1. Check conditional muted alerts first (mutedAlerts array)
-    const mutedAlertEntry = this.mutedAlertsMap.get(alertId);
-    if (mutedAlertEntry) {
+    // 1. Check conditional snoozed alerts first (snoozedAlerts array)
+    const snoozedAlertEntry = this.snoozedAlertsMap.get(alertId);
+    if (snoozedAlertEntry) {
       const hasConditions =
-        mutedAlertEntry.expiresAt ||
-        (mutedAlertEntry.conditions && mutedAlertEntry.conditions.length > 0);
+        snoozedAlertEntry.expiresAt ||
+        (snoozedAlertEntry.conditions && snoozedAlertEntry.conditions.length > 0);
 
       if (hasConditions) {
         // Build current alert data for condition evaluation
@@ -392,7 +392,7 @@ export class PerAlertActionScheduler<
           ? (alert.getAlertAsData() as Record<string, unknown>) ?? {}
           : {};
 
-        const evalResult = evaluateMuteConditions(mutedAlertEntry, alertData);
+        const evalResult = evaluateSnoozeConditions(snoozedAlertEntry, alertData);
         if (evalResult.shouldUnmute) {
           // Conditions met -- mark for auto-unmute, allow actions to fire
           this.alertsToAutoUnmute.push({
@@ -420,7 +420,7 @@ export class PerAlertActionScheduler<
     }
 
     // 2. Fall back to legacy mutedInstanceIds (simple, indefinite mute)
-    const muted = this.mutedAlertIdsSet.has(alertId);
+    const muted = this.snoozedAlertIdsSet.has(alertId);
     if (muted) {
       if (
         !this.skippedAlerts[alertId] ||

@@ -73,7 +73,7 @@ const RuleAttributesAllowedForPartialUpdate = [
   'running',
   'snoozeSchedule',
   'mutedInstanceIds',
-  'mutedAlerts',
+  'snoozedAlerts',
 ];
 
 // direct, partial update to a rule saved object via ElasticsearchClient

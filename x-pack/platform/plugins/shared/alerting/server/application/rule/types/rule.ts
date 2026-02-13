@@ -7,7 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { ruleParamsSchema } from '@kbn/response-ops-rule-params';
-import type { MutedAlertInstance } from '@kbn/alerting-types';
+import type { SnoozedAlertInstance } from '@kbn/alerting-types';
 import type {
   ruleNotifyWhen,
   ruleLastRunOutcomeValues,
@@ -73,7 +73,7 @@ export interface Rule<Params extends RuleParams = never> {
   muteAll: RuleSchemaType['muteAll'];
   notifyWhen?: RuleSchemaType['notifyWhen'];
   mutedInstanceIds: RuleSchemaType['mutedInstanceIds'];
-  mutedAlerts?: MutedAlertInstance[];
+  snoozedAlerts?: SnoozedAlertInstance[];
   executionStatus?: RuleExecutionStatus;
   monitoring?: RuleSchemaType['monitoring'];
   snoozeSchedule?: RuleSchemaType['snoozeSchedule'];
@@ -114,7 +114,7 @@ export interface RuleDomain<Params extends RuleParams = never> {
   muteAll: RuleDomainSchemaType['muteAll'];
   notifyWhen?: RuleDomainSchemaType['notifyWhen'];
   mutedInstanceIds: RuleDomainSchemaType['mutedInstanceIds'];
-  mutedAlerts?: MutedAlertInstance[];
+  snoozedAlerts?: SnoozedAlertInstance[];
   executionStatus?: RuleExecutionStatus;
   monitoring?: RuleDomainSchemaType['monitoring'];
   snoozeSchedule?: RuleDomainSchemaType['snoozeSchedule'];

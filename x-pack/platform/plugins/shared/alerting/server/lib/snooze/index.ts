@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { getActiveSnoozeIfExist } from './get_active_snooze_if_exist';
-export { isSnoozeExpired } from './is_snooze_expired';
+export { evaluateSnoozeConditions } from './evaluate_snooze_conditions';
+export type { SnoozeConditionEvalResult } from './evaluate_snooze_conditions';

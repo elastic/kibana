@@ -1,6 +1,0 @@
-requestBody:
-  content:
-    application/json:
-      examples:
-        muteAlertRequest:
-          $ref: './examples_mute_alert.request.yaml'

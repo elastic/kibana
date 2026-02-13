@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { getAllMutedAlertInstanceIds } from './get_all_muted_alert_instance_ids';
+import { getAllSnoozedAlertInstanceIds } from './get_all_suppressed_alert_instance_ids';
 
-describe('getAllMutedAlertInstanceIds', () => {
-  it('returns legacy mutedInstanceIds when mutedAlerts is undefined', () => {
-    const result = getAllMutedAlertInstanceIds({
+describe('getAllSnoozedAlertInstanceIds', () => {
+  it('returns legacy mutedInstanceIds when snoozedAlerts is undefined', () => {
+    const result = getAllSnoozedAlertInstanceIds({
       mutedInstanceIds: ['a', 'b'],
     });
     expect(result).toEqual(['a', 'b']);
   });
 
-  it('returns legacy mutedInstanceIds when mutedAlerts is empty', () => {
-    const result = getAllMutedAlertInstanceIds({
+  it('returns legacy mutedInstanceIds when snoozedAlerts is empty', () => {
+    const result = getAllSnoozedAlertInstanceIds({
       mutedInstanceIds: ['a', 'b'],
-      mutedAlerts: [],
+      snoozedAlerts: [],
     });
     expect(result).toEqual(['a', 'b']);
   });
 
   it('returns empty array when neither source has data', () => {
-    const result = getAllMutedAlertInstanceIds({});
+    const result = getAllSnoozedAlertInstanceIds({});
     expect(result).toEqual([]);
   });
 
-  it('combines legacy and mutedAlerts entries', () => {
-    const result = getAllMutedAlertInstanceIds({
+  it('combines legacy and snoozedAlerts entries', () => {
+    const result = getAllSnoozedAlertInstanceIds({
       mutedInstanceIds: ['a'],
-      mutedAlerts: [
+      snoozedAlerts: [
         {
           alertInstanceId: 'b',
           mutedAt: '2025-01-01T00:00:00.000Z',
@@ -45,9 +45,9 @@ describe('getAllMutedAlertInstanceIds', () => {
   });
 
   it('de-duplicates IDs present in both sources', () => {
-    const result = getAllMutedAlertInstanceIds({
+    const result = getAllSnoozedAlertInstanceIds({
       mutedInstanceIds: ['a', 'b'],
-      mutedAlerts: [
+      snoozedAlerts: [
         {
           alertInstanceId: 'b',
           mutedAt: '2025-01-01T00:00:00.000Z',
@@ -66,10 +66,10 @@ describe('getAllMutedAlertInstanceIds', () => {
     expect(result).toHaveLength(3);
   });
 
-  it('returns only mutedAlerts IDs when legacy is empty', () => {
-    const result = getAllMutedAlertInstanceIds({
+  it('returns only snoozedAlerts IDs when legacy is empty', () => {
+    const result = getAllSnoozedAlertInstanceIds({
       mutedInstanceIds: [],
-      mutedAlerts: [
+      snoozedAlerts: [
         {
           alertInstanceId: 'x',
           mutedAt: '2025-01-01T00:00:00.000Z',

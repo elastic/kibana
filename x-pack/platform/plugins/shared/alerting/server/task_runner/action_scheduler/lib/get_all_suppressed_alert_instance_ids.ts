@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import type { MutedAlertInstance } from '@kbn/alerting-types';
+import type { SnoozedAlertInstance } from '@kbn/alerting-types';
 
 /**
- * Combines legacy `mutedInstanceIds` and the newer `mutedAlerts` entries
+ * Combines legacy `mutedInstanceIds` and the newer `snoozedAlerts` entries
  * into a single de-duplicated array of alert instance IDs.
  *
  * This is used by summary and system action schedulers to determine which
  * alerts should be excluded from action scheduling.
  */
-export function getAllMutedAlertInstanceIds(rule: {
+export function getAllSnoozedAlertInstanceIds(rule: {
   mutedInstanceIds?: string[];
-  mutedAlerts?: MutedAlertInstance[];
+  snoozedAlerts?: SnoozedAlertInstance[];
 }): string[] {
   const legacyIds = rule.mutedInstanceIds ?? [];
-  const mutedAlerts = rule.mutedAlerts;
-  if (!mutedAlerts || mutedAlerts.length === 0) {
+  const snoozedAlerts = rule.snoozedAlerts;
+  if (!snoozedAlerts || snoozedAlerts.length === 0) {
     return legacyIds;
   }
-  const mutedAlertIds = mutedAlerts.map((entry) => entry.alertInstanceId);
-  return [...new Set([...legacyIds, ...mutedAlertIds])];
+  const snoozedAlertIds = snoozedAlerts.map((entry) => entry.alertInstanceId);
+  return [...new Set([...legacyIds, ...snoozedAlertIds])];
 }

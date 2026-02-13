@@ -161,7 +161,7 @@ const muteConditionSchema = schema.object({
   snapshotValue: schema.maybe(schema.string()),
 });
 
-const mutedAlertInstanceSchema = schema.object({
+const snoozedAlertInstanceSchema = schema.object({
   alertInstanceId: schema.string(),
   mutedAt: schema.string(),
   mutedBy: schema.maybe(schema.string()),
@@ -197,7 +197,7 @@ export const ruleDomainSchema = schema.object({
   muteAll: schema.boolean(),
   notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
   mutedInstanceIds: schema.arrayOf(schema.string()),
-  mutedAlerts: schema.maybe(schema.arrayOf(mutedAlertInstanceSchema)),
+  snoozedAlerts: schema.maybe(schema.arrayOf(snoozedAlertInstanceSchema)),
   executionStatus: ruleExecutionStatusSchema,
   monitoring: schema.maybe(monitoringSchema),
   snoozeSchedule: schema.maybe(schema.arrayOf(snoozeScheduleSchema)),
@@ -240,7 +240,7 @@ export const ruleSchema = schema.object({
   muteAll: schema.boolean(),
   notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
   mutedInstanceIds: schema.arrayOf(schema.string()),
-  mutedAlerts: schema.maybe(schema.arrayOf(mutedAlertInstanceSchema)),
+  snoozedAlerts: schema.maybe(schema.arrayOf(snoozedAlertInstanceSchema)),
   executionStatus: ruleExecutionStatusSchema,
   monitoring: schema.maybe(monitoringSchema),
   snoozeSchedule: schema.maybe(schema.arrayOf(snoozeScheduleSchema)),

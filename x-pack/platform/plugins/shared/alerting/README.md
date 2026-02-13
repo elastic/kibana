@@ -261,7 +261,7 @@ The alerting framework supports per-alert-instance snooze/mute with optional tim
 The `Rule` saved object has two fields for muting individual alert instances:
 
 - **`mutedInstanceIds: string[]`** -- Legacy field. A simple list of muted alert instance IDs. Used for indefinite (unconditional) mutes and backward compatibility.
-- **`mutedAlerts: MutedAlertInstance[]`** -- New field. Each entry can optionally carry an `expiresAt` timestamp and/or an array of `conditions` that, when met, automatically lift the mute.
+- **`snoozedAlerts: SnoozedAlertInstance[]`** -- New field. Each entry can optionally carry an `expiresAt` timestamp and/or an array of `conditions` that, when met, automatically lift the mute.
 
 ```typescript
 interface MuteCondition {
@@ -271,7 +271,7 @@ interface MuteCondition {
   snapshotValue?: string;    // value at the time of mute (for change detection)
 }
 
-interface MutedAlertInstance {
+interface SnoozedAlertInstance {
   alertInstanceId: string;
   mutedAt: string;           // ISO timestamp
   mutedBy?: string;
@@ -313,9 +313,9 @@ When no body is provided, the alert is muted indefinitely (existing behavior).
 
 ### Auto-Unmute
 
-During each rule execution, the `PerAlertActionScheduler` evaluates conditions for every alert in the `mutedAlerts` array. If conditions are met, the alert is:
+During each rule execution, the `PerAlertActionScheduler` evaluates conditions for every alert in the `snoozedAlerts` array. If conditions are met, the alert is:
 
-1. Removed from both `mutedAlerts` and `mutedInstanceIds` on the Rule saved object.
+1. Removed from both `snoozedAlerts` and `mutedInstanceIds` on the Rule saved object.
 2. Allowed to fire actions in the current execution cycle.
 3. Logged via `logger.info()` with the reason for unmute.
 

@@ -201,7 +201,7 @@
           }
         }
       },
-      "mutedAlerts": [
+      "snoozedAlerts": [
         {
           "alertInstanceId": "test-alert-1",
           "mutedAt": "2025-11-21T12:00:00Z",

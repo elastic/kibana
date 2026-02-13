@@ -234,7 +234,7 @@
       "muteAll": {
         "type": "boolean"
       },
-      "mutedAlerts": {
+      "snoozedAlerts": {
         "properties": {
           "alertInstanceId": {
             "type": "keyword"

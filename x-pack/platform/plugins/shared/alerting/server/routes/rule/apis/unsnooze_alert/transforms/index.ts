@@ -4,6 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export { evaluateMuteConditions } from './evaluate_mute_conditions';
-export type { MuteConditionEvalResult } from './evaluate_mute_conditions';
+export { transformRequestParamsToApplication as transformRequestParamsToApplicationV1 } from './transform_request_params_to_application/v1';

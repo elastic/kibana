@@ -41,7 +41,7 @@ export const transformRuleDomainToRule = <Params extends RuleParams = never>(
     muteAll: ruleDomain.muteAll,
     notifyWhen: ruleDomain.notifyWhen,
     mutedInstanceIds: ruleDomain.mutedInstanceIds,
-    mutedAlerts: ruleDomain.mutedAlerts,
+    snoozedAlerts: ruleDomain.snoozedAlerts,
     executionStatus: ruleDomain.executionStatus,
     monitoring: ruleDomain.monitoring,
     snoozeSchedule: ruleDomain.snoozeSchedule,

@@ -11,16 +11,16 @@ import type { AuditLogger } from '@kbn/core-security-server';
 import { partiallyUpdateRuleWithEs, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { ruleAuditEvent, RuleAuditAction } from '../../rules_client/common/audit_events';
 
-interface ClearExpiredMutedAlertsOpts {
+interface ClearExpiredSnoozedAlertsOpts {
   esClient: ElasticsearchClient;
   logger: Logger;
-  rule: Pick<SanitizedRule<RuleTypeParams>, 'id' | 'name' | 'mutedAlerts' | 'mutedInstanceIds'>;
+  rule: Pick<SanitizedRule<RuleTypeParams>, 'id' | 'name' | 'snoozedAlerts' | 'mutedInstanceIds'>;
   version?: string;
   auditLogger?: AuditLogger;
 }
 
 /**
- * Sweeps the `mutedAlerts` array on a rule saved object and removes entries
+ * Sweeps the `snoozedAlerts` array on a rule saved object and removes entries
  * whose `expiresAt` timestamp is in the past. Also removes the corresponding
  * IDs from the legacy `mutedInstanceIds` array to keep both in sync.
  *
@@ -28,15 +28,15 @@ interface ClearExpiredMutedAlertsOpts {
  * time-based snoozes are cleaned up even when the snoozed alert does not fire
  * in the current execution cycle.
  */
-export async function clearExpiredMutedAlerts(opts: ClearExpiredMutedAlertsOpts): Promise<void> {
+export async function clearExpiredSnoozedAlerts(opts: ClearExpiredSnoozedAlertsOpts): Promise<void> {
   const { esClient, logger, rule, version, auditLogger } = opts;
 
-  if (!rule.mutedAlerts || rule.mutedAlerts.length === 0) return;
+  if (!rule.snoozedAlerts || rule.snoozedAlerts.length === 0) return;
 
   const now = Date.now();
   const expiredIds = new Set<string>();
 
-  for (const entry of rule.mutedAlerts) {
+  for (const entry of rule.snoozedAlerts) {
     if (entry.expiresAt && new Date(entry.expiresAt).getTime() <= now) {
       expiredIds.add(entry.alertInstanceId);
     }
@@ -44,13 +44,13 @@ export async function clearExpiredMutedAlerts(opts: ClearExpiredMutedAlertsOpts)
 
   if (expiredIds.size === 0) return;
 
-  const updatedMutedAlerts = rule.mutedAlerts.filter((e) => !expiredIds.has(e.alertInstanceId));
+  const updatedSnoozedAlerts = rule.snoozedAlerts.filter((e) => !expiredIds.has(e.alertInstanceId));
   const updatedMutedInstanceIds = (rule.mutedInstanceIds ?? []).filter((id) => !expiredIds.has(id));
 
   await partiallyUpdateRuleWithEs(
     esClient,
     rule.id,
-    { mutedAlerts: updatedMutedAlerts, mutedInstanceIds: updatedMutedInstanceIds },
+    { snoozedAlerts: updatedSnoozedAlerts, mutedInstanceIds: updatedMutedInstanceIds },
     { version, refresh: false }
   );
 

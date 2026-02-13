@@ -13,7 +13,7 @@ import type { GetSummarizedAlertsParams } from '../../../alerts_client/types';
 import {
   buildRuleUrl,
   formatActionToEnqueue,
-  getAllMutedAlertInstanceIds,
+  getAllSnoozedAlertInstanceIds,
   getSummarizedAlerts,
   shouldScheduleAction,
 } from '../lib';
@@ -73,7 +73,7 @@ export class SystemActionScheduler<
       const options: GetSummarizedAlertsParams = {
         spaceId: this.context.taskInstance.params.spaceId,
         ruleId: this.context.rule.id,
-        excludedAlertInstanceIds: getAllMutedAlertInstanceIds(this.context.rule),
+        excludedAlertInstanceIds: getAllSnoozedAlertInstanceIds(this.context.rule),
         executionUuid: this.context.executionId,
       };
 

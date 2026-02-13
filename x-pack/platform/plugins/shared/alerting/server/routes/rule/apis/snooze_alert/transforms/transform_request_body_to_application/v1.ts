@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type { MuteAlertQuery } from '../../../../../../application/rule/methods/mute_alert/types';
-import type { MuteAlertRequestBodyV1 } from '../../../../../../../common/routes/rule/apis/mute_alert';
+import type { SnoozeAlertRequestBodyV1 } from '../../../../../../../common/routes/rule/apis/snooze_alert';
+import type { SnoozeAlertOptions } from '../../../../../../application/rule/methods/snooze_alert/types';
 
 /**
- * Transforms the snake_case request body into camelCase application-layer fields
- * that can be merged into the MuteAlertQuery passed to muteInstance().
+ * Transforms the snake_case request body into camelCase application-layer fields.
  */
 export const transformRequestBodyToApplication = (
-  body?: MuteAlertRequestBodyV1
-): Partial<MuteAlertQuery> => {
+  body?: SnoozeAlertRequestBodyV1
+): Partial<SnoozeAlertOptions> => {
   if (!body) {
     return {};
   }

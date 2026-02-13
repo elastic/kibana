@@ -166,9 +166,9 @@ export interface RuleMonitoring {
 
 /**
  * Describes a condition under which a per-alert mute/snooze should be automatically lifted.
- * Multiple conditions on the same MutedAlertInstance are combined with the `conditionOperator`.
+ * Multiple conditions on the same SnoozedAlertInstance are combined with the `conditionOperator`.
  */
-export interface MuteCondition {
+export interface SnoozeCondition {
   /** The kind of condition to evaluate. */
   type: 'severity_change' | 'severity_equals' | 'field_change';
   /** The alert document field to monitor (e.g. 'kibana.alert.severity'). */
@@ -184,7 +184,7 @@ export interface MuteCondition {
  * and/or conditional unmute logic.  Stored in the Rule saved object alongside
  * the legacy `mutedInstanceIds` array.
  */
-export interface MutedAlertInstance {
+export interface SnoozedAlertInstance {
   /** The alert instance ID (matches entries in `mutedInstanceIds`). */
   alertInstanceId: string;
   /** ISO timestamp when the mute was created. */
@@ -194,7 +194,7 @@ export interface MutedAlertInstance {
   /** ISO timestamp after which the mute expires automatically. Absent means indefinite. */
   expiresAt?: string;
   /** Zero or more conditions; when any/all are met the alert is auto-unmuted. */
-  conditions?: MuteCondition[];
+  conditions?: SnoozeCondition[];
   /** How multiple conditions (including time expiry) combine. 'any' = OR (first met wins). */
   conditionOperator?: 'any' | 'all';
 }
@@ -286,7 +286,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   muteAll: boolean;
   notifyWhen?: RuleNotifyWhenType | null;
   mutedInstanceIds: string[];
-  mutedAlerts?: MutedAlertInstance[];
+  snoozedAlerts?: SnoozedAlertInstance[];
   executionStatus: RuleExecutionStatus;
   monitoring?: RuleMonitoring;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
