@@ -191,6 +191,26 @@ describe('EditIlmPhasesFlyout', () => {
       expect(onSave).toHaveBeenCalledWith(initialPhases);
     });
 
+    it('allows saving unchanged phases when warm min_age uses ms', async () => {
+      const initialPhases: IlmPolicyPhases = {
+        hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+        warm: { name: 'warm', size_in_bytes: 0, min_age: '1500ms' },
+      } as any;
+
+      const { onSave } = renderFlyout({ initialPhases }, { initialSelectedPhase: 'warm' });
+      await tick();
+
+      const warmPanel = withinPhase('warm');
+      const unitSelect = warmPanel.getByTestId(
+        `${DATA_TEST_SUBJ}MoveAfterUnit`
+      ) as HTMLSelectElement;
+      expect(unitSelect.value).toBe('ms');
+
+      fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`));
+      await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+      expect(onSave).toHaveBeenCalledWith(initialPhases);
+    });
+
     it('calls onClose when cancelling', async () => {
       const { onClose } = renderFlyout();
       await tick();

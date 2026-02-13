@@ -16,7 +16,8 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import type { DownsamplePhase, TimeUnit } from '../types';
+import { getTimeUnitLabel } from '../../../../helpers/format_size_units';
+import type { DownsamplePhase, PreservedTimeUnit, TimeUnit } from '../types';
 import { DOWNSAMPLE_PHASES } from '../types';
 import { formatMillisecondsInUnit, getRelativeBoundsInMs } from '../utils';
 import { useOnFieldErrorsChange } from '../error_tracking';
@@ -72,7 +73,20 @@ export const DownsampleIntervalField = ({
           {(unitField) => {
             const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(valueField);
             const currentValue = String(valueField.value ?? '');
-            const currentUnit = String(unitField.value ?? 'd') as TimeUnit;
+            const currentUnit = String(unitField.value ?? 'd') as PreservedTimeUnit;
+
+            let unitOptions: Array<{ value: PreservedTimeUnit; text: string }> =
+              timeUnitOptions.map((o) => ({ value: o.value, text: o.text }));
+            const canShowNonDefaultUnit =
+              currentUnit === 'ms' || currentUnit === 'micros' || currentUnit === 'nanos';
+            if (canShowNonDefaultUnit) {
+              // Preserve and display known non-default units that can appear in ILM policies.
+              // We still only *offer* `d/h/m/s` by default.
+              unitOptions = [
+                ...unitOptions,
+                { value: currentUnit, text: getTimeUnitLabel(currentUnit) },
+              ];
+            }
 
             const showInvalid = isEnabled && isInvalid;
             const showError = isEnabled ? errorMessage : null;
@@ -140,10 +154,10 @@ export const DownsampleIntervalField = ({
                           defaultMessage: 'Downsampling interval unit',
                         }
                       )}
-                      options={timeUnitOptions.map((o) => ({ value: o.value, text: o.text }))}
+                      options={unitOptions}
                       value={currentUnit}
                       data-test-subj={`${dataTestSubj}DownsamplingIntervalUnit`}
-                      onChange={(e) => unitField.setValue(e.target.value as TimeUnit)}
+                      onChange={(e) => unitField.setValue(e.target.value as PreservedTimeUnit)}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

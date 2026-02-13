@@ -6,15 +6,21 @@
  */
 
 import type { IlmPolicyHotPhase, IlmPolicyPhases } from '@kbn/streams-schema';
+import type { StreamsTimeUnit } from '../../../helpers/format_size_units';
 
-export type TimeUnit = 'd' | 'h' | 'm' | 's';
+export type TimeUnit = Extract<StreamsTimeUnit, 'd' | 'h' | 'm' | 's'>;
+export type PreservedTimeUnit = StreamsTimeUnit;
 
 export const DOWNSAMPLE_PHASES = ['hot', 'warm', 'cold'] as const;
 export type DownsamplePhase = (typeof DOWNSAMPLE_PHASES)[number];
 
 export interface MinAgeMetaFields {
   minAgeValue: string;
-  minAgeUnit: TimeUnit;
+  /**
+   * The UI only offers `d/h/m/s` by default, but ILM policies can contain other units (e.g. `ms`,
+   * `micros`, `nanos`). We preserve and round-trip the unit as-is.
+   */
+  minAgeUnit: PreservedTimeUnit;
   /**
    * Derived field used for cross-phase min_age validation.
    * -1 means "unset / invalid / not computed".
@@ -24,7 +30,11 @@ export interface MinAgeMetaFields {
 
 export interface DownsampleMetaFields {
   fixedIntervalValue: string;
-  fixedIntervalUnit: TimeUnit;
+  /**
+   * The UI only offers `d/h/m/s` by default, but ILM policies can contain other units (e.g. `ms`).
+   * We preserve and round-trip the unit as-is.
+   */
+  fixedIntervalUnit: PreservedTimeUnit;
 }
 
 export interface HotPhaseMetaFields {

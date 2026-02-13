@@ -6,7 +6,7 @@
  */
 
 import type { IlmPolicyPhases } from '@kbn/streams-schema';
-import type { IlmPhasesFlyoutFormInternal, TimeUnit } from './types';
+import type { IlmPhasesFlyoutFormInternal, PreservedTimeUnit } from './types';
 import { parseInterval, toMilliseconds } from './utils';
 
 export const createIlmPhasesFlyoutDeserializer = () => {
@@ -14,7 +14,7 @@ export const createIlmPhasesFlyoutDeserializer = () => {
     const withMillis = (duration: string | undefined) => {
       const parsed = parseInterval(duration);
       const minAgeValue = parsed?.value ?? '';
-      const minAgeUnit = (parsed?.unit ?? 'd') as TimeUnit;
+      const minAgeUnit = (parsed?.unit ?? 'd') as PreservedTimeUnit;
       return {
         minAgeValue,
         minAgeUnit,
@@ -27,7 +27,7 @@ export const createIlmPhasesFlyoutDeserializer = () => {
       const parsed = parseInterval(fixedInterval);
       return {
         fixedIntervalValue: parsed?.value ?? '1',
-        fixedIntervalUnit: (parsed?.unit ?? 'd') as TimeUnit,
+        fixedIntervalUnit: (parsed?.unit ?? 'd') as PreservedTimeUnit,
       };
     };
 

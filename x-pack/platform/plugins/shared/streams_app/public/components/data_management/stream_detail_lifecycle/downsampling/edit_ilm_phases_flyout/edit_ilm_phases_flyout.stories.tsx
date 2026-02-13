@@ -156,6 +156,56 @@ export const Default: Story = {
   },
 };
 
+export const PreserveMsUnits: Story = {
+  render: () => {
+    const StoryComponent = () => {
+      const initialPhases: IlmPolicyPhases = {
+        hot: {
+          name: 'hot',
+          size_in_bytes: 0,
+          rollover: {},
+        },
+        warm: {
+          name: 'warm',
+          size_in_bytes: 0,
+          min_age: '1500ms',
+          downsample: { after: '1500ms', fixed_interval: '1500ms' },
+        },
+      } as any;
+
+      const [selectedPhase, setSelectedPhase] = useState<PhaseName | undefined>('warm');
+
+      return (
+        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
+          <EuiFlexItem grow={false}>
+            <EditIlmPhasesFlyout
+              initialPhases={initialPhases}
+              selectedPhase={selectedPhase}
+              setSelectedPhase={setSelectedPhase}
+              searchableSnapshotRepositories={['found-snapshots', 'another-repo']}
+              onRefreshSearchableSnapshotRepositories={() =>
+                action('onRefreshSearchableSnapshots')()
+              }
+              onCreateSnapshotRepository={() => action('onCreateSnapshotRepository')()}
+              onClose={() => {
+                action('onClose')();
+              }}
+              onChange={(next) => {
+                action('onChange')(next);
+              }}
+              onSave={(next) => {
+                action('onSave')(next);
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    };
+
+    return <StoryComponent />;
+  },
+};
+
 export const WarmAndDeletePhases: Story = {
   render: () => {
     const StoryComponent = () => {

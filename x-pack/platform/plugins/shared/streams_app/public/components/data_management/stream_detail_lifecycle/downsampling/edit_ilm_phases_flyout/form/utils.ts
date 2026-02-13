@@ -5,33 +5,36 @@
  * 2.0.
  */
 
-import type { TimeUnit } from './types';
+import type { StreamsTimeUnit } from '../../../helpers/format_size_units';
+import { splitSizeAndUnits, toMillis } from '../../../helpers/format_size_units';
 
-const TIME_UNIT_TO_MILLISECONDS: Record<TimeUnit, number> = {
-  s: 1000,
-  m: 60_000,
-  h: 3_600_000,
-  d: 86_400_000,
-};
-
-export function toMilliseconds(value: string, unit: TimeUnit): number {
+export function toMilliseconds(value: string, unit: StreamsTimeUnit): number {
   if (value.trim() === '') return -1;
-  const num = Number(value);
-  if (!Number.isFinite(num)) return Number.NaN;
-  return num * TIME_UNIT_TO_MILLISECONDS[unit];
+  const resolvedValue = value.trim();
+  const ms = toMillis(`${resolvedValue}${unit}`);
+  return ms === undefined ? Number.NaN : ms;
 }
 
 export function parseInterval(
   duration: string | undefined
-): { value: string; unit: TimeUnit } | undefined {
+): { value: string; unit: StreamsTimeUnit } | undefined {
   if (!duration) return;
-  const result = /^(\d+(?:\.\d+)?)([dhms])$/.exec(duration);
-  if (!result) return;
-  return { value: result[1], unit: result[2] as TimeUnit };
+
+  // Preserve the original unit from ILM policies (e.g. `ms`, `micros`, `nanos`).
+  // Streams flyout only *offers* d/h/m/s by default, but can display and round-trip other units.
+  const { size, unit } = splitSizeAndUnits(duration);
+  if (!size || !unit) return;
+  if (toMillis(`1${unit}`) === undefined) return;
+  return { value: size, unit: unit as StreamsTimeUnit };
 }
 
-export function formatMillisecondsInUnit(ms: number, unit: TimeUnit, precision = 2): string {
-  const valueInUnit = ms / TIME_UNIT_TO_MILLISECONDS[unit];
+export function formatMillisecondsInUnit(ms: number, unit: string, precision = 2): string {
+  const multiplier = toMillis(`1${unit}`);
+  if (multiplier === undefined || multiplier === 0) {
+    return `${ms}ms`;
+  }
+
+  const valueInUnit = ms / multiplier;
   const formatted =
     Number.isFinite(valueInUnit) && Number.isInteger(valueInUnit)
       ? String(valueInUnit)

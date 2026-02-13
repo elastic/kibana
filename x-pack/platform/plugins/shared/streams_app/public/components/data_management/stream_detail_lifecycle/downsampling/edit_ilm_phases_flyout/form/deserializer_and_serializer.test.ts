@@ -191,6 +191,31 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
     expect(internal._meta.warm.minAgeToMilliSeconds).toBe(2 * 86_400_000);
   });
 
+  it('round-trips preserved units like ms for min_age and downsample fixed_interval', () => {
+    const input: IlmPolicyPhases = {
+      hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+      warm: {
+        name: 'warm',
+        size_in_bytes: 0,
+        min_age: '1500ms',
+        downsample: {
+          after: '1500ms',
+          fixed_interval: '1500ms',
+        },
+      },
+    } as any;
+
+    const internal = deserializer(input);
+    expect(internal._meta.warm.minAgeValue).toBe('1500');
+    expect(internal._meta.warm.minAgeUnit).toBe('ms');
+    expect(internal._meta.warm.minAgeToMilliSeconds).toBe(1500);
+    expect(internal._meta.warm.downsample.fixedIntervalValue).toBe('1500');
+    expect(internal._meta.warm.downsample.fixedIntervalUnit).toBe('ms');
+
+    const out = createIlmPhasesFlyoutSerializer(cloneDeep(input))(internal);
+    expect(out).toEqual(input);
+  });
+
   it('serializes searchable_snapshot for cold only when enabled; frozen always when enabled', () => {
     const internal: IlmPhasesFlyoutFormInternal = cloneDeep(formInternal);
     internal._meta.searchableSnapshot.repository = 'repo1';

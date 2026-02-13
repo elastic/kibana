@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
-import type { DownsamplePhase, TimeUnit } from './types';
+import type { DownsamplePhase, PreservedTimeUnit } from './types';
 import { toMilliseconds } from './utils';
 
 const { emptyField, isInteger } = fieldValidators;
@@ -88,7 +88,9 @@ export const minAgeGreaterThanPreviousPhase =
       }
 
       const minAgeValue = String((formData as any)[`_meta.${p}.minAgeValue`] ?? '');
-      const minAgeUnit = String((formData as any)[`_meta.${p}.minAgeUnit`] ?? 'd') as TimeUnit;
+      const minAgeUnit = String(
+        (formData as any)[`_meta.${p}.minAgeUnit`] ?? 'd'
+      ) as PreservedTimeUnit;
       const milli = (formData as any)[`_meta.${p}.minAgeToMilliSeconds`] ?? -1;
 
       const computed = toMilliseconds(minAgeValue, minAgeUnit);
@@ -222,7 +224,7 @@ export const downsampleIntervalMultipleOfPreviousOne =
       const value = String((formData as any)[`_meta.${p}.downsample.fixedIntervalValue`] ?? '');
       const unit = String(
         (formData as any)[`_meta.${p}.downsample.fixedIntervalUnit`] ?? 'd'
-      ) as TimeUnit;
+      ) as PreservedTimeUnit;
 
       if (!value || !unit) return null;
 

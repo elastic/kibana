@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimeUnit } from './types';
+import type { PreservedTimeUnit } from './types';
 import { toMilliseconds } from './utils';
 
 interface FormWithFields {
@@ -53,7 +53,9 @@ export const getPhaseDurationMs = <Phase extends string>(
   const value = String(fields[`_meta.${phase}.${valuePathSuffix}`]?.value ?? '').trim();
   if (!value) return null;
 
-  const unit = String(fields[`_meta.${phase}.${unitPathSuffix}`]?.value ?? 'd') as TimeUnit;
+  const unit = String(
+    fields[`_meta.${phase}.${unitPathSuffix}`]?.value ?? 'd'
+  ) as PreservedTimeUnit;
   const ms = toMilliseconds(value, unit);
   return Number.isFinite(ms) && ms >= 0 ? ms : null;
 };

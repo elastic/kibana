@@ -16,10 +16,11 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import type { TimeUnit } from '../types';
+import { getTimeUnitLabel } from '../../../../helpers/format_size_units';
 import { formatMillisecondsInUnit, getRelativeBoundsInMs, toMilliseconds } from '../utils';
 import { useOnFieldErrorsChange } from '../error_tracking';
 import { getPhaseDurationMs } from '../get_phase_duration_ms';
+import type { PreservedTimeUnit, TimeUnit } from '../types';
 
 export interface MinAgeFieldProps {
   phaseName: PhaseName | undefined;
@@ -87,7 +88,20 @@ export const MinAgeField = ({ phaseName, dataTestSubj, timeUnitOptions }: MinAge
                   getFieldValidityAndErrorMessage(minAgeValueField);
 
                 const currentValue = String(minAgeValueField.value ?? '');
-                const currentUnit = String(minAgeUnitField.value ?? 'd') as TimeUnit;
+                const currentUnit = String(minAgeUnitField.value ?? 'd') as PreservedTimeUnit;
+
+                let unitOptions: Array<{ value: PreservedTimeUnit; text: string }> =
+                  timeUnitOptions.map((o) => ({ value: o.value, text: o.text }));
+                const canShowNonDefaultUnit =
+                  currentUnit === 'ms' || currentUnit === 'micros' || currentUnit === 'nanos';
+                if (canShowNonDefaultUnit) {
+                  // Preserve and display known non-default units that can appear in ILM policies.
+                  // We still only *offer* `d/h/m/s` by default.
+                  unitOptions = [
+                    ...unitOptions,
+                    { value: currentUnit, text: getTimeUnitLabel(currentUnit) },
+                  ];
+                }
 
                 const minAgePhases = ['warm', 'cold', 'frozen', 'delete'] as const;
                 type MinAgePhase = (typeof minAgePhases)[number];
@@ -148,11 +162,11 @@ export const MinAgeField = ({ phaseName, dataTestSubj, timeUnitOptions }: MinAge
                               defaultMessage: 'Move after unit',
                             }
                           )}
-                          options={timeUnitOptions.map((o) => ({ value: o.value, text: o.text }))}
+                          options={unitOptions}
                           value={currentUnit}
                           data-test-subj={`${dataTestSubj}MoveAfterUnit`}
                           onChange={(e) => {
-                            const nextUnit = e.target.value as TimeUnit;
+                            const nextUnit = e.target.value as PreservedTimeUnit;
                             minAgeUnitField.setValue(nextUnit);
 
                             const millis =
