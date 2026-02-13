@@ -186,14 +186,14 @@ function collectMetricValues(rows: MetricsExplorerRow[], unpackMetrics: UnpackMe
   const averageMemoryUsageValues: number[] = [];
 
   rows.forEach((row) => {
-    const { averageCpuUsage, averageMemoryUsage: averageMemoryUsageMegabytes } = unpackMetrics(row);
+    const { averageCpuUsage, averageMemoryUsage } = unpackMetrics(row);
 
     if (averageCpuUsage !== null) {
       averageCpuUsageValues.push(averageCpuUsage);
     }
 
-    if (averageMemoryUsageMegabytes !== null) {
-      averageMemoryUsageValues.push(averageMemoryUsageMegabytes);
+    if (averageMemoryUsage !== null) {
+      averageMemoryUsageValues.push(averageMemoryUsage);
     }
   });
 

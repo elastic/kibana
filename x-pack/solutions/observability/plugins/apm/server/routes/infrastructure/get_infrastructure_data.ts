@@ -17,6 +17,7 @@ import {
   HOST_NAME,
 } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { termQuery, termsQuery } from '@kbn/es-query';
 
 export const getInfrastructureData = async ({
   kuery,
@@ -100,7 +101,7 @@ export const getInfrastructureData = async ({
             filter: [
               ...rangeQuery(start, end),
               ...kqlQuery(kuery),
-              { terms: { [k8sFilterField]: podNames } },
+              ...termsQuery(k8sFilterField, podNames),
             ],
           },
         },
