@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import type { ReauthorizeTransformsRequestSchema } from '../../../../common';
 import { generateTransformConfig, generateDestIndex } from '../helpers/transform_config';
@@ -171,7 +172,7 @@ apiTest.describe('/internal/transform/reauthorize_transforms', { tag: tags.ESS_O
       );
       expect(statusCode).toBe(200);
       expect(body[invalidTransformId].success).toBe(false);
-      expect(body[invalidTransformId]).toHaveProperty('error');
+      expect(body[invalidTransformId].error).toBeDefined();
     }
   );
 });

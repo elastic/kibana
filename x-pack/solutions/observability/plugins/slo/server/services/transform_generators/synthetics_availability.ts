@@ -108,6 +108,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
   }
 
   private async buildSource(slo: SLODefinition, indicator: SyntheticsAvailabilityIndicator) {
+    const dataView = await this.getIndicatorDataView(indicator.params.dataViewId);
     const queryFilter: estypes.QueryDslQueryContainer[] = [
       { term: { 'summary.final_attempt': true } },
       { term: { 'meta.space_id': this.spaceId } },
@@ -144,10 +145,8 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     }
 
     if (!!indicator.params.filter) {
-      queryFilter.push(getElasticsearchQueryOrThrow(indicator.params.filter));
+      queryFilter.push(getElasticsearchQueryOrThrow(indicator.params.filter, dataView));
     }
-
-    const dataView = await this.getIndicatorDataView(indicator.params.dataViewId);
 
     return {
       index: SYNTHETICS_INDEX_PATTERN,

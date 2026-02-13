@@ -43,7 +43,7 @@ export class TimesliceMetricTransformGenerator extends TransformGenerator {
       await this.buildSource(slo, slo.indicator),
       this.buildDestination(slo),
       this.buildCommonGroupBy(slo, slo.indicator.params.timestampField),
-      this.buildAggregations(slo, slo.indicator),
+      await this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo, slo.indicator.params.timestampField),
       slo
     );
@@ -77,7 +77,7 @@ export class TimesliceMetricTransformGenerator extends TransformGenerator {
     };
   }
 
-  private buildAggregations(slo: SLODefinition, indicator: TimesliceMetricIndicator) {
+  private async buildAggregations(slo: SLODefinition, indicator: TimesliceMetricIndicator) {
     if (indicator.params.metric.equation.match(INVALID_EQUATION_REGEX)) {
       throw new Error(`Invalid equation: ${indicator.params.metric.equation}`);
     }
@@ -86,7 +86,8 @@ export class TimesliceMetricTransformGenerator extends TransformGenerator {
       throw new Error('The sli.metric.timeslice indicator MUST have a timeslice budgeting method.');
     }
 
-    const getIndicatorAggregation = new GetTimesliceMetricIndicatorAggregation(indicator);
+    const dataView = await this.getIndicatorDataView(indicator.params.dataViewId);
+    const getIndicatorAggregation = new GetTimesliceMetricIndicatorAggregation(indicator, dataView);
     const comparator = timesliceMetricComparatorMapping[indicator.params.metric.comparator];
     return {
       ...getIndicatorAggregation.execute('_metric'),

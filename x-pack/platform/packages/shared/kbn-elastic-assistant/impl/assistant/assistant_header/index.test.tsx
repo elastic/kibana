@@ -102,4 +102,18 @@ describe('AssistantHeader', () => {
 
     expect(screen.getByRole('button', { name: CLOSE })).toBeInTheDocument();
   });
+
+  it('disables assistant settings menu when isDisabled=true', () => {
+    render(<AssistantHeader {...testProps} isDisabled={true} />, {
+      wrapper: TestProviders,
+    });
+    expect(screen.getByTestId('chat-context-menu')).toBeDisabled();
+  });
+
+  it('enables assistant settings menu when isDisabled=false', () => {
+    render(<AssistantHeader {...testProps} isDisabled={false} />, {
+      wrapper: TestProviders,
+    });
+    expect(screen.getByTestId('chat-context-menu')).not.toBeDisabled();
+  });
 });

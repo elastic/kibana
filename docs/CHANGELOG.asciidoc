@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.11>>
 * <<release-notes-8.19.10>>
 * <<release-notes-8.19.9>>
 * <<release-notes-8.19.8>>
@@ -117,6 +118,29 @@ Review important information about the {kib} 8.x releases.
 
 include::upgrade-notes.asciidoc[]
 
+[[release-notes-8.19.11]]
+== {kib} 8.19.11
+
+The 8.19.11 release includes the following fixes.
+
+[float]
+[[fixes-v8.19.11]]
+=== Fixes
+Alerting::
+* Fixes timestamp override for ES|QL CSV scheduled reports with relative time ranges ({kibana-pull}248169[#248169]).
+Elastic Observability solution::
+* Fixes incorrect dependencies stats ({kibana-pull}249434[#249434]).
+* Adds `maxQueue` backpressure to anonymization regex worker pool ({kibana-pull}249108[#249108]).
+* Uses monitor query ID for project monitors package policies ({kibana-pull}248762[#248762]).
+* Fixes an issue where synthetics test results showed up as duplicated on the monitor status heat map, for higher granularity columns ({kibana-pull}248761[#248761]).
+* Adds more granular control over how alerts behave when data stops being reported for metric threshold rules ({kibana-pull}247669[#247669]).
+Elastic Security solution::
+For the Elastic Security 8.19.11 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana platform::
+* Fixes an issue with the Share menu where all time ranges were being shared as absolute ({kibana-pull}248804[#248804]).
+* Fixes an issue with certain properties causing failures when adding a policy to an index template ({kibana-pull}249168[#249168]).
+* Fixes an issue with duplicated managed ILM policies still appearing as managed ({kibana-pull}248586[#248586]).
+* Fixes Stack Monitoring Recent Log Entries' timestamps to respect Kibana's time zone setting (`dateFormat:tz`) ({kibana-pull}249016[#249016]).
 
 [[release-notes-8.19.10]]
 == {kib} 8.19.10
