@@ -18,6 +18,8 @@ import type { ProductFeaturesService } from '../../../../product_features_servic
 import { createPrebuiltRuleAssetsClient } from '../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import type { RuleImportErrorObject } from '../import/errors';
 import type {
+  BulkDeleteRulesArgs,
+  BulkDeleteRulesReturn,
   CreateCustomRuleArgs,
   CreatePrebuiltRuleArgs,
   DeleteRuleArgs,
@@ -30,6 +32,7 @@ import type {
   UpgradePrebuiltRuleArgs,
 } from './detection_rules_client_interface';
 import { createRule } from './methods/create_rule';
+import { bulkDeleteRules } from './methods/bulk_delete_rules';
 import { deleteRule } from './methods/delete_rule';
 import { importRule } from './methods/import_rule';
 import { importRules } from './methods/import_rules';
@@ -136,6 +139,12 @@ export const createDetectionRulesClient = ({
     async deleteRule({ ruleId }: DeleteRuleArgs): Promise<void> {
       return withSecuritySpan('DetectionRulesClient.deleteRule', async () => {
         return deleteRule({ rulesClient, ruleId });
+      });
+    },
+
+    async bulkDeleteRules({ ruleIds }: BulkDeleteRulesArgs): Promise<BulkDeleteRulesReturn> {
+      return withSecuritySpan('DetectionRulesClient.bulkDeleteRules', async () => {
+        return bulkDeleteRules({ rulesClient, ruleIds });
       });
     },
 

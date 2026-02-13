@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import type {
   RuleCreateProps,
   RuleUpdateProps,
@@ -18,6 +19,7 @@ import type { IRuleSourceImporter } from '../import/rule_source_importer';
 import type { RuleImportErrorObject } from '../import/errors';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
+import type { RuleAlertType } from '../../../rule_schema';
 
 export interface IDetectionRulesClient {
   getRuleCustomizationStatus: () => PrebuiltRulesCustomizationStatus;
@@ -26,6 +28,7 @@ export interface IDetectionRulesClient {
   updateRule: (args: UpdateRuleArgs) => Promise<RuleResponse>;
   patchRule: (args: PatchRuleArgs) => Promise<RuleResponse>;
   deleteRule: (args: DeleteRuleArgs) => Promise<void>;
+  bulkDeleteRules: (args: BulkDeleteRulesArgs) => Promise<BulkDeleteRulesReturn>;
   upgradePrebuiltRule: (args: UpgradePrebuiltRuleArgs) => Promise<RuleResponse>;
   revertPrebuiltRule: (args: RevertPrebuiltRuleArgs) => Promise<RuleResponse>;
   importRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
@@ -50,6 +53,15 @@ export interface PatchRuleArgs {
 
 export interface DeleteRuleArgs {
   ruleId: RuleObjectId;
+}
+
+export interface BulkDeleteRulesArgs {
+  ruleIds: RuleObjectId[];
+}
+
+export interface BulkDeleteRulesReturn {
+  rules: RuleAlertType[];
+  errors: BulkOperationError[];
 }
 
 export interface UpgradePrebuiltRuleArgs {
