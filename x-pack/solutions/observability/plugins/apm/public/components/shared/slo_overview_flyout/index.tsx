@@ -99,6 +99,7 @@ const STATUS_PRIORITY: Record<string, number> = {
   NO_DATA: 1,
   HEALTHY: 0,
 };
+const SEARCH_DEBOUNCE_MS = 300;
 const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50];
 
 export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
@@ -114,7 +115,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
       setDebouncedSearchQuery(searchQuery);
       setPage(0);
     },
-    300,
+    SEARCH_DEBOUNCE_MS,
     [searchQuery]
   );
   const [selectedStatuses, setSelectedStatuses] = useState<SloStatusFilter[]>([]);
@@ -367,7 +368,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
                 fontWeight: euiTheme.font.weight.regular,
               }}
             >
-              <EuiIcon type="expand" color="subdued" />
+              <EuiIcon type="expand" color="subdued" aria-hidden={true} />
               {name}
             </EuiLink>
           </EuiToolTip>
