@@ -10,6 +10,7 @@
 import type { Observable } from 'rxjs';
 import { map, startWith, Subject, distinctUntilChanged } from 'rxjs';
 import type {
+  SidebarAppConfig,
   SidebarAppDefinition,
   SidebarAppId,
   SidebarAppUpdate,
@@ -25,7 +26,7 @@ export class SidebarRegistryService {
 
   @bind
   registerApp<TState = undefined, TActions = undefined>(
-    app: SidebarAppDefinition<TState, TActions>
+    app: SidebarAppConfig<TState, TActions>
   ): SidebarAppUpdater {
     if (!isValidSidebarAppId(app.appId)) {
       throw new Error(
@@ -39,7 +40,7 @@ export class SidebarRegistryService {
 
     this.registeredApps.set(app.appId, {
       ...app,
-      status: app.status ?? 'accessible',
+      status: app.status ?? 'available',
       restoreOnReload: app.restoreOnReload !== false,
     } as SidebarAppDefinition);
     this.changed$.next();
@@ -83,18 +84,18 @@ export class SidebarRegistryService {
 
     return this.changed$.pipe(
       startWith(undefined),
-      map(() => this.registeredApps.get(appId)?.status ?? 'accessible'),
+      map(() => this.registeredApps.get(appId)!.status),
       distinctUntilChanged()
     );
   }
 
-  isAccessible(appId: SidebarAppId): boolean {
+  isOpenable(appId: SidebarAppId): boolean {
     const app = this.registeredApps.get(appId);
-    return app ? app.status !== 'inaccessible' : false;
+    return app ? app.status !== 'unavailable' : false;
   }
 
   isRestorable(appId: SidebarAppId): boolean {
     const app = this.registeredApps.get(appId);
-    return app ? app.restoreOnReload !== false : false;
+    return app ? app.restoreOnReload : false;
   }
 }

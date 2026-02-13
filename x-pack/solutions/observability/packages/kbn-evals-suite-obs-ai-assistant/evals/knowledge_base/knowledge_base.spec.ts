@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { evaluate } from '../../src/evaluate';
 import { testDocs } from '../../src/sample_data/knowledge_base';
 
@@ -14,7 +15,7 @@ import { testDocs } from '../../src/sample_data/knowledge_base';
  * Any changes should be made in both places until the legacy evaluation framework is removed.
  */
 
-evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
+evaluate.describe('Knowledge base', { tag: tags.serverless.observability.complete }, () => {
   evaluate.beforeAll(async ({ knowledgeBaseClient }) => {
     await knowledgeBaseClient.ensureInstalled().catch((e) => {
       throw new Error(`Failed to install knowledge base: ${e.message}`);

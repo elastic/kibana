@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { apiTest } from '../../common/fixtures';
 import { esResourcesEndpoint } from '../../common/fixtures/constants';
 
-apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, () => {
+apiTest.describe('Collector integration is not installed', { tag: tags.stateful.classic }, () => {
   let viewerApiCreditials: RoleApiCredentials;
   apiTest.beforeAll(async ({ requestAuth, profilingSetup }) => {
     await profilingSetup.cleanup();

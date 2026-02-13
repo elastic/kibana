@@ -16,14 +16,14 @@ export enum AttachmentType {
   screenContext = 'screen_context',
   text = 'text',
   esql = 'esql',
-  visualizationRef = 'visualization_ref',
+  visualization = 'visualization',
 }
 
 interface AttachmentDataMap {
   [AttachmentType.esql]: EsqlAttachmentData;
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
-  [AttachmentType.visualizationRef]: VisualizationRefAttachmentData;
+  [AttachmentType.visualization]: VisualizationAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -79,19 +79,39 @@ export interface ScreenContextAttachmentData {
   additional_data?: Record<string, string>;
 }
 
-export const visualizationRefAttachmentDataSchema = z.object({
+export const visualizationAttachmentDataSchema = z.object({
+  query: z.string(),
+  visualization: z.record(z.unknown()),
+  chart_type: z.string(),
+  esql: z.string(),
+});
+
+/**
+ * Data for a visualization attachment.
+ * Same shape for both by-value and resolved by-ref attachments.
+ */
+export interface VisualizationAttachmentData {
+  /** The display query */
+  query: string;
+  /** Lens API configuration */
+  visualization: Record<string, unknown>;
+  /** Chart type identifier */
+  chart_type: string;
+  /** The ES|QL query */
+  esql: string;
+}
+
+export const visualizationOriginDataSchema = z.object({
   saved_object_id: z.string(),
   title: z.string().optional(),
   description: z.string().optional(),
 });
 
 /**
- * Data for a visualization_ref attachment.
- *
- * This attachment does not store the full saved object state, only a reference to a Lens saved
- * object. The content can be resolved on-demand by the server when needed.
+ * Origin data for a visualization attachment created by-reference.
+ * Stored on the attachment for UI purposes (e.g., "Open in Lens" link).
  */
-export interface VisualizationRefAttachmentData {
+export interface VisualizationOriginData {
   saved_object_id: string;
   title?: string;
   description?: string;

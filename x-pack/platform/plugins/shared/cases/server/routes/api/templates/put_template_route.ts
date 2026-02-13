@@ -7,16 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import yaml from 'js-yaml';
-import {
-  UpdateTemplateInputSchema,
-  type Template,
-} from '../../../../common/types/domain/template/v1';
+import { UpdateTemplateInputSchema } from '../../../../common/types/domain/template/v1';
 import { INTERNAL_TEMPLATE_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { mockTemplates } from './mock_data';
 import { parseTemplate } from './parse_template';
 
 /**
@@ -39,17 +34,14 @@ export const putTemplateRoute = createCasesRoute({
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
-      await caseContext.getCasesClient();
+      const casesClient = await caseContext.getCasesClient();
 
       const { template_id: templateId } = request.params;
       const input = UpdateTemplateInputSchema.parse(request.body);
 
-      // Find the latest version of the template
-      const existingVersions = mockTemplates.filter(
-        (t) => t.templateId === templateId && t.deletedAt === null
-      );
+      const existingTemplate = await casesClient.templates.getTemplate(templateId);
 
-      if (existingVersions.length === 0) {
+      if (!existingTemplate) {
         return response.notFound({
           body: { message: `Template with id ${templateId} not found` },
         });
@@ -64,21 +56,8 @@ export const putTemplateRoute = createCasesRoute({
         });
       }
 
-      const latestVersion = Math.max(...existingVersions.map((t) => t.templateVersion));
-
-      // Create new version
-      const updatedTemplate: Template = {
-        templateId,
-        name: input.name,
-        owner: input.owner,
-        definition: input.definition,
-        templateVersion: latestVersion + 1,
-        deletedAt: null,
-      };
-
-      mockTemplates.push(updatedTemplate);
-
-      const parsedTemplate = parseTemplate(updatedTemplate);
+      const updatedTemplate = await casesClient.templates.updateTemplate(templateId, input);
+      const parsedTemplate = parseTemplate(updatedTemplate.attributes);
 
       return response.ok({
         body: parsedTemplate,
