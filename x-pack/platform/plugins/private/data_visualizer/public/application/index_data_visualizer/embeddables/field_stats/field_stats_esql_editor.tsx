@@ -48,7 +48,6 @@ export const FieldStatsESQLEditor = ({
           prevQuery.current = q;
         }}
         editorIsInline
-        hideRunQueryText
         onTextLangQuerySubmit={onTextLangQuerySubmit}
         allowQueryCancellation={false}
         disableSubmitAction={disableSubmitAction}

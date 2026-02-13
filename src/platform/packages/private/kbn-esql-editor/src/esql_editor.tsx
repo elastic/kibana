@@ -12,7 +12,6 @@ import {
   EuiDatePicker,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormLabel,
   EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -59,6 +58,9 @@ import { QuerySource } from '@kbn/esql-types';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './lookup_join';
 import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
+import { ESQLMenu } from './editor_menu';
+import { getTrimmedQuery } from './history_local_storage';
+import { useEsqlEditorActions } from './use_esql_editor_actions';
 import {
   EDITOR_INITIAL_HEIGHT,
   EDITOR_INITIAL_HEIGHT_INLINE_EDITING,
@@ -67,6 +69,7 @@ import {
   esqlEditorStyles,
 } from './esql_editor.styles';
 import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
+import { useEsqlEditorActionsRegistration } from './editor_actions_context';
 import {
   filterDataErrors,
   filterDuplicatedWarnings,
@@ -88,8 +91,15 @@ import { addQueriesToCache } from './history_local_storage';
 import type { getHistoryItems } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
 import { useRestorableRef, useRestorableState, withRestorableState } from './restorable_state';
-import type { StarredQueryMetadata } from './editor_footer/esql_starred_queries_service';
+import {
+  EsqlStarredQueriesService,
+  type StarredQueryMetadata,
+} from './editor_footer/esql_starred_queries_service';
 import type { ESQLEditorDeps, ESQLEditorProps as ESQLEditorPropsInternal } from './types';
+import {
+  EsqlEditorActionsProvider,
+  useHasEsqlEditorActionsProvider,
+} from './editor_actions_context';
 import {
   registerCustomCommands,
   addEditorKeyBindings,
@@ -114,7 +124,6 @@ const ESQLEditorInternal = function ESQLEditor({
   warning: serverWarning,
   isLoading,
   isDisabled,
-  hideRunQueryText,
   hideRunQueryButton,
   editorIsInline,
   disableSubmitAction,
@@ -129,7 +138,6 @@ const ESQLEditorInternal = function ESQLEditor({
   onOpenQueryInNewTab,
   expandToFitQueryOnMount,
   dataErrorsControl,
-  formLabel,
   mergeExternalMessages,
   hideQuickSearch,
   queryStats,
@@ -152,8 +160,17 @@ const ESQLEditorInternal = function ESQLEditor({
   const isFirstFocusRef = useRef<boolean>(true);
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
-  const { application, core, fieldsMetadata, uiSettings, uiActions, data, usageCollection, kql } =
-    kibana.services;
+  const {
+    application,
+    core,
+    fieldsMetadata,
+    uiSettings,
+    uiActions,
+    data,
+    usageCollection,
+    kql,
+    storage,
+  } = kibana.services;
 
   const favoritesClient = useMemo(
     () =>
@@ -200,6 +217,9 @@ const ESQLEditorInternal = function ESQLEditor({
   const isSpaceReduced = Boolean(editorIsInline) && measuredEditorWidth < BREAKPOINT_WIDTH;
 
   const [isHistoryOpen, setIsHistoryOpen] = useRestorableState('isHistoryOpen', false);
+  const [starredQueriesService, setStarredQueriesService] =
+    useState<EsqlStarredQueriesService | null>(null);
+  const [isCurrentQueryStarred, setIsCurrentQueryStarred] = useState(false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const abortControllerRef = useRef(new AbortController());
@@ -248,10 +268,48 @@ const ESQLEditorInternal = function ESQLEditor({
     setIsVisorOpen,
   ]);
 
-  const onToggleVisor = useCallback(() => {
-    setHasUserDismissedVisorAutoOpen(!hasUserDismissedVisorAutoOpen);
-    setIsVisorOpen(!isVisorOpenRef.current);
-  }, [hasUserDismissedVisorAutoOpen, setHasUserDismissedVisorAutoOpen, setIsVisorOpen]);
+  const trimmedQuery = useMemo(() => getTrimmedQuery(code ?? ''), [code]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const initializeStarredQueriesService = async () => {
+      const service = await EsqlStarredQueriesService.initialize({
+        http: core.http,
+        userProfile: core.userProfile,
+        usageCollection,
+        storage,
+      });
+      if (isMounted) {
+        setStarredQueriesService(service ?? null);
+      }
+    };
+
+    initializeStarredQueriesService();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [core.http, core.userProfile, storage, usageCollection]);
+
+  useEffect(() => {
+    if (!starredQueriesService) {
+      setIsCurrentQueryStarred(false);
+      return;
+    }
+
+    const updateStarredState = () => {
+      setIsCurrentQueryStarred(
+        Boolean(trimmedQuery) && starredQueriesService.checkIfQueryIsStarred(trimmedQuery)
+      );
+    };
+
+    updateStarredState();
+    const subscription = starredQueriesService.queries$.subscribe(() => {
+      updateStarredState();
+    });
+
+    return () => subscription.unsubscribe();
+  }, [starredQueriesService, trimmedQuery]);
 
   const onQueryUpdate = useCallback(
     (value: string) => {
@@ -627,13 +685,22 @@ const ESQLEditorInternal = function ESQLEditor({
     [onSuggestionsReady, telemetryService]
   );
 
-  const onClickQueryHistory = useCallback(
-    (isOpen: boolean) => {
-      telemetryService.trackQueryHistoryOpened(isOpen);
-      setIsHistoryOpen(isOpen);
-    },
-    [telemetryService, setIsHistoryOpen]
-  );
+  const { editorActions, onClickQueryHistory, onToggleVisor } = useEsqlEditorActions({
+    code,
+    isHistoryOpen,
+    isCurrentQueryStarred,
+    onUpdateAndSubmitQuery,
+    starredQueriesService,
+    trimmedQuery,
+    hasUserDismissedVisorAutoOpen: Boolean(hasUserDismissedVisorAutoOpen),
+    isVisorOpenRef,
+    setHasUserDismissedVisorAutoOpen,
+    setIsHistoryOpen,
+    setIsCurrentQueryStarred,
+    setIsVisorOpen,
+    trackQueryHistoryOpened: (isOpen) => telemetryService.trackQueryHistoryOpened(isOpen),
+  });
+  useEsqlEditorActionsRegistration(editorActions);
 
   const isResourceBrowserEnabled = useCallback(async () => {
     const currentApp = await firstValueFrom(application?.currentAppId$ ?? of(undefined));
@@ -689,7 +756,6 @@ const ESQLEditorInternal = function ESQLEditor({
         label: i18n.translate('esqlEditor.query.cancel', {
           defaultMessage: 'Cancel',
         }),
-        iconType: 'cross',
         color: 'text',
       };
     }
@@ -698,15 +764,13 @@ const ESQLEditorInternal = function ESQLEditor({
         label: i18n.translate('esqlEditor.query.runQuery', {
           defaultMessage: 'Run query',
         }),
-        iconType: 'play',
         color: 'success',
       };
     }
     return {
-      label: i18n.translate('esqlEditor.query.refreshLabel', {
-        defaultMessage: 'Refresh',
+      label: i18n.translate('esqlEditor.query.searchLabel', {
+        defaultMessage: 'Search',
       }),
-      iconType: 'refresh',
       color: 'primary',
     };
   }, [allowQueryCancellation, code, codeWhenSubmitted, isLoading]);
@@ -1026,7 +1090,6 @@ const ESQLEditorInternal = function ESQLEditor({
   );
 
   const htmlId = useGeneratedHtmlId({ prefix: 'esql-editor' });
-  const [labelInFocus, setLabelInFocus] = useState(false);
 
   const editorPanel = (
     <>
@@ -1036,59 +1099,39 @@ const ESQLEditorInternal = function ESQLEditor({
           ${sourcesBadgeStyle}
         `}
       />
-      {Boolean(editorIsInline) && (formLabel || !hideRunQueryButton) ? (
+      {Boolean(editorIsInline) && !hideRunQueryButton ? (
         <EuiFlexGroup
           gutterSize="none"
           responsive={false}
           justifyContent="spaceBetween"
-          alignItems={hideRunQueryButton ? 'flexEnd' : 'center'}
+          alignItems="center"
           css={css`
-            padding: ${theme.euiTheme.size.s} 0;
+            padding: ${theme.euiTheme.size.s};
           `}
         >
-          {formLabel && (
-            <EuiFlexItem grow={false}>
-              <EuiFormLabel
-                isFocused={labelInFocus && !isDisabled}
-                isDisabled={isDisabled}
-                aria-invalid={Boolean(editorMessages.errors.length)}
-                isInvalid={Boolean(editorMessages.errors.length)}
-                onClick={() => {
-                  // HTML `for` doesn't correctly transfer click behavior to the code editor hint, so apply it manually
-                  const editorElement = document.getElementById(htmlId);
-                  if (editorElement) {
-                    editorElement.click();
-                  }
-                }}
-                htmlFor={htmlId}
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              position="top"
+              content={i18n.translate('esqlEditor.query.runQuery', {
+                defaultMessage: 'Run query',
+              })}
+            >
+              <EuiButton
+                color={queryRunButtonProperties.color as EuiButtonColor}
+                onClick={() => onQuerySubmit(QuerySource.MANUAL)}
+                size="s"
+                isLoading={isLoading && !allowQueryCancellation}
+                isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
+                data-test-subj="ESQLEditor-run-query-button"
+                aria-label={queryRunButtonProperties.label}
               >
-                {formLabel}
-              </EuiFormLabel>
-            </EuiFlexItem>
-          )}
-          {!hideRunQueryButton && (
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                position="top"
-                content={i18n.translate('esqlEditor.query.runQuery', {
-                  defaultMessage: 'Run query',
-                })}
-              >
-                <EuiButton
-                  color={queryRunButtonProperties.color as EuiButtonColor}
-                  onClick={() => onQuerySubmit(QuerySource.MANUAL)}
-                  iconType={queryRunButtonProperties.iconType}
-                  size="s"
-                  isLoading={isLoading && !allowQueryCancellation}
-                  isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
-                  data-test-subj="ESQLEditor-run-query-button"
-                  aria-label={queryRunButtonProperties.label}
-                >
-                  {queryRunButtonProperties.label}
-                </EuiButton>
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
+                {queryRunButtonProperties.label}
+              </EuiButton>
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ESQLMenu hideHistory={hideQueryHistory} />
+          </EuiFlexItem>
         </EuiFlexGroup>
       ) : null}
       <EuiFlexGroup
@@ -1112,7 +1155,9 @@ const ESQLEditorInternal = function ESQLEditor({
             <div css={styles.editorContainer}>
               <CodeEditor
                 htmlId={htmlId}
-                aria-label={formLabel}
+                aria-label={i18n.translate('esqlEditor.ariaLabel', {
+                  defaultMessage: 'ES|QL editor',
+                })}
                 languageId={ESQL_LANG_ID}
                 classNameCss={getEditorOverwrites(theme)}
                 value={code}
@@ -1123,8 +1168,6 @@ const ESQLEditorInternal = function ESQLEditor({
                 signatureProvider={signatureProvider}
                 inlineCompletionsProvider={inlineCompletionsProvider}
                 onChange={onQueryUpdate}
-                onFocus={() => setLabelInFocus(true)}
-                onBlur={() => setLabelInFocus(false)}
                 editorDidMount={async (editor) => {
                   // Track editor init time once per mount
                   reportInitLatency();
@@ -1276,7 +1319,6 @@ const ESQLEditorInternal = function ESQLEditor({
         }}
         onUpdateAndSubmitQuery={onUpdateAndSubmitQuery}
         onPrettifyQuery={onPrettifyQuery}
-        hideRunQueryText={hideRunQueryText}
         editorIsInline={editorIsInline}
         isSpaceReduced={isSpaceReduced}
         isHistoryOpen={isHistoryOpen}
@@ -1284,13 +1326,11 @@ const ESQLEditorInternal = function ESQLEditor({
         isLanguageComponentOpen={isLanguageComponentOpen}
         setIsLanguageComponentOpen={setIsLanguageComponentOpen}
         measuredContainerWidth={measuredEditorWidth}
-        hideQueryHistory={hideQueryHistory}
         resizableContainerButton={resizableContainerButton}
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
         dataErrorsControl={dataErrorsControl}
-        toggleVisor={onToggleVisor}
-        hideQuickSearch={hideQuickSearch}
+        starredQueriesService={starredQueriesService}
         queryStats={queryStats}
         {...editorMessages}
         onErrorClick={onErrorClick}
@@ -1386,5 +1426,19 @@ const ESQLEditorInternal = function ESQLEditor({
   return editorPanel;
 };
 
-export const ESQLEditor = withRestorableState(ESQLEditorInternal);
+const ESQLEditorWithState = withRestorableState(ESQLEditorInternal);
+
+export const ESQLEditor = (props: ComponentProps<typeof ESQLEditorWithState>) => {
+  const hasProvider = useHasEsqlEditorActionsProvider();
+
+  if (hasProvider) {
+    return <ESQLEditorWithState {...props} />;
+  }
+
+  return (
+    <EsqlEditorActionsProvider>
+      <ESQLEditorWithState {...props} />
+    </EsqlEditorActionsProvider>
+  );
+};
 export type ESQLEditorProps = ComponentProps<typeof ESQLEditor>;

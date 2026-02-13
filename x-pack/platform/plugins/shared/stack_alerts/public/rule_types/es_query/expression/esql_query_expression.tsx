@@ -308,7 +308,6 @@ export const EsqlQueryExpression: React.FC<
           }}
           warning={touched && keepWarning ? keepWarning : undefined}
           onTextLangQuerySubmit={async () => {}}
-          hideRunQueryText
           hideRunQueryButton
           isLoading={isLoading}
           editorIsInline

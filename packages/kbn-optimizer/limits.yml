@@ -46,7 +46,7 @@ pageLoadAssetSize:
   dataVisualizer: 32778
   developerToolbar: 4467
   devTools: 8109
-  discover: 28131
+  discover: 28284
   discoverEnhanced: 5517
   discoverShared: 2322
   elasticAssistant: 338870
@@ -56,7 +56,7 @@ pageLoadAssetSize:
   embeddableEnhanced: 4488
   enterpriseSearch: 37566
   entityStore: 71717
-  esql: 18224
+  esql: 19247
   esqlDataGrid: 10209
   esUiShared: 101220
   eventAnnotation: 22361
@@ -110,7 +110,7 @@ pageLoadAssetSize:
   logsDataAccess: 7900
   logsShared: 101273
   logstash: 15882
-  maintenanceWindows: 8783
+  maintenanceWindows: 8775
   management: 12951
   maps: 45917
   mapsEms: 6734
@@ -210,6 +210,6 @@ pageLoadAssetSize:
   visualizationListing: 5148
   visualizations: 52268
   watcher: 10485
-  workflowsExtensions: 90040
+  workflowsExtensions: 89952
   workflowsManagement: 21318
   workplaceAIApp: 65547

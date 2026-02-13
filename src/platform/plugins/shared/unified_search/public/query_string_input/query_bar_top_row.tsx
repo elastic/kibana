@@ -25,7 +25,12 @@ import {
   isOfAggregateQueryType,
   getLanguageDisplayName,
 } from '@kbn/es-query';
-import { ESQLLangEditor, type ESQLEditorProps } from '@kbn/esql/public';
+import {
+  ESQLLangEditor,
+  ESQLMenu,
+  EsqlEditorActionsProvider,
+  type ESQLEditorProps,
+} from '@kbn/esql/public';
 import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -58,8 +63,6 @@ import { DataViewPicker } from '../dataview_picker';
 import { NoDataPopover } from './no_data_popover';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { shallowEqual } from '../utils/shallow_equal';
-
-import { ESQLMenuPopover, type ESQLMenuPopoverProps } from './esql_menu_popover';
 
 const BUTTON_MIN_WIDTH = 108;
 
@@ -192,7 +195,6 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   submitOnBlur?: boolean;
   renderQueryInputAppend?: () => React.ReactNode;
   disableExternalPadding?: boolean;
-  onESQLDocsFlyoutVisibilityChanged?: ESQLMenuPopoverProps['onESQLDocsFlyoutVisibilityChanged'];
   bubbleSubmitEvent?: boolean;
 
   esqlEditorInitialState?: ESQLEditorProps['initialState'];
@@ -237,6 +239,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    * Optional ES|QL prop - Callback function invoked to open the given ES|QL query in a new Discover tab
    */
   onOpenQueryInNewTab?: ESQLEditorProps['onOpenQueryInNewTab'];
+  onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
   /**
    * Optional ES|QL prop - Enable data source browser in ESQL editor
    */
@@ -742,7 +745,7 @@ export const QueryBarTopRow = React.memo(
       );
     }
 
-    function renderUpdateButton() {
+    function renderDatePickerWithUpdateBtn() {
       if (!shouldRenderUpdatebutton() && !shouldRenderDatePicker()) {
         return null;
       }
@@ -815,8 +818,17 @@ export const QueryBarTopRow = React.memo(
         <EuiFlexItem grow={false}>
           <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
             <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-              {shouldRenderDatePicker() ? renderDatePicker() : null}
-              {shouldRenderUpdatebutton() ? button : null}
+              {isQueryLangSelected ? (
+                <>
+                  {shouldRenderUpdatebutton() ? button : null}
+                  {shouldRenderDatePicker() ? renderDatePicker() : null}
+                </>
+              ) : (
+                <>
+                  {shouldRenderDatePicker() ? renderDatePicker() : null}
+                  {shouldRenderUpdatebutton() ? button : null}
+                </>
+              )}
             </EuiFlexGroup>
           </NoDataPopover>
         </EuiFlexItem>
@@ -881,6 +893,18 @@ export const QueryBarTopRow = React.memo(
             />
           </EuiFlexItem>
         )
+      );
+    }
+
+    function renderEsqlMenuPopover() {
+      if (!Boolean(isQueryLangSelected)) {
+        return null;
+      }
+
+      return (
+        <EuiFlexItem grow={false}>
+          <ESQLMenu onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged} />
+        </EuiFlexItem>
       );
     }
 
@@ -960,7 +984,6 @@ export const QueryBarTopRow = React.memo(
               })
             }
             isDisabled={props.isDisabled}
-            hideRunQueryText={true}
             data-test-subj="unifiedTextLangEditor"
             isLoading={props.isLoading}
             initialState={props.esqlEditorInitialState}
@@ -986,6 +1009,24 @@ export const QueryBarTopRow = React.memo(
     const isScreenshotMode = props.isScreenshotMode === true;
     const styles = useMemoCss(inputStringStyles);
 
+    const flexDirection: 'column' | 'row' =
+      isMobile && !shouldShowDatePickerAsBadge() ? 'column' : 'row';
+    const flexJustifyContent: 'flexStart' | 'flexEnd' = shouldShowDatePickerAsBadge()
+      ? 'flexStart'
+      : 'flexEnd';
+    const queryBarFlexGroupProps = {
+      className: 'kbnQueryBar',
+      'data-test-subj': 'kbnQueryBar',
+      direction: flexDirection,
+      responsive: false as const,
+      gutterSize: 's' as const,
+      justifyContent: flexJustifyContent,
+      wrap: true,
+      css: css`
+        padding: ${isQueryLangSelected && !props.disableExternalPadding ? euiTheme.size.s : 0};
+      `,
+    };
+
     return (
       <>
         <SharingMetaFields
@@ -993,48 +1034,37 @@ export const QueryBarTopRow = React.memo(
           to={currentDateRange.to}
           dateFormat={uiSettings.get('dateFormat')}
         />
-        {!isScreenshotMode && (
-          <>
-            <EuiFlexGroup
-              className="kbnQueryBar"
-              data-test-subj="kbnQueryBar"
-              direction={isMobile && !shouldShowDatePickerAsBadge() ? 'column' : 'row'}
-              responsive={false}
-              gutterSize="s"
-              css={css`
-                padding: ${isQueryLangSelected && !props.disableExternalPadding
-                  ? euiTheme.size.s
-                  : 0};
-              `}
-              justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
-              wrap
-            >
-              {props.dataViewPickerOverride || renderDataViewsPicker()}
-              {Boolean(isQueryLangSelected) && (
-                <ESQLMenuPopover
-                  onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
-                  onESQLQuerySubmit={(queryString: string) => {
-                    onSubmit({
-                      query: { esql: queryString } as QT,
-                      dateRange: dateRangeRef.current,
-                    });
-                  }}
-                  adHocDataview={props.indexPatterns?.[0]}
-                />
-              )}
-              {/* Optional wrapper for the ES|QL controls elements */}
-              {Boolean(props.esqlVariablesConfig?.controlsWrapper) && (
-                <EuiFlexItem grow={false}>{props.esqlVariablesConfig?.controlsWrapper}</EuiFlexItem>
-              )}
-              {renderQueryInput()}
-              {props.renderQueryInputAppend?.()}
-              {shouldShowDatePickerAsBadge() && props.filterBar}
-              {renderUpdateButton()}
-            </EuiFlexGroup>
-            {!shouldShowDatePickerAsBadge() && props.filterBar}
-            {renderTextLangEditor()}
-          </>
-        )}
+        {!isScreenshotMode &&
+          (isQueryLangSelected ? (
+            <EsqlEditorActionsProvider>
+              <EuiFlexGroup {...queryBarFlexGroupProps}>
+                {props.dataViewPickerOverride || renderDataViewsPicker()}
+                {renderDatePickerWithUpdateBtn()}
+                {/* Optional wrapper for the ES|QL controls elements */}
+                {Boolean(props.esqlVariablesConfig?.controlsWrapper) && (
+                  <EuiFlexItem grow={false}>
+                    {props.esqlVariablesConfig?.controlsWrapper}
+                  </EuiFlexItem>
+                )}
+                {shouldShowDatePickerAsBadge() && props.filterBar}
+                {renderEsqlMenuPopover()}
+              </EuiFlexGroup>
+              {!shouldShowDatePickerAsBadge() && props.filterBar}
+              {renderTextLangEditor()}
+            </EsqlEditorActionsProvider>
+          ) : (
+            <>
+              <EuiFlexGroup {...queryBarFlexGroupProps}>
+                {props.dataViewPickerOverride || renderDataViewsPicker()}
+                {renderQueryInput()}
+                {props.renderQueryInputAppend?.()}
+                {shouldShowDatePickerAsBadge() && props.filterBar}
+                {renderDatePickerWithUpdateBtn()}
+              </EuiFlexGroup>
+              {!shouldShowDatePickerAsBadge() && props.filterBar}
+              {renderTextLangEditor()}
+            </>
+          ))}
       </>
     );
   },

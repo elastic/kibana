@@ -8,7 +8,15 @@
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiCallOut, EuiComboBox, EuiFormRow, EuiPanel, useEuiTheme } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiComboBox,
+  EuiFormLabel,
+  EuiFormRow,
+  EuiPanel,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { TimeRange } from '@kbn/es-query';
 import {
@@ -276,6 +284,21 @@ export function ValueControlForm({
     <>
       {controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY && (
         <>
+          <EuiFormLabel
+            css={css`
+              display: block;
+              width: 100%;
+              margin-block-start: ${theme.euiTheme.size.s};
+              padding-block-start: ${theme.euiTheme.size.s};
+              padding-block-end: ${theme.euiTheme.size.s};
+              border-bottom: ${theme.euiTheme.border.thin};
+            `}
+          >
+            {i18n.translate('esql.flyout.valuesQueryEditor.label', {
+              defaultMessage: 'Values query',
+            })}
+          </EuiFormLabel>
+          <EuiSpacer size="xs" />
           <ESQLLangEditor
             query={{ esql: valuesQuery }}
             onTextLangQueryChange={(q) => {
@@ -284,7 +307,6 @@ export function ValueControlForm({
             disableAutoFocus={true}
             errors={esqlQueryErrors}
             editorIsInline
-            hideRunQueryText
             onTextLangQuerySubmit={async (q, a) => {
               if (q) {
                 await onValuesQuerySubmit(q.esql);
@@ -292,10 +314,6 @@ export function ValueControlForm({
             }}
             isDisabled={false}
             isLoading={false}
-            hasOutline
-            formLabel={i18n.translate('esql.flyout.valuesQueryEditor.label', {
-              defaultMessage: 'Values query',
-            })}
             esqlVariables={esqlVariables}
           />
           {showValuesPreview && (
