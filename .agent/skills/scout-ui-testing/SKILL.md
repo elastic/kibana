@@ -1,5 +1,5 @@
 ---
-name: Scout UI Testing
+name: scout-ui-testing
 description: Use when creating, updating, debugging, or reviewing Scout UI tests in Kibana (Playwright + Scout fixtures), including page objects, browser authentication, parallel UI tests (spaceTest/scoutSpace), a11y checks, and flake control.
 ---
 
