@@ -36,7 +36,10 @@ import {
   createDashboardListingFilterUrl,
 } from '../utils/urls';
 import { DASHBOARD_DURATION_START_MARK } from '../dashboard_api/performance/dashboard_duration_start_mark';
-import { getDashboardHeaderAppActionsConfig } from '../header_app_actions/header_app_actions_config';
+import {
+  getDashboardHeaderAppActionsConfig,
+  getDashboardListingHeaderAppActionsConfig,
+} from '../header_app_actions/header_app_actions_config';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -145,6 +148,12 @@ export async function mountApp({
     return <DashboardNoMatch history={routeProps.history} />;
   };
 
+  const onCreateDashboard = () => {
+    coreServices.application.navigateToApp(DASHBOARD_APP_ID, {
+      path: `#/${CREATE_NEW_DASHBOARD_URL}`,
+    });
+  };
+
   const DashboardHeaderAppActionsSync = () => {
     const location = useLocation();
     useEffect(() => {
@@ -152,7 +161,9 @@ export async function mountApp({
       const isListingPage =
         pathname === LANDING_PAGE_PATH || pathname.startsWith(`${LANDING_PAGE_PATH}/`);
       if (isListingPage) {
-        coreServices.chrome.setHeaderAppActionsConfig(undefined);
+        coreServices.chrome.setHeaderAppActionsConfig(
+          getDashboardListingHeaderAppActionsConfig(onCreateDashboard)
+        );
       } else {
         coreServices.chrome.setHeaderAppActionsConfig(getDashboardHeaderAppActionsConfig());
       }

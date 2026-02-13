@@ -224,6 +224,29 @@ const DashboardOverflowKeyPadSection: React.FC = () => (
 );
 
 /**
+ * Header app actions config for the Dashboards listing page: icon-only "New" button.
+ */
+export function getDashboardListingHeaderAppActionsConfig(
+  onCreateDashboard: () => void
+): ChromeHeaderAppActionsConfig {
+  return {
+    primaryActions: [
+      <EuiButtonIcon
+        key="listing-new-dashboard"
+        size="xs"
+        color="text"
+        iconType="plusInCircle"
+        onClick={onCreateDashboard}
+        data-test-subj="headerGlobalNav-appActionsNewDashboardButton"
+        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.newAriaLabel', {
+          defaultMessage: 'New',
+        })}
+      />,
+    ],
+  };
+}
+
+/**
  * Header app actions config for the Dashboards app (overflow + Full screen, Share, Edit).
  * Same pattern as Discover: set when app mounts; cleared on app change.
  */
