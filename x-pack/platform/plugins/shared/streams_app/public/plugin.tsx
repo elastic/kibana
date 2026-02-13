@@ -35,9 +35,10 @@ import {
   createDiscoverFlyoutStreamProcessingLink,
 } from './discover_features';
 import { StreamsTelemetryService } from './telemetry/service';
-import { StreamsAppLocatorDefinition } from '../common/locators';
+import { StreamsAppLocator, StreamsAppLocatorDefinition } from '../common/locators';
 import {
   ADD_STREAM_METRICS_PANEL_ACTION_ID,
+  OPEN_STREAM_ACTION_ID,
   STREAM_METRICS_EMBEDDABLE_ID,
 } from '../common/embeddable';
 
@@ -193,6 +194,9 @@ export class StreamsAppPlugin
     // Register the ADD_PANEL_TRIGGER action for adding stream metrics panels to dashboards
     this.registerAddPanelAction(coreStart, pluginsStart);
 
+    // Register the CONTEXT_MENU_TRIGGER action for opening streams from embedded panels
+    this.registerOpenStreamAction(coreStart, pluginsStart, locator);
+
     return {};
   }
 
@@ -211,6 +215,21 @@ export class StreamsAppPlugin
           return createAddStreamMetricsPanelAction(coreStart, pluginsStart);
         }
       );
+    });
+  }
+
+  private registerOpenStreamAction(
+    coreStart: CoreStart,
+    pluginsStart: StreamsAppStartDependencies,
+    locator: StreamsAppLocator
+  ): void {
+    const { uiActions } = pluginsStart;
+    // Dynamic import from ui-actions-plugin to avoid static dependency on CONTEXT_MENU_TRIGGER
+    import('@kbn/ui-actions-plugin/common/trigger_ids').then(({ CONTEXT_MENU_TRIGGER }) => {
+      uiActions.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, OPEN_STREAM_ACTION_ID, async () => {
+        const { createOpenStreamAction } = await import('./actions');
+        return createOpenStreamAction(coreStart, locator);
+      });
     });
   }
 }

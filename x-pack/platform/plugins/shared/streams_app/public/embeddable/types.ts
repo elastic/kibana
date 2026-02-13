@@ -6,7 +6,11 @@
  */
 
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { PublishesWritableTitle, SerializedTitles } from '@kbn/presentation-publishing';
+import type {
+  PublishesWritableTitle,
+  PublishingSubject,
+  SerializedTitles,
+} from '@kbn/presentation-publishing';
 
 export interface StreamMetricsState {
   streamName: string | undefined;
@@ -17,4 +21,5 @@ export type StreamMetricsSerializedState = SerializedTitles & StreamMetricsState
 export type StreamMetricsApi = DefaultEmbeddableApi<StreamMetricsSerializedState> &
   PublishesWritableTitle & {
     setStreamName: (streamName: string | undefined) => void;
+    streamName$: PublishingSubject<string | undefined>;
   };

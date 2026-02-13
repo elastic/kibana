@@ -19,6 +19,7 @@ export const DEFAULT_QUICK_ACTION_IDS: PresentationPanelQuickActionIds = {
     'ACTION_OPEN_IN_DISCOVER',
     'ACTION_VIEW_SAVED_SEARCH',
     'CONVERT_LEGACY_MARKDOWN',
+    'OPEN_STREAM_ACTION',
   ],
   view: [
     'clearControl',
@@ -27,5 +28,6 @@ export const DEFAULT_QUICK_ACTION_IDS: PresentationPanelQuickActionIds = {
     'ACTION_VIEW_SAVED_SEARCH',
     'openInspector',
     'togglePanel',
+    'OPEN_STREAM_ACTION',
   ],
 } as const;

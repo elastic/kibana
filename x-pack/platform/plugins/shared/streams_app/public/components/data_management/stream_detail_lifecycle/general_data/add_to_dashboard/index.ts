@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export const STREAM_METRICS_EMBEDDABLE_ID = 'STREAM_METRICS_EMBEDDABLE';
-export const ADD_STREAM_METRICS_PANEL_ACTION_ID = 'ADD_STREAM_METRICS_PANEL_ACTION';
-export const OPEN_STREAM_ACTION_ID = 'OPEN_STREAM_ACTION';
+export { AddToDashboardFlyout } from './add_to_dashboard_flyout';

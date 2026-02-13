@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import { type IngestStreamLifecycle, type Streams, type IlmPolicy } from '@kbn/streams-schema';
@@ -23,6 +23,7 @@ import { StorageSizeCard } from './cards/storage_size_card';
 import { IngestionCard } from './cards/ingestion_card';
 import { LifecycleSummary } from './lifecycle_summary';
 import { IngestionRate } from './ingestion_rate';
+import { AddToDashboardFlyout } from './add_to_dashboard';
 
 export const StreamDetailGeneralData = ({
   definition,
@@ -47,6 +48,7 @@ export const StreamDetailGeneralData = ({
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [updateInProgress, setUpdateInProgress] = useState(false);
+  const [isAddToDashboardFlyoutOpen, setIsAddToDashboardFlyoutOpen] = useState(false);
 
   const { signal } = useAbortController();
 
@@ -108,20 +110,42 @@ export const StreamDetailGeneralData = ({
           updateInProgress={updateInProgress}
         />
       )}
-      <EuiTitle size="xs">
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="checkInCircleFilled" color="success" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <h4>
-              {i18n.translate('xpack.streams.streamDetailLifecycle.successfulIngestData', {
-                defaultMessage: 'Successful ingest data',
-              })}
-            </h4>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiTitle>
+      {isAddToDashboardFlyoutOpen && (
+        <AddToDashboardFlyout
+          streamName={definition.stream.name}
+          onClose={() => setIsAddToDashboardFlyoutOpen(false)}
+        />
+      )}
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="checkInCircleFilled" color="success" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <h4>
+                  {i18n.translate('xpack.streams.streamDetailLifecycle.successfulIngestData', {
+                    defaultMessage: 'Successful ingest data',
+                  })}
+                </h4>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            iconType="dashboardApp"
+            size="s"
+            onClick={() => setIsAddToDashboardFlyoutOpen(true)}
+            data-test-subj="streamDetailLifecycleAddToDashboardButton"
+          >
+            {i18n.translate('xpack.streams.streamDetailLifecycle.addToDashboardButton', {
+              defaultMessage: 'Add to Dashboard',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       {/* Retention Section */}
       <SectionPanel

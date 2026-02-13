@@ -6,3 +6,4 @@
  */
 
 export { createAddStreamMetricsPanelAction } from './add_stream_metrics_panel_action';
+export { createOpenStreamAction } from './open_stream_action';

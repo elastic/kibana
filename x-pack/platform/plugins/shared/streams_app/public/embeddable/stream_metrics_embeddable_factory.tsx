@@ -34,10 +34,15 @@ import { getAggregations } from '../components/data_management/stream_detail_lif
 import { getCalculatedStats } from '../components/data_management/stream_detail_lifecycle/helpers/get_calculated_stats';
 import { formatBytes } from '../components/data_management/stream_detail_lifecycle/helpers/format_bytes';
 
-const getDefaultTitle = () =>
-  i18n.translate('xpack.streams.streamMetricsEmbeddable.defaultTitle', {
-    defaultMessage: 'Stream Metrics',
-  });
+const getDefaultTitle = (streamName?: string) =>
+  streamName
+    ? i18n.translate('xpack.streams.streamMetricsEmbeddable.defaultTitleWithName', {
+        defaultMessage: 'Stream Metrics: {streamName}',
+        values: { streamName },
+      })
+    : i18n.translate('xpack.streams.streamMetricsEmbeddable.defaultTitle', {
+        defaultMessage: 'Stream Metrics',
+      });
 
 const defaultStreamMetricsState: WithAllKeys<StreamMetricsState> = {
   streamName: undefined,
@@ -68,8 +73,17 @@ export const getStreamMetricsEmbeddableFactory = ({
       initialState,
       defaultStreamMetricsState
     );
-    const defaultTitle$ = new BehaviorSubject<string | undefined>(getDefaultTitle());
+    const defaultTitle$ = new BehaviorSubject<string | undefined>(
+      getDefaultTitle(initialState.streamName)
+    );
     const reload$ = new Subject<boolean>();
+
+    // Subscribe to stream name changes to update the default title dynamically
+    const streamNameSubscription = streamMetricsStateManager.api.streamName$.subscribe(
+      (streamName) => {
+        defaultTitle$.next(getDefaultTitle(streamName));
+      }
+    );
 
     function serializeState(): StreamMetricsSerializedState {
       return {
@@ -105,6 +119,7 @@ export const getStreamMetricsEmbeddableFactory = ({
       setStreamName: (streamName: string | undefined) => {
         streamMetricsStateManager.api.setStreamName(streamName);
       },
+      streamName$: streamMetricsStateManager.api.streamName$,
     });
 
     const fetchSubscription = fetch$(api)
@@ -269,6 +284,7 @@ export const getStreamMetricsEmbeddableFactory = ({
         useEffect(() => {
           return () => {
             fetchSubscription.unsubscribe();
+            streamNameSubscription.unsubscribe();
           };
         }, []);
 
