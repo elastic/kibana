@@ -9,7 +9,10 @@ import { type AggregateQuery, type Filter, type Query, type TimeRange } from '@k
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { type EmbeddableApiContext, apiIsPresentationContainer } from '@kbn/presentation-publishing';
+import {
+  type EmbeddableApiContext,
+  apiIsPresentationContainer,
+} from '@kbn/presentation-publishing';
 import { getEsqlControls } from '@kbn/esql-utils';
 import { isLensApi } from '../react_embeddable/type_guards';
 
