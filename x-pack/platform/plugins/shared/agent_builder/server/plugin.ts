@@ -28,7 +28,11 @@ import { TrackingService } from './telemetry/tracking_service';
 import { registerTelemetryCollector } from './telemetry/telemetry_collector';
 import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
+<<<<<<< HEAD
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
+=======
+import { registerTaskDefinitions } from './services/execution';
+>>>>>>> kibana/main
 
 export class AgentBuilderPlugin
   implements
@@ -83,6 +87,17 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
     });
 
+    registerTaskDefinitions({
+      taskManager: setupDeps.taskManager,
+      getTaskHandler: () => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('getTaskHandler called before service init');
+        }
+        return services.taskHandler;
+      },
+    });
+
     registerFeatures({ features: setupDeps.features });
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
@@ -131,15 +146,15 @@ export class AgentBuilderPlugin
       hooks: {
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
       },
-      skill: {
-        registerSkill: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
+      skills: {
+        register: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
       },
     };
   }
 
   start(
-    { elasticsearch, security, uiSettings, savedObjects, featureFlags }: CoreStart,
-    { inference, spaces, actions }: AgentBuilderStartDependencies
+    { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags }: CoreStart,
+    { inference, spaces, actions, taskManager }: AgentBuilderStartDependencies
   ): AgentBuilderPluginStart {
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
@@ -151,6 +166,8 @@ export class AgentBuilderPlugin
       uiSettings,
       savedObjects,
       featureFlags,
+      dataStreams,
+      taskManager,
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
     });

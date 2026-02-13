@@ -12,6 +12,8 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { DataStreamsStart } from '@kbn/core-data-streams-server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
@@ -20,12 +22,12 @@ import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
 import type { RunnerFactory } from './runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { ConversationService } from './conversation';
-import type { ChatService } from './chat';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
 import type { SkillServiceSetup, SkillServiceStart } from './skills';
 import type { TrackingService } from '../telemetry/tracking_service';
 import type { AnalyticsService } from '../telemetry';
 import type { AuditLogService } from '../audit';
+import type { AgentExecutionService, TaskHandler } from './execution';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -41,7 +43,6 @@ export interface InternalStartServices {
   attachments: AttachmentServiceStart;
   skills: SkillServiceStart;
   conversations: ConversationService;
-  chat: ChatService;
   runnerFactory: RunnerFactory;
   hooks: HooksServiceStart;
   auditLogService: AuditLogService;
@@ -49,6 +50,8 @@ export interface InternalStartServices {
   featureFlags: FeatureFlagsStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  execution: AgentExecutionService;
+  taskHandler: TaskHandler;
 }
 
 export interface ServiceSetupDeps {
@@ -65,10 +68,12 @@ export interface ServicesStartDeps {
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   featureFlags: FeatureFlagsStart;
+  dataStreams: DataStreamsStart;
   // plugin deps
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
+  taskManager: TaskManagerStartContract;
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
 }
