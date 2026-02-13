@@ -36,7 +36,7 @@ export const getLatestAlertEventStateQuery = ({
       last_episode_id = LAST(episode.id, @timestamp), 
       last_episode_status = LAST(episode.status, @timestamp),
       last_episode_status_count = LAST(episode.status_count, @timestamp),
-      last_episode_timestamp = LAST(@timestamp, @timestamp)
+      last_episode_timestamp = MAX(@timestamp)
     BY group_hash`;
 
   query = query.keep(
