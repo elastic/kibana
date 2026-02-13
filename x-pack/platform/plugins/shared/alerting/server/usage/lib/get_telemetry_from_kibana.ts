@@ -444,11 +444,10 @@ export async function getTotalCountAggregations({
       },
       count_rules_by_execution_status: countRulesByExecutionStatus,
       count_rules_with_tags: aggregations.sum_rules_with_tags.value ?? 0,
-      count_rules_with_elasticagent_tag:
-        aggregations.sum_rules_installed_by_integrations.value ?? 0,
+      count_rules_with_elasticagent_tag: aggregations.sum_rules_with_elasticagent_tag.value ?? 0,
       count_rules_with_elasticagent_tag_by_type: {
         ...parseSimpleRuleTypeBucket(
-          aggregations.sum_rules_installed_by_integrations_by_type.by_alert_type.buckets
+          aggregations.sum_rules_with_elasticagent_tag_by_type.by_alert_type.buckets
         ),
       },
       count_rules_by_notify_when: countRulesByNotifyWhen,
