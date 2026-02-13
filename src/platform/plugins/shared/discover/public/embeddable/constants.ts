@@ -7,20 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { SearchEmbeddableState } from '../../common/embeddable/types';
 
 export { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
-
-export const SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID =
-  'SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID';
-
-export const SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER: Trigger = {
-  id: SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
-  title: 'Discover session embeddable cell actions',
-  description:
-    'This trigger is used to replace the cell actions for Discover session embeddable grid.',
-} as const;
 
 export const LEGACY_LOG_STREAM_EMBEDDABLE = 'LOG_STREAM_EMBEDDABLE';
 

@@ -13,7 +13,7 @@ import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
-import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type {
   DiscoverGridSettings,
   DiscoverSession,
@@ -30,6 +30,7 @@ import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DocViewerRestorableState } from '@kbn/unified-doc-viewer';
 import type { SerializedError } from '@reduxjs/toolkit';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
 
@@ -144,7 +145,8 @@ export interface TabState extends TabItem {
   // Persistable attributes of the tab (stored in Discover Session and in local storage).
   attributes: {
     visContext: UnifiedHistogramVisContext | {} | undefined;
-    controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
+    controlGroupState: ControlPanelsState<OptionsListESQLControlState> | undefined;
+    timeRestore: boolean;
   };
 
   // The following properties are used to manage the tab's state after it has been initialized.
