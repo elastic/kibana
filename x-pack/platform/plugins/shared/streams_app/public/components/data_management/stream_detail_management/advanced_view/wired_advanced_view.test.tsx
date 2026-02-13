@@ -269,6 +269,7 @@ describe('WiredAdvancedView', () => {
           contentPacks: { enabled: false },
           significantEvents: { enabled: false, available: true },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -288,6 +289,7 @@ describe('WiredAdvancedView', () => {
           contentPacks: { enabled: false },
           significantEvents: { enabled: true, available: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
