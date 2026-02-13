@@ -161,5 +161,16 @@ export {
   isToolProgressEvent,
   isPromptRequestEvent,
 } from './chat';
+export {
+  type PublicSkillDefinition,
+  type PersistedSkillCreateRequest,
+  type PersistedSkillUpdateRequest,
+  type SkillReferencedContent,
+  skillCreateRequestSchema,
+  skillUpdateRequestSchema,
+  validateSkillId,
+  skillIdMaxLength,
+  skillIdRegexp,
+} from './skills';
 export * from './telemetry';
 export { getLatestVersion, type VersionedAttachment } from './attachments';
