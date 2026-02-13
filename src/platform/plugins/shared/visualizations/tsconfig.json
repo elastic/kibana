@@ -75,7 +75,6 @@
     "@kbn/content-management-utils",
     "@kbn/react-hooks",
     "@kbn/presentation-panel-plugin",
-    "@kbn/ui-actions-browser",
     "@kbn/deeplinks-analytics",
     "@kbn/core-saved-objects-api-server",
     "@kbn/css-utils",

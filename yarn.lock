@@ -2600,10 +2600,10 @@
   dependencies:
     "@elastic/ecs-helpers" "^2.1.1"
 
-"@elastic/ecs@9.0.0":
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/ecs/-/ecs-9.0.0.tgz#5599c87f72a1b2137467f80c158777ff5c4fdd81"
-  integrity sha512-FVFOFGgo8D2XoYs/2M9gaC76VzKhMKkrVqnGkbuQAB0CKoAFy9k5I2K7IMmDs6l4R5OVFiJk6uwfLiTXyHyjDA==
+"@elastic/ecs@9.2.0":
+  version "9.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/ecs/-/ecs-9.2.0.tgz#9b2b19b6c829192edcd79a1f0df348ccd633b3e6"
+  integrity sha512-qYPncAQYJa+PgZT0S0JE2tvaPnxxGx7sUhICMmk9NGkJeeEko6GQ24XLKxaDLFxr4DuYVf/0EOaRX39OENqxwA==
 
 "@elastic/elasticsearch-types@npm:@elastic/elasticsearch@^8.2.1":
   version "8.6.0"
@@ -5201,6 +5201,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-list-assembly@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-list-mock-data@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data":
   version "0.0.0"
   uid ""
@@ -5210,6 +5214,14 @@
   uid ""
 
 "@kbn/content-list-provider@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-provider":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-list-table@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-table":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-list-toolbar@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar":
   version "0.0.0"
   uid ""
 
@@ -6478,6 +6490,10 @@
   uid ""
 
 "@kbn/dataset-quality-plugin@link:x-pack/platform/plugins/shared/dataset_quality":
+  version "0.0.0"
+  uid ""
+
+"@kbn/date-range-picker@link:src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker":
   version "0.0.0"
   uid ""
 
@@ -9473,19 +9489,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ui-actions-enhanced-examples-plugin@link:x-pack/examples/ui_actions_enhanced_examples":
-  version "0.0.0"
-  uid ""
-
 "@kbn/ui-actions-enhanced-plugin@link:src/platform/plugins/shared/ui_actions_enhanced":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ui-actions-examples-plugin@link:examples/ui_action_examples":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ui-actions-explorer-plugin@link:examples/ui_actions_explorer":
   version "0.0.0"
   uid ""
 

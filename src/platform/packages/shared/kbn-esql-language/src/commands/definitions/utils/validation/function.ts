@@ -35,7 +35,7 @@ import type {
 } from '../../types';
 import { getExpressionType, getMatchingSignatures } from '../expressions';
 import { ColumnValidator } from './column';
-import type { PromQLFunction } from '../../../../promql/types';
+import type { PromQLFunction } from '../../../../embedded_languages/promql/types';
 
 export function validateFunction({
   fn,
