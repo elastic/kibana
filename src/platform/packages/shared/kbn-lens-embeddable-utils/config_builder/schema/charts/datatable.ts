@@ -53,7 +53,7 @@ const sortingSchema = schema.oneOf(
         column_type: schema.literal('transposed_metric'),
         index: schema.number({
           min: 0,
-          meta: { description: '' },
+          meta: { description: 'Index of the metric column to sort by (0-based)' },
         }),
         values: schema.arrayOf(schema.string(), {
           minSize: 1,
