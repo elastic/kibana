@@ -45,6 +45,7 @@ import type { GroupTakeActionItems } from '../../alerts_table/types';
 import { AttacksGroupTakeActionItems } from './attacks_group_take_action_items';
 import { useGroupStats } from './grouping_settings/use_group_stats';
 import { AttacksTableSortSelect, DEFAULT_ATTACKS_SORT } from './attacks_table_sort_select';
+import { AlertActionItems } from './alerts_action_items';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
 
@@ -233,12 +234,12 @@ export const TableSection = React.memo(
     );
 
     const groupTakeActionItems: GroupTakeActionItems = useCallback(
-      ({ selectedGroup, groupBucket, closePopover }) => {
-        const attack = getAttack(selectedGroup, groupBucket);
-        if (!attack) return;
-        return <AttacksGroupTakeActionItems attack={attack} closePopover={closePopover} />;
+      (props) => {
+        const attack = getAttack(props.selectedGroup, props.groupBucket);
+        if (!attack) return <AlertActionItems statusFilter={statusFilter} {...props} />;
+        return <AttacksGroupTakeActionItems attack={attack} />;
       },
-      [getAttack]
+      [getAttack, statusFilter]
     );
 
     const accordionExtraActionGroupStats = useGroupStats();
