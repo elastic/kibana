@@ -62,7 +62,8 @@ import { SecurityService } from '@kbn/core-security-server-internal';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
 import { PricingService } from '@kbn/core-pricing-server-internal';
 import { CoreInjectionService } from '@kbn/core-di-server-internal';
-import { SpanStatusCode, trace } from '@opentelemetry/api';
+import { SpanStatusCode } from '@opentelemetry/api';
+import { withActiveSpan } from '@kbn/tracing-utils';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { coreConfig, type CoreConfigType } from './core_config';
@@ -181,25 +182,16 @@ export class Server {
     const prebootStartUptime = performance.now();
     const prebootTransaction = apm.startTransaction('server-preboot', 'kibana-platform');
 
-    return await trace.getTracer('kibana').startActiveSpan(
+    return withActiveSpan(
       'server-preboot',
-      {
-        attributes: {
-          'transaction.type': 'kibana-platform',
-        },
-      },
-      async (span) => {
+      { attributes: { 'transaction.type': 'kibana-platform' } },
+      async () => {
         try {
           const corePreboot = await this.#preboot(disablePreboot);
-          span.setStatus({ code: SpanStatusCode.OK });
-          span.end();
           prebootTransaction.end();
           this.uptimePerStep.preboot = { start: prebootStartUptime, end: performance.now() };
           return corePreboot;
         } catch (error) {
-          span.setStatus({ code: SpanStatusCode.ERROR });
-          span.recordException(error);
-          span.end();
           prebootTransaction.end('error');
           throw error;
         }
@@ -300,25 +292,16 @@ export class Server {
     const setupStartUptime = performance.now();
     const setupTransaction = apm.startTransaction('server-setup', 'kibana-platform');
 
-    return await trace.getTracer('kibana').startActiveSpan(
+    return withActiveSpan(
       'server-setup',
-      {
-        attributes: {
-          'transaction.type': 'kibana-platform',
-        },
-      },
-      async (span) => {
+      { attributes: { 'transaction.type': 'kibana-platform' } },
+      async () => {
         try {
           const coreSetup = await this.#setup();
-          span.setStatus({ code: SpanStatusCode.OK });
-          span.end();
           setupTransaction.end();
           this.uptimePerStep.setup = { start: setupStartUptime, end: performance.now() };
           return coreSetup;
         } catch (error) {
-          span.setStatus({ code: SpanStatusCode.ERROR });
-          span.recordException(error);
-          span.end();
           setupTransaction.end('error');
           throw error;
         }
@@ -487,18 +470,12 @@ export class Server {
     this.log.debug('starting server');
     const startStartUptime = performance.now();
     const startTransaction = apm.startTransaction('server-start', 'kibana-platform');
-    return await trace.getTracer('kibana').startActiveSpan(
+    return withActiveSpan(
       'server-start',
-      {
-        attributes: {
-          'transaction.type': 'kibana-platform',
-        },
-      },
+      { attributes: { 'transaction.type': 'kibana-platform' } },
       async (span) => {
         try {
           const coreStart = await this.#start(startTransaction);
-          span.setStatus({ code: SpanStatusCode.OK });
-          span.end();
           startTransaction.end();
           this.uptimePerStep.start = { start: startStartUptime, end: performance.now() };
 
@@ -510,13 +487,12 @@ export class Server {
           return coreStart;
         } catch (error) {
           if (error instanceof CriticalError && error.code === MIGRATION_EXCEPTION_CODE) {
-            span.setStatus({ code: SpanStatusCode.OK });
-            span.end();
+            // Intentionally setting this span as sucessful as this is not an error condition.
+            // The `withActiveSpan` wrapper utility won't reset it to error because we're ending the span (and it checks that it's still recording before setting anything else).
+            span?.setStatus({ code: SpanStatusCode.OK });
+            span?.end();
             startTransaction.end();
           } else {
-            span.setStatus({ code: SpanStatusCode.ERROR });
-            span.recordException(error);
-            span.end();
             startTransaction.end('error');
           }
           throw error;
@@ -545,14 +521,14 @@ export class Server {
 
     const deprecationsStart = this.deprecations.start();
     const soStartSpan = startTransaction.startSpan('saved_objects.migration', 'migration');
-    const savedObjectsStart = await trace.getTracer('kibana').startActiveSpan(
+    const savedObjectsStart = await withActiveSpan(
       'saved_objects.migration',
       {
         attributes: {
           'transaction.type': 'migration',
         },
       },
-      async (span) => {
+      async () => {
         try {
           const _savedObjectsStart = await this.savedObjects.start({
             elasticsearch: elasticsearchStart,
@@ -564,14 +540,9 @@ export class Server {
             migrationTime: _savedObjectsStart.metrics.migrationDuration,
           };
           await this.resolveSavedObjectsStartPromise!(_savedObjectsStart);
-          span.setStatus({ code: SpanStatusCode.OK });
-          span.end();
           soStartSpan?.end();
           return _savedObjectsStart;
         } catch (error) {
-          span.setStatus({ code: SpanStatusCode.ERROR });
-          span.recordException(error);
-          span.end();
           soStartSpan?.setOutcome('failure');
           soStartSpan?.end();
           throw error;
