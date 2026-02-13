@@ -60,7 +60,6 @@ dependsOn:
   - '@kbn/apm-types'
   - '@kbn/apm-types-shared'
   - '@kbn/observability-utils-server'
-  - '@kbn/observability-plugin'
 tags:
   - plugin
   - prod
