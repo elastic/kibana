@@ -13,7 +13,7 @@ import type { QueryServiceContract } from '../services/query_service/query_servi
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import { getLatestAlertEventStateQuery, type LatestAlertEventState } from './queries';
 import type { AlertEpisodeStatus } from '../../resources/alert_events';
-import { alertEpisodeStatus, type AlertEvent } from '../../resources/alert_events';
+import { alertEpisodeStatus, alertEventType, type AlertEvent } from '../../resources/alert_events';
 import type { RuleResponse } from '../rules_client/types';
 import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
 import { TransitionStrategyFactory } from './strategies/strategy_resolver';
@@ -113,6 +113,7 @@ export class DirectorService {
 
     return {
       ...currentAlertEvent,
+      type: alertEventType.alert,
       episode: {
         id: episodeId,
         status: result.status,
