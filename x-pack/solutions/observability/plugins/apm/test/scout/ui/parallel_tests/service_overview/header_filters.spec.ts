@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-oblt/ui';
-import { test, testData } from '../../fixtures';
+import { test } from '../../fixtures';
 
 test.describe('Service overview - header filters', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -15,47 +15,47 @@ test.describe('Service overview - header filters', { tag: ['@ess', '@svlOblt'] }
 
   test('Filtering by transaction type - changes url when selecting different value', async ({
     page,
-    pageObjects: { serviceDetailsPage },
+    pageObjects: { dependencyDetailsPage },
   }) => {
     await test.step('Navigate to service overview', async () => {
-      await serviceDetailsPage.overviewTab.goToTab({
-        serviceName: testData.SERVICE_OPBEANS_NODE,
-        rangeFrom: testData.START_DATE,
-        rangeTo: testData.END_DATE,
+      await dependencyDetailsPage.overviewTab.goToTab({
+        serviceName: dependencyDetailsPage.DEPENDENCY_NAME,
       });
     });
 
     await test.step('Verify service name is visible and initial state', async () => {
-      await expect(serviceDetailsPage.overviewTab.getTransactionTypeFilter()).toHaveValue(
+      await expect(dependencyDetailsPage.overviewTab.getTransactionTypeFilter()).toHaveValue(
         'request'
       );
     });
 
     await test.step('Select Worker transaction type', async () => {
-      await serviceDetailsPage.overviewTab.selectTransactionType('Worker');
+      await dependencyDetailsPage.overviewTab.selectTransactionType('Worker');
     });
 
     await test.step('Verify URL and filter value updated', async () => {
       await page.waitForURL(/transactionType=Worker/);
       expect(page.url()).toContain('transactionType=Worker');
-      await expect(serviceDetailsPage.overviewTab.getTransactionTypeFilter()).toHaveValue('Worker');
+      await expect(dependencyDetailsPage.overviewTab.getTransactionTypeFilter()).toHaveValue(
+        'Worker'
+      );
     });
   });
 
   test('Filtering by searchbar - filters by transaction.name', async ({
     page,
-    pageObjects: { serviceDetailsPage },
+    pageObjects: { dependencyDetailsPage },
   }) => {
     await test.step('Navigate to opbeans-java service overview', async () => {
-      await serviceDetailsPage.overviewTab.goToTab({
-        serviceName: testData.SERVICE_OPBEANS_JAVA,
-        rangeFrom: testData.START_DATE,
-        rangeTo: testData.END_DATE,
+      await dependencyDetailsPage.overviewTab.goToTab({
+        serviceName: dependencyDetailsPage.DEPENDENCY_NAME,
       });
     });
 
     await test.step('Verify service name is visible', async () => {
-      await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText('opbeans-java');
+      await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(
+        dependencyDetailsPage.DEPENDENCY_NAME
+      );
     });
 
     await test.step('Type transaction.n in searchbar and select autocomplete', async () => {
