@@ -112,3 +112,5 @@ export interface ValidationResult {
 }
 
 export type RuleDashboardsPlugins = Pick<RuleFormPlugins, 'uiActions'>;
+
+export type ShowRequestActivePage = 'create' | 'update';

@@ -21,7 +21,8 @@
       "licensing"
     ],
     "optionalPlugins": [
-      "cloud"
+      "cloud",
+      "home"
     ],
     "requiredBundles": [
       "esUiShared"
