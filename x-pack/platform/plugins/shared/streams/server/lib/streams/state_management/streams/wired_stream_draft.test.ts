@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Streams } from '@kbn/streams-schema';
+import { getEsqlViewName, type Streams } from '@kbn/streams-schema';
 import { WiredStream } from './wired_stream';
 import { State } from '../state';
 import type { StateDependencies } from '../types';
@@ -133,15 +133,25 @@ describe('WiredStream draft mode', () => {
   });
 
   describe('doDetermineCreateActions', () => {
-    it('only persists definition for draft streams', async () => {
+    it('creates ESQL view and definition for draft streams', async () => {
       const definition = createDraftStreamDefinition('logs.draft');
       const stream = new WiredStream(definition, mockDependencies);
 
-      // Mock the state to include the root stream
+      // Create parent with routing to this draft stream
+      const parentDefinition = createWiredStreamDefinition('logs');
+      parentDefinition.ingest.wired.routing = [
+        {
+          destination: 'logs.draft',
+          where: { field: 'log.level', eq: 'error' },
+          status: 'enabled',
+        },
+      ];
+
+      // Mock the state to include the root stream with routing
       const mockState = {
         get: (name: string) => {
           if (name === 'logs') {
-            return new WiredStream(createWiredStreamDefinition('logs'), mockDependencies);
+            return new WiredStream(parentDefinition, mockDependencies);
           }
           return undefined;
         },
@@ -149,9 +159,51 @@ describe('WiredStream draft mode', () => {
 
       const actions = await (stream as any).doDetermineCreateActions(mockState);
 
-      // Draft streams should only have the document upsert action
-      expect(actions.length).toBe(1);
-      expect(actions[0].type).toBe('upsert_dot_streams_document');
+      // Draft streams should have ESQL view upsert and document upsert actions
+      expect(actions.length).toBe(2);
+      expect(actions[0].type).toBe('upsert_esql_view');
+      expect(actions[0].request.name).toBe(getEsqlViewName('logs.draft'));
+      expect(actions[0].request.query).toContain('FROM logs');
+      expect(actions[0].request.query).toContain('WHERE');
+      expect(actions[1].type).toBe('upsert_dot_streams_document');
+    });
+
+    it('includes processing steps in ESQL view query for draft streams', async () => {
+      const definition = createDraftStreamDefinition('logs.draft');
+      definition.ingest.processing.steps = [
+        {
+          action: 'set',
+          to: 'processed',
+          value: 'true',
+        },
+      ];
+      const stream = new WiredStream(definition, mockDependencies);
+
+      // Create parent with routing
+      const parentDefinition = createWiredStreamDefinition('logs');
+      parentDefinition.ingest.wired.routing = [
+        {
+          destination: 'logs.draft',
+          where: { always: {} },
+          status: 'enabled',
+        },
+      ];
+
+      const mockState = {
+        get: (name: string) => {
+          if (name === 'logs') {
+            return new WiredStream(parentDefinition, mockDependencies);
+          }
+          return undefined;
+        },
+      } as unknown as State;
+
+      const actions = await (stream as any).doDetermineCreateActions(mockState);
+
+      // Verify ESQL view includes processing
+      expect(actions[0].type).toBe('upsert_esql_view');
+      // The query should include processing steps (transpiled to ESQL)
+      expect(actions[0].request.query).toContain('processed');
     });
 
     it('includes all ES materialization actions for non-draft streams', async () => {
@@ -196,7 +248,7 @@ describe('WiredStream draft mode', () => {
   });
 
   describe('doDetermineUpdateActions', () => {
-    it('only persists definition for draft stream updates', async () => {
+    it('only persists definition for draft stream updates when processing unchanged', async () => {
       const definition = createDraftStreamDefinition('logs.draft');
       const stream = new WiredStream(definition, mockDependencies);
 
@@ -216,18 +268,72 @@ describe('WiredStream draft mode', () => {
       expect(actions.length).toBe(1);
       expect(actions[0].type).toBe('upsert_dot_streams_document');
     });
+
+    it('updates ESQL view when processing changes for draft streams', async () => {
+      // Create new definition with processing changes
+      const definition = createDraftStreamDefinition('logs.draft');
+      definition.ingest.processing.steps = [
+        {
+          action: 'set',
+          to: 'new_field',
+          value: 'new_value',
+        },
+      ];
+      const stream = new WiredStream(definition, mockDependencies);
+
+      // Mark processing as changed
+      (stream as any)._changes.processing = true;
+
+      // Create parent with routing
+      const parentDefinition = createWiredStreamDefinition('logs');
+      parentDefinition.ingest.wired.routing = [
+        {
+          destination: 'logs.draft',
+          where: { always: {} },
+          status: 'enabled',
+        },
+      ];
+
+      const mockDesiredState = {
+        get: (name: string) => {
+          if (name === 'logs') {
+            return new WiredStream(parentDefinition, mockDependencies);
+          }
+          return undefined;
+        },
+      } as unknown as State;
+      const mockStartingState = {} as State;
+      const mockStartingStateStream = new WiredStream(
+        createDraftStreamDefinition('logs.draft'),
+        mockDependencies
+      );
+
+      const actions = await (stream as any).doDetermineUpdateActions(
+        mockDesiredState,
+        mockStartingState,
+        mockStartingStateStream
+      );
+
+      // Should update ESQL view and definition
+      expect(actions.length).toBe(2);
+      expect(actions[0].type).toBe('upsert_esql_view');
+      expect(actions[0].request.name).toBe(getEsqlViewName('logs.draft'));
+      expect(actions[1].type).toBe('upsert_dot_streams_document');
+    });
   });
 
   describe('doDetermineDeleteActions', () => {
-    it('only deletes definition for draft streams', async () => {
+    it('deletes definition and ESQL view for draft streams', async () => {
       const definition = createDraftStreamDefinition('logs.draft');
       const stream = new WiredStream(definition, mockDependencies);
 
       const actions = await (stream as any).doDetermineDeleteActions();
 
-      // Draft streams should only delete the document
-      expect(actions.length).toBe(1);
+      // Draft streams should delete the document and ESQL view
+      expect(actions.length).toBe(2);
       expect(actions[0].type).toBe('delete_dot_streams_document');
+      expect(actions[1].type).toBe('delete_esql_view');
+      expect(actions[1].request.name).toBe(getEsqlViewName('logs.draft'));
     });
 
     it('includes all cleanup actions for non-draft streams', async () => {

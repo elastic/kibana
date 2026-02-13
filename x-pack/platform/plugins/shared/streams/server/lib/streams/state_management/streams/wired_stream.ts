@@ -15,7 +15,9 @@ import {
   getSegments,
   isInheritLifecycle,
   getInheritedFieldsFromAncestors,
+  getEsqlViewName,
 } from '@kbn/streams-schema';
+import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
 import {
   getAncestors,
   getAncestorsAndSelf,
@@ -31,7 +33,7 @@ import {
   isDisabledLifecycleFailureStore,
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
-import { validateStreamlang } from '@kbn/streamlang';
+import { validateStreamlang, transpileEsql, conditionToESQL } from '@kbn/streamlang';
 import { MAX_STREAM_NAME_LENGTH } from '../../../../../common/constants';
 import { generateLayer } from '../../component_templates/generate_layer';
 import { getComponentTemplateName } from '../../component_templates/name';
@@ -774,11 +776,70 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
   }
 
+  /**
+   * Builds the ESQL query for a draft stream's ESQL view.
+   * The query reads from the parent stream's data stream, applies the routing condition
+   * from the parent that routes to this draft stream, and applies the processing steps.
+   *
+   * Format: FROM <parent_data_stream> | WHERE <routing_condition> | <processing_steps>
+   */
+  private buildDraftStreamEsqlQuery(desiredState: State): string {
+    const parentId = getParentId(this._definition.name);
+    if (!parentId) {
+      throw new StatusError('Draft stream must have a parent stream', 400);
+    }
+
+    const parentStream = desiredState.get(parentId);
+    if (!parentStream || !Streams.WiredStream.Definition.is(parentStream.definition)) {
+      throw new StatusError(`Parent stream ${parentId} not found or not a wired stream`, 400);
+    }
+
+    // Find the routing rule from parent that routes to this draft stream
+    const routingRule = parentStream.definition.ingest.wired.routing.find(
+      (routing) => routing.destination === this._definition.name
+    );
+
+    if (!routingRule) {
+      throw new StatusError(
+        `No routing rule found in parent ${parentId} for draft stream ${this._definition.name}`,
+        400
+      );
+    }
+
+    // Use the root stream's data stream as the source
+    const rootStreamName = getRoot(this._definition.name);
+    const queryParts: string[] = [`FROM ${rootStreamName}`];
+
+    // Add WHERE clause for the routing condition
+    const whereClause = conditionToESQL(routingRule.where);
+    queryParts.push(`WHERE ${whereClause}`);
+
+    // Add transpiled processing steps if any
+    if (this._definition.ingest.processing.steps.length > 0) {
+      const { commands } = transpileEsql(this._definition.ingest.processing);
+      if (commands.length > 0) {
+        queryParts.push(...commands);
+      }
+    }
+
+    return queryParts.join('\n| ');
+  }
+
   protected async doDetermineCreateActions(desiredState: State): Promise<ElasticsearchAction[]> {
-    // For draft streams, only persist the definition document - skip ES materialization
-    // (no templates, pipelines, data streams, etc.)
+    // For draft streams, persist the definition document and create an ESQL view
+    // Skip full ES materialization (no templates, pipelines, data streams, etc.)
     if (this._definition.ingest.wired.draft) {
+      const esqlViewName = getEsqlViewName(this._definition.name);
+      const esqlQuery = this.buildDraftStreamEsqlQuery(desiredState);
+
       return [
+        {
+          type: 'upsert_esql_view',
+          request: {
+            name: esqlViewName,
+            query: esqlQuery,
+          },
+        },
         {
           type: 'upsert_dot_streams_document',
           request: this._definition,
@@ -919,14 +980,29 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       return this.doDetermineCreateActions(desiredState);
     }
 
-    // For draft streams, only update the definition document
+    // For draft streams, update the definition document and ESQL view if processing changed
     if (this._definition.ingest.wired.draft) {
-      return [
-        {
-          type: 'upsert_dot_streams_document',
-          request: this._definition,
-        },
-      ];
+      const actions: ElasticsearchAction[] = [];
+
+      // Update ESQL view if processing changed (the view contains transpiled processing steps)
+      if (this._changes.processing) {
+        const esqlViewName = getEsqlViewName(this._definition.name);
+        const esqlQuery = this.buildDraftStreamEsqlQuery(desiredState);
+        actions.push({
+          type: 'upsert_esql_view',
+          request: {
+            name: esqlViewName,
+            query: esqlQuery,
+          },
+        });
+      }
+
+      actions.push({
+        type: 'upsert_dot_streams_document',
+        request: this._definition,
+      });
+
+      return actions;
     }
 
     const actions: ElasticsearchAction[] = [];
@@ -1071,13 +1147,19 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
   }
 
   protected async doDetermineDeleteActions(): Promise<ElasticsearchAction[]> {
-    // For draft streams, only delete the definition document - no ES artifacts exist
+    // For draft streams, delete the definition document and ESQL view
     if (this._definition.ingest.wired.draft) {
       return [
         {
           type: 'delete_dot_streams_document',
           request: {
             name: this._definition.name,
+          },
+        },
+        {
+          type: 'delete_esql_view',
+          request: {
+            name: getEsqlViewName(this._definition.name),
           },
         },
       ];
