@@ -22,11 +22,22 @@ node scripts/check_api_contracts.js \
   --distribution stack \
   --specPath oas_docs/output/kibana.yaml \
   --baseBranch "$BASE_BRANCH" \
-  "${MERGE_BASE_ARGS[@]+"${MERGE_BASE_ARGS[@]}"}"
+  "${MERGE_BASE_ARGS[@]+"${MERGE_BASE_ARGS[@]}"}" &
+STACK_PID=$!
 
 echo "Checking serverless API contracts..."
 node scripts/check_api_contracts.js \
   --distribution serverless \
   --specPath oas_docs/output/kibana.serverless.yaml \
   --baseBranch "$BASE_BRANCH" \
-  "${MERGE_BASE_ARGS[@]+"${MERGE_BASE_ARGS[@]}"}"
+  "${MERGE_BASE_ARGS[@]+"${MERGE_BASE_ARGS[@]}"}" &
+SERVERLESS_PID=$!
+
+STACK_EXIT=0
+SERVERLESS_EXIT=0
+wait $STACK_PID || STACK_EXIT=$?
+wait $SERVERLESS_PID || SERVERLESS_EXIT=$?
+
+if [ $STACK_EXIT -ne 0 ] || [ $SERVERLESS_EXIT -ne 0 ]; then
+  exit 1
+fi
