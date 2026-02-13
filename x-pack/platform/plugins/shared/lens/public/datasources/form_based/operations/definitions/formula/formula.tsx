@@ -146,8 +146,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
     toExpression: (layer, columnId) => {
       const currentColumn = layer.columns[columnId] as FormulaIndexPatternColumn;
       const params = currentColumn.params;
-      // TODO: improve this logic
-      const label = params?.formula ?? defaultLabel;
+      const label = currentColumn.label || params?.formula || defaultLabel;
 
       return [
         {

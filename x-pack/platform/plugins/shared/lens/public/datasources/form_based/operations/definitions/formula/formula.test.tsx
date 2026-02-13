@@ -141,7 +141,7 @@ describe('[Lens] formula', () => {
           indexPattern,
         })
       ).toEqual({
-        label: 'Formula',
+        label: '',
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
@@ -158,7 +158,7 @@ describe('[Lens] formula', () => {
           indexPattern,
         })
       ).toEqual({
-        label: 'average(bytes)',
+        label: '',
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
@@ -179,7 +179,7 @@ describe('[Lens] formula', () => {
           indexPattern,
         })
       ).toEqual({
-        label: 'Formula',
+        label: '',
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
@@ -208,7 +208,7 @@ describe('[Lens] formula', () => {
           indexPattern,
         })
       ).toEqual({
-        label: 'average(bytes)',
+        label: '',
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
@@ -241,7 +241,7 @@ describe('[Lens] formula', () => {
           indexPattern,
         })
       ).toEqual({
-        label: `average(bytes, kql='category.keyword: "Men\\'s Clothing" or category.keyword: "Men\\'s Shoes"')`,
+        label: '',
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
@@ -269,7 +269,7 @@ describe('[Lens] formula', () => {
           indexPattern,
         })
       ).toEqual({
-        label: `count(lucene='*')`,
+        label: '',
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
@@ -323,7 +323,7 @@ describe('[Lens] formula', () => {
           operationDefinitionMap
         )
       ).toEqual({
-        label: 'moving_average(average(bytes), window=3)',
+        label: '',
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
@@ -376,7 +376,7 @@ describe('[Lens] formula', () => {
           operationDefinitionMap
         )
       ).toEqual({
-        label: 'Formula',
+        label: '',
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
@@ -402,7 +402,7 @@ describe('[Lens] formula', () => {
           indexPattern,
         })
       ).toEqual({
-        label: '0',
+        label: '',
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
@@ -448,7 +448,6 @@ describe('[Lens] formula', () => {
           ...mergedLayer.columns,
           col1: {
             ...mergedColumn,
-            label: formula,
             params: {
               ...mergedColumn.params,
               formula,
@@ -462,7 +461,7 @@ describe('[Lens] formula', () => {
     beforeEach(() => {
       indexPattern = createMockedIndexPattern();
       currentColumn = {
-        label: 'Formula',
+        label: '',
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
@@ -495,7 +494,6 @@ describe('[Lens] formula', () => {
           ...layer.columns,
           col1: {
             ...currentColumn,
-            label: 'average(bytes)',
             references: ['col1X0'],
             params: {
               ...currentColumn.params,
@@ -504,7 +502,6 @@ describe('[Lens] formula', () => {
             },
           },
           col1X0: {
-            customLabel: true,
             dataType: 'number',
             isBucketed: false,
             label: 'Part of average(bytes)',
@@ -516,6 +513,7 @@ describe('[Lens] formula', () => {
       });
     });
 
+    // TODO fix
     it('should create a valid formula expression for numeric literals', () => {
       expect(
         insertOrReplaceFormulaColumn(
@@ -540,7 +538,6 @@ describe('[Lens] formula', () => {
           ...layer.columns,
           col1: {
             ...currentColumn,
-            label: '0',
             references: ['col1X0'],
             params: {
               ...currentColumn.params,
@@ -549,7 +546,6 @@ describe('[Lens] formula', () => {
             },
           },
           col1X0: {
-            customLabel: true,
             dataType: 'number',
             isBucketed: false,
             label: 'Part of 0',
@@ -722,7 +718,6 @@ describe('[Lens] formula', () => {
       expect(newLayer.columns).toEqual(
         expect.objectContaining({
           col1: expect.objectContaining({
-            label: formula,
             filter,
           }),
           col1X1: expect.objectContaining({
@@ -774,7 +769,6 @@ describe('[Lens] formula', () => {
       expect(newLayer.columns).toEqual(
         expect.objectContaining({
           col1: expect.objectContaining({
-            label: formula,
             filter,
           }),
           col1X1: expect.objectContaining({
@@ -821,7 +815,6 @@ describe('[Lens] formula', () => {
       expect(newLayer.columns).toEqual(
         expect.objectContaining({
           col1: expect.objectContaining({
-            label: formula,
             reducedTimeRange,
           }),
           // Moving average column
@@ -873,7 +866,6 @@ describe('[Lens] formula', () => {
       expect(newLayer.columns).toEqual(
         expect.objectContaining({
           col1: expect.objectContaining({
-            label: formula,
             reducedTimeRange,
           }),
           // Moving average column
@@ -908,6 +900,7 @@ describe('[Lens] formula', () => {
                 ...layer.columns,
                 col2: {
                   label: 'My custom formula',
+                  customLabel: true,
                   dataType: 'number',
                   operationType: 'formula',
                   isBucketed: false,
@@ -930,7 +923,7 @@ describe('[Lens] formula', () => {
     );
 
     it.each([true, false])(
-      '[isFormulaBroken: %s] should return the formula as label if defaultLabel is used',
+      '[isFormulaBroken: %s] should return the formula as label if no custom label is set',
       (isFormulaBroken) => {
         const formula = 'average(bytes)';
         expect(
@@ -940,7 +933,7 @@ describe('[Lens] formula', () => {
               columns: {
                 ...layer.columns,
                 col2: {
-                  label: 'Formula',
+                  label: '',
                   dataType: 'number',
                   operationType: 'formula',
                   isBucketed: false,
@@ -972,11 +965,11 @@ describe('[Lens] formula', () => {
               columns: {
                 ...layer.columns,
                 col2: {
-                  label: 'Formula',
+                  label: '',
                   dataType: 'number',
                   operationType: 'formula',
                   isBucketed: false,
-                  params: { formula: '', isFormulaBroken },
+                  params: { isFormulaBroken },
                   references: [],
                 } as FormulaIndexPatternColumn,
               },

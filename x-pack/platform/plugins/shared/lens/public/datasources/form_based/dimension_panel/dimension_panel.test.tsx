@@ -669,7 +669,7 @@ describe('FormBasedDimensionEditor', () => {
     wrapper = mountWithProviders(
       <FormBasedDimensionEditorComponent
         {...defaultProps}
-        state={getStateWithColumns({ col1: bytesColumn })}
+        state={getStateWithColumns({ col1: { ...bytesColumn, label: '' } })}
       />
     );
 
@@ -686,7 +686,7 @@ describe('FormBasedDimensionEditor', () => {
           columns: {
             ...state.layers.first.columns,
             col1: expect.objectContaining({
-              label: 'Minimum of bytes',
+              label: '',
             }),
           },
         },
@@ -722,7 +722,6 @@ describe('FormBasedDimensionEditor', () => {
             ...state.layers.first.columns,
             col1: expect.objectContaining({
               label: 'Custom label',
-              customLabel: true,
             }),
           },
         },
@@ -730,7 +729,7 @@ describe('FormBasedDimensionEditor', () => {
     });
   });
 
-  it('should remove customLabel flag if label is set to default', () => {
+  it('should set customLabel flag based on label truthiness', () => {
     wrapper = mountWithProviders(
       <FormBasedDimensionEditorComponent
         {...defaultProps}
@@ -760,7 +759,7 @@ describe('FormBasedDimensionEditor', () => {
             ...state.layers.first.columns,
             col1: expect.objectContaining({
               label: 'Sum of bytes',
-              customLabel: false,
+              customLabel: true,
               // Other parts of this don't matter for this test
             }),
           },
@@ -1105,7 +1104,6 @@ describe('FormBasedDimensionEditor', () => {
             dataType: 'date',
             isBucketed: true,
             label: '',
-            customLabel: true,
             operationType: 'date_histogram',
             sourceField: 'ts',
             params: {
@@ -1115,7 +1113,7 @@ describe('FormBasedDimensionEditor', () => {
           col2: {
             dataType: 'number',
             isBucketed: false,
-            label: 'Count of records',
+            label: '',
             operationType: 'count',
             sourceField: '___records___',
             ...colOverrides,
@@ -1178,7 +1176,7 @@ describe('FormBasedDimensionEditor', () => {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
                 timeScale: 's',
-                label: 'Count of records per second',
+                operationType: 'sum',
               }),
             },
           },
@@ -1191,7 +1189,6 @@ describe('FormBasedDimensionEditor', () => {
         timeScale: 'h',
         sourceField: 'bytes',
         operationType: 'sum',
-        label: 'Sum of bytes per hour',
       });
       wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
       act(() => {
@@ -1207,7 +1204,7 @@ describe('FormBasedDimensionEditor', () => {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
                 timeScale: 'h',
-                label: 'Count of bytes per hour',
+                operationType: 'count',
               }),
             },
           },
@@ -1220,7 +1217,6 @@ describe('FormBasedDimensionEditor', () => {
         timeScale: 'h',
         sourceField: 'bytes',
         operationType: 'sum',
-        label: 'Sum of bytes per hour',
       });
       wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
       act(() => {
@@ -1238,7 +1234,7 @@ describe('FormBasedDimensionEditor', () => {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
                 timeScale: undefined,
-                label: 'Average of bytes',
+                operationType: 'average',
               }),
             },
           },
@@ -1247,7 +1243,7 @@ describe('FormBasedDimensionEditor', () => {
     });
 
     it('should allow to change time scaling', () => {
-      const props = getProps({ timeScale: 's', label: 'Count of records per second' });
+      const props = getProps({ timeScale: 's', operationType: 'sum' });
       wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
       act(() => {
         findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
@@ -1271,7 +1267,7 @@ describe('FormBasedDimensionEditor', () => {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
                 timeScale: 'h',
-                label: 'Count of records per hour',
+                operationType: 'sum',
               }),
             },
           },

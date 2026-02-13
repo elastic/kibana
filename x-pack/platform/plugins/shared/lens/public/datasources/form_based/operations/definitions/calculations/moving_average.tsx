@@ -94,7 +94,7 @@ export const movingAverageOperation: OperationDefinition<
     const referencedColumn = layer.columns[referenceIds[0]];
     const timeShift = columnParams?.shift || previousColumn?.timeShift;
 
-    const label = referencedColumn.label
+    const label = referencedColumn?.label
       ? ofName(referencedColumn.label, previousColumn?.timeScale, timeShift)
       : '';
 
