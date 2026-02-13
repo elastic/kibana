@@ -12,6 +12,7 @@ import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import type { MetricField, Dimension, UnifiedMetricsGridProps } from '../../../types';
 import type { ChartSize } from '../../chart';
 import { Chart } from '../../chart';
@@ -33,6 +34,7 @@ export type MetricsGridProps = Pick<
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   fields: MetricField[];
   whereStatements?: string[];
+  getUserMessages?: (metric: MetricField) => EmbeddableComponentProps['userMessages'];
 };
 
 const getItemKey = (metric: MetricField, index: number) => {
@@ -50,6 +52,7 @@ export const MetricsGrid = ({
   fetchParams,
   discoverFetch$,
   searchTerm,
+  getUserMessages,
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -149,6 +152,7 @@ export const MetricsGrid = ({
                   onViewDetails={handleViewDetails}
                   searchTerm={searchTerm}
                   whereStatements={whereStatements}
+                  userMessages={getUserMessages ? getUserMessages(metric) : undefined}
                 />
               </EuiFlexItem>
             );
@@ -184,6 +188,7 @@ interface ChartItemProps
   onFocusCell: (rowIndex: number, colIndex: number) => void;
   onViewDetails: (index: number, esqlQuery: string, metric: MetricField) => void;
   whereStatements?: string[];
+  userMessages?: EmbeddableComponentProps['userMessages'];
 }
 
 const ChartItem = React.memo(
@@ -206,6 +211,7 @@ const ChartItem = React.memo(
     whereStatements,
     onFocusCell,
     onViewDetails,
+    userMessages,
   }: ChartItemProps) => {
     const { euiTheme } = useEuiTheme();
     const colorPalette = useMemo(
@@ -254,6 +260,7 @@ const ChartItem = React.memo(
           chartLayers={chartLayers}
           titleHighlight={searchTerm}
           extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
+          userMessages={userMessages}
         />
       </A11yGridCell>
     );

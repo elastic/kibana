@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
@@ -19,9 +19,10 @@ import {
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
-
 import type { MetricField, UnifiedMetricsGridProps } from '../../../types';
 import { PAGE_SIZE } from '../../../common/constants';
+import { isLegacyHistogram } from '../../../common/utils/legacy_histogram';
+import { LEGACY_HISTOGRAM_USER_MESSAGES } from '../../../common/utils/user_messages';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from '../../pagination';
 import { usePagination } from './hooks';
@@ -69,6 +70,12 @@ export const MetricsExperienceGridContent = ({
   const columns = useMemo<NonNullable<EuiFlexGridProps['columns']>>(
     () => Math.min(filteredFieldsCount, 4) as NonNullable<EuiFlexGridProps['columns']>,
     [filteredFieldsCount]
+  );
+
+  const getUserMessages = useCallback(
+    (metric: MetricField) =>
+      isLegacyHistogram(metric) ? LEGACY_HISTOGRAM_USER_MESSAGES : undefined,
+    []
   );
 
   return (
@@ -146,6 +153,7 @@ export const MetricsExperienceGridContent = ({
           fetchParams={fetchParams}
           searchTerm={searchTerm}
           whereStatements={whereStatements}
+          getUserMessages={getUserMessages}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
