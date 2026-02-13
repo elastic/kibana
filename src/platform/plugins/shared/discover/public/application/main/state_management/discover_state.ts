@@ -8,7 +8,6 @@
  */
 
 import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { from, type Observable } from 'rxjs';
 import type { DiscoverServices } from '../../..';
 import type { DiscoverDataStateContainer } from './discover_data_state_container';
@@ -18,8 +17,6 @@ import type { DiscoverAppState } from './redux';
 import type { DiscoverCustomizationContext } from '../../../customizations';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
 import { createTabActionInjector, internalStateActions, selectTab } from './redux';
-import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
-import { getSavedSearchContainer } from './discover_saved_search_container';
 import { createTabAppStateObservable } from './utils/create_tab_app_state_observable';
 
 export interface DiscoverStateContainerParams {
@@ -27,10 +24,6 @@ export interface DiscoverStateContainerParams {
    * The ID of the tab associated with this state container
    */
   tabId: string;
-  /**
-   * The current savedSearch
-   */
-  savedSearch?: string | SavedSearch;
   /**
    * core ui settings service
    */
@@ -88,10 +81,6 @@ export interface DiscoverStateContainer {
    */
   runtimeStateManager: RuntimeStateManager;
   /**
-   * State of saved search, the saved object of Discover
-   */
-  savedSearchState: DiscoverSavedSearchContainer;
-  /**
    * State of url, allows updating and subscribing to url changes
    */
   stateStorage: IKbnUrlStateStorage;
@@ -121,20 +110,11 @@ export function getDiscoverStateContainer({
   const injectCurrentTab = createTabActionInjector(tabId);
   const getCurrentTab = () => selectTab(internalState.getState(), tabId);
 
-  /**
-   * Saved Search State Container, the persisted saved object of Discover
-   */
-  const savedSearchContainer = getSavedSearchContainer({
-    services,
-    getCurrentTab,
-  });
-
   const dataStateContainer = getDataStateContainer({
     services,
     searchSessionManager,
     internalState,
     runtimeStateManager,
-    savedSearchContainer,
     injectCurrentTab,
     getCurrentTab,
   });
@@ -152,7 +132,6 @@ export function getDiscoverStateContainer({
     getCurrentTab,
     runtimeStateManager,
     dataState: dataStateContainer,
-    savedSearchState: savedSearchContainer,
     stateStorage,
     searchSessionManager,
     customizationContext,

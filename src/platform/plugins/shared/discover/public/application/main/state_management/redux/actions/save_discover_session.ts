@@ -21,10 +21,7 @@ import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { selectAllTabs } from '../selectors';
 import { createInternalStateAsyncThunk } from '../utils';
 import { selectTabRuntimeState } from '../runtime_state';
-import {
-  fromSavedSearchToSavedObjectTab,
-  fromTabStateToSavedObjectTab,
-} from '../tab_mapping_utils';
+import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
 import { appendAdHocDataViews, replaceAdHocDataViewWithId } from './data_views';
 import { resetDiscoverSession } from './reset_discover_session';
 
@@ -77,16 +74,16 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
         let updatedTab: DiscoverSessionTab;
 
         if (tabStateContainer) {
-          updatedTab = cloneDeep({
-            ...fromSavedSearchToSavedObjectTab({
+          const currentDataView = tabRuntimeState.currentDataView$.getValue();
+
+          updatedTab = cloneDeep(
+            fromTabStateToSavedObjectTab({
               tab,
-              savedSearch: tabStateContainer.savedSearchState.getState(),
+              overridenTimeRestore: newTimeRestore,
+              dataView: currentDataView,
               services,
-            }),
-            timeRestore: newTimeRestore,
-            timeRange: newTimeRestore ? tab.globalState.timeRange : undefined,
-            refreshInterval: newTimeRestore ? tab.globalState.refreshInterval : undefined,
-          });
+            })
+          );
         } else {
           updatedTab = cloneDeep(
             fromTabStateToSavedObjectTab({

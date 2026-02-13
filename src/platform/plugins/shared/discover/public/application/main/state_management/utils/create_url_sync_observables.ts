@@ -8,7 +8,6 @@
  */
 
 import { type Observable, distinctUntilChanged, map, skip } from 'rxjs';
-import { isEqual } from 'lodash';
 import { type GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { type INullableBaseStateContainer } from '@kbn/kibana-utils-plugin/public';
 import type { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
@@ -17,6 +16,7 @@ import { selectTab, selectTabAppState } from '../redux/selectors';
 import { internalStateActions } from '../redux';
 import type { DiscoverAppState, DiscoverInternalState } from '../redux/types';
 import { createTabAppStateObservable } from './create_tab_app_state_observable';
+import { isEqualState } from './state_comparators';
 
 /**
  * Create observables and state containers for 2-directional syncing of appState and globalState with the URL
@@ -63,7 +63,7 @@ export const createUrlSyncObservables = ({
 
   const globalState$ = internalState$.pipe(
     map(getGlobalState),
-    distinctUntilChanged((a, b) => isEqual(a, b)),
+    distinctUntilChanged((a, b) => isEqualState(a, b)),
     skip(1)
   );
 

@@ -50,6 +50,8 @@ export {
   selectTabAppState,
   selectIsTabsBarHidden,
   selectHasUnsavedChanges,
+  selectTabSearchSource,
+  selectTabSavedSearch,
 } from './selectors';
 
 export {

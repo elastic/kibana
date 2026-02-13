@@ -21,11 +21,7 @@ import { addLog } from '../../../../../utils/add_log';
 import { selectTab } from './tabs';
 import { selectTabRuntimeState, type RuntimeStateManager } from '../runtime_state';
 import type { DiscoverInternalState } from '../types';
-import {
-  fromSavedObjectTabToTabState,
-  fromSavedSearchToSavedObjectTab,
-  fromTabStateToSavedObjectTab,
-} from '../tab_mapping_utils';
+import { fromSavedObjectTabToTabState, fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
 import type { DiscoverServices } from '../../../../../build_services';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { getSerializedSearchSourceDataViewDetails } from '../utils';
@@ -96,17 +92,15 @@ export const selectHasUnsavedChanges = (
     const tabState = selectTab(state, tabId);
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
     const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
-    const normalizedTab = tabStateContainer
-      ? fromSavedSearchToSavedObjectTab({
-          tab: tabState,
-          savedSearch: tabStateContainer.savedSearchState.getState(),
-          services,
-        })
-      : fromTabStateToSavedObjectTab({
-          tab: tabState,
-          overridenTimeRestore: Boolean(persistedTab.timeRestore),
-          services,
-        });
+    const currentDataView = tabStateContainer
+      ? tabRuntimeState?.currentDataView$.getValue()
+      : undefined;
+
+    const normalizedTab = fromTabStateToSavedObjectTab({
+      tab: tabState,
+      dataView: currentDataView,
+      services,
+    });
 
     for (const stringKey of Object.keys(TAB_COMPARATORS)) {
       const key = stringKey as keyof DiscoverSessionTab;

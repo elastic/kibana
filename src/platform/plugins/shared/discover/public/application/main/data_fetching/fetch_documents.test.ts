@@ -39,7 +39,7 @@ const getDeps = (): CommonFetchParams => {
     inspectorAdapters: { requests: new RequestAdapter() },
     searchSessionId: '123',
     services: discoverServiceMock,
-    savedSearch: savedSearchMock,
+    searchSource: savedSearchMock.searchSource,
     internalState,
     scopedProfilesManager: scopedProfilesManager$.getValue(),
     scopedEbtManager: scopedEbtManager$.getValue(),

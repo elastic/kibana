@@ -59,7 +59,7 @@ async function getTestProps({
 
   if (resetTheHook) {
     // resets the state of buildEsqlFetchSubscribe hook so it takes the current app state as the initial one
-    stateContainer.savedSearchState.set(savedSearchMock);
+    stateContainer.dataState.cleanupEsql();
   }
 
   return {

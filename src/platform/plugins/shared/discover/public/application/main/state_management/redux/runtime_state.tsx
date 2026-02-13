@@ -18,7 +18,8 @@ import type { ConnectedCustomizationService } from '../../../../customizations';
 import type { ProfilesManager, ScopedProfilesManager } from '../../../../context_awareness';
 import type { TabState } from './types';
 import type { DiscoverEBTManager, ScopedDiscoverEBTManager } from '../../../../ebt_manager';
-import { selectTab } from './selectors';
+import type { DiscoverServices } from '../../../../build_services';
+import { selectTab, selectTabSearchSource } from './selectors';
 
 interface DiscoverRuntimeState {
   adHocDataViews: DataView[];
@@ -117,20 +118,22 @@ export const selectIsDataViewUsedInMultipleRuntimeTabStates = (
 
 export const selectTabRuntimeInternalState = (
   runtimeStateManager: RuntimeStateManager,
-  tabId: string
+  tabId: string,
+  services: DiscoverServices
 ): TabState['initialInternalState'] | undefined => {
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
   const stateContainer = tabRuntimeState?.stateContainer$.getValue();
-  const savedSearch = stateContainer?.savedSearchState.getState();
 
-  if (!stateContainer || !savedSearch) {
+  if (!stateContainer) {
     return undefined;
   }
 
-  const { dataRequestParams } = selectTab(stateContainer.internalState.getState(), tabId);
+  const state = stateContainer.internalState.getState();
+  const { dataRequestParams } = selectTab(state, tabId);
+  const searchSource = selectTabSearchSource(state, tabId, { runtimeStateManager, services });
 
   return {
-    serializedSearchSource: savedSearch.searchSource.getSerializedFields(),
+    serializedSearchSource: searchSource.getSerializedFields(),
     ...(dataRequestParams.isSearchSessionRestored
       ? { searchSessionId: dataRequestParams.searchSessionId }
       : {}),

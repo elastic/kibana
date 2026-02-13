@@ -41,9 +41,8 @@ import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { getDefaultProfileState } from './utils/get_default_profile_state';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
-import { internalStateActions, selectTabRuntimeState } from './redux';
+import { internalStateActions, selectTabRuntimeState, selectTabSearchSource } from './redux';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
-import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -142,6 +141,10 @@ export interface DiscoverDataStateContainer {
    *  LOADING: data is fetched initially (when Discover is rendered, or data views are switched)
    */
   getInitialFetchStatus: () => FetchStatus;
+  /**
+   * Clean up ES|QL state when saved search changes
+   */
+  cleanupEsql: () => void;
 }
 
 /**
@@ -154,7 +157,6 @@ export function getDataStateContainer({
   searchSessionManager,
   internalState,
   runtimeStateManager,
-  savedSearchContainer,
   injectCurrentTab,
   getCurrentTab,
 }: {
@@ -162,7 +164,6 @@ export function getDataStateContainer({
   searchSessionManager: DiscoverSearchSessionManager;
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
-  savedSearchContainer: DiscoverSavedSearchContainer;
   injectCurrentTab: TabActionInjector;
   getCurrentTab: () => TabState;
 }): DiscoverDataStateContainer {
@@ -224,8 +225,7 @@ export function getDataStateContainer({
 
   // The main subscription to handle state changes
   dataSubjects.documents$.pipe(switchMap(esqlFetchSubscribe)).subscribe();
-  // Make sure to clean up the ES|QL state when the saved search changes
-  savedSearchContainer.getInitial$().subscribe(cleanupEsql);
+  // ES|QL state cleanup is handled by Redux listener middleware (resetOnSavedSearchChange action)
 
   /**
    * handler emitted by `timefilter.getAutoRefreshFetch$()`
@@ -283,6 +283,11 @@ export function getDataStateContainer({
               searchSessionManager.getNextSearchSessionId());
           }
 
+          const searchSource = selectTabSearchSource(internalState.getState(), currentTabId, {
+            runtimeStateManager,
+            services,
+          });
+
           const commonFetchParams: Omit<CommonFetchParams, 'abortController'> = {
             dataSubjects,
             initialFetchStatus: getInitialFetchStatus(),
@@ -290,7 +295,7 @@ export function getDataStateContainer({
             searchSessionId,
             services,
             internalState,
-            savedSearch: savedSearchContainer.getState(),
+            searchSource,
             scopedProfilesManager,
             scopedEbtManager,
             getCurrentTab,
@@ -542,5 +547,6 @@ export function getDataStateContainer({
     getInitialFetchStatus,
     cancel,
     getAbortController,
+    cleanupEsql,
   };
 }

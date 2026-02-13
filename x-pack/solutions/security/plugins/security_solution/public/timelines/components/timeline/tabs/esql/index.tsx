@@ -94,7 +94,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   const {
     discoverAppState,
     discoverSavedSearchState,
-    setDiscoverSavedSearchState,
+    // setDiscoverSavedSearchState,
     setDiscoverInternalState,
     setDiscoverAppState,
   } = useDiscoverState();
@@ -119,7 +119,9 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   const getCombinedDiscoverSavedSearchState: () => SavedSearch | undefined = useCallback(() => {
     if (!discoverSavedSearchState) return;
     return {
-      ...(discoverStateContainer.current?.savedSearchState.getState() ?? discoverSavedSearchState),
+      // TODO: refactor
+      // ...(discoverStateContainer.current?.savedSearchState.getState() ?? discoverSavedSearchState),
+      ...discoverSavedSearchState,
       timeRange: discoverDataService.query.timefilter.timefilter.getTime(),
       refreshInterval: discoverStateContainer.current?.getCurrentTab().globalState.refreshInterval,
       breakdownField: discoverStateContainer.current?.getCurrentTab().appState.breakdownField,
@@ -245,11 +247,12 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         next: setDiscoverInternalState,
       });
 
-      const savedSearchStateSub = stateContainer.savedSearchState.getCurrent$().subscribe({
-        next: (latestSavedSearchState) => {
-          setDiscoverSavedSearchState(latestSavedSearchState);
-        },
-      });
+      // TODO: refactor
+      // const savedSearchStateSub = stateContainer.savedSearchState.getCurrent$().subscribe({
+      //   next: (latestSavedSearchState) => {
+      //     setDiscoverSavedSearchState(latestSavedSearchState);
+      //   },
+      // });
 
       const timeRangeSub = discoverDataService.query.timefilter.timefilter
         .getTimeUpdate$()
@@ -261,12 +264,11 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
       discoverAppStateSubscription.current = unsubscribeState;
       discoverInternalStateSubscription.current = internalStateSubscription;
-      discoverSavedSearchStateSubscription.current = savedSearchStateSub;
+      // discoverSavedSearchStateSubscription.current = savedSearchStateSub;
       discoverTimerangeSubscription.current = timeRangeSub;
     },
     [
       discoverAppState,
-      setDiscoverSavedSearchState,
       setDiscoverInternalState,
       setDiscoverAppState,
       setDiscoverStateContainer,

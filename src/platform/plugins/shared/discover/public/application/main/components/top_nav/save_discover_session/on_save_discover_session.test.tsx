@@ -290,7 +290,7 @@ describe('onSaveDiscoverSession', () => {
       };
       const { stateContainer, saveModal } = await setup({ savedSearch });
       await saveModal?.props.onSave(getOnSaveProps({ newTags: ['tag3', 'tag4'] }));
-      expect(stateContainer.savedSearchState.getCurrent$().getValue().tags).toEqual([
+      expect(stateContainer.internalState.getState().persistedDiscoverSession?.tags).toEqual([
         'tag3',
         'tag4',
       ]);
@@ -306,7 +306,7 @@ describe('onSaveDiscoverSession', () => {
         services: { ...createDiscoverServicesMock(), savedObjectsTagging: undefined },
       });
       await saveModal?.props.onSave(getOnSaveProps({ newTags: ['tag3', 'tag4'] }));
-      expect(stateContainer.savedSearchState.getCurrent$().getValue().tags).toEqual([
+      expect(stateContainer.internalState.getState().persistedDiscoverSession?.tags).toEqual([
         'tag1',
         'tag2',
       ]);

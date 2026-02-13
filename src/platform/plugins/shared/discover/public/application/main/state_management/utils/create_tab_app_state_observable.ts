@@ -8,8 +8,8 @@
  */
 
 import { distinctUntilChanged, map, type Observable, skip } from 'rxjs';
-import { isEqual } from 'lodash';
 import { type DiscoverInternalState, type DiscoverAppState, selectTabAppState } from '../redux';
+import { isEqualState } from './state_comparators';
 
 export const createTabAppStateObservable = ({
   tabId,
@@ -26,7 +26,7 @@ export const createTabAppStateObservable = ({
 
   const appState$ = internalState$.pipe(
     map(getAppState),
-    distinctUntilChanged((a, b) => isEqual(a, b)),
+    distinctUntilChanged((a, b) => isEqualState(a, b)),
     skip(1)
   );
 

@@ -82,10 +82,7 @@ describe('test fetchAll', () => {
       scopedEbtManager: scopedEbtManager$.getValue(),
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
-      savedSearch: {
-        ...savedSearchMock,
-        searchSource,
-      },
+      searchSource,
       services: discoverServiceMock,
       getCurrentTab,
     };

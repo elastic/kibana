@@ -15,7 +15,11 @@ import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import type { AppMountParameters } from '@kbn/core/public';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import React from 'react';
-import { fromTabStateToSavedObjectTab, selectHasUnsavedChanges } from '../redux';
+import {
+  fromTabStateToSavedObjectTab,
+  internalStateActions,
+  selectHasUnsavedChanges,
+} from '../redux';
 import { getTabStateMock } from '../redux/__mocks__/internal_state.mocks';
 import type { AppLeaveActionFactory } from '@kbn/core-application-browser';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
@@ -39,6 +43,10 @@ describe('useUnsavedChanges', () => {
         id: 'persisted-tab',
         initialInternalState: {
           serializedSearchSource: { index: dataViewWithTimefieldMock.id },
+        },
+        appState: {
+          // Include the default sort that gets applied during initialization for a data view with a time field
+          sort: [['timestamp', 'desc']],
         },
       }),
       services,
@@ -114,15 +122,18 @@ describe('useUnsavedChanges', () => {
     expect(internalState.getState().tabs.unsavedIds).toEqual([]);
   });
 
-  it('should detect changes when saved search changes', async () => {
-    const { internalState, stateContainer, getCurrentTab } = await setup();
+  it('should detect changes when app state changes', async () => {
+    const { internalState, getCurrentTab } = await setup();
     expect(internalState.getState().hasUnsavedChanges).toBe(false);
     expect(internalState.getState().tabs.unsavedIds).toEqual([]);
-    const savedSearch = stateContainer.savedSearchState.getState();
-    stateContainer.savedSearchState.assignNextSavedSearch({
-      ...savedSearch,
-      columns: ['newColumn'],
-    });
+    internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: getCurrentTab().id,
+        appState: {
+          columns: ['newColumn'],
+        },
+      })
+    );
     expect(internalState.getState().hasUnsavedChanges).toBe(true);
     expect(internalState.getState().tabs.unsavedIds).toEqual([getCurrentTab().id]);
   });
@@ -171,12 +182,15 @@ describe('useUnsavedChanges', () => {
     const onAppLeave = jest.fn().mockImplementation((callback: typeof onAppLeaveCallback) => {
       onAppLeaveCallback = callback;
     });
-    const { stateContainer } = await setup({ onAppLeave });
-    const savedSearch = stateContainer.savedSearchState.getState();
-    stateContainer.savedSearchState.assignNextSavedSearch({
-      ...savedSearch,
-      columns: ['newColumn'],
-    });
+    const { internalState, getCurrentTab } = await setup({ onAppLeave });
+    internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: getCurrentTab().id,
+        appState: {
+          columns: ['newColumn'],
+        },
+      })
+    );
     const defaultFn = jest.fn();
     const confirmFn = jest.fn();
     onAppLeaveCallback({
