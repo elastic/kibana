@@ -166,9 +166,10 @@ describe('config validation', () => {
     // empty object
     expect(() => {
       validateConfig(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: Field \\"from\\": Required"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type config: ✖ Invalid input: expected string, received undefined
+        → at from"
+    `);
 
     // no service or host/port
     expect(() => {
@@ -506,9 +507,10 @@ describe('params validation', () => {
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: 2 errors:
-       [1]: Field \\"subject\\": Required;
-       [2]: Field \\"message\\": Required"
+      "error validating action params: ✖ Invalid input: expected string, received undefined
+        → at subject
+      ✖ Invalid input: expected string, received undefined
+        → at message"
     `);
   });
 
@@ -634,9 +636,10 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Field \\"to.0\\": String must contain at most 512 character(s)"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: ✖ Too big: expected string to have <=512 characters
+        → at to[0]"
+    `);
   });
   test('throws for too long "cc" address ', async () => {
     const configUtils = actionsConfigMock.create();
@@ -656,9 +659,10 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Field \\"cc.0\\": String must contain at most 512 character(s)"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: ✖ Too big: expected string to have <=512 characters
+        → at cc[0]"
+    `);
   });
   test('throws for too long "bcc" address ', async () => {
     const configUtils = actionsConfigMock.create();
@@ -678,9 +682,10 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Field \\"bcc.0\\": String must contain at most 512 character(s)"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: ✖ Too big: expected string to have <=512 characters
+        → at bcc[0]"
+    `);
   });
 
   test('params validation succeeds with valid replyTo', async () => {
@@ -753,9 +758,10 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Field \\"replyTo.0\\": String must contain at most 512 character(s)"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: ✖ Too big: expected string to have <=512 characters
+        → at replyTo[0]"
+    `);
   });
 
   test('throws for more than 10 "replyTo" addresses', async () => {
@@ -774,9 +780,10 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Field \\"replyTo\\": Array must contain at most 10 element(s)"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: ✖ Too big: expected array to have <=10 items
+        → at replyTo"
+    `);
   });
 });
 

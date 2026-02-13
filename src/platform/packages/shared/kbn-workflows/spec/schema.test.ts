@@ -33,7 +33,6 @@ describe('WorkflowSchemaForAutocomplete', () => {
     ).toEqual({
       version: '1',
       name: 'test',
-      enabled: true,
       triggers: [],
       steps: [
         {
@@ -56,7 +55,6 @@ describe('WorkflowSchemaForAutocomplete', () => {
       }).data
     ).toEqual({
       version: '1',
-      enabled: true,
       triggers: [],
       steps: [
         {
@@ -78,7 +76,6 @@ describe('WorkflowSchemaForAutocomplete', () => {
       }).data
     ).toEqual({
       version: '1',
-      enabled: true,
       triggers: [
         {
           type: 'manual',
@@ -99,7 +96,6 @@ describe('WorkflowSchemaForAutocomplete', () => {
       }).data
     ).toEqual({
       version: '1',
-      enabled: true,
       triggers: [],
       steps: [
         {
@@ -118,7 +114,6 @@ describe('WorkflowSchemaForAutocomplete', () => {
       }).data
     ).toEqual({
       version: '1',
-      enabled: true,
       triggers: [
         {
           type: '',
@@ -135,7 +130,6 @@ describe('WorkflowSchemaForAutocomplete', () => {
       }).data
     ).toEqual({
       version: '1',
-      enabled: true,
       steps: [],
       triggers: [],
     });

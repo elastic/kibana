@@ -164,8 +164,8 @@ apiTest.describe(
           [
             {
               code: 'custom',
-              message: 'Set processor must have either value or copy_from, but not both.',
               path: ['steps', 0, 'value', 'copy_from'],
+              message: 'Set processor must have either value or copy_from, but not both.',
             },
           ],
           null,
@@ -191,8 +191,8 @@ apiTest.describe(
           [
             {
               code: 'custom',
-              message: 'Set processor must have either value or copy_from, but not both.',
               path: ['steps', 0, 'value', 'copy_from'],
+              message: 'Set processor must have either value or copy_from, but not both.',
             },
           ],
           null,
