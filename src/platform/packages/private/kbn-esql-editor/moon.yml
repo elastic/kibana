@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/search-types'
   - '@kbn/esql-resource-browser'
+  - '@kbn/projects-solutions-groups'
 tags:
   - shared-browser
   - package
