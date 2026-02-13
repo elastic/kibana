@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, startWith, merge } from 'rxjs';
+import { combineLatest, startWith } from 'rxjs';
 import {
   connectToQueryState,
   noSearchSessionStorageCapabilityMessage,
@@ -24,7 +24,8 @@ import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../commo
 import { getCurrentUrlState } from '../../utils/cleanup_url_state';
 import { buildStateSubscribe } from '../../utils/build_state_subscribe';
 import { createUrlSyncObservables } from '../../utils/create_url_sync_observables';
-import { createTabAttributesObservable } from '../../utils/create_tab_attributes_observable';
+import { createTabStateObservable } from '../../utils/create_tab_state_observable';
+import { createTabAppAndGlobalStatesObservable } from '../../utils/create_tab_app_and_global_states_observable';
 import { createSearchSessionRestorationDataProvider } from '../../utils/create_search_session_restoration_data_provider';
 import {
   createDataViewDataSource,
@@ -49,13 +50,12 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     }
 
     dispatch(stopSyncing({ tabId }));
-    const { appState$, appStateContainer, globalState$, globalStateContainer } =
-      createUrlSyncObservables({
-        tabId,
-        dispatch,
-        getState,
-        internalState$: getInternalState$(),
-      });
+    const { appState$, appStateContainer, globalStateContainer } = createUrlSyncObservables({
+      tabId,
+      dispatch,
+      getState,
+      internalState$: getInternalState$(),
+    });
 
     const getCurrentTab = () => selectTab(getState(), tabId);
     const getAppState = (): DiscoverAppState => {
@@ -207,8 +207,12 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     // initialize syncing with _g and _a part of the URL
     const unsubscribeUrlState = initializeAndSyncUrlState();
 
-    // subscribing to state changes of appStateContainer, triggering data fetching
-    const appStateSubscription = appStateContainer.state$.subscribe(
+    // subscribing to state changes of app state and global state, triggering data fetching
+    const appAndGlobalStatesSubscription = createTabAppAndGlobalStatesObservable({
+      tabId,
+      internalState$: getInternalState$(),
+      getState,
+    }).subscribe(
       buildStateSubscribe({
         dataState: stateContainer.dataState,
         internalState: stateContainer.internalState,
@@ -218,24 +222,11 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       })
     );
 
-    const globalStateSubscription = globalState$.subscribe(() => {
-      addLog('[tab_sync] global state changes triggers data fetching');
-      dispatch(
-        internalStateActions.fetchData({
-          tabId,
-        })
-      );
-    });
-
-    const tabStateSubscription = merge(
-      appState$,
-      globalState$,
-      createTabAttributesObservable({
-        tabId,
-        internalState$: getInternalState$(),
-        getState,
-      })
-    ).subscribe(() => {
+    const tabStateSubscription = createTabStateObservable({
+      tabId,
+      internalState$: getInternalState$(),
+      getState,
+    }).subscribe(() => {
       dispatch(
         internalStateActions.syncLocallyPersistedTabState({
           tabId,
@@ -266,8 +257,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
 
     const unsubscribeFn = () => {
       unsubscribeData();
-      appStateSubscription.unsubscribe();
-      globalStateSubscription.unsubscribe();
+      appAndGlobalStatesSubscription.unsubscribe();
       tabStateSubscription.unsubscribe();
       unsubscribeUrlState();
       unsubscribeUrlTracking();

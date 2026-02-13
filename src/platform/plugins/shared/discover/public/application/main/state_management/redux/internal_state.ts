@@ -219,6 +219,16 @@ export const internalStateSlice = createSlice({
      */
     setGlobalState: (state, action: TabAction<Pick<TabState, 'globalState'>>) =>
       withTab(state, action.payload, (tab) => {
+        tab.previousGlobalState = tab.globalState;
+        tab.globalState = action.payload.globalState;
+      }),
+
+    /**
+     * Set the tab global state and previous global state, overwriting existing state
+     */
+    resetGlobalState: (state, action: TabAction<Pick<TabState, 'globalState'>>) =>
+      withTab(state, action.payload, (tab) => {
+        tab.previousGlobalState = action.payload.globalState;
         tab.globalState = action.payload.globalState;
       }),
 

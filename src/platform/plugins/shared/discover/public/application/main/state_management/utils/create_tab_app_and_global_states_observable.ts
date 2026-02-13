@@ -8,10 +8,10 @@
  */
 
 import { distinctUntilChanged, map, type Observable, skip } from 'rxjs';
-import { isEqual } from 'lodash';
-import { type DiscoverInternalState, type TabState, selectTab } from '../redux';
+import { type DiscoverInternalState, selectTab, type TabState } from '../redux';
+import { isEqualState } from './state_comparators';
 
-export const createTabAttributesObservable = ({
+export const createTabAppAndGlobalStatesObservable = ({
   tabId,
   internalState$,
   getState,
@@ -19,16 +19,21 @@ export const createTabAttributesObservable = ({
   tabId: string;
   internalState$: Observable<DiscoverInternalState>;
   getState: () => DiscoverInternalState;
-}) => {
-  const getAttributes = (): TabState['attributes'] => {
-    return selectTab(getState(), tabId).attributes;
+}): Observable<Pick<TabState, 'appState' | 'globalState'>> => {
+  const getTabState = (): Pick<TabState, 'appState' | 'globalState'> => {
+    const tabState = selectTab(getState(), tabId);
+
+    return {
+      appState: tabState.appState,
+      globalState: tabState.globalState,
+    };
   };
 
-  const tabAttributes$ = internalState$.pipe(
-    map(getAttributes),
-    distinctUntilChanged((a, b) => isEqual(a, b)),
+  return internalState$.pipe(
+    map(getTabState),
+    distinctUntilChanged(
+      (a, b) => isEqualState(a.appState, b.appState) && isEqualState(a.globalState, b.globalState)
+    ),
     skip(1)
   );
-
-  return tabAttributes$;
 };

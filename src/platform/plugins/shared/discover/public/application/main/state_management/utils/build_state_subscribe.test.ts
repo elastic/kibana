@@ -38,6 +38,16 @@ describe('buildStateSubscribe', () => {
     });
     stateContainer = result.stateContainer;
 
+    // TODO: verify and improve
+    // Sync previousGlobalState with globalState to establish a clean baseline for tests
+    // During initialization, globalState gets populated by the timefilter but previousGlobalState remains empty
+    toolkit.internalState.dispatch(
+      internalStateActions.resetGlobalState({
+        tabId: toolkit.getCurrentTab().id,
+        globalState: toolkit.getCurrentTab().globalState,
+      })
+    );
+
     stateContainer.dataState.refetch$.next = jest.fn();
     stateContainer.dataState.reset = jest.fn();
     jest.spyOn(internalStateActions, 'assignNextDataView');
@@ -58,12 +68,25 @@ describe('buildStateSubscribe', () => {
     await setup();
   });
 
+  const getNextState = ({
+    appState: appStateOverrides = {},
+    globalState: globalStateOverrides = {},
+  }: {
+    appState?: Record<string, unknown>;
+    globalState?: Record<string, unknown>;
+  } = {}) => ({
+    appState: { ...toolkit.getCurrentTab().appState, ...appStateOverrides },
+    globalState: { ...toolkit.getCurrentTab().globalState, ...globalStateOverrides },
+  });
+
   it('should set the data view if the index has changed, and refetch should be triggered', async () => {
-    const currentAppState = toolkit.getCurrentTab().appState;
-    await getSubscribeFn()({
-      ...currentAppState,
-      dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
-    });
+    await getSubscribeFn()(
+      getNextState({
+        appState: {
+          dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
+        },
+      })
+    );
 
     expect(internalStateActions.assignNextDataView as jest.Mock).toHaveBeenCalledWith({
       tabId: toolkit.getCurrentTab().id,
@@ -74,63 +97,62 @@ describe('buildStateSubscribe', () => {
   });
 
   it('should not call refetch$ if nothing changes', async () => {
-    await getSubscribeFn()(toolkit.getCurrentTab().appState);
+    await getSubscribeFn()(getNextState());
 
     expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
   });
 
   it('should not call refetch$ if viewMode changes', async () => {
-    await getSubscribeFn()({
-      ...toolkit.getCurrentTab().appState,
-      dataSource: {
-        type: DataSourceType.Esql,
-      },
-      viewMode: VIEW_MODE.AGGREGATED_LEVEL,
-    });
+    await getSubscribeFn()(
+      getNextState({
+        appState: {
+          dataSource: { type: DataSourceType.Esql },
+          viewMode: VIEW_MODE.AGGREGATED_LEVEL,
+        },
+      })
+    );
 
     expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
     expect(stateContainer.dataState.reset).not.toHaveBeenCalled();
   });
 
   it('should not call refetch$ if the chart is hidden', async () => {
-    const currentAppState = toolkit.getCurrentTab().appState;
-    await getSubscribeFn()({ ...currentAppState, hideChart: true });
+    await getSubscribeFn()(getNextState({ appState: { hideChart: true } }));
 
     expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
   });
 
   it('should not call refetch$ if the chart interval has changed', async () => {
-    const currentAppState = toolkit.getCurrentTab().appState;
-    await getSubscribeFn()({ ...currentAppState, interval: 's' });
+    await getSubscribeFn()(getNextState({ appState: { interval: 's' } }));
 
     expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
   });
 
   it('should not call refetch$ if breakdownField has changed', async () => {
-    const currentAppState = toolkit.getCurrentTab().appState;
-    await getSubscribeFn()({ ...currentAppState, breakdownField: '💣' });
+    await getSubscribeFn()(getNextState({ appState: { breakdownField: '💣' } }));
 
     expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
   });
 
   it('should call refetch$ if sort has changed', async () => {
-    const currentAppState = toolkit.getCurrentTab().appState;
-    await getSubscribeFn()({ ...currentAppState, sort: [['field', 'test']] });
+    await getSubscribeFn()(getNextState({ appState: { sort: [['field', 'test']] } }));
 
     expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
   });
 
   it('should call refetch$ if filters have changed', async () => {
-    const currentAppState = toolkit.getCurrentTab().appState;
-    await getSubscribeFn()({
-      ...currentAppState,
-      filters: [
-        {
-          meta: { index: 'test-index', disabled: false, negate: false, alias: null },
-          query: { match: { field: 'value' } },
+    await getSubscribeFn()(
+      getNextState({
+        appState: {
+          filters: [
+            {
+              meta: { index: 'test-index', disabled: false, negate: false, alias: null },
+              query: { match: { field: 'value' } },
+            },
+          ],
         },
-      ],
-    });
+      })
+    );
 
     expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
   });
@@ -138,22 +160,21 @@ describe('buildStateSubscribe', () => {
   it('should not execute setState function if initialFetchStatus is UNINITIALIZED', async () => {
     const stateSubscribeFn = getSubscribeFn();
     stateContainer.dataState.getInitialFetchStatus = jest.fn(() => FetchStatus.UNINITIALIZED);
-    const currentAppState = toolkit.getCurrentTab().appState;
-    await stateSubscribeFn({
-      ...currentAppState,
-      dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
-    });
+    await stateSubscribeFn(
+      getNextState({
+        appState: {
+          dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
+        },
+      })
+    );
 
     expect(stateContainer.dataState.reset).toHaveBeenCalled();
   });
+
   it('should not execute setState twice if the identical data view change is propagated twice', async () => {
-    const currentAppState = toolkit.getCurrentTab().appState;
     const newDataSource = createDataViewDataSource({ dataViewId: dataViewComplexMock.id! });
 
-    await getSubscribeFn()({
-      ...currentAppState,
-      dataSource: newDataSource,
-    });
+    await getSubscribeFn()(getNextState({ appState: { dataSource: newDataSource } }));
 
     expect(stateContainer.dataState.reset).toBeCalledTimes(1);
 
@@ -165,11 +186,42 @@ describe('buildStateSubscribe', () => {
       })
     );
 
-    const updatedAppState = toolkit.getCurrentTab().appState;
-    await getSubscribeFn()({
-      ...updatedAppState,
-      dataSource: newDataSource,
-    });
+    await getSubscribeFn()(getNextState({ appState: { dataSource: newDataSource } }));
     expect(stateContainer.dataState.reset).toBeCalledTimes(1);
+  });
+
+  describe('global state changes', () => {
+    it('should call refetch$ when timeRange changes', async () => {
+      await getSubscribeFn()(
+        getNextState({ globalState: { timeRange: { from: 'now-30m', to: 'now' } } })
+      );
+
+      expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
+    });
+
+    it('should call refetch$ when refreshInterval changes', async () => {
+      await getSubscribeFn()(
+        getNextState({ globalState: { refreshInterval: { pause: false, value: 5000 } } })
+      );
+
+      expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
+    });
+
+    it('should call refetch$ when global filters change', async () => {
+      await getSubscribeFn()(
+        getNextState({
+          globalState: {
+            filters: [
+              {
+                meta: { index: 'test-index', disabled: false, negate: false, alias: null },
+                query: { match: { field: 'value' } },
+              },
+            ],
+          },
+        })
+      );
+
+      expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
+    });
   });
 });

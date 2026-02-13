@@ -292,8 +292,11 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
      * Update state containers
      */
 
-    // Make sure app state is completely reset
+    // Make sure app state and global state are completely reset
     dispatch(internalStateSlice.actions.resetAppState({ tabId, appState: initialAppState }));
+    dispatch(
+      internalStateSlice.actions.resetGlobalState({ tabId, globalState: initialGlobalState })
+    );
 
     // Set runtime state
     stateContainer$.next(stateContainer);

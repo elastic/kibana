@@ -8,16 +8,13 @@
  */
 
 import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { from, type Observable } from 'rxjs';
 import type { DiscoverServices } from '../../..';
 import type { DiscoverDataStateContainer } from './discover_data_state_container';
 import { getDataStateContainer } from './discover_data_state_container';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
-import type { DiscoverAppState } from './redux';
 import type { DiscoverCustomizationContext } from '../../../customizations';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
 import { createTabActionInjector, internalStateActions, selectTab } from './redux';
-import { createTabAppStateObservable } from './utils/create_tab_app_state_observable';
 
 export interface DiscoverStateContainerParams {
   /**
@@ -51,10 +48,6 @@ export interface DiscoverStateContainerParams {
 }
 
 export interface DiscoverStateContainer {
-  /**
-   * An observable of the current tab's app state
-   */
-  createAppStateObservable: () => Observable<DiscoverAppState>;
   /**
    * Data fetching related state
    **/
@@ -120,12 +113,6 @@ export function getDiscoverStateContainer({
   });
 
   return {
-    createAppStateObservable: () =>
-      createTabAppStateObservable({
-        tabId,
-        internalState$: from(internalState),
-        getState: internalState.getState,
-      }),
     internalState,
     internalStateActions,
     injectCurrentTab,

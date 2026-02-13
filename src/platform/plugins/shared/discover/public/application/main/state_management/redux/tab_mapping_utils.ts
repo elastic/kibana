@@ -51,6 +51,13 @@ export const fromSavedObjectTabToTabState = ({
     density: tab.density,
   };
 
+  const globalState = {
+    timeRange: tab.timeRestore ? tab.timeRange : existingTab?.globalState.timeRange,
+    refreshInterval: tab.timeRestore
+      ? tab.refreshInterval
+      : existingTab?.globalState.refreshInterval,
+  };
+
   return {
     ...DEFAULT_TAB_STATE,
     ...existingTab,
@@ -61,12 +68,8 @@ export const fromSavedObjectTabToTabState = ({
     },
     appState,
     previousAppState: existingTab?.appState ?? appState,
-    globalState: {
-      timeRange: tab.timeRestore ? tab.timeRange : existingTab?.globalState.timeRange,
-      refreshInterval: tab.timeRestore
-        ? tab.refreshInterval
-        : existingTab?.globalState.refreshInterval,
-    },
+    globalState,
+    previousGlobalState: existingTab?.globalState ?? globalState,
     attributes: {
       ...DEFAULT_TAB_STATE.attributes,
       timeRestore: tab.timeRestore ?? false,

@@ -10,6 +10,7 @@
 import { createContext, useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { isFunction } from 'lodash';
+import { from } from 'rxjs';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
 import type { CustomizationCallback, ExtendedDiscoverStateContainer } from './types';
@@ -19,10 +20,16 @@ import type {
 } from './customization_service';
 import { createCustomizationService } from './customization_service';
 import { getInitialAppState } from '../application/main/state_management/utils/get_initial_app_state';
+import { createTabAppStateObservable } from '../application/main/state_management/utils/create_tab_app_state_observable';
+import { createTabStateObservable } from '../application/main/state_management/utils/create_tab_state_observable';
 import type { DiscoverServices } from '../build_services';
 import {
   fromSavedSearchToSavedObjectTab,
+  fromSavedObjectTabToSavedSearch,
+  fromTabStateToSavedObjectTab,
   internalStateActions,
+  selectTab,
+  selectTabRuntimeState,
 } from '../application/main/state_management/redux';
 
 const customizationContext = createContext(createCustomizationService());
@@ -47,25 +54,64 @@ export interface ConnectedCustomizationService extends DiscoverCustomizationServ
 export const getExtendedDiscoverStateContainer = (
   stateContainer: DiscoverStateContainer,
   services: DiscoverServices
-): ExtendedDiscoverStateContainer => ({
-  ...stateContainer,
-  getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => {
-    return getInitialAppState({
-      initialUrlState: undefined,
-      persistedTab: fromSavedSearchToSavedObjectTab({
-        tab: stateContainer.getCurrentTab(),
-        savedSearch: newSavedSearch,
-        services,
+): ExtendedDiscoverStateContainer => {
+  const tabId = stateContainer.getCurrentTab().id;
+
+  return {
+    ...stateContainer,
+    createAppStateObservable: () =>
+      createTabAppStateObservable({
+        tabId,
+        internalState$: from(stateContainer.internalState),
+        getState: stateContainer.internalState.getState,
       }),
-      dataView: newSavedSearch.searchSource.getField('index'),
-      services,
-    });
-  },
-  internalActions: {
-    fetchData: internalStateActions.fetchData,
-    openDiscoverSession: internalStateActions.openDiscoverSession,
-  },
-});
+    createTabStateObservable: () =>
+      createTabStateObservable({
+        tabId,
+        internalState$: from(stateContainer.internalState),
+        getState: stateContainer.internalState.getState,
+      }),
+    getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => {
+      return getInitialAppState({
+        initialUrlState: undefined,
+        persistedTab: fromSavedSearchToSavedObjectTab({
+          tab: stateContainer.getCurrentTab(),
+          savedSearch: newSavedSearch,
+          services,
+        }),
+        dataView: newSavedSearch.searchSource.getField('index'),
+        services,
+      });
+    },
+    internalActions: {
+      fetchData: internalStateActions.fetchData,
+      openDiscoverSession: internalStateActions.openDiscoverSession,
+    },
+    getSavedSearchFromCurrentTab: async () => {
+      const tabState = selectTab(stateContainer.internalState.getState(), tabId);
+      const currentDataView = selectTabRuntimeState(
+        stateContainer.runtimeStateManager,
+        tabId
+      ).currentDataView$.getValue();
+
+      if (!currentDataView) {
+        return undefined;
+      }
+
+      const tab = fromTabStateToSavedObjectTab({
+        tab: tabState,
+        dataView: currentDataView,
+        services,
+      });
+
+      return fromSavedObjectTabToSavedSearch({
+        tab,
+        discoverSession: undefined,
+        services,
+      });
+    },
+  };
+};
 
 export const getConnectedCustomizationService = async ({
   customizationCallbacks,
