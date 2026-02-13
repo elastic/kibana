@@ -82,10 +82,7 @@ export function ContentFrameworkTable({
     fieldNames,
   });
 
-  const flattenedHit = useMemo(
-    () => getFlattenedFields(hit, fieldNames),
-    [hit, fieldNames]
-  );
+  const flattenedHit = useMemo(() => getFlattenedFields(hit, fieldNames), [hit, fieldNames]);
 
   const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
