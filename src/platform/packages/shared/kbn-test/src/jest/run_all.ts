@@ -167,24 +167,26 @@ async function runConfigs(
 
   // In Buildkite, skip configs already completed on a previous attempt (checkpoint resume)
   if (isInBuildkite()) {
+    log.info(`[jest-checkpoint] Checking ${allConfigs.length} configs for prior completion (step=${process.env.BUILDKITE_STEP_ID || ''}, job=${process.env.BUILDKITE_PARALLEL_JOB || '0'}, retry=${process.env.BUILDKITE_RETRY_COUNT || '0'})`);
+
     const completionStatus = await Promise.all(
-      allConfigs.map(async (config) => ({
-        config,
-        completed: await isConfigCompleted(config),
-      }))
+      allConfigs.map(async (config) => {
+        const completed = await isConfigCompleted(config);
+        log.info(`[jest-checkpoint]   ${completed ? 'SKIP' : 'RUN '} ${config}`);
+        return { config, completed };
+      })
     );
 
     const skipped = completionStatus.filter((c) => c.completed);
     configs = completionStatus.filter((c) => !c.completed).map((c) => c.config);
 
     for (const { config } of skipped) {
-      log.info(`Skipping ${config} (already completed on previous attempt)`);
       skippedResults.push({ config, code: 0, durationMs: 0 });
     }
 
     if (skipped.length > 0) {
       log.info(
-        `Resumed from checkpoint: skipped ${skipped.length} already-completed configs, ${configs.length} remaining`
+        `[jest-checkpoint] Resumed: skipped ${skipped.length} already-completed, ${configs.length} remaining`
       );
     }
   }
@@ -274,6 +276,7 @@ async function runConfigs(
 
           // Write checkpoint for successful configs before proceeding
           if (code === 0 && isInBuildkite()) {
+            log.info(`[jest-checkpoint] Marking ${config} as completed`);
             markConfigCompleted(config).then(proceed, proceed);
           } else {
             proceed();
