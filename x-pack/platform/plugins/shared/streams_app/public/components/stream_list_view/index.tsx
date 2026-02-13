@@ -26,7 +26,7 @@ import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useTimefilter } from '../../hooks/use_timefilter';
-import { FeedbackButton } from '../feedback_button';
+// import { FeedbackButton } from '../feedback_button';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { WelcomeTourCallout } from '../streams_tour';
 import { ClassicStreamCreationFlyout } from './classic_stream_creation_flyout';
@@ -36,6 +36,7 @@ import { StreamsTreeTable } from './tree_table';
 import { LegacyLogsDeprecationCallout } from './legacy_logs_deprecation_callout';
 import { CreateQueryStreamFlyout } from '../query_streams/create_query_stream_flyout';
 import { getFormattedError } from '../../util/errors';
+import { getStreamsHeaderAppActionsConfig } from '../../header_app_actions/header_app_actions_config';
 
 export function StreamListView() {
   const { euiTheme } = useEuiTheme();
@@ -48,6 +49,19 @@ export function StreamListView() {
     },
     core,
   } = context;
+
+  // Global header app actions: overflow (Settings) + New (create classic stream)
+  useEffect(() => {
+    core.chrome.setHeaderAppActionsConfig(
+      getStreamsHeaderAppActionsConfig({
+        onSettings: () => setIsSettingsFlyoutOpen(true),
+        onCreateClassicStream: () => setIsClassicStreamCreationFlyoutOpen(true),
+      })
+    );
+    return () => {
+      core.chrome.setHeaderAppActionsConfig(undefined);
+    };
+  }, [core.chrome]);
   const { onPageReady } = usePerformanceContext();
   const router = useStreamsAppRouter();
 
@@ -149,7 +163,8 @@ export function StreamListView() {
 
   return (
     <>
-      <StreamsAppPageTemplate.Header
+      {/* Page header commented out: actions moved to global header (overflow + New button) */}
+      {/* <StreamsAppPageTemplate.Header
         bottomBorder="extended"
         css={css`
           background: ${euiTheme.colors.backgroundBasePlain};
@@ -214,7 +229,7 @@ export function StreamListView() {
             )}
           </EuiFlexGroup>
         }
-      />
+      /> */}
       <StreamsAppPageTemplate.Body grow>
         {streamsListFetch.loading && streamsListFetch.value === undefined ? (
           <EuiEmptyPrompt
