@@ -17,6 +17,7 @@ import type {
   EuiInMemoryTableProps,
   EuiTableFieldDataColumnType,
   EuiSelectableOption,
+  UseEuiTheme,
 } from '@elastic/eui';
 import {
   EuiInMemoryTable,
@@ -324,11 +325,11 @@ export const PipelineTable: FunctionComponent<Props> = ({
     onTableChange,
     columns: [
       {
-        width: '25%',
         field: 'name',
         name: i18n.translate('xpack.ingestPipelines.list.table.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
+        style: { minWidth: '200px' },
         sortable: true,
         render: (name: string) => {
           return (
@@ -378,19 +379,30 @@ export const PipelineTable: FunctionComponent<Props> = ({
         name: i18n.translate('xpack.ingestPipelines.list.table.descriptionColumnTitle', {
           defaultMessage: 'Description',
         }),
+        style: { minWidth: '160px' },
+        render: (description: string | undefined) => {
+          if (!description?.length || !description.trim().length) {
+            return (
+              <span css={({ euiTheme }: UseEuiTheme) => ({ color: euiTheme.colors.mediumShade })}>
+                —
+              </span>
+            );
+          }
+
+          return description;
+        },
       },
       {
         width: '120px',
         name: i18n.translate('xpack.ingestPipelines.list.table.preprocessorsColumnTitle', {
           defaultMessage: 'Preprocessors',
         }),
-        align: 'right',
         dataType: 'number',
         sortable: ({ processors }: Pipeline) => processors.length,
         render: ({ processors }: Pipeline) => processors.length,
       },
       {
-        width: '120px',
+        width: '96px',
         name: (
           <FormattedMessage
             id="xpack.ingestPipelines.list.table.actionColumnTitle"
@@ -442,5 +454,5 @@ export const PipelineTable: FunctionComponent<Props> = ({
     loading: isLoading,
   };
 
-  return <EuiInMemoryTable {...tableProps} />;
+  return <EuiInMemoryTable {...tableProps} tableLayout="auto" />;
 };

@@ -164,11 +164,13 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                 </EuiLink>
               );
             },
+            style: { minWidth: '200px' },
           },
           {
             name: i18n.translate('xpack.fleet.epmInstalledIntegrations.versionColumnTitle', {
               defaultMessage: 'Version',
             }),
+            className: 'eui-textNoWrap',
             render: (item: InstalledPackageUIPackageListItem) => (
               <InstallationVersionStatus item={item} />
             ),

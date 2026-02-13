@@ -620,6 +620,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
             />
           );
         },
+        style: { minWidth: '300px' },
       },
     ];
 
@@ -647,7 +648,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           ),
         sortable:
           false /* createdBy column is not sortable because it doesn't make sense to sort by id*/,
-        width: '100px',
+        width: '65px',
+        style: { minWidth: '65px' },
         align: 'center',
       });
     }
@@ -663,6 +665,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         ),
         sortable: true,
         width: '130px',
+        style: { minWidth: '130px' },
       });
     }
 
@@ -725,7 +728,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         name: i18n.translate('contentManagement.tableList.listing.table.actionTitle', {
           defaultMessage: 'Actions',
         }),
-        width: `72px`,
+        width: '74px',
         actions,
       });
     }

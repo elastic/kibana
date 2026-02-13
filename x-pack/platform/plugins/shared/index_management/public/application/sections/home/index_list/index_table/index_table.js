@@ -92,6 +92,7 @@ const getColumnConfigs = ({
           </>
         );
       },
+      style: { minWidth: '150px' },
     },
     {
       fieldName: 'data_stream',
@@ -130,6 +131,8 @@ const getColumnConfigs = ({
           return <DocCountCell indexName={index.name} docCountApi={docCountApi} />;
         },
         readOnly: true,
+        width: '140px',
+        style: { minWidth: '140px' },
       },
       {
         fieldName: 'size',
@@ -150,6 +153,9 @@ const getColumnConfigs = ({
         }),
         order: 20,
         render: (index) => (index.health ? <DataHealth health={index.health} /> : undefined),
+        className: 'eui-textNoWrap',
+        width: '80px',
+        style: { minWidth: '80px' },
       },
       {
         fieldName: 'status',
@@ -394,19 +400,21 @@ export class IndexTable extends Component {
 
   buildHeader(columnConfigs) {
     const { sortField, isSortAscending } = this.props;
-    return columnConfigs.map(({ fieldName, label, readOnly }) => {
+    return columnConfigs.map(({ fieldName, label, readOnly, width, style }) => {
       const isSorted = sortField === fieldName;
       // we only want to make index name column 25% width when there are more columns displayed
-      const widthStyle = fieldName === 'name' && columnConfigs.length > 2 ? { width: '25%' } : {};
+      // TODO(tkajtoch): Address this
+      // const widthStyle = fieldName === 'name' && columnConfigs.length > 2 ? { width: '25%' } : {};
       return (
         <EuiTableHeaderCell
           key={fieldName}
           onSort={() => this.onSort(fieldName)}
           isSorted={isSorted}
           isSortAscending={isSortAscending}
-          style={widthStyle}
           data-test-subj={`indexTableHeaderCell-${fieldName}`}
           readOnly={readOnly}
+          width={width}
+          style={style}
         >
           {label}
         </EuiTableHeaderCell>
@@ -743,7 +751,7 @@ export class IndexTable extends Component {
               <EuiSpacer size="m" />
 
               <div style={{ maxWidth: '100%', overflow: 'auto' }}>
-                <EuiTable data-test-subj="indexTable">
+                <EuiTable data-test-subj="indexTable" tableLayout="auto">
                   <EuiScreenReaderOnly>
                     <caption role="status" aria-relevant="text" aria-live="polite">
                       <FormattedMessage
