@@ -103,7 +103,7 @@ describe('RuleExecutorTaskRunner', () => {
 
       const result = await runner.run({ taskInstance, abortController });
 
-      expect(result).toEqual({ state: { foo: 'bar' } }); // preserves taskInstance.state
+      expect(result).toEqual({ state: { foo: 'bar' } });
     });
 
     it('returns empty state for unknown halt reasons', async () => {
