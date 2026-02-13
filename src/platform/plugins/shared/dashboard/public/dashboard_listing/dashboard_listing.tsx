@@ -69,6 +69,8 @@ export const DashboardListing = ({
           tabs={tabs}
           activeTabId={activeTabId}
           changeActiveTab={changeActiveTab}
+          hidePageTitle={true}
+          restrictWidth={false}
         />
       </QueryClientProvider>
     </I18nProvider>

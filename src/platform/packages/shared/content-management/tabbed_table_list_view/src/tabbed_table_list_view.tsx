@@ -27,7 +27,15 @@ export interface TableListTab<T extends UserContentCommonSchema = UserContentCom
 type TabbedTableListViewProps = Pick<
   TableListViewProps<UserContentCommonSchema>,
   'title' | 'description' | 'headingId' | 'children'
-> & { tabs: TableListTab[]; activeTabId: string; changeActiveTab: (id: string) => void };
+> & {
+  tabs: TableListTab[];
+  activeTabId: string;
+  changeActiveTab: (id: string) => void;
+  /** When true, hides the page title and description but keeps the tabs visible */
+  hidePageTitle?: boolean;
+  /** When false, content uses full width. Passed to KibanaPageTemplate (EUI defaults to true). */
+  restrictWidth?: boolean | number | string;
+};
 
 export const TabbedTableListView = ({
   title,
@@ -37,6 +45,8 @@ export const TabbedTableListView = ({
   tabs,
   activeTabId,
   changeActiveTab,
+  hidePageTitle = false,
+  restrictWidth,
 }: TabbedTableListViewProps) => {
   const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
   const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
@@ -64,11 +74,23 @@ export const TabbedTableListView = ({
     loadTableList();
   }, [activeTabId, tabs, getActiveTab, onFetchSuccess]);
 
+  const headerPageTitle = hidePageTitle ? undefined : <span id={headingId}>{title}</span>;
+  const headerDescription = hidePageTitle ? undefined : description;
+
   return (
-    <KibanaPageTemplate panelled data-test-subj={pageDataTestSubject}>
+    <KibanaPageTemplate
+      panelled
+      data-test-subj={pageDataTestSubject}
+      {...(restrictWidth !== undefined && { restrictWidth })}
+    >
+      {hidePageTitle && (
+        <span id={headingId} className="euiScreenReaderOnly">
+          {title}
+        </span>
+      )}
       <KibanaPageTemplate.Header
-        pageTitle={<span id={headingId}>{title}</span>}
-        description={description}
+        pageTitle={headerPageTitle}
+        description={headerDescription}
         data-test-subj="top-nav"
         tabs={tabs.map((tab) => ({
           onClick: () => changeActiveTab(tab.id),

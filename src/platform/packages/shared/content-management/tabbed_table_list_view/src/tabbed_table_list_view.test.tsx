@@ -76,6 +76,24 @@ describe('TabbedTableListView', () => {
     expect(wrapper.find(KibanaPageTemplate.Header).prop('description')).toContain(description);
   });
 
+  it('should hide page title and description but keep tabs when hidePageTitle is true', () => {
+    const wrapper = shallow(
+      <TabbedTableListView
+        title={title}
+        description={description}
+        headingId={headingId}
+        children={children}
+        tabs={tabs}
+        activeTabId={'tab-1'}
+        changeActiveTab={() => {}}
+        hidePageTitle={true}
+      />
+    );
+    expect(wrapper.find(KibanaPageTemplate.Header).prop('pageTitle')).toBeUndefined();
+    expect(wrapper.find(KibanaPageTemplate.Header).prop('description')).toBeUndefined();
+    expect(wrapper.find(EuiPageTemplate.Header).prop('tabs')).toHaveLength(2);
+  });
+
   it('should render the correct number of tabs', () => {
     const wrapper = shallow(
       <TabbedTableListView
