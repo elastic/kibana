@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 import { generateLogsData } from '../fixtures/generators';
 
@@ -13,7 +14,7 @@ const WIRED_STREAM_NAME = 'logs.child';
 
 test.describe(
   'Discover integration - Wired Stream - Navigate to Stream processing from document flyout',
-  { tag: ['@svlOblt'] },
+  { tag: tags.serverless.observability.complete },
   () => {
     test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
       // Create a wired stream

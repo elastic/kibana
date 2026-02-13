@@ -80,6 +80,15 @@ export type AReactElementFn = () => ReactElement<MyProps>;
 //     line 61 - foo
 //     line 62 - bar
 //     line 65 - AReactElementFn
+//   param doc mismatches (3):
+//     line 30 - FnTypeWithGeneric
+//     line 54 - foo
+//     line 62 - bar
+//   missing complex type info (4):
+//     line 36 - p
+//     line 36 - p
+//     line 53 - ImAnObject
+//     line 60 - MyProps
 //   no references (21):
 //     line 14 - StringOrUndefinedType
 //     line 19 - TypeWithGeneric

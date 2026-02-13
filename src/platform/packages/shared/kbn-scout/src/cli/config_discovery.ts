@@ -47,7 +47,7 @@ const buildModuleDiscoveryInfo = (): ModuleDiscoveryInfo[] => {
         (test) => test.expectedStatus === 'passed' && test.location.file.endsWith('.spec.ts')
       );
 
-      const usesParallelWorkers = config.path.includes('parallel.playwright.config.ts');
+      const usesParallelWorkers = config.type === 'parallel';
       const allTags = collectUniqueTags(config.manifest.tests);
 
       return {
@@ -149,7 +149,7 @@ const logFlattenedConfigs = (flattenedConfigs: FlattenedConfigGroup[], log: Tool
   log.info(`Found ${flattenedConfigs.length} flattened config group(s):`);
   flattenedConfigs.forEach((group) => {
     log.info(
-      `- ${group.mode} / ${group.group} / ${group.scoutCommand}: ${group.configs.length} config(s)`
+      `- ${group.testTarget.arch} / ${group.group} / ${group.scoutCommand}: ${group.configs.length} config(s)`
     );
   });
 };
@@ -174,8 +174,8 @@ const handleFlattenedOutput = (
   logFlattenedConfigs(flattenedConfigs, log);
 };
 
-// Splits modules with long runtime by 'serverRunFlags' to have a better control over
-// test execution: streams_app-stateful, streams_app-serverless-default
+// Splits 'streams_app' module by 'serverRunFlags' so CI can run each arch/domain as a
+// separate job (e.g. streams_app-stateful-classic, streams_app-serverless-search).
 const splitStreamsTestsByServerRunFlags = (
   modules: ModuleDiscoveryInfo[]
 ): ModuleDiscoveryInfo[] => {
@@ -191,8 +191,11 @@ const splitStreamsTestsByServerRunFlags = (
     });
 
     return Array.from(allServerRunFlags).map((flag) => {
-      // transform: --stateful -> stateful, --serverless=default -> serverless-default
-      const flagSuffix = flag.replace(/^--/, '').replace(/=/g, '-');
+      // transform: "--arch <arch> --domain <domain>" -> "<arch>-<domain>"
+      const archDomainMatch = flag.match(/--arch\s+(\S+)\s+--domain\s+(\S+)/);
+      const flagSuffix = archDomainMatch
+        ? `${archDomainMatch[1]}-${archDomainMatch[2]}`
+        : flag.replace(/^--/g, '').replace(/\s*--/g, '-').replace(/=/g, '-').replace(/\s+/g, '-');
       const newModuleName = `${module.name}-${flagSuffix}`;
 
       const filteredConfigs = module.configs

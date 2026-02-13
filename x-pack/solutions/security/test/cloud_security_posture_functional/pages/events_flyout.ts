@@ -118,7 +118,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       // Show events with the same action
       await expandedFlyoutGraph.showEventsOfSameAction(
-        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)oe(1)oa(0)'
+        'label(google.iam.admin.v1.CreateRole)ln(1)oe(1)oa(0)'
       );
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
@@ -133,7 +133,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       // Hide events with the same action
       await expandedFlyoutGraph.hideEventsOfSameAction(
-        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)oe(1)oa(0)'
+        'label(google.iam.admin.v1.CreateRole)ln(1)oe(1)oa(0)'
       );
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
@@ -203,7 +203,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.showEventOrAlertDetails(
-        'a(admin4@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)oe(1)oa(0)'
+        'label(google.iam.admin.v1.CreateRole)ln(5)oe(1)oa(0)'
       );
       await networkEventsPage.flyout.assertPreviewPanelIsOpen('event');
     });
@@ -248,7 +248,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       // Show event details from group node
       await expandedFlyoutGraph.showEventOrAlertDetails(
-        'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)oe(0)oa(0)'
+        'label(google.iam.admin.v1.CreateRole)ln(c6579aaf5457eee679bb88bc31162a3d)oe(0)oa(0)'
       );
       await networkEventsPage.flyout.assertPreviewPanelIsOpen('group');
       await networkEventsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
@@ -309,7 +309,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.showEventOrAlertDetails(
-        'a(admin6@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole2)oe(1)oa(0)'
+        'label(google.iam.admin.v1.CreateRole2)ln(6)oe(1)oa(0)'
       );
       // An alert is always coupled with an event, so we open the group preview panel instead of the alert panel
       await networkEventsPage.flyout.assertPreviewPanelIsOpen('group');
@@ -400,6 +400,73 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           await expandedFlyoutGraph.assertNodeEntityTag(serviceNodeId, 'Service');
           await expandedFlyoutGraph.assertNodeEntityDetails(serviceNodeId, 'GCP Service Account');
         });
+
+        it('expanded flyout - MV_EXPAND deduplication: single label node for targets with different entity types', async () => {
+          // This test verifies the fix for GitHub issue #245739
+          // A single document with targets that have DIFFERENT entity types after enrichment
+          // should create only ONE label node (not multiple) because they share the same document ID
+          //
+          // Document: MvExpandBugTest123
+          // - Actor: mv-expand-test-actor@example.com (Identity/GCP IAM User)
+          // - Target 1: mv-expand-target-identity (Identity/GCP IAM User)
+          // - Target 2: mv-expand-target-storage (Storage/GCP Storage Bucket)
+          //
+          // Before fix: MV_EXPAND creates 2 rows, which after enrichment have different targetEntityType,
+          // causing ESQL to create 2 separate groups -> 2 label nodes
+          //
+          // After fix: Both rows share the same labelNodeId (document ID "MvExpandBugTest123"),
+          // so only ONE label node is created with edges to both targets
+
+          await networkEventsPage.navigateToNetworkEventsPage(
+            `${networkEventsPage.getAbsoluteTimerangeFilter(
+              '2024-09-01T00:00:00.000Z',
+              '2024-09-02T00:00:00.000Z'
+            )}&${networkEventsPage.getFlyoutFilter('MvExpandBugTest123')}`
+          );
+          await networkEventsPage.waitForListToHaveEvents();
+
+          await networkEventsPage.flyout.expandVisualizations();
+          await networkEventsPage.flyout.assertGraphPreviewVisible();
+
+          // Expected nodes with the fix:
+          // - 1 actor node (mv-expand-test-actor@example.com - Identity/GCP IAM User)
+          // - 1 target node (mv-expand-target-identity - Identity/GCP IAM User)
+          // - 1 target node (mv-expand-target-storage - Storage/GCP Storage Bucket)
+          // - 1 label node (shared by both edges because they come from the same document)
+          //
+          // Before the fix, this would incorrectly create 5 nodes (2 label nodes instead of 1)
+          const expectedNodes = 4;
+          await networkEventsPage.flyout.assertGraphNodesNumber(expectedNodes);
+
+          await expandedFlyoutGraph.expandGraph();
+          await expandedFlyoutGraph.waitGraphIsLoaded();
+          await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodes);
+
+          // Verify actor node
+          const actorNodeId = 'mv-expand-test-actor@example.com';
+          await expandedFlyoutGraph.assertNodeEntityTag(actorNodeId, 'Identity');
+          await expandedFlyoutGraph.assertNodeEntityDetails(actorNodeId, 'GCP IAM User');
+
+          // Verify first target (Identity type)
+          const identityTargetNodeId = 'mv-expand-target-identity';
+          await expandedFlyoutGraph.assertNodeEntityTag(identityTargetNodeId, 'Identity');
+          await expandedFlyoutGraph.assertNodeEntityDetails(identityTargetNodeId, 'GCP IAM User');
+
+          // Verify second target (Storage type - different from first target!)
+          const storageTargetNodeId = 'mv-expand-target-storage';
+          await expandedFlyoutGraph.assertNodeEntityTag(storageTargetNodeId, 'Storage');
+          await expandedFlyoutGraph.assertNodeEntityDetails(
+            storageTargetNodeId,
+            'GCP Storage Bucket'
+          );
+
+          // Verify the label node exists
+          // Format: label(action)ln(labelNodeId)oe(isOrigin)oa(isOriginAlert)
+          // The labelNodeId is the document ID since there's only one document
+          const labelNodeId =
+            'label(google.iam.admin.v1.MvExpandTest)ln(MvExpandBugTest123)oe(0)oa(0)';
+          await expandedFlyoutGraph.assertNodeExists(labelNodeId);
+        });
       };
 
       describe('via ENRICH policy (v1)', () => {
@@ -415,7 +482,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             logger,
             retry,
             entitiesIndex: '.entities.v1.latest.security_*',
-            expectedCount: 12,
+            expectedCount: 15,
           });
 
           await waitForEnrichPolicyCreated({ es, retry, logger });
@@ -448,7 +515,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             logger,
             retry,
             entitiesIndex: '.entities.v2.latest.security_*',
-            expectedCount: 12,
+            expectedCount: 15,
           });
         });
 
