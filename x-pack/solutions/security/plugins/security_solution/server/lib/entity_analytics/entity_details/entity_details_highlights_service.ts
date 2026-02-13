@@ -28,6 +28,7 @@ import type {
   QueryDslQueryContainer,
   QueryDslFieldAndFormat,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { MlSummaryJob } from '@kbn/ml-plugin/server';
 import { createGetRiskScores } from '../risk_score/get_risk_score';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_client';
@@ -154,7 +155,7 @@ export const entityDetailsHighlightsServiceFactory = ({
     ) {
       let anomaliesAnonymized: Record<string, string[]>[] = [];
       if (ml) {
-        const jobs = await ml.jobServiceProvider(request, soClient).jobsSummary();
+        const jobs: MlSummaryJob[] = await ml.jobServiceProvider(request, soClient).jobsSummary();
         const securityJobIds = jobs.filter(isSecurityJob).map((j) => j.id);
         const { getAnomaliesTableData } = ml.resultsServiceProvider(request, soClient);
         const anomalyScore = await uiSettingsClient.get<number>(DEFAULT_ANOMALY_SCORE);
@@ -176,7 +177,7 @@ export const entityDetailsHighlightsServiceFactory = ({
         const jobNameById = jobs.reduce<Record<string, { name: string; description: string }>>(
           (acc, job) => {
             acc[job.id] = {
-              name: job.customSettings.security_app_display_name,
+              name: job.customSettings?.security_app_display_name ?? job.id,
               description: job.description,
             };
             return acc;
