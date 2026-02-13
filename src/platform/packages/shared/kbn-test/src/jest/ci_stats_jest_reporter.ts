@@ -69,8 +69,7 @@ export default class CiStatsJestReporter extends BaseReporter {
     // This matches the annotated names produced by pick_test_group_run_order.ts
     // (e.g., "config.js||shard=1/2").
     const shardArg = argv.shard;
-    this.reportName =
-      typeof shardArg === 'string' ? `${configArg}||shard=${shardArg}` : configArg;
+    this.reportName = typeof shardArg === 'string' ? `${configArg}||shard=${shardArg}` : configArg;
   }
 
   async onRunStart() {
