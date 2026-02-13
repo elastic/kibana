@@ -127,6 +127,7 @@ export const createSkillsServiceMock = (): SkillsServiceMock => {
 
 export const createToolManagerMock = (): ToolManagerMock => {
   return {
+    setEventEmitter: jest.fn(),
     addTools: jest.fn(),
     list: jest.fn(),
     recordToolUse: jest.fn(),
@@ -164,7 +165,6 @@ export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock =
     getAccessedRefs: jest.fn(),
     clearAccessTracking: jest.fn(),
     resolveRefs: jest.fn(),
-    resolveAttachment: jest.fn(),
     getTotalTokenEstimate: jest.fn(),
     hasChanges: jest.fn(),
     markClean: jest.fn(),

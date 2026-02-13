@@ -10,6 +10,7 @@
 // TODO: Remove eslint exceptions comments and fix the issues
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import dateMath from '@kbn/datemath';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 import type {
@@ -133,8 +134,16 @@ function convertLiteralToValue(
   expectedType: 'string' | 'number' | 'boolean'
 ): any {
   switch (expectedType) {
-    case 'string':
-      return String(node.value);
+    case 'string': {
+      const strValue = String(node.value);
+      const parsed = dateMath.parse(strValue);
+      if (parsed?.isValid()) {
+        // it's a date math expression, return the resolved ISO string
+        return parsed.toISOString();
+      }
+
+      return strValue;
+    }
     case 'number':
       return parseFloat(node.value as string);
     case 'boolean':

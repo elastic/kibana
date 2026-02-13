@@ -8,7 +8,7 @@
 import type { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type {
