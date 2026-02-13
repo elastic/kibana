@@ -21,10 +21,10 @@ import { formatDuration } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import type { RuleDetails } from '../../services/rules_api';
+import type { RuleApiResponse } from '../../services/rules_api';
 
 export interface RuleDetailPageProps {
-  rule: RuleDetails;
+  rule: RuleApiResponse;
 }
 
 const EMPTY_VALUE = '-';
@@ -100,7 +100,7 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
         description: (
           <ItemValueRuleSummary
             data-test-subj="alertingV2RuleDetailsSchedule"
-            itemValue={formatEvery(rule.schedule?.custom)}
+            itemValue={formatEvery(rule.schedule.every)}
           />
         ),
       },
@@ -111,7 +111,7 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
         description: (
           <ItemValueRuleSummary
             data-test-subj="alertingV2RuleDetailsLookback"
-            itemValue={formatMaybeDuration(rule.lookbackWindow)}
+            itemValue={formatMaybeDuration(rule.schedule.lookback)}
           />
         ),
       },
@@ -122,7 +122,7 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
         description: (
           <ItemValueRuleSummary
             data-test-subj="alertingV2RuleDetailsTimeField"
-            itemValue={formatMaybeString(rule.timeField)}
+            itemValue={formatMaybeString(rule.time_field)}
           />
         ),
       },
@@ -133,12 +133,12 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
         description: (
           <ItemValueRuleSummary
             data-test-subj="alertingV2RuleDetailsGroupBy"
-            itemValue={formatMaybeList(rule.groupingKey)}
+            itemValue={formatMaybeList(rule.grouping?.fields)}
           />
         ),
       },
     ],
-    [rule.schedule, rule.lookbackWindow, rule.timeField, rule.groupingKey]
+    [rule.schedule, rule.time_field, rule.grouping?.fields]
   );
 
   const metadataListItems = useMemo(
@@ -190,7 +190,7 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.ruleDetails.ruleDetailsTitle"
               defaultMessage="{ruleName}"
-              values={{ ruleName: rule.name }}
+              values={{ ruleName: rule.metadata.name }}
             />
           </span>
         }
@@ -255,11 +255,11 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  {rule.tags && (
+                  {rule.metadata.labels && (
                     <EuiFlexGroup gutterSize="xs" wrap responsive={false} data-test-subj="ruleTags">
-                      {rule.tags.map((tag) => (
-                        <EuiFlexItem key={tag} grow={false}>
-                          <EuiBadge color="hollow">{tag}</EuiBadge>
+                      {rule.metadata.labels.map((label) => (
+                        <EuiFlexItem key={label} grow={false}>
+                          <EuiBadge color="hollow">{label}</EuiBadge>
                         </EuiFlexItem>
                       ))}
                     </EuiFlexGroup>
@@ -308,7 +308,7 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
                 data-test-subj="alertingV2RuleDetailsQuery"
                 css={{ width: '100%' }}
               >
-                {rule.query || EMPTY_VALUE}
+                {rule.evaluation?.query?.base || EMPTY_VALUE}
               </EuiCodeBlock>
             </EuiPanel>
           </EuiPanel>
