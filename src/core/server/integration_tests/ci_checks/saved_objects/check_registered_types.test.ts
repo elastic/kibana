@@ -201,6 +201,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "url": "d9c7d0ed307a191111efd9d1b2df787f4dcd64d66000c742dee108daa95e5932",
         "usage-counter": "c489ccf0d36fa107aa27c6b589ea4deb4834e8365282ba137ab9415d76c5511e",
         "usage-counters": "cdfa1fa5d0dd16bc612eed3762d801053a6fb606eb387fcad22d257963d54a26",
+        "user_connector_token": "524b43a59d7bbc5b0430b19332f8f0f69e323dec2e391a87c568bb4fb4b3690c",
         "visualization": "b7c299233eb6fc88faccdf5924d4cff9fc2f4c3fe8acf5376d7232c05c9a3cfd",
         "workplace_search_telemetry": "b17dd0963b685cea46246d00b7da598822668434659b7e698313da6c2212febb",
       }
@@ -1285,6 +1286,11 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "usage-counters|mappings: 435214259b7e5a3aea91163c53afc13a223547e4",
         "usage-counters|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
         "================================================================",
+        "user_connector_token|global: e61d81d8f7d9becf82d58b6fddac0f47d2a1e14f",
+        "user_connector_token|mappings: 44fe19c04086807ed4f8faffc2be1556b6cdd6bc",
+        "user_connector_token|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "user_connector_token|10.1.0: 2ed52373b74b81653c4f3cdd126f0dc5abf262b2f3a79a11379cb58f27dcf69b",
+        "=============================================================================================",
         "visualization|global: 8a88e742e29159f4351701a9d677a11685c2cac5",
         "visualization|mappings: 98f1ae04a5d2af527a40e93292dd90c0080b44be",
         "visualization|schemas: 8d6477e08dfdf20335752a69994646f9da90741f",
@@ -1469,6 +1475,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "url": "10.0.0",
         "usage-counter": "10.0.0",
         "usage-counters": "10.0.0",
+        "user_connector_token": "10.1.0",
         "visualization": "10.0.0",
         "workplace_search_telemetry": "10.0.0",
       }
@@ -1625,6 +1632,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "url": "0.0.0",
         "usage-counter": "0.0.0",
         "usage-counters": "0.0.0",
+        "user_connector_token": "10.1.0",
         "visualization": "8.5.0",
         "workplace_search_telemetry": "0.0.0",
       }

@@ -18,6 +18,7 @@ import {
   actionTaskParamsMappings,
   connectorTokenMappings,
   oauthStateMappings,
+  userConnectorTokenMappings,
 } from './mappings';
 import { getActionsMigrations } from './actions_migrations';
 import { getActionTaskParamsMigrations } from './action_task_params_migrations';
@@ -30,12 +31,14 @@ import {
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
   OAUTH_STATE_SAVED_OBJECT_TYPE,
+  USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
 import {
   actionTaskParamsModelVersions,
   connectorModelVersions,
   connectorTokenModelVersions,
   oauthStateModelVersions,
+  userConnectorTokenModelVersions,
 } from './model_versions';
 
 export function setupSavedObjects(
@@ -144,6 +147,32 @@ export function setupSavedObjects(
       'createdAt',
       'updatedAt',
       'refreshTokenExpiresAt',
+    ]),
+  });
+
+  savedObjects.registerType({
+    name: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'agnostic',
+    mappings: userConnectorTokenMappings,
+    management: {
+      importableAndExportable: false,
+    },
+    modelVersions: userConnectorTokenModelVersions,
+  });
+
+  encryptedSavedObjects.registerType({
+    type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['credentials']),
+    attributesToIncludeInAAD: new Set([
+      'profileUid',
+      'connectorId',
+      'credentialType',
+      'expiresAt',
+      'refreshTokenExpiresAt',
+      'createdAt',
+      'updatedAt',
     ]),
   });
 
