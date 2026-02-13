@@ -135,7 +135,11 @@ export class EnterForeachNodeImpl implements NodeImplementation {
       );
     }
 
-    if (expression.startsWith('{{') && expression.endsWith('}}')) {
+    if (
+      typeof expression === 'string' &&
+      expression.startsWith('{{') &&
+      expression.endsWith('}}')
+    ) {
       return this.stepExecutionRuntime.contextManager.evaluateExpressionInContext(expression);
     }
 

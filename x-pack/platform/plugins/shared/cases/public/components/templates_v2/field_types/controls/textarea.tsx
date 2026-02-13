@@ -7,7 +7,7 @@
 
 import type { z } from '@kbn/zod';
 import React from 'react';
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/components';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextAreaField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import type { TextareaFieldSchema } from '../../../../../common/types/domain/template/fields';

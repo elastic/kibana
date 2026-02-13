@@ -100,8 +100,6 @@ dependsOn:
   - '@kbn/core-security-server-mocks'
   - '@kbn/server-http-tools'
   - '@kbn/zod'
-  - '@kbn/reporting-public'
-  - '@kbn/field-formats-plugin'
   - '@kbn/core-security-server'
   - '@kbn/core-notifications-browser-mocks'
   - '@kbn/handlebars'
@@ -119,6 +117,8 @@ dependsOn:
   - '@kbn/fs'
   - '@kbn/kql'
   - '@kbn/scout'
+  - '@kbn/reporting-common'
+  - '@kbn/reporting-plugin'
 tags:
   - plugin
   - prod
