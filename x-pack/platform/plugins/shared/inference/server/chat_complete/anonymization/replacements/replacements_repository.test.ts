@@ -66,7 +66,10 @@ describe('ReplacementsRepository', () => {
       createdBy: 'test',
     });
 
-    const createdDoc = (esClient.index as jest.Mock).mock.calls[0][0].document as Record<string, unknown>;
+    const createdDoc = (esClient.index as jest.Mock).mock.calls[0][0].document as Record<
+      string,
+      unknown
+    >;
     (esClient.get as jest.Mock).mockResolvedValue({
       _source: createdDoc,
     });
