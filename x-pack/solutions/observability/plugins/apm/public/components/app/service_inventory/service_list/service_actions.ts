@@ -60,7 +60,7 @@ export function useServiceActions({
       id: 'discover',
       actions: [
         {
-          id: 'openTracesInDiscover',
+          id: 'servicesTable-openTracesInDiscover',
           name: i18n.translate('xpack.apm.servicesTable.actions.openTracesInDiscover', {
             defaultMessage: 'Open traces in Discover',
           }),
@@ -85,7 +85,7 @@ export function useServiceActions({
           },
         },
         {
-          id: 'openLogsInDiscover',
+          id: 'servicesTable-openLogsInDiscover',
           name: i18n.translate('xpack.apm.servicesTable.actions.openLogsInDiscover', {
             defaultMessage: 'Open logs in Discover',
           }),
