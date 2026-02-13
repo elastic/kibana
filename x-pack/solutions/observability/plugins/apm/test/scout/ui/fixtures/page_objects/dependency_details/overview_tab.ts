@@ -1,66 +1,43 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-import { BIGGER_TIMEOUT } from '../../constants';
-import type { ServiceDetailsPageTabName } from '../service_details/service_details_tab';
-import { ServiceDetailsTab } from '../service_details/service_details_tab';
+import capitalize from 'lodash/capitalize';
+import type { DependencyDetailsPageTabName } from './dependency_details_tab';
+import { DependencyDetailsTab } from './dependency_details_tab';
+import { waitForChartToLoad, waitForTableToLoad } from '../utils';
 
-export class OverviewTab extends ServiceDetailsTab {
-  public readonly tabName: ServiceDetailsPageTabName = 'overview';
+export class OverviewTab extends DependencyDetailsTab {
+  public readonly tabName: DependencyDetailsPageTabName = 'overview';
   public readonly tab: Locator;
 
-  // Chart and table locators
   public readonly latencyChart: Locator;
   public readonly throughputChart: Locator;
-  public readonly transactionsGroupTable: Locator;
-  public readonly serviceOverviewErrorsTable: Locator;
-  public readonly instancesLatencyDistribution: Locator;
-  public readonly serviceOverviewInstancesTable: Locator;
+  public readonly failedTransactionRateChart: Locator;
+  public readonly upstreamServicesTable: Locator;
 
-  constructor(page: ScoutPage, kbnUrl: KibanaUrl, defaultServiceName: string) {
-    super(page, kbnUrl, defaultServiceName);
-    this.tab = this.page.getByTestId(`${this.tabName}Tab`);
+  constructor(page: ScoutPage, kbnUrl: KibanaUrl, defaultDependencyName: string) {
+    super(page, kbnUrl, defaultDependencyName);
+    this.tab = this.page.getByRole('tab', { name: capitalize(this.tabName) });
     this.latencyChart = this.page.getByTestId('latencyChart');
-    this.throughputChart = this.page.getByTestId('throughput');
-    this.transactionsGroupTable = this.page.getByTestId('transactionsGroupTable');
-    this.serviceOverviewErrorsTable = this.page.getByTestId('serviceOverviewErrorsTable');
-    this.instancesLatencyDistribution = this.page.getByTestId('instancesLatencyDistribution');
-    this.serviceOverviewInstancesTable = this.page.getByTestId('serviceOverviewInstancesTable');
+    this.throughputChart = this.page.getByTestId('throughputChart');
+    this.failedTransactionRateChart = this.page.getByTestId('errorRateChart');
+    this.upstreamServicesTable = this.page.getByTestId('dependenciesTable');
   }
 
-  protected async waitForTabLoad(): Promise<void> {
+  protected async waitForTabLoad() {
     await Promise.all([
-      this.latencyChart.waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT }),
-      this.throughputChart.waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT }),
+      waitForChartToLoad(this.page, this.latencyChart),
+      waitForChartToLoad(this.page, this.throughputChart),
+      waitForChartToLoad(this.page, this.failedTransactionRateChart),
+      waitForTableToLoad(this.page, this.upstreamServicesTable),
     ]);
   }
 
-  // #region Charts and Tables
-  getInstancesTableContainer() {
-    return this.page.getByTestId('serviceInstancesTableContainer');
+  public getServiceInUpstreamServicesTable(serviceName: string) {
+    return this.upstreamServicesTable.getByRole('link', { name: serviceName });
   }
 
-  getViewTransactionsLink() {
-    return this.page.getByRole('link', { name: 'View transactions' });
+  public async clickServiceInUpstreamServicesTable(serviceName: string) {
+    await this.getServiceInUpstreamServicesTable(serviceName).click();
   }
-
-  async clickViewTransactionsLink() {
-    await this.getViewTransactionsLink().click();
-  }
-
-  getViewErrorsLink() {
-    return this.page.getByRole('link', { name: 'View errors' });
-  }
-
-  async clickViewErrorsLink() {
-    await this.getViewErrorsLink().click();
-  }
-  // #endregion
 
   // #region Header Filters
   getTransactionTypeFilter() {
@@ -97,24 +74,6 @@ export class OverviewTab extends ServiceDetailsTab {
 
   async clickRefreshButton() {
     await this.getRefreshButton().click();
-  }
-  // #endregion
-
-  // #region Service Icons
-  getServiceIcon() {
-    return this.page.getByTestId('service');
-  }
-
-  async clickServiceIcon() {
-    await this.getServiceIcon().click();
-  }
-
-  getOpenTelemetryIcon() {
-    return this.page.getByTestId('popover_Service');
-  }
-
-  async clickOpenTelemetryIcon() {
-    await this.getOpenTelemetryIcon().click();
   }
   // #endregion
 }
