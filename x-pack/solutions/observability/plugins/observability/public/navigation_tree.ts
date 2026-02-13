@@ -31,12 +31,6 @@ const LazyIconProductCloudInfra = lazy(() =>
     default: iconProductCloudInfra,
   }))
 );
-const LazyAgentBuilderIcon = lazy(() =>
-  import('@kbn/observability-nav-icons').then(({ iconRobot }) => ({
-    default: iconRobot,
-  }))
-);
-
 const title = i18n.translate(
   'xpack.observability.obltNav.headerSolutionSwitcher.obltSolutionTitle',
   {
@@ -290,7 +284,7 @@ function createNavTree({
         : [
             {
               link: 'agent_builder' as const,
-              icon: LazyAgentBuilderIcon,
+              icon: 'productRobot',
             },
           ]),
       {

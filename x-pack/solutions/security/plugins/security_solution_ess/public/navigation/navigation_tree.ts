@@ -14,7 +14,6 @@ import {
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import {
   defaultNavigationTree,
-  LazyIconAgentBuilder,
   LazyIconFindings,
   LazyIconIntelligence,
 } from '@kbn/security-solution-navigation/navigation_tree';
@@ -53,8 +52,7 @@ export const createNavigationTree = (
     ...(chatExperience === AIChatExperience.Agent
       ? [
           {
-            // TODO: update icon to 'robot' once it's available in EUI
-            icon: LazyIconAgentBuilder,
+            icon: 'productRobot',
             link: 'agent_builder' as AppDeepLinkId,
           },
         ]

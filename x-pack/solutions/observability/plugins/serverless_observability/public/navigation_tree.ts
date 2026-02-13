@@ -26,12 +26,6 @@ const LazyIconProductCloudInfra = lazy(() =>
     default: iconProductCloudInfra,
   }))
 );
-const LazyAgentBuilderIcon = lazy(() =>
-  import('@kbn/observability-nav-icons').then(({ iconRobot }) => ({
-    default: iconRobot,
-  }))
-);
-
 export function filterForFeatureAvailability(
   node: NodeDefinition,
   featureFlag: boolean = false
@@ -211,7 +205,7 @@ export const createNavigationTree = ({
       ...filterForFeatureAvailability(
         {
           link: 'agent_builder',
-          icon: LazyAgentBuilderIcon, // Temp svg until we have the icon in EUI
+          icon: 'productRobot',
         },
         !showAiAssistant
       ),

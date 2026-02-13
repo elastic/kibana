@@ -19,9 +19,6 @@ import {
   AI_CHAT_EXPERIENCE_TYPE,
 } from '@kbn/management-settings-ids';
 
-jest.mock('@kbn/ai-assistant-icon', () => ({
-  RobotIcon: ({ size }: { size: string }) => <div data-testid="robot-icon" data-size={size} />,
-}));
 jest.mock('../../icons/assistant_icon/assistant_icon', () => ({
   AssistantIcon: 'assistant-icon',
 }));

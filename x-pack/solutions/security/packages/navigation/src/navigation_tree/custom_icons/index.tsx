@@ -7,10 +7,6 @@
 
 import { lazy } from 'react';
 
-export const LazyIconAgentBuilder = lazy(() =>
-  import('./agent_builder').then(({ iconAgentBuilder }) => ({ default: iconAgentBuilder }))
-);
-
 // TODO delete when the `bullseye` EUI icon has been updated
 export const LazyIconFindings = lazy(() =>
   import('./findings').then(({ iconFindings }) => ({ default: iconFindings }))
