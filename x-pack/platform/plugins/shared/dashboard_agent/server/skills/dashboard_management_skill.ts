@@ -73,7 +73,9 @@ This skill has access to the following tools. Each has a specific role in the da
 - **${
     platformCoreTools.executeEsql
   }**: Execute an ES|QL query and return results. Use to validate that data actually exists or to preview the data shape before building visualizations.
-- **${dashboardTools.manageDashboard}**: Create or update an in-memory dashboard with panels. This is the primary tool for this skill.
+- **${
+    dashboardTools.manageDashboard
+  }**: Create or update an in-memory dashboard with panels. This is the primary tool for this skill.
 
 ## Core Instructions
 
@@ -118,7 +120,9 @@ Call ${dashboardTools.manageDashboard} with:
 #### Updating an existing dashboard
 
 1. Extract the dashboard attachment ID from the previous tool result: look for \`data.dashboardAttachment.id\`.
-2. Call ${dashboardTools.manageDashboard} with \`dashboardAttachmentId\` plus **only** the fields you need to change:
+2. Call ${
+    dashboardTools.manageDashboard
+  } with \`dashboardAttachmentId\` plus **only** the fields you need to change:
    - \`visualizationQueries\`: add new LLM-generated visualizations.
    - \`existingVisualizationIds\`: add visualization attachments that were already created earlier in the conversation. Pass their attachment IDs directly instead of regenerating them.
    - \`removePanelIds\`: remove panels by their \`panelId\`. Find panel IDs in the previous result at \`data.dashboardAttachment.content.panels[].panelId\`.
