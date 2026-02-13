@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/management-plugin",
@@ -35,7 +35,8 @@
     "@kbn/ai-agent-confirmation-modal",
     "@kbn/product-doc-common",
     "@kbn/react-kibana-mount",
-    "@kbn/agent-builder-common"
+    "@kbn/agent-builder-common",
+    "@kbn/scout",
   ],
   "exclude": ["target/**/*"]
 }
