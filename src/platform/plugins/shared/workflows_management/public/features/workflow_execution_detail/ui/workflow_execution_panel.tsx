@@ -93,7 +93,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
         )}
 
         <EuiFlexItem css={{ overflow: 'hidden' }}>
-          <EuiPanel paddingSize="m" hasShadow={false} css={{ overflow: 'hidden' }}>
+          <EuiPanel paddingSize="m" hasShadow={false} css={{ overflowY: 'auto' }}>
             <WorkflowStepExecutionTree
               definition={definition}
               execution={execution ?? null}

@@ -7,11 +7,14 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../use_kibana';
+import { useGetLicenseInfo } from '../use_get_license_info';
 
 export const useAgentCount = () => {
   const {
     services: { onechat },
   } = useKibana();
+
+  const { hasEnterpriseLicense } = useGetLicenseInfo();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['fetchAgentCount'],
@@ -22,7 +25,13 @@ export const useAgentCount = () => {
         tools: tools?.length ?? 0,
       };
     },
+    enabled: hasEnterpriseLicense && !!onechat,
   });
 
-  return { tools: data?.tools ?? 0, agents: data?.agents ?? 0, isLoading, isError };
+  return {
+    tools: data?.tools ?? 0,
+    agents: data?.agents ?? 0,
+    isLoading: hasEnterpriseLicense ? isLoading : false,
+    isError: isError || !hasEnterpriseLicense,
+  };
 };

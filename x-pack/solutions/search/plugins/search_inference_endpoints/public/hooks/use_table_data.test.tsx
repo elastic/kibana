@@ -151,6 +151,21 @@ describe('useTableData', () => {
       { wrapper }
     );
     const filteredData = result.current.sortedTableData;
-    expect(filteredData.every((item) => item.inference_id.includes(searchKey))).toBeTruthy();
+    expect(filteredData.every((item) => item.inference_id.includes(searchKey2))).toBeTruthy();
+  });
+
+  it('should set pagination total to filtered count', () => {
+    const filteredSearchKey = 'openai';
+    const { result } = renderHook(
+      () => useTableData(inferenceEndpoints, queryParams, filterOptions, filteredSearchKey),
+      { wrapper }
+    );
+
+    expect(result.current.pagination).toEqual({
+      pageIndex: 0,
+      pageSize: 10,
+      pageSizeOptions: INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
+      totalItemCount: 1,
+    });
   });
 });

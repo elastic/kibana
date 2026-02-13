@@ -98,11 +98,12 @@ export const createToolHandlerContext = (
     esClient: mockEsClient,
     logger: mockLogger,
     spaceId: 'default',
-    modelProvider: additionalContext.modelProvider ?? createMockModelProvider(),
-    toolProvider: additionalContext.toolProvider ?? createMockToolProvider(),
-    runner: additionalContext.runner ?? createMockScopedRunner(),
-    resultStore: additionalContext.resultStore ?? createMockToolResultStore(),
-    events: additionalContext.events ?? createMockToolEventEmitter(),
+    modelProvider: createMockModelProvider(),
+    toolProvider: createMockToolProvider(),
+    runner: createMockScopedRunner(),
+    resultStore: createMockToolResultStore(),
+    events: createMockToolEventEmitter(),
+    ...additionalContext,
   };
 };
 

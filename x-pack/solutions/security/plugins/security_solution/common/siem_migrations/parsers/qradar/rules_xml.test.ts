@@ -9,13 +9,13 @@ import { QradarRulesXmlParser } from './rules_xml';
 import { getMockQRadarXml } from './mock/data';
 
 const RULE_NAME = 'BB:CategoryDefinition: Authentication Success';
-
+const isBuildingBlockRule = true;
 const {
   mockQradarXml,
   mockRuleDataBase64s: _,
   mockRuleDataXmls,
   mockRuleDataXmlsSanitized,
-} = getMockQRadarXml([RULE_NAME]);
+} = getMockQRadarXml([RULE_NAME], isBuildingBlockRule);
 
 describe('QradarRulesXmlParser', () => {
   describe('getRules', () => {

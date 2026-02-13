@@ -1,19 +1,21 @@
 {
-  "lastModified": "2025-12-03T19:03:45.191Z",
-  "sha1": "4e28fc89c7aef69501d9b4110c9d5ab54d73fffa",
+  "lastModified": "2026-02-12T10:42:15.501Z",
+  "sha1": "9377a9adbbdcdf3aacce32275acbbbd5850b629c",
   "tests": [
     {
       "id": "16bb4a7ec47d274-1887bb9ce43cc37",
       "title": "Observability Landing Page redirects to page specified in defaultRoute uiSetting",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
-        "line": 27,
-        "column": 7
+        "line": 31,
+        "column": 9
       }
     },
     {
@@ -21,13 +23,15 @@
       "title": "Observability Landing Page redirects to Discover logs when logs data exists",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
-        "line": 50,
-        "column": 7
+        "line": 54,
+        "column": 9
       }
     },
     {
@@ -35,13 +39,15 @@
       "title": "Observability Landing Page redirects to APM services when only APM data exists",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
-        "line": 65,
-        "column": 7
+        "line": 69,
+        "column": 9
       }
     },
     {
@@ -49,13 +55,15 @@
       "title": "Observability Landing Page redirects to Discover logs when both logs and APM data exist (logs priority)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
-        "line": 80,
-        "column": 7
+        "line": 84,
+        "column": 9
       }
     },
     {
@@ -63,13 +71,31 @@
       "title": "Observability Landing Page redirects to onboarding when no data exists",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
-        "line": 97,
-        "column": 7
+        "line": 101,
+        "column": 9
+      }
+    },
+    {
+      "id": "16bb4a7ec47d274-d5a54704b60249e",
+      "title": "Observability Landing Page redirects to onboarding when log data that should be ignored exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
+        "line": 109,
+        "column": 9
       }
     }
   ]

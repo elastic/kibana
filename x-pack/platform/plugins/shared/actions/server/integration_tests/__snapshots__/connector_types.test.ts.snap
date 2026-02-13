@@ -18,6 +18,9 @@ Object {
           "default": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
           "type": "string",
         },
+        "region": Object {
+          "type": "string",
+        },
         "temperature": Object {
           "type": "number",
         },

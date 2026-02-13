@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { DateProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
-import { streamlangApiTest as apiTest } from '../..';
+import { streamlangApiTest as apiTest, tags } from '../..';
 
 apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
   apiTest(
     'should parse a date and set it to @timestamp',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed }) => {
       const indexName = 'stream-e2e-test-date';
 
@@ -34,13 +34,13 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('@timestamp', '2025-01-01T12:34:56.789Z');
+      expect(ingestedDocs[0]?.['@timestamp']).toBe('2025-01-01T12:34:56.789Z');
     }
   );
 
   apiTest(
     'should override the field if from and to are same',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed }) => {
       const indexName = 'stream-e2e-test-date-override';
 
@@ -63,13 +63,13 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('event.created', '2025-01-01');
+      expect(ingestedDocs[0]?.event?.created).toBe('2025-01-01');
     }
   );
 
   apiTest(
     'should parse a date with a specific format',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed }) => {
       const indexName = 'stream-e2e-test-date-format';
 
@@ -91,12 +91,12 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('event.created_date', '2025-01-01T12:34:56.000Z');
+      expect(ingestedDocs[0]?.event?.created_date).toBe('2025-01-01T12:34:56.000Z');
     }
   );
 
   // This test fails/flaky on Serverless, which is a different behavior then Stateful and needs to be checked
-  apiTest('should handle multiple formats', { tag: ['@ess'] }, async ({ testBed }) => {
+  apiTest('should handle multiple formats', { tag: tags.stateful.classic }, async ({ testBed }) => {
     const indexName = 'stream-e2e-test-date-multiple-formats';
 
     const streamlangDSL: StreamlangDSL = {
@@ -121,13 +121,13 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
 
     const ingestedDocs = await testBed.getDocsOrdered(indexName);
     expect(ingestedDocs).toHaveLength(2);
-    expect(ingestedDocs[0]).toHaveProperty('event.created_date', '01 01 2025 12:34');
-    expect(ingestedDocs[1]).toHaveProperty('event.created_date', '01 01 2025 12:35');
+    expect(ingestedDocs[0]?.event?.created_date).toBe('01 01 2025 12:34');
+    expect(ingestedDocs[1]?.event?.created_date).toBe('01 01 2025 12:35');
   });
 
   apiTest(
     'should parse a date with a specific output format',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed }) => {
       const indexName = 'stream-e2e-test-date-output-format';
 
@@ -150,13 +150,13 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('event.created_date', '2025-01-01');
+      expect(ingestedDocs[0]?.event?.created_date).toBe('2025-01-01');
     }
   );
 
   apiTest(
     'should fail when date format is incorrect',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed }) => {
       const indexName = 'stream-e2e-test-date-fail';
 
@@ -190,27 +190,31 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
       description: 'should reject {{{ }}} template syntax in field names',
     },
   ].forEach(({ templateFrom, templateTo, description }) => {
-    apiTest(`${description}`, { tag: ['@ess', '@svlOblt'] }, async () => {
-      expect(() => {
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'date',
-              from: templateFrom,
-              to: templateTo,
-              formats: ['ISO8601'],
-              output_format: 'yyyy-MM-dd',
-            } as DateProcessor,
-          ],
-        };
-        transpile(streamlangDSL);
-      }).toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed');
-    });
+    apiTest(
+      `${description}`,
+      { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+      async () => {
+        expect(() => {
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'date',
+                from: templateFrom,
+                to: templateTo,
+                formats: ['ISO8601'],
+                output_format: 'yyyy-MM-dd',
+              } as DateProcessor,
+            ],
+          };
+          transpile(streamlangDSL);
+        }).toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed');
+      }
+    );
   });
 
   apiTest(
     'should parse a date with a specific locale and timezone',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed }) => {
       const indexName = 'stream-e2e-test-locale-timezone';
 
@@ -235,13 +239,13 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
       const ingestedDocs = await testBed.getDocs(indexName);
 
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('event.created_date', '2025-09-10T00:00:00.000+02:00');
+      expect(ingestedDocs[0]?.event?.created_date).toBe('2025-09-10T00:00:00.000+02:00');
     }
   );
 
   apiTest(
     'should fail when locale is not valid',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed }) => {
       const indexName = 'stream-e2e-test-locale-fail';
 
@@ -271,7 +275,7 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
 
   apiTest(
     'should fail when timezone is not valid',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed }) => {
       const indexName = 'stream-e2e-test-timezone-fail';
 
