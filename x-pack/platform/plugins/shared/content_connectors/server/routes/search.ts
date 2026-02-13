@@ -28,6 +28,7 @@ export function registerSearchRoute({ router, log }: SearchConnectorsPluginSetup
       validate: {
         body: schema.object({
           searchQuery: schema.string({
+            maxLength: 1000,
             defaultValue: '',
           }),
         }),

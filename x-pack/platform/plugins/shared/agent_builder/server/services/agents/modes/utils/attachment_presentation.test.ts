@@ -108,21 +108,20 @@ describe('attachment_presentation', () => {
       expect(result.content.length).toBeLessThan(largeContent.length);
     });
 
-    it('should handle visualization_ref type as JSON', async () => {
+    it('should handle visualization type as JSON', async () => {
       const attachments = [
-        createMockAttachment('1', 'visualization_ref', {
-          saved_object_id: 'viz-123',
-          saved_object_type: 'lens',
-          title: 'My Chart',
-          resolved_content: { huge: 'content' },
+        createMockAttachment('1', 'visualization', {
+          query: 'My Chart',
+          visualization: { layers: [] },
+          chart_type: 'bar',
+          esql: 'FROM index',
         }),
       ];
 
       const result = await prepareAttachmentPresentation(attachments);
 
-      expect(result.content).toContain('saved_object_id');
-      expect(result.content).toContain('viz-123');
-      expect(result.content).toContain('"huge"'); // Full JSON stringified content shown
+      expect(result.content).toContain('My Chart');
+      expect(result.content).toContain('"chart_type"'); // Full JSON stringified content shown
     });
 
     it('should include description in XML attributes', async () => {
