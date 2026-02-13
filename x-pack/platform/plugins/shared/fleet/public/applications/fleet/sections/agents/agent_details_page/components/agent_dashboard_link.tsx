@@ -39,40 +39,35 @@ function isKibanaAssetsInstalledInSpace(spaceId: string | undefined, res?: GetIn
     (spaceId && installationInfo.additional_spaces_installed_kibana?.[spaceId])
   );
 }
-function useAgentDashboardLink(agent: Agent) {
-  const { isLoading, data } = useGetPackageInfoByKeyQuery(FLEET_ELASTIC_AGENT_PACKAGE);
+function useAgentDashboardLink(agent: Agent, packageName: string) {
+  const { isLoading, data } = useGetPackageInfoByKeyQuery(packageName);
   const { spaceId } = useFleetStatus();
 
   const isInstalled = isKibanaAssetsInstalledInSpace(spaceId, data);
   const dashboardLocator = useDashboardLocator();
 
+  let link: string | undefined;
   if (agent.type === 'OPAMP') {
-    const link = dashboardLocator?.getRedirectUrl({
+    link = dashboardLocator?.getRedirectUrl({
       dashboardId: DASHBOARD_LOCATORS_IDS.OTEL_INTERNAL_TELEMETRY,
       query: {
         language: 'kuery',
         query: `service.instance.id:${agent.id}`,
       },
     });
-
-    return {
-      isLoading: false,
-      isInstalled: true,
-      link,
-    };
+  } else {
+    link = dashboardLocator?.getRedirectUrl({
+      dashboardId: getDashboardIdForSpace(
+        spaceId,
+        data,
+        DASHBOARD_LOCATORS_IDS.ELASTIC_AGENT_AGENT_METRICS
+      ),
+      query: {
+        language: 'kuery',
+        query: `elastic_agent.id:${agent.id}`,
+      },
+    });
   }
-
-  const link = dashboardLocator?.getRedirectUrl({
-    dashboardId: getDashboardIdForSpace(
-      spaceId,
-      data,
-      DASHBOARD_LOCATORS_IDS.ELASTIC_AGENT_AGENT_METRICS
-    ),
-    query: {
-      language: 'kuery',
-      query: `elastic_agent.id:${agent.id}`,
-    },
-  });
 
   return {
     isLoading,
@@ -89,16 +84,15 @@ export const AgentDashboardLink: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
 }> = ({ agent, agentPolicy }) => {
-  const { isInstalled, link, isLoading } = useAgentDashboardLink(agent);
+  const packageName =
+    agent.type === 'OPAMP' ? 'otel_internal_telemetry' : FLEET_ELASTIC_AGENT_PACKAGE;
+  const { isInstalled, link, isLoading } = useAgentDashboardLink(agent, packageName);
   const { getHref } = useLink();
 
   const isLogAndMetricsEnabled = agentPolicy?.monitoring_enabled?.length ?? 0 > 0;
 
-  let buttonArgs: any =
+  const buttonArgs: any =
     !isInstalled || isLoading || !isLogAndMetricsEnabled ? { disabled: true } : { href: link };
-  if (agent.type === 'OPAMP') {
-    buttonArgs = { href: link, external: true, target: '_blank' };
-  }
 
   const button = (
     <EuiButtonCompressed
@@ -147,7 +141,8 @@ export const AgentDashboardLink: React.FunctionComponent<{
         content={
           <FormattedMessage
             id="xpack.fleet.agentDetails.viewDashboardButton.disabledNoIntegrationTooltip"
-            defaultMessage="Agent dashboard not found, you need to install the elastic_agent integration."
+            defaultMessage="Agent dashboard not found, you need to install the {integration} integration."
+            values={{ integration: packageName }}
           />
         }
       >
