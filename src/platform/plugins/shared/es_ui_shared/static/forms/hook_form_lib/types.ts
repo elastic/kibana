@@ -36,7 +36,7 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   /** Sets a field errors imperatively. */
   setFieldErrors: (fieldName: string, errors: ValidationError[]) => void;
   /** Access the fields on the form. */
-  getFields: () => FieldsMap;
+  getFields: () => FieldsMap<T>;
   /** Access the defaultValue for a specific field */
   getFieldDefaultValue: <FieldType = unknown>(path: string) => FieldType | undefined;
   /** Return the form data. */
@@ -105,7 +105,7 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
     // @ts-expect-error upgrade typescript v4.9.5
   ) => FieldConfig<FieldType, FormType, InternalFieldType> | undefined;
   __getFormDefaultValue: () => I | undefined;
-  __getFieldsRemoved: () => FieldsMap;
+  __getFieldsRemoved: () => FieldsMap<T>;
 }
 
 export type FormSchema<T extends FormData = FormData> = {
@@ -232,9 +232,9 @@ export interface FieldValidationData {
   validationDataProvider?: () => Promise<unknown>;
 }
 
-export interface FieldsMap {
-  [key: string]: FieldHook;
-}
+export type FieldsMap<T extends FormData = FormData> = {
+  [K in keyof T]: FieldHook<T[K]>;
+};
 
 export type FormSubmitHandler<T extends FormData = FormData> = (
   formData: T,
