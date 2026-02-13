@@ -28,6 +28,8 @@ import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { useSavedQueries } from '../../../saved_queries/use_saved_queries';
+import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
+import { SavedQueryRowActions } from './saved_query_row_actions';
 
 export interface SavedQuerySO {
   name: string;
@@ -132,6 +134,7 @@ const EditButton = React.memo(EditButtonComponent);
 
 const SavedQueriesPageComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
+  const queryHistoryRework = useIsExperimentalFeatureEnabled('queryHistoryRework');
 
   useBreadcrumbs('saved_queries');
   const newQueryLinkProps = useRouterNavigate('saved_queries/new');
@@ -221,8 +224,22 @@ const SavedQueriesPageComponent = () => {
         }),
         actions: [{ render: renderPlayAction }, { render: renderEditAction }],
       },
+      ...(queryHistoryRework
+        ? [
+            {
+              width: '40px',
+              render: (item: SavedQuerySO) => <SavedQueryRowActions item={item} />,
+            },
+          ]
+        : []),
     ],
-    [renderDescriptionColumn, renderEditAction, renderPlayAction, renderUpdatedAt]
+    [
+      renderDescriptionColumn,
+      renderEditAction,
+      renderPlayAction,
+      renderUpdatedAt,
+      queryHistoryRework,
+    ]
   );
 
   const onTableChange = useCallback(({ page = {}, sort = {} }: any) => {

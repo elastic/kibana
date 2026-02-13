@@ -26,7 +26,6 @@ import {
   forceQuerySchema,
   getAnomalyDetectorsResponse,
 } from './schemas/anomaly_detectors_schema';
-import { getAuthorizationHeader } from '../lib/request_authorization';
 
 /**
  * Routes for the anomaly detectors
@@ -193,14 +192,11 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
           const { jobId } = request.params;
-          const body = await mlClient.putJob(
-            {
-              job_id: jobId,
-              // @ts-expect-error job type custom_rules is incorrect
-              body: request.body,
-            },
-            getAuthorizationHeader(request)
-          );
+          const body = await mlClient.putJob({
+            job_id: jobId,
+            // @ts-expect-error job type custom_rules is incorrect
+            body: request.body,
+          });
 
           return response.ok({
             body,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-security';
+
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',
@@ -24,6 +26,6 @@ export const ENTITY_STORE_ROUTES = {
     `internal/security/entity-store/${entityType}/force-log-extraction`,
 } as const;
 
-export const ENTITY_STORE_TAGS = ['@ess', '@svlSecurity'];
+export const ENTITY_STORE_TAGS = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
 export const UPDATES_INDEX = '.entities.v2.updates.security_default';
