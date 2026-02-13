@@ -68,7 +68,7 @@ describe('monitor warnings', () => {
           schedule: '10',
           timeout: '60',
           privateLocations: ['private-1'],
-          locations: ['public-1']
+          locations: ['public-1'],
         } as ProjectMonitor,
       ];
 
