@@ -194,6 +194,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
           onClose={onClose}
           maxWidth={1400}
           style={{ width: '1200px', height: '100vh' }}
+          data-test-subj="workflowExecuteModal"
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle id={modalTitleId}>

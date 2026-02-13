@@ -11,14 +11,14 @@ import { render, waitFor } from '@testing-library/react';
 import type { Config } from './url_drilldown';
 import { UrlDrilldown } from './url_drilldown';
 import type { ValueClickContext } from '@kbn/embeddable-plugin/public';
-import {
-  CONTEXT_MENU_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-} from '@kbn/embeddable-plugin/public';
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { createPoint, rowClickData } from './test/data';
-import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import {
+  CONTEXT_MENU_TRIGGER,
+  ROW_CLICK_TRIGGER,
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import React from 'react';

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
 import type { Location } from 'history';
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
@@ -25,10 +24,6 @@ function isEditingFromDashboard(
     location.hash.includes('originatingApp=dashboards');
   return isVizApp && hasOriginatingApp;
 }
-
-const LazyIconAgents = lazy(() =>
-  import('@kbn/search-shared-ui/src/v2_icons/robot').then((m) => ({ default: m.iconRobot }))
-);
 
 const NAV_TITLE = i18n.translate('xpack.serverlessSearch.nav.title', {
   defaultMessage: 'Elasticsearch',
@@ -71,15 +66,17 @@ export function createNavigationTree({
       },
       {
         link: 'discover',
+        icon: 'productDiscover',
       },
       {
         link: 'dashboards',
+        icon: 'productDashboard',
         getIsActive: ({ pathNameSerialized, prepend, location }) =>
           pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
           isEditingFromDashboard(location, pathNameSerialized, prepend),
       },
       {
-        icon: LazyIconAgents, // Temp svg until we have icon in EUI
+        icon: 'productAgent',
         link: 'agent_builder',
       },
       {
@@ -132,7 +129,7 @@ export function createNavigationTree({
             ],
           },
         ],
-        icon: 'machineLearningApp',
+        icon: 'productML',
         id: 'machine_learning',
         renderAs: 'panelOpener',
         title: MACHINE_LEARNING_TITLE,

@@ -81,19 +81,19 @@ export const mlExecutor = async ({
       jobSummaries.some((job) => !isJobStarted(job.jobState, job.datafeedState))
     ) {
       const warningMessage = [
-        'ML jobs are not started',
+        'Machine learning job(s) are not started:',
         ...jobSummaries.map((job) =>
           [
-            `Job ID: "${job.id}"`,
-            `Job name: "${job?.customSettings?.security_app_display_name ?? job.id}"`,
-            `Job status: "${job.jobState}"`,
-            `Datafeed status: "${job.datafeedState}"`,
-          ].join('. ')
+            `job id: "${job.id}"`,
+            `job name: "${job?.customSettings?.security_app_display_name ?? job.id}"`,
+            `job status: "${job.jobState}"`,
+            `datafeed status: "${job.datafeedState}"`,
+          ].join(', ')
         ),
-      ].join('\n');
+      ].join(' ');
 
       result.warningMessages.push(warningMessage);
-      ruleExecutionLogger.debug(warningMessage);
+      ruleExecutionLogger.warn(warningMessage);
       result.warning = true;
     }
 
@@ -139,7 +139,7 @@ export const mlExecutor = async ({
 
     const anomalyCount = filteredAnomalyHits.length;
     if (anomalyCount) {
-      ruleExecutionLogger.info(`Alerts from ML anomalies: ${anomalyCount}`);
+      ruleExecutionLogger.debug(`Found ${anomalyCount} signals from ML anomalies`);
     }
 
     if (
