@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", ".storybook/**/*.ts", "common/**/*", "public/**/*", "server/**/*"],
+  "include": ["*.ts", ".storybook/**/*.ts", "common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/inspector-plugin",
@@ -87,7 +87,9 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/std",
     "@kbn/css-utils",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/scout",
+    "@kbn/test"
   ],
   "exclude": ["target/**/*"]
 }

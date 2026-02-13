@@ -6,7 +6,8 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt';
+
+import { expect } from '@kbn/scout-oblt/ui';
 
 export class ServiceMapPage {
   public serviceMap: Locator;
