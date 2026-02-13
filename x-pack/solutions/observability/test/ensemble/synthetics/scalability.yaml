@@ -1,0 +1,247 @@
+name: Synthetics Scalability Test
+description: Scalability test for Synthetics monitors
+
+params:
+  - name: github_token
+    description: GitHub authentication token
+    type: exec
+    command: gh
+    args:
+      - auth
+      - token
+
+  - name: github_username
+    description: GitHub Username
+    type: exec
+    command: gh
+    args:
+      - api
+      - user
+      - -q
+      - ".login"
+
+  - name: github_email
+    description: GitHub email
+    type: exec
+    command: git
+    args:
+      - config
+      - user.email
+
+  - name: gcp_app_credentials
+    description: GCP application default credentials JSON
+    type: automation
+    automation: gcp_auth
+
+  - name: cleanup_after (y/n)
+    description: "Delete cluster and agent when done?"
+    type: string
+
+  - name: http
+    description: HTTP monitors to create
+    type: string
+
+  - name: tcp
+    description: TCP monitors to create
+    type: string
+
+  - name: icmp
+    description: ICMP monitors to create
+    type: string
+
+  - name: browser
+    description: Browser monitors to create
+    type: string
+
+steps:
+  - name: Find latest kibana version
+    id: artifact
+    type: services.artifacts.search
+    with:
+      channel: "unstable"
+      github_token: "{{ param.github_token }}"
+
+  - name: Create cluster
+    id: cluster
+    type: providers.oblt_cli.create_custom_cluster
+    with:
+      gcp_app_credentials: ".secrets/credentials.json"
+      github_username: "{{ param.github_username }}"
+      github_email: "{{ param.github_email }}"
+      github_token: "{{ param.github_token }}"
+      template: ess
+      parameters:
+        StackVersion: "{{ step.artifact.data.version }}"
+        ElasticsearchDockerImage: "{{ step.artifact.data.docker.elasticsearch }}"
+        KibanaDockerImage: "{{ step.artifact.data.docker.kibana }}"
+        EnableIntegrations: true
+        EphemeralCluster: true
+        ExpiryDate: '{{ now() + timedelta(hours=6) }}'
+    resources:
+      - type: file
+        content: "{{ param.gcp_app_credentials }}"
+        filename: ".secrets/credentials.json"
+    retry:
+      max: 3
+      interval: 5
+
+  - name: Run Synthetics Forge
+    id: run_forge
+    type: providers.shell.run
+    with:
+      script_file: run_forge.sh
+    resources:
+      - type: env
+        variables:
+          KIBANA_URL: "{{ step.cluster.data.kibana_url }}"
+          KIBANA_USERNAME: "{{ step.cluster.data.kibana_username }}"
+          KIBANA_PASSWORD: "{{ step.cluster.data.kibana_password }}"
+          HTTP: "{{ param.http }}"
+          TCP: "{{ param.tcp }}"
+          ICMP: "{{ param.icmp }}"
+          BROWSER: "{{ param.browser }}"
+          FORGE_ACTION: "create"
+          OUTPUT_FILE: "/tmp/forge_output.json"
+      - type: file
+        filename: run_forge.sh
+        content: |
+          #!/bin/bash
+          set -e
+          echo "KIBANA_URL: $KIBANA_URL"
+          echo "KIBANA_USERNAME: $KIBANA_USERNAME"
+          echo "KIBANA_PASSWORD: $KIBANA_PASSWORD"
+          node /Users/faisal/elastic/kibana/x-pack/scripts/synthetics_forge.js
+          echo "Forge output:"
+          cat $OUTPUT_FILE
+
+  - name: Wait for enrollment token to be active
+    type: builtin.wait
+    with:
+      time: 10
+
+  - name: Deploy Elastic Agent
+    id: deploy_agent
+    type: providers.shell.run
+    with:
+      script_file: deploy_agent.sh
+    resources:
+      - type: env
+        variables:
+          FLEET_URL: "{{ step.cluster.data.fleet_url }}"
+          OUTPUT_FILE: "/tmp/forge_output.json"
+      - type: file
+        filename: deploy_agent.sh
+        content: |
+          #!/bin/bash
+          set -e
+
+          AGENT_VERSION="8.17.1"
+          ENROLLMENT_TOKEN=$(jq -r '.enrollmentToken' $OUTPUT_FILE)
+
+          echo "Fleet URL: $FLEET_URL"
+          echo "Agent Version: $AGENT_VERSION"
+          echo "Enrollment Token: $ENROLLMENT_TOKEN"
+
+          docker rm -f synthetics-agent 2>/dev/null || true
+
+          # Use elastic-agent-complete for browser monitor support (includes Chromium/Playwright)
+          docker run -d \
+            --name synthetics-agent \
+            -e FLEET_URL="$FLEET_URL" \
+            -e FLEET_ENROLLMENT_TOKEN="$ENROLLMENT_TOKEN" \
+            -e FLEET_ENROLL=1 \
+            -e FLEET_INSECURE=true \
+            docker.elastic.co/beats/elastic-agent-complete:$AGENT_VERSION
+
+          sleep 15
+          echo "Elastic Agent container started"
+          docker logs synthetics-agent 2>&1 | grep -i "enroll\|success" | head -5 || true
+
+  - name: Wait for agent enrollment
+    type: builtin.wait
+    with:
+      time: 20
+
+  - name: Verify agent health
+    type: providers.shell.run
+    with:
+      script_file: verify_agent.sh
+    resources:
+      - type: env
+        variables:
+          KIBANA_URL: "{{ step.cluster.data.kibana_url }}"
+          KIBANA_USERNAME: "{{ step.cluster.data.kibana_username }}"
+          KIBANA_PASSWORD: "{{ step.cluster.data.kibana_password }}"
+      - type: file
+        filename: verify_agent.sh
+        content: |
+          #!/bin/bash
+          echo "Agent enrollment status:"
+          docker logs synthetics-agent 2>&1 | grep -i "enroll" | tail -3 || true
+          echo ""
+          AGENT_COUNT=$(curl -s -u "$KIBANA_USERNAME:$KIBANA_PASSWORD" \
+            "$KIBANA_URL/api/fleet/agents" -H "kbn-xsrf: true" | jq '.items | length')
+          echo "Agents enrolled: $AGENT_COUNT"
+
+  - name: Cleanup agent container
+    type: providers.shell.run
+    when: always
+    with:
+      script_file: cleanup_agent.sh
+    resources:
+      - type: env
+        variables:
+          CLEANUP: "{{ param['cleanup_after (y/n)'] }}"
+      - type: file
+        filename: cleanup_agent.sh
+        content: |
+          #!/bin/bash
+          if [ "$CLEANUP" != "y" ]; then
+            echo "Skipping agent cleanup (cleanup_after=$CLEANUP)"
+            echo "Agent container 'synthetics-agent' is still running"
+            exit 0
+          fi
+          echo "Stopping and removing Elastic Agent container..."
+          docker rm -f synthetics-agent 2>/dev/null || true
+          echo "Agent cleanup complete"
+
+  - name: Cleanup cluster
+    type: providers.shell.run
+    when: always
+    with:
+      script_file: cleanup_cluster.sh
+    resources:
+      - type: env
+        variables:
+          CLEANUP: "{{ param['cleanup_after (y/n)'] }}"
+          CLUSTER_NAME: "{{ step.cluster.data.cluster_name | default('') }}"
+          GITHUB_USERNAME: "{{ param.github_username }}"
+          GITHUB_EMAIL: "{{ param.github_email }}"
+          GITHUB_TOKEN: "{{ param.github_token }}"
+      - type: file
+        content: "{{ param.gcp_app_credentials }}"
+        filename: ".secrets/credentials.json"
+      - type: file
+        filename: cleanup_cluster.sh
+        content: |
+          #!/bin/bash
+          export GOOGLE_APPLICATION_CREDENTIALS=".secrets/credentials.json"
+
+          git config --global user.name "$GITHUB_USERNAME"
+          git config --global user.email "$GITHUB_EMAIL"
+
+          if [ "$CLEANUP" != "y" ]; then
+            echo "Skipping cluster deletion (cleanup_after=$CLEANUP)"
+            echo "Cluster '$CLUSTER_NAME' is still running"
+            exit 0
+          fi
+
+          if [ -z "$CLUSTER_NAME" ]; then
+            echo "No cluster name found, skipping deletion"
+            exit 0
+          fi
+
+          echo "Destroying cluster: $CLUSTER_NAME"
+          oblt-cli cluster destroy --cluster-name "$CLUSTER_NAME" --force
+          echo "Cluster destroyed"
+
