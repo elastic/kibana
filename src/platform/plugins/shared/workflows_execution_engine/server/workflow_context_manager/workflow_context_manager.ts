@@ -330,6 +330,14 @@ export class WorkflowContextManager {
       }
     }
 
+    // When there is only one foreach frame (e.g. single-step run with subgraph), use
+    // contextOverride.foreach as the parent so inner expressions like {{foreach.item}} resolve.
+    const contextOverride =
+      this.workflowExecutionState.getWorkflowExecution().context?.contextOverride;
+    if (foreachEntries.length === 1 && contextOverride?.foreach != null) {
+      stepContext.foreach = contextOverride.foreach;
+    }
+
     // Build foreach context in outer-to-inner order so inner expressions like
     // {{foreach.item}} resolve against the outer foreach context.
     for (const { stepExecution } of foreachEntries.reverse()) {
