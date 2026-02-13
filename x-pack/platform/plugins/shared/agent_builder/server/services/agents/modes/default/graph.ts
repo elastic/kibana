@@ -94,7 +94,7 @@ export const createAgentGraph = ({
       return {
         mainActions: [action],
         currentCycle: state.currentCycle + 1,
-        errorCount: isAgentErrorAction(action) ? state.errorCount + 1 : 0,
+        errorCount: 0,
       };
     } catch (error) {
       const executionError = convertError(error);
@@ -186,18 +186,9 @@ export const createAgentGraph = ({
     }
   };
 
-  // Some providers (e.g. Claude via OpenAI-compatible gateways) may reject conversations that contain
-  // tool calls / tool messages unless the tools list is provided. We bind the available tools here
-  // but force `tool_choice: 'none'` so the answer step doesn't initiate new tool calls.
-  const availableTools = toolManager.list();
-  const answeringModel =
-    availableTools.length > 0
-      ? chatModel.bindTools(availableTools, { tool_choice: 'none' }).withConfig({
-          tags: [tags.agent, tags.answerAgent],
-        })
-      : chatModel.withConfig({
-          tags: [tags.agent, tags.answerAgent],
-        });
+  const answeringModel = chatModel.withConfig({
+    tags: [tags.agent, tags.answerAgent],
+  });
 
   const answerAgent = async (state: StateType) => {
     if (state.answerActions.length === 0 && state.errorCount === 0) {
@@ -215,7 +206,7 @@ export const createAgentGraph = ({
 
       return {
         answerActions: [action],
-        errorCount: isAgentErrorAction(action) ? state.errorCount + 1 : 0,
+        errorCount: 0,
       };
     } catch (error) {
       const executionError = convertError(error);
