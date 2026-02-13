@@ -322,6 +322,8 @@ function generateAlertSummary({
     - Service summary: instance counts, versions, anomalies, and metadata
     - Host infrastructure: CPU, memory, disk, network usage — indicates host-level resource pressure
 
+    Note: Numeric values on a 0-1 scale represent percentages (e.g., 0.95 = 95%, 0.3 = 30%).
+
     ${getEntityLinkingInstructions({ urlPrefix })}
   `);
 
