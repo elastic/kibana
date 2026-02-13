@@ -9,14 +9,24 @@
 
 import React, { useState } from 'react';
 import {
+  EuiButton,
   EuiButtonIcon,
   EuiContextMenu,
   EuiHorizontalRule,
   EuiIcon,
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiPopover,
+  EuiSwitch,
+  EuiSpacer,
+  EuiText,
   EuiSplitButton,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -43,7 +53,48 @@ const primaryButtonCss = css`
   block-size: 28px;
 `;
 
-const OverflowKeyPadSection: React.FC = () => (
+export interface ShareModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
+  const modalTitleId = useGeneratedHtmlId({ prefix: 'shareModal', suffix: 'title' });
+  if (!isOpen) return null;
+  return (
+    <EuiModal
+      aria-labelledby={modalTitleId}
+      onClose={onClose}
+      data-test-subj="discoverShareModal"
+    >
+      <EuiModalHeader>
+        <EuiModalHeaderTitle id={modalTitleId}>Share this Discover session</EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiSwitch
+          label="Use absolute time range"
+          checked={noop}
+          onChange={noop}
+        />
+        <EuiSpacer size="m" />
+        <EuiText>
+          <p>Recipients will see all data from 15 minutes ago to now from the time viewed.</p>
+        </EuiText>
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButton onClick={onClose} iconType="copy" fill data-test-subj="discoverShareModalClose">
+          Copy link
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
+  );
+};
+
+interface OverflowKeyPadSectionProps {
+  onShare?: () => void;
+}
+
+const OverflowKeyPadSection: React.FC<OverflowKeyPadSectionProps> = ({ onShare }) => (
   <>
     <EuiKeyPadMenu css={overflowKeyPadCss}>
       <EuiKeyPadMenuItem
@@ -64,7 +115,7 @@ const OverflowKeyPadSection: React.FC = () => (
       </EuiKeyPadMenuItem>
       <EuiKeyPadMenuItem
         label="Share"
-        onClick={noop}
+        onClick={onShare ?? noop}
         css={overflowKeyPadItemCss}
         data-test-subj="headerGlobalNav-overflowShare"
       >
@@ -135,15 +186,18 @@ const DiscoverSaveButton: React.FC = () => {
 /**
  * POC: Static header app actions config for Discover (overflow + New, Share, Save).
  * Same pattern as setHelpExtension: set when app mounts; cleared on app change.
+ * @param openShareModal - Callback to open the shared Share modal (used by primary Share button and overflow Share keypad item).
  */
-export function getDiscoverHeaderAppActionsConfig(): ChromeHeaderAppActionsConfig {
+export function getDiscoverHeaderAppActionsConfig(
+  openShareModal: () => void
+): ChromeHeaderAppActionsConfig {
   return {
     overflowPanels: [
       {
         id: 0,
         title: '',
         items: [
-          { renderItem: () => <OverflowKeyPadSection />, key: 'keypad' },
+          { renderItem: () => <OverflowKeyPadSection onShare={openShareModal} />, key: 'keypad' },
           { name: 'Open', icon: 'folderOpen', onClick: noop },
           { name: 'Inspect', icon: 'inspect', onClick: noop },
           { name: 'Data sets', icon: 'indexOpen', onClick: noop },
@@ -191,6 +245,7 @@ export function getDiscoverHeaderAppActionsConfig(): ChromeHeaderAppActionsConfi
         size="xs"
         color="text"
         iconType="share"
+        onClick={openShareModal}
         data-test-subj="headerGlobalNav-appActionsShareButton"
       >
         Share
