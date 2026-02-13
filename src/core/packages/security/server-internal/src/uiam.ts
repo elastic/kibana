@@ -7,23 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { convertSecurityApi } from './convert_security_api';
-export { getDefaultSecurityImplementation } from './default_implementation';
-
-export interface SecurityServiceConfigType {
-  fipsMode?: {
-    enabled: boolean;
-  };
-  uiam?: { enabled: false } | { enabled: true; sharedSecret: string };
-}
-
-export interface PKCS12ConfigType {
-  ssl?: {
-    keystore?: {
-      path?: string;
-    };
-    truststore?: {
-      path?: string;
-    };
-  };
+/**
+ * Core's UIAM service
+ *
+ * @public
+ */
+export interface CoreUiamService {
+  /**
+   * A UIAM shared secret should always be provided with UIAM internal credentials via the `x-client-authentication`
+   * HTTP header if the credentials are primary, and via `es-secondary-x-client-authentication` if they are secondary.
+   */
+  readonly sharedSecret: string;
 }

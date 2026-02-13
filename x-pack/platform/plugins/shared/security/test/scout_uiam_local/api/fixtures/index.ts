@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { BasicHTTPAuthorizationHeaderCredentials } from './basic_http_authorization_header_credentials';
+export { extractAttributeValue } from './utils';
+export { COMMON_HEADERS, COMMON_UNSAFE_HEADERS } from './constants';
