@@ -216,7 +216,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('returns warning for browser timeout without private locations', async () => {
+    it('returns warning for browser timeout with public locations', async () => {
       const monitor = {
         ...browserMonitorJson,
         name: `Browser timeout warning ${uuidv4()}`,
@@ -233,7 +233,10 @@ export default function ({ getService }: FtrProviderContext) {
       const [warning] = apiResponse.body.warnings;
       expect(warning.monitorId).eql(apiResponse.body.id);
       expect(warning.message).to.contain('timeout');
-      expect(warning.message).to.contain('no private locations');
+      expect(warning.message).to.contain('running on public locations');
+      expect(warning.message).to.contain('The timeout will have no effect on these locations');
+      expect(warning.publicLocationIds).to.be.an('array');
+      expect(warning.publicLocationIds).to.not.be.empty();
 
       await supertestAPI
         .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
