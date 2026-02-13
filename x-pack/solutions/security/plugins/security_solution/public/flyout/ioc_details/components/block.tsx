@@ -8,14 +8,11 @@
 import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
 import { IndicatorFieldValue } from '../../../threat_intelligence/modules/indicators/components/common/field_value';
 import { IndicatorFieldLabel } from '../../../threat_intelligence/modules/indicators/components/common/field_label';
-import {
-  CellActionsMode,
-  SecurityCellActions,
-  SecurityCellActionsTrigger,
-} from '../../../common/components/cell_actions';
+import { CellActionsMode, SecurityCellActions } from '../../../common/components/cell_actions';
 import { getIndicatorFieldAndValue } from '../../../threat_intelligence/modules/indicators/utils/field_value';
 
 const panelProps = {
@@ -46,7 +43,7 @@ export const IndicatorBlock: FC<IndicatorBlockProps> = ({
       <SecurityCellActions
         data={{ field: key, value }}
         mode={CellActionsMode.HOVER_DOWN}
-        triggerId={SecurityCellActionsTrigger.DEFAULT}
+        triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
       >
         <EuiText>
           <IndicatorFieldLabel field={field} />

@@ -34,7 +34,7 @@ import { checkForShardFailures } from '../util';
 
 export interface FetchSearchSourceQueryOpts {
   ruleId: string;
-  alertLimit: number | undefined;
+  alertLimit: number;
   params: OnlySearchSourceRuleParams;
   latestTimestamp: string | undefined;
   spacePrefix: string;
@@ -138,7 +138,7 @@ export async function updateSearchSource(
   dateStart: string,
   dateEnd: string,
   logger: Logger,
-  alertLimit?: number
+  alertLimit: number
 ): Promise<{ searchSource: ISearchSource; filterToExcludeHitsFromPreviousRun: Filter | null }> {
   const isGroupAgg = isGroupAggregation(params.termField);
   const timeField = await index.getTimeField();

@@ -13,9 +13,10 @@ import { getTemplateRoute } from './get_template_route';
 import { postTemplateRoute } from './post_template_route';
 import { putTemplateRoute } from './put_template_route';
 import { patchTemplateRoute } from './patch_template_route';
-import { deleteTemplateRoute } from './delete_template_route';
 import { bulkDeleteTemplatesRoute } from './bulk_delete_templates_route';
 import { bulkExportTemplatesRoute } from './bulk_export_templates_route';
+import { getTemplateTagsRoute } from './get_template_tags_route';
+import { getTemplateCreatorsRoute } from './get_template_creators_route';
 
 const buildDefinition = (name: string) =>
   yaml.dump({
@@ -37,6 +38,8 @@ const createTestTemplates = (): Template[] => [
     templateId: 'template-1',
     name: 'Template One',
     owner: 'securitySolution',
+    tags: ['security', 'tag-a'],
+    author: 'alice',
     definition: validDefinition,
     templateVersion: 1,
     deletedAt: null,
@@ -45,6 +48,8 @@ const createTestTemplates = (): Template[] => [
     templateId: 'template-2',
     name: 'Template Two',
     owner: 'observability',
+    tags: ['observability', 'tag-a'],
+    author: 'bob',
     definition: validDefinition,
     templateVersion: 1,
     deletedAt: null,
@@ -53,6 +58,8 @@ const createTestTemplates = (): Template[] => [
     templateId: 'template-3',
     name: 'Deleted Template',
     owner: 'securitySolution',
+    tags: ['deleted'],
+    author: 'charlie',
     definition: validDefinition,
     templateVersion: 1,
     deletedAt: '2024-01-15T10:00:00.000Z',
@@ -77,7 +84,14 @@ const createMockCasesClient = () => ({
           }
         });
 
-      return Array.from(latestById.values()).map((template) => toSavedObject(template));
+      const templates = Array.from(latestById.values());
+
+      return {
+        templates,
+        page: 1,
+        perPage: 10,
+        total: templates.length,
+      };
     }),
     getTemplate: jest.fn(async (templateId: string, version?: string) => {
       const candidates = mockTemplates.filter(
@@ -179,15 +193,20 @@ describe('Template Routes', () => {
   describe('GET /internal/cases/templates', () => {
     it('returns non-deleted templates by default', async () => {
       const context = createMockContext();
-      const request = { query: { includeDeleted: false } };
+      const request = {
+        query: { page: 1, perPage: 10, isDeleted: false },
+      };
       const response = createMockResponse();
 
       // @ts-expect-error: mocking necessary properties for handler logic only
       await getTemplatesRoute.handler({ context, request, response });
 
       const body = response.ok.mock.calls[0][0].body;
-      expect(body).toHaveLength(2);
-      expect(body).toEqual(
+      expect(body.templates).toHaveLength(2);
+      expect(body.page).toBe(1);
+      expect(body.perPage).toBe(10);
+      expect(body.total).toBe(2);
+      expect(body.templates).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ templateId: 'template-1', name: 'Template One' }),
           expect.objectContaining({ templateId: 'template-2', name: 'Template Two' }),
@@ -195,19 +214,51 @@ describe('Template Routes', () => {
       );
     });
 
-    it('still excludes deleted templates when includeDeleted is true', async () => {
+    it('still excludes deleted templates when isDeleted is false', async () => {
       const context = createMockContext();
-      const request = { query: { includeDeleted: true } };
+      const request = {
+        query: { page: 1, perPage: 10, isDeleted: false },
+      };
       const response = createMockResponse();
 
       // @ts-expect-error: mocking necessary properties for handler logic only
       await getTemplatesRoute.handler({ context, request, response });
 
       const body = response.ok.mock.calls[0][0].body;
-      expect(body).toHaveLength(2);
-      expect(body).toEqual(
+      expect(body.templates).toHaveLength(2);
+      expect(body.templates).toEqual(
         expect.not.arrayContaining([expect.objectContaining({ templateId: 'template-3' })])
       );
+    });
+  });
+
+  describe('GET /internal/cases/templates/tags', () => {
+    it('returns unique, sorted tags from non-deleted templates', async () => {
+      const context = createMockContext();
+      const request = {};
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await getTemplateTagsRoute.handler({ context, request, response });
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: ['observability', 'security', 'tag-a'],
+      });
+    });
+  });
+
+  describe('GET /internal/cases/templates/creators', () => {
+    it('returns unique, sorted creators from non-deleted templates', async () => {
+      const context = createMockContext();
+      const request = {};
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await getTemplateCreatorsRoute.handler({ context, request, response });
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: ['alice', 'bob'],
+      });
     });
   });
 
@@ -448,46 +499,7 @@ describe('Template Routes', () => {
     });
   });
 
-  describe('DELETE /internal/cases/templates/{template_id}', () => {
-    it('soft deletes a template by setting deletedAt', async () => {
-      const context = createMockContext();
-      const request = { params: { template_id: 'template-1' } };
-      const response = createMockResponse();
-
-      // @ts-expect-error: mocking necessary properties for handler logic only
-      await deleteTemplateRoute.handler({ context, request, response });
-
-      expect(response.noContent).toHaveBeenCalled();
-      const deleted = mockTemplates.find((t) => t.templateId === 'template-1');
-      expect(deleted?.deletedAt).not.toBeNull();
-    });
-
-    it('returns 404 for a non-existent template', async () => {
-      const context = createMockContext();
-      const request = { params: { template_id: 'non-existent' } };
-      const response = createMockResponse();
-
-      // @ts-expect-error: mocking necessary properties for handler logic only
-      await deleteTemplateRoute.handler({ context, request, response });
-
-      expect(response.notFound).toHaveBeenCalledWith({
-        body: { message: 'Template with id non-existent not found' },
-      });
-    });
-
-    it('returns 404 for an already-deleted template', async () => {
-      const context = createMockContext();
-      const request = { params: { template_id: 'template-3' } };
-      const response = createMockResponse();
-
-      // @ts-expect-error: mocking necessary properties for handler logic only
-      await deleteTemplateRoute.handler({ context, request, response });
-
-      expect(response.notFound).toHaveBeenCalledWith({
-        body: { message: 'Template with id template-3 not found' },
-      });
-    });
-  });
+  // NOTE: single-template delete is implemented by calling the bulk delete endpoint with a single id.
 
   describe('POST /internal/cases/templates/_bulk_delete', () => {
     it('bulk soft deletes multiple templates', async () => {

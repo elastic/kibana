@@ -10,9 +10,9 @@
 import { createCellActionFactory } from '@kbn/cell-actions/actions';
 import { useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { AdditionalCellActionsParams } from '../types';
 import {
-  DISCOVER_CELL_ACTIONS_TRIGGER,
   type AdditionalCellAction,
   type AdditionalCellActionContext,
   type DiscoverCellAction,
@@ -58,14 +58,14 @@ export const useAdditionalCellActions = ({
 
     actions.forEach((action) => {
       uiActions.registerAction(action);
-      uiActions.attachAction(DISCOVER_CELL_ACTIONS_TRIGGER.id, action.id);
+      uiActions.attachAction(DISCOVER_CELL_ACTIONS_TRIGGER_ID, action.id);
     });
 
     setInstanceId(currentInstanceId);
 
     return () => {
       actions.forEach((action) => {
-        uiActions.detachAction(DISCOVER_CELL_ACTIONS_TRIGGER.id, action.id);
+        uiActions.detachAction(DISCOVER_CELL_ACTIONS_TRIGGER_ID, action.id);
         uiActions.unregisterAction(action.id);
       });
 
