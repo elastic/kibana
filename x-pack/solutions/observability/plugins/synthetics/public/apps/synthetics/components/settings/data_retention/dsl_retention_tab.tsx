@@ -32,6 +32,9 @@ export const DslRetentionTab = () => {
       loading={loading === true}
       columns={DSL_RETENTION_COLUMNS}
       tableLayout="auto"
+      tableCaption={i18n.translate('xpack.synthetics.dslRetention.table.caption', {
+        defaultMessage: 'Retention overview',
+      })}
     />
   );
 };
