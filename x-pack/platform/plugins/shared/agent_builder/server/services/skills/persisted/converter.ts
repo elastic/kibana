@@ -8,7 +8,9 @@
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { SkillPersistedDefinition } from './client';
 
-export const convertPersistedSkill = (skill: SkillPersistedDefinition): InternalSkillDefinition => ({
+export const convertPersistedSkill = (
+  skill: SkillPersistedDefinition
+): InternalSkillDefinition => ({
   id: skill.id,
   name: skill.name,
   description: skill.description,
