@@ -4,8 +4,8 @@
 xpack.cloud.serverless.product_tier: complete
 
 # Cross Project Search
+elasticsearch.cpsEnabled: false
 cps.enabled: true
-cps.cpsEnabled: false
 
 ## Enabled plugins
 xpack.infra.enabled: true

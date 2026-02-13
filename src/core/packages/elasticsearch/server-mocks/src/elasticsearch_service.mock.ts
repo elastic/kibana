@@ -65,7 +65,7 @@ const createPrebootContractMock = () => {
 const createSetupContractMock = () => {
   const setupContract: MockedElasticSearchServiceSetup = lazyObject({
     setUnauthorizedErrorHandler: jest.fn(),
-    setCpsFeatureFlag: jest.fn(),
+    getCpsEnabled: jest.fn().mockReturnValue(false),
     legacy: {
       config$: new BehaviorSubject({} as ElasticsearchConfig),
     },

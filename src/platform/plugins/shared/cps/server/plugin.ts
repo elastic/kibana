@@ -9,34 +9,27 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { registerRoutes } from './routes';
-import type { CPSConfig } from './config';
 import type { CPSServerSetup } from './types';
 
 export class CPSServerPlugin implements Plugin<CPSServerSetup> {
   private readonly initContext: PluginInitializerContext;
   private readonly isServerless: boolean;
-  private readonly config$: CPSConfig;
 
   constructor(initContext: PluginInitializerContext) {
     this.initContext = { ...initContext };
     this.isServerless = initContext.env.packageInfo.buildFlavor === 'serverless';
-    this.config$ = initContext.config.get();
   }
 
   public setup(core: CoreSetup) {
-    const { initContext, config$ } = this;
-    const { cpsEnabled } = config$;
+    const { initContext } = this;
 
     // Register route only for serverless
     if (this.isServerless) {
       registerRoutes(core, initContext);
     }
 
-    // Set CPS feature flag in Elasticsearch service
-    core.elasticsearch.setCpsFeatureFlag(cpsEnabled);
-
     return {
-      getCpsEnabled: () => cpsEnabled,
+      getCpsEnabled: () => core.elasticsearch.getCpsEnabled(),
     };
   }
 
