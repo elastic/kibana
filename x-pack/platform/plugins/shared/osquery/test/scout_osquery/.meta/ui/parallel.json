@@ -1,0 +1,1414 @@
+{
+  "lastModified": "2026-02-13T22:32:17.464Z",
+  "sha1": "87ad2a19efe1eb2ba2e4d7145b6e6edc69816536",
+  "tests": [
+    {
+      "id": "502120a0e5a578f-c815631c126bff9",
+      "title": "Set up Fleet Server and Elastic Agents for Osquery tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/global.setup.ts",
+        "line": 292,
+        "column": 16
+      }
+    },
+    {
+      "id": "dbee0f42afb91d2-d72f40aa9560831",
+      "title": "ALL - Add Integration validate osquery is not available and nav search links to integration",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/add_integration.spec.ts",
+        "line": 44,
+        "column": 9
+      }
+    },
+    {
+      "id": "dbee0f42afb91d2-164ed18b9245443",
+      "title": "ALL - Add Integration Add and upgrade integration should add the old integration and be able to upgrade it",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/add_integration.spec.ts",
+        "line": 95,
+        "column": 13
+      }
+    },
+    {
+      "id": "dbee0f42afb91d2-d7c8349d27a9e90",
+      "title": "ALL - Add Integration Add integration to policy add integration",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/add_integration.spec.ts",
+        "line": 166,
+        "column": 11
+      }
+    },
+    {
+      "id": "dbee0f42afb91d2-506ce92f7fb9410",
+      "title": "ALL - Add Integration Upgrade policy with existing packs should have integration and packs copied when upgrading integration",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/add_integration.spec.ts",
+        "line": 233,
+        "column": 11
+      }
+    },
+    {
+      "id": "0ae5b243c77f00e-37aab881053c983",
+      "title": "Alert Flyout Automated Action Results can visit discover from response action results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/alerts_automated_action_results.spec.ts",
+        "line": 41,
+        "column": 9
+      }
+    },
+    {
+      "id": "0ae5b243c77f00e-5bddffacfec5064",
+      "title": "Alert Flyout Automated Action Results can visit lens from response action results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/alerts_automated_action_results.spec.ts",
+        "line": 90,
+        "column": 9
+      }
+    },
+    {
+      "id": "0ae5b243c77f00e-ad2dbda69952672",
+      "title": "Alert Flyout Automated Action Results can add to timeline from response action results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/alerts_automated_action_results.spec.ts",
+        "line": 136,
+        "column": 9
+      }
+    },
+    {
+      "id": "fe8d821612933e3-83206d438cfd962",
+      "title": "Alert Event Details - Cases Case creation runs osquery against alert and creates a new case",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/alerts_cases.spec.ts",
+        "line": 57,
+        "column": 11
+      }
+    },
+    {
+      "id": "fe8d821612933e3-1927b3e1f6bcf74",
+      "title": "Alert Event Details - Cases Case sees osquery results from last action and add to a case",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/alerts_cases.spec.ts",
+        "line": 153,
+        "column": 11
+      }
+    },
+    {
+      "id": "31392f7c7985816-9988a9da78e61c1",
+      "title": "Alert Event Details should be able to add investigation guides to response actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/alerts_linked_apps.spec.ts",
+        "line": 41,
+        "column": 9
+      }
+    },
+    {
+      "id": "31392f7c7985816-cf8549586ec9c12",
+      "title": "Alert Event Details should be able to run live query and add to timeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/alerts_linked_apps.spec.ts",
+        "line": 83,
+        "column": 9
+      }
+    },
+    {
+      "id": "ae6a2d626dc357d-d39c3369fba394a",
+      "title": "Alert Event Details - dynamic params should substitute parameters in investigation guide",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/alerts_multiple_agents.spec.ts",
+        "line": 39,
+        "column": 9
+      }
+    },
+    {
+      "id": "ae6a2d626dc357d-d1ea081b55a33ef",
+      "title": "Alert Event Details - dynamic params should substitute parameters in live query and increase number of ran queries",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/alerts_multiple_agents.spec.ts",
+        "line": 75,
+        "column": 10
+      }
+    },
+    {
+      "id": "ae6a2d626dc357d-359dddc7e61b7b6",
+      "title": "Alert Event Details - dynamic params should be able to run take action query against all enrolled agents",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/alerts_multiple_agents.spec.ts",
+        "line": 114,
+        "column": 10
+      }
+    },
+    {
+      "id": "ae6a2d626dc357d-37bdfc7209a6096",
+      "title": "Alert Event Details - dynamic params should substitute params in osquery ran from timelines alerts",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/alerts_multiple_agents.spec.ts",
+        "line": 152,
+        "column": 10
+      }
+    },
+    {
+      "id": "ff0e035f4072002-4e7d7701cebdeaa",
+      "title": "Alert Event Details - Response Actions Form adds response actions with osquery with proper validation and form values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/alerts_response_actions_form.spec.ts",
+        "line": 56,
+        "column": 9
+      }
+    },
+    {
+      "id": "8e4d2f1003d7bbc-a3e7d0838ec3a85",
+      "title": "Live query GET getLiveQueryDetailsRoute - validates we get successful response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/api/live_query_results.spec.ts",
+        "line": 28,
+        "column": 9
+      }
+    },
+    {
+      "id": "8e4d2f1003d7bbc-d19fa3559794b23",
+      "title": "Live query GET getLiveQueryResultsRoute - validates we get successful response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/api/live_query_results.spec.ts",
+        "line": 38,
+        "column": 9
+      }
+    },
+    {
+      "id": "14a172cfd4de054-48e45991071066f",
+      "title": "Packs Duplicate policy ids should strip duplicate policy ids when saving pack",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/api/packs.spec.ts",
+        "line": 68,
+        "column": 11
+      }
+    },
+    {
+      "id": "14a172cfd4de054-bfb180c6a8aa739",
+      "title": "Packs Non existent policy id should return bad request error single non-existent policy id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/api/packs.spec.ts",
+        "line": 79,
+        "column": 11
+      }
+    },
+    {
+      "id": "14a172cfd4de054-8f472ee28a4b611",
+      "title": "Packs Non existent policy id should return bad request error multiple policy ids with one non-existent policy id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/api/packs.spec.ts",
+        "line": 111,
+        "column": 11
+      }
+    },
+    {
+      "id": "606e23f8359c12b-71a276f550b4297",
+      "title": "Add to Cases observability should add result to a case without showing add to timeline button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/cases.spec.ts",
+        "line": 51,
+        "column": 11
+      }
+    },
+    {
+      "id": "606e23f8359c12b-7a561078f9e030a",
+      "title": "Add to Cases security should add result to a case without showing add to timeline button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/cases.spec.ts",
+        "line": 108,
+        "column": 13
+      }
+    },
+    {
+      "id": "d3745d6205b6e32-ba9003f1866e6ce",
+      "title": "ALL - Custom space [default] Discover should be opened in new tab in results table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/custom_space.spec.ts",
+        "line": 84,
+        "column": 9
+      }
+    },
+    {
+      "id": "d3745d6205b6e32-6e5dbefeb096dd6",
+      "title": "ALL - Custom space [default] runs packs normally",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/custom_space.spec.ts",
+        "line": 124,
+        "column": 9
+      }
+    },
+    {
+      "id": "d3745d6205b6e32-0fbcdc1694bccd7",
+      "title": "ALL - Custom space [custom-space] Discover should be opened in new tab in results table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/custom_space.spec.ts",
+        "line": 84,
+        "column": 9
+      }
+    },
+    {
+      "id": "d3745d6205b6e32-f99b922b2680e5e",
+      "title": "ALL - Custom space [custom-space] runs packs normally",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/custom_space.spec.ts",
+        "line": 124,
+        "column": 9
+      }
+    },
+    {
+      "id": "fe71aed78cf0df4-d5cd27b5f80833e",
+      "title": "EcsMapping should properly show static values in form and results",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/ecs_mappings.spec.ts",
+        "line": 24,
+        "column": 9
+      }
+    },
+    {
+      "id": "fe71aed78cf0df4-92593cfe5f50e5d",
+      "title": "EcsMapping should hide and show ecs mappings on Advanced accordion click",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/ecs_mappings.spec.ts",
+        "line": 99,
+        "column": 9
+      }
+    },
+    {
+      "id": "4f0fadf29064fc9-0d1c8c68c19feda",
+      "title": "ALL - Edit saved query by changing ecs mappings and platforms",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/edit_saved_queries.spec.ts",
+        "line": 37,
+        "column": 9
+      }
+    },
+    {
+      "id": "bf4d3025d78b78f-928ae64d372a0ac",
+      "title": "ALL - Live Query Packs should run live pack",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/live_query_packs.spec.ts",
+        "line": 66,
+        "column": 9
+      }
+    },
+    {
+      "id": "c4b5bab7ef7b8af-183592198248dd3",
+      "title": "ALL - Live Query run custom and saved should run query and enable ecs mapping",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/live_query_run.spec.ts",
+        "line": 41,
+        "column": 9
+      }
+    },
+    {
+      "id": "c4b5bab7ef7b8af-b72c891b32a3d17",
+      "title": "ALL - Live Query run custom and saved should run customized saved query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/live_query_run.spec.ts",
+        "line": 91,
+        "column": 9
+      }
+    },
+    {
+      "id": "c4b5bab7ef7b8af-8555b8a2bbf8427",
+      "title": "ALL - Live Query run custom and saved should open query details by clicking the details icon",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/live_query_run.spec.ts",
+        "line": 139,
+        "column": 9
+      }
+    },
+    {
+      "id": "d601ea14233f365-1668a2e1a48ac95",
+      "title": "ALL - Live Query should validate the form",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/live_query.spec.ts",
+        "line": 23,
+        "column": 9
+      }
+    },
+    {
+      "id": "d601ea14233f365-9661005fdc8c412",
+      "title": "ALL - Live Query should show timeout validation errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/live_query.spec.ts",
+        "line": 45,
+        "column": 9
+      }
+    },
+    {
+      "id": "d601ea14233f365-af485b739a192af",
+      "title": "ALL - Live Query should handle multiline query in editor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/live_query.spec.ts",
+        "line": 70,
+        "column": 9
+      }
+    },
+    {
+      "id": "d601ea14233f365-2803c93d70320fa",
+      "title": "ALL - Live Query should run a live query and check results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/live_query.spec.ts",
+        "line": 124,
+        "column": 9
+      }
+    },
+    {
+      "id": "d601ea14233f365-0c791fb88b71792",
+      "title": "ALL - Live Query should run multiline query and display results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/live_query.spec.ts",
+        "line": 147,
+        "column": 9
+      }
+    },
+    {
+      "id": "d601ea14233f365-1fc329247db3c10",
+      "title": "ALL - Live Query should validate form fully and submit with ECS mapping",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/live_query.spec.ts",
+        "line": 190,
+        "column": 9
+      }
+    },
+    {
+      "id": "caeb51b70b1f810-6aa2e1f3dde1538",
+      "title": "ALL - Inventory should be able to run the query from Infrastructure",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/metrics.spec.ts",
+        "line": 31,
+        "column": 7
+      }
+    },
+    {
+      "id": "caeb51b70b1f810-9ac4e9aa6ccc25e",
+      "title": "ALL - Inventory should be able to run the previously saved query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/metrics.spec.ts",
+        "line": 78,
+        "column": 7
+      }
+    },
+    {
+      "id": "fa9def1e8e1c39d-edf43691902c5e3",
+      "title": "Packs - Create and Edit Check if result type is correct Check if result type is correct",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/packs_create_edit.spec.ts",
+        "line": 103,
+        "column": 11
+      }
+    },
+    {
+      "id": "fa9def1e8e1c39d-792a9620296b57c",
+      "title": "Packs - Create and Edit Check if pack is created should add a pack from a saved query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/packs_create_edit.spec.ts",
+        "line": 202,
+        "column": 11
+      }
+    },
+    {
+      "id": "fa9def1e8e1c39d-c0964e729d7f34e",
+      "title": "Packs - Create and Edit to click the edit button and edit pack should edit pack and add new query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/packs_create_edit.spec.ts",
+        "line": 283,
+        "column": 11
+      }
+    },
+    {
+      "id": "fa9def1e8e1c39d-d13b7b3fac0925c",
+      "title": "Packs - Create and Edit should trigger validation when saved query is being chosen should trigger validation when saved query is being chosen",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/packs_create_edit.spec.ts",
+        "line": 350,
+        "column": 11
+      }
+    },
+    {
+      "id": "fa9def1e8e1c39d-48ff83612a5535c",
+      "title": "Packs - Create and Edit should open lens in new tab should open lens in new tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/packs_create_edit.spec.ts",
+        "line": 404,
+        "column": 11
+      }
+    },
+    {
+      "id": "fa9def1e8e1c39d-7c459fa5ab909d1",
+      "title": "Packs - Create and Edit should open discover in new tab should open discover in new tab",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/packs_create_edit.spec.ts",
+        "line": 487,
+        "column": 13
+      }
+    },
+    {
+      "id": "fa9def1e8e1c39d-8a71cf93bfafa54",
+      "title": "Packs - Create and Edit deactivate and activate pack deactivate and activate pack",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/packs_create_edit.spec.ts",
+        "line": 564,
+        "column": 11
+      }
+    },
+    {
+      "id": "fa9def1e8e1c39d-2f9e9fadf5ee0ae",
+      "title": "Packs - Create and Edit should verify that packs are triggered should verify that packs are triggered",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/packs_create_edit.spec.ts",
+        "line": 605,
+        "column": 11
+      }
+    },
+    {
+      "id": "fa9def1e8e1c39d-fdcebc1f5d8949c",
+      "title": "Packs - Create and Edit delete all queries in pack delete all queries in pack",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/packs_create_edit.spec.ts",
+        "line": 673,
+        "column": 11
+      }
+    },
+    {
+      "id": "fa9def1e8e1c39d-202214f9b1cae0c",
+      "title": "Packs - Create and Edit enable changing saved queries and ecs_mappings enable changing saved queries and ecs_mappings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/packs_create_edit.spec.ts",
+        "line": 737,
+        "column": 11
+      }
+    },
+    {
+      "id": "fa9def1e8e1c39d-e81d78a444cd9fe",
+      "title": "Packs - Create and Edit to click delete button should delete pack",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/packs_create_edit.spec.ts",
+        "line": 819,
+        "column": 11
+      }
+    },
+    {
+      "id": "1bd8f15e5c11994-7aefde4792a59f1",
+      "title": "ALL - Packs Validate that agent policy is removed from pack when agent policy is removed add integration and validate pack policy",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/packs_integration.spec.ts",
+        "line": 59,
+        "column": 13
+      }
+    },
+    {
+      "id": "1bd8f15e5c11994-ef9090e2d8d3201",
+      "title": "ALL - Packs Load prebuilt packs should load prebuilt packs",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/packs_integration.spec.ts",
+        "line": 155,
+        "column": 13
+      }
+    },
+    {
+      "id": "1bd8f15e5c11994-b3beeca553eea7a",
+      "title": "ALL - Packs Load prebuilt packs should be able to activate pack",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/packs_integration.spec.ts",
+        "line": 169,
+        "column": 13
+      }
+    },
+    {
+      "id": "1bd8f15e5c11994-fa66a19bb1ebf0e",
+      "title": "ALL - Packs Load prebuilt packs should be able to run live prebuilt pack",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/packs_integration.spec.ts",
+        "line": 175,
+        "column": 13
+      }
+    },
+    {
+      "id": "1bd8f15e5c11994-20a5a9c3a1df4c0",
+      "title": "ALL - Packs Global packs add global packs to policies",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/packs_integration.spec.ts",
+        "line": 217,
+        "column": 13
+      }
+    },
+    {
+      "id": "d6b0718a6dd96c1-8102f7e17008bad",
+      "title": "Alert Test should be able to run rule investigation guide query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/roles/alert_test.spec.ts",
+        "line": 47,
+        "column": 7
+      }
+    },
+    {
+      "id": "d6b0718a6dd96c1-8b769a62c651c94",
+      "title": "Alert Test should not be able to run custom query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/roles/alert_test.spec.ts",
+        "line": 52,
+        "column": 7
+      }
+    },
+    {
+      "id": "eb65e94c089bc89-ffc2e096bab465d",
+      "title": "Reader - only READ should not be able to add nor run saved queries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/roles/reader.spec.ts",
+        "line": 56,
+        "column": 7
+      }
+    },
+    {
+      "id": "eb65e94c089bc89-7fdb221da2c2e47",
+      "title": "Reader - only READ should not be able to enter live queries with just read and no run saved queries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/roles/reader.spec.ts",
+        "line": 72,
+        "column": 7
+      }
+    },
+    {
+      "id": "eb65e94c089bc89-aba452f5c29e2b6",
+      "title": "Reader - only READ should not be able to play in live queries history",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/roles/reader.spec.ts",
+        "line": 80,
+        "column": 7
+      }
+    },
+    {
+      "id": "eb65e94c089bc89-89ff6b8baf5db06",
+      "title": "Reader - only READ should not be able to add nor edit packs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/roles/reader.spec.ts",
+        "line": 88,
+        "column": 7
+      }
+    },
+    {
+      "id": "58af2fb5e98ab2a-86df9ca9f3b333c",
+      "title": "T1 and T2 analysts - t1_analyst should be able to run saved queries but not add new ones",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/roles/t1_and_t2_analyst.spec.ts",
+        "line": 70,
+        "column": 11
+      }
+    },
+    {
+      "id": "58af2fb5e98ab2a-27ace832b5d77f5",
+      "title": "T1 and T2 analysts - t1_analyst should be able to play in live queries history",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/roles/t1_and_t2_analyst.spec.ts",
+        "line": 96,
+        "column": 11
+      }
+    },
+    {
+      "id": "58af2fb5e98ab2a-0da860b12ac7c71",
+      "title": "T1 and T2 analysts - t1_analyst should be able to use saved query in a new query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/roles/t1_and_t2_analyst.spec.ts",
+        "line": 115,
+        "column": 11
+      }
+    },
+    {
+      "id": "58af2fb5e98ab2a-daacafbae714e95",
+      "title": "T1 and T2 analysts - t1_analyst should not be able to add nor edit packs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/roles/t1_and_t2_analyst.spec.ts",
+        "line": 136,
+        "column": 11
+      }
+    },
+    {
+      "id": "58af2fb5e98ab2a-fbd2d650278a44f",
+      "title": "T1 and T2 analysts - t1_analyst should not be able to create new liveQuery from scratch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/roles/t1_and_t2_analyst.spec.ts",
+        "line": 164,
+        "column": 11
+      }
+    },
+    {
+      "id": "58af2fb5e98ab2a-6bc42980726b256",
+      "title": "T1 and T2 analysts - t2_analyst should be able to run saved queries but not add new ones",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/roles/t1_and_t2_analyst.spec.ts",
+        "line": 70,
+        "column": 11
+      }
+    },
+    {
+      "id": "58af2fb5e98ab2a-7a6a588005629fd",
+      "title": "T1 and T2 analysts - t2_analyst should be able to play in live queries history",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/roles/t1_and_t2_analyst.spec.ts",
+        "line": 96,
+        "column": 11
+      }
+    },
+    {
+      "id": "58af2fb5e98ab2a-3218543bd2d14c8",
+      "title": "T1 and T2 analysts - t2_analyst should be able to use saved query in a new query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/roles/t1_and_t2_analyst.spec.ts",
+        "line": 115,
+        "column": 11
+      }
+    },
+    {
+      "id": "58af2fb5e98ab2a-28722928df1c6cb",
+      "title": "T1 and T2 analysts - t2_analyst should not be able to add nor edit packs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/roles/t1_and_t2_analyst.spec.ts",
+        "line": 136,
+        "column": 11
+      }
+    },
+    {
+      "id": "58af2fb5e98ab2a-3ae28d294cbbde7",
+      "title": "T1 and T2 analysts - t2_analyst should not be able to create new liveQuery from scratch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/roles/t1_and_t2_analyst.spec.ts",
+        "line": 164,
+        "column": 11
+      }
+    },
+    {
+      "id": "a73e2cbfe5f2b24-e0d939d9d0e26b4",
+      "title": "ALL - Saved queries should create a new query and verify hidden columns, full screen, sorting, pagination, and CRUD",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/saved_queries.spec.ts",
+        "line": 48,
+        "column": 9
+      }
+    },
+    {
+      "id": "a73e2cbfe5f2b24-88e5f4181bf9d80",
+      "title": "ALL - Saved queries checks that user cant add a saved query with an ID that already exists",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/saved_queries.spec.ts",
+        "line": 175,
+        "column": 10
+      }
+    },
+    {
+      "id": "a73e2cbfe5f2b24-1e5538b1ac7370e",
+      "title": "ALL - Saved queries checks default values on new saved query",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/saved_queries.spec.ts",
+        "line": 189,
+        "column": 9
+      }
+    },
+    {
+      "id": "a73e2cbfe5f2b24-4f7d3fce7372fb6",
+      "title": "ALL - Saved queries prebuilt checks result type on prebuilt saved query",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/saved_queries.spec.ts",
+        "line": 241,
+        "column": 11
+      }
+    },
+    {
+      "id": "a73e2cbfe5f2b24-cbfdf0ea96e7c79",
+      "title": "ALL - Saved queries prebuilt user can run prebuilt saved query and add to case",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/saved_queries.spec.ts",
+        "line": 246,
+        "column": 11
+      }
+    },
+    {
+      "id": "a73e2cbfe5f2b24-aa8159967dcbb4c",
+      "title": "ALL - Saved queries prebuilt user can not delete prebuilt saved query but can delete normal saved query",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/saved_queries.spec.ts",
+        "line": 265,
+        "column": 11
+      }
+    },
+    {
+      "id": "a73e2cbfe5f2b24-d0a0a5ce0115ebc",
+      "title": "ALL - Saved queries prebuilt user can edit prebuilt saved query under pack",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/saved_queries.spec.ts",
+        "line": 277,
+        "column": 11
+      }
+    },
+    {
+      "id": "f6ec09c5c07b96f-0a4958b91f88cc2",
+      "title": "App Features for Endpoint Complete PLI response actions should be available",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/tiers/endpoint_complete.spec.ts",
+        "line": 42,
+        "column": 9
+      }
+    },
+    {
+      "id": "850c68a1cc0c195-6f47c3f16180fac",
+      "title": "App Features for Endpoint Essentials PLI response actions should not be available",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/tiers/endpoint_essentials.spec.ts",
+        "line": 42,
+        "column": 9
+      }
+    },
+    {
+      "id": "e9843b9ccfb81c2-566a6b480c563af",
+      "title": "App Features for Security Complete PLI response actions should not be available",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/tiers/security_complete.spec.ts",
+        "line": 39,
+        "column": 9
+      }
+    },
+    {
+      "id": "0651e8407cca473-5cfca05c75e53df",
+      "title": "App Features for Security Essentials PLI response actions should not be available",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/tiers/security_essentials.spec.ts",
+        "line": 42,
+        "column": 9
+      }
+    },
+    {
+      "id": "cb67ee72260eb4c-b9c763db1d37f34",
+      "title": "ALL - Timelines should substitute osquery parameter on non-alert event take action",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/timelines.spec.ts",
+        "line": 21,
+        "column": 7
+      }
+    }
+  ]
+}
