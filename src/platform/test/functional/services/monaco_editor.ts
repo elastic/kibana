@@ -86,4 +86,24 @@ export class MonacoEditorService extends FtrService {
       '[data-test-subj="kbnCodeEditorEditorOverflowWidgetsContainer"] .suggest-widget'
     );
   }
+
+  public async setScrollTop(scrollTop: number, nthIndex: number = 0) {
+    await this.browser.execute(
+      (editorIndex, scrollAmount) => {
+        const editors = window.MonacoEnvironment?.monaco?.editor?.getEditors();
+        if (editors && editors[editorIndex]) {
+          editors[editorIndex].setScrollTop(scrollAmount);
+        }
+      },
+      nthIndex,
+      scrollTop
+    );
+  }
+
+  public async getScrollTop(nthIndex: number = 0): Promise<number> {
+    return await this.browser.execute((editorIndex) => {
+      const editors = window.MonacoEnvironment?.monaco?.editor?.getEditors();
+      return editors?.[editorIndex]?.getScrollTop() ?? 0;
+    }, nthIndex);
+  }
 }

@@ -22,6 +22,7 @@ import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { reportingMock } from '@kbn/reporting-plugin/server/mocks';
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
@@ -202,6 +203,7 @@ export const createAppContextStartContractMock = (
     alertingStart: {
       getRulesClientWithRequest: jest.fn(),
     } as any,
+    reportingStart: reportingMock.createStart(),
   };
 };
 

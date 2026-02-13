@@ -9,6 +9,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import styled from '@emotion/styled';
 import type { Filter, Query } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { AttacksListPanel } from './attacks_list_panel/attacks_list_panel';
 import { AttacksVolumePanel } from './attacks_volume_panel/attacks_volume_panel';
 
 const StyledFlexGroup = styled(EuiFlexGroup)`
@@ -25,14 +27,16 @@ export interface SummaryViewContentProps {
   filters?: Filter[];
   /** Search query string */
   query?: Query;
+  /** DataView for the attacks page */
+  dataView: DataView;
 }
 
 /**
  * Renders the content for the "Summary" KPI view.
- * Displays summary visualizations like AttacksVolumePanel.
+ * Displays summary visualizations like AttacksVolumePanel and AttacksListPanel.
  */
 export const SummaryViewContent: React.FC<SummaryViewContentProps> = React.memo(
-  ({ filters, query }) => {
+  ({ filters, query, dataView }) => {
     return (
       <StyledFlexGroup
         data-test-subj="summary-view-content"
@@ -40,6 +44,9 @@ export const SummaryViewContent: React.FC<SummaryViewContentProps> = React.memo(
         wrap
         gutterSize="m"
       >
+        <EuiFlexItem grow={false}>
+          <AttacksListPanel filters={filters} query={query} dataView={dataView} />
+        </EuiFlexItem>
         <StyledFlexItem>
           <AttacksVolumePanel filters={filters} query={query} />
         </StyledFlexItem>

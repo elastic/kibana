@@ -37,9 +37,9 @@ export function generateConnectorSnippet(
   const stringifyOptions: ToStringOptions = { indent: 2 };
   let parameters: Record<string, unknown>;
 
-  const isConnectorIdRequired = getCachedAllConnectors(dynamicConnectorTypes).find(
-    (c) => c.type === connectorType
-  )?.connectorIdRequired;
+  const isConnectorIdRequired =
+    getCachedAllConnectors(dynamicConnectorTypes).find((c) => c.type === connectorType)
+      ?.hasConnectorId === 'required';
 
   // Generate smart connector-id value based on available instances
   let connectorIdValue: string | undefined;

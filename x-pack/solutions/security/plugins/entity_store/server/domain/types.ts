@@ -7,15 +7,8 @@
 
 import { z } from '@kbn/zod';
 import type { EngineDescriptor } from './definitions/saved_objects';
-
-export type EntityStoreStatus = z.infer<typeof EntityStoreStatus>;
-export const EntityStoreStatus = z.enum([
-  'not_installed',
-  'installing',
-  'running',
-  'stopped',
-  'error',
-]);
+import type { EntityStoreStatus } from '../../common';
+export type { EntityStoreStatus };
 
 export const EngineComponentResource = z.enum([
   'entity_definition',
