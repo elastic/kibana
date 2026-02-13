@@ -12,6 +12,14 @@ export {
   type SkillServiceStart,
   createSkillService,
 } from './skill_service';
-export { type SkillRegistry, type SkillProvider, createSkillRegistry } from './skill_registry';
-export { builtinSkillToPublicDefinition, persistedSkillToPublicDefinition } from './utils';
-export { createPersistedProvider } from './persisted_provider';
+export { type SkillRegistry, createSkillRegistry } from './skill_registry';
+export {
+  type ReadonlySkillProvider,
+  type WritableSkillProvider,
+  type SkillProvider,
+  isReadonlySkillProvider,
+  isWritableSkillProvider,
+} from './skill_provider';
+export { createBuiltinSkillProvider } from './builtin';
+export { createPersistedSkillProvider } from './persisted';
+export { internalToPublicDefinition } from './utils';

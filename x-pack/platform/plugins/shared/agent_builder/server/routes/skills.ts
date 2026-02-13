@@ -20,6 +20,7 @@ import type {
 } from '../../common/http_api/skills';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
+import { internalToPublicDefinition } from '../services/skills/utils';
 
 const REFERENCED_CONTENT_SCHEMA = schema.arrayOf(
   schema.object({
@@ -129,7 +130,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         const skills = await registry.list();
         return response.ok<ListSkillsResponse>({
           body: {
-            results: skills,
+            results: skills.map(internalToPublicDefinition),
           },
         });
       }, featureFlagConfig)
@@ -163,14 +164,9 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         const { skills: skillService } = getInternalServices();
         const registry = await skillService.getRegistry({ request });
         const skill = await registry.get(skillId);
-        if (!skill) {
-          return response.notFound({
-            body: { message: `Skill with id '${skillId}' not found` },
-          });
-        }
 
         return response.ok<GetSkillResponse>({
-          body: skill,
+          body: internalToPublicDefinition(skill),
         });
       }, featureFlagConfig)
     );
@@ -204,7 +200,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         const registry = await skillService.getRegistry({ request });
         const skill = await registry.create(createRequest);
         return response.ok<CreateSkillResponse>({
-          body: skill,
+          body: internalToPublicDefinition(skill),
         });
       }, featureFlagConfig)
     );
@@ -240,7 +236,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         const registry = await skillService.getRegistry({ request });
         const skill = await registry.update(skillId, update);
         return response.ok<UpdateSkillResponse>({
-          body: skill,
+          body: internalToPublicDefinition(skill),
         });
       }, featureFlagConfig)
     );

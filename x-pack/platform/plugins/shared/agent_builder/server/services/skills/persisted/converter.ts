@@ -6,24 +6,19 @@
  */
 
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
-import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
+import type { SkillPersistedDefinition } from './client';
 
-/**
- * Converts an InternalSkillDefinition to a PublicSkillDefinition
- * suitable for API responses. This is used at the route handler boundary.
- */
-export const internalToPublicDefinition = (
-  skill: InternalSkillDefinition
-): PublicSkillDefinition => ({
+export const convertPersistedSkill = (skill: SkillPersistedDefinition): InternalSkillDefinition => ({
   id: skill.id,
   name: skill.name,
   description: skill.description,
   content: skill.content,
-  referenced_content: skill.referencedContent?.map((rc) => ({
+  readonly: false,
+  referencedContent: skill.referenced_content?.map((rc) => ({
     name: rc.name,
     relativePath: rc.relativePath,
     content: rc.content,
   })),
-  tool_ids: skill.getAllowedTools(),
-  readonly: skill.readonly,
+  getAllowedTools: () => skill.tool_ids ?? [],
+  // Persisted skills have no inline tools or basePath
 });

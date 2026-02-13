@@ -119,8 +119,8 @@ export const createPromptManagerMock = (): PromptManagerMock => {
 
 export const createSkillsServiceMock = (): SkillsServiceMock => {
   return {
-    list: jest.fn(),
-    getSkillDefinition: jest.fn(),
+    list: jest.fn().mockResolvedValue([]),
+    get: jest.fn().mockResolvedValue(undefined),
     convertSkillTool: jest.fn(),
   };
 };
@@ -143,8 +143,6 @@ export const createStateManagerMock = (): StateManagerMock => {
 
 export const createSkillServiceStartMock = (): SkillServiceStartMock => {
   return {
-    getSkillDefinition: jest.fn(),
-    listSkills: jest.fn().mockReturnValue([]),
     getRegistry: jest.fn().mockResolvedValue(createSkillRegistryMock()),
   };
 };
@@ -152,9 +150,8 @@ export const createSkillServiceStartMock = (): SkillServiceStartMock => {
 export const createSkillRegistryMock = (): SkillRegistryMock => {
   return {
     has: jest.fn().mockResolvedValue(false),
-    get: jest.fn().mockResolvedValue(undefined),
+    get: jest.fn(),
     list: jest.fn().mockResolvedValue([]),
-    listSkillDefinitions: jest.fn().mockResolvedValue([]),
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),

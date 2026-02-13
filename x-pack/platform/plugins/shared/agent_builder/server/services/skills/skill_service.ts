@@ -11,12 +11,12 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
-import { createClient } from './client';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { getSkillEntryPath } from '../runner/store/volumes/skills/utils';
 import { createSkillRegistry } from './skill_registry';
 import type { SkillRegistry } from './skill_registry';
-import { createPersistedProvider } from './persisted_provider';
+import { createBuiltinSkillProvider } from './builtin';
+import { createPersistedSkillProvider } from './persisted';
 
 export interface SkillServiceSetup {
   registerSkill(skill: SkillDefinition): Promise<void>;
@@ -24,16 +24,9 @@ export interface SkillServiceSetup {
 
 export interface SkillServiceStart {
   /**
-   * Returns the list of registered built-in skill definitions.
-   */
-  listSkills(): SkillDefinition[];
-  /**
-   * Returns the built-in skill definition for a given skill id, or undefined.
-   */
-  getSkillDefinition(skillId: string): SkillDefinition | undefined;
-  /**
    * Create a skill registry scoped to the current user and context.
    * The registry provides access to both built-in and persisted skills.
+   * This is the single entry point for all skill access.
    */
   getRegistry(opts: { request: KibanaRequest }): Promise<SkillRegistry>;
 }
@@ -86,17 +79,18 @@ class SkillServiceImpl implements SkillService {
     getToolRegistry,
   }: SkillServiceStartDeps): SkillServiceStart {
     return {
-      listSkills: () => [...this.skills.values()],
-      getSkillDefinition: (skillId) => this.skills.get(skillId),
       getRegistry: async ({ request }) => {
         const space = getCurrentSpaceId({ request, spaces });
-        const esClient = elasticsearch.client.asInternalUser;
-        const skillClient = createClient({ space, esClient, logger });
-        const persistedProvider = createPersistedProvider(skillClient);
+        const builtinProvider = createBuiltinSkillProvider([...this.skills.values()]);
+        const persistedProvider = createPersistedSkillProvider({
+          space,
+          esClient: elasticsearch.client.asInternalUser,
+          logger,
+        });
         const toolRegistry = await getToolRegistry({ request });
 
         return createSkillRegistry({
-          builtinSkills: [...this.skills.values()],
+          builtinProvider,
           persistedProvider,
           toolRegistry,
         });

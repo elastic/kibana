@@ -5,51 +5,62 @@
  * 2.0.
  */
 
-import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
-import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
+import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
-import { createSkillRegistry, type SkillProvider } from './skill_registry';
+import { createSkillRegistry } from './skill_registry';
+import type { ReadonlySkillProvider, WritableSkillProvider } from './skill_provider';
 
-const createMockSkillDefinition = (overrides: Partial<SkillDefinition> = {}): SkillDefinition => ({
+const createMockInternalSkillDefinition = (
+  overrides: Partial<InternalSkillDefinition> = {}
+): InternalSkillDefinition => ({
   id: 'test-skill-1',
-  name: 'test-skill' as any,
-  basePath: 'skills/platform' as any,
+  name: 'test-skill',
   description: 'A test skill',
   content: 'Skill body content',
+  readonly: true,
   getAllowedTools: () => [],
   ...overrides,
 });
 
-const createMockPublicSkillDefinition = (
-  id: string,
-  overrides: Partial<PublicSkillDefinition> = {}
-): PublicSkillDefinition => ({
-  id,
-  name: `${id}-name`,
-  description: `Description for ${id}`,
-  content: `Content for ${id}`,
-  readonly: false,
-  ...overrides,
-});
+const createMockBuiltinProvider = (
+  skills: InternalSkillDefinition[]
+): jest.Mocked<ReadonlySkillProvider> => {
+  const skillsMap = new Map(skills.map((s) => [s.id, s]));
+  return {
+    id: 'builtin',
+    readonly: true,
+    has: jest.fn(async (id: string) => skillsMap.has(id)),
+    get: jest.fn(async (id: string) => skillsMap.get(id)),
+    list: jest.fn(async () => skills),
+  };
+};
 
-const createMockPersistedProvider = (skills: PublicSkillDefinition[]): SkillProvider => ({
-  id: 'persisted',
-  has: jest.fn(async (id: string) => skills.some((s) => s.id === id)),
-  get: jest.fn(async (id: string) => skills.find((s) => s.id === id)),
-  list: jest.fn(async () => skills),
-  create: jest.fn(async (params) => ({
-    ...params,
+const createMockPersistedProvider = (
+  skills: InternalSkillDefinition[]
+): jest.Mocked<WritableSkillProvider> => {
+  const skillsMap = new Map(skills.map((s) => [s.id, s]));
+  return {
+    id: 'persisted',
     readonly: false,
-  })),
-  update: jest.fn(async (id, update) => ({
-    id,
-    name: update.name ?? 'original-name',
-    description: update.description ?? 'original-description',
-    content: update.content ?? 'original-content',
-    readonly: false,
-  })),
-  delete: jest.fn(async () => true),
-});
+    has: jest.fn(async (id: string) => skillsMap.has(id)),
+    get: jest.fn(async (id: string) => skillsMap.get(id)),
+    list: jest.fn(async () => skills),
+    create: jest.fn(async (params) => ({
+      ...params,
+      readonly: false,
+      getAllowedTools: () => params.tool_ids ?? [],
+    })),
+    update: jest.fn(async (id, update) => ({
+      id,
+      name: update.name ?? 'original-name',
+      description: update.description ?? 'original-description',
+      content: update.content ?? 'original-content',
+      readonly: false,
+      getAllowedTools: () => update.tool_ids ?? [],
+    })),
+    delete: jest.fn(async () => true),
+  };
+};
 
 const createMockToolRegistry = (toolIds: string[] = []): ToolRegistry =>
   ({
@@ -57,20 +68,28 @@ const createMockToolRegistry = (toolIds: string[] = []): ToolRegistry =>
   } as unknown as ToolRegistry);
 
 describe('createSkillRegistry', () => {
-  const builtinSkill1 = createMockSkillDefinition({
+  const builtinSkill1 = createMockInternalSkillDefinition({
     id: 'builtin-skill-1',
-    name: 'builtin-skill-1-name' as any,
+    name: 'builtin-skill-1-name',
+    readonly: true,
   });
-  const builtinSkill2 = createMockSkillDefinition({
+  const builtinSkill2 = createMockInternalSkillDefinition({
     id: 'builtin-skill-2',
-    name: 'builtin-skill-2-name' as any,
+    name: 'builtin-skill-2-name',
+    readonly: true,
   });
-  const persistedSkill1 = createMockPublicSkillDefinition('custom-skill-1');
+  const persistedSkill1 = createMockInternalSkillDefinition({
+    id: 'custom-skill-1',
+    name: 'custom-skill-1-name',
+    description: 'Description for custom-skill-1',
+    content: 'Content for custom-skill-1',
+    readonly: false,
+  });
 
   describe('has', () => {
     it('returns true for a built-in skill', async () => {
       const registry = createSkillRegistry({
-        builtinSkills: [builtinSkill1],
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
       });
@@ -80,7 +99,7 @@ describe('createSkillRegistry', () => {
 
     it('returns true for a persisted skill', async () => {
       const registry = createSkillRegistry({
-        builtinSkills: [],
+        builtinProvider: createMockBuiltinProvider([]),
         persistedProvider: createMockPersistedProvider([persistedSkill1]),
         toolRegistry: createMockToolRegistry(),
       });
@@ -90,7 +109,7 @@ describe('createSkillRegistry', () => {
 
     it('returns false for a non-existent skill', async () => {
       const registry = createSkillRegistry({
-        builtinSkills: [builtinSkill1],
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
         persistedProvider: createMockPersistedProvider([persistedSkill1]),
         toolRegistry: createMockToolRegistry(),
       });
@@ -102,7 +121,7 @@ describe('createSkillRegistry', () => {
   describe('get', () => {
     it('returns built-in skill when it exists', async () => {
       const registry = createSkillRegistry({
-        builtinSkills: [builtinSkill1],
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
       });
@@ -112,7 +131,7 @@ describe('createSkillRegistry', () => {
 
     it('returns persisted skill when no built-in exists', async () => {
       const registry = createSkillRegistry({
-        builtinSkills: [],
+        builtinProvider: createMockBuiltinProvider([]),
         persistedProvider: createMockPersistedProvider([persistedSkill1]),
         toolRegistry: createMockToolRegistry(),
       });
@@ -121,9 +140,12 @@ describe('createSkillRegistry', () => {
     });
 
     it('prefers built-in over persisted', async () => {
-      const overlapSkill = createMockPublicSkillDefinition('builtin-skill-1');
+      const overlapSkill = createMockInternalSkillDefinition({
+        id: 'builtin-skill-1',
+        readonly: false,
+      });
       const registry = createSkillRegistry({
-        builtinSkills: [builtinSkill1],
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
         persistedProvider: createMockPersistedProvider([overlapSkill]),
         toolRegistry: createMockToolRegistry(),
       });
@@ -131,21 +153,23 @@ describe('createSkillRegistry', () => {
       expect(await registry.get('builtin-skill-1')).toEqual(builtinSkill1);
     });
 
-    it('returns undefined for non-existent skill', async () => {
+    it('throws for non-existent skill', async () => {
       const registry = createSkillRegistry({
-        builtinSkills: [],
+        builtinProvider: createMockBuiltinProvider([]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
       });
 
-      expect(await registry.get('non-existent')).toBeUndefined();
+      await expect(registry.get('non-existent')).rejects.toThrow(
+        "Skill with id 'non-existent' not found"
+      );
     });
   });
 
   describe('list', () => {
-    it('returns merged list with built-in skills marked as readonly', async () => {
+    it('returns merged list with correct readonly flags', async () => {
       const registry = createSkillRegistry({
-        builtinSkills: [builtinSkill1],
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
         persistedProvider: createMockPersistedProvider([persistedSkill1]),
         toolRegistry: createMockToolRegistry(),
       });
@@ -161,25 +185,11 @@ describe('createSkillRegistry', () => {
     });
   });
 
-  describe('listSkillDefinitions', () => {
-    it('returns only built-in skill definitions', async () => {
-      const registry = createSkillRegistry({
-        builtinSkills: [builtinSkill1, builtinSkill2],
-        persistedProvider: createMockPersistedProvider([persistedSkill1]),
-        toolRegistry: createMockToolRegistry(),
-      });
-
-      const result = await registry.listSkillDefinitions();
-      expect(result).toHaveLength(2);
-      expect(result.map((s) => s.id)).toEqual(['builtin-skill-1', 'builtin-skill-2']);
-    });
-  });
-
   describe('create', () => {
     it('creates a new persisted skill', async () => {
       const persistedProvider = createMockPersistedProvider([]);
       const registry = createSkillRegistry({
-        builtinSkills: [],
+        builtinProvider: createMockBuiltinProvider([]),
         persistedProvider,
         toolRegistry: createMockToolRegistry(['tool-a']),
       });
@@ -203,7 +213,7 @@ describe('createSkillRegistry', () => {
 
     it('throws when skill ID already exists in built-in', async () => {
       const registry = createSkillRegistry({
-        builtinSkills: [builtinSkill1],
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
       });
@@ -221,7 +231,7 @@ describe('createSkillRegistry', () => {
 
     it('throws when tool IDs are invalid', async () => {
       const registry = createSkillRegistry({
-        builtinSkills: [],
+        builtinProvider: createMockBuiltinProvider([]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(['tool-a']),
       });
@@ -240,7 +250,7 @@ describe('createSkillRegistry', () => {
     it('throws when more than 5 tool IDs are provided', async () => {
       const toolIds = ['tool-1', 'tool-2', 'tool-3', 'tool-4', 'tool-5', 'tool-6'];
       const registry = createSkillRegistry({
-        builtinSkills: [],
+        builtinProvider: createMockBuiltinProvider([]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(toolIds),
       });
@@ -260,7 +270,7 @@ describe('createSkillRegistry', () => {
       const toolIds = ['tool-1', 'tool-2', 'tool-3', 'tool-4', 'tool-5'];
       const persistedProvider = createMockPersistedProvider([]);
       const registry = createSkillRegistry({
-        builtinSkills: [],
+        builtinProvider: createMockBuiltinProvider([]),
         persistedProvider,
         toolRegistry: createMockToolRegistry(toolIds),
       });
@@ -281,7 +291,7 @@ describe('createSkillRegistry', () => {
     it('updates a persisted skill', async () => {
       const persistedProvider = createMockPersistedProvider([persistedSkill1]);
       const registry = createSkillRegistry({
-        builtinSkills: [],
+        builtinProvider: createMockBuiltinProvider([]),
         persistedProvider,
         toolRegistry: createMockToolRegistry(),
       });
@@ -295,7 +305,7 @@ describe('createSkillRegistry', () => {
 
     it('throws when trying to update a built-in skill', async () => {
       const registry = createSkillRegistry({
-        builtinSkills: [builtinSkill1],
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
       });
@@ -307,7 +317,7 @@ describe('createSkillRegistry', () => {
 
     it('throws when skill does not exist', async () => {
       const registry = createSkillRegistry({
-        builtinSkills: [],
+        builtinProvider: createMockBuiltinProvider([]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
       });
@@ -320,7 +330,7 @@ describe('createSkillRegistry', () => {
     it('throws when updating with more than 5 tool IDs', async () => {
       const toolIds = ['tool-1', 'tool-2', 'tool-3', 'tool-4', 'tool-5', 'tool-6'];
       const registry = createSkillRegistry({
-        builtinSkills: [],
+        builtinProvider: createMockBuiltinProvider([]),
         persistedProvider: createMockPersistedProvider([persistedSkill1]),
         toolRegistry: createMockToolRegistry(toolIds),
       });
@@ -335,7 +345,7 @@ describe('createSkillRegistry', () => {
     it('deletes a persisted skill', async () => {
       const persistedProvider = createMockPersistedProvider([persistedSkill1]);
       const registry = createSkillRegistry({
-        builtinSkills: [],
+        builtinProvider: createMockBuiltinProvider([]),
         persistedProvider,
         toolRegistry: createMockToolRegistry(),
       });
@@ -347,7 +357,7 @@ describe('createSkillRegistry', () => {
 
     it('throws when trying to delete a built-in skill', async () => {
       const registry = createSkillRegistry({
-        builtinSkills: [builtinSkill1],
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
       });
@@ -359,7 +369,7 @@ describe('createSkillRegistry', () => {
 
     it('throws when skill does not exist', async () => {
       const registry = createSkillRegistry({
-        builtinSkills: [],
+        builtinProvider: createMockBuiltinProvider([]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
       });

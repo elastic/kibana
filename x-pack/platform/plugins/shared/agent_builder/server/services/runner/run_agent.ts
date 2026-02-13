@@ -91,7 +91,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       spaceId,
       runner: manager.getRunner(),
     }),
-    skills: createSkillsService({
+    skills: await createSkillsService({
       skillServiceStart,
       toolsServiceStart: toolsService,
       request,
