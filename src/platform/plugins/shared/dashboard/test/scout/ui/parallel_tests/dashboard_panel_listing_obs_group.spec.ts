@@ -14,14 +14,12 @@ import { DASHBOARD_DEFAULT_INDEX_TITLE, DASHBOARD_SAVED_SEARCH_ARCHIVE } from '.
 // includes "observabilityGroup" panel group
 const DASHBOARD_PANEL_GROUP_ORDER = [
   'visualizationsGroup',
-  'controlsGroup',
   'annotation-and-navigationGroup',
   'mlGroup',
   'observabilityGroup',
-  'legacyGroup',
 ];
 
-const DASHBOARD_PANEL_TYPE_COUNT = 24;
+const DASHBOARD_PANEL_TYPE_COUNT = 21;
 
 spaceTest.describe(
   'Dashboard panel listing (includes observability group)',

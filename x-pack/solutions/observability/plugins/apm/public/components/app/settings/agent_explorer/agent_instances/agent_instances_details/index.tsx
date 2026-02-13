@@ -213,6 +213,9 @@ export function AgentInstancesDetails({
     <>
       <EuiInMemoryTable
         items={items}
+        tableCaption={i18n.translate('xpack.apm.agentInstanceDetails.tableCaption', {
+          defaultMessage: 'Agent instances overview',
+        })}
         columns={getInstanceColumns({
           serviceName,
           agentName,
