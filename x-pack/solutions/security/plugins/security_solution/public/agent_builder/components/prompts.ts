@@ -91,3 +91,21 @@ export const RULE_ATTACHMENT_PROMPT = `Review the detection rule provided and he
 Put each suggested field into copyable code block of new field value in markdown with named sections.
 
 Question:`;
+
+export const RULE_EXPLORATION_ATTACHMENT_PROMPT = `
+Evealuate provided Security Detection rule.
+
+Analyze attached rule configuration and explain:
+- What the rule is trying to detect (intent and detection strategy)
+- Query logic and data sources (assumptions, blind spots, and likely false positives)
+- MITRE ATT&CK mappings (coverage quality and possible gaps), briefly explain each mapping
+- Rule schedule and lookback periods (timing risks and missed-event risk)
+- Rule tags, name, and description quality (clarity and discoverability)
+- Rest of the rule configuration
+
+When suggesting improvements:
+- Keep each suggestion focused and practical
+- Put each suggested field value in a separate, copyable markdown code block
+- Use named sections per field
+- If information is missing, ask concise follow-up questions
+`;

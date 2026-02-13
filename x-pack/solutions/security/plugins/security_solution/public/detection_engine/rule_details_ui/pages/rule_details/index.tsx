@@ -148,6 +148,7 @@ import { RuleDefinitionSection } from '../../../rule_management/components/rule_
 import { RuleScheduleSection } from '../../../rule_management/components/rule_details/rule_schedule_section';
 import { ModifiedRuleBadge } from '../../../rule_management/components/rule_details/modified_rule_badge';
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
+import { AddRuleAttachmentToChatButton } from '../../../rule_creation_ui/components/add_rule_attachment_to_chat_button';
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 // eslint-disable-next-line no-restricted-imports
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
@@ -704,6 +705,16 @@ export const RuleDetailsPage = connector(
 
                       <EuiFlexItem grow={false}>
                         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            {rule != null && (
+                              <AddRuleAttachmentToChatButton
+                                rule={rule}
+                                size="s"
+                                pathway="rules_table"
+                                mode="exploration"
+                              />
+                            )}
+                          </EuiFlexItem>
                           <EuiFlexItem grow={false}>
                             <EditRuleSettingButtonLink
                               ruleId={ruleId}

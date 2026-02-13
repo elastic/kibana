@@ -61,7 +61,7 @@ export const RulePanel: FC<RulePanelProps> = memo(({ ruleId, isPreviewMode }) =>
       <FlyoutNavigation flyoutIsExpandable={false} isPreviewMode={isPreviewMode} />
       <PanelHeader rule={rule} isSuppressed={!isExistingRule} />
       <PanelContent rule={rule} />
-      {isPreviewMode && <PreviewFooter ruleId={ruleId} />}
+      {isPreviewMode && <PreviewFooter ruleId={ruleId} rule={rule} />}
     </>
   ) : (
     <FlyoutError />

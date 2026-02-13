@@ -75,6 +75,7 @@ import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/comp
 import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
@@ -543,6 +544,19 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                         isRulePreviewVisible={isRulePreviewVisible}
                         setIsRulePreviewVisible={setIsRulePreviewVisible}
                         togglePanel={togglePanel}
+                        addToChatButton={
+                          rule != null ? (
+                            <AddRuleAttachmentToChatButton
+                              defineStepData={defineStepData}
+                              aboutStepData={aboutStepData}
+                              scheduleStepData={scheduleStepData}
+                              actionsStepData={actionsStepData}
+                              actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
+                              size="s"
+                              mode="exploration"
+                            />
+                          ) : undefined
+                        }
                       />
                       {isRulesCustomizationEnabled && upgradeCallout}
                       {invalidSteps.length > 0 && (
