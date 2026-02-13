@@ -411,13 +411,17 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     const children: Set<string> = new Set();
     const prefix = this.definition.name + '.';
     for (const routing of this._definition.ingest.wired.routing) {
-      // Validate the child stream name using shared validation
-      const childNameValidation = validateStreamName(routing.destination);
-      if (!childNameValidation.valid) {
-        return {
-          isValid: false,
-          errors: [new Error(childNameValidation.message)],
-        };
+      // Only validate child stream name if the child doesn't exist in desired state.
+      // If it exists, it will validate its own name in its own doValidateUpsertion call,
+      // avoiding duplicate error messages.
+      if (!desiredState.has(routing.destination)) {
+        const childNameValidation = validateStreamName(routing.destination);
+        if (!childNameValidation.valid) {
+          return {
+            isValid: false,
+            errors: [new Error(childNameValidation.message)],
+          };
+        }
       }
       if (routing.destination.length <= prefix.length) {
         return {
