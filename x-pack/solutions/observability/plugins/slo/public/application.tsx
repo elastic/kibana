@@ -18,13 +18,15 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import React from 'react';
+import { useHistory } from 'react-router-dom';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import type { ExperimentalFeatures } from '../common/config';
 import { PluginContext } from './context/plugin_context';
+import { getSloHeaderAppActionsConfig } from './header_app_actions/header_app_actions_config';
 import { getRoutes } from './routes/routes';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from './types';
-import type { ISloTelemetryClient } from './services/telemetry';
+import { useKibana } from './hooks/use_kibana';
 
 interface Props {
   core: CoreStart;
@@ -38,7 +40,6 @@ interface Props {
   isServerless?: boolean;
   experimentalFeatures: ExperimentalFeatures;
   sloClient: SLORepositoryClient;
-  telemetry?: ISloTelemetryClient;
 }
 
 export const renderApp = ({
@@ -53,7 +54,6 @@ export const renderApp = ({
   observabilityRuleTypeRegistry,
   experimentalFeatures,
   sloClient,
-  telemetry,
 }: Props) => {
   const { element, history } = appMountParameters;
 
@@ -112,7 +112,6 @@ export const renderApp = ({
                 observabilityRuleTypeRegistry,
                 experimentalFeatures,
                 sloClient,
-                telemetry,
               }}
             >
               <Router history={history}>
@@ -145,6 +144,20 @@ export const renderApp = ({
 
 function App() {
   const routes = getRoutes();
+  const { chrome, application, docLinks } = useKibana().services;
+  const history = useHistory();
+
+  useEffect(() => {
+    chrome.setHeaderAppActionsConfig(
+      getSloHeaderAppActionsConfig({
+        onAnnotations: () => application.navigateToApp('observability', { path: '/annotations' }),
+        onDocs: () => window.open(docLinks.links.observability.slo, '_blank'),
+        onManage: () => history.push('/management'),
+        onSettings: () => history.push('/settings'),
+        onCreateSlo: () => history.push('/create'),
+      })
+    );
+  }, [chrome, application, docLinks, history]);
 
   return (
     <Routes enableExecutionContextTracking={true}>
