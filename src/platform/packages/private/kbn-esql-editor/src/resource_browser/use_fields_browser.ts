@@ -16,8 +16,12 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import type { monaco } from '@kbn/monaco';
 import { BROWSER_POPOVER_WIDTH, DataSourceSelectionChange } from '@kbn/esql-resource-browser';
 import { getEditorExtensions, getEsqlColumns } from '@kbn/esql-utils';
-import { getLocatedSourceItemsFromQuery, getRangeFromOffsets } from './utils';
-import { BROWSER_POPOVER_VERTICAL_OFFSET } from './constants';
+import {
+  getLocatedSourceItemsFromQuery,
+  getQueryWithoutLastPipe,
+  getRangeFromOffsets,
+} from './utils';
+import { BROWSER_POPOVER_VERTICAL_OFFSET, DEFAULT_FIELDS_BROWSER_INDEX } from './constants';
 
 interface UseFieldsBrowserParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
@@ -33,8 +37,6 @@ interface BrowserPopoverPosition {
   top?: number;
   left?: number;
 }
-
-const DEFAULT_FIELDS_BROWSER_INDEX = '.kibana';
 
 export function useFieldsBrowser({
   editorRef,
@@ -95,21 +97,21 @@ export function useFieldsBrowser({
 
   const fetchFields = useCallback(
     async (queryText: string) => {
-      // We only need a source command to retrieve fields. When the current query doesn't have
-      // any sources yet, fall back to a stable Kibana index so the browser can still function.
-      const mainSources = getLocatedSourceItemsFromQuery(queryText)
+      // Run the query without the last pipe so trailing incomplete commands (e.g. "| KEEP")
+      // are dropped and we get columns for the context the user is editing.
+      const queryToRun = getQueryWithoutLastPipe(queryText);
+      const mainSources = getLocatedSourceItemsFromQuery(queryToRun)
         .map((s) => s.name)
         .filter((name): name is string => Boolean(name));
       const indexPattern = mainSources.length
         ? mainSources.join(',')
         : DEFAULT_FIELDS_BROWSER_INDEX;
-      // `getColumnsFor` ultimately uses `getESQLQueryColumnsRaw()`, which appends `| limit 0`
-      // internally. So we pass a plain source query here (no extra LIMIT) to match the
-      // existing usage in `kbn-esql-language` (e.g. `fetchFields('FROM <index>')`).
-      const minimalQuery = `FROM ${indexPattern}`;
+      // When the trimmed query has no source command (e.g. only "| STATS ..."), fall back
+      // to a minimal FROM so the browser can still retrieve fields.
+      const esqlQuery = queryToRun && mainSources.length ? queryToRun : `FROM ${indexPattern}`;
 
       return await getEsqlColumns({
-        esqlQuery: minimalQuery,
+        esqlQuery,
         search,
         timeRange: getTimeRange(),
         signal,
@@ -134,15 +136,16 @@ export function useFieldsBrowser({
   );
 
   const openFieldsBrowser = useCallback(
-    async (options?: { preloadedFields?: string[] }) => {
+    async (options?: { preloadedFields?: Array<{ name: string; type?: string }> }) => {
       const model = editorModel.current;
       const editor = editorRef.current;
       if (!model || !editor) return;
 
       // Reset per-open-session state.
       insertedTextLengthRef.current = 0;
-      suggestedFieldNamesRef.current = options?.preloadedFields?.length
-        ? new Set(options.preloadedFields)
+      const preloadedFields = options?.preloadedFields;
+      suggestedFieldNamesRef.current = preloadedFields?.length
+        ? new Set(preloadedFields.map((f) => f.name))
         : undefined;
 
       const fullText = model.getValue() || '';
@@ -152,31 +155,51 @@ export function useFieldsBrowser({
       const cursorOffset = model.getOffsetAt(cursorPosition);
       insertAnchorOffsetRef.current = cursorOffset;
 
-      setIsLoadingFields(true);
-      try {
-        const [fetchedFields, fetchedRecommended] = await Promise.all([
-          fetchFields(fullText),
-          fetchRecommendedFields(fullText),
-        ]);
+      // If callers already have fields (e.g. from autocomplete context) we reuse them to avoid
+      // an extra async fetch, improving responsiveness.
+      const shouldUsePreloaded = Boolean(preloadedFields?.length);
 
-        const suggested = suggestedFieldNamesRef.current;
-        const filteredFields =
-          suggested && suggested.size
-            ? fetchedFields.filter((f) => suggested.has(f.name))
-            : fetchedFields;
+      if (shouldUsePreloaded && preloadedFields) {
+        const fieldsFromNames: ESQLFieldWithMetadata[] = preloadedFields.map((f) => ({
+          name: f.name,
+          type: (f.type as ESQLFieldWithMetadata['type']) ?? 'keyword',
+          userDefined: false,
+        }));
+        setAllFields(fieldsFromNames);
+        setIsLoadingFields(false);
+        // Recommended fields are always fetched (even when using preloaded fields).
+        fetchRecommendedFields(fullText).then((fetchedRecommended) => {
+          if (isMountedRef.current) {
+            setRecommendedFields(fetchedRecommended);
+          }
+        });
+      } else {
+        setIsLoadingFields(true);
+        try {
+          const [fetchedFields, fetchedRecommended] = await Promise.all([
+            fetchFields(fullText),
+            fetchRecommendedFields(fullText),
+          ]);
 
-        if (isMountedRef.current) {
-          setAllFields(filteredFields);
-          setRecommendedFields(fetchedRecommended);
-        }
-      } catch {
-        if (isMountedRef.current) {
-          setAllFields([]);
-          setRecommendedFields([]);
-        }
-      } finally {
-        if (isMountedRef.current) {
-          setIsLoadingFields(false);
+          const suggested = suggestedFieldNamesRef.current;
+          const filteredFields =
+            suggested && suggested.size
+              ? fetchedFields.filter((f) => suggested.has(f.name))
+              : fetchedFields;
+
+          if (isMountedRef.current) {
+            setAllFields(filteredFields);
+            setRecommendedFields(fetchedRecommended);
+          }
+        } catch {
+          if (isMountedRef.current) {
+            setAllFields([]);
+            setRecommendedFields([]);
+          }
+        } finally {
+          if (isMountedRef.current) {
+            setIsLoadingFields(false);
+          }
         }
       }
 

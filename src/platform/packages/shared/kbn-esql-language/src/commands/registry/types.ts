@@ -110,6 +110,8 @@ export type GetColumnsByTypeFn = (
     openSuggestions?: boolean;
     addComma?: boolean;
     variableType?: ESQLVariableType;
+    /** When true, prepends a "Browse fields" suggestion with current columns as preloaded fields. */
+    isFieldsBrowserEnabled?: boolean;
   }
 ) => Promise<ISuggestionItem[]>;
 

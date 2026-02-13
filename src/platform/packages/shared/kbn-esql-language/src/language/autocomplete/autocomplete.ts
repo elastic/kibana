@@ -272,12 +272,20 @@ async function getSuggestionsWithinCommandExpression(
     unmappedFieldsStrategy,
   };
 
+  // Wrap getColumnsByType so the fields browser option is injected from context;
+  // command autocompletes and getFieldsSuggestions stay agnostic.
+  const getByTypeWithContext: GetColumnsByTypeFn = (type, ignored, options) =>
+    getColumnsByType(type, ignored, {
+      ...options,
+      isFieldsBrowserEnabled: context.isFieldsBrowserEnabled,
+    });
+
   // does it make sense to have a different context per command?
   const suggestions = await commandDefinition.methods.autocomplete(
     fullText,
     astContext.command,
     {
-      getByType: getColumnsByType,
+      getByType: getByTypeWithContext,
       getSuggestedUserDefinedColumnName,
       getColumnsForQuery: callbacks?.getColumnsFor
         ? async (query: string) => {
