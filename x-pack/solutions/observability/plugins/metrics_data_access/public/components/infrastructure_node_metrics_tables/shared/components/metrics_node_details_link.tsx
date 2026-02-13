@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import { parse } from '@kbn/datemath';
 import { EuiLink } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { type ComposerQuery, esql } from '@kbn/esql-language';
 import type {
   DataSchemaFormat,
   InventoryItemType,
@@ -33,26 +34,20 @@ interface MetricsNodeDetailsLinkProps {
   metricIndices?: string;
 }
 
-/** Escape entity id for use inside an ES|QL double-quoted string literal. */
-function escapeEsqlStringLiteral(value: string): string {
-  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-}
-
 /** Build an ES|QL query that filters by the given node type and entity id. */
 function getDiscoverEsqlQueryForNode(
   nodeType: NodeTypeForLink,
   entityId: string,
   indexPattern: string
 ): string {
-  const escaped = escapeEsqlStringLiteral(entityId);
   const from = indexPattern || DEFAULT_METRICS_INDEX;
   switch (nodeType) {
     case 'container':
-      return `TS ${from} | WHERE container.id == "${escaped}"`;
+      return esql`FROM ${from} | WHERE container.id == "${entityId}"`.toString();
     case 'pod':
-      return `TS ${from} | WHERE k8s.pod.uid == "${escaped}"`;
+      return esql`TS ${from} | WHERE k8s.pod.uid == "${entityId}"`.toString();
     default:
-      return `TS ${from}`;
+      return esql`TS ${from}`.toString();
   }
 }
 
