@@ -50,9 +50,8 @@ export function SuggestedStreamPanel({
   onPreview(toggle: boolean): void;
   index: number;
   onEdit(index: number, suggestion: PartitionSuggestion): void;
-  onSave?: () => void;
+  onSave?: (suggestion: PartitionSuggestion) => void;
 }) {
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const {
     changeSuggestionNameDebounced,
     changeSuggestionCondition,
@@ -60,12 +59,20 @@ export function SuggestedStreamPanel({
     setConditionEditorValidity,
   } = useStreamRoutingEvents();
 
-  const editedSuggestion = routingSnapshot.context.editedSuggestion;
-  const isEditing =
-    routingSnapshot.matches({ ready: { ingestMode: 'editingSuggestedRule' } }) &&
-    routingSnapshot.context.editingSuggestionIndex === index;
+  const isEditing = useStreamsRoutingSelector(
+    (snapshot) =>
+      snapshot.matches({ ready: { ingestMode: 'editingSuggestedRule' } }) &&
+      snapshot.context.editingSuggestionIndex === index
+  );
+  const editedSuggestionForPanel = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({ ready: { ingestMode: 'editingSuggestedRule' } }) &&
+    snapshot.context.editingSuggestionIndex === index
+      ? snapshot.context.editedSuggestion
+      : null
+  );
 
-  const currentSuggestion = isEditing && editedSuggestion ? editedSuggestion : partition;
+  const currentSuggestion =
+    isEditing && editedSuggestionForPanel ? editedSuggestionForPanel : partition;
   const matchRate = useMatchRate(definition, currentSuggestion);
 
   const selectedPreview = useStreamSamplesSelector((snapshot) => snapshot.context.selectedPreview);
@@ -126,7 +133,7 @@ export function SuggestedStreamPanel({
             isSuggestionRouting={true}
           />
           <EditSuggestedRuleControls
-            onSave={onSave}
+            onSave={onSave ? () => onSave(currentSuggestion) : undefined}
             onAccept={() => reviewSuggestedRule(currentSuggestion.name || partition.name)}
             conditionError={conditionError}
             isStreamNameValid={isStreamNameValid}
