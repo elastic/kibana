@@ -148,6 +148,13 @@ export class OnboardingApp {
         { timeout: 30_000 }
       );
     }
+
+    // For flows that have the ingestion selector, wait for it to be visible
+    const flowsWithIngestionSelector =
+      /(auto-detect-logs|kubernetes-quick-start|otel-logs|otel-kubernetes)/;
+    if (flowsWithIngestionSelector.test(cardSelector)) {
+      await this.ingestionModeSelector.waitFor({ state: 'visible', timeout: 30000 });
+    }
   }
 
   async getGridColumnCount() {
@@ -183,5 +190,66 @@ export class OnboardingApp {
     await this.hostUseCaseTile.waitFor({ state: 'visible' });
     await this.kubernetesUseCaseTile.waitFor({ state: 'visible' });
     await this.cloudUseCaseTile.waitFor({ state: 'visible' });
+  }
+
+  public get ingestionModeSelector() {
+    return this.page.getByTestId('observabilityOnboardingIngestionModeSelector');
+  }
+
+  public get classicIngestionOption() {
+    return this.ingestionModeSelector.getByRole('button', { name: /Classic ingestion/i });
+  }
+
+  public get wiredStreamsOption() {
+    return this.ingestionModeSelector.getByRole('button', { name: /Wired Streams/i });
+  }
+
+  public get techPreviewBadge() {
+    return this.ingestionModeSelector.locator('.euiBetaBadge', { hasText: 'Tech Preview' });
+  }
+
+  async selectWiredStreams() {
+    await this.wiredStreamsOption.click();
+  }
+
+  async selectClassicIngestion() {
+    await this.classicIngestionOption.click();
+  }
+
+  public get autoDetectCodeSnippet() {
+    return this.page.getByTestId('observabilityOnboardingAutoDetectPanelCodeSnippet');
+  }
+
+  public get kubernetesCodeSnippet() {
+    return this.page.getByTestId('observabilityOnboardingKubernetesPanelCodeSnippet');
+  }
+
+  async getAutoDetectCommandContent(): Promise<string> {
+    return (await this.autoDetectCodeSnippet.textContent()) ?? '';
+  }
+
+  async getKubernetesCommandContent(): Promise<string> {
+    return (await this.kubernetesCodeSnippet.textContent()) ?? '';
+  }
+
+  // Enable Wired Streams Modal
+  public get enableWiredStreamsModal() {
+    return this.page.getByTestId('observabilityOnboardingEnableWiredStreamsModal');
+  }
+
+  public get enableWiredStreamsCancelButton() {
+    return this.page.getByTestId('observabilityOnboardingEnableWiredStreamsCancelButton');
+  }
+
+  public get enableWiredStreamsConfirmButton() {
+    return this.page.getByTestId('observabilityOnboardingEnableWiredStreamsConfirmButton');
+  }
+
+  async cancelEnableWiredStreamsModal() {
+    await this.enableWiredStreamsCancelButton.click();
+  }
+
+  async confirmEnableWiredStreamsModal() {
+    await this.enableWiredStreamsConfirmButton.click();
   }
 }

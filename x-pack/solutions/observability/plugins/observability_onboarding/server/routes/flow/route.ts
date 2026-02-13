@@ -13,8 +13,9 @@ import {
   type PackageClient,
 } from '@kbn/fleet-plugin/server';
 import { dump } from 'js-yaml';
-import type { PackageDataStreamTypes, Output } from '@kbn/fleet-plugin/common/types';
-import { transformOutputToFullPolicyOutput } from '@kbn/fleet-plugin/server/services/output_client';
+import type { PackageDataStreamTypes } from '@kbn/fleet-plugin/common/types';
+import { generateAgentConfigTar } from './generate_agent_config';
+import { createWiredStreamsRoutingProcessor } from './inject_wired_streams_routing';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../common/telemetry_events';
 import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
 import type { SavedObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
@@ -28,7 +29,6 @@ import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { createInstallApiKey } from '../../lib/api_key/create_install_api_key';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 import { hasFleetIntegrationPrivileges } from '../../lib/api_key/has_fleet_integration_privileges';
-import { makeTar, type Entry } from './make_tar';
 
 const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/flow/{id}/step/{name}',
@@ -303,6 +303,7 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
     query: t.union([
       t.partial({
         metricsEnabled: t.string,
+        writeToLogsStreams: t.string,
       }),
       t.undefined,
     ]),
@@ -352,12 +353,14 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
     }
 
     const metricsEnabled = params.query?.metricsEnabled === 'true';
+    const writeToLogsStreams = params.query?.writeToLogsStreams === 'true';
     let installedIntegrations: InstalledIntegration[] = [];
     try {
       const settledResults = await ensureInstalledIntegrations(
         integrationsToInstall,
         packageClient,
-        metricsEnabled
+        metricsEnabled,
+        writeToLogsStreams
       );
       installedIntegrations = settledResults.reduce<InstalledIntegration[]>((acc, result) => {
         if (result.status === 'fulfilled') {
@@ -413,11 +416,15 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       },
     });
 
+    const shouldWriteToLogsStreams =
+      writeToLogsStreams &&
+      installedIntegrations.some((integration) => integration.installSource === 'custom');
+
     return response.ok({
       headers: {
         'content-type': 'application/x-tar',
       },
-      body: generateAgentConfigTar(output, installedIntegrations),
+      body: generateAgentConfigTar(output, installedIntegrations, shouldWriteToLogsStreams),
     });
   },
 });
@@ -443,7 +450,8 @@ export type IntegrationToInstall = RegistryIntegrationToInstall | CustomIntegrat
 async function ensureInstalledIntegrations(
   integrationsToInstall: IntegrationToInstall[],
   packageClient: PackageClient,
-  metricsEnabled: boolean = true
+  metricsEnabled: boolean = true,
+  writeToLogsStreams: boolean = false
 ): Promise<Array<PromiseSettledResult<InstalledIntegration>>> {
   return Promise.allSettled(
     integrationsToInstall.map(async (integration) => {
@@ -457,7 +465,10 @@ async function ensureInstalledIntegrations(
           pkg.version,
           (input) =>
             !['httpjson', 'winlog'].includes(input.type) &&
-            (metricsEnabled || !input.type.endsWith('/metrics'))
+            (metricsEnabled || !input.type.endsWith('/metrics')),
+          undefined, // prerelease
+          undefined, // ignoreUnverified
+          false // injectWiredStreamsRouting (only custom logs should route to /logs)
         );
 
         const { packageInfo } = await packageClient.getPackage(pkg.name, pkg.version);
@@ -479,6 +490,19 @@ async function ensureInstalledIntegrations(
         type: 'logs',
         dataset: pkgName,
       };
+
+      const processors = [
+        ...(writeToLogsStreams ? [createWiredStreamsRoutingProcessor()] : []),
+        {
+          add_fields: {
+            target: 'service',
+            fields: {
+              name: pkgName,
+            },
+          },
+        },
+      ];
+
       const installed: InstalledIntegration = {
         installSource,
         pkgName,
@@ -494,16 +518,7 @@ async function ensureInstalledIntegrations(
                   id: `filestream-${pkgName}`,
                   data_stream: dataStream,
                   paths: integration.logFilePaths,
-                  processors: [
-                    {
-                      add_fields: {
-                        target: 'service',
-                        fields: {
-                          name: pkgName,
-                        },
-                      },
-                    },
-                  ],
+                  processors,
                 },
               ],
             },
@@ -613,37 +628,6 @@ function parseRegistryIntegrationMetadata(
     default:
       return undefined;
   }
-}
-
-function generateAgentConfigTar(output: Output, installedIntegrations: InstalledIntegration[]) {
-  const now = new Date();
-
-  return makeTar([
-    {
-      type: 'File',
-      path: 'elastic-agent.yml',
-      mode: 0o644,
-      mtime: now,
-      data: dump({
-        outputs: {
-          default: transformOutputToFullPolicyOutput(output, undefined, true),
-        },
-      }),
-    },
-    {
-      type: 'Directory',
-      path: 'inputs.d/',
-      mode: 0o755,
-      mtime: now,
-    },
-    ...installedIntegrations.map<Entry>((integration) => ({
-      type: 'File',
-      path: `inputs.d/${integration.pkgName}.yml`,
-      mode: 0o644,
-      mtime: now,
-      data: integration.config,
-    })),
-  ]);
 }
 
 export const flowRouteRepository = {

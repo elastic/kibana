@@ -53,6 +53,8 @@ dependsOn:
   - '@kbn/apm-plugin'
   - '@kbn/react-kibana-mount'
   - '@kbn/react-query'
+  - '@kbn/streams-plugin'
+  - '@kbn/data-views-plugin'
 tags:
   - plugin
   - prod

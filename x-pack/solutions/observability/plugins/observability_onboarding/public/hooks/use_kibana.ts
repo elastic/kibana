@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
 import {
   context as KibanaContext,
   KibanaContextProvider,
   useKibana,
 } from '@kbn/kibana-react-plugin/public';
+import type { ObservabilityOnboardingAppServices } from '..';
 
-export type Services = CoreStart;
+export type Services = ObservabilityOnboardingAppServices;
 
 const useTypedKibana = () => useKibana<Services>();
 
