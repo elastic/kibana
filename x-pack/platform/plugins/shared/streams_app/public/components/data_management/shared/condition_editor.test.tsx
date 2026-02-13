@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
@@ -16,11 +16,12 @@ import { ConditionEditor } from './condition_editor';
 import type { Suggestion } from './autocomplete_selector';
 
 jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({ value, onChange, dataTestSubj }: any) => (
+  CodeEditor: ({ value, onChange, onBlur, dataTestSubj }: any) => (
     <textarea
       data-test-subj={dataTestSubj}
       value={value}
       onChange={(e) => onChange?.(e.target.value)}
+      onBlur={() => onBlur?.()}
     />
   ),
 }));
@@ -108,6 +109,125 @@ describe('ConditionEditor', () => {
 
       const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
       expect(switchButton).toBeDisabled();
+    });
+
+    it('does not call onConditionChange on every keystroke; emits on debounce when JSON is valid', async () => {
+      jest.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+        />
+      );
+
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      const textarea = screen.getByTestId(
+        'streamsAppConditionEditorCodeEditor'
+      ) as HTMLTextAreaElement;
+      const nextValue = JSON.stringify({ field: 'severity_text', eq: 'error' }, null, 2);
+
+      fireEvent.change(textarea, { target: { value: nextValue } });
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
+
+      act(() => {
+        jest.advanceTimersByTime(400);
+      });
+
+      expect(mockOnConditionChange).toHaveBeenCalledTimes(1);
+      expect(mockOnConditionChange).toHaveBeenCalledWith({ field: 'severity_text', eq: 'error' });
+
+      jest.useRealTimers();
+    });
+
+    it('flushes the last valid JSON immediately on blur', async () => {
+      jest.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+        />
+      );
+
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      const textarea = screen.getByTestId(
+        'streamsAppConditionEditorCodeEditor'
+      ) as HTMLTextAreaElement;
+      const nextValue = JSON.stringify({ field: 'severity_text', eq: 'warn' }, null, 2);
+
+      fireEvent.change(textarea, { target: { value: nextValue } });
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
+
+      fireEvent.blur(textarea);
+      expect(mockOnConditionChange).toHaveBeenCalledTimes(1);
+      expect(mockOnConditionChange).toHaveBeenCalledWith({ field: 'severity_text', eq: 'warn' });
+
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+      expect(mockOnConditionChange).toHaveBeenCalledTimes(1);
+
+      jest.useRealTimers();
+    });
+
+    it('does not flush on blur when the syntax editor value has not changed', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+        />
+      );
+
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      const textarea = screen.getByTestId(
+        'streamsAppConditionEditorCodeEditor'
+      ) as HTMLTextAreaElement;
+
+      fireEvent.blur(textarea);
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
+    });
+
+    it('flushes pending debounced updates on unmount', async () => {
+      jest.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+
+      const { unmount } = renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+        />
+      );
+
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      const textarea = screen.getByTestId(
+        'streamsAppConditionEditorCodeEditor'
+      ) as HTMLTextAreaElement;
+      const nextValue = JSON.stringify({ field: 'severity_text', eq: 'debug' }, null, 2);
+
+      fireEvent.change(textarea, { target: { value: nextValue } });
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
+
+      unmount();
+      expect(mockOnConditionChange).toHaveBeenCalledTimes(1);
+      expect(mockOnConditionChange).toHaveBeenCalledWith({ field: 'severity_text', eq: 'debug' });
+
+      jest.useRealTimers();
     });
   });
 
