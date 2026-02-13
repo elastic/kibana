@@ -118,14 +118,34 @@ const mockServices: ServiceListItem[] = [
 
 function createMockServiceActions({
   showActionsColumn = true,
+  hasDiscoverActions = true,
   hasAlertActions = true,
   hasSloActions = true,
 }: {
   showActionsColumn?: boolean;
+  hasDiscoverActions?: boolean;
   hasAlertActions?: boolean;
   hasSloActions?: boolean;
 } = {}) {
   const actions = [];
+
+  if (hasDiscoverActions) {
+    actions.push({
+      id: 'discover',
+      actions: [
+        {
+          id: 'servicesTable-openTracesInDiscover',
+          name: 'Open traces in Discover',
+          href: jest.fn().mockReturnValue('http://discover/traces'),
+        },
+        {
+          id: 'servicesTable-openLogsInDiscover',
+          name: 'Open logs in Discover',
+          href: jest.fn().mockReturnValue('http://discover/logs'),
+        },
+      ],
+    });
+  }
 
   if (hasAlertActions) {
     actions.push({
@@ -663,6 +683,12 @@ describe('ApmServicesTable', () => {
       fireEvent.click(actionButtons[0]);
 
       await waitFor(() => {
+        expect(
+          screen.getByTestId('apmManagedTableActionsMenuItem-servicesTable-openTracesInDiscover')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByTestId('apmManagedTableActionsMenuItem-servicesTable-openLogsInDiscover')
+        ).toBeInTheDocument();
         expect(screen.getByTestId('apmManagedTableActionsMenuGroup-alerts')).toBeInTheDocument();
         expect(screen.getByTestId('apmManagedTableActionsMenuGroup-slos')).toBeInTheDocument();
       });
@@ -726,6 +752,62 @@ describe('ApmServicesTable', () => {
           screen.getByTestId('apmManagedTableActionsMenuItem-createAvailabilitySlo')
         ).toBeInTheDocument();
         expect(screen.getByTestId('apmManagedTableActionsMenuItem-manageSlos')).toBeInTheDocument();
+      });
+    });
+
+    it('shows Discover actions in the menu', async () => {
+      mockUseServiceActions.mockReturnValue(
+        createMockServiceActions({
+          showActionsColumn: true,
+          hasDiscoverActions: true,
+          hasAlertActions: false,
+          hasSloActions: false,
+        })
+      );
+
+      renderApmServicesTable({ history });
+
+      await screen.findByRole('table');
+
+      const actionButtons = screen.getAllByTestId('apmManagedTableActionsCellButton');
+      fireEvent.click(actionButtons[0]);
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId('apmManagedTableActionsMenuItem-servicesTable-openTracesInDiscover')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByTestId('apmManagedTableActionsMenuItem-servicesTable-openLogsInDiscover')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('always shows Discover actions alongside alert and SLO actions', async () => {
+      mockUseServiceActions.mockReturnValue(
+        createMockServiceActions({
+          showActionsColumn: true,
+          hasDiscoverActions: true,
+          hasAlertActions: true,
+          hasSloActions: true,
+        })
+      );
+
+      renderApmServicesTable({ history });
+
+      await screen.findByRole('table');
+
+      const actionButtons = screen.getAllByTestId('apmManagedTableActionsCellButton');
+      fireEvent.click(actionButtons[0]);
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId('apmManagedTableActionsMenuItem-servicesTable-openTracesInDiscover')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByTestId('apmManagedTableActionsMenuItem-servicesTable-openLogsInDiscover')
+        ).toBeInTheDocument();
+        expect(screen.getByTestId('apmManagedTableActionsMenuGroup-alerts')).toBeInTheDocument();
+        expect(screen.getByTestId('apmManagedTableActionsMenuGroup-slos')).toBeInTheDocument();
       });
     });
   });
