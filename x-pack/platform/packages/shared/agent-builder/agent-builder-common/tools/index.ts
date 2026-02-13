@@ -68,6 +68,8 @@ export {
   type ResourceListResult,
   type EsqlResults,
   type VisualizationResult,
+  type ScriptPanelResult,
+  type ScriptPanelResultData,
   type OtherResult,
   type FileReferenceResult,
   isErrorResult,
@@ -77,6 +79,7 @@ export {
   isResourceResult,
   isResourceListResult,
   isVisualizationResult,
+  isScriptPanelResult,
   isFileReferenceResult,
 } from './tool_result';
 export { type BrowserApiToolMetadata } from './browser_tool_metadata';
