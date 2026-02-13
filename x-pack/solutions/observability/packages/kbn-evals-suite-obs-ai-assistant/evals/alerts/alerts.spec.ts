@@ -8,6 +8,7 @@
 import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
 import moment from 'moment';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { tags } from '@kbn/evals';
 import { createEvaluateAlertsDataset } from './evaluate_alerts_dataset';
 import type { EvaluateAlertsDataset } from './evaluate_alerts_dataset';
 import { evaluate as base } from '../../src/evaluate';
@@ -39,7 +40,7 @@ const evaluate = base.extend<{
   ],
 });
 
-evaluate.describe('Alerts', { tag: '@svlOblt' }, () => {
+evaluate.describe('Alerts', { tag: tags.serverless.observability.complete }, () => {
   const ruleIds: string[] = [];
 
   evaluate.beforeAll(async ({ kbnClient, apmSynthtraceEsClient, log }) => {

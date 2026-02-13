@@ -6,6 +6,7 @@
  */
 
 import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
+import { tags } from '@kbn/evals';
 import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateApmDataset } from './evaluate_apm_dataset';
 import { createEvaluateApmDataset } from './evaluate_apm_dataset';
@@ -35,7 +36,7 @@ const evaluate = base.extend<{
   ],
 });
 
-evaluate.describe('APM functionality', { tag: '@svlOblt' }, () => {
+evaluate.describe('APM functionality', { tag: tags.serverless.observability.complete }, () => {
   const ruleIds: string[] = [];
 
   evaluate.beforeAll(async ({ apmSynthtraceEsClient, kbnClient, log }) => {
