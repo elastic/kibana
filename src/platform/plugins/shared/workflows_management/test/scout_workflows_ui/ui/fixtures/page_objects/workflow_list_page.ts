@@ -27,6 +27,7 @@ export class WorkflowListPage {
     const toggles = this.getWorkflowRow(workflowName).locator(
       '[data-test-subj^="workflowToggleSwitch-"]'
     );
+    // eslint-disable-next-line playwright/no-nth-methods
     return toggles.nth(index);
   }
 
@@ -35,6 +36,7 @@ export class WorkflowListPage {
     const checkboxes = this.getWorkflowRow(workflowName).locator(
       'td:first-child input[type="checkbox"]'
     );
+    // eslint-disable-next-line playwright/no-nth-methods
     return checkboxes.nth(index);
   }
 
@@ -47,6 +49,7 @@ export class WorkflowListPage {
     index: number = 0
   ): Locator {
     const actions = this.getWorkflowRow(workflowName).locator(`[data-test-subj="${action}"]`);
+    // eslint-disable-next-line playwright/no-nth-methods
     return actions.nth(index);
   }
 
@@ -63,6 +66,7 @@ export class WorkflowListPage {
     const buttons = this.getWorkflowRow(workflowName).locator(
       '[data-test-subj="euiCollapsedItemActionsButton"]'
     );
+    // eslint-disable-next-line playwright/no-nth-methods
     buttons.nth(index).click();
     return this.page.locator(`.euiContextMenuPanel [data-test-subj="${action}"]`);
   }
