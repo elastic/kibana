@@ -12,6 +12,7 @@ import { EuiFieldSearch, EuiHighlight, EuiSelectable, EuiSpacer } from '@elastic
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { getUserDisplayName, UserAvatar } from '@kbn/user-profile-components';
+import { NO_ASSIGNEES_OPTION_KEY } from '../constants';
 import { OptionsListStrings } from '../options_list_strings';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_message';
@@ -32,7 +33,7 @@ export const UsersSuggestions = memo(() => {
 
   const renderOption = useCallback((option: EuiSelectableOption, searchStringValue: string) => {
     return (
-      <EuiHighlight search={option.key === 'exists-option' ? '' : searchStringValue}>
+      <EuiHighlight search={option.key === NO_ASSIGNEES_OPTION_KEY ? '' : searchStringValue}>
         {option.label}
       </EuiHighlight>
     );
@@ -63,18 +64,27 @@ export const UsersSuggestions = memo(() => {
   const selectableOptions = useMemo(() => {
     const selectedOptionsSet = new Set(selectedOptions);
 
-    return suggestedUserIds.map((uid) => {
+    const noAssigneesOption: EuiSelectableOption = {
+      key: NO_ASSIGNEES_OPTION_KEY,
+      label: OptionsListStrings.controlAndPopover.getNoAssignees(),
+      checked: selectedOptionsSet.has(NO_ASSIGNEES_OPTION_KEY) ? 'on' : undefined,
+      'data-test-subj': 'optionsList-control-selection-no-assignees',
+    };
+
+    const userSuggestions = suggestedUserIds.map((uid) => {
       const profile = getCachedUserProfileWithAvatar(uid);
 
       return {
         key: uid,
         label: profile?.user ? getUserDisplayName(profile.user) : undefined,
-        checked: selectedOptionsSet.has(uid) ? 'on' : undefined, // TODO: change to "on" when selected
+        checked: selectedOptionsSet.has(uid) ? 'on' : undefined,
         prepend: profile?.user ? (
           <UserAvatar user={profile.user} avatar={profile.data.avatar} size="s" />
         ) : undefined,
       } as EuiSelectableOption;
     });
+
+    return [noAssigneesOption, ...userSuggestions];
   }, [suggestedUserIds, selectedOptions]);
 
   return (
