@@ -1,0 +1,16 @@
+// This file is used as an example in the generated file kibana-settings-main.asciidoc
+The following example shows a valid verbose `logging.root` configuration:
++
+[source,text]
+--
+logging:
+  appenders:
+    console_appender:
+      type: console
+      layout:
+        type: pattern
+        highlight: true
+  root:
+    appenders: [console_appender]
+    level: all
+--
