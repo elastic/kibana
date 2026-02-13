@@ -24,7 +24,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let apiClient: StreamsSupertestRepositoryClient;
 
   describe('Systems', function () {
-    const STREAM_NAME = 'logs.systems-test';
+    const STREAM_NAME = 'logs.otel.systems-test';
 
     const upsertSystem = async (body: System) => {
       return await apiClient.fetch('PUT /internal/streams/{name}/systems/{systemName}', {

@@ -57,6 +57,28 @@ const otelBaseFields: FieldDefinition = {
   },
 };
 
+// ECS base fields used by logs.ecs root stream
+const ecsBaseFields: FieldDefinition = {
+  '@timestamp': {
+    type: 'date',
+  },
+  'stream.name': {
+    type: 'system',
+  },
+  'host.name': {
+    type: 'keyword',
+  },
+  'service.name': {
+    type: 'keyword',
+  },
+  message: {
+    type: 'match_only_text',
+  },
+  'log.level': {
+    type: 'keyword',
+  },
+};
+
 // Helper function to create root stream definition
 function createRootStreamDefinition(
   name: string,
@@ -93,7 +115,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // Get the correct root stream definition based on the stream name
         const rootStreamDefinition = createRootStreamDefinition(
           rootStream,
-          rootStream === 'logs.otel' ? otelBaseFields : {}
+          rootStream === 'logs.otel' ? otelBaseFields : ecsBaseFields
         );
 
         before(async () => {

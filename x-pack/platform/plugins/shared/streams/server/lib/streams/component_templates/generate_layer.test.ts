@@ -367,7 +367,7 @@ describe('generateLayer', () => {
       const settings = result.template.settings as Record<string, any>;
 
       expect(settings.index.mode).toBe('logsdb');
-      expect(settings.index.sort.field).toEqual(['@timestamp']);
+      expect(settings.index.sort.field).toEqual(['host.name', '@timestamp']);
     });
 
     it('should include OTel aliases for child streams of OTel-based roots', () => {

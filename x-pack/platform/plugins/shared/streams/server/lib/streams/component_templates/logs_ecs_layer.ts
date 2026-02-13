@@ -6,14 +6,15 @@
  */
 
 import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldDefinition } from '@kbn/streams-schema';
 
 export const ecsLogsSettings: IndicesIndexSettings = {
   index: {
     mode: 'logsdb',
     codec: 'best_compression',
     sort: {
-      field: ['@timestamp'],
-      order: ['desc'],
+      field: ['host.name', '@timestamp'],
+      order: ['asc', 'desc'],
     },
     mapping: {
       total_fields: {
@@ -21,5 +22,26 @@ export const ecsLogsSettings: IndicesIndexSettings = {
       },
       ignore_malformed: true,
     },
+  },
+};
+
+export const ecsBaseFields: FieldDefinition = {
+  '@timestamp': {
+    type: 'date',
+  },
+  'stream.name': {
+    type: 'system',
+  },
+  'host.name': {
+    type: 'keyword',
+  },
+  'service.name': {
+    type: 'keyword',
+  },
+  message: {
+    type: 'match_only_text',
+  },
+  'log.level': {
+    type: 'keyword',
   },
 };

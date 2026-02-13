@@ -12,6 +12,7 @@ import {
   ROOT_STREAM_NAMES,
 } from '@kbn/streams-schema';
 import { baseFields } from './component_templates/logs_layer';
+import { ecsBaseFields } from './component_templates/logs_ecs_layer';
 
 export const createRootStreamDefinition = (
   streamName: string = LOGS_ROOT_STREAM_NAME
@@ -31,7 +32,7 @@ export const createRootStreamDefinition = (
       processing: { steps: [], updated_at: now },
       wired: {
         routing: [],
-        fields: streamName === LOGS_ECS_STREAM_NAME ? {} : baseFields,
+        fields: streamName === LOGS_ECS_STREAM_NAME ? ecsBaseFields : baseFields,
       },
     },
   };
