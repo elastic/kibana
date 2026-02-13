@@ -6,13 +6,14 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
 import { getFleetNoneIntegrationsAllRole } from '../fixtures/services/privileges';
 
 test.describe(
   'When the user has All privileges for Integrations but None for Fleet',
-  { tag: ['@ess'] },
+  { tag: tags.stateful.classic },
   () => {
     test('Integrations are visible but cannot be added', async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginWithCustomRole(getFleetNoneIntegrationsAllRole());

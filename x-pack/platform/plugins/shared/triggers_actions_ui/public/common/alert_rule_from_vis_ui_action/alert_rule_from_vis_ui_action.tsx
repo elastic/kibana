@@ -13,11 +13,11 @@ import type {
 } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import type { LensApi } from '@kbn/lens-plugin/public';
-import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { css } from '@emotion/react';
+import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { type ServiceDependencies } from './rule_flyout_component';
 
 interface Context {

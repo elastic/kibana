@@ -14,7 +14,6 @@ import { Subscription, switchMap } from 'rxjs';
 
 import { EuiButtonIcon, EuiToolTip, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { CONTROL_HOVER_TRIGGER_ID } from '@kbn/controls-constants';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
@@ -25,6 +24,7 @@ import {
 } from '@kbn/presentation-publishing';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 
+import { CONTROL_HOVER_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { ControlRendererServices } from '../types';
 
 export interface FloatingActionsProps {
