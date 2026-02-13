@@ -12,7 +12,7 @@ import type { AlertingUsage } from './types';
 
 const byTypeSchema: MakeSchemaFrom<AlertingUsage>['count_by_type'] = {
   // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
-  DYNAMIC_KEY: { type: 'long', _meta: { description: 'Breakdown for unknown rule type.' } },
+  DYNAMIC_KEY: { type: 'long', _meta: { description: 'Breakdown for other rule types.' } },
   // Known rule types (searching the use of the rules API `registerType`:
   // Built-in
   '__index-threshold': {

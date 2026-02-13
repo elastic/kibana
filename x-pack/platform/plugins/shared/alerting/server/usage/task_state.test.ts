@@ -913,7 +913,7 @@ describe('telemetry task state', () => {
 
   describe('v6', () => {
     const v6 = stateSchemaByVersion[6];
-    it('should add count_backfill_executions and gap fields when running the up migration', () => {
+    it('should work on empty object when running the up migration', () => {
       const result = v6.up({});
       expect(result).toHaveProperty('count_backfill_executions', 0);
       expect(result).toHaveProperty('count_backfills_by_execution_status_per_day', {});
@@ -931,7 +931,7 @@ describe('telemetry task state', () => {
 
   describe('v7', () => {
     const v7 = stateSchemaByVersion[7];
-    it('should add count_rules_with_elasticagent_tag fields when running the up migration', () => {
+    it('should work on empty object when running the up migration', () => {
       const result = v7.up({});
       expect(result).toHaveProperty('count_rules_with_elasticagent_tag', 0);
       expect(result).toHaveProperty('count_rules_with_elasticagent_tag_by_type', {});

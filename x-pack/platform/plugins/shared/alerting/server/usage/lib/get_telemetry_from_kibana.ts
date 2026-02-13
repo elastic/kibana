@@ -197,7 +197,7 @@ export async function getTotalCountAggregations({
                 }`,
           },
         },
-        rule_installed_by_integration: {
+        rule_with_elasticagent_tag: {
           type: 'long' as const,
           script: {
             source: `
@@ -332,10 +332,10 @@ export async function getTotalCountAggregations({
           },
         },
         sum_rules_with_tags: { sum: { field: 'rule_with_tags' } },
-        sum_rules_installed_by_integrations: { sum: { field: 'rule_installed_by_integration' } },
-        sum_rules_installed_by_integrations_by_type: {
+        sum_rules_with_elasticagent_tag: { sum: { field: 'rule_with_elasticagent_tag' } },
+        sum_rules_with_elasticagent_tag_by_type: {
           filter: {
-            term: { rule_installed_by_integration: 1 },
+            term: { rule_with_elasticagent_tag: 1 },
           },
           aggs: {
             by_alert_type: {
@@ -399,8 +399,8 @@ export async function getTotalCountAggregations({
       connector_types_by_consumers: AggregationsTermsAggregateBase<ConnectorsByConsumersBucket>;
       by_search_type: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
       sum_rules_with_tags: AggregationsSingleMetricAggregateBase;
-      sum_rules_installed_by_integrations: AggregationsSingleMetricAggregateBase;
-      sum_rules_installed_by_integrations_by_type: {
+      sum_rules_with_elasticagent_tag: AggregationsSingleMetricAggregateBase;
+      sum_rules_with_elasticagent_tag_by_type: {
         by_alert_type: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
       };
       sum_rules_snoozed: AggregationsSingleMetricAggregateBase;
