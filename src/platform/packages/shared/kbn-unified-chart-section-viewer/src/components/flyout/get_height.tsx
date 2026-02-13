@@ -37,4 +37,3 @@ export function calculateFlyoutContentHeight(
 
   return getTabContentAvailableHeight(containerRef, marginBottom + footerHeight);
 }
-
