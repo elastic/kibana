@@ -78,7 +78,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     services: { cloud, application },
   } = useKibana();
   const [searchKey, setSearchKey] = useState('');
-  const [groupBy, setGroupBy] = React.useState<GroupByOptions>(initializeGroupBy);
+  const [groupBy, setGroupBy] = useState<GroupByOptions>(initializeGroupBy);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
 
   const {
