@@ -10,6 +10,7 @@ import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -45,6 +46,9 @@ export interface InternalStartServices {
   hooks: HooksServiceStart;
   auditLogService: AuditLogService;
   spaces?: SpacesPluginStart;
+  featureFlags: FeatureFlagsStart;
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
 }
 
 export interface ServiceSetupDeps {
@@ -60,6 +64,7 @@ export interface ServicesStartDeps {
   security: SecurityServiceStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  featureFlags: FeatureFlagsStart;
   // plugin deps
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;

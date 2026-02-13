@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiFormRow,
@@ -26,8 +26,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Control, FormState } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
+import { AGENT_WORKFLOWS_FEATURE_FLAG } from '@kbn/agent-builder-common';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import { labels } from '../../../../utils/i18n';
 import { useAgentLabels } from '../../../../hooks/agents/use_agent_labels';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { WorkflowPicker } from '../../../tools/form/components/workflow/workflow_picker';
 import type { AgentFormData } from '../agent_form';
 
@@ -45,6 +48,14 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   isFormDisabled,
 }) => {
   const { labels: existingLabels, isLoading: labelsLoading } = useAgentLabels();
+  const {
+    services: { settings, featureFlags },
+  } = useKibana();
+  const showAgentWorkflowsSection = useMemo(() => {
+    const workflowsUiEnabled = settings.client.get(WORKFLOWS_UI_SETTING_ID, false);
+    const agentWorkflowsEnabled = featureFlags.getBooleanValue(AGENT_WORKFLOWS_FEATURE_FLAG, false);
+    return workflowsUiEnabled && agentWorkflowsEnabled;
+  }, [settings, featureFlags]);
 
   /* Enable shrinking; default min-width:auto blocks it and causes overflow */
   const formFlexColumnStyles = css`
@@ -463,55 +474,59 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiHorizontalRule />
+      {showAgentWorkflowsSection && (
+        <>
+          <EuiHorizontalRule />
 
-      <EuiFlexGroup
-        direction="row"
-        gutterSize="xl"
-        alignItems="flexStart"
-        aria-labelledby="workflow-section-title"
-      >
-        <EuiFlexItem grow={1}>
-          <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
-            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-              <EuiIcon type="play" aria-hidden={true} />
-              <EuiTitle size="xs">
-                <h2 id="workflow-section-title">
-                  {i18n.translate('xpack.agentBuilder.agents.form.settings.workflowTitle', {
-                    defaultMessage: 'Pre-execution workflow ',
-                  })}
-                </h2>
-              </EuiTitle>
-            </EuiFlexGroup>
-            <EuiText size="s" color="subdued">
-              {i18n.translate('xpack.agentBuilder.agents.form.settings.workflowDescription', {
-                defaultMessage: 'Runs as soon as the agent is invoked, before the LLM call.',
-              })}
-            </EuiText>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={2} css={formFlexColumnStyles}>
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate('xpack.agentBuilder.agents.form.settings.workflowLabel', {
-              defaultMessage: 'Workflows',
-            })}
-            labelAppend={
-              <EuiText size="xs" color="subdued">
-                {labels.common.optional}
-              </EuiText>
-            }
-            isInvalid={!!formState.errors.configuration?.workflow_ids}
-            error={formState.errors.configuration?.workflow_ids?.message}
+          <EuiFlexGroup
+            direction="row"
+            gutterSize="xl"
+            alignItems="flexStart"
+            aria-labelledby="workflow-section-title"
           >
-            <WorkflowPicker
-              name="configuration.workflow_ids"
-              singleSelection={false}
-              isDisabled={isFormDisabled}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            <EuiFlexItem grow={1}>
+              <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+                <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+                  <EuiIcon type="play" aria-hidden={true} />
+                  <EuiTitle size="xs">
+                    <h2 id="workflow-section-title">
+                      {i18n.translate('xpack.agentBuilder.agents.form.settings.workflowTitle', {
+                        defaultMessage: 'Pre-execution workflow ',
+                      })}
+                    </h2>
+                  </EuiTitle>
+                </EuiFlexGroup>
+                <EuiText size="s" color="subdued">
+                  {i18n.translate('xpack.agentBuilder.agents.form.settings.workflowDescription', {
+                    defaultMessage: 'Runs as soon as the agent is invoked, before the LLM call.',
+                  })}
+                </EuiText>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={2} css={formFlexColumnStyles}>
+              <EuiFormRow
+                fullWidth
+                label={i18n.translate('xpack.agentBuilder.agents.form.settings.workflowLabel', {
+                  defaultMessage: 'Workflows',
+                })}
+                labelAppend={
+                  <EuiText size="xs" color="subdued">
+                    {labels.common.optional}
+                  </EuiText>
+                }
+                isInvalid={!!formState.errors.configuration?.workflow_ids}
+                error={formState.errors.configuration?.workflow_ids?.message}
+              >
+                <WorkflowPicker
+                  name="configuration.workflow_ids"
+                  singleSelection={false}
+                  isDisabled={isFormDisabled}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </>
   );
 };

@@ -165,3 +165,4 @@ export {
 } from './chat';
 export * from './telemetry';
 export type { VersionedAttachment } from './attachments';
+export { AGENT_WORKFLOWS_FEATURE_FLAG } from './feature_flags';

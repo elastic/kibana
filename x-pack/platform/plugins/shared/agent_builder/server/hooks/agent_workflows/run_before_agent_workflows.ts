@@ -10,7 +10,11 @@ import type {
   HookHandlerResult,
   HookLifecycle,
 } from '@kbn/agent-builder-server';
-import { createWorkflowAbortedError } from '@kbn/agent-builder-common';
+import {
+  createWorkflowAbortedError,
+  AGENT_WORKFLOWS_FEATURE_FLAG,
+} from '@kbn/agent-builder-common';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import type { Logger } from '@kbn/logging';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { InternalStartServices } from '../../services/types';
@@ -64,7 +68,19 @@ export async function runBeforeAgentWorkflows({
     return;
   }
 
-  const { agents, spaces } = getInternalServices();
+  const { agents, spaces, featureFlags, uiSettings, savedObjects } = getInternalServices();
+  const agentWorkflowsEnabled = await featureFlags.getBooleanValue(
+    AGENT_WORKFLOWS_FEATURE_FLAG,
+    false
+  );
+  const soClient = savedObjects.getScopedClient(context.request);
+  const uiSettingsClient = uiSettings.asScopedToClient(soClient);
+  const workflowsUiEnabled =
+    (await uiSettingsClient.get<boolean>(WORKFLOWS_UI_SETTING_ID)) ?? false;
+  if (!agentWorkflowsEnabled || !workflowsUiEnabled) {
+    return;
+  }
+
   const registry = await agents.getRegistry({ request: context.request });
   const agent = await registry.get(context.agentId);
   const workflowIds = agent?.configuration?.workflow_ids;
