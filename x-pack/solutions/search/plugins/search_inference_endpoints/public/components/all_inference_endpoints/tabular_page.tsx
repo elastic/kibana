@@ -31,8 +31,8 @@ import {
 } from '../../../common/translations';
 
 import { useKibana } from '../../hooks/use_kibana';
-import { useTableData } from '../../hooks/use_table_data';
 import { useEndpointActions } from '../../hooks/use_endpoint_actions';
+import { useFilteredInferenceEndpoints } from '../../hooks/use_filtered_endpoints';
 import { type FilterOptions, GroupByOptions } from '../../types';
 import { getModelId } from '../../utils/get_model_id';
 import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
@@ -110,7 +110,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     setFilterOptions((prev) => ({ ...prev, ...newFilterOptions }));
   }, []);
 
-  const tableData = useTableData(inferenceEndpoints, filterOptions, searchKey);
+  const tableData = useFilteredInferenceEndpoints(inferenceEndpoints, filterOptions, searchKey);
 
   const tableColumns = useMemo<Array<EuiBasicTableColumn<InferenceInferenceEndpointInfo>>>(
     () => [

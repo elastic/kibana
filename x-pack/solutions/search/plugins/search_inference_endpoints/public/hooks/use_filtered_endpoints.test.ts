@@ -8,6 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 import { InferenceEndpoints } from '../__mocks__/inference_endpoints';
 import type { FilterOptions } from '../types';
@@ -53,7 +54,7 @@ describe('useFilteredInferenceEndpoints', () => {
         useFilteredInferenceEndpoints(InferenceEndpoints, filters, '')
       );
 
-      expect(result.current).toHaveLength(InferenceEndpoints.length);
+      expect(result.current).toHaveLength(29);
       expect(
         result.current.every(
           (endpoint) => endpoint.service === 'elasticsearch' || endpoint.service === 'elastic'
@@ -80,7 +81,7 @@ describe('useFilteredInferenceEndpoints', () => {
         useFilteredInferenceEndpoints(InferenceEndpoints, filters, '')
       );
 
-      expect(result.current).toHaveLength(5);
+      expect(result.current).toHaveLength(6);
       expect(result.current.every((endpoint) => endpoint.task_type === 'text_embedding')).toBe(
         true
       );
@@ -262,6 +263,61 @@ describe('useFilteredInferenceEndpoints', () => {
         expect(result.current.length).toBeGreaterThan(0);
         expect(result.current.every((endpoint) => endpoint.service === service)).toBe(true);
       });
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should return empty array when inferenceEndpoints is empty', () => {
+      const { result } = renderHook(() => useFilteredInferenceEndpoints([], emptyFilters, ''));
+
+      expect(result.current).toHaveLength(0);
+    });
+
+    it('should handle endpoints with no model_id in service_settings', () => {
+      const endpointsWithNoModelId: InferenceAPIConfigResponse[] = [
+        {
+          inference_id: 'endpoint-no-model',
+          task_type: 'sparse_embedding',
+          service: 'elasticsearch',
+          service_settings: {
+            num_allocations: 1,
+            num_threads: 1,
+          },
+          task_settings: {},
+        },
+      ];
+
+      const { result } = renderHook(() =>
+        useFilteredInferenceEndpoints(endpointsWithNoModelId, emptyFilters, 'endpoint-no-model')
+      );
+      expect(result.current).toHaveLength(1);
+      expect(result.current[0].inference_id).toBe('endpoint-no-model');
+
+      const { result: result2 } = renderHook(() =>
+        useFilteredInferenceEndpoints(endpointsWithNoModelId, emptyFilters, 'some-model-id')
+      );
+      expect(result2.current).toHaveLength(0);
+    });
+
+    it('should search by service_settings.model field (alternative to model_id)', () => {
+      const endpointsWithModelField: InferenceAPIConfigResponse[] = [
+        {
+          inference_id: 'bedrock-endpoint',
+          task_type: 'text_embedding',
+          service: 'amazonbedrock',
+          service_settings: {
+            model: 'amazon.titan-embed-text-v1',
+          },
+          task_settings: {},
+        },
+      ];
+
+      const { result } = renderHook(() =>
+        useFilteredInferenceEndpoints(endpointsWithModelField, emptyFilters, 'titan-embed')
+      );
+
+      expect(result.current).toHaveLength(1);
+      expect(result.current[0].inference_id).toBe('bedrock-endpoint');
     });
   });
 });
