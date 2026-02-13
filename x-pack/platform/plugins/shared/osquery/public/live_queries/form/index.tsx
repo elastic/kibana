@@ -29,9 +29,11 @@ import type { AgentSelection } from '../../agents/types';
 import type { AddToTimelineHandler } from '../../types';
 import LiveQueryQueryField from './live_query_query_field';
 import { AgentsTableField } from './agents_table_field';
+import { TagsField } from './tags_field';
 import { savedQueryDataSerializer } from '../../saved_queries/form/use_saved_query_form';
 import { PackFieldWrapper } from '../../shared_components/osquery_response_action_type/pack_field_wrapper';
 import { AlertAttachmentContext } from '../../common/contexts';
+import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
 
 export interface LiveQueryFormFields {
   alertIds?: string[];
@@ -42,6 +44,7 @@ export interface LiveQueryFormFields {
   packId: string[];
   timeout?: number;
   queryType: 'query' | 'pack';
+  tags?: string[];
 }
 
 interface DefaultLiveQueryFormFields {
@@ -77,6 +80,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   addToTimeline,
 }) => {
   const alertAttachmentContext = useContext(AlertAttachmentContext);
+  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
 
   const { application } = useKibana().services;
   const permissions = application.capabilities.osquery;
@@ -156,6 +160,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           alert_ids: values.alertIds,
           pack_id: queryType === 'pack' && values?.packId?.length ? values?.packId[0] : undefined,
           ecs_mapping: values.ecs_mapping,
+          tags: values.tags,
           ...(queryType === 'query' ? { timeout: values.timeout } : {}),
         },
         (value) => !isEmpty(value) || isNumber(value)
@@ -317,17 +322,29 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
             </EuiFlexItem>
           )}
           {queryType === 'pack' ? (
-            <PackFieldWrapper
-              liveQueryDetails={liveQueryDetails}
-              submitButtonContent={submitButtonContent}
-              showResultsHeader
-              addToTimeline={addToTimeline}
-            />
+            <>
+              {isHistoryEnabled && (
+                <EuiFlexItem>
+                  <TagsField />
+                </EuiFlexItem>
+              )}
+              <PackFieldWrapper
+                liveQueryDetails={liveQueryDetails}
+                submitButtonContent={submitButtonContent}
+                showResultsHeader
+                addToTimeline={addToTimeline}
+              />
+            </>
           ) : (
             <>
               <EuiFlexItem>
                 <LiveQueryQueryField handleSubmitForm={handleSubmit(onSubmit)} />
               </EuiFlexItem>
+              {isHistoryEnabled && (
+                <EuiFlexItem>
+                  <TagsField />
+                </EuiFlexItem>
+              )}
               {submitButtonContent}
               <EuiFlexItem>{resultsStepContent}</EuiFlexItem>
             </>

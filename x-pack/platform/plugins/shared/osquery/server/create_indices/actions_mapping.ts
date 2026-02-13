@@ -76,6 +76,10 @@ export const actionsMapping: MappingTypeMapping = {
     pack_prebuilt: {
       type: 'boolean',
     },
+    tags: {
+      type: 'keyword',
+      ignore_above: 256,
+    },
     queries: {
       properties: {
         action_id: {

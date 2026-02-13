@@ -30,6 +30,7 @@ export const createLiveQueryRequestBodySchema = t.partial({
   alert_ids: t.array(t.string),
   case_ids: t.array(t.string),
   event_ids: t.array(t.string),
+  tags: t.array(t.string),
   metadata: t.union([t.object, t.undefined]),
 });
 

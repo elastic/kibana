@@ -57,6 +57,14 @@ components:
           type: array
           items:
             type: string
+        tags:
+          description: 'A list of tags to associate with the live query action.'
+          type: array
+          items:
+            type: string
+            maxLength: 256
+            minLength: 1
+          maxItems: 20
         metadata:
           description: 'Custom metadata object associated with the live query.'
           type: object

@@ -98,6 +98,7 @@ export class TelemetryEventsSender {
         alert_ids: { type: 'pass_through', _meta: { description: '', optional: true } },
         event_ids: { type: 'pass_through', _meta: { description: '', optional: true } },
         case_ids: { type: 'pass_through', _meta: { description: '', optional: true } },
+        tags: { type: 'pass_through', _meta: { description: '', optional: true } },
         pack_id: { type: 'keyword', _meta: { description: '', optional: true } },
         pack_name: { type: 'keyword', _meta: { description: '', optional: true } },
         pack_prebuilt: { type: 'boolean', _meta: { description: '', optional: true } },

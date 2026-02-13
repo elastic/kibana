@@ -96,7 +96,7 @@ const ActionsTableComponent = () => {
 
     if (debouncedSearchValue.trim()) {
       const escaped = debouncedSearchValue.trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-      parts.push(`(queries.query: ${escaped}* OR pack_name: ${escaped}*)`);
+      parts.push(`(queries.query: ${escaped}* OR pack_name: ${escaped}* OR tags: ${escaped}*)`);
     }
 
     if (selectedUserUid) {
@@ -297,6 +297,33 @@ const ActionsTableComponent = () => {
     return <EuiBadge color="hollow">Rule</EuiBadge>;
   }, []);
 
+  const renderTagsColumn = useCallback((_: unknown, item: SearchHit) => {
+    const action = item._source as ActionDetails;
+    const actionTags = action?.tags;
+    if (!actionTags?.length) return null;
+
+    const maxVisible = 2;
+    const visible = actionTags.slice(0, maxVisible);
+    const remaining = actionTags.length - maxVisible;
+
+    return (
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+        {visible.map((tag) => (
+          <EuiFlexItem grow={false} key={tag}>
+            <EuiBadge color="hollow">{tag}</EuiBadge>
+          </EuiFlexItem>
+        ))}
+        {remaining > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={actionTags.slice(maxVisible).join(', ')}>
+              <EuiBadge color="hollow">+{remaining}</EuiBadge>
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
+  }, []);
+
   const renderRunByColumn = useCallback((_: unknown, item: SearchHit) => {
     const action = item._source as ActionDetails;
     const profileUid = action?.user_profile_uid;
@@ -419,6 +446,14 @@ const ActionsTableComponent = () => {
         width: '180px',
         render: renderRunByColumn,
       },
+      {
+        field: 'tags',
+        name: i18n.translate('xpack.osquery.history.table.tagsColumnTitle', {
+          defaultMessage: 'Tags',
+        }),
+        width: '180px',
+        render: renderTagsColumn,
+      },
     ],
     [
       isPlayButtonAvailable,
@@ -429,6 +464,7 @@ const ActionsTableComponent = () => {
       renderResultsColumn,
       renderRunByColumn,
       renderSourceColumn,
+      renderTagsColumn,
       renderTimestampColumn,
     ]
   );

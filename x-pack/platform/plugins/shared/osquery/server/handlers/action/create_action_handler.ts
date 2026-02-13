@@ -90,6 +90,7 @@ export const createActionHandler = async (
     alert_ids: params.alert_ids,
     event_ids: params.event_ids,
     case_ids: params.case_ids,
+    tags: params.tags ?? [],
     agent_ids: params.agent_ids,
     agent_all: params.agent_all,
     agent_platforms: params.agent_platforms,

@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useLayoutEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { useRouterNavigate } from '../../../common/lib/kibana';
+import { useRouterNavigate, useKibana } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_status_table';
+import { TagsEditor } from '../../../actions/tags_editor';
+import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 
 const tableWrapperCss = {
   paddingLeft: '10px',
@@ -26,6 +28,8 @@ const LiveQueryDetailsPageComponent = () => {
   const liveQueryListProps = useRouterNavigate('live_queries');
   const [isLive, setIsLive] = useState(false);
   const { data } = useLiveQueryDetails({ actionId, isLive });
+  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
+  const permissions = useKibana().services.application.capabilities.osquery;
 
   const LeftColumn = useMemo(
     () => (
@@ -59,6 +63,16 @@ const LiveQueryDetailsPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
+      {isHistoryEnabled && data?.action_id && (
+        <EuiFlexItem css={tableWrapperCss}>
+          <TagsEditor
+            actionId={data.action_id}
+            tags={data.tags ?? []}
+            isReadOnly={!permissions.writeLiveQueries}
+          />
+          <EuiSpacer size="m" />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem css={tableWrapperCss}>
         <PackQueriesStatusTable
           actionId={actionId}
