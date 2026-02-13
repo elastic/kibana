@@ -1,5 +1,5 @@
 ---
-name: Scout API Testing
+name: scout-api-testing
 description: Use when creating, updating, debugging, or reviewing Scout API tests in Kibana (apiTest/apiClient/requestAuth/samlAuth/apiServices), including auth choices, response assertions, and API service patterns.
 ---
 
@@ -14,7 +14,7 @@ description: Use when creating, updating, debugging, or reviewing Scout API test
 - `x-pack/solutions/search/**` -> `@kbn/scout-search`
 - `x-pack/solutions/security/**` -> `@kbn/scout-security`
 - Prefer a single top-level `apiTest.describe(...)` per file and avoid nested `describe` blocks; multiple top-level `describe`s are supported, but files get hard to read quickly.
-- Tags: add `{ tag: ... }` on the suite (or individual tests) so CI/discovery can select the right deployment target (for example `tags.DEPLOYMENT_AGNOSTIC` or `['@ess']`). Unlike UI tests, API tests don’t currently validate tags at runtime.
+- Tags: add `{ tag: ... }` on the suite (or individual tests) so CI/discovery can select the right test target (for example `tags.deploymentAgnostic` or `[...tags.stateful.classic]`). Unlike UI tests, API tests don’t currently validate tags at runtime.
 - If the module provides Scout fixtures, import `apiTest` from `<module-root>/test/scout*/api/fixtures` to get module-specific extensions. Importing directly from the module’s Scout package is also fine when you don’t need extensions.
 - Browser fixtures are disabled for `apiTest` (no `page`, `browserAuth`, `pageObjects`).
 

@@ -11,7 +11,12 @@ import { uiActionsPluginMock } from '../mocks';
 import { createHelloWorldAction } from './test_samples';
 import type { ActionDefinition } from '../actions';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { Trigger } from '@kbn/ui-actions-browser';
+import {
+  ADD_PANEL_TRIGGER,
+  CONTEXT_MENU_TRIGGER,
+  ROW_CLICK_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+} from '../../common/trigger_ids';
 
 const coreStart = coreMock.createStart();
 let action: ActionDefinition<{ name: string }>;
@@ -25,11 +30,8 @@ beforeEach(() => {
   };
 
   uiActions.setup.registerAction(action as ActionDefinition);
-  uiActions.setup.registerTrigger({
-    id: 'trigger',
-    title: 'trigger',
-  });
-  uiActions.setup.addTriggerAction('trigger', action as ActionDefinition);
+
+  uiActions.setup.addTriggerAction(CONTEXT_MENU_TRIGGER, action as ActionDefinition);
 });
 
 test('can register action', async () => {
@@ -45,15 +47,10 @@ test('getTriggerCompatibleActions returns attached actions', async () => {
 
   setup.registerAction(helloWorldAction);
 
-  const testTrigger: Trigger = {
-    id: 'MY-TRIGGER',
-    title: 'My trigger',
-  };
-  setup.registerTrigger(testTrigger);
-  setup.addTriggerAction('MY-TRIGGER', helloWorldAction);
+  setup.addTriggerAction(VALUE_CLICK_TRIGGER, helloWorldAction);
 
   const start = doStart();
-  const actions = await start.getTriggerCompatibleActions('MY-TRIGGER', {});
+  const actions = await start.getTriggerCompatibleActions(VALUE_CLICK_TRIGGER, {});
 
   expect(actions.length).toBe(1);
   expect(actions[0].id).toBe(helloWorldAction.id);
@@ -70,21 +67,15 @@ test('filters out actions not applicable based on the context', async () => {
     execute: () => Promise.resolve(),
   };
 
-  const testTrigger: Trigger = {
-    id: 'MY-TRIGGER2',
-    title: 'My trigger',
-  };
-
-  setup.registerTrigger(testTrigger);
   setup.registerAction(action1);
-  setup.addTriggerAction(testTrigger.id, action1);
+  setup.addTriggerAction(ROW_CLICK_TRIGGER, action1);
 
   const start = doStart();
-  let actions = await start.getTriggerCompatibleActions(testTrigger.id, { accept: true });
+  let actions = await start.getTriggerCompatibleActions(ROW_CLICK_TRIGGER, { accept: true });
 
   expect(actions.length).toBe(1);
 
-  actions = await start.getTriggerCompatibleActions(testTrigger.id, { accept: false });
+  actions = await start.getTriggerCompatibleActions(ROW_CLICK_TRIGGER, { accept: false });
 
   expect(actions.length).toBe(0);
 });
@@ -99,15 +90,10 @@ test(`throws an error with an invalid trigger ID`, async () => {
 });
 
 test(`with a trigger mapping that maps to an non-existing action returns empty list`, async () => {
-  const { setup, doStart } = uiActions;
-  const testTrigger: Trigger = {
-    id: '123',
-    title: '123',
-  };
-  setup.registerTrigger(testTrigger);
+  const { doStart } = uiActions;
 
   const start = doStart();
-  const actions = await start.getTriggerCompatibleActions(testTrigger.id, {});
+  const actions = await start.getTriggerCompatibleActions(ADD_PANEL_TRIGGER, {});
 
   expect(actions).toEqual([]);
 });

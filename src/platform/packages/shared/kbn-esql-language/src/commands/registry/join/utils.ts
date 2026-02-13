@@ -22,7 +22,7 @@ import type {
 import type { ICommand } from '../registry';
 import type { GetColumnsByTypeFn, ICommandContext, ISuggestionItem } from '../types';
 import type { JoinCommandPosition, JoinStaticPosition } from './types';
-import { SuggestionCategory } from '../../../shared/sorting/types';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 import { getLookupJoinSource } from '../../definitions/utils/sources';
 
 const REGEX =

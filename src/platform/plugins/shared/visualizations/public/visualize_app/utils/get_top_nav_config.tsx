@@ -32,6 +32,10 @@ import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { VISUALIZE_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 
 import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
+import {
+  AGG_BASED_VISUALIZATION_TRIGGER,
+  VISUALIZE_EDITOR_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { saveVisualization } from '../../utils/saved_visualize_utils';
 import { getFullPath } from '../..';
 
@@ -43,7 +47,6 @@ import type {
 import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from './breadcrumbs';
 import type { VisualizeLocatorParams } from '../../../common/locator';
 import { getUiActions } from '../../services';
-import { VISUALIZE_EDITOR_TRIGGER, AGG_BASED_VISUALIZATION_TRIGGER } from '../../triggers';
 import { getVizEditorOriginatingAppUrl } from './utils';
 
 import { serializeState } from '../../embeddable/state';
@@ -426,13 +429,12 @@ export const getTopNavConfig = (
               if (navigateToLensConfig) {
                 hideLensBadge();
                 setNavigateToLens(true);
-                getUiActions()
-                  .getTrigger(
-                    visInstance.vis.type.group === 'aggbased'
-                      ? AGG_BASED_VISUALIZATION_TRIGGER
-                      : VISUALIZE_EDITOR_TRIGGER
-                  )
-                  .exec(updatedWithMeta);
+                getUiActions().executeTriggerActions(
+                  visInstance.vis.type.group === 'aggbased'
+                    ? AGG_BASED_VISUALIZATION_TRIGGER
+                    : VISUALIZE_EDITOR_TRIGGER,
+                  updatedWithMeta
+                );
               }
             },
           },

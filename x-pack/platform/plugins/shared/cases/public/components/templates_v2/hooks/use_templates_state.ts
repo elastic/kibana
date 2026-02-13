@@ -8,12 +8,12 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { EuiBasicTableProps, EuiTableSelectionType } from '@elastic/eui';
 import type { Template } from '../../../../common/types/domain/template/v1';
-import type { QueryParams } from '../types';
+import type { TemplatesFindRequest } from '../../../../common/types/api/template/v1';
 import { useSyncedQueryParams } from './use_synced_query_params';
 
 interface UseTemplatesStateReturn {
-  queryParams: QueryParams;
-  setQueryParams: (queryParam: Partial<QueryParams>) => void;
+  queryParams: TemplatesFindRequest;
+  setQueryParams: (queryParam: Partial<TemplatesFindRequest>) => void;
   sorting: EuiBasicTableProps<Template>['sorting'];
   selectedTemplates: Template[];
   selection: EuiTableSelectionType<Template>;
@@ -25,7 +25,7 @@ export const useTemplatesState = (): UseTemplatesStateReturn => {
   const { queryParams, setQueryParams: setSyncedQueryParams } = useSyncedQueryParams();
 
   const setQueryParams = useCallback(
-    (newQueryParams: Partial<QueryParams>) => {
+    (newQueryParams: Partial<TemplatesFindRequest>) => {
       setSyncedQueryParams(newQueryParams);
       setSelectedTemplates([]);
     },

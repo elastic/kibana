@@ -9,7 +9,7 @@
 
 import { within, Walker } from '../../ast';
 import type { ESQLAstBaseItem, ESQLFunction } from '../../types';
-import type { PromQLFunction } from '../../promql/types';
+import type { PromQLFunction } from '../../embedded_languages/promql/types';
 import { getFormattedPromqlFunctionSignature } from '../../commands/definitions/utils/hover/functions';
 import { getPromqlFunctionDefinition } from '../../commands/definitions/utils/promql';
 
