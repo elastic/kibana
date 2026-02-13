@@ -122,6 +122,15 @@ describe('AgentsService', () => {
           })
         );
       });
+
+      it('propagates errors from runToolRefCleanup', async () => {
+        const error = new Error('Search failed');
+        runToolRefCleanupMock.mockRejectedValue(error);
+
+        await expect(started.getAgentsUsingTools({ request, toolIds: ['tool-1'] })).rejects.toThrow(
+          'Search failed'
+        );
+      });
     });
 
     describe('#removeToolRefsFromAgents', () => {
@@ -140,6 +149,15 @@ describe('AgentsService', () => {
           })
         );
         expect(runToolRefCleanupMock.mock.calls[0][0]).not.toHaveProperty('checkOnly');
+      });
+
+      it('propagates errors from runToolRefCleanup', async () => {
+        const error = new Error('Bulk update failed');
+        runToolRefCleanupMock.mockRejectedValue(error);
+
+        await expect(
+          started.removeToolRefsFromAgents({ request, toolIds: ['tool-1'] })
+        ).rejects.toThrow('Bulk update failed');
       });
     });
   });
