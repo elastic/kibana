@@ -84,6 +84,40 @@ apiTest.describe(
       }
     );
 
+    // Draft stream should have ESQL view created
+    apiTest(
+      'should create an ESQL view for draft streams',
+      async ({ apiClient, samlAuth, esClient }) => {
+        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const childStreamName = `${streamNamePrefix}-esql-view`;
+
+        // Create draft stream
+        const { statusCode } = await apiClient.post('api/streams/logs/_fork', {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            stream: { name: childStreamName },
+            where: { field: 'service.name', eq: 'test-esql' },
+            status: 'enabled',
+            draft: true,
+          },
+          responseType: 'json',
+        });
+        expect(statusCode).toBe(200);
+
+        // Verify ESQL view exists - the view name format is $.<stream_name>
+        const viewName = `$.${childStreamName}`;
+        const viewExists = await esClient.esql
+          .query({
+            query: `FROM ${viewName} | LIMIT 0`,
+            format: 'json',
+          })
+          .then(() => true)
+          .catch(() => false);
+
+        expect(viewExists).toBe(true);
+      }
+    );
+
     // Draft stream deletion
     apiTest('should delete a draft stream', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
@@ -521,6 +555,55 @@ apiTest.describe(
         expect(verifyBody.ingest.wired.draft).toBe(true);
         expect(verifyBody.ingest.processing.steps).toHaveLength(1);
         expect(verifyBody.ingest.processing.steps[0].action).toBe('set');
+      }
+    );
+
+    // Simulate processing on draft stream
+    apiTest(
+      'should simulate processing on draft stream using documents from parent',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const childStreamName = `${streamNamePrefix}-simulate`;
+
+        // Create draft stream
+        await apiClient.post('api/streams/logs/_fork', {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            stream: { name: childStreamName },
+            where: { field: 'service.name', eq: 'simulate-test' },
+            status: 'enabled',
+            draft: true,
+          },
+          responseType: 'json',
+        });
+
+        // Simulate processing with sample documents
+        // Since draft streams don't have their own data stream, the simulation
+        // should work by using the parent stream's index state
+        const { statusCode: simStatus, body: simBody } = await apiClient.post(
+          `api/streams/${childStreamName}/processing/_simulate`,
+          {
+            headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+            body: {
+              processing: {
+                steps: [{ action: 'set', to: 'attributes.simulated', value: 'yes' }],
+              },
+              documents: [
+                {
+                  message: 'test message',
+                  'service.name': 'simulate-test',
+                },
+              ],
+            },
+            responseType: 'json',
+          }
+        );
+
+        // The simulation should succeed even though the draft stream has no data stream
+        expect(simStatus).toBe(200);
+        // Verify the simulation processed the document
+        expect(simBody.documents).toHaveLength(1);
+        expect(simBody.documents[0].value['attributes.simulated']).toBe('yes');
       }
     );
 
