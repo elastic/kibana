@@ -64,10 +64,14 @@ function convertTreeToEuiTreeViewItems(
     const stepId = stepExecution?.stepId ?? item.stepId;
     const stepType = stepExecution?.stepType ?? item.stepType;
 
+    // Check if this is a skeleton step (not yet received from server)
+    const isSkeletonStep = stepExecution?.id?.startsWith('skeleton-') ?? false;
+
     const selectStepExecution: React.MouseEventHandler = (e) => {
       // Prevent the click event from bubbling up to the tree view item so that the tree view item is not expanded/collapsed when selected
       e.preventDefault();
       e.stopPropagation();
+      // Don't allow selecting skeleton steps
       if (stepExecution?.id) {
         onSelectStepExecution(stepExecution.id);
       }
@@ -80,6 +84,12 @@ function convertTreeToEuiTreeViewItems(
       id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
       css: [
         getStatusCss({ status, selected }, euiTheme),
+        // Don't allow selecting skeleton steps using css, as we don't have a 'disabled' prop on the tree view item
+        isSkeletonStep &&
+          css`
+            pointer-events: none;
+            cursor: not-allowed;
+          `,
         isTriggerPseudoStep &&
           css`
             .euiTreeView__arrowPlaceholder::before {
@@ -219,7 +229,7 @@ export const WorkflowStepExecutionTree = ({
           stepId: step.name,
           stepType: step.type,
           status: 'pending' as WorkflowStepExecutionDto['status'],
-          id: `${step.name}-${step.type}-${index}`,
+          id: `skeleton-${step.name}-${step.type}-${index}`,
           scopeStack: [],
           workflowRunId: '',
           workflowId: '',
@@ -300,6 +310,7 @@ export const WorkflowStepExecutionTree = ({
           {/* Regular steps */}
           {regularItems.length > 0 && (
             <EuiTreeView
+              data-test-subj="workflowStepExecutionTree"
               showExpansionArrows
               expandByDefault
               items={regularItems}
