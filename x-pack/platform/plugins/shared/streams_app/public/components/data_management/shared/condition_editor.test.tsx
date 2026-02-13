@@ -315,7 +315,8 @@ describe('ConditionEditor', () => {
     });
 
     it('should call onConditionChange when syntax editor contains valid JSON', async () => {
-      const user = userEvent.setup();
+      jest.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       renderWithProviders(
         <ConditionEditor
           condition={{ field: 'severity_text', eq: 'info' }}
@@ -334,12 +335,20 @@ describe('ConditionEditor', () => {
 
       const codeEditor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
 
-      // Type valid JSON
-      await user.clear(codeEditor);
-      await user.type(codeEditor, '{{"field": "test", "eq": "value"}}');
+      // Set valid JSON via fireEvent.change (userEvent.type types character by character which is problematic)
+      const validJson = JSON.stringify({ field: 'test', eq: 'value' }, null, 2);
+      fireEvent.change(codeEditor, { target: { value: validJson } });
+
+      // Wait for debounce to complete
+      act(() => {
+        jest.advanceTimersByTime(400);
+      });
 
       // Verify onConditionChange was called with the parsed JSON
       expect(mockOnConditionChange).toHaveBeenCalled();
+      expect(mockOnConditionChange).toHaveBeenCalledWith({ field: 'test', eq: 'value' });
+
+      jest.useRealTimers();
     });
 
     it('should show error message when condition becomes invalid via syntax editor', () => {
@@ -523,7 +532,8 @@ describe('ConditionEditor', () => {
     });
 
     it('should report valid JSON and update condition on parse', async () => {
-      const user = userEvent.setup();
+      jest.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       renderWithProviders(
         <ConditionEditor
           condition={{ field: 'severity_text', eq: 'info' }}
@@ -536,11 +546,20 @@ describe('ConditionEditor', () => {
       await user.click(screen.getByTestId('streamsAppConditionEditorSwitch'));
 
       const editor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
-      await user.clear(editor);
-      await user.paste('{"field":"severity_text","eq":"warn"}');
+
+      // Use fireEvent.change to set valid JSON directly
+      const validJson = '{"field":"severity_text","eq":"warn"}';
+      fireEvent.change(editor, { target: { value: validJson } });
+
+      // Wait for debounce to complete
+      act(() => {
+        jest.advanceTimersByTime(400);
+      });
 
       expect(mockOnConditionChange).toHaveBeenCalledWith({ field: 'severity_text', eq: 'warn' });
       expect(mockOnValidityChange).toHaveBeenLastCalledWith(true);
+
+      jest.useRealTimers();
     });
   });
 });
