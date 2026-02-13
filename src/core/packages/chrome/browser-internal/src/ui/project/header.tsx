@@ -11,7 +11,6 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiContextMenu,
-  EuiContextMenuItem,
   EuiHeader,
   EuiHeaderLinks,
   EuiHeaderLogo,
@@ -113,30 +112,10 @@ const overflowMenuCss = css`
 
 const noop = () => {};
 
-const OVERFLOW_LIST_SECTIONS: Array<
-  | { name: string; icon: ComponentProps<typeof EuiContextMenuItem>['icon']; onClick: () => void }
-  | { separator: true }
-> = [
-  { name: 'Open', icon: 'folderOpen', onClick: noop },
-  { name: 'Inspect', icon: 'inspect', onClick: noop },
-  { name: 'Data sets', icon: 'indexOpen', onClick: noop },
-  { name: 'Background searches', icon: 'search', onClick: noop },
-  // { separator: true },
-  { name: 'Alerts', icon: 'bell', onClick: noop },
-  { name: 'Export', icon: 'exportAction', onClick: noop },
-  { separator: true },
-  { name: 'Docs', icon: 'documentation', onClick: noop },
-  { name: 'Feedback', icon: 'editorComment', onClick: noop },
-  { separator: true },
-  { name: 'Rename', icon: 'pencil', onClick: noop },
-  { name: 'Settings', icon: 'gear', onClick: noop },
-  // { separator: true },
-  // { name: 'Save', icon: 'save', onClick: noop },
-  // { name: 'Save as', icon: 'save', onClick: noop },
-  // { name: 'Reset changes', icon: 'editorUndo', onClick: noop },
-];
+const ALERTS_PANEL_ID = 1;
+const EXPORT_PANEL_ID = 2;
 
-const OverflowPopoverContent: React.FC = () => (
+const OverflowKeyPadSection: React.FC = () => (
   <>
     <EuiKeyPadMenu css={overflowKeyPadCss}>
       <EuiKeyPadMenuItem
@@ -165,28 +144,58 @@ const OverflowPopoverContent: React.FC = () => (
       </EuiKeyPadMenuItem>
     </EuiKeyPadMenu>
     <EuiHorizontalRule margin="none" />
-    {OVERFLOW_LIST_SECTIONS.map((item, index) =>
-      'separator' in item && item.separator ? (
-        <EuiHorizontalRule key={`sep-${index}`} margin="none" />
-      ) : (
-        <EuiContextMenuItem
-          key={'name' in item ? item.name : index}
-          icon={'icon' in item ? item.icon : undefined}
-          onClick={'onClick' in item ? item.onClick : undefined}
-          size="s"
-        >
-          {'name' in item ? item.name : null}
-        </EuiContextMenuItem>
-      )
-    )}
   </>
 );
 
-const OVERFLOW_PANELS = [
+const OVERFLOW_PANELS: Array<
+  | {
+      id: number;
+      title: string;
+      content?: never;
+      items: Array<
+        | { name: string; icon: string; onClick: () => void; panel?: number }
+        | { isSeparator: true; key: string }
+        | { renderItem: () => React.ReactNode; key?: string }
+      >;
+    }
+  | { id: number; title: string; items: Array<{ name: string; icon: string; onClick: () => void }> }
+> = [
   {
     id: 0,
     title: '',
-    content: <OverflowPopoverContent />,
+    items: [
+      { renderItem: () => <OverflowKeyPadSection />, key: 'keypad' },
+      { isSeparator: true as const, key: 'sep1' },
+      { name: 'Open', icon: 'folderOpen', onClick: noop },
+      { name: 'Inspect', icon: 'inspect', onClick: noop },
+      { name: 'Data sets', icon: 'indexOpen', onClick: noop },
+      { name: 'Background searches', icon: 'search', onClick: noop },
+      { isSeparator: true as const, key: 'sep2' },
+      { name: 'Alerts', icon: 'bell', onClick: noop, panel: ALERTS_PANEL_ID },
+      { name: 'Export', icon: 'exportAction', onClick: noop, panel: EXPORT_PANEL_ID },
+      { isSeparator: true as const, key: 'sep3' },
+      { name: 'Rename', icon: 'pencil', onClick: noop },
+      { name: 'Settings', icon: 'gear', onClick: noop },
+      { isSeparator: true as const, key: 'sep4' },
+      { name: 'Docs', icon: 'documentation', onClick: noop },
+      { name: 'Feedback', icon: 'editorComment', onClick: noop },
+    ],
+  },
+  {
+    id: ALERTS_PANEL_ID,
+    title: 'Alerts',
+    items: [
+      { name: 'Create search threshold rule', icon: 'bell', onClick: noop },
+      { name: 'Manage rules and connectors', icon: 'document', onClick: noop },
+    ],
+  },
+  {
+    id: EXPORT_PANEL_ID,
+    title: 'Export',
+    items: [
+      { name: 'CSV', icon: 'calendar', onClick: noop },
+      { name: 'Schedule export', icon: 'calendar', onClick: noop },
+    ],
   },
 ];
 
