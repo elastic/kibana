@@ -273,6 +273,8 @@ export const performBulkActionRoute = (
             case BulkActionTypeEnum.delete: {
               // during dry run return early for delete, as no validations needed for this action
               if (isDryRun) {
+                // Populate `deleted` so the summary reflects the correct count of affected rules
+                deleted = rules;
                 break;
               }
 
