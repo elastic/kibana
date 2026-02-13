@@ -83,7 +83,7 @@ test.describe('WorkflowsList/BulkActions', { tag: [...tags.stateful.classic] }, 
     );
 
     const orderAfter = await pageObjects.workflowList.getVisibleWorkflowNamesInOrder();
-    expect(orderAfter).toEqual(orderBefore);
+    expect(orderAfter).toStrictEqual(orderBefore);
   });
 
   test('should disable enabled workflows', async ({
