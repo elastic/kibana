@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { emptyAssets } from '@kbn/streams-schema';
-import type { FieldDefinition, Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import {
@@ -16,92 +16,10 @@ import {
   indexDocument,
   putStream,
   deleteStream,
+  getStream,
 } from './helpers/requests';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-
-// OTEL base fields used by logs.otel root stream
-const otelBaseFields: FieldDefinition = {
-  '@timestamp': {
-    type: 'date',
-  },
-  'scope.name': {
-    type: 'keyword',
-  },
-  trace_id: {
-    type: 'keyword',
-  },
-  span_id: {
-    type: 'keyword',
-  },
-  event_name: {
-    type: 'keyword',
-  },
-  severity_text: {
-    type: 'keyword',
-  },
-  'body.text': {
-    type: 'match_only_text',
-  },
-  severity_number: {
-    type: 'long',
-  },
-  'resource.attributes.host.name': {
-    type: 'keyword',
-  },
-  'resource.attributes.service.name': {
-    type: 'keyword',
-  },
-  'stream.name': {
-    type: 'system',
-  },
-};
-
-// ECS base fields used by logs.ecs root stream
-const ecsBaseFields: FieldDefinition = {
-  '@timestamp': {
-    type: 'date',
-  },
-  'stream.name': {
-    type: 'system',
-  },
-  'host.name': {
-    type: 'keyword',
-  },
-  'service.name': {
-    type: 'keyword',
-  },
-  message: {
-    type: 'match_only_text',
-  },
-  'log.level': {
-    type: 'keyword',
-  },
-};
-
-// Helper function to create root stream definition
-function createRootStreamDefinition(
-  name: string,
-  fields: FieldDefinition
-): Streams.WiredStream.Definition {
-  return {
-    name,
-    description: '',
-    updated_at: new Date().toISOString(),
-    ingest: {
-      lifecycle: { dsl: {} },
-      processing: { steps: [], updated_at: new Date().toISOString() },
-      settings: {},
-      wired: {
-        routing: [],
-        fields,
-      },
-      failure_store: {
-        lifecycle: { enabled: { data_retention: '30d' } },
-      },
-    },
-  };
-}
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -112,12 +30,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     // Test logs.otel and logs.ecs root streams with the same validation rules
     ['logs.otel', 'logs.ecs'].forEach((rootStream) => {
       describe(`${rootStream} root stream`, () => {
-        // Get the correct root stream definition based on the stream name
-        const rootStreamDefinition = createRootStreamDefinition(
-          rootStream,
-          rootStream === 'logs.otel' ? otelBaseFields : ecsBaseFields
-        );
-
         before(async () => {
           apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
           await enableStreams(apiClient);
@@ -128,12 +40,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('Should not allow processing changes', async () => {
+          // Fetch the current stream definition to get the real field definitions
+          const currentStream = await getStream(apiClient, rootStream);
+
+          // Type assertion: we know root streams are wired streams
+          const wiredStream = currentStream as Streams.WiredStream.GetResponse;
+
           const body: Streams.WiredStream.UpsertRequest = {
             ...emptyAssets,
             stream: {
               description: '',
               ingest: {
-                ...rootStreamDefinition.ingest,
+                ...wiredStream.stream.ingest,
                 processing: {
                   steps: [
                     {
@@ -157,17 +75,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('Should not allow fields changes', async () => {
+          // Fetch the current stream definition to get the real field definitions
+          const currentStream = await getStream(apiClient, rootStream);
+
+          // Type assertion: we know root streams are wired streams
+          const wiredStream = currentStream as Streams.WiredStream.GetResponse;
+
           const body: Streams.WiredStream.UpsertRequest = {
             ...emptyAssets,
             stream: {
               description: '',
               ingest: {
-                ...rootStreamDefinition.ingest,
-                processing: omit(rootStreamDefinition.ingest.processing, 'updated_at'),
+                ...wiredStream.stream.ingest,
+                processing: omit(wiredStream.stream.ingest.processing, 'updated_at'),
                 wired: {
-                  ...rootStreamDefinition.ingest.wired,
+                  ...wiredStream.stream.ingest.wired,
                   fields: {
-                    ...rootStreamDefinition.ingest.wired.fields,
+                    ...wiredStream.stream.ingest.wired.fields,
                     'log.level': {
                       type: 'boolean',
                     },
@@ -185,15 +109,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('Should allow routing changes', async () => {
+          // Fetch the current stream definition to get the real field definitions
+          const currentStream = await getStream(apiClient, rootStream);
+
+          // Type assertion: we know root streams are wired streams
+          const wiredStream = currentStream as Streams.WiredStream.GetResponse;
+
           const body: Streams.WiredStream.UpsertRequest = {
             ...emptyAssets,
             stream: {
               description: '',
               ingest: {
-                ...rootStreamDefinition.ingest,
-                processing: omit(rootStreamDefinition.ingest.processing, 'updated_at'),
+                ...wiredStream.stream.ingest,
+                processing: omit(wiredStream.stream.ingest.processing, 'updated_at'),
                 wired: {
-                  ...rootStreamDefinition.ingest.wired,
+                  ...wiredStream.stream.ingest.wired,
                   routing: [
                     {
                       destination: `${rootStream}.gcpcloud`,
@@ -212,12 +142,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(response).to.have.property('acknowledged', true);
         });
 
-        it('Should not allow sending data directly to a child stream', async () => {
+        it('Should route direct writes to child stream to failure store', async () => {
           const doc = {
             '@timestamp': '2024-01-01T00:00:20.000Z',
             message: 'test',
           };
+
+          // Direct writes to child streams are allowed but routed to the failure store
+          // The routing test above creates the child stream, so this write should succeed
           const response = await indexDocument(esClient, `${rootStream}.gcpcloud`, doc, false);
+
+          // Verify the document was routed to the failure store
           expect(response.failure_store).to.be('used');
         });
       });
