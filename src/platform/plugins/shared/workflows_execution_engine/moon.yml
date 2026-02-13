@@ -34,12 +34,6 @@ dependsOn:
   - '@kbn/es-mappings'
   - '@kbn/workflows-extensions'
   - '@kbn/licensing-plugin'
-  - '@kbn/core'
-  - '@kbn/config-schema'
-  - '@kbn/actions-plugin'
-  - '@kbn/workflows'
-  - '@kbn/task-manager-plugin'
-  - '@kbn/es-query'
 tags:
   - plugin
   - prod
