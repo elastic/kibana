@@ -8,11 +8,6 @@
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import {
-  EXCEPTIONS_API_ALL,
-  RULES_API_ALL,
-  RULES_API_READ,
-} from '@kbn/security-solution-features/constants';
 import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { PatchRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {

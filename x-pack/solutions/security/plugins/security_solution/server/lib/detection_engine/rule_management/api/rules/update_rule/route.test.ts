@@ -26,10 +26,6 @@ import {
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { ResponseActionTypesEnum } from '../../../../../../../common/api/detection_engine';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
-import type {
-  MockClients,
-  SecuritySolutionRequestHandlerContextMock,
-} from '../../../../routes/__mocks__/request_context';
 import { createMockEndpointAppContextService } from '../../../../../../endpoint/mocks';
 
 describe('Update rule route', () => {

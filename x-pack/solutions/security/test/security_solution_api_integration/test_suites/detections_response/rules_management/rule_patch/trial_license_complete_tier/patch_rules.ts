@@ -32,7 +32,6 @@ import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/dete
 import { createSupertestErrorLogger } from '../../../../edr_workflows/utils';
 import { ROLE } from '../../../../../config/services/security_solution_edr_workflows_roles_users';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
 import {
   getSimpleRule,
   getSimpleRuleOutput,

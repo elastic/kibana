@@ -25,7 +25,6 @@ import type { BaseDefaultableFields } from '@kbn/security-solution-plugin/common
 import moment from 'moment';
 import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import { getGapsByRuleId } from '@kbn/detections-response-ftr-services/rules/get_gaps_by_rule_id';
-import { gapFillStatus } from '@kbn/alerting-plugin/common';
 import type TestAgent from 'supertest/lib/agent';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { createSupertestErrorLogger } from '../../../../edr_workflows/utils';

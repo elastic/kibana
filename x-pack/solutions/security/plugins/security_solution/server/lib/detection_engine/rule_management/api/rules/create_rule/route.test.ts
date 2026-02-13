@@ -26,10 +26,6 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
 import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
-import type {
-  MockClients,
-  SecuritySolutionRequestHandlerContextMock,
-} from '../../../../routes/__mocks__/request_context';
 import { createMockEndpointAppContextService } from '../../../../../../endpoint/mocks';
 
 describe('Create rule route', () => {
