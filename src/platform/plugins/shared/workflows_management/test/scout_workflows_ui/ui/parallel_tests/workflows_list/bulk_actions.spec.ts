@@ -78,7 +78,7 @@ test.describe('WorkflowsList/BulkActions', { tag: [...tags.stateful.classic] }, 
     const orderBefore = await pageObjects.workflowList.getVisibleWorkflowNamesInOrder();
 
     await pageObjects.workflowList.performBulkAction(
-      workflows.slice(0, 2).map((w) => w.name),
+      workflows.slice(1).map((w) => w.name),
       'enable'
     );
 
