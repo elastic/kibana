@@ -79,7 +79,7 @@ describe('UserProfileService', () => {
     let mockRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
     beforeEach(() => {
       mockRequest = httpServerMock.createKibanaRequest({
-        headers: { cookie: 'some-cookie' },
+        headers: { sid: 'some-cookie' },
       });
 
       mockUserProfile = userProfileMock.createWithSecurity({
@@ -99,7 +99,13 @@ describe('UserProfileService', () => {
     });
 
     describe(`with session`, () => {
-      // ToDo: test anonymous access case
+      beforeEach(() => {
+        mockStartParams.session.getSID.mockResolvedValue('some-session-id');
+      });
+
+      afterEach(() => {
+        mockStartParams.session.getSID.mockReset();
+      });
 
       it('returns `null` if session is not available', async () => {
         const startContract = userProfileService.start(mockStartParams);

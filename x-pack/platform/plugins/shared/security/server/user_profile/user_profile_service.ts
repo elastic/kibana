@@ -265,8 +265,7 @@ export class UserProfileService {
     const base64Credentials = authHeader.trim().substring('basic '.length);
     const [username, password] = Buffer.from(base64Credentials, 'base64').toString().split(':');
     if (!username || !password) {
-      this.logger.debug(`Basic credentials are malformed, cannot extract username and password.`);
-      return undefined;
+      throw new Error(`Malformed basic credentials in Authorization header.`);
     }
 
     const activatedProfile = await this.activate(clusterClient, {
@@ -338,8 +337,7 @@ export class UserProfileService {
     { request, dataPath }: UserProfileGetCurrentParams
   ) {
     if (request.auth.isAuthenticated === false) {
-      this.logger.debug(`Request to get current user profile is not authenticated.`);
-      return null;
+      throw new Error('Request to get current user profile is not authenticated.');
     }
 
     let profileId: string | undefined;
@@ -347,7 +345,7 @@ export class UserProfileService {
     let profileActivationRequired: boolean | undefined;
     let apiKeyRetrievalRequired: boolean | undefined;
 
-    if (request.headers.cookie) {
+    if (await session.getSID(request)) {
       this.logger.debug(`Request to get current user profile is authenticated via session.`);
       ({ profileId, sessionId } = await this.getCurrentUserProfileIdViaSession(session, request));
     } else {
