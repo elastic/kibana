@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * @jest-environment node
+ */
+
 import type {
   TestServerlessESUtils,
   TestServerlessKibanaUtils,
