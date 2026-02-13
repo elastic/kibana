@@ -287,7 +287,8 @@ paths:
                       "warnings": [
                         {
                           "id": "monitor-id",
-                          "message": "Browser monitor \"Example journey\" specifies a timeout but has no private locations configured. Timeout is only supported for browser monitors running on private locations and will have no effect."
+                          "message": "For browser monitors, timeout is only supported on private locations. Browser monitor \"Example journey\" specifies a timeout and is running on public locations: \"public-1, public-2\". The timeout will have no effect on these locations.",
+                          "publicLocationIds": ["public-1", "public-2"]
                         }
                       ]
                     }
@@ -537,7 +538,8 @@ paths:
                       "warnings": [
                         {
                           "id": "monitor-id",
-                          "message": "Browser monitor \"Example journey\" specifies a timeout but has no private locations configured. Timeout is only supported for browser monitors running on private locations and will have no effect."
+                          "message": "For browser monitors, timeout is only supported on private locations. Browser monitor \"Example journey\" specifies a timeout and is running on public locations: \"public-1, public-2\". The timeout will have no effect on these locations.",
+                          "publicLocationIds": ["public-1", "public-2"]
                         }
                       ]
                     }
@@ -1384,12 +1386,17 @@ components:
       title: Monitor warning
       type: object
       properties:
-        id:
+        monitorId:
           type: string
           description: The monitor ID associated with the warning.
         message:
           type: string
           description: A human-readable warning message.
+        publicLocationIds:
+          type: array
+          items:
+            type: string
+          description: The public location IDs associated with the warning.
     browserMonitorFields:
       title: Browser monitor fields
       allOf: # Combines the common fields schema with the browser monitor-specific details
