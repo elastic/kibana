@@ -8,8 +8,10 @@
  */
 
 import React from 'react';
-import { EuiButtonGroup } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Controller, useFormContext } from 'react-hook-form';
+import type { FormValues } from '../types';
 
 export type KindType = 'signal' | 'alert';
 
@@ -43,33 +45,47 @@ const kindToSelection: Record<KindType, KindSelection> = {
   alert: 'alert',
 };
 
-interface Props {
-  value?: KindType;
-  onChange: (value: KindType) => void;
-}
-
-export const KindField = React.forwardRef<HTMLDivElement, Props>(({ value, onChange }, ref) => {
-  const selectedId = value ? kindToSelection[value] : 'monitor';
-
-  const handleChange = (id: string) => {
-    const selection = id as KindSelection;
-    onChange(selectionToKind[selection]);
-  };
+export const KindField: React.FC = () => {
+  const { control } = useFormContext<FormValues>();
 
   return (
-    <div ref={ref}>
-      <EuiButtonGroup
-        legend={i18n.translate('xpack.esqlRuleForm.kindField.legend', {
-          defaultMessage: 'Rule kind',
-        })}
-        options={KIND_OPTIONS}
-        idSelected={selectedId}
-        onChange={handleChange}
-        buttonSize="m"
-        color="primary"
-        isFullWidth
-        data-test-subj="kindField"
+    <EuiFormRow
+      label={i18n.translate('xpack.esqlRuleForm.kindLabel', {
+        defaultMessage: 'Rule kind',
+      })}
+      helpText={i18n.translate('xpack.esqlRuleForm.kindHelpText', {
+        defaultMessage: 'Choose whether this rule creates monitors or alerts.',
+      })}
+    >
+      <Controller
+        name="kind"
+        control={control}
+        render={({ field: { value, onChange, ref } }) => {
+          const selectedId = value ? kindToSelection[value] : 'monitor';
+
+          const handleChange = (id: string) => {
+            const selection = id as KindSelection;
+            onChange(selectionToKind[selection]);
+          };
+
+          return (
+            <div ref={ref}>
+              <EuiButtonGroup
+                legend={i18n.translate('xpack.esqlRuleForm.kindField.legend', {
+                  defaultMessage: 'Rule kind',
+                })}
+                options={KIND_OPTIONS}
+                idSelected={selectedId}
+                onChange={handleChange}
+                buttonSize="m"
+                color="primary"
+                isFullWidth
+                data-test-subj="kindField"
+              />
+            </div>
+          );
+        }}
       />
-    </div>
+    </EuiFormRow>
   );
-});
+};
