@@ -45,6 +45,7 @@ import {
   ConnectorMappingsService,
   AttachmentService,
   AlertService,
+  TemplatesService,
 } from '../services';
 
 import { AuthorizationAuditLogger } from '../authorization';
@@ -111,11 +112,13 @@ export class CasesClientFactory {
   public async create({
     request,
     scopedClusterClient,
+    internalClusterClient,
     savedObjectsService,
   }: {
     request: KibanaRequest;
     savedObjectsService: SavedObjectsServiceStart;
     scopedClusterClient: ElasticsearchClient;
+    internalClusterClient: ElasticsearchClient;
   }): Promise<CasesClient> {
     this.validateInitialization();
 
@@ -144,6 +147,7 @@ export class CasesClientFactory {
       unsecuredSavedObjectsClient,
       savedObjectsSerializer,
       esClient: scopedClusterClient,
+      internalClusterClient,
       request,
       auditLogger,
       alertsClient,
@@ -183,6 +187,7 @@ export class CasesClientFactory {
     unsecuredSavedObjectsClient,
     savedObjectsSerializer,
     esClient,
+    internalClusterClient,
     request,
     auditLogger,
     alertsClient,
@@ -190,6 +195,7 @@ export class CasesClientFactory {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     savedObjectsSerializer: ISavedObjectsSerializer;
     esClient: ElasticsearchClient;
+    internalClusterClient: ElasticsearchClient;
     request: KibanaRequest;
     auditLogger: AuditLogger;
     alertsClient: PublicMethodsOf<AlertsClient>;
@@ -200,6 +206,13 @@ export class CasesClientFactory {
       log: this.logger,
       persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
       unsecuredSavedObjectsClient,
+    });
+
+    const templatesService = new TemplatesService({
+      unsecuredSavedObjectsClient,
+      savedObjectsSerializer,
+      esClient,
+      internalClusterClient,
     });
 
     const caseService = new CasesService({
@@ -228,6 +241,7 @@ export class CasesClientFactory {
     });
 
     return {
+      templatesService,
       alertsService: new AlertService(esClient, this.logger, alertsClient),
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),

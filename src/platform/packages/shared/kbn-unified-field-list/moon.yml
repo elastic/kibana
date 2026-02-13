@@ -35,7 +35,6 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/es-types'
   - '@kbn/field-types'
-  - '@kbn/ui-actions-browser'
   - '@kbn/data-service'
   - '@kbn/data-view-field-editor-plugin'
   - '@kbn/dom-drag-drop'

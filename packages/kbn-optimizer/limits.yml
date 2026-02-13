@@ -4,7 +4,7 @@ pageLoadAssetSize:
   agentBuilder: 96771
   agentBuilderPlatform: 64202
   aiAssistantManagementSelection: 13590
-  aiops: 15359
+  aiops: 15227
   alerting: 22371
   apm: 38573
   apmSourcesAccess: 2278
@@ -42,15 +42,15 @@ pageLoadAssetSize:
   dataViewFieldEditor: 26024
   dataViewManagement: 6250
   dataViews: 65000
-  dataVisualizer: 32797
+  dataVisualizer: 32778
   developerToolbar: 4467
   devTools: 8109
-  discover: 28617
+  discover: 28131
   discoverEnhanced: 5660
   discoverShared: 2322
   elasticAssistant: 338870
   elasticAssistantSharedState: 4881
-  embeddable: 17466
+  embeddable: 14545
   embeddableAlertsTable: 6524
   embeddableEnhanced: 4488
   enterpriseSearch: 40244
@@ -156,7 +156,7 @@ pageLoadAssetSize:
   searchInferenceEndpoints: 8071
   searchNavigation: 7404
   searchNotebooks: 18826
-  searchPlayground: 10993
+  searchPlayground: 12122
   searchprofiler: 6509
   searchQueryRules: 6689
   searchSynonyms: 6371
@@ -183,7 +183,7 @@ pageLoadAssetSize:
   timelines: 192134
   transform: 16515
   triggersActionsUi: 112000
-  uiActions: 24670
+  uiActions: 35278
   uiActionsEnhanced: 19272
   unifiedDocViewer: 14513
   unifiedSearch: 19500
@@ -207,7 +207,7 @@ pageLoadAssetSize:
   visTypeVislib: 14679
   visTypeXy: 32342
   visualizationListing: 5148
-  visualizations: 53333
+  visualizations: 52268
   watcher: 10485
   workflowsExtensions: 90040
   workflowsManagement: 21318

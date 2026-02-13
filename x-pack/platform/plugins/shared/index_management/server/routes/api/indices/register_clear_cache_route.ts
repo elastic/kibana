@@ -12,7 +12,7 @@ import { addBasePath } from '..';
 import { executeAsyncByChunks } from './helpers';
 
 const bodySchema = schema.object({
-  indices: schema.arrayOf(schema.string()),
+  indices: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
 });
 
 export function registerClearCacheRoute({ router, lib: { handleEsError } }: RouteDependencies) {

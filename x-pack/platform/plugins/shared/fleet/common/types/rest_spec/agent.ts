@@ -367,3 +367,19 @@ export interface BulkChangeAgentPrivilegeLevelRequest {
 export interface BulkChangeAgentPrivilegeLevelResponse {
   actionId: string;
 }
+
+export interface PostGenerateAgentsReportRequest {
+  body: {
+    agents: string[] | string;
+    fields: string[];
+    timezone?: string;
+    sort?: {
+      field?: string;
+      direction?: 'asc' | 'desc';
+    };
+  };
+}
+
+export interface PostGenerateAgentsReportResponse {
+  url: string;
+}

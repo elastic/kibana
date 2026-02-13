@@ -11,7 +11,7 @@ import path from 'path';
 import fs from 'fs';
 
 import yaml from 'js-yaml';
-import merge from 'lodash/merge';
+import deepmerge from 'deepmerge';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { run } from '@kbn/dev-cli-runner';
@@ -85,7 +85,7 @@ export function regenerateMoonProjects() {
       const pathInPackage = (fileName: string) =>
         path.resolve(pkg.normalizedRepoRelativeDir, fileName);
       const kibanaJsonc = readJsonWithComments(pathInPackage(KIBANA_JSONC_FILENAME));
-      const projectConfig = buildBaseProjectConfig(template, pkg, kibanaJsonc);
+      let projectConfig = buildBaseProjectConfig(template, pkg, kibanaJsonc);
 
       applyTsConfigSettings(projectConfig, {
         tsConfigPath: pathInPackage('tsconfig.json'),
@@ -95,7 +95,10 @@ export function regenerateMoonProjects() {
 
       applyJestTaskConfig(projectConfig);
 
-      applyDevOverrides(projectConfig, pathInPackage(MOON_CONST.EXTENSION_FILE_NAME));
+      projectConfig = applyDevOverrides(
+        projectConfig,
+        pathInPackage(MOON_CONST.EXTENSION_FILE_NAME)
+      );
 
       const result = writeProjectConfigFile(
         pathInPackage(MOON_CONST.MOON_CONFIG_FILE_NAME),
@@ -304,13 +307,15 @@ function writeProjectConfigFile(
 
 function applyDevOverrides(projectConfig: MoonProjectConfig, devOverridesPath: string) {
   if (!fs.existsSync(devOverridesPath)) {
-    return;
+    return projectConfig;
   }
 
   logger.info(`Applying development overrides from ${path.relative(REPO_ROOT, devOverridesPath)}`);
   try {
-    const devOverrides = yaml.load(readFile(devOverridesPath));
-    merge(projectConfig, devOverrides);
+    const devOverrides = yaml.load(readFile(devOverridesPath)) as Partial<MoonProjectConfig>;
+    return deepmerge(projectConfig, devOverrides, {
+      arrayMerge: (target, source) => target.concat(source),
+    });
   } catch (e) {
     logger.error(
       `Failed to apply development overrides from ${path.relative(REPO_ROOT, devOverridesPath)}: ${
