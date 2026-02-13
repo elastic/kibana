@@ -11,7 +11,7 @@ export KBN_NP_PLUGINS_BUILT=true
 VERSION="$(jq -r '.version' package.json)-SNAPSHOT"
 ECCTL_LOGS=$(mktemp --suffix ".json")
 
-KIBANA_MEMORY_SIZE=${KIBANA_MEMORY_SIZE:-1024}
+KIBANA_MEMORY_SIZE=${KIBANA_MEMORY_SIZE:-2048}
 case "$KIBANA_MEMORY_SIZE" in
   1024|2048|4096|8192)
     echo "--- Kibana node memory size: ${KIBANA_MEMORY_SIZE}MB"
@@ -33,7 +33,7 @@ case "$ES_ZONE_COUNT" in
     ;;
 esac
 
-ES_HOT_TIER_MEMORY_SIZE=${ES_HOT_TIER_MEMORY_SIZE:-1024}
+ES_HOT_TIER_MEMORY_SIZE=${ES_HOT_TIER_MEMORY_SIZE:-2048}
 case "$ES_HOT_TIER_MEMORY_SIZE" in
   1024|2048|4096|8192|16384|32768)
     echo "--- Elasticsearch hot tier memory size: ${ES_HOT_TIER_MEMORY_SIZE}MB"
