@@ -68,6 +68,19 @@ export function createErrorAttachmentType({
                   serviceEnvironment: environment ?? '',
                 });
 
+                if (!errorDetails) {
+                  return {
+                    results: [
+                      {
+                        type: ToolResultType.error,
+                        data: {
+                          message: `Error details not found for ${errorId}`,
+                        },
+                      },
+                    ],
+                  };
+                }
+
                 return {
                   results: [
                     {

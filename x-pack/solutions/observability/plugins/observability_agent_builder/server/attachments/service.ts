@@ -69,7 +69,16 @@ export function createServiceAttachmentType({
                 });
 
                 if (!serviceDetails) {
-                  throw new Error('Service details not found');
+                  return {
+                    results: [
+                      {
+                        type: ToolResultType.error,
+                        data: {
+                          message: `Service details not found for ${serviceName}`,
+                        },
+                      },
+                    ],
+                  };
                 }
 
                 return {

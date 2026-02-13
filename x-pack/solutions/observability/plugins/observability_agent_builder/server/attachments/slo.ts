@@ -65,7 +65,16 @@ export function createSloAttachmentType({
                 });
 
                 if (!sloDetails) {
-                  throw new Error('SLO details not found');
+                  return {
+                    results: [
+                      {
+                        type: ToolResultType.error,
+                        data: {
+                          message: `SLO details not found for ${sloId}`,
+                        },
+                      },
+                    ],
+                  };
                 }
 
                 return {

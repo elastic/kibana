@@ -62,6 +62,19 @@ export function createAlertAttachmentType({
 
                 const alertDoc = await alertsClient.get({ id: alertId });
 
+                if (!alertDoc) {
+                  return {
+                    results: [
+                      {
+                        type: ToolResultType.error,
+                        data: {
+                          message: `Alert document not found for ${alertId}`,
+                        },
+                      },
+                    ],
+                  };
+                }
+
                 return {
                   results: [
                     {
