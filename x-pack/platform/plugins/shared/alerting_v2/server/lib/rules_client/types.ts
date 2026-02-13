@@ -7,13 +7,13 @@
 
 import type { CreateRuleData, UpdateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
 
+/** Re-exported from the shared schemas package. */
+export type { CreateRuleData, UpdateRuleData, RuleResponse };
+
 export interface CreateRuleParams {
   data: CreateRuleData;
   options?: { id?: string };
 }
-
-export type { CreateRuleData, UpdateRuleData, RuleResponse };
-
 export interface FindRulesParams {
   page?: number;
   perPage?: number;

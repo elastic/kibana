@@ -15,3 +15,8 @@ export type {
   RuleResponse,
   UpdateRuleData,
 } from './types';
+export {
+  transformCreateRuleBodyToRuleSoAttributes,
+  transformRuleSoAttributesToRuleApiResponse,
+  buildUpdateRuleAttributes,
+} from './utils';

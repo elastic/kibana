@@ -30,6 +30,11 @@ import type {
   RuleResponse,
   UpdateRuleData,
 } from './types';
+import {
+  transformCreateRuleBodyToRuleSoAttributes,
+  transformRuleSoAttributesToRuleApiResponse,
+  buildUpdateRuleAttributes,
+} from './utils';
 
 @injectable()
 export class RulesClient {
@@ -62,21 +67,13 @@ export class RulesClient {
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
-    const ruleAttributes: RuleSavedObjectAttributes = {
-      name: parsed.data.name,
-      kind: parsed.data.kind,
-      tags: parsed.data.tags,
-      schedule: parsed.data.schedule,
-      enabled: parsed.data.enabled,
-      query: parsed.data.query,
-      timeField: parsed.data.timeField,
-      lookbackWindow: parsed.data.lookbackWindow,
-      groupingKey: parsed.data.groupingKey,
+    const ruleAttributes = transformCreateRuleBodyToRuleSoAttributes(parsed.data, {
+      enabled: true,
       createdBy: userProfileUid,
       createdAt: nowIso,
       updatedBy: userProfileUid,
       updatedAt: nowIso,
-    };
+    });
 
     let id: string;
     try {
@@ -92,25 +89,22 @@ export class RulesClient {
       throw e;
     }
 
-    if (ruleAttributes.enabled) {
-      try {
-        await ensureRuleExecutorTaskScheduled({
-          services: { taskManager: this.taskManager },
-          input: {
-            ruleId: id,
-            spaceId,
-            schedule: { interval: ruleAttributes.schedule.custom },
-            request: this.request as unknown as CoreKibanaRequest,
-          },
-        });
-      } catch (e) {
-        await this.rulesSavedObjectService.delete({ id }).catch(() => {});
-        throw e;
-      }
+    try {
+      await ensureRuleExecutorTaskScheduled({
+        services: { taskManager: this.taskManager },
+        input: {
+          ruleId: id,
+          spaceId,
+          schedule: { interval: ruleAttributes.schedule.every },
+          request: this.request as unknown as CoreKibanaRequest,
+        },
+      });
+    } catch (e) {
+      await this.rulesSavedObjectService.delete({ id }).catch(() => {});
+      throw e;
     }
 
-    // Keep response shape identical to the previous method implementation.
-    return { id, ...ruleAttributes };
+    return transformRuleSoAttributesToRuleApiResponse(id, ruleAttributes);
   }
 
   public async updateRule({
@@ -145,35 +139,21 @@ export class RulesClient {
       throw e;
     }
 
-    const wasEnabled = Boolean(existingAttrs.enabled);
-    const willBeEnabled =
-      parsed.data.enabled !== undefined ? Boolean(parsed.data.enabled) : wasEnabled;
-
-    const nextAttrs: RuleSavedObjectAttributes = {
-      ...existingAttrs,
-      ...parsed.data,
+    const nextAttrs = buildUpdateRuleAttributes(existingAttrs, parsed.data, {
       updatedBy: userProfileUid,
       updatedAt: nowIso,
-    };
+    });
 
-    // Disable transition: remove the scheduled task.
-    if (wasEnabled && !willBeEnabled) {
-      const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
-      await this.taskManager.removeIfExists(taskId);
-    }
-
-    // If enabled, ensure task exists and schedule is up-to-date (also handles schedule changes).
-    if (willBeEnabled) {
-      await ensureRuleExecutorTaskScheduled({
-        services: { taskManager: this.taskManager },
-        input: {
-          ruleId: id,
-          spaceId,
-          schedule: { interval: nextAttrs.schedule.custom },
-          request: this.request as unknown as CoreKibanaRequest,
-        },
-      });
-    }
+    // Ensure the task schedule is up-to-date.
+    await ensureRuleExecutorTaskScheduled({
+      services: { taskManager: this.taskManager },
+      input: {
+        ruleId: id,
+        spaceId,
+        schedule: { interval: nextAttrs.schedule.every },
+        request: this.request as unknown as CoreKibanaRequest,
+      },
+    });
 
     try {
       await this.rulesSavedObjectService.update({
@@ -188,14 +168,13 @@ export class RulesClient {
       throw e;
     }
 
-    return { id, ...nextAttrs };
+    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs);
   }
 
   public async getRule({ id }: { id: string }): Promise<RuleResponse> {
     try {
       const doc = await this.rulesSavedObjectService.get(id);
-      const attrs = doc.attributes;
-      return { id, ...attrs };
+      return transformRuleSoAttributesToRuleApiResponse(id, doc.attributes);
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw Boom.notFound(`Rule with id "${id}" not found`);
@@ -229,10 +208,9 @@ export class RulesClient {
     const res = await this.rulesSavedObjectService.find({ page, perPage });
 
     return {
-      items: res.saved_objects.map((so) => ({
-        id: so.id,
-        ...so.attributes,
-      })),
+      items: res.saved_objects.map((so) =>
+        transformRuleSoAttributesToRuleApiResponse(so.id, so.attributes)
+      ),
       total: res.total,
       page,
       perPage,
