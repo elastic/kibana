@@ -36,7 +36,9 @@ export interface MonacoCommandDependencies {
     preloadedSources?: ESQLSourceResult[];
     preloadedTimeSeriesSources?: IndexAutocompleteItem[];
   }) => void;
-  openFieldsBrowser?: (options?: { preloadedFields?: string[] }) => void;
+  openFieldsBrowser?: (options?: {
+    preloadedFields?: Array<{ name: string; type?: string }>;
+  }) => void;
 }
 
 const triggerControl = async (
@@ -133,11 +135,18 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
     commandDisposables.push(
       monaco.editor.registerCommand('esql.fieldsBrowser.open', (...args) => {
         const [, payload] = args;
-        let preloadedFields: string[] | undefined;
+        let preloadedFields: Array<{ name: string; type?: string }> | undefined;
 
         if (payload?.fields) {
           try {
-            preloadedFields = JSON.parse(payload.fields) as string[];
+            const parsed = JSON.parse(payload.fields) as unknown;
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              // Support typed fields [{ name, type }, ...] or legacy string[] for backward compat
+              preloadedFields =
+                typeof parsed[0] === 'string'
+                  ? (parsed as string[]).map((name) => ({ name }))
+                  : (parsed as Array<{ name: string; type?: string }>);
+            }
           } catch {
             preloadedFields = undefined;
           }

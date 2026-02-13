@@ -142,6 +142,40 @@ export const getSourceCommandContextFromQuery = ({
 };
 
 /**
+ * Returns the query text up to (but not including) the last pipe, so that a trailing
+ * command (e.g. `| KEEP`) is dropped and we can run the query to get columns from the
+ * previous pipeline. Uses the ESQL parser to find the last command boundary.
+ *
+ * Examples:
+ * - "FROM a | STATS AVG(bytes) | KEEP" → "FROM a | STATS AVG(bytes)"
+ * - "FROM kibana_sample_data_logs | KEEP" → "FROM kibana_sample_data_logs"
+ * - "FROM a | STATS count(*)" → "FROM a"
+ * - "FROM a" → "FROM a"
+ */
+export const getQueryWithoutLastPipe = (queryText: string): string => {
+  const trimmed = queryText.trim();
+  if (!trimmed) return trimmed;
+  try {
+    const { root } = Parser.parse(trimmed, { withFormatting: true });
+    const commands = root.commands;
+    // Drop the last command whenever there is at least one pipe (2+ commands).
+    if (commands.length > 1) {
+      const lastCmd = commands[commands.length - 1];
+      const endOffset = lastCmd.location?.min ?? trimmed.length;
+      let result = trimmed.slice(0, endOffset).trimEnd();
+      // Parser min is the start of the last command; slice leaves the preceding "|". Remove it.
+      if (result.endsWith('|')) {
+        result = result.slice(0, -1).trimEnd();
+      }
+      return result;
+    }
+    return trimmed;
+  } catch {
+    return trimmed;
+  }
+};
+
+/**
  * Parses the query and returns the `location.min/max` for each *existing* `source` argument
  * of the main `FROM`/`TS` command.
  *
