@@ -26,13 +26,15 @@ export const useInlineActionsMenuAnchor = ({
   containerRef,
 }: UseInlineActionsMenuAnchorOptions): AnchorPosition | null => {
   const [anchorPosition, setAnchorPosition] = useState<AnchorPosition | null>(null);
+  const triggerStartOffset = triggerMatch.activeTrigger?.triggerStartOffset;
 
+  // Update anchor position
   useEffect(() => {
-    if (!triggerMatch.activeTrigger || !editorRef.current || !containerRef.current) {
+    if (typeof triggerStartOffset !== 'number' || !editorRef.current || !containerRef.current) {
+      setAnchorPosition(null);
       return;
     }
 
-    const { triggerStartOffset } = triggerMatch.activeTrigger;
     const rect = getRectAtOffset(editorRef.current, triggerStartOffset);
     if (!rect) {
       return;
@@ -44,7 +46,7 @@ export const useInlineActionsMenuAnchor = ({
       left: rect.left - containerRect.left,
       top: rect.top - containerRect.top,
     });
-  }, [triggerMatch, editorRef, containerRef]);
+  }, [triggerStartOffset, editorRef, containerRef]);
 
   return anchorPosition;
 };

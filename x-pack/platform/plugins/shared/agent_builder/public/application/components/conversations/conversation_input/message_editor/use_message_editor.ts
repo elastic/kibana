@@ -23,7 +23,7 @@ export interface MessageEditorInstance {
   isEmpty: boolean;
 
   /** Dismiss the active trigger menu */
-  cancelTrigger: () => void;
+  dismissTrigger: () => void;
 }
 
 /**
@@ -42,7 +42,11 @@ export interface MessageEditorInstance {
 export const useMessageEditor = (): MessageEditorInstance => {
   const ref = useRef<HTMLDivElement>(null);
   const [isEmpty, setIsEmpty] = useState(true);
-  const triggerState = useInlineActionTrigger();
+  const {
+    match: triggerMatch,
+    dismiss: dismissTrigger,
+    handleInput: handleTriggerInput,
+  } = useInlineActionTrigger();
 
   const syncIsEmpty = useCallback(() => {
     if (!ref?.current) {
@@ -64,10 +68,10 @@ export const useMessageEditor = (): MessageEditorInstance => {
         onChange: () => {
           syncIsEmpty();
           if (ref.current) {
-            triggerState.handleInput(ref.current);
+            handleTriggerInput(ref.current);
           }
         },
-        triggerMatch: triggerState.match,
+        triggerMatch,
       },
       focus: () => {
         ref.current?.focus();
@@ -93,9 +97,9 @@ export const useMessageEditor = (): MessageEditorInstance => {
         }
       },
       isEmpty,
-      cancelTrigger: triggerState.dismiss,
+      dismissTrigger,
     }),
-    [isEmpty, syncIsEmpty, triggerState]
+    [isEmpty, syncIsEmpty, triggerMatch, dismissTrigger, handleTriggerInput]
   );
 
   return instance;

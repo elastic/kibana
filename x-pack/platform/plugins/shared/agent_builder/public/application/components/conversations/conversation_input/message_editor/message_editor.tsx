@@ -81,7 +81,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   return (
     <InlineActionsContainer
       triggerMatch={triggerMatch}
-      onClose={messageEditor.cancelTrigger}
+      onClose={messageEditor.dismissTrigger}
       editorRef={ref}
       data-test-subj={`${dataTestSubj}-container`}
     >
@@ -103,7 +103,8 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
         onCompositionEnd={handleCompositionEnd}
         onKeyDown={(event) => {
           if (event.key === keys.ESCAPE) {
-            messageEditor.cancelTrigger();
+            event.stopPropagation();
+            messageEditor.dismissTrigger();
           } else if (!event.shiftKey && event.key === keys.ENTER && !isComposing) {
             event.preventDefault();
             onSubmit();
