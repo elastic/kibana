@@ -56,6 +56,14 @@ const status = schema.object({
 export const searchSessionStatusSchema = status;
 
 export const searchSessionStatusesSchema = schema.object({
+  sessions: schema.recordOf(
+    schema.string(),
+    schema.object({
+      name: schema.maybe(schema.string()),
+      restoreState: schema.maybe(serializeableSchema),
+      locatorId: schema.maybe(schema.string()),
+    })
+  ),
   statuses: schema.recordOf(schema.string(), status),
 });
 

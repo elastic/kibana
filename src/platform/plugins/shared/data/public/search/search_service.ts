@@ -309,7 +309,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
     const config = this.initializerContext.config.get();
 
-    this.backgroundSearchNotifier = new BackgroundSearchNotifier(this.sessionsClient, coreStart);
+    this.backgroundSearchNotifier = new BackgroundSearchNotifier(
+      this.sessionsClient,
+      coreStart,
+      share.url.locators
+    );
     this.backgroundSearchNotifier.startPolling(BACKGROUND_SESSION_POLLING_INTERVAL);
 
     return {

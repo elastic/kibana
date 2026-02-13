@@ -14,15 +14,31 @@ import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { SearchSessionStatus, type SearchSessionStatusResponse } from '../../../common';
+import {
+  SearchSessionStatus,
+  type SearchSessionStatusResponse,
+  type SearchSessionStatusesResponse,
+} from '../../../common';
 import type { ISessionsClient } from '../..';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { getInProgressSessionIds, setInProgressSessionIds } from './in_progress_session';
+import type { LocatorsStart } from './sessions_mgmt/types';
+import { getRestoreUrl } from './get_session_redirect_url';
+
+interface SessionNotificationInfo {
+  id: string;
+  name: string;
+  restoreUrl?: string;
+}
 
 export class BackgroundSearchNotifier {
   private pollingSubscription?: Subscription;
 
-  constructor(private sessionsClient: ISessionsClient, private core: CoreStart) {}
+  constructor(
+    private sessionsClient: ISessionsClient,
+    private core: CoreStart,
+    private locators: LocatorsStart
+  ) {}
 
   public startPolling(interval: number) {
     this.stopPolling();
@@ -36,8 +52,9 @@ export class BackgroundSearchNotifier {
             map((loadedStatuses) => ({ loadedStatuses, existingIds })),
             catchError(() =>
               of({
-                loadedStatuses: { statuses: {} } as {
+                loadedStatuses: { statuses: {}, sessions: {} } as {
                   statuses: Record<string, SearchSessionStatusResponse>;
+                  sessions: SearchSessionStatusesResponse['sessions'];
                 },
                 existingIds,
               })
@@ -45,7 +62,7 @@ export class BackgroundSearchNotifier {
           )
         ),
         map(({ loadedStatuses, existingIds }) =>
-          this.groupSessions(loadedStatuses.statuses, existingIds)
+          this.groupSessions(loadedStatuses.statuses, loadedStatuses.sessions, existingIds)
         ),
         tap((sessions) => this.updateSessions(sessions))
       )
@@ -58,54 +75,84 @@ export class BackgroundSearchNotifier {
   }
 
   private groupSessions(
-    loadedSessions: Record<string, SearchSessionStatusResponse>,
+    loadedStatuses: Record<string, SearchSessionStatusResponse>,
+    loadedSessions: SearchSessionStatusesResponse['sessions'],
     existingIds: string[]
   ) {
     const inProgressIds: string[] = [];
-    const completedIds: string[] = [];
-    const failedIds: string[] = [];
+    const completedSessions: SessionNotificationInfo[] = [];
+    const failedSessions: SessionNotificationInfo[] = [];
 
     for (const existingId of existingIds) {
-      const sessionStatus = loadedSessions[existingId];
+      const sessionStatus = loadedStatuses[existingId];
       if (!sessionStatus || sessionStatus.status === SearchSessionStatus.IN_PROGRESS)
         inProgressIds.push(existingId);
-      else if (sessionStatus.status === SearchSessionStatus.COMPLETE) completedIds.push(existingId);
-      else failedIds.push(existingId);
+      else if (sessionStatus.status === SearchSessionStatus.COMPLETE)
+        completedSessions.push(this.buildNotificationInfo(existingId, loadedSessions[existingId]));
+      else failedSessions.push(this.buildNotificationInfo(existingId, loadedSessions[existingId]));
     }
 
-    return { inProgressIds, completedIds, failedIds };
+    return { inProgressIds, completedSessions, failedSessions };
   }
 
   private updateSessions(sessions: {
     inProgressIds: string[];
-    completedIds: string[];
-    failedIds: string[];
+    completedSessions: SessionNotificationInfo[];
+    failedSessions: SessionNotificationInfo[];
   }) {
     setInProgressSessionIds(sessions.inProgressIds);
-    this.showNotifications(sessions.completedIds, sessions.failedIds);
+    this.showNotifications(sessions.completedSessions, sessions.failedSessions);
   }
 
-  private showNotifications(completedIds: string[], failedIds: string[]) {
+  private buildNotificationInfo(
+    sessionId: string,
+    sessionData?: SearchSessionStatusesResponse['sessions'][string]
+  ): SessionNotificationInfo {
+    const name = sessionData?.name ?? this.getDefaultSessionName();
+    return {
+      id: sessionId,
+      name,
+      restoreUrl: getRestoreUrl({
+        locators: this.locators,
+        locatorId: sessionData?.locatorId,
+        restoreState: sessionData?.restoreState,
+        sessionName: name,
+      }),
+    };
+  }
+
+  private getDefaultSessionName() {
+    return i18n.translate('data.search.sessions.backgroundSearch.unnamedSession', {
+      defaultMessage: 'Untitled background search',
+    });
+  }
+
+  private showNotifications(
+    completedSessions: SessionNotificationInfo[],
+    failedSessions: SessionNotificationInfo[]
+  ) {
     const managementUrl = this.core.application.getUrlForApp('management', {
       deepLinkId: SEARCH_SESSIONS_MANAGEMENT_ID,
     });
 
-    if (completedIds.length > 0) {
+    for (const completedSession of completedSessions) {
       this.core.notifications.toasts.addSuccess({
         title: i18n.translate('data.search.sessions.backgroundSearch.completedToastTitle', {
-          defaultMessage:
-            '{count, plural, one {Background search completed} other {Completed {count} background searches}}',
+          defaultMessage: 'Background search completed: {sessionName}',
           values: {
-            count: completedIds.length,
+            sessionName: completedSession.name,
           },
         }),
         text: toMountPoint(
           <FormattedMessage
             id="data.search.sessions.backgroundSearch.completedToastText"
-            defaultMessage="<link>View results in Background Search</link>"
+            defaultMessage="<link>Open session</link>"
             values={{
               link: (chunks: React.ReactNode) => (
-                <EuiLink href={managementUrl} data-test-subj="backgroundSearchCompletedToastLink">
+                <EuiLink
+                  href={completedSession.restoreUrl ?? managementUrl}
+                  data-test-subj="backgroundSearchCompletedToastLink"
+                >
                   {chunks}
                 </EuiLink>
               ),
@@ -116,13 +163,13 @@ export class BackgroundSearchNotifier {
       });
     }
 
-    if (failedIds.length > 0) {
+    if (failedSessions.length > 0) {
       this.core.notifications.toasts.addDanger({
         title: i18n.translate('data.search.sessions.backgroundSearch.failedToastTitle', {
           defaultMessage:
             '{count, plural, one {Background search failed} other {Failed {count} background searches}}',
           values: {
-            count: failedIds.length,
+            count: failedSessions.length,
           },
         }),
         text: toMountPoint(

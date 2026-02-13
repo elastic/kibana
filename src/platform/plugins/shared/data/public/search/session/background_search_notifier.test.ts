@@ -11,10 +11,13 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { BackgroundSearchNotifier } from './background_search_notifier';
 import { getSessionsClientMock } from './mocks';
 import { getInProgressSessionIds, setInProgressSessionIds } from './in_progress_session';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 jest.mock('./in_progress_session');
 const mockGetInProgressSessionIds = jest.mocked(getInProgressSessionIds);
 const mockSetInProgressSessionIds = jest.mocked(setInProgressSessionIds);
+
+const locatorsMock = sharePluginMock.createStartContract().url.locators;
 
 describe('BackgroundSearchNotifier', () => {
   beforeEach(() => {
@@ -31,12 +34,13 @@ describe('BackgroundSearchNotifier', () => {
       it('should not call status endpoint', async () => {
         // Given
         const sessionsClientMock = getSessionsClientMock({
-          status: jest.fn().mockResolvedValue({ statuses: {} }),
+          status: jest.fn().mockResolvedValue({ statuses: {}, sessions: {} }),
         });
         const coreStartMock = coreMock.createStart();
         const backgroundSearchNotifier = new BackgroundSearchNotifier(
           sessionsClientMock,
-          coreStartMock
+          coreStartMock,
+          locatorsMock
         );
         mockGetInProgressSessionIds.mockReturnValue([]);
 
@@ -58,12 +62,14 @@ describe('BackgroundSearchNotifier', () => {
               'session-1': { status: 'in_progress' },
               'session-2': { status: 'in_progress' },
             },
+            sessions: {},
           }),
         });
         const coreStartMock = coreMock.createStart();
         const backgroundSearchNotifier = new BackgroundSearchNotifier(
           sessionsClientMock,
-          coreStartMock
+          coreStartMock,
+          locatorsMock
         );
         mockGetInProgressSessionIds.mockReturnValue(['session-1', 'session-2']);
 
@@ -88,12 +94,25 @@ describe('BackgroundSearchNotifier', () => {
               'session-1': { status: 'complete' },
               'session-2': { status: 'complete' },
             },
+            sessions: {
+              'session-1': {
+                name: 'session-1',
+                locatorId: 'DISCOVER_APP_LOCATOR',
+                restoreState: {},
+              },
+              'session-2': {
+                name: 'session-2',
+                locatorId: 'DISCOVER_APP_LOCATOR',
+                restoreState: {},
+              },
+            },
           }),
         });
         const coreStartMock = coreMock.createStart();
         const backgroundSearchNotifier = new BackgroundSearchNotifier(
           sessionsClientMock,
-          coreStartMock
+          coreStartMock,
+          locatorsMock
         );
         // First call is for the initial poll, second call is for the next interval
         mockGetInProgressSessionIds
@@ -107,7 +126,7 @@ describe('BackgroundSearchNotifier', () => {
 
         // Then
         expect(mockSetInProgressSessionIds).toHaveBeenCalledWith([]);
-        expect(coreStartMock.notifications.toasts.addSuccess).toHaveBeenCalledTimes(1);
+        expect(coreStartMock.notifications.toasts.addSuccess).toHaveBeenCalledTimes(2);
         expect(coreStartMock.notifications.toasts.addDanger).not.toHaveBeenCalled();
       });
     });
@@ -121,12 +140,25 @@ describe('BackgroundSearchNotifier', () => {
               'session-1': { status: 'error' },
               'session-2': { status: 'cancelled' },
             },
+            sessions: {
+              'session-1': {
+                name: 'session-1',
+                locatorId: 'DISCOVER_APP_LOCATOR',
+                restoreState: {},
+              },
+              'session-2': {
+                name: 'session-2',
+                locatorId: 'DISCOVER_APP_LOCATOR',
+                restoreState: {},
+              },
+            },
           }),
         });
         const coreStartMock = coreMock.createStart();
         const backgroundSearchNotifier = new BackgroundSearchNotifier(
           sessionsClientMock,
-          coreStartMock
+          coreStartMock,
+          locatorsMock
         );
         // First call is for the initial poll, second call is for the next interval
         mockGetInProgressSessionIds
@@ -156,12 +188,25 @@ describe('BackgroundSearchNotifier', () => {
               'session-3': { status: 'error' },
               'session-4': { status: 'in_progress' },
             },
+            sessions: {
+              'session-2': {
+                name: 'session-2',
+                locatorId: 'DISCOVER_APP_LOCATOR',
+                restoreState: {},
+              },
+              'session-3': {
+                name: 'session-3',
+                locatorId: 'DISCOVER_APP_LOCATOR',
+                restoreState: {},
+              },
+            },
           }),
         });
         const coreStartMock = coreMock.createStart();
         const backgroundSearchNotifier = new BackgroundSearchNotifier(
           sessionsClientMock,
-          coreStartMock
+          coreStartMock,
+          locatorsMock
         );
         // First call is for the initial poll, second call is for the next interval
         mockGetInProgressSessionIds
@@ -189,12 +234,14 @@ describe('BackgroundSearchNotifier', () => {
               'session-1': { status: 'in_progress' },
               // session-2 and session-3 not in response
             },
+            sessions: {},
           }),
         });
         const coreStartMock = coreMock.createStart();
         const backgroundSearchNotifier = new BackgroundSearchNotifier(
           sessionsClientMock,
-          coreStartMock
+          coreStartMock,
+          locatorsMock
         );
         mockGetInProgressSessionIds.mockReturnValue(['session-1', 'session-2', 'session-3']);
 
@@ -224,12 +271,20 @@ describe('BackgroundSearchNotifier', () => {
               statuses: {
                 'session-1': { status: 'complete' },
               },
+              sessions: {
+                'session-1': {
+                  name: 'session-1',
+                  locatorId: 'DISCOVER_APP_LOCATOR',
+                  restoreState: {},
+                },
+              },
             }),
         });
         const coreStartMock = coreMock.createStart();
         const backgroundSearchNotifier = new BackgroundSearchNotifier(
           sessionsClientMock,
-          coreStartMock
+          coreStartMock,
+          locatorsMock
         );
         mockGetInProgressSessionIds
           .mockReturnValueOnce(['session-1'])
@@ -265,7 +320,8 @@ describe('BackgroundSearchNotifier', () => {
         const coreStartMock = coreMock.createStart();
         const backgroundSearchNotifier = new BackgroundSearchNotifier(
           sessionsClientMock,
-          coreStartMock
+          coreStartMock,
+          locatorsMock
         );
         mockGetInProgressSessionIds.mockReturnValue(['session-1']);
 
@@ -281,6 +337,7 @@ describe('BackgroundSearchNotifier', () => {
           statuses: {
             'session-1': { status: 'in_progress' },
           },
+          sessions: {},
         });
         await jest.advanceTimersByTimeAsync(0);
         await jest.advanceTimersByTimeAsync(1000);
