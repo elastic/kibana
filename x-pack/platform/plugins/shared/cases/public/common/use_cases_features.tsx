@@ -30,7 +30,6 @@ export const useCasesFeatures = (): UseCasesFeatures => {
   const { isAtLeastGold, isAtLeastPlatinum } = useLicense();
   const hasLicenseGreaterThanPlatinum = isAtLeastPlatinum();
   const hasLicenseWithAtLeastGold = isAtLeastGold();
-
   const casesFeatures = useMemo(
     () => ({
       isAlertsEnabled: features.alerts.enabled,

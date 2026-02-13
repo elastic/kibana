@@ -6,10 +6,11 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
 
-test.describe('Browse integration', { tag: ['@ess'] }, () => {
+test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ apiServices, config }) => {
     // TODO: re-enable when the 'beforeAll' hook starts working on Cloud
     // The following line will skip all tests in this suite when running on ECH

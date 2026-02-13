@@ -181,18 +181,4 @@ describe('NavLinksService', () => {
       expect(start.has('phony')).toBe(false);
     });
   });
-
-  describe('#enableForcedAppSwitcherNavigation()', () => {
-    it('flips #getForceAppSwitcherNavigation$()', async () => {
-      await expect(
-        lastValueFrom(start.getForceAppSwitcherNavigation$().pipe(take(1)))
-      ).resolves.toBe(false);
-
-      start.enableForcedAppSwitcherNavigation();
-
-      await expect(
-        lastValueFrom(start.getForceAppSwitcherNavigation$().pipe(take(1)))
-      ).resolves.toBe(true);
-    });
-  });
 });

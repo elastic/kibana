@@ -10,7 +10,7 @@
 import { omit, uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
-import { hasNoParams } from '../../formatters/formatting_utils';
+import { hasNoParams } from '../../formatters/param_utils';
 import { formatLocation } from '../../../../common/utils/location_formatter';
 import type {
   BrowserFields,
