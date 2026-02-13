@@ -14,7 +14,6 @@ import type {
   DashboardAgentPluginStart,
 } from './types';
 import { registerSkills } from './skills';
-import { manageDashboardTool } from './tools';
 import { getIsDashboardAgentEnabled } from './utils/get_is_dashboard_agent_enabled';
 import { DASHBOARD_AGENT_FEATURE_FLAG } from '../common/constants';
 import { createDashboardAttachmentType } from './attachment_types';
@@ -49,9 +48,7 @@ export class DashboardAgentPlugin
           return;
         }
 
-        this.registerToolsAndSkills(setupDeps).catch((error) => {
-          this.logger.error(`Error registering dashboard tools and skills: ${error}`);
-        });
+        this.registerToolsAndSkills(setupDeps);
       })
       .catch((error) => {
         this.logger.error(`Error checking whether the dashboard agent is enabled: ${error}`);
@@ -60,15 +57,12 @@ export class DashboardAgentPlugin
     return {};
   }
 
-  private async registerToolsAndSkills(setupDeps: DashboardAgentSetupDependencies) {
+  private registerToolsAndSkills(setupDeps: DashboardAgentSetupDependencies) {
     // Register the dashboard attachment type
     setupDeps.agentBuilder.attachments.registerType(createDashboardAttachmentType() as any);
 
-    // Register the consolidated manage_dashboard tool
-    setupDeps.agentBuilder.tools.register(manageDashboardTool({}));
-
     // Register dashboard skills for the default agent.
-    await registerSkills(setupDeps.agentBuilder);
+    registerSkills(setupDeps.agentBuilder);
   }
 
   start(

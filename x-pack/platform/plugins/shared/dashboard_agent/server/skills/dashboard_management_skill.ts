@@ -8,6 +8,7 @@
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { manageDashboardTool } from '../tools';
 
 const manageDashboardToolId = 'platform.dashboard.manage_dashboard' as const;
 
@@ -513,11 +514,9 @@ On error, the dashboard was not created or updated. Inform the user about what w
     },
   ],
   getAllowedTools: () => [
-    manageDashboardToolId,
     platformCoreTools.createVisualization,
-    platformCoreTools.listIndices,
-    platformCoreTools.getIndexMapping,
     platformCoreTools.generateEsql,
     platformCoreTools.executeEsql,
   ],
+  getInlineTools: () => [manageDashboardTool()],
 });
