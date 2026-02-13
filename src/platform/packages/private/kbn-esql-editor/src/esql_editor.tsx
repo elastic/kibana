@@ -1009,6 +1009,7 @@ const ESQLEditorInternal = function ESQLEditor({
       readOnly: isDisabled,
       renderLineHighlight: 'line',
       renderLineHighlightOnlyWhenFocus: true,
+      lineHeight: 22,
       scrollbar: {
         horizontal: 'hidden',
         horizontalScrollbarSize: 6,
