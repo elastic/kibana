@@ -117,12 +117,10 @@ const mockServices: ServiceListItem[] = [
 ];
 
 function createMockServiceActions({
-  showActionsColumn = true,
   hasDiscoverActions = true,
   hasAlertActions = true,
   hasSloActions = true,
 }: {
-  showActionsColumn?: boolean;
   hasDiscoverActions?: boolean;
   hasAlertActions?: boolean;
   hasSloActions?: boolean;
@@ -183,7 +181,7 @@ function createMockServiceActions({
     });
   }
 
-  return { actions, showActionsColumn };
+  return actions;
 }
 
 function renderApmServicesTable({
@@ -619,55 +617,18 @@ describe('ApmServicesTable', () => {
   });
 
   describe('actions column', () => {
-    it('renders actions column when user has alert permissions', async () => {
-      mockUseServiceActions.mockReturnValue(
-        createMockServiceActions({
-          showActionsColumn: true,
-          hasAlertActions: true,
-          hasSloActions: false,
-        })
-      );
+    it('renders actions column', async () => {
+      mockUseServiceActions.mockReturnValue(createMockServiceActions());
 
       renderApmServicesTable({ history });
 
       expect(await screen.findByRole('table')).toBeInTheDocument();
       expect(screen.getByText('Actions')).toBeInTheDocument();
-    });
-
-    it('renders actions column when user has SLO permissions', async () => {
-      mockUseServiceActions.mockReturnValue(
-        createMockServiceActions({
-          showActionsColumn: true,
-          hasAlertActions: false,
-          hasSloActions: true,
-        })
-      );
-
-      renderApmServicesTable({ history });
-
-      expect(await screen.findByRole('table')).toBeInTheDocument();
-      expect(screen.getByText('Actions')).toBeInTheDocument();
-    });
-
-    it('does not render actions column when user has no permissions', async () => {
-      mockUseServiceActions.mockReturnValue(
-        createMockServiceActions({
-          showActionsColumn: false,
-          hasAlertActions: false,
-          hasSloActions: false,
-        })
-      );
-
-      renderApmServicesTable({ history });
-
-      expect(await screen.findByRole('table')).toBeInTheDocument();
-      expect(screen.queryByText('Actions')).not.toBeInTheDocument();
     });
 
     it('opens actions menu when clicking action button', async () => {
       mockUseServiceActions.mockReturnValue(
         createMockServiceActions({
-          showActionsColumn: true,
           hasAlertActions: true,
           hasSloActions: true,
         })
@@ -697,7 +658,6 @@ describe('ApmServicesTable', () => {
     it('shows alert actions when user has alert permissions', async () => {
       mockUseServiceActions.mockReturnValue(
         createMockServiceActions({
-          showActionsColumn: true,
           hasAlertActions: true,
           hasSloActions: false,
         })
@@ -730,7 +690,6 @@ describe('ApmServicesTable', () => {
     it('shows SLO actions when user has SLO permissions', async () => {
       mockUseServiceActions.mockReturnValue(
         createMockServiceActions({
-          showActionsColumn: true,
           hasAlertActions: false,
           hasSloActions: true,
         })
@@ -758,7 +717,6 @@ describe('ApmServicesTable', () => {
     it('shows Discover actions in the menu', async () => {
       mockUseServiceActions.mockReturnValue(
         createMockServiceActions({
-          showActionsColumn: true,
           hasDiscoverActions: true,
           hasAlertActions: false,
           hasSloActions: false,
@@ -785,7 +743,6 @@ describe('ApmServicesTable', () => {
     it('always shows Discover actions alongside alert and SLO actions', async () => {
       mockUseServiceActions.mockReturnValue(
         createMockServiceActions({
-          showActionsColumn: true,
           hasDiscoverActions: true,
           hasAlertActions: true,
           hasSloActions: true,
