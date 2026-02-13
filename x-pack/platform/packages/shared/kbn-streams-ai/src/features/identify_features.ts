@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { uniqBy } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
 import { type BaseFeature, baseFeatureSchema } from '@kbn/streams-schema';
@@ -47,16 +48,19 @@ export async function identifyFeatures({
     })
   );
 
-  const features = response.toolCalls
-    .flatMap((toolCall) => toolCall.function.arguments.features)
-    .map((feature) => ({
-      ...feature,
-      stream_name: streamName,
-    }))
-    .filter((feature) => {
-      const result = baseFeatureSchema.safeParse(feature);
-      return result.success;
-    });
+  const features = uniqBy(
+    response.toolCalls
+      .flatMap((toolCall) => toolCall.function.arguments.features)
+      .map((feature) => ({
+        ...feature,
+        stream_name: streamName,
+      }))
+      .filter((feature) => {
+        const result = baseFeatureSchema.safeParse(feature);
+        return result.success;
+      }),
+    (feature) => feature.id
+  );
 
   return {
     features,

@@ -7,14 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Where the indices browser was opened from.
- *
- * This affects insertion behavior:
- * - `Badge`: insert at the beginning of the sources list
- * - `Autocomplete`: insert at the cursor position
- */
-export enum IndicesBrowserOpenMode {
-  Badge = 'badge',
-  Autocomplete = 'autocomplete',
-}
+export { isUiamCredential } from './utils';
