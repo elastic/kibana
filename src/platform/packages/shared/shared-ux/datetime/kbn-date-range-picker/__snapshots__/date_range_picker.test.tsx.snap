@@ -5,7 +5,7 @@ exports[`DateRangePicker renders 1`] = `
   class="euiPopover emotion-euiPopover-block-DateRangePickerDialog"
 >
   <div
-    style="display: flex; align-items: center; gap: 8px; max-inline-size: 400px;"
+    class="css-sai07k-containerStyles"
   >
     <div
       class="euiFormControlLayout emotion-euiFormControlLayout-compressed"
