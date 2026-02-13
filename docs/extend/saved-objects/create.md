@@ -1,5 +1,5 @@
 ---
-navigation_title: Create
+navigation_title: Create a type
 ---
 
 # Create a Saved Object type [saved-objects-create]
@@ -194,6 +194,10 @@ router.get(
 When you create a new Saved Object type, define an initial model version (version 1) that describes the current shape. The first version must be numbered 1, with no gaps in subsequent versions.
 
 We recommend defining `create` and `forwardCompatibility` schemas that include **all** fields of your Saved Object type: those that appear in your mappings, as well as any non-indexed attributes you store. Exhaustive schemas give better validation on create and on read, and support safe rollbacks in Serverless.
+
+:::{important}
+Changes to a type’s `create` schema, specifically adding new required fields, can effectively become breaking changes for consumers using the deprecated Saved Objects HTTP CRUD APIs, because those APIs validate create and bulk-create payloads against this schema for that type.
+:::
 
 ```ts
 import { schema } from '@kbn/config-schema';

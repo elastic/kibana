@@ -1,5 +1,5 @@
 ---
-name: Scout Best Practices Reviewer
+name: scout-best-practices-reviewer
 description: Use when writing and reviewing Scout UI and API test files.
 ---
 

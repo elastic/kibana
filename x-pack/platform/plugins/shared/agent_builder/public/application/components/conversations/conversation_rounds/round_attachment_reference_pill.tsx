@@ -79,6 +79,7 @@ export const AttachmentReferencePill: React.FC<AttachmentReferencePillProps> = (
         id: attachment.id,
         type: attachment.type,
         data: versionData.data,
+        ...(attachment.origin !== undefined && { origin: attachment.origin }),
       };
       return uiDefinition.getLabel(mockAttachment as any);
     }
@@ -95,6 +96,7 @@ export const AttachmentReferencePill: React.FC<AttachmentReferencePillProps> = (
               id: attachment.id,
               type: attachment.type,
               data: versionData.data,
+              ...(attachment.origin !== undefined && { origin: attachment.origin }),
             },
             version: versionData,
           })
@@ -153,7 +155,7 @@ export const AttachmentReferencePill: React.FC<AttachmentReferencePillProps> = (
             <strong>{displayName}</strong>
           </EuiText>
           <EuiText size="xs" color="subdued">
-            {`v${version} · ${operationLabel}`}
+            {operationLabel}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
