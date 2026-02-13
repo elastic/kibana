@@ -135,7 +135,7 @@ Here are some examples of non-acceptable submissions, but not limited to:
 
 #### Questions and disclosure
 
-Please view our [Security Issues](https://www.elastic.co/community/security) page for any questions or concerns related to this offering.
+Please view our [Security Issues](https://github.com/elastic/.github/blob/main/SECURITY.md) page for any questions or concerns related to this offering.
 
 ## How to get involved
 
