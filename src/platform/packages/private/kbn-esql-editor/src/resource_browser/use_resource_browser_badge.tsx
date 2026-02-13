@@ -12,8 +12,9 @@ import { useEuiTheme } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { useCallback, useRef } from 'react';
 import type { MutableRefObject } from 'react';
-import { getSupportedCommand, SUPPORTED_COMMANDS } from './utils';
-import { IndicesBrowserOpenMode } from './open_mode';
+import { getSupportedCommand } from './utils';
+import { IndicesBrowserOpenMode } from './types';
+import { SUPPORTED_COMMANDS } from './constants';
 
 interface UseSourcesBadgeParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
