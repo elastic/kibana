@@ -1021,6 +1021,71 @@ export const EntityStoreUtils = (getService: FtrProviderContext['getService']) =
 };
 ```
 
+### Entity Store Test Patterns
+
+Common patterns for Entity Store API tests based on lessons learned from PR #252853:
+
+| Issue | Solution |
+|-------|----------|
+| Task conflict with multiple engines | Enable only the required engine type(s) |
+| Transform not found | Wait for transform existence with retry, handle `resource_not_found_exception` |
+| Components not installed | Poll until all components have `installed: true` |
+| Status 'running' but not ready | Check both status AND component states |
+
+**Recommended `enableEntityStore` parameters:**
+
+```typescript
+// Test validates only host behavior
+await enableEntityStore(providerContext, { entityTypes: ['host'] });
+
+// Test validates only user behavior  
+await enableEntityStore(providerContext, { entityTypes: ['user'] });
+
+// Test requires all engines (use with caution - may need retry logic)
+await enableEntityStore(providerContext, { entityTypes: ['host', 'user', 'service'] });
+```
+
+**Why enable only required engines?**
+
+The Entity Store server-side code initializes engines concurrently using `Promise.all`, which can cause task conflicts when multiple engines try to run the shared `data_view:refresh` task simultaneously. By enabling only the engine(s) your test actually validates, you avoid this race condition.
+
+**When you must enable all engines:**
+
+If your test genuinely requires all engines (e.g., testing bulk operations across entity types), use retry logic with backoff:
+
+```typescript
+const RETRIES = 5;
+const RETRY_DELAY_MS = 5000;
+
+for (let attempt = 0; attempt < RETRIES; attempt++) {
+  const response = await supertest
+    .post('/api/entity_store/enable')
+    .set('kbn-xsrf', 'xxxx')
+    .send({ entityTypes: ['host', 'user', 'service'] });
+    
+  // Wait for running status
+  await retry.waitForWithTimeout('Entity Store to initialize', TIMEOUT_MS, async () => {
+    const { body } = await supertest.get('/api/entity_store/status').expect(200);
+    
+    if (body.status === 'error') {
+      // Check for task conflict - exit loop to retry
+      const hasTaskConflict = body.engines?.some((e: any) =>
+        e.error?.message?.includes('currently running')
+      );
+      if (hasTaskConflict) return true; // Exit to retry
+    }
+    
+    return body.status === 'running';
+  });
+  
+  if (success) break;
+  
+  // Clean up and retry with delay
+  await cleanUpEntityStore(providerContext);
+  await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+}
+```
+
 ---
 
 ## Scout Migration Guidelines
@@ -1567,6 +1632,103 @@ const expectTransformExists = async (
 ```
 
 **Real Example:** Entity Store tests checking for transform existence immediately after engine initialization. Fix: Added polling utilities like `expectTransformExists()` with configurable retry attempts.
+
+**Enhanced Fix - Handle `resource_not_found_exception` explicitly:**
+
+When waiting for a transform to exist, explicitly catch and handle the `resource_not_found_exception`:
+
+```typescript
+// Wait for transform to exist, handling the specific exception
+await retry.waitForWithTimeout(
+  `Transform ${TRANSFORM_ID} to exist`,
+  TIMEOUT_MS,
+  async () => {
+    try {
+      const { count, transforms } = await es.transform.getTransformStats({
+        transform_id: TRANSFORM_ID,
+      });
+      if (count !== 1) {
+        log.debug(`Waiting for transform ${TRANSFORM_ID} to exist, count: ${count}`);
+        return false;
+      }
+      return true;
+    } catch (e: any) {
+      if (e.message?.includes('resource_not_found_exception')) {
+        log.debug(`Transform ${TRANSFORM_ID} not found yet, waiting...`);
+        return false;
+      }
+      throw e; // Re-throw unexpected errors
+    }
+  }
+);
+```
+
+**Real Example:** PR #252853 - `host_transform.ts` test failed with `resource_not_found_exception` because `createDocumentsAndTriggerTransform` tried to get transform stats before the transform existed. Fix: Added retry loop that catches `resource_not_found_exception` and continues polling.
+
+### API Pattern: Task Conflict During Concurrent Initialization
+
+**Symptoms:**
+- Error: "Failed to run task [task_id] as it is currently running"
+- Multiple engines or resources initialized via `Promise.all`
+- Test passes when running single engine, fails with multiple
+- Intermittent failures that seem timing-dependent
+
+**Root Cause:** When multiple resources share a background task (e.g., `data_view:refresh`), initializing them concurrently causes each initialization to call `taskManager.runSoon()` on the same task. The second call fails because the task is already running.
+
+**Diagnosis:**
+1. Check if the test initializes multiple engines/resources concurrently
+2. Look for shared tasks between the resources
+3. Check server logs for "currently running" errors
+
+```typescript
+// ❌ Flaky - concurrent initialization causes task conflicts
+await enableEntityStore(providerContext); // Enables host, user, service concurrently
+
+// ✅ Stable - initialize only required engine(s)
+await enableEntityStore(providerContext, { entityTypes: ['host'] });
+```
+
+**Fix Options:**
+1. **Enable only required engines** - If test only validates one engine type
+2. **Add retry with backoff** - Retry the entire initialization with delays
+3. **File server-side bug** - This is often a server-side issue to fix
+
+**Real Example:** PR #252853 - Entity Store `host_transform.ts` test failed because enabling all three engines (host, user, service) caused the shared `data_view:refresh` task to conflict. Fix: Enable only the 'host' engine since the test only validates host transform behavior.
+
+### API Pattern: Component Installation Not Complete
+
+**Symptoms:**
+- Entity Store or engine status is 'running' but assertions fail
+- Error: "expected false to equal true" on `component.installed` check
+- Works locally (slower), fails in CI (faster)
+
+**Root Cause:** The engine reports `status: 'running'` before all sub-components have `installed: true`. Asserting immediately catches the engine in a transitional state.
+
+```typescript
+// ❌ Flaky - components may not be fully installed yet
+const { body } = await supertest.get('/api/entity_store/status').expect(200);
+expect(body.status).to.eql('running');
+for (const component of body.engines[0].components) {
+  expect(component.installed).to.be(true); // May fail!
+}
+
+// ✅ Stable - wait for all components to be installed
+await retry.waitForWithTimeout(
+  'All components to be installed',
+  TIMEOUT_MS,
+  async () => {
+    const { body } = await supertest.get('/api/entity_store/status').expect(200);
+    if (body.status !== 'running') return false;
+    
+    const allInstalled = body.engines.every((engine: any) =>
+      engine.components?.every((c: any) => c.installed === true)
+    );
+    return allInstalled;
+  }
+);
+```
+
+**Real Example:** PR #252853 - The test "Should return 200 and status 'running' for host engine" failed because components weren't fully installed when the assertion ran. Fix: Added `retry.waitForWithTimeout` to poll until all components have `installed: true`.
 
 ### API Pattern: Background Task Timing
 
