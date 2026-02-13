@@ -38,13 +38,29 @@ interface AddRoutingRuleControlsProps {
 }
 
 export const AddRoutingRuleControls = ({ isStreamNameValid }: AddRoutingRuleControlsProps) => {
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const { cancelChanges, forkStream } = useStreamRoutingEvents();
   const [isRequestPreviewFlyoutOpen, setIsRequestPreviewFlyoutOpen] = React.useState(false);
   const [requestPreviewCodeContent, setRequestPreviewCodeContent] = React.useState<string>('');
 
+  const streamName = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.definition.stream.name
+  );
+  const hasPrivileges = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.definition.privileges.manage
+  );
+  const isForking = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({
+      ready: { ingestMode: { creatingNewRule: 'forking' } },
+    })
+  );
+  const canForkRouting = useStreamsRoutingSelector((snapshot) =>
+    snapshot.can({ type: 'routingRule.fork' })
+  );
+  const currentRoutingRule = useStreamsRoutingSelector((snapshot) =>
+    selectCurrentRule(snapshot.context)
+  );
+
   const onViewCodeClick = () => {
-    const currentRoutingRule = selectCurrentRule(routingSnapshot.context);
     const body = buildRoutingForkRequestPayload({
       where: currentRoutingRule.where,
       destination: currentRoutingRule.destination,
@@ -53,7 +69,7 @@ export const AddRoutingRuleControls = ({ isStreamNameValid }: AddRoutingRuleCont
     setRequestPreviewCodeContent(
       buildRequestPreviewCodeContent({
         method: 'POST',
-        url: `/api/streams/${routingSnapshot.context.definition.stream.name}/_fork`,
+        url: `/api/streams/${streamName}/_fork`,
         body,
       })
     );
@@ -64,12 +80,6 @@ export const AddRoutingRuleControls = ({ isStreamNameValid }: AddRoutingRuleCont
     setIsRequestPreviewFlyoutOpen(false);
     setRequestPreviewCodeContent('');
   };
-
-  const isForking = routingSnapshot.matches({
-    ready: { ingestMode: { creatingNewRule: 'forking' } },
-  });
-  const canForkRouting = routingSnapshot.can({ type: 'routingRule.fork' });
-  const hasPrivileges = routingSnapshot.context.definition.privileges.manage;
 
   return (
     <>
@@ -113,19 +123,38 @@ export const EditRoutingRuleControls = ({
 }: {
   routingRule: RoutingDefinitionWithUIAttributes;
 }) => {
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const { cancelChanges, removeRule, saveChanges } = useStreamRoutingEvents();
   const [isRequestPreviewFlyoutOpen, setIsRequestPreviewFlyoutOpen] = React.useState(false);
   const [requestPreviewCodeContent, setRequestPreviewCodeContent] = React.useState<string>('');
 
+  const streamName = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.definition.stream.name
+  );
+  const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
+  const routing = useStreamsRoutingSelector((snapshot) => snapshot.context.routing);
+  const isUpdating = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({
+      ready: { ingestMode: { editingRule: 'updatingRule' } },
+    })
+  );
+  const canUpdateRouting = useStreamsRoutingSelector((snapshot) =>
+    snapshot.can({ type: 'routingRule.save' })
+  );
+  const canRemoveRoutingRule = useStreamsRoutingSelector((snapshot) =>
+    snapshot.can({ type: 'routingRule.remove' })
+  );
+  const hasPrivileges = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.definition.privileges.manage
+  );
+
   const onViewCodeClick = () => {
-    const routing = routingSnapshot.context.routing.map(routingConverter.toAPIDefinition);
-    const body = buildRoutingSaveRequestPayload(routingSnapshot.context.definition, routing);
+    const routingPayload = routing.map(routingConverter.toAPIDefinition);
+    const body = buildRoutingSaveRequestPayload(definition, routingPayload);
 
     setRequestPreviewCodeContent(
       buildRequestPreviewCodeContent({
         method: 'PUT',
-        url: `/api/streams/${routingSnapshot.context.definition.stream.name}/_ingest`,
+        url: `/api/streams/${streamName}/_ingest`,
         body,
       })
     );
@@ -138,14 +167,6 @@ export const EditRoutingRuleControls = ({
   };
 
   const routingRuleName = routingRule.destination;
-
-  const isUpdating = routingSnapshot.matches({
-    ready: { ingestMode: { editingRule: 'updatingRule' } },
-  });
-
-  const canUpdateRouting = routingSnapshot.can({ type: 'routingRule.save' });
-  const canRemoveRoutingRule = routingSnapshot.can({ type: 'routingRule.remove' });
-  const hasPrivileges = routingSnapshot.context.definition.privileges.manage;
 
   return (
     <>
@@ -203,11 +224,14 @@ export const EditSuggestedRuleControls = ({
   conditionError?: string;
   isStreamNameValid: boolean;
 }) => {
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const { cancelChanges } = useStreamRoutingEvents();
 
-  const canSave = routingSnapshot.can({ type: 'suggestion.saveSuggestion' });
-  const hasPrivileges = routingSnapshot.context.definition.privileges.manage;
+  const canSave = useStreamsRoutingSelector((snapshot) =>
+    snapshot.can({ type: 'suggestion.saveSuggestion' })
+  );
+  const hasPrivileges = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.definition.privileges.manage
+  );
 
   const hasValidationErrors = !!conditionError;
   const isUpdateDisabled = hasValidationErrors || !canSave;
