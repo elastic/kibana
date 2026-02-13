@@ -315,23 +315,22 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
     if (!this.persistedLog) {
       return [];
     }
+    const getRecentSearchText = (recentSearch: unknown): string => {
+      if (typeof recentSearch === 'string') {
+        return recentSearch;
+      }
+      if (recentSearch != null && typeof recentSearch === 'object') {
+        return toUser(recentSearch as { [key: string]: unknown });
+      }
+      return '';
+    };
     const recentSearches = this.persistedLog.get();
     const matchingRecentSearches = recentSearches.filter((recentQuery) => {
-      const recentQueryString =
-        typeof recentQuery === 'string'
-          ? recentQuery
-          : recentQuery != null && typeof recentQuery === 'object'
-          ? toUser(recentQuery as { [key: string]: unknown })
-          : '';
+      const recentQueryString = getRecentSearchText(recentQuery);
       return recentQueryString !== '' && recentQueryString.includes(query);
     });
     return matchingRecentSearches.map((recentSearch) => {
-      const text =
-        typeof recentSearch === 'string'
-          ? recentSearch
-          : recentSearch != null && typeof recentSearch === 'object'
-          ? toUser(recentSearch as { [key: string]: unknown })
-          : '';
+      const text = getRecentSearchText(recentSearch);
       const start = 0;
       const end = query.length;
       return { type: QuerySuggestionTypes.RecentSearch, text, start, end };

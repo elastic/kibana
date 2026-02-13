@@ -622,7 +622,10 @@ export class SearchSource {
     val: SearchSourceFields[K],
     key: K
   ): false | void {
-    val = typeof val === 'function' ? val() : val;
+    if (typeof val === 'function') {
+      const fn = val as unknown as (searchSource?: SearchSource) => SearchSourceFields[K];
+      val = fn.length > 0 ? fn(this) : fn();
+    }
     if (val == null || !key) return;
 
     const addToRoot = (rootKey: string, value: unknown) => {
@@ -830,13 +833,7 @@ export class SearchSource {
         : body._source;
 
     // get filter if data view specified, otherwise null filter
-    const sourceExcludes =
-      typeof _source === 'object' &&
-      _source !== null &&
-      'excludes' in _source &&
-      Array.isArray((_source as { excludes?: unknown }).excludes)
-        ? (_source as { excludes: string[] }).excludes ?? []
-        : [];
+    const sourceExcludes = this.extractSourceExcludes(_source);
     const filter = this.getFieldFilter({ bodySourceExcludes: sourceExcludes, metaFields });
 
     const fieldsFromSource = filter(searchRequest.fieldsFromSource || []);
@@ -997,6 +994,15 @@ export class SearchSource {
     const filter = fieldWildcardFilter(bodySourceExcludes, metaFields);
     return (fieldsToFilter: SearchFieldValue[]) =>
       fieldsToFilter.filter((fld) => filter(this.getFieldName(fld)));
+  }
+
+  private extractSourceExcludes(_source: unknown): string[] {
+    return typeof _source === 'object' &&
+      _source !== null &&
+      'excludes' in _source &&
+      Array.isArray((_source as { excludes?: unknown }).excludes)
+      ? (_source as { excludes: string[] }).excludes ?? []
+      : [];
   }
 
   private getUniqueFieldNames({

@@ -16,8 +16,26 @@ import { toAbsoluteDates } from './date_interval_utils';
 import { autoInterval } from '../buckets/_interval_options';
 
 export function getCalculateAutoTimeExpression(getConfig: (key: string) => unknown) {
-  const getNumberConfig = (key: string): number => Number(getConfig(key));
-  const getStringConfig = (key: string): string => String(getConfig(key));
+  const getNumberConfig = (key: string): number => {
+    const value = getConfig(key);
+    if (typeof value === 'number') {
+      return value;
+    }
+    if (typeof value === 'string') {
+      return Number(value);
+    }
+    return Number.NaN;
+  };
+  const getStringConfig = (key: string): string => {
+    const value = getConfig(key);
+    if (typeof value === 'string') {
+      return value;
+    }
+    if (value == null) {
+      return '';
+    }
+    return String(value);
+  };
   const getScaledDateFormatsConfig = (key: string): string[][] => {
     const value = getConfig(key);
     return Array.isArray(value) ? (value as string[][]) : [];
