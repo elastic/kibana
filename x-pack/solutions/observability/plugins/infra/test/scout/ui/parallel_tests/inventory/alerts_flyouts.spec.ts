@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 
-test.describe('Infrastructure Inventory - Alerts Flyout', { tag: ['@ess'] }, () => {
+test.describe('Infrastructure Inventory - Alerts Flyout', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
     await browserAuth.loginAsPrivilegedUser();
     await inventoryPage.addDismissK8sTourInitScript();
@@ -17,7 +18,7 @@ test.describe('Infrastructure Inventory - Alerts Flyout', { tag: ['@ess'] }, () 
 
   test(
     'Should open inventory rule flyout',
-    { tag: ['@svlOblt'] },
+    { tag: tags.serverless.observability.complete },
     async ({ pageObjects: { inventoryPage } }) => {
       await test.step('open alerts menu', async () => {
         await inventoryPage.alertsHeaderButton.click();
@@ -59,7 +60,7 @@ test.describe('Infrastructure Inventory - Alerts Flyout', { tag: ['@ess'] }, () 
 
   test(
     'Should not have option to create custom threshold rule',
-    { tag: ['@svlOblt'] },
+    { tag: tags.serverless.observability.complete },
     async ({ pageObjects: { inventoryPage } }) => {
       await test.step('open alerts menu', async () => {
         await inventoryPage.alertsHeaderButton.click();

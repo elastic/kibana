@@ -163,6 +163,9 @@ export function TopErrors() {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiBasicTable
+          tableCaption={i18n.translate('xpack.apm.transactionDetails.topErrors.caption', {
+            defaultMessage: 'Top errors summary',
+          })}
           error={
             status === FETCH_STATUS.FAILURE
               ? i18n.translate('xpack.apm.transactionDetails.topErrors.errorMessage', {
