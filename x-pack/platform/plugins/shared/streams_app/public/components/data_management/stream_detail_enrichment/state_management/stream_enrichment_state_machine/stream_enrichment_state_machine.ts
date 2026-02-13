@@ -4,12 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  getRoot,
-  isEnabledFailureStore,
-  LOGS_ECS_STREAM_NAME,
-  Streams,
-} from '@kbn/streams-schema';
+import { getRoot, isEnabledFailureStore, LOGS_ECS_STREAM_NAME, Streams } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
 import { assign, cancel, forwardTo, raise, sendTo, setup, stopChild } from 'xstate5';
