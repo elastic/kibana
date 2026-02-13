@@ -23,7 +23,7 @@ export const getCaseByIdStepDefinition = (
     ...getCaseByIdStepCommonDefinition,
     handler: createCasesStepHandler(getCasesClient, (client, input: GetCaseByIdStepInput) =>
       client.cases.get({
-        id: input.id,
+        id: input.case_id,
         includeComments: input.include_comments,
       })
     ),

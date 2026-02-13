@@ -7,35 +7,19 @@
 
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import { CaseIdSchema, CaseResponseSchema } from '../schemas/case_workflow_schemas';
+import { CaseResponseProperties } from '../../../docs/openapi/bundled-types.gen';
 
-/**
- * Step type ID for getting a case by ID.
- * Follows namespaced format: 'cases.getCaseById'
- */
 export const GetCaseByIdStepTypeId = 'cases.getCaseById';
 
-/**
- * Input schema for the getCaseById step.
- * Defines the parameters required to retrieve a case.
- */
 export const InputSchema = z.object({
-  case_id: CaseIdSchema,
+  case_id: z.string().min(1, 'case_id is required'),
   include_comments: z.boolean().optional().default(false),
 });
 
-/**
- * Output schema for the getCaseById step.
- * Returns the complete case object.
- */
 export const OutputSchema = z.object({
-  case: CaseResponseSchema,
+  case: CaseResponseProperties,
 });
 
-/**
- * Config schema for the getCaseById step.
- * Allows step-level configuration outside the 'with' block.
- */
 export const ConfigSchema = z.object({
   id: z.string(),
 });
@@ -48,9 +32,6 @@ export type GetCaseByIdStepInput = z.infer<typeof InputSchema>;
 export type GetCaseByIdStepOutput = z.infer<typeof OutputSchema>;
 export type GetCaseByIdStepConfig = z.infer<typeof ConfigSchema>;
 
-/**
- * Common step definition for getCaseById, shared between server and public.
- */
 export const getCaseByIdStepCommonDefinition: CommonStepDefinition<
   GetCaseByIdStepInputSchema,
   GetCaseByIdStepOutputSchema,

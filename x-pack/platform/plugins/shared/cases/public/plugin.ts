@@ -122,7 +122,7 @@ export class CasesUiPlugin
 
     registerAnalytics({ analyticsService: core.analytics });
 
-    registerCasesSteps(plugins.workflowsExtensions);
+    registerCasesSteps(core, plugins.workflowsExtensions);
 
     return {
       attachmentFramework: {

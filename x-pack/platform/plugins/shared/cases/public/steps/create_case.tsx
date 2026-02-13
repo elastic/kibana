@@ -6,34 +6,62 @@
  */
 
 import React from 'react';
-import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
+import type { CoreSetup, HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { ActionsMenuGroup } from '@kbn/workflows-extensions/public';
+import { ActionsMenuGroup, createPublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { getAllConnectorsUrl } from '../../common/utils/connectors_api';
 import {
   createCaseStepCommonDefinition,
   CreateCaseStepTypeId,
 } from '../../common/workflows/steps/create_case';
 
-export const createCaseStepDefinition: PublicStepDefinition = {
-  ...createCaseStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/document_edit').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
-  label: i18n.translate('xpack.cases.workflowSteps.createCase.label', {
-    defaultMessage: 'Create case',
-  }),
-  description: i18n.translate('xpack.cases.workflowSteps.createCase.description', {
-    defaultMessage: 'Creates a new case with the specified attributes',
-  }),
-  documentation: {
-    details: i18n.translate('xpack.cases.workflowSteps.createCase.documentation.details', {
-      defaultMessage:
-        'This step creates a new case in the cases system. You can specify title, description, tags, assignees, severity, category, connector configuration, sync settings, and custom fields. The step returns the complete created case object.',
+interface ConnectorOption {
+  id: string;
+  name: string;
+  actionTypeId?: string;
+}
+
+function CreateCaseIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+      <path d="M3 2h7l3 3v9H3V2zm7 1.5V6h2.5L10 3.5zM5 8h6v1H5V8zm0 2h6v1H5v-1z" />
+    </svg>
+  );
+}
+
+CreateCaseIcon.displayName = 'CreateCaseIcon';
+
+export const createCreateCaseStepDefinition = (core: CoreSetup) => {
+  let httpPromise: Promise<HttpStart> | null = null;
+
+  const getHttp = async (): Promise<HttpStart> => {
+    if (!httpPromise) {
+      httpPromise = core.getStartServices().then(([coreStart]) => coreStart.http);
+    }
+    return httpPromise;
+  };
+
+  const getConnectors = async (): Promise<ConnectorOption[]> => {
+    const http = await getHttp();
+    return http.get<ConnectorOption[]>(getAllConnectorsUrl());
+  };
+
+  return createPublicStepDefinition({
+    ...createCaseStepCommonDefinition,
+    icon: CreateCaseIcon,
+    label: i18n.translate('xpack.cases.workflowSteps.createCase.label', {
+      defaultMessage: 'Create case',
     }),
-    examples: [
-      `## Basic case creation
+    description: i18n.translate('xpack.cases.workflowSteps.createCase.description', {
+      defaultMessage: 'Creates a new case with the specified attributes',
+    }),
+    documentation: {
+      details: i18n.translate('xpack.cases.workflowSteps.createCase.documentation.details', {
+        defaultMessage:
+          'This step creates a new case in the cases system. You can specify title, description, tags, assignees, severity, category, connector configuration, sync settings, and custom fields. The step returns the complete created case object.',
+      }),
+      examples: [
+        `## Basic case creation
 \`\`\`yaml
 - name: create_security_case
   type: ${CreateCaseStepTypeId}
@@ -50,7 +78,7 @@ export const createCaseStepDefinition: PublicStepDefinition = {
     settings:
       syncAlerts: true
 \`\`\``,
-      `## Case with assignees and severity
+        `## Case with assignees and severity
 \`\`\`yaml
 - name: create_high_severity_case
   type: ${CreateCaseStepTypeId}
@@ -72,7 +100,7 @@ export const createCaseStepDefinition: PublicStepDefinition = {
       syncAlerts: true
       extractObservables: true
 \`\`\``,
-      `## Case with category and custom fields
+        `## Case with category and custom fields
 \`\`\`yaml
 - name: create_categorized_case
   type: ${CreateCaseStepTypeId}
@@ -98,7 +126,7 @@ export const createCaseStepDefinition: PublicStepDefinition = {
     settings:
       syncAlerts: true
 \`\`\``,
-      `## Using data from previous steps
+        `## Using data from previous steps
 \`\`\`yaml
 - name: analyze_alerts
   type: elasticsearch.search
@@ -124,7 +152,66 @@ export const createCaseStepDefinition: PublicStepDefinition = {
     settings:
       syncAlerts: true
 \`\`\``,
-    ],
-  },
-  actionsMenuGroup: ActionsMenuGroup.kibana,
+      ],
+    },
+    actionsMenuGroup: ActionsMenuGroup.kibana,
+    editorHandlers: {
+      input: {
+        // TODO: add assignees selection support when array item paths are supported in editor handlers.
+        'connector.id': {
+          selection: {
+            search: async (input: string) => {
+              const connectors = await getConnectors();
+              const query = input.trim().toLowerCase();
+              return connectors
+                .filter(
+                  (connector) =>
+                    query.length === 0 ||
+                    connector.id.toLowerCase().includes(query) ||
+                    connector.name.toLowerCase().includes(query)
+                )
+                .map((connector) => ({
+                  value: connector.id,
+                  label: connector.name,
+                  description: connector.actionTypeId
+                    ? `Connector type: ${connector.actionTypeId}`
+                    : undefined,
+                }));
+            },
+            resolve: async (value: string) => {
+              const connectors = await getConnectors();
+              const connector = connectors.find((item) => item.id === value);
+
+              if (!connector) {
+                return null;
+              }
+
+              return {
+                value: connector.id,
+                label: connector.name,
+                description: connector.actionTypeId
+                  ? `Connector type: ${connector.actionTypeId}`
+                  : undefined,
+              };
+            },
+            getDetails: async (
+              value: string,
+              _context: unknown,
+              option: { value: string; label: string } | null
+            ) => {
+              if (option) {
+                return {
+                  message: `Connector "${option.label}" is available for case workflows.`,
+                };
+              }
+
+              return {
+                message: `Connector "${value}" was not found. Select an existing connector in Kibana connectors.`,
+              };
+            },
+          },
+        },
+      },
+    },
+  });
 };

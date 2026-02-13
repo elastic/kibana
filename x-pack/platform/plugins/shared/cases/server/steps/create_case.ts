@@ -10,6 +10,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
   createCaseStepCommonDefinition,
   type CreateCaseStepInput,
+  type CreateCaseStepOutput,
 } from '../../common/workflows/steps/create_case';
 import type { CasesServerStartDependencies } from '../types';
 import type { CasesClient } from '../client';
@@ -22,7 +23,10 @@ export const createCaseStepDefinition = (
 ) =>
   createServerStepDefinition({
     ...createCaseStepCommonDefinition,
-    handler: createCasesStepHandler(getCasesClient, (client, input: CreateCaseStepInput) =>
-      client.cases.create(input)
-    ),
+    handler: createCasesStepHandler(getCasesClient, async (client, input: CreateCaseStepInput) => {
+      const createdCase = await client.cases.create(
+        input as unknown as Parameters<typeof client.cases.create>[0]
+      );
+      return createdCase as unknown as CreateCaseStepOutput['case'];
+    }),
   });
