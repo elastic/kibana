@@ -9,8 +9,9 @@
 
 import getopts from 'getopts';
 import { promises as fs } from 'fs';
-import { relative, dirname } from 'path';
-import { spawn } from 'child_process';
+import { relative } from 'path';
+import { spawn, execFile as _execFile } from 'child_process';
+import { createHash } from 'crypto';
 import Table from 'cli-table3';
 import chalk from 'chalk';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -37,6 +38,52 @@ interface FailedTest {
   fullName: string;
   filePath: string;
   failureMessage: string;
+}
+
+function execBuildkiteAgent(args: string[]): Promise<{ stdout: string }> {
+  return new Promise((resolve, reject) => {
+    _execFile('buildkite-agent', args, (error, stdout) => {
+      if (error) reject(error);
+      else resolve({ stdout });
+    });
+  });
+}
+
+// --- Buildkite checkpoint helpers ---
+// On retry, already-passed configs are skipped via Buildkite meta-data.
+
+function isInBuildkite(): boolean {
+  return Boolean(process.env.BUILDKITE);
+}
+
+function getCheckpointKey(config: string): string {
+  const stepId = process.env.BUILDKITE_STEP_ID || '';
+  const job = process.env.BUILDKITE_PARALLEL_JOB || '0';
+  const hash = createHash('sha256').update(config).digest('hex').substring(0, 12);
+  return `jest_ckpt_${stepId}_${job}_${hash}`;
+}
+
+async function markConfigCompleted(config: string): Promise<void> {
+  try {
+    await execBuildkiteAgent(['meta-data', 'set', getCheckpointKey(config), 'done']);
+  } catch {
+    // Best-effort: ignore errors writing checkpoint
+  }
+}
+
+async function isConfigCompleted(config: string): Promise<boolean> {
+  try {
+    const { stdout } = await execBuildkiteAgent([
+      'meta-data',
+      'get',
+      getCheckpointKey(config),
+      '--default',
+      '',
+    ]);
+    return stdout.trim() === 'done';
+  } catch {
+    return false;
+  }
 }
 
 // Run multiple Jest configs in parallel using separate Jest processes (one per config).
@@ -149,23 +196,6 @@ export async function runJestAll() {
     testFiles: results.map((r) => relative(process.cwd(), r.config)),
   });
 
-  // Persist failed configs for retry logic if requested
-  if (process.env.JEST_ALL_FAILED_CONFIGS_PATH) {
-    const failed = results.filter((r) => r.code !== 0).map((r) => r.config);
-
-    try {
-      await fs.mkdir(dirname(process.env.JEST_ALL_FAILED_CONFIGS_PATH), { recursive: true });
-
-      await fs.writeFile(
-        process.env.JEST_ALL_FAILED_CONFIGS_PATH,
-        JSON.stringify(failed, null, 2),
-        'utf8'
-      );
-    } catch (err) {
-      log.warning(`Unable to write failed configs file: ${(err as Error).message}`);
-    }
-  }
-
   log.write('--- Combined Jest run summary');
 
   await writeSummary(results, log, totalMs);
@@ -174,10 +204,41 @@ export async function runJestAll() {
 }
 
 async function runConfigs(
-  configs: string[],
+  allConfigs: string[],
   maxParallel: number,
   log: ToolingLog
 ): Promise<JestConfigResult[]> {
+  const skippedResults: JestConfigResult[] = [];
+  let configs = allConfigs;
+
+  // In Buildkite, skip configs already completed on a previous attempt (checkpoint resume)
+  if (isInBuildkite()) {
+    const completionStatus = await Promise.all(
+      allConfigs.map(async (config) => ({
+        config,
+        completed: await isConfigCompleted(config),
+      }))
+    );
+
+    const skipped = completionStatus.filter((c) => c.completed);
+    configs = completionStatus.filter((c) => !c.completed).map((c) => c.config);
+
+    for (const { config } of skipped) {
+      log.info(`Skipping ${config} (already completed on previous attempt)`);
+      skippedResults.push({ config, code: 0, durationMs: 0 });
+    }
+
+    if (skipped.length > 0) {
+      log.info(
+        `Resumed from checkpoint: skipped ${skipped.length} already-completed configs, ${configs.length} remaining`
+      );
+    }
+  }
+
+  if (configs.length === 0) {
+    return skippedResults;
+  }
+
   const results: JestConfigResult[] = [];
   let active = 0;
   let index = 0;
@@ -248,11 +309,20 @@ async function runConfigs(
           const remaining = configs.length - results.length;
           log.info(`Configs left: ${remaining}`);
 
-          active -= 1;
-          if (index < configs.length) {
-            launchNext();
-          } else if (active === 0) {
-            resolveAll();
+          const proceed = () => {
+            active -= 1;
+            if (index < configs.length) {
+              launchNext();
+            } else if (active === 0) {
+              resolveAll();
+            }
+          };
+
+          // Write checkpoint for successful configs before proceeding
+          if (code === 0 && isInBuildkite()) {
+            markConfigCompleted(config).then(proceed, proceed);
+          } else {
+            proceed();
           }
         });
       }
@@ -260,7 +330,7 @@ async function runConfigs(
     launchNext();
   });
 
-  return results;
+  return [...skippedResults, ...results];
 }
 
 function parseFailedTests(output: string): FailedTest[] {
