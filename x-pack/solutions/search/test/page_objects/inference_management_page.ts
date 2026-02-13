@@ -194,7 +194,7 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
       async expectGroupBySelection(label: string) {
         await testSubjects.existOrFail('group-by-select');
         await testSubjects.existOrFail('group-by-button');
-        (await testSubjects.getVisibleText('group-by-button')).includes(label);
+        expect(await testSubjects.getVisibleText('group-by-button')).contain(label);
       },
 
       async selectGroupByOption(key: string) {
@@ -219,7 +219,7 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
         await testSubjects.existOrFail(`${groupId}-accordion`);
 
         await retry.tryWithRetries(
-          `Waiting for ${groupId} accordion to be closed`,
+          `Waiting for ${groupId} accordion to be open`,
           async () => {
             const isOpen =
               (await (
