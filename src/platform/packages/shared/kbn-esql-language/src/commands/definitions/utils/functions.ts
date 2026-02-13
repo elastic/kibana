@@ -29,6 +29,8 @@ import type { ESQLColumnData, ISuggestionItem } from '../../registry/types';
 import { withAutoSuggest } from './autocomplete/helpers';
 import { buildFunctionDocumentation } from './documentation';
 import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
+import { buildFieldsBrowserCommandArgs } from '../../../language/autocomplete/autocomplete_utils';
+import { createFieldsBrowserSuggestion } from '../../registry/complete_items';
 import type { ESQLAstItem, ESQLFunction } from '../../../types';
 import { removeFinalUnknownIdentiferArg, techPreviewLabel } from './shared';
 import { getTestFunctions } from './test_functions';
@@ -434,6 +436,7 @@ export const buildColumnSuggestions = (
     variableType?: ESQLVariableType;
     supportsControls?: boolean;
     supportsMultiValue?: boolean;
+    isFieldsBrowserEnabled?: boolean;
   },
   variables?: ESQLControlVariable[]
 ): ISuggestionItem[] => {
@@ -488,6 +491,13 @@ export const buildColumnSuggestions = (
       )
     : [];
   suggestions.push(...controlSuggestions);
+
+  if (options?.isFieldsBrowserEnabled) {
+    const commandArgs = buildFieldsBrowserCommandArgs({
+      fields: columns.map((col) => ({ name: col.name, type: col.type })),
+    });
+    suggestions.unshift(createFieldsBrowserSuggestion(commandArgs));
+  }
 
   return [...suggestions];
 };
