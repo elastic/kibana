@@ -10,8 +10,7 @@
 import getopts from 'getopts';
 import { promises as fs } from 'fs';
 import { relative } from 'path';
-import { spawn, execFile as _execFile } from 'child_process';
-import { createHash } from 'crypto';
+import { spawn } from 'child_process';
 import Table from 'cli-table3';
 import chalk from 'chalk';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -19,6 +18,11 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { tmpdir } from 'os';
 import { getJestConfigs } from './configs/get_jest_configs';
+import {
+  isInBuildkite,
+  markConfigCompleted,
+  isConfigCompleted,
+} from './buildkite_checkpoint';
 
 interface JestConfigResult {
   config: string;
@@ -38,52 +42,6 @@ interface FailedTest {
   fullName: string;
   filePath: string;
   failureMessage: string;
-}
-
-function execBuildkiteAgent(args: string[]): Promise<{ stdout: string }> {
-  return new Promise((resolve, reject) => {
-    _execFile('buildkite-agent', args, (error, stdout) => {
-      if (error) reject(error);
-      else resolve({ stdout });
-    });
-  });
-}
-
-// --- Buildkite checkpoint helpers ---
-// On retry, already-passed configs are skipped via Buildkite meta-data.
-
-function isInBuildkite(): boolean {
-  return Boolean(process.env.BUILDKITE);
-}
-
-function getCheckpointKey(config: string): string {
-  const stepId = process.env.BUILDKITE_STEP_ID || '';
-  const job = process.env.BUILDKITE_PARALLEL_JOB || '0';
-  const hash = createHash('sha256').update(config).digest('hex').substring(0, 12);
-  return `jest_ckpt_${stepId}_${job}_${hash}`;
-}
-
-async function markConfigCompleted(config: string): Promise<void> {
-  try {
-    await execBuildkiteAgent(['meta-data', 'set', getCheckpointKey(config), 'done']);
-  } catch {
-    // Best-effort: ignore errors writing checkpoint
-  }
-}
-
-async function isConfigCompleted(config: string): Promise<boolean> {
-  try {
-    const { stdout } = await execBuildkiteAgent([
-      'meta-data',
-      'get',
-      getCheckpointKey(config),
-      '--default',
-      '',
-    ]);
-    return stdout.trim() === 'done';
-  } catch {
-    return false;
-  }
 }
 
 // Run multiple Jest configs in parallel using separate Jest processes (one per config).
