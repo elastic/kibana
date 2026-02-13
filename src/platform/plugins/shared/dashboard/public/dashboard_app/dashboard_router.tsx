@@ -35,6 +35,7 @@ import {
   createDashboardListingFilterUrl,
 } from '../utils/urls';
 import { DASHBOARD_DURATION_START_MARK } from '../dashboard_api/performance/dashboard_duration_start_mark';
+import { getDashboardHeaderAppActionsConfig } from '../header_app_actions/header_app_actions_config';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -193,6 +194,8 @@ export async function mountApp({
       },
     ],
   });
+
+  coreServices.chrome.setHeaderAppActionsConfig(getDashboardHeaderAppActionsConfig());
 
   if (!getDashboardCapabilities().showWriteControls) {
     coreServices.chrome.setBadge({

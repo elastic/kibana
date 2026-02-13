@@ -7,9 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiHorizontalRule, EuiIcon, EuiKeyPadMenu, EuiKeyPadMenuItem } from '@elastic/eui';
+import React, { useState } from 'react';
+import {
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiKeyPadMenu,
+  EuiKeyPadMenuItem,
+  EuiPopover,
+  EuiSplitButton,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import type { ChromeHeaderAppActionsConfig } from '@kbn/core-chrome-browser';
 
 const noop = () => {};
@@ -61,8 +71,63 @@ const OverflowKeyPadSection: React.FC = () => (
   </>
 );
 
+const saveOverflowMenuCss = css`
+  width: 160px;
+`;
+
+const DiscoverSaveButton: React.FC = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const panels = [
+    {
+      id: 0,
+      title: '',
+      items: [
+        { name: 'Save as', icon: 'save', onClick: () => setIsOpen(false) },
+        { name: 'Reset changes', icon: 'editorUndo', onClick: () => setIsOpen(false) },
+      ],
+    },
+  ];
+  return (
+    <EuiSplitButton
+      size="s"
+      color="text"
+      fill={false}
+      data-test-subj="headerGlobalNav-appActionsSaveSplitButton"
+      aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.saveAriaLabel', {
+        defaultMessage: 'Save',
+      })}
+    >
+      <EuiSplitButton.ActionPrimary
+        iconType="save"
+        data-test-subj="headerGlobalNav-appActionsSaveButton"
+        minWidth={false}
+      >
+        Save
+      </EuiSplitButton.ActionPrimary>
+      <EuiPopover
+        button={React.cloneElement(
+          <EuiSplitButton.ActionSecondary
+            iconType="arrowDown"
+            aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.saveOptionsAriaLabel', {
+              defaultMessage: 'Save options',
+            })}
+            data-test-subj="headerGlobalNav-appActionsSaveDropdown"
+          />,
+          { onClick: () => setIsOpen(true) }
+        )}
+        isOpen={isOpen}
+        closePopover={() => setIsOpen(false)}
+        anchorPosition="downLeft"
+        panelPaddingSize="none"
+      >
+        <EuiContextMenu css={saveOverflowMenuCss} panels={panels} initialPanelId={0} />
+      </EuiPopover>
+    </EuiSplitButton>
+  );
+};
+
 /**
- * POC: Static header app actions config for Discover (overflow menu + New/Share/Save buttons).
+ * POC: Static header app actions config for Discover (overflow + New, Share, Save).
  * Same pattern as setHelpExtension: set when app mounts; cleared on app change.
  */
 export function getDiscoverHeaderAppActionsConfig(): ChromeHeaderAppActionsConfig {
@@ -76,7 +141,7 @@ export function getDiscoverHeaderAppActionsConfig(): ChromeHeaderAppActionsConfi
           { name: 'Open', icon: 'folderOpen', onClick: noop },
           { name: 'Inspect', icon: 'inspect', onClick: noop },
           { name: 'Data sets', icon: 'indexOpen', onClick: noop },
-          { name: 'Background searches', icon: 'search', onClick: noop },
+          { name: 'Background searches', icon: 'backgroundTask', onClick: noop },
           { isSeparator: true as const, key: 'sep2' },
           { name: 'Alerts', icon: 'bell', onClick: noop, panel: ALERTS_PANEL_ID },
           { name: 'Export', icon: 'exportAction', onClick: noop, panel: EXPORT_PANEL_ID },
@@ -105,15 +170,26 @@ export function getDiscoverHeaderAppActionsConfig(): ChromeHeaderAppActionsConfi
         ],
       },
     ],
-    savePopoverPanels: [
-      {
-        id: 0,
-        title: '',
-        items: [
-          { name: 'Save as', icon: 'save', onClick: noop },
-          { name: 'Reset changes', icon: 'editorUndo', onClick: noop },
-        ],
-      },
+    primaryActions: [
+      <EuiButtonIcon
+        key="new"
+        size="xs"
+        color="text"
+        iconType="plusInCircle"
+        data-test-subj="headerGlobalNav-appActionsNewButton"
+      >
+        New
+      </EuiButtonIcon>,
+      <EuiButtonIcon
+        key="share"
+        size="xs"
+        color="text"
+        iconType="share"
+        data-test-subj="headerGlobalNav-appActionsShareButton"
+      >
+        Share
+      </EuiButtonIcon>,
+      <DiscoverSaveButton key="save" />,
     ],
   };
 }
