@@ -87,7 +87,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: Field \"apiUrl\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at apiUrl`,
             });
           });
       });
@@ -133,7 +133,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type secrets: Field \"apiKey\": Required`,
+              message: `error validating connector type secrets: ✖ Invalid input: expected string, received undefined\n  → at apiKey`,
             });
           });
       });
@@ -212,7 +212,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message: `Request validation failed (Field \"message\": Required)`,
+            service_message: `Request validation failed (✖ Invalid input: expected string, received undefined\n  → at message)`,
           });
         });
 
@@ -231,7 +231,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message: `Request validation failed (Field \"alias\": Required)`,
+            service_message: `Request validation failed (✖ Invalid input: expected string, received undefined\n  → at alias)`,
           });
         });
 
@@ -263,7 +263,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed (Field \"responders.0\": Unrecognized key(s) in object: 'name', Unrecognized key(s) in object: 'name')`,
+                service_message: `Request validation failed (✖ Unrecognized key(s) in object: 'name', Unrecognized key(s) in object: 'name'\n  → at responders[0])`,
               });
             });
 
@@ -292,7 +292,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed (4 errors:\n [1]: Field \"responders.0.name\": Required;\n [2]: Field \"responders.0.id\": Required;\n [3]: Field \"responders.0.username\": Required;\n [4]: Field \"responders.0.type\": Invalid literal value, expected \"user\")`,
+                service_message: `Request validation failed (✖ Invalid input: expected string, received undefined\n  → at responders[0].name\n✖ Invalid input: expected string, received undefined\n  → at responders[0].id\n✖ Invalid input: expected string, received undefined\n  → at responders[0].username\n✖ Invalid input\n  → at responders[0].type)`,
               });
             });
 
@@ -394,7 +394,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed (Field \"visibleTo.0\": Unrecognized key(s) in object: 'name', Unrecognized key(s) in object: 'name', Unrecognized key(s) in object: 'name')`,
+                service_message: `Request validation failed (✖ Unrecognized key(s) in object: 'name', Unrecognized key(s) in object: 'name', Unrecognized key(s) in object: 'name'\n  → at visibleTo[0])`,
               });
             });
 
@@ -458,7 +458,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed (Field \"details.bananas\": Expected string, received number)`,
+                service_message: `Request validation failed (✖ Invalid input: expected string, received number\n  → at details.bananas)`,
               });
             });
 

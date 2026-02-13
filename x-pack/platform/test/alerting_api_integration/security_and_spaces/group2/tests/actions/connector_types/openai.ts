@@ -147,7 +147,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: 2 errors:\n [1]: Field \"apiProvider\": Required, Required, Required;\n [2]: Field \"defaultModel\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at apiProvider\n✖ Invalid input: expected string, received undefined\n  → at defaultModel`,
             });
           });
       });
@@ -167,7 +167,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: 3 errors:\n [1]: Field \"apiProvider\": Invalid enum value. Expected 'Azure OpenAI', received 'OpenAI', Invalid enum value. Expected 'Other', received 'OpenAI';\n [2]: Field \"apiUrl\": Required, Required, Required;\n [3]: Field \"defaultModel\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected 'Azure OpenAI' | 'Other', received 'OpenAI'\n  → at apiProvider\n✖ Invalid input: expected string, received undefined\n  → at apiUrl\n✖ Invalid input: expected string, received undefined\n  → at defaultModel`,
             });
           });
       });
@@ -415,7 +415,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: genAiActionId,
-            message: `error validating action params: Field \"subAction\": Required`,
+            message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subAction`,
             retry: false,
             errorSource: TaskErrorSource.USER,
           });
@@ -646,7 +646,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             expect(body).to.eql({
               status: 'error',
               connector_id: genAiActionId,
-              message: `error validating action params: Field \"subAction\": Required`,
+              message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subAction`,
               retry: false,
               errorSource: TaskErrorSource.USER,
             });

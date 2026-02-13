@@ -194,7 +194,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           retry: true,
           connector_id: res.body.id,
           errorSource: TaskErrorSource.USER,
-          service_message: `Request validation failed (2 errors:\n [1]: Unrecognized key(s) in object: 'foo';\n [2]: Field \"id\": Required)`,
+          service_message: `Request validation failed (✖ Unrecognized key(s) in object: 'foo'\n  → at subActionParams\n✖ Invalid input: expected string, received undefined\n  → at id)`,
         });
       });
 

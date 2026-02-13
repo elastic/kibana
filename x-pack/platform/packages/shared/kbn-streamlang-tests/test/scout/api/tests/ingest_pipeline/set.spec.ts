@@ -160,17 +160,7 @@ apiTest.describe(
       };
 
       expect(() => transpile(streamlangDSL)).toThrowError(
-        JSON.stringify(
-          [
-            {
-              code: 'custom',
-              path: ['steps', 0, 'value', 'copy_from'],
-              message: 'Set processor must have either value or copy_from, but not both.',
-            },
-          ],
-          null,
-          2
-        )
+        'Set processor must have either value or copy_from, but not both.'
       );
     });
 
@@ -187,17 +177,7 @@ apiTest.describe(
       };
 
       expect(() => transpile(streamlangDSL)).toThrowError(
-        JSON.stringify(
-          [
-            {
-              code: 'custom',
-              path: ['steps', 0, 'value', 'copy_from'],
-              message: 'Set processor must have either value or copy_from, but not both.',
-            },
-          ],
-          null,
-          2
-        )
+        'Set processor must have either value or copy_from, but not both.'
       );
     });
   }

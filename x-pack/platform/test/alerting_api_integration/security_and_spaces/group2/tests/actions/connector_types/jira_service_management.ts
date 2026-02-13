@@ -87,7 +87,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: Field \"apiUrl\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at apiUrl`,
             });
           });
       });
@@ -133,7 +133,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type secrets: Field \"apiKey\": Required`,
+              message: `error validating connector type secrets: ✖ Invalid input: expected string, received undefined\n  → at apiKey`,
             });
           });
       });
@@ -212,7 +212,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message: `Request validation failed (Field \"message\": Required)`,
+            service_message: `Request validation failed (✖ Invalid input: expected string, received undefined\n  → at message)`,
           });
         });
 
@@ -231,7 +231,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message: `Request validation failed (Field \"alias\": Required)`,
+            service_message: `Request validation failed (✖ Invalid input: expected string, received undefined\n  → at alias)`,
           });
         });
 
@@ -263,7 +263,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed (Field \"responders.0\": Unrecognized key(s) in object: 'name')`,
+                service_message: `Request validation failed (✖ Unrecognized key(s) in object: 'name'\n  → at responders[0])`,
               });
             });
 
@@ -292,7 +292,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed (Field \"responders.0.id\": Required)`,
+                service_message: `Request validation failed (✖ Invalid input: expected string, received undefined\n  → at responders[0].id)`,
               });
             });
 
@@ -356,7 +356,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed (Field \"details.bananas\": Expected string, received number)`,
+                service_message: `Request validation failed (✖ Invalid input: expected string, received number\n  → at details.bananas)`,
               });
             });
 
