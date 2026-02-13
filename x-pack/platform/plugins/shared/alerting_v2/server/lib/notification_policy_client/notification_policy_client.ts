@@ -14,11 +14,8 @@ import type { NotificationPolicySavedObjectServiceContract } from '../services/n
 import { NotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
-import type {
-  CreateNotificationPolicyParams,
-  NotificationPolicyResponse,
-  UpdateNotificationPolicyParams,
-} from './types';
+import type { CreateNotificationPolicyParams, UpdateNotificationPolicyParams } from './types';
+import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
 
 @injectable()
 export class NotificationPolicyClient {
@@ -35,9 +32,7 @@ export class NotificationPolicyClient {
     const now = new Date().toISOString();
 
     const attributes: NotificationPolicySavedObjectAttributes = {
-      name: params.data.name,
-      description: params.data.description,
-      workflow_id: params.data.workflow_id,
+      ...params.data,
       createdBy: userProfileUid,
       createdAt: now,
       updatedBy: userProfileUid,

@@ -6,6 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
+import {
+  createNotificationPolicyDataSchema,
+  type CreateNotificationPolicyData,
+} from '@kbn/alerting-v2-schemas';
 import { Logger } from '@kbn/core-di';
 import type { RouteHandler } from '@kbn/core-di-server';
 import { Request, Response } from '@kbn/core-di-server';
@@ -22,12 +26,6 @@ const createNotificationPolicyParamsSchema = z.object({
   id: z.string().optional(),
 });
 
-const createNotificationPolicyBodySchema = z.object({
-  name: z.string(),
-  description: z.string(),
-  workflow_id: z.string(),
-});
-
 @injectable()
 export class CreateNotificationPolicyRoute implements RouteHandler {
   static method = 'post' as const;
@@ -40,7 +38,7 @@ export class CreateNotificationPolicyRoute implements RouteHandler {
   static options = { access: 'internal' } as const;
   static validate = {
     request: {
-      body: buildRouteValidationWithZod(createNotificationPolicyBodySchema),
+      body: buildRouteValidationWithZod(createNotificationPolicyDataSchema),
       params: buildRouteValidationWithZod(createNotificationPolicyParamsSchema),
     },
   } as const;
@@ -51,7 +49,7 @@ export class CreateNotificationPolicyRoute implements RouteHandler {
     private readonly request: KibanaRequest<
       z.infer<typeof createNotificationPolicyParamsSchema>,
       unknown,
-      z.infer<typeof createNotificationPolicyBodySchema>
+      CreateNotificationPolicyData
     >,
     @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(NotificationPolicyClient)
