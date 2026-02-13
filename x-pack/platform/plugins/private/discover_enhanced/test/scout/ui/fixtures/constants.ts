@@ -11,10 +11,12 @@ export const LOGSTASH_DEFAULT_END_TIME = '2015-09-23T18:31:44.000Z';
 export const TSDB_LOGS_DEFAULT_START_TIME = '2023-03-28T09:17:00.000Z';
 export const TSDB_LOGS_DEFAULT_END_TIME = '2023-06-28T09:17:00.000Z';
 
+export const METRICS_TEST_INDEX_NAME = 'test-metrics-experience';
+
 export const ESQL_QUERIES = {
   TS_TSDB_LOGS: 'TS kibana_sample_data_logstsdb',
   FROM_TSDB_LOGS: 'FROM kibana_sample_data_logstsdb',
-  TS_METRICS_TEST: 'TS test-metrics-experience',
+  TS_METRICS_TEST: `TS ${METRICS_TEST_INDEX_NAME}`,
 };
 
 /**
