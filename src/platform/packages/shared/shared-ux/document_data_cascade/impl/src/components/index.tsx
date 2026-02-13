@@ -42,6 +42,7 @@ export const DataCascade = forwardRef(function DataCascadeWithProvider<
     initialGroupColumn,
     customTableHeader,
     tableTitleSlot,
+    initialExpandedRowIds,
     ...restProps
   }: Omit<DataCascadeImplProps<G, L>, 'cascadeRef'> & DataCascadeProviderProps,
   ref: ForwardedRef<DataCascadeImplRef<G, L>>
@@ -54,6 +55,7 @@ export const DataCascade = forwardRef(function DataCascadeWithProvider<
     <DataCascadeProvider<G, L>
       cascadeGroups={cascadeGroups}
       initialGroupColumn={initialGroupColumn}
+      initialExpandedRowIds={initialExpandedRowIds}
     >
       <DataCascadeImpl<G, L> {...cascadeImplProps} />
     </DataCascadeProvider>
