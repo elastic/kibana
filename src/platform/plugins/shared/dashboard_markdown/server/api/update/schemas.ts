@@ -8,14 +8,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { markdownByValueEmbeddableSchema } from '../../schemas';
 import { baseMetaSchema, updatedMetaSchema } from '../meta_schemas';
+import { markdownAttributesSchema } from '../../markdown_saved_object/schema/v1';
 
-export const updateRequestBodySchema = markdownByValueEmbeddableSchema;
+export const updateRequestBodySchema = markdownAttributesSchema;
 
 export const updateResponseBodySchema = schema.object({
   id: schema.string(),
-  data: markdownByValueEmbeddableSchema,
+  data: markdownAttributesSchema,
   meta: schema.allOf([baseMetaSchema, updatedMetaSchema]),
   spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1 })),
 });
