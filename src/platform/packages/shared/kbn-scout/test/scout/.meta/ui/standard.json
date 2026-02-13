@@ -1,19 +1,21 @@
 {
-  "lastModified": "2025-12-11T11:37:06.007Z",
-  "sha1": "d5cc795a226e4ac28e8773d67660f89a4eb43dd4",
+  "lastModified": "2026-02-12T22:59:58.415Z",
+  "sha1": "9a4cdd9322a44b8a715b8b452cfcfe073e873cec",
   "tests": [
     {
       "id": "c6ec4a747994e21-5b82e5b7ac2b08c",
       "title": "runA11yScan returns violations array (empty for basic accessible markup)",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/axe.spec.ts",
-        "line": 13,
-        "column": 7
+        "line": 16,
+        "column": 9
       }
     },
     {
@@ -21,13 +23,15 @@
       "title": "runA11yScan returns violations related to the CSS \"include\" selector only",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/axe.spec.ts",
-        "line": 38,
-        "column": 7
+        "line": 41,
+        "column": 9
       }
     },
     {
@@ -35,13 +39,15 @@
       "title": "EUI testing wrapper: EuiCheckBox checkbox",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/check_box.spec.ts",
-        "line": 19,
-        "column": 7
+        "line": 22,
+        "column": 9
       }
     },
     {
@@ -49,13 +55,15 @@
       "title": "EUI testing wrapper: EuiComboBox with multiple selections (pills)",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/combo_box.spec.ts",
-        "line": 15,
-        "column": 7
+        "line": 18,
+        "column": 9
       }
     },
     {
@@ -63,27 +71,31 @@
       "title": "EUI testing wrapper: EuiComboBox with the single selection",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/combo_box.spec.ts",
-        "line": 60,
-        "column": 7
+        "line": 67,
+        "column": 9
       }
     },
     {
       "id": "971167b9a56711d-061f9fed6becd0d",
       "title": "EUI testing wrapper: EuiDataGrid data grid, run",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/data_grid.spec.ts",
-        "line": 15,
-        "column": 7
+        "line": 19,
+        "column": 9
       }
     },
     {
@@ -91,13 +103,15 @@
       "title": "EUI testing wrapper: EuiFieldText fieldText",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/field_text.spec.ts",
-        "line": 15,
-        "column": 7
+        "line": 18,
+        "column": 9
       }
     },
     {
@@ -105,13 +119,15 @@
       "title": "EUI testing wrapper: EuiSelectable selectable with search field",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/selectable.spec.ts",
-        "line": 15,
-        "column": 7
+        "line": 18,
+        "column": 9
       }
     },
     {
@@ -119,13 +135,15 @@
       "title": "EUI testing wrapper: EuiToast toast",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/toast.spec.ts",
-        "line": 15,
-        "column": 7
+        "line": 18,
+        "column": 9
       }
     }
   ]

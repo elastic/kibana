@@ -1,0 +1,132 @@
+{
+  "lastModified": "2026-02-13T09:47:08.913Z",
+  "sha1": "c0c28963e049e371da3ff28018a334eb407dad60",
+  "tests": [
+    {
+      "id": "1219f91050e9ce3-eaaf5032684392c",
+      "title": "Set up Profiling Resources and Data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/global.setup.ts",
+        "line": 11,
+        "column": 16
+      }
+    },
+    {
+      "id": "75373d7623eeeee-a54347ac1e57e7e",
+      "title": "Profiling is not setup and no data is loaded Admin users",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup.spec.ts",
+        "line": 28,
+        "column": 12
+      }
+    },
+    {
+      "id": "75373d7623eeeee-429a339166c2e77",
+      "title": "Profiling is not setup and no data is loaded Viewer users",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup.spec.ts",
+        "line": 42,
+        "column": 12
+      }
+    },
+    {
+      "id": "75373d7623eeeee-0723e6c11fe5d87",
+      "title": "APM integration not installed but setup completed Admin user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup.spec.ts",
+        "line": 73,
+        "column": 12
+      }
+    },
+    {
+      "id": "75373d7623eeeee-76b2ff68d4e7a1b",
+      "title": "APM integration not installed but setup completed Viewer user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup.spec.ts",
+        "line": 88,
+        "column": 12
+      }
+    },
+    {
+      "id": "75373d7623eeeee-271837831195e95",
+      "title": "Profiling is setup and data is loaded Admin user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup.spec.ts",
+        "line": 118,
+        "column": 10
+      }
+    },
+    {
+      "id": "75373d7623eeeee-7018203930dfa66",
+      "title": "Profiling is setup and data is loaded Viewer user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup.spec.ts",
+        "line": 132,
+        "column": 10
+      }
+    },
+    {
+      "id": "75373d7623eeeee-3ee5b04db1c974d",
+      "title": "Collector integration is not installed collector integration missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup.spec.ts",
+        "line": 159,
+        "column": 10
+      }
+    },
+    {
+      "id": "75373d7623eeeee-7029a2aca281cbb",
+      "title": "Collector integration is not installed Symbolizer integration is not installed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup.spec.ts",
+        "line": 187,
+        "column": 10
+      }
+    }
+  ]
+}
