@@ -23,16 +23,11 @@ interface UseServiceActionsParams {
   getDiscoverHref: (item: ServiceListItem, indexType: IndexType) => string | undefined;
 }
 
-interface UseServiceActionsReturn {
-  actions: TableActions<ServiceListItem>;
-  showActionsColumn: boolean;
-}
-
 export function useServiceActions({
   openAlertFlyout,
   openSloFlyout,
   getDiscoverHref,
-}: UseServiceActionsParams): UseServiceActionsReturn {
+}: UseServiceActionsParams): TableActions<ServiceListItem> {
   const { core, plugins, share } = useApmPluginContext();
   const { capabilities } = core.application;
   const sloListLocator = share.url.locators.get<SloListLocatorParams>(sloListLocatorID);
@@ -40,7 +35,6 @@ export function useServiceActions({
   const { canSaveAlerts } = getAlertingCapabilities(plugins, capabilities);
   const canSaveApmAlerts = !!(capabilities.apm.save && canSaveAlerts);
   const canWriteSlos = !!capabilities.slo?.write;
-  const showActionsColumn = true;
 
   const actions = useMemo(() => {
     const actionsList: TableActions<ServiceListItem> = [];
@@ -205,5 +199,5 @@ export function useServiceActions({
     getDiscoverHref,
   ]);
 
-  return { actions, showActionsColumn };
+  return actions;
 }

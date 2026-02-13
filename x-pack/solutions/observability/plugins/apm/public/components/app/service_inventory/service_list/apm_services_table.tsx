@@ -559,7 +559,7 @@ export function ApmServicesTable({
     ]
   );
 
-  const { actions: serviceActions, showActionsColumn } = useServiceActions({
+  const serviceActions = useServiceActions({
     openAlertFlyout,
     openSloFlyout,
     getDiscoverHref,
@@ -621,10 +621,8 @@ export function ApmServicesTable({
           onChangeRenderedItems={onChangeRenderedItems}
           onChangeItemIndices={onChangeItemIndices}
           tableSearchBar={tableSearchBar}
-          {...(showActionsColumn && {
-            actions: serviceActions,
-            isActionsDisabled: (item: ServiceListItem) => item.serviceName === OTHER_SERVICE_NAME,
-          })}
+          actions={serviceActions}
+          isActionsDisabled={(item: ServiceListItem) => item.serviceName === OTHER_SERVICE_NAME}
         />
       </EuiFlexItem>
       <AlertingFlyout
