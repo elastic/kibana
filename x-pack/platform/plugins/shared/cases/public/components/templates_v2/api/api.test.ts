@@ -127,8 +127,6 @@ describe('templates_v2 api bulk actions', () => {
           search: '',
           sortField: 'name',
           sortOrder: 'asc',
-          tags: [],
-          author: [],
           isDeleted: false,
         },
         signal: undefined,
