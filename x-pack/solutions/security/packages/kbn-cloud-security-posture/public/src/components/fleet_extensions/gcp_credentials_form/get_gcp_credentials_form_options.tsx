@@ -36,7 +36,7 @@ export interface GcpOptionValue {
 }
 
 export const getInputVarsFields = (input: NewPackagePolicyInput, fields: GcpCredentialsFields) =>
-  Object.entries(input.streams[0].vars || {})
+  Object.entries(input.streams?.[0]?.vars || {})
     .filter(([id]) => id in fields)
     .map(([id, inputVar]) => {
       const field = fields[id];
@@ -170,6 +170,26 @@ export const getGcpCloudConnectorsCredentialsFormOptions = (): Omit<
       ),
       info: CredentialsJsonDescription,
       fields: {
+        'gcp.organization_id': {
+          label: i18n.translate(
+            'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.organizationIdLabel',
+            {
+              defaultMessage: 'Organization ID',
+            }
+          ),
+          type: 'text',
+          dataTestSubj: 'organization_id_test_id',
+        },
+        'gcp.project_id': {
+          label: i18n.translate(
+            'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.projectIdLabel',
+            {
+              defaultMessage: 'Project ID',
+            }
+          ),
+          type: 'text',
+          dataTestSubj: 'project_id_test_id',
+        },
         'gcp.credentials.json': {
           label: i18n.translate(
             'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.credentialsJsonFieldLabel',
@@ -199,6 +219,26 @@ export const getGcpAgentlessFormOptions = (): Omit<
       ),
       info: CredentialsJsonDescription,
       fields: {
+        'gcp.organization_id': {
+          label: i18n.translate(
+            'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.organizationIdLabel',
+            {
+              defaultMessage: 'Organization ID',
+            }
+          ),
+          type: 'text',
+          dataTestSubj: 'organization_id_test_id',
+        },
+        'gcp.project_id': {
+          label: i18n.translate(
+            'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.projectIdLabel',
+            {
+              defaultMessage: 'Project ID',
+            }
+          ),
+          type: 'text',
+          dataTestSubj: 'project_id_test_id',
+        },
         'gcp.credentials.json': {
           label: i18n.translate(
             'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.credentialsJsonFieldLabel',
