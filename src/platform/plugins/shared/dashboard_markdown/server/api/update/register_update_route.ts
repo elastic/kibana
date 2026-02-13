@@ -18,7 +18,7 @@ import { MARKDOWN_API_PATH } from '../../../common/constants';
 export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const updateRoute = router.put({
     path: `${MARKDOWN_API_PATH}/{id}`,
-    summary: `Replace current dashboard state with the dashboard state from request body.`,
+    summary: `Replace current markdown panel state with the markdown panel state from request body.`,
     ...commonRouteConfig,
   });
 
@@ -29,7 +29,7 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
         request: {
           params: schema.object({
             id: schema.string({
-              meta: { description: 'A unique identifier for the dashboard.' },
+              meta: { description: 'A unique identifier for the markdown panel.' },
             }),
           }),
           body: updateRequestBodySchema,
@@ -49,7 +49,7 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
         if (e.isBoom && e.output.statusCode === 404) {
           return res.notFound({
             body: {
-              message: `A dashboard with ID ${req.params.id} was not found.`,
+              message: `A markdown panel with ID ${req.params.id} was not found.`,
             },
           });
         }

@@ -19,7 +19,7 @@ const markdownByValueStateSchema = schema.object({
 // Markdown by-reference state schema (contains savedObjectId)
 const markdownByReferenceStateSchema = schema.object({
   ref_id: schema.string({
-    meta: { description: 'The ID of the saved markdown object' },
+    meta: { description: 'The unique identifier of the markdown panel.' },
   }),
 });
 

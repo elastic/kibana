@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Latest model version for dashboard saved objects is v3
+// Latest model version for markdown saved objects is v3
 export {
   markdownAttributesSchema as markdownSavedObjectSchema,
   type MarkdownAttributes as MarkdownSavedObjectAttributes,

@@ -16,14 +16,14 @@ export const searchRequestBodySchema = schema.object({
   page: schema.maybe(
     schema.number({
       meta: {
-        description: 'The page of markdown embeddables to return',
+        description: 'The page of markdown panels to return',
       },
     })
   ),
   per_page: schema.maybe(
     schema.number({
       meta: {
-        description: 'The number of markdown embeddables to return per page',
+        description: 'The number of markdown panels to return per page',
       },
       max: MAX_PER_PAGE,
     })
@@ -32,7 +32,7 @@ export const searchRequestBodySchema = schema.object({
     schema.string({
       meta: {
         description:
-          'An Elasticsearch simple_query_string query that filters the markdown embeddables in the response by "title" and "description"',
+          'An Elasticsearch simple_query_string query that filters the markdown panels in the response by "title" and "description"',
       },
     })
   ),
