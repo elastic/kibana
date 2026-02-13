@@ -7,8 +7,6 @@
 
 import React, { useMemo, type FC } from 'react';
 
-import datemath from '@elastic/datemath';
-
 import type { TimeRange } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-service';
@@ -21,6 +19,8 @@ import { getDefaultLogRateAnalysisAppState } from '../../application/url_state/l
 
 import { LogRateAnalysisDocumentCountChartData } from './log_rate_analysis_content/log_rate_analysis_document_count_chart_data';
 import { LogRateAnalysisContent } from './log_rate_analysis_content/log_rate_analysis_content';
+
+import { calculateBounds } from '@kbn/data-plugin/common';
 
 export interface LogRateAnalysisForEmbeddableProps {
   timeRange: TimeRange;
@@ -45,10 +45,9 @@ export const LogRateAnalysisForEmbeddable: FC<LogRateAnalysisForEmbeddableProps>
 
   const timeRangeParsed = useMemo(() => {
     if (timeRange) {
-      const min = datemath.parse(timeRange.from);
-      const max = datemath.parse(timeRange.to);
-      if (min && max) {
-        return { min, max };
+      const bounds = calculateBounds(timeRange);
+      if (bounds?.min && bounds?.max) {
+        return { min: bounds.min, max: bounds.max };
       }
     }
   }, [timeRange]);
