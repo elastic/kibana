@@ -211,7 +211,7 @@ describe('extractDashboardState', () => {
       ]);
     });
 
-    test.only('should filter out null values that should be undefined', () => {
+    test('should filter out null values that should be undefined', () => {
       const dashboardState = extractDashboardState({
         controlGroupInput: {
           ignoreParentSettings: {
