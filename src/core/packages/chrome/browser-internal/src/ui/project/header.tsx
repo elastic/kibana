@@ -99,22 +99,21 @@ const OVERFLOW_PANELS = [
       { name: 'New', icon: 'plusInCircle', onClick: noop },
       { name: 'Favorite', icon: 'star', onClick: noop },
       { name: 'Share', icon: 'share', onClick: noop },
-    ],
-  },
-  {
-    id: 1,
-    title: '',
-    items: [
+      { isSeparator: true as const, key: 'sep1' },
       { name: 'Open', icon: 'folderOpen', onClick: noop },
-      { name: 'Inspect', icon: 'inspector', onClick: noop },
+      { name: 'Inspect', icon: 'inspect', onClick: noop },
       { name: 'Data sets', icon: 'indexOpen', onClick: noop },
       { name: 'Background searches', icon: 'search', onClick: noop },
+      { isSeparator: true as const, key: 'sep2' },
       { name: 'Alerts', icon: 'bell', onClick: noop },
       { name: 'Export', icon: 'exportAction', onClick: noop },
+      { isSeparator: true as const, key: 'sep3' },
       { name: 'Rename', icon: 'pencil', onClick: noop },
       { name: 'Settings', icon: 'gear', onClick: noop },
+      { isSeparator: true as const, key: 'sep4' },
       { name: 'Docs', icon: 'documentation', onClick: noop },
       { name: 'Feedback', icon: 'editorComment', onClick: noop },
+      { isSeparator: true as const, key: 'sep5' },
       { name: 'Save', icon: 'save', onClick: noop },
       { name: 'Save as', icon: 'save', onClick: noop },
       { name: 'Reset changes', icon: 'editorUndo', onClick: noop },
@@ -154,7 +153,7 @@ const GlobalHeaderAppActionsDumb: React.FC = () => {
         anchorPosition="downLeft"
         panelPaddingSize="none"
       >
-        <EuiContextMenu panels={OVERFLOW_PANELS} initialPanelId={0} />
+        <EuiContextMenu size="s" panels={OVERFLOW_PANELS} initialPanelId={0} />
       </EuiPopover>
       <EuiButtonIcon size="xs" color="text" iconType="plusInCircle" data-test-subj="headerGlobalNav-appActionsNewButton">
         New
