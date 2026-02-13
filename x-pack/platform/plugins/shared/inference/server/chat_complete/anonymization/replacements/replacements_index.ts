@@ -25,6 +25,7 @@ export const ANONYMIZATION_REPLACEMENTS_MAPPINGS = {
     scope_id: { type: 'keyword' as const },
     profile_id: { type: 'keyword' as const },
     token_to_original: { type: 'flattened' as const },
+    token_to_original_encrypted: { type: 'flattened' as const },
     token_sources: {
       type: 'nested' as const,
       properties: {
@@ -44,6 +45,7 @@ export const ANONYMIZATION_REPLACEMENTS_MAPPINGS = {
     },
     created_at: { type: 'date' as const },
     updated_at: { type: 'date' as const },
+    expires_at: { type: 'date' as const },
     created_by: { type: 'keyword' as const },
     namespace: { type: 'keyword' as const },
   },

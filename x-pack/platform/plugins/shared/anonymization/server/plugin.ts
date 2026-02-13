@@ -12,7 +12,9 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import type { FieldRule } from '@kbn/anonymization-common';
 import { resolveEffectivePolicy } from '@kbn/anonymization-common';
 import type {
   EncryptedSavedObjectsPluginSetup,
@@ -108,14 +110,46 @@ export class AnonymizationPlugin
 
     const esClient = core.elasticsearch.client.asInternalUser;
 
-    // Ensure system index exists (lazy, idempotent)
-    ensureProfilesIndex({ esClient, logger: this.logger }).catch((err) => {
-      this.logger.error(`Failed to ensure anonymization profiles index: ${err.message}`);
-    });
+    const ensureProfilesIndexReady = async (): Promise<void> => {
+      await ensureProfilesIndex({ esClient, logger: this.logger });
+    };
 
     // Initialize services
     const saltService = new SaltService(core.savedObjects, deps.encryptedSavedObjects, this.logger);
     const profilesRepo = new ProfilesRepository(esClient);
+    const getDataViewIndexPatternTargets = async (
+      namespace: string,
+      dataViewId: string
+    ): Promise<string[]> => {
+      const namespaceScopedClient = core.savedObjects
+        .getUnsafeInternalClient()
+        .asScopedToNamespace(namespace);
+
+      try {
+        const result = await namespaceScopedClient.resolve<{
+          title?: string;
+        }>('index-pattern', dataViewId);
+        const title = result.saved_object?.attributes?.title;
+        if (!title || typeof title !== 'string') {
+          return [];
+        }
+
+        return title
+          .split(',')
+          .map((pattern) => pattern.trim())
+          .filter((pattern) => pattern.length > 0);
+      } catch (err) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+          return [];
+        }
+        this.logger.warn(
+          `Failed resolving data view ${dataViewId} in space ${namespace}: ${
+            (err as Error).message
+          }`
+        );
+        return [];
+      }
+    };
     const runLegacySettingsMigration = async (namespace: string): Promise<void> => {
       const namespaceScopedClient = core.savedObjects
         .getUnsafeInternalClient()
@@ -132,17 +166,22 @@ export class AnonymizationPlugin
     };
 
     // Ensure a default alerts data view profile exists in the default space at startup.
-    ensureAlertsDataViewProfile({
-      namespace: 'default',
-      profilesRepo,
-      saltService,
-      migrateLegacySettings: () => runLegacySettingsMigration('default'),
-      logger: this.logger,
-    }).catch((err: Error) => {
-      this.logger.error(
-        `Failed to initialize default alerts anonymization profile: ${err.message}`
-      );
-    });
+    (async () => {
+      try {
+        await ensureProfilesIndexReady();
+        await ensureAlertsDataViewProfile({
+          namespace: 'default',
+          profilesRepo,
+          saltService,
+          migrateLegacySettings: () => runLegacySettingsMigration('default'),
+          logger: this.logger,
+        });
+      } catch (err) {
+        this.logger.error(
+          `Failed to initialize default alerts anonymization profile: ${(err as Error).message}`
+        );
+      }
+    })();
 
     this.policyService = {
       resolveEffectivePolicy: async (namespace, target) => {
@@ -151,6 +190,7 @@ export class AnonymizationPlugin
           target.id === getAlertsDataViewTargetId(namespace)
         ) {
           // Lazily ensure the alerts profile in the request namespace.
+          await ensureProfilesIndexReady();
           await ensureAlertsDataViewProfile({
             namespace,
             profilesRepo,
@@ -160,17 +200,42 @@ export class AnonymizationPlugin
           });
         }
 
-        // For data_view targets: load data view profile + any contributing index pattern profiles
-        // For index_pattern / index targets: load that target's profile only
-        const profile = await profilesRepo.findByTarget(namespace, target.type, target.id);
+        if (target.type === 'data_view') {
+          const fieldRuleSets: FieldRule[][] = [];
+          const dataViewProfile = await profilesRepo.findByTarget(
+            namespace,
+            target.type,
+            target.id
+          );
+          if (dataViewProfile) {
+            fieldRuleSets.push(dataViewProfile.rules.fieldRules);
+          }
 
+          const indexPatterns = await getDataViewIndexPatternTargets(namespace, target.id);
+          if (indexPatterns.length > 0) {
+            const indexPatternProfiles = await Promise.all(
+              indexPatterns.map((indexPattern) =>
+                profilesRepo.findByTarget(namespace, 'index_pattern', indexPattern)
+              )
+            );
+            for (const profile of indexPatternProfiles) {
+              if (profile) {
+                fieldRuleSets.push(profile.rules.fieldRules);
+              }
+            }
+          }
+
+          if (fieldRuleSets.length === 0) {
+            return {};
+          }
+
+          return resolveEffectivePolicy(...fieldRuleSets);
+        }
+
+        const profile = await profilesRepo.findByTarget(namespace, target.type, target.id);
         if (!profile) {
           return {};
         }
-
-        // TODO(future): For data_view targets, also load index pattern profiles
-        // from the data view's patterns and merge them using resolveEffectivePolicy.
-        // For now, resolve from the single profile found.
         return resolveEffectivePolicy(profile.rules.fieldRules);
       },
 

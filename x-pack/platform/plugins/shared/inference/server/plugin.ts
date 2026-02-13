@@ -21,6 +21,7 @@ import { RegexWorkerService } from './chat_complete/anonymization/regex_worker_s
 import { registerRoutes } from './routes';
 import type { InferenceConfig } from './config';
 import { ensureReplacementsIndex } from './chat_complete/anonymization/replacements/replacements_index';
+import { ReplacementsRepository } from './chat_complete/anonymization/replacements/replacements_repository';
 import type {
   InferenceBoundClientCreateOptions,
   InferenceClientCreateOptions,
@@ -63,6 +64,10 @@ export class InferencePlugin
       router,
       coreSetup,
       logger: this.logger,
+      replacements: {
+        encryptionKey: this.config.replacements.encryptionKey,
+        retentionMs: this.config.replacements.retention.asMilliseconds(),
+      },
     });
 
     return {};
@@ -78,6 +83,13 @@ export class InferencePlugin
     const internalEsClient = core.elasticsearch.client.asInternalUser;
     ensureReplacementsIndex({ esClient: internalEsClient, logger: this.logger }).catch((err) => {
       this.logger.error(`Failed to ensure anonymization replacements index: ${err.message}`);
+    });
+    const replacementsRepo = new ReplacementsRepository(internalEsClient, {
+      encryptionKey: this.config.replacements.encryptionKey,
+      retentionMs: this.config.replacements.retention.asMilliseconds(),
+    });
+    replacementsRepo.deleteExpired().catch((err) => {
+      this.logger.error(`Failed to delete expired replacements: ${err.message}`);
     });
 
     // Wire up anonymization policy service if the anonymization plugin is available

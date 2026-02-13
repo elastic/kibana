@@ -20,7 +20,14 @@ import { ensureReplacementsIndex } from './replacements_index';
 const API_VERSION = '1';
 const REPLACEMENTS_API_BASE = '/internal/inference/anonymization/replacements';
 
-export const registerReplacementsRoutes = (router: IRouter, logger: Logger): void => {
+export const registerReplacementsRoutes = (
+  router: IRouter,
+  logger: Logger,
+  options: {
+    encryptionKey: string;
+    retentionMs: number;
+  }
+): void => {
   // GET /internal/inference/anonymization/replacements/{id} — Resolve by ID
   router.versioned
     .get({
@@ -47,7 +54,7 @@ export const registerReplacementsRoutes = (router: IRouter, logger: Logger): voi
           const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-          const repo = new ReplacementsRepository(esClient);
+          const repo = new ReplacementsRepository(esClient, options);
           const replacements = await repo.get(namespace, request.params.id);
 
           if (!replacements) {
@@ -104,7 +111,7 @@ export const registerReplacementsRoutes = (router: IRouter, logger: Logger): voi
           const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-          const repo = new ReplacementsRepository(esClient);
+          const repo = new ReplacementsRepository(esClient, options);
           const replacements = await repo.findByScope(
             namespace,
             query.type,
@@ -165,7 +172,7 @@ export const registerReplacementsRoutes = (router: IRouter, logger: Logger): voi
           const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-          const repo = new ReplacementsRepository(esClient);
+          const repo = new ReplacementsRepository(esClient, options);
           const replacements = await repo.get(namespace, body.replacementsId);
 
           if (!replacements) {
@@ -220,7 +227,7 @@ export const registerReplacementsRoutes = (router: IRouter, logger: Logger): voi
 
           await ensureReplacementsIndex({ esClient, logger });
 
-          const repo = new ReplacementsRepository(esClient);
+          const repo = new ReplacementsRepository(esClient, options);
           const result = await repo.importReplacements(
             namespace,
             body.sourceId,

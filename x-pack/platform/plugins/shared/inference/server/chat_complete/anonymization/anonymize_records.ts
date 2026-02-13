@@ -18,6 +18,14 @@ import { getEntityMask } from './get_entity_mask';
 
 const ROOT_FIELDS_TO_STRIP = ['content', 'response', 'system', 'toolCalls'] as const;
 
+const shouldIgnoreNerModelError = (error: unknown): boolean => {
+  const message = error instanceof Error ? error.message : String(error);
+  return (
+    message.includes('The NER model') &&
+    (message.includes('was not found') || message.includes('is not deployed'))
+  );
+};
+
 const unescapePointerToken = (token: string): string =>
   token.replace(/~1/g, '/').replace(/~0/g, '~');
 
@@ -191,11 +199,17 @@ export async function anonymizeRecords({
   }
 
   for (const nerRule of nerRules) {
-    state = await executeNerRule({
-      state,
-      rule: nerRule,
-      esClient,
-    });
+    try {
+      state = await executeNerRule({
+        state,
+        rule: nerRule,
+        esClient,
+      });
+    } catch (error) {
+      if (!shouldIgnoreNerModelError(error)) {
+        throw error;
+      }
+    }
   }
 
   return state;

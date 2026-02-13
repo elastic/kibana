@@ -30,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
+  const spaces = getService('spaces');
 
   describe('anonymization profiles', function () {
     let createdProfileId: string;
@@ -163,29 +164,59 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('space isolation', () => {
-      it('returns 404 when getting a profile with a non-matching namespace', async () => {
-        // Create a profile in default space
-        const { body: created } = await supertest
-          .post(PROFILES_API)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', API_VERSION)
-          .send({
-            ...defaultProfile,
-            targetId: 'space-isolation-test',
-          });
+      it('returns 404 when getting a profile from a different space', async () => {
+        const spaceId = `anon-space-${Date.now()}`;
+        await spaces.create({ id: spaceId, name: spaceId });
 
-        // Try to get it — this should work since we're in the same space
-        const { status: getStatus } = await supertest
-          .get(`${PROFILES_API}/${created.id}`)
+        try {
+          // Create a profile in the custom space
+          const { body: created, status: createStatus } = await supertest
+            .post(`/s/${spaceId}${PROFILES_API}`)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', API_VERSION)
+            .send({
+              ...defaultProfile,
+              targetId: `space-isolation-${Date.now()}`,
+            });
+          expect(createStatus).to.be(200);
+
+          // Verify profile is visible inside its own space
+          const { status: sameSpaceStatus } = await supertest
+            .get(`/s/${spaceId}${PROFILES_API}/${created.id}`)
+            .set('elastic-api-version', API_VERSION);
+          expect(sameSpaceStatus).to.be(200);
+
+          // Verify profile is NOT visible from default space
+          const { status: defaultSpaceStatus } = await supertest
+            .get(`${PROFILES_API}/${created.id}`)
+            .set('elastic-api-version', API_VERSION);
+          expect(defaultSpaceStatus).to.be(404);
+
+          await supertest
+            .delete(`/s/${spaceId}${PROFILES_API}/${created.id}`)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', API_VERSION);
+        } finally {
+          await spaces.delete(spaceId);
+        }
+      });
+    });
+
+    describe('alerts data view profile auto-initialization', () => {
+      it('finds the default alerts data view profile in default space', async () => {
+        const { body, status } = await supertest
+          .get(
+            `${PROFILES_API}/_find?target_type=data_view&target_id=${encodeURIComponent(
+              'security-solution-default'
+            )}`
+          )
           .set('elastic-api-version', API_VERSION);
 
-        expect(getStatus).to.be(200);
-
-        // Clean up
-        await supertest
-          .delete(`${PROFILES_API}/${created.id}`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', API_VERSION);
+        expect(status).to.be(200);
+        expect(body.total).to.be.greaterThan(0);
+        expect(
+          body.data.some((p: { targetId: string }) => p.targetId === 'security-solution-default')
+        ).to.be(true);
       });
     });
 

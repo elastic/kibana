@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ReplacementsSet, TokenSourceEntry } from '@kbn/anonymization-common';
@@ -16,7 +17,8 @@ interface EsReplacementsDocument {
   scope_type: string;
   scope_id: string;
   profile_id: string;
-  token_to_original: Record<string, string>;
+  token_to_original?: Record<string, string>;
+  token_to_original_encrypted?: Record<string, string>;
   token_sources: Array<{
     token: string;
     pointer: string;
@@ -33,6 +35,7 @@ interface EsReplacementsDocument {
   }>;
   created_at: string;
   updated_at: string;
+  expires_at?: string;
   created_by: string;
   namespace: string;
 }
@@ -56,13 +59,103 @@ interface UpdateReplacementsParams {
 
 /** Maximum number of token source entries per replacements set. */
 const MAX_TOKEN_SOURCES = 10000;
+const DEFAULT_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
+const ENCRYPTION_VERSION = 'v1';
 
 /**
  * Repository for CRUD operations on anonymization replacements sets.
  * Owned by the inference plugin.
  */
 export class ReplacementsRepository {
-  constructor(private readonly esClient: ElasticsearchClient) {}
+  private readonly encryptionKey: string | undefined;
+  private readonly retentionMs: number;
+
+  constructor(
+    private readonly esClient: ElasticsearchClient,
+    options?: {
+      encryptionKey?: string;
+      retentionMs?: number;
+    }
+  ) {
+    this.encryptionKey = options?.encryptionKey;
+    this.retentionMs = options?.retentionMs ?? DEFAULT_RETENTION_MS;
+  }
+
+  private deriveKey(secret: string): Buffer {
+    return createHash('sha256').update(secret).digest();
+  }
+
+  private encryptValue(secret: string, value: string): string {
+    const key = this.deriveKey(secret);
+    const iv = randomBytes(12);
+    const cipher = createCipheriv('aes-256-gcm', key, iv);
+    const encrypted = Buffer.concat([cipher.update(value, 'utf8'), cipher.final()]);
+    const authTag = cipher.getAuthTag();
+    return `${ENCRYPTION_VERSION}:${iv.toString('base64')}:${authTag.toString(
+      'base64'
+    )}:${encrypted.toString('base64')}`;
+  }
+
+  private decryptValue(secret: string, encryptedValue: string): string {
+    const [version, ivB64, authTagB64, payloadB64] = encryptedValue.split(':');
+    if (version !== ENCRYPTION_VERSION || !ivB64 || !authTagB64 || !payloadB64) {
+      throw new Error('Unsupported encrypted replacements payload format');
+    }
+
+    const key = this.deriveKey(secret);
+    const decipher = createDecipheriv('aes-256-gcm', key, Buffer.from(ivB64, 'base64'));
+    decipher.setAuthTag(Buffer.from(authTagB64, 'base64'));
+    const decrypted = Buffer.concat([
+      decipher.update(Buffer.from(payloadB64, 'base64')),
+      decipher.final(),
+    ]);
+    return decrypted.toString('utf8');
+  }
+
+  private serializeTokenMap(
+    tokenToOriginal: Record<string, string>
+  ): Pick<EsReplacementsDocument, 'token_to_original' | 'token_to_original_encrypted'> {
+    if (!this.encryptionKey) {
+      return { token_to_original: tokenToOriginal };
+    }
+
+    return {
+      token_to_original_encrypted: Object.fromEntries(
+        Object.entries(tokenToOriginal).map(([token, original]) => [
+          token,
+          this.encryptValue(this.encryptionKey as string, original),
+        ])
+      ),
+    };
+  }
+
+  private deserializeTokenMap(doc: EsReplacementsDocument): Record<string, string> {
+    if (doc.token_to_original_encrypted) {
+      if (!this.encryptionKey) {
+        throw new Error('Encrypted replacements found but encryption key is not configured');
+      }
+
+      return Object.fromEntries(
+        Object.entries(doc.token_to_original_encrypted).map(([token, encrypted]) => [
+          token,
+          this.decryptValue(this.encryptionKey as string, encrypted),
+        ])
+      );
+    }
+
+    return doc.token_to_original ?? {};
+  }
+
+  private getExpiryIso(nowIso: string): string {
+    return new Date(Date.parse(nowIso) + this.retentionMs).toISOString();
+  }
+
+  private isExpired(doc: EsReplacementsDocument): boolean {
+    if (!doc.expires_at) {
+      return false;
+    }
+    return Date.parse(doc.expires_at) <= Date.now();
+  }
 
   /**
    * Creates a new replacements set.
@@ -76,7 +169,7 @@ export class ReplacementsRepository {
       scope_type: params.scopeType,
       scope_id: params.scopeId,
       profile_id: params.profileId,
-      token_to_original: params.tokenToOriginal,
+      ...this.serializeTokenMap(params.tokenToOriginal),
       token_sources: params.tokenSources.slice(0, MAX_TOKEN_SOURCES).map((s) => ({
         token: s.token,
         pointer: s.pointer,
@@ -93,6 +186,7 @@ export class ReplacementsRepository {
       })),
       created_at: now,
       updated_at: now,
+      expires_at: this.getExpiryIso(now),
       created_by: params.createdBy,
       namespace: params.namespace,
     };
@@ -118,7 +212,7 @@ export class ReplacementsRepository {
       });
 
       const doc = result._source;
-      if (!doc || doc.namespace !== namespace) {
+      if (!doc || doc.namespace !== namespace || this.isExpired(doc)) {
         return null;
       }
 
@@ -155,7 +249,11 @@ export class ReplacementsRepository {
       size: 1,
     });
 
-    const doc = result.hits.hits[0]?._source;
+    const doc = result.hits.hits
+      .map((hit) => hit._source)
+      .find((candidate): candidate is EsReplacementsDocument =>
+        Boolean(candidate && !this.isExpired(candidate))
+      );
     return doc ? this.toReplacementsSet(doc) : null;
   }
 
@@ -215,7 +313,7 @@ export class ReplacementsRepository {
       index: ANONYMIZATION_REPLACEMENTS_INDEX,
       id: replacementsId,
       doc: {
-        token_to_original: mergedTokenToOriginal,
+        ...this.serializeTokenMap(mergedTokenToOriginal),
         token_sources: mergedSources.map((s) => ({
           token: s.token,
           pointer: s.pointer,
@@ -231,6 +329,7 @@ export class ReplacementsRepository {
           first_seen_at: s.firstSeenAt,
         })),
         updated_at: now,
+        expires_at: this.getExpiryIso(now),
       },
       refresh: 'wait_for',
     });
@@ -289,6 +388,23 @@ export class ReplacementsRepository {
     return result!;
   }
 
+  async deleteExpired(): Promise<number> {
+    const nowIso = new Date().toISOString();
+    const result = await this.esClient.deleteByQuery({
+      index: ANONYMIZATION_REPLACEMENTS_INDEX,
+      refresh: true,
+      conflicts: 'proceed',
+      query: {
+        range: {
+          expires_at: {
+            lte: nowIso,
+          },
+        },
+      },
+    });
+    return result.deleted ?? 0;
+  }
+
   /**
    * Converts an ES document to the public ReplacementsSet type.
    */
@@ -298,7 +414,7 @@ export class ReplacementsRepository {
       scopeType: doc.scope_type as 'thread' | 'execution',
       scopeId: doc.scope_id,
       profileId: doc.profile_id,
-      tokenToOriginal: doc.token_to_original ?? {},
+      tokenToOriginal: this.deserializeTokenMap(doc),
       tokenSources: (doc.token_sources ?? []).map((s) => ({
         token: s.token,
         pointer: s.pointer,

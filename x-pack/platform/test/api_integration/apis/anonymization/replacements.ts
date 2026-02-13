@@ -110,6 +110,19 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(status).to.be(404);
       });
+
+      it('returns 404 for expired replacements', async () => {
+        const { id } = await createReplacementsDoc({
+          expires_at: new Date(Date.now() - 60_000).toISOString(),
+        });
+
+        const { status } = await supertest
+          .get(`${REPLACEMENTS_API}/${id}`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', API_VERSION);
+
+        expect(status).to.be(404);
+      });
     });
 
     describe('space isolation', () => {
