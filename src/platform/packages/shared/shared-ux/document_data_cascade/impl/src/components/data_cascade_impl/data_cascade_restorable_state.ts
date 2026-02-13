@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DataCascade, DataCascadeRow, DataCascadeRowCell } from './src/components';
-export type {
-  GroupNode,
-  LeafNode,
-  DataCascadeProps,
-  DataCascadeRestorableState,
-  DataCascadeRowProps,
-  DataCascadeRowCellProps,
-  CascadeRowCellNestedVirtualizationAnchorProps,
-} from './src/components';
-export * from './src/lib';
-export { NumberBadge } from './src/components/helpers';
+import type { ExpandedState, RowSelectionState } from '@tanstack/react-table';
+import { createRestorableStateProvider } from '@kbn/restorable-state';
+
+export interface DataCascadeRestorableState {
+  expandedState: ExpandedState;
+  rowSelection: RowSelectionState;
+  scrollOffset: number;
+}
+
+export const { RestorableStateProvider, useRestorableState, useRestorableRef } =
+  createRestorableStateProvider<DataCascadeRestorableState>();

@@ -29,6 +29,7 @@ import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-secti
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DocViewerRestorableState } from '@kbn/unified-doc-viewer';
+import type { DataCascadeRestorableState } from '@kbn/shared-ux-document-data-cascade';
 import type { SerializedError } from '@reduxjs/toolkit';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
@@ -174,6 +175,7 @@ export interface TabState extends TabItem {
     searchDraft?: Partial<UnifiedSearchDraft>;
     metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
     docViewer?: Partial<DocViewerRestorableState>;
+    dataCascade?: Partial<DataCascadeRestorableState>;
   };
   expandedDoc: DataTableRecord | undefined;
   initialDocViewerTabId?: string;

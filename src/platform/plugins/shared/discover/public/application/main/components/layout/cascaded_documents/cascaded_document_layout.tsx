@@ -14,6 +14,7 @@ import {
   DataCascadeRow,
   DataCascadeRowCell,
   type DataCascadeRowCellProps,
+  type DataCascadeRestorableState,
 } from '@kbn/shared-ux-document-data-cascade';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
@@ -31,6 +32,12 @@ import { cascadedDocumentsStyles } from './cascaded_documents.styles';
 import { useEsqlDataCascadeRowActionHelpers } from './blocks/use_row_header_components';
 import { useDataCascadeRowExpansionHandlers, useGroupedCascadeData } from './hooks';
 import { useCascadedDocumentsContext } from './cascaded_documents_provider';
+import {
+  internalStateActions,
+  useCurrentTabAction,
+  useCurrentTabSelector,
+  useInternalStateDispatch,
+} from '../../../state_management/redux';
 
 export interface ESQLDataCascadeProps
   extends Pick<
@@ -58,6 +65,16 @@ const ESQLDataCascade = React.memo(
       viewModeToggle,
       cascadeGroupingChangeHandler,
     } = useCascadedDocumentsContext();
+
+    const dispatch = useInternalStateDispatch();
+    const dataCascadeUiState = useCurrentTabSelector((state) => state.uiState.dataCascade);
+    const setDataCascadeUiState = useCurrentTabAction(internalStateActions.setDataCascadeUiState);
+    const onInitialStateChange = useCallback(
+      (newDataCascadeUiState: Partial<DataCascadeRestorableState>) => {
+        dispatch(setDataCascadeUiState({ dataCascadeUiState: newDataCascadeUiState }));
+      },
+      [dispatch, setDataCascadeUiState]
+    );
 
     const cascadeGroupData = useGroupedCascadeData({
       selectedCascadeGroups,
@@ -117,6 +134,8 @@ const ESQLDataCascade = React.memo(
         cascadeGroups={availableCascadeGroups}
         initialGroupColumn={selectedCascadeGroups}
         customTableHeader={customTableHeading}
+        initialState={dataCascadeUiState}
+        onInitialStateChange={onInitialStateChange}
       >
         <DataCascadeRow<ESQLDataGroupNode, DataTableRecord>
           rowHeaderTitleSlot={rowHeaderTitle}

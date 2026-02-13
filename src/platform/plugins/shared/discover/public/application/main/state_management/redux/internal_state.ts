@@ -396,6 +396,14 @@ export const internalStateSlice = createSlice({
       withTab(state, action.payload, (tab) => {
         tab.uiState.docViewer = action.payload.docViewerUiState;
       }),
+
+    setDataCascadeUiState: (
+      state,
+      action: TabAction<{ dataCascadeUiState: Partial<TabState['uiState']['dataCascade']> }>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.uiState.dataCascade = action.payload.dataCascadeUiState;
+      }),
   },
   extraReducers: (builder) => {
     builder.addCase(loadDataViewList.fulfilled, (state, action) => {
