@@ -106,6 +106,7 @@ dependsOn:
   - '@kbn/home-plugin'
   - '@kbn/data-plugin'
   - '@kbn/security-plugin'
+  - '@kbn/core-feature-flags-server'
 tags:
   - plugin
   - prod
