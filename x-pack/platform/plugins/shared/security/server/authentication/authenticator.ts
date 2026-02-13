@@ -788,6 +788,14 @@ export class Authenticator {
       );
     }
 
+    // Don't update session if request is "minimally" authenticated.
+    if (request.route.options.security?.authc?.enabled === 'minimal') {
+      this.logger.debug(
+        'Session should not be changed for requests that require minimal authentication, skipping session update.'
+      );
+      return null;
+    }
+
     if (!existingSessionValue && !authenticationResult.shouldUpdateState()) {
       return null;
     }
