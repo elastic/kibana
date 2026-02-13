@@ -49,7 +49,7 @@ describe('fromStoredFilter', () => {
       expect(resultUndefined).toBeUndefined();
     });
 
-    it('should skip pinned filters (globalState) by default', () => {
+    it('should skip pinned filters (globalState)', () => {
       // Pinned filters are UI-level state and should not be persisted in AsCodeFilter format
       const pinnedFilter = {
         meta: {
@@ -70,36 +70,6 @@ describe('fromStoredFilter', () => {
 
       const result = fromStoredFilter(pinnedFilter);
       expect(result).toBeUndefined();
-    });
-
-    it('should convert pinned filters when ignorePinned is false', () => {
-      const pinnedFilter = {
-        meta: {
-          disabled: false,
-          negate: false,
-          alias: null,
-          key: 'status',
-          field: 'status',
-          type: 'phrase',
-        },
-        query: {
-          match_phrase: {
-            status: 'active',
-          },
-        },
-        $state: { store: FilterStateStore.GLOBAL_STATE },
-      };
-
-      const result = fromStoredFilter(pinnedFilter, undefined, false) as AsCodeFilter;
-
-      expect(isConditionFilter(result)).toBe(true);
-      if (isConditionFilter(result)) {
-        expect(result.condition).toEqual({
-          field: 'status',
-          operator: 'is',
-          value: 'active',
-        });
-      }
     });
   });
 

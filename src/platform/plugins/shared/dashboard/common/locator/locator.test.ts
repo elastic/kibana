@@ -10,24 +10,9 @@
 import { DashboardAppLocatorDefinition } from './locator';
 import { hashedItemStore } from '@kbn/kibana-utils-plugin/public';
 import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item_store/mock';
-import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
-import type { DashboardLocatorParams, DashboardLocatorParamsSerializable } from '../types';
+import { FilterStateStore } from '@kbn/es-query';
 
 describe('dashboard locator', () => {
-  const getLocation = (
-    definition: DashboardAppLocatorDefinition,
-    params: Partial<DashboardLocatorParams> = {}
-  ) => definition.getLocation(params as DashboardLocatorParamsSerializable);
-
-  const makeConditionFilter = (field: string, value: string): AsCodeFilter => ({
-    type: 'condition',
-    condition: {
-      field,
-      operator: 'is',
-      value,
-    },
-  });
-
   beforeEach(() => {
     // @ts-ignore
     hashedItemStore.storage = mockStorage;
@@ -38,13 +23,13 @@ describe('dashboard locator', () => {
       useHashedUrl: false,
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
-    const location = await getLocation(definition);
+    const location = await definition.getLocation({});
 
     expect(location).toMatchObject({
       app: 'dashboards',
+      path: '#/create?_g=()',
       state: {},
     });
-    expect(location.path).toMatchInlineSnapshot(`"#/create?_g=()"`);
   });
 
   test('creates a link with global time range set up', async () => {
@@ -52,12 +37,13 @@ describe('dashboard locator', () => {
       useHashedUrl: false,
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
-    const location = await getLocation(definition, {
+    const location = await definition.getLocation({
       time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
     });
 
     expect(location).toMatchObject({
       app: 'dashboards',
+      path: '#/create?_g=(time:(from:now-15m,mode:relative,to:now))',
       state: {
         time_range: {
           from: 'now-15m',
@@ -66,9 +52,6 @@ describe('dashboard locator', () => {
         },
       },
     });
-    expect(location.path).toMatchInlineSnapshot(
-      `"#/create?_g=(time:(from:now-15m,mode:relative,to:now))"`
-    );
   });
 
   test('creates a link with filters, time range, refresh interval and query to a saved object', async () => {
@@ -76,19 +59,63 @@ describe('dashboard locator', () => {
       useHashedUrl: false,
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
-    const location = await getLocation(definition, {
+    const location = await definition.getLocation({
       time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
       refresh_interval: { pause: false, value: 300 },
       dashboardId: '123',
-      filters: [makeConditionFilter('status', 'hi')],
-      pinnedFilters: [makeConditionFilter('status', 'pinned')],
+      filters: [
+        {
+          meta: {
+            alias: null,
+            disabled: false,
+            negate: false,
+          },
+          query: { query: 'hi' },
+        },
+        {
+          meta: {
+            alias: null,
+            disabled: false,
+            negate: false,
+          },
+          query: { query: 'hi' },
+          $state: {
+            store: FilterStateStore.GLOBAL_STATE,
+          },
+        },
+      ],
       query: { query: 'bye', language: 'kuery' },
     });
 
     expect(location).toMatchObject({
       app: 'dashboards',
+      path: `#/view/123?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))`,
       state: {
-        filters: [makeConditionFilter('status', 'hi')],
+        filters: [
+          {
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+            },
+            query: {
+              query: 'hi',
+            },
+          },
+          {
+            $state: {
+              store: 'globalState',
+            },
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+            },
+            query: {
+              query: 'hi',
+            },
+          },
+        ],
         query: {
           language: 'kuery',
           query: 'bye',
@@ -104,9 +131,6 @@ describe('dashboard locator', () => {
         },
       },
     });
-    expect(location.path).toMatchInlineSnapshot(
-      `"#/view/123?_g=(filters:!(('$state':(store:globalState),meta:(field:status,key:status,params:(query:pinned),type:phrase),query:(match_phrase:(status:pinned)))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))"`
-    );
   });
 
   test('searchSessionId', async () => {
@@ -114,7 +138,7 @@ describe('dashboard locator', () => {
       useHashedUrl: false,
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
-    const location = await getLocation(definition, {
+    const location = await definition.getLocation({
       time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
       refresh_interval: { pause: false, value: 300 },
       dashboardId: '123',
@@ -125,6 +149,7 @@ describe('dashboard locator', () => {
 
     expect(location).toMatchObject({
       app: 'dashboards',
+      path: `#/view/123?_g=(filters:!(),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&searchSessionId=__sessionSearchId__`,
       state: {
         filters: [],
         query: {
@@ -142,9 +167,6 @@ describe('dashboard locator', () => {
         },
       },
     });
-    expect(location.path).toMatchInlineSnapshot(
-      `"#/view/123?_g=(refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&searchSessionId=__sessionSearchId__"`
-    );
   });
 
   test('panels', async () => {
@@ -152,17 +174,17 @@ describe('dashboard locator', () => {
       useHashedUrl: false,
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
-    const location = await getLocation(definition, {
+    const location = await definition.getLocation({
       panels: [{ fakePanelContent: 'fakePanelContent' }] as any,
     });
 
     expect(location).toMatchObject({
       app: 'dashboards',
+      path: `#/create?_g=()`,
       state: {
         panels: [{ fakePanelContent: 'fakePanelContent' }],
       },
     });
-    expect(location.path).toMatchInlineSnapshot(`"#/create?_g=()"`);
   });
 
   test('if no useHash setting is given, uses the one was start services', async () => {
@@ -170,7 +192,7 @@ describe('dashboard locator', () => {
       useHashedUrl: true,
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
-    const location = await getLocation(definition, {
+    const location = await definition.getLocation({
       time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
     });
 
@@ -182,7 +204,7 @@ describe('dashboard locator', () => {
       useHashedUrl: false,
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
-    const location = await getLocation(definition, {
+    const location = await definition.getLocation({
       time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
       useHash: true,
     });
@@ -195,7 +217,7 @@ describe('dashboard locator', () => {
       useHashedUrl: true,
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
-    const location = await getLocation(definition, {
+    const location = await definition.getLocation({
       time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
       useHash: false,
     });
@@ -204,9 +226,32 @@ describe('dashboard locator', () => {
   });
 
   describe('preserving saved filters', () => {
-    const savedFilter1 = makeConditionFilter('status', 'savedfilter1');
-    const savedFilter2 = makeConditionFilter('status', 'savedfilter2');
-    const appliedFilter = makeConditionFilter('status', 'appliedfilter');
+    const savedFilter1 = {
+      meta: {
+        alias: null,
+        disabled: false,
+        negate: false,
+      },
+      query: { query: 'savedfilter1' },
+    };
+
+    const savedFilter2 = {
+      meta: {
+        alias: null,
+        disabled: false,
+        negate: false,
+      },
+      query: { query: 'savedfilter2' },
+    };
+
+    const appliedFilter = {
+      meta: {
+        alias: null,
+        disabled: false,
+        negate: false,
+      },
+      query: { query: 'appliedfilter' },
+    };
 
     test('attaches filters from destination dashboard', async () => {
       const definition = new DashboardAppLocatorDefinition({
@@ -220,24 +265,66 @@ describe('dashboard locator', () => {
         },
       });
 
-      const location1 = await getLocation(definition, {
+      const location1 = await definition.getLocation({
         dashboardId: 'dashboard1',
         filters: [appliedFilter],
       });
 
-      expect(location1.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=()"`);
+      expect(location1.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=(filters:!())"`);
       expect(location1.state).toMatchObject({
-        filters: [savedFilter1, appliedFilter],
+        filters: [
+          {
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+            },
+            query: {
+              query: 'savedfilter1',
+            },
+          },
+          {
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+            },
+            query: {
+              query: 'appliedfilter',
+            },
+          },
+        ],
       });
 
-      const location2 = await getLocation(definition, {
+      const location2 = await definition.getLocation({
         dashboardId: 'dashboard2',
         filters: [appliedFilter],
       });
 
-      expect(location2.path).toMatchInlineSnapshot(`"#/view/dashboard2?_g=()"`);
+      expect(location2.path).toMatchInlineSnapshot(`"#/view/dashboard2?_g=(filters:!())"`);
       expect(location2.state).toMatchObject({
-        filters: [savedFilter2, appliedFilter],
+        filters: [
+          {
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+            },
+            query: {
+              query: 'savedfilter2',
+            },
+          },
+          {
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+            },
+            query: {
+              query: 'appliedfilter',
+            },
+          },
+        ],
       });
     });
 
@@ -252,14 +339,25 @@ describe('dashboard locator', () => {
         },
       });
 
-      const location = await getLocation(definition, {
+      const location = await definition.getLocation({
         dashboardId: 'dashboard1',
         filters: [appliedFilter],
       });
 
-      expect(location.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=()"`);
+      expect(location.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=(filters:!())"`);
       expect(location.state).toMatchObject({
-        filters: [appliedFilter],
+        filters: [
+          {
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+            },
+            query: {
+              query: 'appliedfilter',
+            },
+          },
+        ],
       });
     });
 
@@ -274,13 +372,13 @@ describe('dashboard locator', () => {
         },
       });
 
-      const location = await getLocation(definition, {
+      const location = await definition.getLocation({
         dashboardId: 'dashboard1',
         filters: [],
         preserveSavedFilters: false,
       });
 
-      expect(location.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=()"`);
+      expect(location.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=(filters:!())"`);
       expect(location.state).toMatchObject({
         filters: [],
       });
@@ -297,7 +395,7 @@ describe('dashboard locator', () => {
         },
       });
 
-      const location = await getLocation(definition, {
+      const location = await definition.getLocation({
         dashboardId: 'dashboard1',
       });
 
@@ -316,15 +414,26 @@ describe('dashboard locator', () => {
         },
       });
 
-      const location = await getLocation(definition, {
+      const location = await definition.getLocation({
         dashboardId: 'dashboard1',
         filters: [appliedFilter],
         preserveSavedFilters: false,
       });
 
-      expect(location.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=()"`);
+      expect(location.path).toMatchInlineSnapshot(`"#/view/dashboard1?_g=(filters:!())"`);
       expect(location.state).toMatchObject({
-        filters: [appliedFilter],
+        filters: [
+          {
+            meta: {
+              alias: null,
+              disabled: false,
+              negate: false,
+            },
+            query: {
+              query: 'appliedfilter',
+            },
+          },
+        ],
       });
     });
   });

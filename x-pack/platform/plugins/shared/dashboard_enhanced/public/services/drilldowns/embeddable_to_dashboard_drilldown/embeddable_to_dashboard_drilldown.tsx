@@ -68,7 +68,7 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
 
     const location = await this.locator.getLocation(params);
     if (useUrlForState) {
-      this.useUrlForState(location);
+      this.useUrlForState(location as KibanaLocation<DashboardLocatorParams>);
     }
 
     return location;

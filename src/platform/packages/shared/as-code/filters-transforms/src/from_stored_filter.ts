@@ -50,15 +50,9 @@ import {
  * as DSL to prevent data loss from incorrect parsing of complex queries.
  *
  * @param storedFilter The filter to convert (typically from saved object or URL state)
- * @param logger Optional logger for conversion warnings
- * @param ignorePinned Whether to skip pinned filters (global state). Defaults to true.
  * @returns AsCodeFilter with condition, group, or dsl format or undefined if conversion fails
  */
-export function fromStoredFilter(
-  storedFilter: unknown,
-  logger?: Logger,
-  ignorePinned: boolean = true
-): AsCodeFilter | undefined {
+export function fromStoredFilter(storedFilter: unknown, logger?: Logger): AsCodeFilter | undefined {
   try {
     // Validate input is a non-null object
     if (!storedFilter || typeof storedFilter !== 'object') {
@@ -71,8 +65,8 @@ export function fromStoredFilter(
     // Cast to StoredFilter for type-safe access
     const filter = storedFilter as StoredFilter;
 
-    // Skip pinned filters (globalState) unless explicitly requested.
-    if (ignorePinned && filter.$state?.store === FilterStateStore.GLOBAL_STATE) {
+    // Skip pinned filters (globalState) - these are UI-level state and should not be persisted in AsCodeFilter format
+    if (filter.$state?.store === FilterStateStore.GLOBAL_STATE) {
       return undefined;
     }
 
@@ -475,17 +469,15 @@ function validateHomogeneousArray(values: Array<string | number | boolean>, cont
  *
  * @param filters Array of stored filters to convert
  * @param logger Optional logger for conversion warnings
- * @param ignorePinned Whether to skip pinned filters (global state). Defaults to true.
  * @returns Array of successfully converted AsCode filters (undefined values filtered out), or undefined if input is undefined
  *
  * @public
  */
 export function fromStoredFilters(
   filters: unknown[] | undefined,
-  logger?: Logger,
-  ignorePinned: boolean = true
+  logger?: Logger
 ): AsCodeFilter[] | undefined {
   return filters
-    ?.map((f) => fromStoredFilter(f, logger, ignorePinned))
+    ?.map((f) => fromStoredFilter(f, logger))
     .filter((f): f is AsCodeFilter => f !== undefined);
 }

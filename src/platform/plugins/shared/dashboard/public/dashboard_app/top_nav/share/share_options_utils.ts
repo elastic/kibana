@@ -14,11 +14,9 @@ import type { QueryState } from '@kbn/data-plugin/common';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
+import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import { topNavStrings } from '../../_dashboard_app_strings';
-import type {
-  DashboardLocatorParams,
-  DashboardLocatorParamsSerializable,
-} from '../../../../common';
+import type { DashboardLocatorParams } from '../../../../common';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 import { dataService, shareService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
@@ -40,13 +38,14 @@ export function buildDashboardShareOptions({
   title: string;
   hasPanelChanges: boolean;
 } {
-  const unsavedDashboardState =
-    getDashboardBackupService().getState(objectId) ?? ({} as DashboardLocatorParams);
+  const unsavedDashboardState = getDashboardBackupService().getState(objectId);
+  const { filters: asCodeFilters, ...restUnsavedDashboardState } = unsavedDashboardState ?? {};
 
-  const hasPanelChanges = unsavedDashboardState.panels !== undefined;
+  const hasPanelChanges = unsavedDashboardState?.panels !== undefined;
 
   const unsavedDashboardStateForLocator: DashboardLocatorParams = {
-    ...unsavedDashboardState,
+    ...restUnsavedDashboardState,
+    filters: toStoredFilters(asCodeFilters),
   };
 
   const locatorParams: DashboardLocatorParams = {
@@ -129,7 +128,7 @@ export function buildShareableUrlLocatorParams(locatorParams: DashboardLocatorPa
   return {
     locator: shareService?.url.locators.get(
       DASHBOARD_APP_LOCATOR
-    ) as LocatorPublic<DashboardLocatorParamsSerializable>,
+    ) as LocatorPublic<DashboardLocatorParams>,
     params: { ...locatorParams, timeRange: locatorParams.time_range },
   };
 }

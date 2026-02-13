@@ -29,11 +29,7 @@ export function extractSearchState(state: {
         if (isAsCodeFilter(filter)) {
           return filter;
         }
-        // Existing locator URLs may contain pinned filters which we should not ignore.
-        // However, this conversion changes the filter to an unpinned filter.
-        // We should decide if this is acceptable or if we need to preserve the
-        // pinned state of the filter.
-        return fromStoredFilter(filter, undefined, false);
+        return fromStoredFilter(filter);
       })
       .filter((filter): filter is AsCodeFilter => Boolean(filter));
   }

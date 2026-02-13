@@ -51,7 +51,7 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { Reference } from '@kbn/content-management-utils';
-import type { DashboardLocatorParamsSerializable } from '../../common';
+import type { DashboardLocatorParams } from '../../common';
 import type { DashboardReadResponseBody, DashboardState, GridData } from '../../server';
 import type { SaveDashboardReturn } from './save_modal/types';
 import type { DashboardLayout } from './layout_manager/types';
@@ -179,10 +179,7 @@ export type DashboardApi = CanExpandPanels &
     isEmbeddedExternally: boolean;
     isEditableByUser: boolean;
     isManaged: boolean;
-    locator?: Pick<
-      LocatorPublic<DashboardLocatorParamsSerializable>,
-      'navigate' | 'getRedirectUrl'
-    >;
+    locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
     runInteractiveSave: () => Promise<SaveDashboardReturn | undefined>;
     runQuickSave: () => Promise<void>;
     scrollToPanel: (panelRef: HTMLDivElement) => void;

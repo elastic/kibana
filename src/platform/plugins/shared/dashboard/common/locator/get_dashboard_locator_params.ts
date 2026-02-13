@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isFilterPinned, type Filter, type Query } from '@kbn/es-query';
-import { fromStoredFilter } from '@kbn/as-code-filters-transforms';
-import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
+import { isFilterPinned, type Query } from '@kbn/es-query';
 import type { HasParentApi, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import type { DashboardNavigationOptions } from '../../server';
 import type { DashboardLocatorParams } from '../types';
@@ -42,24 +40,12 @@ export const getDashboardLocatorParamsFromEmbeddable = (
     params.time_range = timeRange;
   }
 
-  // Preserve pinned filters separately for `_g.filters` and only include unpinned filters in app state.
-  const filters = (api.parentApi?.filters$?.value ?? []) as Filter[];
-  const { pinnedFiltersAsCode, filtersAsCode } = filters.reduce(
-    (acc, filter) => {
-      if (isFilterPinned(filter)) {
-        const pinnedAsCode = fromStoredFilter(filter, undefined, false);
-        if (pinnedAsCode) acc.pinnedFiltersAsCode.push(pinnedAsCode);
-      } else {
-        const filterAsCode = fromStoredFilter(filter);
-        if (filterAsCode) acc.filtersAsCode.push(filterAsCode);
-      }
-      return acc;
-    },
-    { pinnedFiltersAsCode: [] as AsCodeFilter[], filtersAsCode: [] as AsCodeFilter[] }
-  );
+  // if useCurrentDashboardFilters enabled, then preserve all the filters (pinned, unpinned, and from controls)
+  // otherwise preserve only pinned
+  const filters = api.parentApi?.filters$?.value ?? [];
+  params.filters = options.use_filters ? filters : filters?.filter((f) => isFilterPinned(f));
 
-  params.pinnedFilters = pinnedFiltersAsCode.length ? pinnedFiltersAsCode : undefined;
-  params.filters = options.use_filters && filtersAsCode?.length ? filtersAsCode : undefined;
+  return params;
 
   return params;
 };

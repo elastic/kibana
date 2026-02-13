@@ -10,7 +10,6 @@
 export type {
   DashboardCapabilities,
   DashboardLocatorParams,
-  DashboardLocatorParamsSerializable,
   DashboardState,
   DashboardPinnedPanelsState,
   DashboardPinnedPanel,
