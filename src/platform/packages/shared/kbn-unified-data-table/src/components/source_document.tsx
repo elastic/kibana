@@ -153,12 +153,13 @@ const componentStyles = {
         background: 'transparent',
         fontWeight: euiTheme.font.weight.bold,
         lineHeight: 'inherit', // Required for EuiDataGrid lineCount to work correctly
+        display: 'inline-block',
       },
 
       '.unifiedDataTable__descriptionListDescription': {
         marginInline: `${euiTheme.size.s} ${euiTheme.size.s}`,
         paddingInline: 0,
-        overflowWrap: 'break-word',
+        wordBreak: 'break-all',
         whiteSpace: 'normal',
         lineHeight: 'inherit', // Required for EuiDataGrid lineCount to work correctly
 
