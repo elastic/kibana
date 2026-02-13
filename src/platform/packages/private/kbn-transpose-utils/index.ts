@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { initial } from 'lodash';
-
 /**
  * Used to delimitate felids of a transposed column id
  */
@@ -46,6 +44,6 @@ export function parseTransposeId(id: string) {
 
   return {
     id: idParts[idParts.length - 1],
-    values: initial(idParts),
+    values: idParts.slice(0, -1),
   };
 }
