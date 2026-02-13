@@ -35,6 +35,7 @@ exports[`View policy flyout shows all phases 1`] = `
     >
       <div
         class="euiFlyoutBody__overflow emotion-euiFlyoutBody__overflow-noBanner"
+        data-test-subj="euiFlyoutBodyOverflow"
         tabindex="0"
       >
         <div
