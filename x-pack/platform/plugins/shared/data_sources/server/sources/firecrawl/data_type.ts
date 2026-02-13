@@ -6,8 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { API_KEY_URL_PLACEHOLDER, MCPAuthType } from '@kbn/connector-schemas/mcp';
+import { MCPAuthType } from '@kbn/connector-schemas/mcp';
 import type { DataSource } from '@kbn/data-catalog-plugin';
+
+/** Placeholder for API key in URL; must match @kbn/connector-schemas/mcp API_KEY_URL_PLACEHOLDER for MCP form serialization. */
+const API_KEY_URL_PLACEHOLDER = '{{apiKey}}';
 
 export const firecrawlDataSource: DataSource = {
   id: 'firecrawl',
