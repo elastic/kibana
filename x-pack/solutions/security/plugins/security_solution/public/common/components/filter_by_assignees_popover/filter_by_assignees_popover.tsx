@@ -82,7 +82,7 @@ export const FilterByAssigneesPopover: FC<FilterByAssigneesPopoverProps> = memo(
     );
 
     return (
-      <EuiFilterGroup>
+      <EuiFilterGroup compressed>
         <EuiPopover
           panelPaddingSize="none"
           initialFocus={`[id="${searchInputId}"]`}

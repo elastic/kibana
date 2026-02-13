@@ -53,7 +53,7 @@ export const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
 
 export type PageFiltersProps = Pick<
   AlertFilterControlsProps,
-  'filters' | 'onFiltersChange' | 'query' | 'timeRange' | 'onInit'
+  'filters' | 'onFiltersChange' | 'query' | 'timeRange' | 'onInit' | 'prependControls' | 'appendControls'
 > & {
   dataView: DataView | DataViewSpec;
 };

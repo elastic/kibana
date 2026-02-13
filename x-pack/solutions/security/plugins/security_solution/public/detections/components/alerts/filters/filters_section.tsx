@@ -48,6 +48,10 @@ export interface FiltersSectionProps {
    * Callback to set the status filter to the alerts page as it's also used in the GroupedTable component
    */
   setStatusFilter: Dispatch<SetStateAction<Status[]>>;
+  /**
+   * Optional content to render before the filter controls in the same bar (e.g. assignees filter)
+   */
+  prependControls?: React.ReactNode;
 }
 
 /**
@@ -61,6 +65,7 @@ export const FiltersSection = memo(
     setPageFilterHandler,
     setPageFilters,
     setStatusFilter,
+    prependControls,
   }: FiltersSectionProps) => {
     const getGlobalFiltersQuerySelector = useMemo(
       () => inputsSelectors.globalFiltersQuerySelector(),
@@ -123,6 +128,7 @@ export const FiltersSection = memo(
         timeRange={pageFiltersTimeRange}
         onInit={setPageFilterHandler}
         dataView={dataView}
+        prependControls={prependControls}
       />
     );
   }

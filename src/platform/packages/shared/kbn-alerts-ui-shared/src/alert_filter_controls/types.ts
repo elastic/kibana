@@ -11,6 +11,7 @@ import type { ControlGroupRendererApi } from '@kbn/control-group-renderer';
 import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type React from 'react';
 
 export type FilterUrlFormat = Record<
   string,
@@ -70,4 +71,12 @@ export interface FilterGroupProps {
   Storage: typeof Storage;
   storageKey?: string;
   disableLocalStorageSync?: boolean;
+  /**
+   * Optional content to render before the filter controls in the same bar
+   */
+  prependControls?: React.ReactNode;
+  /**
+   * Optional content to render after the filter controls (before Add/Save/context menu) in the same bar
+   */
+  appendControls?: React.ReactNode;
 }

@@ -25,6 +25,7 @@ import { HeaderSection } from './header/header_section';
 import { SearchBarSection } from './search_bar/search_bar_section';
 import { TableSection } from './table/table_section';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
+import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import { Display } from '../../../explore/hosts/pages/display';
@@ -127,7 +128,7 @@ export const AlertsPageContent = memo(
         >
           <Display show={!globalFullScreen}>
             <HeaderPage title={PAGE_TITLE}>
-              <HeaderSection assignees={assignees} setAssignees={setAssignees} />
+              <HeaderSection />
             </HeaderPage>
             <EuiHorizontalRule margin="none" />
             <EuiSpacer size="l" />
@@ -138,6 +139,12 @@ export const AlertsPageContent = memo(
               setStatusFilter={setStatusFilter}
               setPageFilters={setPageFilters}
               setPageFilterHandler={setPageFilterHandler}
+              prependControls={
+                <FilterByAssigneesPopover
+                  selectedUserIds={assignees}
+                  onSelectionChange={setAssignees}
+                />
+              }
             />
             <EuiSpacer size="l" />
             <KPIsSection
