@@ -1894,8 +1894,7 @@ export const tasks: TelemetryTask[] = [
                     field: SDK_NAME_FIELD,
                   },
                 },
-                // range1d,
-                { range: { '@timestamp': { gte: 'now-15m' } } },
+                range1d,
               ],
           },
         },
@@ -2014,8 +2013,7 @@ export const tasks: TelemetryTask[] = [
                     field: SDK_NAME_FIELD,
                   },
                 },
-                // range1d,
-                { range: { '@timestamp': { gte: 'now-15m' } } },
+                range1d,
               ],
             },
           },
@@ -2140,8 +2138,7 @@ export const tasks: TelemetryTask[] = [
         query: {
           bool: {
             filter: [{ exists: { field: SDK_NAME_FIELD } }, 
-              // range1d,
-              { range: { '@timestamp': { gte: 'now-15m' } } },
+              range1d,
             ],
           },
         },
@@ -2178,9 +2175,9 @@ export const tasks: TelemetryTask[] = [
       // Process SDK results
       const sdkStats: Record<
         string,
-        { docs: number; versions: Record<string, number>; services_per_version: Record<string, number> }
+        { total_docs: number; docs_per_version: Record<string, number>; services_per_version: Record<string, number> }
       > = {};
-      const distroStats: Record<string, { docs: number; versions: Record<string, number>; services_per_version: Record<string, number> }> = {};
+      const distroStats: Record<string, { total_docs: number; docs_per_version: Record<string, number>; services_per_version: Record<string, number> }> = {};
       
       const sdkBuckets =
         (
@@ -2208,23 +2205,23 @@ export const tasks: TelemetryTask[] = [
         const key = distroName ? `${sdkName}/${sdkLanguage}/${distroName}` : `${sdkName}/${sdkLanguage}`;
 
         if (!sdkStats[key]) {
-          sdkStats[key] = { docs: 0, versions: {}, services_per_version: {} };
+          sdkStats[key] = { total_docs: 0, docs_per_version: {}, services_per_version: {} };
         }
 
-        sdkStats[key].docs += bucket.doc_count;
-        sdkStats[key].versions[sdkVersion] =
-          (sdkStats[key].versions[sdkVersion] || 0) + bucket.doc_count;
+        sdkStats[key].total_docs += bucket.doc_count;
+        sdkStats[key].docs_per_version[sdkVersion] =
+          (sdkStats[key].docs_per_version[sdkVersion] || 0) + bucket.doc_count;
         sdkStats[key].services_per_version[sdkVersion] =
           (sdkStats[key].services_per_version[sdkVersion] || 0) + serviceCount;
 
         // Also track distro separately if it exists
         if (distroName && distroName !== 'unknown' && distroName !== '') {
           if (!distroStats[distroName]) {
-            distroStats[distroName] = { docs: 0, versions: {}, services_per_version: {} };
+            distroStats[distroName] = { total_docs: 0, docs_per_version: {}, services_per_version: {} };
           }
-          distroStats[distroName].docs += bucket.doc_count;
-          distroStats[distroName].versions[sdkVersion] =
-            (distroStats[distroName].versions[sdkVersion] || 0) + bucket.doc_count;
+          distroStats[distroName].total_docs += bucket.doc_count;
+          distroStats[distroName].docs_per_version[sdkVersion] =
+            (distroStats[distroName].docs_per_version[sdkVersion] || 0) + bucket.doc_count;
           distroStats[distroName].services_per_version[sdkVersion] =
             (distroStats[distroName].services_per_version[sdkVersion] || 0) + serviceCount;
         }

@@ -876,13 +876,13 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
   },
   otel_sdk: {
     DYNAMIC_KEY: {
-      docs: {
+      total_docs: {
         type: 'long',
         _meta: {
           description: 'Number of documents for this SDK name/language combination within the last day',
         },
       },
-      versions: {
+      docs_per_version: {
         DYNAMIC_KEY: {
           type: 'long',
           _meta: {
@@ -902,13 +902,13 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
   },
   otel_distro: {
     DYNAMIC_KEY: {
-      docs: {
+      total_docs: {
         type: 'long',
         _meta: {
           description: 'Number of documents for this distro within the last day',
         },
       },
-      versions: {
+      docs_per_version: {
         DYNAMIC_KEY: {
           type: 'long',
           _meta: {

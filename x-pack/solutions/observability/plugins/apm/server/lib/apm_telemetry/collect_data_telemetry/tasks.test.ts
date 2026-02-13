@@ -1435,8 +1435,8 @@ describe('data telemetry collection tasks', () => {
       expect(result).toEqual({
         otel_sdk: {
           'opentelemetry/nodejs': {
-            docs: 700,
-            versions: {
+            total_docs: 700,
+            docs_per_version: {
               '1.20.0': 500,
               '1.19.0': 200,
             },
@@ -1446,8 +1446,8 @@ describe('data telemetry collection tasks', () => {
             },
           },
           'opentelemetry/python/elastic': {
-            docs: 300,
-            versions: {
+            total_docs: 300,
+            docs_per_version: {
               '1.15.0': 300,
             },
             services_per_version: {
@@ -1455,8 +1455,8 @@ describe('data telemetry collection tasks', () => {
             },
           },
           'opentelemetry/java/elastic': {
-            docs: 200,
-            versions: {
+            total_docs: 200,
+            docs_per_version: {
               '1.12.0': 200,
             },
             services_per_version: {
@@ -1466,8 +1466,8 @@ describe('data telemetry collection tasks', () => {
         },
         otel_distro: {
           elastic: {
-            docs: 500,
-            versions: {
+            total_docs: 500,
+            docs_per_version: {
               '1.15.0': 300,
               '1.12.0': 200,
             },
@@ -1571,8 +1571,8 @@ describe('data telemetry collection tasks', () => {
       expect(result).toEqual({
         otel_sdk: {
           'opentelemetry/nodejs/elastic': {
-            docs: 300,
-            versions: {
+            total_docs: 300,
+            docs_per_version: {
               '1.20.0': 300,
             },
             services_per_version: {
@@ -1582,8 +1582,8 @@ describe('data telemetry collection tasks', () => {
         },
         otel_distro: {
           elastic: {
-            docs: 300,
-            versions: {
+            total_docs: 300,
+            docs_per_version: {
               '1.20.0': 300,
             },
             services_per_version: {
