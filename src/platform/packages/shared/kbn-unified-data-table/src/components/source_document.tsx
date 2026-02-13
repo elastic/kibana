@@ -158,7 +158,7 @@ const componentStyles = {
       '.unifiedDataTable__descriptionListDescription': {
         marginInline: `${euiTheme.size.s} ${euiTheme.size.s}`,
         paddingInline: 0,
-        wordBreak: 'break-all',
+        overflowWrap: 'break-word',
         whiteSpace: 'normal',
         lineHeight: 'inherit', // Required for EuiDataGrid lineCount to work correctly
 
