@@ -34,7 +34,7 @@ import {
 import {
   actionTaskParamsModelVersions,
   connectorModelVersions,
-  connectorTokenModelVersions,
+  getConnectorTokenModelVersions,
   oauthStateModelVersions,
 } from './model_versions';
 
@@ -131,9 +131,8 @@ export function setupSavedObjects(
     management: {
       importableAndExportable: false,
     },
-    modelVersions: connectorTokenModelVersions,
+    modelVersions: getConnectorTokenModelVersions(encryptedSavedObjects),
   });
-
   encryptedSavedObjects.registerType({
     type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['token', 'refreshToken']),
@@ -170,15 +169,6 @@ export function setupSavedObjects(
   encryptedSavedObjects.registerType({
     type: OAUTH_STATE_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['codeVerifier']),
-    attributesToIncludeInAAD: new Set([
-      'state',
-      'connectorId',
-      'authorizationUrl',
-      'scope',
-      'spaceId',
-      'createdAt',
-      'expiresAt',
-      'createdBy',
-    ]),
+    attributesToIncludeInAAD: new Set(['state', 'connectorId', 'spaceId', 'expiresAt']),
   });
 }
