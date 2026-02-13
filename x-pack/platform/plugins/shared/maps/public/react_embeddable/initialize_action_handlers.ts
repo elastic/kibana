@@ -7,9 +7,11 @@
 
 import type { Filter } from '@kbn/es-query';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
-import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
+import {
+  APPLY_FILTER_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { RawValue } from '../../common/constants';
 import type { MapApi } from './types';
 import { getUiActions } from '../kibana_services';
