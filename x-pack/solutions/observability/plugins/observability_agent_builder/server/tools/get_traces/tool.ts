@@ -27,9 +27,9 @@ const getTracesSchema = z.object({
   kqlFilter: z
     .string()
     .describe(
-      'KQL filter used to find seed documents (logs or APM events) within the selected time range. Examples: \'service.name: "payment-service"\', \'trace.id: "abc123"\', \'_id: "a1b2c3"\'. The tool discovers one or more `trace.id` values from matching documents (up to `maxTraceIds`) and returns APM trace events and logs for each discovered trace.id.'
+      'KQL filter used to find seed Observability documents (logs, transactions, spans, and errors) within the selected time range. Examples: \'service.name: "payment-service"\', \'trace.id: "abc123"\', \'_id: "a1b2c3"\'. The tool discovers one or more `trace.id` values from matching documents (up to `maxTraces`) and returns Observability documents grouped by trace.id.'
     ),
-  maxTraceIds: z
+  maxTraces: z
     .number()
     .optional()
     .default(10)
@@ -38,14 +38,12 @@ const getTracesSchema = z.object({
     .number()
     .optional()
     .default(DEFAULT_MAX_TRACES)
-    .describe(
-      'Maximum number of documents to return per trace. Defaults to 100.'
-    ),
+    .describe('Maximum number of documents to return per trace. Defaults to 100.'),
 
   fields: z
     .array(z.string())
     .default(DEFAULT_TRACE_FIELDS)
-    .describe('Fields to include in the returned trace events.'),
+    .describe('Fields to include in the returned documents.'),
 });
 
 export function createGetTracesTool({
@@ -60,17 +58,15 @@ export function createGetTracesTool({
   const toolDefinition: BuiltinToolDefinition<typeof getTracesSchema> = {
     id: OBSERVABILITY_GET_TRACES_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves trace data (APM transactions/spans/errors) plus logs for one or more traces.
+    description: `Retrieves Observability documents (logs, transactions, spans, and errors) for one or more traces.
 
-  This tool is KQL-driven: it searches for matching documents (logs or APM events) within the time range, extracts one or more trace.id values, then returns for each trace.id:
-  - APM events (transactions, spans, errors)
-  - Logs
+  This tool is KQL-driven: it searches for matching Observability documents within the time range, extracts one or more trace.id values, then returns Observability documents grouped by trace.id.
 
   Common patterns:
   - Retrieve a specific trace: kqlFilter: "trace.id: abc123"
   - Expand from a specific document id: kqlFilter: "_id: a1b2c3" (only works if that document has a trace.id)
 
-  Note: The optional "index" parameter is used for trace.id discovery. The returned APM/log documents are fetched from the configured Observability data sources.
+  Note: The optional "index" parameter is used for trace.id discovery. The returned documents are fetched from the configured Observability data sources.
 
   Do NOT use for:
   - Finding traces by a broad query (use observability.get_trace_metrics or observability.get_trace_change_points to scope first)`,
@@ -83,7 +79,7 @@ export function createGetTracesTool({
       },
     },
     handler: async (
-      { start, end, index, kqlFilter, maxDocsPerTrace, maxTraceIds, fields },
+      { start, end, index, kqlFilter, maxDocsPerTrace, maxTraces, fields },
       { esClient }
     ) => {
       try {
@@ -98,7 +94,7 @@ export function createGetTracesTool({
           kqlFilter,
           maxDocsPerTrace,
           fields,
-          maxTraceIds,
+          maxTraces,
         });
 
         return {

@@ -14,14 +14,14 @@
  * multiple log sequences using a variety of correlation identifiers.
  *
  * This scenario is designed to exercise the tool's capabilities:
- * - Direct trace lookup via `kqlFilter` on `trace.id` (returns APM events + logs)
+ * - Direct trace lookup via `kqlFilter` on `trace.id`
  * - Anchor-based lookup via broader `kqlFilter` (discovers multiple trace.id values)
  * - Using a specific document `_id` as the anchor in `kqlFilter`
- * - Limiting results via `maxTraceIds` (how many trace ids) and `maxDocsPerTrace` (docs per trace)
+ * - Limiting results via `maxTraces` (how many trace ids) and `maxDocsPerTrace` (docs per trace)
  *
  * Validate via:
  *
- * 1) Direct lookup by trace id (APM + logs)
+ * 1) Direct lookup by trace id
  * ```
  * POST kbn:///api/agent_builder/tools/_execute
  * {
@@ -30,7 +30,7 @@
  *     "start": "now-1h",
  *     "end": "now",
  *     "kqlFilter": "trace.id: \"trace-get-traces-001\"",
- *     "maxTraceIds": 1
+ *     "maxTraces": 1
  *   }
  * }
  * ```
@@ -44,7 +44,7 @@
  *     "start": "now-1h",
  *     "end": "now",
  *     "kqlFilter": "service.name: payment-service",
- *     "maxTraceIds": 5,
+ *     "maxTraces": 5,
  *     "maxDocsPerTrace": 100
  *   }
  * }
@@ -57,7 +57,7 @@
  *   "tool_id": "observability.get_traces",
  *   "tool_params": {
  *     "kqlFilter": "_id: \"<document_id>\"",
- *     "maxTraceIds": 1
+ *     "maxTraces": 1
  *   }
  * }
  */

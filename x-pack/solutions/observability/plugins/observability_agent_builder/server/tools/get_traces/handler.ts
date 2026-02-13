@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import moment from 'moment';
+import type { MsearchRequestItem } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
 import { TRACE_ID } from '@kbn/apm-types';
@@ -15,14 +17,13 @@ import type {
 import { getObservabilityDataSources } from '../../utils/get_observability_data_sources';
 import { parseDatemath } from '../../utils/time';
 import { timeRangeFilter, termFilter } from '../../utils/dsl_filters';
-import { getTypedSearch } from '../../utils/get_typed_search';
 import { unwrapEsFields } from '../../utils/unwrap_es_fields';
-import { getTraceTimeWindows } from './get_trace_time_windows/get_trace_time_windows';
 import { getTotalHits } from '../../utils/get_total_hits';
+import { getTraceIds } from './get_trace_ids';
 
 export async function fetchTraceDocuments({
   esClient,
-  traceId,
+  traceIds,
   index,
   startTime,
   endTime,
@@ -30,35 +31,49 @@ export async function fetchTraceDocuments({
   fields,
 }: {
   esClient: IScopedClusterClient;
-  traceId: string;
+  traceIds: string[];
   index: string[];
   startTime: number;
   endTime: number;
   size: number;
   fields: string[];
 }) {
-  const search = getTypedSearch(esClient.asCurrentUser);
-
-  const searchResult = await search({
-    index,
-    track_total_hits: size + 1, // +1 to determine if results are truncated
-    size,
-    sort: [{ '@timestamp': { order: 'asc' } }],
-    _source: false,
-    fields,
-    query: {
-      bool: {
-        filter: [
-          ...timeRangeFilter('@timestamp', { start: startTime, end: endTime }),
-          ...termFilter(TRACE_ID, traceId),
-        ],
+  const searches: MsearchRequestItem[] = traceIds.flatMap((traceId) => [
+    { index },
+    {
+      track_total_hits: size + 1, // +1 to determine if results are truncated
+      size,
+      sort: [{ '@timestamp': { order: 'asc' } }],
+      _source: false,
+      fields,
+      query: {
+        bool: {
+          filter: [
+            ...timeRangeFilter('@timestamp', { start: startTime, end: endTime }),
+            ...termFilter(TRACE_ID, traceId),
+          ],
+        },
       },
     },
+  ]);
+  const msearchResponse = await esClient.asCurrentUser.msearch({
+    searches,
   });
-  return {
-    items: searchResult.hits.hits.map((hit) => unwrapEsFields(hit.fields)),
-    isTruncated: getTotalHits(searchResult) > size,
-  };
+  return msearchResponse.responses.map((response, responseIndex) => {
+    const traceId = traceIds[responseIndex];
+    if ('error' in response) {
+      return {
+        items: [],
+        error: `Failed to fetch trace documents for trace.id ${traceId}: ${response.error.type}: ${response.error.reason}`,
+        isTruncated: false,
+      };
+    }
+
+    return {
+      items: response.hits.hits.map((hit) => unwrapEsFields(hit.fields)),
+      isTruncated: getTotalHits(response) > size,
+    };
+  });
 }
 
 export async function getToolHandler({
@@ -71,7 +86,7 @@ export async function getToolHandler({
   index,
   kqlFilter,
   fields,
-  maxTraceIds,
+  maxTraces,
   maxDocsPerTrace,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
@@ -81,9 +96,9 @@ export async function getToolHandler({
   start: string;
   end: string;
   index?: string;
-  kqlFilter?: string;
+  kqlFilter: string;
   fields: string[];
-  maxTraceIds: number;
+  maxTraces: number;
   maxDocsPerTrace: number;
 }) {
   const dataSources = await getObservabilityDataSources({ core, plugins, logger });
@@ -96,30 +111,33 @@ export async function getToolHandler({
   const startTime = parseDatemath(start);
   const endTime = parseDatemath(end, { roundUp: true });
 
-  const traceTimeWindows = await getTraceTimeWindows({
+  const traceIds = await getTraceIds({
     esClient,
     indices,
     startTime,
     endTime,
     kqlFilter,
     logger,
-    maxDocsPerTrace,
+    maxTraces,
   });
 
-  // For each trace time window, find the full distributed trace (transactions, spans, errors, and logs)
-  const traces = await Promise.all(
-    traceTimeWindows.map(async (traceTimeWindow) => {
-      return await fetchTraceDocuments({
-        esClient,
-        traceId: traceTimeWindow.traceId,
-        index: indices,
-        startTime: traceTimeWindow.start,
-        endTime: traceTimeWindow.end,
-        size: maxTraceIds,
-        fields,
-      });
-    })
-  );
+  if (traceIds.length === 0) {
+    return { traces: [] };
+  }
+  // For each trace.id, we want to fetch all documents with an extended time window to try capture the full trace (transactions, spans, errors, and logs)
+  const traceTimeWindow = {
+    start: moment(startTime).subtract(1, 'hour').valueOf(),
+    end: moment(endTime).add(1, 'hour').valueOf(),
+  };
+  const traces = await fetchTraceDocuments({
+    esClient,
+    traceIds,
+    index: indices,
+    startTime: traceTimeWindow.start,
+    endTime: traceTimeWindow.end,
+    size: maxDocsPerTrace,
+    fields,
+  });
 
   return { traces };
 }

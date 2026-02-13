@@ -1,9 +1,8 @@
 # get_traces
 
-Retrieves trace data (APM transactions/spans/errors) plus logs for one or more traces.
+Retrieves Observability documents (logs, transactions, spans, and errors) for one or more traces.
 
-This tool finds traces: documents grouped  by `trace.id` within a given time range and for a given kql filter. 
-
+This tool finds traces: documents grouped by `trace.id` within a given time range and for a given kql filter.
 
 ## Examples
 
@@ -20,8 +19,6 @@ POST kbn://api/agent_builder/tools/_execute
   }
 }
 ```
-
-Note: When `kqlFilter` targets a specific `trace.id`, the tool typically returns a single trace. If `kqlFilter` is broader (e.g. `service.name: ...`), it may discover multiple trace ids; you can control how many via `maxTraceIds`.
 
 ### Expand from a specific log document id
 
@@ -47,7 +44,7 @@ POST kbn://api/agent_builder/tools/_execute
     "start": "now-30m",
     "end": "now",
     "kqlFilter": "service.name: payment-service",
-    "maxTraceIds": 5
+    "maxTraces": 5
   }
 }
 ```

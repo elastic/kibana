@@ -7,10 +7,8 @@
 
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { TRACE_ID } from '@kbn/apm-types';
-import { getTypedSearch } from '../../../utils/get_typed_search';
-import { kqlFilter as buildKqlFilter, timeRangeFilter } from '../../../utils/dsl_filters';
-import type { TraceIdSample } from '../types';
-import type { TraceIdAggregations } from './types';
+import { getTypedSearch } from '../../utils/get_typed_search';
+import { kqlFilter as buildKqlFilter, timeRangeFilter } from '../../utils/dsl_filters';
 
 export async function getTraceIds({
   esClient,
@@ -19,7 +17,7 @@ export async function getTraceIds({
   endTime,
   kqlFilter,
   logger,
-  maxDocsPerTrace,
+  maxTraces,
 }: {
   esClient: IScopedClusterClient;
   indices: string[];
@@ -27,12 +25,12 @@ export async function getTraceIds({
   endTime: number;
   kqlFilter: string | undefined;
   logger: Logger;
-  maxDocsPerTrace: number;
-}): Promise<TraceIdSample[]> {
+  maxTraces: number;
+}): Promise<string[]> {
   const search = getTypedSearch(esClient.asCurrentUser);
 
   // `traceIdBucketSize` controls the number of unique `trace.id` values returned (terms `size`).
-  const traceIdBucketSize = Math.min(maxDocsPerTrace, 20);
+  const traceIdBucketSize = Math.min(maxTraces, 20);
   // `samplerShardSize` controls how many documents are considered per shard for the nested terms agg.
   const samplerShardSize = Math.max(200, traceIdBucketSize * 10);
   const searchRequest = {
@@ -66,15 +64,6 @@ export async function getTraceIds({
                 _key: 'desc' as const,
               },
             },
-            aggs: {
-              // Fetch a representative timestamp for each trace.id so we can build the +/- 1h window.
-              sample_doc: {
-                top_hits: {
-                  size: 1,
-                  _source: ['@timestamp'],
-                },
-              },
-            },
           },
         },
       },
@@ -82,20 +71,9 @@ export async function getTraceIds({
   };
 
   const response = await search(searchRequest);
-
-  const aggregations = response.aggregations as TraceIdAggregations | undefined;
+  const aggregations = response.aggregations;
   const buckets = aggregations?.sample?.trace_ids?.buckets ?? [];
-
-  const traceIdSamples: TraceIdSample[] = buckets.map((bucket) => {
-    const firstHit = bucket.sample_doc.hits.hits[0];
-
-    return {
-      timestamp: firstHit?._source?.['@timestamp'],
-      traceId: String(bucket.key),
-    };
-  });
-
-  logger.debug(`Found ${traceIdSamples.length} trace.id samples`);
-
-  return traceIdSamples;
+  const traceIds = buckets.map((bucket) => String(bucket.key));
+  logger.debug(`Found ${traceIds.length} trace.ids matching KQL filter`);
+  return traceIds;
 }
