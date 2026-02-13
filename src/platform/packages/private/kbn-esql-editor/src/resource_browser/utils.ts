@@ -8,17 +8,25 @@
  */
 
 import { Parser, isSource } from '@kbn/esql-language';
-import { IndicesBrowserOpenMode } from './open_mode';
+import type { monaco } from '@kbn/monaco';
+import type { CommandRange, SourceCommandContext, LocatedSourceItem } from './types';
+import { IndicesBrowserOpenMode } from './types';
+import { SUPPORTED_COMMANDS } from './constants';
 
-export interface CommandRange {
-  lineNumber: number; // 1-based, assumes the command is on a single line
-  startColumn: number; // 1-based
-  endColumn: number; // 1-based, inclusive
-}
-
-// Commands that should have a badge
-// Only FROM and TS commands support sources
-export const SUPPORTED_COMMANDS = ['from', 'ts'];
+export const getRangeFromOffsets = (
+  model: monaco.editor.ITextModel,
+  startOffset: number,
+  endOffset: number
+): monaco.IRange => {
+  const start = model.getPositionAt(startOffset);
+  const end = model.getPositionAt(endOffset);
+  return {
+    startLineNumber: start.lineNumber,
+    startColumn: start.column,
+    endLineNumber: end.lineNumber,
+    endColumn: end.column,
+  };
+};
 
 /**
  * Returns the first command in the query that matches one of the `supportedCommands`.
@@ -54,32 +62,6 @@ export const getSupportedCommand = (
     return undefined;
   }
 };
-
-export interface LocatedSourceItem {
-  min: number;
-  max: number;
-  type?: string;
-  name?: string;
-}
-
-export interface SourceCommandContext {
-  /** The main source command in the query, if present. */
-  command?: 'from' | 'ts';
-  /**
-   * `[start, end)` offsets of the *existing* source arguments for the main `FROM`/`TS` command.
-   * When there are no existing sources (e.g. `FROM |`), these are `undefined`.
-   */
-  sourcesStartOffset?: number;
-  sourcesEndOffset?: number;
-  /**
-   * Where a newly selected source should be inserted, as a 0-based offset into the query string.
-   *
-   * - If opened from the badge and there are existing sources, we insert at the beginning of the
-   *   sources list.
-   * - Otherwise, we insert at the cursor (when available).
-   */
-  insertionOffset?: number;
-}
 
 /**
  * Computes the source-command context for opening the indices browser.
@@ -125,6 +107,40 @@ export const getSourceCommandContextFromQuery = ({
     };
   } catch {
     return { insertionOffset: cursorOffset };
+  }
+};
+
+/**
+ * Returns the query text up to (but not including) the last pipe, so that a trailing
+ * command (e.g. `| KEEP`) is dropped and we can run the query to get columns from the
+ * previous pipeline. Uses the ESQL parser to find the last command boundary.
+ *
+ * Examples:
+ * - "FROM a | STATS AVG(bytes) | KEEP" → "FROM a | STATS AVG(bytes)"
+ * - "FROM kibana_sample_data_logs | KEEP" → "FROM kibana_sample_data_logs"
+ * - "FROM a | STATS count(*)" → "FROM a"
+ * - "FROM a" → "FROM a"
+ */
+export const getQueryWithoutLastPipe = (queryText: string): string => {
+  const trimmed = queryText.trim();
+  if (!trimmed) return trimmed;
+  try {
+    const { root } = Parser.parse(trimmed, { withFormatting: true });
+    const commands = root.commands;
+    // Drop the last command whenever there is at least one pipe (2+ commands).
+    if (commands.length > 1) {
+      const lastCmd = commands[commands.length - 1];
+      const endOffset = lastCmd.location?.min ?? trimmed.length;
+      let result = trimmed.slice(0, endOffset).trimEnd();
+      // Parser min is the start of the last command; slice leaves the preceding "|". Remove it.
+      if (result.endsWith('|')) {
+        result = result.slice(0, -1).trimEnd();
+      }
+      return result;
+    }
+    return trimmed;
+  } catch {
+    return trimmed;
   }
 };
 
