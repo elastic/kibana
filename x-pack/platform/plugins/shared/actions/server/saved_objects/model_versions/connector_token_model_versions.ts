@@ -52,7 +52,13 @@ export const getConnectorTokenModelVersions = (
   },
   '2': encryptedSavedObjects.createModelVersion({
     modelVersion: {
-      changes: [],
+      changes: [
+        {
+          // no-op backfill to trigger the re-encryption
+          type: 'data_backfill',
+          backfillFn: (doc) => doc,
+        },
+      ],
       schemas: {
         forwardCompatibility: rawConnectorTokenSchemaV2.extends({}, { unknowns: 'ignore' }),
         create: rawConnectorTokenSchemaV2,
