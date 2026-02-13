@@ -390,11 +390,13 @@ export function InternalDashboardTopNav({
       <AppMenu
         setAppMenu={coreServices.chrome.setAppMenu}
         config={
-          visibilityProps.showTopNavMenu
-            ? viewMode === 'edit'
-              ? editModeTopNavConfig
-              : viewModeTopNavConfig
-            : undefined
+          // App menu (middle bar below global header) is optional; when no items are passed it won't show.
+          // visibilityProps.showTopNavMenu
+          //   ? viewMode === 'edit'
+          //     ? editModeTopNavConfig
+          //     : viewModeTopNavConfig
+          //   : undefined
+          undefined
         }
       />
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
