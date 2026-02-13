@@ -16,6 +16,7 @@ interface LifecycleBarProps {
   gridTemplateColumns: string;
   phaseColumnSpans: number[];
   onPhaseClick?: (phase: LifecyclePhase, index: number) => void;
+  testSubjPrefix?: string;
   isIlm?: boolean;
   onRemovePhase?: (phaseName: string) => void;
   canManageLifecycle: boolean;
@@ -27,7 +28,8 @@ const renderLifecyclePhase = (
   onPhaseClick?: (phase: LifecyclePhase, index: number) => void,
   isIlm?: boolean,
   onRemovePhase?: (phaseName: string) => void,
-  canManageLifecycle?: boolean
+  canManageLifecycle?: boolean,
+  testSubjPrefix?: string
 ) => {
   const commonProps = {
     description: phase.description,
@@ -40,6 +42,7 @@ const renderLifecyclePhase = (
     },
     isIlm,
     minAge: phase.min_age,
+    testSubjPrefix,
     onRemovePhase,
     canManageLifecycle: canManageLifecycle ?? false,
   };
@@ -63,6 +66,7 @@ export const LifecycleBar = ({
   gridTemplateColumns,
   phaseColumnSpans,
   onPhaseClick,
+  testSubjPrefix,
   isIlm,
   onRemovePhase,
   canManageLifecycle,
@@ -117,7 +121,8 @@ export const LifecycleBar = ({
                 onPhaseClick,
                 isIlm,
                 onRemovePhase,
-                canManageLifecycle
+                canManageLifecycle,
+                testSubjPrefix
               )}
             </EuiFlexItem>
           ))}

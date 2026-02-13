@@ -45,4 +45,8 @@ export const RuleExecutionEvent = z.object({
   type: RuleExecutionEventType,
   execution_id: z.string().min(1),
   message: z.string(),
+  /**
+   * Event details. The details vary per event type.
+   */
+  details: z.object({}).catchall(z.unknown()).optional(),
 });

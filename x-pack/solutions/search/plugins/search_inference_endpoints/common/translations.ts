@@ -47,51 +47,6 @@ export const ADD_ENDPOINT_LABEL = i18n.translate(
   }
 );
 
-export const ERROR_TITLE = i18n.translate('xpack.searchInferenceEndpoints.inferenceId.errorTitle', {
-  defaultMessage: 'Error adding inference endpoint',
-});
-
-export const UNABLE_TO_CREATE_INFERENCE_ENDPOINT = i18n.translate(
-  'xpack.searchInferenceEndpoints.inferenceFlyoutWrapperComponent.unableTocreateInferenceEndpointError',
-  {
-    defaultMessage: 'Unable to create an inference endpoint.',
-  }
-);
-
-export const INFERENCE_ENDPOINT_ALREADY_EXISTS = i18n.translate(
-  'xpack.searchInferenceEndpoints.inferenceFlyoutWrapperComponent.inferenceEndpointAlreadyExistsError',
-  {
-    defaultMessage: 'Inference endpoint id already exists',
-  }
-);
-
-export const FORBIDDEN_TO_ACCESS_TRAINED_MODELS = i18n.translate(
-  'xpack.searchInferenceEndpoints.inferenceFlyoutWrapperComponent.forbiddenToAccessTrainedModelsError',
-  {
-    defaultMessage: 'Forbidden to access trained models',
-  }
-);
-
-export const ENDPOINT_ADDED_SUCCESS = i18n.translate(
-  'xpack.searchInferenceEndpoints.actions.endpointAddedSuccess',
-  {
-    defaultMessage: 'Endpoint added',
-  }
-);
-
-export const ENDPOINT_CREATION_FAILED = i18n.translate(
-  'xpack.searchInferenceEndpoints.actions.endpointAddedFailure',
-  {
-    defaultMessage: 'Endpoint creation failed',
-  }
-);
-
-export const ENDPOINT_ADDED_SUCCESS_DESCRIPTION = (endpointId: string) =>
-  i18n.translate('xpack.searchInferenceEndpoints.actions.endpointAddedSuccessDescription', {
-    defaultMessage: 'The inference endpoint "{endpointId}" was added.',
-    values: { endpointId },
-  });
-
 export const ENDPOINT = i18n.translate('xpack.searchInferenceEndpoints.endpoint', {
   defaultMessage: 'Endpoint',
 });
@@ -107,13 +62,6 @@ export const SERVICE_PROVIDER = i18n.translate('xpack.searchInferenceEndpoints.s
 export const TASK_TYPE = i18n.translate('xpack.searchInferenceEndpoints.taskType', {
   defaultMessage: 'Type',
 });
-
-export const TRAINED_MODELS_STAT_GATHER_FAILED = i18n.translate(
-  'xpack.searchInferenceEndpoints.actions.trainedModelsStatGatherFailed',
-  {
-    defaultMessage: 'Failed to retrieve trained model statistics',
-  }
-);
 
 export const BREADCRUMB_RELEVANCE = i18n.translate(
   'xpack.searchInferenceEndpoints.breadcrumbs.relevance',
