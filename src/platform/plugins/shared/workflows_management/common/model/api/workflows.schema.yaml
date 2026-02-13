@@ -1,0 +1,520 @@
+openapi: 3.0.3
+info:
+  title: Workflows Management API
+  version: '1'
+paths:
+  /api/workflows/stats:
+    get:
+      summary: Get workflow statistics
+      operationId: GetWorkflowStats
+      x-codegen-enabled: true
+      description: Retrieves workflow statistics for the current space
+      tags:
+        - Workflows
+      responses:
+        200:
+          description: Workflow stats returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
+  /api/workflows/aggs:
+    get:
+      summary: Get workflow aggregations
+      operationId: GetWorkflowAggs
+      x-codegen-enabled: true
+      description: Retrieves aggregations for workflow fields
+      tags:
+        - Workflows
+      parameters:
+        - name: fields
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+            maxItems: 25
+      responses:
+        200:
+          description: Aggregations returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
+  /api/workflows/{id}:
+    get:
+      summary: Get workflow by ID
+      operationId: GetWorkflowById
+      x-codegen-enabled: true
+      description: Retrieves a single workflow by id
+      tags:
+        - Workflows
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Workflow returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        404:
+          description: Workflow not found
+    put:
+      summary: Update workflow
+      operationId: PutUpdateWorkflow
+      x-codegen-enabled: true
+      description: Updates an existing workflow
+      tags:
+        - Workflows
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        200:
+          description: Workflow updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        404:
+          description: Workflow not found
+    delete:
+      summary: Delete workflow by ID
+      operationId: DeleteWorkflowById
+      x-codegen-enabled: true
+      description: Deletes a workflow by id
+      tags:
+        - Workflows
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Workflow deleted successfully
+        404:
+          description: Workflow not found
+
+  /api/workflows:
+    get:
+      summary: List or search workflows
+      operationId: GetListWorkflows
+      x-codegen-enabled: true
+      description: Lists workflows with optional filters and pagination (query params)
+      tags:
+        - Workflows
+      parameters:
+        - name: size
+          in: query
+          schema:
+            type: number
+        - name: page
+          in: query
+          schema:
+            type: number
+        - name: enabled
+          in: query
+          schema:
+            type: array
+            items:
+              type: boolean
+        - name: createdBy
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: tags
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: query
+          in: query
+          schema:
+            type: string
+      responses:
+        200:
+          description: Workflow list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items: {}
+                  total:
+                    type: number
+    post:
+      summary: Create workflow
+      operationId: PostCreateWorkflow
+      x-codegen-enabled: true
+      description: Creates a new workflow
+      tags:
+        - Workflows
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                yaml:
+                  type: string
+      responses:
+        200:
+          description: Workflow created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+    delete:
+      summary: Bulk delete workflows
+      operationId: DeleteWorkflowsBulk
+      x-codegen-enabled: true
+      description: Deletes multiple workflows by ids
+      tags:
+        - Workflows
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ids
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+                  maxItems: 1000
+      responses:
+        200:
+          description: Bulk delete result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: number
+                  deleted:
+                    type: number
+                  failures:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        error:
+                          type: string
+
+  /api/workflows/search:
+    post:
+      summary: Search workflows
+      operationId: PostSearchWorkflows
+      x-codegen-enabled: true
+      description: Searches workflows with filters and pagination
+      tags:
+        - Workflows
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                size:
+                  type: number
+                page:
+                  type: number
+                enabled:
+                  type: array
+                  items:
+                    type: boolean
+                createdBy:
+                  type: array
+                  items:
+                    type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+                query:
+                  type: string
+      responses:
+        200:
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                  total:
+                    type: number
+
+  /api/workflows/connectors:
+    get:
+      summary: Get available connectors
+      operationId: GetConnectors
+      x-codegen-enabled: true
+      x-internal: true
+      description: Returns available connector types for workflows
+      tags:
+        - Workflows
+      responses:
+        200:
+          description: Connectors returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  connectorTypes:
+                    type: object
+                    additionalProperties: true
+                  totalConnectors:
+                    type: number
+
+  /api/workflows/workflow-json-schema:
+    get:
+      summary: Get workflow JSON schema
+      operationId: GetWorkflowJsonSchema
+      x-codegen-enabled: true
+      description: Returns the JSON schema for workflow definition validation
+      tags:
+        - Workflows
+      parameters:
+        - name: loose
+          in: query
+          required: true
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: JSON schema returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        500:
+          description: Error generating schema
+
+  /api/workflows/_bulk_create:
+    post:
+      summary: Bulk create workflows
+      operationId: PostBulkCreateWorkflows
+      x-codegen-enabled: true
+      description: Creates multiple workflows
+      tags:
+        - Workflows
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - workflows
+              properties:
+                workflows:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      yaml:
+                        type: string
+      responses:
+        200:
+          description: Bulk create result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  created:
+                    type: array
+                    items:
+                      type: object
+                  failed:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        index:
+                          type: number
+                        error:
+                          type: string
+
+  /api/workflows/{id}/run:
+    post:
+      summary: Run workflow
+      operationId: PostRunWorkflow
+      x-codegen-enabled: true
+      description: Executes a workflow
+      tags:
+        - Workflows
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - inputs
+              properties:
+                inputs:
+                  type: object
+                  additionalProperties: true
+      responses:
+        200:
+          description: Execution started
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - workflowExecutionId
+                properties:
+                  workflowExecutionId:
+                    type: string
+        404:
+          description: Workflow not found
+        400:
+          description: Workflow not valid or disabled
+
+  /api/workflows/{id}/clone:
+    post:
+      summary: Clone workflow
+      operationId: PostCloneWorkflow
+      x-codegen-enabled: true
+      description: Clones an existing workflow
+      tags:
+        - Workflows
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Cloned workflow returned
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        404:
+          description: Workflow not found
+
+  /api/workflows/test:
+    post:
+      summary: Test workflow
+      operationId: PostTestWorkflow
+      x-codegen-enabled: true
+      description: Runs a workflow in test mode
+      tags:
+        - Workflows
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - inputs
+              properties:
+                workflowId:
+                  type: string
+                workflowYaml:
+                  type: string
+                inputs:
+                  type: object
+                  additionalProperties: true
+      responses:
+        200:
+          description: Test execution started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  workflowExecutionId:
+                    type: string
+
+  /api/workflows/testStep:
+    post:
+      summary: Test workflow step
+      operationId: PostTestStep
+      x-codegen-enabled: true
+      description: Runs a single workflow step in test mode
+      tags:
+        - Workflows
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - stepId
+                - contextOverride
+                - workflowYaml
+              properties:
+                stepId:
+                  type: string
+                contextOverride:
+                  type: object
+                  additionalProperties: true
+                workflowYaml:
+                  type: string
+      responses:
+        200:
+          description: Step test execution started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  workflowExecutionId:
+                    type: string

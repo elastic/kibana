@@ -18,6 +18,7 @@ jest.mock('../../../hooks/use_async_thunk');
 const mockUseAsyncThunkState = useAsyncThunkState as jest.MockedFunction<typeof useAsyncThunkState>;
 
 describe('useWorkflowExecutionPolling', () => {
+  const mockWorkflowId = 'test-workflow-id';
   const mockWorkflowExecutionId = 'test-execution-id';
   let mockLoadExecution: jest.Mock;
   let hookResult: any;
@@ -111,7 +112,9 @@ describe('useWorkflowExecutionPolling', () => {
     const mockError = new Error('Test error');
     setupMock(mockWorkflowExecution, false, mockError);
 
-    hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+    hookResult = renderHook(() =>
+      useWorkflowExecutionPolling(mockWorkflowExecutionId)
+    );
     const { result } = hookResult;
 
     expect(result.current.workflowExecution).toBe(mockWorkflowExecution);
@@ -123,7 +126,9 @@ describe('useWorkflowExecutionPolling', () => {
     const mockWorkflowExecution = createMockWorkflowExecution(ExecutionStatus.RUNNING);
     setupMock(mockWorkflowExecution);
 
-    hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+    hookResult = renderHook(() =>
+      useWorkflowExecutionPolling(mockWorkflowExecutionId)
+    );
 
     // timer(0, PollingIntervalMs) emits immediately (0ms) then every PollingIntervalMs
     // So we need to advance timers to let the immediate emission happen
@@ -131,13 +136,17 @@ describe('useWorkflowExecutionPolling', () => {
       jest.advanceTimersByTime(0);
     });
     expect(mockLoadExecution).toHaveBeenCalledTimes(1);
-    expect(mockLoadExecution).toHaveBeenCalledWith({ id: mockWorkflowExecutionId });
+    expect(mockLoadExecution).toHaveBeenCalledWith({
+      id: mockWorkflowExecutionId,
+    });
   });
 
   it('should not start polling when workflow execution data is not available', () => {
     setupMock(undefined, true);
 
-    hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+    hookResult = renderHook(() =>
+      useWorkflowExecutionPolling(mockWorkflowExecutionId)
+    );
 
     // Fast forward time to check if polling would occur
     act(() => {
@@ -162,7 +171,9 @@ describe('useWorkflowExecutionPolling', () => {
         const mockWorkflowExecution = createMockWorkflowExecution(status);
         setupMock(mockWorkflowExecution);
 
-        hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+        hookResult = renderHook(() =>
+          useWorkflowExecutionPolling(mockWorkflowExecutionId)
+        );
 
         // timer(0, PollingIntervalMs) emits immediately (0ms) then every PollingIntervalMs
         act(() => {
@@ -198,7 +209,9 @@ describe('useWorkflowExecutionPolling', () => {
         const initialWorkflowExecution = createMockWorkflowExecution(ExecutionStatus.RUNNING);
         setupMock(initialWorkflowExecution);
 
-        hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+        hookResult = renderHook(() =>
+          useWorkflowExecutionPolling(mockWorkflowExecutionId)
+        );
         const { rerender } = hookResult;
 
         // Verify polling starts
@@ -235,7 +248,9 @@ describe('useWorkflowExecutionPolling', () => {
         const mockWorkflowExecution = createMockWorkflowExecution(status);
         setupMock(mockWorkflowExecution);
 
-        hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+        hookResult = renderHook(() =>
+          useWorkflowExecutionPolling(mockWorkflowExecutionId)
+        );
 
         // When status is terminal from the start, the stop signal is sent immediately
         // which stops polling before the timer can emit. So we don't expect it to be called.
@@ -260,7 +275,9 @@ describe('useWorkflowExecutionPolling', () => {
     const mockWorkflowExecution = createMockWorkflowExecution(ExecutionStatus.RUNNING);
     setupMock(mockWorkflowExecution);
 
-    hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+    hookResult = renderHook(() =>
+      useWorkflowExecutionPolling(mockWorkflowExecutionId)
+    );
     const { unmount } = hookResult;
 
     // Verify polling starts
@@ -294,7 +311,9 @@ describe('useWorkflowExecutionPolling', () => {
     // Start with no data
     setupMock(undefined, true, null, true);
 
-    hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+    hookResult = renderHook(() =>
+      useWorkflowExecutionPolling(mockWorkflowExecutionId)
+    );
     const { rerender } = hookResult;
 
     // Polling still starts immediately
@@ -334,7 +353,9 @@ describe('useWorkflowExecutionPolling', () => {
     const runningExecution = createMockWorkflowExecution(ExecutionStatus.RUNNING);
     setupMock(runningExecution, false, null, true);
 
-    hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+    hookResult = renderHook(() =>
+      useWorkflowExecutionPolling(mockWorkflowExecutionId)
+    );
     const { rerender } = hookResult;
 
     // Verify initial polling starts
@@ -392,7 +413,9 @@ describe('useWorkflowExecutionPolling', () => {
     const mockWorkflowExecution = createMockWorkflowExecution(ExecutionStatus.COMPLETED);
     setupMock(mockWorkflowExecution);
 
-    hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+    hookResult = renderHook(() =>
+      useWorkflowExecutionPolling(mockWorkflowExecutionId)
+    );
     const { result } = hookResult;
 
     // Wait for effects to run

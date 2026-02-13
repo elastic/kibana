@@ -9,6 +9,7 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
+import { WORKFLOWS_API_PATHS } from '../../../../../../common/api/constants';
 import { addDynamicConnectorsToCache, getWorkflowZodSchema } from '../../../../../../common/schema';
 import type { WorkflowsServices } from '../../../../../types';
 import type { ConnectorsResponse } from '../../../../connectors/model/types';
@@ -30,7 +31,7 @@ export const loadConnectorsThunk = createAsyncThunk<
     const lastConnectorTypes = state.detail.connectors?.connectorTypes;
     try {
       // Not caching to avoid missing newly created connectors. We can think of caching if this becomes a bottleneck.
-      const response = await http.get<ConnectorsResponse>('/api/workflows/connectors');
+      const response = await http.get<ConnectorsResponse>(WORKFLOWS_API_PATHS.CONNECTORS);
       dispatch(setConnectors(response)); // Set connectors response first
 
       const currentConnectorTypes = response.connectorTypes;

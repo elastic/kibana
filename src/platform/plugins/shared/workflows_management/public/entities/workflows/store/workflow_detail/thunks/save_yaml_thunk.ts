@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { WorkflowDetailDto } from '@kbn/workflows/types/latest';
 import { loadWorkflowThunk } from './load_workflow_thunk';
 import { PLUGIN_ID } from '../../../../../../common';
+import { getWorkflowPath, WORKFLOWS_API_PATHS } from '../../../../../../common/api/constants';
 import { WorkflowsBaseTelemetry } from '../../../../../common/service/telemetry';
 import { queryClient } from '../../../../../shared/lib/query_client';
 import type { WorkflowsServices } from '../../../../../types';
@@ -60,7 +61,7 @@ export const saveYamlThunk = createAsyncThunk<
 
       if (id) {
         // Update the workflow in the API if the id is provided
-        await http.put<void>(`/api/workflows/${id}`, {
+        await http.put<void>(getWorkflowPath(id), {
           body: JSON.stringify({ yaml: yamlString }),
         });
 
@@ -85,9 +86,12 @@ export const saveYamlThunk = createAsyncThunk<
         await dispatch(loadWorkflowThunk({ id }));
       } else {
         // Create the workflow in the API if the id is not provided
-        const workflow: WorkflowDetailDto = await http.post<WorkflowDetailDto>('/api/workflows', {
-          body: JSON.stringify({ yaml: yamlString }),
-        });
+        const workflow: WorkflowDetailDto = await http.post<WorkflowDetailDto>(
+          WORKFLOWS_API_PATHS.CREATE,
+          {
+            body: JSON.stringify({ yaml: yamlString }),
+          }
+        );
 
         // Report telemetry for workflow creation
         // Use workflow.definition from the created workflow if available, otherwise fall back to workflowDefinition from state

@@ -9,6 +9,7 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
+import { getWorkflowRunPath } from '../../../../../../common/api/constants';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
 import { selectWorkflow } from '../selectors';
@@ -38,7 +39,7 @@ export const runWorkflowThunk = createAsyncThunk<
       }
 
       // Make the API call to run the workflow
-      const response = await http.post<RunWorkflowResponse>(`/api/workflows/${workflow.id}/run`, {
+      const response = await http.post<RunWorkflowResponse>(getWorkflowRunPath(workflow.id), {
         body: JSON.stringify({
           inputs,
         }),

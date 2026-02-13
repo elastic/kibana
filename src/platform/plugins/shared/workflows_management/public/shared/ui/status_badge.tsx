@@ -125,6 +125,7 @@ export const getExecutionStatusIcon = (euiTheme: EuiThemeComputed, status: Execu
     <EuiIcon
       type={ExecutionStatusIconTypeMap[status]}
       color={getExecutionStatusColors(euiTheme, status).color}
+      aria-hidden={true}
     />
   );
 };

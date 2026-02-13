@@ -12,17 +12,18 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getExecutionCancelPath } from '../../../../common/api/constants';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 
 interface CancelExecutionButtonProps {
+  workflowId: string;
   executionId: string;
-  workflowId?: string;
   startedAt?: string;
 }
 
 export const CancelExecutionButton: React.FC<CancelExecutionButtonProps> = ({
-  executionId,
   workflowId,
+  executionId,
   startedAt,
 }) => {
   const { application, http, notifications } = useKibana().services;
@@ -34,7 +35,7 @@ export const CancelExecutionButton: React.FC<CancelExecutionButtonProps> = ({
     const timeToCancellation = startedAt ? Date.now() - new Date(startedAt).getTime() : undefined;
 
     try {
-      await http?.post(`/api/workflowExecutions/${executionId}/cancel`);
+      await http?.post(getExecutionCancelPath(executionId));
       notifications?.toasts.addSuccess({
         title: i18n.translate(
           'workflowsManagement.executionDetail.cancelButton.successNotificationTitle',

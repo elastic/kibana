@@ -10,15 +10,20 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import { getStepExecutionByIdPath } from '../../../../common/api/constants';
 
-export function useStepExecution(workflowExecutionId: string, stepExecutionId: string) {
+export function useStepExecution(
+  _workflowId: string,
+  workflowExecutionId: string,
+  stepExecutionId: string
+) {
   const { http } = useKibana().services;
 
   return useQuery({
     queryKey: ['stepExecution', workflowExecutionId, stepExecutionId],
     queryFn: async () => {
       const response = await http?.get<EsWorkflowStepExecution>(
-        `/api/workflowExecutions/${workflowExecutionId}/steps/${stepExecutionId}`
+        getStepExecutionByIdPath(workflowExecutionId, stepExecutionId)
       );
       return response;
     },

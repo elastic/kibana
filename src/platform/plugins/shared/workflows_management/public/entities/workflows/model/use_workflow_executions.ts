@@ -10,13 +10,14 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useInfiniteQuery, type UseInfiniteQueryOptions } from '@kbn/react-query';
 import type { ExecutionStatus, ExecutionType, WorkflowExecutionListDto } from '@kbn/workflows';
+import { getWorkflowExecutionsListPath } from '../../../../common/api/constants';
 import { useKibana } from '../../../hooks/use_kibana';
 
 const DEFAULT_PAGE_SIZE = 100;
 const MAX_RETRIES = 3;
 
 interface UseWorkflowExecutionsParams {
-  workflowId: string | null;
+  workflowId: string;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
@@ -41,9 +42,8 @@ export function useWorkflowExecutions(
 
   const queryFn = useCallback(
     async ({ pageParam = 1 }: { pageParam?: number }) => {
-      return http.get<WorkflowExecutionListDto>(`/api/workflowExecutions`, {
+      return http.get<WorkflowExecutionListDto>(getWorkflowExecutionsListPath(params.workflowId), {
         query: {
-          workflowId: params.workflowId,
           statuses: params.statuses,
           executionTypes: params.executionTypes,
           ...(params.executedBy && params.executedBy.length > 0
@@ -84,9 +84,8 @@ export function useWorkflowExecutions(
     isLoading: isInitialLoading,
     refetch,
     error,
-  } = useInfiniteQuery({
-    networkMode: 'always',
-    queryKey: [
+  } = useInfiniteQuery(
+    [
       'workflows',
       params.workflowId,
       'executions',

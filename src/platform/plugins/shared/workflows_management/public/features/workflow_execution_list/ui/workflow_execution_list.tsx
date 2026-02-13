@@ -98,7 +98,7 @@ export const WorkflowExecutionList = ({
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
         css={styles.container}
-        icon={<EuiIcon type="error" size="l" />}
+        icon={<EuiIcon type="error" size="l" aria-hidden={true} />}
         title={
           <h2>
             <FormattedMessage
@@ -115,7 +115,7 @@ export const WorkflowExecutionList = ({
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
         css={styles.container}
-        icon={<EuiIcon type="play" size="l" />}
+        icon={<EuiIcon type="play" size="l" aria-hidden={true} />}
         title={
           <h2>
             <FormattedMessage

@@ -89,9 +89,9 @@ export const getWorkflowsApiService = (kbnClient: KbnClient): WorkflowsApiServic
 
     deleteAll: async (spaceId: string): Promise<void> => {
       const response = await kbnClient.request<{ results?: Array<{ id: string }> }>({
-        method: 'POST',
-        path: `/s/${spaceId}/api/workflows/search`,
-        body: { size: 10000, page: 1 },
+        method: 'GET',
+        path: `/s/${spaceId}/api/workflows`,
+        query: { size: 10000, page: 1 },
       });
 
       const workflowIds = response.data.results?.map((w) => w.id) || [];

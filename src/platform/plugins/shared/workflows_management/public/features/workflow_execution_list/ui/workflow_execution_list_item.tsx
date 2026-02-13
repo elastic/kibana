@@ -157,7 +157,7 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
                     wrap={false}
                   >
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="clock" color="subdued" />
+                      <EuiIcon type="clock" color="subdued" aria-hidden={true} />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs" color="subdued">
