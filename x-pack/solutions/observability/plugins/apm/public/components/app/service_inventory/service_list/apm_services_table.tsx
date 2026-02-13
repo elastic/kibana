@@ -14,6 +14,7 @@ import {
   EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { apmEnableServiceInventoryTableSearchBar } from '@kbn/observability-plugin/common';
@@ -61,6 +62,7 @@ import { ManagedTable } from '../../../shared/managed_table';
 import { ColumnHeaderWithTooltip } from './column_header_with_tooltip';
 import { HealthBadge } from './health_badge';
 import { SloStatusBadge } from '../../../shared/slo_status_badge';
+import { getESQLQuery, type IndexType } from '../../../shared/links/discover_links/get_esql_query';
 import { useServiceActions } from './service_actions';
 import {
   APM_SLO_INDICATOR_TYPES,
@@ -376,7 +378,8 @@ export function ApmServicesTable({
   onChangeItemIndices,
 }: Props) {
   const breakpoints = useBreakpoints();
-  const { core } = useApmPluginContext();
+  const { core, share } = useApmPluginContext();
+  const discoverLocator = share.url.locators.get(DISCOVER_APP_LOCATOR);
   const { slo, apmSourcesAccess } = useKibana<ApmPluginStartDeps>().services;
   const { link } = useApmRouter();
   const showTransactionTypeColumn = items.some(
@@ -526,21 +529,40 @@ export function ApmServicesTable({
     };
   }, [isTableSearchBarEnabled, maxCountExceeded, onChangeSearchQuery]);
 
-  const discoverActionParams = useMemo(
-    () => ({
+  const getDiscoverHref = useCallback(
+    (item: ServiceListItem, indexType: IndexType) => {
+      const esqlQuery = getESQLQuery({
+        indexType,
+        params: {
+          kuery,
+          serviceName: item.serviceName,
+          transactionType: item.transactionType,
+          environment,
+        },
+        indexSettings: indexSettingsData.apmIndexSettings,
+      });
+
+      if (!esqlQuery) return undefined;
+
+      return discoverLocator?.getRedirectUrl({
+        timeRange: { from: query.rangeFrom, to: query.rangeTo },
+        query: { esql: esqlQuery },
+      });
+    },
+    [
       kuery,
-      rangeFrom: query.rangeFrom,
-      rangeTo: query.rangeTo,
       environment,
-      indexSettings: indexSettingsData.apmIndexSettings,
-    }),
-    [kuery, query.rangeFrom, query.rangeTo, environment, indexSettingsData.apmIndexSettings]
+      indexSettingsData.apmIndexSettings,
+      query.rangeFrom,
+      query.rangeTo,
+      discoverLocator,
+    ]
   );
 
   const { actions: serviceActions, showActionsColumn } = useServiceActions({
     openAlertFlyout,
     openSloFlyout,
-    discoverActionParams,
+    getDiscoverHref,
   });
 
   return (

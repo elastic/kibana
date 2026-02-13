@@ -5,32 +5,22 @@
  * 2.0.
  */
 
-import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { sloListLocatorID, type SloListLocatorParams } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import type { ApmIndexSettingsResponse } from '@kbn/apm-sources-access-plugin/server/routes/settings';
 import { useMemo } from 'react';
 import type { ServiceListItem } from '../../../../../common/service_inventory';
 import type { ApmIndicatorType } from '../../../../../common/slo_indicator_types';
 import { APM_SLO_INDICATOR_TYPES } from '../../../../../common/slo_indicator_types';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
-import { getESQLQuery } from '../../../shared/links/discover_links/get_esql_query';
 import type { TableActions } from '../../../shared/managed_table';
-
-export interface DiscoverActionParams {
-  kuery: string;
-  rangeFrom: string;
-  rangeTo: string;
-  environment: string;
-  indexSettings: ApmIndexSettingsResponse['apmIndexSettings'];
-}
+import type { IndexType } from '../../../shared/links/discover_links/get_esql_query';
 
 interface UseServiceActionsParams {
   openAlertFlyout: (ruleType: ApmRuleType, serviceName: string) => void;
   openSloFlyout: (indicatorType: ApmIndicatorType, serviceName: string) => void;
-  discoverActionParams: DiscoverActionParams;
+  getDiscoverHref: (item: ServiceListItem, indexType: IndexType) => string | undefined;
 }
 
 interface UseServiceActionsReturn {
@@ -41,12 +31,11 @@ interface UseServiceActionsReturn {
 export function useServiceActions({
   openAlertFlyout,
   openSloFlyout,
-  discoverActionParams,
+  getDiscoverHref,
 }: UseServiceActionsParams): UseServiceActionsReturn {
   const { core, plugins, share } = useApmPluginContext();
   const { capabilities } = core.application;
   const sloListLocator = share.url.locators.get<SloListLocatorParams>(sloListLocatorID);
-  const discoverLocator = share.url.locators.get(DISCOVER_APP_LOCATOR);
 
   const { canSaveAlerts } = getAlertingCapabilities(plugins, capabilities);
   const canSaveApmAlerts = !!(capabilities.apm.save && canSaveAlerts);
@@ -64,50 +53,14 @@ export function useServiceActions({
           name: i18n.translate('xpack.apm.servicesTable.actions.openTracesInDiscover', {
             defaultMessage: 'Open traces in Discover',
           }),
-          href: (item) => {
-            const esqlQuery = getESQLQuery({
-              indexType: 'traces',
-              params: {
-                kuery: discoverActionParams.kuery,
-                serviceName: item.serviceName,
-                transactionType: item.transactionType,
-                environment: discoverActionParams.environment,
-              },
-              indexSettings: discoverActionParams.indexSettings,
-            });
-
-            if (!esqlQuery) return undefined;
-
-            return discoverLocator?.getRedirectUrl({
-              timeRange: { from: discoverActionParams.rangeFrom, to: discoverActionParams.rangeTo },
-              query: { esql: esqlQuery },
-            });
-          },
+          href: (item) => getDiscoverHref(item, 'traces'),
         },
         {
           id: 'servicesTable-openLogsInDiscover',
           name: i18n.translate('xpack.apm.servicesTable.actions.openLogsInDiscover', {
             defaultMessage: 'Open logs in Discover',
           }),
-          href: (item) => {
-            const esqlQuery = getESQLQuery({
-              indexType: 'error',
-              params: {
-                kuery: discoverActionParams.kuery,
-                serviceName: item.serviceName,
-                transactionType: item.transactionType,
-                environment: discoverActionParams.environment,
-              },
-              indexSettings: discoverActionParams.indexSettings,
-            });
-
-            if (!esqlQuery) return undefined;
-
-            return discoverLocator?.getRedirectUrl({
-              timeRange: { from: discoverActionParams.rangeFrom, to: discoverActionParams.rangeTo },
-              query: { esql: esqlQuery },
-            });
-          },
+          href: (item) => getDiscoverHref(item, 'error'),
         },
       ],
     });
@@ -249,8 +202,7 @@ export function useServiceActions({
     canSaveApmAlerts,
     canWriteSlos,
     sloListLocator,
-    discoverLocator,
-    discoverActionParams,
+    getDiscoverHref,
   ]);
 
   return { actions, showActionsColumn };
