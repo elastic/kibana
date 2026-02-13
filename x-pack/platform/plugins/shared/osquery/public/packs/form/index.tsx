@@ -122,6 +122,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   const {
     handleSubmit,
     watch,
+    trigger,
     formState: { isSubmitting },
   } = hooksForm;
   const { policy_ids: policyIds, shards } = watch();
@@ -199,7 +200,12 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     [policyIds, agentPoliciesById]
   );
 
-  const handleSaveClick = useCallback(() => {
+  const handleSaveClick = useCallback(async () => {
+    const isValid = await trigger();
+    if (!isValid) {
+      return;
+    }
+
     if (agentCount) {
       setShowConfirmationModal(true);
 
@@ -207,11 +213,11 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     }
 
     handleSubmitForm();
-  }, [agentCount, handleSubmitForm]);
+  }, [agentCount, handleSubmitForm, trigger]);
 
-  const handleConfirmConfirmationClick = useCallback(() => {
-    handleSubmitForm();
+  const handleConfirmConfirmationClick = useCallback(async () => {
     setShowConfirmationModal(false);
+    await handleSubmitForm();
   }, [handleSubmitForm]);
 
   const euiFieldProps = useMemo(() => ({ isDisabled: isReadOnly }), [isReadOnly]);
