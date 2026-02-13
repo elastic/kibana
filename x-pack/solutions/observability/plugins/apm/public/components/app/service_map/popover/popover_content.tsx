@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle, EuiIconTip } from '@elastic/eui';
 import type { MouseEvent, ComponentType } from 'react';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { enableDiagnosticMode } from '@kbn/observability-plugin/common';
 import type { Environment } from '../../../../../common/environment_rt';
@@ -28,7 +28,7 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 
 export type ServiceMapSelection = ServiceMapNode | ServiceMapEdge;
 
-function isEdge(selection: ServiceMapSelection): selection is ServiceMapEdge {
+export function isEdge(selection: ServiceMapSelection): selection is ServiceMapEdge {
   return 'source' in selection && 'target' in selection;
 }
 
@@ -47,6 +47,8 @@ export interface ContentsProps {
   onDiagnoseClick?: () => void;
 }
 
+const ServiceContentsWithDiagnose = withDiagnoseButton(ServiceContents);
+
 /**
  * Returns the content component for the given selection (node or edge).
  */
@@ -62,7 +64,7 @@ export function getContentsComponent(
     return ExternalsListContents;
   }
   if (isServiceNodeData(data)) {
-    return isDiagnosticModeEnabled ? withDiagnoseButton(ServiceContents) : ServiceContents;
+    return isDiagnosticModeEnabled ? ServiceContentsWithDiagnose : ServiceContents;
   }
   if (data.spanType === 'resource') {
     return ResourceContents;
@@ -90,8 +92,7 @@ interface PopoverContentProps {
 }
 
 /**
- * Shared popover content for the React Flow service map.
- * Uses the selected node or edge directly (no conversion to ElementData).
+ * Popover content for the service map.
  */
 export function PopoverContent({
   selectedNode,
@@ -105,9 +106,6 @@ export function PopoverContent({
 }: PopoverContentProps) {
   const { core } = useApmPluginContext();
   const isDiagnosticModeEnabled = core.uiSettings.get(enableDiagnosticMode);
-  const handleDiagnoseClick = useCallback(() => {
-    onOpenDiagnostic?.();
-  }, [onOpenDiagnostic]);
 
   const selection = selectedEdge ?? selectedNode;
   if (selection == null) {
@@ -152,7 +150,7 @@ export function PopoverContent({
           start={start}
           end={end}
           showDiagnoseButton={isDiagnosticModeEnabled}
-          onDiagnoseClick={handleDiagnoseClick}
+          onDiagnoseClick={onOpenDiagnostic}
         />
       </EuiFlexGroup>
     </>

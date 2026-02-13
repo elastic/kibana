@@ -9,7 +9,7 @@ import { EuiDescriptionListDescription, EuiDescriptionListTitle } from '@elastic
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from '@emotion/styled';
-import type { ContentsProps } from './popover_content';
+import { isEdge, type ContentsProps } from './popover_content';
 import { isDependencyNodeData, type DependencyNodeData } from '../../../../../common/service_map';
 import { SPAN_SUBTYPE, SPAN_TYPE } from '../../../../../common/es_fields/apm';
 
@@ -24,7 +24,7 @@ const SubduedDescriptionListTitle = styled(EuiDescriptionListTitle)`
 `;
 
 export function ResourceContents({ selection }: ContentsProps) {
-  if ('source' in selection && 'target' in selection) {
+  if (isEdge(selection)) {
     return null;
   }
   const node = selection;

@@ -39,7 +39,7 @@ import type { ServiceMapSelection } from '../popover/popover_content';
 interface DiagnosticFlyoutProps {
   onClose: () => void;
   isOpen: boolean;
-  /** Selected node or edge from the service map (React Flow) */
+  /** Selected node or edge from the service map */
   selection: ServiceMapSelection;
 }
 

@@ -38,7 +38,9 @@ export interface ServiceNodeData extends BaseNodeData {
 }
 
 /**
- * Data for dependency/external nodes (camelCase and optional ES field names).
+ * Data for dependency/external nodes.
+ * Both camelCase (spanType, spanSubtype) and ES field symbols ([SPAN_TYPE], [SPAN_SUBTYPE]) are
+ * present for compatibility with ES responses and display code.
  */
 export interface DependencyNodeData extends BaseNodeData {
   isService: false;

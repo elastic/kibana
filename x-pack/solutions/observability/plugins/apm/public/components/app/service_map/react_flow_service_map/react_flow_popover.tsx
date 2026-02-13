@@ -236,7 +236,7 @@ export function ReactFlowPopover({
       {diagnosticFlyoutSelection && (
         <DiagnosticFlyout
           selection={diagnosticFlyoutSelection}
-          isOpen={true}
+          isOpen
           onClose={() => setDiagnosticFlyoutSelection(null)}
         />
       )}

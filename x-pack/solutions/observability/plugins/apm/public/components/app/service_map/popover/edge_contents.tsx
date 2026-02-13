@@ -9,7 +9,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import type { ContentsProps } from './popover_content';
+import { isEdge, type ContentsProps } from './popover_content';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { StatsList } from './stats_list';
@@ -30,7 +30,7 @@ export function EdgeContents({ selection, environment, start, end }: ContentsPro
   );
   const { offset, comparisonEnabled } = query;
 
-  const isEdgeSelection = 'source' in selection && 'target' in selection;
+  const isEdgeSelection = isEdge(selection);
   const sourceData = isEdgeSelection
     ? selection.data?.sourceData ?? { id: selection.source }
     : null;

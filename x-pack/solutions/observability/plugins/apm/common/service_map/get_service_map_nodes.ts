@@ -92,10 +92,7 @@ export function getAllServices(
   anomalies: ServiceAnomaliesResponse
 ) {
   const anomaliesByServiceName = new Map<string, ServiceAnomalyStats>(
-    anomalies.serviceAnomalies.map((item: { serviceName: string } & ServiceAnomalyStats) => [
-      item.serviceName,
-      item,
-    ])
+    anomalies.serviceAnomalies.map((item) => [item.serviceName, item])
   );
 
   const serviceNodes = new Map<string, ServiceConnectionNode>();

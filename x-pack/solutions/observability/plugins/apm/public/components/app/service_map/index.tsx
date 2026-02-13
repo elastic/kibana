@@ -8,8 +8,7 @@
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React, { useEffect, useRef } from 'react';
-import { Subscription } from 'rxjs';
+import React from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../../common/service_map';
@@ -96,15 +95,6 @@ export function ServiceMap({
 
   const { config } = useApmPluginContext();
   const { onPageReady } = usePerformanceContext();
-
-  const subscriptions = useRef<Subscription>(new Subscription());
-
-  useEffect(() => {
-    const currentSubscriptions = subscriptions.current;
-    return () => {
-      currentSubscriptions.unsubscribe();
-    };
-  }, []);
 
   const { data, status, error } = useServiceMap({
     environment,

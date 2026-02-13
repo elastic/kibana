@@ -12,32 +12,40 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import React, { Fragment } from 'react';
-import styled from '@emotion/styled';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import type { ServiceMapNode } from '../../../../../common/service_map';
 import type { ContentsProps } from './popover_content';
 import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_TYPE,
   SPAN_SUBTYPE,
 } from '../../../../../common/es_fields/apm';
+import { isEdge } from './popover_content';
 import { isGroupedNodeData, type GroupedConnectionInfo } from '../../../../../common/service_map';
 
-const ExternalResourcesList = styled.section`
+const externalResourcesListCss = css`
   max-height: 360px;
   overflow: auto;
 `;
 
-export function ExternalsListContents({ selection }: ContentsProps) {
-  if ('source' in selection && 'target' in selection) {
+export function ExternalsListContents({ selection }: Pick<ContentsProps, 'selection'>) {
+  if (isEdge(selection)) {
     return null;
   }
-  const node = selection;
+  const node = selection as ServiceMapNode;
   if (!isGroupedNodeData(node.data)) {
     return null;
   }
   const groupedConnections = node.data.groupedConnections;
   return (
     <EuiFlexItem>
-      <ExternalResourcesList>
+      <section
+        css={externalResourcesListCss}
+        aria-label={i18n.translate('xpack.apm.serviceMap.externalResourcesList.ariaLabel', {
+          defaultMessage: 'External resources',
+        })}
+      >
         <EuiDescriptionList>
           {groupedConnections.map((resource: GroupedConnectionInfo) => {
             const title = resource.label || (resource[SPAN_DESTINATION_SERVICE_RESOURCE] ?? '');
@@ -58,7 +66,7 @@ export function ExternalsListContents({ selection }: ContentsProps) {
             );
           })}
         </EuiDescriptionList>
-      </ExternalResourcesList>
+      </section>
     </EuiFlexItem>
   );
 }

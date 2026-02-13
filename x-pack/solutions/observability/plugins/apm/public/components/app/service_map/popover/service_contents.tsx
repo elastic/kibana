@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import type { ContentsProps } from './popover_content';
+import { isEdge, type ContentsProps } from './popover_content';
 import { isServiceNodeData, type ServiceNodeData } from '../../../../../common/service_map';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -43,8 +43,7 @@ export function ServiceContents({ onFocusClick, selection, environment, kuery }:
   const { rangeFrom, rangeTo, comparisonEnabled, offset } = query;
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const isServiceNode =
-    !('source' in selection && 'target' in selection) && isServiceNodeData(selection.data);
+  const isServiceNode = !isEdge(selection) && isServiceNodeData(selection.data);
   const nodeData: ServiceNodeData | null = isServiceNode
     ? (selection.data as ServiceNodeData)
     : null;

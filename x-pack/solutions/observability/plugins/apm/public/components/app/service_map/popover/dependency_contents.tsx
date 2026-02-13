@@ -12,7 +12,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import React from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import type { ContentsProps } from './popover_content';
+import { isEdge, type ContentsProps } from './popover_content';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -36,7 +36,7 @@ export function DependencyContents({ selection, environment, start, end }: Conte
   const { offset, comparisonEnabled } = query;
   const apmRouter = useApmRouter();
 
-  const isNode = !('source' in selection && 'target' in selection);
+  const isNode = !isEdge(selection);
   const dependencyName = isNode ? selection.data.label : undefined;
 
   const { data = INITIAL_STATE, status } = useFetcher(
