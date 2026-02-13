@@ -17,59 +17,61 @@ import {
   createLlmProxyActionConnector,
   deleteActionConnector,
 } from '../../utils/llm_proxy/llm_proxy_action_connector';
-import { createAgentBuilderApiClient } from '../../utils/agent_builder_client';
+import { createAgentBuilderApiClient, type ExecutionMode } from '../../utils/agent_builder_client';
 import type { AgentBuilderApiFtrProviderContext } from '../../../agent_builder/services/api';
 
-export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
-  const supertest = getService('supertest');
-  const log = getService('log');
-  const agentBuilderApiClient = createAgentBuilderApiClient(supertest);
+export function createErrorHandlingTests(executionMode: ExecutionMode) {
+  return function ({ getService }: AgentBuilderApiFtrProviderContext) {
+    const supertest = getService('supertest');
+    const log = getService('log');
+    const agentBuilderApiClient = createAgentBuilderApiClient(supertest, { executionMode });
 
-  describe('POST /api/agent_builder/converse: error handling', () => {
-    let llmProxy: LlmProxy;
-    let connectorId: string;
+    describe(`[${executionMode}] error handling`, () => {
+      let llmProxy: LlmProxy;
+      let connectorId: string;
 
-    const USER_PROMPT = 'Please do something';
-    const MOCKED_LLM_TITLE = 'Mocked conversation title';
-    const MOCKED_LLM_RESPONSE = 'Mocked LLM response';
+      const USER_PROMPT = 'Please do something';
+      const MOCKED_LLM_TITLE = 'Mocked conversation title';
+      const MOCKED_LLM_RESPONSE = 'Mocked LLM response';
 
-    before(async () => {
-      llmProxy = await createLlmProxy(log);
-      connectorId = await createLlmProxyActionConnector(getService, { port: llmProxy.getPort() });
-    });
-
-    after(async () => {
-      llmProxy.close();
-      await deleteActionConnector(getService, { actionId: connectorId });
-    });
-
-    it('recovers and calls the LLM again when the answer agent tries calling a tool', async () => {
-      await setupAnswerAgentCallsInvalidTool({
-        proxy: llmProxy,
-        title: MOCKED_LLM_TITLE,
-        response: MOCKED_LLM_RESPONSE,
+      before(async () => {
+        llmProxy = await createLlmProxy(log);
+        connectorId = await createLlmProxyActionConnector(getService, { port: llmProxy.getPort() });
       });
 
-      const body = await agentBuilderApiClient.converse({
-        input: USER_PROMPT,
-        connector_id: connectorId,
+      after(async () => {
+        llmProxy.close();
+        await deleteActionConnector(getService, { actionId: connectorId });
       });
 
-      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+      it('recovers and calls the LLM again when the answer agent tries calling a tool', async () => {
+        await setupAnswerAgentCallsInvalidTool({
+          proxy: llmProxy,
+          title: MOCKED_LLM_TITLE,
+          response: MOCKED_LLM_RESPONSE,
+        });
 
-      expect(body.response.message).to.eql(MOCKED_LLM_RESPONSE);
+        const body = await agentBuilderApiClient.converse({
+          input: USER_PROMPT,
+          connector_id: connectorId,
+        });
 
-      const retryRequest = llmProxy.interceptedRequests.find(
-        (request) => request.matchingInterceptorName === 'final-assistant-response'
-      )!.requestBody;
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-      const messages = retryRequest.messages;
+        expect(body.response.message).to.eql(MOCKED_LLM_RESPONSE);
 
-      const errorMessage = JSON.parse(messages[messages.length - 1].content as string).response;
+        const retryRequest = llmProxy.interceptedRequests.find(
+          (request) => request.matchingInterceptorName === 'final-assistant-response'
+        )!.requestBody;
 
-      expect(errorMessage).to.contain('ERROR: called a tool which was not available');
+        const messages = retryRequest.messages;
+
+        const errorMessage = JSON.parse(messages[messages.length - 1].content as string).response;
+
+        expect(errorMessage).to.contain('ERROR: called a tool which was not available');
+      });
     });
-  });
+  };
 }
 
 /**
