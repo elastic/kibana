@@ -39,10 +39,16 @@ export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
 };
 
 export const getAlertEpisodeSuppressionsQuery = (alertEpisodes: AlertEpisode[]): EsqlRequest => {
-  const minLastEventTimestamp = alertEpisodes.reduce(
-    (min, ep) => (ep.last_event_timestamp < min ? ep.last_event_timestamp : min),
-    alertEpisodes[0].last_event_timestamp
-  );
+  const minLastEventTimestamp =
+    alertEpisodes.reduce<string | undefined>((min, ep) => {
+      const parsedTimestamp = new Date(ep.last_event_timestamp);
+      if (Number.isNaN(parsedTimestamp.getTime())) {
+        return min;
+      }
+
+      const normalizedTimestamp = parsedTimestamp.toISOString();
+      return min === undefined || normalizedTimestamp < min ? normalizedTimestamp : min;
+    }, undefined) ?? new Date(0).toISOString();
 
   let whereClause = esql.exp`FALSE`;
   for (const alertEpisode of alertEpisodes) {

@@ -98,8 +98,6 @@ const ALERT_EVENTS_TEST_DATA: AlertEvent[] = [
 ];
 
 /**
- * Test dataset from .llm-docs/alerts-events-and-actions-dataset.md
- *
  * 5 rules with various suppression scenarios:
  * - rule-001: single series, ack then unack → fire
  * - rule-002: single series, ack with no unack → suppress
