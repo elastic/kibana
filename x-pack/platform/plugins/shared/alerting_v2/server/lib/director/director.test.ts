@@ -432,7 +432,6 @@ describe('DirectorService', () => {
       expect(result[0].episode).toEqual({
         id: 'episode-1',
         status: alertEpisodeStatus.active,
-        status_count: 1,
       });
     });
   });

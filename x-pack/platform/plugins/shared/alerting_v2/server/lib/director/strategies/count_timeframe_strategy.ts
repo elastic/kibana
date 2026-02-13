@@ -127,12 +127,12 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
 
     // --- Handle pending count of 0: skip pending, go directly to active ---
     if (this.shouldSkipPending(stateTransition, basicResult.status)) {
-      return { status: alertEpisodeStatus.active, statusCount: DEFAULT_STATUS_COUNT };
+      return { status: alertEpisodeStatus.active };
     }
 
     // --- Handle recovering count of 0: skip recovering, go directly to inactive ---
     if (this.shouldSkipRecovering(stateTransition, basicResult.status)) {
-      return { status: alertEpisodeStatus.inactive, statusCount: DEFAULT_STATUS_COUNT };
+      return { status: alertEpisodeStatus.inactive };
     }
 
     // --- Pending → Active threshold ---
@@ -245,7 +245,7 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     const config: ThresholdConfig = { operator, count, timeframeMs };
 
     if (isThresholdMet(nextCount, elapsedMs, config)) {
-      return { status: successStatus, statusCount: DEFAULT_STATUS_COUNT };
+      return { status: successStatus };
     }
 
     return { status: stayStatus, statusCount: nextCount };

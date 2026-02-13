@@ -122,7 +122,6 @@ describe('CountTimeframeStrategy', () => {
         on: alertEventStatus.breached,
         to: alertEpisodeStatus.active,
         stateTransition,
-        expectedStatusCount: 1,
       });
     });
 
@@ -131,7 +130,6 @@ describe('CountTimeframeStrategy', () => {
         on: alertEventStatus.breached,
         to: alertEpisodeStatus.active,
         stateTransition,
-        expectedStatusCount: 1,
       });
     });
   });
@@ -176,7 +174,6 @@ describe('CountTimeframeStrategy', () => {
         to: alertEpisodeStatus.active,
         stateTransition,
         statusCount: 2,
-        expectedStatusCount: 1,
       });
     });
 
@@ -187,7 +184,6 @@ describe('CountTimeframeStrategy', () => {
         to: alertEpisodeStatus.active,
         stateTransition,
         statusCount: 5,
-        expectedStatusCount: 1,
       });
     });
 
@@ -210,7 +206,6 @@ describe('CountTimeframeStrategy', () => {
         to: alertEpisodeStatus.active,
         stateTransition: { pending_timeframe: '2m' },
         statusCount: 1,
-        expectedStatusCount: 1,
         eventTimestamp: '2025-01-01T00:02:00.000Z',
         previousTimestamp: '2025-01-01T00:00:00.000Z',
       });
@@ -240,7 +235,6 @@ describe('CountTimeframeStrategy', () => {
           pending_operator: 'OR',
         },
         statusCount: 1,
-        expectedStatusCount: 1,
         eventTimestamp: '2025-01-01T00:02:00.000Z',
         previousTimestamp: '2025-01-01T00:00:00.000Z',
       });
@@ -273,7 +267,6 @@ describe('CountTimeframeStrategy', () => {
         on: alertEventStatus.recovered,
         to: alertEpisodeStatus.inactive,
         stateTransition,
-        expectedStatusCount: 1,
       });
     });
   });
@@ -309,7 +302,6 @@ describe('CountTimeframeStrategy', () => {
         to: alertEpisodeStatus.inactive,
         stateTransition,
         statusCount: 2,
-        expectedStatusCount: 1,
       });
     });
 
@@ -332,7 +324,6 @@ describe('CountTimeframeStrategy', () => {
         to: alertEpisodeStatus.inactive,
         stateTransition: { recovering_timeframe: '2m' },
         statusCount: 1,
-        expectedStatusCount: 1,
         eventTimestamp: '2025-01-01T00:02:00.000Z',
         previousTimestamp: '2025-01-01T00:00:00.000Z',
       });
@@ -362,7 +353,6 @@ describe('CountTimeframeStrategy', () => {
           recovering_operator: 'OR',
         },
         statusCount: 1,
-        expectedStatusCount: 1,
         eventTimestamp: '2025-01-01T00:02:00.000Z',
         previousTimestamp: '2025-01-01T00:00:00.000Z',
       });
@@ -399,7 +389,6 @@ describe('CountTimeframeStrategy', () => {
         to: alertEpisodeStatus.active,
         stateTransition,
         statusCount: 1,
-        expectedStatusCount: 1,
       });
     });
 
@@ -410,7 +399,6 @@ describe('CountTimeframeStrategy', () => {
         to: alertEpisodeStatus.inactive,
         stateTransition,
         statusCount: 1,
-        expectedStatusCount: 1,
       });
     });
   });
@@ -445,7 +433,6 @@ describe('CountTimeframeStrategy', () => {
         to: alertEpisodeStatus.active,
         stateTransition: { pending_count: 2, pending_timeframe: 'bad' },
         statusCount: 1,
-        expectedStatusCount: 1,
       });
     });
 
@@ -456,7 +443,6 @@ describe('CountTimeframeStrategy', () => {
         to: alertEpisodeStatus.inactive,
         stateTransition: { recovering_count: 2, recovering_timeframe: 'bad' },
         statusCount: 1,
-        expectedStatusCount: 1,
       });
     });
   });
