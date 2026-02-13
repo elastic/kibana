@@ -43,25 +43,27 @@ export class KibanaAgentExecutor implements AgentExecutor {
         .map((part: TextPart) => part.text)
         .join(' ');
 
-      const { chat } = this.getInternalServices();
+      const { execution } = this.getInternalServices();
 
       const a2aConversationId = generateA2AConversationId(contextId);
 
-      const chatEvents$ = chat.converse({
-        agentId: this.agentId,
-        nextInput: { message: userText },
+      const { events$ } = await execution.executeAgent({
         request: this.kibanaRequest,
-        conversationId: a2aConversationId,
-        capabilities: { visualizations: false },
-        autoCreateConversationWithId: true,
+        params: {
+          agentId: this.agentId,
+          nextInput: { message: userText },
+          conversationId: a2aConversationId,
+          capabilities: { visualizations: false },
+          autoCreateConversationWithId: true,
+        },
       });
 
-      // Process chat response
-      const events = await firstValueFrom(chatEvents$.pipe(toArray()));
+      // Process execution response
+      const events = await firstValueFrom(events$.pipe(toArray()));
       const roundCompleteEvent = events.find(isRoundCompleteEvent);
 
       if (!roundCompleteEvent) {
-        throw new Error('No complete response received from chat service');
+        throw new Error('No complete response received from execution service');
       }
 
       const responseText = roundCompleteEvent.data.round.response.message;

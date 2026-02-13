@@ -17,6 +17,7 @@ import {
   getReviewFields as getDissectReviewFields,
   getDissectProcessorWithReview,
 } from '@kbn/dissect-heuristics';
+import { tags } from '@kbn/scout';
 import type { KbnClient } from '@kbn/scout';
 import { evaluate } from '../src/evaluate';
 import {
@@ -36,7 +37,7 @@ import {
  * Tests the quality of Grok and Dissect pattern generation using real log samples
  * and comprehensive quality metrics.
  *
- * @tags @ess
+ * @tags @local-stateful-classic @cloud-stateful-classic
  */
 
 evaluate.describe.configure({ timeout: 300_000 });
@@ -412,45 +413,45 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
 
           // Criterion 3: Field naming conventions (OTEL/ECS standards)
           `FIELD NAMING: Field names should follow OpenTelemetry (OTEL) and Elastic Common Schema (ECS) standards.
-           
+
            EXCELLENT naming (standard-compliant):
            - OTEL standard: "severity_text", "trace_id", "span_id", "service.name", "resource.attributes.*"
            - ECS standard: "source.ip", "host.name", "process.pid", "http.response.status_code", "user.name"
            - Combined: "attributes.source.ip", "attributes.http.status_code"
            - Body field: "body.text" (standard for message content)
-           
+
            GOOD naming (semantic but non-standard):
            - Descriptive hierarchical names like "custom.timestamp", "nginx.error.connection_id"
            - Domain-specific names that describe the data
-           
+
            BAD naming (avoid):
            - Numbered fields: "field1", "field2", "f0", "column1"
            - Generic placeholders: "data", "value", "content", "text"
            - Single letters or meaningless abbreviations
-           
+
            The field name should describe what the data represents.`,
 
           // Criterion 4: Value type correctness
           `VALUE QUALITY: Extracted values should match their expected types:
-           
+
            - TIMESTAMP values: Should contain date/time info (digits, separators, timezone)
            - IP values: Should look like IP addresses (e.g., "192.168.1.1" or IPv6)
            - NUMBER values: Should be numeric, not strings with units
            - KEYWORD values: Clean strings without excessive delimiters
-           
+
            ACCEPTABLE: Quoted strings, special chars, brackets if part of original data.
            Example: User-agent "Mozilla/5.0 (Windows NT 6.1)" is correctly extracted.
-           
+
            NOT ACCEPTABLE: Leading/trailing delimiters that should be stripped.
            Example: "[INFO]" when it should be "INFO".`,
 
           // Criterion 5: Field count (using ground truth values)
           `FIELD COUNT: This log format should extract ${minFields}-${maxFields} fields.
-           
+
            - Less than ${minFields} fields: Important data is being missed
            - ${minFields}-${maxFields} fields: Optimal extraction
            - More than ${maxFields} fields: May indicate over-extraction or splitting
-           
+
            Count the actual extracted fields in each example and compare.`,
         ];
 
@@ -493,7 +494,7 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
     const label = patternType === 'grok' ? 'Grok' : 'Dissect';
 
     Object.entries(datasets).forEach(([_, dataset]) => {
-      evaluate.describe(`${label}: ${dataset.name}`, { tag: '@ess' }, () => {
+      evaluate.describe(`${label}: ${dataset.name}`, { tag: tags.stateful.classic }, () => {
         dataset.examples.forEach((example, idx) => {
           evaluate(
             `${idx + 1}. ${example.input.stream_name}`,
