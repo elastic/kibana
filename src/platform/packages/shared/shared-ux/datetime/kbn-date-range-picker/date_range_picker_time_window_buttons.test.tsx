@@ -83,18 +83,6 @@ describe('TimeWindowButtons', () => {
     expect(screen.queryByTestId('dateRangePickerTimeWindowButtons')).not.toBeInTheDocument();
   });
 
-  // TODO confirm this is the expected behavior
-  it('hides buttons during editing mode', async () => {
-    renderPicker();
-    expect(screen.getByTestId('dateRangePickerTimeWindowButtons')).toBeInTheDocument();
-
-    await act(async () => {
-      fireEvent.click(screen.getByTestId('dateRangePickerControlButton'));
-    });
-
-    expect(screen.queryByTestId('dateRangePickerTimeWindowButtons')).not.toBeInTheDocument();
-  });
-
   describe('time shift', () => {
     it('calls onChange when stepping forward', async () => {
       const { onChange } = renderPicker({

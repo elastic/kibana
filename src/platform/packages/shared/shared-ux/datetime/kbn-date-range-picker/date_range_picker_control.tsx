@@ -193,9 +193,7 @@ export function DateRangePickerControl() {
           </EuiToolTip>
         )}
       </EuiFormControlLayout>
-      {!isEditing && timeWindowButtonsConfig && (
-        <TimeWindowButtons config={timeWindowButtonsConfig} />
-      )}
+      {timeWindowButtonsConfig && <TimeWindowButtons config={timeWindowButtonsConfig} />}
     </div>
   );
 }
