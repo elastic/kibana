@@ -207,6 +207,7 @@ export function createAlertingUsageCollector(
           count_rules_muted: 0,
           count_rules_with_linked_dashboards: 0,
           count_rules_with_investigation_guide: 0,
+          count_rules_with_api_key_created_by_user: 0,
           count_mw_total: 0,
           count_mw_with_repeat_toggle_on: 0,
           count_mw_with_filter_alert_toggle_on: 0,
@@ -306,6 +307,13 @@ export function createAlertingUsageCollector(
       count_rules_muted: { type: 'long' },
       count_rules_with_linked_dashboards: { type: 'long' },
       count_rules_with_investigation_guide: { type: 'long' },
+      count_rules_with_api_key_created_by_user: {
+        type: 'long',
+        _meta: {
+          description:
+            'The total number of rules with API keys that are manually provided by the user, not created by the alerting framework.',
+        },
+      },
       count_mw_total: { type: 'long' },
       count_mw_with_repeat_toggle_on: { type: 'long' },
       count_mw_with_filter_alert_toggle_on: { type: 'long' },
