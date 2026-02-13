@@ -33,6 +33,7 @@ export function setupAppChangeHandler({
     // Reset UI elements
     state.badge.set(undefined);
     state.appMenu.set(undefined);
+    state.globalHeaderAppActions.set(undefined);
 
     // Reset breadcrumbs
     state.breadcrumbs.classic.set([]);

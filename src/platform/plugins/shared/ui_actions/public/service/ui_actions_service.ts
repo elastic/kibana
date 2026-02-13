@@ -44,6 +44,14 @@ export class UiActionsService {
   };
 
   /**
+   * No-op for backward compatibility. Triggers are now defined statically in the plugin.
+   * Callers that still use this API will not throw.
+   */
+  public readonly registerTrigger = (_trigger: Trigger): void => {
+    // Triggers are registered statically in ../triggers.ts; dynamic registration is no longer supported.
+  };
+
+  /**
    * @deprecated
    *
    * Use `plugins.uiActions.registerActionAsync` instead.

@@ -9,12 +9,17 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiContextMenu,
   EuiHeader,
+  EuiHeaderLinks,
   EuiHeaderLogo,
   EuiHeaderSection,
   EuiHeaderSectionItem,
   EuiImage,
   EuiLoadingSpinner,
+  EuiPopover,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -30,7 +35,7 @@ import { type ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser/
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import React, { type ComponentProps, useCallback } from 'react';
+import React, { type ComponentProps, useCallback, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import { debounceTime } from 'rxjs';
@@ -83,6 +88,78 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
 });
 
 type HeaderCss = ReturnType<typeof getHeaderCss>;
+
+const noop = () => {};
+
+const OVERFLOW_PANELS = [
+  {
+    id: 0,
+    title: '',
+    items: [
+      { name: 'New', icon: 'plusInCircle', onClick: noop },
+      { name: 'Favorite', icon: 'star', onClick: noop },
+      { name: 'Share', icon: 'share', onClick: noop },
+    ],
+  },
+  {
+    id: 1,
+    title: '',
+    items: [
+      { name: 'Open', icon: 'folderOpen', onClick: noop },
+      { name: 'Inspect', icon: 'inspector', onClick: noop },
+      { name: 'Data sets', icon: 'indexOpen', onClick: noop },
+      { name: 'Background searches', icon: 'search', onClick: noop },
+      { name: 'Alerts', icon: 'bell', onClick: noop },
+      { name: 'Export', icon: 'exportAction', onClick: noop },
+      { name: 'Rename', icon: 'pencil', onClick: noop },
+      { name: 'Settings', icon: 'gear', onClick: noop },
+      { name: 'Docs', icon: 'documentation', onClick: noop },
+      { name: 'Feedback', icon: 'editorComment', onClick: noop },
+      { name: 'Save', icon: 'save', onClick: noop },
+      { name: 'Save as', icon: 'save', onClick: noop },
+      { name: 'Reset changes', icon: 'editorUndo', onClick: noop },
+    ],
+  },
+];
+
+const GlobalHeaderAppActionsDumb: React.FC = () => {
+  const [isOverflowOpen, setIsOverflowOpen] = useState(false);
+  const overflowButton = (
+    <EuiButtonIcon
+      iconType="boxesVertical"
+      aria-label="More actions"
+      onClick={() => setIsOverflowOpen(!isOverflowOpen)}
+      data-test-subj="headerGlobalNav-appActionsOverflowButton"
+    />
+  );
+  return (
+    <EuiHeaderLinks gutterSize="xs" popoverBreakpoints="none">
+      <EuiButtonEmpty size="s" iconType="plusInCircle" data-test-subj="headerGlobalNav-appActionsNewButton">
+        New
+      </EuiButtonEmpty>
+      <EuiButtonEmpty size="s" iconType="share" data-test-subj="headerGlobalNav-appActionsShareButton">
+        Share
+      </EuiButtonEmpty>
+      <EuiPopover
+        button={overflowButton}
+        isOpen={isOverflowOpen}
+        closePopover={() => setIsOverflowOpen(false)}
+        anchorPosition="downRight"
+        panelPaddingSize="none"
+      >
+        <EuiContextMenu panels={OVERFLOW_PANELS} initialPanelId={0} />
+      </EuiPopover>
+      <EuiButtonEmpty size="s" iconType="save" data-test-subj="headerGlobalNav-appActionsSaveButton">
+        Save
+      </EuiButtonEmpty>
+      <EuiButtonIcon
+        iconType="arrowDown"
+        aria-label="Save options"
+        data-test-subj="headerGlobalNav-appActionsSaveDropdown"
+      />
+    </EuiHeaderLinks>
+  );
+};
 
 const headerStrings = {
   logo: {
@@ -260,11 +337,18 @@ export const ProjectHeader = ({
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
 
+            <EuiHeaderSection grow={false}>
+              <EuiHeaderSectionItem>
+                <GlobalHeaderAppActionsDumb />
+              </EuiHeaderSectionItem>
+            </EuiHeaderSection>
+
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem>
                 <HeaderNavControls navControls$={observables.navControlsCenter$} />
               </EuiHeaderSectionItem>
 
+              {/* Global header prototype: Help menu hidden (Docs/Feedback in overflow)
               <EuiHeaderSectionItem>
                 <HeaderHelpMenu
                   isServerless={isServerless}
@@ -278,6 +362,7 @@ export const ProjectHeader = ({
                   navigateToUrl={application.navigateToUrl}
                 />
               </EuiHeaderSectionItem>
+              */}
 
               <EuiHeaderSectionItem
                 css={css`

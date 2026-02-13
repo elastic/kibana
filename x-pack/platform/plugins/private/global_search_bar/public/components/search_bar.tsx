@@ -92,7 +92,8 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   const chromeStyle = useObservable(chromeStyle$);
 
   // These hooks are used when on chromeStyle set to 'project'
-  const [isVisible, setIsVisible] = useState(false);
+  // Global header prototype: show search input by default (replace search icon with search input)
+  const [isVisible, setIsVisible] = useState(true);
   const visibilityButtonRef = useRef<HTMLButtonElement | null>(null);
 
   // General hooks

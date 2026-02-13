@@ -113,6 +113,7 @@ export const createChromeComponents = ({
       navControlsExtension$={navControls.extension$}
       customBranding$={customBranding$}
       appMenu$={state.appMenu.$}
+      globalHeaderAppActions$={state.globalHeaderAppActions.$}
     />
   );
 

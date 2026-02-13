@@ -11,6 +11,7 @@ import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -62,6 +63,8 @@ export interface ChromeState {
   globalFooter: State<ReactNode>;
   customNavLink: State<ChromeNavLink | undefined>;
   appMenu: State<AppMenuConfig | undefined>;
+  /** Global header app-defined actions (e.g. New, Share, Overflow, Save). Cleared on app unmount. */
+  globalHeaderAppActions: State<MountPoint<HTMLDivElement> | undefined>;
 
   /** Help system */
   help: {
@@ -101,6 +104,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   // UI Elements (per-app reset handled in setupAppChangeHandler)
   const badge = createState<ChromeBadge | undefined>(undefined);
   const appMenu = createState<AppMenuConfig | undefined>(undefined);
+  const globalHeaderAppActions = createState<MountPoint<HTMLDivElement> | undefined>(undefined);
 
   // UI Elements (not reset on app change)
   const globalFooter = createState<ReactNode>(null);
@@ -128,6 +132,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     globalFooter,
     customNavLink,
     appMenu,
+    globalHeaderAppActions,
     help: {
       extension: helpExtension,
       supportUrl: helpSupportUrl,

@@ -141,6 +141,10 @@ export function createChromeApi({
     getAppMenu$: () => state.appMenu.$,
     setAppMenu: state.appMenu.set,
 
+    // Global header app actions (app-defined actions in the global header, e.g. New, Share, Overflow, Save)
+    getGlobalHeaderAppActions$: () => state.globalHeaderAppActions.$,
+    setGlobalHeaderAppActions: state.globalHeaderAppActions.set,
+
     // Help
     getHelpExtension$: () => state.help.extension.$,
     setHelpExtension: state.help.extension.set,
