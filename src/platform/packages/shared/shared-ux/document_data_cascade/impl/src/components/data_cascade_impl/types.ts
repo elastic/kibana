@@ -257,6 +257,10 @@ interface DataCascadeImplBaseProps<G extends GroupNode, L extends LeafNode>
    * Whether to allow multiple group rows to be expanded at the same time, default is false.
    */
   allowMultipleRowToggle?: boolean;
+  /**
+   * Initial vertical scroll position in pixels. When set, the list and scroll container start at this offset.
+   */
+  initialScrollOffset?: number;
   children: React.ReactElement<DataCascadeRowProps<G, L>>;
   cascadeRef: React.ForwardedRef<DataCascadeImplRef<G, L>>;
 }
