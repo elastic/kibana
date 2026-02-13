@@ -26,6 +26,14 @@ describe('TemplatesSearch', () => {
     expect(await screen.findByDisplayValue('')).toBeInTheDocument();
   });
 
+  it('displays placeholder text indicating searchable fields', async () => {
+    renderWithTestingProviders(<TemplatesSearch search="" onSearchChange={onSearchChange} />);
+
+    expect(
+      await screen.findByPlaceholderText('Search by name, description, or field name')
+    ).toBeInTheDocument();
+  });
+
   it('renders with initial value correctly', async () => {
     renderWithTestingProviders(
       <TemplatesSearch search="My search" onSearchChange={onSearchChange} />

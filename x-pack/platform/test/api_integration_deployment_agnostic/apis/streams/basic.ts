@@ -113,15 +113,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
           it('Elasticsearch streams is enabled too', async () => {
-            const response = await esClient.transport.request({
+            type StreamsStatusResponse = {
+              logs: { enabled: boolean } & Record<string, unknown>;
+            } & Record<string, unknown>;
+
+            const response = await esClient.transport.request<StreamsStatusResponse>({
               method: 'GET',
               path: '/_streams/status',
             });
-            expect(response).to.eql({
-              logs: {
-                enabled: true,
-              },
-            });
+            // Elasticsearch may return additional status keys (e.g. `logs.ecs`, `logs.otel`).
+            expect(response).to.have.property('logs');
+            expect(response.logs).to.have.property('enabled', true);
           });
         }
 

@@ -11,10 +11,10 @@ import { screen } from '@testing-library/react';
 
 import { TemplatesTableFilters } from './templates_table_filters';
 import { renderWithTestingProviders } from '../../../common/mock';
-import type { QueryParams } from '../types';
+import type { TemplatesFindRequest } from '../../../../common/types/api/template/v1';
 
 describe('TemplatesTableFilters', () => {
-  const defaultQueryParams: QueryParams = {
+  const defaultQueryParams: TemplatesFindRequest = {
     page: 1,
     perPage: 10,
     sortField: 'name',
@@ -22,6 +22,7 @@ describe('TemplatesTableFilters', () => {
     search: '',
     tags: [],
     author: [],
+    isDeleted: false,
   };
 
   const onQueryParamsChange = jest.fn();

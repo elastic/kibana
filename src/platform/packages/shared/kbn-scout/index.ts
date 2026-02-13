@@ -53,6 +53,7 @@ export type {
   RequestAuthFixture,
   SamlAuth,
   SynthtraceFixture,
+  SpaceSolutionView,
 } from './src/playwright';
 
 // Service & configuration types

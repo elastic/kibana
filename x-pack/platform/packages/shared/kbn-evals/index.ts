@@ -70,3 +70,6 @@ export type {
   GroundTruthExtractor,
   RetrievedDoc,
 } from './src/evaluators/rag/types';
+
+// Re-export Scout tags here to avoid requiring a direct dependency on @kbn/scout for modules using @kbn/evals
+export { tags } from '@kbn/scout';
