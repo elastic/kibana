@@ -8,11 +8,11 @@
 import { expect } from '@kbn/scout/api';
 import type { RemoveByPrefixProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
-import { streamlangApiTest as apiTest } from '../..';
+import { streamlangApiTest as apiTest, tags } from '../..';
 
 apiTest.describe(
   'Cross-compatibility - RemoveByPrefix Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest(
       'should remove nested fields in both ingest pipeline and ES|QL',

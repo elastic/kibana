@@ -51,7 +51,7 @@ Fixtures offer essential context to your tests. The `@kbn/scout` package include
 Fixtures are similar to **FTR services**. They help tests with authentication, parallelization, and provide access to the Elasticsearch client, ES archiver, Kibana APIs, and more.
 
 ```ts
-test.describe('My test suite', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+test.describe('My test suite', { tag: tags.deploymentAgnostic }, () => {
   test.beforeAll(async ({ kbnClient }) => {
     // [1]
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.ECOMMERCE);
@@ -113,12 +113,12 @@ Let's take a look at [this](https://github.com/elastic/kibana/blob/0cc78184957fc
 
 ```ts
 import type { RoleApiCredentials } from '@kbn/scout'; // [1]
-import { apiTest, expect } from '@kbn/scout'; // [1]
+import { apiTest, expect, tags } from '@kbn/scout'; // [1]
 import { COMMON_HEADERS, TEST_INPUT } from '../fixtures/constants';
 
 apiTest.describe(
   '[search serverless] POST api/painless_lab/execute',
-  { tag: ['@svlSearch'] },
+  { tag: tags.serverless.search },
   () => {
     let adminApiCredentials: RoleApiCredentials;
 
@@ -178,7 +178,7 @@ import { test } from '../fixtures';
 
 // ...
 
-test.describe('Painless Lab', { tag: tags.ESS_ONLY }, () => {
+test.describe('Painless Lab', { tag: tags.stateful.all }, () => {
   // [2]
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();

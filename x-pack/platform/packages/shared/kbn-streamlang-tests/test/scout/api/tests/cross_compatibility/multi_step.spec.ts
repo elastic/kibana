@@ -19,11 +19,11 @@ import type {
   MathProcessor,
 } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
-import { streamlangApiTest as apiTest } from '../..';
+import { streamlangApiTest as apiTest, tags } from '../..';
 
 apiTest.describe(
   'Cross-compatibility - Multi-Step Pipeline with Operator Coverage',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest(
       'should process web server access logs with comprehensive operator and processor coverage',
