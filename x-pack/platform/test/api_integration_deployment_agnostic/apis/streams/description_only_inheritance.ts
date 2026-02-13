@@ -46,8 +46,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       // Save a description-only override on the child (no `type` should be persisted).
-      const childBefore = await getStream(apiClient, childName);
-      expect(Streams.WiredStream.GetResponse.is(childBefore)).to.be(true);
+      const childBefore = Streams.WiredStream.GetResponse.parse(
+        await getStream(apiClient, childName)
+      );
 
       const {
         name: _childStreamName,
@@ -75,8 +76,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       });
 
-      const childAfterSave = await getStream(apiClient, childName);
-      expect(Streams.WiredStream.GetResponse.is(childAfterSave)).to.be(true);
+      const childAfterSave = Streams.WiredStream.GetResponse.parse(
+        await getStream(apiClient, childName)
+      );
 
       expect(childAfterSave.stream.ingest.wired.fields).to.have.property(fieldName);
       expect(childAfterSave.stream.ingest.wired.fields[fieldName]).to.have.property(
@@ -90,8 +92,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       // Later, the parent defines a mapping for `abc`. The child must reflect the new inherited mapping,
       // while keeping its description override without freezing the type.
-      const parentBefore = await getStream(apiClient, parentName);
-      expect(Streams.WiredStream.GetResponse.is(parentBefore)).to.be(true);
+      const parentBefore = Streams.WiredStream.GetResponse.parse(
+        await getStream(apiClient, parentName)
+      );
 
       const {
         name: _parentStreamName,
@@ -123,8 +126,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       // Ensure ES assets are reconciled after changing an ancestor definition.
       await apiClient.fetch('POST /api/streams/_resync 2023-10-31').expect(200);
 
-      const childAfterParentChange = await getStream(apiClient, childName);
-      expect(Streams.WiredStream.GetResponse.is(childAfterParentChange)).to.be(true);
+      const childAfterParentChange = Streams.WiredStream.GetResponse.parse(
+        await getStream(apiClient, childName)
+      );
 
       expect(childAfterParentChange.inherited_fields).to.have.property(fieldName);
       expect(childAfterParentChange.inherited_fields[fieldName].type).to.be('keyword');
