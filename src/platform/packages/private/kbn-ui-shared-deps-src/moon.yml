@@ -18,13 +18,15 @@ project:
   metadata:
     sourceRoot: src/platform/packages/private/kbn-ui-shared-deps-src
 dependsOn:
+  - '@kbn/repo-info'
   - '@kbn/ui-shared-deps-npm'
 tags:
-  - is-webpack-built
+  - shared-common
   - package
   - prod
   - group-platform
   - private
+  - is-webpack-built
 fileGroups:
   src:
     - '**/*.ts'
