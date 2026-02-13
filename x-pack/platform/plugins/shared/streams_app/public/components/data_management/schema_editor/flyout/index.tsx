@@ -109,9 +109,7 @@ export const SchemaEditorFlyout = ({
   // Description-only editing is only allowed for wired streams.
   // Classic streams require a type to be specified to add a description.
   const isDescriptionOnlyEditing =
-    isEditing &&
-    streamType === 'wired' &&
-    field.status === 'inherited';
+    isEditing && streamType === 'wired' && field.status === 'inherited';
   const hasDescriptionChanged =
     (nextField.description ?? undefined) !== (field.description ?? undefined);
   const isInheritedDescriptionOnlyEditing =
