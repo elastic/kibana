@@ -84,7 +84,14 @@ const createMockCasesClient = () => ({
           }
         });
 
-      return Array.from(latestById.values()).map((template) => toSavedObject(template));
+      const templates = Array.from(latestById.values());
+
+      return {
+        templates,
+        page: 1,
+        perPage: 10,
+        total: templates.length,
+      };
     }),
     getTemplate: jest.fn(async (templateId: string, version?: string) => {
       const candidates = mockTemplates.filter(
@@ -186,15 +193,20 @@ describe('Template Routes', () => {
   describe('GET /internal/cases/templates', () => {
     it('returns non-deleted templates by default', async () => {
       const context = createMockContext();
-      const request = { query: { includeDeleted: false } };
+      const request = {
+        query: { page: 1, perPage: 10, isDeleted: false },
+      };
       const response = createMockResponse();
 
       // @ts-expect-error: mocking necessary properties for handler logic only
       await getTemplatesRoute.handler({ context, request, response });
 
       const body = response.ok.mock.calls[0][0].body;
-      expect(body).toHaveLength(2);
-      expect(body).toEqual(
+      expect(body.templates).toHaveLength(2);
+      expect(body.page).toBe(1);
+      expect(body.perPage).toBe(10);
+      expect(body.total).toBe(2);
+      expect(body.templates).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ templateId: 'template-1', name: 'Template One' }),
           expect.objectContaining({ templateId: 'template-2', name: 'Template Two' }),
@@ -202,17 +214,19 @@ describe('Template Routes', () => {
       );
     });
 
-    it('still excludes deleted templates when includeDeleted is true', async () => {
+    it('still excludes deleted templates when isDeleted is false', async () => {
       const context = createMockContext();
-      const request = { query: { includeDeleted: true } };
+      const request = {
+        query: { page: 1, perPage: 10, isDeleted: false },
+      };
       const response = createMockResponse();
 
       // @ts-expect-error: mocking necessary properties for handler logic only
       await getTemplatesRoute.handler({ context, request, response });
 
       const body = response.ok.mock.calls[0][0].body;
-      expect(body).toHaveLength(2);
-      expect(body).toEqual(
+      expect(body.templates).toHaveLength(2);
+      expect(body.templates).toEqual(
         expect.not.arrayContaining([expect.objectContaining({ templateId: 'template-3' })])
       );
     });
