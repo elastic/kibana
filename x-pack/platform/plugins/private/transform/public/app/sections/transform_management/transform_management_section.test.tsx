@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// @ts-nocheck
 
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fireEvent } from '@testing-library/react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 
 import { TransformManagementSection } from './transform_management_section';
@@ -54,7 +53,7 @@ jest.mock('../../serverless_context', () => ({
 }));
 
 jest.mock('./components/transform_list', () => ({
-  TransformList: ({ onCreateTransform }) => (
+  TransformList: ({ onCreateTransform }: { onCreateTransform: () => void }) => (
     <button data-test-subj="mockCreateTransformButton" onClick={onCreateTransform}>
       Create transform
     </button>
@@ -71,7 +70,7 @@ jest.mock('./components/dangling_task_warning/dangling_task_warning', () => ({
 
 jest.mock('../../../alerting/transform_alerting_flyout', () => ({
   AlertRulesManageContext: {
-    Provider: ({ children }) => <>{children}</>,
+    Provider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   },
   getAlertRuleManageContext: () => ({}),
   TransformAlertFlyoutWrapper: () => null,
