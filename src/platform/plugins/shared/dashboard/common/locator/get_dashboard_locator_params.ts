@@ -46,6 +46,4 @@ export const getDashboardLocatorParamsFromEmbeddable = (
   params.filters = options.use_filters ? filters : filters?.filter((f) => isFilterPinned(f));
 
   return params;
-
-  return params;
 };
