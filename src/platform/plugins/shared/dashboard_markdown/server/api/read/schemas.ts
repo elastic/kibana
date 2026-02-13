@@ -8,16 +8,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  baseMetaSchema,
-  createdMetaSchema,
-  resolveMetaSchema,
-  updatedMetaSchema,
-} from '../meta_schemas';
+import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
 import { markdownAttributesSchema } from '../../markdown_saved_object/schema/v1';
 
 export const readResponseBodySchema = schema.object({
   id: schema.string(),
   data: markdownAttributesSchema,
-  meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema, resolveMetaSchema]),
+  meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
 });

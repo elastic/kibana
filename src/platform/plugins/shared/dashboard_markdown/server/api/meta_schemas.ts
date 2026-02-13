@@ -30,15 +30,3 @@ export const updatedMetaSchema = schema.object({
   updated_at: schema.maybe(schema.string()),
   updated_by: schema.maybe(schema.string()),
 });
-
-export const resolveMetaSchema = schema.object({
-  outcome: schema.oneOf([
-    schema.literal('exactMatch'),
-    schema.literal('aliasMatch'),
-    schema.literal('conflict'),
-  ]),
-  alias_target_id: schema.maybe(schema.string()),
-  alias_purpose: schema.maybe(
-    schema.oneOf([schema.literal('savedObjectConversion'), schema.literal('savedObjectImport')])
-  ),
-});
