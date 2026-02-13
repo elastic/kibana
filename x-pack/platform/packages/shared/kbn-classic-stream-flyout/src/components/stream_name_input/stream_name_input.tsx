@@ -98,10 +98,18 @@ export const StreamNameInput = ({
         z-index: 1;
       }
 
-      /* Prevent truncation on labels */
       .euiFormControlLayout__prepend,
       .euiFormControlLayout__append {
+        /* Prevent truncation on labels */
         max-width: none;
+
+        &::before {
+          height: 100%;
+        }
+      }
+
+      .euiFormControlLayout {
+        background: ${euiTheme.components.forms.backgroundReadOnly};
       }
     `;
   };
