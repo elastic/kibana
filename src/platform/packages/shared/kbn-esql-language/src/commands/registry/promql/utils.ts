@@ -529,7 +529,7 @@ function getLabelMapTextFallbackPosition(text: string, cursor: number): PromqlPo
       .slice(openBraceIndex + 1)
       .split(',')
       .pop() ?? '';
-  const trimmedEntryBeforeCursor = selectorEntryBeforeCursor.trimEnd();
+  const trimmedEntryBeforeCursor = selectorEntryBeforeCursor.trim();
   const entryHeadIdentifier = getTrailingIdentifier(trimmedEntryBeforeCursor);
   const afterCursor = text.slice(cursor).trimStart();
   const nextChar = afterCursor[0];
@@ -549,7 +549,7 @@ function getLabelMapTextFallbackPosition(text: string, cursor: number): PromqlPo
   const tailAfterIdentifier = leadingIdentifierMatch[2]?.trimStart() ?? '';
 
   if (tailAfterIdentifier.length === 0) {
-    return undefined;
+    return { type: 'after_label_name' };
   }
 
   if (tailAfterIdentifier.includes('"') || tailAfterIdentifier.includes("'")) {
