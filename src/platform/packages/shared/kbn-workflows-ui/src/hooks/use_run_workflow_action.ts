@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import { useMutation } from '@kbn/react-query';
-import type { UseMutationOptions } from '@kbn/react-query';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useMutation, type UseMutationOptions } from '@kbn/react-query';
 import type { RunWorkflowCommand, RunWorkflowResponseDto } from '@kbn/workflows';
-import { useKibana } from '../../../hooks/use_kibana';
 
 export type RunWorkflowActionParams = RunWorkflowCommand & {
   id: string;
@@ -28,6 +27,9 @@ export const useRunWorkflowAction = (
   return useMutation<RunWorkflowResponseDto, HttpError, RunWorkflowActionParams>({
     mutationKey: ['POST', 'workflows', 'id', 'run'],
     mutationFn: ({ id, inputs }) => {
+      if (!http) {
+        return Promise.reject(new Error('Http service is not available'));
+      }
       return http.post(`/api/workflows/${id}/run`, {
         body: JSON.stringify({ inputs }),
       });

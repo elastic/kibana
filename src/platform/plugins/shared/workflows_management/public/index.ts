@@ -15,4 +15,3 @@ export function plugin() {
   return new WorkflowsPlugin();
 }
 export type { WorkflowsPublicPluginSetup, WorkflowsPublicPluginStart } from './types';
-export { useRunWorkflowAction } from './entities/workflows/model/use_run_workflow_action';
