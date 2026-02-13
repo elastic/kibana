@@ -80,6 +80,11 @@ export function createNavigationTree({
         link: 'agent_builder',
       },
       {
+        link: 'data_sources',
+        icon: 'plugs',
+        badgeType: 'techPreview',
+      },
+      {
         link: 'workflows',
       },
       {
