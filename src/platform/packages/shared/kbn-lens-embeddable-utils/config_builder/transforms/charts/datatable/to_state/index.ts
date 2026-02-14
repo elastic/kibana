@@ -95,6 +95,6 @@ export function buildVisualizationState(config: DatatableState): DatatableVisual
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
     ...buildAppearanceState(config),
-    columns: metrics.concat(rows, splitMetrics),
+    columns: rows.concat(splitMetrics, metrics),
   };
 }
