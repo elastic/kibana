@@ -6,8 +6,9 @@
  */
 
 import Boom from '@hapi/boom';
-import { Request, Response } from '@kbn/core-di-server';
+import { Request, Response, type RouteHandler } from '@kbn/core-di-server';
 import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { inject, injectable } from 'inversify';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
@@ -20,7 +21,7 @@ import {
 } from './schemas/alert_action_schema';
 
 @injectable()
-export class CreateAlertActionRoute {
+export class CreateAlertActionRoute implements RouteHandler {
   static method = 'post' as const;
   static path = `${INTERNAL_ALERTING_V2_ALERT_API_PATH}/{group_hash}/action`;
   static security: RouteSecurity = {
@@ -31,8 +32,8 @@ export class CreateAlertActionRoute {
   static options = { access: 'internal' } as const;
   static validate = {
     request: {
-      params: createAlertActionParamsSchema,
-      body: createAlertActionBodySchema,
+      params: buildRouteValidationWithZod(createAlertActionParamsSchema),
+      body: buildRouteValidationWithZod(createAlertActionBodySchema),
     },
   } as const;
 

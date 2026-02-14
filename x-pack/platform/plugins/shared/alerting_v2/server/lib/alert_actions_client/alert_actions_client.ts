@@ -17,11 +17,11 @@ import type {
 } from '../../routes/schemas/alert_action_schema';
 import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
 import { type QueryServiceContract } from '../services/query_service/query_service';
+import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
-import { QueryServiceInternalToken } from '../services/query_service/tokens';
 
 @injectable()
 export class AlertActionsClient {
@@ -96,10 +96,10 @@ export class AlertActionsClient {
   private async fetchLastAlertEventRecordsForActions(
     actions: BulkCreateAlertActionItemBody[]
   ): Promise<AlertEventRecord[]> {
-    let whereClause = esql.exp`TRUE`;
+    let whereClause = esql.exp`FALSE`;
     for (const action of actions) {
       whereClause = esql.exp`${whereClause} OR (group_hash == ${action.group_hash} AND ${
-        'episode_id' in action ? esql.exp`episode.id == ${action.episode_id}` : esql.exp`true`
+        'episode_id' in action ? esql.exp`episode.id == ${action.episode_id}` : esql.exp`TRUE`
       })`;
     }
 
