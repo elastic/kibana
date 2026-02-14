@@ -198,7 +198,7 @@ const treemapStateSchemaESQL = schema.object(
 
 export const treemapStateSchema = schema.oneOf([treemapStateSchemaNoESQL, treemapStateSchemaESQL], {
   meta: {
-    id: 'treemapChartSchema',
+    id: 'treemapChart',
     description:
       'Treemap chart configuration schema supporting both data source queries (non-ES|QL) and ES|QL query modes',
   },

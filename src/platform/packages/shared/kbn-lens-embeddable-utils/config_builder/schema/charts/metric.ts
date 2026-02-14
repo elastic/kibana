@@ -320,7 +320,7 @@ export const esqlMetricState = schema.object({
 });
 
 export const metricStateSchema = schema.oneOf([metricStateSchemaNoESQL, esqlMetricState], {
-  meta: { id: 'metricChartSchema' },
+  meta: { id: 'metricChart' },
 });
 
 export type MetricState = TypeOf<typeof metricStateSchema>;

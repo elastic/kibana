@@ -138,7 +138,7 @@ export const heatmapStateSchemaESQL = schema.object(
 );
 
 export const heatmapStateSchema = schema.oneOf([heatmapStateSchemaNoESQL, heatmapStateSchemaESQL], {
-  meta: { id: 'heatmapChartSchema' },
+  meta: { id: 'heatmapChart' },
 });
 
 export type HeatmapState = TypeOf<typeof heatmapStateSchema>;

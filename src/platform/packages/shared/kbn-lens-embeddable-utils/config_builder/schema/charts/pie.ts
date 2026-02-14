@@ -189,7 +189,7 @@ const pieStateSchemaESQL = schema.object(
 export const pieStateSchema = schema.oneOf([pieStateSchemaNoESQL, pieStateSchemaESQL], {
   meta: {
     description: 'Pie/donut chart state: standard query or ES|QL query',
-    id: 'pieChartSchema',
+    id: 'pieChart',
   },
 });
 

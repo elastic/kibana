@@ -152,7 +152,7 @@ const waffleStateSchemaESQL = schema.object(
  */
 export const waffleStateSchema = schema.oneOf([waffleStateSchemaNoESQL, waffleStateSchemaESQL], {
   meta: {
-    id: 'waffleChartSchema',
+    id: 'waffleChart',
     description: 'Waffle chart configuration: DSL or ES|QL query based',
   },
 });

@@ -110,7 +110,7 @@ const esqlLegacyMetricState = schema.object(
 export const legacyMetricStateSchema = schema.oneOf(
   [legacyMetricStateSchemaNoESQL, esqlLegacyMetricState],
   {
-    meta: { id: 'legacyMetricChartSchema' },
+    meta: { id: 'legacyMetricChart' },
   }
 );
 

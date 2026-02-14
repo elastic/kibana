@@ -725,7 +725,7 @@ export const xyStateSchema = schema.object(
       }
     ),
   },
-  { meta: { id: 'xyChartSchema', description: 'Complete XY chart configuration' } }
+  { meta: { id: 'xyChart', description: 'Complete XY chart configuration' } }
 );
 
 export type XYState = TypeOf<typeof xyStateSchema>;
