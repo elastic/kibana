@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useMemo } from 'react';
 import { useController, useFormContext } from 'react-hook-form';
 import { useListWorkflows } from '../../../../../hooks/tools/use_list_workflows';
 import type { WorkflowToolFormData } from '../../types/tool_form_types';
 
 export const WorkflowPicker: React.FC = () => {
-  const { control, trigger } = useFormContext<WorkflowToolFormData>();
+  const { control, trigger, setValue } = useFormContext<WorkflowToolFormData>();
   const {
     field: { value, onChange, onBlur, name },
     fieldState,
@@ -50,6 +50,18 @@ export const WorkflowPicker: React.FC = () => {
   ) => {
     const selectedWorkflowId = newSelectedOptions.length > 0 ? newSelectedOptions[0].value : '';
     onChange(selectedWorkflowId);
+
+    // Auto-populate description from the workflow definition, mirroring MCP tool behavior.
+    // Clear it when the workflow selection is removed.
+    if (selectedWorkflowId) {
+      const selectedWorkflow = workflows?.find((w) => w.id === selectedWorkflowId);
+      if (selectedWorkflow?.description) {
+        setValue('description', selectedWorkflow.description, { shouldValidate: true });
+      }
+    } else {
+      setValue('description', '', { shouldValidate: true });
+    }
+
     await trigger(name);
   };
 
