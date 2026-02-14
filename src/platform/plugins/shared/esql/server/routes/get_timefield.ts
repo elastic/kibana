@@ -9,9 +9,14 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
-import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import {
+  expandIndexPatternWithViewsList,
+  getIndexPatternFromESQLQuery,
+  getTimeFieldFromESQLQuery,
+} from '@kbn/esql-utils';
 import { Parser, isSubQuery } from '@kbn/esql-language';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
+import { EsqlService } from '../services/esql_service';
 
 /**
  * Registers the ESQL get timefield route.
@@ -66,14 +71,17 @@ export const registerGetTimeFieldRoute = (
           body: { timeField: undefined },
         });
       }
-      const sources = getIndexPatternFromESQLQuery(query);
+      const rawSources = getIndexPatternFromESQLQuery(query);
+      const service = new EsqlService({ client: core.elasticsearch.client.asCurrentUser });
+      const { views } = await service.getViews().catch(() => ({ views: [] }));
+      const sources = expandIndexPatternWithViewsList(rawSources, views);
       const subqueryArgs = sourceCommand.args.filter(isSubQuery);
       const hasSubqueries = subqueryArgs.length > 0;
 
       try {
         // in case of subqueries we need to check all indices separately
         const indices = hasSubqueries ? sources.split(',') : [sources];
-        const fieldCapsPromises = indices.map((index) =>
+        const fieldCapsPromises = indices.map((index: string) =>
           client.fieldCaps({
             index,
             fields: '@timestamp',

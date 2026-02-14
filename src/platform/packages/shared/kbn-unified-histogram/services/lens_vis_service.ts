@@ -490,6 +490,13 @@ export class LensVisService {
     preferredVisAttributes?: UnifiedHistogramVisContext['attributes'];
   }): Suggestion | undefined => {
     const { dataView, query, timeRange, columns } = queryParams;
+    if (
+      dataView.timeFieldName &&
+      columns &&
+      !columns.some((column) => column.name === dataView.timeFieldName)
+    ) {
+      return undefined;
+    }
     const breakdownColumn = breakdownField?.name
       ? columns?.find((column) => column.name === breakdownField.name)
       : undefined;
