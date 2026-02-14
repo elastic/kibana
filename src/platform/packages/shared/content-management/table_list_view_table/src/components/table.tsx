@@ -366,6 +366,7 @@ export function Table<T extends UserContentCommonSchema>({
         clearTagSelection={clearTagSelection}
       >
         <EuiInMemoryTable<T>
+          tableLayout="auto"
           itemId="id"
           items={visibleItems}
           columns={tableColumns}
