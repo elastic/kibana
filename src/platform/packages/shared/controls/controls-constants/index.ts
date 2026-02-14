@@ -20,8 +20,6 @@ export {
 } from './src/controls_group_constants';
 
 export {
-  CONTROL_HOVER_TRIGGER_ID,
-  CONTROL_MENU_TRIGGER,
   ESQL_CONTROL,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,

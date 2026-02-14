@@ -80,15 +80,15 @@ export const doctorCmd: Command<void> = {
     if (scoutProcesses === null) {
       runtimeChecks.push({ label: 'Scout server', status: 'unknown (pgrep not available)' });
     } else if (scoutIsRunning) {
-      const configDirMatch = scoutProcesses.match(/--config-dir(?:=|\s+)(\S+)/);
-      const configDir = configDirMatch?.[1];
-      const mode = scoutProcesses.includes('--stateful')
+      const serverConfigSetMatch = scoutProcesses.match(/--serverConfigSet(?:=|\s+)(\S+)/);
+      const configDir = serverConfigSetMatch?.[1];
+      const targetArch = /--arch(?:=|\s+)stateful/.test(scoutProcesses)
         ? 'stateful'
-        : scoutProcesses.includes('--serverless')
+        : /--arch(?:=|\s+)serverless/.test(scoutProcesses)
         ? 'serverless'
         : undefined;
 
-      const details = [mode, configDir ? `config-dir=${configDir}` : undefined]
+      const details = [targetArch, configDir ? `serverConfigSet=${configDir}` : undefined]
         .filter(Boolean)
         .join(', ');
 
@@ -130,7 +130,9 @@ export const doctorCmd: Command<void> = {
 
     log.info('Common local flow:');
     log.info('  1) Start Scout with tracing enabled (recommended):');
-    log.info('     node scripts/scout.js start-server --stateful --config-dir evals_tracing');
+    log.info(
+      '     node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet evals_tracing'
+    );
     log.info('     # This enables OTLP export to http://localhost:4318/v1/traces');
     log.info('  2) Run EDOT collector to capture traces (uses kibana.dev.yml by default):');
     log.info('     node scripts/edot_collector.js');

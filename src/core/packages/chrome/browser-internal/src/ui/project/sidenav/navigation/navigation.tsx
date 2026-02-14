@@ -34,7 +34,6 @@ export interface ChromeNavigationProps {
   // kibana deps
   basePath: BasePath;
   application: Pick<ApplicationStart, 'navigateToUrl' | 'currentAppId$'>;
-  reportEvent: (eventType: string, eventData: object) => void;
 
   // nav state
   navigationTree$: Observable<NavigationTreeDefinitionUI>;

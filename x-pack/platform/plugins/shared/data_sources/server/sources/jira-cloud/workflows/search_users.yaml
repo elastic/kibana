@@ -1,0 +1,37 @@
+version: '1'
+name: 'sources.jira.search_users'
+description: 'Find Jira users by name, username, or email. Use when you need a user accountId (e.g. for JQL assignee filters) or to look up user details. Inputs: query (string), username (string), accountId (string), startAt (number), maxResults (number), property (string); all optional.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: query
+    type: string
+    required: false
+  - name: username
+    type: string
+    required: false
+  - name: accountId
+    type: string
+    required: false
+  - name: startAt
+    type: number
+    required: false
+  - name: maxResults
+    type: number
+    required: false
+  - name: property
+    type: string
+    required: false
+steps:
+  - name: search-users
+    type: jira-cloud.searchUsers
+    connector-id: <%= jira-cloud-stack-connector-id %>
+    with:
+      query: "${{inputs.query}}"
+      username: "${{inputs.username}}"
+      accountId: "${{inputs.accountId}}"
+      startAt: ${{inputs.startAt}}
+      maxResults: ${{inputs.maxResults}}
+      property: "${{inputs.property}}"
