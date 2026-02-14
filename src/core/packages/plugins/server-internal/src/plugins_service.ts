@@ -36,6 +36,7 @@ import type { PluginsConfigType } from './plugins_config';
 import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { createBrowserConfig } from './create_browser_config';
+import { NodeRemoteService } from '@kbn/core/packages/node/server';
 
 /** @internal */
 export type DiscoveredPlugins = {
@@ -118,12 +119,12 @@ export class PluginsService
         airgapped,
       },
       nodeInfo: {
-        roles: node.roles,
+        roles: node.roles
       },
     });
 
     await this.handleDiscoveryErrors(error$);
-    await this.handleDiscoveredPlugins(plugin$);
+    await this.handleDiscoveredPlugins(plugin$, node.service, node.remoteServices);
 
     const prebootUiPlugins = this.prebootPluginsSystem.uiPlugins();
     const standardUiPlugins = this.standardPluginsSystem.uiPlugins();
@@ -263,12 +264,20 @@ export class PluginsService
     }
   }
 
-  private async handleDiscoveredPlugins(plugin$: Observable<PluginWrapper>) {
+  private async handleDiscoveredPlugins(plugin$: Observable<PluginWrapper>, service?: string, remoteServices?: NodeRemoteService[]) {
     const pluginEnableStatuses = new Map<
       PluginName,
       { plugin: PluginWrapper; isEnabled: boolean }
     >();
-    const plugins = await firstValueFrom(plugin$.pipe(toArray()));
+    let plugins = await firstValueFrom(plugin$.pipe(toArray()));
+    
+    if (service != null) {
+      plugins = onlyServiceAndDependencies(plugins, service);
+    }
+
+    if (remoteServices != null) {
+      plugins = excludeServices(plugins, remoteServices.map(rs => rs.name));
+    }
 
     // Register config descriptors and deprecations
     for (const plugin of plugins) {
@@ -337,18 +346,19 @@ export class PluginsService
     const disabledPlugins = [];
     const disabledDependants = [];
     const disabledDependantsCauses = new Set<string>();
-    const pluginEnablementCache = new Map<PluginName, PluginEnablementResult>();
+    const pluginDependenciesAvailibilityCache = new Map<PluginName, AllDependenciesAvailableResult>();
 
+    
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
       this.validatePluginDependencies(plugin, pluginEnableStatuses);
 
-      const pluginEnablement = shouldEnablePlugin({
+      const allDependenciesAvailableResult = allDependenciesAvailable({
         pluginName,
         pluginEnableStatuses,
-        cache: pluginEnablementCache,
+        cache: pluginDependenciesAvailibilityCache,
       });
 
-      if (pluginEnablement.enabled) {
+      if (allDependenciesAvailableResult.success) {
         if (plugin.manifest.type === PluginType.preboot) {
           this.prebootPluginsSystem.addPlugin(plugin);
         } else {
@@ -356,7 +366,7 @@ export class PluginsService
         }
       } else if (isEnabled) {
         disabledDependants.push(pluginName);
-        pluginEnablement.missingOrIncompatibleDependencies.forEach((dependency) =>
+        allDependenciesAvailableResult.missingOrIncompatibleDependencies.forEach((dependency) =>
           disabledDependantsCauses.add(dependency)
         );
       } else {
@@ -420,11 +430,11 @@ export class PluginsService
   }
 }
 
-type PluginEnablementResult =
-  | { enabled: true }
-  | { enabled: false; missingOrIncompatibleDependencies: string[] };
+type AllDependenciesAvailableResult =
+  | { success: true }
+  | { success: false; missingOrIncompatibleDependencies: string[] };
 
-function shouldEnablePlugin({
+function allDependenciesAvailable({
   pluginName,
   pluginEnableStatuses,
   cache,
@@ -432,9 +442,9 @@ function shouldEnablePlugin({
 }: {
   pluginName: PluginName;
   pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>;
-  cache: Map<PluginName, PluginEnablementResult>;
+  cache: Map<PluginName, AllDependenciesAvailableResult>;
   parents?: PluginName[];
-}): PluginEnablementResult {
+}): AllDependenciesAvailableResult {
   const cachedValue = cache.get(pluginName);
   if (cachedValue) {
     return cachedValue;
@@ -442,10 +452,10 @@ function shouldEnablePlugin({
 
   const pluginInfo = pluginEnableStatuses.get(pluginName);
 
-  let result: PluginEnablementResult;
+  let result: AllDependenciesAvailableResult;
   if (pluginInfo === undefined || !pluginInfo.isEnabled) {
     result = {
-      enabled: false,
+      success: false,
       missingOrIncompatibleDependencies: [],
     };
   } else {
@@ -455,21 +465,21 @@ function shouldEnablePlugin({
         (dependencyName) =>
           pluginEnableStatuses.get(dependencyName)?.plugin.manifest.type !==
             pluginInfo.plugin.manifest.type ||
-          !shouldEnablePlugin({
+          !allDependenciesAvailable({
             pluginName: dependencyName,
             pluginEnableStatuses,
             parents: [...parents, pluginName],
             cache,
-          }).enabled
+          }).success
       );
 
     if (missingOrIncompatibleDependencies.length === 0) {
       result = {
-        enabled: true,
+        success: true,
       };
     } else {
       result = {
-        enabled: false,
+        success: false,
         missingOrIncompatibleDependencies,
       };
     }
@@ -477,4 +487,35 @@ function shouldEnablePlugin({
 
   cache.set(pluginName, result);
   return result;
+}
+
+function onlyServiceAndDependencies(allPlugins: PluginWrapper[], service: string) : PluginWrapper[] {
+  // start with only the plugins that are explicit for this service
+  const servicePlugins = new Set(allPlugins.filter(p => p.manifest.service == service));
+
+  // prepare a map, so we can lookup a plugin by just its name
+  const map = allPlugins.reduce((m, p) => { m.set(p.name, p); return m; }, new Map<string, PluginWrapper>());
+
+  // we're going to iterate over the set of servicePlugins. for each plugin, we are going to add its
+  // dependencies to the servicePlugins set using the map. by the end of this process, we'll
+  // have just the plugins and the dependencies
+  for (const servicePlugin of servicePlugins) {
+    for (const dep of servicePlugin.optionalPlugins) {
+      servicePlugins.add(map.get(dep)!);
+    }
+
+    for (const dep of servicePlugin.requiredPlugins) {
+      servicePlugins.add(map.get(dep)!);
+    }
+
+    for (const dep of servicePlugin.requiredBundles) {
+      servicePlugins.add(map.get(dep)!);
+    }
+  }
+
+  return Array.from(servicePlugins);
+}
+
+function excludeServices(allPlugins: PluginWrapper[], services: string[]) {
+  return allPlugins.filter(p => !services.includes(p.name) );
 }
