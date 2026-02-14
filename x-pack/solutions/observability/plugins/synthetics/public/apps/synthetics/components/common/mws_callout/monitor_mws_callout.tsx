@@ -9,6 +9,8 @@ import React from 'react';
 import { useFetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MwsCalloutContent } from './mws_callout_content';
+import { MwsPendingSyncCallout } from './mws_pending_sync_callout';
+import { useMwPendingSync } from './use_mw_pending_sync';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 import { useSelectedMonitor } from '../../monitor_details/hooks/use_selected_monitor';
 import type { ClientPluginsStart } from '../../../../../plugin';
@@ -20,17 +22,30 @@ export const MonitorMWsCallout = () => {
   const { data } = useFetchActiveMaintenanceWindows(services, {
     enabled: true,
   });
+
+  const monitorMWs = monitor?.[ConfigKey.MAINTENANCE_WINDOWS];
+  const hasMonitorMWs = !!(monitorMWs && monitorMWs.length > 0);
+
+  const activeMWs =
+    hasMonitorMWs && data?.length ? data.filter((mw) => monitorMWs.includes(mw.id)) : [];
+
+  const activeIdsKey = activeMWs
+    .map((mw) => mw.id)
+    .sort()
+    .join(',');
+
+  const { showPendingSync, syncInterval } = useMwPendingSync({ activeIdsKey, hasMonitorMWs });
+
   if (!monitor) {
     return null;
   }
-  const monitorMWs = monitor[ConfigKey.MAINTENANCE_WINDOWS];
-  const hasMonitorMWs = monitorMWs && monitorMWs.length > 0;
 
-  if (data?.length && hasMonitorMWs) {
-    const activeMWs = data.filter((mw) => monitorMWs.includes(mw.id));
-    if (activeMWs) {
-      return <MwsCalloutContent activeMWs={activeMWs} />;
-    }
+  if (activeMWs.length) {
+    return <MwsCalloutContent activeMWs={activeMWs} />;
+  }
+
+  if (showPendingSync) {
+    return <MwsPendingSyncCallout syncInterval={syncInterval} />;
   }
 
   return null;
