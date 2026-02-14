@@ -191,7 +191,7 @@ export const SourceDataSelector: FC<SourceDataSelectorProps> = React.memo(
               aria-label={i18n.translate('xpack.transform.sourceDataSelector.modalAriaLabel', {
                 defaultMessage: 'Choose a source',
               })}
-              data-test-subj="transformSourceDataSelectorModal"
+              data-test-subj="transformSelectSourceModal"
             >
               <SearchSelection
                 onSearchSelected={(id: string) => {

@@ -74,7 +74,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       // Source selection is now done from within the wizard via the data selector modal.
       await testSubjects.click('transformSourceDataSelectorButton');
-      await testSubjects.existOrFail('transformSourceDataSelectorModal');
+      await testSubjects.existOrFail('transformSelectSourceModal');
       await transform.sourceSelection.selectSource('logstash-2015.09.22');
 
       await transform.datePicker.assertUseFullDataButtonVisible(true);
