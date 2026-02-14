@@ -17,14 +17,16 @@ interface Props {
   initialSlo?: SLODefinitionResponse;
   errors?: string[];
   onSelected: (slo: SLODefinitionResponse | undefined) => void;
+  hasInteracted?: boolean;
+  setHasInteracted?: (hasInteracted: boolean) => void;
 }
 
-function SloSelector({ initialSlo, onSelected, errors }: Props) {
+function SloSelector({ initialSlo, onSelected, errors, hasInteracted, setHasInteracted }: Props) {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
   const { isLoading, data } = useFetchSloDefinitions({ name: searchValue });
-  const hasError = errors !== undefined && errors.length > 0;
+  const hasError = hasInteracted && errors !== undefined && errors.length > 0;
 
   useEffect(() => {
     setSelectedOptions(initialSlo ? [{ value: initialSlo.id, label: initialSlo.name }] : []);
@@ -39,6 +41,7 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
   }, [isLoading, data]);
 
   const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
+    setHasInteracted?.(true);
     setSelectedOptions(opts);
     const selectedSlo =
       opts.length === 1 ? data?.results?.find((slo) => slo.id === opts[0].value) : undefined;
@@ -67,6 +70,9 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
         selectedOptions={selectedOptions}
         async
         isLoading={isLoading}
+        onBlur={() => {
+          setHasInteracted?.(true);
+        }}
         onChange={onChange}
         fullWidth
         onSearchChange={onSearchChange}
