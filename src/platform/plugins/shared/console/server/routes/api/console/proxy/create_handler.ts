@@ -89,13 +89,19 @@ export const createHandler =
     const { hosts } = legacyConfig;
     let esIncomingMessage: IncomingMessage;
 
-    // Resolve the requested host back to a configured host. The client receives URLs
-    // with credentials stripped, so we match by comparing stripped versions to find
-    // the original configured host (which may contain credentials needed for auth).
+    // Validate that the requested host is one of the configured Elasticsearch hosts.
+    // The client receives URLs with credentials stripped, so we match by comparing
+    // stripped versions to find the original configured host (which may contain
+    // credentials needed for auth). Reject any host not in the allowlist to prevent SSRF.
     let host = hosts[0];
     if (requestHost) {
       const match = hosts.find((h) => stripCredentialsFromUrl(h) === requestHost);
-      host = match || requestHost;
+      if (!match) {
+        return response.badRequest({
+          body: 'Host is not configured in elasticsearch.hosts',
+        });
+      }
+      host = match;
     }
     try {
       const uri = toURL(host, path);
