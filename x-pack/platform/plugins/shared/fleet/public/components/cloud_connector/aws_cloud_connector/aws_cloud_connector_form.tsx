@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiAccordion, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
 
 import { CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ } from '../../../../common/services/cloud_connectors/test_subjects';
-import { extractRawCredentialVars } from '../../../../common';
+import { extractRawCredentialVars, ORGANIZATION_ACCOUNT } from '../../../../common';
 import { type CloudConnectorFormProps } from '../types';
 
 import {
@@ -35,11 +35,13 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   cloud,
   updatePolicy,
   hasInvalidRequiredVars = false,
-  isOrganization = false,
   templateName,
   credentials,
   setCredentials,
+  accountType,
 }) => {
+  const isOrganization = accountType === ORGANIZATION_ACCOUNT;
+
   const cloudConnectorRemoteRoleTemplate =
     cloud && templateName
       ? getCloudConnectorRemoteRoleTemplate({

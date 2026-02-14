@@ -10,6 +10,7 @@ import React from 'react';
 import type { NewCloudConnectorFormProps } from '../types';
 import { AWSCloudConnectorForm } from '../aws_cloud_connector/aws_cloud_connector_form';
 import { AzureCloudConnectorForm } from '../azure_cloud_connector/azure_cloud_connector_form';
+import { GCPCloudConnectorForm } from '../gcp_cloud_connector/gcp_cloud_connector_form';
 import { AWS_PROVIDER, AZURE_PROVIDER } from '../constants';
 
 export const NewCloudConnectorForm: React.FC<NewCloudConnectorFormProps> = ({
@@ -24,6 +25,7 @@ export const NewCloudConnectorForm: React.FC<NewCloudConnectorFormProps> = ({
   credentials,
   setCredentials,
   hasInvalidRequiredVars,
+  accountType,
 }) => {
   // Default to AWS if no cloudProvider is specified
   const provider = cloudProvider || AWS_PROVIDER;
@@ -43,6 +45,7 @@ export const NewCloudConnectorForm: React.FC<NewCloudConnectorFormProps> = ({
           cloudProvider={provider}
           credentials={credentials}
           setCredentials={setCredentials}
+          accountType={accountType}
         />
       );
     case AZURE_PROVIDER:
@@ -58,11 +61,26 @@ export const NewCloudConnectorForm: React.FC<NewCloudConnectorFormProps> = ({
           hasInvalidRequiredVars={hasInvalidRequiredVars}
           credentials={credentials}
           setCredentials={setCredentials}
+          accountType={accountType}
         />
       );
     case 'gcp':
-      // TODO: Implement GCP cloud connector forms
-      return null;
+      return (
+        <GCPCloudConnectorForm
+          templateName={templateName || ''}
+          input={input}
+          newPolicy={newPolicy}
+          packageInfo={packageInfo}
+          updatePolicy={updatePolicy}
+          isEditPage={isEditPage}
+          cloud={cloud}
+          hasInvalidRequiredVars={hasInvalidRequiredVars}
+          cloudProvider={provider}
+          credentials={credentials}
+          setCredentials={setCredentials}
+          accountType={accountType}
+        />
+      );
     default:
       return null;
   }

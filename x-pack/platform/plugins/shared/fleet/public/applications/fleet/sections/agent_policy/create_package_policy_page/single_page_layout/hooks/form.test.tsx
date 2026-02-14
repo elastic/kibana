@@ -694,7 +694,7 @@ describe('useOnSubmit', () => {
       });
     });
 
-    it('should clear cloud_connectors and set supports_cloud_connector to false for gcp', () => {
+    it('should update agentless cloud connector config when enabled and target CSP is gcp', () => {
       const setNewAgentPolicy = jest.fn();
       const setPackagePolicy = jest.fn();
 
@@ -707,6 +707,60 @@ describe('useOnSubmit', () => {
               {
                 vars: {
                   'gcp.supports_cloud_connectors': { value: true },
+                },
+              },
+            ],
+          },
+        ],
+        supports_cloud_connector: true,
+      } as any;
+
+      const newAgentPolicy = {
+        supports_agentless: true,
+        agentless: {
+          cloud_connectors: {
+            enabled: false,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      updateAgentlessCloudConnectorConfig(
+        packagePolicy,
+        newAgentPolicy,
+        setNewAgentPolicy,
+        setPackagePolicy
+      );
+
+      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+        ...newAgentPolicy,
+        agentless: {
+          ...newAgentPolicy.agentless,
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'gcp',
+          },
+        },
+      });
+      expect(setPackagePolicy).toHaveBeenCalledWith({
+        ...packagePolicy,
+        supports_cloud_connector: true,
+      });
+    });
+
+    it('should set cloud_connectors enabled to false and supports_cloud_connector to false for gcp when cloud connector input var is false', () => {
+      const setNewAgentPolicy = jest.fn();
+      const setPackagePolicy = jest.fn();
+
+      const packagePolicy = {
+        inputs: [
+          {
+            type: 'gcp',
+            enabled: true,
+            streams: [
+              {
+                vars: {
+                  'gcp.supports_cloud_connectors': { value: false },
                 },
               },
             ],
@@ -736,7 +790,10 @@ describe('useOnSubmit', () => {
         ...newAgentPolicy,
         agentless: {
           ...newAgentPolicy.agentless,
-          cloud_connectors: undefined,
+          cloud_connectors: {
+            enabled: false,
+            target_csp: 'gcp',
+          },
         },
       });
       expect(setPackagePolicy).toHaveBeenCalledWith({

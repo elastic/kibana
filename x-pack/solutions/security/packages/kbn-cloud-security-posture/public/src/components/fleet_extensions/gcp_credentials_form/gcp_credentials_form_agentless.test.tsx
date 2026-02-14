@@ -14,6 +14,7 @@ import type {
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
 import { ORGANIZATION_ACCOUNT } from '@kbn/fleet-plugin/common';
+import { SetupTechnology } from '@kbn/fleet-plugin/common/types';
 
 import { GcpCredentialsFormAgentless } from './gcp_credentials_form_agentless';
 
@@ -24,6 +25,7 @@ jest.mock('../utils');
 jest.mock('../utils', () => ({
   getTemplateUrlFromPackageInfo: jest.fn(),
   updatePolicyWithInputs: jest.fn(),
+  getCloudCredentialVarsConfig: jest.fn().mockReturnValue({}),
   gcpField: {
     fields: {
       'gcp.project_id': { label: 'Project ID', type: 'text' },
@@ -31,7 +33,6 @@ jest.mock('../utils', () => ({
       'gcp.credentials.json': { label: 'Credentials JSON', type: 'password' },
     },
   },
-  getGcpInputVarsFields: jest.fn(),
 }));
 
 jest.mock('./gcp_setup_info', () => ({
@@ -94,7 +95,6 @@ const { useCloudSetup: mockUseCloudSetup } = jest.requireMock('../hooks/use_clou
 const {
   getTemplateUrlFromPackageInfo: mockGetTemplateUrlFromPackageInfo,
   updatePolicyWithInputs: mockUpdatePolicyWithInputs,
-  getGcpInputVarsFields: mockGetGcpInputVarsFields,
 } = jest.requireMock('../utils');
 
 const renderWithIntl = (component: React.ReactElement) =>
@@ -170,22 +170,8 @@ const getDefaultGcpAgentlessCloudSetup = () => ({
   templateName: 'cspm',
   gcpPolicyType: 'cloudbeat/cis_gcp',
   gcpOverviewPath: '/app/cloud-security-posture/overview/gcp',
+  isGcpCloudConnectorEnabled: false,
 });
-
-const getMockGcpAgentlessFields = () => [
-  {
-    id: 'gcp.project_id',
-    label: 'Project ID',
-    type: 'text' as const,
-    value: 'test-project',
-  },
-  {
-    id: 'gcp.credentials.json',
-    label: 'Credentials JSON',
-    type: 'password' as const,
-    value: '{"type":"service_account"}',
-  },
-];
 
 describe('GcpCredentialsFormAgentless', () => {
   const mockUpdatePolicy = jest.fn();
@@ -200,10 +186,10 @@ describe('GcpCredentialsFormAgentless', () => {
     packageInfo: mockPackageInfo,
     disabled: false,
     hasInvalidRequiredVars: false,
+    setupTechnology: SetupTechnology.AGENTLESS,
   };
 
   const defaultCloudSetup = getDefaultGcpAgentlessCloudSetup();
-  const mockFields = getMockGcpAgentlessFields();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -211,8 +197,6 @@ describe('GcpCredentialsFormAgentless', () => {
     mockUpdatePolicyWithInputs.mockImplementation(
       (policy: NewPackagePolicy): NewPackagePolicy => policy
     );
-    // Ensure getGcpInputVarsFields always returns an array
-    mockGetGcpInputVarsFields.mockReturnValue(mockFields);
     mockGetTemplateUrlFromPackageInfo.mockReturnValue(
       'https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/elastic/cloudbeat&cloudshell_workspace=deploy/cloud&shellonly=true&cloudshell_tutorial=deploy/cloud/cloud-shell-gcp.md&env_vars=CLOUD_SHELL_DEPLOYMENT_TYPE=cspm,CLOUD_SHELL_CSPM_ACCOUNT_TYPE=single-account'
     );
@@ -271,7 +255,7 @@ describe('GcpCredentialsFormAgentless', () => {
       renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} />);
 
       expect(screen.getByTestId('organization-state')).toHaveTextContent('false');
-      expect(mockGetGcpInputVarsFields).toHaveBeenCalled();
+      expect(screen.getByTestId('gcp-input-var-fields')).toBeInTheDocument();
     });
 
     it('generates correct cloud shell URL for single account', () => {
@@ -360,7 +344,7 @@ describe('GcpCredentialsFormAgentless', () => {
       it('filters fields correctly for single account', () => {
         renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} />);
 
-        expect(mockGetGcpInputVarsFields).toHaveBeenCalled();
+        expect(screen.getByTestId('gcp-input-var-fields')).toBeInTheDocument();
       });
 
       it('filters fields correctly for organization account', () => {
@@ -382,7 +366,7 @@ describe('GcpCredentialsFormAgentless', () => {
 
         renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} input={orgInput} />);
 
-        expect(mockGetGcpInputVarsFields).toHaveBeenCalled();
+        expect(screen.getByTestId('gcp-input-var-fields')).toBeInTheDocument();
       });
     });
   });
