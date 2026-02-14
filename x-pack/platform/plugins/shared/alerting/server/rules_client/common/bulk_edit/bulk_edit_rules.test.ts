@@ -438,6 +438,7 @@ describe('bulkEditRules', () => {
       rules: [],
       skipped: [],
       username: undefined,
+      legacyActionsMigratedRuleIds: [],
     });
     expect(updateFn).toHaveBeenNthCalledWith(2, {
       apiKeysMap: expect.any(Map),
@@ -446,6 +447,7 @@ describe('bulkEditRules', () => {
       rules: [],
       skipped: [],
       username: undefined,
+      legacyActionsMigratedRuleIds: [],
     });
     expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
   });

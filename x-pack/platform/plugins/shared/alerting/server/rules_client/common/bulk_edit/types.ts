@@ -60,4 +60,5 @@ export interface UpdateOperationOpts {
   skipped: BulkEditActionSkipResult[];
   errors: BulkOperationError[];
   username: string | null;
+  legacyActionsMigratedRuleIds: string[];
 }
