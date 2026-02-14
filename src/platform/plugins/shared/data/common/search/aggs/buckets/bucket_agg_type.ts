@@ -97,6 +97,11 @@ export class BucketAggType<TBucketAggConfig extends IAggConfig = IBucketAggConfi
   }
 }
 
-export function isBucketAggType(aggConfig: any): aggConfig is BucketAggType {
-  return aggConfig && aggConfig.type === bucketType;
+export function isBucketAggType(aggConfig: unknown): aggConfig is BucketAggType {
+  return (
+    typeof aggConfig === 'object' &&
+    aggConfig !== null &&
+    'type' in aggConfig &&
+    (aggConfig as BucketAggType).type === bucketType
+  );
 }

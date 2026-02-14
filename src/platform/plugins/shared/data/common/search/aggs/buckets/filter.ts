@@ -91,7 +91,7 @@ export const getFilterBucketAgg = ({
             ? moment(calculateBounds(aggConfigs.timeRange).max)
             : undefined;
 
-          output.params =
+          output.params = (
             !timeWindow || !timeRangeAnchor || !aggConfig.getIndexPattern().timeFieldName
               ? query
               : {
@@ -116,7 +116,8 @@ export const getFilterBucketAgg = ({
                       query ? query : undefined,
                     ].filter(Boolean),
                   },
-                };
+                }
+          ) as Record<string, any>;
         },
         toExpressionAst: queryToAst,
       },

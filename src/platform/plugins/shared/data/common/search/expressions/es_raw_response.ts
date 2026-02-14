@@ -18,22 +18,22 @@ export interface EsRawResponse<T = unknown> {
 }
 
 // flattens elasticsearch object into table rows
-function flatten(obj: any, keyPrefix = '') {
-  let topLevelKeys: Record<string, any> = {};
-  const nestedRows: any[] = [];
+function flatten(obj: Record<string, unknown>, keyPrefix = '') {
+  let topLevelKeys: Record<string, unknown> = {};
+  const nestedRows: Array<Record<string, unknown>> = [];
   const prefix = keyPrefix ? keyPrefix + '.' : '';
   Object.keys(obj).forEach((key) => {
     if (Array.isArray(obj[key])) {
       nestedRows.push(
-        ...obj[key]
-          .map((nestedRow: any) => flatten(nestedRow, prefix + key))
-          .reduce((acc: unknown[], object: unknown[]) => {
+        ...(obj[key] as unknown[])
+          .map((nestedRow: unknown) => flatten(nestedRow as Record<string, unknown>, prefix + key))
+          .reduce((acc: Array<Record<string, unknown>>, object: Array<Record<string, unknown>>) => {
             acc.push(...object);
             return acc;
           }, [])
       );
     } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-      const subRows = flatten(obj[key], prefix + key);
+      const subRows = flatten(obj[key] as Record<string, unknown>, prefix + key);
       if (subRows.length === 1) {
         topLevelKeys = { ...topLevelKeys, ...subRows[0] };
       } else {
@@ -50,12 +50,18 @@ function flatten(obj: any, keyPrefix = '') {
   }
 }
 
-const parseRawDocs = (hits: estypes.SearchResponse<unknown>['hits']) => {
-  return hits.hits.map((hit) => hit.fields || hit._source).filter((hit) => hit);
+const parseRawDocs = (
+  hits: estypes.SearchResponse<unknown>['hits']
+): Array<Record<string, unknown>> => {
+  return hits.hits
+    .map((hit) => hit.fields || hit._source)
+    .filter((hit): hit is Record<string, unknown> => hit != null);
 };
 
-const convertResult = (body: estypes.SearchResponse<unknown>) => {
-  return !body.aggregations ? parseRawDocs(body.hits) : flatten(body.aggregations);
+const convertResult = (body: estypes.SearchResponse<unknown>): Array<Record<string, unknown>> => {
+  return !body.aggregations
+    ? parseRawDocs(body.hits)
+    : flatten(body.aggregations as Record<string, unknown>);
 };
 
 export type EsRawResponseExpressionTypeDefinition = ExpressionTypeDefinition<

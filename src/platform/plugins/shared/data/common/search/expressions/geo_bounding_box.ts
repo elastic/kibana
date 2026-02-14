@@ -97,19 +97,21 @@ type GeoPointsArguments =
 
 type GeoBoundingBoxArguments = GeoBox | GeoPointsArguments | WellKnownText;
 
-function isGeoBox(value: any): value is GeoBox {
-  return value?.top != null && value?.left != null && value?.bottom != null && value?.right != null;
+function isGeoBox(value: unknown): value is GeoBox {
+  const v = value as Record<string, unknown> | null | undefined;
+  return v?.top != null && v?.left != null && v?.bottom != null && v?.right != null;
 }
 
-function isGeoPoints(value: any): value is GeoPointsArguments {
+function isGeoPoints(value: unknown): value is GeoPointsArguments {
+  const v = value as Record<string, unknown> | null | undefined;
   return (
-    (value?.topLeft != null && value?.bottomRight != null) ||
-    (value?.topRight != null && value?.bottomLeft != null)
+    (v?.topLeft != null && v?.bottomRight != null) || (v?.topRight != null && v?.bottomLeft != null)
   );
 }
 
-function isWellKnownText(value: any): value is WellKnownText {
-  return value?.wkt != null;
+function isWellKnownText(value: unknown): value is WellKnownText {
+  const v = value as Record<string, unknown> | null | undefined;
+  return v?.wkt != null;
 }
 
 export type ExpressionFunctionGeoBoundingBox = ExpressionFunctionDefinition<

@@ -47,7 +47,7 @@ interface EsdslStartDependencies {
 export const getEsdslFn = ({
   getStartDependencies,
 }: {
-  getStartDependencies: (getKibanaRequest: any) => Promise<EsdslStartDependencies>;
+  getStartDependencies: (getKibanaRequest: unknown) => Promise<EsdslStartDependencies>;
 }) => {
   const esdsl: EsdslExpressionFunctionDefinition = {
     name,
@@ -87,7 +87,9 @@ export const getEsdslFn = ({
       const dsl = JSON.parse(args.dsl);
 
       if (input) {
-        const esQueryConfigs = getEsQueryConfig(uiSettingsClient as any);
+        const esQueryConfigs = getEsQueryConfig(
+          uiSettingsClient as Parameters<typeof getEsQueryConfig>[0]
+        );
         const query = buildEsQuery(
           undefined, //        args.index,
           input.query || [],

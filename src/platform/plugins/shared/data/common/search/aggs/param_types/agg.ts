@@ -10,6 +10,7 @@
 import type { IAggConfig, AggConfigSerialized } from '../agg_config';
 import { AggConfig } from '../agg_config';
 import { BaseParamType } from './base';
+import type { AggParamOutput } from './base';
 
 export class AggParamType<
   TAggConfig extends IAggConfig = IAggConfig
@@ -25,7 +26,7 @@ export class AggParamType<
     }
 
     if (!config.write) {
-      this.write = (aggConfig: TAggConfig, output: Record<string, any>) => {
+      this.write = (aggConfig: TAggConfig, output: AggParamOutput) => {
         if (aggConfig.params[this.name] && aggConfig.params[this.name].length) {
           output.params[this.name] = aggConfig.params[this.name];
         }

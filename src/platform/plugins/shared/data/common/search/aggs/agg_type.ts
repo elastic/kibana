@@ -23,6 +23,10 @@ import type { IAggConfigs } from './agg_configs';
 import { BaseParamType } from './param_types/base';
 import type { AggParamType } from './param_types/agg';
 
+export interface AggTypeOrdered {
+  date?: boolean;
+}
+
 type PostFlightRequestFn<TAggConfig> = (
   resp: estypes.SearchResponse<any>,
   aggConfigs: IAggConfigs,
@@ -45,7 +49,7 @@ export interface AggTypeConfig<
   dslName?: string;
   expressionName: string;
   makeLabel?: ((aggConfig: TAggConfig) => string) | (() => string);
-  ordered?: any;
+  ordered?: AggTypeOrdered;
   hasNoDsl?: boolean;
   hasNoDslParams?: boolean;
   params?: Array<Partial<TParam>>;
@@ -54,7 +58,7 @@ export interface AggTypeConfig<
   getResponseAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   customLabels?: boolean;
   json?: boolean;
-  decorateAggConfig?: () => any;
+  decorateAggConfig?: () => PropertyDescriptorMap;
   postFlightRequest?: PostFlightRequestFn<TAggConfig>;
   hasPrecisionError?: (aggBucket: Record<string, unknown>) => boolean;
   getSerializedFormat?: (agg: TAggConfig) => SerializedFieldFormat;
@@ -130,7 +134,7 @@ export class AggType<
    * @property ordered
    * @type {object|undefined}
    */
-  ordered: any;
+  ordered: AggTypeOrdered | undefined;
   /**
    * Flag that prevents this aggregation from being included in the dsl. This is only
    * used by the count aggregation (currently) since it doesn't really exist and it's output
@@ -184,7 +188,7 @@ export class AggType<
    * A function that will be called each time an aggConfig of this type
    * is created, giving the agg type a chance to modify the agg config
    */
-  decorateAggConfig: () => any;
+  decorateAggConfig: () => PropertyDescriptorMap;
 
   hasPrecisionError?: (aggBucket: Record<string, unknown>) => boolean;
 
@@ -287,7 +291,7 @@ export class AggType<
           name: 'json',
           type: 'json',
           advanced: true,
-        });
+        } as Partial<TParam>);
       }
 
       // always append custom label
@@ -300,7 +304,7 @@ export class AggType<
           }),
           type: 'string',
           write: noop,
-        });
+        } as Partial<TParam>);
       }
 
       this.params = initParams(params);

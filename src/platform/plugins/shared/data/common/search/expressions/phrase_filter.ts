@@ -63,7 +63,7 @@ export const phraseFilterFunction: ExpressionFunctionPhraseFilter = {
       return {
         type: 'kibana_filter',
         ...buildFilter(
-          {} as any as DataView,
+          {} as unknown as DataView,
           args.field.spec,
           FILTERS.PHRASE,
           args.negate || false,

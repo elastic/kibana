@@ -12,6 +12,7 @@ import { SavedFieldTypeInvalidForAgg } from '@kbn/kibana-utils-plugin/common';
 import { isNestedField, DataViewField } from '@kbn/data-views-plugin/common';
 import type { IAggConfig } from '../agg_config';
 import { BaseParamType } from './base';
+import type { AggParamOutput } from './base';
 import { propFilter } from '../utils';
 import { KBN_FIELD_TYPES } from '../../../kbn_field_types/types';
 
@@ -46,7 +47,7 @@ export class FieldParamType extends BaseParamType {
 
     // TODO - are there any custom write methods that do a missing check?
     if (!config.write) {
-      this.write = (aggConfig: IAggConfig, output: Record<string, any>) => {
+      this.write = (aggConfig: IAggConfig, output: AggParamOutput) => {
         const field = aggConfig.getField();
 
         if (!field) {
@@ -64,7 +65,7 @@ export class FieldParamType extends BaseParamType {
         const validField =
           field.type === KBN_FIELD_TYPES.MISSING // missing fields are always valid
             ? field
-            : this.getAvailableFields(aggConfig).find((f: any) => f.name === field.name);
+            : this.getAvailableFields(aggConfig).find((f: DataViewField) => f.name === field.name);
 
         if (!validField) {
           throw new SavedFieldTypeInvalidForAgg(
