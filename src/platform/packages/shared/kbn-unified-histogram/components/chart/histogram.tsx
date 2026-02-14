@@ -79,6 +79,9 @@ export function Histogram({
     & .lnsExpressionRenderer {
       width: ${attributes.visualizationType === 'lnsMetric' ? '90%' : '100%'};
       margin: auto;
+      border: ${attributes.visualizationType === 'lnsMetric'
+        ? `1px solid ${euiTheme.colors.borderBaseSubdued}`
+        : 'none'};
     }
 
     & .echLegend .echLegendList {
