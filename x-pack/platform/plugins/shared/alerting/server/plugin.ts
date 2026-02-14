@@ -773,7 +773,9 @@ export class AlertingPlugin {
       () => {}
     ); // it shouldn't reject, but just in case
 
-    this.uiamApiKeyProvisioningTask?.start(plugins.taskManager).catch(() => {});
+    this.uiamApiKeyProvisioningTask
+      ?.start({ core, taskManager: plugins.taskManager })
+      .catch(() => {});
 
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),

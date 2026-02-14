@@ -10,6 +10,7 @@ import type {
   CoreSetup,
   SavedObjectsBulkUpdateObject,
   SavedObjectsClientContract,
+  CoreStart,
 } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
@@ -36,13 +37,16 @@ import {
 import { generateUiamKeysForRules } from './generate_uiam_keys_for_rules';
 import type { AlertingPluginsStart } from '../plugin';
 
+const PROVISION_UIAM_API_KEYS_FLAG = 'alerting.rules.provisionUiamApiKeys';
+
 export const API_KEY_PROVISIONING_TASK_ID = 'api_key_provisioning';
 export const API_KEY_PROVISIONING_TASK_TYPE = `alerting:${API_KEY_PROVISIONING_TASK_ID}`;
-export const API_KEY_PROVISIONING_TASK_TASK_SCHEDULE: IntervalSchedule = { interval: '10m' };
+export const API_KEY_PROVISIONING_TASK_TASK_SCHEDULE: IntervalSchedule = { interval: '1h' };
 
 export class UiamApiKeyProvisioningTask {
   private readonly logger: Logger;
   private readonly isServerless: boolean;
+  private isTaskScheduled: boolean | undefined = undefined;
 
   constructor({ logger, isServerless }: { logger: Logger; isServerless: boolean }) {
     this.logger = logger;
@@ -72,9 +76,7 @@ export class UiamApiKeyProvisioningTask {
         stateSchemaByVersion,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
-            run: async () => {
-              return this.runTask(taskInstance, core);
-            },
+            run: async () => this.runTask(taskInstance, core),
             cancel: async () => {},
           };
         },
@@ -82,7 +84,13 @@ export class UiamApiKeyProvisioningTask {
     });
   }
 
-  public start = async (taskManager?: TaskManagerStartContract) => {
+  public start = async ({
+    core,
+    taskManager,
+  }: {
+    core: CoreStart;
+    taskManager: TaskManagerStartContract;
+  }) => {
     if (!this.isServerless) {
       return;
     }
@@ -93,19 +101,37 @@ export class UiamApiKeyProvisioningTask {
       return;
     }
 
-    try {
-      await taskManager.ensureScheduled({
-        id: API_KEY_PROVISIONING_TASK_ID,
-        taskType: API_KEY_PROVISIONING_TASK_TYPE,
-        schedule: API_KEY_PROVISIONING_TASK_TASK_SCHEDULE,
-        state: emptyState,
-        params: {},
-      });
-    } catch (e) {
-      this.logger.error(
-        `Error scheduling task ${API_KEY_PROVISIONING_TASK_TYPE}, received ${e.message}`
-      );
-    }
+    const applyFlag = async (enabled: boolean) => {
+      if (enabled && this.isTaskScheduled !== true) {
+        try {
+          await taskManager.ensureScheduled({
+            id: API_KEY_PROVISIONING_TASK_ID,
+            taskType: API_KEY_PROVISIONING_TASK_TYPE,
+            schedule: API_KEY_PROVISIONING_TASK_TASK_SCHEDULE,
+            state: emptyState,
+            params: {},
+          });
+          this.isTaskScheduled = true;
+        } catch (e) {
+          this.logger.error(
+            `Error scheduling task ${API_KEY_PROVISIONING_TASK_TYPE}, received ${e.message}`
+          );
+        }
+      } else if (!enabled && this.isTaskScheduled === true) {
+        try {
+          await taskManager.removeIfExists(API_KEY_PROVISIONING_TASK_ID);
+          this.isTaskScheduled = false;
+        } catch (e) {
+          this.logger.error(
+            `Error removing task ${API_KEY_PROVISIONING_TASK_TYPE}, received ${e.message}`
+          );
+        }
+      }
+    };
+
+    core.featureFlags.getBooleanValue$(PROVISION_UIAM_API_KEYS_FLAG, false).subscribe((enabled) => {
+      applyFlag(enabled).catch(() => {});
+    });
   };
 
   /**
