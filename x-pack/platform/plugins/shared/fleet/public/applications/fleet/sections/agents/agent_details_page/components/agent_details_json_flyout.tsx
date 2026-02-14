@@ -30,7 +30,8 @@ import { MAX_FLYOUT_WIDTH } from '../../../../constants';
 
 export const AgentDetailsJsonFlyout = memo<{ agent: Agent; onClose: () => void }>(
   ({ agent, onClose }) => {
-    const agentToJson = JSON.stringify(agent, null, 2);
+    const agentWithoutEffectiveConfig = { ...agent, effective_config: undefined };
+    const agentToJson = JSON.stringify(agentWithoutEffectiveConfig, null, 2);
     const agentName =
       typeof agent.local_metadata?.host?.hostname === 'string'
         ? agent.local_metadata.host.hostname
