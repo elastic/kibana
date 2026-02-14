@@ -10,7 +10,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import { unflattenObject } from '@kbn/object-utils';
 import fs from 'fs';
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import { pickBy, identity } from 'lodash';
 import { resolve } from 'path';
 
@@ -49,7 +49,7 @@ export const readKibanaConfig = (log: ToolingLog, configPath?: string): KibanaCo
   let serverConfigValues = {};
 
   if (fs.existsSync(configPathToUse)) {
-    const loaded = (yaml.load(fs.readFileSync(configPathToUse, 'utf8')) || {}) as Record<
+    const loaded = (parse(fs.readFileSync(configPathToUse, 'utf8')) || {}) as Record<
       string,
       any
     >;
