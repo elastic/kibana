@@ -62,6 +62,8 @@ import { SecurityService } from '@kbn/core-security-server-internal';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
 import { PricingService } from '@kbn/core-pricing-server-internal';
 import { CoreInjectionService } from '@kbn/core-di-server-internal';
+import { SpanStatusCode } from '@opentelemetry/api';
+import { withActiveSpan } from '@kbn/tracing-utils';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { coreConfig, type CoreConfigType } from './core_config';
@@ -180,9 +182,29 @@ export class Server {
     const prebootStartUptime = performance.now();
     const prebootTransaction = apm.startTransaction('server-preboot', 'kibana-platform');
 
+    return withActiveSpan(
+      'server-preboot',
+      { attributes: { 'transaction.type': 'kibana-platform' } },
+      async () => {
+        try {
+          const corePreboot = await this.#preboot(disablePreboot);
+          prebootTransaction.end();
+          this.uptimePerStep.preboot = { start: prebootStartUptime, end: performance.now() };
+          return corePreboot;
+        } catch (error) {
+          prebootTransaction.end('error');
+          throw error;
+        }
+      }
+    );
+  }
+
+  async #preboot(disablePreboot: boolean) {
     // service required for plugin discovery
     const analyticsPreboot = this.analytics.preboot();
-    const environmentPreboot = await this.environment.preboot({ analytics: analyticsPreboot });
+    const environmentPreboot = await this.environment.preboot({
+      analytics: analyticsPreboot,
+    });
     const nodePreboot = await this.node.preboot({ loggingSystem: this.loggingSystem });
     this.nodeRoles = nodePreboot.roles;
 
@@ -262,10 +284,6 @@ export class Server {
 
       this.coreApp.preboot(corePreboot, uiPlugins);
     }
-
-    prebootTransaction.end();
-    this.uptimePerStep.preboot = { start: prebootStartUptime, end: performance.now() };
-
     return corePreboot;
   }
 
@@ -274,6 +292,24 @@ export class Server {
     const setupStartUptime = performance.now();
     const setupTransaction = apm.startTransaction('server-setup', 'kibana-platform');
 
+    return withActiveSpan(
+      'server-setup',
+      { attributes: { 'transaction.type': 'kibana-platform' } },
+      async () => {
+        try {
+          const coreSetup = await this.#setup();
+          setupTransaction.end();
+          this.uptimePerStep.setup = { start: setupStartUptime, end: performance.now() };
+          return coreSetup;
+        } catch (error) {
+          setupTransaction.end('error');
+          throw error;
+        }
+      }
+    );
+  }
+
+  async #setup() {
     const analyticsSetup = this.analytics.setup();
 
     registerRootEvents(analyticsSetup);
@@ -428,8 +464,6 @@ export class Server {
     this.registerCoreContext(coreSetup);
     await this.coreApp.setup(coreSetup, uiPlugins);
 
-    setupTransaction.end();
-    this.uptimePerStep.setup = { start: setupStartUptime, end: performance.now() };
     return coreSetup;
   }
 
@@ -437,7 +471,38 @@ export class Server {
     this.log.debug('starting server');
     const startStartUptime = performance.now();
     const startTransaction = apm.startTransaction('server-start', 'kibana-platform');
+    return withActiveSpan(
+      'server-start',
+      { attributes: { 'transaction.type': 'kibana-platform' } },
+      async (span) => {
+        try {
+          const coreStart = await this.#start(startTransaction);
+          startTransaction.end();
+          this.uptimePerStep.start = { start: startStartUptime, end: performance.now() };
 
+          reportKibanaStartedEvent({
+            uptimeSteps: this.uptimePerStep as UptimeSteps,
+            analytics: coreStart.analytics,
+          });
+
+          return coreStart;
+        } catch (error) {
+          if (error instanceof CriticalError && error.code === MIGRATION_EXCEPTION_CODE) {
+            // Intentionally setting this span as sucessful as this is not an error condition.
+            // The `withActiveSpan` wrapper utility won't reset it to error because we're ending the span (and it checks that it's still recording before setting anything else).
+            span?.setStatus({ code: SpanStatusCode.OK });
+            span?.end();
+            startTransaction.end();
+          } else {
+            startTransaction.end('error');
+          }
+          throw error;
+        }
+      }
+    );
+  }
+
+  async #start(startTransaction: apm.Transaction) {
     const injectionStart = this.injection.start();
     const analyticsStart = this.analytics.start();
     const securityStart = this.security.start();
@@ -457,21 +522,36 @@ export class Server {
 
     const deprecationsStart = this.deprecations.start();
     const soStartSpan = startTransaction.startSpan('saved_objects.migration', 'migration');
-    const savedObjectsStart = await this.savedObjects.start({
-      elasticsearch: elasticsearchStart,
-      pluginsInitialized: this.#pluginsInitialized,
-      docLinks: docLinkStart,
-      node: await this.node.start(),
-    });
-    this.uptimePerStep.savedObjects = {
-      migrationTime: savedObjectsStart.metrics.migrationDuration,
-    };
-    await this.resolveSavedObjectsStartPromise!(savedObjectsStart);
-
-    soStartSpan?.end();
+    const savedObjectsStart = await withActiveSpan(
+      'saved_objects.migration',
+      {
+        attributes: {
+          'transaction.type': 'migration',
+        },
+      },
+      async () => {
+        try {
+          const _savedObjectsStart = await this.savedObjects.start({
+            elasticsearch: elasticsearchStart,
+            pluginsInitialized: this.#pluginsInitialized,
+            docLinks: docLinkStart,
+            node: await this.node.start(),
+          });
+          this.uptimePerStep.savedObjects = {
+            migrationTime: _savedObjectsStart.metrics.migrationDuration,
+          };
+          await this.resolveSavedObjectsStartPromise!(_savedObjectsStart);
+          soStartSpan?.end();
+          return _savedObjectsStart;
+        } catch (error) {
+          soStartSpan?.setOutcome('failure');
+          soStartSpan?.end();
+          throw error;
+        }
+      }
+    );
 
     if (this.nodeRoles?.migrator === true) {
-      startTransaction.end();
       this.log.info('Detected migrator node role; shutting down Kibana...');
       throw new CriticalError(
         'Migrations completed, shutting down Kibana',
@@ -528,15 +608,6 @@ export class Server {
     await this.plugins.start(this.coreStart);
 
     await this.http.start();
-
-    startTransaction.end();
-
-    this.uptimePerStep.start = { start: startStartUptime, end: performance.now() };
-
-    reportKibanaStartedEvent({
-      uptimeSteps: this.uptimePerStep as UptimeSteps,
-      analytics: analyticsStart,
-    });
 
     return this.coreStart;
   }
