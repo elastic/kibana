@@ -56,12 +56,17 @@ jest.mock('../state_management/stream_routing_state_machine', () => ({
 
 const condition: Condition = { field: 'service.name', eq: 'api' };
 
-const setupSuggestionsApi = () => {
+const setupSuggestionsApi = ({
+  reason,
+}: {
+  reason?: 'no_clusters' | 'no_samples' | 'all_data_partitioned';
+} = {}) => {
   const mockResponse = {
     partitions: [
       { name: 'logs.api', condition },
       { name: 'logs.ui', condition },
     ],
+    reason,
   };
 
   // Mock the Observable stream
@@ -85,6 +90,7 @@ describe('useReviewSuggestionsForm', () => {
   it('initializes with undefined suggestions and not loading', () => {
     const { result } = renderHook(() => useReviewSuggestionsForm());
     expect(result.current.suggestions).toBeUndefined();
+    expect(result.current.suggestionReason).toBeUndefined();
     expect(result.current.isLoadingSuggestions).toBe(false);
   });
 
@@ -120,7 +126,7 @@ describe('useReviewSuggestionsForm', () => {
   });
 
   it('resetForm clears suggestions and sends suggestion.preview blank event', async () => {
-    setupSuggestionsApi();
+    setupSuggestionsApi({ reason: 'all_data_partitioned' });
 
     const { result } = renderHook(() => useReviewSuggestionsForm());
 
@@ -140,6 +146,7 @@ describe('useReviewSuggestionsForm', () => {
     });
 
     expect(result.current.suggestions).toBeUndefined();
+    expect(result.current.suggestionReason).toBeUndefined();
     expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'suggestion.preview',
@@ -355,7 +362,7 @@ describe('useReviewSuggestionsForm', () => {
     const mockObservable = {
       subscribe: jest.fn((observer) => {
         resolveObserver = () => {
-          observer.next({ partitions: [] });
+          observer.next({ partitions: [], reason: 'no_clusters' as const });
           observer.complete();
         };
       }),
@@ -384,5 +391,22 @@ describe('useReviewSuggestionsForm', () => {
     });
 
     expect(result.current.isLoadingSuggestions).toBe(false);
+  });
+
+  it('sets suggestion reason from API response', async () => {
+    setupSuggestionsApi({ reason: 'all_data_partitioned' });
+
+    const { result } = renderHook(() => useReviewSuggestionsForm());
+
+    await act(async () => {
+      await result.current.fetchSuggestions({
+        streamName: 'test-stream',
+        connectorId: 'test-connector',
+        start: 0,
+        end: 1000,
+      });
+    });
+
+    expect(result.current.suggestionReason).toBe('all_data_partitioned');
   });
 });

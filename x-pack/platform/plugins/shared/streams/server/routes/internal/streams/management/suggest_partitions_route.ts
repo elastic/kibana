@@ -39,10 +39,7 @@ export const suggestPartitionsSchema = z.object({
 }) satisfies z.Schema<SuggestPartitionsParams>;
 
 type SuggestPartitionsResponse = Observable<
-  ServerSentEventBase<
-    'suggested_partitions',
-    { partitions: Awaited<ReturnType<typeof partitionStream>> }
-  >
+  ServerSentEventBase<'suggested_partitions', Awaited<ReturnType<typeof partitionStream>>>
 >;
 
 export const suggestPartitionsRoute = createServerRoute({
@@ -91,8 +88,8 @@ export const suggestPartitionsRoute = createServerRoute({
     // Turn our promise into an Observable ServerSideEvent. The only reason we're streaming the
     // response here is to avoid timeout issues prevalent with long-running requests to LLMs.
     return from(partitionsPromise).pipe(
-      map((partitions) => ({
-        partitions,
+      map((suggestions) => ({
+        ...suggestions,
         type: 'suggested_partitions' as const,
       }))
     );
