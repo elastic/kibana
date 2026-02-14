@@ -89,13 +89,13 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
       {loading && (
         <>
           <EuiProgress size="xs" color="accent" position="absolute" />
-          <HeaderSection title={i18n.ABOUT_TEXT} />
+          <HeaderSection title={i18n.ABOUT_TEXT} border={true} hideSubtitle={true} />
         </>
       )}
       {stepData != null && stepDataDetails != null && (
         <EuiFlexGroup gutterSize="xs" direction="column" className={fullHeight}>
           <EuiFlexItem grow={false} key="header">
-            <HeaderSection title={i18n.ABOUT_TEXT}>
+            <HeaderSection title={i18n.ABOUT_TEXT} border={true} hideSubtitle={true}>
               {toggleOptions.length > 0 && (
                 <EuiButtonGroup
                   options={toggleOptions}
@@ -179,7 +179,7 @@ function VerticalOverflowContent({
 }: PropsWithChildren<VerticalOverflowContentProps>): JSX.Element {
   return (
     <div
-      className={`eui-yScroll ${css`
+      className={`eui-yScroll eui-xScroll ${css`
         max-height: ${maxHeight}px;
       `}`}
     >
