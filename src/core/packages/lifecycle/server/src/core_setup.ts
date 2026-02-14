@@ -35,6 +35,7 @@ import type { SecurityServiceSetup } from '@kbn/core-security-server';
 import type { UserProfileServiceSetup } from '@kbn/core-user-profile-server';
 import type { CoreDiServiceSetup } from '@kbn/core-di';
 import type { DataStreamsSetup } from '@kbn/core-data-streams-server';
+import type { UserActivityServiceSetup } from '@kbn/core-user-activity-server';
 import type { CoreStart } from './core_start';
 
 /**
@@ -82,6 +83,8 @@ export interface CoreSetup<TPluginsStart extends Record<string, any> = {}, TStar
   userSettings: UserSettingsServiceSetup;
   /** {@link DeprecationsServiceSetup} */
   deprecations: DeprecationsServiceSetup;
+  /** {@link UserActivityServiceSetup} */
+  userActivity: UserActivityServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
   /** {@link RequestHandlerContextFactory} */
