@@ -34,8 +34,9 @@
     ],
     "optionalPlugins": [
       "agentBuilder",
-      "indexManagement",
       "contentConnectors",
+      "dataSources",
+      "indexManagement",
       "searchInferenceEndpoints",
       "searchPlayground",
       "usageCollection",

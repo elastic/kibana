@@ -24,6 +24,7 @@
       "sampleDataIngest",
       "dataViews",
       "agentBuilder",
+      "dataSources",
     ],
     "requiredBundles": [
       "kibanaReact"
