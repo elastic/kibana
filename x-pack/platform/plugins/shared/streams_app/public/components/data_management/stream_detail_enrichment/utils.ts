@@ -351,10 +351,42 @@ export const getFormStateFromActionStep = (
     };
   }
 
+  if (step.action === 'date') {
+    const { customIdentifier, parentId, ...restStep } = step;
+    // Merge with defaults to ensure array fields have proper initial values
+    const defaults = defaultDateProcessorFormState(sampleDocuments);
+    return structuredClone({
+      ...defaults,
+      ...restStep,
+      formats: restStep.formats ?? defaults.formats,
+    });
+  }
+
+  if (step.action === 'join') {
+    const { customIdentifier, parentId, ...restStep } = step;
+    // Merge with defaults to ensure array fields have proper initial values
+    const defaults = defaultJoinProcessorFormState();
+    return structuredClone({
+      ...defaults,
+      ...restStep,
+      from: restStep.from ?? defaults.from,
+    });
+  }
+
+  if (step.action === 'concat') {
+    const { customIdentifier, parentId, ...restStep } = step;
+    // Merge with defaults to ensure array fields have proper initial values
+    const defaults = defaultConcatProcessorFormState();
+    return structuredClone({
+      ...defaults,
+      ...restStep,
+      from: restStep.from ?? defaults.from,
+    });
+  }
+
   if (
     step.action === 'dissect' ||
     step.action === 'manual_ingest_pipeline' ||
-    step.action === 'date' ||
     step.action === 'drop_document' ||
     step.action === 'set' ||
     step.action === 'convert' ||
@@ -362,9 +394,7 @@ export const getFormStateFromActionStep = (
     step.action === 'math' ||
     step.action === 'uppercase' ||
     step.action === 'lowercase' ||
-    step.action === 'trim' ||
-    step.action === 'join' ||
-    step.action === 'concat'
+    step.action === 'trim'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({

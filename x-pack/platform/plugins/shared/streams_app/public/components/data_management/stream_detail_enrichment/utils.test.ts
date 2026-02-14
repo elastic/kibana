@@ -11,7 +11,12 @@ import { ALWAYS_CONDITION, convertUIStepsToDSL } from '@kbn/streamlang';
 import type { Streams } from '@kbn/streams-schema';
 import { type FieldDefinition, type FlattenRecord } from '@kbn/streams-schema';
 import { omit } from 'lodash';
-import { buildUpsertStreamRequestPayload, getDefaultFormStateByType } from './utils';
+import type { StreamlangProcessorDefinitionWithUIAttributes } from '@kbn/streamlang';
+import {
+  buildUpsertStreamRequestPayload,
+  getDefaultFormStateByType,
+  getFormStateFromActionStep,
+} from './utils';
 
 let grokCollection: GrokCollection;
 
@@ -140,6 +145,165 @@ describe('utils', () => {
       } else {
         throw new Error('Result is not a grok processor');
       }
+    });
+  });
+
+  describe('getFormStateFromActionStep()', () => {
+    const sampleDocs: FlattenRecord[] = [];
+    const formStateDependencies = { grokCollection };
+
+    describe('join processor', () => {
+      it('should return form state with default empty array for "from" when the step has a valid "from" array', () => {
+        const step: StreamlangProcessorDefinitionWithUIAttributes = {
+          customIdentifier: 'join-1',
+          parentId: null,
+          action: 'join',
+          from: ['field1', 'field2'],
+          to: 'combined',
+          delimiter: ',',
+          ignore_failure: true,
+          ignore_missing: true,
+          where: ALWAYS_CONDITION,
+        };
+
+        const result = getFormStateFromActionStep(sampleDocs, formStateDependencies, step);
+
+        expect(result).toEqual({
+          action: 'join',
+          from: ['field1', 'field2'],
+          to: 'combined',
+          delimiter: ',',
+          ignore_failure: true,
+          ignore_missing: true,
+          where: ALWAYS_CONDITION,
+        });
+      });
+
+      it('should default "from" to empty array when step is missing the "from" field', () => {
+        // Simulate a malformed step that is missing the 'from' array field
+        const step = {
+          customIdentifier: 'join-1',
+          parentId: null,
+          action: 'join',
+          to: 'combined',
+          delimiter: ',',
+          ignore_failure: true,
+          ignore_missing: true,
+          where: ALWAYS_CONDITION,
+        } as unknown as StreamlangProcessorDefinitionWithUIAttributes;
+
+        const result = getFormStateFromActionStep(sampleDocs, formStateDependencies, step);
+
+        expect(result).toMatchObject({
+          action: 'join',
+          from: [], // Should default to empty array, not undefined
+          to: 'combined',
+          delimiter: ',',
+        });
+      });
+    });
+
+    describe('date processor', () => {
+      it('should return form state with "formats" array when the step has valid formats', () => {
+        const step: StreamlangProcessorDefinitionWithUIAttributes = {
+          customIdentifier: 'date-1',
+          parentId: null,
+          action: 'date',
+          from: 'timestamp_field',
+          formats: ['ISO8601', 'UNIX'],
+          ignore_failure: true,
+          where: ALWAYS_CONDITION,
+        };
+
+        const result = getFormStateFromActionStep(sampleDocs, formStateDependencies, step);
+
+        expect(result).toMatchObject({
+          action: 'date',
+          from: 'timestamp_field',
+          formats: ['ISO8601', 'UNIX'],
+          ignore_failure: true,
+        });
+      });
+
+      it('should default "formats" to empty array when step is missing the "formats" field', () => {
+        // Simulate a malformed step that is missing the 'formats' array field
+        const step = {
+          customIdentifier: 'date-1',
+          parentId: null,
+          action: 'date',
+          from: 'timestamp_field',
+          ignore_failure: true,
+          where: ALWAYS_CONDITION,
+        } as unknown as StreamlangProcessorDefinitionWithUIAttributes;
+
+        const result = getFormStateFromActionStep(sampleDocs, formStateDependencies, step);
+
+        expect(result).toMatchObject({
+          action: 'date',
+          from: 'timestamp_field',
+          formats: [], // Should default to empty array, not undefined
+          ignore_failure: true,
+        });
+      });
+    });
+
+    describe('concat processor', () => {
+      it('should return form state with "from" array when the step has valid from entries', () => {
+        const step: StreamlangProcessorDefinitionWithUIAttributes = {
+          customIdentifier: 'concat-1',
+          parentId: null,
+          action: 'concat',
+          from: [
+            { type: 'field', value: 'field1' },
+            { type: 'literal', value: ' - ' },
+          ],
+          to: 'combined',
+          ignore_failure: true,
+          ignore_missing: true,
+          where: ALWAYS_CONDITION,
+        };
+
+        const result = getFormStateFromActionStep(sampleDocs, formStateDependencies, step);
+
+        expect(result).toMatchObject({
+          action: 'concat',
+          from: [
+            { type: 'field', value: 'field1' },
+            { type: 'literal', value: ' - ' },
+          ],
+          to: 'combined',
+        });
+      });
+
+      it('should default "from" to empty array when step is missing the "from" field', () => {
+        // Simulate a malformed step that is missing the 'from' array field
+        const step = {
+          customIdentifier: 'concat-1',
+          parentId: null,
+          action: 'concat',
+          to: 'combined',
+          ignore_failure: true,
+          ignore_missing: true,
+          where: ALWAYS_CONDITION,
+        } as unknown as StreamlangProcessorDefinitionWithUIAttributes;
+
+        const result = getFormStateFromActionStep(sampleDocs, formStateDependencies, step);
+
+        expect(result).toMatchObject({
+          action: 'concat',
+          from: [], // Should default to empty array, not undefined
+          to: 'combined',
+        });
+      });
+    });
+
+    it('should return default grok form state when step is undefined', () => {
+      const result = getFormStateFromActionStep(sampleDocs, formStateDependencies, undefined);
+
+      expect(result).toMatchObject({
+        action: 'grok',
+        patterns: [{ value: '' }],
+      });
     });
   });
 

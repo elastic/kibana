@@ -44,7 +44,7 @@ export const JoinProcessorForm = () => {
         <EuiComboBox
           isClearable
           options={fieldSuggestions.map((fieldSuggestion) => ({ label: fieldSuggestion.name }))}
-          selectedOptions={fromFields.value.map((field) => ({ label: field }))}
+          selectedOptions={(fromFields.value ?? []).map((field) => ({ label: field }))}
           onChange={(options) => fromFields.onChange(options.map((option) => option.label))}
           fullWidth
           isInvalid={fieldState.invalid}
