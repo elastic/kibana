@@ -77,7 +77,8 @@ export interface SavedSearchAttributes {
 }
 
 export type SavedSearchByValueAttributes = SavedSearchAttributes & {
-  references: Reference[];
+  /** @deprecated References are now extracted/injected by server transforms */
+  references?: Reference[];
 };
 
 /** @internal **/

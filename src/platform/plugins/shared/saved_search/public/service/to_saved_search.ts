@@ -32,10 +32,11 @@ export const byValueToSavedSearch = async <
   serializable?: Serialized
 ): Promise<ReturnType> => {
   const { sharingSavedObjectProps, managed } = result.metaInfo ?? {};
-
+  const { references, ...attributes } = result.attributes;
   return await convertToSavedSearch(
     {
-      ...splitReferences(result.attributes),
+      attributes,
+      references: references ?? [],
       savedSearchId: undefined,
       sharingSavedObjectProps,
       managed,
@@ -43,16 +44,4 @@ export const byValueToSavedSearch = async <
     createGetSavedSearchDeps(services),
     serializable
   );
-};
-
-const splitReferences = (attributes: SavedSearchByValueAttributes) => {
-  const { references, ...attrs } = attributes;
-
-  return {
-    references,
-    attributes: {
-      ...attrs,
-      description: attrs.description ?? '',
-    },
-  };
 };

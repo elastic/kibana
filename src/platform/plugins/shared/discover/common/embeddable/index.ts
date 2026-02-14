@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { inject, extract } from './search_inject_extract';
 export { getSearchEmbeddableTransforms } from './search_embeddable_transforms';

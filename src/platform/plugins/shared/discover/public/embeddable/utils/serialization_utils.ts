@@ -85,7 +85,7 @@ export const serializeState = ({
   savedObjectId?: string;
 }): SearchEmbeddableState => {
   const searchSource = savedSearch.searchSource;
-  const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
+  const searchSourceJSON = JSON.stringify(searchSource.getSerializedFields());
   const savedSearchAttributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
 
   if (savedObjectId) {
@@ -110,17 +110,10 @@ export const serializeState = ({
     };
   }
 
-  const state = {
-    attributes: {
-      ...savedSearchAttributes,
-      references: originalReferences,
-    },
-  };
-
   return {
     ...serializeTitles(),
     ...serializeTimeRange(),
     ...serializeDynamicActions?.(),
-    ...state,
+    attributes: savedSearchAttributes,
   };
 };
