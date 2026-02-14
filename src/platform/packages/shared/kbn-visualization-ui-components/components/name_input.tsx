@@ -37,6 +37,7 @@ export const NameInput = ({
         value={value}
         onChange={onChange}
         defaultValue={defaultValue}
+        allowFalsyValue
       />
     </EuiFormRow>
   );

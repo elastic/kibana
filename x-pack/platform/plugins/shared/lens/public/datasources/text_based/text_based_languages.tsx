@@ -234,18 +234,18 @@ export function getTextBasedDatasource({
           textBasedQueryColumns,
           c?.meta?.type
         );
-        return {
+        const column: TextBasedLayerColumn = {
           columnId: c.variable ?? c.id,
           fieldName: c.variable ? `??${c.variable}` : c.id,
           variable: c.variable,
-          label: c.name,
-          customLabel: c.id !== c.name,
+          label: '', // only set when a user changes the name of the column, otherwise we use the fieldName for display purposes
           meta: c.meta,
           // makes non-number fields to act as metrics, used for datatable suggestions
           ...(inMetricDimension && {
             inMetricDimension,
           }),
         };
+        return column;
       });
 
       addColumnsToCache(context.query, textBasedQueryColumns);

@@ -58,7 +58,7 @@ describe('last_value', () => {
       columnOrder: ['col1', 'col2'],
       columns: {
         col1: {
-          label: 'Top value of category',
+          label: '',
           dataType: 'string',
           isBucketed: true,
           operationType: 'terms',
@@ -70,7 +70,7 @@ describe('last_value', () => {
           sourceField: 'category',
         } as TermsIndexPatternColumn,
         col2: {
-          label: 'Last value of a',
+          label: '',
           dataType: 'number',
           isBucketed: false,
           sourceField: 'a',
@@ -146,6 +146,11 @@ describe('last_value', () => {
         },
       };
       const indexPattern = createMockedIndexPattern();
+
+      expect(
+        lastValueOperation.getDefaultLabel(oldColumn, layer.columns, createMockedIndexPattern())
+      ).toBe('Last value of source');
+
       const newNumberField = indexPattern.getFieldByName('bytes')!;
       const column = lastValueOperation.onFieldChange(oldColumn, newNumberField);
 
@@ -158,14 +163,16 @@ describe('last_value', () => {
           }),
         })
       );
-      expect(column.label).toContain('bytes');
+      expect(
+        lastValueOperation.getDefaultLabel(column, layer.columns, createMockedIndexPattern())
+      ).toBe('Last value of bytes');
     });
 
     it('should adjust filter if it is exists filter on the current field', () => {
       const oldColumn: LastValueIndexPatternColumn = {
         operationType: 'last_value',
         sourceField: 'source',
-        label: 'Last value of source',
+        label: '',
         isBucketed: true,
         dataType: 'string',
         filter: { language: 'kuery', query: 'source: *' },
@@ -189,7 +196,7 @@ describe('last_value', () => {
       const oldColumn: LastValueIndexPatternColumn = {
         operationType: 'last_value',
         sourceField: 'source',
-        label: 'Last value of source',
+        label: '',
         isBucketed: true,
         dataType: 'string',
         filter: { language: 'kuery', query: 'something_else: 123' },
@@ -213,7 +220,7 @@ describe('last_value', () => {
       const oldColumn: LastValueIndexPatternColumn = {
         operationType: 'last_value',
         sourceField: 'source',
-        label: 'Last value of source',
+        label: '',
         isBucketed: true,
         dataType: 'string',
         params: {
@@ -232,7 +239,7 @@ describe('last_value', () => {
       const oldColumn: LastValueIndexPatternColumn = {
         operationType: 'last_value',
         sourceField: 'bytes',
-        label: 'Last value of bytes',
+        label: '',
         isBucketed: false,
         dataType: 'number',
         params: {
@@ -253,7 +260,7 @@ describe('last_value', () => {
       const oldColumn: LastValueIndexPatternColumn = {
         operationType: 'last_value',
         sourceField: 'bytes',
-        label: 'Last value of bytes',
+        label: '',
         isBucketed: false,
         dataType: 'number',
         params: {
@@ -273,7 +280,7 @@ describe('last_value', () => {
       const oldColumn: LastValueIndexPatternColumn = {
         operationType: 'last_value',
         sourceField: 'bytes',
-        label: 'Last value of bytes',
+        label: '',
         isBucketed: false,
         dataType: 'number',
         params: {
@@ -297,7 +304,7 @@ describe('last_value', () => {
       const oldColumn: LastValueIndexPatternColumn = {
         operationType: 'last_value',
         sourceField: 'bytes',
-        label: 'Last value of bytes',
+        label: '',
         isBucketed: false,
         dataType: 'number',
         params: {
@@ -317,7 +324,7 @@ describe('last_value', () => {
       const oldColumn: LastValueIndexPatternColumn = {
         operationType: 'last_value',
         sourceField: 'bytes',
-        label: 'Last value of bytes',
+        label: '',
         isBucketed: false,
         dataType: 'number',
         params: {
@@ -511,7 +518,7 @@ describe('last_value', () => {
         layer: {
           columns: {
             col1: {
-              label: 'Count',
+              label: '',
               dataType: 'number',
               isBucketed: false,
               sourceField: '___records___',

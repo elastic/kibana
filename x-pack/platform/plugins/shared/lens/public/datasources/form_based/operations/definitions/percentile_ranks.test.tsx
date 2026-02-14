@@ -61,7 +61,7 @@ describe('percentile ranks', () => {
       columnOrder: ['col1', 'col2'],
       columns: {
         col1: {
-          label: 'Top value of category',
+          label: '',
           dataType: 'string',
           isBucketed: true,
           operationType: 'terms',
@@ -73,7 +73,7 @@ describe('percentile ranks', () => {
           sourceField: 'category',
         } as TermsIndexPatternColumn,
         col2: {
-          label: 'Percentile (100) of a',
+          label: '',
           dataType: 'number',
           isBucketed: false,
           sourceField: 'a',
@@ -162,13 +162,22 @@ describe('percentile ranks', () => {
       const oldColumn: PercentileRanksIndexPatternColumn = {
         operationType: 'percentile_rank',
         sourceField: 'bytes',
-        label: 'Percentile rank (100) of bytes',
+        label: '',
         isBucketed: true,
         dataType: 'number',
         params: {
           value: 100,
         },
       };
+
+      expect(
+        percentileRanksOperation.getDefaultLabel(
+          oldColumn,
+          layer.columns,
+          createMockedIndexPattern()
+        )
+      ).toBe('Percentile rank (100) of bytes');
+
       const indexPattern = createMockedIndexPattern();
       const newNumberField = indexPattern.getFieldByName('memory')!;
       const column = percentileRanksOperation.onFieldChange(oldColumn, newNumberField);
@@ -182,7 +191,9 @@ describe('percentile ranks', () => {
           }),
         })
       );
-      expect(column.label).toContain('memory');
+      expect(
+        percentileRanksOperation.getDefaultLabel(column, layer.columns, createMockedIndexPattern())
+      ).toBe('Percentile rank (100) of memory');
     });
   });
 
@@ -198,7 +209,9 @@ describe('percentile ranks', () => {
       });
       expect(percentileRanksColumn.dataType).toEqual('number');
       expect(percentileRanksColumn.params.value).toEqual(0);
-      expect(percentileRanksColumn.label).toEqual('Percentile rank (0) of test');
+      expect(
+        percentileRanksOperation.getDefaultLabel(percentileRanksColumn, {}, indexPattern)
+      ).toBe('Percentile rank (0) of test');
     });
 
     it('should create a percentile rank from formula', () => {
@@ -215,7 +228,9 @@ describe('percentile ranks', () => {
       );
       expect(percentileRanksColumn.dataType).toEqual('number');
       expect(percentileRanksColumn.params.value).toEqual(1024);
-      expect(percentileRanksColumn.label).toEqual('Percentile rank (1024) of test');
+      expect(
+        percentileRanksOperation.getDefaultLabel(percentileRanksColumn, {}, indexPattern)
+      ).toBe('Percentile rank (1024) of test');
     });
 
     it('should create a percentile rank from formula with filter', () => {
@@ -232,8 +247,10 @@ describe('percentile ranks', () => {
       );
       expect(percentileRanksColumn.dataType).toEqual('number');
       expect(percentileRanksColumn.params.value).toEqual(1024);
+      expect(
+        percentileRanksOperation.getDefaultLabel(percentileRanksColumn, {}, indexPattern)
+      ).toBe('Percentile rank (1024) of test');
       expect(percentileRanksColumn.filter).toEqual({ language: 'kuery', query: 'bytes > 100' });
-      expect(percentileRanksColumn.label).toEqual('Percentile rank (1024) of test');
     });
   });
 
@@ -304,7 +321,7 @@ describe('percentile ranks', () => {
         params: {
           value: 103,
         },
-        label: 'Percentile rank (103) of a',
+        label: '',
       });
     });
 

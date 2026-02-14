@@ -72,19 +72,12 @@ export const cumulativeSumOperation: OperationDefinition<
       column.timeShift
     );
   },
-  toExpression: (layer, columnId) => {
-    return dateBasedOperationToExpression(layer, columnId, 'cumulative_sum');
+  toExpression: (layer, columnId, indexPattern) => {
+    return dateBasedOperationToExpression(layer, columnId, 'cumulative_sum', {}, indexPattern);
   },
   buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
-    const ref = layer.columns[referenceIds[0]];
     return {
-      label: ofName(
-        ref && 'sourceField' in ref
-          ? indexPattern.getFieldByName(ref.sourceField)?.displayName
-          : undefined,
-        undefined,
-        previousColumn?.timeShift
-      ),
+      label: '',
       dataType: 'number',
       operationType: 'cumulative_sum',
       isBucketed: false,

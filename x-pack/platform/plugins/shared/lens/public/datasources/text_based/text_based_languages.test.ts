@@ -509,27 +509,28 @@ describe('Textbased Data Source', () => {
               {
                 columnId: 'bytes',
                 fieldName: 'bytes',
-                customLabel: false,
-                label: 'bytes',
+                label: '',
                 inMetricDimension: true,
                 meta: {
                   type: 'number',
                 },
+                variable: undefined,
               },
               {
                 columnId: 'dest',
                 fieldName: 'dest',
-                customLabel: false,
-                label: 'dest',
+                label: '',
                 meta: {
                   type: 'string',
                 },
+                variable: undefined,
               },
             ],
             index: '1',
             query: {
               esql: 'FROM "foo"',
             },
+            timeField: undefined,
           },
         },
       });
@@ -651,8 +652,7 @@ describe('Textbased Data Source', () => {
               {
                 columnId: '@timestamp',
                 fieldName: '@timestamp',
-                customLabel: false,
-                label: '@timestamp',
+                label: '',
                 inMetricDimension: true,
                 meta: {
                   type: 'date',
@@ -661,8 +661,7 @@ describe('Textbased Data Source', () => {
               {
                 columnId: 'dest',
                 fieldName: 'dest',
-                customLabel: false,
-                label: 'dest',
+                label: '',
                 inMetricDimension: true,
                 meta: {
                   type: 'string',

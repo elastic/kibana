@@ -285,12 +285,17 @@ describe('date_histogram', () => {
         },
       };
       const indexPattern = createMockedIndexPattern();
+      expect(
+        dateHistogramOperation.getDefaultLabel(oldColumn, layer.columns, createMockedIndexPattern())
+      ).toBe('timestampLabel');
       const newDateField = indexPattern.getFieldByName('start_date')!;
 
       const column = dateHistogramOperation.onFieldChange(oldColumn, newDateField);
       expect(column).toHaveProperty('sourceField', 'start_date');
       expect(column).toHaveProperty('params.interval', 'd');
-      expect(column.label).toContain('start_date');
+      expect(
+        dateHistogramOperation.getDefaultLabel(column, layer.columns, createMockedIndexPattern())
+      ).toBe('start_date');
     });
 
     it('should not change interval from auto when switching to a non primary time field', () => {
@@ -310,7 +315,7 @@ describe('date_histogram', () => {
       const column = dateHistogramOperation.onFieldChange(oldColumn, newDateField);
       expect(column).toHaveProperty('sourceField', 'start_date');
       expect(column).toHaveProperty('params.interval', 'auto');
-      expect(column.label).toContain('start_date');
+      expect(column.label).toEqual('');
     });
   });
 
@@ -375,7 +380,7 @@ describe('date_histogram', () => {
         columnOrder: ['col1'],
         columns: {
           col1: {
-            label: 'Value of timestamp',
+            label: '',
             dataType: 'date',
             isBucketed: true,
 
@@ -410,7 +415,7 @@ describe('date_histogram', () => {
         columnOrder: ['col1'],
         columns: {
           col1: {
-            label: 'Value of timestamp',
+            label: '',
             dataType: 'date',
             isBucketed: true,
 
@@ -452,7 +457,7 @@ describe('date_histogram', () => {
         columnOrder: ['col1'],
         columns: {
           col1: {
-            label: 'Value of timestamp',
+            label: '',
             dataType: 'date',
             isBucketed: true,
 
@@ -494,7 +499,7 @@ describe('date_histogram', () => {
         columnOrder: ['col1'],
         columns: {
           col1: {
-            label: 'Value of timestamp',
+            label: '',
             dataType: 'date',
             isBucketed: true,
 
@@ -536,7 +541,7 @@ describe('date_histogram', () => {
         columnOrder: ['col1'],
         columns: {
           col1: {
-            label: 'Value of timestamp',
+            label: '',
             dataType: 'date',
             isBucketed: true,
 

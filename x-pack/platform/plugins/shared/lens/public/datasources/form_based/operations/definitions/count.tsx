@@ -86,7 +86,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(field, oldColumn.timeShift, oldColumn.timeShift, oldColumn.reducedTimeRange),
+      label: '',
       sourceField: field.name,
     };
   },
@@ -112,12 +112,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   },
   buildColumn({ field, previousColumn }, columnParams) {
     return {
-      label: ofName(
-        field,
-        previousColumn?.timeShift,
-        previousColumn?.timeScale,
-        previousColumn?.reducedTimeRange
-      ),
+      label: '',
       dataType: 'number',
       operationType: COUNT_ID,
       isBucketed: false,

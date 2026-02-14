@@ -26,5 +26,6 @@ export const getValueApiColumn = (accessor: string, layer: TextBasedLayer) => {
   return {
     operation: 'value' as const,
     column: layer.columns.find((c) => c.columnId === accessor)!.fieldName,
+    label: layer.columns.find((c) => c.columnId === accessor)!.label,
   };
 };

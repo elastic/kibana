@@ -31,6 +31,7 @@ function getSuffix(
   );
 }
 
+// TODO will need to rework this to be dynamically created at runtime
 export function adjustTimeScaleLabelSuffix(
   oldLabel: string,
   previousTimeScale: TimeScaleUnit | undefined,

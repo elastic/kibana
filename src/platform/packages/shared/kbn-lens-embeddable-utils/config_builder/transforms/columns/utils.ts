@@ -45,8 +45,7 @@ export function getLensStateMetricSharedProps(
     ...(options.reduced_time_range ? { reducedTimeRange: options.reduced_time_range } : {}),
     ...(options.time_shift ? { timeShift: options.time_shift } : {}),
     label: options.label ?? LENS_DEFAULT_LABEL,
-    // @TODO improve this based on default label logic
-    customLabel: options.label != null,
+    customLabel: Boolean(options.label), // if a label is present in the API state, it's a custom label
   };
 }
 
@@ -59,6 +58,11 @@ export function getLensAPIMetricSharedProps(options: {
   label?: string;
 }) {
   return {
+    // customLabel is deprecated in the Lens application (new code should check label emptiness instead),
+    // but we still set it for API transforms. We check customLabel here rather than label because
+    // older saved objects may have stored default labels with customLabel undefined or false.
+    // Only labels explicitly marked as custom should be included in the API response.
+    // see https://github.com/elastic/kibana/pull/2526033
     ...(options.customLabel ? { label: options.label } : {}),
     ...(options.timeScale ? { time_scale: options.timeScale } : {}),
     ...(options.reducedTimeRange ? { reduced_time_range: options.reducedTimeRange } : {}),
@@ -71,7 +75,7 @@ export function getLensStateBucketSharedProps(options: { label?: string; field?:
   return {
     sourceField: options.field ?? '',
     label: options.label ?? LENS_DEFAULT_LABEL,
-    customLabel: Boolean(options.label),
+    customLabel: Boolean(options.label), // if a label is present in the API state, it's a custom label
     isBucketed: true,
   };
 }
@@ -83,6 +87,11 @@ export function getLensAPIBucketSharedProps(options: {
 }) {
   return {
     field: options.sourceField,
+    // customLabel is deprecated in the Lens application (new code should check label emptiness instead),
+    // but we still set it for API transforms. We check customLabel here rather than label because
+    // older saved objects may have stored default labels with customLabel undefined or false.
+    // Only labels explicitly marked as custom should be included in the API response.
+    // see https://github.com/elastic/kibana/pull/252603
     ...(options.customLabel ? { label: options.label } : {}),
   };
 }

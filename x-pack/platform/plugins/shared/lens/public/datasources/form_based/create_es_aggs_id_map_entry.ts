@@ -46,7 +46,7 @@ export function createEsAggsIdMapEntry({
   dateRange,
   includeSourceField = false,
 }: CreateEsAggsIdMapEntryParams): OriginalColumn[] {
-  const label = col.customLabel
+  const label = col.label
     ? col.label
     : operationDefinitionMap[col.operationType].getDefaultLabel(
         col,
@@ -67,7 +67,6 @@ export function createEsAggsIdMapEntry({
         interval,
         ...(format !== undefined ? { format } : {}),
         ...(col.dataType ? { dataType: col.dataType } : {}),
-        ...(col.customLabel ? { customLabel: col.customLabel } : {}),
       },
     ];
   }
@@ -82,7 +81,6 @@ export function createEsAggsIdMapEntry({
       ...(includeSourceField && 'sourceField' in col ? { sourceField: col.sourceField } : {}),
       ...(format !== undefined ? { format } : {}),
       ...(col.dataType ? { dataType: col.dataType } : {}),
-      ...(col.customLabel ? { customLabel: col.customLabel } : {}),
     },
   ];
 }

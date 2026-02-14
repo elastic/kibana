@@ -149,7 +149,7 @@ const initialState: FormBasedPrivateState = {
       columnOrder: ['col1', 'col2'],
       columns: {
         col1: {
-          label: 'My Op',
+          label: '',
           dataType: 'string',
           isBucketed: true,
           operationType: 'terms',
@@ -163,7 +163,7 @@ const initialState: FormBasedPrivateState = {
           },
         } as TermsIndexPatternColumn,
         col2: {
-          label: 'My Op',
+          label: '',
           dataType: 'number',
           isBucketed: false,
           operationType: 'average',

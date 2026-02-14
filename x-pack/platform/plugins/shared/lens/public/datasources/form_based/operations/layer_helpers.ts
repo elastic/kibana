@@ -372,16 +372,13 @@ export function insertNewColumn({
       ? operationDefinition.buildColumn({ ...baseOptions, layer }, columnParams)
       : operationDefinition.buildColumn({ ...baseOptions, layer });
 
-    return updateDefaultLabels(
-      addOperationFn(
-        layer,
-        buildColumnFn,
-        columnId,
-        visualizationGroups,
-        targetGroup,
-        respectOrder
-      ),
-      indexPattern
+    return addOperationFn(
+      layer,
+      buildColumnFn,
+      columnId,
+      visualizationGroups,
+      targetGroup,
+      respectOrder
     );
   }
 
@@ -430,16 +427,13 @@ export function insertNewColumn({
           columnParams
         )
       : operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, referenceIds });
-    return updateDefaultLabels(
-      addOperationFn(
-        tempLayer,
-        buildColumnFn,
-        columnId,
-        visualizationGroups,
-        targetGroup,
-        respectOrder
-      ),
-      indexPattern
+    return addOperationFn(
+      tempLayer,
+      buildColumnFn,
+      columnId,
+      visualizationGroups,
+      targetGroup,
+      respectOrder
     );
   }
 
@@ -455,25 +449,19 @@ export function insertNewColumn({
     }
     const isBucketed = Boolean(possibleOperation.isBucketed);
     if (isBucketed) {
-      return updateDefaultLabels(
-        addBucket(
-          layer,
-          operationDefinition.buildColumn({ ...baseOptions, layer, field: invalidField }),
-          columnId,
-          visualizationGroups,
-          targetGroup,
-          respectOrder
-        ),
-        indexPattern
+      return addBucket(
+        layer,
+        operationDefinition.buildColumn({ ...baseOptions, layer, field: invalidField }),
+        columnId,
+        visualizationGroups,
+        targetGroup,
+        respectOrder
       );
     } else {
-      return updateDefaultLabels(
-        addMetric(
-          layer,
-          operationDefinition.buildColumn({ ...baseOptions, layer, field: invalidField }),
-          columnId
-        ),
-        indexPattern
+      return addMetric(
+        layer,
+        operationDefinition.buildColumn({ ...baseOptions, layer, field: invalidField }),
+        columnId
       );
     }
   } else if (!field) {
@@ -501,10 +489,7 @@ export function insertNewColumn({
   const newColumn = operationDefinition.buildColumn({ ...baseOptions, layer, field }, columnParams);
   const isBucketed = Boolean(possibleOperation.isBucketed);
   const addOperationFn = isBucketed ? addBucket : addMetric;
-  return updateDefaultLabels(
-    addOperationFn(layer, newColumn, columnId, visualizationGroups, targetGroup, respectOrder),
-    indexPattern
-  );
+  return addOperationFn(layer, newColumn, columnId, visualizationGroups, targetGroup, respectOrder);
 }
 
 function replaceFormulaColumn(
@@ -560,21 +545,17 @@ function replaceFormulaColumn(
 
   // when coming to Formula keep the custom label
   const regeneratedColumn = newLayer.columns[columnId];
-  if (!shouldResetLabel && previousColumn.customLabel) {
-    regeneratedColumn.customLabel = true;
+  if (!shouldResetLabel && previousColumn.label) {
     regeneratedColumn.label = previousColumn.label;
   }
 
-  return updateDefaultLabels(
-    adjustColumnReferencesForChangedColumn(
-      {
-        ...tempLayer,
-        columnOrder: getColumnOrder(newLayer),
-        columns: newLayer.columns,
-      },
-      columnId
-    ),
-    indexPattern
+  return adjustColumnReferencesForChangedColumn(
+    {
+      ...tempLayer,
+      columnOrder: getColumnOrder(newLayer),
+      columns: newLayer.columns,
+    },
+    columnId
   );
 }
 
@@ -638,12 +619,11 @@ export function replaceColumn({
       // if the formula label is not the default one, propagate it to the new operation
       if (
         !shouldResetLabel &&
-        previousColumn.customLabel &&
+        previousColumn.label &&
         hypotheticalLayer.columns[columnId] &&
         previousColumn.label !==
           previousDefinition.getDefaultLabel(previousColumn, tempLayer.columns, indexPattern)
       ) {
-        hypotheticalLayer.columns[columnId].customLabel = true;
         hypotheticalLayer.columns[columnId].label = previousColumn.label;
       }
       if (hypotheticalLayer.incompleteColumns && hypotheticalLayer.incompleteColumns[columnId]) {
@@ -704,10 +684,7 @@ export function replaceColumn({
               [columnId]: column,
             },
           };
-          return updateDefaultLabels(
-            adjustColumnReferencesForChangedColumn(tempLayer, columnId),
-            indexPattern
-          );
+          return adjustColumnReferencesForChangedColumn(tempLayer, columnId);
         } else if (
           !field &&
           'sourceField' in referenceColumn &&
@@ -753,15 +730,12 @@ export function replaceColumn({
         ...tempLayer,
         columns: { ...tempLayer.columns, [columnId]: newColumn },
       };
-      return updateDefaultLabels(
-        adjustColumnReferencesForChangedColumn(
-          {
-            ...newLayer,
-            columnOrder: getColumnOrder(newLayer),
-          },
-          columnId
-        ),
-        indexPattern
+      return adjustColumnReferencesForChangedColumn(
+        {
+          ...newLayer,
+          columnOrder: getColumnOrder(newLayer),
+        },
+        columnId
       );
     }
 
@@ -811,15 +785,12 @@ export function replaceColumn({
       newColumn = copyCustomLabel(newColumn, previousColumn);
     }
     const newLayer = { ...tempLayer, columns: { ...tempLayer.columns, [columnId]: newColumn } };
-    return updateDefaultLabels(
-      adjustColumnReferencesForChangedColumn(
-        {
-          ...newLayer,
-          columnOrder: getColumnOrder(newLayer),
-        },
-        columnId
-      ),
-      indexPattern
+    return adjustColumnReferencesForChangedColumn(
+      {
+        ...newLayer,
+        columnOrder: getColumnOrder(newLayer),
+      },
+      columnId
     );
   } else if (
     operationDefinition.input === 'field' &&
@@ -842,15 +813,12 @@ export function replaceColumn({
       columnId
     );
 
-    return updateDefaultLabels(
-      adjustColumnReferencesForChangedColumn(
-        {
-          ...newLayer,
-          columnOrder: getColumnOrder(newLayer),
-        },
-        columnId
-      ),
-      indexPattern
+    return adjustColumnReferencesForChangedColumn(
+      {
+        ...newLayer,
+        columnOrder: getColumnOrder(newLayer),
+      },
+      columnId
     );
   } else if (operationDefinition.input === 'managedReference') {
     // Just changing a param in a formula column should trigger
@@ -1022,15 +990,12 @@ function applyReferenceTransition({
           },
         },
       };
-      layer = updateDefaultLabels(
-        adjustColumnReferencesForChangedColumn(
-          {
-            ...newLayer,
-            columnOrder: getColumnOrder(newLayer),
-          },
-          newId
-        ),
-        indexPattern
+      layer = adjustColumnReferencesForChangedColumn(
+        {
+          ...newLayer,
+          columnOrder: getColumnOrder(newLayer),
+        },
+        newId
       );
       return newId;
     }
@@ -1167,15 +1132,12 @@ function applyReferenceTransition({
       }),
     },
   };
-  return updateDefaultLabels(
-    adjustColumnReferencesForChangedColumn(
-      {
-        ...layer,
-        columnOrder: getColumnOrder(layer),
-      },
-      columnId
-    ),
-    indexPattern
+  return adjustColumnReferencesForChangedColumn(
+    {
+      ...layer,
+      columnOrder: getColumnOrder(layer),
+    },
+    columnId
   );
 }
 
@@ -1189,8 +1151,7 @@ function copyCustomLabel(
     ('sourceField' in newColumn && newColumn.sourceField) !==
     ('sourceField' in previousOptions && previousOptions.sourceField);
   // only copy custom label if either used operation or used field stayed the same
-  if (previousOptions.customLabel && (!operationChanged || !fieldChanged)) {
-    adjustedColumn.customLabel = true;
+  if (previousOptions.label && (!operationChanged || !fieldChanged)) {
     adjustedColumn.label = previousOptions.label;
   }
   return adjustedColumn;
@@ -1338,7 +1299,6 @@ export function updateColumnLabel({
       [columnId]: {
         ...oldColumn,
         label: customLabel !== undefined ? customLabel : oldColumn.label,
-        customLabel: Boolean(customLabel),
       },
     } as Record<string, GenericIndexPatternColumn>,
   };
@@ -1454,14 +1414,11 @@ export function deleteColumn({
   const newIncomplete = { ...(newLayer.incompleteColumns || {}) };
   delete newIncomplete[columnId];
 
-  return updateDefaultLabels(
-    {
-      ...newLayer,
-      columnOrder: getColumnOrder(newLayer),
-      incompleteColumns: newIncomplete,
-    },
-    indexPattern
-  );
+  return {
+    ...newLayer,
+    columnOrder: getColumnOrder(newLayer),
+    incompleteColumns: newIncomplete,
+  };
 }
 
 // Column order mostly affects the visual order in the UI. It is derived
@@ -1693,29 +1650,6 @@ export function isOperationAllowedAsReference({
     (!validation.specificOperations || validation.specificOperations.includes(operationType)) &&
     hasValidMetadata
   );
-}
-
-// Labels need to be updated when columns are added because reference-based column labels
-// are sometimes copied into the parents
-export function updateDefaultLabels(
-  layer: FormBasedLayer,
-  indexPattern: IndexPattern
-): FormBasedLayer {
-  const copiedColumns = { ...layer.columns };
-  layer.columnOrder.forEach((id) => {
-    const col = copiedColumns[id];
-    if (!col.customLabel) {
-      copiedColumns[id] = {
-        ...col,
-        label: operationDefinitionMap[col.operationType].getDefaultLabel(
-          col,
-          copiedColumns,
-          indexPattern
-        ),
-      };
-    }
-  });
-  return { ...layer, columns: copiedColumns };
 }
 
 export function resetIncomplete(layer: FormBasedLayer, columnId: string): FormBasedLayer {

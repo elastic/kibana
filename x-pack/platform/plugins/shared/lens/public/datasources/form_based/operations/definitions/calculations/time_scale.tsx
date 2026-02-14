@@ -62,7 +62,7 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
     },
     buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
       return {
-        label: NORMALIZE_BY_UNIT_NAME,
+        label: '',
         dataType: 'number',
         operationType: NORMALIZE_BY_UNIT_ID,
         isBucketed: false,

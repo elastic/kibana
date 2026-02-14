@@ -91,7 +91,7 @@ export const rangeOperation: OperationDefinition<
   buildColumn({ field }, columnParams) {
     const type = columnParams?.type ?? MODES.Histogram;
     return {
-      label: field.displayName,
+      label: '',
       dataType: type === MODES.Histogram ? 'number' : 'string', // string for Range
       operationType: 'range',
       sourceField: field.name,
