@@ -36,7 +36,7 @@
             "tags": [],
             "label": "props",
             "description": [
-              "The {@link FieldRowProps } for the {@link FieldRow } component."
+              "The {@link FieldRowProps} for the {@link FieldRow} component."
             ],
             "signature": [
               {
@@ -397,7 +397,7 @@
             "label": "children",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/services.tsx",
             "lineNumber": 25,

@@ -832,7 +832,7 @@
         "label": "DashboardDrilldownConfig",
         "description": [],
         "signature": [
-          "{ dashboardId?: string | undefined; } & Required<Readonly<{ use_filters?: boolean | undefined; use_time_range?: boolean | undefined; open_in_new_tab?: boolean | undefined; } & {}>>"
+          "{ dashboardId?: string | undefined; } & Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }>"
         ],
         "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/types.ts",
         "lineNumber": 11,

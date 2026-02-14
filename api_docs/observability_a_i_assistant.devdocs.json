@@ -683,7 +683,7 @@
         "label": "EisKnowledgeBaseCallout",
         "description": [],
         "signature": [
-          "({ children, isOpen, zIndex, anchorPosition, dismissCallout, }: { children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; isOpen?: boolean | undefined; zIndex?: number | undefined; anchorPosition?: \"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined; dismissCallout: () => void; }) => React.JSX.Element"
+          "({ children, isOpen, zIndex, anchorPosition, dismissCallout, }: { children: React.ReactElement<any>; isOpen?: boolean | undefined; zIndex?: number | undefined; anchorPosition?: \"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined; dismissCallout: () => void; }) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/tour_callout/eis_knowledge_base_callout.tsx",
         "lineNumber": 16,
@@ -712,7 +712,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+                  "React.ReactElement<any>"
                 ],
                 "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/tour_callout/eis_knowledge_base_callout.tsx",
                 "lineNumber": 23,
@@ -800,7 +800,7 @@
         "label": "ElasticLlmTourCallout",
         "description": [],
         "signature": [
-          "({ children, isOpen, zIndex, dismissTour, }: { children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; isOpen?: boolean | undefined; zIndex?: number | undefined; dismissTour?: (() => void) | undefined; }) => React.JSX.Element"
+          "({ children, isOpen, zIndex, dismissTour, }: { children: React.ReactElement<any>; isOpen?: boolean | undefined; zIndex?: number | undefined; dismissTour?: (() => void) | undefined; }) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/tour_callout/elastic_llm_tour_callout.tsx",
         "lineNumber": 16,
@@ -829,7 +829,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+                  "React.ReactElement<any>"
                 ],
                 "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/tour_callout/elastic_llm_tour_callout.tsx",
                 "lineNumber": 22,
@@ -920,7 +920,7 @@
         "label": "FeedbackButtons",
         "description": [],
         "signature": [
-          "({ onClickFeedback }: FeedbackButtonsProps) => React.JSX.Element"
+          "({ onClickFeedback }: FeedbackButtonsProps) => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/buttons/feedback_buttons.tsx",
         "lineNumber": 24,
@@ -4258,7 +4258,7 @@
               "ObservabilityAIAssistantRouteHandlerResources",
               ", void, ",
               "ObservabilityAIAssistantRouteCreateOptions",
-              ">; }, TEndpoint> & Omit<FetchOptions, \"query\" | \"body\" | \"signal\" | \"pathname\"> & { signal: AbortSignal | null; } & ",
+              ">; }, TEndpoint> & Omit<FetchOptions, \"query\" | \"signal\" | \"body\" | \"pathname\"> & { signal: AbortSignal | null; } & ",
               "HttpFetchOptions",
               ">) => Promise<",
               {
@@ -11317,7 +11317,7 @@
                     "label": "entry",
                     "description": [],
                     "signature": [
-                      "{ id: string; text: string; title?: string | undefined; user?: { name: string; } | undefined; labels?: Record<string, string> | undefined; public: boolean; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
+                      "{ id: string; text: string; labels?: Record<string, string> | undefined; title?: string | undefined; user?: { name: string; } | undefined; public: boolean; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "lineNumber": 782,
@@ -11375,7 +11375,7 @@
                     "label": "entry",
                     "description": [],
                     "signature": [
-                      "{ id: string; text: string; role: ",
+                      "{ id: string; text: string; labels?: Record<string, string> | undefined; title?: string | undefined; role: ",
                       {
                         "pluginId": "observabilityAIAssistant",
                         "scope": "common",
@@ -11383,7 +11383,7 @@
                         "section": "def-common.KnowledgeBaseEntryRole",
                         "text": "KnowledgeBaseEntryRole"
                       },
-                      "; title?: string | undefined; user?: { name: string; } | undefined; labels?: Record<string, string> | undefined; public: boolean; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
+                      "; user?: { name: string; } | undefined; public: boolean; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "lineNumber": 819,

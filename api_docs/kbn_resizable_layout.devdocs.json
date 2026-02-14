@@ -193,7 +193,7 @@
               "\nThe fixed panel"
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
             "lineNumber": 42,
@@ -211,7 +211,7 @@
               "\nThe flex panel"
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
             "lineNumber": 46,

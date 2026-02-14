@@ -1,0 +1,414 @@
+{
+  "id": "@kbn/content-list-provider-client",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.ContentListClientProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "ContentListClientProvider",
+        "description": [
+          "\nClient-side content list provider.\n\nWraps an existing `TableListView`-style `findItems` function and provides\nclient-side sorting, filtering, and pagination. The strategy handles transformation\nof `UserContentCommonSchema` items to `ContentListItem` format.\n"
+        ],
+        "signature": [
+          "({ children, findItems: tableListViewFindItems, ...rest }: ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.ContentListClientProviderProps",
+            "text": "ContentListClientProviderProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/provider.tsx",
+        "lineNumber": 56,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.ContentListClientProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  findItems: tableListViewFindItems,\n  ...rest\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.ContentListClientProviderProps",
+                "text": "ContentListClientProviderProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/provider.tsx",
+            "lineNumber": 56,
+            "columnNumber": 43,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.createFindItemsFn",
+        "type": "Function",
+        "tags": [],
+        "label": "createFindItemsFn",
+        "description": [
+          "\nCreates a `FindItemsFn` that wraps a `TableListView`-style `findItems` function.\n\nThis adapter:\n- Translates between the old and new API signatures.\n- Applies client-side sorting and pagination (matching original `TableListView` behavior).\n- Transforms results to `ContentListItem` format (only for the returned page).\n- Forwards the `AbortSignal` for request cancellation (consumers may optionally respect it).\n\n**Limitations:**\n- Only `searchQuery` is passed to the underlying `findItems`. The `params.filters` object\n  and `refs` (references/referencesToExclude) from the second parameter are not forwarded.\n"
+        ],
+        "signature": [
+          "(tableListViewFindItems: ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.TableListViewFindItemsFn",
+            "text": "TableListViewFindItemsFn"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.FindItemsFn",
+            "text": "FindItemsFn"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/strategy.ts",
+        "lineNumber": 148,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.createFindItemsFn.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "tableListViewFindItems",
+            "description": [
+              "- The consumer's existing `findItems` function."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.TableListViewFindItemsFn",
+                "text": "TableListViewFindItemsFn"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/strategy.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "A `FindItemsFn` compatible with `ContentListProvider`."
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.SavedObjectReference",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectReference",
+        "description": [
+          "\nReference type matching `SavedObjectsFindOptionsReference` from Kibana core."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.SavedObjectReference.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.SavedObjectReference.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.SavedObjectReference.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.TableListViewFindItemsResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "TableListViewFindItemsResult",
+        "description": [
+          "\nResult type from the `TableListView` `findItems` function."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.TableListViewFindItemsResult.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [
+              "Total count of matching items."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.TableListViewFindItemsResult.hits",
+            "type": "Array",
+            "tags": [],
+            "label": "hits",
+            "description": [
+              "Items matching the search query."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-table-list-view-common",
+                "scope": "common",
+                "docId": "kibKbnContentManagementTableListViewCommonPluginApi",
+                "section": "def-common.UserContentCommonSchema",
+                "text": "UserContentCommonSchema"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.ContentListClientProviderProps",
+        "type": "Type",
+        "tags": [],
+        "label": "ContentListClientProviderProps",
+        "description": [
+          "\nProps for the Client provider.\n\nThis provider wraps an existing `TableListView`-style `findItems` function and handles\nclient-side sorting, filtering, and pagination."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListCoreConfig",
+            "text": "ContentListCoreConfig"
+          },
+          " & { children?: React.ReactNode; findItems: ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.TableListViewFindItemsFn",
+            "text": "TableListViewFindItemsFn"
+          },
+          "; features?: ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListFeatures",
+            "text": "ContentListFeatures"
+          },
+          " | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/provider.tsx",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.TableListViewFindItemsFn",
+        "type": "Type",
+        "tags": [],
+        "label": "TableListViewFindItemsFn",
+        "description": [
+          "\nThe existing `TableListView` `findItems` signature that consumers already have.\n\nThis matches the signature expected by `TableListViewTableProps.findItems`, with an\noptional `signal` parameter for request cancellation."
+        ],
+        "signature": [
+          "(searchQuery: string, refs?: { references?: ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.SavedObjectReference",
+            "text": "SavedObjectReference"
+          },
+          "[] | undefined; referencesToExclude?: ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.SavedObjectReference",
+            "text": "SavedObjectReference"
+          },
+          "[] | undefined; } | undefined, signal?: AbortSignal | undefined) => Promise<",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.TableListViewFindItemsResult",
+            "text": "TableListViewFindItemsResult"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.TableListViewFindItemsFn.$1",
+            "type": "string",
+            "tags": [],
+            "label": "searchQuery",
+            "description": [],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.TableListViewFindItemsFn.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "refs",
+            "description": [],
+            "signature": [
+              "{ references?: ",
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
+              "[] | undefined; referencesToExclude?: ",
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
+              "[] | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.TableListViewFindItemsFn.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "signal",
+            "description": [],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

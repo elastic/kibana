@@ -515,7 +515,7 @@
               "Optional content to display beneath the description."
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/call_to_action.tsx",
             "lineNumber": 68,

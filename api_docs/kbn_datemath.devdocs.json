@@ -131,7 +131,7 @@
         "label": "Unit",
         "description": [],
         "signature": [
-          "\"m\" | \"d\" | \"y\" | \"s\" | \"M\" | \"w\" | \"h\" | \"ms\""
+          "\"m\" | \"s\" | \"h\" | \"d\" | \"y\" | \"M\" | \"w\" | \"ms\""
         ],
         "path": "src/platform/packages/shared/kbn-datemath/index.ts",
         "lineNumber": 22,
@@ -220,7 +220,7 @@
         "label": "UnitsMap",
         "description": [],
         "signature": [
-          "{ m: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; d: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; y: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; s: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; M: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; w: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; h: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; ms: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; }"
+          "{ m: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; s: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; h: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; d: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; y: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; M: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; w: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; ms: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-datemath/index.ts",
         "lineNumber": 23,

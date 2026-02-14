@@ -70,7 +70,7 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
+                  "Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { duration: string; size: number; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -283,7 +283,7 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
+                  "Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { duration: string; size: number; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -447,6 +447,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/generate-csv",
+                "id": "def-server.CsvGenerator.Unnamed.$11",
+                "type": "boolean",
+                "tags": [],
+                "label": "useInternalUser",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/platform/packages/private/kbn-generate-csv/src/generate_csv.ts",
+                "lineNumber": 73,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -464,7 +481,7 @@
               ">"
             ],
             "path": "src/platform/packages/private/kbn-generate-csv/src/generate_csv.ts",
-            "lineNumber": 244,
+            "lineNumber": 245,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

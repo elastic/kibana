@@ -163,9 +163,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsCreateOptions } - options for the create operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsCreateOptions",
                   " | undefined"
@@ -236,9 +234,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsCreateOptions } - options for the bulk create operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsCreateOptions",
                   " | undefined"
@@ -306,7 +302,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsBaseOptions } - options for the check conflict operation"
+                  "{@link SavedObjectsBaseOptions} - options for the check conflict operation"
                 ],
                 "signature": [
                   "SavedObjectsBaseOptions",
@@ -390,9 +386,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsDeleteOptions } - options for the delete operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsDeleteOptions",
                   " | undefined"
@@ -457,9 +451,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsBulkDeleteOptions } - options for the bulk delete operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsBulkDeleteOptions",
                   " | undefined"
@@ -522,7 +514,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsDeleteByNamespaceOptions } - options for the delete by namespace operation"
+                  "{@link SavedObjectsDeleteByNamespaceOptions} - options for the delete by namespace operation"
                 ],
                 "signature": [
                   "SavedObjectsDeleteByNamespaceOptions",
@@ -585,9 +577,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsFindOptions } - options for the find operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsFindOptions"
                 ],
@@ -605,7 +595,7 @@
                 "tags": [],
                 "label": "internalOptions",
                 "description": [
-                  "{@link SavedObjectsFindInternalOptions } - internal-only options for the find operation"
+                  "{@link SavedObjectsFindInternalOptions} - internal-only options for the find operation"
                 ],
                 "signature": [
                   "SavedObjectsFindInternalOptions",
@@ -656,7 +646,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsSearchOptions } - options for the search operation"
+                  "{@link SavedObjectsSearchOptions} - options for the search operation"
                 ],
                 "signature": [
                   "SavedObjectsSearchOptions"
@@ -726,9 +716,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsGetOptions } - options for the bulk get operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsGetOptions",
                   " | undefined"
@@ -798,9 +786,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsResolveOptions } - options for the bulk resolve operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsResolveOptions",
                   " | undefined"
@@ -886,9 +872,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsGetOptions } - options for the get operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsGetOptions",
                   " | undefined"
@@ -974,9 +958,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsResolveOptions } - options for the resolve operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsResolveOptions",
                   " | undefined"
@@ -1082,9 +1064,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsUpdateOptions } - options for the update operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsUpdateOptions",
                   "<T> | undefined"
@@ -1152,7 +1132,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsCollectMultiNamespaceReferencesOptions } - the options for the operation"
+                  "{@link SavedObjectsCollectMultiNamespaceReferencesOptions} - the options for the operation"
                 ],
                 "signature": [
                   "SavedObjectsCollectMultiNamespaceReferencesOptions",
@@ -1259,7 +1239,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsUpdateObjectsSpacesOptions } - options for the operation"
+                  "{@link SavedObjectsUpdateObjectsSpacesOptions} - options for the operation"
                 ],
                 "signature": [
                   "SavedObjectsUpdateObjectsSpacesOptions",
@@ -1331,7 +1311,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsBulkUpdateOptions } - options for the bulk update operation"
+                  "{@link SavedObjectsBulkUpdateOptions} - options for the bulk update operation"
                 ],
                 "signature": [
                   "SavedObjectsBulkUpdateOptions",
@@ -1416,7 +1396,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsRemoveReferencesToOptions } - options for the remove references operation"
+                  "{@link SavedObjectsRemoveReferencesToOptions} - options for the remove references operation"
                 ],
                 "signature": [
                   "SavedObjectsRemoveReferencesToOptions",
@@ -1503,7 +1483,7 @@
                 "tags": [],
                 "label": "counterFields",
                 "description": [
-                  "- An array of field names to increment or an array of {@link SavedObjectsIncrementCounterField }"
+                  "- An array of field names to increment or an array of {@link SavedObjectsIncrementCounterField}"
                 ],
                 "signature": [
                   "(string | ",
@@ -1524,7 +1504,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsIncrementCounterOptions }"
+                  "{@link SavedObjectsIncrementCounterOptions}"
                 ],
                 "signature": [
                   "SavedObjectsIncrementCounterOptions",
@@ -1594,9 +1574,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsOpenPointInTimeOptions } - options for the open PIT operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsOpenPointInTimeOptions",
                   " | undefined"
@@ -1615,7 +1593,7 @@
                 "tags": [],
                 "label": "internalOptions",
                 "description": [
-                  "{@link SavedObjectsFindInternalOptions } - internal options for the open PIT operation"
+                  "{@link SavedObjectsFindInternalOptions} - internal options for the open PIT operation"
                 ],
                 "signature": [
                   "SavedObjectsFindInternalOptions",
@@ -1682,9 +1660,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link SavedObjectsClosePointInTimeOptions } - options for the close PIT operation"
-                ],
+                "description": [],
                 "signature": [
                   "SavedObjectsBaseOptions",
                   " | undefined"
@@ -1703,7 +1679,7 @@
                 "tags": [],
                 "label": "internalOptions",
                 "description": [
-                  "{@link SavedObjectsFindInternalOptions } - internal options for the close PIT operation"
+                  "{@link SavedObjectsFindInternalOptions} - internal options for the close PIT operation"
                 ],
                 "signature": [
                   "SavedObjectsFindInternalOptions",
@@ -1752,7 +1728,7 @@
                 "tags": [],
                 "label": "findOptions",
                 "description": [
-                  "- {@link SavedObjectsCreatePointInTimeFinderOptions } - the options for creating the point-in-time finder"
+                  "- {@link SavedObjectsCreatePointInTimeFinderOptions} - the options for creating the point-in-time finder"
                 ],
                 "signature": [
                   "SavedObjectsCreatePointInTimeFinderOptions"
@@ -1771,7 +1747,7 @@
                 "tags": [],
                 "label": "dependencies",
                 "description": [
-                  "- {@link SavedObjectsCreatePointInTimeFinderDependencies } - the dependencies for creating the point-in-time finder"
+                  "- {@link SavedObjectsCreatePointInTimeFinderDependencies} - the dependencies for creating the point-in-time finder"
                 ],
                 "signature": [
                   "SavedObjectsCreatePointInTimeFinderDependencies",
@@ -1899,7 +1875,7 @@
                 "tags": [],
                 "label": "objects",
                 "description": [
-                  "{@link SavedObjectsChangeAccessControlObject } - the objects to update"
+                  "{@link SavedObjectsChangeAccessControlObject} - the objects to update"
                 ],
                 "signature": [
                   "SavedObjectsChangeAccessControlObject",
@@ -1919,7 +1895,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsChangeOwnershipOptions } - object containing owner profile_uid that will be the new owner"
+                  "{@link SavedObjectsChangeOwnershipOptions} - object containing owner profile_uid that will be the new owner"
                 ],
                 "signature": [
                   "SavedObjectsChangeOwnershipOptions"
@@ -1967,7 +1943,7 @@
                 "tags": [],
                 "label": "objects",
                 "description": [
-                  "{@link SavedObjectsChangeAccessControlObject } - the objects to update"
+                  "{@link SavedObjectsChangeAccessControlObject} - the objects to update"
                 ],
                 "signature": [
                   "SavedObjectsChangeAccessControlObject",
@@ -1987,7 +1963,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsChangeAccessControlOptions } - object containing access mode. If empty, is considered to be marked as editable"
+                  "{@link SavedObjectsChangeAccessControlOptions} - object containing access mode. If empty, is considered to be marked as editable"
                 ],
                 "signature": [
                   "SavedObjectsChangeAccessModeOptions"
@@ -4238,7 +4214,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsCreateOptions } - options for the create operation"
+                  "{@link SavedObjectsCreateOptions} - options for the create operation"
                 ],
                 "signature": [
                   "SavedObjectsCreateOptions",
@@ -4307,7 +4283,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsCreateOptions } - options for the bulk create operation"
+                  "{@link SavedObjectsCreateOptions} - options for the bulk create operation"
                 ],
                 "signature": [
                   "SavedObjectsCreateOptions",
@@ -4376,7 +4352,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsBaseOptions } - options for the check conflicts operation"
+                  "{@link SavedObjectsBaseOptions} - options for the check conflicts operation"
                 ],
                 "signature": [
                   "SavedObjectsBaseOptions",
@@ -4459,7 +4435,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsDeleteOptions } - options for the delete operation"
+                  "{@link SavedObjectsDeleteOptions} - options for the delete operation"
                 ],
                 "signature": [
                   "SavedObjectsDeleteOptions",
@@ -4526,7 +4502,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsBulkDeleteOptions } - options for the bulk delete operation"
+                  "{@link SavedObjectsBulkDeleteOptions} - options for the bulk delete operation"
                 ],
                 "signature": [
                   "SavedObjectsBulkDeleteOptions",
@@ -4573,7 +4549,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsFindOptions } - options for the find operation"
+                  "{@link SavedObjectsFindOptions} - options for the find operation"
                 ],
                 "signature": [
                   "SavedObjectsFindOptions"
@@ -4623,7 +4599,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsSearchOptions } - options for the search operation"
+                  "{@link SavedObjectsSearchOptions} - options for the search operation"
                 ],
                 "signature": [
                   "SavedObjectsSearchOptions"
@@ -4691,7 +4667,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsGetOptions } - options for the bulk get operation"
+                  "{@link SavedObjectsGetOptions} - options for the bulk get operation"
                 ],
                 "signature": [
                   "SavedObjectsGetOptions",
@@ -4776,7 +4752,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsGetOptions } - options for the get operation"
+                  "{@link SavedObjectsGetOptions} - options for the get operation"
                 ],
                 "signature": [
                   "SavedObjectsGetOptions",
@@ -4845,7 +4821,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsResolveOptions } - options for the bulk resolve operation"
+                  "{@link SavedObjectsResolveOptions} - options for the bulk resolve operation"
                 ],
                 "signature": [
                   "SavedObjectsResolveOptions",
@@ -4930,7 +4906,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsResolveOptions } - options for the resolve operation"
+                  "{@link SavedObjectsResolveOptions} - options for the resolve operation"
                 ],
                 "signature": [
                   "SavedObjectsResolveOptions",
@@ -5034,7 +5010,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsUpdateOptions } - options for the update operation"
+                  "{@link SavedObjectsUpdateOptions} - options for the update operation"
                 ],
                 "signature": [
                   "SavedObjectsUpdateOptions",
@@ -5103,7 +5079,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsBulkUpdateOptions } - options for the bulkUpdate operation"
+                  "{@link SavedObjectsBulkUpdateOptions} - options for the bulkUpdate operation"
                 ],
                 "signature": [
                   "SavedObjectsBulkUpdateOptions",
@@ -5188,7 +5164,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsRemoveReferencesToOptions } - options for the remove references operation"
+                  "{@link SavedObjectsRemoveReferencesToOptions} - options for the remove references operation"
                 ],
                 "signature": [
                   "SavedObjectsRemoveReferencesToOptions",
@@ -5254,7 +5230,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsOpenPointInTimeOptions } - options for the open PIT for type operation"
+                  "{@link SavedObjectsOpenPointInTimeOptions} - options for the open PIT for type operation"
                 ],
                 "signature": [
                   "SavedObjectsOpenPointInTimeOptions",
@@ -5320,7 +5296,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsClosePointInTimeOptions } - options for the close PIT operation"
+                  "{@link SavedObjectsClosePointInTimeOptions} - options for the close PIT operation"
                 ],
                 "signature": [
                   "SavedObjectsBaseOptions",
@@ -5369,7 +5345,7 @@
                 "tags": [],
                 "label": "findOptions",
                 "description": [
-                  "{@link SavedObjectsCreatePointInTimeFinderOptions } - options for the create PIT finder operation"
+                  "{@link SavedObjectsCreatePointInTimeFinderOptions} - options for the create PIT finder operation"
                 ],
                 "signature": [
                   "SavedObjectsCreatePointInTimeFinderOptions"
@@ -5388,7 +5364,7 @@
                 "tags": [],
                 "label": "dependencies",
                 "description": [
-                  "{@link SavedObjectsCreatePointInTimeFinderDependencies } - dependencies for the create PIT finder operation"
+                  "{@link SavedObjectsCreatePointInTimeFinderDependencies} - dependencies for the create PIT finder operation"
                 ],
                 "signature": [
                   "SavedObjectsCreatePointInTimeFinderDependencies",
@@ -5457,7 +5433,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsCollectMultiNamespaceReferencesOptions } - options for the collect multi namespace references operation"
+                  "{@link SavedObjectsCollectMultiNamespaceReferencesOptions} - options for the collect multi namespace references operation"
                 ],
                 "signature": [
                   "SavedObjectsCollectMultiNamespaceReferencesOptions",
@@ -5564,7 +5540,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsUpdateObjectsSpacesOptions } - options for the update spaces operation"
+                  "{@link SavedObjectsUpdateObjectsSpacesOptions} - options for the update spaces operation"
                 ],
                 "signature": [
                   "SavedObjectsUpdateObjectsSpacesOptions",
@@ -5694,7 +5670,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsChangeAccessControlOptions } - options for the change ownership operation"
+                  "{@link SavedObjectsChangeAccessControlOptions} - options for the change ownership operation"
                 ],
                 "signature": [
                   "SavedObjectsChangeOwnershipOptions"
@@ -5762,7 +5738,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link SavedObjectsChangeAccessModeOptions } - options for the change access mode operation"
+                  "{@link SavedObjectsChangeAccessModeOptions} - options for the change access mode operation"
                 ],
                 "signature": [
                   "SavedObjectsChangeAccessModeOptions"
@@ -8488,13 +8464,13 @@
         "signature": [
           "{ type: string | string[]; search?: string | undefined; filter?: any; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
-          "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
+          "> | undefined; namespaces?: string[] | undefined; fields?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
           "SortOrder",
           " | undefined; hasReference?: ",
           "SavedObjectsFindOptionsReference",
           " | ",
           "SavedObjectsFindOptionsReference",
-          "[] | undefined; fields?: string[] | undefined; preference?: string | undefined; rootSearchFields?: string[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
+          "[] | undefined; preference?: string | undefined; rootSearchFields?: string[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
           "SavedObjectsFindOptionsReference",
           " | ",
           "SavedObjectsFindOptionsReference",
