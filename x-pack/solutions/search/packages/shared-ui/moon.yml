@@ -17,8 +17,7 @@ project:
   owner: '@elastic/search-kibana'
   metadata:
     sourceRoot: x-pack/solutions/search/packages/shared-ui
-dependsOn:
-  - '@kbn/i18n'
+dependsOn: []
 tags:
   - shared-browser
   - package

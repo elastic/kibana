@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 
-import { FormInfoField } from '@kbn/search-shared-ui';
+import { FormInfoField } from '@kbn/search-api-panels';
 import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
 import { ApiKeyForm } from './api_key_form';
 import { ELASTICSEARCH_ENDPOINT_LABEL } from './shared/i18n';

@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { FormInfoField } from '@kbn/search-shared-ui';
+import { FormInfoField } from '@kbn/search-api-panels';
 import { ApiKeyFlyoutWrapper } from './api_key_flyout_wrapper';
 import { useSearchApiKey } from '../hooks/use_search_api_key';
 import { Status } from '../constants';

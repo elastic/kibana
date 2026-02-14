@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ApplicationStart, IUiSettingsClient } from '@kbn/core/public';
+import type { ApplicationStart, IUiSettingsClient, NotificationsStart } from '@kbn/core/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 export enum Languages {
   JAVA = 'java',
@@ -56,4 +57,6 @@ export interface LanguageDefinition {
 export interface SearchApiPanelsServicesContext {
   application: ApplicationStart;
   uiSettings: IUiSettingsClient;
+  notifications?: NotificationsStart;
+  cloud?: CloudStart;
 }

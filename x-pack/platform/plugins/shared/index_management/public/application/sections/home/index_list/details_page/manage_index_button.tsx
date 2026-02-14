@@ -25,6 +25,8 @@ import { httpService } from '../../../../services/http';
 
 import type { IndexActionsContextMenuProps } from '../index_actions_context_menu/index_actions_context_menu';
 import { IndexActionsContextMenu } from '../index_actions_context_menu/index_actions_context_menu';
+import { PLATFORM_INDEX_MGMT_V2 } from '../../../../../../common/constants';
+import { useAppContext } from '../../../../app_context';
 
 const getIndexStatusByName = (
   indexNames: string[],
@@ -55,6 +57,8 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
   reloadIndexDetails,
   navigateToIndicesList,
 }) => {
+  const { settings } = useAppContext();
+  const isNewDesignEnabled = settings?.client.get<boolean>(PLATFORM_INDEX_MGMT_V2, false);
   const [isLoading, setIsLoading] = useState(false);
 
   // the "index actions context menu" component is expecting an array of indices, the same as on the indices list
@@ -235,6 +239,13 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       deleteIndices={deleteIndices}
       performExtensionAction={performExtensionAction}
       reloadIndices={reloadIndices}
+      label={
+        isNewDesignEnabled
+          ? i18n.translate('xpack.idxMgmt.manageIndexButton.label', {
+              defaultMessage: 'Manage',
+            })
+          : undefined
+      }
     />
   );
 };

@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIconTip, EuiButtonEmpty } from 
 import { i18n } from '@kbn/i18n';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 import { ApiKeyForm } from '@kbn/search-api-keys-components';
-import { FormInfoField } from '@kbn/search-shared-ui';
+import { FormInfoField } from '@kbn/search-api-panels';
 import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
 
 export const ElasticsearchConnectionDetails = () => {

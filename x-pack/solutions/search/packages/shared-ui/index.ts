@@ -6,7 +6,6 @@
  */
 
 export * from './src/connector_icon';
-export * from './src/form_info_field/form_info_field';
 export * from './src/search_empty_prompt';
 export * from './src/constants';
 export type * from './src/types';

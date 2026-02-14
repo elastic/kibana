@@ -35,7 +35,8 @@
     "@kbn/doc-links",
     "@kbn/cloud",
     "@kbn/deeplinks-search",
-    "@kbn/scout-search"
+    "@kbn/scout-search",
+    "@kbn/search-api-panels"
   ],
   "exclude": [
     "target/**/*"

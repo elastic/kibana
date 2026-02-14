@@ -70,7 +70,8 @@
     "@kbn/scout",
     "@kbn/deeplinks-management",
     "@kbn/test-eui-helpers",
-    "@kbn/core-elasticsearch-server"
+    "@kbn/core-elasticsearch-server",
+    "@kbn/cloud"
   ],
   "exclude": ["target/**/*"]
 }
