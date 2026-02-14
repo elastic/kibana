@@ -54,7 +54,7 @@ import {
   DOCUMENTS_COLUMN_HEADER,
   FAILURE_STORE_PERMISSIONS_ERROR,
 } from './translations';
-import { DiscoverBadgeButton, QueryStreamBadge } from '../stream_badges';
+import { DiscoverBadgeButton, DraftStreamBadge, QueryStreamBadge } from '../stream_badges';
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -63,6 +63,13 @@ const datePickerStyle = css`
     height: 40px;
   }
 `;
+
+/**
+ * Checks if a stream is a draft wired stream.
+ */
+const isDraftWiredStream = (stream: Streams.all.Definition): boolean => {
+  return Streams.WiredStream.Definition.is(stream) && stream.ingest.wired.draft === true;
+};
 
 export function StreamsTreeTable({
   loading,
@@ -413,6 +420,7 @@ export function StreamsTreeTable({
                     <EuiHighlight search={searchQuery?.text ?? ''}>{item.stream.name}</EuiHighlight>
                   </EuiLink>
                   {Streams.QueryStream.Definition.is(item.stream) && <QueryStreamBadge />}
+                  {isDraftWiredStream(item.stream) && <DraftStreamBadge />}
                 </EuiFlexGroup>
               </EuiFlexGroup>
             );
@@ -437,15 +445,20 @@ export function StreamsTreeTable({
           sortable: docCountsLoaded ? (row: TableRow) => docsByStream[row.stream.name] ?? 0 : false,
           align: 'right',
           dataType: 'number',
-          render: (_: unknown, item: TableRow) =>
-            item.data_stream ? (
+          render: (_: unknown, item: TableRow) => {
+            // Draft streams don't have a data stream, show dash
+            if (isDraftWiredStream(item.stream)) {
+              return '-';
+            }
+            return item.data_stream ? (
               <DocumentsColumn
                 indexPattern={item.stream.name}
                 histogramQueryFetch={getStreamHistogram(item.stream.name)}
                 timeState={timeState}
                 numDataPoints={numDataPoints}
               />
-            ) : null,
+            ) : null;
+          },
         },
         {
           field: 'dataQuality',
@@ -467,8 +480,12 @@ export function StreamsTreeTable({
             ? (item: TableRow) => qualityRank[item.dataQuality as QualityIndicators]
             : false,
           dataType: 'string',
-          render: (_: unknown, item: TableRow) =>
-            item.data_stream ? (
+          render: (_: unknown, item: TableRow) => {
+            // Draft streams don't have data quality metrics
+            if (isDraftWiredStream(item.stream)) {
+              return '-';
+            }
+            return item.data_stream ? (
               <DataQualityColumn
                 streamName={item.stream.name}
                 quality={item.dataQuality as QualityIndicators}
@@ -478,7 +495,8 @@ export function StreamsTreeTable({
               />
             ) : (
               '-'
-            ),
+            );
+          },
         },
         {
           field: 'retentionMs',
@@ -489,16 +507,22 @@ export function StreamsTreeTable({
           sortable: (row: TableRow) => row.rootRetentionMs,
           dataType: 'number',
           width: '220px',
-          render: (_: unknown, item: TableRow) => (
-            <RetentionColumn
-              lifecycle={item.effective_lifecycle!}
-              aria-label={i18n.translate('xpack.streams.streamsTreeTable.retentionCellAriaLabel', {
-                defaultMessage: 'Retention policy for {name}',
-                values: { name: item.stream.name },
-              })}
-              dataTestSubj={`retentionColumn-${item.stream.name}`}
-            />
-          ),
+          render: (_: unknown, item: TableRow) => {
+            // Draft streams don't have retention policies as they're not materialized
+            if (isDraftWiredStream(item.stream)) {
+              return '-';
+            }
+            return (
+              <RetentionColumn
+                lifecycle={item.effective_lifecycle!}
+                aria-label={i18n.translate('xpack.streams.streamsTreeTable.retentionCellAriaLabel', {
+                  defaultMessage: 'Retention policy for {name}',
+                  values: { name: item.stream.name },
+                })}
+                dataTestSubj={`retentionColumn-${item.stream.name}`}
+              />
+            );
+          },
         },
         {
           field: 'definition',
