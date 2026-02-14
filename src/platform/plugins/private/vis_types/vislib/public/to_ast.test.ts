@@ -41,6 +41,7 @@ describe('vislib vis toExpressionAst function', () => {
     toExpressionAst(vis, params);
     const [builtExpression] = (buildExpression as jest.Mock).mock.calls[0][0];
 
+    // timeRange is now resolved via SearchSource field callbacks during AST generation.
     expect(builtExpression).toMatchSnapshot();
   });
 });
