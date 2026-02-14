@@ -62,7 +62,11 @@ describe('Histogram Agg', () => {
         name: 'field',
       },
     });
-    return aggConfigs.aggs[0].toDsl()[BUCKET_TYPES.HISTOGRAM];
+    const dsl = aggConfigs.aggs[0].toDsl();
+    if (!dsl) {
+      throw new Error('dsl is undefined');
+    }
+    return dsl[BUCKET_TYPES.HISTOGRAM];
   };
 
   test('produces the expected expression ast', () => {
@@ -185,7 +189,11 @@ describe('Histogram Agg', () => {
             name: 'field',
           },
         });
-        const { [BUCKET_TYPES.HISTOGRAM]: params } = aggConfigs.aggs[0].toDsl();
+        const dsl = aggConfigs.aggs[0].toDsl();
+        if (!dsl) {
+          throw new Error('dsl is undefined');
+        }
+        const { [BUCKET_TYPES.HISTOGRAM]: params } = dsl;
 
         expect(params).not.toHaveProperty('intervalBase');
       });
@@ -199,7 +207,11 @@ describe('Histogram Agg', () => {
             name: 'field',
           },
         });
-        const { [BUCKET_TYPES.HISTOGRAM]: params } = aggConfigs.aggs[0].toDsl();
+        const dsl = aggConfigs.aggs[0].toDsl();
+        if (!dsl) {
+          throw new Error('dsl is undefined');
+        }
+        const { [BUCKET_TYPES.HISTOGRAM]: params } = dsl;
 
         expect(params).not.toHaveProperty('maxBars');
       });
@@ -270,7 +282,9 @@ describe('Histogram Agg', () => {
             name: 'field',
           },
         }).aggs[0];
-        freshHistogramAggConfig.setParams(serializedAgg.params);
+        if (serializedAgg.params) {
+          freshHistogramAggConfig.setParams(serializedAgg.params);
+        }
         expect(freshHistogramAggConfig.getParam('interval')).toEqual('auto');
       });
 
@@ -413,7 +427,11 @@ describe('Histogram Agg', () => {
             },
           });
           (aggConfigs.aggs[0] as IBucketHistogramAggConfig).setAutoBounds({ min: 0, max: 1000 });
-          const output = aggConfigs.aggs[0].toDsl()[BUCKET_TYPES.HISTOGRAM];
+          const dsl = aggConfigs.aggs[0].toDsl();
+          if (!dsl) {
+            throw new Error('dsl is undefined');
+          }
+          const output = dsl[BUCKET_TYPES.HISTOGRAM];
 
           expect(output.extended_bounds).toHaveProperty('min', 0);
           expect(output.extended_bounds).toHaveProperty('max', 1000);

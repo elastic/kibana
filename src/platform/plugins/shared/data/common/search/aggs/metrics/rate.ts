@@ -32,7 +32,10 @@ export const getRateMetricAgg = () => {
     makeLabel: (aggConfig) => {
       return i18n.translate('data.search.aggs.metrics.rateLabel', {
         defaultMessage: 'Rate of {field} per {unit}',
-        values: { field: aggConfig.getFieldDisplayName(), unit: aggConfig.getParam('unit') },
+        values: {
+          field: aggConfig.getFieldDisplayName(),
+          unit: aggConfig.getParam('unit') as string,
+        },
       });
     },
     params: [

@@ -68,12 +68,12 @@ export const getFilteredMetricAgg = ({ getConfig }: FiltersMetricAggDependencies
       );
     },
     getValue(agg, bucket) {
-      const customMetric = agg.getParam('customMetric');
-      const customBucket = agg.getParam('customBucket');
+      const customMetric = agg.getParam('customMetric') as IAggConfig;
+      const customBucket = agg.getParam('customBucket') as IAggConfig;
       return bucket && bucket[customBucket.id] && customMetric.getValue(bucket[customBucket.id]);
     },
     getValueType(agg) {
-      const customMetric = agg.getParam('customMetric');
+      const customMetric = agg.getParam('customMetric') as IAggConfig;
       return (
         customMetric.type.getValueType?.(customMetric) ||
         customMetric.params.field?.type ||
@@ -81,8 +81,8 @@ export const getFilteredMetricAgg = ({ getConfig }: FiltersMetricAggDependencies
       );
     },
     getValueBucketPath(agg) {
-      const customBucket = agg.getParam('customBucket');
-      const customMetric = agg.getParam('customMetric');
+      const customBucket = agg.getParam('customBucket') as IAggConfig;
+      const customMetric = agg.getParam('customMetric') as IAggConfig;
       if (customMetric.type.name === 'count') {
         return customBucket.getValueBucketPath();
       }

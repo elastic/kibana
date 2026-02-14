@@ -114,6 +114,9 @@ describe('AggConfig', () => {
       const football = {};
       jest.spyOn(aggConfig, 'write').mockImplementation(() => ({ params: football }));
       const dsl = aggConfig.toDsl();
+      if (!dsl) {
+        throw new Error('dsl is undefined');
+      }
       expect(dsl.date_histogram).toBe(football);
     });
 
@@ -144,6 +147,9 @@ describe('AggConfig', () => {
       jest.spyOn(avgConfig, 'write').mockImplementation(() => ({ params: football }));
 
       const dsl = histoConfig.toDsl();
+      if (!dsl) {
+        throw new Error('dsl is undefined');
+      }
       expect(dsl).toHaveProperty('aggs');
       expect(dsl.aggs).toHaveProperty(avgConfig.id);
       expect(dsl.aggs[avgConfig.id]).toHaveProperty('avg');
@@ -186,6 +192,9 @@ describe('AggConfig', () => {
 
       (histoConfig as any).subAggs = [medianConfig];
       const dsl = histoConfig.toDsl();
+      if (!dsl) {
+        throw new Error('dsl is undefined');
+      }
       expect(dsl).toHaveProperty('aggs');
       expect(dsl.aggs).toHaveProperty(avgConfig.id);
       expect(dsl.aggs[avgConfig.id]).toHaveProperty('avg');
@@ -236,20 +245,8 @@ describe('AggConfig', () => {
       expect(dsl).toMatchInlineSnapshot(`
         Object {
           "1": Object {
-            "avg_bucket": Object {
-              "buckets_path": "1-bucket>1-metric",
-            },
-          },
-          "1-bucket": Object {
             "aggs": Object {
               "1-bucket": Object {
-                "aggs": Object {
-                  "1-metric": Object {
-                    "sum": Object {
-                      "field": "bytes",
-                    },
-                  },
-                },
                 "date_histogram": Object {
                   "field": "@timestamp",
                   "fixed_interval": "30m",
@@ -257,6 +254,13 @@ describe('AggConfig', () => {
                   "time_zone": "dateFormat:tz",
                 },
               },
+            },
+            "avg_bucket": Object {
+              "buckets_path": "1-bucket>1-metric",
+            },
+          },
+          "1-bucket": Object {
+            "aggs": Object {
               "1-metric": Object {
                 "avg_bucket": Object {
                   "buckets_path": "1-bucket>1-metric",

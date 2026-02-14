@@ -49,7 +49,11 @@ describe('Significant Terms Agg', () => {
 
       const testSerializeAndWrite = (aggs: IAggConfigs) => {
         const [agg] = aggs.aggs;
-        const { [BUCKET_TYPES.SIGNIFICANT_TERMS]: params } = agg.toDsl();
+        const dsl = agg.toDsl();
+        if (!dsl) {
+          throw new Error('dsl is undefined');
+        }
+        const { [BUCKET_TYPES.SIGNIFICANT_TERMS]: params } = dsl;
 
         expect(params.field).toBe('field');
         expect(params.include).toBe('404');

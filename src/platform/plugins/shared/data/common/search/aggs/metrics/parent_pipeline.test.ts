@@ -97,7 +97,11 @@ describe('parent pipeline aggs', function () {
         // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
         metricAgg = metric.provider;
         aggConfig = aggConfigs.aggs[1] as IMetricAggConfig;
-        aggDsl = aggConfig.toDsl(aggConfigs);
+        const dsl = aggConfig.toDsl(aggConfigs);
+        if (!dsl) {
+          throw new Error('dsl is undefined');
+        }
+        aggDsl = dsl;
       };
 
       it(`should return a label prefixed with ${metric.title} of`, () => {

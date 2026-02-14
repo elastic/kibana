@@ -262,9 +262,11 @@ export const buildOtherBucketAgg = (
       filters.push(filter);
     });
 
-    resultAgg.filters.filters[key] = {
-      bool: buildQueryFromFilters(filters, indexPattern),
-    };
+    if (resultAgg.filters) {
+      resultAgg.filters.filters[key] = {
+        bool: buildQueryFromFilters(filters, indexPattern),
+      };
+    }
   };
   walkBucketTree(
     0,

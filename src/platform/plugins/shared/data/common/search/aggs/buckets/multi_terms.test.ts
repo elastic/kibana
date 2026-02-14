@@ -190,7 +190,11 @@ describe('Multi Terms Agg', () => {
       { typesRegistry: mockAggTypesRegistry() },
       jest.fn()
     );
-    const { [BUCKET_TYPES.MULTI_TERMS]: params } = aggConfigs.aggs[0].toDsl();
+    const dsl = aggConfigs.aggs[0].toDsl();
+    if (!dsl) {
+      throw new Error('dsl is undefined');
+    }
+    const { [BUCKET_TYPES.MULTI_TERMS]: params } = dsl;
     expect(params.order).toEqual({ 'test-orderAgg.50': 'desc' });
   });
 
@@ -202,7 +206,11 @@ describe('Multi Terms Agg', () => {
         type: 'count',
       },
     });
-    const { [BUCKET_TYPES.MULTI_TERMS]: params } = aggConfigs.aggs[0].toDsl();
+    const dsl = aggConfigs.aggs[0].toDsl();
+    if (!dsl) {
+      throw new Error('dsl is undefined');
+    }
+    const { [BUCKET_TYPES.MULTI_TERMS]: params } = dsl;
     expect(params.shard_size).toEqual(1000);
   });
 
