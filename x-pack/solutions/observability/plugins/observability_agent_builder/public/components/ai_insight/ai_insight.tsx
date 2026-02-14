@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   EuiIcon,
   EuiAccordion,
@@ -34,7 +34,13 @@ import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { StartConversationButton } from './start_conversation_button';
 import { AiInsightErrorBanner } from './ai_insight_error_banner';
 import { LoadingCursor } from './loading_cursor';
+import { FeedbackButtons, type Feedback } from './feedback_buttons';
 import { OBSERVABILITY_AGENT_ID } from '../../../common/constants';
+import {
+  ObservabilityAgentBuilderTelemetryEventType,
+  reportTelemetryEvent,
+  type InsightType,
+} from '../../analytics';
 
 export interface AiInsightResponse {
   summary: string;
@@ -49,16 +55,17 @@ export interface AiInsightAttachment {
 
 export interface AiInsightProps {
   title: string;
+  insightType: InsightType;
   createStream: (signal: AbortSignal) => Observable<InsightStreamEvent>;
   buildAttachments: (summary: string, context: string) => AiInsightAttachment[];
 }
 
-export function AiInsight({ title, createStream, buildAttachments }: AiInsightProps) {
+export function AiInsight({ title, insightType, createStream, buildAttachments }: AiInsightProps) {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
 
   const {
-    services: { agentBuilder, application },
+    services: { agentBuilder, application, analytics },
   } = useKibana();
 
   const { getLicense } = useLicense();
@@ -72,8 +79,21 @@ export function AiInsight({ title, createStream, buildAttachments }: AiInsightPr
   const hasEnterpriseLicense = license?.hasAtLeast('enterprise');
   const hasAgentBuilderAccess = application?.capabilities.agentBuilder?.show === true;
 
-  const { isLoading, error, summary, context, wasStopped, fetch, stop, regenerate } =
+  const { isLoading, error, summary, context, connectorInfo, wasStopped, fetch, stop, regenerate } =
     useStreamingAiInsight(createStream);
+
+  // Report the response generated event when the stream finishes (completely or stopped)
+  useEffect(() => {
+    const hasContent = Boolean(summary && summary.trim());
+    const hasGeneratedInsight = !isLoading && hasContent && !error;
+
+    if (hasGeneratedInsight && connectorInfo) {
+      reportTelemetryEvent(analytics, {
+        type: ObservabilityAgentBuilderTelemetryEventType.AiInsightResponseGenerated,
+        payload: { insightType, connector: connectorInfo },
+      });
+    }
+  }, [analytics, connectorInfo, error, insightType, isLoading, summary]);
 
   const handleStartConversation = useCallback(() => {
     if (!agentBuilder?.openConversationFlyout) return;
@@ -84,6 +104,25 @@ export function AiInsight({ title, createStream, buildAttachments }: AiInsightPr
       attachments: buildAttachments(summary, context),
     });
   }, [agentBuilder, buildAttachments, summary, context]);
+
+  const handleFeedback = useCallback(
+    (feedback: Feedback) => {
+      reportTelemetryEvent(analytics, {
+        type: ObservabilityAgentBuilderTelemetryEventType.AiInsightFeedback,
+        payload: { feedback, insightType, connector: connectorInfo! },
+      });
+    },
+    [analytics, connectorInfo, insightType]
+  );
+
+  useEffect(() => {
+    if (error && connectorInfo) {
+      reportTelemetryEvent(analytics, {
+        type: ObservabilityAgentBuilderTelemetryEventType.AiInsightFailed,
+        payload: { insightType, errorMessage: error, connector: connectorInfo },
+      });
+    }
+  }, [analytics, connectorInfo, error, insightType]);
 
   if (
     !hasConnectors ||
@@ -195,7 +234,10 @@ export function AiInsight({ title, createStream, buildAttachments }: AiInsightPr
                 </EuiFlexItem>
                 {Boolean(summary && summary.trim()) && (
                   <EuiFlexItem grow={false}>
-                    <StartConversationButton onClick={handleStartConversation} />
+                    <StartConversationButton
+                      insightType={insightType}
+                      onClick={handleStartConversation}
+                    />
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
@@ -205,9 +247,15 @@ export function AiInsight({ title, createStream, buildAttachments }: AiInsightPr
               <EuiSpacer size="m" />
               <EuiHorizontalRule margin="none" />
               <EuiSpacer size="s" />
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+              <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <StartConversationButton onClick={handleStartConversation} />
+                  <FeedbackButtons onClickFeedback={handleFeedback} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <StartConversationButton
+                    insightType={insightType}
+                    onClick={handleStartConversation}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </>

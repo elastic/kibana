@@ -39,6 +39,7 @@ const renderComponent = () =>
     <EuiThemeProvider>
       <AiInsightTest
         title="AI Insight"
+        insightType="log"
         createStream={mockCreateStream}
         buildAttachments={jest.fn().mockReturnValue([])}
       />
@@ -46,6 +47,7 @@ const renderComponent = () =>
   );
 
 const mockOpenConversationFlyout = jest.fn();
+const mockReportEvent = jest.fn();
 
 const baseStreamingState = () => ({
   isLoading: false,
@@ -77,6 +79,9 @@ describe('AiInsight', () => {
           capabilities: {
             agentBuilder: { show: true },
           },
+        },
+        analytics: {
+          reportEvent: mockReportEvent,
         },
       },
     });
@@ -157,7 +162,7 @@ describe('AiInsight', () => {
       fireEvent.click(toggle!);
 
       const startConversationButton = container.querySelector(
-        '[data-test-subj="aiAgentStartConversationButton"]'
+        '[data-test-subj="observabilityAgentBuilderLogStartConversationButton"]'
       );
 
       expect(startConversationButton).toBeTruthy();
@@ -175,6 +180,7 @@ describe('AiInsight', () => {
         <EuiThemeProvider>
           <AiInsightTest
             title="AI Insight"
+            insightType="log"
             createStream={mockCreateStream}
             buildAttachments={buildAttachments}
           />
@@ -185,7 +191,7 @@ describe('AiInsight', () => {
       fireEvent.click(toggle!);
 
       const startConversationButton = container.querySelector(
-        '[data-test-subj="aiAgentStartConversationButton"]'
+        '[data-test-subj="observabilityAgentBuilderLogStartConversationButton"]'
       );
       fireEvent.click(startConversationButton!);
 
