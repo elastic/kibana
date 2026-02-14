@@ -13,6 +13,7 @@ export interface Connector {
   type: string;
   iconType: string;
   category: DataSourceCategory;
+  preloadUrl?: string;
 }
 
 export interface Agent {

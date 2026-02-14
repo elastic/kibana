@@ -7,6 +7,7 @@
 
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import type { Config } from '@kbn/connector-schemas/mcp';
+import { API_KEY_URL_PLACEHOLDER, MCPAuthType } from '@kbn/connector-schemas/mcp';
 import { isEmpty } from 'lodash';
 import { type HeaderField, HeaderFieldType, type MCPInternalConnectorForm } from '../types';
 import { toHeaderFields, toHeadersRecord } from './transform';
@@ -15,6 +16,30 @@ export const formSerializer = (formData: MCPInternalConnectorForm): ConnectorFor
   const headers = (formData.__internal__?.headers ?? []) as HeaderField[];
   const configHeaders = toHeadersRecord(headers, HeaderFieldType.CONFIG);
   const secretHeaders = toHeadersRecord(headers, HeaderFieldType.SECRET);
+
+  const serverUrl = formData.config?.serverUrl ?? '';
+  const credential =
+    formData.secrets?.token ?? formData.secrets?.apiKey ?? '';
+
+  if (
+    formData.config?.authType === MCPAuthType.ApiKeyInUrl &&
+    typeof serverUrl === 'string' &&
+    serverUrl.includes(API_KEY_URL_PLACEHOLDER) &&
+    credential
+  ) {
+    return {
+      ...formData,
+      config: {
+        ...formData.config,
+        serverUrl: serverUrl.split(API_KEY_URL_PLACEHOLDER).join(credential),
+        hasAuth: false,
+        headers: isEmpty(configHeaders) ? undefined : configHeaders,
+      },
+      secrets: {
+        secretHeaders: isEmpty(secretHeaders) ? undefined : secretHeaders,
+      },
+    };
+  }
 
   return {
     ...formData,

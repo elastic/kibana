@@ -1,0 +1,20 @@
+version: '1'
+name: 'sources.firecrawl.search'
+description: 'Search or crawl web content via Firecrawl'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: query
+    type: string
+    required: true
+    description: 'Search or crawl query (placeholder)'
+steps:
+  - name: search-firecrawl
+    type: mcp.callTool
+    connector-id: <%= mcp-stack-connector-id %>
+    with:
+      name: 'search'
+      arguments:
+        query: "${{inputs.query}}"

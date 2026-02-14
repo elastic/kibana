@@ -213,6 +213,22 @@ describe('buildHeadersFromSecrets', () => {
     });
   });
 
+  describe('apiKeyInUrl auth type', () => {
+    it('should return empty headers even when token is set (credential is in URL)', () => {
+      const config: MCPConnectorConfig = {
+        ...baseConfig,
+        authType: MCPAuthType.ApiKeyInUrl,
+      };
+      const secrets: MCPConnectorSecrets = {
+        token: 'my-api-key',
+      };
+
+      const headers = buildHeadersFromSecrets(secrets, config);
+
+      expect(headers).toEqual({});
+    });
+  });
+
   describe('secret headers', () => {
     it('should include secret headers in the result', () => {
       const config: MCPConnectorConfig = {

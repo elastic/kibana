@@ -17,6 +17,8 @@ export const MCPAuthType = {
   Bearer: 'bearer',
   ApiKey: 'apiKey',
   Basic: 'basic',
+  /** Credential is provided in the URL (e.g. via {{apiKey}} placeholder); no auth headers. */
+  ApiKeyInUrl: 'apiKeyInUrl',
 } as const;
 
 /**
@@ -37,7 +39,13 @@ export const MCPConnectorConfigSchema = z.object({
    * Authentication type to use when hasAuth is true.
    */
   authType: z
-    .enum([MCPAuthType.None, MCPAuthType.Bearer, MCPAuthType.ApiKey, MCPAuthType.Basic])
+    .enum([
+      MCPAuthType.None,
+      MCPAuthType.Bearer,
+      MCPAuthType.ApiKey,
+      MCPAuthType.Basic,
+      MCPAuthType.ApiKeyInUrl,
+    ])
     .optional(),
   /**
    * Custom header name for API key authentication.
