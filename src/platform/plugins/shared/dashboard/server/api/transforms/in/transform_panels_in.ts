@@ -20,7 +20,10 @@ import type {
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService, logger } from '../../../kibana_services';
 
-export function transformPanelsIn(widgets: Required<DashboardState>['panels']): {
+export function transformPanelsIn(
+  widgets: Required<DashboardState>['panels'],
+  legacyMode: boolean = false
+): {
   panelsJSON: DashboardSavedObjectAttributes['panelsJSON'];
   sections: DashboardSavedObjectAttributes['sections'];
   references: SavedObjectReference[];
@@ -35,7 +38,7 @@ export function transformPanelsIn(widgets: Required<DashboardState>['panels']): 
       const idx = uid ?? uuidv4();
       sections.push({ ...restOfSection, gridData: { ...grid, i: idx } });
       sectionPanels.forEach((panel) => {
-        const { storedPanel, references } = transformPanelIn(panel);
+        const { storedPanel, references } = transformPanelIn(panel, legacyMode);
         panels.push({
           ...storedPanel,
           gridData: { ...storedPanel.gridData, sectionId: idx },
@@ -52,14 +55,17 @@ export function transformPanelsIn(widgets: Required<DashboardState>['panels']): 
   return { panelsJSON: JSON.stringify(panels), sections, references: panelReferences };
 }
 
-function transformPanelIn(panel: DashboardPanel): {
+function transformPanelIn(
+  panel: DashboardPanel,
+  legacyMode: boolean = false
+): {
   storedPanel: SavedDashboardPanel;
   references: SavedObjectReference[];
 } {
   const { uid, grid, config, ...restPanel } = panel;
   const idx = uid ?? uuidv4();
 
-  const transforms = embeddableService?.getTransforms(panel.type);
+  const transforms = embeddableService?.getTransforms(panel.type, legacyMode);
   const panelSchema = transforms?.schema;
 
   if (panelSchema) {

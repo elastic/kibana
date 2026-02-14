@@ -176,7 +176,7 @@ export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSeri
 
   const chartType = builder.getType(state.attributes);
 
-  if (!builder.isSupported(chartType)) {
+  if (!builder.isEnabled || !builder.isSupported(chartType)) {
     return state as LensSerializedState;
   }
 
@@ -215,7 +215,7 @@ export function transformToApiConfig(state: LensSerializedState): LensByValueSer
 
   const chartType = builder.getType(state.attributes);
 
-  if (!builder.isSupported(chartType)) {
+  if (!builder.isEnabled || !builder.isSupported(chartType)) {
     // TODO: remove this once all formats are supported
     return state as LensByValueSerializedAPIConfig;
   }

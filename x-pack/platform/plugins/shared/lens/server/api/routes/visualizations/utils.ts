@@ -8,13 +8,14 @@
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
 import type { LensConfigBuilder, LensApiSchemaType } from '@kbn/lens-embeddable-utils';
 
-import type { LensSavedObject, LensUpdateIn } from '../../content_management';
+import type { LensSavedObject, LensUpdateIn } from '../../../content_management';
 import type {
   LensCreateRequestBody,
   LensItemMeta,
   LensResponseItem,
   LensUpdateRequestBody,
 } from './types';
+
 /**
  * Converts Lens request data to Lens Config
  */
@@ -22,35 +23,11 @@ export function getLensRequestConfig(
   builder: LensConfigBuilder,
   request: LensCreateRequestBody | LensUpdateRequestBody
 ): LensUpdateIn['data'] & LensUpdateIn['options'] {
-  const chartType = builder.getType(request);
-  const useApiFormat = builder.isSupported(chartType);
-
-  if (useApiFormat) {
-    const config = request as LensApiSchemaType;
-    const attributes = builder.fromAPIFormat(config);
-
-    return {
-      ...attributes,
-    } satisfies LensUpdateIn['data'] & LensUpdateIn['options'];
-  }
-
-  if (!('state' in request)) {
-    // This should never happen, only to typeguard until fully supported
-    throw new Error('Failure to transform API Format');
-  }
-
-  const { visualizationType, ...attributes } = request;
-
-  if (!visualizationType) {
-    throw new Error('Missing visualizationType');
-  }
+  const config = request as LensApiSchemaType;
+  const attributes = builder.fromAPIFormat(config);
 
   return {
     ...attributes,
-    // TODO: fix these type issues
-    visualizationType,
-    title: attributes.title ?? '',
-    description: attributes.description ?? undefined,
   } satisfies LensUpdateIn['data'] & LensUpdateIn['options'];
 }
 
@@ -74,29 +51,17 @@ export function getLensResponseItem<M extends Record<string, string | boolean>>(
 ): ExtendedLensResponseItem<M> {
   const { id, references, attributes } = item;
   const meta = getLensResponseItemMeta<M>(item, extraMeta);
-  const useApiFormat = builder.isSupported(attributes.visualizationType);
 
-  if (useApiFormat) {
-    const data = builder.toAPIFormat({
-      references,
-      ...attributes,
-      // TODO: fix these type issues
-      state: attributes.state!,
-      visualizationType: attributes.visualizationType ?? LENS_UNKNOWN_VIS,
-    });
-    return {
-      id,
-      data,
-      meta,
-    } satisfies LensResponseItem;
-  }
-
+  const data = builder.toAPIFormat({
+    references,
+    ...attributes,
+    // TODO: fix these type issues
+    state: attributes.state!,
+    visualizationType: attributes.visualizationType ?? LENS_UNKNOWN_VIS,
+  });
   return {
     id,
-    data: {
-      references,
-      ...attributes,
-    },
+    data,
     meta,
   } satisfies LensResponseItem;
 }
@@ -110,12 +75,12 @@ function getLensResponseItemMeta<M extends Record<string, string | boolean>>(
 ): LensItemMeta & M {
   return {
     type,
-    createdAt,
-    updatedAt,
-    createdBy,
-    updatedBy,
     managed,
-    originId,
+    created_at: createdAt,
+    updated_at: updatedAt,
+    created_by: createdBy,
+    updated_by: updatedBy,
+    origin_id: originId,
     ...extraMeta,
   };
 }

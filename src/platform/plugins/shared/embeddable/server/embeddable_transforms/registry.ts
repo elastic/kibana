@@ -26,10 +26,10 @@ export function getTransformsRegistry(drilldownRegistry: ReturnType<typeof getDr
       Object.values(transformsRegistry)
         .map((transformsSetup) => transformsSetup?.getSchema?.(drilldownRegistry.getSchema))
         .filter((schema) => Boolean(schema)) as ObjectType[],
-    getEmbeddableTransforms: (type: string) => {
+    getEmbeddableTransforms: (type: string, legacyMode: boolean) => {
       const { getTransforms, getSchema, throwOnUnmappedPanel } = transformsRegistry[type] ?? {};
       return {
-        ...getTransforms?.(drilldownRegistry.transforms),
+        ...getTransforms?.(drilldownRegistry.transforms, legacyMode),
         ...(getSchema ? { schema: getSchema(drilldownRegistry.getSchema) } : {}),
         ...(typeof throwOnUnmappedPanel === 'boolean' ? { throwOnUnmappedPanel } : {}),
       };

@@ -61,7 +61,10 @@ export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
    */
   getAllEmbeddableSchemas: () => ObjectType[];
 
-  getTransforms: (type: string) =>
+  getTransforms: (
+    type: string,
+    legacyMode: boolean
+  ) =>
     | (EmbeddableTransforms & {
         schema?: Type<object>;
         throwOnUnmappedPanel?: EmbeddableTransformsSetup['throwOnUnmappedPanel'];
@@ -75,7 +78,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private drilldownRegistry = getDrilldownRegistry();
   private transformsRegistry = getTransformsRegistry(this.drilldownRegistry);
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup): EmbeddableSetup {
     this.migrateFn = getMigrateFunction(this.getEmbeddableFactory);
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
@@ -90,7 +93,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart): EmbeddableStart {
     return {
       getAllEmbeddableSchemas: this.transformsRegistry.getAllEmbeddableSchemas,
       getTransforms: this.transformsRegistry.getEmbeddableTransforms,

@@ -18,7 +18,8 @@ import { panelBwc } from './panel_bwc';
 export function transformPanelsOut(
   panelsJSON: string = '[]',
   sections: SavedDashboardSection[] = [],
-  containerReferences?: SavedObjectReference[]
+  containerReferences?: SavedObjectReference[],
+  legacyMode: boolean = false
 ): DashboardState['panels'] {
   const topLevelPanels: DashboardPanel[] = [];
   const sectionsMap: { [uuid: string]: DashboardSection } = {};
@@ -38,10 +39,12 @@ export function transformPanelsOut(
     const { sectionId } = panel.gridData;
     if (sectionId) {
       sectionsMap[sectionId].panels.push(
-        transformPanelProperties(panel, panelReferences, containerReferences)
+        transformPanelProperties(panel, panelReferences, containerReferences, legacyMode)
       );
     } else {
-      topLevelPanels.push(transformPanelProperties(panel, panelReferences, containerReferences));
+      topLevelPanels.push(
+        transformPanelProperties(panel, panelReferences, containerReferences, legacyMode)
+      );
     }
   });
   return [...topLevelPanels, ...Object.values(sectionsMap)];
@@ -54,14 +57,15 @@ const defaultTransform = (
 function transformPanelProperties(
   storedPanel: SavedDashboardPanel,
   storedPanelReferences?: SavedObjectReference[],
-  containerReferences?: SavedObjectReference[]
+  containerReferences?: SavedObjectReference[],
+  legacyMode: boolean = false
 ) {
   const { panel, panelReferences } = panelBwc(storedPanel, storedPanelReferences ?? []);
   const { embeddableConfig, gridData, panelIndex, type, version } = panel;
 
   const { sectionId, i, ...restOfGrid } = gridData;
 
-  const transforms = embeddableService?.getTransforms(type);
+  const transforms = embeddableService?.getTransforms(type, legacyMode);
 
   let transformedPanelConfig;
   try {
