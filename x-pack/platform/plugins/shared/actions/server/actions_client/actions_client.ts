@@ -37,6 +37,7 @@ import type {
   IExecutionLogResult,
 } from '../../common';
 import type { ActionTypeRegistry } from '../action_type_registry';
+import type { AuthTypeRegistry } from '../auth_types/auth_type_registry';
 import type { ActionExecutorContract } from '../lib';
 import { parseDate } from '../lib';
 import type {
@@ -58,6 +59,7 @@ import type { ActionsAuthorization } from '../authorization/actions_authorizatio
 import { connectorAuditEvent, ConnectorAuditAction } from '../lib/audit_events';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type {
+  OAuthAuthorizationCodeParams,
   OAuthClientCredentialsParams,
   OAuthJwtParams,
   OAuthParams,
@@ -69,6 +71,11 @@ import type {
   GetOAuthClientCredentialsSecrets,
 } from '../lib/get_oauth_client_credentials_access_token';
 import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_credentials_access_token';
+import {
+  getOAuthAuthorizationCodeAccessToken,
+  type GetOAuthAuthorizationCodeConfig,
+  type GetOAuthAuthorizationCodeSecrets,
+} from '../lib/get_oauth_authorization_code_access_token';
 import {
   ACTION_FILTER,
   formatExecutionKPIResult,
@@ -92,6 +99,7 @@ export interface ConstructorOptions {
   kibanaIndices: string[];
   scopedClusterClient: IScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
+  authTypeRegistry: AuthTypeRegistry;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   inMemoryConnectors: InMemoryConnector[];
@@ -121,6 +129,7 @@ export interface ActionsClientContext {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   actionTypeRegistry: ActionTypeRegistry;
+  authTypeRegistry: AuthTypeRegistry;
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
   request: KibanaRequest;
@@ -144,6 +153,7 @@ export class ActionsClient {
   constructor({
     logger,
     actionTypeRegistry,
+    authTypeRegistry,
     kibanaIndices,
     scopedClusterClient,
     encryptedSavedObjectsClient,
@@ -165,6 +175,7 @@ export class ActionsClient {
     this.context = {
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       encryptedSavedObjectsClient,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
@@ -417,6 +428,32 @@ export class ActionsClient {
             }, scope ${tokenOpts.scope} and config ${JSON.stringify(tokenOpts.config)} - ${
               err.message
             }`
+        );
+        throw Boom.badRequest(`Failed to retrieve access token`);
+      }
+    } else if (type === 'authorization_code') {
+      const tokenOpts = options as OAuthAuthorizationCodeParams;
+      try {
+        accessToken = await getOAuthAuthorizationCodeAccessToken({
+          connectorId: tokenOpts.connectorId,
+          logger: this.context.logger,
+          configurationUtilities,
+          credentials: {
+            config: tokenOpts.config as GetOAuthAuthorizationCodeConfig,
+            secrets: tokenOpts.secrets as GetOAuthAuthorizationCodeSecrets,
+          },
+          connectorTokenClient: this.context.connectorTokenClient,
+          scope: tokenOpts.scope,
+        });
+
+        this.context.logger.debug(
+          () =>
+            `Successfully retrieved access token using Authorization Code OAuth for connector ${tokenOpts.connectorId} with tokenUrl ${tokenOpts.tokenUrl}`
+        );
+      } catch (err) {
+        this.context.logger.debug(
+          () =>
+            `Failed to retrieve access token using Authorization Code OAuth for connector ${tokenOpts.connectorId} with tokenUrl ${tokenOpts.tokenUrl} - ${err.message}`
         );
         throw Boom.badRequest(`Failed to retrieve access token`);
       }

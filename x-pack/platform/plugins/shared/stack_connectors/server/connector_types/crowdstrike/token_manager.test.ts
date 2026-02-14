@@ -83,7 +83,7 @@ describe('CrowdStrikeTokenManager', () => {
     jest.spyOn(connectorTokenClientMock, 'updateOrReplace').mockImplementation(async (options) => {
       // Calculate expiration time based on expiresInSec
       const expiresAt = new Date(
-        options.tokenRequestDate + options.expiresInSec * 1000
+        options.tokenRequestDate + (options.expiresInSec ?? 0) * 1000
       ).toISOString();
       cachedTokenMock = createConnectorTokenMock({
         connectorId: options.connectorId,

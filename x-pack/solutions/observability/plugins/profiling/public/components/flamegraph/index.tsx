@@ -147,6 +147,7 @@ export function FlameGraph({
   if (!isWebGLAvailable) {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate('xpack.profiling.flamegraph.webglNotAvailable.title', {
           defaultMessage: 'WebGL is required to display the flamegraph',
         })}

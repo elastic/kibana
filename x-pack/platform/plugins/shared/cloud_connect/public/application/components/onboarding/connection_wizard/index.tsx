@@ -180,6 +180,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
           <>
             <EuiSpacer size="m" />
             <EuiCallOut
+              announceOnMount
               title="Authentication failed"
               color="danger"
               iconType="error"

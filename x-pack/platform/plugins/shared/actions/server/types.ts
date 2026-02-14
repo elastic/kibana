@@ -297,12 +297,15 @@ export interface ResponseSettings {
 }
 
 export interface ConnectorToken extends SavedObjectAttributes {
+  id?: string;
   connectorId: string;
   tokenType: string;
   token: string;
-  expiresAt: string;
+  expiresAt?: string;
   createdAt: string;
   updatedAt?: string;
+  refreshToken?: string;
+  refreshTokenExpiresAt?: string;
 }
 
 // This unallowlist should only contain connector types that require a request or API key for

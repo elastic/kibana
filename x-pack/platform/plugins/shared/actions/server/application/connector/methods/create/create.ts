@@ -15,6 +15,7 @@ import { validateConfig, validateConnector, validateSecrets } from '../../../../
 import { isConnectorDeprecated } from '../../lib';
 import type { HookServices, ActionResult } from '../../../../types';
 import { tryCatch } from '../../../../lib';
+import { inferAuthMode } from '../../../../lib/infer_auth_mode';
 
 export async function create({
   context,
@@ -116,6 +117,12 @@ export async function create({
     })
   );
 
+  const authMode = inferAuthMode({
+    authTypeRegistry: context.authTypeRegistry,
+    secrets,
+    config,
+  });
+
   const result = await tryCatch(
     async () =>
       await context.unsecuredSavedObjectsClient.create(
@@ -126,6 +133,7 @@ export async function create({
           isMissingSecrets: false,
           config: validatedActionTypeConfig as SavedObjectAttributes,
           secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+          ...(authMode !== undefined ? { authMode } : {}),
         },
         { id }
       )
@@ -168,5 +176,6 @@ export async function create({
     isSystemAction: false,
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
+    ...(result.attributes.authMode !== undefined ? { authMode: result.attributes.authMode } : {}),
   };
 }

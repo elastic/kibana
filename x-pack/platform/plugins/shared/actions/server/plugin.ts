@@ -73,6 +73,10 @@ import { getActionsConfigurationUtilities } from './actions_config';
 import { defineRoutes } from './routes';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
+  initializeOAuthStateCleanupTask,
+  scheduleOAuthStateCleanupTask,
+} from './lib/oauth_state_cleanup_task';
+import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
@@ -105,6 +109,7 @@ import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured
 import { createSystemConnectors } from './create_system_actions';
 import { ConnectorUsageReportingTask } from './usage/connector_usage_reporting_task';
 import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
+import { OAuthRateLimiter } from './lib/oauth_rate_limiter';
 import type { GetAxiosInstanceWithAuthFnOpts } from './lib/get_axios_instance';
 import { getAxiosInstanceWithAuth } from './lib/get_axios_instance';
 
@@ -394,11 +399,22 @@ export class ActionsPlugin
       });
     }
 
+    // Initialize OAuth state cleanup task
+    initializeOAuthStateCleanupTask(this.logger, plugins.taskManager, core);
+
     const subActionFramework = createSubActionConnectorFramework({
       actionTypeRegistry,
       logger: this.logger,
       actionsConfigUtils,
     });
+
+    // Initialize OAuth rate limiter
+    const oauthRateLimiter = new OAuthRateLimiter({
+      config: this.actionsConfig.oAuthRateLimit,
+    });
+    this.logger.info(
+      `OAuth rate limiter initialized with authorize limit: ${this.actionsConfig.oAuthRateLimit.authorize.limit}`
+    );
 
     // Routes
     defineRoutes({
@@ -406,6 +422,9 @@ export class ActionsPlugin
       licenseState: this.licenseState,
       actionsConfigUtils,
       usageCounter: this.usageCounter,
+      logger: this.logger,
+      core,
+      oauthRateLimiter,
     });
 
     return {
@@ -509,6 +528,7 @@ export class ActionsPlugin
         logger,
         unsecuredSavedObjectsClient,
         actionTypeRegistry: actionTypeRegistry!,
+        authTypeRegistry: this.authTypeRegistry!,
         kibanaIndices: core.savedObjects.getAllIndices(),
         scopedClusterClient: core.elasticsearch.client.asScoped(request),
         inMemoryConnectors: this.inMemoryConnectors,
@@ -658,6 +678,7 @@ export class ActionsPlugin
     this.eventLogService!.isEsContextReady()
       .then(() => {
         scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
+        scheduleOAuthStateCleanupTask(this.logger, plugins.taskManager);
       })
       .catch(() => {});
 
@@ -800,6 +821,7 @@ export class ActionsPlugin
   ): IContextProvider<ActionsRequestHandlerContext, 'actions'> => {
     const {
       actionTypeRegistry,
+      authTypeRegistry,
       isESOCanEncrypt,
       getInMemoryConnectors,
       actionExecutor,
@@ -837,6 +859,7 @@ export class ActionsPlugin
             logger,
             unsecuredSavedObjectsClient,
             actionTypeRegistry: actionTypeRegistry!,
+            authTypeRegistry: authTypeRegistry!,
             kibanaIndices: savedObjects.getAllIndices(),
             scopedClusterClient: coreContext.elasticsearch.client,
             inMemoryConnectors,

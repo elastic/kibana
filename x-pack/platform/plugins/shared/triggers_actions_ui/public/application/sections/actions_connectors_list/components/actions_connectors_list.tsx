@@ -124,6 +124,28 @@ const ActionsConnectorsList = ({
     chrome.docTitle.change(getCurrentDocTitle('connectors'));
   }, [chrome, setBreadcrumbs]);
 
+  // Check for OAuth authorization success and show toast notification
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('oauth_authorization') === 'success') {
+      toasts.addSuccess({
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.actionsConnectorsList.oauthAuthorizationSuccessTitle',
+          { defaultMessage: 'Authorization successful' }
+        ),
+        text: i18n.translate(
+          'xpack.triggersActionsUI.sections.actionsConnectorsList.oauthAuthorizationSuccessMessage',
+          { defaultMessage: 'Your connector has been authorized successfully.' }
+        ),
+      });
+
+      // Clean up the URL parameter
+      params.delete('oauth_authorization');
+      const newUrl = `${location.pathname}${params.toString() ? `?${params.toString()}` : ''}`;
+      history.replace(newUrl);
+    }
+  }, [location.search, location.pathname, history, toasts]);
+
   useEffect(() => {
     (async () => {
       try {

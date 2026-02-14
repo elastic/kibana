@@ -16,6 +16,7 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorTokenClientContract } from '../types';
 import { getBeforeRedirectFn } from './before_redirect';
 import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
+import { getOAuthAuthorizationCodeAccessToken } from './get_oauth_authorization_code_access_token';
 import { getDeleteTokenAxiosInterceptor } from './delete_token_axios_interceptor';
 
 export type ConnectorInfo = Omit<ActionInfo, 'rawAction'>;
@@ -27,6 +28,85 @@ interface GetAxiosInstanceOpts {
 }
 
 type ValidatedSecrets = Record<string, unknown>;
+
+interface AxiosErrorWithRetry {
+  config: InternalAxiosRequestConfig & { _retry?: boolean };
+  response?: { status: number };
+  message: string;
+}
+
+interface OAuth2AuthCodeParams {
+  clientId?: string;
+  clientSecret?: string;
+  tokenUrl?: string;
+  scope?: string;
+  useBasicAuth?: boolean;
+}
+
+async function handleOAuth401Error({
+  error,
+  connectorId,
+  secrets,
+  connectorTokenClient,
+  logger,
+  configurationUtilities,
+  axiosInstance,
+}: {
+  error: AxiosErrorWithRetry;
+  connectorId: string;
+  secrets: OAuth2AuthCodeParams;
+  connectorTokenClient: ConnectorTokenClientContract;
+  logger: Logger;
+  configurationUtilities: ActionsConfigurationUtilities;
+  axiosInstance: AxiosInstance;
+}): Promise<never | AxiosInstance> {
+  // Prevent retry loops - only attempt refresh once per request
+  if (error.config._retry) {
+    return Promise.reject(error);
+  }
+
+  error.config._retry = true;
+  logger.debug(`Attempting token refresh for connectorId ${connectorId} after 401 error`);
+
+  const { clientId, clientSecret, tokenUrl, scope, useBasicAuth } = secrets;
+  if (!clientId || !clientSecret || !tokenUrl) {
+    error.message =
+      'Authentication failed: Missing required OAuth configuration (clientId, clientSecret, tokenUrl).';
+    return Promise.reject(error);
+  }
+
+  // Use the shared token refresh function with mutex protection
+  const newAccessToken = await getOAuthAuthorizationCodeAccessToken({
+    connectorId,
+    logger,
+    configurationUtilities,
+    credentials: {
+      config: {
+        clientId,
+        tokenUrl,
+        useBasicAuth,
+      },
+      secrets: {
+        clientSecret,
+      },
+    },
+    connectorTokenClient,
+    scope,
+    forceRefresh: true,
+  });
+
+  if (!newAccessToken) {
+    error.message =
+      'Authentication failed: Unable to refresh access token. Please re-authorize the connector.';
+    return Promise.reject(error);
+  }
+
+  logger.debug(`Token refreshed successfully for connectorId ${connectorId}. Retrying request.`);
+
+  // Update request with the new token and retry
+  error.config.headers.Authorization = newAccessToken;
+  return axiosInstance.request(error.config);
+}
 
 export interface GetAxiosInstanceWithAuthFnOpts {
   additionalHeaders?: Record<string, AxiosHeaderValue>;
@@ -98,9 +178,56 @@ export const getAxiosInstanceWithAuth = ({
         axiosInstance.interceptors.response.use(onFulfilled, onRejected);
       }
 
+      // Add a response interceptor to handle 401 errors for OAuth authz code grant connectors
+      if (authTypeId === 'oauth_authorization_code' && connectorTokenClient) {
+        axiosInstance.interceptors.response.use(
+          (response) => response,
+          (error) => {
+            if (error.response?.status === 401) {
+              return handleOAuth401Error({
+                error,
+                connectorId,
+                secrets: secrets as OAuth2AuthCodeParams,
+                connectorTokenClient,
+                logger,
+                configurationUtilities,
+                axiosInstance,
+              });
+            }
+            return Promise.reject(error);
+          }
+        );
+      }
+
       const configureCtx = {
         getCustomHostSettings: (url: string) => configurationUtilities.getCustomHostSettings(url),
         getToken: async (opts: GetTokenOpts) => {
+          // Use different token retrieval method based on auth type
+          if (authTypeId === 'oauth_authorization_code') {
+            // For authorization code flow, retrieve stored tokens from callback
+            if (!connectorTokenClient) {
+              throw new Error('ConnectorTokenClient is required for OAuth authorization code flow');
+            }
+            return await getOAuthAuthorizationCodeAccessToken({
+              connectorId,
+              logger,
+              configurationUtilities,
+              credentials: {
+                config: {
+                  clientId: opts.clientId,
+                  tokenUrl: opts.tokenUrl,
+                  ...(opts.additionalFields ? { additionalFields: opts.additionalFields } : {}),
+                },
+                secrets: {
+                  clientSecret: opts.clientSecret,
+                },
+              },
+              connectorTokenClient,
+              scope: opts.scope,
+            });
+          }
+
+          // For client credentials flow, request new token each time
           return await getOAuthClientCredentialsAccessToken({
             connectorId,
             logger,

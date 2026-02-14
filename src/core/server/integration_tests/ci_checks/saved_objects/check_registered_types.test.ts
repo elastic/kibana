@@ -57,7 +57,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
 
     expect(hashMap).toMatchInlineSnapshot(`
       Object {
-        "action": "f57d48f1be0e7895817648ecc89db8a5b594edc5185ad7c60b5ab743c960311b",
+        "action": "3ab1aa6b6d32d7704fa2dc5fe34c65d632d869af3736f5d08a761d09b93430e2",
         "action_task_params": "6751dc8a4707a432bc9b90f5a025f183aefc84bca5ec26c29ce6939b24ea81e4",
         "ad_hoc_run_params": "9c372f2a8f8b468e9b699a6df633c7f14fab7f13216c9ec160813e75bae56098",
         "alert": "119624b6025ea6794d2c33e2b41c2e4730d10446430b285691f7638ee6787af5",
@@ -89,7 +89,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "cloud-security-posture-settings": "86ac8eba7ea80c15ab48bf424f7c15f1d935774f84ff32c5c1e04c95c67e72b6",
         "config": "d368f46c1a9920560f23b0d2793379995ee24bbff8e0438661bc3d9f528f4947",
         "config-global": "e306e70563eb2f3204aff45506f3ca1c3c67461971a45fba471c72bd8eb4435b",
-        "connector_token": "6e14114a9a7ca64becf611b7db23d59438cd332fd5228fbf7c6cc2144e0459d0",
+        "connector_token": "04838c9e72fae94ee65cd2e0b7ac9acf883506c390304c5b02626961905d1656",
         "core-usage-stats": "0e76782718b2eef6104d2ddec46ed356339220997ad8da8d4f86433c3b46f77a",
         "csp-rule-template": "6fec028650a7aa0ef5a07d3d2906c32c2505da013adb2e51fa0e66bbf0ff70c5",
         "dashboard": "3cfab5e285c531092dd9abed38565e6e048b843d75ba9a6c1f5c3017a42db0c6",
@@ -150,6 +150,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "ml-module": "cb77705b41ea0a35d8ba79b19014a30069e0e93a2cfb7ae8c6f20a79207d5daa",
         "ml-trained-model": "133305438dc0b60a6660c44f0d8183ad5ba079db8fdd4e4f4b5ab3a09d2f29b8",
         "monitoring-telemetry": "fa7c4f2a099b4f0539e571372a598601c2a0c65ba50f6c34df23b4d6925cdc53",
+        "oauth_state": "8902d67a5fb68ccea1f3a63100dc45b84a764c786dd13d77b75ca5a901f42335",
         "observability-onboarding-state": "b656db675800bfee8a2ddb5bf73b543542c7a7db64ed268ab5adcae6910773d2",
         "osquery-manager-usage-metric": "8833b9f812e9179897444c395761f9911945cfb77de9869c4e9b6ee6eeb0f573",
         "osquery-pack": "7ee940ea04c9c562406977efaa213050b2079c5bcc4e06ec56c8be6a85eb5ccd",
@@ -236,6 +237,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "action|global: 04984aae6011426601f8a2a06278e30080f6da3a",
         "action|mappings: c4a658c865d4c30b51ae9b49e1dec06d012bc213",
         "action|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "action|10.2.0: 4367848750ed49705e88d5ffbe6229bf25312bd17e0f66f1848ec0031b6667b8",
         "action|10.1.0: e588c3ab049a6d529d68099cac0cb5b8256603d421f28dd475bbcd2146451d6f",
         "action|8.3.0: 89bd5d9dfbcd73496bf7ff424f5ed670b074078e",
         "action|8.0.0: 89bd5d9dfbcd73496bf7ff424f5ed670b074078e",
@@ -531,6 +533,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "connector_token|global: 9c6972571df6c56a0d542bdca734a55a7a3859e5",
         "connector_token|mappings: 8c3f381518f3a37955cc7a434e72a81c11e28f1c",
         "connector_token|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "connector_token|10.2.0: 796867ae86b9d9eb58eb4647bc61fdb58fbeca3024cf4ff556f18e34b7b70060",
         "connector_token|10.1.0: ab76db77c61eebd5d731958f792a26402d8c216ed20de984c25f17bd0b59b784",
         "========================================================================================",
         "core-usage-stats|global: 0f6c6a66d1ec3ccababd15890476caf7f6f57700",
@@ -990,6 +993,11 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "monitoring-telemetry|mappings: 400d044dff084cdfc58f413f5628494343bae327",
         "monitoring-telemetry|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
         "======================================================================",
+        "oauth_state|global: a665293b001c9e7b6e92c0a50a553b8163dbcd41",
+        "oauth_state|mappings: 04721e2fa836fed1f3f2e9c343d96ec5304f8f09",
+        "oauth_state|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "oauth_state|10.1.0: 8324da0f847d48f9b0de638008110b966275a95f53d3efc9242fe25f5a2f1f13",
+        "====================================================================================",
         "observability-onboarding-state|global: c226ba4dd0412c2d7fd7a01976461e9da00b78bf",
         "observability-onboarding-state|mappings: d6efe91e6efcc5e1b41fac37b731b715182939ce",
         "observability-onboarding-state|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
@@ -1318,7 +1326,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
     // WARNING Existing entries' semvers should NEVER be downgraded. Never validate changes if they cause a downgrade.
     expect(map).toMatchInlineSnapshot(`
       Object {
-        "action": "10.1.0",
+        "action": "10.2.0",
         "action_task_params": "10.2.0",
         "ad_hoc_run_params": "10.3.0",
         "alert": "10.8.0",
@@ -1350,7 +1358,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "cloud-security-posture-settings": "10.1.0",
         "config": "10.2.0",
         "config-global": "10.0.0",
-        "connector_token": "10.1.0",
+        "connector_token": "10.2.0",
         "core-usage-stats": "10.0.0",
         "csp-rule-template": "10.0.0",
         "dashboard": "10.3.0",
@@ -1411,6 +1419,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "ml-module": "10.0.0",
         "ml-trained-model": "10.0.0",
         "monitoring-telemetry": "10.0.0",
+        "oauth_state": "10.1.0",
         "observability-onboarding-state": "10.2.0",
         "osquery-manager-usage-metric": "10.0.0",
         "osquery-pack": "10.1.0",
@@ -1473,7 +1482,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
     // WARNING Existing entries' semvers should NEVER be downgraded. Never validate changes if they cause a downgrade.
     expect(map).toMatchInlineSnapshot(`
       Object {
-        "action": "10.1.0",
+        "action": "10.2.0",
         "action_task_params": "10.2.0",
         "ad_hoc_run_params": "10.3.0",
         "alert": "10.8.0",
@@ -1505,7 +1514,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "cloud-security-posture-settings": "10.1.0",
         "config": "10.2.0",
         "config-global": "0.0.0",
-        "connector_token": "10.1.0",
+        "connector_token": "10.2.0",
         "core-usage-stats": "7.14.1",
         "csp-rule-template": "8.7.0",
         "dashboard": "10.3.0",
@@ -1566,6 +1575,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "ml-module": "7.10.0",
         "ml-trained-model": "7.10.0",
         "monitoring-telemetry": "0.0.0",
+        "oauth_state": "10.1.0",
         "observability-onboarding-state": "10.2.0",
         "osquery-manager-usage-metric": "0.0.0",
         "osquery-pack": "10.1.0",
