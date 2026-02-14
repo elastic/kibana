@@ -14,5 +14,6 @@ export { OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from './get_downstr
 export { OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID } from './get_correlated_logs/tool';
 export { OBSERVABILITY_GET_HOSTS_TOOL_ID } from './get_hosts/tool';
 export { OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID } from './get_trace_metrics/tool';
+export { OBSERVABILITY_GET_TRACES_TOOL_ID } from './get_traces/tool';
 export { OBSERVABILITY_GET_RUNTIME_METRICS_TOOL_ID } from './get_runtime_metrics/tool';
 export { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID } from './get_index_info';
