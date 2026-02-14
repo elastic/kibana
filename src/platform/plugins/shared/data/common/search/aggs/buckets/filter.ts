@@ -48,7 +48,7 @@ export const getFilterBucketAgg = ({
     params: [
       {
         name: 'geo_bounding_box',
-        toExpressionAst: geoBoundingBoxToAst,
+        toExpressionAst: (value: unknown) => geoBoundingBoxToAst(value as GeoBoundingBox),
       },
       {
         name: 'timeShift',
@@ -91,7 +91,7 @@ export const getFilterBucketAgg = ({
             ? moment(calculateBounds(aggConfigs.timeRange).max)
             : undefined;
 
-          output.params =
+          output.params = (
             !timeWindow || !timeRangeAnchor || !aggConfig.getIndexPattern().timeFieldName
               ? query
               : {
@@ -116,9 +116,10 @@ export const getFilterBucketAgg = ({
                       query ? query : undefined,
                     ].filter(Boolean),
                   },
-                };
+                }
+          ) as Record<string, unknown>;
         },
-        toExpressionAst: queryToAst,
+        toExpressionAst: (value: unknown) => queryToAst(value as Query),
       },
     ],
   });

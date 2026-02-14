@@ -11,6 +11,7 @@ import _ from 'lodash';
 
 import type { IAggConfig } from '../agg_config';
 import { BaseParamType } from './base';
+import type { AggParamOutput } from './base';
 
 function collapseLiteralStrings(xjson: string) {
   const tripleQuotes = '"""';
@@ -24,13 +25,13 @@ function collapseLiteralStrings(xjson: string) {
 }
 
 export class JsonParamType extends BaseParamType {
-  constructor(config: Record<string, any>) {
+  constructor(config: Record<string, unknown>) {
     super(config);
 
-    this.name = config.name || 'json';
+    this.name = (config.name as string) || 'json';
 
     if (!config.write) {
-      this.write = (aggConfig: IAggConfig, output: Record<string, any>) => {
+      this.write = (aggConfig: IAggConfig, output: AggParamOutput) => {
         let paramJson;
         const param = aggConfig.params[this.name];
 
@@ -44,27 +45,31 @@ export class JsonParamType extends BaseParamType {
           return;
         }
 
-        function filteredCombine(srcA: any, srcB: any) {
-          function mergeObjs(a: any, b: any) {
+        function filteredCombine(srcA: unknown, srcB: unknown) {
+          function mergeObjs(
+            a: Record<string, unknown>,
+            b: Record<string, unknown>
+          ): Record<string, unknown> {
             return _(a)
               .keys()
               .union(_.keys(b))
-              .transform(function (dest: any, key) {
+              .transform(function (dest: Record<string, unknown>, key) {
                 const val = compare(a[key], b[key]);
                 if (val !== undefined) dest[key] = val;
-              }, {})
+              }, {} as Record<string, unknown>)
               .value();
           }
 
-          function mergeArrays(a: any, b: any): any {
+          function mergeArrays(a: unknown[], b: unknown[]): unknown[] {
             // attempt to merge each value
             return _.times(Math.max(a.length, b.length), function (i) {
               return compare(a[i], b[i]);
             });
           }
 
-          function compare(a: any, b: any) {
-            if (_.isPlainObject(a) && _.isPlainObject(b)) return mergeObjs(a, b);
+          function compare(a: unknown, b: unknown): unknown {
+            if (_.isPlainObject(a) && _.isPlainObject(b))
+              return mergeObjs(a as Record<string, unknown>, b as Record<string, unknown>);
             if (Array.isArray(a) && Array.isArray(b)) return mergeArrays(a, b);
             if (b === null) return undefined;
             if (b !== undefined) return b;
@@ -74,7 +79,7 @@ export class JsonParamType extends BaseParamType {
           return compare(srcA, srcB);
         }
 
-        output.params = filteredCombine(output.params, paramJson);
+        output.params = filteredCombine(output.params, paramJson) as Record<string, unknown>;
         return;
       };
     }

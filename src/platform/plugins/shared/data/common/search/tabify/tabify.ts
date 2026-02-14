@@ -35,7 +35,9 @@ function collectBucket(
     const agg = column.aggConfig;
     if (agg.getParam('scaleMetricValues')) {
       const aggInfo = agg.write(aggs);
-      aggScale *= aggInfo.metricScale || 1;
+      const metricScaleRaw = aggInfo.metricScale;
+      aggScale *=
+        typeof metricScaleRaw === 'number' && !Number.isNaN(metricScaleRaw) ? metricScaleRaw : 1;
     }
 
     switch (agg.type.type) {

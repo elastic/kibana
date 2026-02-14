@@ -119,14 +119,15 @@ export function getResponseInspectorStats(
     };
   }
 
-  if (lastRequest && (lastRequest.ms === 0 || lastRequest.ms)) {
+  const lastRequestMs = (lastRequest as { ms?: number })?.ms;
+  if (lastRequest && (lastRequestMs === 0 || lastRequestMs)) {
     stats.requestTime = {
       label: i18n.translate('data.search.searchSource.requestTimeLabel', {
         defaultMessage: 'Request time',
       }),
       value: i18n.translate('data.search.searchSource.requestTimeValue', {
         defaultMessage: '{requestTime}ms',
-        values: { requestTime: lastRequest.ms },
+        values: { requestTime: lastRequestMs },
       }),
       description: i18n.translate('data.search.searchSource.requestTimeDescription', {
         defaultMessage:

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { DataViewsContract, DataViewLazy } from '@kbn/data-views-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
@@ -42,9 +43,10 @@ export const createSearchSource = (
     searchSourceFields: SerializedSearchSourceFields = {},
     useDataViewLazy = false
   ) => {
-    const { index, parent, ...restOfFields } = searchSourceFields;
+    const { index, parent, highlight, ...restOfFields } = searchSourceFields;
     const fields: SearchSourceFields = {
       ...restOfFields,
+      ...(highlight ? { highlight: highlight as unknown as estypes.SearchHighlight } : {}),
     };
 
     // hydrating index pattern

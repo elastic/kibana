@@ -69,7 +69,7 @@ export const getDateRangeBucketAgg = ({ aggExecutionContext, getConfig }: AggTyp
             to: 'now',
           },
         ],
-        toExpressionAst: (ranges) => ranges?.map(dateRangeToAst),
+        toExpressionAst: (value: unknown) => (value as DateRange[])?.map(dateRangeToAst),
       },
       {
         name: 'time_zone',

@@ -8,11 +8,12 @@
  */
 
 import type { IAggConfigs } from '../../agg_configs';
+import type { AggParamOutput } from '../../param_types/base';
 import type { IMetricAggConfig } from '../metric_agg_type';
 
 export const parentPipelineAggWriter = (
   agg: IMetricAggConfig,
-  output: Record<string, any>,
+  output: AggParamOutput,
   aggConfigs?: IAggConfigs
 ): void => {
   const customMetric = agg.getParam('customMetric');

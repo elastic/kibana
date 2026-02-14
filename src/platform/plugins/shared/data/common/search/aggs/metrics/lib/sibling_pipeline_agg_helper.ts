@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { siblingPipelineAggWriter } from './sibling_pipeline_agg_writer';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
+import type { AggParamOutput } from '../../param_types/base';
 import type { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
 
 const metricAggFilter: string[] = [
@@ -71,7 +72,7 @@ export const siblingPipelineAggHelper = {
         },
         modifyAggConfigOnSearchRequestStart:
           forwardModifyAggConfigOnSearchRequestStart('customMetric'),
-        write: (agg: IMetricAggConfig, output: Record<string, any>) =>
+        write: (agg: IMetricAggConfig, output: AggParamOutput) =>
           siblingPipelineAggWriter(agg, output),
       },
     ] as Array<MetricAggParam<IMetricAggConfig>>;

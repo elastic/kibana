@@ -76,7 +76,7 @@ import {
 import { catchError, finalize, first, last, map, shareReplay, switchMap, tap } from 'rxjs';
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
-import type { Filter } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { buildEsQuery, isOfQueryType, isPhraseFilter, isPhrasesFilter } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
@@ -84,9 +84,15 @@ import type { DataView, DataViewLazy, DataViewsContract } from '@kbn/data-views-
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type { ISearchGeneric, IKibanaSearchResponse, IEsSearchResponse } from '@kbn/search-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { normalizeSortRequest } from './normalize_sort_request';
 
-import type { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
+import type {
+  AggConfigSerialized,
+  DataViewField,
+  GetConfigFn,
+  SerializedSearchSourceFields,
+} from '../..';
 import { queryToFields } from './query_to_fields';
 
 import type { EsQuerySortValue } from '../..';
@@ -110,6 +116,24 @@ import type {
   ExpressionFunctionKibanaContext,
 } from '../expressions';
 import { filtersToAst, queryToAst } from '../expressions';
+
+/**
+ * Internal mutable type used during SearchRequest construction in mergeProps/flatten.
+ * Explicitly models the known internal fields accumulated during the merge process.
+ */
+interface MutableSearchRequest extends SearchRequest {
+  body: Record<string, unknown>;
+  filters?: Filter[] | (() => Filter[]);
+  nonHighlightingFilters?: Filter[];
+  query?: (Query | AggregateQuery)[];
+  fieldsFromSource?: SearchFieldValue[];
+  index?: DataView | string;
+  type?: string;
+  highlightAll?: boolean;
+  pit?: estypes.SearchPointInTimeReference;
+  timezone?: string;
+  [key: string]: unknown;
+}
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -361,7 +385,7 @@ export class SearchSource {
         const searchRequest = this.flatten();
         this.history = [searchRequest];
         if (searchRequest.index) {
-          options.indexPattern = searchRequest.index;
+          options.indexPattern = searchRequest.index as unknown as DataView;
         }
 
         return this.fetchSearch$(searchRequest, options);
@@ -404,8 +428,12 @@ export class SearchSource {
   /**
    * Returns body contents of the search request, often referred as query DSL.
    */
-  getSearchRequestBody() {
-    return this.flatten().body;
+  getSearchRequestBody(): Record<string, unknown> & {
+    query?: estypes.QueryDslQueryContainer;
+  } {
+    return this.flatten().body as Record<string, unknown> & {
+      query?: estypes.QueryDslQueryContainer;
+    };
   }
 
   /**
@@ -433,7 +461,7 @@ export class SearchSource {
 
     const trackRequestBody = () => {
       try {
-        requestResponder?.json(this.getSearchRequestBody());
+        requestResponder?.json(this.getSearchRequestBody() as object);
       } catch (e) {} // eslint-disable-line no-empty
     };
 
@@ -618,11 +646,14 @@ export class SearchSource {
    * @param  {*} key - The key of `val`
    */
   private mergeProp<K extends keyof SearchSourceFields>(
-    data: SearchRequest,
+    data: MutableSearchRequest,
     val: SearchSourceFields[K],
     key: K
   ): false | void {
-    val = typeof val === 'function' ? val(this) : val;
+    val =
+      typeof val === 'function'
+        ? (val as (searchSource: SearchSource) => SearchSourceFields[K])(this)
+        : val;
     if (val == null || !key) return;
 
     const addToRoot = (rootKey: string, value: unknown) => {
@@ -645,12 +676,17 @@ export class SearchSource {
       case 'filter':
         return addToRoot(
           'filters',
-          (typeof data.filters === 'function' ? data.filters() : data.filters ?? []).concat(val)
+          (typeof data.filters === 'function' ? data.filters() : data.filters ?? []).concat(
+            val as Filter | Filter[]
+          )
         );
       case 'nonHighlightingFilters':
-        return addToRoot('nonHighlightingFilters', (data.nonHighlightingFilters ?? []).concat(val));
+        return addToRoot(
+          'nonHighlightingFilters',
+          (data.nonHighlightingFilters ?? []).concat(val as Filter[])
+        );
       case 'query':
-        return addToRoot(key, (data.query ?? []).concat(val));
+        return addToRoot(key, (data.query ?? []).concat(val as Query | AggregateQuery));
       case 'fields':
         // This will pass the passed in parameters to the new fields API.
         // Also if will only return scripted fields that are part of the specified
@@ -661,7 +697,11 @@ export class SearchSource {
         return addToBody('fields', val);
       case 'fieldsFromSource':
         // preserves legacy behavior
-        const fields = [...new Set((data.fieldsFromSource || []).concat(val))];
+        const fields = [
+          ...new Set(
+            (data.fieldsFromSource || []).concat(val as SearchFieldValue | SearchFieldValue[])
+          ),
+        ];
         return addToRoot(key, fields);
       case 'index':
       case 'type':
@@ -675,7 +715,7 @@ export class SearchSource {
         return addToBody('_source', val);
       case 'sort':
         const sort = normalizeSortRequest(
-          val,
+          val as EsQuerySortValue | EsQuerySortValue[],
           this.getField('index'),
           getConfig(UI_SETTINGS.SORT_OPTIONS)
         );
@@ -684,7 +724,7 @@ export class SearchSource {
         return addToRoot(key, val);
       case 'aggs':
         if ((val as unknown) instanceof AggConfigs) {
-          return addToBody('aggs', val.toDsl());
+          return addToBody('aggs', (val as AggConfigs).toDsl());
         } else {
           return addToBody('aggs', val);
         }
@@ -700,7 +740,10 @@ export class SearchSource {
    * flat representation (taking into account merging rules)
    * @resolved {Object|null} - the flat data of the SearchSource
    */
-  private mergeProps(root = this, searchRequest: SearchRequest = { body: {} }): SearchRequest {
+  private mergeProps(
+    root = this,
+    searchRequest: MutableSearchRequest = { body: {} }
+  ): MutableSearchRequest {
     Object.entries(this.fields).forEach(([key, value]) => {
       this.mergeProp(searchRequest, value, key as keyof SearchSourceFields);
     });
@@ -801,7 +844,15 @@ export class SearchSource {
       'body',
       'timezone',
     ]);
-    const body = { ...bodyParams, ...searchRequest.body };
+    const body = { ...bodyParams, ...searchRequest.body } as {
+      fields?: SearchFieldValue[];
+      _source?: estypes.MappingSourceField | boolean;
+      script_fields?: Record<string, estypes.ScriptField>;
+      docvalue_fields?: Array<{ field: string; format: string }>;
+      size?: number;
+      sort?: unknown;
+      [key: string]: unknown;
+    };
     const dataView = this.getDataView(searchRequest.index);
 
     // get some special field types from the index pattern
@@ -819,7 +870,11 @@ export class SearchSource {
         : body._source;
 
     // get filter if data view specified, otherwise null filter
-    const filter = this.getFieldFilter({ bodySourceExcludes: _source?.excludes, metaFields });
+    const _sourceObj = typeof _source === 'object' ? _source : undefined;
+    const filter = this.getFieldFilter({
+      bodySourceExcludes: _sourceObj?.excludes ?? [],
+      metaFields,
+    });
 
     const fieldsFromSource = filter(searchRequest.fieldsFromSource || []);
     // apply source filters from index pattern if specified by the user
@@ -854,7 +909,7 @@ export class SearchSource {
       uniqFieldNames,
       scriptFields: scriptedFields,
       runtimeFields,
-      _source,
+      _source: (_sourceObj ?? {}) as estypes.MappingSourceField,
     });
 
     // For testing shard failure messages in the UI, follow these steps:
@@ -940,7 +995,7 @@ export class SearchSource {
       fields: this.getFieldsList({
         index: dataView,
         fields,
-        docvalueFields: body.docvalue_fields,
+        docvalueFields: body.docvalue_fields ?? [],
         fieldsFromSource,
         filteredDocvalueFields,
         metaFields,
@@ -1005,12 +1060,12 @@ export class SearchSource {
 
   private getBuiltEsQuery({ index, query = [], filters = [], getConfig, sort }: SearchRequest) {
     // If sorting by _score, build queries in the "must" clause instead of "filter" clause to enable scoring
-    const filtersInMustClause = (sort ?? []).some((srt: EsQuerySortValue[]) =>
+    const filtersInMustClause = ((sort ?? []) as EsQuerySortValue[]).some((srt: EsQuerySortValue) =>
       Object.hasOwn(srt, '_score')
     );
     const overwriteTimezone = this.getField('timezone');
     const esQueryConfigs = {
-      ...getEsQueryConfig({ get: getConfig }),
+      ...getEsQueryConfig({ get: getConfig as GetConfigFn }),
       filtersInMustClause,
       ...(overwriteTimezone ? { dateFormatTZ: overwriteTimezone } : {}),
     };
@@ -1141,11 +1196,13 @@ export class SearchSource {
       size: _size, // omit it
       sort,
       index,
+      highlight,
       ...searchSourceFields
     } = this.getFields();
 
     let serializedSearchSourceFields: SerializedSearchSourceFields = {
       ...searchSourceFields,
+      ...(highlight ? { highlight: highlight as unknown as SerializableRecord } : {}),
     };
     if (index) {
       serializedSearchSourceFields.index = index.isPersisted() ? index.id : index.toMinimalSpec();
@@ -1255,7 +1312,7 @@ export class SearchSource {
     } else {
       ast.chain.push(
         buildExpressionFunction<EsdslExpressionFunctionDefinition>('esdsl', {
-          size: body?.size,
+          size: body?.size as number,
           dsl: JSON.stringify({}),
           index: typeof index === 'string' ? index : `${dataView?.id}`,
         }).toAst()

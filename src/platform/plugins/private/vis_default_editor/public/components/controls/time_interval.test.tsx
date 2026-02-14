@@ -11,6 +11,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { TimeIntervalParamEditor } from './time_interval';
 import { aggParamCommonPropsMock } from './test_utils';
+import type { AggParamOption } from '@kbn/data-plugin/public';
 import type { AggParamEditorProps } from '../agg_param_props';
 
 jest.mock('@kbn/data-plugin/public', () => ({
@@ -87,11 +88,11 @@ describe('TimeIntervalParamEditor', () => {
     });
 
     test('should filter out "auto" interval value if it is disabled in options and mark as invalid', () => {
-      props.aggParam.options[0].enabled = jest.fn().mockReturnValue(false);
+      (props.aggParam.options[0] as AggParamOption).enabled = jest.fn().mockReturnValue(false);
       props.value = 'auto';
       const comp = shallow(<TimeIntervalParamEditor {...props} />);
 
-      expect(props.aggParam.options[0].enabled).toHaveBeenCalledWith(props.agg);
+      expect((props.aggParam.options[0] as AggParamOption).enabled).toHaveBeenCalledWith(props.agg);
       expect(comp.prop('isInvalid')).toBeTruthy();
       expect(comp.children().prop('selectedOptions')).toEqual([]);
       expect(comp.children().prop('options')).toEqual([

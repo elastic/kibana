@@ -91,7 +91,7 @@ export interface SearchSourceFields {
    * {@link EsQuerySortValue}
    */
   sort?: EsQuerySortValue | EsQuerySortValue[];
-  highlight?: any;
+  highlight?: estypes.SearchHighlight;
   highlightAll?: boolean;
   trackTotalHits?: boolean | number;
   /**
