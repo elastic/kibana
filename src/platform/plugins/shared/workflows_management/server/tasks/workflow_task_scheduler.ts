@@ -14,6 +14,9 @@ import { getReadableFrequency, getReadableInterval } from '../lib/rrule_logging_
 import type { WorkflowTrigger } from '../lib/schedule_utils';
 import { convertWorkflowScheduleToTaskSchedule, getScheduledTriggers } from '../lib/schedule_utils';
 
+const VERSION_CONFLICT_STATUS = 409;
+const NOT_FOUND_STATUS = 404;
+
 export interface WorkflowTaskSchedulerParams {
   workflowId: string;
   spaceId: string;
@@ -27,12 +30,13 @@ export class WorkflowTaskScheduler {
   ) {}
 
   /**
-   * Schedules tasks for all scheduled triggers in a workflow
+   * Schedules tasks for all scheduled triggers in a workflow.
+   * Uses idempotent scheduling: if a task already exists, its schedule is updated in place.
    */
   async scheduleWorkflowTasks(
     workflow: EsWorkflow,
     spaceId: string,
-    request?: KibanaRequest
+    request: KibanaRequest
   ): Promise<string[]> {
     const scheduledTriggers = getScheduledTriggers(workflow.definition?.triggers ?? []);
     const scheduledTaskIds: string[] = [];
@@ -56,15 +60,18 @@ export class WorkflowTaskScheduler {
   }
 
   /**
-   * Schedules a single workflow task for a specific trigger
+   * Schedules a single workflow task for a specific trigger.
+   * Idempotent: if the task already exists (409 conflict), updates the schedule in place
+   * via bulkUpdateSchedules instead of failing. This handles both interval and RRule schedules.
    */
   async scheduleWorkflowTask(
     workflowId: string,
     spaceId: string,
     trigger: WorkflowTrigger,
-    request?: KibanaRequest
+    request: KibanaRequest
   ): Promise<string> {
     const schedule = convertWorkflowScheduleToTaskSchedule(trigger);
+    const taskId = `workflow:${workflowId}:${trigger.type}`;
 
     // Log RRule-specific scheduling details
     if ('rrule' in schedule && schedule.rrule) {
@@ -77,7 +84,7 @@ export class WorkflowTaskScheduler {
     }
 
     const taskInstance = {
-      id: `workflow:${workflowId}:${trigger.type}`,
+      id: taskId,
       taskType: 'workflow:scheduled',
       schedule,
       params: {
@@ -94,19 +101,41 @@ export class WorkflowTaskScheduler {
       enabled: true,
     };
 
-    // Use Task Manager's first-class API key support by passing the request
-    // Task Manager will automatically create and manage the API key for user context
-    const scheduledTask = request
-      ? await this.taskManager.schedule(taskInstance, { request })
-      : await this.taskManager.schedule(taskInstance);
+    try {
+      // Use Task Manager's first-class API key support by passing the request.
+      // Task Manager will automatically create and manage the API key for user context.
+      const scheduledTask = await this.taskManager.schedule(taskInstance, { request });
 
-    return scheduledTask.id;
+      return scheduledTask.id;
+    } catch (err) {
+      if ((err as { statusCode?: number }).statusCode === VERSION_CONFLICT_STATUS) {
+        // Task already exists — update its schedule in place rather than failing.
+        // This handles both interval and RRule schedule types.
+        const result = await this.taskManager.bulkUpdateSchedules([taskId], schedule);
+        if (result.errors.length > 0) {
+          const firstError = result.errors[0].error;
+          // 409 (concurrent update) and 404 (task was just removed) are non-fatal
+          if (
+            firstError.statusCode !== VERSION_CONFLICT_STATUS &&
+            firstError.statusCode !== NOT_FOUND_STATUS
+          ) {
+            throw new Error(
+              `Failed to update schedule for workflow task "${taskId}": ${firstError.message}`
+            );
+          }
+        }
+        this.logger.debug(
+          `Updated existing scheduled task for workflow ${workflowId} (schedule updated in place)`
+        );
+        return taskId;
+      }
+      throw err;
+    }
   }
 
   /**
    * Unschedules all tasks for a workflow
    */
-
   async unscheduleWorkflowTasks(workflowId: string): Promise<void> {
     try {
       // Find all tasks for this workflow
@@ -134,17 +163,18 @@ export class WorkflowTaskScheduler {
   }
 
   /**
-   * Updates scheduled tasks when a workflow is updated
+   * Updates scheduled tasks when a workflow is updated.
+   * Uses idempotent scheduling (create-or-update) instead of a non-atomic delete-then-create
+   * pattern. This prevents the task from being permanently lost if the create step fails
+   * after the delete step succeeds.
    */
   async updateWorkflowTasks(
     workflow: EsWorkflow,
     spaceId: string,
-    request?: KibanaRequest
+    request: KibanaRequest
   ): Promise<void> {
-    // First, unschedule all existing tasks
-    await this.unscheduleWorkflowTasks(workflow.id);
-
-    // Then, schedule new tasks for scheduled triggers
+    // Schedule tasks idempotently — creates new tasks or updates existing ones in place.
+    // No need to unschedule first since scheduleWorkflowTask handles 409 conflicts gracefully.
     await this.scheduleWorkflowTasks(workflow, spaceId, request);
   }
 }
