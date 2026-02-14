@@ -8,9 +8,12 @@
     "server/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
-    "public/**/*"
+    "public/**/*",
+    "scripts/**/*"
   ],
   "kbn_references": [
+    "@kbn/dev-cli-errors",
+    "@kbn/dev-cli-runner",
     "@kbn/core",
     "@kbn/task-manager-plugin",
     "@kbn/features-plugin",
