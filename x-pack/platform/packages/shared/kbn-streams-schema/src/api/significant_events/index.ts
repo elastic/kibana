@@ -9,8 +9,8 @@ import type { Observable } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Condition } from '@kbn/streamlang';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
-import type { StreamQueryKql } from '../../queries';
 import type { TaskStatus } from '../../tasks/types';
+import type { StreamQueryKql } from '../../queries';
 
 /**
  * SignificantEvents Get Response

@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { useQueryClient, useMutation } from '@kbn/react-query';
+import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../hooks/use_fetch_discovery_queries';
 import { useFetchErrorToast } from '../../../../hooks/use_fetch_error_toast';
 import { type SignificantEventItem } from '../../../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -30,7 +31,7 @@ export function PromoteAction({ item }: { item: SignificantEventItem }) {
       if (promotedQueryCount === 1) {
         toasts.addSuccess(getPromoteQuerySuccessToast(item.query.title));
       }
-      queryClient.invalidateQueries({ queryKey: ['significantEvents'] });
+      queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ['unbackedQueriesCount'] });
     },
     onError: showFetchErrorToast,
