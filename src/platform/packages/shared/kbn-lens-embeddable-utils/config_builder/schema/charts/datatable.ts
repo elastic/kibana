@@ -50,12 +50,10 @@ const sortingSchema = schema.oneOf(
     // Sorting for split_metrics_by (transposed) columns
     schema.object(
       {
-        column_type: schema.literal('split_metrics_by'),
-        metric_index: schema.number({
+        column_type: schema.literal('transposed_metric'),
+        index: schema.number({
           min: 0,
-          meta: {
-            description: 'Index of the metric column to sort by (0-based)',
-          },
+          meta: { description: 'Index of the metric column to sort by (0-based)' },
         }),
         values: schema.arrayOf(schema.string(), {
           minSize: 1,
@@ -302,9 +300,8 @@ interface SortByValidationInput {
   rows?: Array<{}>;
   split_metrics_by?: Array<{}>;
   sort_by?: {
-    column_type: 'metric' | 'row' | 'split_metrics_by';
+    column_type: 'metric' | 'row' | 'transposed_metric';
     index?: number;
-    metric_index?: number;
     values?: string[];
   };
 }
@@ -319,10 +316,9 @@ function validateSortBy({
     return;
   }
 
-  const { column_type } = sort_by;
+  const { column_type, index, values } = sort_by;
 
   if (column_type === 'metric') {
-    const index = sort_by.index;
     if (index == null || index >= metrics.length) {
       return `The 'sort_by.index' (${index}) is out of bounds. The 'metrics' array has ${metrics.length} item(s).`;
     }
@@ -332,23 +328,21 @@ function validateSortBy({
     if (!rows || rows.length === 0) {
       return `Cannot sort by 'row' when no rows are defined.`;
     }
-    const index = sort_by.index;
+
     if (index == null || index >= rows.length) {
       return `The 'sort_by.index' (${index}) is out of bounds. The 'rows' array has ${rows.length} item(s).`;
     }
   }
 
-  if (column_type === 'split_metrics_by') {
+  if (column_type === 'transposed_metric') {
     if (!split_metrics_by || split_metrics_by.length === 0) {
-      return `Cannot sort by 'split_metrics_by' when no split_metrics_by columns are defined.`;
+      return `Cannot sort by 'transposed_metric' when no split_metrics_by columns are defined.`;
     }
 
-    const metricIndex = sort_by.metric_index;
-    if (metricIndex == null || metricIndex >= metrics.length) {
-      return `The 'sort_by.metric_index' (${metricIndex}) is out of bounds. The 'metrics' array has ${metrics.length} item(s).`;
+    if (index == null || index >= metrics.length) {
+      return `The 'sort_by.index' (${index}) is out of bounds. The 'metrics' array has ${metrics.length} item(s).`;
     }
 
-    const values = sort_by.values;
     if (values == null || values.length !== split_metrics_by.length) {
       return `The 'sort_by.values' length (${values?.length}) must match the 'split_metrics_by' length (${split_metrics_by.length}).`;
     }
