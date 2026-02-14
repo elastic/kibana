@@ -70,8 +70,6 @@ import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type {
   CellRenderersExtensionParams,
-  DocViewerExtensionParams,
-  OpenInNewTabParams,
   UpdateESQLQueryFn,
 } from '../../../../context_awareness';
 import { useAdditionalCellActions, useProfileAccessor } from '../../../../context_awareness';
@@ -305,22 +303,12 @@ function DiscoverDocumentsComponent({
   );
   const { filters } = useQuerySubscriber({ data: services.data });
 
-  const extensionActions = useMemo(
-    () => ({
-      openInNewTab: (params: OpenInNewTabParams) => {
-        dispatch(internalStateActions.openInNewTabExtPointAction(params));
-      },
-    }),
-    [dispatch]
-  );
-
   const cellActionsMetadata = useAdditionalCellActions({
     dataSource,
     dataView,
     query,
     filters,
     timeRange: requestParams.timeRangeAbsolute,
-    extensionActions,
   });
 
   const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
@@ -329,14 +317,6 @@ function DiscoverDocumentsComponent({
       dispatch(updateESQLQuery({ queryOrUpdater }));
     },
     [dispatch, updateESQLQuery]
-  );
-
-  const docViewerExtensionActions = useMemo<DocViewerExtensionParams['actions']>(
-    () => ({
-      openInNewTab: (params) => dispatch(internalStateActions.openInNewTabExtPointAction(params)),
-      updateESQLQuery: onUpdateESQLQuery,
-    }),
-    [dispatch, onUpdateESQLQuery]
   );
 
   const docViewerUiState = useCurrentTabSelector((state) => state.uiState.docViewer);
@@ -384,7 +364,6 @@ function DiscoverDocumentsComponent({
         setExpandedDoc={expandedDocSetter}
         onClose={expandedDocSetter.bind(null, undefined)}
         docViewerRef={docViewerRef}
-        docViewerExtensionActions={docViewerExtensionActions}
         onUpdateSelectedTabId={onUpdateSelectedTabId}
         initialDocViewerState={docViewerUiState}
         onInitialDocViewerStateChange={onInitialDocViewerStateChange}
@@ -398,7 +377,6 @@ function DiscoverDocumentsComponent({
       onAddFilter,
       onRemoveColumnWithTracking,
       onAddColumnWithTracking,
-      docViewerExtensionActions,
       onUpdateSelectedTabId,
       docViewerUiState,
       onInitialDocViewerStateChange,
@@ -431,12 +409,11 @@ function DiscoverDocumentsComponent({
   );
   const cellRendererParams: CellRenderersExtensionParams = useMemo(
     () => ({
-      actions: { addFilter: onAddFilter },
       dataView,
       density: cellRendererDensity,
       rowHeight: cellRendererRowHeight,
     }),
-    [onAddFilter, dataView, cellRendererDensity, cellRendererRowHeight]
+    [dataView, cellRendererDensity, cellRendererRowHeight]
   );
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');

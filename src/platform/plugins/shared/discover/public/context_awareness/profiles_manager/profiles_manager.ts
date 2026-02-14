@@ -20,6 +20,7 @@ import type {
 import type { ContextWithProfileId } from '../profile_service';
 import type { ScopedDiscoverEBTManager } from '../../ebt_manager';
 import type { AppliedProfile } from '../composable_profile';
+import { EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT } from '../toolkit';
 import { logResolutionError } from './utils';
 import { ScopedProfilesManager } from './scoped_profiles_manager';
 import { ContextualProfileLevel } from './consts';
@@ -55,10 +56,16 @@ export class ProfilesManager {
     private readonly documentProfileService: DocumentProfileService
   ) {
     this.rootContext$ = new BehaviorSubject(rootProfileService.defaultContext);
-    this.rootProfile = rootProfileService.getProfile({ context: this.rootContext$.getValue() });
+    this.rootProfile = rootProfileService.getProfile({
+      context: this.rootContext$.getValue(),
+      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+    });
 
     this.rootContext$.pipe(skip(1)).subscribe((context) => {
-      this.rootProfile = rootProfileService.getProfile({ context });
+      this.rootProfile = rootProfileService.getProfile({
+        context,
+        toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+      });
     });
   }
 
@@ -117,7 +124,7 @@ export class ProfilesManager {
   }) {
     return new ScopedProfilesManager(
       this.rootContext$,
-      () => this.rootProfile,
+      this.rootProfileService,
       this.dataSourceProfileService,
       this.documentProfileService,
       scopedEbtManager

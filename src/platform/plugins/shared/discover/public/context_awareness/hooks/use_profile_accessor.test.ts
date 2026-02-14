@@ -33,7 +33,6 @@ jest.mock('../composable_profile', () => {
 const record = getDataTableRecords(dataViewWithTimefieldMock)[0];
 
 const getCellRenderersParams = {
-  actions: { addFilter: jest.fn() },
   dataView: dataViewWithTimefieldMock,
   density: DataGridDensity.COMPACT,
   rowHeight: 0,

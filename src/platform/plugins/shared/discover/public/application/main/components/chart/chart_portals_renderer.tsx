@@ -16,7 +16,12 @@ import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { i18n } from '@kbn/i18n';
-import { type UpdateESQLQueryFn, useProfileAccessor } from '../../../../context_awareness';
+import {
+  ContextAwarenessToolkitProvider,
+  type OpenInNewTabParams,
+  type UpdateESQLQueryFn,
+  useProfileAccessor,
+} from '../../../../context_awareness';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import {
   CurrentTabProvider,
@@ -36,10 +41,7 @@ import type { DiscoverStateContainer } from '../../state_management/discover_sta
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
 import { useUnifiedHistogramRuntimeState } from './use_unified_histogram_runtime_state';
 import { useUnifiedHistogramCommon } from './use_unified_histogram_common';
-import type {
-  ChartSectionConfigurationExtensionParams,
-  ChartSectionConfiguration,
-} from '../../../../context_awareness/types';
+import type { ChartSectionConfiguration } from '../../../../context_awareness/types';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 export type ChartPortalNode = HtmlPortalNode;
@@ -143,8 +145,6 @@ type UnifiedHistogramChartProps = Pick<UnifiedHistogramGuardProps, 'panelsToggle
 
 const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
   const dispatch = useInternalStateDispatch();
-  const getChartConfigAccessor = useProfileAccessor('getChartSectionConfiguration');
-
   const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
   const onUpdateESQLQuery: UpdateESQLQueryFn = useCallback(
     (queryOrUpdater) => {
@@ -152,16 +152,27 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
     },
     [dispatch, updateESQLQuery]
   );
-  const chartSectionConfigurationExtParams: ChartSectionConfigurationExtensionParams =
-    useMemo(() => {
-      return {
-        actions: {
-          openInNewTab: (params) =>
-            dispatch(internalStateActions.openInNewTabExtPointAction(params)),
-          updateESQLQuery: onUpdateESQLQuery,
-        },
-      };
-    }, [dispatch, onUpdateESQLQuery]);
+
+  const toolkitOverrides = useMemo(
+    () => ({
+      actions: {
+        openInNewTab: (params: OpenInNewTabParams) =>
+          dispatch(internalStateActions.openInNewTabExtPointAction(params)),
+        updateESQLQuery: onUpdateESQLQuery,
+      },
+    }),
+    [dispatch, onUpdateESQLQuery]
+  );
+
+  return (
+    <ContextAwarenessToolkitProvider value={toolkitOverrides}>
+      <ChartsWrapperInner stateContainer={stateContainer} panelsToggle={panelsToggle} />
+    </ContextAwarenessToolkitProvider>
+  );
+};
+
+const ChartsWrapperInner = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
+  const getChartConfigAccessor = useProfileAccessor('getChartSectionConfiguration');
 
   const isEsqlMode = useIsEsqlMode();
   const chartSectionConfig = useMemo<ChartSectionConfiguration>(() => {
@@ -173,8 +184,8 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
 
     return getChartConfigAccessor(() => ({
       replaceDefaultChart: false,
-    }))(chartSectionConfigurationExtParams);
-  }, [getChartConfigAccessor, chartSectionConfigurationExtParams, isEsqlMode]);
+    }))({});
+  }, [getChartConfigAccessor, isEsqlMode]);
 
   useEffect(() => {
     const histogramConfig$ = selectTabRuntimeState(

@@ -17,6 +17,7 @@ import type { ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 import { createIntegrationLogsDataSourceProfileProviders } from './integration_logs';
 import { RESOLUTION_MATCH } from '../__mocks__';
+import { EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT } from '../../../../toolkit';
 
 const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
   profileId: OBSERVABILITY_ROOT_PROFILE_ID,
@@ -134,6 +135,7 @@ describe('createIntegrationLogsDataSourceProfileProviders', () => {
     it('should return default app state', () => {
       const getDefaultAppState = provider.profile.getDefaultAppState?.(() => ({}), {
         context: RESOLUTION_MATCH.context,
+        toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
       });
       expect(getDefaultAppState?.({ dataView: dataViewWithTimefieldMock })).toEqual({
         columns: expectedColumnsMap[provider.profileId],

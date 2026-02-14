@@ -13,12 +13,20 @@ import type { DataSourceProfileProvider } from '../../../../profiles';
 
 export const createChartSection =
   (): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
-  (prev) =>
+  (prev, { toolkit }) =>
   (params) => {
     return {
       ...prev(params),
       renderChartSection: (props) => {
-        return <TraceMetricsGrid {...props} actions={params.actions} />;
+        return (
+          <TraceMetricsGrid
+            {...props}
+            actions={{
+              openInNewTab: toolkit.actions.openInNewTab,
+              updateESQLQuery: toolkit.actions.updateESQLQuery,
+            }}
+          />
+        );
       },
       replaceDefaultChart: true,
       defaultTopPanelHeight: 300,

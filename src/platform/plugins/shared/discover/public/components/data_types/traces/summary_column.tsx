@@ -16,6 +16,7 @@ import type {
 } from '@kbn/discover-contextual-components';
 import { LazySummaryColumn } from '@kbn/discover-contextual-components';
 import type { CellRenderersExtensionParams } from '../../../context_awareness';
+import type { DiscoverContextAwarenessToolkit } from '../../../context_awareness';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
 export type SummaryColumnGetterDeps = CellRenderersExtensionParams;
@@ -25,8 +26,11 @@ const SummaryColumn = (props: Omit<AllSummaryColumnProps, 'core' | 'share'>) => 
   return <LazySummaryColumn {...props} share={share} core={core} />;
 };
 
-export const getTracesSummaryColumn = (params: SummaryColumnGetterDeps) => {
-  const { actions, dataView, density, rowHeight } = params;
+export const getTracesSummaryColumn = (
+  params: SummaryColumnGetterDeps,
+  toolkit: DiscoverContextAwarenessToolkit
+) => {
+  const { dataView, density, rowHeight } = params;
   const shouldShowFieldHandler = createGetShouldShowFieldHandler(dataView);
 
   return (props: Omit<SummaryColumnProps, 'core' | 'share'>) => (
@@ -34,7 +38,7 @@ export const getTracesSummaryColumn = (params: SummaryColumnGetterDeps) => {
       {...props}
       isTracesSummary
       density={density}
-      onFilter={actions.addFilter}
+      onFilter={toolkit.actions.addFilter}
       rowHeight={rowHeight}
       shouldShowFieldHandler={shouldShowFieldHandler}
     />

@@ -20,6 +20,7 @@ import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/d
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
+import { useContextAwarenessToolkit } from '../../../../../context_awareness';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
@@ -41,12 +42,10 @@ const CreateAlertFlyout: React.FC<{
   onFinishAction: () => void;
   stateContainer: DiscoverStateContainer;
 }> = ({ stateContainer, discoverParams, services, onFinishAction = () => {} }) => {
-  const {
-    dataView,
-    isEsqlMode,
-    adHocDataViews,
-    actions: { updateAdHocDataViews },
-  } = discoverParams;
+  const { dataView, isEsqlMode, adHocDataViews } = discoverParams;
+
+  const { actions } = useContextAwarenessToolkit();
+  const updateAdHocDataViews = actions.updateAdHocDataViews;
   const {
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
   } = services;
@@ -99,7 +98,7 @@ const CreateAlertFlyout: React.FC<{
       onCancel={onFinishAction}
       onSubmit={onFinishAction}
       onChangeMetaData={(metadata: EsQueryAlertMetaData) =>
-        updateAdHocDataViews(metadata.adHocDataViewList)
+        updateAdHocDataViews?.(metadata.adHocDataViewList)
       }
       ruleTypeId={ES_QUERY_ID}
       initialValues={{ params: getParams() }}
