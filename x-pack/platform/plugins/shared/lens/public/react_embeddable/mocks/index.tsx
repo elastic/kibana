@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Subject, of } from 'rxjs';
+import { BehaviorSubject, NEVER, Subject, of } from 'rxjs';
 import deepMerge from 'deepmerge';
 import React from 'react';
 import { faker } from '@faker-js/faker';
@@ -180,6 +180,9 @@ export function makeEmbeddableServices(
     visualizations: visualizationsPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     eventAnnotation: {} as LensEmbeddableStartServices['eventAnnotation'],
+    eventAnnotationService: {
+      annotationGroupUpdated$: NEVER,
+    } as unknown as LensEmbeddableStartServices['eventAnnotationService'],
     timefilter: services.data.query.timefilter.timefilter,
     coreHttp: services.http,
     coreStart: coreMock.createStart(),
