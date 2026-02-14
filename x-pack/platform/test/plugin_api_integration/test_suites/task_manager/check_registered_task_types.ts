@@ -78,6 +78,8 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.email',
         'actions:.gemini',
         'actions:.gen-ai',
+        'actions:.http',
+        'actions:.http-system',
         'actions:.index',
         'actions:.inference',
         'actions:.jira',

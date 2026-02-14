@@ -15,7 +15,6 @@ import {
   BaseConnectorStepSchema,
   DataSetStepSchema,
   getForEachStepSchema,
-  getHttpStepSchema,
   getIfStepSchema,
   getMergeStepSchema,
   getOnFailureStepSchema,
@@ -97,7 +96,6 @@ function createRecursiveStepSchema(
     const ifSchema = getIfStepSchema(stepSchema, loose);
     const parallelSchema = getParallelStepSchema(stepSchema, loose);
     const mergeSchema = getMergeStepSchema(stepSchema, loose);
-    const httpSchema = getHttpStepSchema(stepSchema, loose);
 
     const connectorSchemas = connectors.map((c) =>
       generateStepSchemaForConnector(c, stepSchema, loose)
@@ -116,7 +114,6 @@ function createRecursiveStepSchema(
       mergeSchema,
       WaitStepSchema,
       DataSetStepSchema,
-      httpSchema,
       ...connectorSchemas,
       ...aliasSchemas,
     ]);

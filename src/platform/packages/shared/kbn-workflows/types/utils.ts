@@ -20,7 +20,6 @@ import type {
   BuiltInStepType,
   ElasticsearchStep,
   ForEachStep,
-  HttpStep,
   IfStep,
   KibanaStep,
   MergeStep,
@@ -77,7 +76,6 @@ export function isCancelableStatus(status: ExecutionStatus) {
 
 // Type guards for steps types
 export const isWaitStep = (step: Step): step is WaitStep => step.type === 'wait';
-export const isHttpStep = (step: Step): step is HttpStep => step.type === 'http';
 export const isElasticsearchStep = (step: Step): step is ElasticsearchStep =>
   step.type === 'elasticsearch';
 export const isKibanaStep = (step: Step): step is KibanaStep => step.type === 'kibana';

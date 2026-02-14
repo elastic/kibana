@@ -14,6 +14,7 @@ export { CONNECTOR_ID as D3SecurityConnectorTypeId } from './d3security';
 export { CONNECTOR_ID as EmailConnectorTypeId } from './email';
 export { CONNECTOR_ID as EsIndexConnectorTypeId } from './es_index';
 export { CONNECTOR_ID as GeminiConnectorTypeId } from './gemini';
+export { CONNECTOR_ID as HttpConnectorTypeId } from './http';
 export { CONNECTOR_ID as InferenceConnectorTypeId } from './inference';
 export { CONNECTOR_ID as JiraConnectorTypeId } from './jira';
 export { CONNECTOR_ID as JiraServiceManagementConnectorTypeId } from './jira-service-management';

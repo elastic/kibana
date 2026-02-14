@@ -71,11 +71,6 @@ export function generateBuiltInStepSnippet(
         },
       };
       break;
-    case 'http':
-      parameters = {
-        with: { url: 'https://api.example.com', method: 'GET' },
-      };
-      break;
     case 'wait':
       parameters = {
         with: { duration: '5s' },

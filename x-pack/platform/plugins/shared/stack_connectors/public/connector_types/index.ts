@@ -30,6 +30,7 @@ import { getTeamsConnectorType } from './teams';
 import { getTinesConnectorType } from './tines';
 import { getTorqConnectorType } from './torq';
 import { getWebhookConnectorType } from './webhook';
+import { getHttpConnectorType } from './http';
 import { getXmattersConnectorType } from './xmatters';
 import { getD3SecurityConnectorType } from './d3security';
 import { ExperimentalFeaturesService } from '../common/experimental_features_service';
@@ -63,6 +64,7 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getSwimlaneConnectorType());
   connectorTypeRegistry.register(getCasesWebhookConnectorType());
   connectorTypeRegistry.register(getWebhookConnectorType());
+  connectorTypeRegistry.register(getHttpConnectorType());
   connectorTypeRegistry.register(getXmattersConnectorType());
   connectorTypeRegistry.register(getServiceNowITSMConnectorType());
   connectorTypeRegistry.register(getServiceNowITOMConnectorType());

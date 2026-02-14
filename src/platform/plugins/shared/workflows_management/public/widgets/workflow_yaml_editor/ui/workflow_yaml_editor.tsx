@@ -69,6 +69,7 @@ import { interceptMonacoYamlHoverProvider } from '../lib/hover/intercept_monaco_
 import {
   ElasticsearchMonacoConnectorHandler,
   GenericMonacoConnectorHandler,
+  HttpMonacoConnectorStepHandler,
   KibanaMonacoConnectorHandler,
 } from '../lib/monaco_connectors';
 import { CustomMonacoStepHandler } from '../lib/monaco_connectors/custom_monaco_step_handler';
@@ -356,6 +357,9 @@ export const WorkflowYAMLEditor = ({
 
         const genericHandler = new GenericMonacoConnectorHandler();
         registerMonacoConnectorHandler(genericHandler);
+
+        const httpHandler = new HttpMonacoConnectorStepHandler();
+        registerMonacoConnectorHandler(httpHandler);
 
         // Create unified providers with template expression support
         const providerConfig = {

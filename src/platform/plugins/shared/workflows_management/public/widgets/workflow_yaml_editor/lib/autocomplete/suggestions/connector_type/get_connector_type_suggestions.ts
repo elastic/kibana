@@ -12,7 +12,6 @@ import type { BuiltInStepType, ConnectorTypeInfo } from '@kbn/workflows';
 import {
   DataSetStepSchema,
   ForEachStepSchema,
-  HttpStepSchema,
   IfStepSchema,
   MergeStepSchema,
   ParallelStepSchema,
@@ -228,11 +227,6 @@ function getBuiltInStepTypesFromSchema(): Array<{
       schema: DataSetStepSchema,
       description: 'Define or compute variables for use in the workflow',
       icon: monaco.languages.CompletionItemKind.Variable,
-    },
-    {
-      schema: HttpStepSchema,
-      description: 'Make HTTP requests',
-      icon: monaco.languages.CompletionItemKind.Reference,
     },
     {
       schema: WaitStepSchema,

@@ -71,6 +71,7 @@ const enabledActionTypes = [
   '.thehive',
   '.tines',
   '.webhook',
+  '.http',
   '.xmatters',
   '.xsoar',
   '.torq',

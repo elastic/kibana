@@ -15,7 +15,7 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 /**
  * Create http and https proxy agents with custom proxy /hosts/SSL settings from configurationUtilities
  */
-interface GetCustomAgentsResponse {
+export interface CustomAgents {
   httpAgent: HttpAgent | undefined;
   httpsAgent: HttpsAgent | undefined;
 }
@@ -25,7 +25,7 @@ export function getCustomAgents(
   logger: Logger,
   url: string,
   sslOverrides?: SSLSettings
-): GetCustomAgentsResponse {
+): CustomAgents {
   const generalSSLSettings = configurationUtilities.getSSLSettings();
   const proxySettings = configurationUtilities.getProxySettings();
   const customHostSettings = configurationUtilities.getCustomHostSettings(url);

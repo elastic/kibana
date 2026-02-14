@@ -6,6 +6,7 @@
  */
 
 import { isObjectLike, isEmpty } from 'lodash';
+import type { Agent } from 'agent-base';
 import type {
   AxiosInstance,
   Method,
@@ -34,6 +35,7 @@ export const request = async <T = unknown>({
   sslOverrides,
   timeout,
   connectorUsageCollector,
+  keepAlive,
   ...config
 }: {
   axios: AxiosInstance;
@@ -46,6 +48,7 @@ export const request = async <T = unknown>({
   timeout?: number;
   sslOverrides?: SSLSettings;
   connectorUsageCollector?: ConnectorUsageCollector;
+  keepAlive?: boolean;
 } & AxiosRequestConfig): Promise<AxiosResponse> => {
   if (!isEmpty(axios?.defaults?.baseURL ?? '')) {
     throw new Error(
@@ -58,6 +61,16 @@ export const request = async <T = unknown>({
     url,
     sslOverrides
   );
+
+  if (keepAlive) {
+    if (httpsAgent) {
+      httpsAgent.options.keepAlive = keepAlive;
+    }
+    if (httpAgent) {
+      (httpAgent as Agent).options.keepAlive = keepAlive;
+    }
+  }
+
   const { maxContentLength, timeout: settingsTimeout } =
     configurationUtilities.getResponseSettings();
 
