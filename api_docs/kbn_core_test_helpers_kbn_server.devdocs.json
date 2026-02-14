@@ -38,9 +38,7 @@
             "type": "Object",
             "tags": [],
             "label": "settings",
-            "description": [
-              "Any config overrides for this instance."
-            ],
+            "description": [],
             "signature": [
               "{}"
             ],
@@ -101,9 +99,7 @@
             "type": "Object",
             "tags": [],
             "label": "settings",
-            "description": [
-              "Any config overrides for this instance."
-            ],
+            "description": [],
             "signature": [
               "{}"
             ],
@@ -853,7 +849,7 @@
         "signature": [
           "Pick<",
           "TestElasticsearchUtils",
-          ", \"stop\" | \"es\"> & { getClient: () => ",
+          ", \"es\" | \"stop\"> & { getClient: () => ",
           "default",
           "; }"
         ],

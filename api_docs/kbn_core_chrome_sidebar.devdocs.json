@@ -1,0 +1,1295 @@
+{
+  "id": "@kbn/core-chrome-sidebar",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar",
+        "id": "def-common.createSidebarStore",
+        "type": "Function",
+        "tags": [],
+        "label": "createSidebarStore",
+        "description": [
+          "\nCreate a sidebar store configuration with schema and actions.\nThe store is instantiated lazily when the app is first accessed.\n"
+        ],
+        "signature": [
+          "(config: { schema: z.ZodType<TState>; actions: (set: ",
+          "SetState",
+          "<TState>, get: ",
+          "GetState",
+          "<TState>, sidebar: ",
+          "SidebarContext",
+          ") => TActions; }) => ",
+          "SidebarStoreConfig",
+          "<TState, TActions>"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.createSidebarStore.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
+            "lineNumber": 53,
+            "columnNumber": 62,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-sidebar",
+                "id": "def-common.createSidebarStore.$1.schema",
+                "type": "Any",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  "z.ZodType<TState>"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
+                "lineNumber": 54,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-chrome-sidebar",
+                "id": "def-common.createSidebarStore.$1.actions",
+                "type": "Function",
+                "tags": [],
+                "label": "actions",
+                "description": [],
+                "signature": [
+                  "(set: ",
+                  "SetState",
+                  "<TState>, get: ",
+                  "GetState",
+                  "<TState>, sidebar: ",
+                  "SidebarContext",
+                  ") => TActions"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
+                "lineNumber": 55,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/core-chrome-sidebar",
+                    "id": "def-common.createSidebarStore.$1.actions.$1",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "set",
+                    "description": [],
+                    "signature": [
+                      "SetState",
+                      "<TState>"
+                    ],
+                    "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
+                    "lineNumber": 55,
+                    "columnNumber": 13,
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  },
+                  {
+                    "parentPluginId": "@kbn/core-chrome-sidebar",
+                    "id": "def-common.createSidebarStore.$1.actions.$2",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "get",
+                    "description": [],
+                    "signature": [
+                      "GetState",
+                      "<TState>"
+                    ],
+                    "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
+                    "lineNumber": 55,
+                    "columnNumber": 36,
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  },
+                  {
+                    "parentPluginId": "@kbn/core-chrome-sidebar",
+                    "id": "def-common.createSidebarStore.$1.actions.$3",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "sidebar",
+                    "description": [],
+                    "signature": [
+                      "SidebarContext"
+                    ],
+                    "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
+                    "lineNumber": 55,
+                    "columnNumber": 59,
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar",
+        "id": "def-common.isValidSidebarAppId",
+        "type": "Function",
+        "tags": [],
+        "label": "isValidSidebarAppId",
+        "description": [
+          "Runtime validation for sidebar app IDs"
+        ],
+        "signature": [
+          "(appId: string) => boolean"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.isValidSidebarAppId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "appId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 40,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar",
+        "id": "def-common.SidebarApp",
+        "type": "Interface",
+        "tags": [],
+        "label": "SidebarApp",
+        "description": [
+          "\nApp-bound API obtained via `sidebar.getApp(appId)`.\nAll methods are present regardless of whether the app has a store.\nFor stateless apps, `actions` is undefined and `getState()` returns undefined."
+        ],
+        "signature": [
+          "SidebarApp",
+          "<TState, TActions>"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+        "lineNumber": 110,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarApp.open",
+            "type": "Function",
+            "tags": [],
+            "label": "open",
+            "description": [
+              "Open sidebar to this app"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarApp.close",
+            "type": "Function",
+            "tags": [],
+            "label": "close",
+            "description": [
+              "Close sidebar"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarApp.actions",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "actions",
+            "description": [
+              "Bound actions to modify state. Undefined for stateless apps."
+            ],
+            "signature": [
+              "TActions"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarApp.getState",
+            "type": "Function",
+            "tags": [],
+            "label": "getState",
+            "description": [
+              "Get current state. Returns undefined for stateless apps."
+            ],
+            "signature": [
+              "() => TState"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarApp.getState$",
+            "type": "Function",
+            "tags": [],
+            "label": "getState$",
+            "description": [
+              "Observable of state. Emits undefined for stateless apps."
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<TState>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar",
+        "id": "def-common.SidebarAppDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "SidebarAppDefinition",
+        "description": [
+          "App definition for sidebar registration"
+        ],
+        "signature": [
+          "SidebarAppDefinition",
+          "<TState, TActions>"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarAppDefinition.appId",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "appId",
+            "description": [
+              "Unique identifier"
+            ],
+            "signature": [
+              "`sidebarExample${string}`"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarAppDefinition.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [
+              "Accessibility status. Defaults to `accessible`. Use the returned updater for async checks."
+            ],
+            "signature": [
+              "SidebarAppStatus",
+              " | undefined"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarAppDefinition.restoreOnReload",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "restoreOnReload",
+            "description": [
+              "\nWhether to restore on page reload. Defaults to true.\nUse as last resort. Apps should use store state for restoration."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarAppDefinition.loadComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "loadComponent",
+            "description": [
+              "Async component loader"
+            ],
+            "signature": [
+              "() => Promise<",
+              "SidebarComponentType",
+              "<TState, TActions>>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarAppDefinition.store",
+            "type": "Object",
+            "tags": [],
+            "label": "store",
+            "description": [
+              "\nOptional store for state management. Created via `createSidebarStore`.\nIf omitted, the app is stateless and only receives `onClose` prop.\nState persists to localStorage."
+            ],
+            "signature": [
+              "SidebarStoreConfig",
+              "<TState, TActions> | undefined"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar",
+        "id": "def-common.SidebarAppUpdate",
+        "type": "Interface",
+        "tags": [],
+        "label": "SidebarAppUpdate",
+        "description": [
+          "Sidebar app update payload"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+        "lineNumber": 93,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarAppUpdate.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [
+              "Accessibility status. Defaults to `accessible` when omitted."
+            ],
+            "signature": [
+              "SidebarAppStatus",
+              " | undefined"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar",
+        "id": "def-common.SidebarContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "SidebarContext",
+        "description": [
+          "Sidebar control passed to actions"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarContext.open",
+            "type": "Function",
+            "tags": [],
+            "label": "open",
+            "description": [
+              "Open this sidebar app"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarContext.close",
+            "type": "Function",
+            "tags": [],
+            "label": "close",
+            "description": [
+              "Close sidebar"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarContext.isCurrent",
+            "type": "Function",
+            "tags": [],
+            "label": "isCurrent",
+            "description": [
+              "Check if this app is currently shown"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar",
+        "id": "def-common.SidebarSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "SidebarSetup",
+        "description": [
+          "Sidebar setup contract"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+        "lineNumber": 102,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarSetup.registerApp",
+            "type": "Function",
+            "tags": [],
+            "label": "registerApp",
+            "description": [
+              "Register a sidebar app"
+            ],
+            "signature": [
+              "<TState = undefined, TActions = undefined>(app: ",
+              "SidebarAppDefinition",
+              "<TState, TActions>) => ",
+              "SidebarAppUpdater"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-sidebar",
+                "id": "def-common.SidebarSetup.registerApp.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "app",
+                "description": [],
+                "signature": [
+                  "SidebarAppDefinition",
+                  "<TState, TActions>"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+                "lineNumber": 106,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar",
+        "id": "def-common.SidebarStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "SidebarStart",
+        "description": [
+          "Sidebar start contract"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+        "lineNumber": 128,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarStart.isOpen$",
+            "type": "Function",
+            "tags": [],
+            "label": "isOpen$",
+            "description": [
+              "Observable of open state"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarStart.isOpen",
+            "type": "Function",
+            "tags": [],
+            "label": "isOpen",
+            "description": [
+              "Whether sidebar is open"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarStart.close",
+            "type": "Function",
+            "tags": [],
+            "label": "close",
+            "description": [
+              "Close sidebar"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarStart.getWidth$",
+            "type": "Function",
+            "tags": [],
+            "label": "getWidth$",
+            "description": [
+              "Observable of width"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<number>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarStart.getWidth",
+            "type": "Function",
+            "tags": [],
+            "label": "getWidth",
+            "description": [
+              "Get width"
+            ],
+            "signature": [
+              "() => number"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarStart.setWidth",
+            "type": "Function",
+            "tags": [],
+            "label": "setWidth",
+            "description": [
+              "Set width"
+            ],
+            "signature": [
+              "(width: number) => void"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-sidebar",
+                "id": "def-common.SidebarStart.setWidth.$1",
+                "type": "number",
+                "tags": [],
+                "label": "width",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+                "lineNumber": 141,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarStart.getCurrentAppId$",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrentAppId$",
+            "description": [
+              "Observable of current app ID"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<`sidebarExample${string}` | null>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 142,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarStart.getCurrentAppId",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrentAppId",
+            "description": [
+              "Get current app ID"
+            ],
+            "signature": [
+              "() => `sidebarExample${string}` | null"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarStart.hasApp",
+            "type": "Function",
+            "tags": [],
+            "label": "hasApp",
+            "description": [
+              "Check if app is registered"
+            ],
+            "signature": [
+              "(appId: `sidebarExample${string}`) => boolean"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 146,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-sidebar",
+                "id": "def-common.SidebarStart.hasApp.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "appId",
+                "description": [],
+                "signature": [
+                  "`sidebarExample${string}`"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+                "lineNumber": 147,
+                "columnNumber": 12,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarStart.getApp",
+            "type": "Function",
+            "tags": [],
+            "label": "getApp",
+            "description": [
+              "Get app-bound API"
+            ],
+            "signature": [
+              "<TState = undefined, TActions = undefined>(appId: `sidebarExample${string}`) => ",
+              "SidebarApp",
+              "<TState, TActions>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-sidebar",
+                "id": "def-common.SidebarStart.getApp.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "appId",
+                "description": [],
+                "signature": [
+                  "`sidebarExample${string}`"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+                "lineNumber": 150,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarStart.getAppDefinition",
+            "type": "Function",
+            "tags": [],
+            "label": "getAppDefinition",
+            "description": [
+              "Get app definition"
+            ],
+            "signature": [
+              "(appId: `sidebarExample${string}`) => ",
+              "SidebarAppDefinition",
+              "<undefined, undefined>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 152,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-sidebar",
+                "id": "def-common.SidebarStart.getAppDefinition.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "appId",
+                "description": [],
+                "signature": [
+                  "`sidebarExample${string}`"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+                "lineNumber": 153,
+                "columnNumber": 22,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar",
+        "id": "def-common.SidebarStoreConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "SidebarStoreConfig",
+        "description": [
+          "Store configuration - schema and actions factory"
+        ],
+        "signature": [
+          "SidebarStoreConfig",
+          "<TState, TActions>"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarStoreConfig.schema",
+            "type": "Any",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "z.ZodType<TState>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarStoreConfig.actions",
+            "type": "Function",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              "(set: ",
+              "SetState",
+              "<TState>, get: ",
+              "GetState",
+              "<TState>, sidebar: ",
+              "SidebarContext",
+              ") => TActions"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-sidebar",
+                "id": "def-common.SidebarStoreConfig.actions.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "set",
+                "description": [],
+                "signature": [
+                  "SetState",
+                  "<TState>"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
+                "lineNumber": 33,
+                "columnNumber": 13,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-chrome-sidebar",
+                "id": "def-common.SidebarStoreConfig.actions.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "get",
+                "description": [],
+                "signature": [
+                  "GetState",
+                  "<TState>"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
+                "lineNumber": 33,
+                "columnNumber": 36,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-chrome-sidebar",
+                "id": "def-common.SidebarStoreConfig.actions.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "sidebar",
+                "description": [],
+                "signature": [
+                  "SidebarContext"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
+                "lineNumber": 33,
+                "columnNumber": 59,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarStoreConfig.types",
+            "type": "Object",
+            "tags": [],
+            "label": "types",
+            "description": [
+              "Type helpers for inference - never used at runtime"
+            ],
+            "signature": [
+              "{ readonly state: TState; readonly actions: TActions; }"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar",
+        "id": "def-common.EXAMPLE_APP_ID_PREFIX",
+        "type": "string",
+        "tags": [],
+        "label": "EXAMPLE_APP_ID_PREFIX",
+        "description": [
+          "Prefix for example/test app IDs"
+        ],
+        "signature": [
+          "\"sidebarExample\""
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar",
+        "id": "def-common.GetState",
+        "type": "Type",
+        "tags": [],
+        "label": "GetState",
+        "description": [
+          "Get current state"
+        ],
+        "signature": [
+          "() => TState"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar",
+        "id": "def-common.SetState",
+        "type": "Type",
+        "tags": [],
+        "label": "SetState",
+        "description": [
+          "Set state - accepts partial state or updater function"
+        ],
+        "signature": [
+          "(partial: Partial<TState> | ((state: TState) => Partial<TState>)) => void"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SetState.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "partial",
+            "description": [],
+            "signature": [
+              "Partial<TState> | ((state: TState) => Partial<TState>)"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar",
+        "id": "def-common.SidebarAppId",
+        "type": "Type",
+        "tags": [],
+        "label": "SidebarAppId",
+        "description": [
+          "Valid sidebar app IDs: production apps or IDs starting with 'sidebarExample'"
+        ],
+        "signature": [
+          "`sidebarExample${string}`"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar",
+        "id": "def-common.SidebarAppStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "SidebarAppStatus",
+        "description": [
+          "Accessibility status of a sidebar app."
+        ],
+        "signature": [
+          "\"accessible\" | \"inaccessible\""
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+        "lineNumber": 69,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar",
+        "id": "def-common.SidebarAppUpdater",
+        "type": "Type",
+        "tags": [],
+        "label": "SidebarAppUpdater",
+        "description": [
+          "Sidebar app updater returned from registration"
+        ],
+        "signature": [
+          "(update: ",
+          "SidebarAppUpdate",
+          ") => void"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+        "lineNumber": 99,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar",
+            "id": "def-common.SidebarAppUpdater.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "update",
+            "description": [],
+            "signature": [
+              "SidebarAppUpdate"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 100,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar",
+        "id": "def-common.SidebarComponentProps",
+        "type": "Type",
+        "tags": [],
+        "label": "SidebarComponentProps",
+        "description": [
+          "\nProps passed to sidebar app components.\n- With store: receives state + actions + onClose\n- Without store: receives only onClose"
+        ],
+        "signature": [
+          "TState extends undefined ? { onClose: () => void; } : { state: TState; actions: TActions; onClose: () => void; }"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar",
+        "id": "def-common.SidebarComponentType",
+        "type": "Type",
+        "tags": [],
+        "label": "SidebarComponentType",
+        "description": [
+          "Component type for sidebar apps"
+        ],
+        "signature": [
+          "React.ComponentClass<",
+          "SidebarComponentProps",
+          "<TState, TActions>, any> | React.FunctionComponent<",
+          "SidebarComponentProps",
+          "<TState, TActions>>"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar",
+        "id": "def-common.VALID_SIDEBAR_APP_IDS",
+        "type": "Object",
+        "tags": [],
+        "label": "VALID_SIDEBAR_APP_IDS",
+        "description": [
+          "Production sidebar app IDs"
+        ],
+        "signature": [
+          "readonly []"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

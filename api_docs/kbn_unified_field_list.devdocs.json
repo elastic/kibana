@@ -2780,7 +2780,7 @@
             "label": "infoIcon",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
             "lineNumber": 41,
@@ -3640,7 +3640,7 @@
             "label": "prepend",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_list/field_list.tsx",
             "lineNumber": 28,
@@ -3656,7 +3656,7 @@
             "label": "append",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_list/field_list.tsx",
             "lineNumber": 29,
