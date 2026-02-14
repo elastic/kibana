@@ -8,7 +8,7 @@
  */
 
 import { get } from 'lodash';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
+import { controlsGroupSchema, type ControlsGroupState } from '@kbn/controls-schemas';
 import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
   DEFAULT_IGNORE_VALIDATIONS,
@@ -46,6 +46,16 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
       if ('controlConfig' in control) {
         // >8.18 to <9.4 controls had `config` stored under `controlConfig`
         const { controlConfig, ...rest } = control;
+        try {
+          controlsGroupSchema.validate([{ ...rest, config: controlConfig }]);
+        } catch (e) {
+          // If the control config fails to validate because of unexpected `null` values, try omitting the `null` values
+          const deNulledConfig = Object.entries(controlConfig).reduce((result, [key, value]) => {
+            if (value === null) return result;
+            return { ...result, [key]: value };
+          }, {});
+          return { ...rest, config: deNulledConfig };
+        }
         return { ...rest, config: controlConfig };
       }
       return control; // otherwise, we are dealing with state >=9.4
