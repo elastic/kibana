@@ -51,6 +51,14 @@ interface StreamsInsightsGeneratedProps {
   cached_tokens_used?: number;
 }
 
+interface StreamsProcessingPipelineSuggestedProps {
+  duration_ms: number;
+  steps_used: number;
+  success: boolean;
+  stream_name: string;
+  stream_type: StreamType;
+}
+
 export {
   type StreamEndpointLatencyProps,
   type StreamsStateErrorProps,
@@ -58,4 +66,5 @@ export {
   type StreamsDescriptionGeneratedProps,
   type StreamsSignificantEventsQueriesGeneratedProps,
   type StreamsInsightsGeneratedProps,
+  type StreamsProcessingPipelineSuggestedProps,
 };
