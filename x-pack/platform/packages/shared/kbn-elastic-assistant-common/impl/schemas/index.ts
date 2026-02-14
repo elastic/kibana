@@ -75,6 +75,11 @@ export {
 } from './attack_discovery/routes/public/post/post_attack_discovery_generations_dismiss.route.gen';
 
 export {
+  PostAttackDiscoveryPromoteRequestBody,
+  PostAttackDiscoveryPromoteResponse,
+} from './attack_discovery/routes/internal/promote/post_attack_discovery_promote';
+
+export {
   GetAttackDiscoveryGenerationRequestParams,
   GetAttackDiscoveryGenerationRequestQuery,
   GetAttackDiscoveryGenerationResponse,
