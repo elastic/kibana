@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { isCcsTarget } from '../utils/ccs';
 
 export interface GetDocumentByIdSuccess {
   id: string;
@@ -22,6 +23,12 @@ export interface GetDocumentByIdFailure {
 
 export type GetDocumentByIdResult = GetDocumentByIdSuccess | GetDocumentByIdFailure;
 
+/**
+ * Fetches a document by ID from the given index.
+ * For local indices, uses the _get API. For cross-cluster search (CCS) targets
+ * (index name contains ':'), uses _search with a term query on _id because _get
+ * does not support CCS.
+ */
 export const getDocumentById = async ({
   id,
   index,
@@ -31,6 +38,24 @@ export const getDocumentById = async ({
   index: string;
   esClient: ElasticsearchClient;
 }): Promise<GetDocumentByIdResult> => {
+  if (isCcsTarget(index)) {
+    const response = await esClient.search({
+      index,
+      size: 1,
+      query: { term: { _id: id } },
+    });
+    const hit = response.hits?.hits?.[0];
+    if (!hit || hit._source === undefined) {
+      return { id, index, found: false };
+    }
+    return {
+      id: hit._id!,
+      index: hit._index ?? index,
+      found: true,
+      _source: (hit._source as Record<string, unknown>) ?? {},
+    };
+  }
+
   const { body: response, statusCode } = await esClient.get<Record<string, unknown>>(
     {
       id,

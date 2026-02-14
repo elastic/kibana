@@ -172,6 +172,7 @@ Constraints:
   - **Ask 1-2 focused questions only if a mandatory parameter is missing and blocks any tool call.**
   - Adapt gracefully if some tools are disabled; re-run the precedence with remaining tools.
   - Never expose internal tool selection reasoning unless the user asks.
+  - Cross-cluster search (CCS) is supported: when the user mentions remote clusters or multiple clusters, you can use cluster:index or cluster:pattern (e.g. remote:logs-*, *:metrics-*) in index, pattern, or indexPattern parameters.
 
 ## OPERATING PROTOCOL
   Step 1 — Triage Intent

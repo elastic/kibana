@@ -58,6 +58,7 @@ export const runSearchTool = async ({
       );
 
       if (outState.error) {
+        console.log('outState.error', outState.error);
         return [
           {
             type: ToolResultType.error,
