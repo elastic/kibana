@@ -26,6 +26,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
 import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
+import { createMockEndpointAppContextService } from '../../../../../../endpoint/mocks';
 
 describe('Create rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -42,6 +43,10 @@ describe('Create rule route', () => {
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
+    context.securitySolution.getEndpointService.mockReturnValue(
+      createMockEndpointAppContextService()
+    );
+
     createRuleRoute(server.router);
   });
 
@@ -227,7 +232,7 @@ describe('Create rule route', () => {
       const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.status).toEqual(403);
       expect(response.body.message).toEqual(
-        'User is not authorized to change isolate response actions'
+        'User is not authorized to create/update isolate response action'
       );
     });
     test('pass when provided with process action', async () => {
