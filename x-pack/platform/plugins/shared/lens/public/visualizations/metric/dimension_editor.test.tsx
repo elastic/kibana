@@ -20,8 +20,12 @@ import userEvent from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import type { DataType } from '@kbn/lens-common';
-import type { MetricVisualizationState } from './types';
+import type { DataType, MetricVisualizationState } from '@kbn/lens-common';
+import {
+  LENS_LEGACY_METRIC_STATE_DEFAULTS,
+  LENS_METRIC_GROUP_ID,
+  LENS_METRIC_STATE_DEFAULTS,
+} from '@kbn/lens-common';
 import type { Props, SupportingVisType, ApplyColor } from './dimension_editor';
 import {
   DimensionEditor,
@@ -29,7 +33,6 @@ import {
   DimensionEditorDataExtraComponent,
 } from './dimension_editor';
 import { createMockFramePublicAPI, createMockDatasource } from '../../mocks';
-import { GROUP_ID, legacyMetricStateDefaults, metricStateDefaults } from './constants';
 import { getDefaultConfigForMode } from './helpers';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
@@ -45,7 +48,6 @@ const SELECTORS = {
   COLOR_PICKER: 'euiColorPickerAnchor',
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/234063
 describe('dimension editor', () => {
   const palette: PaletteOutput<CustomPaletteParams> = {
     type: 'palette',
@@ -225,7 +227,10 @@ describe('dimension editor', () => {
         });
         await setIcon('Compute');
         expect(setState).toHaveBeenCalledWith(
-          expect.objectContaining({ icon: 'compute', iconAlign: metricStateDefaults.iconAlign })
+          expect.objectContaining({
+            icon: 'compute',
+            iconAlign: LENS_METRIC_STATE_DEFAULTS.iconAlign,
+          })
         );
       });
 
@@ -239,7 +244,7 @@ describe('dimension editor', () => {
         expect(setState).toHaveBeenCalledWith(
           expect.objectContaining({
             icon: 'compute',
-            iconAlign: legacyMetricStateDefaults.iconAlign,
+            iconAlign: LENS_LEGACY_METRIC_STATE_DEFAULTS.iconAlign,
           })
         );
       });
@@ -858,7 +863,7 @@ describe('dimension editor', () => {
         const rtlRender = render(
           <DimensionEditorDataExtraComponent
             {...props}
-            groupId={GROUP_ID.BREAKDOWN_BY}
+            groupId={LENS_METRIC_GROUP_ID.BREAKDOWN_BY}
             state={{ ...fullState, breakdownByAccessor: accessor }}
             accessor={accessor}
             setState={mockSetState}
@@ -878,7 +883,7 @@ describe('dimension editor', () => {
             rtlRender.rerender(
               <DimensionEditorDataExtraComponent
                 {...props}
-                groupId={GROUP_ID.BREAKDOWN_BY}
+                groupId={LENS_METRIC_GROUP_ID.BREAKDOWN_BY}
                 state={{ ...fullState, breakdownByAccessor: accessor }}
                 accessor={accessor}
                 setState={mockSetState}
@@ -909,13 +914,14 @@ describe('dimension editor', () => {
         expect(screen.getByLabelText(/collapse by/i)).toBeInTheDocument();
       });
 
-      it.each([[GROUP_ID.METRIC], [GROUP_ID.SECONDARY_METRIC], [GROUP_ID.MAX]])(
-        'should not render for other group types: %s',
-        async (groupId) => {
-          const { container } = renderBreakdownEditorDataSection({ groupId });
-          expect(container).toBeEmptyDOMElement();
-        }
-      );
+      it.each([
+        [LENS_METRIC_GROUP_ID.METRIC],
+        [LENS_METRIC_GROUP_ID.SECONDARY_METRIC],
+        [LENS_METRIC_GROUP_ID.MAX],
+      ])('should not render for other group types: %s', async (groupId) => {
+        const { container } = renderBreakdownEditorDataSection({ groupId });
+        expect(container).toBeEmptyDOMElement();
+      });
     });
   });
 

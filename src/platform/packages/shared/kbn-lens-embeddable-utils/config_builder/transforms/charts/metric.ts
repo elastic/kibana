@@ -137,7 +137,7 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
     valueFontMode: primaryMetric.fit ? 'fit' : 'default',
     ...(primaryMetric.alignments
       ? {
-          valuesTextAlign: primaryMetric.alignments.value,
+          primaryAlign: primaryMetric.alignments.value,
           titlesTextAlign: primaryMetric.alignments.labels,
         }
       : {}),
@@ -388,9 +388,16 @@ function enrichConfigurationWithVisualizationProperties(
       };
     }
 
-    if (visualization.valuesTextAlign || visualization.titlesTextAlign) {
+    if (
+      visualization.primaryAlign ||
+      visualization.valuesTextAlign ||
+      visualization.titlesTextAlign
+    ) {
       primaryMetric.alignments = {
-        value: visualization.valuesTextAlign ?? LENS_METRIC_STATE_DEFAULTS.valuesTextAlign,
+        value:
+          visualization.primaryAlign ??
+          visualization.valuesTextAlign ??
+          LENS_METRIC_STATE_DEFAULTS.primaryAlign,
         labels: visualization.titlesTextAlign ?? LENS_METRIC_STATE_DEFAULTS.titlesTextAlign,
       };
     }

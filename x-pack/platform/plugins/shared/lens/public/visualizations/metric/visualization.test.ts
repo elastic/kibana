@@ -23,12 +23,12 @@ import type {
   OperationDescriptor,
   OperationMetadata,
   Visualization,
+  MetricVisualizationState,
 } from '@kbn/lens-common';
-import { GROUP_ID } from './constants';
+import { LENS_METRIC_GROUP_ID } from '@kbn/lens-common';
 import { getMetricVisualization } from './visualization';
 import type { Ast } from '@kbn/interpreter';
 import { LayoutDirection } from '@elastic/charts';
-import type { MetricVisualizationState } from './types';
 import { getDefaultConfigForMode } from './helpers';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 
@@ -250,7 +250,9 @@ describe('metric visualization', () => {
           layerId: fullState.layerId,
           frame: mockFrameApi,
         }).groups;
-        const breakdownGroup = groups.find(({ groupId }) => groupId === GROUP_ID.BREAKDOWN_BY);
+        const breakdownGroup = groups.find(
+          ({ groupId }) => groupId === LENS_METRIC_GROUP_ID.BREAKDOWN_BY
+        );
         expect(breakdownGroup?.accessors[0].triggerIconType).toBeUndefined();
       });
 
@@ -267,7 +269,9 @@ describe('metric visualization', () => {
             ]),
           }),
         }).groups;
-        const breakdownGroup = groups.find(({ groupId }) => groupId === GROUP_ID.BREAKDOWN_BY);
+        const breakdownGroup = groups.find(
+          ({ groupId }) => groupId === LENS_METRIC_GROUP_ID.BREAKDOWN_BY
+        );
         expect(breakdownGroup?.accessors[0].triggerIconType).toBeUndefined();
       });
 
@@ -1465,7 +1469,7 @@ describe('metric visualization', () => {
 
       expect(supportedLayers[1].initialDimensions).toHaveLength(1);
       expect(supportedLayers[1].initialDimensions![0]).toMatchObject({
-        groupId: GROUP_ID.TREND_TIME,
+        groupId: LENS_METRIC_GROUP_ID.TREND_TIME,
         autoTimeField: true,
         columnId: expect.any(String),
       });
@@ -1476,7 +1480,7 @@ describe('metric visualization', () => {
       expect(supportedLayers[0].initialDimensions).toHaveLength(1);
       expect(supportedLayers[0].initialDimensions![0]).toEqual(
         expect.objectContaining({
-          groupId: GROUP_ID.MAX,
+          groupId: LENS_METRIC_GROUP_ID.MAX,
           staticValue: 0,
         })
       );
@@ -1488,17 +1492,23 @@ describe('metric visualization', () => {
     const columnId = 'col-id';
 
     const cases: Array<{
-      groupId: (typeof GROUP_ID)[keyof typeof GROUP_ID];
+      groupId: (typeof LENS_METRIC_GROUP_ID)[keyof typeof LENS_METRIC_GROUP_ID];
       accessor: keyof MetricVisualizationState;
     }> = [
-      { groupId: GROUP_ID.METRIC, accessor: 'metricAccessor' },
-      { groupId: GROUP_ID.SECONDARY_METRIC, accessor: 'secondaryMetricAccessor' },
-      { groupId: GROUP_ID.MAX, accessor: 'maxAccessor' },
-      { groupId: GROUP_ID.BREAKDOWN_BY, accessor: 'breakdownByAccessor' },
-      { groupId: GROUP_ID.TREND_METRIC, accessor: 'trendlineMetricAccessor' },
-      { groupId: GROUP_ID.TREND_SECONDARY_METRIC, accessor: 'trendlineSecondaryMetricAccessor' },
-      { groupId: GROUP_ID.TREND_TIME, accessor: 'trendlineTimeAccessor' },
-      { groupId: GROUP_ID.TREND_BREAKDOWN_BY, accessor: 'trendlineBreakdownByAccessor' },
+      { groupId: LENS_METRIC_GROUP_ID.METRIC, accessor: 'metricAccessor' },
+      { groupId: LENS_METRIC_GROUP_ID.SECONDARY_METRIC, accessor: 'secondaryMetricAccessor' },
+      { groupId: LENS_METRIC_GROUP_ID.MAX, accessor: 'maxAccessor' },
+      { groupId: LENS_METRIC_GROUP_ID.BREAKDOWN_BY, accessor: 'breakdownByAccessor' },
+      { groupId: LENS_METRIC_GROUP_ID.TREND_METRIC, accessor: 'trendlineMetricAccessor' },
+      {
+        groupId: LENS_METRIC_GROUP_ID.TREND_SECONDARY_METRIC,
+        accessor: 'trendlineSecondaryMetricAccessor',
+      },
+      { groupId: LENS_METRIC_GROUP_ID.TREND_TIME, accessor: 'trendlineTimeAccessor' },
+      {
+        groupId: LENS_METRIC_GROUP_ID.TREND_BREAKDOWN_BY,
+        accessor: 'trendlineBreakdownByAccessor',
+      },
     ];
 
     it.each(cases)('sets %s', ({ groupId, accessor }) => {
@@ -1522,7 +1532,7 @@ describe('metric visualization', () => {
         visualization.setDimension({
           prevState: state,
           columnId,
-          groupId: GROUP_ID.MAX,
+          groupId: LENS_METRIC_GROUP_ID.MAX,
           layerId: 'some-id',
           frame: mockFrameApi,
         })
@@ -1537,7 +1547,7 @@ describe('metric visualization', () => {
         visualization.setDimension({
           prevState: { ...state, ...trendlineProps },
           columnId,
-          groupId: GROUP_ID.MAX,
+          groupId: LENS_METRIC_GROUP_ID.MAX,
           layerId: 'some-id',
           frame: mockFrameApi,
         })
