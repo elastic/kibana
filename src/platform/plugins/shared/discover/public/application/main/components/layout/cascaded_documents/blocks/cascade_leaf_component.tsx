@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiPanel, EuiText, type EuiDataGridCustomBodyProps, useEuiTheme } from '@elastic/eui';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { throttle } from 'lodash';
 import {
   getRenderCustomToolbarWithElements,
   UnifiedDataTable,
@@ -23,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useDiscoverServices } from '../../../../../../hooks/use_discover_services';
 import { getCustomCascadeGridBodyStyle } from './cascade_leaf_component.styles';
 import type { ESQLDataGroupNode } from './types';
+import type { DataCascadeLeafUiState } from '../../../state_management/redux';
 
 interface ESQLDataCascadeLeafCellProps
   extends Pick<
@@ -41,6 +43,8 @@ interface ESQLDataCascadeLeafCellProps
     > {
   cellData: DataTableRecord[];
   cellId: string;
+  leafUiState?: DataCascadeLeafUiState;
+  onLeafUiStateChange?: (nextState: DataCascadeLeafUiState) => void;
 }
 
 interface CustomCascadeGridBodyProps
@@ -52,6 +56,7 @@ interface CustomCascadeGridBodyProps
   data: DataTableRecord[];
   isFullScreenMode?: boolean;
   initialOffset: () => number;
+  onScrollOffsetChange?: (scrollOffset: number) => void;
 }
 
 const EMPTY_SORT: SortOrder[] = [];
@@ -72,6 +77,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   getScrollElement,
   getScrollMargin,
   preventSizeChangePropagation,
+  onScrollOffsetChange,
   Cell,
   visibleColumns,
   visibleRowData,
@@ -124,6 +130,15 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
     getScrollElement: scrollElementGetter,
   });
 
+  const handleScroll = useCallback(
+    (event: React.UIEvent<HTMLDivElement>) => {
+      if (isFullScreenMode) {
+        onScrollOffsetChange?.(event.currentTarget.scrollTop);
+      }
+    },
+    [isFullScreenMode, onScrollOffsetChange]
+  );
+
   /**
    * Register/unregister this nested virtualizer with the parent based on fullscreen mode.
    * When registered (not fullscreen), the parent won't adjust scroll position when this row resizes.
@@ -155,6 +170,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
       <div
         ref={customGridBodyScrollContainerRef}
         css={customCascadeGridBodyStyle.virtualizerContainer}
+        onScroll={handleScroll}
       >
         <div style={{ height: virtualizer.getTotalSize() }}>
           <div
@@ -203,29 +219,38 @@ export const ESQLDataCascadeLeafCell = React.memo(
     getScrollOffset,
     preventSizeChangePropagation,
     onUpdateDataGridDensity,
+    leafUiState,
+    onLeafUiStateChange,
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
-    const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
-    const [cascadeDataGridDensityState, setCascadeDataGridDensityState] = useState<DataGridDensity>(
-      dataGridDensityState ?? DataGridDensity.COMPACT
-    );
+    const cascadeDataGridDensityState =
+      leafUiState?.density ?? dataGridDensityState ?? DataGridDensity.COMPACT;
 
     // TODO: Implement column selection logic,
     // probably requires a new selection component that will be used within the row
-    const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+    const selectedColumns = leafUiState?.selectedColumns ?? [];
 
-    useEffect(() => {
-      // propagate localized changes of the data grid density,
-      // so that other rows can use the same density value
-      onUpdateDataGridDensity?.(cascadeDataGridDensityState);
-    }, [cascadeDataGridDensityState, onUpdateDataGridDensity]);
+    const isCellInFullScreenMode = leafUiState?.isFullScreen ?? false;
 
-    const [isCellInFullScreenMode, setIsCellInFullScreenMode] = useState(false);
+    const expandedDoc = useMemo(() => {
+      if (!leafUiState?.expandedDocId) {
+        return undefined;
+      }
+
+      return cellData.find((doc) => doc.id === leafUiState.expandedDocId);
+    }, [cellData, leafUiState?.expandedDocId]);
+
+    const handleFullScreenChange = useCallback(
+      (nextIsFullScreen: boolean) => {
+        onLeafUiStateChange?.({ isFullScreen: nextIsFullScreen });
+      },
+      [onLeafUiStateChange]
+    );
 
     const setExpandedDocFn = useCallback(
       (...args: Parameters<NonNullable<UnifiedDataTableProps['setExpandedDoc']>>) =>
-        setExpandedDoc(args[0]),
-      [setExpandedDoc]
+        onLeafUiStateChange?.({ expandedDocId: args[0]?.id }),
+      [onLeafUiStateChange]
     );
 
     const renderCustomToolbarWithElements = useMemo(
@@ -245,6 +270,18 @@ export const ESQLDataCascadeLeafCell = React.memo(
         }),
       [cellData]
     );
+
+    const handleLeafScrollOffsetChange = useMemo(
+      () =>
+        throttle((scrollOffset: number) => {
+          onLeafUiStateChange?.({ scrollOffset });
+        }, 150),
+      [onLeafUiStateChange]
+    );
+
+    useEffect(() => {
+      return () => handleLeafScrollOffsetChange.cancel();
+    }, [handleLeafScrollOffsetChange]);
 
     const renderCustomCascadeGridBodyCallback = useCallback<
       NonNullable<UnifiedDataTableProps['renderCustomGridBody']>
@@ -271,8 +308,11 @@ export const ESQLDataCascadeLeafCell = React.memo(
           setCustomGridBodyProps={setCustomGridBodyProps}
           getScrollElement={getScrollElement}
           preventSizeChangePropagation={preventSizeChangePropagation}
-          initialOffset={getScrollOffset}
+          initialOffset={() =>
+            isCellInFullScreenMode ? leafUiState?.scrollOffset ?? 0 : getScrollOffset()
+          }
           isFullScreenMode={isCellInFullScreenMode}
+          onScrollOffsetChange={handleLeafScrollOffsetChange}
         />
       ),
       [
@@ -283,7 +323,24 @@ export const ESQLDataCascadeLeafCell = React.memo(
         getScrollMargin,
         getScrollOffset,
         isCellInFullScreenMode,
+        handleLeafScrollOffsetChange,
+        leafUiState?.scrollOffset,
       ]
+    );
+
+    const handleSetColumns = useCallback(
+      (nextColumns: string[]) => {
+        onLeafUiStateChange?.({ selectedColumns: nextColumns });
+      },
+      [onLeafUiStateChange]
+    );
+
+    const handleDensityChange = useCallback(
+      (nextDensity: DataGridDensity) => {
+        onUpdateDataGridDensity?.(nextDensity);
+        onLeafUiStateChange?.({ density: nextDensity });
+      },
+      [onLeafUiStateChange, onUpdateDataGridDensity]
     );
 
     return (
@@ -302,15 +359,15 @@ export const ESQLDataCascadeLeafCell = React.memo(
           rows={cellData}
           loadingState={DataLoadingState.loaded}
           columns={selectedColumns}
-          onSetColumns={setSelectedColumns}
+          onSetColumns={handleSetColumns}
           renderCustomToolbar={renderCustomToolbarWithElements}
           expandedDoc={expandedDoc}
           setExpandedDoc={setExpandedDocFn}
           dataGridDensityState={cascadeDataGridDensityState}
-          onUpdateDataGridDensity={setCascadeDataGridDensityState}
+          onUpdateDataGridDensity={handleDensityChange}
           renderDocumentView={renderDocumentView}
           renderCustomGridBody={renderCustomCascadeGridBodyCallback}
-          onFullScreenChange={setIsCellInFullScreenMode}
+          onFullScreenChange={handleFullScreenChange}
           externalCustomRenderers={externalCustomRenderers}
           paginationMode="infinite"
           sampleSizeState={cellData.length}

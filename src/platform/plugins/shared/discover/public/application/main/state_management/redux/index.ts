@@ -18,6 +18,8 @@ export {
   type DiscoverAppState,
   type InternalStateDataRequestParams,
   type CascadedDocumentsState,
+  type DataCascadeUiState,
+  type DataCascadeLeafUiState,
   TabInitializationStatus,
 } from './types';
 
@@ -48,6 +50,7 @@ export {
   selectRecentlyClosedTabs,
   selectTab,
   selectTabAppState,
+  selectTabCombinedFilters,
   selectIsTabsBarHidden,
   selectHasUnsavedChanges,
 } from './selectors';

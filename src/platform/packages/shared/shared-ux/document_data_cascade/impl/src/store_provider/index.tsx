@@ -9,7 +9,13 @@
 
 import { once } from 'lodash';
 import { enableMapSet } from 'immer';
-import React, { createContext, useContext, useMemo, type PropsWithChildren } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useMemo,
+  useEffect,
+  type PropsWithChildren,
+} from 'react';
 import { useCreateStore, type ActionsFromReducers } from './store';
 import {
   type GroupNode,
@@ -23,6 +29,7 @@ export type { GroupNode, LeafNode, IStoreState } from './reducers';
 interface IDataCascadeProviderProps {
   initialGroupColumn?: string[];
   cascadeGroups: string[];
+  initialTableState?: Partial<TableState>;
 }
 
 interface IStoreContext<G extends GroupNode, L extends LeafNode> {
@@ -69,6 +76,7 @@ export function useCascadeLeafNode<G extends GroupNode, L extends LeafNode>(cach
 export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
   cascadeGroups,
   initialGroupColumn,
+  initialTableState,
   children,
 }: PropsWithChildren<IDataCascadeProviderProps>) {
   const StoreContext = createStoreContext<G, L>();
@@ -81,7 +89,7 @@ export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
 
   const { state, actions } = useCreateStore({
     initialState: {
-      table: {} as TableState,
+      table: (initialTableState ?? {}) as TableState,
       groupNodes: [] as G[],
       leafNodes: new Map<string, L[]>(), // TODO: consider externalizing this so the consumer might provide their own external cache
       groupByColumns: cascadeGroups,
@@ -93,6 +101,22 @@ export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
     },
     reducers: storeReducers,
   });
+
+  useEffect(() => {
+    if (!initialTableState) {
+      actions.setExpandedRows({});
+      actions.setSelectedRows({});
+      return;
+    }
+
+    if (initialTableState.expanded !== undefined) {
+      actions.setExpandedRows(initialTableState.expanded);
+    }
+
+    if (initialTableState.rowSelection !== undefined) {
+      actions.setSelectedRows(initialTableState.rowSelection);
+    }
+  }, [actions, initialTableState?.expanded, initialTableState?.rowSelection]);
 
   return <StoreContext.Provider value={{ state, actions }}>{children}</StoreContext.Provider>;
 }

@@ -9,21 +9,20 @@
 
 import React, { useMemo, useCallback, Fragment, useRef, useEffect } from 'react';
 import { useEuiTheme } from '@elastic/eui';
+import { throttle } from 'lodash';
+import type { ExpandedState, RowSelectionState } from '@tanstack/react-table';
 import {
   DataCascade,
   DataCascadeRow,
   DataCascadeRowCell,
   type DataCascadeRowCellProps,
 } from '@kbn/shared-ux-document-data-cascade';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { EsqlQuery } from '@kbn/esql-language';
 import { type ESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { getStatsCommandToOperateOn } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers/utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
-import { useScopedServices } from '../../../../../components/scoped_services_provider/scoped_services_provider';
 import {
   useEsqlDataCascadeRowHeaderComponents,
   useEsqlDataCascadeHeaderComponent,
@@ -32,12 +31,9 @@ import {
 } from './blocks';
 import { cascadedDocumentsStyles } from './cascaded_documents.styles';
 import { useEsqlDataCascadeRowActionHelpers } from './blocks/use_row_header_components';
-import {
-  useDataCascadeRowExpansionHandlers,
-  useGroupedCascadeData,
-  useScopedESQLQueryFetchClient,
-} from './hooks';
+import { useDataCascadeRowExpansionHandlers, useGroupedCascadeData } from './hooks';
 import { useCascadedDocumentsContext } from './cascaded_documents_provider';
+import type { DataCascadeLeafUiState } from '../../../state_management/redux';
 
 export interface ESQLDataCascadeProps
   extends Pick<
@@ -61,21 +57,12 @@ const ESQLDataCascade = React.memo(
     const {
       availableCascadeGroups,
       selectedCascadeGroups,
-      esqlQuery,
+      dataCascadeUiState,
+      setDataCascadeUiState,
       esqlVariables,
-      timeRange,
       viewModeToggle,
       cascadeGroupingChangeHandler,
-      registerCascadeRequestsInspectorAdapter,
     } = useCascadedDocumentsContext();
-    const { scopedProfilesManager } = useScopedServices();
-    const { data, expressions } = useDiscoverServices();
-
-    const cascadeRequestsInspectorAdapter = useRef<RequestAdapter>(new RequestAdapter());
-
-    useEffect(() => {
-      registerCascadeRequestsInspectorAdapter(cascadeRequestsInspectorAdapter.current);
-    }, [registerCascadeRequestsInspectorAdapter]);
 
     const cascadeGroupData = useGroupedCascadeData({
       selectedCascadeGroups,
@@ -84,23 +71,12 @@ const ESQLDataCascade = React.memo(
       esqlVariables,
     });
 
-    const fetchCascadeData = useScopedESQLQueryFetchClient({
-      query: esqlQuery,
-      dataView,
-      data,
-      esqlVariables,
-      expressions,
-      timeRange,
-      scopedProfilesManager,
-      inspectorAdapters: { requests: cascadeRequestsInspectorAdapter.current },
-    });
-
     const {
       onCascadeGroupNodeExpanded,
       onCascadeGroupNodeCollapsed,
       onCascadeLeafNodeExpanded,
       onCascadeLeafNodeCollapsed,
-    } = useDataCascadeRowExpansionHandlers({ cascadeFetchClient: fetchCascadeData });
+    } = useDataCascadeRowExpansionHandlers({ dataView });
 
     const customTableHeading = useEsqlDataCascadeHeaderComponent({
       viewModeToggle,
@@ -111,6 +87,54 @@ const ESQLDataCascade = React.memo(
       queryMeta,
       columns,
       togglePopover
+    );
+
+    const initialTableState = useMemo(() => {
+      if (!dataCascadeUiState) {
+        return undefined;
+      }
+
+      return {
+        expanded: dataCascadeUiState.expanded,
+        rowSelection: dataCascadeUiState.rowSelection,
+      };
+    }, [dataCascadeUiState]);
+
+    const handleTableStateChange = useCallback(
+      (nextState: { expanded?: ExpandedState; rowSelection?: RowSelectionState }) => {
+        setDataCascadeUiState({
+          expanded: nextState.expanded,
+          rowSelection: nextState.rowSelection,
+        });
+      },
+      [setDataCascadeUiState]
+    );
+
+    const handleScrollChange = useMemo(
+      () =>
+        throttle((scrollOffset: number) => {
+          setDataCascadeUiState({ scrollOffset });
+        }, 150),
+      [setDataCascadeUiState]
+    );
+
+    useEffect(() => {
+      return () => handleScrollChange.cancel();
+    }, [handleScrollChange]);
+
+    const updateLeafUiState = useCallback(
+      (cellId: string, nextState: DataCascadeLeafUiState) => {
+        const existingLeafState = dataCascadeUiState?.leafUiState?.[cellId] ?? {};
+        setDataCascadeUiState({
+          leafUiState: {
+            [cellId]: {
+              ...existingLeafState,
+              ...nextState,
+            },
+          },
+        });
+      },
+      [dataCascadeUiState?.leafUiState, setDataCascadeUiState]
     );
 
     const cascadeLeafRowRenderer = useCallback<
@@ -129,13 +153,15 @@ const ESQLDataCascade = React.memo(
           dataView={dataView}
           cellData={cellData!}
           cellId={cellId}
+          leafUiState={dataCascadeUiState?.leafUiState?.[cellId]}
+          onLeafUiStateChange={(nextState) => updateLeafUiState(cellId, nextState)}
           getScrollElement={getScrollElement}
           getScrollOffset={getScrollOffset}
           getScrollMargin={getScrollMargin}
           preventSizeChangePropagation={preventSizeChangePropagation}
         />
       ),
-      [dataView, props]
+      [dataCascadeUiState?.leafUiState, dataView, props, updateLeafUiState]
     );
 
     return (
@@ -145,7 +171,11 @@ const ESQLDataCascade = React.memo(
         data={cascadeGroupData}
         cascadeGroups={availableCascadeGroups}
         initialGroupColumn={selectedCascadeGroups}
+        initialTableState={initialTableState}
+        initialScrollOffset={dataCascadeUiState?.scrollOffset}
         customTableHeader={customTableHeading}
+        onScrollChange={handleScrollChange}
+        onTableStateChange={handleTableStateChange}
       >
         <DataCascadeRow<ESQLDataGroupNode, DataTableRecord>
           rowHeaderTitleSlot={rowHeaderTitle}

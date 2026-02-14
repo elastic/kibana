@@ -19,6 +19,8 @@ import {
   type CellContext,
   type Row,
   type Cell,
+  type ExpandedState,
+  type RowSelectionState,
 } from '@tanstack/react-table';
 import type { LeafNode } from '../../../store_provider';
 import {
@@ -47,6 +49,10 @@ export interface TableProps<G, L>
   allowMultipleRowToggle: boolean;
   header: FC<{ table: Table<G> }>;
   rowCell: FC<CellContext<G, L>>;
+  onTableStateChange?: (state: {
+    expanded?: ExpandedState;
+    rowSelection?: RowSelectionState;
+  }) => void;
 }
 
 export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
@@ -54,6 +60,7 @@ export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
   enableRowSelection,
   header: Header,
   rowCell: RowCell,
+  onTableStateChange,
   initialData,
   ...rest
 }: TableProps<G, L>) => {
@@ -86,6 +93,11 @@ export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
         typeof updater === 'function' ? updater(state.table.rowSelection) : updater;
 
       actions.setSelectedRows(proposedSelectedState);
+
+      onTableStateChange?.({
+        rowSelection: proposedSelectedState,
+        expanded: state.table.expanded,
+      });
     },
     onExpandedChange: (updater) => {
       const proposedExpandedState =
@@ -96,7 +108,12 @@ export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
 
       // escape early if it's just one row that is expanded, or no rows are expanded
       if (proposedExpandedRows.length <= 1) {
-        return actions.setExpandedRows(proposedExpandedState);
+        actions.setExpandedRows(proposedExpandedState);
+        onTableStateChange?.({
+          expanded: proposedExpandedState,
+          rowSelection: state.table.rowSelection,
+        });
+        return;
       }
 
       // track if we encountered a root row in the proposed expanded rows, not existing in previous expanded rows
@@ -138,7 +155,13 @@ export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
         }
       }
 
-      return actions.setExpandedRows(newRootRow ? { [newRootRow]: true } : newExpandedRows);
+      const nextExpandedState = newRootRow ? { [newRootRow]: true } : newExpandedRows;
+      actions.setExpandedRows(nextExpandedState);
+      onTableStateChange?.({
+        expanded: nextExpandedState,
+        rowSelection: state.table.rowSelection,
+      });
+      return;
     },
     getRowId: (rowData) => rowData.id,
     getSubRows: (row) => row.children as G[],

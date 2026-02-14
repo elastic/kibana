@@ -134,7 +134,6 @@ export interface DiscoverDataStateContainer {
   inspectorAdapters: {
     requests: RequestAdapter;
     lensRequests?: RequestAdapter;
-    cascadeRequests?: RequestAdapter;
   };
   /**
    * Return the initial fetch status
@@ -296,8 +295,7 @@ export function getDataStateContainer({
             getCurrentTab,
           };
 
-          abortController?.abort(AbortReason.REPLACED);
-          abortControllerFetchMore?.abort(AbortReason.REPLACED);
+          cancel(AbortReason.REPLACED);
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
@@ -330,6 +328,19 @@ export function getDataStateContainer({
                 isSearchSessionRestored,
               },
             })
+          );
+
+          internalState.dispatch(
+            injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
+              cascadedDocumentsState: {
+                ...getCurrentTab().cascadedDocumentsState,
+                cascadedDocumentsMap: {},
+              },
+            })
+          );
+
+          internalState.dispatch(
+            injectCurrentTab(internalStateActions.resetDataCascadeUiState)({})
           );
 
           await scopedProfilesManager.resolveDataSourceProfile(
@@ -413,6 +424,7 @@ export function getDataStateContainer({
                 internalState.dispatch(
                   injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
                     cascadedDocumentsState: {
+                      ...getCurrentTab().cascadedDocumentsState,
                       availableCascadeGroups: newAvailableGroups,
                       selectedCascadeGroups: newSelectedGroups,
                     },
@@ -422,6 +434,7 @@ export function getDataStateContainer({
                 internalState.dispatch(
                   injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
                     cascadedDocumentsState: {
+                      ...getCurrentTab().cascadedDocumentsState,
                       availableCascadeGroups: [],
                       selectedCascadeGroups: [],
                     },
@@ -520,9 +533,15 @@ export function getDataStateContainer({
     sendResetMsg(dataSubjects, getInitialFetchStatus());
   };
 
-  const cancel = () => {
-    abortController?.abort(AbortReason.CANCELED);
-    abortControllerFetchMore?.abort(AbortReason.CANCELED);
+  const cancel = (reason: AbortReason = AbortReason.CANCELED) => {
+    const { cascadedDocumentsFetcher$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      getCurrentTab().id
+    );
+
+    cascadedDocumentsFetcher$.getValue().cancelAllFetches();
+    abortController?.abort(reason);
+    abortControllerFetchMore?.abort(reason);
   };
 
   const getAbortController = () => {
