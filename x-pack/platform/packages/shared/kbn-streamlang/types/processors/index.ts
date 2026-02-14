@@ -496,6 +496,42 @@ export const trimProcessorSchema = processorBaseWithWhereSchema.extend({
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<TrimProcessor>;
 
+export interface UriPartsProcessor extends ProcessorBaseWithWhere {
+  action: 'uri_parts';
+  from: string;
+  to?: string;
+  /**
+   * Mirrors Elasticsearch ingest processor behavior (default: true).
+   * When true, copies the unparsed URI string to `${target_field}.original`.
+   */
+  keep_original?: boolean;
+  /**
+   * Mirrors Elasticsearch ingest processor behavior (default: false).
+   * When true, removes the source field after a successful parse.
+   */
+  remove_if_successful?: boolean;
+  /**
+   * Mirrors Elasticsearch ingest processor behavior (default: false).
+   * When true, the processor silently exits when the source field is missing.
+   */
+  ignore_missing?: boolean;
+}
+
+export const uriPartsProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('uri_parts'),
+  from: StreamlangSourceField.describe('Field containing the URI string'),
+  to: z
+    .optional(StreamlangTargetField)
+    .describe('Target field/prefix to store parsed URI parts (defaults to "url")'),
+  keep_original: z
+    .optional(z.boolean())
+    .describe('Copy unparsed URI to `${target_field}.original` (defaults to true)'),
+  remove_if_successful: z
+    .optional(z.boolean())
+    .describe('Remove source field after successful parse (defaults to false)'),
+  ignore_missing: z.optional(z.boolean()).describe('Skip when source field is missing'),
+}) satisfies z.Schema<UriPartsProcessor>;
+
 export interface JoinProcessor extends ProcessorBaseWithWhere {
   action: 'join';
   from: string[];
@@ -574,6 +610,7 @@ export type StreamlangProcessorDefinition =
   | UppercaseProcessor
   | LowercaseProcessor
   | TrimProcessor
+  | UriPartsProcessor
   | JoinProcessor
   | ConcatProcessor
   | ManualIngestPipelineProcessor;
@@ -594,6 +631,7 @@ export const streamlangProcessorSchema = z.union([
   uppercaseProcessorSchema,
   lowercaseProcessorSchema,
   trimProcessorSchema,
+  uriPartsProcessorSchema,
   joinProcessorSchema,
   convertProcessorSchema,
   concatProcessorSchema,
@@ -615,6 +653,7 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     replaceProcessorSchema,
     redactProcessorSchema,
     mathProcessorSchema,
+    uriPartsProcessorSchema,
   ])
 );
 

@@ -189,6 +189,33 @@ const getAvailableProcessors: (
       />
     ),
   },
+  uri_parts: {
+    type: 'uri_parts',
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.uriPartsInputDisplay',
+      { defaultMessage: 'URI parts' }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => (
+      <FormattedMessage
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.uriPartsHelpText"
+        defaultMessage="{uriPartsLink} Extracts parts of a URI into structured fields."
+        values={{
+          uriPartsLink: (
+            <EuiLink
+              data-test-subj="streamsAppAvailableProcessorsUriPartsLink"
+              external
+              target="_blank"
+              href={docLinks.links.ingest.uriParts}
+            >
+              {i18n.translate('xpack.streams.availableProcessors.uriPartsLinkLabel', {
+                defaultMessage: 'Parses a URI',
+              })}
+            </EuiLink>
+          ),
+        }}
+      />
+    ),
+  },
   convert: {
     type: 'convert' as const,
     inputDisplay: i18n.translate(
@@ -551,6 +578,7 @@ const PROCESSOR_GROUP_MAP: Record<
   drop_document: 'remove',
   grok: 'extract',
   dissect: 'extract',
+  uri_parts: 'extract',
   convert: 'convert',
   date: 'convert',
   replace: 'convert',
