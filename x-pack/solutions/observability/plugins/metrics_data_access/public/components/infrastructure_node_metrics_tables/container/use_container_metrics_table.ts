@@ -31,8 +31,11 @@ import {
 export type { ContainerSemconvRuntime };
 export { metricByFieldEcs, metricByField } from './container_metrics_configs';
 
-export interface UseContainerMetricsTableOptions extends UseNodeMetricsTableOptions {
-  /** When schema is 'semconv', which runtime to use. Defaults to 'docker'. */
+export interface UseContainerMetricsTableOptions
+  extends Omit<UseNodeMetricsTableOptions, 'schema'> {
+  /** When true, use OpenTelemetry SemConv metrics (equivalent to schema === 'semconv'). */
+  isOtel?: boolean;
+  /** When isOtel is true, which runtime to use. Defaults to 'docker'. */
   semconvRuntime?: ContainerSemconvRuntime;
 }
 
@@ -45,10 +48,10 @@ export interface ContainerNodeMetricsRow {
 type UnpackMetricsFn = (row: MetricsExplorerRow) => Omit<ContainerNodeMetricsRow, 'id'>;
 
 function getUnpackMetricsForSchema(
-  schema: UseNodeMetricsTableOptions['schema'],
+  isOtel: boolean,
   semconvRuntime: ContainerSemconvRuntime
 ): UnpackMetricsFn {
-  if (schema === 'semconv') {
+  if (isOtel) {
     if (semconvRuntime === 'k8s') {
       return (row) => {
         // semconv k8s unpack metrics
@@ -97,7 +100,7 @@ export function useContainerMetricsTable({
   timerange,
   kuery,
   metricsClient,
-  schema,
+  isOtel,
   semconvRuntime = 'docker',
 }: UseContainerMetricsTableOptions) {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
@@ -107,15 +110,15 @@ export function useContainerMetricsTable({
   });
 
   const metricsExplorerOptions = useMemo(
-    () => getOptionsForSchema(schema, semconvRuntime, kuery).options,
-    [schema, semconvRuntime, kuery]
+    () => getOptionsForSchema(isOtel ?? false, semconvRuntime, kuery).options,
+    [isOtel, semconvRuntime, kuery]
   );
 
   const transform = useMemo(() => {
-    const unpackMetrics = getUnpackMetricsForSchema(schema ?? 'ecs', semconvRuntime);
+    const unpackMetrics = getUnpackMetricsForSchema(isOtel ?? false, semconvRuntime);
     return (series: MetricsExplorerSeries): ContainerNodeMetricsRow =>
       seriesToContainerNodeMetricsRow(series, unpackMetrics);
-  }, [schema, semconvRuntime]);
+  }, [isOtel, semconvRuntime]);
 
   const { data, isLoading, metricIndices } = useInfrastructureNodeMetrics<ContainerNodeMetricsRow>({
     metricsExplorerOptions,

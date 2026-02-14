@@ -23,7 +23,6 @@ import {
   NumberCell,
   StepwisePagination,
 } from '../shared';
-import type { DataSchemaFormat } from '../../../../common';
 import type { ContainerSemconvRuntime } from './container_metrics_configs';
 import {
   SEMCONV_CONTAINER_CPU_LIMIT_UTILIZATION_DISPLAY,
@@ -41,9 +40,10 @@ export interface ContainerMetricsTableProps {
     from: string;
     to: string;
   };
-  schema?: DataSchemaFormat;
+  /** When true, use OpenTelemetry SemConv metrics (equivalent to schema === 'semconv'). */
+  isOtel?: boolean;
   metricsIndices?: string;
-  /** When schema is 'semconv', used to choose correct unit for memory (e.g. % for k8s, MB for docker). */
+  /** When isOtel is true, used to choose correct unit for memory (e.g. % for k8s, MB for docker). */
   semconvRuntime?: ContainerSemconvRuntime;
 }
 
@@ -55,14 +55,14 @@ export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
     setSortState,
     sortState,
     timerange,
-    schema,
+    isOtel,
     metricsIndices,
     semconvRuntime,
   } = props;
 
   const columns = useMemo(
-    () => containerNodeColumns({ timerange, schema, metricsIndices, semconvRuntime }),
-    [timerange, schema, metricsIndices, semconvRuntime]
+    () => containerNodeColumns({ timerange, isOtel, metricsIndices, semconvRuntime }),
+    [timerange, isOtel, metricsIndices, semconvRuntime]
   );
 
   const sortSettings: EuiTableSortingType<ContainerNodeMetricsRow> = {
@@ -137,14 +137,14 @@ export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
 
 function containerNodeColumns({
   timerange,
-  schema,
+  isOtel,
   metricsIndices,
   semconvRuntime,
 }: Pick<
   ContainerMetricsTableProps,
-  'timerange' | 'schema' | 'metricsIndices' | 'semconvRuntime'
+  'timerange' | 'isOtel' | 'metricsIndices' | 'semconvRuntime'
 >): Array<EuiBasicTableColumn<ContainerNodeMetricsRow>> {
-  const memoryUnit = schema === 'semconv' && semconvRuntime === 'k8s' ? '%' : ' MB';
+  const memoryUnit = isOtel && semconvRuntime === 'k8s' ? '%' : ' MB';
   return [
     {
       name: i18n.translate('xpack.metricsData.metricsTable.container.idColumnHeader', {
@@ -160,7 +160,7 @@ function containerNodeColumns({
             label={id}
             nodeType={'container'}
             timerange={timerange}
-            schema={schema}
+            isOtel={isOtel}
             metricsIndices={metricsIndices}
           />
         );
@@ -177,7 +177,7 @@ function containerNodeColumns({
               }
             )}
           </EuiFlexItem>
-          {schema === 'semconv' ? (
+          {isOtel ? (
             <EuiFlexItem grow={false}>
               <EuiIconTip
                 content={i18n.translate(
@@ -212,7 +212,7 @@ function containerNodeColumns({
               }
             )}
           </EuiFlexItem>
-          {schema === 'semconv' ? (
+          {isOtel ? (
             <EuiFlexItem grow={false}>
               <EuiIconTip
                 content={i18n.translate(

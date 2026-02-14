@@ -187,7 +187,7 @@ export const BasicWithSemconv = {
       pageCount: 10,
       rows: loadedPods,
     },
-    schema: 'semconv',
+    isOtel: true,
   },
 };
 
@@ -196,6 +196,6 @@ export const LoadingWithSemconv = {
 
   args: {
     isLoading: true,
-    schema: 'semconv',
+    isOtel: true,
   },
 };

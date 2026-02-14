@@ -9,10 +9,7 @@ import React, { useMemo } from 'react';
 import { parse } from '@kbn/datemath';
 import { EuiLink } from '@elastic/eui';
 import { type ComposerQuery, esql } from '@kbn/esql-language';
-import type {
-  DataSchemaFormat,
-  InventoryItemType,
-} from '../../../../../common/inventory_models/types';
+import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useAssetDetailsRedirect } from '../../../../pages/link_to/use_asset_details_redirect';
 
@@ -29,8 +26,8 @@ interface MetricsNodeDetailsLinkProps {
   label: string;
   nodeType: NodeTypeForLink;
   timerange: { from: string; to: string };
-  schema?: DataSchemaFormat;
-  /** Infrastructure/metrics index pattern from settings; used for Discover ES|QL when schema is semconv. */
+  isOtel?: boolean;
+  /** Infrastructure/metrics index pattern from settings; used for Discover ES|QL when isOtel is true. */
   metricsIndices?: string;
 }
 
@@ -56,13 +53,13 @@ export const MetricsNodeDetailsLink = ({
   label,
   nodeType,
   timerange,
-  schema,
+  isOtel,
   metricsIndices,
 }: MetricsNodeDetailsLinkProps) => {
   const { share } = useKibanaContextForPlugin().services;
   const { getAssetDetailUrl } = useAssetDetailsRedirect();
 
-  const redirectToDiscover = schema === 'semconv' && nodeType !== 'host';
+  const redirectToDiscover = isOtel && nodeType !== 'host';
 
   const linkProps = useMemo(() => {
     if (redirectToDiscover) {
@@ -98,7 +95,7 @@ export const MetricsNodeDetailsLink = ({
         from: parse(timerange.from)?.valueOf(),
         to: parse(timerange.to)?.valueOf(),
       },
-      preferredSchema: schema,
+      isOtel,
     });
     return { href: assetDetails.href, onClick: assetDetails.onClick };
   }, [
@@ -109,7 +106,7 @@ export const MetricsNodeDetailsLink = ({
     nodeType,
     id,
     label,
-    schema,
+    isOtel,
     metricsIndices,
     getAssetDetailUrl,
   ]);

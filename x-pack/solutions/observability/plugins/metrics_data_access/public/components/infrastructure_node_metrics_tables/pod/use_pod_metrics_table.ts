@@ -101,7 +101,7 @@ export function usePodMetricsTable({
   timerange,
   kuery,
   metricsClient,
-  schema,
+  isOtel,
 }: UseNodeMetricsTableOptions) {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [sortState, setSortState] = useState<SortState<PodNodeMetricsRow>>({
@@ -120,7 +120,7 @@ export function usePodMetricsTable({
   );
 
   const { data, isLoading, metricIndices } = useInfrastructureNodeMetrics<PodNodeMetricsRow>({
-    metricsExplorerOptions: schema === 'semconv' ? podMetricsOptionsOtel : podMetricsOptions,
+    metricsExplorerOptions: isOtel ? podMetricsOptionsOtel : podMetricsOptions,
     timerange,
     transform: seriesToPodNodeMetricsRow,
     sortState,

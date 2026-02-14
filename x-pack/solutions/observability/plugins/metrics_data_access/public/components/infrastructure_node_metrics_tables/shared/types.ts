@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { DataSchemaFormat } from '../../../../common';
 import type { CoreProvidersProps } from '../../../apps/common_providers';
 import type { MetricsDataClient } from '../../../lib/metrics_client';
 
@@ -13,7 +12,7 @@ export interface UseNodeMetricsTableOptions {
   timerange: { from: string; to: string };
   kuery?: string;
   metricsClient: MetricsDataClient;
-  schema?: DataSchemaFormat;
+  isOtel?: boolean;
 }
 
 export interface SourceProviderProps {

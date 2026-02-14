@@ -74,7 +74,7 @@ describe('MetricsNodeDetailsLink', () => {
     jest.clearAllMocks();
   });
 
-  describe('when schema is semconv and nodeType is not host', () => {
+  describe('when isOtel is true and nodeType is not host', () => {
     it('navigates to Discover with ES|QL query for container', () => {
       const discoverLocator = createDiscoverLocatorMock();
       const Wrapper = createWrapper(discoverLocator);
@@ -82,7 +82,7 @@ describe('MetricsNodeDetailsLink', () => {
       render(
         <MetricsNodeDetailsLink
           {...defaultProps}
-          schema="semconv"
+          isOtel={true}
           nodeType="container"
           id="abc-123"
         />,
@@ -103,12 +103,7 @@ describe('MetricsNodeDetailsLink', () => {
       const Wrapper = createWrapper(discoverLocator);
 
       render(
-        <MetricsNodeDetailsLink
-          {...defaultProps}
-          schema="semconv"
-          nodeType="pod"
-          id="pod-uid-456"
-        />,
+        <MetricsNodeDetailsLink {...defaultProps} isOtel={true} nodeType="pod" id="pod-uid-456" />,
         { wrapper: Wrapper }
       );
 
@@ -128,7 +123,7 @@ describe('MetricsNodeDetailsLink', () => {
       render(
         <MetricsNodeDetailsLink
           {...defaultProps}
-          schema="semconv"
+          isOtel={true}
           nodeType="container"
           id="abc-123"
           metricsIndices="my-metrics-*"
@@ -149,7 +144,7 @@ describe('MetricsNodeDetailsLink', () => {
       const Wrapper = createWrapper(discoverLocator);
 
       render(
-        <MetricsNodeDetailsLink {...defaultProps} schema="semconv" nodeType="container" id="x" />,
+        <MetricsNodeDetailsLink {...defaultProps} isOtel={true} nodeType="container" id="x" />,
         { wrapper: Wrapper }
       );
 
@@ -168,7 +163,7 @@ describe('MetricsNodeDetailsLink', () => {
       render(
         <MetricsNodeDetailsLink
           {...defaultProps}
-          schema="semconv"
+          isOtel={true}
           nodeType="container"
           id='id-with-"quote"'
         />,
@@ -186,7 +181,7 @@ describe('MetricsNodeDetailsLink', () => {
     });
   });
 
-  describe('when schema is semconv and nodeType is host', () => {
+  describe('when isOtel is true and nodeType is host', () => {
     it('uses asset details redirect, not Discover', () => {
       const discoverLocator = createDiscoverLocatorMock();
       const Wrapper = createWrapper(discoverLocator);
@@ -194,7 +189,7 @@ describe('MetricsNodeDetailsLink', () => {
       render(
         <MetricsNodeDetailsLink
           {...defaultProps}
-          schema="semconv"
+          isOtel={true}
           nodeType="host"
           id="host-01"
           label="host-01"
@@ -206,22 +201,22 @@ describe('MetricsNodeDetailsLink', () => {
         expect.objectContaining({
           entityType: 'host',
           entityId: 'host-01',
-          preferredSchema: 'semconv',
+          isOtel: true,
         })
       );
       expect(discoverLocator.getRedirectUrl).not.toHaveBeenCalled();
     });
   });
 
-  describe('when schema is ecs or undefined', () => {
-    it('uses asset details redirect for container when schema is ecs', () => {
+  describe('when isOtel is false or undefined', () => {
+    it('uses asset details redirect for container when isOtel is false', () => {
       const discoverLocator = createDiscoverLocatorMock();
       const Wrapper = createWrapper(discoverLocator);
 
       render(
         <MetricsNodeDetailsLink
           {...defaultProps}
-          schema="ecs"
+          isOtel={false}
           nodeType="container"
           id="abc-123"
           label="my-container"
@@ -233,14 +228,14 @@ describe('MetricsNodeDetailsLink', () => {
         expect.objectContaining({
           entityType: 'container',
           entityId: 'abc-123',
-          preferredSchema: 'ecs',
+          isOtel: false,
           search: expect.objectContaining({ name: 'my-container' }),
         })
       );
       expect(discoverLocator.getRedirectUrl).not.toHaveBeenCalled();
     });
 
-    it('uses asset details redirect when schema is undefined', () => {
+    it('uses asset details redirect when isOtel is undefined', () => {
       const discoverLocator = createDiscoverLocatorMock();
       const Wrapper = createWrapper(discoverLocator);
 
@@ -253,7 +248,6 @@ describe('MetricsNodeDetailsLink', () => {
         expect.objectContaining({
           entityType: 'pod',
           entityId: 'pod-1',
-          preferredSchema: undefined,
         })
       );
       expect(discoverLocator.getRedirectUrl).not.toHaveBeenCalled();
@@ -275,7 +269,7 @@ describe('MetricsNodeDetailsLink', () => {
     it('uses Discover href when redirecting to Discover', () => {
       const Wrapper = createWrapper();
 
-      render(<MetricsNodeDetailsLink {...defaultProps} schema="semconv" nodeType="container" />, {
+      render(<MetricsNodeDetailsLink {...defaultProps} isOtel={true} nodeType="container" />, {
         wrapper: Wrapper,
       });
 

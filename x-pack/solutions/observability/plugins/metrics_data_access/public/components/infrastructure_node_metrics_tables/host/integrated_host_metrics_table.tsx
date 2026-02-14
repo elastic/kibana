@@ -7,21 +7,30 @@
 
 import React from 'react';
 import { CoreProviders } from '../../../apps/common_providers';
-import type { IntegratedNodeMetricsTableProps, UseNodeMetricsTableOptions } from '../shared';
+import type { IntegratedNodeMetricsTableProps } from '../shared';
 import { HostMetricsTable } from './host_metrics_table';
 import { useHostMetricsTable } from './use_host_metrics_table';
+
+type HostIntegratedProps = Omit<IntegratedNodeMetricsTableProps, 'schema'> & {
+  isOtel?: boolean;
+};
+
+type HookedHostMetricsTableProps = Pick<
+  HostIntegratedProps,
+  'timerange' | 'kuery' | 'isOtel' | 'metricsClient'
+>;
 
 function HookedHostMetricsTable({
   timerange,
   kuery,
   metricsClient,
-  schema,
-}: UseNodeMetricsTableOptions) {
-  const hostMetricsTableProps = useHostMetricsTable({ timerange, kuery, metricsClient, schema });
+  isOtel,
+}: HookedHostMetricsTableProps) {
+  const hostMetricsTableProps = useHostMetricsTable({ timerange, kuery, metricsClient, isOtel });
   return (
     <HostMetricsTable
       {...hostMetricsTableProps}
-      schema={schema}
+      isOtel={isOtel}
       metricIndices={hostMetricsTableProps.metricIndices}
     />
   );
@@ -32,16 +41,16 @@ function HostMetricsTableWithProviders({
   kuery,
   sourceId,
   metricsClient,
-  schema,
+  isOtel,
   ...coreProvidersProps
-}: IntegratedNodeMetricsTableProps) {
+}: HostIntegratedProps) {
   return (
     <CoreProviders {...coreProvidersProps}>
       <HookedHostMetricsTable
         timerange={timerange}
         kuery={kuery}
         metricsClient={metricsClient}
-        schema={schema}
+        isOtel={isOtel}
       />
     </CoreProviders>
   );

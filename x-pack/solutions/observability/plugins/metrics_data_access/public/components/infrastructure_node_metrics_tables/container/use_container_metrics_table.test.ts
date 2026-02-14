@@ -57,7 +57,7 @@ describe('useContainerMetricsTable hook', () => {
     );
   });
 
-  it('should call useInfrastructureNodeMetrics with SemConv Docker metrics when schema is semconv (default)', () => {
+  it('should call useInfrastructureNodeMetrics with SemConv Docker metrics when isOtel is true (default)', () => {
     const kuery = 'container.id: "gke-edge-oblt-pool-1-9a60016d-lgg9"';
 
     useInfrastructureNodeMetricsMock.mockReturnValue({
@@ -71,7 +71,7 @@ describe('useContainerMetricsTable hook', () => {
         timerange: { from: 'now-30d', to: 'now' },
         kuery,
         metricsClient: createMetricsClientMock({}),
-        schema: 'semconv',
+        isOtel: true,
       })
     );
 
@@ -88,7 +88,7 @@ describe('useContainerMetricsTable hook', () => {
     );
   });
 
-  it('should call useInfrastructureNodeMetrics with SemConv K8s metrics when schema is semconv and semconvRuntime is k8s', () => {
+  it('should call useInfrastructureNodeMetrics with SemConv K8s metrics when isOtel is true and semconvRuntime is k8s', () => {
     const kuery = 'container.id: "some-k8s-container"';
 
     useInfrastructureNodeMetricsMock.mockReturnValue({
@@ -102,7 +102,7 @@ describe('useContainerMetricsTable hook', () => {
         timerange: { from: 'now-30d', to: 'now' },
         kuery,
         metricsClient: createMetricsClientMock({}),
-        schema: 'semconv',
+        isOtel: true,
         semconvRuntime: 'k8s',
       })
     );
@@ -124,7 +124,7 @@ describe('useContainerMetricsTable hook', () => {
     );
   });
 
-  it('should call useInfrastructureNodeMetrics with ECS metrics when schema is ecs', () => {
+  it('should call useInfrastructureNodeMetrics with ECS metrics when isOtel is false', () => {
     const kuery = 'container.id: "gke-edge-oblt-pool-1-9a60016d-lgg9"';
 
     useInfrastructureNodeMetricsMock.mockReturnValue({
@@ -138,7 +138,7 @@ describe('useContainerMetricsTable hook', () => {
         timerange: { from: 'now-30d', to: 'now' },
         kuery,
         metricsClient: createMetricsClientMock({}),
-        schema: 'ecs',
+        isOtel: false,
       })
     );
 

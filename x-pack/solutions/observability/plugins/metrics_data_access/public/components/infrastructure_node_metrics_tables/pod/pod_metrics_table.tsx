@@ -23,7 +23,6 @@ import {
   NumberCell,
   StepwisePagination,
 } from '../shared';
-import type { DataSchemaFormat } from '../../../../common';
 import {
   SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
   SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
@@ -40,7 +39,7 @@ export interface PodMetricsTableProps {
     from: string;
     to: string;
   };
-  schema?: DataSchemaFormat;
+  isOtel?: boolean;
   metricIndices?: string;
 }
 
@@ -52,13 +51,13 @@ export const PodMetricsTable = (props: PodMetricsTableProps) => {
     setSortState,
     sortState,
     timerange,
-    schema,
+    isOtel,
     metricIndices,
   } = props;
 
   const columns = useMemo(
-    () => podNodeColumns(timerange, schema, metricIndices),
-    [timerange, schema, metricIndices]
+    () => podNodeColumns(timerange, isOtel, metricIndices),
+    [timerange, isOtel, metricIndices]
   );
 
   const sorting: EuiTableSortingType<PodNodeMetricsRow> = {
@@ -128,7 +127,7 @@ export const PodMetricsTable = (props: PodMetricsTableProps) => {
 
 function podNodeColumns(
   timerange: PodMetricsTableProps['timerange'],
-  schema?: PodMetricsTableProps['schema'],
+  isOtel?: PodMetricsTableProps['isOtel'],
   metricIndices?: PodMetricsTableProps['metricIndices']
 ): Array<EuiBasicTableColumn<PodNodeMetricsRow>> {
   return [
@@ -146,8 +145,8 @@ function podNodeColumns(
             label={name}
             nodeType={'pod'}
             timerange={timerange}
-            schema={schema}
-            metricIndices={metricIndices}
+            isOtel={isOtel}
+            metricsIndices={metricIndices}
           />
         );
       },
@@ -163,7 +162,7 @@ function podNodeColumns(
               }
             )}
           </EuiFlexItem>
-          {schema === 'semconv' ? (
+          {isOtel ? (
             <EuiFlexItem grow={false}>
               <EuiIconTip
                 content={i18n.translate(
@@ -198,7 +197,7 @@ function podNodeColumns(
               }
             )}
           </EuiFlexItem>
-          {schema === 'semconv' ? (
+          {isOtel ? (
             <EuiFlexItem grow={false}>
               <EuiIconTip
                 content={i18n.translate(

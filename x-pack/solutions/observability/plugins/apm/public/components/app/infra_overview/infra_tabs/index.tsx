@@ -6,9 +6,8 @@
  */
 
 import { EuiLoadingSpinner, EuiTabs, EuiTab } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { hasOpenTelemetryPrefix } from '@kbn/elastic-agent-utils';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -32,13 +31,6 @@ export function InfraTabs() {
   } = useApmParams('/services/{serviceName}/infrastructure');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const schema = useMemo(() => {
-    if (hasOpenTelemetryPrefix(agentName)) {
-      return 'semconv';
-    }
-    return 'ecs';
-  }, [agentName]);
-
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
@@ -50,13 +42,13 @@ export function InfraTabs() {
               kuery,
               start,
               end,
-              schema,
+              agentName,
             },
           },
         });
       }
     },
-    [environment, kuery, schema, serviceName, start, end]
+    [environment, kuery, agentName, serviceName, start, end]
   );
 
   const { containerIds, podNames, hostNames } = data;
@@ -65,7 +57,7 @@ export function InfraTabs() {
     containerIds,
     podNames,
     hostNames,
-    schema,
+    agentName,
     start,
     end,
   });

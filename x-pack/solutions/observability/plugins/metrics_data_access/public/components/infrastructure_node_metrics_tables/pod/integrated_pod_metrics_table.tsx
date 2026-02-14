@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { CoreProviders } from '../../../apps/common_providers';
-import type { IntegratedNodeMetricsTableProps, UseNodeMetricsTableOptions } from '../shared';
+import type { IntegratedNodeMetricsTableProps } from '../shared';
 import { PodMetricsTable } from './pod_metrics_table';
 import { usePodMetricsTable } from './use_pod_metrics_table';
 
@@ -15,13 +15,13 @@ function HookedPodMetricsTable({
   timerange,
   kuery,
   metricsClient,
-  schema,
+  isOtel,
 }: UseNodeMetricsTableOptions) {
-  const podMetricsTableProps = usePodMetricsTable({ timerange, kuery, metricsClient, schema });
+  const podMetricsTableProps = usePodMetricsTable({ timerange, kuery, metricsClient, isOtel });
   return (
     <PodMetricsTable
       {...podMetricsTableProps}
-      schema={schema}
+      isOtel={isOtel}
       metricIndices={podMetricsTableProps.metricIndices}
     />
   );
@@ -32,7 +32,7 @@ function PodMetricsTableWithProviders({
   kuery,
   sourceId,
   metricsClient,
-  schema,
+  isOtel,
   ...coreProvidersProps
 }: IntegratedNodeMetricsTableProps) {
   return (
@@ -41,7 +41,7 @@ function PodMetricsTableWithProviders({
         timerange={timerange}
         kuery={kuery}
         metricsClient={metricsClient}
-        schema={schema}
+        isOtel={isOtel}
       />
     </CoreProviders>
   );

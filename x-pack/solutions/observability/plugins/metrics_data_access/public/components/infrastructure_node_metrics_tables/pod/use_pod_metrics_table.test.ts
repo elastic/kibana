@@ -54,7 +54,7 @@ describe('usePodMetricsTable hook', () => {
     );
   });
 
-  it('should call useInfrastructureNodeMetrics with OTEL/semconv metrics when schema is semconv', () => {
+  it('should call useInfrastructureNodeMetrics with OTEL/semconv metrics when isOtel is true', () => {
     const kuery = 'container.id: "gke-edge-oblt-pool-1-9a60016d-lgg9"';
 
     // include this to prevent rendering error in test
@@ -69,7 +69,7 @@ describe('usePodMetricsTable hook', () => {
         timerange: { from: 'now-30d', to: 'now' },
         kuery,
         metricsClient: createMetricsClientMock({}),
-        schema: 'semconv',
+        isOtel: true,
       })
     );
 
@@ -86,7 +86,7 @@ describe('usePodMetricsTable hook', () => {
     );
   });
 
-  it('should call useInfrastructureNodeMetrics with ECS metrics when schema is ecs', () => {
+  it('should call useInfrastructureNodeMetrics with ECS metrics when isOtel is false', () => {
     const kuery = 'container.id: "gke-edge-oblt-pool-1-9a60016d-lgg9"';
 
     // include this to prevent rendering error in test
@@ -101,7 +101,7 @@ describe('usePodMetricsTable hook', () => {
         timerange: { from: 'now-30d', to: 'now' },
         kuery: `(${kuery})`,
         metricsClient: createMetricsClientMock({}),
-        schema: 'ecs',
+        isOtel: false,
       })
     );
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MetricsQueryOptions, UseNodeMetricsTableOptions } from '../shared';
+import type { MetricsQueryOptions } from '../shared';
 import { createMetricByFieldLookup, makeUnpackMetric, metricsToApiOptions } from '../shared';
 import {
   ECS_CONTAINER_CPU_USAGE_LIMIT_PCT,
@@ -99,11 +99,11 @@ export const unpackMetricSemconvK8s = makeUnpackMetric(metricByFieldSemconvK8s);
 export const metricByField = metricByFieldEcs;
 
 export function getOptionsForSchema(
-  schema: UseNodeMetricsTableOptions['schema'],
+  isOtel: boolean,
   semconvRuntime: ContainerSemconvRuntime,
   kuery?: string
 ) {
-  if (schema === 'semconv') {
+  if (isOtel) {
     return semconvRuntime === 'k8s'
       ? metricsToApiOptions(containerMetricsQueryConfigSemconvK8s, kuery)
       : metricsToApiOptions(containerMetricsQueryConfigSemconvDocker, kuery);

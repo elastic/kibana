@@ -18,25 +18,27 @@ import {
 } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { termQuery, termsQuery } from '@kbn/es-query';
+import { hasOpenTelemetryPrefix } from '../../../common/agent_name';
 
 export const getInfrastructureData = async ({
   kuery,
   serviceName,
-  schema,
+  agentName,
   environment,
   apmEventClient,
   start,
   end,
 }: {
   kuery: string;
-  schema: string;
+  agentName: string | undefined;
   serviceName: string;
   environment: string;
   apmEventClient: APMEventClient;
   start: number;
   end: number;
 }) => {
-  const k8sFilterField = schema === 'semconv' ? KUBERNETES_POD_NAME_OTEL : KUBERNETES_POD_NAME;
+  const isOtel = Boolean(agentName && hasOpenTelemetryPrefix(agentName));
+  const k8sFilterField = isOtel ? KUBERNETES_POD_NAME_OTEL : KUBERNETES_POD_NAME;
 
   const response = await apmEventClient.search(
     'get_service_infrastructure',
@@ -87,7 +89,7 @@ export const getInfrastructureData = async ({
   const podNames =
     response.aggregations?.podNames?.buckets.map((bucket) => bucket.key as string) ?? [];
 
-  if (podNames.length > 0 && schema === 'semconv') {
+  if (podNames.length > 0 && isOtel) {
     const containersByPodResponse = await apmEventClient.search(
       'get_container_ids_by_pod_names',
       {

@@ -20,9 +20,12 @@ export function createLazyContainerMetricsTable(core: CoreStart, metricsClient: 
     timerange,
     kuery,
     sourceId,
-    schema,
+    isOtel,
     semconvRuntime,
-  }: NodeMetricsTableProps & { semconvRuntime?: ContainerSemconvRuntime }) => {
+  }: Omit<NodeMetricsTableProps, 'schema'> & {
+    isOtel?: boolean;
+    semconvRuntime?: ContainerSemconvRuntime;
+  }) => {
     return (
       <Suspense fallback={null}>
         <LazyIntegratedContainerMetricsTable
@@ -31,7 +34,7 @@ export function createLazyContainerMetricsTable(core: CoreStart, metricsClient: 
           sourceId={sourceId || 'default'}
           timerange={timerange}
           kuery={kuery}
-          schema={schema}
+          isOtel={isOtel}
           semconvRuntime={semconvRuntime}
         />
       </Suspense>

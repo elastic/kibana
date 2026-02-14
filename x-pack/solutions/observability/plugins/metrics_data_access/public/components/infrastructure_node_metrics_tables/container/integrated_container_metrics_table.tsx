@@ -7,28 +7,39 @@
 
 import React from 'react';
 import { CoreProviders } from '../../../apps/common_providers';
-import type { IntegratedNodeMetricsTableProps, UseNodeMetricsTableOptions } from '../shared';
+import type { IntegratedNodeMetricsTableProps } from '../shared';
 import { ContainerMetricsTable } from './container_metrics_table';
 import { useContainerMetricsTable } from './use_container_metrics_table';
 import type { ContainerSemconvRuntime } from './container_metrics_configs';
+
+type ContainerIntegratedProps = Omit<IntegratedNodeMetricsTableProps, 'schema'> & {
+  isOtel?: boolean;
+  semconvRuntime?: ContainerSemconvRuntime;
+};
+
+type HookedContainerMetricsTableProps = Pick<
+  ContainerIntegratedProps,
+  'timerange' | 'kuery' | 'isOtel' | 'semconvRuntime' | 'metricsClient'
+>;
+
 function HookedContainerMetricsTable({
   timerange,
   kuery,
-  schema,
+  isOtel,
   semconvRuntime,
   metricsClient,
-}: UseNodeMetricsTableOptions & { semconvRuntime?: ContainerSemconvRuntime }) {
+}: HookedContainerMetricsTableProps) {
   const containerMetricsTableProps = useContainerMetricsTable({
     timerange,
     kuery,
-    schema,
+    isOtel,
     semconvRuntime,
     metricsClient,
   });
   return (
     <ContainerMetricsTable
       {...containerMetricsTableProps}
-      schema={schema}
+      isOtel={isOtel}
       metricsIndices={containerMetricsTableProps.metricIndices}
       semconvRuntime={semconvRuntime}
     />
@@ -39,17 +50,17 @@ function ContainerMetricsTableWithProviders({
   timerange,
   kuery,
   sourceId,
-  schema,
+  isOtel,
   semconvRuntime,
   metricsClient,
   ...coreProvidersProps
-}: IntegratedNodeMetricsTableProps & { semconvRuntime?: ContainerSemconvRuntime }) {
+}: ContainerIntegratedProps) {
   return (
     <CoreProviders {...coreProvidersProps}>
       <HookedContainerMetricsTable
         timerange={timerange}
         kuery={kuery}
-        schema={schema}
+        isOtel={isOtel}
         metricsClient={metricsClient}
         semconvRuntime={semconvRuntime}
       />
