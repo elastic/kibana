@@ -913,7 +913,7 @@
         "label": "UiSettingsSolutions",
         "description": [],
         "signature": [
-          "(\"security\" | \"workplaceai\" | \"oblt\" | \"es\" | \"classic\")[]"
+          "(\"security\" | \"es\" | \"workplaceai\" | \"oblt\" | \"classic\")[]"
         ],
         "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
         "lineNumber": 67,

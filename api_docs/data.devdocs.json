@@ -326,9 +326,7 @@
                 "type": "Any",
                 "tags": [],
                 "label": "from",
-                "description": [
-                  "- optional object to read values from,\n used when initializing"
-                ],
+                "description": [],
                 "signature": [
                   "any"
                 ],
@@ -3515,7 +3513,7 @@
                 "tags": [],
                 "label": "overwriteType",
                 "description": [
-                  "If `false` is passed in it will disable the overwrite, otherwise\nthe passed in value will be used as the data view type for this search source."
+                  "If `false` is passed in it will disable the overwrite, otherwise"
                 ],
                 "signature": [
                   "string | false | undefined"
@@ -3570,9 +3568,7 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "field",
-                "description": [
-                  ": field name"
-                ],
+                "description": [],
                 "signature": [
                   "K"
                 ],
@@ -3589,9 +3585,7 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "value",
-                "description": [
-                  ": value for the field"
-                ],
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "data",
@@ -3644,9 +3638,7 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "field",
-                "description": [
-                  ": field name"
-                ],
+                "description": [],
                 "signature": [
                   "K"
                 ],
@@ -9902,8 +9894,8 @@
         "signature": [
           "\"FILTER_TRIGGER\""
         ],
-        "path": "src/platform/plugins/shared/data/public/triggers/apply_filter_trigger.ts",
-        "lineNumber": 13,
+        "path": "src/platform/plugins/shared/data/common/constants.ts",
+        "lineNumber": 22,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -13083,7 +13075,7 @@
                 "tags": [],
                 "label": "includeFields",
                 "description": [
-                  "Whether or not to include the `fields` list as part of this spec. If not included, the list\nwill be fetched from Elasticsearch when instantiating a new Data View with this spec."
+                  "Whether or not to include the `fields` list as part of this spec. If not included, the list"
                 ],
                 "signature": [
                   "boolean"
@@ -14973,9 +14965,7 @@
                 "type": "Array",
                 "tags": [],
                 "label": "fields",
-                "description": [
-                  ": FieldSpec[]"
-                ],
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -14999,9 +14989,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "fieldAttrs",
-                "description": [
-                  ": FieldAttrs"
-                ],
+                "description": [],
                 "signature": [
                   "FieldAttrsAsObject",
                   " | undefined"
@@ -15818,9 +15806,7 @@
                 "type": "string",
                 "tags": [],
                 "label": "indexPatternId",
-                "description": [
-                  ": Id of kibana Index Pattern to delete"
-                ],
+                "description": [],
                 "signature": [
                   "string"
                 ],
@@ -15945,7 +15931,9 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "refreshFields",
-                    "description": [],
+                    "description": [
+                      "- If true, will refresh the fields of the default data view"
+                    ],
                     "signature": [
                       "boolean | undefined"
                     ],
@@ -18133,7 +18121,7 @@
                 "tags": [],
                 "label": "includeFields",
                 "description": [
-                  "Whether or not to include the `fields` list as part of this spec. If not included, the list\nwill be fetched from Elasticsearch when instantiating a new Data View with this spec."
+                  "Whether or not to include the `fields` list as part of this spec. If not included, the list"
                 ],
                 "signature": [
                   "boolean"
@@ -21070,9 +21058,7 @@
                 "type": "Array",
                 "tags": [],
                 "label": "fields",
-                "description": [
-                  ": FieldSpec[]"
-                ],
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -21096,9 +21082,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "fieldAttrs",
-                "description": [
-                  ": FieldAttrs"
-                ],
+                "description": [],
                 "signature": [
                   "FieldAttrsAsObject",
                   " | undefined"
@@ -21915,9 +21899,7 @@
                 "type": "string",
                 "tags": [],
                 "label": "indexPatternId",
-                "description": [
-                  ": Id of kibana Index Pattern to delete"
-                ],
+                "description": [],
                 "signature": [
                   "string"
                 ],
@@ -22042,7 +22024,9 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "refreshFields",
-                    "description": [],
+                    "description": [
+                      "- If true, will refresh the fields of the default data view"
+                    ],
                     "signature": [
                       "boolean | undefined"
                     ],
@@ -24975,6 +24959,23 @@
         "path": "src/platform/plugins/shared/data_views/common/types.ts",
         "lineNumber": 350,
         "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.APPLY_FILTER_TRIGGER",
+        "type": "string",
+        "tags": [],
+        "label": "APPLY_FILTER_TRIGGER",
+        "description": [],
+        "signature": [
+          "\"FILTER_TRIGGER\""
+        ],
+        "path": "src/platform/plugins/shared/data/common/constants.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

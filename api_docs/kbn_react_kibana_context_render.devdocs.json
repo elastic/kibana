@@ -36,7 +36,9 @@
           "I18nStart",
           "; analytics?: Pick<",
           "AnalyticsServiceStart",
-          ", \"reportEvent\"> | undefined; executionContext?: ",
+          ", \"reportEvent\"> | undefined; chrome?: Pick<",
+          "ChromeStart",
+          ", \"withProvider\"> | undefined; executionContext?: ",
           "ExecutionContextSetup",
           " | undefined; theme: ",
           {

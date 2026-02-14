@@ -1,0 +1,295 @@
+{
+  "id": "@kbn/visualization-listing-components",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/visualization-listing-components",
+        "id": "def-public.getCustomColumn",
+        "type": "Function",
+        "tags": [],
+        "label": "getCustomColumn",
+        "description": [],
+        "signature": [
+          "() => { field: string; name: string; sortable: boolean; width: string; render: (field: string, record: ",
+          {
+            "pluginId": "@kbn/visualization-listing-components",
+            "scope": "public",
+            "docId": "kibKbnVisualizationListingComponentsPluginApi",
+            "section": "def-public.VisualizationListItem",
+            "text": "VisualizationListItem"
+          },
+          ") => React.JSX.Element; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-visualization-listing-components/get_custom_column.tsx",
+        "lineNumber": 67,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-listing-components",
+        "id": "def-public.getCustomSortingOptions",
+        "type": "Function",
+        "tags": [],
+        "label": "getCustomSortingOptions",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/content-management-table-list-view-table",
+            "scope": "public",
+            "docId": "kibKbnContentManagementTableListViewTablePluginApi",
+            "section": "def-public.CustomSortingOptions",
+            "text": "CustomSortingOptions"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-visualization-listing-components/get_custom_sorting_options.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-listing-components",
+        "id": "def-public.getNoItemsMessage",
+        "type": "Function",
+        "tags": [],
+        "label": "getNoItemsMessage",
+        "description": [],
+        "signature": [
+          "(createItem: () => void) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-visualization-listing-components/get_no_items_message.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-listing-components",
+            "id": "def-public.getNoItemsMessage.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "createItem",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualization-listing-components/get_no_items_message.tsx",
+            "lineNumber": 14,
+            "columnNumber": 35,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-listing-components",
+        "id": "def-public.getVisualizationListingTableStyles",
+        "type": "Function",
+        "tags": [],
+        "label": "getVisualizationListingTableStyles",
+        "description": [],
+        "signature": [
+          "({ euiTheme }: ",
+          "UseEuiTheme",
+          "<{}>) => ",
+          "SerializedStyles"
+        ],
+        "path": "src/platform/packages/shared/kbn-visualization-listing-components/get_listing_styles.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-listing-components",
+            "id": "def-public.getVisualizationListingTableStyles.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ euiTheme }",
+            "description": [],
+            "signature": [
+              "UseEuiTheme",
+              "<{}>"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualization-listing-components/get_listing_styles.ts",
+            "lineNumber": 13,
+            "columnNumber": 52,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/visualization-listing-components",
+        "id": "def-public.VisualizationListItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "VisualizationListItem",
+        "description": [
+          "\nRepresents a visualization item in the listing table"
+        ],
+        "path": "src/platform/packages/shared/kbn-visualization-listing-components/types.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-listing-components",
+            "id": "def-public.VisualizationListItem.error",
+            "type": "string",
+            "tags": [],
+            "label": "error",
+            "description": [
+              "Optional error message if the visualization failed to load"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualization-listing-components/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-listing-components",
+            "id": "def-public.VisualizationListItem.icon",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
+            "description": [
+              "Icon identifier for the visualization type"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualization-listing-components/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-listing-components",
+            "id": "def-public.VisualizationListItem.image",
+            "type": "string",
+            "tags": [],
+            "label": "image",
+            "description": [
+              "Image URL for custom visualization type icons"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualization-listing-components/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-listing-components",
+            "id": "def-public.VisualizationListItem.stage",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "stage",
+            "description": [
+              "Release stage of the visualization type"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/visualization-listing-components",
+                "scope": "public",
+                "docId": "kibKbnVisualizationListingComponentsPluginApi",
+                "section": "def-public.VisualizationStage",
+                "text": "VisualizationStage"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualization-listing-components/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-listing-components",
+            "id": "def-public.VisualizationListItem.typeTitle",
+            "type": "string",
+            "tags": [],
+            "label": "typeTitle",
+            "description": [
+              "Display name of the visualization type"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-visualization-listing-components/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/visualization-listing-components",
+        "id": "def-public.VisualizationStage",
+        "type": "Type",
+        "tags": [],
+        "label": "VisualizationStage",
+        "description": [
+          "\nRelease stage of a visualization type"
+        ],
+        "signature": [
+          "\"experimental\" | \"beta\" | \"production\""
+        ],
+        "path": "src/platform/packages/shared/kbn-visualization-listing-components/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
