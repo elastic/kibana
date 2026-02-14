@@ -21,6 +21,7 @@ export const journey = new Journey({
   .step('Go to data view selection', async ({ page }) => {
     const createButtons = page.locator(subj('transformCreateFirstButton'));
     await createButtons.first().click();
+    await page.locator(subj('transformSourceDataSelectorButton')).click();
     await page.waitForSelector(subj('savedObjectsFinderTable'));
   })
   .step('Go to Transform Wizard', async ({ page }) => {
