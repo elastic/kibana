@@ -31,11 +31,7 @@ import {
 export type { ContainerSemconvRuntime };
 export { metricByFieldEcs, metricByField } from './container_metrics_configs';
 
-export interface UseContainerMetricsTableOptions
-  extends Omit<UseNodeMetricsTableOptions, 'schema'> {
-  /** When true, use OpenTelemetry SemConv metrics (equivalent to schema === 'semconv'). */
-  isOtel?: boolean;
-  /** When isOtel is true, which runtime to use. Defaults to 'docker'. */
+export interface UseContainerMetricsTableOptions extends UseNodeMetricsTableOptions {
   semconvRuntime?: ContainerSemconvRuntime;
 }
 

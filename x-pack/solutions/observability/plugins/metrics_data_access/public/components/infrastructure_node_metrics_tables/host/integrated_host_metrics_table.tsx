@@ -7,16 +7,12 @@
 
 import React from 'react';
 import { CoreProviders } from '../../../apps/common_providers';
-import type { IntegratedNodeMetricsTableProps } from '../shared';
 import { HostMetricsTable } from './host_metrics_table';
 import { useHostMetricsTable } from './use_host_metrics_table';
-
-type HostIntegratedProps = Omit<IntegratedNodeMetricsTableProps, 'schema'> & {
-  isOtel?: boolean;
-};
+import type { IntegratedNodeMetricsTableProps } from '../shared';
 
 type HookedHostMetricsTableProps = Pick<
-  HostIntegratedProps,
+  IntegratedNodeMetricsTableProps,
   'timerange' | 'kuery' | 'isOtel' | 'metricsClient'
 >;
 
@@ -43,7 +39,7 @@ function HostMetricsTableWithProviders({
   metricsClient,
   isOtel,
   ...coreProvidersProps
-}: HostIntegratedProps) {
+}: IntegratedNodeMetricsTableProps) {
   return (
     <CoreProviders {...coreProvidersProps}>
       <HookedHostMetricsTable

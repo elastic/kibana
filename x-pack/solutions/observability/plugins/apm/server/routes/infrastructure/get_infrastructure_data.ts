@@ -7,7 +7,6 @@
 
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { termQuery } from '@kbn/es-query';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   SERVICE_NAME,

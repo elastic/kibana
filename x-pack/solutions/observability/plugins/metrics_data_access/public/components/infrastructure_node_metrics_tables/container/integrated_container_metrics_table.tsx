@@ -12,8 +12,7 @@ import { ContainerMetricsTable } from './container_metrics_table';
 import { useContainerMetricsTable } from './use_container_metrics_table';
 import type { ContainerSemconvRuntime } from './container_metrics_configs';
 
-type ContainerIntegratedProps = Omit<IntegratedNodeMetricsTableProps, 'schema'> & {
-  isOtel?: boolean;
+type ContainerIntegratedProps = IntegratedNodeMetricsTableProps & {
   semconvRuntime?: ContainerSemconvRuntime;
 };
 

@@ -22,8 +22,7 @@ export function createLazyContainerMetricsTable(core: CoreStart, metricsClient: 
     sourceId,
     isOtel,
     semconvRuntime,
-  }: Omit<NodeMetricsTableProps, 'schema'> & {
-    isOtel?: boolean;
+  }: NodeMetricsTableProps & {
     semconvRuntime?: ContainerSemconvRuntime;
   }) => {
     return (
