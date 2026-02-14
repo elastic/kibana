@@ -86,4 +86,8 @@ export const ConnectorIconsMap: Map<
       () => import(/* webpackChunkName: "connectorIconGoogleDrive" */ './specs/google_drive/icon')
     ),
   ],
+  [
+    '.slack2',
+    lazy(() => import(/* webpackChunkName: "connectorIconslack2" */ './specs/slack/icon')),
+  ],
 ]);
