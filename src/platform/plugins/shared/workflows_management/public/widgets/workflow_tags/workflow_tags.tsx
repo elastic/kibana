@@ -202,6 +202,7 @@ export const WorkflowTags = ({ tags }: WorkflowTagsProps) => {
                       css={css`
                         margin-right: 4px;
                       `}
+                      aria-hidden={true}
                     />
                     {restOfTags.length.toString()}
                   </>

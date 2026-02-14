@@ -204,7 +204,7 @@ export const useWorkflowBulkActions = ({
             })}
           </EuiTextColor>
         ),
-        icon: <EuiIcon type="trash" size="m" color="danger" />,
+        icon: <EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />,
         disabled: isDisabled,
         onClick: handleDeleteWorkflows,
         'data-test-subj': 'workflows-bulk-action-delete',

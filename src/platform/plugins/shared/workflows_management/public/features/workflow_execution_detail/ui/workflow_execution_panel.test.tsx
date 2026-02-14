@@ -16,7 +16,13 @@ import { TestWrapper } from '../../../shared/test_utils';
 
 // Mock child components
 jest.mock('./cancel_execution_button', () => ({
-  CancelExecutionButton: ({ executionId }: { executionId: string }) => (
+  CancelExecutionButton: ({
+    workflowId,
+    executionId,
+  }: {
+    workflowId: string;
+    executionId: string;
+  }) => (
     <div data-test-subj="cancel-execution-button">
       {'Cancel Execution'} {executionId}
     </div>

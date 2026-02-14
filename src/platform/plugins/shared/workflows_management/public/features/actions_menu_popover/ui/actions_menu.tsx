@@ -72,7 +72,12 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
                 executionStatus={undefined}
               />
             ) : isActionGroup(option) || isActionOption(option) ? (
-              <EuiIcon type={option.iconType} size="m" color={option.iconColor} />
+              <EuiIcon
+                type={option.iconType}
+                size="m"
+                color={option.iconColor}
+                aria-hidden={true}
+              />
             ) : null}
           </span>
         </EuiFlexItem>

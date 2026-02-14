@@ -85,7 +85,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
               <EuiPanel paddingSize="m" hasShadow={false} css={styles.linkCss}>
                 <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="sortLeft" />
+                    <EuiIcon type="sortLeft" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xxs">
@@ -117,8 +117,8 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
             <EuiPanel paddingSize="m" hasShadow={false}>
               {showCancelButton && execution ? (
                 <CancelExecutionButton
+                  workflowId={execution.workflowId ?? ''}
                   executionId={execution.id}
-                  workflowId={execution.workflowId}
                   startedAt={execution.startedAt}
                 />
               ) : (

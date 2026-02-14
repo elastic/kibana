@@ -1,0 +1,219 @@
+openapi: 3.0.3
+info:
+  title: Workflow Executions API
+  version: '1'
+paths:
+  /api/workflows/{workflowId}/executions:
+    get:
+      summary: List workflow executions
+      operationId: GetWorkflowExecutions
+      x-codegen-enabled: true
+      description: Lists executions for a workflow with optional filters
+      tags:
+        - Workflow Executions
+      parameters:
+        - name: workflowId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: statuses
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: executionTypes
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: executedBy
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: page
+          in: query
+          schema:
+            type: number
+            minimum: 1
+        - name: size
+          in: query
+          schema:
+            type: number
+            minimum: 1
+            maximum: 100
+      responses:
+        200:
+          description: Executions list returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                  total:
+                    type: number
+                  page:
+                    type: number
+                  size:
+                    type: number
+
+  /api/workflows-executions/{executionId}:
+    get:
+      summary: Get workflow execution by ID
+      operationId: GetWorkflowExecutionById
+      x-codegen-enabled: true
+      description: Retrieves a single workflow execution by execution ID only (no workflow ID required)
+      tags:
+        - Workflow Executions
+      parameters:
+        - name: executionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Execution returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        404:
+          description: Execution not found
+
+  /api/workflows-executions/{executionId}/cancel:
+    post:
+      summary: Cancel workflow execution
+      operationId: PostCancelWorkflowExecution
+      x-codegen-enabled: true
+      description: Cancels a running workflow execution
+      tags:
+        - Workflow Executions
+      parameters:
+        - name: executionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Execution cancelled successfully
+        404:
+          description: Execution not found
+
+  /api/workflows-executions/{executionId}/logs:
+    get:
+      summary: Get workflow execution logs
+      operationId: GetWorkflowExecutionLogs
+      x-codegen-enabled: true
+      description: Retrieves logs for a workflow execution
+      tags:
+        - Workflow Executions
+      parameters:
+        - name: executionId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: stepExecutionId
+          in: query
+          schema:
+            type: string
+        - name: size
+          in: query
+          schema:
+            type: number
+            minimum: 1
+            maximum: 1000
+            default: 100
+        - name: page
+          in: query
+          schema:
+            type: number
+            minimum: 1
+            default: 1
+        - name: sortField
+          in: query
+          schema:
+            type: string
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+      responses:
+        200:
+          description: Logs returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logs:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        timestamp:
+                          type: string
+                        level:
+                          type: string
+                        message:
+                          type: string
+                        stepId:
+                          type: string
+                        stepName:
+                          type: string
+                        connectorType:
+                          type: string
+                        duration:
+                          type: number
+                  total:
+                    type: number
+                  size:
+                    type: number
+                  page:
+                    type: number
+
+  /api/workflows-executions/{executionId}/steps/{stepId}:
+    get:
+      summary: Get step execution
+      operationId: GetStepExecution
+      x-codegen-enabled: true
+      description: Retrieves a single step execution within a workflow execution
+      tags:
+        - Workflow Executions
+      parameters:
+        - name: executionId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: stepId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Step execution returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        404:
+          description: Step execution not found

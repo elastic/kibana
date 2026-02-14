@@ -10,6 +10,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowDetailDto } from '@kbn/workflows';
+import { getWorkflowPath } from '../../../../../../common/api/constants';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
 import { setWorkflow, setYamlString } from '../slice';
@@ -30,7 +31,7 @@ export const loadWorkflowThunk = createAsyncThunk<
     const { http, notifications } = services;
     try {
       // Make the API call to load the workflow
-      const response = await http.get<WorkflowDetailDto>(`/api/workflows/${id}`);
+      const response = await http.get<WorkflowDetailDto>(getWorkflowPath(id));
       dispatch(setWorkflow(response));
       dispatch(setYamlString(response.yaml));
 

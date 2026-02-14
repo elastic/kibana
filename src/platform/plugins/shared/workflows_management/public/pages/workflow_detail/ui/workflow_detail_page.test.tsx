@@ -67,8 +67,12 @@ jest.mock('./workflow_detail_test_modal', () => ({
   ),
 }));
 jest.mock('../../../features/workflow_execution_detail', () => ({
-  WorkflowExecutionDetail: ({ executionId }: any) => (
-    <div data-test-subj="workflow-execution-detail">{executionId}</div>
+  WorkflowExecutionDetail: ({ workflowId, executionId }: any) => (
+    <div data-test-subj="workflow-execution-detail">
+      {workflowId}
+      {'-'}
+      {executionId}
+    </div>
   ),
 }));
 jest.mock('../../../features/workflow_execution_list/ui/workflow_execution_list_stateful', () => ({
