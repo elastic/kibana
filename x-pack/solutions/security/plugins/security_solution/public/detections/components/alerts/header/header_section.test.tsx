@@ -45,15 +45,26 @@ describe('HeaderSection', () => {
     (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
   });
 
-  it('should render correctly', () => {
+  it('should render correctly with manage rules button', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <HeaderSection assignees={[]} setAssignees={jest.fn()} />
+        <HeaderSection assignees={[]} setAssignees={jest.fn()} showManageRulesButton={true} />
       </TestProviders>
     );
 
     expect(getByTestId(FILTER_BY_ASSIGNEES_BUTTON)).toBeInTheDocument();
     expect(getByTestId(GO_TO_RULES_BUTTON_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should not render manage rules button when showManageRulesButton is false', () => {
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders>
+        <HeaderSection assignees={[]} setAssignees={jest.fn()} showManageRulesButton={false} />
+      </TestProviders>
+    );
+
+    expect(getByTestId(FILTER_BY_ASSIGNEES_BUTTON)).toBeInTheDocument();
+    expect(queryByTestId(GO_TO_RULES_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should set assignee', async () => {
@@ -69,7 +80,7 @@ describe('HeaderSection', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <HeaderSection assignees={[]} setAssignees={setAssignees} />
+        <HeaderSection assignees={[]} setAssignees={setAssignees} showManageRulesButton={true} />
       </TestProviders>
     );
 
@@ -99,7 +110,11 @@ describe('HeaderSection', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <HeaderSection assignees={[user.uid]} setAssignees={setAssignees} />
+        <HeaderSection
+          assignees={[user.uid]}
+          setAssignees={setAssignees}
+          showManageRulesButton={true}
+        />
       </TestProviders>
     );
 

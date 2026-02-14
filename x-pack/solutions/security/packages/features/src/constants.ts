@@ -9,6 +9,8 @@
 export const APP_ID = 'securitySolution' as const;
 export const SERVER_APP_ID = 'siem' as const;
 
+export const SECURITY_FEATURE_ID_V1 = SERVER_APP_ID;
+
 // New version created in 8.18. It was previously `SERVER_APP_ID`.
 export const SECURITY_FEATURE_ID_V2 = 'siemV2' as const;
 // New version for 9.1.
@@ -49,13 +51,12 @@ export const SIEM_MIGRATIONS_FEATURE_ID = 'securitySolutionSiemMigrations' as co
 export const SECURITY_SOLUTION_RULES_APP_ID = 'securitySolutionRules' as const;
 export const RULES_FEATURE_ID_V1 = 'securitySolutionRulesV1' as const;
 export const RULES_FEATURE_ID_V2 = 'securitySolutionRulesV2' as const;
-export const RULES_FEATURE_LATEST = RULES_FEATURE_ID_V2;
+export const RULES_FEATURE_ID_V3 = 'securitySolutionRulesV3' as const;
+export const RULES_FEATURE_LATEST = RULES_FEATURE_ID_V3;
 
 // Rules API privileges
 export const RULES_API_READ = 'rules-read' as const;
 export const RULES_API_ALL = 'rules-all' as const;
-export const ALERTS_API_READ = 'alerts-read' as const;
-export const ALERTS_API_ALL = 'alerts-all' as const;
 export const EXCEPTIONS_API_READ = 'exceptions-read' as const;
 export const EXCEPTIONS_API_ALL = 'exceptions-all' as const;
 export const LISTS_API_READ = 'lists-read' as const;
@@ -68,19 +69,45 @@ export const USERS_API_READ = 'users-read' as const;
 export const RULES_UI_READ = 'read_rules' as const;
 export const RULES_UI_DETECTIONS = 'detections' as const;
 export const RULES_UI_EXTERNAL_DETECTIONS = 'external_detections' as const;
-export const RULES_UI_READ_PRIVILEGE = `${RULES_FEATURE_ID_V2}.${RULES_UI_READ}` as const;
+export const RULES_UI_READ_PRIVILEGE = `${RULES_FEATURE_ID_V3}.${RULES_UI_READ}` as const;
 export const RULES_UI_EDIT = 'edit_rules' as const;
-export const RULES_UI_EDIT_PRIVILEGE = `${RULES_FEATURE_ID_V2}.${RULES_UI_EDIT}` as const;
+export const RULES_UI_EDIT_PRIVILEGE = `${RULES_FEATURE_ID_V3}.${RULES_UI_EDIT}` as const;
 export const RULES_UI_DETECTIONS_PRIVILEGE =
-  `${RULES_FEATURE_ID_V2}.${RULES_UI_DETECTIONS}` as const;
+  `${RULES_FEATURE_ID_V3}.${RULES_UI_DETECTIONS}` as const;
 export const RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE =
-  `${RULES_FEATURE_ID_V2}.${RULES_UI_EXTERNAL_DETECTIONS}` as const;
+  `${RULES_FEATURE_ID_V3}.${RULES_UI_EXTERNAL_DETECTIONS}` as const;
 export const EXCEPTIONS_UI_READ = 'readExceptions' as const;
 export const EXCEPTIONS_UI_EDIT = 'editExceptions' as const;
 export const EXCEPTIONS_UI_READ_PRIVILEGES =
-  `${RULES_FEATURE_ID_V2}.${EXCEPTIONS_UI_READ}` as const;
+  `${RULES_FEATURE_ID_V3}.${EXCEPTIONS_UI_READ}` as const;
 export const EXCEPTIONS_UI_EDIT_PRIVILEGES =
-  `${RULES_FEATURE_ID_V2}.${EXCEPTIONS_UI_EDIT}` as const;
+  `${RULES_FEATURE_ID_V3}.${EXCEPTIONS_UI_EDIT}` as const;
+
+export const ALERTS_FEATURE_ID = 'securitySolutionAlertsV1' as const;
+
+// Alerts API privileges
+export const ALERTS_API_READ = 'alerts-read' as const;
+export const ALERTS_API_ALL = 'alerts-all' as const;
+
+// Rules UI privileges
+export const ALERTS_UI_READ = 'read_alerts' as const;
+export const ALERTS_UI_EDIT = 'edit_alerts' as const;
+export const ALERTS_UI_DETECTIONS = 'detections' as const;
+export const ALERTS_UI_EXTERNAL_DETECTIONS = 'external_detections' as const;
+export const ALERTS_UI_READ_PRIVILEGE = `${ALERTS_FEATURE_ID}.${ALERTS_UI_READ}` as const;
+export const ALERTS_UI_EDIT_PRIVILEGE = `${ALERTS_FEATURE_ID}.${ALERTS_UI_EDIT}` as const;
+export const ALERTS_UI_DETECTIONS_PRIVILEGE =
+  `${ALERTS_FEATURE_ID}.${ALERTS_UI_DETECTIONS}` as const;
+export const ALERTS_UI_EXTERNAL_DETECTIONS_PRIVILEGE =
+  `${ALERTS_FEATURE_ID}.${ALERTS_UI_EXTERNAL_DETECTIONS}` as const;
+
+// Previously users with "ALERTS_API_READ" were able to update alerts (assign, tag, change status)
+// When the alerts feature was introduced, the privilege in the endpoints was changed to `ALERTS_API_ALL`
+// however to ensure backwards compatibility with old features, these permissions were added in the affected places.
+export const ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE =
+  'alerts-signal-update-deprecated-privilege' as const;
+export const ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE =
+  'edit_alerts-update-deprecated-privilege' as const;
 
 // Same as the plugin id defined by Cloud Security Posture
 export const CLOUD_POSTURE_APP_ID = 'csp' as const;

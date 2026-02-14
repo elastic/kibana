@@ -17,7 +17,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { noKibanaPrivileges, rulesRead } from '../../utils/auth/roles';
+import { noKibanaPrivileges, alertsRead } from '../../utils/auth/roles';
 import { getMissingSecurityKibanaPrivilegesError } from '../../utils/privileges_errors';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -59,7 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('RBAC', () => {
       describe('Kibana privileges', () => {
         it('should update alerts with rules read privileges', async () => {
-          const testAgent = await utils.createSuperTestWithCustomRole(rulesRead);
+          const testAgent = await utils.createSuperTestWithCustomRole(alertsRead);
 
           const { body } = await testAgent
             .post(DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL)

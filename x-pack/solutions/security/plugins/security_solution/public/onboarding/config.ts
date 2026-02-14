@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  ALERTS_UI_DETECTIONS_PRIVILEGE,
   RULES_UI_DETECTIONS_PRIVILEGE,
   RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
@@ -24,7 +25,7 @@ export const onboardingConfig: TopicConfig[] = [
     title: i18n.translate('xpack.securitySolution.onboarding.topic.default', {
       defaultMessage: 'Set up Security',
     }),
-    capabilitiesRequired: RULES_UI_DETECTIONS_PRIVILEGE,
+    capabilitiesRequired: [RULES_UI_DETECTIONS_PRIVILEGE, ALERTS_UI_DETECTIONS_PRIVILEGE],
     body: defaultBodyConfig,
   },
   {

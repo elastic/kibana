@@ -16,7 +16,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { noKibanaPrivileges, rulesReadUser } from '../../utils/auth/users';
+import { noKibanaPrivileges, alertsReadUser } from '../../utils/auth/users';
 import { getMissingSecurityKibanaPrivilegesError } from '../../utils/privileges_errors';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -25,10 +25,10 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess Set Alert Tags - ESS', () => {
     describe('RBAC', () => {
       describe('Kibana privileges', () => {
-        it('should update tags with rules read privileges', async () => {
+        it('should update tags with alerts read privileges', async () => {
           const { body } = await supertestWithoutAuth
             .post(DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL)
-            .auth(rulesReadUser.username, rulesReadUser.password)
+            .auth(alertsReadUser.username, alertsReadUser.password)
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body).toHaveProperty('updated');
         });
 
-        it('should not update tags without rules read privileges', async () => {
+        it('should not update tags without alerts read privileges', async () => {
           const { body } = await supertestWithoutAuth
             .post(DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL)
             .auth(noKibanaPrivileges.username, noKibanaPrivileges.password)

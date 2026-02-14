@@ -17,7 +17,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { noKibanaPrivileges, rulesRead } from '../../utils/auth/roles';
+import { noKibanaPrivileges, alertsRead } from '../../utils/auth/roles';
 import { getMissingSecurityKibanaPrivilegesError } from '../../utils/privileges_errors';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -61,8 +61,8 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('RBAC', () => {
       describe('Kibana privileges', () => {
-        it('should update assignees with rules read privileges', async () => {
-          const testAgent = await utils.createSuperTestWithCustomRole(rulesRead);
+        it('should update assignees with alerts read privileges', async () => {
+          const testAgent = await utils.createSuperTestWithCustomRole(alertsRead);
 
           const { body } = await testAgent
             .post(DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL)
@@ -81,7 +81,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body).toHaveProperty('updated');
         });
 
-        it('should not update assignees without rules read privileges', async () => {
+        it('should not update assignees without alerts read privileges', async () => {
           const testAgent = await utils.createSuperTestWithCustomRole(noKibanaPrivileges);
 
           const { body } = await testAgent

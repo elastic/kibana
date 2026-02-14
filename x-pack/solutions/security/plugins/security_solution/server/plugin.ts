@@ -158,6 +158,7 @@ import {
 } from './lib/trial_companion/services/trial_companion_milestone_service';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
+import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -678,6 +679,15 @@ export class Plugin implements ISecuritySolutionPlugin {
     }
 
     this.registerAgentBuilderAttachmentsAndTools(plugins.agentBuilder, core, this.logger);
+
+    setupAlertsCapabilitiesSwitcher({
+      core,
+      logger: this.logger,
+      getSecurityStart: async () => {
+        const [, startPlugins] = await core.getStartServices();
+        return startPlugins.security;
+      },
+    });
 
     return {
       setProductFeaturesConfigurator:

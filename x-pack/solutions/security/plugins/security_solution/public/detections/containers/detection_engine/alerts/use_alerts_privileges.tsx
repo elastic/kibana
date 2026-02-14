@@ -22,6 +22,7 @@ export interface AlertsPrivelegesState {
   hasIndexRead: boolean | null;
   hasAlertsRead: boolean;
   hasAlertsAll: boolean;
+  hasAlertsUpdate: boolean;
 }
 /**
  * Hook to get user privilege from
@@ -30,9 +31,8 @@ export interface AlertsPrivelegesState {
 export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
   const {
     detectionEnginePrivileges: { error, result, loading },
-    // Rules privileges implicitly contain alerts privileges. Until we separate them out into dedicated privileges, we are using rules privileges to determine alerts privileges.
-    rulesPrivileges: {
-      rules: { read: hasAlertsRead, edit: hasAlertsAll },
+    alertsPrivileges: {
+      alerts: { edit: hasAlertsAll, read: hasAlertsRead, legacyUpdate: hasLegacyAlertsUpdate },
     },
   } = useUserPrivileges();
 
@@ -44,6 +44,7 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
   }, [result?.index]);
 
   const privileges = useMemo(() => {
+    const hasAlertsUpdate = hasAlertsAll || hasLegacyAlertsUpdate;
     if (error != null) {
       return {
         isAuthenticated: false,
@@ -55,24 +56,30 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
         hasIndexMaintenance: false,
         hasAlertsRead,
         hasAlertsAll,
+        hasAlertsUpdate,
       };
     }
 
     if (result != null && indexName) {
+      const hasIndexWrite =
+        result.index[indexName].create ||
+        result.index[indexName].create_doc ||
+        result.index[indexName].index ||
+        result.index[indexName].write;
+      const hasIndexRead = result.index[indexName].read;
       return {
         isAuthenticated: result.is_authenticated,
         hasEncryptionKey: result.has_encryption_key,
         hasIndexManage: result.index[indexName].manage && result.cluster.manage,
         hasIndexMaintenance: result.index[indexName].maintenance,
-        hasIndexRead: result.index[indexName].read,
-        hasIndexWrite:
-          result.index[indexName].create ||
-          result.index[indexName].create_doc ||
-          result.index[indexName].index ||
-          result.index[indexName].write,
+        hasIndexRead,
+        hasIndexWrite,
         hasIndexUpdateDelete: result.index[indexName].write,
-        hasAlertsRead,
-        hasAlertsAll,
+        // For now hasAlertsRead and hasAlertsAll will depend both on the RBAC setup and the explicit read/write access to the alerts index
+        // We do this to avoid doing this double wherever this hook is used.
+        hasAlertsRead: hasAlertsRead && hasIndexRead,
+        hasAlertsAll: hasAlertsAll && hasIndexWrite,
+        hasAlertsUpdate: hasAlertsUpdate && hasIndexWrite,
       };
     }
 
@@ -86,8 +93,9 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
       hasIndexMaintenance: null,
       hasAlertsRead: false,
       hasAlertsAll: false,
+      hasAlertsUpdate: false,
     };
-  }, [error, result, indexName, hasAlertsRead, hasAlertsAll]);
+  }, [error, result, indexName, hasAlertsRead, hasAlertsAll, hasLegacyAlertsUpdate]);
 
   return { loading: loading ?? false, ...privileges };
 };

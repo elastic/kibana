@@ -12,15 +12,10 @@ import { AttacksGroupTakeActionItems } from './attacks_group_take_action_items';
 import { getMockAttackDiscoveryAlerts } from '../../../../attack_discovery/pages/mock/mock_attack_discovery_alerts';
 import { useAttacksPrivileges } from '../../../hooks/attacks/bulk_actions/use_attacks_privileges';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 jest.mock('../../../hooks/attacks/bulk_actions/use_attacks_privileges');
-jest.mock('../../../../common/components/user_privileges', () => ({
-  useUserPrivileges: () => ({
-    timelinePrivileges: { read: true },
-    detectionEnginePrivileges: { loading: false },
-    rulesPrivileges: { rules: { read: true, edit: true } },
-  }),
-}));
+jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/hooks/use_license', () => ({
   useLicense: () => ({
     isPlatinumPlus: () => true,
@@ -119,8 +114,18 @@ describe('AttacksGroupTakeActionItems', () => {
   });
 
   describe('investigate in timeline', () => {
-    it('should render the `Investigate in timeline` action item', async () => {
+    it('does not render the `Investigate in timeline` action item when user does not have timeline read privileges', () => {
+      const { queryByText } = renderAttack(mockAttack);
+      expect(queryByText('Investigate in timeline')).not.toBeInTheDocument();
+    });
+
+    it('renders the `Investigate in timeline` action item when user has timeline read privileges', async () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...useUserPrivileges(),
+        timelinePrivileges: { read: true },
+      });
       const { findByText } = renderAttack(mockAttack);
+
       expect(await findByText('Investigate in timeline')).toBeInTheDocument();
     });
   });

@@ -88,6 +88,7 @@ import {
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
 import { EventLogEventTypes } from '../../../../../common/lib/telemetry';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { useAlertsPrivileges } from '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 const EXECUTION_UUID_FIELD_NAME = 'kibana.alert.rule.execution.uuid';
 
@@ -130,6 +131,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     timelines,
     telemetry,
   } = useKibana().services;
+
+  const { hasAlertsRead: canReadAlerts } = useAlertsPrivileges();
 
   const {
     [RuleDetailTabs.executionResults]: {
@@ -428,32 +431,36 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
   const actions = useMemo(
     () => [
-      {
-        field: EXECUTION_UUID_FIELD_NAME,
-        name: i18n.COLUMN_ACTIONS,
-        width: '64px',
-        actions: [
-          {
-            name: 'Edit',
-            isPrimary: true,
-            field: '',
-            description: i18n.COLUMN_ACTIONS_TOOLTIP,
-            icon: 'filter',
-            type: 'icon',
-            onClick: (executionEvent: RuleExecutionResult) => {
-              if (executionEvent?.execution_uuid) {
-                onFilterByExecutionIdCallback(
-                  executionEvent.execution_uuid,
-                  executionEvent.timestamp
-                );
-              }
+      ...(canReadAlerts
+        ? [
+            {
+              field: EXECUTION_UUID_FIELD_NAME,
+              name: i18n.COLUMN_ACTIONS,
+              width: '64px',
+              actions: [
+                {
+                  name: 'Edit',
+                  isPrimary: true,
+                  field: '',
+                  description: i18n.COLUMN_ACTIONS_TOOLTIP,
+                  icon: 'filter',
+                  type: 'icon',
+                  onClick: (executionEvent: RuleExecutionResult) => {
+                    if (executionEvent?.execution_uuid) {
+                      onFilterByExecutionIdCallback(
+                        executionEvent.execution_uuid,
+                        executionEvent.timestamp
+                      );
+                    }
+                  },
+                  'data-test-subj': 'action-filter-by-execution-id',
+                },
+              ],
             },
-            'data-test-subj': 'action-filter-by-execution-id',
-          },
-        ],
-      },
+          ]
+        : []),
     ],
-    [onFilterByExecutionIdCallback]
+    [onFilterByExecutionIdCallback, canReadAlerts]
   );
 
   const getItemId = useCallback((item: RuleExecutionResult): string => {
