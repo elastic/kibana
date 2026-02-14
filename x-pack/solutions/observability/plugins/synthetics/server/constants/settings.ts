@@ -16,6 +16,7 @@ export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettingsAttributes = {
     cc: [],
     bcc: [],
   },
+  privateLocationsSyncInterval: 5,
 };
 
 export const DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES: DynamicSettingsAttributes =
