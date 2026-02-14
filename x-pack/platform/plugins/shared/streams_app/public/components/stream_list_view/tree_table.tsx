@@ -54,7 +54,7 @@ import {
   DOCUMENTS_COLUMN_HEADER,
   FAILURE_STORE_PERMISSIONS_ERROR,
 } from './translations';
-import { DiscoverBadgeButton, QueryStreamBadge } from '../stream_badges';
+import { DiscoverBadgeButton, QueryStreamBadge, SuggestionBadge } from '../stream_badges';
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -413,6 +413,7 @@ export function StreamsTreeTable({
                     <EuiHighlight search={searchQuery?.text ?? ''}>{item.stream.name}</EuiHighlight>
                   </EuiLink>
                   {Streams.QueryStream.Definition.is(item.stream) && <QueryStreamBadge />}
+                  {item.stream.suggestion && <SuggestionBadge />}
                 </EuiFlexGroup>
               </EuiFlexGroup>
             );

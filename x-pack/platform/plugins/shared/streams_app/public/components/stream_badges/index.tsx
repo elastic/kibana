@@ -103,6 +103,38 @@ export function QueryStreamBadge() {
   );
 }
 
+export function SuggestionBadge() {
+  return (
+    <EuiToolTip
+      position="top"
+      title={i18n.translate('xpack.streams.badges.suggestion.title', {
+        defaultMessage: 'Suggested Stream',
+      })}
+      content={i18n.translate('xpack.streams.badges.suggestion.description', {
+        defaultMessage:
+          'This stream was auto-generated as a suggestion by the streams suggestion workflow. Review and enable it to start routing data.',
+      })}
+      anchorProps={{
+        css: css`
+          display: inline-flex;
+        `,
+      }}
+    >
+      <EuiBadge
+        color="hollow"
+        iconType="sparkles"
+        iconSide="left"
+        tabIndex={0}
+        data-test-subj="suggestionStreamBadge"
+      >
+        {i18n.translate('xpack.streams.badges.suggestion.label', {
+          defaultMessage: 'Suggested',
+        })}
+      </EuiBadge>
+    </EuiToolTip>
+  );
+}
+
 export function LifecycleBadge({
   lifecycle,
   dataTestSubj,
