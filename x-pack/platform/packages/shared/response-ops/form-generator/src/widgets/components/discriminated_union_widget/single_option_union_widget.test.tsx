@@ -13,6 +13,8 @@ import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_l
 import { SingleOptionUnionWidget } from './single_option_union_widget';
 import { addMeta, getMeta } from '../../../schema_connector_metadata';
 
+const meta = { getMeta, addMeta };
+
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
 );
@@ -46,6 +48,7 @@ describe('SingleOptionUnionWidget', () => {
       render(
         <TestFormWrapper>
           <SingleOptionUnionWidget
+            meta={meta}
             formConfig={{}}
             path="auth"
             schema={schema}
@@ -78,6 +81,7 @@ describe('SingleOptionUnionWidget', () => {
       render(
         <TestFormWrapper>
           <SingleOptionUnionWidget
+            meta={meta}
             formConfig={{}}
             path="auth"
             schema={schema}
@@ -110,6 +114,7 @@ describe('SingleOptionUnionWidget', () => {
       render(
         <TestFormWrapper>
           <SingleOptionUnionWidget
+            meta={meta}
             formConfig={{}}
             path="auth"
             schema={schema}
@@ -147,6 +152,7 @@ describe('SingleOptionUnionWidget', () => {
       render(
         <TestFormWrapper>
           <SingleOptionUnionWidget
+            meta={meta}
             formConfig={{}}
             path="auth"
             schema={schema}
@@ -253,6 +259,7 @@ describe('SingleOptionUnionWidget', () => {
       render(
         <TestFormWrapper>
           <SingleOptionUnionWidget
+            meta={meta}
             formConfig={{}}
             path="auth"
             schema={schema}
@@ -297,6 +304,7 @@ describe('SingleOptionUnionWidget', () => {
           }}
         >
           <SingleOptionUnionWidget
+            meta={meta}
             formConfig={{}}
             path="auth"
             schema={schema}

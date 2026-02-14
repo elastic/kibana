@@ -13,6 +13,9 @@ import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import type { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';
@@ -53,6 +56,15 @@ const filterActionTypes = (actionTypes: RegisteredActionType[], searchValue: str
   });
 };
 
+export function getConnectorIcon(id: string): IconType {
+  const lazyIcon = ConnectorIconsMap.get(id);
+  if (lazyIcon) {
+    return lazyIcon;
+  }
+
+  return 'plugs';
+}
+
 export const ActionTypeMenu = ({
   onActionTypeChange,
   featureId,
@@ -64,6 +76,7 @@ export const ActionTypeMenu = ({
   const {
     http,
     notifications: { toasts },
+    uiSettings,
   } = useKibana().services;
   const [loadingActionTypes, setLoadingActionTypes] = useState<boolean>(false);
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
@@ -106,16 +119,46 @@ export const ActionTypeMenu = ({
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
-    .filter(([id, details]) => {
+    .filter(([id, actionType]) => {
       const actionTypeModel = actionTypeRegistry.has(id) ? actionTypeRegistry.get(id) : undefined;
-      const shouldHideInUi = actionTypeModel?.getHideInUi?.(
+      if (actionType.source === ACTION_TYPE_SOURCES.spec) {
+        // Temporary workaround to hide workflows connector when workflows UI setting is disabled.
+        const supportedFeatureIds = actionType.supportedFeatureIds;
+        if (
+          supportedFeatureIds.length === 1 &&
+          supportedFeatureIds[0] === WorkflowsConnectorFeatureId
+        ) {
+          const isWorkflowsUiEnabled = uiSettings.get<boolean>('workflows:ui:enabled');
+          return isWorkflowsUiEnabled;
+        }
+
+        return false;
+      }
+
+      if (!actionTypeModel) {
+        return false;
+      }
+
+      const shouldHideInUi = actionTypeModel.getHideInUi?.(
         actionTypesIndex ? Object.values(actionTypesIndex) : []
       );
 
-      return details.enabledInConfig === true && !shouldHideInUi;
+      return actionType.enabledInConfig === true && !shouldHideInUi;
     })
     .map(([id, actionType]) => {
+      if (actionType.source === ACTION_TYPE_SOURCES.spec) {
+        return {
+          iconClass: getConnectorIcon(actionType.id),
+          selectMessage: actionType.selectMessage ?? '',
+          actionType,
+          name: actionType.name,
+          isExperimental: false,
+          isDeprecated: actionType.isDeprecated,
+        };
+      }
+
       const actionTypeModel = actionTypeRegistry.get(id);
       return {
         iconClass: actionTypeModel ? actionTypeModel.iconClass : '',

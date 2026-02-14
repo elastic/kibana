@@ -8,7 +8,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { EuiCheckableCard, EuiFormFieldset, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { useFormData, useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { addMeta, getMeta } from '../../../schema_connector_metadata';
 import {
   getDiscriminatorFieldValue,
   type DiscriminatedUnionWidgetProps,
@@ -79,7 +78,9 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
   fieldConfig,
   fieldProps,
   formConfig,
+  meta,
 }) => {
+  const { getMeta, addMeta } = meta;
   const [selectedOption, setSelectedOption] = useState(() => {
     const defaultOption = getDefaultOption(options, discriminatorKey, fieldConfig);
     return getDiscriminatorFieldValue(defaultOption, discriminatorKey);
@@ -99,8 +100,6 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
       return;
     }
 
-    // After initialization: Sync selectedOption changes back to form data
-    // This happens when user clicks a different option
     if (hasInitializedFromFormData.current && discriminatorValueFromForm !== selectedOption) {
       setFieldValue(discriminatorFieldPath, selectedOption);
     }
@@ -125,7 +124,6 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
         const label = optionMeta.label;
         const isChecked = selectedOption === discriminatorValue;
 
-        // if the entire fieldset is disabled, ensure each option is also marked as disabled
         if (isFieldsetDisabled && optionMeta.disabled !== false) {
           addMeta(option, { disabled: true });
         }
@@ -150,6 +148,7 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
                   fieldConfig={fieldConfig}
                   fieldProps={fieldProps}
                   formConfig={formConfig}
+                  meta={meta}
                 />
               )}
             </EuiCheckableCard>

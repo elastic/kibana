@@ -52,5 +52,6 @@ export const createConnectorTypeFromSpec = (
     ...(executor ? { executor } : {}),
     globalAuthHeaders: spec.auth?.headers,
     source: ACTION_TYPE_SOURCES.spec,
+    selectMessage: spec.metadata.description,
   };
 };
