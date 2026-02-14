@@ -40,6 +40,9 @@ import type { AlertingPluginsStart } from '../plugin';
 const PROVISION_UIAM_API_KEYS_FLAG = 'alerting.rules.provisionUiamApiKeys';
 const API_KEY_PROVISIONING_TASK_TASK_SCHEDULE: IntervalSchedule = { interval: '1h' };
 const RUN_AT_INTERVAL = 60000;
+const TASK_TIMEOUT = '5m';
+const GET_RULES_BATCH_SIZE = 500;
+const GET_STATUS_BATCH_SIZE = 500;
 
 export const API_KEY_PROVISIONING_TASK_ID = 'api_key_provisioning';
 export const API_KEY_PROVISIONING_TASK_TYPE = `alerting:${API_KEY_PROVISIONING_TASK_ID}`;
@@ -72,8 +75,8 @@ export class UiamApiKeyProvisioningTask {
     }
     taskManager.registerTaskDefinitions({
       [API_KEY_PROVISIONING_TASK_TYPE]: {
-        title: 'API key migration task',
-        timeout: '1m',
+        title: 'UIAM API key provisioning task',
+        timeout: TASK_TIMEOUT,
         stateSchemaByVersion,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
@@ -152,7 +155,6 @@ export class UiamApiKeyProvisioningTask {
     ]);
     const ruleIds = new Set<string>();
     let page = 1;
-    const perPage = 500;
     let hasMore = true;
     while (hasMore) {
       const { saved_objects, total } = await savedObjectsClient.find<{
@@ -162,7 +164,7 @@ export class UiamApiKeyProvisioningTask {
       }>({
         type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
         filter,
-        perPage,
+        perPage: GET_STATUS_BATCH_SIZE,
         page,
         namespaces: ['*'],
       });
@@ -171,7 +173,7 @@ export class UiamApiKeyProvisioningTask {
           ruleIds.add(so.attributes.entityId);
         }
       }
-      hasMore = page * perPage < total;
+      hasMore = page * GET_STATUS_BATCH_SIZE < total;
       page += 1;
     }
     return ruleIds;
@@ -201,7 +203,7 @@ export class UiamApiKeyProvisioningTask {
 
     const response = await savedObjectsClient.find<RawRule>({
       type: RULE_SAVED_OBJECT_TYPE,
-      perPage: 500,
+      perPage: GET_RULES_BATCH_SIZE,
       namespaces: ['*'],
       ...(excludeRulesFilter ? { filter: excludeRulesFilter } : {}),
     });
