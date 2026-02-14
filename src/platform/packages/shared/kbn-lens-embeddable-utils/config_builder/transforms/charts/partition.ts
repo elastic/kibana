@@ -386,6 +386,7 @@ export function fromAPItoLensState(config: PartitionState): PartitionLensWithout
 
 export function fromLensStateToAPI(config: LensAttributes): PartitionState {
   const { state } = config;
+  console.log('fromLensStateToAPI', { state });
   const visualizationState = state.visualization as LensPartitionVisualizationState;
   const layers = getDatasourceLayers(state);
   const layer = layers[visualizationState.layers[0].layerId];
@@ -520,6 +521,7 @@ function convertLensStateToAPIGrouping(
   groupByAccessors: string[],
   groupIndexForColorMapping: number
 ) {
+  console.log('convertLensStateToAPIGrouping', { vizLayer });
   const colorMapping = fromColorMappingLensStateToAPI(vizLayer.colorMapping);
   if (isTextBasedLayer(layer)) {
     return groupByAccessors.map(

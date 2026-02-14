@@ -44,6 +44,7 @@ export function transformPanelsOut(
       topLevelPanels.push(transformPanelProperties(panel, panelReferences, containerReferences));
     }
   });
+  console.log({ topLevelPanels: JSON.stringify(topLevelPanels) });
   return [...topLevelPanels, ...Object.values(sectionsMap)];
 }
 

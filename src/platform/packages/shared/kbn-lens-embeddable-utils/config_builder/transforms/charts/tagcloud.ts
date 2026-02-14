@@ -40,7 +40,11 @@ import {
   operationFromColumn,
 } from '../utils';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
-import { fromColorMappingAPIToLensState, fromColorMappingLensStateToAPI } from '../coloring';
+import {
+  fromColorByValueLensStateToAPI,
+  fromColorMappingAPIToLensState,
+  fromColorMappingLensStateToAPI,
+} from '../coloring';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
 import {
@@ -49,6 +53,8 @@ import {
   getSharedChartAPIToLensState,
   getSharedChartLensStateToAPI,
 } from './utils';
+import { ColorMapping } from '@kbn/coloring';
+import { ColorMappingType } from '../../schema/color';
 
 const ACCESSOR = 'tagcloud_accessor';
 function getAccessorName(type: 'metric' | 'tag') {
@@ -57,7 +63,8 @@ function getAccessorName(type: 'metric' | 'tag') {
 
 function buildVisualizationState(config: TagcloudState): LensTagCloudState {
   const layer = config;
-
+  console.log({ config });
+  // debugger;
   return {
     layerId: DEFAULT_LAYER_ID,
     valueAccessor: getAccessorName('metric'),
@@ -117,17 +124,24 @@ function getTagcloudTagBy(
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   visualization: LensTagCloudState
 ): TagcloudState['tag_by'] {
+  console.log('getTagcloudTagBy', { layer, visualization });
+  // debugger;
   if (visualization.tagAccessor == null) {
     throw new Error('Tag accessor is missing in the visualization state');
   }
 
-  const colorMapping = fromColorMappingLensStateToAPI(visualization.colorMapping);
+  let color: ColorMappingType | undefined;
+  if (visualization.palette) {
+    color = { mode: 'categorical', palette: visualization.palette.name, mapping: [] };
+  } else {
+    color = fromColorMappingLensStateToAPI(visualization.colorMapping);
+  }
 
   return {
     ...(isTextBasedLayer(layer)
       ? getValueApiColumn(visualization.tagAccessor, layer)
       : (operationFromColumn(visualization.tagAccessor, layer) as LensApiBucketOperations)),
-    ...(colorMapping ? { color: colorMapping } : {}),
+    ...(color && { color }),
   };
 }
 
@@ -139,9 +153,17 @@ function reverseBuildVisualizationState(
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
 ): TagcloudState {
+  // debugger;
   const dataset = getTagcloudDataset(layer, adHocDataViews, references, adhocReferences, layerId);
   const metric = getTagcloudMetric(layer, visualization);
   const tagBy = getTagcloudTagBy(layer, visualization);
+
+  const paletteProps = {
+    ...(visualization.palette && {
+      color: fromColorByValueLensStateToAPI(visualization.palette),
+    }),
+  };
+  console.log({ visualization, paletteProps });
 
   return {
     type: 'tagcloud',
@@ -211,7 +233,7 @@ export function fromAPItoLensState(
   const references = regularDataViews.length
     ? buildReferences({ [DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
     : [];
-
+  console.log({ config });
   return {
     visualizationType: 'lnsTagcloud',
     ...getSharedChartAPIToLensState(config),
@@ -228,11 +250,12 @@ export function fromAPItoLensState(
 export function fromLensStateToAPI(
   config: LensAttributes
 ): Extract<LensApiState, { type: 'tagcloud' }> {
+  // debugger;
   const { state } = config;
   const visualization = state.visualization as LensTagCloudState;
   const layers = getDatasourceLayers(state);
   const [layerId, layer] = getLensStateLayer(layers, visualization.layerId);
-
+  console.log(' fromLensStateToAPI', { state });
   const visualizationState = {
     ...getSharedChartLensStateToAPI(config),
     ...reverseBuildVisualizationState(
