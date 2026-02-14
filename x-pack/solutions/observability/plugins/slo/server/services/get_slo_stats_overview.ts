@@ -47,53 +47,24 @@ export class GetSLOStatsOverview {
             getElasticsearchQueryOrThrow(kqlQuery),
             ...(parsedFilters.filter ?? []),
           ],
-          must_not: [...(parsedFilters.must_not ?? [])],
+          must: parsedFilters.must ?? [],
+          should: parsedFilters.should ?? [],
+          must_not: parsedFilters.must_not ?? [],
         },
       },
       aggs: {
-        stale: {
-          filter: {
-            range: {
-              summaryUpdatedAt: {
-                lt: `now-${this.settings.staleThresholdInHours}h`,
-              },
-            },
-          },
-        },
-        not_stale: {
-          filter: {
-            range: {
-              summaryUpdatedAt: {
-                gte: `now-${this.settings.staleThresholdInHours}h`,
-              },
-            },
+        by_status: {
+          terms: {
+            size: 10,
+            field: 'status',
           },
           aggs: {
-            violated: {
+            stale: {
               filter: {
-                term: {
-                  status: 'VIOLATED',
-                },
-              },
-            },
-            healthy: {
-              filter: {
-                term: {
-                  status: 'HEALTHY',
-                },
-              },
-            },
-            degrading: {
-              filter: {
-                term: {
-                  status: 'DEGRADING',
-                },
-              },
-            },
-            noData: {
-              filter: {
-                term: {
-                  status: 'NO_DATA',
+                range: {
+                  summaryUpdatedAt: {
+                    lt: `now-${this.settings.staleThresholdInHours}h`,
+                  },
                 },
               },
             },
@@ -119,13 +90,21 @@ export class GetSLOStatsOverview {
     ]);
 
     const aggs = response.aggregations;
+    const statusBuckets = aggs?.by_status?.buckets ?? [];
+
+    const getStatusStats = (status: string) => {
+      const bucket = statusBuckets.find((b) => b.key === status);
+      return {
+        total: bucket?.doc_count ?? 0,
+        stale: bucket?.stale?.doc_count ?? 0,
+      };
+    };
 
     return {
-      violated: aggs?.not_stale?.violated.doc_count ?? 0,
-      degrading: aggs?.not_stale?.degrading.doc_count ?? 0,
-      healthy: aggs?.not_stale?.healthy?.doc_count ?? 0,
-      noData: aggs?.not_stale?.noData.doc_count ?? 0,
-      stale: aggs?.stale.doc_count ?? 0,
+      healthy: getStatusStats('HEALTHY'),
+      violated: getStatusStats('VIOLATED'),
+      degrading: getStatusStats('DEGRADING'),
+      noData: getStatusStats('NO_DATA'),
       burnRateRules: rules.total,
       burnRateActiveAlerts: alerts.activeAlertCount,
       burnRateRecoveredAlerts: alerts.recoveredAlertCount,
