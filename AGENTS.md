@@ -1,6 +1,11 @@
 # Kibana
 
 ## Setup
+- This repo requires the **exact** Node.js version in `.nvmrc`. Before running any `yarn` or `node` command, prefix it with:
+  ```bash
+  source scripts/ensure_llm_sandbox_env.sh && <your command>
+  ```
+  This sets up the sandbox environment: activates the correct Node.js version via nvm, disables sandbox-incompatible native modules (LMDB), and disables network-dependent services (ci-stats). If nvm is not installed, it warns and sets a fallback so commands can still run. It will continuously be updated as we go to include more helpful setups for llm environments.
 - Run `yarn kbn bootstrap` for initial setup, after switching branches, or when encountering dependency errors
 
 ## Overview
