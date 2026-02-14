@@ -10,11 +10,10 @@ import React from 'react';
 import type { Ast } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import type { ThemeServiceStart } from '@kbn/core/public';
-import type { PaletteRegistry, PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
+import type { PaletteRegistry } from '@kbn/coloring';
 import {
-  CUSTOM_PALETTE,
   DEFAULT_COLOR_MAPPING_CONFIG,
-  applyPaletteParams,
+  getFallbackDataBounds,
   getOverridePaletteStops,
 } from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
@@ -50,10 +49,10 @@ import {
   type DatatableExpressionFunction,
 } from '../../../common/expressions';
 import {
-  defaultPaletteParams,
   findMinMaxByColumnId,
   getPaletteDisplayColors,
   getAccessorType,
+  getColorByValuePalette,
 } from '../../shared_components';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { DatatableInspectorTables } from '../../../common/expressions/defs/datatable/datatable';
@@ -148,44 +147,42 @@ export const getDatatableVisualization = ({
     const columns = state.columns.map((column) => {
       const newColumn = { ...column };
       const accessor = newColumn.columnId;
+      const currentData = frame?.activeData?.[state.layerId];
+
       const { isNumeric, isCategory: isBucketable } = getAccessorType(datasource, accessor);
 
-      if (newColumn.palette && (isNumeric || isBucketable)) {
+      // Only handle transitions when color config exists and column is colorable
+      if ((newColumn.palette || newColumn.colorMapping) && (isNumeric || isBucketable)) {
         const showColorByTerms = isBucketable;
 
-        if (!showColorByTerms && newColumn.colorMapping) {
-          // switched from terms to values
-          delete newColumn.colorMapping;
-        }
-
-        if (showColorByTerms && !newColumn.colorMapping) {
-          // switched from values to terms
-          newColumn.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
-        }
-
-        const currentData = frame?.activeData?.[state.layerId];
-        const palette = paletteMap.get(newColumn.palette?.name ?? '');
         const columnsToCheck = hasTransposedColumn
           ? currentData?.columns
               .filter(({ id }) => getOriginalId(id) === accessor)
               .map(({ id }) => id) || []
           : [accessor];
         const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
+
+        if (!showColorByTerms && newColumn.colorMapping) {
+          // switched from terms to values
+          delete newColumn.colorMapping;
+          const dataBounds = minMaxByColumnId.get(accessor) ?? getFallbackDataBounds();
+          const { palette } = getColorByValuePalette(paletteService, dataBounds);
+          newColumn.palette = palette;
+        }
+
+        if (showColorByTerms && newColumn.palette) {
+          // switched from values to terms
+          delete newColumn.palette;
+          newColumn.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+        }
+
+        // Handle palettes that don't support dynamic coloring (categorical-only palettes)
+        // Replace them with default color-by-value palette
+        const paletteEntry = paletteMap.get(newColumn.palette?.name ?? '');
         const dataBounds = minMaxByColumnId.get(accessor);
-        if (palette && !showColorByTerms && !palette?.canDynamicColoring && dataBounds) {
-          const newPalette: PaletteOutput<CustomPaletteParams> = {
-            type: 'palette',
-            name: defaultPaletteParams.name,
-          };
-          return {
-            ...newColumn,
-            palette: {
-              ...newPalette,
-              params: {
-                stops: applyPaletteParams(paletteService, newPalette, dataBounds),
-              },
-            },
-          };
+        if (paletteEntry && !showColorByTerms && !paletteEntry.canDynamicColoring && dataBounds) {
+          const { palette } = getColorByValuePalette(paletteService, dataBounds);
+          return { ...newColumn, palette };
         }
       }
 
@@ -614,7 +611,6 @@ export const getDatatableVisualization = ({
             datasource?.getOperationForColumnId(column.columnId) ?? {};
           const hasNoSummaryRow = column.summaryRow == null || column.summaryRow === 'none';
           const canColor = isNumeric || isBucketable;
-          const colorByTerms = isBucketable;
           let isTransposable =
             !isTextBasedLanguage &&
             !datasource!.getOperationForColumnId(column.columnId)?.isBucketed;
@@ -623,6 +619,9 @@ export const getDatatableVisualization = ({
             isTransposable = Boolean(column?.isMetric || inMetricDimension);
           }
 
+          // Pass through palette/colorMapping as-is without defaults.
+          // Defaults are applied at render time (table_basic.tsx) where we have
+          // access to actual data type and bounds for correct default calculation.
           const datatableColumnFn = buildExpressionFunction<DatatableColumnFn>(
             'lens_datatable_column',
             {
@@ -634,12 +633,10 @@ export const getDatatableVisualization = ({
               transposable: isTransposable,
               alignment: column.alignment,
               colorMode: canColor ? column.colorMode ?? 'none' : 'none',
-              palette: !canColor
-                ? undefined
-                : paletteService
-                    // The by value palette is a pseudo custom palette that is only custom from params level
-                    .get(colorByTerms ? column.palette?.name || CUSTOM_PALETTE : CUSTOM_PALETTE)
-                    .toExpression(paletteParams),
+              palette:
+                !canColor || !column.palette
+                  ? undefined
+                  : paletteService.get(column.palette.name).toExpression(paletteParams),
               colorMapping:
                 canColor && column.colorMapping ? JSON.stringify(column.colorMapping) : undefined,
               summaryRow: hasNoSummaryRow ? undefined : column.summaryRow!,

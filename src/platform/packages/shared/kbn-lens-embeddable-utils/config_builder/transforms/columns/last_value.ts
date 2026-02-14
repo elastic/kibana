@@ -7,20 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LastValueIndexPatternColumn } from '@kbn/lens-common';
+import type { DataType, LastValueIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiLastValueOperation } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
 
 export const fromLastValueAPItoLensState = (
-  options: LensApiLastValueOperation
+  options: LensApiLastValueOperation,
+  dataType?: DataType
 ): LastValueIndexPatternColumn => {
   const { field, format, sort_by, show_array_values } = options;
 
   return {
     operationType: 'last_value',
     sourceField: field,
-    ...getLensStateMetricSharedProps(options),
+    ...getLensStateMetricSharedProps(options, dataType),
     params: {
       sortField: sort_by,
       showArrayValues: show_array_values,

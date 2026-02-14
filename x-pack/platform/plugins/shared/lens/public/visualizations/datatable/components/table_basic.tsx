@@ -6,7 +6,7 @@
  */
 
 import type { ColorMappingInputData, PaletteOutput } from '@kbn/coloring';
-import { getFallbackDataBounds } from '@kbn/coloring';
+import { getFallbackDataBounds, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import React, {
   useLayoutEffect,
   useCallback,
@@ -51,7 +51,11 @@ import type {
   LensPagesizeAction,
 } from '@kbn/lens-common';
 import type { LensGridDirection } from '../../../../common/expressions';
-import { findMinMaxByColumnId, shouldColorByTerms } from '../../../shared_components';
+import {
+  findMinMaxByColumnId,
+  shouldColorByTerms,
+  getColorByValuePalette,
+} from '../../../shared_components';
 import type { DataContextType, DatatableRenderProps } from './types';
 import { createGridColumns } from './columns';
 import { createGridCell } from './cell_value';
@@ -397,15 +401,52 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         return cellColorFnMap.get(originalId)!;
       }
 
-      const colInfo = getDatatableColumn(firstLocalTable, originalId);
+      const colInfo = getDatatableColumn(firstLocalTable, originalId); // actual data
       const isBucketed = bucketedColumns.some((id) => id === columnId);
       const colorByTerms = shouldColorByTerms(colInfo?.meta.type, isBucketed);
+
+      // A color by value palette has params.stops (numeric color stops), while legacy palettes for bucket columns don't
+      const isValueBasedPalette = Boolean(palette?.params?.stops?.length);
+      // Validate color config matches actual data type
+      const hasColorConfigMismatch =
+        (!colorByTerms && colorMapping != null) || (colorByTerms && isValueBasedPalette);
+
+      let appliedPalette = hasColorConfigMismatch ? undefined : palette;
+      let appliedColorMapping = hasColorConfigMismatch ? undefined : colorMapping;
+
+      // Apply defaults when colorMode is set but no color config provided
+      if (!hasColorConfigMismatch && !palette && !colorMapping) {
+        if (colorByTerms) {
+          appliedColorMapping = JSON.stringify(DEFAULT_COLOR_MAPPING_CONFIG);
+        } else {
+          const dataBounds = minMaxByColumnId.get(originalId) ?? getFallbackDataBounds();
+          const { palette: defaultPalette } = getColorByValuePalette(
+            props.paletteService,
+            dataBounds
+          );
+          const stops = defaultPalette.params?.stops || [];
+          appliedPalette = {
+            type: 'palette',
+            name: 'custom', // Only 'custom' palette has getColorForValue
+            params: {
+              colors: stops.map(({ color }) => color),
+              stops: stops.map(({ stop }) => stop),
+              gradient: false,
+              range: defaultPalette.params?.rangeType ?? 'percent',
+              rangeMin: dataBounds.min,
+              rangeMax: dataBounds.max,
+              continuity: defaultPalette.params?.continuity,
+            },
+          };
+        }
+      }
+
       const categoryRows = (untransposedDataRef.current ?? firstLocalTable)?.rows;
 
       const data: ColorMappingInputData = colorByTerms
         ? {
             type: 'categories',
-            categories: colorMapping
+            categories: appliedColorMapping
               ? getColorCategories(categoryRows, [originalId], [null])
               : getLegacyColorCategories(categoryRows, [originalId], [null]),
           }
@@ -421,8 +462,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         colorByTerms,
         isDarkMode,
         syncColors,
-        palette,
-        colorMapping
+        appliedPalette,
+        appliedColorMapping
       );
       cellColorFnMap.set(originalId, colorFn);
 

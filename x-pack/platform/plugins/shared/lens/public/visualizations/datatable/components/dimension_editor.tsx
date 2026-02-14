@@ -8,11 +8,9 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
-import type { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import type { PaletteRegistry, PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import {
-  CUSTOM_PALETTE,
   DEFAULT_COLOR_MAPPING_CONFIG,
-  applyPaletteParams,
   canCreateCustomMatch,
   getFallbackDataBounds,
 } from '@kbn/coloring';
@@ -27,9 +25,9 @@ import type {
 import { DatatableInspectorTables } from '../../../../common/expressions';
 
 import {
-  defaultPaletteParams,
   findMinMaxByColumnId,
   getAccessorType,
+  getColorByValuePalette,
 } from '../../../shared_components';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
 import { ColorMappingByValues } from '../../../shared_components/coloring/color_mapping_by_values';
@@ -93,7 +91,11 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   const allowCustomMatch = canCreateCustomMatch(columnMeta);
   const datasource = frame.datasourceLayers?.[localState.layerId];
 
-  const { isNumeric, isCategory: isBucketable } = getAccessorType(datasource, accessor);
+  const { isNumeric, isCategory: isBucketable } = getAccessorType(
+    datasource,
+    accessor,
+    columnMeta?.type
+  );
   const showColorByTerms = isBucketable;
   const showDynamicColoringFeature = isBucketable || isNumeric;
   const currentAlignment = getColumnAlignment(column, isNumeric);
@@ -109,21 +111,23 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
   const currentMinMax = minMaxByColumnId.get(accessor) ?? getFallbackDataBounds();
 
-  const activePalette: PaletteOutput<CustomPaletteParams> = {
-    type: 'palette',
-    name: showColorByTerms ? 'default' : defaultPaletteParams.name,
-    ...column?.palette,
-    params: { ...column?.palette?.params },
-  };
-  // need to tell the helper that the colorStops are required to display
-  const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
+  let activePalette: PaletteOutput<CustomPaletteParams>;
+  let displayStops: Array<{ color: string; stop: number }>;
 
-  if (activePalette.name !== CUSTOM_PALETTE && activePalette.params?.stops) {
-    activePalette.params.stops = applyPaletteParams(
-      props.paletteService,
-      activePalette,
-      currentMinMax
-    );
+  if (showColorByTerms) {
+    // Terms coloring uses 'default' categorical palette
+    activePalette = {
+      type: 'palette',
+      name: 'default',
+      ...column?.palette,
+      params: { ...column?.palette?.params },
+    };
+    displayStops = [];
+  } else {
+    // Value coloring uses the existing palette or the 'positive' color by value palette
+    const result = getColorByValuePalette(props.paletteService, currentMinMax, column?.palette);
+    activePalette = result.palette;
+    displayStops = result.displayStops;
   }
 
   return (

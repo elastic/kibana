@@ -27,6 +27,12 @@ import { getOriginalId } from '@kbn/transpose-utils';
 import type { Datatable, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type { KbnPalettes } from '@kbn/palettes';
 import type { DataType, DatasourcePublicAPI, OperationDescriptor } from '@kbn/lens-common';
+import { defaultPaletteParams } from './constants';
+
+/**
+ * Determines if a data type is numeric.
+ */
+export const isDataTypeNumeric = (dataType?: string): boolean => dataType === 'number';
 
 /**
  * Returns array of colors for provided palette or colorMapping
@@ -48,26 +54,42 @@ export function getPaletteDisplayColors(
 }
 
 export function getAccessorTypeFromOperation(
-  operation: Pick<OperationDescriptor, 'isBucketed' | 'dataType' | 'hasArraySupport'> | null
+  operation: Pick<OperationDescriptor, 'isBucketed' | 'dataType' | 'hasArraySupport'> | null,
+  dataTypeFallback?: DataType | DatatableColumnType,
+  isTextBased?: boolean
 ) {
+  // Use fallback when the operation's dataType differs from the activeData type (and fallback is defined)
+  const useFallback = dataTypeFallback != null && operation?.dataType !== dataTypeFallback;
+  const dataType = useFallback ? dataTypeFallback : operation?.dataType;
+  const hasArraySupport = operation?.hasArraySupport;
+
+  // For text_based datasource: isBucketed is calculated as isNotNumeric(datatype), which may be wrong. Recalculate from actual data.
+  // For form_based: trust operation.isBucketed as it's explicitly set by the operation definition.
+  const isBucketed =
+    useFallback && isTextBased ? !isDataTypeNumeric(dataTypeFallback) : operation?.isBucketed;
+
   const isNumericTypeFromOperation = Boolean(
-    !operation?.isBucketed && operation?.dataType === 'number' && !operation.hasArraySupport
+    !isBucketed && isDataTypeNumeric(dataType) && !hasArraySupport
   );
   const isBucketableTypeFromOperationType = Boolean(
-    operation?.isBucketed ||
-      (!['number', 'date'].includes(operation?.dataType || '') && !operation?.hasArraySupport)
+    isBucketed || (!['number', 'date'].includes(dataType || '') && !hasArraySupport)
   );
   return { isNumeric: isNumericTypeFromOperation, isCategory: isBucketableTypeFromOperationType };
 }
 
 /**
  * Analyze the column from the datasource prospective (formal check)
- * to know whether it's a numeric type or not
+ * to know whether it's a numeric type or not.
+ * Optionally accepts a dataTypeFallback from activeData to override schema type
+ * when there's a mismatch.
  * Note: to be used for Lens UI only
  */
 export function getAccessorType(
-  datasource: Pick<DatasourcePublicAPI, 'getOperationForColumnId'> | undefined,
-  accessor: string | undefined
+  datasource:
+    | Pick<DatasourcePublicAPI, 'getOperationForColumnId' | 'isTextBasedLanguage'>
+    | undefined,
+  accessor: string | undefined,
+  dataTypeFallback?: DataType | DatatableColumnType
 ) {
   // No accessor means it's not a numeric type by default
   if (!accessor || !datasource) {
@@ -75,8 +97,9 @@ export function getAccessorType(
   }
 
   const operation = datasource.getOperationForColumnId(accessor);
+  const isTextBased = datasource.isTextBasedLanguage?.();
 
-  return getAccessorTypeFromOperation(operation);
+  return getAccessorTypeFromOperation(operation, dataTypeFallback, isTextBased);
 }
 
 /**
@@ -161,3 +184,37 @@ export const findMinMaxByColumnId = (columnIds: string[], table: Datatable | und
   }
   return minMaxMap;
 };
+
+export function getColorByValuePalette(
+  paletteService: PaletteRegistry,
+  dataBounds: DataBounds,
+  existingPalette?: PaletteOutput<CustomPaletteParams>
+): {
+  palette: PaletteOutput<CustomPaletteParams>;
+  displayStops: Array<{ color: string; stop: number }>;
+} {
+  // Use existing palette or create default
+  const activePalette: PaletteOutput<CustomPaletteParams> = existingPalette
+    ? {
+        type: 'palette',
+        name: existingPalette.name,
+        params: { ...existingPalette.params },
+      }
+    : {
+        type: 'palette',
+        name: defaultPaletteParams.name,
+        params: { ...defaultPaletteParams },
+      };
+
+  const displayStops = applyPaletteParams(paletteService, activePalette, dataBounds);
+
+  // For non-custom palettes -> update the stops with computed values
+  if (activePalette.name !== CUSTOM_PALETTE) {
+    activePalette.params = {
+      ...activePalette.params,
+      stops: displayStops,
+    };
+  }
+
+  return { palette: activePalette, displayStops };
+}

@@ -546,7 +546,7 @@ function getValueColumns(layer: MetricStateESQL) {
         ]
       : []),
     ...(secondaryMetric
-      ? [getValueColumn(getAccessorName('secondary'), secondaryMetric.column)]
+      ? [getValueColumn(getAccessorName('secondary'), secondaryMetric.column, 'number')]
       : []),
   ];
 }
