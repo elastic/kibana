@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import { join as joinPath } from 'path';
 import { Environment, FileSystemLoader } from 'nunjucks';
 import { deepCopy } from './util';
@@ -44,7 +44,7 @@ function createAppendProcessors(processors: SimplifiedProcessors): ESProcessorIt
   });
   const template = env.getTemplate('append.yml.njk');
   const renderedTemplate = template.render({ processors });
-  const appendProcessors = load(renderedTemplate) as ESProcessorItem[];
+  const appendProcessors = parse(renderedTemplate) as ESProcessorItem[];
   return appendProcessors;
 }
 
@@ -57,7 +57,7 @@ export function createGrokProcessor(grokPatterns: string[]): ESProcessorItem {
   });
   const template = env.getTemplate('grok.yml.njk');
   const renderedTemplate = template.render({ grokPatterns });
-  const grokProcessor = load(renderedTemplate) as ESProcessorItem;
+  const grokProcessor = parse(renderedTemplate) as ESProcessorItem;
   return grokProcessor;
 }
 
@@ -81,7 +81,7 @@ export function createKVProcessor(kvInput: KVProcessor, state: KVState): ESProce
     packageName: state.packageName,
     dataStreamName: state.dataStreamName,
   });
-  const kvProcessor = load(renderedTemplate) as ESProcessorItem;
+  const kvProcessor = parse(renderedTemplate) as ESProcessorItem;
   return kvProcessor;
 }
 

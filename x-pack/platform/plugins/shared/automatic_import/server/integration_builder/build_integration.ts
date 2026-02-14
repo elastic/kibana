@@ -7,7 +7,7 @@
 
 import { getDataPath } from '@kbn/utils';
 import AdmZip from 'adm-zip';
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import nunjucks from 'nunjucks';
 import { join as joinPath } from 'path';
 import type { DataStream, Integration } from '../../common';
@@ -263,7 +263,7 @@ export function renderPackageManifestYAML(integration: Integration): string {
     uniqueInputsList // inputs
   );
 
-  return dump(packageData);
+  return stringify(packageData);
 }
 
 function createPackageManifest(packageDir: string, integration: Integration): void {

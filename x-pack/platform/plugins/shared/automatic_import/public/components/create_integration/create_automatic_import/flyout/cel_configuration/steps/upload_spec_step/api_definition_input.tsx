@@ -8,7 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { EuiFilePicker, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import Oas from 'oas';
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import type { IntegrationSettings } from '../../../../types';
 import * as i18n from './translations';
 import { useActions } from '../../../../state';
@@ -37,7 +37,7 @@ const prepareOas = (fileContent: string): PrepareOasResult => {
     parsedApiSpec = new Oas(fileContent);
   } catch (parseJsonOasError) {
     try {
-      const specYaml = yaml.load(fileContent);
+      const specYaml = parse(fileContent);
       const specJson = JSON.stringify(specYaml);
       parsedApiSpec = new Oas(specJson);
     } catch (parseYamlOasError) {

@@ -7,7 +7,7 @@
 
 import nunjucks from 'nunjucks';
 import { join as joinPath } from 'path';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import type { CelInput, DataStream } from '../../common';
 import { CEL_EXISTING_AUTH_CONFIG_FIELDS, DEFAULT_CEL_PROGRAM, DEFAULT_URL } from './constants';
 import { copySync, createSync, ensureDirSync, listDirSync, readSync } from '../util';
@@ -83,7 +83,7 @@ function loadFieldsFromFiles(sourcePath: string, files: string[]): Field[] {
   return files.flatMap((file) => {
     const filePath = joinPath(sourcePath, file);
     const content = readSync(filePath);
-    return load(content) as Field[];
+    return parse(content) as Field[];
   });
 }
 

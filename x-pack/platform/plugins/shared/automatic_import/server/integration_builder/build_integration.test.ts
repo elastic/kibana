@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import { testIntegration } from '../../__jest__/fixtures/build_integration';
 import type { DataStream, Docs, InputType, Integration, Pipeline } from '../../common';
 import { createSync, ensureDirSync, generateUniqueId } from '../util';
@@ -280,7 +280,7 @@ describe('renderPackageManifestYAML', () => {
     const manifestContent = renderPackageManifestYAML(integration);
 
     // The manifest content must be parseable as YAML.
-    const manifest = yaml.load(manifestContent) as Record<string, unknown>;
+    const manifest = parse(manifestContent) as Record<string, unknown>;
 
     expect(manifest).toBeDefined();
     expect(manifest.title).toBe(integration.title);

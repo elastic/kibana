@@ -6,11 +6,11 @@
  */
 
 import { join as joinPath } from 'path';
-import yaml from 'js-yaml';
+import { stringify } from 'yaml';
 import { createSync } from '../util';
 
 export function createPipeline(specificDataStreamDir: string, pipeline: object): void {
   const filePath = joinPath(specificDataStreamDir, 'elasticsearch/ingest_pipeline/default.yml');
-  const yamlContent = `---\n${yaml.dump(pipeline, { sortKeys: false })}`;
+  const yamlContent = `---\n${stringify(pipeline, { sortMapEntries: false })}`;
   createSync(filePath, yamlContent);
 }
