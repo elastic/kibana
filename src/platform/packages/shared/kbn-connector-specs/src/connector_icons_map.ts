@@ -86,4 +86,11 @@ export const ConnectorIconsMap: Map<
       () => import(/* webpackChunkName: "connectorIconGoogleDrive" */ './specs/google_drive/icon')
     ),
   ],
+  [
+    '.microsoft-teams',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconmicrosoftteams" */ './specs/microsoft_teams/icon')
+    ),
+  ],
 ]);

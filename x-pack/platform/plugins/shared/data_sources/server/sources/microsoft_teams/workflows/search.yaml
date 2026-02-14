@@ -1,0 +1,33 @@
+version: '1'
+name: 'sources.microsoft-teams.search'
+description: 'Search messages across Microsoft Teams using KQL syntax. Actions and inputs: searchMessages (query, optional from, optional size, optional enable_top_results).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: query
+    type: string
+    required: true
+    description: "Search query with KQL syntax support (e.g., \"from:bob sent>2024-01-01\")"
+  - name: from
+    type: number
+    required: false
+    description: "Offset for pagination"
+  - name: size
+    type: number
+    required: false
+    description: "Number of results to return (max 25)"
+  - name: enable_top_results
+    type: boolean
+    required: false
+    description: "Sort results by relevance"
+steps:
+  - name: search-messages
+    type: microsoft-teams.searchMessages
+    connector-id: <%= stackConnectorId %>
+    with:
+      query: "${{ inputs.query }}"
+      from: ${{ inputs.from }}
+      size: ${{ inputs.size }}
+      enableTopResults: ${{ inputs.enable_top_results }}
