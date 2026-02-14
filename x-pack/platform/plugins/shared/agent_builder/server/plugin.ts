@@ -167,7 +167,8 @@ export class AgentBuilderPlugin
     }
     return {
       agents: {
-        runAgent: agents.execute.bind(agents),
+        getRegistry: ({ request }) => agents.getRegistry({ request }),
+        runAgent: runner.runAgent.bind(runner),
       },
       tools: {
         getRegistry: ({ request }) => tools.getRegistry({ request }),

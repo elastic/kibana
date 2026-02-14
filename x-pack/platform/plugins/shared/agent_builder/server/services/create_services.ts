@@ -99,7 +99,6 @@ export class ServiceManager {
       elasticsearch,
       uiSettings,
       savedObjects,
-      getRunner,
       toolsService: tools,
     });
 
@@ -141,6 +140,7 @@ export class ServiceManager {
       inference,
       conversationService: conversations,
       agentService: agents,
+      runAgent: runner.runAgent,
       uiSettings,
       savedObjects,
       spaces,
@@ -156,6 +156,7 @@ export class ServiceManager {
       inference,
       conversationService: conversations,
       agentService: agents,
+      runAgent: runner.runAgent,
       uiSettings,
       savedObjects,
       trackingService,
