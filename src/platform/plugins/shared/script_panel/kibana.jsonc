@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/script-panel",
+  "owner": "@elastic/kibana-presentation",
+  "description": "Script panel - a sandboxed scriptable embeddable for dashboards",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "scriptPanel",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "embeddable",
+      "uiActions",
+      "data",
+      "expressions"
+    ]
+  }
+}

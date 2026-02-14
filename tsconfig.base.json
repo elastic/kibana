@@ -1934,6 +1934,8 @@
       "@kbn/screenshotting-plugin/*": ["x-pack/platform/plugins/shared/screenshotting/*"],
       "@kbn/screenshotting-server": ["src/platform/packages/private/kbn-screenshotting-server"],
       "@kbn/screenshotting-server/*": ["src/platform/packages/private/kbn-screenshotting-server/*"],
+      "@kbn/script-panel": ["src/platform/plugins/shared/script_panel"],
+      "@kbn/script-panel/*": ["src/platform/plugins/shared/script_panel/*"],
       "@kbn/search-api-keys-components": ["x-pack/solutions/search/packages/kbn-search-api-keys-components"],
       "@kbn/search-api-keys-components/*": ["x-pack/solutions/search/packages/kbn-search-api-keys-components/*"],
       "@kbn/search-api-keys-server": ["x-pack/solutions/search/packages/kbn-search-api-keys-server"],

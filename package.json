@@ -954,6 +954,7 @@
     "@kbn/screenshotting-example-plugin": "link:x-pack/examples/screenshotting_example",
     "@kbn/screenshotting-plugin": "link:x-pack/platform/plugins/shared/screenshotting",
     "@kbn/screenshotting-server": "link:src/platform/packages/private/kbn-screenshotting-server",
+    "@kbn/script-panel": "link:src/platform/plugins/shared/script_panel",
     "@kbn/search-api-keys-components": "link:x-pack/solutions/search/packages/kbn-search-api-keys-components",
     "@kbn/search-api-keys-server": "link:x-pack/solutions/search/packages/kbn-search-api-keys-server",
     "@kbn/search-api-panels": "link:src/platform/packages/shared/kbn-search-api-panels",
