@@ -17,7 +17,8 @@ import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { Runner } from '@kbn/agent-builder-server';
 import { getCurrentSpaceId } from '../../utils/spaces';
-import type { AgentsServiceSetup, AgentsServiceStart } from './types';
+import type { AgentsServiceSetup, AgentsServiceStart, ToolRefsParams } from './types';
+import type { AgentsUsingToolsResult } from './persisted/types';
 import type { ToolsServiceStart } from '../tools';
 import {
   createBuiltinAgentRegistry,
@@ -27,6 +28,8 @@ import {
 } from './builtin';
 import { createPersistedProviderFn } from './persisted';
 import { createAgentRegistry } from './agent_registry';
+import { createStorage } from './persisted/client/storage';
+import { runToolRefCleanup } from './persisted/tool_reference_cleanup';
 
 export interface AgentsServiceSetupDeps {
   logger: Logger;
@@ -76,6 +79,11 @@ export class AgentsService {
     const { getRunner, security, elasticsearch, spaces, toolsService, uiSettings, savedObjects } =
       startDeps;
 
+    const internalStorage = createStorage({
+      logger,
+      esClient: elasticsearch.client.asInternalUser,
+    });
+
     const builtinProviderFn = createBuiltinProviderFn({ registry: this.builtinRegistry });
     const persistedProviderFn = createPersistedProviderFn({
       elasticsearch,
@@ -96,11 +104,41 @@ export class AgentsService {
       });
     };
 
+    const removeToolRefsFromAgents = async ({
+      request,
+      toolIds,
+    }: ToolRefsParams): Promise<void> => {
+      const spaceId = getCurrentSpaceId({ request, spaces });
+      await runToolRefCleanup({
+        storage: internalStorage,
+        spaceId,
+        toolIds,
+        logger,
+      });
+    };
+
+    const getAgentsUsingTools = async ({
+      request,
+      toolIds,
+    }: ToolRefsParams): Promise<AgentsUsingToolsResult> => {
+      const spaceId = getCurrentSpaceId({ request, spaces });
+      const result = await runToolRefCleanup({
+        storage: internalStorage,
+        spaceId,
+        toolIds,
+        logger,
+        checkOnly: true,
+      });
+      return result as AgentsUsingToolsResult;
+    };
+
     return {
       getRegistry,
       execute: async (args) => {
         return getRunner().runAgent(args);
       },
+      removeToolRefsFromAgents,
+      getAgentsUsingTools,
     };
   }
 }

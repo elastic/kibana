@@ -53,6 +53,7 @@ export function registerInternalToolsRoutes({
       validate: {
         body: schema.object({
           ids: schema.arrayOf(schema.string()),
+          force: schema.boolean({ defaultValue: true }),
         }),
       },
       options: { access: 'internal' },
@@ -61,8 +62,16 @@ export function registerInternalToolsRoutes({
       },
     },
     wrapHandler(async (ctx, request, response) => {
-      const { ids } = request.body;
-      const { tools: toolService, auditLogService } = getInternalServices();
+      const { ids, force } = request.body;
+      const { tools: toolService, agents: agentsService, auditLogService } = getInternalServices();
+
+      if (force) {
+        await agentsService.removeToolRefsFromAgents({
+          request,
+          toolIds: ids,
+        });
+      }
+
       const registry = await toolService.getRegistry({ request });
       const deleteResults = await Promise.allSettled(ids.map((id) => registry.delete(id)));
 
@@ -86,9 +95,7 @@ export function registerInternalToolsRoutes({
       auditLogService.logBulkToolDeleteResults(request, { ids, deleteResults });
 
       return response.ok<BulkDeleteToolResponse>({
-        body: {
-          results,
-        },
+        body: { results },
       });
     })
   );

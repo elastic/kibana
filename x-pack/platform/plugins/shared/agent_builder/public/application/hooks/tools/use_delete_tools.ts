@@ -9,14 +9,29 @@ import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useCallback, useRef, useState } from 'react';
-import type { BulkDeleteToolResponse, DeleteToolResponse } from '../../../../common/http_api/tools';
+import type {
+  AgentRef,
+  BulkDeleteToolResponse,
+  DeleteToolResponse,
+} from '../../../../common/http_api/tools';
+import { TOOL_USED_BY_AGENTS_ERROR_CODE } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';
 import { labels } from '../../utils/i18n';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { useToasts } from '../use_toasts';
 
+export interface ToolUsedByAgents {
+  toolId: string;
+  agents: AgentRef[];
+}
+
+interface ToolUsedByAgentsErrorBody {
+  attributes?: { code?: string; agents?: ToolUsedByAgents['agents'] };
+}
+
 interface DeleteToolMutationVariables {
   toolId: string;
+  force?: boolean;
 }
 
 type DeleteToolMutationOptions = UseMutationOptions<
@@ -41,6 +56,15 @@ type DeleteToolsMutationOptions = UseMutationOptions<
 type DeleteToolsSuccessCallback = NonNullable<DeleteToolsMutationOptions['onSuccess']>;
 type DeleteToolsErrorCallback = NonNullable<DeleteToolsMutationOptions['onError']>;
 
+function getToolUsedByAgentsFromError(error: unknown, toolId: string): ToolUsedByAgents | null {
+  const body = (error as { body?: ToolUsedByAgentsErrorBody }).body;
+  const attrs = body?.attributes;
+  if (attrs?.code !== TOOL_USED_BY_AGENTS_ERROR_CODE || !Array.isArray(attrs.agents)) {
+    return null;
+  }
+  return { toolId, agents: attrs.agents };
+}
+
 export const useDeleteToolService = ({
   onSuccess,
   onError,
@@ -56,7 +80,7 @@ export const useDeleteToolService = ({
     Error,
     DeleteToolMutationVariables
   >({
-    mutationFn: ({ toolId }) => toolsService.delete({ toolId }),
+    mutationFn: ({ toolId, force }) => toolsService.delete({ toolId, force }),
     onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.tools.all }),
     onSuccess,
     onError,
@@ -98,10 +122,12 @@ export const useDeleteTool = ({
 } = {}) => {
   const { addSuccessToast, addErrorToast } = useToasts();
   const [deleteToolId, setDeleteToolId] = useState<string | null>(null);
+  const [usedByAgents, setUsedByAgents] = useState<ToolUsedByAgents | null>(null);
   const onConfirmCallbackRef = useRef<() => void>();
   const onCancelCallbackRef = useRef<() => void>();
 
   const isModalOpen = deleteToolId !== null;
+  const isForceConfirmModalOpen = usedByAgents !== null;
 
   const deleteTool = useCallback(
     (
@@ -109,6 +135,7 @@ export const useDeleteTool = ({
       { onConfirm, onCancel }: { onConfirm?: () => void; onCancel?: () => void } = {}
     ) => {
       setDeleteToolId(toolId);
+      setUsedByAgents(null);
       onConfirmCallbackRef.current = onConfirm;
       onCancelCallbackRef.current = onCancel;
     },
@@ -130,9 +157,17 @@ export const useDeleteTool = ({
       title: labels.tools.deleteToolSuccessToast(toolId),
     });
     setDeleteToolId(null);
+    setUsedByAgents(null);
   };
 
   const handleError: DeleteToolErrorCallback = (error, { toolId }) => {
+    const payload = getToolUsedByAgentsFromError(error, toolId);
+    if (payload) {
+      setUsedByAgents(payload);
+      setDeleteToolId(null);
+      return;
+    }
+    setUsedByAgents(null);
     addErrorToast({
       title: labels.tools.deleteToolErrorToast(toolId),
       text: formatAgentBuilderErrorMessage(error),
@@ -156,8 +191,22 @@ export const useDeleteTool = ({
 
   const cancelDelete = useCallback(() => {
     setDeleteToolId(null);
+    setUsedByAgents(null);
     onCancelCallbackRef.current?.();
     onCancelCallbackRef.current = undefined;
+  }, []);
+
+  const confirmForceDelete = useCallback(async () => {
+    if (!usedByAgents) {
+      return;
+    }
+    await deleteToolMutation({ toolId: usedByAgents.toolId, force: true }, { onSuccess, onError });
+    onConfirmCallbackRef.current?.();
+    onConfirmCallbackRef.current = undefined;
+  }, [usedByAgents, deleteToolMutation, onSuccess, onError]);
+
+  const cancelForceDelete = useCallback(() => {
+    setUsedByAgents(null);
   }, []);
 
   return {
@@ -167,6 +216,10 @@ export const useDeleteTool = ({
     deleteTool,
     confirmDelete,
     cancelDelete,
+    usedByAgents,
+    isForceConfirmModalOpen,
+    confirmForceDelete,
+    cancelForceDelete,
   };
 };
 
