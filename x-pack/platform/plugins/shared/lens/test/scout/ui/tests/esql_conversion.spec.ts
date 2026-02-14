@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
-
 import { test } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 const ES_ARCHIVES = {
   LOGSTASH: 'x-pack/platform/test/fixtures/es_archives/logstash_functional',

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { apiTest, expect } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 
 import { COMMON_HEADERS } from '../fixtures/constants';
 
@@ -16,7 +17,7 @@ apiTest.describe('Create new UIAM session', { tag: ['@svlSecurity'] }, () => {
       headers: { ...COMMON_HEADERS, ...cookieHeader },
       responseType: 'json',
     });
-    expect(response.statusCode).toBe(200);
+    expect(response).toHaveStatusCode(200);
     expect(response.body).toStrictEqual(expect.objectContaining({ username: '1806480617' }));
   });
 });

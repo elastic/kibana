@@ -26,6 +26,9 @@ export const getDefaultRowsPerPage = (uiSettings: IUiSettingsClient): number => 
 // local storage key for the ES|QL to Dataviews transition modal
 export const ESQL_TRANSITION_MODAL_KEY = 'data.textLangTransitionModal';
 
+// local storage key for the query mode when starting a new discover session
+export const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
+
 /**
  * The id value used to indicate that a link should open in a new Discover tab.
  * It will be used in the `_tab` URL param to indicate that a new tab should be created.

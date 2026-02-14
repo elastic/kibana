@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { RenameProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -34,7 +34,7 @@ apiTest.describe('Streamlang to ES|QL - Rename Processor', { tag: ['@ess', '@svl
     expect(esqlResult.documents[0]).toStrictEqual(
       expect.objectContaining({ 'host.renamed': 'test-host' })
     );
-    expect(esqlResult.documents[0]).not.toHaveProperty('host.original');
+    expect(esqlResult.documents[0]?.['host.original']).toBeUndefined();
   });
 
   apiTest(

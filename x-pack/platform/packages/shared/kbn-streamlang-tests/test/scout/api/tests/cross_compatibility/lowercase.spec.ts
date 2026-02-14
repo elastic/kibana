@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { LowercaseProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql, transpileIngestPipeline } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -42,12 +42,12 @@ apiTest.describe('Cross-compatibility - Lowercase Processor', { tag: ['@ess', '@
       const esqlResult = await esql.queryOnIndex('esql-e2e-test-lowercase-basic', query);
 
       expect(ingestResult).toHaveLength(2);
-      expect(ingestResult[0]).toHaveProperty('message', 'test message 1');
-      expect(ingestResult[1]).toHaveProperty('message', 'test message 2');
+      expect(ingestResult[0]?.message).toBe('test message 1');
+      expect(ingestResult[1]?.message).toBe('test message 2');
 
       expect(esqlResult.documents).toHaveLength(2);
-      expect(esqlResult.documents[0]).toHaveProperty('message', 'test message 1');
-      expect(esqlResult.documents[1]).toHaveProperty('message', 'test message 2');
+      expect(esqlResult.documents[0]?.message).toBe('test message 1');
+      expect(esqlResult.documents[1]?.message).toBe('test message 2');
     }
   );
 
@@ -73,12 +73,12 @@ apiTest.describe('Cross-compatibility - Lowercase Processor', { tag: ['@ess', '@
     const esqlResult = await esql.queryOnIndex('esql-e2e-test-lowercase-basic', query);
 
     expect(ingestResult).toHaveLength(2);
-    expect(ingestResult[0]).toHaveProperty('message_lowercase', 'test message 1');
-    expect(ingestResult[1]).toHaveProperty('message_lowercase', 'test message 2');
+    expect(ingestResult[0]?.message_lowercase).toBe('test message 1');
+    expect(ingestResult[1]?.message_lowercase).toBe('test message 2');
 
     expect(esqlResult.documents).toHaveLength(2);
-    expect(esqlResult.documents[0]).toHaveProperty('message_lowercase', 'test message 1');
-    expect(esqlResult.documents[1]).toHaveProperty('message_lowercase', 'test message 2');
+    expect(esqlResult.documents[0]?.message_lowercase).toBe('test message 1');
+    expect(esqlResult.documents[1]?.message_lowercase).toBe('test message 2');
   });
 
   apiTest('should lowercase a field with a where condition', async ({ testBed, esql }) => {
@@ -109,11 +109,11 @@ apiTest.describe('Cross-compatibility - Lowercase Processor', { tag: ['@ess', '@
     const esqlResult = await esql.queryOnIndex('esql-e2e-test-lowercase-basic', query);
 
     expect(ingestResult).toHaveLength(2);
-    expect(ingestResult[0]).toHaveProperty('message', 'test message 1');
-    expect(ingestResult[1]).toHaveProperty('message', 'TEST MESSAGE 2');
+    expect(ingestResult[0]?.message).toBe('test message 1');
+    expect(ingestResult[1]?.message).toBe('TEST MESSAGE 2');
 
     expect(esqlResult.documents).toHaveLength(2);
-    expect(esqlResult.documents[0]).toHaveProperty('message', 'test message 1');
-    expect(esqlResult.documents[1]).toHaveProperty('message', 'TEST MESSAGE 2');
+    expect(esqlResult.documents[0]?.message).toBe('test message 1');
+    expect(esqlResult.documents[1]?.message).toBe('TEST MESSAGE 2');
   });
 });

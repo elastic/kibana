@@ -433,6 +433,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('trackSubmittingQuery telemetry', () => {
       beforeEach(async () => {
+        await discover.resetQueryMode();
         await common.navigateToApp('discover');
         await discover.waitUntilTabIsLoaded();
         await ebtUIHelper.setOptIn(true);

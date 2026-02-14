@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { MathProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -34,7 +34,7 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
     await testBed.ingest('esql-math-multiply', docs);
     const esqlResult = await esql.queryOnIndex('esql-math-multiply', query);
 
-    expect(ingestResult[0]).toHaveProperty('total', 50);
+    expect(ingestResult[0]?.total).toBe(50);
     expect(esqlResult.documentsOrdered[0]).toStrictEqual(expect.objectContaining({ total: 50 }));
   });
 
@@ -164,11 +164,11 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
     await testBed.ingest('esql-math-neq', docs);
     const esqlResult = await esql.queryOnIndex('esql-math-neq', query);
 
-    expect(ingestResult[0]).toHaveProperty('not_equal', true);
+    expect(ingestResult[0]?.not_equal).toBe(true);
     expect(esqlResult.documentsOrdered[0]).toStrictEqual(
       expect.objectContaining({ not_equal: true })
     );
-    expect(ingestResult[1]).toHaveProperty('not_equal', false);
+    expect(ingestResult[1]?.not_equal).toBe(false);
     expect(esqlResult.documentsOrdered[1]).toStrictEqual(
       expect.objectContaining({ not_equal: false })
     );
@@ -198,11 +198,11 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
     await testBed.ingest('esql-math-gt', docs);
     const esqlResult = await esql.queryOnIndex('esql-math-gt', query);
 
-    expect(ingestResult[0]).toHaveProperty('a_greater', true);
+    expect(ingestResult[0]?.a_greater).toBe(true);
     expect(esqlResult.documentsOrdered[0]).toStrictEqual(
       expect.objectContaining({ a_greater: true })
     );
-    expect(ingestResult[1]).toHaveProperty('a_greater', false);
+    expect(ingestResult[1]?.a_greater).toBe(false);
     expect(esqlResult.documentsOrdered[1]).toStrictEqual(
       expect.objectContaining({ a_greater: false })
     );
@@ -232,9 +232,9 @@ apiTest.describe('Cross-compatibility - Math Processor', { tag: ['@ess', '@svlOb
     await testBed.ingest('esql-math-eq', docs);
     const esqlResult = await esql.queryOnIndex('esql-math-eq', query);
 
-    expect(ingestResult[0]).toHaveProperty('equal', true);
+    expect(ingestResult[0]?.equal).toBe(true);
     expect(esqlResult.documentsOrdered[0]).toStrictEqual(expect.objectContaining({ equal: true }));
-    expect(ingestResult[1]).toHaveProperty('equal', false);
+    expect(ingestResult[1]?.equal).toBe(false);
     expect(esqlResult.documentsOrdered[1]).toStrictEqual(expect.objectContaining({ equal: false }));
   });
 

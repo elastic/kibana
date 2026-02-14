@@ -34,6 +34,7 @@ import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
 import { MANUAL_TRIGGERS_DESCRIPTIONS } from '../../../../common/translations';
+import type { WorkflowTriggerTab } from '../../../common/lib/telemetry/events/workflows/execution/types';
 
 type TriggerType = 'manual' | 'index' | 'alert';
 
@@ -59,7 +60,7 @@ interface WorkflowExecuteModalProps {
   workflowId?: string;
   isTestRun: boolean;
   onClose: () => void;
-  onSubmit: (data: Record<string, unknown>) => void;
+  onSubmit: (data: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => void;
   yamlString?: string;
 }
 export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
@@ -79,9 +80,9 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
     const { euiTheme } = useEuiTheme();
 
     const handleSubmit = useCallback(() => {
-      onSubmit(JSON.parse(executionInput));
+      onSubmit(JSON.parse(executionInput), selectedTrigger);
       onClose();
-    }, [onSubmit, onClose, executionInput]);
+    }, [onSubmit, onClose, executionInput, selectedTrigger]);
 
     const handleChangeTrigger = useCallback(
       (trigger: TriggerType): void => {
@@ -127,7 +128,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
 
     useEffect(() => {
       if (shouldAutoRun) {
-        onSubmit({});
+        onSubmit({}, 'manual'); // Auto-run defaults to manual trigger
         onClose();
         return;
       }

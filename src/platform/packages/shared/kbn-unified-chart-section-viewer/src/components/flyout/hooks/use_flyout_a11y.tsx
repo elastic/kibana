@@ -10,11 +10,9 @@
 import { EuiScreenReaderOnly, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import useUnmount from 'react-use/lib/useUnmount';
 
 export const useFlyoutA11y = ({ isXlScreen }: { isXlScreen: boolean }) => {
   const descriptionId = useGeneratedHtmlId();
-  const [triggerEl] = useState(document.activeElement);
   const [flyoutEl, setFlyoutEl] = useState<HTMLElement | null>(null);
 
   // Auto-focus push flyout on open or when switching to XL screen
@@ -25,13 +23,6 @@ export const useFlyoutA11y = ({ isXlScreen }: { isXlScreen: boolean }) => {
       setTimeout(() => flyoutEl.focus());
     }
   }, [flyoutEl, isXlScreen]);
-
-  // Return focus to the trigger element when the flyout is closed
-  useUnmount(() => {
-    if (triggerEl instanceof HTMLElement && document.contains(triggerEl)) {
-      triggerEl.focus();
-    }
-  });
 
   return {
     a11yProps: {

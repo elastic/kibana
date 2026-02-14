@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { ChatResponse } from '@kbn/agent-builder-plugin/common/http_api/chat';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import { apm, timerange } from '@kbn/synthtrace-client';
-import type { QueryResult, TabularDataResult } from '@kbn/agent-builder-common';
+import type { QueryResult, EsqlResults } from '@kbn/agent-builder-common';
 import { setupAgentCallSearchToolWithEsqlThenAnswer } from '../../utils/proxy_scenario';
 import { createLlmProxy, type LlmProxy } from '../../utils/llm_proxy';
 import {
@@ -30,7 +30,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
     let connectorId: string;
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     let queryResult: QueryResult;
-    let tabularDataResult: TabularDataResult;
+    let esqlResults: EsqlResults;
 
     const USER_PROMPT = 'Please find a single trace with `service.name:java-backend`';
     const MOCKED_LLM_TITLE = 'Mocked conversation title';
@@ -71,10 +71,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
       expect(esqlToolCallMsg.role).to.eql('tool');
 
       const toolCallContent = JSON.parse(esqlToolCallMsg?.content as string);
-      [queryResult, tabularDataResult] = toolCallContent.results as [
-        QueryResult,
-        TabularDataResult
-      ];
+      [queryResult, esqlResults] = toolCallContent.results as [QueryResult, EsqlResults];
     });
 
     after(async () => {
@@ -89,11 +86,10 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
     });
 
     it('sends the correct esql result to the LLM', () => {
-      expect(tabularDataResult.type).to.be('tabular_data');
-      expect(tabularDataResult).have.property('tool_result_id');
-      expect(tabularDataResult.data.source).to.be('esql');
-      expect(tabularDataResult.data.query).to.be(MOCKED_ESQL_QUERY);
-      expect(tabularDataResult.data.values).to.have.length(15);
+      expect(esqlResults.type).to.be('esql_results');
+      expect(esqlResults).have.property('tool_result_id');
+      expect(esqlResults.data.query).to.be(MOCKED_ESQL_QUERY);
+      expect(esqlResults.data.values).to.have.length(15);
     });
 
     it('returns the response from the LLM', async () => {

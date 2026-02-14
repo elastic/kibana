@@ -6,7 +6,8 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
-import { apiTest, expect } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS, TEST_INPUT } from '../fixtures/constants';
 
 apiTest.describe(
@@ -26,7 +27,7 @@ apiTest.describe(
         responseType: 'json',
         body: TEST_INPUT.script,
       });
-      expect(response.statusCode).toBe(404);
+      expect(response).toHaveStatusCode(404);
       expect(response.body.message).toBe('Not Found');
     });
   }

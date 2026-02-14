@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { DateProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
@@ -34,7 +34,7 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('@timestamp', '2025-01-01T12:34:56.789Z');
+      expect(ingestedDocs[0]?.['@timestamp']).toBe('2025-01-01T12:34:56.789Z');
     }
   );
 
@@ -63,7 +63,7 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('event.created', '2025-01-01');
+      expect(ingestedDocs[0]?.event?.created).toBe('2025-01-01');
     }
   );
 
@@ -91,7 +91,7 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('event.created_date', '2025-01-01T12:34:56.000Z');
+      expect(ingestedDocs[0]?.event?.created_date).toBe('2025-01-01T12:34:56.000Z');
     }
   );
 
@@ -121,8 +121,8 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
 
     const ingestedDocs = await testBed.getDocsOrdered(indexName);
     expect(ingestedDocs).toHaveLength(2);
-    expect(ingestedDocs[0]).toHaveProperty('event.created_date', '01 01 2025 12:34');
-    expect(ingestedDocs[1]).toHaveProperty('event.created_date', '01 01 2025 12:35');
+    expect(ingestedDocs[0]?.event?.created_date).toBe('01 01 2025 12:34');
+    expect(ingestedDocs[1]?.event?.created_date).toBe('01 01 2025 12:35');
   });
 
   apiTest(
@@ -150,7 +150,7 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('event.created_date', '2025-01-01');
+      expect(ingestedDocs[0]?.event?.created_date).toBe('2025-01-01');
     }
   );
 
@@ -235,7 +235,7 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
       const ingestedDocs = await testBed.getDocs(indexName);
 
       expect(ingestedDocs).toHaveLength(1);
-      expect(ingestedDocs[0]).toHaveProperty('event.created_date', '2025-09-10T00:00:00.000+02:00');
+      expect(ingestedDocs[0]?.event?.created_date).toBe('2025-09-10T00:00:00.000+02:00');
     }
   );
 

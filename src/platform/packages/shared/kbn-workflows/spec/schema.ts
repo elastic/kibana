@@ -555,6 +555,8 @@ export const WorkflowExecutionContextSchema = z.object({
   isTestRun: z.boolean(),
   startedAt: z.date(),
   url: z.string(),
+  executedBy: z.string().optional(),
+  triggeredBy: z.string().optional(),
 });
 export type WorkflowExecutionContext = z.infer<typeof WorkflowExecutionContextSchema>;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { GrokProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
 import { expectDefined } from '../../../utils';
@@ -583,13 +583,12 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
       expect(esqlResult.documents).toHaveLength(1);
-      expect(esqlResult.documents[0]).toHaveProperty('timestamp', '11-06 13:43:41.377');
-      expect(esqlResult.documents[0]).toHaveProperty('pid', '1702');
-      expect(esqlResult.documents[0]).toHaveProperty('tid', '17633');
-      expect(esqlResult.documents[0]).toHaveProperty('level', 'W');
-      expect(esqlResult.documents[0]).toHaveProperty('tag', 'ActivityManager');
-      expect(esqlResult.documents[0]).toHaveProperty(
-        'log_message',
+      expect(esqlResult.documents[0]?.timestamp).toBe('11-06 13:43:41.377');
+      expect(esqlResult.documents[0]?.pid).toBe('1702');
+      expect(esqlResult.documents[0]?.tid).toBe('17633');
+      expect(esqlResult.documents[0]?.level).toBe('W');
+      expect(esqlResult.documents[0]?.tag).toBe('ActivityManager');
+      expect(esqlResult.documents[0]?.log_message).toBe(
         'getRunningAppProcesses: caller 10113 does not hold REAL_GET_TASKS; limiting output'
       );
     }

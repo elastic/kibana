@@ -4,4 +4,9 @@ Public React components and hooks for interacting with the Chrome Sidebar in plu
 
 ```tsx
 import { SidebarHeader, SidebarBody, useSidebarApp } from '@kbn/core-chrome-sidebar-components';
+
+// Access app API from hooks
+const myApp = useSidebarApp('mySidebarApp');
+myApp.actions.openWithData(data);
+myApp.open();  // Opens with default state
 ```

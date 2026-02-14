@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { RemoveProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -30,7 +30,7 @@ apiTest.describe('Streamlang to ES|QL - Remove Processor', { tag: ['@ess', '@svl
     const esqlResult = await esql.queryOnIndex(indexName, query);
 
     expect(esqlResult.documents).toHaveLength(1);
-    expect(esqlResult.documents[0]).not.toHaveProperty('temp_field');
+    expect(esqlResult.documents[0]?.temp_field).toBeUndefined();
     expect(esqlResult.documents[0]).toStrictEqual(
       expect.objectContaining({ message: 'keep-this' })
     );
@@ -59,7 +59,7 @@ apiTest.describe('Streamlang to ES|QL - Remove Processor', { tag: ['@ess', '@svl
     // ES|QL filters out documents with missing field when ignore_missing: false
     expect(esqlResult.documents).toHaveLength(1);
     expect(esqlResult.documents[0]).toStrictEqual(expect.objectContaining({ message: 'doc1' }));
-    expect(esqlResult.documents[0]).not.toHaveProperty('temp_field');
+    expect(esqlResult.documents[0]?.temp_field).toBeUndefined();
   });
 
   apiTest('should handle ignore_missing: true with DROP', async ({ testBed, esql }) => {
@@ -87,8 +87,8 @@ apiTest.describe('Streamlang to ES|QL - Remove Processor', { tag: ['@ess', '@svl
     expect(esqlResult.documents).toHaveLength(2);
     const doc1 = esqlResult.documents.find((d: any) => d.message === 'doc1');
     const doc2 = esqlResult.documents.find((d: any) => d.message === 'doc2');
-    expect(doc1).not.toHaveProperty('temp_field');
-    expect(doc2).not.toHaveProperty('temp_field');
+    expect(doc1?.temp_field).toBeUndefined();
+    expect(doc2?.temp_field).toBeUndefined();
   });
 
   apiTest('should remove field conditionally with EVAL CASE', async ({ testBed, esql }) => {
@@ -121,12 +121,12 @@ apiTest.describe('Streamlang to ES|QL - Remove Processor', { tag: ['@ess', '@svl
     // First doc should have temp_data nulled (where condition matched)
     const doc1 = esqlResult.documents.find((d: any) => d.message === 'doc1');
     // Note: ESQL CASE sets to null, which is removed from the result
-    expect(doc1).toHaveProperty('temp_data', null);
+    expect(doc1?.temp_data).toBeNull();
     expect(doc1?.['event.kind']).toBe('test');
 
     // Second doc should keep temp_data (where condition not matched)
     const doc2 = esqlResult.documents.find((d: any) => d.message === 'doc2');
-    expect(doc2).toHaveProperty('temp_data', 'keep-me');
+    expect(doc2?.temp_data).toBe('keep-me');
     expect(doc2?.['event.kind']).toBe('production');
   });
 

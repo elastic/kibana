@@ -24,7 +24,9 @@ export class SidebarRegistryService {
   private readonly changed$ = new Subject<void>();
 
   @bind
-  registerApp<TParams = {}>(app: SidebarAppDefinition<TParams>): SidebarAppUpdater {
+  registerApp<TState = undefined, TActions = undefined>(
+    app: SidebarAppDefinition<TState, TActions>
+  ): SidebarAppUpdater {
     if (!isValidSidebarAppId(app.appId)) {
       throw new Error(
         `[Sidebar Registry] Invalid app ID: ${app.appId}. App ID must be either explicitly listed`

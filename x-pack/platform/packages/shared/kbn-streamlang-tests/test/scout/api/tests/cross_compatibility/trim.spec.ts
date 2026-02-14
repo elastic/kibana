@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { StreamlangDSL, TrimProcessor } from '@kbn/streamlang';
 import { transpileEsql, transpileIngestPipeline } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -40,12 +40,12 @@ apiTest.describe('Cross-compatibility - Trim Processor', { tag: ['@ess', '@svlOb
     const esqlResult = await esql.queryOnIndex('esql-e2e-test-trim-basic', query);
 
     expect(ingestResult).toHaveLength(2);
-    expect(ingestResult[0]).toHaveProperty('message', 'test message 1');
-    expect(ingestResult[1]).toHaveProperty('message', 'test message 2');
+    expect(ingestResult[0]?.message).toBe('test message 1');
+    expect(ingestResult[1]?.message).toBe('test message 2');
 
     expect(esqlResult.documents).toHaveLength(2);
-    expect(esqlResult.documents[0]).toHaveProperty('message', 'test message 1');
-    expect(esqlResult.documents[1]).toHaveProperty('message', 'test message 2');
+    expect(esqlResult.documents[0]?.message).toBe('test message 1');
+    expect(esqlResult.documents[1]?.message).toBe('test message 2');
   });
 
   apiTest('should trim a field into a target field', async ({ testBed, esql }) => {
@@ -70,12 +70,12 @@ apiTest.describe('Cross-compatibility - Trim Processor', { tag: ['@ess', '@svlOb
     const esqlResult = await esql.queryOnIndex('esql-e2e-test-trim-basic', query);
 
     expect(ingestResult).toHaveLength(2);
-    expect(ingestResult[0]).toHaveProperty('message_trimmed', 'test message 1');
-    expect(ingestResult[1]).toHaveProperty('message_trimmed', 'test message 2');
+    expect(ingestResult[0]?.message_trimmed).toBe('test message 1');
+    expect(ingestResult[1]?.message_trimmed).toBe('test message 2');
 
     expect(esqlResult.documents).toHaveLength(2);
-    expect(esqlResult.documents[0]).toHaveProperty('message_trimmed', 'test message 1');
-    expect(esqlResult.documents[1]).toHaveProperty('message_trimmed', 'test message 2');
+    expect(esqlResult.documents[0]?.message_trimmed).toBe('test message 1');
+    expect(esqlResult.documents[1]?.message_trimmed).toBe('test message 2');
   });
 
   apiTest('should trim a field with a where condition', async ({ testBed, esql }) => {
@@ -106,11 +106,11 @@ apiTest.describe('Cross-compatibility - Trim Processor', { tag: ['@ess', '@svlOb
     const esqlResult = await esql.queryOnIndex('esql-e2e-test-trim-basic', query);
 
     expect(ingestResult).toHaveLength(2);
-    expect(ingestResult[0]).toHaveProperty('message', 'test message 1');
-    expect(ingestResult[1]).toHaveProperty('message', '   test message 2   ');
+    expect(ingestResult[0]?.message).toBe('test message 1');
+    expect(ingestResult[1]?.message).toBe('   test message 2   ');
 
     expect(esqlResult.documents).toHaveLength(2);
-    expect(esqlResult.documents[0]).toHaveProperty('message', 'test message 1');
-    expect(esqlResult.documents[1]).toHaveProperty('message', '   test message 2   ');
+    expect(esqlResult.documents[0]?.message).toBe('test message 1');
+    expect(esqlResult.documents[1]?.message).toBe('   test message 2   ');
   });
 });
