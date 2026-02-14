@@ -7,9 +7,7 @@
 
 import React from 'react';
 import type { CoreSetup } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { ActionsMenuGroup, createPublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { OwnerEnum } from '../../docs/openapi/bundled-types.gen';
 import {
   createCaseStepCommonDefinition,
   CreateCaseStepTypeId,
@@ -24,11 +22,8 @@ import {
   buildTemplateSelectionHandler,
   createCasesWorkflowAutocompleteDataSources,
 } from './case_autocomplete';
-
-const ownerOptions = Object.values(OwnerEnum).map((owner) => ({
-  value: owner,
-  label: owner,
-}));
+import { caseSeverityOptions, connectorTypeOptions, ownerOptions } from './case_enum_options';
+import * as i18n from './translations';
 
 export const createCreateCaseStepDefinition = (core: CoreSetup) => {
   const {
@@ -46,17 +41,10 @@ export const createCreateCaseStepDefinition = (core: CoreSetup) => {
         default: icon,
       }))
     ),
-    label: i18n.translate('xpack.cases.workflowSteps.createCase.label', {
-      defaultMessage: 'Create case',
-    }),
-    description: i18n.translate('xpack.cases.workflowSteps.createCase.description', {
-      defaultMessage: 'Creates a new case with the specified attributes',
-    }),
+    label: i18n.CREATE_CASE_STEP_LABEL,
+    description: i18n.CREATE_CASE_STEP_DESCRIPTION,
     documentation: {
-      details: i18n.translate('xpack.cases.workflowSteps.createCase.documentation.details', {
-        defaultMessage:
-          'This step creates a new case in the cases system. You can specify title, description, tags, assignees, severity, category, connector configuration, sync settings, and custom fields. The step returns the complete created case object.',
-      }),
+      details: i18n.CREATE_CASE_STEP_DOCUMENTATION_DETAILS,
       examples: [
         `## Basic case creation
 \`\`\`yaml
@@ -172,14 +160,15 @@ export const createCreateCaseStepDefinition = (core: CoreSetup) => {
             ) => {
               if (option) {
                 return {
-                  message: `Owner "${option.label}" is valid for case workflows.`,
+                  message: i18n.OWNER_VALID_MESSAGE(option.label),
                 };
               }
 
               return {
-                message: `Owner "${value}" is not supported. Allowed values: ${ownerOptions
-                  .map((owner) => owner.value)
-                  .join(', ')}.`,
+                message: i18n.OWNER_NOT_SUPPORTED_MESSAGE(
+                  value,
+                  ownerOptions.map((owner) => owner.value).join(', ')
+                ),
               };
             },
           },
@@ -191,33 +180,22 @@ export const createCreateCaseStepDefinition = (core: CoreSetup) => {
           selection: buildConnectorSelectionHandler(getConnectors, 'name'),
         },
         'connector.type': {
-          selection: buildEnumSelectionHandler(
-            [
-              '.cases-webhook',
-              '.jira',
-              '.none',
-              '.resilient',
-              '.servicenow',
-              '.servicenow-sir',
-              '.swimlane',
-            ],
-            'Connector type'
-          ),
+          selection: buildEnumSelectionHandler(connectorTypeOptions, i18n.CONNECTOR_TYPE_LABEL),
         },
         severity: {
-          selection: buildEnumSelectionHandler(['low', 'medium', 'high', 'critical'], 'Severity'),
+          selection: buildEnumSelectionHandler(caseSeverityOptions, i18n.SEVERITY_LABEL),
         },
         category: {
-          selection: buildStringValueSelectionHandler(getCategoryOptions, 'Category'),
+          selection: buildStringValueSelectionHandler(getCategoryOptions, i18n.CATEGORY_LABEL),
         },
         tags: {
-          selection: buildStringValueSelectionHandler(getTagOptions, 'Tag'),
+          selection: buildStringValueSelectionHandler(getTagOptions, i18n.TAG_LABEL),
         },
         'settings.syncAlerts': {
-          selection: buildBooleanSelectionHandler('alert sync'),
+          selection: buildBooleanSelectionHandler(i18n.ALERT_SYNC_LABEL),
         },
         'settings.extractObservables': {
-          selection: buildBooleanSelectionHandler('observable extraction'),
+          selection: buildBooleanSelectionHandler(i18n.OBSERVABLE_EXTRACTION_LABEL),
         },
         // editorHandlers do not currently support array item paths reliably.
         // Use customFields.key and customFields.type to provide discoverability for values from case configuration.

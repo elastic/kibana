@@ -7,7 +7,6 @@
 
 import React from 'react';
 import type { CoreSetup } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { ActionsMenuGroup, createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import {
   updateCaseStepCommonDefinition,
@@ -22,6 +21,8 @@ import {
   buildStringValueSelectionHandler,
   createCasesWorkflowAutocompleteDataSources,
 } from './case_autocomplete';
+import { caseSeverityOptions, caseStatusOptions, connectorTypeOptions } from './case_enum_options';
+import * as i18n from './translations';
 
 export const createUpdateCaseStepDefinition = (core: CoreSetup) => {
   const { getConnectors, getCustomFieldOptions, getCategoryOptions, getTagOptions } =
@@ -34,17 +35,10 @@ export const createUpdateCaseStepDefinition = (core: CoreSetup) => {
         default: icon,
       }))
     ),
-    label: i18n.translate('xpack.cases.workflowSteps.updateCase.label', {
-      defaultMessage: 'Update case',
-    }),
-    description: i18n.translate('xpack.cases.workflowSteps.updateCase.description', {
-      defaultMessage: 'Updates a case with the provided fields',
-    }),
+    label: i18n.UPDATE_CASE_STEP_LABEL,
+    description: i18n.UPDATE_CASE_STEP_DESCRIPTION,
     documentation: {
-      details: i18n.translate('xpack.cases.workflowSteps.updateCase.documentation.details', {
-        defaultMessage:
-          'This step first fetches the case to retrieve the latest version and then applies the requested updates.',
-      }),
+      details: i18n.UPDATE_CASE_STEP_DOCUMENTATION_DETAILS,
       examples: [
         `## Update case status and severity
 \`\`\`yaml
@@ -62,16 +56,16 @@ export const createUpdateCaseStepDefinition = (core: CoreSetup) => {
     editorHandlers: {
       input: {
         'updates.severity': {
-          selection: buildEnumSelectionHandler(['low', 'medium', 'high', 'critical'], 'Severity'),
+          selection: buildEnumSelectionHandler(caseSeverityOptions, i18n.SEVERITY_LABEL),
         },
         'updates.status': {
-          selection: buildEnumSelectionHandler(['open', 'in-progress', 'closed'], 'Status'),
+          selection: buildEnumSelectionHandler(caseStatusOptions, i18n.STATUS_LABEL),
         },
         'updates.category': {
-          selection: buildStringValueSelectionHandler(getCategoryOptions, 'Category'),
+          selection: buildStringValueSelectionHandler(getCategoryOptions, i18n.CATEGORY_LABEL),
         },
         'updates.tags': {
-          selection: buildStringValueSelectionHandler(getTagOptions, 'Tag'),
+          selection: buildStringValueSelectionHandler(getTagOptions, i18n.TAG_LABEL),
         },
         'updates.connector.id': {
           selection: buildConnectorSelectionHandler(getConnectors, 'id'),
@@ -80,24 +74,13 @@ export const createUpdateCaseStepDefinition = (core: CoreSetup) => {
           selection: buildConnectorSelectionHandler(getConnectors, 'name'),
         },
         'updates.connector.type': {
-          selection: buildEnumSelectionHandler(
-            [
-              '.cases-webhook',
-              '.jira',
-              '.none',
-              '.resilient',
-              '.servicenow',
-              '.servicenow-sir',
-              '.swimlane',
-            ],
-            'Connector type'
-          ),
+          selection: buildEnumSelectionHandler(connectorTypeOptions, i18n.CONNECTOR_TYPE_LABEL),
         },
         'updates.settings.syncAlerts': {
-          selection: buildBooleanSelectionHandler('alert sync'),
+          selection: buildBooleanSelectionHandler(i18n.ALERT_SYNC_LABEL),
         },
         'updates.settings.extractObservables': {
-          selection: buildBooleanSelectionHandler('observable extraction'),
+          selection: buildBooleanSelectionHandler(i18n.OBSERVABLE_EXTRACTION_LABEL),
         },
         'updates.customFields.key': {
           selection: buildCustomFieldKeySelectionHandler(getCustomFieldOptions),

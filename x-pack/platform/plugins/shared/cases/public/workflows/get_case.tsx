@@ -7,12 +7,12 @@
 
 import React from 'react';
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { i18n } from '@kbn/i18n';
 import { ActionsMenuGroup } from '@kbn/workflows-extensions/public';
 import {
   getCaseStepCommonDefinition,
   GetCaseStepTypeId,
 } from '../../common/workflows/steps/get_case';
+import * as i18n from './translations';
 
 export const getCaseStepDefinition: PublicStepDefinition = {
   ...getCaseStepCommonDefinition,
@@ -21,17 +21,10 @@ export const getCaseStepDefinition: PublicStepDefinition = {
       default: icon,
     }))
   ),
-  label: i18n.translate('xpack.cases.workflowSteps.getCase.label', {
-    defaultMessage: 'Get case by ID',
-  }),
-  description: i18n.translate('xpack.cases.workflowSteps.getCase.description', {
-    defaultMessage: 'Retrieves a case using its unique identifier',
-  }),
+  label: i18n.GET_CASE_STEP_LABEL,
+  description: i18n.GET_CASE_STEP_DESCRIPTION,
   documentation: {
-    details: i18n.translate('xpack.cases.workflowSteps.getCase.documentation.details', {
-      defaultMessage:
-        'This step retrieves a complete case object from the cases system using its ID. You can optionally include comments and attachments in the response.',
-    }),
+    details: i18n.GET_CASE_STEP_DOCUMENTATION_DETAILS,
     examples: [
       `## Basic usage
 \`\`\`yaml

@@ -7,12 +7,12 @@
 
 import React from 'react';
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { i18n } from '@kbn/i18n';
 import { ActionsMenuGroup } from '@kbn/workflows-extensions/public';
 import {
   addCommentStepCommonDefinition,
   AddCommentStepTypeId,
 } from '../../common/workflows/steps/add_comment';
+import * as i18n from './translations';
 
 export const addCommentStepDefinition: PublicStepDefinition = {
   ...addCommentStepCommonDefinition,
@@ -21,16 +21,10 @@ export const addCommentStepDefinition: PublicStepDefinition = {
       default: icon,
     }))
   ),
-  label: i18n.translate('xpack.cases.workflowSteps.addComment.label', {
-    defaultMessage: 'Add case comment',
-  }),
-  description: i18n.translate('xpack.cases.workflowSteps.addComment.description', {
-    defaultMessage: 'Adds a user comment to a case',
-  }),
+  label: i18n.ADD_COMMENT_STEP_LABEL,
+  description: i18n.ADD_COMMENT_STEP_DESCRIPTION,
   documentation: {
-    details: i18n.translate('xpack.cases.workflowSteps.addComment.documentation.details', {
-      defaultMessage: 'This step appends a new user comment to the selected case.',
-    }),
+    details: i18n.ADD_COMMENT_STEP_DOCUMENTATION_DETAILS,
     examples: [
       `## Add comment to a case
 \`\`\`yaml

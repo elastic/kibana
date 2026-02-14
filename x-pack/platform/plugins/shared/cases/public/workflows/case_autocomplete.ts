@@ -9,6 +9,7 @@ import type { CoreSetup, HttpStart } from '@kbn/core/public';
 import type { PropertySelectionHandler, SelectionOption } from '@kbn/workflows';
 import { CASE_CONFIGURE_URL, CASE_TAGS_URL } from '../../common/constants';
 import { getAllConnectorsUrl } from '../../common/utils/connectors_api';
+import * as i18n from './translations';
 
 export interface ConnectorOption {
   id: string;
@@ -160,12 +161,12 @@ export const buildEnumSelectionHandler = (
   getDetails: async (value: string, _context: unknown, option: SelectionOption<string> | null) => {
     if (option) {
       return {
-        message: `${label} "${option.label}" is supported.`,
+        message: i18n.ENUM_VALUE_SUPPORTED_MESSAGE(label, option.label),
       };
     }
 
     return {
-      message: `${label} "${value}" is not supported. Allowed values: ${values.join(', ')}.`,
+      message: i18n.ENUM_VALUE_NOT_SUPPORTED_MESSAGE(label, value, values.join(', ')),
     };
   },
 });
@@ -174,18 +175,18 @@ export const buildBooleanSelectionHandler = (label: string): PropertySelectionHa
   search: async (input: string) => {
     const query = input.trim().toLowerCase();
     const options: Array<{ value: boolean; label: string; description: string }> = [
-      { value: true, label: 'true', description: `Enable ${label}` },
-      { value: false, label: 'false', description: `Disable ${label}` },
+      { value: true, label: 'true', description: i18n.ENABLE_BOOLEAN_OPTION(label) },
+      { value: false, label: 'false', description: i18n.DISABLE_BOOLEAN_OPTION(label) },
     ];
     return options.filter((option) => query.length === 0 || option.label.includes(query));
   },
   resolve: async (value: boolean) => ({
     value,
     label: String(value),
-    description: value ? `Enable ${label}` : `Disable ${label}`,
+    description: value ? i18n.ENABLE_BOOLEAN_OPTION(label) : i18n.DISABLE_BOOLEAN_OPTION(label),
   }),
   getDetails: async (value: string) => ({
-    message: `${label} is set to "${value}".`,
+    message: i18n.BOOLEAN_SET_TO_MESSAGE(label, value),
   }),
 });
 
@@ -208,7 +209,7 @@ export const buildConnectorSelectionHandler = (
         value: (connector[valueKey] ?? '') as string,
         label: connector.name,
         description: connector.actionTypeId
-          ? `Connector type: ${connector.actionTypeId}`
+          ? i18n.CONNECTOR_ACTION_TYPE_DESCRIPTION(connector.actionTypeId)
           : undefined,
       }))
       .filter((option) => option.value.length > 0);
@@ -224,18 +225,20 @@ export const buildConnectorSelectionHandler = (
     return {
       value: (connector[valueKey] ?? '') as string,
       label: connector.name,
-      description: connector.actionTypeId ? `Connector type: ${connector.actionTypeId}` : undefined,
+      description: connector.actionTypeId
+        ? i18n.CONNECTOR_ACTION_TYPE_DESCRIPTION(connector.actionTypeId)
+        : undefined,
     };
   },
   getDetails: async (value: string, _context: unknown, option: SelectionOption<string> | null) => {
     if (option) {
       return {
-        message: `Connector "${option.label}" is available for case workflows.`,
+        message: i18n.CONNECTOR_AVAILABLE_MESSAGE(option.label),
       };
     }
 
     return {
-      message: `Connector "${value}" was not found. Select an existing connector in Kibana connectors.`,
+      message: i18n.CONNECTOR_NOT_FOUND_MESSAGE(value),
     };
   },
 });
@@ -278,12 +281,12 @@ export const buildTemplateSelectionHandler = (
   getDetails: async (value: string, _context: unknown, option: SelectionOption<string> | null) => {
     if (option) {
       return {
-        message: `Template "${option.label}" can be used to prefill case attributes.`,
+        message: i18n.TEMPLATE_CAN_BE_USED_MESSAGE(option.label),
       };
     }
 
     return {
-      message: `Template "${value}" was not found in case configuration.`,
+      message: i18n.TEMPLATE_NOT_FOUND_MESSAGE(value),
     };
   },
 });
@@ -304,7 +307,7 @@ export const buildCustomFieldKeySelectionHandler = (
       .map((customField) => ({
         value: customField.key,
         label: customField.label,
-        description: `key: ${customField.key} | type: ${customField.type}`,
+        description: i18n.CUSTOM_FIELD_KEY_TYPE_DESCRIPTION(customField.key, customField.type),
       }));
   },
   resolve: async (value: string) => {
@@ -318,18 +321,18 @@ export const buildCustomFieldKeySelectionHandler = (
     return {
       value: customField.key,
       label: customField.label,
-      description: `key: ${customField.key} | type: ${customField.type}`,
+      description: i18n.CUSTOM_FIELD_KEY_TYPE_DESCRIPTION(customField.key, customField.type),
     };
   },
   getDetails: async (value: string, _context: unknown, option: SelectionOption<string> | null) => {
     if (option) {
       return {
-        message: `Custom field "${option.label}" is available in case configuration.`,
+        message: i18n.CUSTOM_FIELD_AVAILABLE_MESSAGE(option.label),
       };
     }
 
     return {
-      message: `Custom field "${value}" was not found in case configuration.`,
+      message: i18n.CUSTOM_FIELD_NOT_FOUND_MESSAGE(value),
     };
   },
 });
@@ -350,7 +353,7 @@ export const buildCustomFieldTypeSelectionHandler = (
       .map(([type, count]) => ({
         value: type,
         label: type,
-        description: `Used by ${count} configured custom field${count > 1 ? 's' : ''}`,
+        description: i18n.CUSTOM_FIELD_TYPE_USAGE_DESCRIPTION(count),
       }));
   },
   resolve: async (value: string) => ({
@@ -358,7 +361,7 @@ export const buildCustomFieldTypeSelectionHandler = (
     label: value,
   }),
   getDetails: async (value: string) => ({
-    message: `Custom field type "${value}" can be used with configured case custom fields.`,
+    message: i18n.CUSTOM_FIELD_TYPE_CAN_BE_USED_MESSAGE(value),
   }),
 });
 
@@ -386,11 +389,11 @@ export const buildStringValueSelectionHandler = (
   getDetails: async (value: string, _context: unknown, option: SelectionOption<string> | null) => {
     if (option) {
       return {
-        message: `${label} "${option.label}" is available.`,
+        message: i18n.STRING_VALUE_AVAILABLE_MESSAGE(label, option.label),
       };
     }
     return {
-      message: `${label} "${value}" is not in the current suggestions, but can still be used.`,
+      message: i18n.STRING_VALUE_NOT_IN_SUGGESTIONS_MESSAGE(label, value),
     };
   },
 });
