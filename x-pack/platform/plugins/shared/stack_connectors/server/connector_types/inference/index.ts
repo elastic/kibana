@@ -105,6 +105,23 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
       } catch (e) {
         /* throws error if inference endpoint by id does not exist */
       }
+
+      // EIS / Elastic provider inference endpoints are provisioned and managed outside Kibana
+      // (e.g. Cloud Connected Mode auto-provisions chat_completion endpoints).
+      // For this provider, connector creation should *reference* an existing endpoint, not try to create/update/delete it.
+      if (provider === ServiceProviderKeys.elastic) {
+        if (!inferenceExists) {
+          throw new Error(
+            `Inference with id ${config?.inferenceId} and task type ${config?.taskType} does not exist.`
+          );
+        }
+
+        logger.debug(
+          `Inference endpoint for provider "${provider}" and inference id ${config?.inferenceId} already exists; skipping endpoint management`
+        );
+        return;
+      }
+
       if (!isUpdate && inferenceExists) {
         throw new Error(
           `Inference with id ${config?.inferenceId} and task type ${config?.taskType} already exists.`
@@ -149,6 +166,10 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
   },
   postSaveHook: async ({ config, logger, services, wasSuccessful, isUpdate }) => {
     if (!wasSuccessful && !isUpdate) {
+      if (config.provider === ServiceProviderKeys.elastic) {
+        // EIS / Elastic endpoints are managed outside Kibana; do not delete.
+        return;
+      }
       const esClient = services.scopedClusterClient.asInternalUser;
       await deleteInferenceEndpoint(
         config.inferenceId,
@@ -159,6 +180,10 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     }
   },
   postDeleteHook: async ({ config, logger, services }) => {
+    if (config.provider === ServiceProviderKeys.elastic) {
+      // EIS / Elastic endpoints are managed outside Kibana; do not delete.
+      return;
+    }
     const esClient = services.scopedClusterClient.asInternalUser;
     await deleteInferenceEndpoint(
       config.inferenceId,
