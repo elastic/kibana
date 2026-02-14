@@ -8,7 +8,6 @@ steps:
       - linting
       - linting_with_types
       - check_types
-      - check_oas_snapshot
     steps:
       - command: .buildkite/scripts/steps/test/ftr_configs.sh
         env:
