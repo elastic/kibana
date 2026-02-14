@@ -66,6 +66,8 @@ import {
   PostCancelActionRequestSchema,
   PostNewAgentActionResponseSchema,
   PostRetrieveAgentsByActionsResponseSchema,
+  PostGenerateAgentsReportRequestSchema,
+  PostGenerateAgentsReportResponseSchema,
 } from '../../types/rest_spec/agent';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { calculateRouteAuthz } from '../../services/security/security';
@@ -107,6 +109,7 @@ import {
   changeAgentPrivilegeLevelHandler,
 } from './change_privilege_level_handlers';
 import { bulkRollbackAgentHandler, rollbackAgentHandler } from './rollback_handlers';
+import { generateReportHandler } from './generate_report_handler';
 
 export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
   const experimentalFeatures = parseExperimentalConfigValue(
@@ -1203,6 +1206,44 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
 
         bulkChangeAgentsPrivilegeLevelHandler
+      );
+
+    router.versioned
+      .post({
+        path: AGENT_API_ROUTES.GENERATE_REPORT_PATTERN,
+        access: 'internal',
+        enableQueryVersion: true,
+        security: {
+          authz: {
+            requiredPrivileges: [
+              FLEET_API_PRIVILEGES.AGENTS.READ,
+              FLEET_API_PRIVILEGES.GENERATE_REPORTS.ALL,
+            ],
+          },
+        },
+        summary: `Generate agent csv report`,
+        options: {
+          tags: ['oas-tag:Elastic Agents'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.internal.v1,
+          validate: {
+            request: PostGenerateAgentsReportRequestSchema,
+            response: {
+              200: {
+                description: 'OK: A successful request.',
+                body: () => PostGenerateAgentsReportResponseSchema,
+              },
+              400: {
+                description: 'A bad request.',
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        generateReportHandler
       );
   }
 

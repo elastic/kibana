@@ -64,7 +64,7 @@ export function registerBatchReindexIndicesRoutes({
       },
       validate: {
         body: schema.object({
-          indices: schema.arrayOf(reindexSchema),
+          indices: schema.arrayOf(reindexSchema, { maxSize: 1000 }),
         }),
       },
     },

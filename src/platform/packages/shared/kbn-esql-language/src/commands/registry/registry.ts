@@ -85,6 +85,7 @@ export interface ICommandMethods<TContext = any> {
 export interface ICommandMetadata {
   preview?: boolean; // Optional property to indicate if the command is in preview mode
   subquerySupport?: boolean; // Optional property to indicate if the command supports subqueries (ONLY FROM). This is temporary and we will remove it when subqueries in FROM move to Technical Preview.
+  viewsSupport?: boolean; // Optional property to indicate if the command suggests/validates ES|QL views (ONLY FROM). This is temporary and we will remove it when views in FROM move to Preview.
   description: string; // Optional property for a brief description of the command
   declaration: string; // The pattern for declaring this command statement. Displayed in the autocomplete.
   examples: string[]; // A list of examples of how to use the command. Displayed in the autocomplete.

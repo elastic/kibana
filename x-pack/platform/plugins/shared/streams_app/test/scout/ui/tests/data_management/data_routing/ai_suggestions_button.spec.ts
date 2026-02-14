@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { DATE_RANGE, generateLogsData } from '../../../fixtures/generators';
 import {
@@ -15,7 +16,7 @@ import {
   type LlmProxySetup,
 } from '../../../fixtures/ai_suggestions_helpers';
 
-test.describe('Stream data routing - AI suggestions button', { tag: ['@ess'] }, () => {
+test.describe('Stream data routing - AI suggestions button', { tag: tags.stateful.classic }, () => {
   let llmSetup: LlmProxySetup;
 
   test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, log }) => {

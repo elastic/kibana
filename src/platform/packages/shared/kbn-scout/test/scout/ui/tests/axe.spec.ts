@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test, expect } from '../../../../src/playwright';
+import { test, expect, tags } from '../../../../src/playwright';
 
-test.describe('runA11yScan', { tag: ['@svlSecurity', '@ess'] }, () => {
-  test('returns violations array (empty for basic accessible markup)', async ({ page }) => {
-    await page.setContent(`
+test.describe(
+  'runA11yScan',
+  { tag: [...tags.serverless.security.complete, ...tags.stateful.classic] },
+  () => {
+    test('returns violations array (empty for basic accessible markup)', async ({ page }) => {
+      await page.setContent(`
       <html lang="en">
       <head>
         <title>AXE Core check for basic accessible markup</title>
@@ -27,16 +30,16 @@ test.describe('runA11yScan', { tag: ['@svlSecurity', '@ess'] }, () => {
       </html>
     `);
 
-    const { violations } = await page.checkA11y();
+      const { violations } = await page.checkA11y();
 
-    expect(Array.isArray(violations)).toBe(true);
+      expect(Array.isArray(violations)).toBe(true);
 
-    // Basic page should have no serious/critical violations
-    expect(violations).toHaveLength(0);
-  });
+      // Basic page should have no serious/critical violations
+      expect(violations).toHaveLength(0);
+    });
 
-  test('returns violations related to the CSS "include" selector only', async ({ page }) => {
-    await page.setContent(`
+    test('returns violations related to the CSS "include" selector only', async ({ page }) => {
+      await page.setContent(`
       <main>
         <h1>AXE Core check for basic accessible markup</h1>
         <form>
@@ -46,8 +49,9 @@ test.describe('runA11yScan', { tag: ['@svlSecurity', '@ess'] }, () => {
       </main>
     `);
 
-    const { violations } = await page.checkA11y({ include: ['form'] });
+      const { violations } = await page.checkA11y({ include: ['form'] });
 
-    expect(violations).toHaveLength(1);
-  });
-});
+      expect(violations).toHaveLength(1);
+    });
+  }
+);
