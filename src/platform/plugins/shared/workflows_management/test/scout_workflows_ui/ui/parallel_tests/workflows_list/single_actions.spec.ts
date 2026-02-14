@@ -81,8 +81,18 @@ test.describe('WorkflowsList/SingleActions', { tag: [...tags.stateful.classic] }
       description: 'This workflow starts disabled and should be enabled via toggle',
       enabled: false,
     };
-    await apiServices.workflows.create(scoutSpace.id, getListTestWorkflowYaml(disabledWorkflow));
+    const anchorWorkflow = {
+      name: 'Toggle Enable Workflow Anchor',
+      description: 'Anchor workflow for table order stability',
+      enabled: true,
+    };
+    await apiServices.workflows.bulkCreate(
+      scoutSpace.id,
+      [disabledWorkflow, anchorWorkflow].map(getListTestWorkflowYaml)
+    );
     await pageObjects.workflowList.navigate();
+
+    const orderBefore = await pageObjects.workflowList.getVisibleWorkflowNamesInOrder();
 
     const toggle = pageObjects.workflowList.getWorkflowStateToggle(disabledWorkflow.name);
     await expect(toggle).not.toBeChecked();
@@ -93,6 +103,9 @@ test.describe('WorkflowsList/SingleActions', { tag: [...tags.stateful.classic] }
     await expect(
       pageObjects.workflowList.getWorkflowAction(disabledWorkflow.name, 'runWorkflowAction')
     ).toBeEnabled();
+
+    const orderAfter = await pageObjects.workflowList.getVisibleWorkflowNamesInOrder();
+    expect(orderAfter).toStrictEqual(orderBefore);
   });
 
   test('should disable enabled workflow via toggle', async ({
@@ -105,8 +118,18 @@ test.describe('WorkflowsList/SingleActions', { tag: [...tags.stateful.classic] }
       description: 'This workflow starts enabled and should be disabled via toggle',
       enabled: true,
     };
-    await apiServices.workflows.create(scoutSpace.id, getListTestWorkflowYaml(enabledWorkflow));
+    const anchorWorkflow = {
+      name: 'Toggle Disable Workflow Anchor',
+      description: 'Anchor workflow for table order stability',
+      enabled: false,
+    };
+    await apiServices.workflows.bulkCreate(
+      scoutSpace.id,
+      [enabledWorkflow, anchorWorkflow].map(getListTestWorkflowYaml)
+    );
     await pageObjects.workflowList.navigate();
+
+    const orderBefore = await pageObjects.workflowList.getVisibleWorkflowNamesInOrder();
 
     const toggle = pageObjects.workflowList.getWorkflowStateToggle(enabledWorkflow.name);
     await expect(toggle).toBeChecked();
@@ -117,6 +140,9 @@ test.describe('WorkflowsList/SingleActions', { tag: [...tags.stateful.classic] }
     await expect(
       pageObjects.workflowList.getWorkflowAction(enabledWorkflow.name, 'runWorkflowAction')
     ).toBeDisabled();
+
+    const orderAfter = await pageObjects.workflowList.getVisibleWorkflowNamesInOrder();
+    expect(orderAfter).toStrictEqual(orderBefore);
   });
 
   test('should open workflow for editing via edit action', async ({

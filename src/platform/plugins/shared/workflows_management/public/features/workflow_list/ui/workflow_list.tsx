@@ -33,7 +33,11 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { getRunTooltipContent, StatusBadge, WorkflowStatus } from '../../../shared/ui';
 import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
-import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
+import {
+  areSimilarResults,
+  keepPreviousWorkflowOrder,
+  shouldShowWorkflowsEmptyState,
+} from '../../../shared/utils/workflow_utils';
 import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
 import { WorkflowTags } from '../../../widgets/workflow_tags/workflow_tags';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
@@ -76,15 +80,20 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
 
   const onRefresh = useCallback(async () => {
     const result = await refetch();
+
+    if (workflows && result.data && areSimilarResults(result.data, workflows)) {
+      keepPreviousWorkflowOrder({ previousData: workflows, freshData: result.data });
+    }
+
     // Update selected items with fresh data after refetch
     if (result.data?.results && selectedItems.length > 0) {
-      const selectedIds = selectedItems.map((item) => item.id);
+      const selectedIds = new Set(selectedItems.map((item) => item.id));
       const updatedSelectedItems = result.data.results.filter((workflow) =>
-        selectedIds.includes(workflow.id)
+        selectedIds.has(workflow.id)
       );
       setSelectedItems(updatedSelectedItems);
     }
-  }, [refetch, selectedItems]);
+  }, [refetch, selectedItems, workflows]);
 
   const handleRunWorkflow = useCallback(
     (id: string, event: Record<string, unknown>, triggerTab?: 'manual' | 'alert' | 'index') => {
@@ -149,6 +158,10 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           workflow: {
             enabled: !item.enabled,
           },
+          areSimilar: (previous, fresh) => {
+            return areSimilarResults(fresh, previous);
+          },
+          onSuccessWhenSimilar: keepPreviousWorkflowOrder,
         },
         {
           onError: (err: unknown) => {
