@@ -20,9 +20,11 @@ import { SloCardItemBadges } from '../../../pages/slos/components/card_view/slo_
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { SloOverviewDetails } from '../common/slo_overview_details';
 
-import type { SingleSloCustomInput } from './types';
-
-interface Props extends SingleSloCustomInput {
+interface Props {
+  sloId: string | undefined;
+  sloInstanceId: string | undefined;
+  remoteName?: string;
+  showAllGroupByInstances?: boolean;
   reloadSubject?: Subject<boolean>;
 }
 

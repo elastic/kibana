@@ -9,7 +9,7 @@ import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/publ
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useCallback } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
-import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../../../embeddable/slo/overview/constants';
+import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../../../../common/embeddables/overview/constants'
 
 export function useSloListActions({
   slo,

@@ -19,25 +19,27 @@ import type {
 export type OverviewMode = 'single' | 'groups';
 export type GroupBy = 'slo.tags' | 'status' | 'slo.indicator.type';
 export interface GroupFilters {
-  groupBy: GroupBy;
+  group_by: GroupBy;
   groups?: string[];
   filters?: Filter[];
-  kqlQuery?: string;
+  kql_query?: string;
 }
 
 export interface SloConfigurationProps {
-  overviewMode?: OverviewMode;
+  overview_mode?: OverviewMode;
 }
 
+// TODO import from common schema
 export type SingleSloCustomInput = SloConfigurationProps & {
-  sloId: string | undefined;
-  sloInstanceId: string | undefined;
-  remoteName?: string;
-  showAllGroupByInstances?: boolean;
+  slo_id: string | undefined;
+  slo_instance_id: string | undefined;
+  remote_name?: string;
+  show_all_group_by_instances?: boolean;
 };
 
+// TODO import from commn schema
 export type GroupSloCustomInput = SloConfigurationProps & {
-  groupFilters: GroupFilters | undefined;
+  group_filters: GroupFilters | undefined;
 };
 
 export type SloOverviewState = Partial<GroupSloCustomInput> & Partial<SingleSloCustomInput>;

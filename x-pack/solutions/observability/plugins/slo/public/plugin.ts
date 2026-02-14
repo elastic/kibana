@@ -25,7 +25,7 @@ import type { SLORouteRepository } from '../server/routes/get_slo_server_route_r
 import { SLO_ALERTS_EMBEDDABLE_ID } from './embeddable/slo/alerts/constants';
 import { SLO_BURN_RATE_EMBEDDABLE_ID } from './embeddable/slo/burn_rate/constants';
 import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
-import { SLO_OVERVIEW_EMBEDDABLE_ID } from './embeddable/slo/overview/constants';
+import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../common/embeddables/overview/constants';
 import type { SloOverviewEmbeddableState } from './embeddable/slo/overview/types';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
 import { SloDetailsHistoryLocatorDefinition } from './locators/slo_details_history';
@@ -135,7 +135,7 @@ export class SLOPlugin
         pluginsStart.presentationUtil.registerPanelPlacementSettings(
           SLO_OVERVIEW_EMBEDDABLE_ID,
           (serializedState?: SloOverviewEmbeddableState) => {
-            if (serializedState?.showAllGroupByInstances || serializedState?.groupFilters) {
+            if (serializedState?.show_all_group_by_instances || serializedState?.group_filters) {
               return { placementSettings: { width: 24, height: 8 } };
             }
             return { placementSettings: { width: 12, height: 8 } };
