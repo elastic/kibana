@@ -11,25 +11,52 @@ import { areCloudResourcesSetup } from '../../../common/cloud_setup';
 import { areResourcesSetup } from '../../../common/setup';
 import type { RegisterServicesParams } from '../register_services';
 import { getSetupState } from '../setup_state';
+import { areServerlessResourcesSetup } from '../../../common/serverless_setup';
 
 export interface HasSetupParams {
   soClient: SavedObjectsClientContract;
   esClient: IScopedClusterClient;
   spaceId?: string;
+  isServerless?: boolean;
 }
 
 export function createGetStatusService(params: RegisterServicesParams) {
-  return async ({ esClient, soClient, spaceId }: HasSetupParams): Promise<ProfilingStatus> => {
+  return async ({
+    esClient,
+    soClient,
+    spaceId,
+    isServerless,
+  }: HasSetupParams): Promise<ProfilingStatus> => {
     try {
-      const { type, setupState } = await getSetupState({ ...params, esClient, soClient, spaceId });
+      const { type, setupState } = await getSetupState({
+        ...params,
+        esClient,
+        soClient,
+        spaceId,
+        isServerless,
+      });
 
       params.logger.debug(
         () => `Set up state for: ${type}: ${JSON.stringify(setupState, null, 2)}`
       );
 
+      let hasSetup = false;
+      switch (type) {
+        case 'cloud':
+          hasSetup = areCloudResourcesSetup(setupState);
+          break;
+        case 'self-managed':
+          hasSetup = areResourcesSetup(setupState);
+          break;
+        case 'serverless':
+          hasSetup = areServerlessResourcesSetup(setupState);
+          break;
+      }
+
       return {
-        has_setup:
-          type === 'cloud' ? areCloudResourcesSetup(setupState) : areResourcesSetup(setupState),
+        type,
+        profiling_enabled: setupState.profiling.enabled,
+        has_setup: hasSetup,
         has_data: setupState.data.available,
         pre_8_9_1_data: setupState.resources.pre_8_9_1_data,
       };
@@ -40,6 +67,7 @@ export function createGetStatusService(params: RegisterServicesParams) {
       // is needed to call the profiling ES plugin for example.
       if (error?.meta?.statusCode === 403 || error?.originalError?.meta?.statusCode === 403) {
         return {
+          profiling_enabled: true,
           has_setup: true,
           pre_8_9_1_data: false,
           has_data: true,

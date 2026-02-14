@@ -88,6 +88,7 @@ describe('TopN data from Elasticsearch', () => {
         highCardinality: false,
         kuery: '',
         showErrorFrames: false,
+        preFilterShardSize: 1,
       });
 
       expect(client.search).toHaveBeenCalledTimes(2);
