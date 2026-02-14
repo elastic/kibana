@@ -38,10 +38,11 @@ import { generateUiamKeysForRules } from './generate_uiam_keys_for_rules';
 import type { AlertingPluginsStart } from '../plugin';
 
 const PROVISION_UIAM_API_KEYS_FLAG = 'alerting.rules.provisionUiamApiKeys';
+const API_KEY_PROVISIONING_TASK_TASK_SCHEDULE: IntervalSchedule = { interval: '1h' };
+const RUN_AT_INTERVAL = 60000;
 
 export const API_KEY_PROVISIONING_TASK_ID = 'api_key_provisioning';
 export const API_KEY_PROVISIONING_TASK_TYPE = `alerting:${API_KEY_PROVISIONING_TASK_ID}`;
-export const API_KEY_PROVISIONING_TASK_TASK_SCHEDULE: IntervalSchedule = { interval: '1h' };
 
 export class UiamApiKeyProvisioningTask {
   private readonly logger: Logger;
@@ -252,7 +253,7 @@ export class UiamApiKeyProvisioningTask {
 
     return {
       state: { runs: state.runs + 1 },
-      ...(hasMoreToConvert ? { runAt: new Date(Date.now() + 60_000) } : {}),
+      ...(hasMoreToConvert ? { runAt: new Date(Date.now() + RUN_AT_INTERVAL) } : {}),
     };
   };
 }
