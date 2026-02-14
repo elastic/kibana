@@ -97,7 +97,8 @@ export function buildUserMessagesHelpers(
   internalApi: LensInternalApi,
   { coreStart, data, visualizationMap, datasourceMap, spaces }: LensEmbeddableStartServices,
   onBeforeBadgesRender: LensPublicCallbacks['onBeforeBadgesRender'],
-  metaInfo?: SharingSavedObjectProps
+  metaInfo?: SharingSavedObjectProps,
+  getConsumerMessages?: () => UserMessage[]
 ): {
   getUserMessages: UserMessagesGetter;
   addUserMessages: (messages: UserMessage[]) => void;
@@ -203,6 +204,12 @@ export function buildUserMessagesHelpers(
         frame: framePublicAPI,
       }) ?? [])
     );
+
+    const consumerMessages = getConsumerMessages?.() ?? [];
+
+    if (consumerMessages.length) {
+      userMessages.push(...consumerMessages);
+    }
 
     return handleMessageOverwriteFromConsumer(
       filterAndSortUserMessages(

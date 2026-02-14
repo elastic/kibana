@@ -15,6 +15,7 @@ import type {
   LensApiCallbacks,
   LensPublicCallbacks,
   LensComponentForwardedProps,
+  UserMessage,
 } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
 
@@ -46,6 +47,10 @@ export function apiHasLensComponentCallbacks(api: unknown): api is LensPublicCal
       Object.hasOwn(api, fn)
     )
   );
+}
+
+export function apiHasUserMessages(api: unknown): api is { userMessages?: UserMessage[] } {
+  return isObject(api) && Object.hasOwn(api, 'userMessages');
 }
 
 export function apiHasLensComponentProps(api: unknown): api is LensComponentForwardedProps {

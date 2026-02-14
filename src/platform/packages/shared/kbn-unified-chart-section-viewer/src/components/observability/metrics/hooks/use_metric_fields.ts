@@ -13,6 +13,7 @@ import type { Dimension, MetricField, MetricUnit } from '../../../../types';
 import { useMetricsExperienceFieldsContext } from '../context/metrics_experience_fields_provider';
 import { normalizeUnit } from '../../../../common/utils/metric_unit/normalize_unit';
 import { hasValue } from '../../../../common/utils/fields';
+import { isLegacyHistogram } from '../../../../common/utils/legacy_histogram';
 import { useMetricsExperienceState } from '../context/metrics_experience_state_provider';
 import { useMetricFieldsFilter } from './use_metric_fields_filter';
 
@@ -49,11 +50,6 @@ export const useMetricFields = (): UseMetricFieldsReturn => {
     const fields: MetricField[] = [];
 
     for (const metricField of metricFields) {
-      // Filter out legacy histogram metric types
-      if (metricField.type === 'histogram') {
-        continue;
-      }
-
       const row = getSampleRow(metricField.name);
       if (row) {
         const enriched = enrichMetricField(metricField, dimensions, row);

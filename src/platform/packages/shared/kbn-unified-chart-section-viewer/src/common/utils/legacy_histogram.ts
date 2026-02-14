@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './esql/create_esql_query';
-export * from './esql/create_aggregation';
-export * from './metric_unit/get_lens_metric_format';
-export * from './metric_unit/get_unit_label';
-export * from './metric_unit/normalize_unit';
-export * from './fields';
-export * from './user_messages';
+import type { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
+
+/**
+ * A legacy histogram is a metric where both the ES field type and the
+ * metric instrument are histogram.
+ */
+export const isLegacyHistogram = (field: {
+  type: ES_FIELD_TYPES;
+  instrument?: MappingTimeSeriesMetricType;
+}): boolean => field.type === 'histogram' && field.instrument === 'histogram';
