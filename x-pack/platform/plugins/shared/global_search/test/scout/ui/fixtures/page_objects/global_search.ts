@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout/ui';
-import type { ScoutPage } from '@kbn/scout';
-
-interface SearchResult {
-  label: string;
-}
+import type { ScoutPage, Locator } from '@kbn/scout';
 
 export class GlobalSearch {
   constructor(private readonly page: ScoutPage) {}
+
+  public get resultLabels(): Locator {
+    return this.page
+      .locator('.navSearch__panel')
+      .locator('.euiSelectableTemplateSitewide__listItemTitle');
+  }
 
   async navigateToHome() {
     await this.page.gotoApp('home');
@@ -30,17 +31,11 @@ export class GlobalSearch {
     await this.page.locator('.navSearch__panel').waitFor({ state: 'hidden', timeout: 5000 });
   }
 
-  async searchFor(
-    term: string,
-    { clear = true, wait = true }: { clear?: boolean; wait?: boolean } = {}
-  ) {
+  async searchFor(term: string, { clear = true }: { clear?: boolean } = {}) {
     if (clear) {
       await this.clearField();
     }
     await this.page.testSubj.fill('nav-search-input', term);
-    if (wait) {
-      await this.waitForResultsLoaded();
-    }
   }
 
   async getFieldValue() {
@@ -58,33 +53,6 @@ export class GlobalSearch {
   async clickOnOption(index: number) {
     const options = await this.page.testSubj.locator('nav-search-option').all();
     await options[index].click();
-  }
-
-  async waitForResultsLoaded() {
-    // Wait for at least one option to appear
-    await this.page.testSubj.waitForSelector('nav-search-option');
-
-    // Results are emitted in multiple batches. Poll the result count to ensure
-    // all batches have been received (count stabilizes when no more results are coming).
-    await expect(async () => {
-      const count = await this.page.testSubj.locator('nav-search-option').count();
-      expect(count).toBeGreaterThan(0);
-    }).toPass({ timeout: 10000, intervals: [500, 1000] });
-  }
-
-  async getDisplayedResults(): Promise<SearchResult[]> {
-    const resultElements = await this.page.testSubj.locator('nav-search-option').all();
-    const results: SearchResult[] = [];
-
-    for (const resultEl of resultElements) {
-      const labelEl = resultEl.locator('.euiSelectableTemplateSitewide__listItemTitle');
-      const label = await labelEl.textContent();
-      if (label) {
-        results.push({ label: label.trim() });
-      }
-    }
-
-    return results;
   }
 
   async isNoResultsPlaceholderDisplayed() {
