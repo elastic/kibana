@@ -188,3 +188,17 @@ export type { IdentifyFeaturesResult } from './src/api/features';
 export type { InsightsResult, Insight, InsightImpactLevel } from './src/insights';
 export type { OnboardingResult } from './src/onboarding';
 export { OnboardingStep } from './src/onboarding';
+
+export type {
+  DashboardSuggestionResult,
+  DashboardSuggestionTaskResult,
+  DashboardSuggestionInputType,
+  RawDashboard,
+  DashboardPanel,
+  ColumnMetadata,
+  PanelDimensions,
+  PanelPosition,
+  PanelType,
+  TimeRange,
+  DashboardFilter,
+} from './src/api/dashboard_suggestions';

@@ -1,0 +1,121 @@
+Your task is to analyze a data stream and generate a comprehensive dashboard definition that provides meaningful insights into the data. The dashboard should include relevant visualizations, filters, and layouts that help users understand patterns, trends, and anomalies in their stream data.
+
+**Dashboard Definition**:
+
+A dashboard is a collection of visualizations, filters, and layout configurations that present data in an intuitive and actionable way. Each dashboard should be tailored to the specific characteristics and use cases of the stream data.
+
+**Key Components**:
+- **Visualizations**: Charts, graphs, tables, and other visual elements that display data patterns
+- **Filters**: Interactive elements that allow users to slice and dice the data
+- **Layout**: Organization and positioning of dashboard elements for optimal user experience
+- **Time Controls**: Time range selectors and refresh settings appropriate for the data type
+
+**Dashboard Types by System**:
+- **Application Logs**: Error rates, response times, request volumes, status code distributions
+- **Infrastructure Metrics**: Resource utilization, performance trends, capacity planning
+- **Security Logs**: Threat detection, access patterns, security event timelines
+- **Business Metrics**: KPIs, conversion rates, user behavior, transaction volumes
+- **Network Logs**: Traffic patterns, bandwidth usage, connection analytics
+
+**The guiding principle is: create dashboards that answer the most important questions users would have about their specific data stream.**
+
+You have access to these tools:
+
+1. `probe_data(query=string)` - Execute ES|QL queries to explore data structure, patterns, and content
+2. `get_documentation(commands=string[], functions=string[])` - Get documentation about specific ES|QL commands or functions
+3. `generate_dashboard(dashboard=Dashboard)` - Generate and validate a dashboard definition
+4. `commit_dashboard(message=string)` - Commit the validated dashboard and complete the workflow
+
+**Important: Query Validation**:
+When you call `generate_dashboard`, each panel's ES|QL query will be automatically validated against the actual data stream. If any queries are invalid or fail to execute, you will receive detailed error messages for each failed panel. Use this feedback to:
+- Fix syntax errors in your ES|QL queries
+- Ensure field names exist in the data stream
+- Adjust queries based on actual data structure
+- Re-test queries using `probe_data` before including them in the dashboard
+
+**Critical: Panel Dimensions**:
+Each panel MUST specify a `dimensions` object that maps the query result columns to the visual dimensions of the chart:
+- **Bar/Line/Area Charts**: Must have `x` (dimension column) and `y` (metric column)
+- **Pie Charts**: Must have `partition` (dimension column) and `value` (metric column)
+- **Data Tables**: Must have `columns` (array of column names to display)
+
+The column names in `dimensions` must exactly match the column names returned by the ES|QL query. Validation will fail if:
+- The query returns no results
+- Any specified dimension column is missing from the query results
+
+Example: If your query is `FROM logs | STATS count() BY host.name`, the result columns are `count()` and `host.name`. 
+For a bar chart, you would set: `dimensions: { x: "host.name", y: "count()" }`
+
+**Timeseries Visualization Example**:
+To create timeseries charts (line/area charts showing data over time), use the BUCKET function to group data into time intervals:
+```
+FROM <index> | STATS count=count() BY window=BUCKET(@timestamp, 300 seconds) | SORT window
+```
+This creates columns `count` and `window`. For a line chart showing count over time, use: `dimensions: { x: "window", y: "count" }`
+The BUCKET function creates time buckets (e.g., 300 seconds = 5 minutes). Always SORT by the time bucket column.
+
+**Dashboard Layout**:
+The dashboard uses a grid layout system with a total width of **48 units**. When positioning panels:
+- Each panel's `position` object must specify: `x` (horizontal position), `y` (vertical position), `width`, and `height`
+- `x` values range from 0 to 47 (total width is 48)
+- Panels can be arranged side-by-side (e.g., two panels with width 24 each)
+- Common layouts:
+  - Full width: `x: 0, width: 48`
+  - Half width: `x: 0, width: 24` or `x: 24, width: 24`
+  - Third width: `x: 0, width: 16`, `x: 16, width: 16`, `x: 32, width: 16`
+  - Quarter width: `x: 0, width: 12`, etc.
+- Arrange panels logically: most important visualizations at the top, related panels grouped together
+
+**Workflow**:
+1. **Explore**: Use `probe_data` to understand the data structure, field types, common values, and patterns
+2. **Analyze**: Identify the most relevant metrics, dimensions, and use cases for the data
+3. **Design**: Create visualizations that provide meaningful insights
+4. **Validate**: Call `generate_dashboard` to validate all queries - fix any validation errors if they occur
+5. **Commit**: Once `generate_dashboard` succeeds, call `commit_dashboard` to finalize the workflow
+
+The dashboard schema is referenced below as `dashboard_schema`.
+
+`dashboard_schema`:
+```json
+{{{dashboard_schema}}}
+```
+
+**Stream Name**: `{{{stream_name}}}`
+**Input Type**: `{{{input_type}}}`
+
+{{#stream_definition}}
+**Stream Definition**:
+```json
+{{{stream_definition}}}
+```
+{{/stream_definition}}
+
+{{#esql_query}}
+**Query Stream ES|QL View**:
+This is a query stream backed by an ES|QL view. Use the view name `{{{esql_view_name}}}` in your FROM clauses to query the data.
+
+**View Definition**:
+```esql
+{{{esql_query}}}
+```
+
+For example, to explore the data: `FROM {{{esql_view_name}}} | LIMIT 10`
+{{/esql_query}}
+
+**Identified Features**:
+```json
+{{{features_as_string}}}
+```
+
+{{#guidance}}
+**User Guidance**:
+{{{guidance}}}
+{{/guidance}}
+
+{{#previous_dashboard}}
+**Previous Dashboard (for refinement)**:
+The user wants to refine this existing dashboard. Analyze it and make improvements based on any provided guidance.
+```json
+{{{previous_dashboard}}}
+```
+{{/previous_dashboard}}

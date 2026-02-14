@@ -17,3 +17,24 @@ export { generateSignificantEvents } from './src/significant_events/generate_sig
 export { sumTokens } from './src/helpers/sum_tokens';
 export { identifyFeatures, type IdentifyFeaturesOptions } from './src/features/identify_features';
 export { generateAllComputedFeatures } from './src/features/computed';
+export {
+  suggestDashboard,
+  prepareDashboardSuggestionInput,
+  getInputTypeFromDefinition,
+  isQueryStreamDefinition,
+  isIngestStreamDefinition,
+  type DashboardSuggestionInput,
+  type DashboardSuggestionResult,
+  type DashboardSuggestionTaskResult,
+  type DashboardSuggestionInputType,
+  type DashboardSuggestionEngineOptions,
+  type PrepareDashboardSuggestionInputOptions,
+  type RawDashboard,
+  type DashboardPanel,
+  type ColumnMetadata,
+  type PanelDimensions,
+  type PanelPosition,
+  type PanelType,
+  type TimeRange,
+  type DashboardFilter,
+} from './workflows/dashboard_suggestions';
