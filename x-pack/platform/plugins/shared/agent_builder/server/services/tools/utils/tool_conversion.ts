@@ -54,6 +54,7 @@ export const toDescriptorWithSchema = async (
     // Zod v4 schema
     const { $schema, ...rest } = z.toJSONSchema(schema, {
       unrepresentable: 'any',
+      io: 'input',
     }) as Record<string, any>;
     jsonSchema = rest;
   } else {

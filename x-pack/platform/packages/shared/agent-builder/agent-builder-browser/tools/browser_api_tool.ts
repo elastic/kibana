@@ -52,6 +52,7 @@ export function toToolMetadata<TParams>(
     description: tool.description,
     schema: (() => {
       const { $schema, ...jsonSchema } = z.toJSONSchema(tool.schema, {
+        io: 'input',
         unrepresentable: 'any',
       });
       return jsonSchema;

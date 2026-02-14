@@ -343,7 +343,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
             description,
             parameters:
               '_zod' in (schema as object)
-                ? z4.toJSONSchema(schema as unknown as z4.ZodType)
+                ? z4.toJSONSchema(schema as unknown as z4.ZodType, { io: 'input' })
                 : zodToJsonSchema(schema as unknown as ZodSchema),
           },
         },

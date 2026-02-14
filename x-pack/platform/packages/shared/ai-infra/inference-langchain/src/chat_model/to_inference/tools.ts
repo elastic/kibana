@@ -72,7 +72,7 @@ function isZodV4(schema: unknown): boolean {
 
 function zodSchemaToInference(schema: ZodSchema): ToolSchema {
   if (isZodV4(schema)) {
-    return pick(z4.toJSONSchema(schema as unknown as z4.ZodType), [
+    return pick(z4.toJSONSchema(schema as unknown as z4.ZodType, { io: 'input' }), [
       'type',
       'properties',
       'required',
