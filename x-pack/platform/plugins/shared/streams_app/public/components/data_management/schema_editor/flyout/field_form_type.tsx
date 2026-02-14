@@ -15,6 +15,29 @@ import type { FieldTypeOption } from '../constants';
 import { EMPTY_CONTENT, FIELD_TYPE_MAP } from '../constants';
 import type { MappedSchemaField, SchemaField } from '../types';
 
+/**
+ * Returns a filtered and alphabetically sorted (by display label) list of field type options.
+ * Excludes readonly types and conditionally excludes geo_point based on stream type and feature flag.
+ */
+export const getFieldTypeOptions = ({
+  streamType,
+  enableGeoPointSuggestions,
+}: {
+  streamType: 'classic' | 'wired';
+  enableGeoPointSuggestions?: boolean;
+}): FieldTypeOption[] => {
+  return (Object.keys(FIELD_TYPE_MAP) as FieldTypeOption[])
+    .filter((optionKey) => {
+      if (FIELD_TYPE_MAP[optionKey].readonly) return false;
+      if (optionKey === 'geo_point') {
+        if (streamType !== 'classic') return false;
+        if (enableGeoPointSuggestions === false) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => FIELD_TYPE_MAP[a].label.localeCompare(FIELD_TYPE_MAP[b].label));
+};
+
 interface FieldFormTypeProps {
   field: SchemaField;
   isEditing: boolean;
@@ -95,20 +118,11 @@ export const FieldTypeSelector = ({
   enableGeoPointSuggestions,
 }: FieldTypeSelectorProps) => {
   const typeSelectorOptions = useMemo(() => {
-    return (Object.keys(FIELD_TYPE_MAP) as FieldTypeOption[])
-      .filter((optionKey) => {
-        if (FIELD_TYPE_MAP[optionKey].readonly) return false;
-        if (optionKey === 'geo_point') {
-          if (streamType !== 'classic') return false;
-          if (enableGeoPointSuggestions === false) return false;
-        }
-        return true;
-      })
-      .map((optionKey) => ({
-        value: optionKey,
-        inputDisplay: <FieldType type={optionKey} />,
-        'data-test-subj': `option-type-${optionKey}`,
-      }));
+    return getFieldTypeOptions({ streamType, enableGeoPointSuggestions }).map((optionKey) => ({
+      value: optionKey,
+      inputDisplay: <FieldType type={optionKey} />,
+      'data-test-subj': `option-type-${optionKey}`,
+    }));
   }, [enableGeoPointSuggestions, streamType]);
 
   return (
