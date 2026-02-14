@@ -44,6 +44,7 @@ export interface AppSetupUIPluginDependencies {
 export interface AppPluginSetupDependencies {
   data: DataPublicPluginStart;
   licensing: LicensingPluginStart;
+  share: SharePluginStart;
 }
 
 export interface AppStartUIPluginDependencies {

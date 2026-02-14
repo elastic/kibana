@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiCode,
@@ -64,6 +64,7 @@ const styles = {
 };
 
 const DELAY_FOR_HIDING_SPINNER = 500;
+const DISCOVER_LOCATOR_ID = 'DISCOVER_APP_LOCATOR';
 
 const getLanguageLabelByValue = (value: string) => {
   return AVAILABLE_LANGUAGES.find((lang) => lang.value === value)?.label || DEFAULT_LANGUAGE;
@@ -78,7 +79,7 @@ export const ContextMenu = ({
 }: Props) => {
   // Get default language from local storage
   const {
-    services: { storage, esHostService },
+    services: { storage, esHostService, share },
     config: { isPackagedEnvironment },
   } = useServicesContext();
 
@@ -86,6 +87,7 @@ export const ContextMenu = ({
   const [isRequestConverterLoading, setRequestConverterLoading] = useState(false);
   const [isLanguageSelectorVisible, setLanguageSelectorVisibility] = useState(false);
   const [isKbnRequestSelected, setIsKbnRequestSelected] = useState<boolean | null>(null);
+  const [isEsqlQuerySelected, setIsEsqlQuerySelected] = useState<boolean>(false);
   const [defaultLanguage, setDefaultLanguage] = useState(
     storage.get(StorageKeys.DEFAULT_LANGUAGE, DEFAULT_LANGUAGE)
   );
@@ -159,9 +161,20 @@ export const ContextMenu = ({
     await copyText(requestsAsCode);
   };
 
-  const checkIsKbnRequestSelected = async () => {
+  const checkIsKbnRequestSelected = useCallback(async () => {
     setIsKbnRequestSelected(await getIsKbnRequestSelected());
-  };
+  }, [getIsKbnRequestSelected]);
+
+  const checkIsEsqlQuerySelected = useCallback(async () => {
+    const requests = await getRequests();
+    // Check if any selected request is an ES|QL query (POST to /_query)
+    const hasEsqlQuery = requests.some(
+      (req) =>
+        req.method === 'POST' &&
+        (req.url === '/_query' || req.url.startsWith('/_query?') || req.url.startsWith('/_query/'))
+    );
+    setIsEsqlQuerySelected(hasEsqlQuery);
+  }, [getRequests]);
 
   const onCopyAsSubmit = async (language?: string) => {
     const withLanguage = language || currentLanguage;
@@ -219,11 +232,83 @@ export const ContextMenu = ({
     autoIndent(event);
   };
 
+  const openInDiscover = useCallback(async () => {
+    closePopover();
+    const discoverLocator = share.url.locators.get(DISCOVER_LOCATOR_ID);
+    if (!discoverLocator) {
+      notifications.toasts.addWarning({
+        title: i18n.translate('console.consoleMenu.discoverNotAvailable', {
+          defaultMessage: 'Discover is not available.',
+        }),
+      });
+      return;
+    }
+
+    // Get the selected requests from the editor
+    const requests = await getRequests();
+
+    // Find ES|QL query request (POST to /_query with optional query params or path)
+    // Handles: /_query, /_query?format=txt, /_query/async, etc.
+    const esqlRequest = requests.find(
+      (req) =>
+        req.method === 'POST' &&
+        (req.url === '/_query' || req.url.startsWith('/_query?') || req.url.startsWith('/_query/'))
+    );
+
+    if (!esqlRequest) {
+      notifications.toasts.addWarning({
+        title: i18n.translate('console.consoleMenu.noEsqlQuery', {
+          defaultMessage: 'No ES|QL query found. Please select a POST /_query request.',
+        }),
+      });
+      return;
+    }
+
+    // Extract the ES|QL query from the request body
+    let esqlQuery: string | undefined;
+    try {
+      // The data is an array of JSON strings
+      if (esqlRequest.data.length > 0) {
+        const requestBody = JSON.parse(esqlRequest.data[0]);
+        esqlQuery = requestBody.query;
+      }
+
+      if (!esqlQuery) {
+        notifications.toasts.addWarning({
+          title: i18n.translate('console.consoleMenu.noQueryField', {
+            defaultMessage: 'No "query" field found in the request body.',
+          }),
+        });
+        return;
+      }
+    } catch (error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('console.consoleMenu.invalidRequestBody', {
+          defaultMessage: 'Failed to parse the request body.',
+        }),
+      });
+      return;
+    }
+
+    try {
+      await discoverLocator.navigate({
+        query: { esql: esqlQuery },
+      });
+    } catch (error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('console.consoleMenu.discoverNavigationFailed', {
+          defaultMessage: 'Failed to open in Discover',
+        }),
+      });
+    }
+  }, [share, getRequests, notifications]);
+
   const button = (
     <EuiButtonIcon
       onClick={() => {
         setIsPopoverOpen((prev) => !prev);
         checkIsKbnRequestSelected();
+        checkIsEsqlQuerySelected();
       }}
       data-test-subj="toggleConsoleMenu"
       aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
@@ -332,6 +417,21 @@ export const ContextMenu = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiContextMenuItem>,
+    ...(isEsqlQuerySelected
+      ? [
+          <EuiContextMenuItem
+            key="Display in Discover"
+            data-test-subj="consoleMenuOpenInDiscover"
+            onClick={openInDiscover}
+            icon="discoverApp"
+          >
+            <FormattedMessage
+              id="console.monaco.requestOptions.displayInDiscoverButtonLabel"
+              defaultMessage="Display in Discover"
+            />
+          </EuiContextMenuItem>,
+        ]
+      : []),
   ];
 
   return (
