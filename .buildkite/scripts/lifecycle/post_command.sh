@@ -43,7 +43,6 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload 'data/es_debug_*.tar.gz'
   buildkite-agent artifact upload '.es/es*.log'
   buildkite-agent artifact upload '.es/uiam*.log'
-  buildkite-agent artifact upload '.es/docker-*.log'
 
   if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
     if [[ $BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG == 'elasticsearch-serverless-intake' ]]; then
