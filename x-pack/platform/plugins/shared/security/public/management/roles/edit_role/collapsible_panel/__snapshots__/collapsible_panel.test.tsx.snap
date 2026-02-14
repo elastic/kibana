@@ -771,12 +771,6 @@ exports[`it renders without blowing up 1`] = `
                   ],
                 },
                 "skeletonBackgroundSkeletonMiddleHighContrast": "rgba(255,255,255, 0.3)",
-                "superDatePickerBackgroundSuccees": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBaseSuccess",
-                  ],
-                },
                 "switchBackgroundOff": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -1209,12 +1203,6 @@ exports[`it renders without blowing up 1`] = `
                   ],
                 },
                 "skeletonBackgroundSkeletonMiddleHighContrast": "rgba(72,89,117, 0.04)",
-                "superDatePickerBackgroundSuccees": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBaseSuccess",
-                  ],
-                },
                 "switchBackgroundOff": Computed {
                   "computer": [Function],
                   "dependencies": Array [

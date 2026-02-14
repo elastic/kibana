@@ -12,9 +12,9 @@ import {
   EuiCode,
   EuiDescribedFormGroup,
   EuiFieldText,
+  EuiFormPrepend,
   EuiFormRow,
   EuiSwitch,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -98,12 +98,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
         >
           <EuiFieldText
             isInvalid={Boolean(hasErrors && settingErrors.uri)}
-            prepend={
-              <EuiText size="s" id="hdfsRepositoryUriProtocolDescription">
-                {/* Wrap as string due to prettier not parsing `//` inside JSX correctly (prettier/prettier#2347) */}
-                {'hdfs://'}
-              </EuiText>
-            }
+            prepend={<EuiFormPrepend id="hdfsRepositoryUriProtocolPrepend" label={'hdfs://'} />}
             defaultValue={uri ? uri.split('hdfs://')[1] : ''}
             fullWidth
             onChange={(e) => {

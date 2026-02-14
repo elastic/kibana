@@ -222,7 +222,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                       class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                     >
                       <span
-                        class="eui-textTruncate euiButtonEmpty__text"
+                        class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                       >
                         +1 
                         More
@@ -915,7 +915,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                       class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                     >
                       <span
-                        class="eui-textTruncate euiButtonEmpty__text"
+                        class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                       >
                         +1 
                         More
