@@ -1,0 +1,248 @@
+{
+  "id": "feedback",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "feedback",
+        "id": "def-common.FeedbackQuestion",
+        "type": "Interface",
+        "tags": [],
+        "label": "FeedbackQuestion",
+        "description": [],
+        "path": "x-pack/platform/plugins/private/feedback/common/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "feedback",
+            "id": "def-common.FeedbackQuestion.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/plugins/private/feedback/common/types.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "feedback",
+            "id": "def-common.FeedbackQuestion.question",
+            "type": "string",
+            "tags": [],
+            "label": "question",
+            "description": [],
+            "path": "x-pack/platform/plugins/private/feedback/common/types.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "feedback",
+            "id": "def-common.FeedbackQuestion.answer",
+            "type": "string",
+            "tags": [],
+            "label": "answer",
+            "description": [],
+            "path": "x-pack/platform/plugins/private/feedback/common/types.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "feedback",
+        "id": "def-common.FeedbackSubmittedData",
+        "type": "Interface",
+        "tags": [],
+        "label": "FeedbackSubmittedData",
+        "description": [],
+        "path": "x-pack/platform/plugins/private/feedback/common/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "feedback",
+            "id": "def-common.FeedbackSubmittedData.app_id",
+            "type": "string",
+            "tags": [],
+            "label": "app_id",
+            "description": [],
+            "path": "x-pack/platform/plugins/private/feedback/common/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "feedback",
+            "id": "def-common.FeedbackSubmittedData.solution",
+            "type": "string",
+            "tags": [],
+            "label": "solution",
+            "description": [],
+            "path": "x-pack/platform/plugins/private/feedback/common/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "feedback",
+            "id": "def-common.FeedbackSubmittedData.allow_email_contact",
+            "type": "boolean",
+            "tags": [],
+            "label": "allow_email_contact",
+            "description": [],
+            "path": "x-pack/platform/plugins/private/feedback/common/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "feedback",
+            "id": "def-common.FeedbackSubmittedData.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [],
+            "path": "x-pack/platform/plugins/private/feedback/common/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "feedback",
+            "id": "def-common.FeedbackSubmittedData.user_email",
+            "type": "string",
+            "tags": [],
+            "label": "user_email",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/private/feedback/common/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "feedback",
+            "id": "def-common.FeedbackSubmittedData.csat_score",
+            "type": "number",
+            "tags": [],
+            "label": "csat_score",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/plugins/private/feedback/common/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "feedback",
+            "id": "def-common.FeedbackSubmittedData.questions",
+            "type": "Array",
+            "tags": [],
+            "label": "questions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "feedback",
+                "scope": "common",
+                "docId": "kibFeedbackPluginApi",
+                "section": "def-common.FeedbackQuestion",
+                "text": "FeedbackQuestion"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/plugins/private/feedback/common/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "feedback",
+            "id": "def-common.FeedbackSubmittedData.organization_id",
+            "type": "string",
+            "tags": [],
+            "label": "organization_id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/private/feedback/common/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "feedback",
+        "id": "def-common.FeedbackFormData",
+        "type": "Type",
+        "tags": [],
+        "label": "FeedbackFormData",
+        "description": [],
+        "signature": [
+          "{ url: string; app_id: string; allow_email_contact: boolean; user_email?: string | undefined; csat_score?: number | undefined; questions?: ",
+          {
+            "pluginId": "feedback",
+            "scope": "common",
+            "docId": "kibFeedbackPluginApi",
+            "section": "def-common.FeedbackQuestion",
+            "text": "FeedbackQuestion"
+          },
+          "[] | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/private/feedback/common/types.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -999,7 +999,7 @@
         "tags": [],
         "label": "Direction",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
         "lineNumber": 25,
         "columnNumber": 1,
         "deprecated": false,
@@ -1138,7 +1138,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; readonly initialized?: boolean | undefined; readonly isLoading: boolean; readonly dataViewId: string | null; readonly totalCount: number; readonly additionalFilters: Record<",
+          "[] | undefined; readonly dataViewId: string | null; readonly initialized?: boolean | undefined; readonly isLoading: boolean; readonly totalCount: number; readonly additionalFilters: Record<",
           "AlertPageFilterType",
           ", boolean>; readonly defaultColumns: (Pick<",
           "EuiDataGridColumn",

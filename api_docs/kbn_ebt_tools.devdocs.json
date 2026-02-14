@@ -316,7 +316,7 @@
         "label": "PerformanceContextProvider",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<{ children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; } & React.RefAttributes<{}>>"
+          "React.ForwardRefExoticComponent<{ children: React.ReactElement<any>; } & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/index.tsx",
         "lineNumber": 28,
@@ -379,7 +379,7 @@
             "tags": [],
             "label": "analytics",
             "description": [
-              "The {@link AnalyticsClient } to report the events."
+              "The {@link AnalyticsClient} to report the events."
             ],
             "signature": [
               "Pick<",
@@ -400,7 +400,7 @@
             "tags": [],
             "label": "eventData",
             "description": [
-              "The data to send, conforming the structure of a {@link PerformanceMetricEvent }."
+              "The data to send, conforming the structure of a {@link PerformanceMetricEvent}."
             ],
             "signature": [
               {

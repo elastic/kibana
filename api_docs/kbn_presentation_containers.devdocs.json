@@ -510,7 +510,7 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
-        "lineNumber": 82,
+        "lineNumber": 81,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -526,7 +526,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
-            "lineNumber": 82,
+            "lineNumber": 81,
             "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
@@ -773,9 +773,9 @@
           "(children$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
+            "section": "def-common.PublishingSubject",
             "text": "PublishingSubject"
           },
           "<{ [key: string]: Api; }>) => ",
@@ -798,9 +798,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.PublishingSubject",
+                "section": "def-common.PublishingSubject",
                 "text": "PublishingSubject"
               },
               "<{ [key: string]: Api; }>"
@@ -829,7 +829,7 @@
           "<PublishingSubjectType>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
-        "lineNumber": 133,
+        "lineNumber": 132,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -845,7 +845,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
-            "lineNumber": 134,
+            "lineNumber": 133,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -862,7 +862,7 @@
               "keyof ApiType"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
-            "lineNumber": 135,
+            "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -879,7 +879,7 @@
               "(api: unknown) => api is ApiType"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
-            "lineNumber": 136,
+            "lineNumber": 135,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -896,7 +896,7 @@
               "PublishingSubjectType"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
-            "lineNumber": 137,
+            "lineNumber": 136,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -913,7 +913,7 @@
               "((array: PublishingSubjectType[]) => PublishingSubjectType) | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
-            "lineNumber": 138,
+            "lineNumber": 137,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -942,7 +942,7 @@
           "<unknown> | undefined"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
-        "lineNumber": 95,
+        "lineNumber": 94,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -958,7 +958,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
-            "lineNumber": 96,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -981,9 +981,9 @@
           "<void>; serializeState: () => StateType; getComparators: () => ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.StateComparators",
+            "section": "def-common.StateComparators",
             "text": "StateComparators"
           },
           "<StateType>; defaultState?: Partial<StateType> | undefined; onReset: (lastSavedPanelState?: StateType | undefined) => ",
@@ -997,9 +997,9 @@
           "<void>; checkRefEquality?: boolean | undefined; }) => ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesUnsavedChanges",
+            "section": "def-common.PublishesUnsavedChanges",
             "text": "PublishesUnsavedChanges"
           }
         ],
@@ -1097,9 +1097,9 @@
                   "() => ",
                   {
                     "pluginId": "@kbn/presentation-publishing",
-                    "scope": "public",
+                    "scope": "common",
                     "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-public.StateComparators",
+                    "section": "def-common.StateComparators",
                     "text": "StateComparators"
                   },
                   "<StateType>"
@@ -1205,7 +1205,7 @@
           "<ApiType extends unknown>(parent: unknown, isCompatible: (api: unknown) => api is ApiType, apiFound: (api: ApiType | undefined) => void | (() => void)) => () => void"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
-        "lineNumber": 103,
+        "lineNumber": 102,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1221,7 +1221,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
-            "lineNumber": 104,
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1238,7 +1238,7 @@
               "(api: unknown) => api is ApiType"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
-            "lineNumber": 105,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1255,7 +1255,7 @@
               "(api: ApiType | undefined) => void | (() => void)"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
-            "lineNumber": 106,
+            "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2057,7 +2057,7 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
-        "lineNumber": 77,
+        "lineNumber": 76,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2073,7 +2073,7 @@
               "(uuid: string) => string | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
-            "lineNumber": 78,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2089,7 +2089,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
-                "lineNumber": 78,
+                "lineNumber": 77,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2111,7 +2111,7 @@
               "<string | undefined>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
-            "lineNumber": 79,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2127,7 +2127,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
-                "lineNumber": 79,
+                "lineNumber": 78,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2845,9 +2845,9 @@
               "{ [x: string]: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.PublishingSubject",
+                "section": "def-common.PublishingSubject",
                 "text": "PublishingSubject"
               },
               "<boolean | undefined>; }"

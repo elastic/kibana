@@ -689,7 +689,7 @@
             "tags": [],
             "label": "config",
             "description": [
-              "- an objects with query:allowLeadingWildcards and query:queryString:options UI\nsettings in form of { allowLeadingWildcards, queryStringOptions }\nconfig contains dateformat:tz"
+              "- an objects with query:allowLeadingWildcards and query:queryString:options UI"
             ],
             "signature": [
               {
@@ -6599,7 +6599,7 @@
         "tags": [],
         "label": "FilterStateStore",
         "description": [
-          "\n  Filter,\nAn enum to denote whether a filter is specific to an application's context or whether it should be applied globally."
+          "\nAn enum to denote whether a filter is specific to an application's context or whether it should be applied globally."
         ],
         "path": "src/platform/packages/shared/kbn-es-query-constants/src/constants.ts",
         "lineNumber": 10,

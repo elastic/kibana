@@ -3267,7 +3267,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [],
+                "description": [
+                  "Optional"
+                ],
                 "signature": [
                   "{ xOffset: number; yOffset: number; }"
                 ],

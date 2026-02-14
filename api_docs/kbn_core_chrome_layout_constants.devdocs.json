@@ -34,7 +34,7 @@
           ", fallback?: string | undefined) => string"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
-        "lineNumber": 49,
+        "lineNumber": 52,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -52,7 +52,7 @@
               "CSSVarName"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
-            "lineNumber": 49,
+            "lineNumber": 52,
             "columnNumber": 27,
             "deprecated": false,
             "trackAdoption": false,
@@ -71,7 +71,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
-            "lineNumber": 49,
+            "lineNumber": 52,
             "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
@@ -98,7 +98,7 @@
           ") => string"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
-        "lineNumber": 77,
+        "lineNumber": 80,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -116,7 +116,7 @@
               "CSSVarName"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
-            "lineNumber": 77,
+            "lineNumber": 80,
             "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
