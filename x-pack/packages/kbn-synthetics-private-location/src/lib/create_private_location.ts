@@ -11,11 +11,17 @@ import type { CliOptions } from '../types';
 import type { KibanaAPIClient } from './kibana_api_client';
 
 export async function createPrivateLocation(
-  { kibanaUrl, kibanaPassword, kibanaUsername, locationName }: CliOptions,
+  { locationName }: CliOptions,
   logger: ToolingLog,
   kibanaApiClient: KibanaAPIClient,
-  agentPolicyId: string
+  agentPolicyId: string,
+  additionalAgentPolicyIds?: string[]
 ) {
+  const allPolicyIds =
+    additionalAgentPolicyIds && additionalAgentPolicyIds.length > 0
+      ? [agentPolicyId, ...additionalAgentPolicyIds]
+      : undefined;
+
   try {
     const response = await kibanaApiClient.sendRequest({
       method: 'post',
@@ -23,6 +29,7 @@ export async function createPrivateLocation(
       data: {
         label: locationName,
         agentPolicyId,
+        ...(allPolicyIds ? { agentPolicyIds: allPolicyIds } : {}),
       },
     });
 
