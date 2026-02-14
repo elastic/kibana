@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  selectAllTabs,
-  selectRecentlyClosedTabs,
-  selectTab,
-  selectTabAppState,
-  selectTabCombinedFilters,
-  selectIsTabsBarHidden,
-} from './tabs';
-export { type HasUnsavedChangesResult, selectHasUnsavedChanges } from './unsaved_changes';
+import type { ExpandedState, RowSelectionState } from '@tanstack/react-table';
+import { createRestorableStateProvider } from '@kbn/restorable-state';
+
+export interface DataCascadeRestorableState {
+  expandedState: ExpandedState;
+  rowSelection: RowSelectionState;
+  scrollOffset: number;
+}
+
+export const { RestorableStateProvider, useRestorableState, useRestorableRef } =
+  createRestorableStateProvider<DataCascadeRestorableState>();

@@ -8,10 +8,16 @@
  */
 
 import React, { type ComponentProps } from 'react';
+import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import { DataCascadeImpl, type DataCascadeImplProps } from './data_cascade_impl';
 import { DataCascadeProvider, type GroupNode, type LeafNode } from '../store_provider';
+import {
+  RestorableStateProvider,
+  type DataCascadeRestorableState,
+} from './data_cascade_impl/data_cascade_restorable_state';
 
 export type { GroupNode, LeafNode, DataCascadeImplProps as DataCascadeProps };
+export type { DataCascadeRestorableState } from './data_cascade_impl/data_cascade_restorable_state';
 export { DataCascadeRow, DataCascadeRowCell } from './data_cascade_impl';
 export type {
   DataCascadeRowProps,
@@ -22,11 +28,20 @@ export type {
 export function DataCascade<G extends GroupNode = GroupNode, L extends LeafNode = LeafNode>({
   cascadeGroups,
   initialGroupColumn,
+  initialState,
+  onInitialStateChange,
   ...props
-}: DataCascadeImplProps<G, L> & ComponentProps<typeof DataCascadeProvider>) {
+}: DataCascadeImplProps<G, L> &
+  ComponentProps<typeof DataCascadeProvider> &
+  RestorableStateProviderProps<DataCascadeRestorableState>) {
   return (
-    <DataCascadeProvider cascadeGroups={cascadeGroups} initialGroupColumn={initialGroupColumn}>
-      <DataCascadeImpl<G, L> {...props} />
-    </DataCascadeProvider>
+    <RestorableStateProvider
+      initialState={initialState}
+      onInitialStateChange={onInitialStateChange}
+    >
+      <DataCascadeProvider cascadeGroups={cascadeGroups} initialGroupColumn={initialGroupColumn}>
+        <DataCascadeImpl<G, L> {...props} />
+      </DataCascadeProvider>
+    </RestorableStateProvider>
   );
 }

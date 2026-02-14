@@ -33,6 +33,7 @@ import {
 import { ScrollSyncProvider } from '../../lib/core/scroll_sync';
 import { dataCascadeImplStyles, relativePosition } from './data_cascade_impl.styles';
 import type { DataCascadeImplProps, DataCascadeRowProps, DataCascadeRowCellProps } from './types';
+import { useRestorableDataCascadeState } from './use_restorable_data_cascade_state';
 
 /**
  * @description Public Component for configuring the rendering of a data cascade row cell
@@ -85,6 +86,9 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   const virtualizerInstance = useRef<ReturnType<typeof useCascadeVirtualizer>>();
 
   const getScrollElement = useCallback(() => scrollElementRef.current, []);
+
+  // Bridge the cascade store with the restorable state system for tab state restoration
+  useRestorableDataCascadeState(scrollElementRef);
 
   // create stable callback we can use to retrieve the current value of the virtualizer elsewhere
   const getVirtualizer = useCallback(() => virtualizerInstance.current, []);

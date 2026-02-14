@@ -12,6 +12,7 @@ export type {
   GroupNode,
   LeafNode,
   DataCascadeProps,
+  DataCascadeRestorableState,
   DataCascadeRowProps,
   DataCascadeRowCellProps,
   CascadeRowCellNestedVirtualizationAnchorProps,

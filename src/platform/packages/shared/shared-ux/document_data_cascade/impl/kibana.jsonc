@@ -1,9 +1,7 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/shared-ux-document-data-cascade",
-  "owner": [
-    "@elastic/appex-sharedux"
-  ],
+  "owner": ["@elastic/appex-sharedux"],
   "group": "platform",
   "visibility": "shared"
 }

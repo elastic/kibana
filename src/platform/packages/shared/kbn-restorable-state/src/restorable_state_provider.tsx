@@ -298,7 +298,13 @@ export const createRestorableStateProvider = <TState extends object>() => {
     return [value, setValue] as const;
   };
 
-  return { withRestorableState, useRestorableState, useRestorableRef, useRestorableLocalStorage };
+  return {
+    RestorableStateProvider,
+    withRestorableState,
+    useRestorableState,
+    useRestorableRef,
+    useRestorableLocalStorage,
+  };
 };
 
 const useStableFunction = <T extends (...args: Parameters<T>) => ReturnType<T>>(fn: T) => {
