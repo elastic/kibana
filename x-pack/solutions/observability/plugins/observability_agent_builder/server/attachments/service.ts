@@ -5,74 +5,76 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import dedent from 'dedent';
+import { z } from '@kbn/zod';
 import type { Logger } from '@kbn/core/server';
+import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import { ToolType } from '@kbn/agent-builder-common';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { ObservabilityAgentBuilderCoreSetup } from '../types';
-import { OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID } from '../../common';
-import { getLogDocumentById } from '../routes/ai_insights/get_log_document_by_id';
+import { OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID } from '../../common';
+import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 import { observabilityAttachmentDataSchema } from './observability_attachment_data_schema';
 
-const GET_LOG_DOCUMENT_TOOL_ID = 'get_log_document';
+const GET_SERVICE_DETAILS_TOOL_ID = 'get_service_details';
 
-const logDataSchema = observabilityAttachmentDataSchema.extend({
-  id: z.string(),
-  index: z.string(),
+const serviceDataSchema = observabilityAttachmentDataSchema.extend({
+  serviceName: z.string(),
+  environment: z.string(),
+  start: z.string(),
+  end: z.string(),
 });
 
-export type LogAttachmentData = z.infer<typeof logDataSchema>;
+export type ServiceAttachmentData = z.infer<typeof serviceDataSchema>;
 
-export function createLogAttachmentType({
-  core,
+export function createServiceAttachmentType({
   logger,
+  dataRegistry,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
-}): AttachmentTypeDefinition<typeof OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID, LogAttachmentData> {
+  dataRegistry: ObservabilityAgentBuilderDataRegistry;
+}): AttachmentTypeDefinition<
+  typeof OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID,
+  ServiceAttachmentData
+> {
   return {
-    id: OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
+    id: OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID,
     validate: (input) => {
-      const parsed = logDataSchema.safeParse(input);
+      const parsed = serviceDataSchema.safeParse(input);
       if (parsed.success) {
         return { valid: true, data: parsed.data };
       }
       return { valid: false, error: parsed.error.message };
     },
     format: (attachment) => {
-      const { index, id } = attachment.data;
+      const { serviceName, environment, start, end } = attachment.data;
 
       return {
         getRepresentation: () => ({
           type: 'text',
-          value: `Observability Log ID: ${index}:${id}. Use the ${GET_LOG_DOCUMENT_TOOL_ID} tool to fetch full log document.`,
+          value: `Observability Service Name: ${serviceName}. Use the ${GET_SERVICE_DETAILS_TOOL_ID} tool to fetch the full service details.`,
         }),
         getBoundedTools: () => [
           {
-            id: GET_LOG_DOCUMENT_TOOL_ID,
+            id: GET_SERVICE_DETAILS_TOOL_ID,
             type: ToolType.builtin,
-            description: `Fetch the log document for ${index}:${id}.`,
+            description: `Fetch the full service details for service ${serviceName}.`,
             schema: z.object({}),
             handler: async (_args, context) => {
               try {
-                const [coreStart] = await core.getStartServices();
-                const esClient = coreStart.elasticsearch.client.asScoped(context.request);
-
-                const logEntry = await getLogDocumentById({
-                  esClient: esClient.asCurrentUser,
-                  index,
-                  id,
+                const serviceDetails = await dataRegistry.getData('apmServiceSummary', {
+                  request: context.request,
+                  serviceName,
+                  serviceEnvironment: environment,
+                  start,
+                  end,
                 });
 
-                if (!logEntry) {
+                if (!serviceDetails) {
                   return {
                     results: [
                       {
                         type: ToolResultType.error,
                         data: {
-                          message: `Log document not found for ${index}:${id}`,
+                          message: `Service details not found for ${serviceName}`,
                         },
                       },
                     ],
@@ -83,12 +85,12 @@ export function createLogAttachmentType({
                   results: [
                     {
                       type: ToolResultType.other,
-                      data: logEntry,
+                      data: serviceDetails,
                     },
                   ],
                 };
               } catch (error) {
-                logger.error(`Failed to fetch log document for attachment: ${error?.message}`);
+                logger.error(`Failed to fetch service details for attachment: ${error?.message}`);
                 logger.debug(error);
 
                 return {
@@ -96,7 +98,7 @@ export function createLogAttachmentType({
                     {
                       type: ToolResultType.error,
                       data: {
-                        message: `Failed to fetch log document: ${error.message}`,
+                        message: `Failed to fetch service details: ${error.message}`,
                         stack: error.stack,
                       },
                     },
@@ -111,7 +113,7 @@ export function createLogAttachmentType({
     getTools: () => [],
     getAgentDescription: () =>
       dedent(
-        `An Observability Log attachment. The log ID is provided - use the ${GET_LOG_DOCUMENT_TOOL_ID} tool to fetch the full log information.`
+        `An Observability service attachment. The service name, environment and the time range is provided - use the ${GET_SERVICE_DETAILS_TOOL_ID} tool to fetch the full service details.`
       ),
   };
 }

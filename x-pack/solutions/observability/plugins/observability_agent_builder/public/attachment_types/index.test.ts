@@ -11,6 +11,8 @@ import {
   OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID,
 } from '../../common/constants';
 import { registerAttachmentUiDefinitions } from '.';
 
@@ -24,10 +26,10 @@ describe('registerAttachmentUiDefinitions', () => {
     jest.clearAllMocks();
   });
 
-  it('registers all four attachment types', () => {
+  it('registers all six attachment types', () => {
     registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
-    expect(mockAddAttachmentType).toHaveBeenCalledTimes(4);
+    expect(mockAddAttachmentType).toHaveBeenCalledTimes(6);
   });
 
   it('registers AI Insight attachment type with correct config', () => {
@@ -128,5 +130,31 @@ describe('registerAttachmentUiDefinitions', () => {
       data: undefined,
     };
     expect(config.getLabel(attachment)).toBe('Observability alert');
+  });
+
+  it('registers SLO attachment type with correct config', () => {
+    registerAttachmentUiDefinitions({ attachments: mockAttachments });
+
+    const sloCall = mockAddAttachmentType.mock.calls.find(
+      (call) => call[0] === OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID
+    );
+    expect(sloCall).toBeDefined();
+
+    const config = sloCall![1];
+    expect(config.getIcon()).toBe('chartGauge');
+    expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('SLO');
+  });
+
+  it('registers service attachment type with correct config', () => {
+    registerAttachmentUiDefinitions({ attachments: mockAttachments });
+
+    const serviceCall = mockAddAttachmentType.mock.calls.find(
+      (call) => call[0] === OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID
+    );
+    expect(serviceCall).toBeDefined();
+
+    const config = serviceCall![1];
+    expect(config.getIcon()).toBe('gear');
+    expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Service');
   });
 });

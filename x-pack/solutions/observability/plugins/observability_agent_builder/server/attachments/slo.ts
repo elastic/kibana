@@ -11,68 +11,66 @@ import type { Logger } from '@kbn/core/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { ObservabilityAgentBuilderCoreSetup } from '../types';
-import { OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID } from '../../common';
-import { getLogDocumentById } from '../routes/ai_insights/get_log_document_by_id';
+import { OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID } from '../../common';
+import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 import { observabilityAttachmentDataSchema } from './observability_attachment_data_schema';
 
-const GET_LOG_DOCUMENT_TOOL_ID = 'get_log_document';
+const GET_SLO_DETAILS_TOOL_ID = 'get_slo_details';
 
-const logDataSchema = observabilityAttachmentDataSchema.extend({
-  id: z.string(),
-  index: z.string(),
+const sloDataSchema = observabilityAttachmentDataSchema.extend({
+  sloId: z.string(),
+  sloInstanceId: z.string().optional(),
+  remoteName: z.string().optional(),
 });
 
-export type LogAttachmentData = z.infer<typeof logDataSchema>;
+export type SloAttachmentData = z.infer<typeof sloDataSchema>;
 
-export function createLogAttachmentType({
-  core,
+export function createSloAttachmentType({
   logger,
+  dataRegistry,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
-}): AttachmentTypeDefinition<typeof OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID, LogAttachmentData> {
+  dataRegistry: ObservabilityAgentBuilderDataRegistry;
+}): AttachmentTypeDefinition<typeof OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID, SloAttachmentData> {
   return {
-    id: OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
+    id: OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID,
     validate: (input) => {
-      const parsed = logDataSchema.safeParse(input);
+      const parsed = sloDataSchema.safeParse(input);
       if (parsed.success) {
         return { valid: true, data: parsed.data };
       }
       return { valid: false, error: parsed.error.message };
     },
     format: (attachment) => {
-      const { index, id } = attachment.data;
+      const { sloId, sloInstanceId, remoteName } = attachment.data;
 
       return {
         getRepresentation: () => ({
           type: 'text',
-          value: `Observability Log ID: ${index}:${id}. Use the ${GET_LOG_DOCUMENT_TOOL_ID} tool to fetch full log document.`,
+          value: `Observability SLO ID: ${sloId}. Use the ${GET_SLO_DETAILS_TOOL_ID} tool to fetch full SLO information.`,
         }),
         getBoundedTools: () => [
           {
-            id: GET_LOG_DOCUMENT_TOOL_ID,
+            id: GET_SLO_DETAILS_TOOL_ID,
             type: ToolType.builtin,
-            description: `Fetch the log document for ${index}:${id}.`,
+            description: `Fetch the full details for SLO ${sloId}.`,
             schema: z.object({}),
             handler: async (_args, context) => {
               try {
-                const [coreStart] = await core.getStartServices();
-                const esClient = coreStart.elasticsearch.client.asScoped(context.request);
-
-                const logEntry = await getLogDocumentById({
-                  esClient: esClient.asCurrentUser,
-                  index,
-                  id,
+                const sloDetails = await dataRegistry.getData('sloDetails', {
+                  request: context.request,
+                  sloId,
+                  sloInstanceId,
+                  remoteName,
                 });
 
-                if (!logEntry) {
+                if (!sloDetails) {
                   return {
                     results: [
                       {
                         type: ToolResultType.error,
                         data: {
-                          message: `Log document not found for ${index}:${id}`,
+                          message: `SLO details not found for ${sloId}`,
                         },
                       },
                     ],
@@ -83,12 +81,12 @@ export function createLogAttachmentType({
                   results: [
                     {
                       type: ToolResultType.other,
-                      data: logEntry,
+                      data: sloDetails,
                     },
                   ],
                 };
               } catch (error) {
-                logger.error(`Failed to fetch log document for attachment: ${error?.message}`);
+                logger.error(`Failed to fetch SLO details for attachment: ${error?.message}`);
                 logger.debug(error);
 
                 return {
@@ -96,7 +94,7 @@ export function createLogAttachmentType({
                     {
                       type: ToolResultType.error,
                       data: {
-                        message: `Failed to fetch log document: ${error.message}`,
+                        message: `Failed to fetch SLO details: ${error.message}`,
                         stack: error.stack,
                       },
                     },
@@ -111,7 +109,7 @@ export function createLogAttachmentType({
     getTools: () => [],
     getAgentDescription: () =>
       dedent(
-        `An Observability Log attachment. The log ID is provided - use the ${GET_LOG_DOCUMENT_TOOL_ID} tool to fetch the full log information.`
+        `An Observability SLO attachment. The SLO ID is provided - use the ${GET_SLO_DETAILS_TOOL_ID} tool to fetch the full SLO information.`
       ),
   };
 }

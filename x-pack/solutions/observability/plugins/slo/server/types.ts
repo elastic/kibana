@@ -24,6 +24,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { ObservabilityAgentBuilderPluginSetup } from '@kbn/observability-agent-builder-plugin/server';
 import type { SloClient } from './client';
 
 export type { SLOConfig } from '../common/config';
@@ -48,6 +49,7 @@ export interface SLOPluginSetupDependencies {
   dataViews: DataViewsServerPluginStart;
   security: SecurityPluginStart;
   sloShared: SloSharedPluginSetup;
+  observabilityAgentBuilder?: ObservabilityAgentBuilderPluginSetup;
 }
 
 export interface SLOPluginStartDependencies {
