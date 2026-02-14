@@ -63,14 +63,17 @@ test.describe('navigation', { tag: tags.serverless.security.complete }, () => {
     }).toPass({ timeout: 30000 });
   });
 
-  test('navigates to maintenance windows', async ({ browserAuth, pageObjects }) => {
+  test('navigates to maintenance windows', async ({ page, browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
-    await pageObjects.navigation.goToSecurity();
-    await pageObjects.collapsibleNav.clickItem('stack_management');
-    await pageObjects.collapsibleNav.clickItem('management:maintenanceWindows', {
-      lowercase: false,
-    });
-    await expect(pageObjects.navigation.getBreadcrumbByText('Maintenance Windows')).toBeVisible();
+    await expect(async () => {
+      await pageObjects.navigation.goToSecurity();
+      await pageObjects.collapsibleNav.clickItem('stack_management');
+      await page.waitForURL(/app\/management/);
+      const mwItem = pageObjects.collapsibleNav.getNavItemById('management:maintenanceWindows');
+      await expect(mwItem).toBeVisible({ timeout: 5000 });
+      await mwItem.click();
+      await expect(pageObjects.navigation.getBreadcrumbByText('Maintenance Windows')).toBeVisible();
+    }).toPass({ timeout: 30000 });
   });
 
   test('renders a feedback callout', async ({ page, pageObjects }) => {
