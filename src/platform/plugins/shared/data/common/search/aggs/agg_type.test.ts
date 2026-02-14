@@ -138,14 +138,16 @@ describe('AggType Class', () => {
 
     describe('getSerializedFormat', () => {
       test('returns the default serialized field format if it exists', () => {
+        const field = {
+          format: {
+            toJSON: () => ({ id: 'format' }),
+          },
+        };
         const aggConfig = {
           params: {
-            field: {
-              format: {
-                toJSON: () => ({ id: 'format' }),
-              },
-            },
+            field,
           },
+          getField: () => field,
           aggConfigs: {
             indexPattern: { getFormatterForField: () => ({ toJSON: () => ({ id: 'format' }) }) },
           },
@@ -165,6 +167,7 @@ describe('AggType Class', () => {
       test('returns an empty object if a field param does not exist', () => {
         const aggConfig = {
           params: {},
+          getField: () => undefined,
         } as unknown as IAggConfig;
         const aggType = new AggType({
           name: 'name',

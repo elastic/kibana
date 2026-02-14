@@ -9,6 +9,7 @@
 
 import moment from 'moment-timezone';
 import { MISSING_TOKEN } from '@kbn/field-formats-common';
+import type { AggConfig } from '../agg_config';
 import type { IBucketAggConfig, BucketAggParam } from './bucket_agg_type';
 
 export const termsAggFilter = [
@@ -47,6 +48,7 @@ export const termsOrderAggParamDefinition: Partial<BucketAggParam<IBucketAggConf
   },
   write(agg, output, aggs) {
     const dir = agg.params.order.value;
+
     const order: Record<string, any> = (output.params.order = {});
 
     let orderAgg = agg.params.orderAgg || aggs!.getResponseAggById(agg.params.orderBy);
@@ -55,10 +57,10 @@ export const termsOrderAggParamDefinition: Partial<BucketAggParam<IBucketAggConf
     // thus causing issues with filtering. This probably causes other issues since float might not
     // be able to contain the number on the elasticsearch side
     if (output.params.script) {
-      output.params.value_type = agg.getField().type === 'number' ? 'float' : agg.getField().type;
+      output.params.value_type = agg.getField()?.type === 'number' ? 'float' : agg.getField()?.type;
     }
 
-    if (agg.params.missingBucket && agg.params.field.type === 'string') {
+    if (agg.params.missingBucket && agg.getField()?.type === 'string') {
       output.params.missing = MISSING_TOKEN;
     }
 
@@ -127,7 +129,7 @@ export const termsOrderAggParamDefinition: Partial<BucketAggParam<IBucketAggConf
       orderAgg = aggs.byId(orderAgg.parentId);
     }
 
-    output.subAggs = (output.subAggs || []).concat(orderAgg);
+    output.subAggs = ((output.subAggs || []) as AggConfig[]).concat(orderAgg);
     order[orderAggPath] = dir;
   },
 };

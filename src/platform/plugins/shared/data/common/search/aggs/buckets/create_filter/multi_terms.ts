@@ -15,16 +15,16 @@ import type { MultiFieldKey } from '../multi_field_key';
 
 export const createFilterMultiTerms = (
   aggConfig: IBucketAggConfig,
-  key: MultiFieldKey,
-  params: { terms: MultiFieldKey[] }
+  key: unknown,
+  params?: Record<string, unknown>
 ): Filter => {
-  const fields = aggConfig.params.fields;
+  const fields = aggConfig.getParam('fields') as string[];
   const indexPattern = aggConfig.aggConfigs.indexPattern;
 
   if (String(key) === '__other__') {
-    const multiTerms = params.terms;
+    const multiTerms = (params as { terms: MultiFieldKey[] }).terms;
 
-    const perMultiTermQuery = multiTerms.map((multiTerm) =>
+    const perMultiTermQuery = multiTerms.map((multiTerm: MultiFieldKey) =>
       multiTerm.keys.map(
         (partialKey, i) =>
           buildPhraseFilter(indexPattern.getFieldByName(fields[i])!, partialKey, indexPattern).query
@@ -55,17 +55,18 @@ export const createFilterMultiTerms = (
       },
     };
   }
-  const partials = key.keys.map((partialKey, i) =>
+  const typedKey = key as MultiFieldKey;
+  const partials = typedKey.keys.map((partialKey, i) =>
     buildPhraseFilter(indexPattern.getFieldByName(fields[i])!, partialKey, indexPattern)
   );
   return {
     meta: {
-      alias: key.keys.join(', '),
+      alias: typedKey.keys.join(', '),
       index: indexPattern.id,
     },
     query: {
       bool: {
-        must: partials.map((partialFilter) => partialFilter.query),
+        must: partials.map((partialFilter: Filter) => partialFilter.query),
       },
     },
   };

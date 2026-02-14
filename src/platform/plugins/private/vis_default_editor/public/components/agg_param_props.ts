@@ -40,6 +40,6 @@ export interface AggParamEditorProps<T, P = AggParam> extends AggParamCommonProp
 
 export interface OptionedParamEditorProps<T = OptionedValueProp> {
   aggParam: {
-    options: T[];
+    options: T[] | unknown[];
   };
 }

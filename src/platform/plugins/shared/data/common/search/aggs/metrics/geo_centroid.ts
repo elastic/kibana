@@ -40,7 +40,8 @@ export const getGeoCentroidMetricAgg = () => {
       },
     ],
     getValue(agg, bucket) {
-      return bucket[agg.id] && bucket[agg.id].location;
+      const b = bucket as Record<string, any>;
+      return b[agg.id] && b[agg.id].location;
     },
   });
 };

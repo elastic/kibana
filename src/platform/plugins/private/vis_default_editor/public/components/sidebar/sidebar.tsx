@@ -141,7 +141,7 @@ function DefaultEditorSideBarComponent({
       const shouldUpdate = !isEqual(state.params[paramName], value);
 
       if (shouldUpdate) {
-        dispatch(setStateParamValue(paramName, value));
+        dispatch(setStateParamValue(paramName as string, value));
       }
     },
     [dispatch, state.params]

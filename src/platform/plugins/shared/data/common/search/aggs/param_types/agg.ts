@@ -9,6 +9,7 @@
 
 import type { IAggConfig, AggConfigSerialized } from '../agg_config';
 import { AggConfig } from '../agg_config';
+import type { AggParamOutput } from './base';
 import { BaseParamType } from './base';
 
 export class AggParamType<
@@ -17,43 +18,44 @@ export class AggParamType<
   makeAgg: (agg: TAggConfig, state?: AggConfigSerialized) => TAggConfig;
   allowedAggs: string[] = [];
 
-  constructor(config: Record<string, any>) {
+  constructor(config: Record<string, unknown>) {
     super(config);
 
     if (config.allowedAggs) {
-      this.allowedAggs = config.allowedAggs;
+      this.allowedAggs = config.allowedAggs as string[];
     }
 
     if (!config.write) {
-      this.write = (aggConfig: TAggConfig, output: Record<string, any>) => {
-        if (aggConfig.params[this.name] && aggConfig.params[this.name].length) {
-          output.params[this.name] = aggConfig.params[this.name];
+      this.write = (aggConfig: TAggConfig, output: AggParamOutput) => {
+        const val = aggConfig.params[this.name];
+        if (val && (val as unknown[]).length) {
+          output.params[this.name] = val;
         }
       };
     }
     if (!config.serialize) {
-      this.serialize = (agg: TAggConfig) => {
-        return agg.serialize();
+      this.serialize = (agg: unknown) => {
+        return (agg as TAggConfig).serialize();
       };
     }
     if (!config.deserialize) {
-      this.deserialize = (state: AggConfigSerialized, agg?: TAggConfig): TAggConfig => {
+      this.deserialize = (state: unknown, agg?: TAggConfig): TAggConfig => {
         if (!agg) {
           throw new Error('aggConfig was not provided to AggParamType deserialize function');
         }
-        return this.makeAgg(agg, state);
+        return this.makeAgg(agg, state as AggConfigSerialized);
       };
     }
     if (!config.toExpressionAst) {
-      this.toExpressionAst = (agg: TAggConfig) => {
-        if (!agg || !agg.toExpressionAst) {
+      this.toExpressionAst = (agg: unknown) => {
+        if (!agg || !(agg as TAggConfig).toExpressionAst) {
           throw new Error('aggConfig was not provided to AggParamType toExpressionAst function');
         }
-        return agg.toExpressionAst();
+        return (agg as TAggConfig).toExpressionAst();
       };
     }
 
-    this.makeAgg = config.makeAgg;
+    this.makeAgg = config.makeAgg as AggParamType<TAggConfig>['makeAgg'];
     this.getValueType = () => AggConfig;
   }
 }

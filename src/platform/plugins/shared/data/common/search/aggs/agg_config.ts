@@ -19,10 +19,12 @@ import type {
 } from '@kbn/expressions-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { ISearchOptions } from '@kbn/search-types';
 import type { ISearchSource } from '../../../public';
 
 import type { IAggType } from './agg_type';
+import type { AggParamOutput } from './param_types/base';
 import { writeParams } from './agg_params';
 import type { IAggConfigs } from './agg_configs';
 import { parseTimeShift } from './utils';
@@ -59,14 +61,14 @@ export class AggConfig {
    * @param  {array[object]} list - a list of objects, objects can be anything really
    * @return {array} - the list that was passed in
    */
-  static ensureIds(list: any[]) {
-    const have: IAggConfig[] = [];
-    const haveNot: AggConfigOptions[] = [];
+  static ensureIds(list: Array<{ id?: string } & Record<string, unknown>>) {
+    const have: Array<{ id: string } & Record<string, unknown>> = [];
+    const haveNot: Array<{ id?: string } & Record<string, unknown>> = [];
     list.forEach(function (obj) {
-      (obj.id ? have : haveNot).push(obj);
+      (obj.id ? have : haveNot).push(obj as { id: string } & Record<string, unknown>);
     });
 
-    let nextId = AggConfig.nextId(have);
+    let nextId = AggConfig.nextId(have as unknown as IAggConfig[]);
     haveNot.forEach(function (obj) {
       obj.id = String(nextId++);
     });
@@ -91,18 +93,20 @@ export class AggConfig {
   public aggConfigs: IAggConfigs;
   public id: string;
   public enabled: boolean;
-  public params: any;
+
+  public params: Record<string, any>;
   public parent?: IAggConfigs;
   public brandNew?: boolean;
   public schema?: string;
 
   private __type: IAggType;
+
   private __typeDecorations: any;
   private subAggs: AggConfig[] = [];
 
   constructor(aggConfigs: IAggConfigs, opts: AggConfigOptions) {
     this.aggConfigs = aggConfigs;
-    this.id = String(opts.id || AggConfig.nextId(aggConfigs.aggs as any));
+    this.id = String(opts.id || AggConfig.nextId(aggConfigs.aggs as IAggConfig[]));
     this.enabled = typeof opts.enabled === 'boolean' ? opts.enabled : true;
 
     // start with empty params so that checks in type/schema setters don't freak
@@ -130,12 +134,15 @@ export class AggConfig {
    *                         used when initializing
    * @return {undefined}
    */
-  setParams(from: any) {
-    from = from || this.params || {};
-    const to = (this.params = {} as any);
+
+  setParams(from: Record<string, any> | {} | SerializableRecord) {
+    const source = (from || this.params || {}) as Record<string, any>;
+
+    const to: Record<string, any> = {};
+    this.params = to;
 
     this.getAggParams().forEach((aggParam) => {
-      let val = from[aggParam.name];
+      let val = source[aggParam.name];
 
       if (val == null) {
         if (aggParam.default == null) return;
@@ -143,7 +150,7 @@ export class AggConfig {
         if (!_.isFunction(aggParam.default)) {
           val = aggParam.default;
         } else {
-          val = aggParam.default(this);
+          val = (aggParam.default as (agg: AggConfig) => unknown)(this);
           if (val == null) return;
         }
       }
@@ -177,7 +184,7 @@ export class AggConfig {
   }
 
   getTimeShift(): undefined | moment.Duration {
-    const rawTimeShift = this.getParam('timeShift');
+    const rawTimeShift = this.getParam('timeShift') as string | undefined;
     if (!rawTimeShift) return undefined;
     const parsedTimeShift = parseTimeShift(rawTimeShift);
     if (parsedTimeShift === 'invalid') {
@@ -198,7 +205,7 @@ export class AggConfig {
     return parsedTimeShift;
   }
 
-  write(aggs?: IAggConfigs) {
+  write(aggs?: IAggConfigs): AggParamOutput {
     return writeParams<AggConfig>(this.type.params, this, aggs);
   }
 
@@ -207,9 +214,9 @@ export class AggConfig {
   }
 
   createFilter(key: string, params = {}) {
-    const createFilter = this.type.createFilter;
+    const createFilterFn = this.type.createFilter;
 
-    if (!createFilter) {
+    if (!createFilterFn) {
       throw new TypeError(`The "${this.type.title}" aggregation does not support filtering.`);
     }
 
@@ -223,7 +230,7 @@ export class AggConfig {
       throw new TypeError(message);
     }
 
-    return createFilter(this, key, params);
+    return createFilterFn(this, key, params);
   }
 
   /**
@@ -255,6 +262,7 @@ export class AggConfig {
    */
   toDsl(aggConfigs?: IAggConfigs) {
     if (this.type.hasNoDsl) return;
+
     const output = this.write(aggConfigs) as any;
 
     const configDsl = {} as any;
@@ -270,6 +278,7 @@ export class AggConfig {
 
     if (output.subAggs) {
       const subDslLvl = configDsl.aggs || (configDsl.aggs = {});
+
       output.subAggs.forEach(function nestAdhocSubAggs(subAggConfig: any) {
         subDslLvl[subAggConfig.id] = subAggConfig.toDsl(aggConfigs);
       });
@@ -277,6 +286,7 @@ export class AggConfig {
 
     if (output.parentAggs) {
       const subDslLvl = configDsl.parentAggs || (configDsl.parentAggs = {});
+
       output.parentAggs.forEach(function nestAdhocSubAggs(subAggConfig: any) {
         subDslLvl[subAggConfig.id] = subAggConfig.toDsl(aggConfigs);
       });
@@ -293,7 +303,8 @@ export class AggConfig {
 
     const outParams = _.transform(
       this.getAggParams(),
-      (out: any, aggParam) => {
+
+      (out: Record<string, any>, aggParam) => {
         let val = params[aggParam.name];
 
         // don't serialize undefined/null values
@@ -421,14 +432,14 @@ export class AggConfig {
     }
   }
 
-  getFieldDisplayName() {
+  getFieldDisplayName(): string {
     const field = this.getField();
 
     return field ? field.displayName || this.fieldName() : '';
   }
 
-  getField() {
-    return this.params.field;
+  getField(): DataViewField | undefined {
+    return this.params.field as DataViewField | undefined;
   }
 
   /**
@@ -496,7 +507,8 @@ export class AggConfig {
     }
 
     this.__type = type;
-    let availableFields = [];
+
+    let availableFields: any[] = [];
 
     const fieldParam = this.type && this.type.params.find((p: any) => p.type === 'field');
 
@@ -508,7 +520,8 @@ export class AggConfig {
     // clear out the previous params except for a few special ones
     this.setParams({
       // almost every agg has fields, so we try to persist that when type changes
-      field: availableFields.find((field: any) => field.name === this.getField()),
+
+      field: availableFields.find((field: any) => field.name === this.getField()?.name),
     });
   }
 

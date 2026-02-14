@@ -18,17 +18,18 @@ import type { IMetricAggConfig } from '../metric_agg_type';
 
 export const createMetricFilter = <TMetricAggConfig extends AggConfig = IMetricAggConfig>(
   aggConfig: TMetricAggConfig,
-  key: string
+  key: unknown
 ) => {
   const indexPattern = aggConfig.getIndexPattern();
-  if (aggConfig.getField()) {
-    return buildExistsFilter(aggConfig.getField(), indexPattern);
+  const field = aggConfig.getField();
+  if (field) {
+    return buildExistsFilter(field, indexPattern);
   }
 };
 
 export const createTopHitFilter = <TMetricAggConfig extends AggConfig = IMetricAggConfig>(
   aggConfig: TMetricAggConfig,
-  key: string
+  key: unknown
 ) => {
   const indexPattern = aggConfig.getIndexPattern();
   const field = aggConfig.getField();
@@ -41,5 +42,5 @@ export const createTopHitFilter = <TMetricAggConfig extends AggConfig = IMetricA
         key.map((k) => buildPhraseFilter(field, k, indexPattern)),
         indexPattern
       )
-    : buildPhraseFilter(field, key, indexPattern);
+    : buildPhraseFilter(field, key as string, indexPattern);
 };

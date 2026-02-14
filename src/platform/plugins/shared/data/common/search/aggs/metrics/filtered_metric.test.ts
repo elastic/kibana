@@ -124,17 +124,21 @@ describe('filtered metric agg type', () => {
     );
 
     expect(
-      getFilteredMetricAgg(aggTypesDependencies).createFilter!(
-        topMetricsAggConfigs.aggs[0] as IMetricAggConfig,
-        10
+      (
+        getFilteredMetricAgg(aggTypesDependencies).createFilter!(
+          topMetricsAggConfigs.aggs[0] as IMetricAggConfig,
+          10
+        ) as any
       ).query.match_phrase
     ).toEqual({ bytes: 10 });
   });
   it('returns filter from the custom bucket filter parameter for metric', () => {
     expect(
-      getFilteredMetricAgg(aggTypesDependencies).createFilter!(
-        aggConfigs.aggs[0] as IMetricAggConfig,
-        '10'
+      (
+        getFilteredMetricAgg(aggTypesDependencies).createFilter!(
+          aggConfigs.aggs[0] as IMetricAggConfig,
+          '10'
+        ) as any
       ).query.bool.filter[0].bool.should[0].match
     ).toEqual({ bytes: 'b' });
   });

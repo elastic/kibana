@@ -36,7 +36,7 @@ const bucketType = 'buckets';
 
 interface BucketAggTypeConfig<TBucketAggConfig extends IAggConfig>
   extends AggTypeConfig<TBucketAggConfig, BucketAggParam<TBucketAggConfig>> {
-  getKey?: (bucket: any, key: any, agg: IAggConfig) => any;
+  getKey?: (bucket: unknown, key: unknown, agg: IAggConfig) => unknown;
   getShiftedKey?: (
     agg: TBucketAggConfig,
     key: string | number,
@@ -51,7 +51,7 @@ export class BucketAggType<TBucketAggConfig extends IAggConfig = IBucketAggConfi
   TBucketAggConfig,
   BucketAggParam<TBucketAggConfig>
 > {
-  getKey: (bucket: any, key: any, agg: TBucketAggConfig) => any;
+  getKey: (bucket: unknown, key: unknown, agg: TBucketAggConfig) => unknown;
   type = bucketType;
 
   getShiftedKey(
@@ -76,7 +76,7 @@ export class BucketAggType<TBucketAggConfig extends IAggConfig = IBucketAggConfi
     this.getKey =
       config.getKey ||
       ((bucket, key) => {
-        return key || bucket.key;
+        return key || (bucket as Record<string, unknown>).key;
       });
 
     if (config.getShiftedKey) {
@@ -97,6 +97,11 @@ export class BucketAggType<TBucketAggConfig extends IAggConfig = IBucketAggConfi
   }
 }
 
-export function isBucketAggType(aggConfig: any): aggConfig is BucketAggType {
-  return aggConfig && aggConfig.type === bucketType;
+export function isBucketAggType(aggConfig: unknown): aggConfig is BucketAggType {
+  return (
+    typeof aggConfig === 'object' &&
+    aggConfig !== null &&
+    'type' in aggConfig &&
+    (aggConfig as Record<string, unknown>).type === bucketType
+  );
 }

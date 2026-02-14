@@ -74,7 +74,7 @@ describe('Buckets wrapper', () => {
           ],
         },
         aggConfigs: {},
-      } as IAggConfig;
+      } as unknown as IAggConfig;
 
       const buckets = new TabifyBuckets(aggResp, agg);
 
@@ -107,7 +107,7 @@ describe('Buckets wrapper', () => {
           ],
         },
         aggConfigs: {},
-      } as IAggConfig;
+      } as unknown as IAggConfig;
 
       const buckets = new TabifyBuckets(aggResp, agg);
 
@@ -135,7 +135,7 @@ describe('Buckets wrapper', () => {
           ],
         },
         aggConfigs: {},
-      } as IAggConfig;
+      } as unknown as IAggConfig;
 
       const buckets = new TabifyBuckets(aggResp, agg);
 
@@ -193,7 +193,7 @@ describe('Buckets wrapper', () => {
           },
         },
         aggConfigs: {},
-      } as IAggConfig;
+      } as unknown as IAggConfig;
       const timeRange = {
         from: moment(150),
         to: moment(350),
@@ -253,7 +253,7 @@ describe('Buckets wrapper', () => {
           },
         },
         aggConfigs: {},
-      } as IAggConfig;
+      } as unknown as IAggConfig;
       const timeRange = {
         from: moment(150),
         to: moment(350),
@@ -273,7 +273,7 @@ describe('Buckets wrapper', () => {
           },
         },
         aggConfigs: {},
-      } as IAggConfig;
+      } as unknown as IAggConfig;
       const timeRange = {
         from: moment(100),
         to: moment(400),
@@ -293,7 +293,7 @@ describe('Buckets wrapper', () => {
           },
         },
         aggConfigs: {},
-      } as IAggConfig;
+      } as unknown as IAggConfig;
       const timeRange = {
         from: moment(150),
         to: moment(350),
@@ -313,7 +313,7 @@ describe('Buckets wrapper', () => {
           },
         },
         aggConfigs: {},
-      } as IAggConfig;
+      } as unknown as IAggConfig;
       const timeRange = {
         from: moment(100),
         to: moment(350),
@@ -321,7 +321,7 @@ describe('Buckets wrapper', () => {
       };
       const buckets = new TabifyBuckets(aggResp, agg, timeRange);
 
-      expect(buckets.buckets.map((b: Bucket) => b.key)).toEqual([100, 200]);
+      expect((buckets.buckets as Bucket[]).map((b: Bucket) => b.key)).toEqual([100, 200]);
     });
 
     test('does not drop bucket when no timeFields have been specified', () => {
@@ -333,7 +333,7 @@ describe('Buckets wrapper', () => {
           },
         },
         aggConfigs: {},
-      } as IAggConfig;
+      } as unknown as IAggConfig;
       const timeRange = {
         from: moment(100),
         to: moment(350),
@@ -341,7 +341,7 @@ describe('Buckets wrapper', () => {
       };
       const buckets = new TabifyBuckets(aggResp, agg, timeRange);
 
-      expect(buckets.buckets.map((b: Bucket) => b.key)).toEqual([0, 100, 200, 300]);
+      expect((buckets.buckets as Bucket[]).map((b: Bucket) => b.key)).toEqual([0, 100, 200, 300]);
     });
   });
 });

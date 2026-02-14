@@ -87,11 +87,11 @@ describe('TimeIntervalParamEditor', () => {
     });
 
     test('should filter out "auto" interval value if it is disabled in options and mark as invalid', () => {
-      props.aggParam.options[0].enabled = jest.fn().mockReturnValue(false);
+      (props.aggParam.options[0] as any).enabled = jest.fn().mockReturnValue(false);
       props.value = 'auto';
       const comp = shallow(<TimeIntervalParamEditor {...props} />);
 
-      expect(props.aggParam.options[0].enabled).toHaveBeenCalledWith(props.agg);
+      expect((props.aggParam.options[0] as any).enabled).toHaveBeenCalledWith(props.agg);
       expect(comp.prop('isInvalid')).toBeTruthy();
       expect(comp.children().prop('selectedOptions')).toEqual([]);
       expect(comp.children().prop('options')).toEqual([

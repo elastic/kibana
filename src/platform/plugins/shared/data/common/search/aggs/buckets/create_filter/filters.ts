@@ -11,13 +11,15 @@ import { get } from 'lodash';
 import { buildQueryFilter } from '@kbn/es-query';
 import type { IBucketAggConfig } from '../bucket_agg_type';
 
-export const createFilterFilters = (aggConfig: IBucketAggConfig, key: string) => {
+export const createFilterFilters = (aggConfig: IBucketAggConfig, key: unknown) => {
   // have the aggConfig write agg dsl params
-  const dslFilters: any = get(aggConfig.toDsl(), 'filters.filters');
-  const filter = dslFilters[key];
+  const dslFilters = get(aggConfig.toDsl(), 'filters.filters') as
+    | Record<string, unknown>
+    | undefined;
+  const filter = dslFilters?.[key as string];
   const indexPattern = aggConfig.getIndexPattern();
 
   if (filter && indexPattern && indexPattern.id) {
-    return buildQueryFilter(filter, indexPattern.id, key);
+    return buildQueryFilter(filter, indexPattern.id, key as string);
   }
 };

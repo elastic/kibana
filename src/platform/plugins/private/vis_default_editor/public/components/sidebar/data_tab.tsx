@@ -76,7 +76,7 @@ function DefaultEditorDataTab({
   );
 
   const onAggParamValueChange: DefaultEditorAggCommonProps['setAggParamValue'] = useCallback(
-    (...props) => dispatch(setAggParamValue(...props)),
+    (...props) => dispatch(setAggParamValue(...props) as EditorAction),
     [dispatch]
   );
 

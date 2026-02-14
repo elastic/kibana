@@ -32,25 +32,26 @@ import type { IBucketAggConfig } from './buckets';
 import { insertTimeShiftSplit, mergeTimeShifts } from './utils/time_splits';
 import { createSamplerAgg, isSamplingEnabled } from './utils/sampler';
 
-function removeParentAggs(obj: any) {
+function removeParentAggs(obj: Record<string, unknown>) {
   for (const prop in obj) {
     if (prop === 'parentAggs') delete obj[prop];
-    else if (typeof obj[prop] === 'object') {
-      const hasParentAggsKey = 'parentAggs' in obj[prop];
-      removeParentAggs(obj[prop]);
+    else if (typeof obj[prop] === 'object' && obj[prop] !== null) {
+      const child = obj[prop] as Record<string, unknown>;
+      const hasParentAggsKey = 'parentAggs' in child;
+      removeParentAggs(child);
       // delete object if parentAggs was the last key
-      if (hasParentAggsKey && Object.keys(obj[prop]).length === 0) {
+      if (hasParentAggsKey && Object.keys(child).length === 0) {
         delete obj[prop];
       }
     }
   }
 }
 
-function parseParentAggs(dslLvlCursor: any, dsl: any) {
+function parseParentAggs(dslLvlCursor: Record<string, unknown>, dsl: Record<string, unknown>) {
   if (dsl.parentAggs) {
-    _.each(dsl.parentAggs, (agg, key) => {
+    _.each(dsl.parentAggs as Record<string, unknown>, (agg: unknown, key: string | undefined) => {
       dslLvlCursor[key as string] = agg;
-      parseParentAggs(dslLvlCursor, agg);
+      parseParentAggs(dslLvlCursor, agg as Record<string, unknown>);
     });
   }
 }
@@ -66,7 +67,7 @@ export interface AggConfigsOptions {
 
 export type CreateAggConfigParams = Assign<AggConfigSerialized, { type: string | IAggType }>;
 
-export type GenericBucket = estypes.AggregationsBuckets<any> & {
+export type GenericBucket = estypes.AggregationsBuckets<unknown> & {
   [property: string]: estypes.AggregationsAggregate;
 };
 
@@ -102,8 +103,8 @@ export class AggConfigs {
       opts?.aggExecutionContext?.shouldDetectTimeZone
     );
 
-    configStates = AggConfig.ensureIds(configStates);
-    configStates.forEach((params: any) => this.createAggConfig(params));
+    configStates = AggConfig.ensureIds(configStates) as CreateAggConfigParams[];
+    configStates.forEach((params: CreateAggConfigParams) => this.createAggConfig(params));
   }
 
   public get hierarchical() {
@@ -242,10 +243,10 @@ export class AggConfigs {
     return true;
   }
 
-  toDsl(): Record<string, any> {
-    const dslTopLvl: Record<string, any> = {};
-    let dslLvlCursor: Record<string, any>;
-    let nestedMetrics: Array<{ config: AggConfig; dsl: Record<string, any> }> | [];
+  toDsl(): Record<string, unknown> {
+    const dslTopLvl: Record<string, unknown> = {};
+    let dslLvlCursor: Record<string, unknown>;
+    let nestedMetrics: Array<{ config: AggConfig; dsl: Record<string, unknown> }> | [];
 
     const timeShifts = this.getTimeShifts();
     const hasMultipleTimeShifts = Object.keys(timeShifts).length > 1;
@@ -262,7 +263,7 @@ export class AggConfigs {
         .map((agg) => {
           return {
             config: agg,
-            dsl: agg.toDsl(this),
+            dsl: agg.toDsl(this)!,
           };
         });
     }
@@ -285,16 +286,19 @@ export class AggConfigs {
         dslLvlCursor = dslTopLvl;
         // when sampling jump directly to the aggs
         if (this.isSamplingEnabled()) {
-          dslLvlCursor = dslLvlCursor.sampling.aggs;
+          dslLvlCursor = (dslLvlCursor.sampling as Record<string, unknown>).aggs as Record<
+            string,
+            unknown
+          >;
         }
       } else {
         const prevConfig: AggConfig = list[i - 1];
-        const prevDsl = dslLvlCursor[prevConfig.id];
+        const prevDsl = dslLvlCursor[prevConfig.id] as Record<string, unknown> | undefined;
 
         // advance the cursor and nest under the previous agg, or
         // put it on the same level if the previous agg doesn't accept
         // sub aggs
-        dslLvlCursor = prevDsl?.aggs || dslLvlCursor;
+        dslLvlCursor = (prevDsl?.aggs as Record<string, unknown>) || dslLvlCursor;
       }
 
       if (hasMultipleTimeShifts) {
@@ -308,32 +312,35 @@ export class AggConfigs {
       const dsl = config.type.hasNoDslParams
         ? config.toDsl(this)
         : (dslLvlCursor[config.id] = config.toDsl(this));
-      let subAggs: any;
+      let subAggs: Record<string, unknown> | undefined;
 
-      parseParentAggs(dslLvlCursor, dsl);
+      parseParentAggs(dslLvlCursor, dsl as Record<string, unknown>);
 
       if (
         config.type.type === AggGroupNames.Buckets &&
         (i < aggsWithDsl - 1 || timeSplitIndex > i)
       ) {
+        const dslObj = dsl as Record<string, unknown>;
         // buckets that are not the last item in the list of dsl producing aggs or have a time split coming up accept sub-aggs
-        subAggs = dsl.aggs || (dsl.aggs = {});
+        subAggs = (dslObj.aggs || (dslObj.aggs = {})) as Record<string, unknown>;
       }
 
       if (subAggs) {
         _.each(subAggs, (agg) => {
-          parseParentAggs(subAggs, agg);
+          parseParentAggs(subAggs!, agg as Record<string, unknown>);
         });
       }
       if (subAggs && nestedMetrics) {
-        nestedMetrics.forEach((agg: any) => {
-          subAggs[agg.config.id] = agg.dsl;
+        nestedMetrics.forEach((agg) => {
+          subAggs![agg.config.id] = agg.dsl;
           // if a nested metric agg has parent aggs, we have to add them to every level of the tree
           // to make sure "bucket_path" references in the nested metric agg itself are still working
           if (agg.dsl.parentAggs) {
-            Object.entries(agg.dsl.parentAggs).forEach(([parentAggId, parentAgg]) => {
-              subAggs[parentAggId] = parentAgg;
-            });
+            Object.entries(agg.dsl.parentAggs as Record<string, unknown>).forEach(
+              ([parentAggId, parentAgg]) => {
+                subAggs![parentAggId] = parentAgg;
+              }
+            );
           }
         });
       }

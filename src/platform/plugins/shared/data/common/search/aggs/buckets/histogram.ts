@@ -118,7 +118,7 @@ export const getHistogramBucketAgg = ({
           options: any
         ) {
           const field = aggConfig.getField();
-          if (field?.type === 'number_range') {
+          if (!field || field.type === 'number_range') {
             // Can't scale number_histogram requests
             return;
           }
@@ -222,7 +222,7 @@ export const getHistogramBucketAgg = ({
           }
         },
         shouldShow: (aggConfig: IBucketAggConfig) => aggConfig.params.has_extended_bounds,
-        toExpressionAst: extendedBoundsToAst,
+        toExpressionAst: (value: unknown) => extendedBoundsToAst(value as ExtendedBounds),
       },
     ],
   });

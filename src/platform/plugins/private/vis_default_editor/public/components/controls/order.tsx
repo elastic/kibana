@@ -40,10 +40,14 @@ function OrderParamEditor({
       display="rowCompressed"
     >
       <EuiSelect
-        options={aggParam.options}
+        options={aggParam.options as OptionedValueProp[]}
         value={value && value.value}
         onChange={(ev) =>
-          setValue(aggParam.options.find((opt: OptionedValueProp) => opt.value === ev.target.value))
+          setValue(
+            (aggParam.options as OptionedValueProp[]).find(
+              (opt: OptionedValueProp) => opt.value === ev.target.value
+            )
+          )
         }
         fullWidth={true}
         compressed

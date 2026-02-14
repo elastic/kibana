@@ -270,7 +270,7 @@ describe('Histogram Agg', () => {
             name: 'field',
           },
         }).aggs[0];
-        freshHistogramAggConfig.setParams(serializedAgg.params);
+        freshHistogramAggConfig.setParams(serializedAgg.params ?? {});
         expect(freshHistogramAggConfig.getParam('interval')).toEqual('auto');
       });
 

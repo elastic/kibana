@@ -38,8 +38,9 @@ export const getDateRangeBucketAgg = ({ aggExecutionContext, getConfig }: AggTyp
     expressionName: aggDateRangeFnName,
     title: dateRangeTitle,
     createFilter: createFilterDateRange,
-    getKey({ from, to }): DateRange {
-      return { from, to };
+    getKey(bucket, key, agg): DateRange {
+      const { from, to } = bucket as Record<string, unknown>;
+      return { from: from as string, to: to as string };
     },
     getSerializedFormat(agg) {
       return {
@@ -69,7 +70,7 @@ export const getDateRangeBucketAgg = ({ aggExecutionContext, getConfig }: AggTyp
             to: 'now',
           },
         ],
-        toExpressionAst: (ranges) => ranges?.map(dateRangeToAst),
+        toExpressionAst: (value: unknown) => (value as DateRange[])?.map(dateRangeToAst),
       },
       {
         name: 'time_zone',

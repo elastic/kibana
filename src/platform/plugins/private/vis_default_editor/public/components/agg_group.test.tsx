@@ -78,7 +78,7 @@ describe('DefaultEditorAgg component', () => {
             },
           },
           schema: 'metrics',
-        } as IAggConfig,
+        } as unknown as IAggConfig,
         {
           id: '3',
           params: {
@@ -87,7 +87,7 @@ describe('DefaultEditorAgg component', () => {
             },
           },
           schema: 'metrics',
-        } as IAggConfig,
+        } as unknown as IAggConfig,
         {
           id: '2',
           params: {
@@ -96,7 +96,7 @@ describe('DefaultEditorAgg component', () => {
             },
           },
           schema: 'buckets',
-        } as IAggConfig,
+        } as unknown as IAggConfig,
       ],
     } as IAggConfigs;
 

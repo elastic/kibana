@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { SavedFieldTypeInvalidForAgg } from '@kbn/kibana-utils-plugin/common';
 import { isNestedField, DataViewField } from '@kbn/data-views-plugin/common';
 import type { IAggConfig } from '../agg_config';
+import type { AggParamOutput } from './base';
 import { BaseParamType } from './base';
 import { propFilter } from '../utils';
 import { KBN_FIELD_TYPES } from '../../../kbn_field_types/types';
@@ -36,17 +37,17 @@ export class FieldParamType extends BaseParamType {
    */
   filterField?: FilterFieldFn;
 
-  constructor(config: Record<string, any>) {
+  constructor(config: Record<string, unknown>) {
     super(config);
 
-    this.filterFieldTypes = config.filterFieldTypes || '*';
+    this.filterFieldTypes = (config.filterFieldTypes as FieldTypes) || '*';
     this.onlyAggregatable = config.onlyAggregatable !== false;
     this.scriptable = config.scriptable !== false;
-    this.filterField = config.filterField;
+    this.filterField = config.filterField as FilterFieldFn | undefined;
 
     // TODO - are there any custom write methods that do a missing check?
     if (!config.write) {
-      this.write = (aggConfig: IAggConfig, output: Record<string, any>) => {
+      this.write = (aggConfig: IAggConfig, output: AggParamOutput) => {
         const field = aggConfig.getField();
 
         if (!field) {
@@ -64,7 +65,7 @@ export class FieldParamType extends BaseParamType {
         const validField =
           field.type === KBN_FIELD_TYPES.MISSING // missing fields are always valid
             ? field
-            : this.getAvailableFields(aggConfig).find((f: any) => f.name === field.name);
+            : this.getAvailableFields(aggConfig).find((f: DataViewField) => f.name === field.name);
 
         if (!validField) {
           throw new SavedFieldTypeInvalidForAgg(
@@ -94,20 +95,20 @@ export class FieldParamType extends BaseParamType {
       };
     }
 
-    this.serialize = (field: DataViewField) => {
-      return field.name;
+    this.serialize = (field: unknown) => {
+      return (field as DataViewField).name;
     };
 
-    this.deserialize = (fieldName: string, aggConfig?: IAggConfig) => {
+    this.deserialize = (fieldName: unknown, aggConfig?: IAggConfig) => {
       if (!aggConfig) {
         throw new Error('aggConfig was not provided to FieldParamType deserialize function');
       }
-      const field = aggConfig.getIndexPattern().fields.getByName(fieldName);
+      const field = aggConfig.getIndexPattern().fields.getByName(fieldName as string);
 
       if (!field) {
         return new DataViewField({
           type: KBN_FIELD_TYPES.MISSING,
-          name: fieldName,
+          name: fieldName as string,
           searchable: false,
           aggregatable: false,
         });

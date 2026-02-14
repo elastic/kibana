@@ -47,7 +47,8 @@ export const getMedianMetricAgg = () => {
       { name: 'percents', default: [50], shouldShow: () => false, serialize: () => undefined },
     ],
     getValue(agg, bucket) {
-      return bucket[agg.id]?.values['50.0'];
+      const b = bucket as Record<string, any>;
+      return b[agg.id]?.values['50.0'];
     },
   });
 };

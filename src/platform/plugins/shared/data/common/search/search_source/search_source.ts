@@ -84,6 +84,7 @@ import type { DataView, DataViewLazy, DataViewsContract } from '@kbn/data-views-
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type { ISearchGeneric, IKibanaSearchResponse, IEsSearchResponse } from '@kbn/search-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { normalizeSortRequest } from './normalize_sort_request';
 
 import type { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
@@ -622,7 +623,7 @@ export class SearchSource {
     val: SearchSourceFields[K],
     key: K
   ): false | void {
-    val = typeof val === 'function' ? val(this) : val;
+    val = typeof val === 'function' ? (val as any)(this) : val;
     if (val == null || !key) return;
 
     const addToRoot = (rootKey: string, value: unknown) => {
@@ -645,12 +646,18 @@ export class SearchSource {
       case 'filter':
         return addToRoot(
           'filters',
-          (typeof data.filters === 'function' ? data.filters() : data.filters ?? []).concat(val)
+
+          (typeof data.filters === 'function' ? data.filters() : data.filters ?? []).concat(
+            val as any
+          )
         );
       case 'nonHighlightingFilters':
-        return addToRoot('nonHighlightingFilters', (data.nonHighlightingFilters ?? []).concat(val));
+        return addToRoot(
+          'nonHighlightingFilters',
+          (data.nonHighlightingFilters ?? []).concat(val as any)
+        );
       case 'query':
-        return addToRoot(key, (data.query ?? []).concat(val));
+        return addToRoot(key, (data.query ?? []).concat(val as any));
       case 'fields':
         // This will pass the passed in parameters to the new fields API.
         // Also if will only return scripted fields that are part of the specified
@@ -675,7 +682,7 @@ export class SearchSource {
         return addToBody('_source', val);
       case 'sort':
         const sort = normalizeSortRequest(
-          val,
+          val as EsQuerySortValue | EsQuerySortValue[],
           this.getField('index'),
           getConfig(UI_SETTINGS.SORT_OPTIONS)
         );
@@ -684,7 +691,7 @@ export class SearchSource {
         return addToRoot(key, val);
       case 'aggs':
         if ((val as unknown) instanceof AggConfigs) {
-          return addToBody('aggs', val.toDsl());
+          return addToBody('aggs', (val as AggConfigs).toDsl());
         } else {
           return addToBody('aggs', val);
         }
@@ -1141,11 +1148,13 @@ export class SearchSource {
       size: _size, // omit it
       sort,
       index,
+      highlight,
       ...searchSourceFields
     } = this.getFields();
 
     let serializedSearchSourceFields: SerializedSearchSourceFields = {
       ...searchSourceFields,
+      ...(highlight ? { highlight: highlight as unknown as SerializableRecord } : {}),
     };
     if (index) {
       serializedSearchSourceFields.index = index.isPersisted() ? index.id : index.toMinimalSpec();

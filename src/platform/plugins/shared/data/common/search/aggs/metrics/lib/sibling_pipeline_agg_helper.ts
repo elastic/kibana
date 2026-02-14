@@ -74,7 +74,7 @@ export const siblingPipelineAggHelper = {
         write: (agg: IMetricAggConfig, output: Record<string, any>) =>
           siblingPipelineAggWriter(agg, output),
       },
-    ] as Array<MetricAggParam<IMetricAggConfig>>;
+    ] as unknown as Array<MetricAggParam<IMetricAggConfig>>;
   },
 
   getSerializedFormat(agg: IMetricAggConfig) {

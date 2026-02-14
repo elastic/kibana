@@ -52,8 +52,12 @@ export interface IBucketDateHistogramAggConfig extends IBucketAggConfig {
   buckets: TimeBuckets;
 }
 
-export function isDateHistogramBucketAggConfig(agg: any): agg is IBucketDateHistogramAggConfig {
-  return Boolean(agg.buckets);
+export function isDateHistogramBucketAggConfig(agg: unknown): agg is IBucketDateHistogramAggConfig {
+  return Boolean(
+    typeof agg === 'object' && agg !== null && 'buckets' in (agg as Record<string, unknown>)
+      ? (agg as Record<string, unknown>).buckets
+      : false
+  );
 }
 
 export interface AggParamsDateHistogram extends BaseAggParams {
@@ -178,7 +182,7 @@ export const getDateHistogramBucketAgg = ({
         name: 'timeRange',
         default: null,
         write: noop,
-        toExpressionAst: timerangeToAst,
+        toExpressionAst: (value: unknown) => timerangeToAst(value as TimeRange),
       },
       {
         name: 'useNormalizedEsInterval',
@@ -363,7 +367,7 @@ export const getDateHistogramBucketAgg = ({
             );
           }
         },
-        toExpressionAst: extendedBoundsToAst,
+        toExpressionAst: (value: unknown) => extendedBoundsToAst(value as ExtendedBounds),
       },
     ],
   });
