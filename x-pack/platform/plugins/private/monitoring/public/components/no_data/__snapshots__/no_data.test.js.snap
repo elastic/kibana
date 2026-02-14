@@ -14,6 +14,58 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
     class="euiPageBody emotion-euiPageBody-restrictWidth"
     style="max-width:600px"
   >
+    <div
+      class="euiPanel euiPanel--primary euiPanel--paddingMedium euiCallOut euiCallOut--primary emotion-euiPanel-none-m-primary-euiCallOut-hasDimissButton-m"
+      data-test-subj="autoOpsPromotionCallout"
+      style="margin:0 24px"
+    >
+      <p
+        class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-primary"
+      >
+        <span
+          aria-hidden="true"
+          class="emotion-euiCallOut__icon"
+          color="inherit"
+          data-euiicon-type="info"
+        />
+        New! Connect this cluster to AutoOps
+      </p>
+      <button
+        aria-label="Dismiss this callout"
+        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary-euiCallOut__dismissButton-m"
+        data-test-subj="euiDismissCalloutButton"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="cross"
+        />
+      </button>
+      <div
+        class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+      />
+      <div
+        class="euiText emotion-euiText-s-euiTextColor-default"
+      >
+        <p>
+          Unlock advanced monitoring of ECE, ECK, and self-managed clusters with AutoOps, now available for free across all license types. Set it up today using 
+          <a
+            class="euiLink emotion-euiLink-primary"
+            data-test-subj="autoOpsPromotionCalloutCloudConnectLink"
+            href="/app/cloud_connect"
+            rel="noreferrer"
+          >
+            Cloud Connect
+          </a>
+          .
+        </p>
+      </div>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+    />
     <section
       class="emotion-euiPageSection-grow-l-center-transparent"
     >
@@ -125,6 +177,58 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
     class="euiPageBody emotion-euiPageBody-restrictWidth"
     style="max-width:600px"
   >
+    <div
+      class="euiPanel euiPanel--primary euiPanel--paddingMedium euiCallOut euiCallOut--primary emotion-euiPanel-none-m-primary-euiCallOut-hasDimissButton-m"
+      data-test-subj="autoOpsPromotionCallout"
+      style="margin:0 24px"
+    >
+      <p
+        class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-primary"
+      >
+        <span
+          aria-hidden="true"
+          class="emotion-euiCallOut__icon"
+          color="inherit"
+          data-euiicon-type="info"
+        />
+        New! Connect this cluster to AutoOps
+      </p>
+      <button
+        aria-label="Dismiss this callout"
+        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary-euiCallOut__dismissButton-m"
+        data-test-subj="euiDismissCalloutButton"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="cross"
+        />
+      </button>
+      <div
+        class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+      />
+      <div
+        class="euiText emotion-euiText-s-euiTextColor-default"
+      >
+        <p>
+          Unlock advanced monitoring of ECE, ECK, and self-managed clusters with AutoOps, now available for free across all license types. Set it up today using 
+          <a
+            class="euiLink emotion-euiLink-primary"
+            data-test-subj="autoOpsPromotionCalloutCloudConnectLink"
+            href="/app/cloud_connect"
+            rel="noreferrer"
+          >
+            Cloud Connect
+          </a>
+          .
+        </p>
+      </div>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+    />
     <section
       class="emotion-euiPageSection-grow-l-center-transparent"
     >

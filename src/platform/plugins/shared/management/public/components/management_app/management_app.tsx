@@ -44,7 +44,7 @@ export interface ManagementAppDependencies {
   kibanaVersion: string;
   coreStart: CoreStart;
   cloud?: { isCloudEnabled: boolean; baseUrl?: string };
-  hasEnterpriseLicense: boolean;
+  isAirGapped: boolean;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
   isSidebarEnabled$: BehaviorSubject<boolean>;
   cardsNavigationConfig$: BehaviorSubject<NavigationCardsSubject>;
@@ -118,7 +118,7 @@ export const ManagementApp = ({ dependencies, history, appBasePath }: Management
     coreStart,
     chromeStyle,
     cloud: dependencies.cloud,
-    hasEnterpriseLicense: dependencies.hasEnterpriseLicense,
+    isAirGapped: dependencies.isAirGapped,
     getAutoOpsStatusHook: dependencies.getAutoOpsStatusHook,
   };
 
