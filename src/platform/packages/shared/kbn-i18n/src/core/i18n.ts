@@ -29,6 +29,8 @@ const defaultLocale = EN_LOCALE;
  */
 let intl: IntlShape<string>;
 let isInitialized = false;
+let debugMode = false;
+
 /**
  * ideally here we would be using a `throw new Error()` if i18n.translate is called before init();
  * to make sure i18n is initialized before any message is attempting to be translated.
@@ -48,6 +50,11 @@ intl = createIntl({
 export const getIsInitialized = () => {
   return isInitialized;
 };
+
+export const getDebugMode = () => {
+  return debugMode;
+};
+
 /**
  * Normalizes locale to make it consistent with IntlMessageFormat locales
  * @param locale
@@ -187,21 +194,26 @@ export function formatList(type: 'conjunction' | 'disjunction' | 'unit', value: 
 /**
  * Initializes the engine
  * @param newTranslation
+ * @param debug
  */
-export function init(newTranslation?: TranslationInput) {
+export function init(
+  newTranslation?: TranslationInput,
+  { debug = false }: { debug?: boolean } = {}
+) {
   if (typeof newTranslation?.locale !== 'string') {
     return;
   }
 
   activateTranslation(newTranslation);
   isInitialized = true;
+  debugMode = debug;
 }
 
 /**
  * Loads JSON with translations from the specified URL and initializes i18n engine with them.
  * @param translationsUrl URL pointing to the JSON bundle with translations.
  */
-export async function load(translationsUrl: string) {
+export async function load(translationsUrl: string, { debug = false }: { debug?: boolean } = {}) {
   // Once this package is integrated into core Kibana we should switch to an abstraction
   // around `fetch` provided by the platform, e.g. `kfetch`.
   const response = await fetch(translationsUrl, {
@@ -217,6 +229,5 @@ export async function load(translationsUrl: string) {
     return;
   }
 
-  init(newTranslation);
-  isInitialized = true;
+  init(newTranslation, { debug });
 }

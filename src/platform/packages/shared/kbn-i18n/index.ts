@@ -10,6 +10,7 @@
 import {
   formatList,
   getIsInitialized,
+  getDebugMode,
   getLocale,
   getTranslation,
   handleIntlError,
@@ -36,6 +37,7 @@ const i18n = {
   load,
   handleIntlError,
   getIsInitialized,
+  getDebugMode,
 };
 
 const i18nLoader = {
