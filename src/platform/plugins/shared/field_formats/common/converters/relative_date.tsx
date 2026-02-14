@@ -7,12 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type { TextContextTypeConvert, HtmlContextTypeConvert } from '../types';
+import type {
+  TextContextTypeConvert,
+  HtmlContextTypeConvert,
+  ReactContextTypeConvert,
+} from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
+import { checkForMissingValueReact } from '../components';
 
 /** @public */
 export class RelativeDateFormat extends FieldFormat {
@@ -43,5 +49,14 @@ export class RelativeDateFormat extends FieldFormat {
     }
 
     return this.textConvert(val, options);
+  };
+
+  reactConvert: ReactContextTypeConvert = (val, options) => {
+    const missing = checkForMissingValueReact(val);
+    if (missing) {
+      return missing;
+    }
+
+    return <>{this.textConvert(val, options)}</>;
   };
 }

@@ -13,6 +13,27 @@ import { getHighlightHtml } from '../utils';
 
 export const HTML_CONTEXT_TYPE: FieldFormatsContentType = 'html';
 
+/**
+ * @internal
+ * Temporary telemetry for tracking legacy HTML render path usage during React migration.
+ * Logs formatter ID when HTML conversion is invoked in development mode.
+ * TODO: Remove after React migration is complete (see issue #383)
+ */
+const logLegacyHtmlUsage = (() => {
+  const loggedFormatters = new Set<string>();
+
+  return (formatId: string, hasCustomHtmlConvert: boolean) => {
+    if (process.env.NODE_ENV === 'development' && !loggedFormatters.has(formatId)) {
+      loggedFormatters.add(formatId);
+      // eslint-disable-next-line no-console
+      console.debug(
+        `[field-formats] Legacy HTML render path used for formatter "${formatId}"` +
+          (hasCustomHtmlConvert ? ' (custom htmlConvert)' : ' (fallback)')
+      );
+    }
+  };
+})();
+
 const getConvertFn = (
   format: IFieldFormat,
   convert?: HtmlContextTypeConvert
@@ -35,9 +56,12 @@ export const setup = (
 ): HtmlContextTypeConvert => {
   const convert = getConvertFn(format, htmlContextTypeConvert);
   const highlight = (text: string) => `<span class="ffArray__highlight">${text}</span>`;
+  const formatId = format.type?.id ?? 'unknown';
+  const hasCustomHtmlConvert = Boolean(htmlContextTypeConvert);
 
   const recurse: HtmlContextTypeConvert = (value, options = {}) => {
     if (!value || !isFunction(value.map)) {
+      logLegacyHtmlUsage(formatId, hasCustomHtmlConvert);
       return convert.call(format, value, options);
     }
 

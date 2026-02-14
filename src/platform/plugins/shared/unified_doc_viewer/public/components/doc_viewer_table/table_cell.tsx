@@ -10,6 +10,7 @@
 import React, { useMemo } from 'react';
 import { FieldName } from '@kbn/unified-doc-viewer';
 import { FieldDescription, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
+import { FormatFieldValueReact } from '@kbn/discover-utils';
 import { TableFieldValue } from './table_cell_value';
 import type { FieldRow } from './field_row';
 import { TermMatch, type UseTableFiltersCallbacksReturn } from './table_filters';
@@ -80,10 +81,19 @@ export const TableCell: React.FC<TableCellProps> = React.memo(
     }
 
     if (columnId === 'value') {
+      const { value, hit, dataView, fieldFormats, dataViewField } = row.renderData;
       return (
         <TableFieldValue
           field={name}
-          formattedValue={row.formattedAsHtml ?? ''}
+          formattedValueReact={
+            <FormatFieldValueReact
+              value={value}
+              hit={hit.raw}
+              fieldFormats={fieldFormats}
+              dataView={dataView}
+              field={dataViewField}
+            />
+          }
           rawValue={flattenedValue}
           ignoreReason={ignoredReason}
           isDetails={isDetails}

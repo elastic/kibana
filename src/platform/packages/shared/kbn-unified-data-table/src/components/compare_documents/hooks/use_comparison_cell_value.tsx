@@ -10,7 +10,7 @@
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { formatFieldValue } from '@kbn/discover-utils';
+import { FormatFieldValueReact } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getFieldIconProps } from '@kbn/field-utils';
@@ -176,20 +176,15 @@ const DiffCellValue = ({
 
   if (!diffMode || diffMode === 'basic') {
     return (
-      <span
-        className={CELL_CLASS}
-        // formatFieldValue guarantees sanitized values
-        // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{
-          __html: formatFieldValue(
-            comparisonValue,
-            comparisonDoc.raw,
-            fieldFormats,
-            dataView,
-            field
-          ),
-        }}
-      />
+      <span className={CELL_CLASS}>
+        <FormatFieldValueReact
+          value={comparisonValue}
+          hit={comparisonDoc.raw}
+          fieldFormats={fieldFormats}
+          dataView={dataView}
+          field={field}
+        />
+      </span>
     );
   }
 

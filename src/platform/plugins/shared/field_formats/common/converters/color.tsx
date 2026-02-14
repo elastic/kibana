@@ -13,10 +13,28 @@ import ReactDOM from 'react-dom/server';
 import { findLast, cloneDeep, escape } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
+import type {
+  HtmlContextTypeConvert,
+  TextContextTypeConvert,
+  ReactContextTypeConvert,
+} from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString } from '../utils';
 import { DEFAULT_CONVERTER_COLOR } from '../constants/color_default';
+import { checkForMissingValueReact } from '../components';
+
+/**
+ * Styles for color/badge rendering.
+ * Using inline styles so we can test with jest (emotion does not work for these formatter utils).
+ * EuiBadge is not multiline, so we define custom styles here instead of using it.
+ */
+const getBadgeStyles = (textColor: string, backgroundColor: string): React.CSSProperties => ({
+  color: textColor,
+  backgroundColor,
+  display: 'inline-block',
+  padding: '0 8px',
+  borderRadius: '3px',
+});
 
 /** @public */
 export class ColorFormat extends FieldFormat {
@@ -84,17 +102,24 @@ export class ColorFormat extends FieldFormat {
 
     return ReactDOM.renderToStaticMarkup(
       <span
-        // using `style` so we can test with jest and emotion does not work for these formatter utils
-        // EuiBadge is not multiline, so we define custom styles here instead of using it.
-        style={{
-          color: color.text,
-          backgroundColor: color.background,
-          display: 'inline-block',
-          padding: '0 8px',
-          borderRadius: '3px',
-        }}
+        style={getBadgeStyles(color.text, color.background)}
         dangerouslySetInnerHTML={{ __html: displayVal }} // eslint-disable-line react/no-danger
       />
     );
+  };
+
+  reactConvert: ReactContextTypeConvert = (val: string | number, options) => {
+    const missing = checkForMissingValueReact(val);
+    if (missing) {
+      return missing;
+    }
+
+    const color = this.findColorRuleForVal(val) as typeof DEFAULT_CONVERTER_COLOR;
+
+    const displayVal = asPrettyString(val, options);
+    if (!color) return <>{displayVal}</>;
+
+    // Native React rendering - no dangerouslySetInnerHTML needed
+    return <span style={getBadgeStyles(color.text, color.background)}>{displayVal}</span>;
   };
 }

@@ -7,38 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { truncate } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type { TextContextTypeConvert, HtmlContextTypeConvert } from '../types';
+import type {
+  HtmlContextTypeConvert,
+  TextContextTypeConvert,
+  ReactContextTypeConvert,
+} from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
-
-const omission = '...';
+import { checkForMissingValueReact } from '../components';
 
 /** @public */
-export class TruncateFormat extends FieldFormat {
-  static id = FIELD_FORMAT_IDS.TRUNCATE;
-  static title = i18n.translate('fieldFormats.truncated_string.title', {
-    defaultMessage: 'Truncated string',
+export class IpFormat extends FieldFormat {
+  static id = FIELD_FORMAT_IDS.IP;
+  static title = i18n.translate('fieldFormats.ip.title', {
+    defaultMessage: 'IP address',
   });
-  static fieldType = KBN_FIELD_TYPES.STRING;
+  static fieldType = KBN_FIELD_TYPES.IP;
 
-  textConvert: TextContextTypeConvert = (val: string) => {
+  textConvert: TextContextTypeConvert = (val: number) => {
     const missing = this.checkForMissingValueText(val);
     if (missing) {
       return missing;
     }
+    if (!isFinite(val)) return String(val);
 
-    const length = this.param('fieldLength');
-    if (length > 0) {
-      return truncate(val, {
-        length: length + omission.length,
-        omission,
-      });
-    }
-
-    return val;
+    // shazzam!
+    // eslint-disable-next-line no-bitwise
+    return [val >>> 24, (val >>> 16) & 0xff, (val >>> 8) & 0xff, val & 0xff].join('.');
   };
 
   htmlConvert: HtmlContextTypeConvert = (val, options) => {
@@ -48,5 +46,14 @@ export class TruncateFormat extends FieldFormat {
     }
 
     return this.textConvert(val, options);
+  };
+
+  reactConvert: ReactContextTypeConvert = (val, options) => {
+    const missing = checkForMissingValueReact(val);
+    if (missing) {
+      return missing;
+    }
+
+    return <>{this.textConvert(val, options)}</>;
   };
 }

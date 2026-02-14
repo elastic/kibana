@@ -21,6 +21,7 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { FormattedValue } from '@kbn/field-formats-plugin/public';
 
 import { useFieldEditorContext } from '../../field_editor_context';
 import { useFieldPreviewContext } from '../field_preview_context';
@@ -95,12 +96,18 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
           const { name, displayName } = field;
           const formatter = dataView.getFormatterForField(field);
           const value = get(currentDocument?.fields, name);
+          // Keep HTML for image preview modal backward compatibility
           const formattedValue = formatter.convert(value, 'html');
+          // React node for preferred rendering path
+          const formattedValueReact = (
+            <FormattedValue fieldFormat={formatter} value={value} options={{}} />
+          );
 
           return {
             key: displayName,
             value,
             formattedValue,
+            formattedValueReact,
             isPinned: false,
           };
         })

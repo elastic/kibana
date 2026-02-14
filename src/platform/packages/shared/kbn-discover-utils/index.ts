@@ -37,6 +37,9 @@ export {
   fieldConstants,
   formatFieldValue,
   formatHit,
+  formatHitReact,
+  FormatFieldValueReact,
+  getFieldFormatter,
   getDocId,
   getLogDocumentOverview,
   getTraceDocumentOverview,
@@ -73,7 +76,16 @@ export {
   severityOrder,
 } from './src';
 
-export type { LogsContextService, ApmContextService, SortOrder, SortInput, SortPair } from './src';
+export type {
+  LogsContextService,
+  ApmContextService,
+  SortOrder,
+  SortInput,
+  SortPair,
+  FormatFieldValueReactProps,
+  FormattedHitReact,
+  FormattedHitReactPair,
+} from './src';
 
 export * from './src/types';
 

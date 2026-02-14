@@ -7,13 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { unitOfTime, Duration } from 'moment';
 import moment from 'moment';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
+import type {
+  HtmlContextTypeConvert,
+  TextContextTypeConvert,
+  ReactContextTypeConvert,
+} from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
+import { checkForMissingValueReact } from '../components';
 import {
   DEFAULT_DURATION_INPUT_FORMAT,
   DEFAULT_DURATION_OUTPUT_FORMAT,
@@ -120,6 +126,15 @@ export class DurationFormat extends FieldFormat {
     }
 
     return this.textConvert(val, options);
+  };
+
+  reactConvert: ReactContextTypeConvert = (val, options) => {
+    const missing = checkForMissingValueReact(val);
+    if (missing) {
+      return missing;
+    }
+
+    return <>{this.textConvert(val, options)}</>;
   };
 }
 

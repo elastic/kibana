@@ -11,8 +11,9 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
 import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
 import { EuiSpacer, EuiText, useEuiTheme, useResizeObserver } from '@elastic/eui';
-import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
 import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
+import { FormatFieldValueReact } from '@kbn/discover-utils';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { css } from '@emotion/react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import { getUnifiedDocViewerServices } from '../../../plugin';
@@ -81,13 +82,7 @@ export function ContentFrameworkTable({
     fieldNames,
   });
 
-  const { formattedHit, flattenedHit } = useMemo(
-    () => ({
-      formattedHit: getFormattedFields(hit, fieldNames, { dataView, fieldFormats }),
-      flattenedHit: getFlattenedFields(hit, fieldNames),
-    }),
-    [dataView, fieldFormats, hit, fieldNames]
-  );
+  const flattenedHit = useMemo(() => getFlattenedFields(hit, fieldNames), [hit, fieldNames]);
 
   const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
@@ -103,7 +98,7 @@ export function ContentFrameworkTable({
           const fieldConfiguration = fieldConfigurations?.[fieldName];
           const fieldDescription =
             fieldConfiguration?.description || fieldsMetadata[fieldName]?.short;
-          const formattedValue = formattedHit[fieldName];
+          const field = dataView.fields.getByName(fieldName);
 
           if (!value) return acc;
 
@@ -113,10 +108,24 @@ export function ContentFrameworkTable({
             description: fieldDescription,
             type: fieldsMetadata[fieldName]?.type,
             valueCellContent: ({ truncate }: { truncate?: boolean } = { truncate: true }) => {
+              // Note: For custom formatters, we still provide the text value as formattedValue
+              // since the custom formatter contract expects string, but uses it for display logic
+              const textValue = fieldFormats
+                .getDefaultInstance(KBN_FIELD_TYPES.STRING)
+                .convert(value, 'text') as string;
+
               return fieldConfiguration?.formatter ? (
-                <>{fieldConfiguration.formatter(value, formattedValue)}</>
+                <>{fieldConfiguration.formatter(value as FieldConfigValue, textValue)}</>
               ) : (
-                <FormattedValue value={formattedValue} truncate={truncate} />
+                <FormattedValue truncate={truncate}>
+                  <FormatFieldValueReact
+                    value={value}
+                    hit={hit.raw}
+                    fieldFormats={fieldFormats}
+                    dataView={dataView}
+                    field={field}
+                  />
+                </FormattedValue>
               );
             },
           };
@@ -138,16 +147,7 @@ export function ContentFrameworkTable({
         },
         { fields: {} as Record<string, TableFieldConfiguration>, rows: [] as FieldRow[] }
       ),
-    [
-      dataView,
-      fieldConfigurations,
-      fieldFormats,
-      fieldNames,
-      fieldsMetadata,
-      flattenedHit,
-      formattedHit,
-      hit,
-    ]
+    [dataView, fieldConfigurations, fieldFormats, fieldNames, fieldsMetadata, flattenedHit, hit]
   );
 
   const cellValueRenderer = useCallback(

@@ -113,7 +113,9 @@ exports[`useComparisonCellValue should render cells with diff mode "Full value" 
   <span
     class="unifiedDataTable__cellValue"
   >
-    This is a message val
+    <span>
+      This is a message val
+    </span>
   </span>
 </div>
 `;
@@ -126,7 +128,9 @@ exports[`useComparisonCellValue should render cells with diff mode "Full value" 
   <span
     class="unifiedDataTable__cellValue"
   >
-    This one is a different msg value
+    <span>
+      This one is a different msg value
+    </span>
   </span>
 </div>
 `;
@@ -139,7 +143,9 @@ exports[`useComparisonCellValue should render cells with diff mode "Full value" 
   <span
     class="unifiedDataTable__cellValue"
   >
-    This is a message val
+    <span>
+      This is a message val
+    </span>
   </span>
 </div>
 `;
@@ -307,7 +313,9 @@ exports[`useComparisonCellValue should render cells with no diff mode 1`] = `
   <span
     class="unifiedDataTable__cellValue"
   >
-    This is a message val
+    <span>
+      This is a message val
+    </span>
   </span>
 </div>
 `;
@@ -319,7 +327,9 @@ exports[`useComparisonCellValue should render cells with no diff mode 2`] = `
   <span
     class="unifiedDataTable__cellValue"
   >
-    This one is a different msg value
+    <span>
+      This one is a different msg value
+    </span>
   </span>
 </div>
 `;
@@ -331,7 +341,9 @@ exports[`useComparisonCellValue should render cells with no diff mode 3`] = `
   <span
     class="unifiedDataTable__cellValue"
   >
-    This is a message val
+    <span>
+      This is a message val
+    </span>
   </span>
 </div>
 `;

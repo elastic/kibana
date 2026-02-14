@@ -38,7 +38,13 @@ jest.mock('../../../plugin', () => ({
         },
       }),
     },
-    fieldFormats: {},
+    fieldFormats: {
+      getDefaultInstance: jest.fn(() => ({
+        convert: (value: unknown) => value,
+        convertToReact: () => undefined,
+        hasReactSupport: () => false,
+      })),
+    },
   }),
 }));
 
@@ -94,12 +100,15 @@ describe('ContentFrameworkTable', () => {
 
   it('renders custom formatter for fieldA', () => {
     render(<ContentFrameworkTable {...defaultProps} />);
-    expect(screen.getByText('Custom: valueA (formattedA)')).toBeInTheDocument();
+    // The custom formatter receives raw value and text-converted value from fieldFormats mock
+    expect(screen.getByText('Custom: valueA (valueA)')).toBeInTheDocument();
   });
 
   it('renders default formatted value for fieldB', () => {
     render(<ContentFrameworkTable {...defaultProps} />);
-    expect(screen.getByText('formattedB')).toBeInTheDocument();
+    // fieldB uses default formatting (FormatFieldValueReact), which renders the raw value
+    // from getFlattenedFields mock ('valueB') via the mock formatter
+    expect(screen.getByText('valueB')).toBeInTheDocument();
   });
 
   it('does not render fields without value', () => {

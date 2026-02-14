@@ -81,7 +81,11 @@ const dataView = {
       })),
   },
   metaFields: ['_index', '_score'],
-  getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+  getFormatterForField: jest.fn(() => ({
+    convert: (value: unknown) => value,
+    convertToReact: () => undefined, // No React support in mock
+    hasReactSupport: () => false,
+  })),
 } as unknown as DataView;
 
 dataView.fields.getByName = (name: string) => {

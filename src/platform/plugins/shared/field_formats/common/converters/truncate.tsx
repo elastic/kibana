@@ -7,30 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { truncate } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
+import type {
+  TextContextTypeConvert,
+  HtmlContextTypeConvert,
+  ReactContextTypeConvert,
+} from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
+import { checkForMissingValueReact } from '../components';
+
+const omission = '...';
 
 /** @public */
-export class IpFormat extends FieldFormat {
-  static id = FIELD_FORMAT_IDS.IP;
-  static title = i18n.translate('fieldFormats.ip.title', {
-    defaultMessage: 'IP address',
+export class TruncateFormat extends FieldFormat {
+  static id = FIELD_FORMAT_IDS.TRUNCATE;
+  static title = i18n.translate('fieldFormats.truncated_string.title', {
+    defaultMessage: 'Truncated string',
   });
-  static fieldType = KBN_FIELD_TYPES.IP;
+  static fieldType = KBN_FIELD_TYPES.STRING;
 
-  textConvert: TextContextTypeConvert = (val: number) => {
+  textConvert: TextContextTypeConvert = (val: string) => {
     const missing = this.checkForMissingValueText(val);
     if (missing) {
       return missing;
     }
-    if (!isFinite(val)) return String(val);
 
-    // shazzam!
-    // eslint-disable-next-line no-bitwise
-    return [val >>> 24, (val >>> 16) & 0xff, (val >>> 8) & 0xff, val & 0xff].join('.');
+    const length = this.param('fieldLength');
+    if (length > 0) {
+      return truncate(val, {
+        length: length + omission.length,
+        omission,
+      });
+    }
+
+    return val;
   };
 
   htmlConvert: HtmlContextTypeConvert = (val, options) => {
@@ -40,5 +54,14 @@ export class IpFormat extends FieldFormat {
     }
 
     return this.textConvert(val, options);
+  };
+
+  reactConvert: ReactContextTypeConvert = (val, options) => {
+    const missing = checkForMissingValueReact(val);
+    if (missing) {
+      return missing;
+    }
+
+    return <>{this.textConvert(val, options)}</>;
   };
 }

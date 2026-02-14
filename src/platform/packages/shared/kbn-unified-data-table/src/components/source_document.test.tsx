@@ -15,9 +15,17 @@ import SourceDocument from './source_document';
 import type { EsHitRecord } from '@kbn/discover-utils/src/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 
+const createMockFormatter = (convertFn: (value: unknown) => string) => ({
+  convert: convertFn,
+  convertToReact: () => undefined, // Falls back to HTML path in FormattedValue
+  hasReactSupport: () => false,
+});
+
 const mockServices = {
   fieldFormats: {
-    getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => (value ? value : '-') })),
+    getDefaultInstance: jest.fn(() =>
+      createMockFormatter((value: unknown) => (value ? String(value) : '-'))
+    ),
   },
 };
 
@@ -52,14 +60,16 @@ describe('Unified data table source document cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<dl class=\\"euiDescriptionList unifiedDataTable__descriptionList unifiedDataTable__cellValue css-1he4oc9-euiDescriptionList-inline-left-descriptionList\\" data-test-subj=\\"discoverCellDescriptionList\\" data-type=\\"inline\\"><dt class=\\"euiDescriptionList__title unifiedDataTable__descriptionListTitle css-4yy33l-euiDescriptionList__title-inline-compressed\\">extension</dt><dd class=\\"euiDescriptionList__description unifiedDataTable__descriptionListDescription css-11rdew2-euiDescriptionList__description-inline-compressed\\">.gz</dd><dt class=\\"euiDescriptionList__title unifiedDataTable__descriptionListTitle css-4yy33l-euiDescriptionList__title-inline-compressed\\">_score</dt><dd class=\\"euiDescriptionList__description unifiedDataTable__descriptionListDescription css-11rdew2-euiDescriptionList__description-inline-compressed\\">1</dd></dl>"`
+      `"<dl class=\\"euiDescriptionList unifiedDataTable__descriptionList unifiedDataTable__cellValue css-1he4oc9-euiDescriptionList-inline-left-descriptionList\\" data-test-subj=\\"discoverCellDescriptionList\\" data-type=\\"inline\\"><dt class=\\"euiDescriptionList__title unifiedDataTable__descriptionListTitle css-4yy33l-euiDescriptionList__title-inline-compressed\\">extension</dt><dd class=\\"euiDescriptionList__description unifiedDataTable__descriptionListDescription css-11rdew2-euiDescriptionList__description-inline-compressed\\"><span>.gz</span></dd><dt class=\\"euiDescriptionList__title unifiedDataTable__descriptionListTitle css-4yy33l-euiDescriptionList__title-inline-compressed\\">_score</dt><dd class=\\"euiDescriptionList__description unifiedDataTable__descriptionListDescription css-11rdew2-euiDescriptionList__description-inline-compressed\\"><span>1</span></dd></dl>"`
     );
   });
 
   it('passes values through appropriate formatter when `useTopLevelObjectColumns` is true', () => {
     const mockConvert = jest.fn((value: unknown) => `${value}`.replaceAll('foo', 'bar'));
     const mockFieldFormats = {
-      getDefaultInstance: jest.fn(() => ({ convert: mockConvert })),
+      getDefaultInstance: jest.fn(() =>
+        createMockFormatter((value: unknown) => mockConvert(value))
+      ),
     };
     const row = build({
       _id: '1',

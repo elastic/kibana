@@ -8,4 +8,5 @@
  */
 
 export { getHighlightHtml } from './highlight_html';
+export { getHighlightReact, SEARCH_HIGHLIGHT_CLASS } from './highlight_react';
 export { getHighlightRequest } from './highlight_request';

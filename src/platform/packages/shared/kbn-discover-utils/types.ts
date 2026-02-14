@@ -15,3 +15,5 @@ export type {
   ShouldShowFieldInTableHandler,
   FormattedHit,
 } from './src/types';
+
+export type { FormattedHitReact, FormattedHitReactPair } from './src/utils/format_hit_react';

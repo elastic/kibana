@@ -9,3 +9,9 @@
 
 export { setup as textContentTypeSetup, TEXT_CONTEXT_TYPE } from './text_content_type';
 export { setup as htmlContentTypeSetup, HTML_CONTEXT_TYPE } from './html_content_type';
+export {
+  setup as reactContentTypeSetup,
+  REACT_CONTEXT_TYPE,
+  ARRAY_HIGHLIGHT_CLASS,
+  hasReactSupport,
+} from './react_content_type';

@@ -48,7 +48,12 @@ const mockServices = {
     get: (key: string) => key === 'discover:maxDocFieldsDisplayed' && 200,
   },
   fieldFormats: {
-    getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => (value ? value : '-') })),
+    getDefaultInstance: jest.fn(() => ({
+      convert: (value: unknown) => (value ? value : '-'),
+      // Support FormattedValue React rendering fallback path
+      convertToReact: () => undefined,
+      hasReactSupport: () => false,
+    })),
   },
 };
 
@@ -127,7 +132,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<span class=\\"unifiedDataTable__cellValue\\">100</span>"`
+      `"<span class=\\"unifiedDataTable__cellValue\\"><span>100</span></span>"`
     );
   });
 
@@ -694,14 +699,315 @@ describe('Unified data table cell rendering', function () {
     expect(component).toMatchInlineSnapshot(`
       <span
         className="unifiedDataTable__cellValue"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": Array [
-              100,
-            ],
+      >
+        <FormatFieldValueReact
+          dataView={
+            Object {
+              "docvalueFields": Array [],
+              "fields": Array [
+                Object {
+                  "aggregatable": false,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "_source",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": false,
+                  "subType": undefined,
+                  "type": "_source",
+                },
+                Object {
+                  "aggregatable": false,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "_index",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "string",
+                },
+                Object {
+                  "aggregatable": false,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "message",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": false,
+                  "subType": undefined,
+                  "type": "string",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "extension",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "string",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": "bytesDisplayName",
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "bytes",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "number",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "scripted",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": true,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "number",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "object.value",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "number",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "@timestamp",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "date",
+                },
+              ],
+              "getAllowHidden": [Function],
+              "getComputedFields": [Function],
+              "getFieldByName": [MockFunction],
+              "getFormatterForField": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    Object {
+                      "aggregatable": true,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": "bytesDisplayName",
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "bytes",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": false,
+                      "searchable": true,
+                      "subType": undefined,
+                      "type": "number",
+                    },
+                  ],
+                  Array [
+                    Object {
+                      "aggregatable": true,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": "bytesDisplayName",
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "bytes",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": false,
+                      "searchable": true,
+                      "subType": undefined,
+                      "type": "number",
+                    },
+                  ],
+                  Array [
+                    Object {
+                      "aggregatable": true,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": "bytesDisplayName",
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "bytes",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": false,
+                      "searchable": true,
+                      "subType": undefined,
+                      "type": "number",
+                    },
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "convert": [Function],
+                      "convertToReact": [Function],
+                      "hasReactSupport": [Function],
+                    },
+                  },
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "convert": [Function],
+                      "convertToReact": [Function],
+                      "hasReactSupport": [Function],
+                    },
+                  },
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "convert": [Function],
+                      "convertToReact": [Function],
+                      "hasReactSupport": [Function],
+                    },
+                  },
+                ],
+              },
+              "getIndexPattern": [Function],
+              "getName": [Function],
+              "getRuntimeField": [Function],
+              "getScriptedField": [Function],
+              "getSourceFiltering": [Function],
+              "getTimeField": [Function],
+              "id": "the-data-view-id",
+              "isPersisted": [Function],
+              "isTSDBMode": [Function],
+              "isTimeBased": [Function],
+              "isTimeNanosBased": [Function],
+              "metaFields": Array [
+                "_index",
+                "_score",
+              ],
+              "name": "the-data-view",
+              "setFieldCount": [MockFunction],
+              "timeFieldName": undefined,
+              "title": "the-data-view-title",
+              "toMinimalSpec": [Function],
+              "toSpec": [Function],
+              "type": "default",
+            }
           }
-        }
-      />
+          field={
+            Object {
+              "aggregatable": true,
+              "conflictDescriptions": undefined,
+              "count": 0,
+              "customDescription": undefined,
+              "customLabel": undefined,
+              "defaultFormatter": undefined,
+              "esTypes": undefined,
+              "lang": undefined,
+              "name": "object.value",
+              "readFromDocValues": false,
+              "script": undefined,
+              "scripted": false,
+              "searchable": true,
+              "subType": undefined,
+              "type": "number",
+            }
+          }
+          fieldFormats={
+            Object {
+              "getDefaultInstance": [MockFunction],
+            }
+          }
+          hit={
+            Object {
+              "_id": "1",
+              "_index": "test",
+              "_score": 1,
+              "_source": undefined,
+              "fields": Object {
+                "extension": Array [
+                  ".gz",
+                ],
+                "object.value": Array [
+                  100,
+                ],
+              },
+              "highlight": Object {
+                "extension": Array [
+                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+                ],
+              },
+            }
+          }
+          value={
+            Array [
+              100,
+            ]
+          }
+        />
+      </span>
     `);
   });
 
@@ -753,7 +1059,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<span class=\\"unifiedDataTable__cellValue\\">-</span>"`
+      `"<span class=\\"unifiedDataTable__cellValue\\"><span>-</span></span>"`
     );
   });
 
@@ -794,14 +1100,309 @@ describe('Unified data table cell rendering', function () {
     expect(component).toMatchInlineSnapshot(`
       <span
         className="unifiedDataTable__cellValue"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": Array [
-              ".gz",
-            ],
+      >
+        <FormatFieldValueReact
+          dataView={
+            Object {
+              "docvalueFields": Array [],
+              "fields": Array [
+                Object {
+                  "aggregatable": false,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "_source",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": false,
+                  "subType": undefined,
+                  "type": "_source",
+                },
+                Object {
+                  "aggregatable": false,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "_index",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "string",
+                },
+                Object {
+                  "aggregatable": false,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "message",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": false,
+                  "subType": undefined,
+                  "type": "string",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "extension",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "string",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": "bytesDisplayName",
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "bytes",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "number",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "scripted",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": true,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "number",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "object.value",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "number",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "@timestamp",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "date",
+                },
+              ],
+              "getAllowHidden": [Function],
+              "getComputedFields": [Function],
+              "getFieldByName": [MockFunction],
+              "getFormatterForField": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    Object {
+                      "aggregatable": true,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": "bytesDisplayName",
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "bytes",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": false,
+                      "searchable": true,
+                      "subType": undefined,
+                      "type": "number",
+                    },
+                  ],
+                  Array [
+                    Object {
+                      "aggregatable": true,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": "bytesDisplayName",
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "bytes",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": false,
+                      "searchable": true,
+                      "subType": undefined,
+                      "type": "number",
+                    },
+                  ],
+                  Array [
+                    Object {
+                      "aggregatable": true,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": "bytesDisplayName",
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "bytes",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": false,
+                      "searchable": true,
+                      "subType": undefined,
+                      "type": "number",
+                    },
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "convert": [Function],
+                      "convertToReact": [Function],
+                      "hasReactSupport": [Function],
+                    },
+                  },
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "convert": [Function],
+                      "convertToReact": [Function],
+                      "hasReactSupport": [Function],
+                    },
+                  },
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "convert": [Function],
+                      "convertToReact": [Function],
+                      "hasReactSupport": [Function],
+                    },
+                  },
+                ],
+              },
+              "getIndexPattern": [Function],
+              "getName": [Function],
+              "getRuntimeField": [Function],
+              "getScriptedField": [Function],
+              "getSourceFiltering": [Function],
+              "getTimeField": [Function],
+              "id": "the-data-view-id",
+              "isPersisted": [Function],
+              "isTSDBMode": [Function],
+              "isTimeBased": [Function],
+              "isTimeNanosBased": [Function],
+              "metaFields": Array [
+                "_index",
+                "_score",
+              ],
+              "name": "the-data-view",
+              "setFieldCount": [MockFunction],
+              "timeFieldName": undefined,
+              "title": "the-data-view-title",
+              "toMinimalSpec": [Function],
+              "toSpec": [Function],
+              "type": "default",
+            }
           }
-        }
-      />
+          fieldFormats={
+            Object {
+              "getDefaultInstance": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "string",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "convert": [Function],
+                      "convertToReact": [Function],
+                      "hasReactSupport": [Function],
+                    },
+                  },
+                ],
+              },
+            }
+          }
+          hit={
+            Object {
+              "_id": "1",
+              "_index": "test",
+              "_score": 1,
+              "_source": undefined,
+              "fields": Object {
+                "unmapped": Array [
+                  ".gz",
+                ],
+              },
+              "highlight": Object {
+                "extension": Array [
+                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+                ],
+              },
+            }
+          }
+          value={
+            Array [
+              ".gz",
+            ]
+          }
+        />
+      </span>
     `);
 
     const componentWithDetails = shallow(
@@ -824,13 +1425,305 @@ describe('Unified data table cell rendering', function () {
       >
         <EuiFlexItem>
           <DataTablePopoverCellValue>
-            <span
-              dangerouslySetInnerHTML={
+            <FormatFieldValueReact
+              dataView={
                 Object {
-                  "__html": Array [
-                    ".gz",
+                  "docvalueFields": Array [],
+                  "fields": Array [
+                    Object {
+                      "aggregatable": false,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": undefined,
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "_source",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": false,
+                      "searchable": false,
+                      "subType": undefined,
+                      "type": "_source",
+                    },
+                    Object {
+                      "aggregatable": false,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": undefined,
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "_index",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": false,
+                      "searchable": true,
+                      "subType": undefined,
+                      "type": "string",
+                    },
+                    Object {
+                      "aggregatable": false,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": undefined,
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "message",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": false,
+                      "searchable": false,
+                      "subType": undefined,
+                      "type": "string",
+                    },
+                    Object {
+                      "aggregatable": true,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": undefined,
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "extension",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": false,
+                      "searchable": true,
+                      "subType": undefined,
+                      "type": "string",
+                    },
+                    Object {
+                      "aggregatable": true,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": "bytesDisplayName",
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "bytes",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": false,
+                      "searchable": true,
+                      "subType": undefined,
+                      "type": "number",
+                    },
+                    Object {
+                      "aggregatable": true,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": undefined,
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "scripted",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": true,
+                      "searchable": true,
+                      "subType": undefined,
+                      "type": "number",
+                    },
+                    Object {
+                      "aggregatable": true,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": undefined,
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "object.value",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": false,
+                      "searchable": true,
+                      "subType": undefined,
+                      "type": "number",
+                    },
+                    Object {
+                      "aggregatable": true,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": undefined,
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "@timestamp",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": false,
+                      "searchable": true,
+                      "subType": undefined,
+                      "type": "date",
+                    },
                   ],
+                  "getAllowHidden": [Function],
+                  "getComputedFields": [Function],
+                  "getFieldByName": [MockFunction],
+                  "getFormatterForField": [MockFunction] {
+                    "calls": Array [
+                      Array [
+                        Object {
+                          "aggregatable": true,
+                          "conflictDescriptions": undefined,
+                          "count": 0,
+                          "customDescription": undefined,
+                          "customLabel": "bytesDisplayName",
+                          "defaultFormatter": undefined,
+                          "esTypes": undefined,
+                          "lang": undefined,
+                          "name": "bytes",
+                          "readFromDocValues": false,
+                          "script": undefined,
+                          "scripted": false,
+                          "searchable": true,
+                          "subType": undefined,
+                          "type": "number",
+                        },
+                      ],
+                      Array [
+                        Object {
+                          "aggregatable": true,
+                          "conflictDescriptions": undefined,
+                          "count": 0,
+                          "customDescription": undefined,
+                          "customLabel": "bytesDisplayName",
+                          "defaultFormatter": undefined,
+                          "esTypes": undefined,
+                          "lang": undefined,
+                          "name": "bytes",
+                          "readFromDocValues": false,
+                          "script": undefined,
+                          "scripted": false,
+                          "searchable": true,
+                          "subType": undefined,
+                          "type": "number",
+                        },
+                      ],
+                      Array [
+                        Object {
+                          "aggregatable": true,
+                          "conflictDescriptions": undefined,
+                          "count": 0,
+                          "customDescription": undefined,
+                          "customLabel": "bytesDisplayName",
+                          "defaultFormatter": undefined,
+                          "esTypes": undefined,
+                          "lang": undefined,
+                          "name": "bytes",
+                          "readFromDocValues": false,
+                          "script": undefined,
+                          "scripted": false,
+                          "searchable": true,
+                          "subType": undefined,
+                          "type": "number",
+                        },
+                      ],
+                    ],
+                    "results": Array [
+                      Object {
+                        "type": "return",
+                        "value": Object {
+                          "convert": [Function],
+                          "convertToReact": [Function],
+                          "hasReactSupport": [Function],
+                        },
+                      },
+                      Object {
+                        "type": "return",
+                        "value": Object {
+                          "convert": [Function],
+                          "convertToReact": [Function],
+                          "hasReactSupport": [Function],
+                        },
+                      },
+                      Object {
+                        "type": "return",
+                        "value": Object {
+                          "convert": [Function],
+                          "convertToReact": [Function],
+                          "hasReactSupport": [Function],
+                        },
+                      },
+                    ],
+                  },
+                  "getIndexPattern": [Function],
+                  "getName": [Function],
+                  "getRuntimeField": [Function],
+                  "getScriptedField": [Function],
+                  "getSourceFiltering": [Function],
+                  "getTimeField": [Function],
+                  "id": "the-data-view-id",
+                  "isPersisted": [Function],
+                  "isTSDBMode": [Function],
+                  "isTimeBased": [Function],
+                  "isTimeNanosBased": [Function],
+                  "metaFields": Array [
+                    "_index",
+                    "_score",
+                  ],
+                  "name": "the-data-view",
+                  "setFieldCount": [MockFunction],
+                  "timeFieldName": undefined,
+                  "title": "the-data-view-title",
+                  "toMinimalSpec": [Function],
+                  "toSpec": [Function],
+                  "type": "default",
                 }
+              }
+              fieldFormats={
+                Object {
+                  "getDefaultInstance": [MockFunction] {
+                    "calls": Array [
+                      Array [
+                        "string",
+                      ],
+                    ],
+                    "results": Array [
+                      Object {
+                        "type": "return",
+                        "value": Object {
+                          "convert": [Function],
+                          "convertToReact": [Function],
+                          "hasReactSupport": [Function],
+                        },
+                      },
+                    ],
+                  },
+                }
+              }
+              hit={
+                Object {
+                  "_id": "1",
+                  "_index": "test",
+                  "_score": 1,
+                  "_source": undefined,
+                  "fields": Object {
+                    "unmapped": Array [
+                      ".gz",
+                    ],
+                  },
+                  "highlight": Object {
+                    "extension": Array [
+                      "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+                    ],
+                  },
+                }
+              }
+              value={
+                Array [
+                  ".gz",
+                ]
               }
             />
           </DataTablePopoverCellValue>
@@ -897,12 +1790,319 @@ describe('Unified data table cell rendering', function () {
     expect(componentWithDataViewField).toMatchInlineSnapshot(`
       <span
         className="unifiedDataTable__cellValue"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": "gif",
+      >
+        <FormatFieldValueReact
+          dataView={
+            Object {
+              "docvalueFields": Array [],
+              "fields": Array [
+                Object {
+                  "aggregatable": false,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "_source",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": false,
+                  "subType": undefined,
+                  "type": "_source",
+                },
+                Object {
+                  "aggregatable": false,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "_index",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "string",
+                },
+                Object {
+                  "aggregatable": false,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "message",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": false,
+                  "subType": undefined,
+                  "type": "string",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "extension",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "string",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": "bytesDisplayName",
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "bytes",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "number",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "scripted",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": true,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "number",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "object.value",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "number",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "@timestamp",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "date",
+                },
+              ],
+              "getAllowHidden": [Function],
+              "getComputedFields": [Function],
+              "getFieldByName": [MockFunction],
+              "getFormatterForField": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    Object {
+                      "aggregatable": true,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": "bytesDisplayName",
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "bytes",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": false,
+                      "searchable": true,
+                      "subType": undefined,
+                      "type": "number",
+                    },
+                  ],
+                  Array [
+                    Object {
+                      "aggregatable": true,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": "bytesDisplayName",
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "bytes",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": false,
+                      "searchable": true,
+                      "subType": undefined,
+                      "type": "number",
+                    },
+                  ],
+                  Array [
+                    Object {
+                      "aggregatable": true,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": "bytesDisplayName",
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "bytes",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": false,
+                      "searchable": true,
+                      "subType": undefined,
+                      "type": "number",
+                    },
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "convert": [Function],
+                      "convertToReact": [Function],
+                      "hasReactSupport": [Function],
+                    },
+                  },
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "convert": [Function],
+                      "convertToReact": [Function],
+                      "hasReactSupport": [Function],
+                    },
+                  },
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "convert": [Function],
+                      "convertToReact": [Function],
+                      "hasReactSupport": [Function],
+                    },
+                  },
+                ],
+              },
+              "getIndexPattern": [Function],
+              "getName": [Function],
+              "getRuntimeField": [Function],
+              "getScriptedField": [Function],
+              "getSourceFiltering": [Function],
+              "getTimeField": [Function],
+              "id": "the-data-view-id",
+              "isPersisted": [Function],
+              "isTSDBMode": [Function],
+              "isTimeBased": [Function],
+              "isTimeNanosBased": [Function],
+              "metaFields": Array [
+                "_index",
+                "_score",
+              ],
+              "name": "the-data-view",
+              "setFieldCount": [MockFunction],
+              "timeFieldName": undefined,
+              "title": "the-data-view-title",
+              "toMinimalSpec": [Function],
+              "toSpec": [Function],
+              "type": "default",
+            }
           }
-        }
-      />
+          field={
+            Object {
+              "aggregatable": true,
+              "conflictDescriptions": undefined,
+              "count": 0,
+              "customDescription": undefined,
+              "customLabel": undefined,
+              "defaultFormatter": undefined,
+              "esTypes": undefined,
+              "lang": undefined,
+              "name": "extension",
+              "readFromDocValues": false,
+              "script": undefined,
+              "scripted": false,
+              "searchable": true,
+              "subType": undefined,
+              "type": "string",
+            }
+          }
+          fieldFormats={
+            Object {
+              "getDefaultInstance": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "string",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "convert": [Function],
+                      "convertToReact": [Function],
+                      "hasReactSupport": [Function],
+                    },
+                  },
+                ],
+              },
+            }
+          }
+          hit={
+            Object {
+              "_id": "1",
+              "_index": "test",
+              "_score": 1,
+              "_source": undefined,
+              "fields": Object {
+                "bytes": 100,
+                "extension": "gif",
+                "var0": 350,
+              },
+            }
+          }
+          value="gif"
+        />
+      </span>
     `);
     const componentWithCustomESQLField = shallow(
       <DataTableCellValue
@@ -918,12 +2118,321 @@ describe('Unified data table cell rendering', function () {
     expect(componentWithCustomESQLField).toMatchInlineSnapshot(`
       <span
         className="unifiedDataTable__cellValue"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": 350,
+      >
+        <FormatFieldValueReact
+          dataView={
+            Object {
+              "docvalueFields": Array [],
+              "fields": Array [
+                Object {
+                  "aggregatable": false,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "_source",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": false,
+                  "subType": undefined,
+                  "type": "_source",
+                },
+                Object {
+                  "aggregatable": false,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "_index",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "string",
+                },
+                Object {
+                  "aggregatable": false,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "message",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": false,
+                  "subType": undefined,
+                  "type": "string",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "extension",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "string",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": "bytesDisplayName",
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "bytes",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "number",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "scripted",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": true,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "number",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "object.value",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "number",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "@timestamp",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "date",
+                },
+              ],
+              "getAllowHidden": [Function],
+              "getComputedFields": [Function],
+              "getFieldByName": [MockFunction],
+              "getFormatterForField": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    Object {
+                      "aggregatable": true,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": "bytesDisplayName",
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "bytes",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": false,
+                      "searchable": true,
+                      "subType": undefined,
+                      "type": "number",
+                    },
+                  ],
+                  Array [
+                    Object {
+                      "aggregatable": true,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": "bytesDisplayName",
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "bytes",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": false,
+                      "searchable": true,
+                      "subType": undefined,
+                      "type": "number",
+                    },
+                  ],
+                  Array [
+                    Object {
+                      "aggregatable": true,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": "bytesDisplayName",
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "bytes",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": false,
+                      "searchable": true,
+                      "subType": undefined,
+                      "type": "number",
+                    },
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "convert": [Function],
+                      "convertToReact": [Function],
+                      "hasReactSupport": [Function],
+                    },
+                  },
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "convert": [Function],
+                      "convertToReact": [Function],
+                      "hasReactSupport": [Function],
+                    },
+                  },
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "convert": [Function],
+                      "convertToReact": [Function],
+                      "hasReactSupport": [Function],
+                    },
+                  },
+                ],
+              },
+              "getIndexPattern": [Function],
+              "getName": [Function],
+              "getRuntimeField": [Function],
+              "getScriptedField": [Function],
+              "getSourceFiltering": [Function],
+              "getTimeField": [Function],
+              "id": "the-data-view-id",
+              "isPersisted": [Function],
+              "isTSDBMode": [Function],
+              "isTimeBased": [Function],
+              "isTimeNanosBased": [Function],
+              "metaFields": Array [
+                "_index",
+                "_score",
+              ],
+              "name": "the-data-view",
+              "setFieldCount": [MockFunction],
+              "timeFieldName": undefined,
+              "title": "the-data-view-title",
+              "toMinimalSpec": [Function],
+              "toSpec": [Function],
+              "type": "default",
+            }
           }
-        }
-      />
+          field={
+            Object {
+              "aggregatable": false,
+              "conflictDescriptions": undefined,
+              "count": 0,
+              "customDescription": undefined,
+              "customLabel": undefined,
+              "defaultFormatter": undefined,
+              "esTypes": Array [
+                "long",
+              ],
+              "lang": undefined,
+              "name": "var0",
+              "readFromDocValues": false,
+              "script": undefined,
+              "scripted": false,
+              "searchable": true,
+              "subType": undefined,
+              "type": "number",
+            }
+          }
+          fieldFormats={
+            Object {
+              "getDefaultInstance": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "string",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "convert": [Function],
+                      "convertToReact": [Function],
+                      "hasReactSupport": [Function],
+                    },
+                  },
+                ],
+              },
+            }
+          }
+          hit={
+            Object {
+              "_id": "1",
+              "_index": "test",
+              "_score": 1,
+              "_source": undefined,
+              "fields": Object {
+                "bytes": 100,
+                "extension": "gif",
+                "var0": 350,
+              },
+            }
+          }
+          value={350}
+        />
+      </span>
     `);
 
     expect(dataViewMock.fields.create).toHaveBeenCalledTimes(1);
@@ -951,12 +2460,321 @@ describe('Unified data table cell rendering', function () {
     expect(componentWithCustomESQLFieldOverride).toMatchInlineSnapshot(`
       <span
         className="unifiedDataTable__cellValue"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": 100,
+      >
+        <FormatFieldValueReact
+          dataView={
+            Object {
+              "docvalueFields": Array [],
+              "fields": Array [
+                Object {
+                  "aggregatable": false,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "_source",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": false,
+                  "subType": undefined,
+                  "type": "_source",
+                },
+                Object {
+                  "aggregatable": false,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "_index",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "string",
+                },
+                Object {
+                  "aggregatable": false,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "message",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": false,
+                  "subType": undefined,
+                  "type": "string",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "extension",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "string",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": "bytesDisplayName",
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "bytes",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "number",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "scripted",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": true,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "number",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "object.value",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "number",
+                },
+                Object {
+                  "aggregatable": true,
+                  "conflictDescriptions": undefined,
+                  "count": 0,
+                  "customDescription": undefined,
+                  "customLabel": undefined,
+                  "defaultFormatter": undefined,
+                  "esTypes": undefined,
+                  "lang": undefined,
+                  "name": "@timestamp",
+                  "readFromDocValues": false,
+                  "script": undefined,
+                  "scripted": false,
+                  "searchable": true,
+                  "subType": undefined,
+                  "type": "date",
+                },
+              ],
+              "getAllowHidden": [Function],
+              "getComputedFields": [Function],
+              "getFieldByName": [MockFunction],
+              "getFormatterForField": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    Object {
+                      "aggregatable": true,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": "bytesDisplayName",
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "bytes",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": false,
+                      "searchable": true,
+                      "subType": undefined,
+                      "type": "number",
+                    },
+                  ],
+                  Array [
+                    Object {
+                      "aggregatable": true,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": "bytesDisplayName",
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "bytes",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": false,
+                      "searchable": true,
+                      "subType": undefined,
+                      "type": "number",
+                    },
+                  ],
+                  Array [
+                    Object {
+                      "aggregatable": true,
+                      "conflictDescriptions": undefined,
+                      "count": 0,
+                      "customDescription": undefined,
+                      "customLabel": "bytesDisplayName",
+                      "defaultFormatter": undefined,
+                      "esTypes": undefined,
+                      "lang": undefined,
+                      "name": "bytes",
+                      "readFromDocValues": false,
+                      "script": undefined,
+                      "scripted": false,
+                      "searchable": true,
+                      "subType": undefined,
+                      "type": "number",
+                    },
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "convert": [Function],
+                      "convertToReact": [Function],
+                      "hasReactSupport": [Function],
+                    },
+                  },
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "convert": [Function],
+                      "convertToReact": [Function],
+                      "hasReactSupport": [Function],
+                    },
+                  },
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "convert": [Function],
+                      "convertToReact": [Function],
+                      "hasReactSupport": [Function],
+                    },
+                  },
+                ],
+              },
+              "getIndexPattern": [Function],
+              "getName": [Function],
+              "getRuntimeField": [Function],
+              "getScriptedField": [Function],
+              "getSourceFiltering": [Function],
+              "getTimeField": [Function],
+              "id": "the-data-view-id",
+              "isPersisted": [Function],
+              "isTSDBMode": [Function],
+              "isTimeBased": [Function],
+              "isTimeNanosBased": [Function],
+              "metaFields": Array [
+                "_index",
+                "_score",
+              ],
+              "name": "the-data-view",
+              "setFieldCount": [MockFunction],
+              "timeFieldName": undefined,
+              "title": "the-data-view-title",
+              "toMinimalSpec": [Function],
+              "toSpec": [Function],
+              "type": "default",
+            }
           }
-        }
-      />
+          field={
+            Object {
+              "aggregatable": false,
+              "conflictDescriptions": undefined,
+              "count": 0,
+              "customDescription": undefined,
+              "customLabel": undefined,
+              "defaultFormatter": undefined,
+              "esTypes": Array [
+                "keyword",
+              ],
+              "lang": undefined,
+              "name": "bytes",
+              "readFromDocValues": false,
+              "script": undefined,
+              "scripted": false,
+              "searchable": true,
+              "subType": undefined,
+              "type": "string",
+            }
+          }
+          fieldFormats={
+            Object {
+              "getDefaultInstance": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "string",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": Object {
+                      "convert": [Function],
+                      "convertToReact": [Function],
+                      "hasReactSupport": [Function],
+                    },
+                  },
+                ],
+              },
+            }
+          }
+          hit={
+            Object {
+              "_id": "1",
+              "_index": "test",
+              "_score": 1,
+              "_source": undefined,
+              "fields": Object {
+                "bytes": 100,
+                "extension": "gif",
+                "var0": 350,
+              },
+            }
+          }
+          value={100}
+        />
+      </span>
     `);
 
     expect(dataViewMock.fields.create).toHaveBeenCalledTimes(2);

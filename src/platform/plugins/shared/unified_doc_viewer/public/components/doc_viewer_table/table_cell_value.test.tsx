@@ -34,7 +34,7 @@ describe('TableFieldValue', () => {
 
     render(
       <TableFieldValue
-        formattedValue="100,000"
+        formattedValueReact={<span>100,000</span>}
         rawValue={10000}
         field="bytes"
         ignoreReason={undefined}
@@ -52,7 +52,7 @@ describe('TableFieldValue', () => {
     const value = 'long value'.repeat(300);
     render(
       <TableFieldValue
-        formattedValue={value}
+        formattedValueReact={<span>{value}</span>}
         rawValue={value}
         field="message"
         ignoreReason={undefined}
@@ -97,7 +97,7 @@ describe('TableFieldValue', () => {
     const value = 'long value'.repeat(300);
     render(
       <TableFieldValue
-        formattedValue={value}
+        formattedValueReact={<span>{value}</span>}
         rawValue={value}
         field="message"
         ignoreReason={undefined}
