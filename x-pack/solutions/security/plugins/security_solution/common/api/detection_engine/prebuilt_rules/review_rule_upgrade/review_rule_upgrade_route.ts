@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { SortOrder, type RuleObjectId, type RuleSignatureId, type RuleTagArray } from '../../model';
 import type { PartialThreeWayRuleDiff } from '../model';
 import type { RuleResponse, RuleVersion } from '../../model/rule_schema';

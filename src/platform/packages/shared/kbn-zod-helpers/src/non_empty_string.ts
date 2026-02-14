@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as z from '@kbn/zod';
+import * as z from '@kbn/zod/v4';
 
 export function isNonEmptyString(input: string, ctx: z.RefinementCtx): void {
   if (input.trim() === '') {

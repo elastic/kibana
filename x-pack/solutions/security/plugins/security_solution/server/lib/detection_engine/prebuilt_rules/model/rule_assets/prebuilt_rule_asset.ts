@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as z from '@kbn/zod';
+import * as z from '@kbn/zod/v4';
 import {
   RuleSignatureId,
   RuleVersion,

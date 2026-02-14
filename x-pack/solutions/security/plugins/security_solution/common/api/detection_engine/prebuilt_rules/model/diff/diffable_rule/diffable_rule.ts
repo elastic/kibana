@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import {
   AlertSuppression,
   AnomalyThreshold,
@@ -232,8 +232,7 @@ export const DiffableAllFields = DiffableCommonFields.merge(
   .merge(DiffableNewTermsFields.omit({ type: true }))
   .merge(z.object({ type: DiffableRuleTypes }));
 
-const getRuleTypeFields = (schema: z.ZodObject<z.ZodRawShape>): string[] =>
-  Object.keys(schema.shape);
+const getRuleTypeFields = (schema: z.ZodObject): string[] => Object.keys(schema.shape);
 
 const createDiffableFieldsPerRuleType = (specificFields: z.ZodObject<z.ZodRawShape>): string[] => [
   ...getRuleTypeFields(DiffableCommonFields),

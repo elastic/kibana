@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { QueryAlertsBodyParams } from '../../signals/query_signals/query_signals_route.gen';
 

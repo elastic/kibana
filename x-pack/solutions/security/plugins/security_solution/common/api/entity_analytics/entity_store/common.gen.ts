@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type EntityType = z.infer<typeof EntityType>;
 export const EntityType = z.enum(['user', 'host', 'service', 'generic']);

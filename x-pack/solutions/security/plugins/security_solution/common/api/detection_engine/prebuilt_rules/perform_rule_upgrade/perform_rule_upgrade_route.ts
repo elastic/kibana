@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { mapValues } from 'lodash';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { AggregatedPrebuiltRuleError, DiffableAllFields, ThreeWayDiffConflict } from '../model';
@@ -70,10 +70,8 @@ export const DiffableFieldsToOmit = NON_UPGRADEABLE_DIFFABLE_FIELDS.reduce((acc,
 export type DiffableUpgradableFields = z.infer<typeof DiffableUpgradableFields>;
 export const DiffableUpgradableFields = DiffableAllFields.omit(DiffableFieldsToOmit);
 
-export type FieldUpgradeSpecifier<T> = z.infer<
-  ReturnType<typeof fieldUpgradeSpecifier<z.ZodType<T>>>
->;
-export const fieldUpgradeSpecifier = <T extends z.ZodTypeAny>(fieldSchema: T) =>
+export type FieldUpgradeSpecifier<T> = z.infer<ReturnType<typeof fieldUpgradeSpecifier<z.ZodAny>>>;
+export const fieldUpgradeSpecifier = <T extends z.ZodType>(fieldSchema: T) =>
   z.discriminatedUnion('pick_version', [
     z
       .object({
@@ -96,7 +94,7 @@ export type RuleFieldsToUpgrade = FieldUpgradeSpecifiers<DiffableUpgradableField
 export const RuleFieldsToUpgrade = z
   .object(
     mapValues(DiffableUpgradableFields.shape, (fieldSchema) => {
-      return fieldUpgradeSpecifier(fieldSchema).optional();
+      return fieldUpgradeSpecifier(fieldSchema as z.ZodType).optional();
     })
   )
   .strict();
