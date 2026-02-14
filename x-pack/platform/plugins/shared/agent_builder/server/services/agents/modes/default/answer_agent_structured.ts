@@ -28,6 +28,7 @@ const structuredOutputZodSchema = z.object({
 });
 
 const { $schema: _$schema, ...structuredOutputSchema } = z.toJSONSchema(structuredOutputZodSchema, {
+  io: 'input',
   unrepresentable: 'any',
 }) as Record<string, unknown>;
 

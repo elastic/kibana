@@ -263,7 +263,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed (✖ Unrecognized key(s) in object: 'name'\n  → at responders[0])`,
+                service_message: `Request validation failed (✖ Unrecognized key: "name"\n  → at responders[0]\n✖ Invalid input: expected string, received undefined\n  → at responders[0].id\n✖ Invalid option: expected one of "team"|"user"|"escalation"|"schedule"\n  → at responders[0].type)`,
               });
             });
 
