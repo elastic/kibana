@@ -5,27 +5,17 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import type { KueryNode } from '@kbn/es-query';
-import { nodeBuilder } from '@kbn/es-query';
+import { nodeBuilder, type KueryNode } from '@kbn/es-query';
 import type { RuleParams } from '../../../application/rule/types';
-import type { RuleBulkOperationAggregation, RulesClientContext } from '../../types';
-import { ruleAuditEvent, type RuleAuditAction } from '../audit_events';
-import {
-  AlertingAuthorizationEntity,
-  type ReadOperations,
-  type WriteOperations,
-} from '../../../authorization';
+import type { RulesClientContext } from '../../types';
+import { type RuleAuditAction } from '../audit_events';
+import { ReadOperations, type WriteOperations } from '../../../authorization';
 import type { RawRule, SanitizedRule } from '../../../types';
 import { buildKueryNodeFilter } from '../build_kuery_node_filter';
+import { checkAuthorizationAndGetTotal } from '../../lib/check_authorization_and_get_total';
+import { getAuthorizationFilter } from '../../lib/get_authorization_filter';
 import { convertRuleIdsToKueryNode } from '../../../lib';
-import {
-  MAX_RULES_NUMBER_FOR_BULK_OPERATION,
-  RULE_TYPE_CHECKS_CONCURRENCY,
-  alertingAuthorizationFilterOpts,
-} from '../constants';
-import { findRulesSo } from '../../../data/rule';
 import { retryIfBulkEditConflicts } from './retry_if_bulk_edit_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleDomainSchema } from '../../../application/rule/schemas';
@@ -82,18 +72,14 @@ export async function bulkEditRules<Params extends RuleParams>(
     ruleTypes: context.ruleTypeRegistry.list(),
   });
 
-  let authorizationTuple;
+  const bulkEditAction: 'BULK_EDIT' | 'BULK_EDIT_PARAMS' =
+    options.requiredAuthOperation === ReadOperations.BulkEditParams
+      ? 'BULK_EDIT_PARAMS'
+      : 'BULK_EDIT';
 
-  try {
-    authorizationTuple = await context.authorization.getFindAuthorizationFilter({
-      authorizationEntity: AlertingAuthorizationEntity.Rule,
-      filterOpts: alertingAuthorizationFilterOpts,
-    });
-  } catch (error) {
-    context.auditLogger?.log(ruleAuditEvent({ action: options.auditAction, error }));
-    throw error;
-  }
-  const { filter: authorizationFilter } = authorizationTuple;
+  const authorizationFilter = await getAuthorizationFilter(context, {
+    action: bulkEditAction,
+  });
 
   const qNodeFilterWithAuth =
     authorizationFilter && qNodeFilter
@@ -107,55 +93,10 @@ export async function bulkEditRules<Params extends RuleParams>(
       })
     : qNodeFilterWithAuth;
 
-  const { aggregations, total } = await findRulesSo<RuleBulkOperationAggregation>({
-    savedObjectsClient: context.unsecuredSavedObjectsClient,
-    savedObjectsFindOptions: {
-      filter: finalFilter,
-      page: 1,
-      perPage: 0,
-      aggs: {
-        alertTypeId: {
-          multi_terms: {
-            terms: [
-              { field: 'alert.attributes.alertTypeId' },
-              { field: 'alert.attributes.consumer' },
-            ],
-          },
-        },
-      },
-    },
+  const { total } = await checkAuthorizationAndGetTotal(context, {
+    filter: finalFilter,
+    action: bulkEditAction,
   });
-
-  if (total > MAX_RULES_NUMBER_FOR_BULK_OPERATION) {
-    throw Boom.badRequest(
-      `More than ${MAX_RULES_NUMBER_FOR_BULK_OPERATION} rules matched for bulk edit`
-    );
-  }
-  const buckets = aggregations?.alertTypeId.buckets;
-
-  if (buckets === undefined) {
-    throw Error('No rules found for bulk edit');
-  }
-
-  await pMap(
-    buckets,
-    async ({ key: [ruleType, consumer] }) => {
-      context.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
-
-      try {
-        await context.authorization.ensureAuthorized({
-          ruleTypeId: ruleType,
-          consumer,
-          operation: options.requiredAuthOperation,
-          entity: AlertingAuthorizationEntity.Rule,
-        });
-      } catch (error) {
-        context.auditLogger?.log(ruleAuditEvent({ action: options.auditAction, error }));
-        throw error;
-      }
-    },
-    { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
-  );
 
   const { apiKeysToInvalidate, results, errors, skipped } = await retryIfBulkEditConflicts(
     context.logger,
