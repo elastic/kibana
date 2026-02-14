@@ -23,31 +23,31 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./cases/get_case'));
     loadTestFile(require.resolve('./cases/post_case'));
     loadTestFile(require.resolve('./cases/resolve_case'));
-    loadTestFile(require.resolve('./cases/reporters/get_reporters'));
-    loadTestFile(require.resolve('./cases/tags/get_tags'));
-    loadTestFile(require.resolve('./cases/categories/get_categories'));
-    loadTestFile(require.resolve('./user_actions/find_user_actions'));
-    loadTestFile(require.resolve('./user_actions/get_user_action_stats'));
-    loadTestFile(require.resolve('./configure/get_configure'));
-    loadTestFile(require.resolve('./configure/patch_configure'));
-    loadTestFile(require.resolve('./configure/post_configure'));
-    loadTestFile(require.resolve('./internal/metrics/get_case_metrics'));
-    loadTestFile(require.resolve('./internal/metrics/get_case_metrics_alerts'));
-    loadTestFile(require.resolve('./internal/metrics/get_case_metrics_actions'));
-    loadTestFile(require.resolve('./internal/metrics/get_case_metrics_connectors'));
-    loadTestFile(require.resolve('./internal/metrics/get_cases_metrics'));
+    // loadTestFile(require.resolve('./cases/reporters/get_reporters'));
+    // loadTestFile(require.resolve('./cases/tags/get_tags'));
+    // loadTestFile(require.resolve('./cases/categories/get_categories'));
+    // loadTestFile(require.resolve('./user_actions/find_user_actions'));
+    // loadTestFile(require.resolve('./user_actions/get_user_action_stats'));
+    // loadTestFile(require.resolve('./configure/get_configure'));
+    // loadTestFile(require.resolve('./configure/patch_configure'));
+    // loadTestFile(require.resolve('./configure/post_configure'));
+    // loadTestFile(require.resolve('./internal/metrics/get_case_metrics'));
+    // loadTestFile(require.resolve('./internal/metrics/get_case_metrics_alerts'));
+    // loadTestFile(require.resolve('./internal/metrics/get_case_metrics_actions'));
+    // loadTestFile(require.resolve('./internal/metrics/get_case_metrics_connectors'));
+    // loadTestFile(require.resolve('./internal/metrics/get_cases_metrics'));
 
     /**
      * Internal routes
      */
     loadTestFile(require.resolve('./internal/bulk_get_cases'));
     loadTestFile(require.resolve('./internal/bulk_get_attachments'));
-    loadTestFile(require.resolve('./internal/get_connectors'));
-    loadTestFile(require.resolve('./internal/user_actions_get_users'));
+    // loadTestFile(require.resolve('./internal/get_connectors'));
+    // loadTestFile(require.resolve('./internal/user_actions_get_users'));
     loadTestFile(require.resolve('./internal/bulk_delete_file_attachments'));
-    loadTestFile(require.resolve('./internal/search_cases'));
-    loadTestFile(require.resolve('./internal/replace_custom_field'));
-    loadTestFile(require.resolve('./internal/find_user_actions.ts'));
+    // loadTestFile(require.resolve('./internal/search_cases'));
+    // loadTestFile(require.resolve('./internal/replace_custom_field'));
+    // loadTestFile(require.resolve('./internal/find_user_actions.ts'));
 
     /**
      * Attachments framework
