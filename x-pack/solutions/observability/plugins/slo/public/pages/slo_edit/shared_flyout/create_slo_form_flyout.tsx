@@ -28,6 +28,10 @@ export default function CreateSLOFormFlyout({
   formSettings?: FormSettings;
 }) {
   const formInitialValues = transformPartialSLODataToFormState(initialValues);
+  const flyoutFormSettings: FormSettings = {
+    ...formSettings,
+    formLayout: 'horizontal',
+  };
 
   return (
     <EuiFlyout onClose={onClose} aria-labelledby="flyoutTitle" size="l" maxWidth={620} ownFocus>
@@ -42,7 +46,7 @@ export default function CreateSLOFormFlyout({
         <SloEditForm
           onFlyoutClose={onClose}
           initialValues={formInitialValues}
-          formSettings={formSettings}
+          formSettings={flyoutFormSettings}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

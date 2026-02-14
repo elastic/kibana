@@ -42,4 +42,5 @@ export interface CreateSLOForm<IndicatorType = Indicator> {
 export interface FormSettings {
   isEditMode?: boolean;
   allowedIndicatorTypes?: IndicatorTypeSchema[];
+  formLayout?: 'vertical' | 'horizontal';
 }

@@ -24,7 +24,11 @@ import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOForm } from '../../../types';
 import { SyncFieldSelector } from './sync_field_selector';
 
-export function AdvancedSettings() {
+interface AdvancedSettingsProps {
+  isHorizontalLayout?: boolean;
+}
+
+export function AdvancedSettings({ isHorizontalLayout = false }: AdvancedSettingsProps) {
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
   const preventBackfillCheckbox = useGeneratedHtmlId({ prefix: 'preventBackfill' });
   const advancedSettingsAccordion = useGeneratedHtmlId({ prefix: 'advancedSettingsAccordion' });
@@ -52,7 +56,7 @@ export function AdvancedSettings() {
       }
     >
       <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiFlexGrid columns={3} gutterSize="m">
+        <EuiFlexGrid columns={isHorizontalLayout ? 1 : 3} gutterSize="m">
           <EuiFlexItem>
             <SyncFieldSelector />
           </EuiFlexItem>
