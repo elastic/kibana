@@ -11,6 +11,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { chunk, partition } from 'lodash/fp';
 import { extname } from 'path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { validateRuleImportResponseActions } from '../../../../../../endpoint/services';
 import {
   ImportRulesRequestQuery,
   ImportRulesResponse,
@@ -99,6 +100,9 @@ export const importRulesRoute = (
 
           const savedObjectsClient = ctx.core.savedObjects.client;
           const exceptionsClient = ctx.lists?.getExceptionListClient();
+          const endpointAuthz = await ctx.securitySolution.getEndpointAuthz();
+          const endpointService = ctx.securitySolution.getEndpointService();
+          const spaceId = ctx.securitySolution.getSpaceId();
 
           const { filename } = (request.body.file as HapiReadableStream).hapi;
           const fileExtension = extname(filename).toLowerCase();
@@ -171,7 +175,16 @@ export const importRulesRoute = (
             rules: parsedRules,
           });
 
-          const ruleChunks = chunk(CHUNK_PARSED_OBJECT_SIZE, validatedActionRules);
+          // Validate that Response Actions are valid
+          const { valid: validatedResponseActionsRules, errors: responseActionsErrors } =
+            await validateRuleImportResponseActions({
+              endpointAuthz,
+              endpointService,
+              spaceId,
+              rulesToImport: validatedActionRules,
+            });
+
+          const ruleChunks = chunk(CHUNK_PARSED_OBJECT_SIZE, validatedResponseActionsRules);
 
           const importRuleResponse = await importRules({
             ruleChunks,
@@ -193,6 +206,7 @@ export const importRulesRoute = (
             ...duplicateIdErrors,
             ...importErrors,
             ...missingActionErrors,
+            ...responseActionsErrors,
           ];
 
           const successes = importRuleResponse.filter((resp) => {
@@ -219,7 +233,7 @@ export const importRulesRoute = (
 
           return response.ok({ body: ImportRulesResponse.parse(importRulesResponse) });
         } catch (err) {
-          logger.error(`importRulesRoute: Caught error:`, err);
+          logger.error(`importRulesRoute: Caught error: ${err.message}`, err);
           const error = transformError(err);
           return siemResponse.error({
             body: error.message,
