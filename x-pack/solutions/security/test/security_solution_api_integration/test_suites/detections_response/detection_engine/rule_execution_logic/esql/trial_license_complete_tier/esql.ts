@@ -64,8 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
    */
   const internalIdPipe = (id: string) => `| where id=="${id}"`;
 
-  // Failing: See https://github.com/elastic/kibana/issues/235895
-  describe.skip('@ess @serverless ES|QL rule type', () => {
+  describe('@ess @serverless ES|QL rule type', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
@@ -1713,7 +1712,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // flaky test: https://github.com/elastic/kibana/issues/235895
-        it.skip('should generate alerts over multiple pages from different indices but same event id for mv_expand when number alerts exceeds max signal', async () => {
+        it('should generate alerts over multiple pages from different indices but same event id for mv_expand when number alerts exceeds max signal', async () => {
           const id = uuidv4();
           const rule: EsqlRuleCreateProps = {
             ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
@@ -1728,17 +1727,19 @@ export default ({ getService }: FtrProviderContext) => {
 
           const document = {
             id,
-            '@timestamp': '2020-10-28T05:30:00.000Z',
             agent: { name: Array.from({ length: 150 }, (_, i) => `test_1_${1000 + i}`) },
           };
 
           await Promise.all(
-            ['ecs_compliant', 'ecs_compliant_synthetic_source'].map((index) =>
+            ['ecs_compliant', 'ecs_compliant_synthetic_source'].map((index, i) =>
               es.index({
                 index,
                 id,
                 refresh: true,
-                document,
+                document: {
+                  ...document,
+                  '@timestamp': `2020-10-28T05:30:00.00${i}Z`,
+                },
               })
             )
           );
