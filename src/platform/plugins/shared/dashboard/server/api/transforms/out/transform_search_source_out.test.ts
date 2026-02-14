@@ -22,18 +22,21 @@ describe('transformSearchSourceOut', () => {
     },
   ];
 
-  it('returns filters and query for valid input', () => {
+  it('returns converted filters and query for valid input', () => {
     const meta = {
       searchSourceJSON: JSON.stringify({
         filter: [
-          { foo: 'bar', meta: { indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index' } },
+          {
+            query: { foo: 'bar' },
+            meta: { indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index' },
+          },
         ],
         query: { query: 'test', language: 'kuery' },
       }),
     };
     const result = transformSearchSourceOut(meta, references);
     expect(result).toEqual({
-      filters: [{ foo: 'bar', meta: { index: 'fizzle-1234' } }],
+      filters: [{ data_view_id: 'fizzle-1234', type: 'dsl', dsl: { query: { foo: 'bar' } } }],
       query: { query: 'test', language: 'kuery' },
     });
   });
@@ -42,21 +45,21 @@ describe('transformSearchSourceOut', () => {
     expect(transformSearchSourceOut({}, [])).toEqual({});
   });
 
-  it('returns empty searchSource if parseSearchSourceJSON throws', () => {
+  it('returns empty object if parseSearchSourceJSON throws', () => {
     const meta = { searchSourceJSON: 'not json' };
     expect(transformSearchSourceOut(meta, [])).toEqual({});
   });
 
-  it('falls back to parsedSearchSource if injectReferences throws', () => {
+  it('falls back to no data_view_id injectReferences throws', () => {
     const meta = {
       searchSourceJSON: JSON.stringify({
-        filter: [{ foo: 'bar', meta: { indexRefName: 'does-not-exist' } }],
+        filter: [{ query: { foo: 'bar' }, meta: { indexRefName: 'does-not-exist' } }],
         query: { query: 'test', language: 'kuery' },
       }),
     };
     const result = transformSearchSourceOut(meta, []);
     expect(result).toEqual({
-      filters: [{ foo: 'bar', meta: { indexRefName: 'does-not-exist' } }],
+      filters: [{ type: 'dsl', dsl: { query: { foo: 'bar' } } }],
       query: { query: 'test', language: 'kuery' },
     });
   });

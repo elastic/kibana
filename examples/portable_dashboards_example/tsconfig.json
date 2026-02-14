@@ -13,7 +13,6 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/es-query",
     "@kbn/data-plugin",
     "@kbn/dashboard-plugin",
     "@kbn/navigation-plugin",
@@ -26,6 +25,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/control-group-renderer",
     "@kbn/ui-actions-plugin",
-    "@kbn/presentation-util-plugin"
+    "@kbn/presentation-util-plugin",
+    "@kbn/as-code-filters-schema"
   ]
 }

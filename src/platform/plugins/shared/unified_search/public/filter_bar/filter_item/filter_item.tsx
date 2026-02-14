@@ -25,12 +25,13 @@ import { type DocLinksStart, type IUiSettingsClient } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-plugin/public';
+import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import { FilterEditor } from '../filter_editor/filter_editor';
 import { FilterView } from '../filter_view';
 import type { FilterPanelOption } from '../../types';
 import type { WithCloseFilterEditorConfirmModalProps } from '../filter_editor';
 import { withCloseFilterEditorConfirmModal } from '../filter_editor';
+import { getFilterKeys, isFilterApplicable } from './is_filter_applicable';
 
 export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps {
   id: string;
@@ -256,25 +257,6 @@ function FilterItemComponent(props: FilterItemProps) {
     ];
   }
 
-  /**
-   * Checks if filter field exists in any of the index patterns provided,
-   * Because if so, a filter for the wrong index pattern may still be applied.
-   * This function makes this behavior explicit, but it needs to be revised.
-   */
-  function isFilterApplicable() {
-    // Any filter is applicable if no index patterns were provided to FilterBar.
-    if (!props.indexPatterns.length) return true;
-
-    const ip = getIndexPatternFromFilter(filter, indexPatterns);
-    if (ip) return true;
-
-    const allFields = indexPatterns.map((indexPattern) => {
-      return indexPattern.fields.map((field) => field.name);
-    });
-    const flatFields = allFields.reduce((acc: string[], it: string[]) => [...acc, ...it], []);
-    return flatFields.includes(filter.meta?.key || '');
-  }
-
   function getValueLabel(): LabelOptions {
     const label: LabelOptions = {
       title: '',
@@ -286,7 +268,7 @@ function FilterItemComponent(props: FilterItemProps) {
       return label;
     }
 
-    if (isFilterApplicable()) {
+    if (isFilterApplicable(filter, indexPatterns)) {
       try {
         label.title = getDisplayValueFromFilter(filter, indexPatterns);
       } catch (e) {
@@ -303,13 +285,16 @@ function FilterItemComponent(props: FilterItemProps) {
         id: 'unifiedSearch.filter.filterBar.labelWarningText',
         defaultMessage: `Warning`,
       });
+      const fieldNames = getFilterKeys(filter);
       label.message = props.intl.formatMessage(
         {
-          id: 'unifiedSearch.filter.filterBar.labelWarningInfo',
-          defaultMessage: 'Field {fieldName} does not exist in current view',
+          id: 'unifiedSearch.filter.filterBar.labelWarningFieldDoesNotExistInCurrentView',
+          defaultMessage:
+            '{fieldCount, plural, =0 {This filter does not exist in the current view} one {Field {fieldNames} does not exist in the current view} other {Fields {fieldNames} do not exist in the current view}}',
         },
         {
-          fieldName: filter.meta.key,
+          fieldCount: fieldNames.length,
+          fieldNames: fieldNames.join(', '),
         }
       );
     }
