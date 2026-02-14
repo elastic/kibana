@@ -35,6 +35,16 @@ export const MAIN_PANEL_LABELS = {
       defaultMessage: 'Export all console requests to a TXT file',
     });
   },
+  get queryDslHelpButton() {
+    return i18n.translate('console.queryDslHelpButtonLabel', {
+      defaultMessage: 'Query DSL help',
+    });
+  },
+  get queryDslHelpButtonTooltip() {
+    return i18n.translate('console.queryDslHelpButtonTooltipLabel', {
+      defaultMessage: 'Open Query DSL quick reference',
+    });
+  },
   get helpButton() {
     return i18n.translate('console.helpButtonTooltipContent', {
       defaultMessage: 'Help',
