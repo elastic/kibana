@@ -109,6 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
         'ad_hoc_run-backfill',
         'agent-builder:run-agent',
         'alert-deletion',
+        'alerting:api_key_provisioning',
         'alerting:.es-query',
         'alerting:.geo-containment',
         'alerting:.index-threshold',

@@ -168,6 +168,7 @@ const previouslyRegisteredTypes = [
   'timelion-sheet',
   'tsvb-validation-telemetry',
   'threshold-explorer-view',
+  'uiam_api_keys_provisioning_status',
   'ui-counter',
   'ui-metric',
   'upgrade-assistant-ml-upgrade-operation',
