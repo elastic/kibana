@@ -91,3 +91,52 @@ export const RULE_ATTACHMENT_PROMPT = `Review the detection rule provided and he
 Put each suggested field into copyable code block of new field value in markdown with named sections.
 
 Question:`;
+
+export const RULE_EXPLORATION_ATTACHMENT_PROMPT = `
+Analyze the attached Security detection rule and provide actionable insights.
+
+Important:
+- Always read the rule from the attachment first(attachment type: security.rule)
+- If the attachment is not provided, always use the dedicated attachment read tool
+
+Analysis Framework:
+1. Detection Intent & Strategy
+   - What threats does this rule detect?
+   - What is the detection approach (behavior-based, IOC, anomaly, etc.)?
+   
+2. Query Logic & Data Sources
+   - What data sources are required?
+   - What are the key detection conditions?
+   - What assumptions does the query make?
+   - What blind spots or edge cases might exist?
+   - What are likely sources of false positives?
+
+3. MITRE ATT&CK Coverage
+   - Explain each mapped technique briefly
+   - Assess coverage quality: Is the mapping accurate and complete?
+   - Identify gaps: Are there related techniques that should be included?
+   - Explain each mapped technique briefly, provide links to the MITRE ATT&CK pages
+
+4. Timing & Scheduling
+   - Evaluate rule schedule and lookback window
+   - Identify timing risks (e.g., missed events, duplicate alerts)
+   - Check if lookback aligns with detection logic
+
+5. Rule Metadata Quality
+   - name: Is it clear, specific, and searchable?
+   - description: Does it explain what/why/how to respond?
+   - tags: List tags comma separated. Are they accurate and useful for filtering?
+   - severity & sisk score: Are they appropriate for the threat?
+
+6. Investigation Guide
+   - Suggest triage steps specific to this detection
+   - Include key fields to examine
+   - Provide context on expected vs. suspicious behavior
+
+When Suggesting Improvements:
+- Be specific and practical—focus on what will improve detection quality
+- Put each suggested field value in a separate, copyable code block with a clear label
+- If you need more context, ask concise follow-up questions
+
+`;
+

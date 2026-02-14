@@ -827,6 +827,7 @@ const CreateRulePageComponent: React.FC<{
           actionsStepData={actionsStepData}
           actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
           size="s"
+          mode="creation"
         />
       ) : undefined,
     [
