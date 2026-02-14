@@ -59,6 +59,7 @@ export {
   isConversationNotFoundError,
   isBadRequestError,
   isRequestAbortedError,
+  isWorkflowAbortedError,
   isAgentExecutionError,
   isContextLengthExceededAgentError,
   createAgentBuilderError,
@@ -68,6 +69,7 @@ export {
   createConversationNotFoundError,
   createBadRequestError,
   createRequestAbortedError,
+  createWorkflowAbortedError,
   type AgentBuilderError,
   type AgentBuilderInternalError,
   type AgentBuilderToolNotFoundError,
@@ -75,6 +77,7 @@ export {
   type AgentBuilderConversationNotFoundError,
   type AgentBuilderBadRequestError,
   type AgentBuilderRequestAbortedError,
+  type AgentBuilderWorkflowAbortedError,
   type AgentBuilderAgentExecutionError,
   type AgentBuilderHooksExecutionError,
   type SerializedAgentBuilderError,
@@ -162,4 +165,5 @@ export {
   isPromptRequestEvent,
 } from './chat';
 export * from './telemetry';
+export { AGENT_WORKFLOWS_FEATURE_FLAG } from './feature_flags';
 export { getLatestVersion, type VersionedAttachment } from './attachments';

@@ -12,8 +12,9 @@ import type { WorkflowToolConfig } from '@kbn/agent-builder-common/tools';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { WAIT_FOR_COMPLETION_TIMEOUT_SEC } from '@kbn/agent-builder-common/tools/types/workflow';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import type { AnyToolTypeDefinition } from '../definitions';
-import { executeWorkflow } from './execute_workflow';
+import { executeWorkflow } from '../../../workflow';
 import { generateSchema } from './generate_schema';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 import { validateWorkflowId } from './validation';
@@ -41,7 +42,7 @@ export const getWorkflowToolType = ({
             const workflowId = config.workflow_id;
 
             try {
-              const workflowResults = await executeWorkflow({
+              const result = await executeWorkflow({
                 request,
                 spaceId,
                 workflowApi,
@@ -50,8 +51,12 @@ export const getWorkflowToolType = ({
                 waitForCompletion: config.wait_for_completion,
               });
 
+              const toolResults = result.success
+                ? [otherResult({ execution: result.execution })]
+                : [errorResult(result.error)];
+
               return {
-                results: workflowResults,
+                results: toolResults,
               };
             } catch (e) {
               return {

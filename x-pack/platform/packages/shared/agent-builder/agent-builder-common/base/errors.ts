@@ -22,6 +22,7 @@ export enum AgentBuilderErrorCode {
   agentExecutionError = 'agentExecutionError',
   requestAborted = 'requestAborted',
   hookExecutionError = 'hookExecutionError',
+  workflowAborted = 'workflowAborted',
 }
 
 const AgentBuilderError = ServerSentEventError;
@@ -201,6 +202,29 @@ export const createRequestAbortedError = (
 };
 
 /**
+ * Represents execution aborted by a workflow.
+ */
+export type AgentBuilderWorkflowAbortedError =
+  AgentBuilderError<AgentBuilderErrorCode.workflowAborted>;
+
+/**
+ * Checks if the given error is a {@link AgentBuilderWorkflowAbortedError}
+ */
+export const isWorkflowAbortedError = (err: unknown): err is AgentBuilderWorkflowAbortedError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.workflowAborted;
+};
+
+/**
+ * Represents an unexpected error in the workflow execution.
+ */
+export const createWorkflowAbortedError = (
+  message: string,
+  meta?: { workflow?: string }
+): AgentBuilderWorkflowAbortedError => {
+  return new AgentBuilderError(AgentBuilderErrorCode.workflowAborted, message, meta ?? {});
+};
+
+/**
  * Represents an error related to agent execution
  */
 export type AgentBuilderAgentExecutionError<
@@ -276,12 +300,14 @@ export const AgentBuilderErrorUtils = {
   isToolNotFoundError,
   isAgentNotFoundError,
   isConversationNotFoundError,
+  isWorkflowAbortedError,
   isAgentExecutionError,
   isContextLengthExceededAgentError,
   createInternalError,
   createToolNotFoundError,
   createAgentNotFoundError,
   createConversationNotFoundError,
+  createWorkflowAbortedError,
   createAgentExecutionError,
   isHooksExecutionError,
 };

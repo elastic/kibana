@@ -17,6 +17,7 @@ import {
 import {
   createHooksExecutionError,
   isHooksExecutionError,
+  isWorkflowAbortedError,
 } from '@kbn/agent-builder-common/base/errors';
 import { orderBy } from 'lodash';
 
@@ -33,7 +34,7 @@ const normalizeHookError = <E extends HookLifecycle>(
   hook: Pick<HookRegistration<E>, 'id' | 'mode'>,
   err: unknown
 ) => {
-  if (isHooksExecutionError(err)) {
+  if (isHooksExecutionError(err) || isWorkflowAbortedError(err)) {
     return err;
   }
 

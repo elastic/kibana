@@ -19,6 +19,7 @@ export interface WorkflowExecutionState {
   started_at: string;
   finished_at?: string;
   output?: JsonValue;
+  workflow_name?: string;
 }
 
 /**
@@ -44,6 +45,7 @@ export const getExecutionState = async ({
     workflow_id: execution.workflowId ?? 'unknown',
     started_at: execution.startedAt,
     finished_at: execution.finishedAt,
+    workflow_name: execution.workflowDefinition.name,
   };
 
   if (execution.status === ExecutionStatus.COMPLETED) {
