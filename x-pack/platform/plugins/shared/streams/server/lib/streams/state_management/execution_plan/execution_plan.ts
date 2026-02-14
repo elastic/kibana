@@ -8,6 +8,7 @@
 import { groupBy } from 'lodash';
 import { getSegments } from '@kbn/streams-schema';
 import type { SecurityHasPrivilegesRequest } from '@elastic/elasticsearch/lib/api/types';
+import { StatusError } from '../../errors/status_error';
 import {
   deleteComponent,
   upsertComponent,
@@ -246,6 +247,9 @@ export class ExecutionPlan {
       // Upsert ES|QL views after the stream documents are created
       await this.upsertEsqlViews(upsert_esql_view);
     } catch (error) {
+      if (error instanceof StatusError) {
+        throw error;
+      }
       throw new FailedToExecuteElasticsearchActionsError(
         `Failed to execute Elasticsearch actions: ${error.message}`
       );

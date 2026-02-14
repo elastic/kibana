@@ -123,6 +123,7 @@ const buildWiredDefinition = (): Streams.WiredStream.GetResponse => ({
   inherited_fields: {},
   effective_lifecycle: { dsl: { data_retention: '1d' }, from: 'parent' },
   effective_settings: {},
+  data_stream_exists: true,
   privileges: { ...privileges },
   effective_failure_store: { disabled: {}, from: 'parent' },
 });

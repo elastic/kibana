@@ -130,6 +130,23 @@ export async function deleteStream(
     .then((response) => response.body);
 }
 
+export async function restoreDataStream(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  expectStatusCode: number = 200
+) {
+  return await apiClient
+    .fetch('POST /internal/streams/{name}/_restore_data_stream', {
+      params: {
+        path: {
+          name,
+        },
+      },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
 export async function getIlmStats(
   apiClient: StreamsSupertestRepositoryClient,
   name: string,

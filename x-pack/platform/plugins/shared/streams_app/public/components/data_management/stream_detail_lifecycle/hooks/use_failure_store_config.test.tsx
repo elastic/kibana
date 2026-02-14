@@ -93,6 +93,7 @@ const createWiredDefinition = (
     from: isRoot ? name : 'logs',
   },
   effective_settings: {},
+  data_stream_exists: true,
   inherited_fields: {},
   dashboards: [],
   queries: [],

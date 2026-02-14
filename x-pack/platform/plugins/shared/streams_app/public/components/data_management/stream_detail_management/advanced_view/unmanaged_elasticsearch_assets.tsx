@@ -7,12 +7,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { MissingDataStreamCallout } from '../missing_data_stream_callout';
 import { ComponentTemplatePanel } from '../component_template_panel';
 import { IndexTemplateDetails } from '../index_template_details';
 import { IngestPipelineDetails } from '../ingest_pipeline_details';
@@ -102,21 +103,11 @@ export function UnmanagedElasticsearchAssets({
 
   if (!definition.data_stream_exists) {
     return (
-      <EuiCallOut
-        announceOnMount
-        title={i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.title', {
-          defaultMessage: 'Data stream missing',
-        })}
-        color="danger"
-        iconType="error"
-      >
-        <p>
-          {i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.description', {
-            defaultMessage:
-              'The underlying Elasticsearch data stream for this classic stream is missing or not accessible because the view_index_metadata privilege is missing. Make sure you have sufficient privileges and the data stream actually exists.',
-          })}
-        </p>
-      </EuiCallOut>
+      <MissingDataStreamCallout
+        streamName={definition.stream.name}
+        canManage={definition.privileges.manage}
+        refreshDefinition={refreshDefinition}
+      />
     );
   }
 

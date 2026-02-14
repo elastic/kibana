@@ -7,12 +7,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import { EuiBadgeGroup, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { RedirectTo } from '../../redirect_to';
 import type { ManagementTabs } from './wrapper';
 import { Wrapper } from './wrapper';
+import { MissingDataStreamCallout } from './missing_data_stream_callout';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
@@ -81,24 +82,11 @@ export function ClassicStreamDetailManagement({
           }
         />
         <StreamsAppPageTemplate.Body>
-          <EuiCallOut
-            announceOnMount
-            title={i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.title', {
-              defaultMessage: 'Data stream missing',
-            })}
-            color="danger"
-            iconType="error"
-          >
-            <p>
-              {i18n.translate(
-                'xpack.streams.unmanagedStreamOverview.missingDatastream.description',
-                {
-                  defaultMessage:
-                    'The underlying Elasticsearch data stream for this classic stream is missing or not accessible because the view_index_metadata privilege is missing. Make sure you have sufficient privileges and the data stream actually exists.',
-                }
-              )}
-            </p>
-          </EuiCallOut>
+          <MissingDataStreamCallout
+            streamName={definition.stream.name}
+            canManage={definition.privileges.manage}
+            refreshDefinition={refreshDefinition}
+          />
         </StreamsAppPageTemplate.Body>
       </>
     );

@@ -148,6 +148,7 @@ describe('Converter Helpers', () => {
           from: 'logs',
         },
         effective_settings: {},
+        data_stream_exists: true,
         inherited_fields: {},
         effective_failure_store: {
           disabled: {},

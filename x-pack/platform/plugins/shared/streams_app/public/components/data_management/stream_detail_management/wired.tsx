@@ -15,6 +15,7 @@ import { StreamDetailRouting } from '../stream_detail_routing';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { Wrapper } from './wrapper';
+import { MissingDataStreamCallout } from './missing_data_stream_callout';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { WiredAdvancedView } from './advanced_view/wired_advanced_view';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
@@ -95,6 +96,31 @@ export function WiredStreamDetailManagement({
               })}
             </p>
           </EuiCallOut>
+        </StreamsAppPageTemplate.Body>
+      </>
+    );
+  }
+
+  if (!definition.data_stream_exists) {
+    return (
+      <>
+        <StreamsAppPageTemplate.Header
+          bottomBorder="extended"
+          pageTitle={
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              {key}
+              <EuiBadgeGroup gutterSize="s">
+                <WiredStreamBadge />
+              </EuiBadgeGroup>
+            </EuiFlexGroup>
+          }
+        />
+        <StreamsAppPageTemplate.Body>
+          <MissingDataStreamCallout
+            streamName={definition.stream.name}
+            canManage={definition.privileges.manage}
+            refreshDefinition={refreshDefinition}
+          />
         </StreamsAppPageTemplate.Body>
       </>
     );

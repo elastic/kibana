@@ -162,6 +162,7 @@ export async function readStream({
     privileges,
     queries,
     index_mode: dataStream?.index_mode,
+    data_stream_exists: !!dataStream,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
     effective_settings: getInheritedSettings([...ancestors, streamDefinition]),
     inherited_fields: inheritedFields,

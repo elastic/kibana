@@ -82,6 +82,7 @@ export const createMockWiredStreamDefinition = (
     manage_failure_store: true,
     view_index_metadata: true,
   },
+  data_stream_exists: true,
   inherited_fields: {
     'attributes.inherited_field': {
       type: 'keyword',

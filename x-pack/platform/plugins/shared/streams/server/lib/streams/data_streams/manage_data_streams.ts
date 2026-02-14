@@ -277,11 +277,12 @@ export async function putDataStreamsSettings({
       settings,
     })
   );
-  const errors = response.data_streams
+  const dataStreamErrors = response.data_streams
     .filter(({ error }) => Boolean(error))
-    .map(({ error }) => error);
-  if (errors.length) {
-    throw new Error(errors.join('\n'));
+    .map(({ error }) => (typeof error === 'string' ? error : JSON.stringify(error)));
+  if (dataStreamErrors.length) {
+    const joined = dataStreamErrors.join('\n');
+    throw new Error(joined);
   }
 }
 
