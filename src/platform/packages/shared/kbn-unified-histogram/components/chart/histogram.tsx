@@ -82,6 +82,9 @@ export function Histogram({
       border: ${attributes.visualizationType === 'lnsMetric'
         ? `1px solid ${euiTheme.colors.borderBaseSubdued}`
         : 'none'};
+      border-radius: ${attributes.visualizationType === 'lnsMetric'
+        ? euiTheme.border.radius.medium
+        : '0'};
     }
 
     & .echLegend .echLegendList {
