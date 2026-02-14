@@ -202,4 +202,66 @@ describe('DiscriminatedUnionType', () => {
       expectType<ExampleType>({ type: 'bool', boolean: 'true' });
     });
   });
+  describe('problematic case', () => {
+    test('should treat oneOf as a single discriminated branch', () => {
+      const type = schema.discriminatedUnion(
+        'type',
+        [
+          schema.oneOf([
+            schema.object({
+              type: schema.literal('str'),
+              obj: schema.object({ string: schema.string() }),
+            }),
+            schema.object({
+              type: schema.literal('str'),
+              obj: schema.object({ string2: schema.string() }),
+            }),
+          ]),
+          schema.object({
+            type: schema.literal('num'),
+            obj: schema.object({ number: schema.number() }),
+          }),
+          schema.object({
+            type: schema.literal('bool'),
+            obj: schema.object({ boolean: schema.boolean() }),
+          }),
+        ],
+        //
+        { defaultValue: { type: 'str', obj: { string: 'test' } } }
+      );
+
+      expect(type.validate({ type: 'str', obj: { string: 'x' } })).toEqual({
+        type: 'str',
+        obj: { string: 'x' },
+      });
+      expect(type.validate({ type: 'str', obj: { string2: 'y' } })).toEqual({
+        type: 'str',
+        obj: { string2: 'y' },
+      });
+      expect(type.validate(undefined)).toEqual({ type: 'str', obj: { string: 'test' } });
+    });
+
+    test('should throw when oneOf alternatives have different discriminator values', () => {
+      expect(() => {
+        schema.discriminatedUnion('type', [
+          schema.oneOf([
+            schema.object({
+              type: schema.literal('str'),
+              obj: schema.object({ string: schema.string() }),
+            }),
+            schema.object({
+              type: schema.literal('num'),
+              obj: schema.object({ number: schema.number() }),
+            }),
+          ]),
+          schema.object({
+            type: schema.literal('bool'),
+            obj: schema.object({ boolean: schema.boolean() }),
+          }),
+        ]);
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Discriminator for schema at index 0 must resolve to a single value, got [\\"str\\", \\"num\\"]"`
+      );
+    });
+  });
 });
