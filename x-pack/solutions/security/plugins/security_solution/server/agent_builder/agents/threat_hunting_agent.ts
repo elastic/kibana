@@ -13,7 +13,6 @@ import {
   SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
   SECURITY_LABS_SEARCH_TOOL_ID,
   SECURITY_ALERTS_TOOL_ID,
-  SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
 } from '../tools';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
@@ -32,7 +31,6 @@ const PLATFORM_TOOL_IDS = [
 const SECURITY_TOOL_IDS = [
   SECURITY_ALERTS_TOOL_ID,
   SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
-  SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
   SECURITY_LABS_SEARCH_TOOL_ID,
 ];
 
@@ -47,7 +45,7 @@ export const createThreatHuntingAgent = (
     avatar_icon: 'logoSecurity',
     name: 'Threat Hunting Agent',
     description:
-      'Agent specialized in security alert analysis tasks, including alert investigation and security documentation.',
+      'Agent specialized in security alert analysis and entity analysis tasks, including alert investigation, entity investigation and security documentation.',
     labels: ['security'],
     availability: {
       cacheMode: 'space',
