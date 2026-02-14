@@ -10,8 +10,6 @@
 export {
   contextMenuTrigger,
   CONTEXT_MENU_TRIGGER,
-  panelBadgeTrigger,
   panelNotificationTrigger,
-  PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
 } from './triggers';
