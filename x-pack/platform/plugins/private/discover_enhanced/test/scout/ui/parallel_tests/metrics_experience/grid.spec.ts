@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+/**
+ * Grid activation and ES|QL command compatibility tests.
+ *
+ * These tests validate when the metrics grid activates (or does not) based on
+ * different ES|QL commands, using static TSDB_LOGS data.
+ * For pagination and search tests see grid.navigation.spec.ts.
+ */
+
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../../fixtures';
@@ -35,50 +43,54 @@ spaceTest.describe(
     });
 
     spaceTest('should render metrics grid with cards', async ({ pageObjects }) => {
-      await spaceTest.step('run ES|QL query', async () => {
-        await pageObjects.metricsExperience.runEsqlQuery(testData.ESQL_QUERIES.TS_TSDB_LOGS);
-      });
-
-      await spaceTest.step('verify grid is visible', async () => {
-        await expect(pageObjects.metricsExperience.grid).toBeVisible();
-      });
-
-      await spaceTest.step('verify at least one metric card is visible', async () => {
-        await expect(pageObjects.metricsExperience.getCardByIndex(0)).toBeVisible();
-      });
+      const { metricsExperience } = pageObjects;
+      await metricsExperience.runEsqlQuery(testData.ESQL_QUERIES.TS_TSDB_LOGS);
+      await expect(metricsExperience.grid).toBeVisible();
+      await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
     });
 
     spaceTest('should render grid with WHERE filter', async ({ pageObjects }) => {
-      await pageObjects.metricsExperience.runEsqlQuery(
+      const { metricsExperience } = pageObjects;
+      await metricsExperience.runEsqlQuery(
         `${testData.ESQL_QUERIES.TS_TSDB_LOGS} | WHERE @timestamp > NOW() - 1 DAY`
       );
-      await expect(pageObjects.metricsExperience.grid).toBeVisible();
+      await expect(metricsExperience.grid).toBeVisible();
     });
 
     spaceTest('should render grid with LIMIT', async ({ pageObjects }) => {
-      await pageObjects.metricsExperience.runEsqlQuery(
-        `${testData.ESQL_QUERIES.TS_TSDB_LOGS} | LIMIT 5`
-      );
-      await expect(pageObjects.metricsExperience.grid).toBeVisible();
+      const { metricsExperience } = pageObjects;
+      await metricsExperience.runEsqlQuery(`${testData.ESQL_QUERIES.TS_TSDB_LOGS} | LIMIT 5`);
+      await expect(metricsExperience.grid).toBeVisible();
     });
 
     spaceTest('should render grid with SORT', async ({ pageObjects }) => {
-      await pageObjects.metricsExperience.runEsqlQuery(
+      const { metricsExperience } = pageObjects;
+      await metricsExperience.runEsqlQuery(
         `${testData.ESQL_QUERIES.TS_TSDB_LOGS} | SORT @timestamp DESC`
       );
-      await expect(pageObjects.metricsExperience.grid).toBeVisible();
+      await expect(metricsExperience.grid).toBeVisible();
     });
 
     spaceTest('should not render grid with FROM command', async ({ pageObjects }) => {
-      await pageObjects.metricsExperience.runEsqlQuery(testData.ESQL_QUERIES.FROM_TSDB_LOGS);
-      await expect(pageObjects.metricsExperience.grid).toBeHidden();
+      const { metricsExperience } = pageObjects;
+      await metricsExperience.runEsqlQuery(testData.ESQL_QUERIES.FROM_TSDB_LOGS);
+      await expect(metricsExperience.grid).toBeHidden();
     });
 
     spaceTest('should not render grid with STATS command', async ({ pageObjects }) => {
-      await pageObjects.metricsExperience.runEsqlQuery(
-        `${testData.ESQL_QUERIES.TS_TSDB_LOGS} | STATS count()`
-      );
-      await expect(pageObjects.metricsExperience.grid).toBeHidden();
+      const { metricsExperience } = pageObjects;
+      await metricsExperience.runEsqlQuery(`${testData.ESQL_QUERIES.TS_TSDB_LOGS} | STATS count()`);
+      await expect(metricsExperience.grid).toBeHidden();
+    });
+
+    spaceTest('should persist grid when changing time range', async ({ pageObjects }) => {
+      const { metricsExperience, datePicker } = pageObjects;
+      await metricsExperience.runEsqlQuery(testData.ESQL_QUERIES.TS_TSDB_LOGS);
+      await expect(metricsExperience.grid).toBeVisible();
+
+      await datePicker.setCommonlyUsedTime('Last_30 days');
+
+      await expect(metricsExperience.grid).toBeVisible();
     });
   }
 );
