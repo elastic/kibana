@@ -209,7 +209,6 @@ enabled:
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/shared/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/rules/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/webhook_disabled_ssl_pfx/config.ts
-  - x-pack/platform/test/functional/apps/advanced_settings/config.ts
   - x-pack/platform/test/functional/apps/aiops/config.ts
   - x-pack/platform/test/functional/apps/api_keys/config.ts
   - x-pack/platform/test/functional/apps/canvas/config.ts

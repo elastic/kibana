@@ -35,4 +35,14 @@ export class CollapsibleNav {
       ? this.page.testSubj.click(`*nav-item-id-${itemName.toLocaleLowerCase()}`)
       : this.page.click(`[title="${itemName}"]`);
   }
+
+  async getNavLinks() {
+    const collapsibleNav = this.page.testSubj.locator('collapsibleNav');
+    if (!(await collapsibleNav.isVisible())) {
+      await this.toggleNavButton.click();
+      await collapsibleNav.waitFor({ state: 'visible' });
+    }
+    const navLinks = this.page.testSubj.locator('collapsibleNavAppLink');
+    return navLinks.allInnerTexts();
+  }
 }

@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/management-settings-application'
   - '@kbn/spaces-plugin'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -38,5 +39,6 @@ fileGroups:
   src:
     - public/**/*
     - server/**/*
+    - test/**/*
     - '!target/**/*'
 tasks: {}

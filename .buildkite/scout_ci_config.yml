@@ -36,6 +36,7 @@ plugins:
     - intercepts
     - custom_branding
     - share
+    - advanced_settings
   disabled:
 
 packages:
