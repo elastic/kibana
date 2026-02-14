@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/core-notifications-browser-mocks'
   - '@kbn/es-query'
   - '@kbn/react-query'
+  - '@kbn/alerting-types'
 tags:
   - shared-browser
   - package

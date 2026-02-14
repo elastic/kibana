@@ -164,6 +164,41 @@ export interface RuleMonitoring {
   };
 }
 
+/**
+ * Describes a condition under which a per-alert mute/snooze should be automatically lifted.
+ * Multiple conditions on the same MutedAlertInstance are combined with the `conditionOperator`.
+ */
+export interface MuteCondition {
+  /** The kind of condition to evaluate. */
+  type: 'severity_change' | 'severity_equals' | 'field_change';
+  /** The alert document field to monitor (e.g. 'kibana.alert.severity'). */
+  field: string;
+  /** For 'severity_equals': the target value that triggers unmute. */
+  value?: string;
+  /** Snapshot of the field value at the time the mute was created (for change detection). */
+  snapshotValue?: string;
+}
+
+/**
+ * Represents a per-alert-instance mute/snooze entry with optional time-bound expiry
+ * and/or conditional unmute logic.  Stored in the Rule saved object alongside
+ * the legacy `mutedInstanceIds` array.
+ */
+export interface MutedAlertInstance {
+  /** The alert instance ID (matches entries in `mutedInstanceIds`). */
+  alertInstanceId: string;
+  /** ISO timestamp when the mute was created. */
+  mutedAt: string;
+  /** Username of the user who created the mute. */
+  mutedBy?: string;
+  /** ISO timestamp after which the mute expires automatically. Absent means indefinite. */
+  expiresAt?: string;
+  /** Zero or more conditions; when any/all are met the alert is auto-unmuted. */
+  conditions?: MuteCondition[];
+  /** How multiple conditions (including time expiry) combine. 'any' = OR (first met wins). */
+  conditionOperator?: 'any' | 'all';
+}
+
 export interface RuleSnoozeSchedule {
   duration: number;
   rRule: RRuleParams;
@@ -251,6 +286,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   muteAll: boolean;
   notifyWhen?: RuleNotifyWhenType | null;
   mutedInstanceIds: string[];
+  mutedAlerts?: MutedAlertInstance[];
   executionStatus: RuleExecutionStatus;
   monitoring?: RuleMonitoring;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API

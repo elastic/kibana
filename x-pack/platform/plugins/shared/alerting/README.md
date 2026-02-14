@@ -252,6 +252,89 @@ for (const alert of getRecoveredAlerts()) {
 }
 ```
 
+## Per-Alert Conditional Snooze
+
+The alerting framework supports per-alert-instance snooze/mute with optional time-bound expiry and conditional auto-unmute.
+
+### Data Model
+
+The `Rule` saved object has two fields for muting individual alert instances:
+
+- **`mutedInstanceIds: string[]`** -- Legacy field. A simple list of muted alert instance IDs. Used for indefinite (unconditional) mutes and backward compatibility.
+- **`mutedAlerts: MutedAlertInstance[]`** -- New field. Each entry can optionally carry an `expiresAt` timestamp and/or an array of `conditions` that, when met, automatically lift the mute.
+
+```typescript
+interface MuteCondition {
+  type: 'severity_change' | 'severity_equals' | 'field_change';
+  field: string;             // e.g. 'kibana.alert.severity'
+  value?: string;            // for severity_equals: the target value
+  snapshotValue?: string;    // value at the time of mute (for change detection)
+}
+
+interface MutedAlertInstance {
+  alertInstanceId: string;
+  mutedAt: string;           // ISO timestamp
+  mutedBy?: string;
+  expiresAt?: string;        // ISO timestamp; absent = indefinite
+  conditions?: MuteCondition[];
+  conditionOperator?: 'any' | 'all'; // 'any' = OR, 'all' = AND
+}
+```
+
+### API
+
+Mute an alert with conditions by sending a body to the existing mute endpoint:
+
+```
+POST /api/alerting/rule/{rule_id}/alert/{alert_id}/_mute
+{
+  "expires_at": "2025-03-01T00:00:00.000Z",
+  "conditions": [
+    { "type": "severity_change", "field": "kibana.alert.severity", "snapshot_value": "medium" }
+  ],
+  "condition_operator": "any"
+}
+```
+
+When no body is provided, the alert is muted indefinitely (existing behavior).
+
+### Condition Types
+
+| Type | Description |
+|------|-------------|
+| `severity_change` | Unmute when the monitored field value differs from `snapshot_value` |
+| `severity_equals` | Unmute when the monitored field value equals `value` |
+| `field_change` | Unmute when any arbitrary field changes from its `snapshot_value` |
+
+### Compound Conditions
+
+- `conditionOperator: 'any'` (default) -- Unmute when **any** condition OR time expiry is met (OR logic).
+- `conditionOperator: 'all'` -- Unmute only when **all** conditions AND time expiry are met (AND logic).
+
+### Auto-Unmute
+
+During each rule execution, the `PerAlertActionScheduler` evaluates conditions for every alert in the `mutedAlerts` array. If conditions are met, the alert is:
+
+1. Removed from both `mutedAlerts` and `mutedInstanceIds` on the Rule saved object.
+2. Allowed to fire actions in the current execution cycle.
+3. Logged via `logger.info()` with the reason for unmute.
+
+### Alert Acknowledgment (ACK)
+
+Alerts can be acknowledged via the workflow status mechanism. The `POST /internal/rac/alerts/bulk_update` endpoint accepts `status: 'acknowledged'` to set `kibana.alert.workflow_status` on alert documents. This works for all rule types, not just Security Solution.
+
+The alerts table includes `AcknowledgeAlertAction` and `UnacknowledgeAlertAction` row actions.
+
+### Audit Events
+
+| Action | Description |
+|--------|-------------|
+| `rule_alert_snooze` | Per-alert conditional snooze created |
+| `rule_alert_unsnooze` | Per-alert auto-unsnooze triggered by condition |
+| `rule_alert_acknowledge` | Alert workflow status changed to acknowledged |
+| `rule_alert_mute` | Simple (unconditional) alert mute |
+| `rule_alert_unmute` | Alert unmuted by user |
+
 ## Licensing
 
 Currently most rule types are free features. But some rule types are subscription features, such as the tracking containment rule.

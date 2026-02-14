@@ -6,12 +6,19 @@
  */
 
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import type { MuteCondition } from '@kbn/alerting-types';
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export interface ToggleAlertParams {
   ruleId: string;
   alertInstanceId: string;
+  /** ISO timestamp; when reached the mute expires automatically. */
+  expiresAt?: string;
+  /** Conditions under which the mute is automatically lifted. */
+  conditions?: MuteCondition[];
+  /** How conditions combine: 'any' = OR, 'all' = AND. Default 'any'. */
+  conditionOperator?: 'any' | 'all';
 }
 
 /**

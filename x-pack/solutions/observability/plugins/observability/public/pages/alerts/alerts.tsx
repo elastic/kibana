@@ -192,6 +192,12 @@ function InternalAlertsPage() {
     snoozed: 0,
   });
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
+  const [lastReloadRequestTime, setLastReloadRequestTime] = useState<number>();
+
+  const handleEsQueryChange = useCallback((newQuery: { bool: BoolQuery }) => {
+    setEsQuery(newQuery);
+    setLastReloadRequestTime(Date.now());
+  }, []);
   const timeBuckets = useTimeBuckets();
   const bucketSize = useMemo(
     () =>
@@ -297,7 +303,7 @@ function InternalAlertsPage() {
             <ObservabilityAlertSearchBar
               {...alertSearchBarStateProps}
               appName={ALERTS_SEARCH_BAR_ID}
-              onEsQueryChange={setEsQuery}
+              onEsQueryChange={handleEsQueryChange}
               filterControls={filterControls}
               onFilterControlsChange={setFilterControls}
               onControlApiAvailable={setControlApi}
@@ -369,6 +375,7 @@ function InternalAlertsPage() {
                       ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
                       consumers={observabilityAlertFeatureIds}
                       query={mergeBoolQueries(esQuery, groupQuery)}
+                      lastReloadRequestTime={lastReloadRequestTime}
                       pageSize={ALERTS_PER_PAGE}
                       onUpdate={onUpdate}
                       columns={tableColumns}

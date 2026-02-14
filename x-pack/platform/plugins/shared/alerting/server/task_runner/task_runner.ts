@@ -65,6 +65,7 @@ import {
   withAlertingSpan,
   processRunResults,
   clearExpiredSnoozes,
+  clearExpiredMutedAlerts,
   getSchedule,
   getState,
   getTaskRunError,
@@ -74,6 +75,7 @@ import {
   isOutdatedTaskVersionError,
   OUTDATED_TASK_VERSION,
 } from '../lib/error_with_type';
+import { ruleAuditEvent, RuleAuditAction } from '../rules_client/common/audit_events';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -432,6 +434,40 @@ export class TaskRunner<
       })
     );
 
+    // Persist auto-unmute for alerts whose conditional snooze conditions were met
+    const alertsToAutoUnmute = actionScheduler.getAlertsToAutoUnmute();
+    if (alertsToAutoUnmute.length > 0) {
+      try {
+        const idsToUnmute = new Set(alertsToAutoUnmute.map((a) => a.alertInstanceId));
+        const updatedMutedInstanceIds = (rule.mutedInstanceIds ?? []).filter(
+          (id: string) => !idsToUnmute.has(id)
+        );
+        const updatedMutedAlerts = (rule.mutedAlerts ?? []).filter(
+          (entry) => !idsToUnmute.has(entry.alertInstanceId)
+        );
+
+        await partiallyUpdateRuleWithEs(this.context.elasticsearch.client.asInternalUser, ruleId, {
+          mutedInstanceIds: updatedMutedInstanceIds,
+          mutedAlerts: updatedMutedAlerts,
+          updatedAt: new Date().toISOString(),
+        });
+
+        for (const { alertInstanceId, reason } of alertsToAutoUnmute) {
+          this.logger.info(
+            `Auto-unmuted alert '${alertInstanceId}' for rule '${ruleId}': ${reason}`
+          );
+          this.context.auditLogger?.log(
+            ruleAuditEvent({
+              action: RuleAuditAction.UNSNOOZE_ALERT,
+              savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: rule.name },
+            })
+          );
+        }
+      } catch (err) {
+        this.logger.error(`Failed to persist auto-unmute for rule '${ruleId}': ${err.message}`);
+      }
+    }
+
     let alertsToReturn: Record<string, RawAlertInstance> = {};
     let recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};
     let alertsToUpdateWithLastScheduledActions: AlertsToUpdateWithLastScheduledActions = {};
@@ -591,6 +627,21 @@ export class TaskRunner<
         } catch (e) {
           // Most likely a 409 conflict error, which is ok, we'll try again at the next rule run
           this.logger.debug(`Failed to clear expired snoozes: ${e.message}`);
+        }
+      })().catch(() => {});
+
+      (async () => {
+        try {
+          await clearExpiredMutedAlerts({
+            esClient: this.context.elasticsearch.client.asInternalUser,
+            logger: this.logger,
+            rule: runRuleParams.rule,
+            version: runRuleParams.version,
+            auditLogger: this.context.auditLogger,
+          });
+        } catch (e) {
+          // Most likely a 409 conflict error, which is ok, we'll try again at the next rule run
+          this.logger.debug(`Failed to clear expired muted alerts: ${e.message}`);
         }
       })().catch(() => {});
 
