@@ -32,6 +32,7 @@ import type { Config } from '@jest/types';
 
 import jestFlags from './jest_flags.json';
 import { isInBuildkite, isConfigCompleted, markConfigCompleted } from './buildkite_checkpoint';
+import { parseShardAnnotation } from './shard_config';
 
 const JEST_CACHE_DIR = 'data/jest-cache';
 
@@ -62,6 +63,32 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
   // Set default NODE_ENV
   if (!process.env.NODE_ENV) {
     process.env.NODE_ENV = 'test';
+  }
+
+  // CI shard annotation support: if --config contains a shard annotation
+  // (e.g., "config.js||shard=1/2"), strip it and inject --shard into the args.
+  // This allows run.ts to be a drop-in replacement for run_all.ts on CI,
+  // where pick_test_group_run_order.ts embeds shard info into config names.
+  if (parsedArguments.config) {
+    const { config: cleanConfig, shard } = parseShardAnnotation(parsedArguments.config);
+    if (shard) {
+      parsedArguments.config = cleanConfig;
+      parsedArguments.shard = shard;
+      // Update process.argv so Jest and downstream code see clean values
+      for (let i = 0; i < process.argv.length; i++) {
+        if (process.argv[i] === '--config' && i + 1 < process.argv.length) {
+          process.argv[i + 1] = cleanConfig;
+          break;
+        }
+        // Handle --config=value form
+        if (process.argv[i].startsWith('--config=')) {
+          process.argv[i] = `--config=${cleanConfig}`;
+          break;
+        }
+      }
+      process.argv.push('--shard', shard);
+      log.info(`Parsed shard annotation: config=${cleanConfig}, shard=${shard}`);
+    }
   }
 
   const currentWorkingDirectory: string = process.env.INIT_CWD || process.cwd();
