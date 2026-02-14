@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { z } from '@kbn/zod/v4';
-import { Coerced, validateKeysAllowed, validateRecordMaxKeys } from '../../common/utils';
+import { Coerced, validateRecordKeysAllowed, validateRecordMaxKeys } from '../../common/utils';
 import { DEFAULT_ALERTS_GROUPING_KEY, MAX_ADDITIONAL_FIELDS_LENGTH } from '../constants';
 
 export const ExternalIncidentServiceConfigurationBase = {
@@ -55,15 +55,6 @@ export const CommentsSchema = z
   .nullable()
   .default(null);
 
-export const validateOtherFieldsKeys = (key: string, ctx: z.RefinementCtx) => {
-  validateKeysAllowed({
-    key,
-    ctx,
-    disallowList: commonIncidentSchemaObjectProperties,
-    fieldName: 'additional_fields',
-  });
-};
-
 export const CommonAttributes = {
   short_description: z.string(),
   description: z.string().nullable().default(null),
@@ -74,12 +65,15 @@ export const CommonAttributes = {
   correlation_display: z.string().nullable().default(null),
   additional_fields: Coerced(
     z
-      .record(
-        z.string().superRefine((value, ctx) => {
-          validateOtherFieldsKeys(value, ctx);
-        }),
-        z.any()
-      )
+      .record(z.string(), z.any())
+      .superRefine((val, ctx) => {
+        validateRecordKeysAllowed({
+          record: val,
+          ctx,
+          disallowList: commonIncidentSchemaObjectProperties,
+          fieldName: 'additional_fields',
+        });
+      })
       .superRefine((val, ctx) =>
         validateRecordMaxKeys({
           record: val,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { z } from '@kbn/zod/v4';
-import { Coerced, validateKeysAllowed, validateRecordMaxKeys } from '../../common/utils';
+import { Coerced, validateRecordKeysAllowed, validateRecordMaxKeys } from '../../common/utils';
 
 export const ExternalIncidentServiceConfiguration = {
   apiUrl: z.string(),
@@ -32,12 +32,15 @@ const MAX_ADDITIONAL_FIELDS_LENGTH = 50;
 const AdditionalFields = {
   additionalFields: Coerced(
     z
-      .record(
-        z.string().superRefine((value, ctx) => {
-          validateOtherFieldsKeys(value, ctx);
-        }),
-        z.any()
-      )
+      .record(z.string(), z.any())
+      .superRefine((val, ctx) => {
+        validateRecordKeysAllowed({
+          record: val,
+          ctx,
+          disallowList: commonIncidentSchemaObjectProperties,
+          fieldName: 'additionalFields',
+        });
+      })
       .superRefine((val, ctx) =>
         validateRecordMaxKeys({
           record: val,
@@ -61,15 +64,6 @@ const CommonIncidentAttributes = {
 };
 
 export const commonIncidentSchemaObjectProperties = Object.keys(CommonIncidentAttributes);
-
-const validateOtherFieldsKeys = (key: string, ctx: z.RefinementCtx) => {
-  validateKeysAllowed({
-    key,
-    ctx,
-    disallowList: commonIncidentSchemaObjectProperties,
-    fieldName: 'additionalFields',
-  });
-};
 
 export const ExecutorSubActionPushParamsSchema = z.object({
   incident: z

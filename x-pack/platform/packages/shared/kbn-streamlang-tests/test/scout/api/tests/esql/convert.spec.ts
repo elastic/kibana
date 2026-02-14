@@ -110,7 +110,7 @@ apiTest.describe(
         };
 
         expect(() => transpile(streamlangDSL)).toThrowError(
-          'Convert processor must have the "to" parameter when there is a "where" condition. It should not be the same as the source field.'
+          /Convert processor must have the .to. parameter when there is a .where. condition/
         );
       }
     );

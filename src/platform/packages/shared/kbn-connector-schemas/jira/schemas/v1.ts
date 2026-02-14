@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { z } from '@kbn/zod/v4';
-import { Coerced, validateKeysAllowed, validateRecordMaxKeys } from '../../common/utils';
+import { Coerced, validateRecordKeysAllowed, validateRecordMaxKeys } from '../../common/utils';
 import { MAX_OTHER_FIELDS_LENGTH } from '../constants';
 
 export const ExternalIncidentServiceConfiguration = {
@@ -27,15 +27,6 @@ export const ExternalIncidentServiceSecretConfiguration = {
 export const ExternalIncidentServiceSecretConfigurationSchema = z
   .object(ExternalIncidentServiceSecretConfiguration)
   .strict();
-
-const validateOtherFieldsKeys = (key: string, ctx: z.RefinementCtx) => {
-  validateKeysAllowed({
-    key,
-    ctx,
-    disallowList: incidentSchemaObjectProperties,
-    fieldName: 'otherFields',
-  });
-};
 
 const incidentSchemaObject = {
   summary: z.string(),
@@ -60,12 +51,15 @@ const incidentSchemaObject = {
   parent: z.string().nullable().default(null),
   otherFields: Coerced(
     z
-      .record(
-        z.string().superRefine((value, ctx) => {
-          validateOtherFieldsKeys(value, ctx);
-        }),
-        z.any()
-      )
+      .record(z.string(), z.any())
+      .superRefine((val, ctx) => {
+        validateRecordKeysAllowed({
+          record: val,
+          ctx,
+          disallowList: incidentSchemaObjectProperties,
+          fieldName: 'otherFields',
+        });
+      })
       .superRefine((val, ctx) =>
         validateRecordMaxKeys({
           record: val,
