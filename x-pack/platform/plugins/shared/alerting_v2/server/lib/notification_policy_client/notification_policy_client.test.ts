@@ -220,6 +220,147 @@ describe('NotificationPolicyClient', () => {
     });
   });
 
+  describe('getNotificationPolicies', () => {
+    it('returns notification policies for multiple ids in input order', async () => {
+      const firstAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'policy-two',
+        description: 'policy-two description',
+        workflow_id: 'workflow-two',
+        createdBy: 'elastic_profile_uid',
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedBy: 'elastic_profile_uid',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      };
+      const secondAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'policy-one',
+        description: 'policy-one description',
+        workflow_id: 'workflow-one',
+        createdBy: 'elastic_profile_uid',
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedBy: 'elastic_profile_uid',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'policy-id-get-2',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: firstAttributes,
+            references: [],
+            version: 'WzIsMV0=',
+          },
+          {
+            id: 'policy-id-get-1',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: secondAttributes,
+            references: [],
+            version: 'WzEsMV0=',
+          },
+        ],
+      });
+
+      const res = await client.getNotificationPolicies({
+        ids: ['policy-id-get-2', 'policy-id-get-1'],
+      });
+
+      expect(res).toEqual([
+        {
+          id: 'policy-id-get-2',
+          version: 'WzIsMV0=',
+          ...firstAttributes,
+        },
+        {
+          id: 'policy-id-get-1',
+          version: 'WzEsMV0=',
+          ...secondAttributes,
+        },
+      ]);
+    });
+
+    it('returns an empty array when ids are empty', async () => {
+      const res = await client.getNotificationPolicies({ ids: [] });
+
+      expect(res).toEqual([]);
+    });
+
+    it('ignores missing notification policies and returns found policies', async () => {
+      const firstAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'policy-found-one',
+        description: 'policy-found-one description',
+        workflow_id: 'workflow-found-one',
+        createdBy: 'elastic_profile_uid',
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedBy: 'elastic_profile_uid',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      };
+      const thirdAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'policy-found-three',
+        description: 'policy-found-three description',
+        workflow_id: 'workflow-found-three',
+        createdBy: 'elastic_profile_uid',
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedBy: 'elastic_profile_uid',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'policy-id-get-found-1',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: firstAttributes,
+            references: [],
+            version: 'WzEsMV0=',
+          },
+          {
+            id: 'policy-id-get-missing',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {} as NotificationPolicySavedObjectAttributes,
+            references: [],
+            error: {
+              statusCode: 404,
+              error: 'Not Found',
+              message: 'Saved object [notification_policy/policy-id-get-missing] not found',
+            },
+          },
+          {
+            id: 'policy-id-get-found-3',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: thirdAttributes,
+            references: [],
+            version: 'WzMsMV0=',
+          },
+        ],
+      });
+
+      const res = await client.getNotificationPolicies({
+        ids: ['policy-id-get-found-1', 'policy-id-get-missing', 'policy-id-get-found-3'],
+      });
+
+      expect(res).toEqual([
+        {
+          id: 'policy-id-get-found-1',
+          version: 'WzEsMV0=',
+          ...firstAttributes,
+        },
+        {
+          id: 'policy-id-get-found-3',
+          version: 'WzMsMV0=',
+          ...thirdAttributes,
+        },
+      ]);
+    });
+
+    it('rethrows unexpected errors', async () => {
+      mockSavedObjectsClient.bulkGet.mockRejectedValueOnce(new Error('unexpected get error'));
+
+      await expect(
+        client.getNotificationPolicies({
+          ids: ['policy-id-get-error'],
+        })
+      ).rejects.toThrow('unexpected get error');
+    });
+  });
+
   describe('updateNotificationPolicy', () => {
     it('updates a notification policy successfully', async () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {

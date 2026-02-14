@@ -14,11 +14,8 @@ import type { NotificationPolicySavedObjectServiceContract } from '../services/n
 import { NotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
-import type {
-  CreateNotificationPolicyParams,
-  NotificationPolicyResponse,
-  UpdateNotificationPolicyParams,
-} from './types';
+import type { CreateNotificationPolicyParams, UpdateNotificationPolicyParams } from './types';
+import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
 
 @injectable()
 export class NotificationPolicyClient {
@@ -35,9 +32,7 @@ export class NotificationPolicyClient {
     const now = new Date().toISOString();
 
     const attributes: NotificationPolicySavedObjectAttributes = {
-      name: params.data.name,
-      description: params.data.description,
-      workflow_id: params.data.workflow_id,
+      ...params.data,
       createdBy: userProfileUid,
       createdAt: now,
       updatedBy: userProfileUid,
@@ -70,6 +65,31 @@ export class NotificationPolicyClient {
       }
       throw e;
     }
+  }
+
+  public async getNotificationPolicies({
+    ids,
+  }: {
+    ids: string[];
+  }): Promise<NotificationPolicyResponse[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const docs = await this.notificationPolicySavedObjectService.bulkGetByIds(ids);
+
+    return docs.flatMap((doc) => {
+      if ('error' in doc) {
+        if (doc.error.statusCode === 404) {
+          return [];
+        }
+        throw Boom.boomify(new Error(doc.error.message), {
+          statusCode: doc.error.statusCode,
+        });
+      }
+
+      return [{ id: doc.id, version: doc.version, ...doc.attributes }];
+    });
   }
 
   public async updateNotificationPolicy(

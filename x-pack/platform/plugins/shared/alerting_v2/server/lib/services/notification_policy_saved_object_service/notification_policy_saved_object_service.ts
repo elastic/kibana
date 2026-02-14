@@ -16,6 +16,18 @@ import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { NotificationPolicySavedObjectAttributes } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
+import type { SavedObjectError } from '@kbn/core/types';
+
+export type NotificationPolicySavedObjectBulkGetItem =
+  | {
+      id: string;
+      attributes: NotificationPolicySavedObjectAttributes;
+      version?: string;
+    }
+  | {
+      id: string;
+      error: SavedObjectError;
+    };
 
 export interface NotificationPolicySavedObjectServiceContract {
   create(params: {
@@ -32,6 +44,10 @@ export interface NotificationPolicySavedObjectServiceContract {
     version: string;
   }): Promise<{ id: string; version?: string }>;
   delete(params: { id: string }): Promise<void>;
+  bulkGetByIds(
+    ids: string[],
+    spaceId?: string
+  ): Promise<NotificationPolicySavedObjectBulkGetItem[]>;
 }
 
 @injectable()
@@ -105,6 +121,36 @@ export class NotificationPolicySavedObjectService
     );
 
     return { id: result.id, version: result.version };
+  }
+
+  public async bulkGetByIds(
+    ids: string[],
+    spaceId?: string
+  ): Promise<NotificationPolicySavedObjectBulkGetItem[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const namespace = spaceIdToNamespace(this.spaces, spaceId);
+    const result = await this.client.bulkGet<NotificationPolicySavedObjectAttributes>(
+      ids.map((id) => ({ type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, id })),
+      namespace ? { namespace } : undefined
+    );
+
+    return result.saved_objects.map((savedObject) => {
+      if ('error' in savedObject && savedObject.error) {
+        return {
+          id: savedObject.id,
+          error: savedObject.error,
+        };
+      }
+
+      return {
+        id: savedObject.id,
+        attributes: savedObject.attributes,
+        version: savedObject.version,
+      };
+    });
   }
 
   public async delete({ id }: { id: string }): Promise<void> {

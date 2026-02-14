@@ -14,8 +14,15 @@ export const notificationPolicySavedObjectAttributesSchema = schema.object({
   name: schema.string(),
   description: schema.string(),
   workflow_id: schema.string(),
+  matcher: schema.maybe(schema.string()),
+  group_by: schema.maybe(schema.arrayOf(schema.string())),
+  throttle: schema.maybe(
+    schema.object({
+      interval: schema.string(),
+    })
+  ),
   createdBy: schema.nullable(schema.string()),
   updatedBy: schema.nullable(schema.string()),
   createdAt: schema.string(),
-  updatedAt: schema.nullable(schema.string()),
+  updatedAt: schema.string(),
 });
