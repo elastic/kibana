@@ -7,6 +7,7 @@
 
 import type { IngestStreamIndexMode } from '../models/ingest/base';
 import { Streams } from '../models/streams';
+import { getEsqlViewName } from '../models/query/view_name';
 import { getIndexPatternsForStream } from './hierarchy_helpers';
 
 export interface GetDiscoverEsqlQueryOptions {
@@ -54,6 +55,15 @@ export function getDiscoverEsqlQuery(options: GetDiscoverEsqlQueryOptions): stri
   if (Streams.QueryStream.Definition.is(definition)) {
     // Use the ES|QL view name as the query source
     return `FROM ${definition.query.view}`;
+  }
+
+  // For draft wired streams, use the ESQL view instead of the data stream
+  // (data streams don't exist for draft streams)
+  if (
+    Streams.WiredStream.Definition.is(definition) &&
+    definition.ingest.wired.draft === true
+  ) {
+    return `FROM ${getEsqlViewName(definition.name)}`;
   }
 
   const indexPatterns = getIndexPatternsForStream(definition);

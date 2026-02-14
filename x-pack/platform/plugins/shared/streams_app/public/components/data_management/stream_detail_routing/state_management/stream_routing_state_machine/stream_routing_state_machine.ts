@@ -129,6 +129,8 @@ export const streamRoutingMachine = setup({
     setRefreshing: assign(() => ({ isRefreshing: true })),
     clearRefreshing: assign(() => ({ isRefreshing: false })),
     notifyQueryStreamSuccess: getPlaceholderFor(createQueryStreamSuccessNotifier),
+    setCreateAsDraft: assign((_, params: { draft: boolean }) => ({ createAsDraft: params.draft })),
+    resetCreateAsDraft: assign(() => ({ createAsDraft: false })),
   },
   guards: {
     canForkStream: and(['hasManagePrivileges', 'isValidRouting', 'isValidChild']),
@@ -169,6 +171,7 @@ export const streamRoutingMachine = setup({
     editingSuggestionIndex: null,
     editedSuggestion: null,
     isRefreshing: false,
+    createAsDraft: false,
   }),
   initial: 'initializing',
   states: {
@@ -374,6 +377,14 @@ export const streamRoutingMachine = setup({
                       guard: 'canForkStream',
                       target: 'forking',
                     },
+                    'routingRule.setDraft': {
+                      actions: [
+                        {
+                          type: 'setCreateAsDraft',
+                          params: ({ event }) => ({ draft: event.draft }),
+                        },
+                      ],
+                    },
                   },
                 },
                 forking: {
@@ -388,11 +399,16 @@ export const streamRoutingMachine = setup({
                         where: currentRoutingRule.where,
                         destination: currentRoutingRule.destination,
                         status: currentRoutingRule.status,
+                        draft: context.createAsDraft,
                       };
                     },
                     onDone: {
                       target: '#idle',
-                      actions: [{ type: 'setRefreshing' }, { type: 'refreshDefinition' }],
+                      actions: [
+                        { type: 'resetCreateAsDraft' },
+                        { type: 'setRefreshing' },
+                        { type: 'refreshDefinition' },
+                      ],
                     },
                     onError: {
                       target: 'changing',
@@ -568,7 +584,7 @@ export const streamRoutingMachine = setup({
                     input: ({ context, event }) => {
                       assertEvent(event, 'routingRule.fork');
 
-                      const { routingRule } = event;
+                      const { routingRule, draft } = event;
                       if (!routingRule) {
                         throw new Error('No routing rule to fork');
                       }
@@ -578,6 +594,7 @@ export const streamRoutingMachine = setup({
                         destination: routingRule.destination,
                         where: routingRule.where,
                         status: 'enabled',
+                        draft,
                       };
                     },
                     onDone: {
