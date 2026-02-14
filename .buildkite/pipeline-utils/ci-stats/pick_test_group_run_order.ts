@@ -244,6 +244,7 @@ export async function pickTestGroupRunOrder() {
         defaultMin: 4,
         maxMin: JEST_MAX_MINUTES,
         overheadMin: 0.2,
+        concurrency: 3,
         names: jestUnitConfigs,
       },
       {
@@ -251,6 +252,7 @@ export async function pickTestGroupRunOrder() {
         defaultMin: 60,
         maxMin: JEST_MAX_MINUTES,
         overheadMin: 0.2,
+        concurrency: 1,
         names: jestIntegrationConfigs,
       },
       ...Array.from(ftrConfigsByQueue).map(([queue, names]) => ({

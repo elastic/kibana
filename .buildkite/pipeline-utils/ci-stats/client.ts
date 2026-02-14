@@ -171,6 +171,7 @@ export class CiStatsClient {
       maxMin: number;
       minimumIsolationMin?: number;
       overheadMin?: number;
+      concurrency?: number;
       names: string[];
     }>;
   }) => {

@@ -239,10 +239,13 @@ async function runConfigs(
         const configHash = config.replace(/[^a-zA-Z0-9]/g, '_');
         const slowTestsFile = `${slowTestsDir}/slow-tests-${configHash}-${Date.now()}.json`;
 
+        const relConfig = relative(REPO_ROOT, config);
+        log.info(`Starting ${relConfig}`);
+
         const args = [
           'scripts/jest',
           '--config',
-          relative(REPO_ROOT, config),
+          relConfig,
           '--runInBand',
           '--coverage=false',
           '--passWithNoTests',
