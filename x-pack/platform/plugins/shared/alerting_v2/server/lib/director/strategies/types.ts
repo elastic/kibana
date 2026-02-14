@@ -5,14 +5,37 @@
  * 2.0.
  */
 
-import type { AlertEventStatus, AlertEpisodeStatus } from '../../../resources/alert_events';
+import type { AlertEpisodeStatus, AlertEvent } from '../../../resources/alert_events';
+import type { RuleResponse } from '../../rules_client/types';
+import type { LatestAlertEventState } from '../queries';
 
-export interface TransitionContext {
-  currentAlertEpisodeStatus?: AlertEpisodeStatus | null;
-  alertEventStatus: AlertEventStatus;
+export interface StateTransitionContext {
+  rule: RuleResponse;
+  alertEvent: AlertEvent;
+  previousEpisode?: LatestAlertEventState;
+}
+
+export interface StateTransitionResult {
+  status: AlertEpisodeStatus;
+  statusCount?: number;
 }
 
 export interface ITransitionStrategy {
+  /** Unique identifier for this strategy, used for logging and debugging. */
   name: string;
-  getNextState(ctx: TransitionContext): AlertEpisodeStatus;
+
+  /**
+   * Determines whether this strategy is applicable for the given rule.
+   * The {@link TransitionStrategyFactory} iterates registered strategies
+   * and selects the first one whose `canHandle` returns `true`.
+   */
+  canHandle(rule: RuleResponse): boolean;
+
+  /**
+   * Computes the next episode status (and optional status count) for an
+   * alert event, given the rule configuration and the previous episode state.
+   */
+  getNextState(ctx: StateTransitionContext): StateTransitionResult;
 }
+
+export const TransitionStrategyToken = Symbol.for('TransitionStrategy');

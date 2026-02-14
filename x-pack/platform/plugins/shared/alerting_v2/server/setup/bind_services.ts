@@ -28,10 +28,12 @@ import {
 import { RetryServiceToken } from '../lib/services/retry_service/tokens';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { DirectorService } from '../lib/director/director';
-import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
 import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
+import { CountTimeframeStrategy } from '../lib/director/strategies/count_timeframe_strategy';
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { UserService } from '../lib/services/user_service/user_service';
+import { TransitionStrategyToken } from '../lib/director/strategies/types';
+import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
 import {
   createTaskRunnerFactory,
   TaskRunnerFactoryToken,
@@ -109,5 +111,9 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(DirectorService).toSelf().inSingletonScope();
   bind(TransitionStrategyFactory).toSelf().inSingletonScope();
-  bind(BasicTransitionStrategy).toSelf().inSingletonScope();
+
+  // Strategies are registered via TransitionStrategyToken for multi-injection.
+  // Order matters: specialized strategies first, fallback (BasicTransitionStrategy) last.
+  bind(TransitionStrategyToken).to(CountTimeframeStrategy).inSingletonScope();
+  bind(TransitionStrategyToken).to(BasicTransitionStrategy).inSingletonScope();
 }

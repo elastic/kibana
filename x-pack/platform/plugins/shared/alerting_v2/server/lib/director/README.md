@@ -41,27 +41,35 @@ The `DirectorService` is the main orchestrator that:
 4. Resolves episode IDs (creates new ones for new lifecycles)
 5. Returns enriched alert events with episode information
 
-### TransitionStrategyResolver
+### TransitionStrategyFactory
 
-The `TransitionStrategyResolver` is responsible for:
+The `TransitionStrategyFactory` is responsible for:
 
-- Registering available transition strategies
-- Resolving which strategy to use for state transitions
-- Providing a default strategy when none is specified
+- Resolving which strategy to use for each rule at runtime
+- Delegating selection to each strategy through `canHandle(rule)`
+- Falling back to the default strategy when no specialized strategy matches
+- Auto-discovering strategies through DI multi-injection (no constructor growth as strategies increase)
 
 ### ITransitionStrategy
 
 The `ITransitionStrategy` interface defines the contract for all transition strategies:
 
 ```typescript
-interface TransitionContext {
-  currentAlertEpisodeStatus?: AlertEpisodeStatus | null;
-  alertEventStatus: AlertEventStatus;
+interface StateTransitionContext {
+  rule: RuleResponse;
+  alertEvent: AlertEvent;
+  previousEpisode?: LatestAlertEventState;
 }
 
 interface ITransitionStrategy {
   name: string;
-  getNextState(ctx: TransitionContext): AlertEpisodeStatus;
+  canHandle(rule: RuleResponse): boolean;
+  getNextState(ctx: StateTransitionContext): StateTransitionResult;
+}
+
+interface StateTransitionResult {
+  status: AlertEpisodeStatus;
+  statusCount?: number;
 }
 ```
 
@@ -145,128 +153,113 @@ The `BasicTransitionStrategy` implements a state machine with the following tran
 
 ## Creating a Custom Strategy
 
-To create a custom transition strategy, implement the `ITransitionStrategy` interface.
+To create a custom transition strategy, implement `ITransitionStrategy`.
 
 ### Step 1: Create the Strategy Class
 
 ```typescript
 import { injectable } from 'inversify';
-import { alertEpisodeStatus, type AlertEpisodeStatus } from '../../../resources/alert_events';
-import type { ITransitionStrategy, TransitionContext } from './types';
+import { alertEpisodeStatus } from '../../../resources/alert_events';
+import type { RuleResponse } from '../../rules_client/types';
+import type {
+  ITransitionStrategy,
+  StateTransitionContext,
+  StateTransitionResult,
+} from './types';
 
 @injectable()
 export class CustomTransitionStrategy implements ITransitionStrategy {
   readonly name = 'custom';
 
-  getNextState({
-    currentAlertEpisodeStatus,
-    alertEventStatus,
-  }: TransitionContext): AlertEpisodeStatus {
-    // Implement your custom transition logic here
-    
-    return alertEpisodeStatus.pending;
-    
+  canHandle(rule: RuleResponse): boolean {
+    // Return true when this strategy should be used for the given rule.
+    return rule.kind === 'alert';
+  }
+
+  getNextState(ctx: StateTransitionContext): StateTransitionResult {
+    // Implement your custom transition logic here.
+    return { status: alertEpisodeStatus.pending, statusCount: 1 };
   }
 }
 ```
 
 ### Step 2: Register the Strategy
 
-Register your custom strategy with the `TransitionStrategyResolver`:
+Register your custom strategy with DI token-based multi-injection:
 
 ```typescript
-import { inject, injectable } from 'inversify';
-import type { ITransitionStrategy } from './types';
 import { BasicTransitionStrategy } from './basic_strategy';
+import { TransitionStrategyFactory } from './strategy_resolver';
+import { TransitionStrategyToken } from './types';
 import { CustomTransitionStrategy } from './custom_strategy';
 
-@injectable()
-export class TransitionStrategyResolver {
-  private strategies = new Map<string, ITransitionStrategy>();
-  private defaultStrategy: ITransitionStrategy;
-
-  constructor(
-    @inject(BasicTransitionStrategy) basic: BasicTransitionStrategy,
-    @inject(CustomTransitionStrategy) custom: CustomTransitionStrategy
-  ) {
-    this.register(basic);
-    this.register(custom);
-    this.defaultStrategy = basic;
-  }
-
-  register(strategy: ITransitionStrategy) {
-    this.strategies.set(strategy.name, strategy);
-  }
-
-  resolve(strategyName?: string): ITransitionStrategy {
-    if (strategyName) {
-      const strategy = this.strategies.get(strategyName);
-      if (strategy) {
-        return strategy;
-      }
-    }
-    return this.defaultStrategy;
-  }
-}
+bind(TransitionStrategyFactory).toSelf().inSingletonScope();
+bind(TransitionStrategyToken).to(CustomTransitionStrategy).inSingletonScope();
+bind(TransitionStrategyToken).to(BasicTransitionStrategy).inSingletonScope();
 ```
 
-### Step 3: Bind the Strategy in the DI Container
+**Important:** binding order matters.
 
-Add the binding in your module's DI container configuration:
-
-```typescript
-container.bind(CustomTransitionStrategy).toSelf().inSingletonScope();
-```
+- Specialized strategies first
+- Fallback strategy (`BasicTransitionStrategy`) last
 
 ## Testing Strategies
 
-When testing custom strategies, you can use the following pattern:
+When testing strategies, use the shared helpers in `director/test_utils.ts`:
+
+- `buildLatestAlertEvent(...)`
+- `buildStrategyStateTransitionContext(...)`
+
+### Example: strategy unit test setup
 
 ```typescript
-import { BasicTransitionStrategy } from './basic_strategy';
+import { CountTimeframeStrategy } from './count_timeframe_strategy';
 import { alertEpisodeStatus, alertEventStatus } from '../../../resources/alert_events';
+import {
+  buildLatestAlertEvent,
+  buildStrategyStateTransitionContext,
+} from '../test_utils';
 
-describe('BasicTransitionStrategy', () => {
-  let strategy: BasicTransitionStrategy;
+describe('CountTimeframeStrategy', () => {
+  let strategy: CountTimeframeStrategy;
 
   beforeEach(() => {
-    strategy = new BasicTransitionStrategy();
+    strategy = new CountTimeframeStrategy();
   });
 
-  it('should transition from inactive to pending on breach', () => {
+  it('transitions pending to active when threshold is met', () => {
     const result = strategy.getNextState({
-      currentAlertEpisodeStatus: alertEpisodeStatus.inactive,
-      alertEventStatus: alertEventStatus.breached,
+      ...buildStrategyStateTransitionContext({
+        eventStatus: alertEventStatus.breached,
+        stateTransition: { pendingCount: 2 },
+        previousEpisode: buildLatestAlertEvent({
+          episodeStatus: alertEpisodeStatus.pending,
+          eventStatus: alertEventStatus.breached,
+          statusCount: 1,
+        }),
+      }),
     });
 
-    expect(result).toBe(alertEpisodeStatus.pending);
-  });
-
-  it('should transition from pending to active on consecutive breach', () => {
-    const result = strategy.getNextState({
-      currentAlertEpisodeStatus: alertEpisodeStatus.pending,
-      alertEventStatus: alertEventStatus.breached,
-    });
-
-    expect(result).toBe(alertEpisodeStatus.active);
-  });
-
-  it('should transition from active to recovering on recovery', () => {
-    const result = strategy.getNextState({
-      currentAlertEpisodeStatus: alertEpisodeStatus.active,
-      alertEventStatus: alertEventStatus.recovered,
-    });
-
-    expect(result).toBe(alertEpisodeStatus.recovering);
-  });
-
-  it('should handle null current status', () => {
-    const result = strategy.getNextState({
-      currentAlertEpisodeStatus: null,
-      alertEventStatus: alertEventStatus.breached,
-    });
-
-    expect(result).toBe(alertEpisodeStatus.pending);
+    expect(result).toEqual({ status: alertEpisodeStatus.active, statusCount: 1 });
   });
 });
 ```
+
+## Notes on Count/Timeframe Strategies
+
+`CountTimeframeStrategy` extends `BasicTransitionStrategy` and adds threshold-based
+gating for:
+
+- `pending -> active`
+- `recovering -> inactive`
+
+Threshold evaluation supports:
+
+- count only
+- timeframe only
+- count + timeframe with `AND` or `OR`
+
+For timeframe evaluation, elapsed time is computed from:
+
+- current alert event `@timestamp`
+- previous episode `last_episode_timestamp`

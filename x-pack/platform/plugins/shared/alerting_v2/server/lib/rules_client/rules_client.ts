@@ -139,6 +139,10 @@ export class RulesClient {
       throw e;
     }
 
+    if (existingAttrs.kind !== 'alert' && parsed.data.state_transition != null) {
+      throw Boom.badRequest('stateTransition is only allowed for rules of kind "alert".');
+    }
+
     const nextAttrs = buildUpdateRuleAttributes(existingAttrs, parsed.data, {
       updatedBy: userProfileUid,
       updatedAt: nowIso,

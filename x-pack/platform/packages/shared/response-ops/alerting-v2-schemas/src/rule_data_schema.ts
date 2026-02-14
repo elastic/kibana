@@ -122,7 +122,9 @@ const stateTransitionSchema = z
       .describe('Time window for recovering evaluation.'),
   })
   .strict()
-  .describe('Episode state transition thresholds (alert-only).');
+  .describe('Episode state transition thresholds (alert-only).')
+  .optional()
+  .nullable();
 
 /** Grouping (optional) */
 
@@ -172,12 +174,25 @@ export const createRuleDataSchema = z
     schedule: scheduleSchema,
     evaluation: evaluationSchema,
     recovery_policy: recoveryPolicySchema.optional(),
-    state_transition: stateTransitionSchema.optional(),
+    state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional(),
     no_data: noDataSchema.optional(),
     notification_policies: z.array(notificationPolicyRefSchema).optional(),
   })
-  .strip();
+  .strip()
+  /**
+   *
+   * The `.refine` method adds a custom validation to the schema.
+   * In this case, it enforces that the `state_transition` property is only allowed when `kind` is "alert".
+   * The predicate `data.kind === 'alert' || data.state_transition == null` means:
+   * - If the rule kind is "alert", `state_transition` may be present (or absent).
+   * - For any other `kind`, `state_transition` must be `null` or `undefined`.
+   * If validation fails, the specified error message will be associated with the `state_transition` field.
+   */
+  .refine((data) => data.kind === 'alert' || data.state_transition == null, {
+    message: 'state_transition is only allowed when kind is "alert".',
+    path: ['state_transition'],
+  });
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 
@@ -187,7 +202,7 @@ export const updateRuleDataSchema = z
   .object({
     metadata: metadataSchema.partial().optional(),
     time_field: z.string().min(1).max(128).optional(),
-    schedule: scheduleSchema.partial().optional(),
+    schedule: scheduleSchema.partial().optional().nullable(),
     evaluation: z
       .object({
         query: z
@@ -201,7 +216,7 @@ export const updateRuleDataSchema = z
       .strict()
       .optional(),
     recovery_policy: recoveryPolicySchema.optional().nullable(),
-    state_transition: stateTransitionSchema.optional().nullable(),
+    state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional().nullable(),
     no_data: noDataSchema.optional().nullable(),
     notification_policies: z.array(notificationPolicyRefSchema).optional().nullable(),

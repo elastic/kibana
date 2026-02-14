@@ -6,26 +6,47 @@
  */
 
 import { TransitionStrategyFactory } from './strategy_resolver';
-import { BasicTransitionStrategy } from './basic_strategy';
+import { createTransitionStrategyFactory } from './strategy_resolver.mock';
+import { createRuleResponse } from '../../test_utils';
 
 describe('TransitionStrategyFactory', () => {
-  let strategyFactory: TransitionStrategyFactory;
-  let basicStrategy: BasicTransitionStrategy;
+  let factory: TransitionStrategyFactory;
 
   beforeEach(() => {
-    basicStrategy = new BasicTransitionStrategy();
-    strategyFactory = new TransitionStrategyFactory(basicStrategy);
+    factory = createTransitionStrategyFactory();
   });
 
-  describe('constructor', () => {
-    it('registers the basic strategy by default', () => {
-      const resolved = strategyFactory.getStrategy();
+  describe('getStrategy', () => {
+    it('returns the basic (fallback) strategy when rule has no stateTransition', () => {
+      const rule = createRuleResponse({ state_transition: undefined });
+      const resolved = factory.getStrategy(rule);
       expect(resolved.name).toBe('basic');
     });
 
-    it('sets basic strategy as the default', () => {
-      const resolved = strategyFactory.getStrategy();
-      expect(resolved).toBe(basicStrategy);
+    it('returns the basic (fallback) strategy when stateTransition is null', () => {
+      const rule = createRuleResponse({ state_transition: null });
+      const resolved = factory.getStrategy(rule);
+      expect(resolved.name).toBe('basic');
+    });
+
+    it('returns the count_timeframe strategy when rule has stateTransition', () => {
+      const rule = createRuleResponse({ state_transition: { pending_count: 3 } });
+      const resolved = factory.getStrategy(rule);
+      expect(resolved.name).toBe('count_timeframe');
+    });
+
+    it('returns the basic (fallback) strategy when stateTransition is an empty object', () => {
+      const rule = createRuleResponse({ state_transition: {} });
+      const resolved = factory.getStrategy(rule);
+      expect(resolved.name).toBe('basic');
+    });
+  });
+
+  describe('error handling', () => {
+    it('throws when no strategies are registered', () => {
+      expect(() => new TransitionStrategyFactory([])).toThrow(
+        'At least one transition strategy must be registered.'
+      );
     });
   });
 });
