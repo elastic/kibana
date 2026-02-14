@@ -30,7 +30,8 @@ import {
 import { LogoutReason } from '../../common/types';
 import type { SessionInfo } from '../../common/types';
 
-export interface SessionState extends Pick<SessionInfo, 'expiresInMs' | 'canBeExtended'> {
+export interface SessionState
+  extends Pick<SessionInfo, 'expiresInMs' | 'canBeExtended' | 'expirationReason'> {
   lastExtensionTime: number;
 }
 
@@ -153,7 +154,7 @@ export class SessionTimeout {
     }
   };
 
-  private resetTimers = ({ lastExtensionTime, expiresInMs }: SessionState) => {
+  private resetTimers = ({ lastExtensionTime, expiresInMs, expirationReason }: SessionState) => {
     this.stopRefreshTimer = this.stopRefreshTimer?.();
     this.stopWarningTimer = this.stopWarningTimer?.();
     this.stopLogoutTimer = this.stopLogoutTimer?.();
@@ -177,10 +178,13 @@ export class SessionTimeout {
       const fetchSessionInMs = showWarningInMs - SESSION_CHECK_MS;
 
       // Schedule logout when session is about to expire
-      this.stopLogoutTimer = startTimer(
-        () => this.sessionExpired.logout(LogoutReason.SESSION_EXPIRED),
-        logoutInMs
-      );
+      const logoutReason =
+        expirationReason === 'lifespan'
+          ? LogoutReason.SESSION_LIFESPAN_TIMEOUT
+          : expirationReason === 'idle'
+          ? LogoutReason.SESSION_IDLE_TIMEOUT
+          : LogoutReason.SESSION_EXPIRED;
+      this.stopLogoutTimer = startTimer(() => this.sessionExpired.logout(logoutReason), logoutInMs);
 
       // Hide warning if session has been extended
       if (showWarningInMs > 0) {
@@ -241,11 +245,12 @@ export class SessionTimeout {
       });
       this.consecutiveErrorCount = 0;
       if (sessionInfo) {
-        const { expiresInMs, canBeExtended } = sessionInfo;
+        const { expiresInMs, canBeExtended, expirationReason } = sessionInfo;
         const nextState: SessionState = {
           lastExtensionTime: Date.now(),
           expiresInMs,
           canBeExtended,
+          expirationReason,
         };
         this.sessionState$.next(nextState);
         if (this.channel) {

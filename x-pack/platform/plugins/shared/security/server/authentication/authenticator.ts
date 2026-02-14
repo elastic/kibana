@@ -1099,9 +1099,14 @@ export class Authenticator {
    * provider in the chain (default) is assumed.
    */
   private getLoggedOutURL(request: KibanaRequest, providerType?: string) {
-    const sessionExpired =
-      request.url.searchParams.get(LOGOUT_REASON_QUERY_STRING_PARAMETER) ===
-      LogoutReason.SESSION_EXPIRED;
+    const sessionExpiredReasons: string[] = [
+      LogoutReason.SESSION_EXPIRED,
+      LogoutReason.SESSION_IDLE_TIMEOUT,
+      LogoutReason.SESSION_LIFESPAN_TIMEOUT,
+    ];
+    const sessionExpired = sessionExpiredReasons.includes(
+      request.url.searchParams.get(LOGOUT_REASON_QUERY_STRING_PARAMETER) ?? ''
+    );
 
     if (this.options.customLogoutURL && !sessionExpired) {
       return this.options.customLogoutURL;

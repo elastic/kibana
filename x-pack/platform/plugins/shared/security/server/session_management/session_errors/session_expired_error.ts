@@ -8,7 +8,12 @@
 import { SessionError, SessionErrorReason } from './session_error';
 
 export class SessionExpiredError extends SessionError {
-  constructor() {
-    super(SessionErrorReason.SESSION_EXPIRED, SessionErrorReason.SESSION_EXPIRED);
+  constructor(
+    reason:
+      | SessionErrorReason.SESSION_EXPIRED
+      | SessionErrorReason.SESSION_IDLE_TIMEOUT
+      | SessionErrorReason.SESSION_LIFESPAN_TIMEOUT = SessionErrorReason.SESSION_EXPIRED
+  ) {
+    super(reason, reason);
   }
 }

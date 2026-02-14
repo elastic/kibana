@@ -73,6 +73,7 @@ describe('Info session routes', () => {
           {
             canBeExtended: true,
             expiresInMs: 100,
+            expirationReason: 'idle',
           },
         ],
         [
@@ -83,6 +84,7 @@ describe('Info session routes', () => {
           {
             canBeExtended: false,
             expiresInMs: 100,
+            expirationReason: 'idle',
           },
         ],
         [
@@ -93,6 +95,7 @@ describe('Info session routes', () => {
           {
             canBeExtended: false,
             expiresInMs: 100,
+            expirationReason: 'lifespan',
           },
         ],
         [
@@ -103,6 +106,7 @@ describe('Info session routes', () => {
           {
             canBeExtended: false,
             expiresInMs: 100,
+            expirationReason: 'lifespan',
           },
         ],
         [
@@ -113,6 +117,7 @@ describe('Info session routes', () => {
           {
             canBeExtended: true,
             expiresInMs: 100,
+            expirationReason: 'idle',
           },
         ],
         [
@@ -130,11 +135,14 @@ describe('Info session routes', () => {
       for (const [sessionInfo, expected] of assertions) {
         session.get.mockResolvedValue({ error: null, value: sessionMock.createValue(sessionInfo) });
 
-        const expectedBody = {
+        const expectedBody: Record<string, unknown> = {
           canBeExtended: expected.canBeExtended,
           expiresInMs: expected.expiresInMs,
           provider: { type: 'basic', name: 'basic1' },
         };
+        if ('expirationReason' in expected) {
+          expectedBody.expirationReason = expected.expirationReason;
+        }
 
         await expect(
           routeHandler(

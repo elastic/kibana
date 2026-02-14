@@ -33,6 +33,10 @@ export function defineSessionInfoRoutes({ router, getSession }: RouteDefinitionP
             ? Math.min(sessionValue.idleTimeoutExpiration, sessionValue.lifespanExpiration)
             : sessionValue.idleTimeoutExpiration || sessionValue.lifespanExpiration;
 
+        // Determine which timeout will trigger first: idle or lifespan
+        const expirationReason: SessionInfo['expirationReason'] =
+          expirationTime === sessionValue.lifespanExpiration ? 'lifespan' : 'idle';
+
         return response.ok({
           body: {
             expiresInMs: expirationTime ? expirationTime - Date.now() : null,
@@ -42,6 +46,7 @@ export function defineSessionInfoRoutes({ router, getSession }: RouteDefinitionP
               (sessionValue.lifespanExpiration === null ||
                 expirationTime + SESSION_EXPIRATION_WARNING_MS < sessionValue.lifespanExpiration),
             provider: sessionValue.provider,
+            ...(expirationTime ? { expirationReason } : {}),
           } as SessionInfo,
         });
       }

@@ -380,6 +380,63 @@ describe('LoginPage', () => {
       });
     });
 
+    it('shows idle timeout message when msg=SESSION_IDLE_TIMEOUT', async () => {
+      const coreStartMock = coreMock.createStart();
+      httpMock.get.mockResolvedValue(createLoginState());
+      window.location.href = `http://some-host/bar?msg=SESSION_IDLE_TIMEOUT`;
+
+      const wrapper = shallow(
+        <LoginPage
+          http={httpMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+          customBranding={customBrandingMock}
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+        resetHttpMock();
+      });
+
+      const { message } = wrapper.find(LoginForm).props();
+      expect(message).toEqual({
+        type: MessageType.Info,
+        content: 'Your session has timed out due to inactivity. Please log in again.',
+      });
+    });
+
+    it('shows lifespan timeout message when msg=SESSION_LIFESPAN_TIMEOUT', async () => {
+      const coreStartMock = coreMock.createStart();
+      httpMock.get.mockResolvedValue(createLoginState());
+      window.location.href = `http://some-host/bar?msg=SESSION_LIFESPAN_TIMEOUT`;
+
+      const wrapper = shallow(
+        <LoginPage
+          http={httpMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+          customBranding={customBrandingMock}
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+        resetHttpMock();
+      });
+
+      const { message } = wrapper.find(LoginForm).props();
+      expect(message).toEqual({
+        type: MessageType.Info,
+        content:
+          'Your session has expired because it reached the maximum lifespan. Please log in again.',
+      });
+    });
+
     it('renders as expected when loginAssistanceMessage is set', async () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState());
