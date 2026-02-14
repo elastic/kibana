@@ -187,7 +187,7 @@ export {
 } from './publishing_subject';
 export { SAVED_OBJECT_REF_NAME } from './constants';
 export { convertCamelCasedKeysToSnakeCase } from './utils/snake_case';
-export { PublishesSearchSession } from './interfaces/fetch/publishes_search_session';
+export type { PublishesSearchSession } from './interfaces/fetch/publishes_search_session';
 
 // =============================================
 // Container interfaces (merged from removed @kbn/presentation-containers package, to avoid circular dependencies between packages)
