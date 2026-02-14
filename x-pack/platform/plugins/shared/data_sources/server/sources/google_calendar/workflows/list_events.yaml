@@ -1,0 +1,44 @@
+version: '1'
+name: 'sources.google_calendar.list_events'
+description: List events from a Google Calendar, optionally filtered by time range. Returns events in chronological order with high-level metadata. Use this to browse upcoming or past events without a specific search query.
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  - name: calendarId
+    type: string
+    required: false
+    default: primary
+    description: "Calendar ID to list events from. Use 'primary' for the user's primary calendar, or a specific calendar ID from the list_calendars tool."
+  - name: timeMin
+    type: string
+    required: false
+    description: "Lower bound (inclusive) for event start time as RFC3339 timestamp. Example: 2024-01-01T00:00:00Z"
+  - name: timeMax
+    type: string
+    required: false
+    description: "Upper bound (exclusive) for event start time as RFC3339 timestamp. Example: 2024-12-31T23:59:59Z"
+  - name: maxResults
+    type: number
+    required: false
+    description: Maximum number of events to return (default 50, max 2500)
+  - name: pageToken
+    type: string
+    required: false
+    description: "Pagination token. Pass the 'nextPageToken' value from a previous response to get the next page."
+  - name: orderBy
+    type: string
+    required: false
+    description: "Sort order: 'startTime' (chronological, default) or 'updated' (last modification time)"
+steps:
+  - name: list_events
+    type: google_calendar.listEvents
+    connector-id: <%= stackConnectorId %>
+    with:
+      calendarId: "${{inputs.calendarId}}"
+      timeMin: "${{inputs.timeMin}}"
+      timeMax: "${{inputs.timeMax}}"
+      maxResults: ${{inputs.maxResults}}
+      pageToken: "${{inputs.pageToken}}"
+      orderBy: "${{inputs.orderBy}}"

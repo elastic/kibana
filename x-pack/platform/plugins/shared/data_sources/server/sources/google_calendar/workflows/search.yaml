@@ -1,0 +1,38 @@
+version: '1'
+name: 'sources.google_calendar.search'
+description: Search for events in Google Calendar by keywords. Matches against event summary, description, location, and attendee names. Results include high-level metadata like title, time, location, and attendees.
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  - name: query
+    type: string
+    description: "Free text search terms to find events. Examples: 'team standup', 'budget review', 'John Smith', 'quarterly planning'"
+  - name: calendarId
+    type: string
+    required: false
+    default: primary
+    description: "Calendar ID to search. Use 'primary' for the user's primary calendar, or a specific calendar ID from the list_calendars tool."
+  - name: timeMin
+    type: string
+    required: false
+    description: "Lower bound (inclusive) for event start time as RFC3339 timestamp. Example: 2024-01-01T00:00:00Z"
+  - name: timeMax
+    type: string
+    required: false
+    description: "Upper bound (exclusive) for event start time as RFC3339 timestamp. Example: 2024-12-31T23:59:59Z"
+  - name: maxResults
+    type: number
+    required: false
+    description: Maximum number of events to return (default 50, max 2500)
+steps:
+  - name: search_events
+    type: google_calendar.searchEvents
+    connector-id: <%= stackConnectorId %>
+    with:
+      query: "${{inputs.query}}"
+      calendarId: "${{inputs.calendarId}}"
+      timeMin: "${{inputs.timeMin}}"
+      timeMax: "${{inputs.timeMax}}"
+      maxResults: ${{inputs.maxResults}}

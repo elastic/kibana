@@ -1,0 +1,23 @@
+version: '1'
+name: 'sources.google_calendar.get_event'
+description: Retrieve full details of a specific Google Calendar event by its ID. Returns comprehensive metadata including summary, description, location, start/end times, organizer, attendees with response status, recurrence info, conference/hangout links, and attachments.
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  - name: eventId
+    type: string
+    description: The ID of the event to retrieve. Use event IDs from search or list results.
+  - name: calendarId
+    type: string
+    required: false
+    default: primary
+    description: "Calendar ID containing the event. Use 'primary' for the user's primary calendar."
+steps:
+  - name: get_event
+    type: google_calendar.getEvent
+    connector-id: <%= stackConnectorId %>
+    with:
+      eventId: "${{inputs.eventId}}"
+      calendarId: "${{inputs.calendarId}}"
