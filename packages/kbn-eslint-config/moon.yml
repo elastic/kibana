@@ -25,6 +25,11 @@ tags:
   - private
 fileGroups:
   src:
+    - javascript.js
+    - jest.js
+    - react.js
+    - restricted_globals.js
+    - typescript.js
     - version_dependencies.txt
 tasks:
   extract-version-dependencies:

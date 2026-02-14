@@ -7,15 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fs from 'fs';
-
-export function emitPipeline(pipelineSteps: string[]) {
-  const pipelineStr = [...new Set(pipelineSteps)].join('\n');
-  console.warn('debug:', pipelineSteps);
-  console.log(pipelineStr);
-}
-
-export const getPipeline = (filename: string, removeSteps = true) => {
-  const str = fs.readFileSync(filename).toString();
-  return removeSteps ? str.replace(/^steps:/, '') : str;
-};
+require('@kbn/setup-node-env');
+require('../src/dev/eslint/run_eslint_through_moon');

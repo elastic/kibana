@@ -160,8 +160,9 @@ export async function pickTestGroupRunOrder() {
     );
   };
 
+  const JEST_CONFIG_GLOB = process.env.JEST_CONFIG_GLOB || '**/jest.config.js';
   const jestUnitConfigsWithEmpties = LIMIT_CONFIG_TYPE.includes('unit')
-    ? globby.sync(getJestConfigGlobs(['**/jest.config.js', '!**/__fixtures__/**']), {
+    ? globby.sync(getJestConfigGlobs([JEST_CONFIG_GLOB, '!**/__fixtures__/**']), {
         cwd: process.cwd(),
         absolute: false,
         ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],
@@ -172,8 +173,10 @@ export async function pickTestGroupRunOrder() {
     os.availableParallelism()
   );
 
+  const JEST_INTEGRATION_CONFIG_GLOB =
+    process.env.JEST_CONFIG_GLOB || '**/jest.integration.config.*js';
   const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
-    ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.*js', '!**/__fixtures__/**']), {
+    ? globby.sync(getJestConfigGlobs([JEST_INTEGRATION_CONFIG_GLOB, '!**/__fixtures__/**']), {
         cwd: process.cwd(),
         absolute: false,
         ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],
