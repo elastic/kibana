@@ -148,7 +148,7 @@ const componentStyles = {
 
       // Following guidelines for CSS-in-JS - styles for high granularity components should be assigned to a parent and targeting classes of repeating children
       '.unifiedDataTable__descriptionListTitle': {
-        marginInline: '0 0',
+        marginInline: `0 ${euiTheme.size.s}`,
         paddingInline: 0,
         background: 'transparent',
         fontWeight: euiTheme.font.weight.bold,
@@ -157,7 +157,7 @@ const componentStyles = {
       },
 
       '.unifiedDataTable__descriptionListDescription': {
-        marginInline: `${euiTheme.size.s} ${euiTheme.size.s}`,
+        marginInline: `0 ${euiTheme.size.s}`,
         paddingInline: 0,
         wordBreak: 'break-all',
         whiteSpace: 'normal',
