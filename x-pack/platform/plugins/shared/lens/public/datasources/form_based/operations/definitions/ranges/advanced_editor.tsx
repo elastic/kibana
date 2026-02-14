@@ -20,6 +20,8 @@ import {
   htmlIdGenerator,
   keys,
   useEuiTheme,
+  EuiFormPrepend,
+  EuiFormAppend,
 } from '@elastic/eui';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import {
@@ -117,9 +119,7 @@ export const RangePopover = ({
               }}
               append={
                 <EuiToolTip content={lteTooltipContent}>
-                  <EuiText tabIndex={0} size="s">
-                    {lteAppendLabel}
-                  </EuiText>
+                  <EuiFormAppend label={lteAppendLabel} tabIndex={0} />
                 </EuiToolTip>
               }
               onKeyDown={({ key }: React.KeyboardEvent<HTMLInputElement>) => {
@@ -157,9 +157,7 @@ export const RangePopover = ({
               }}
               prepend={
                 <EuiToolTip content={ltTooltipContent}>
-                  <EuiText tabIndex={0} size="s">
-                    {ltPrependLabel}
-                  </EuiText>
+                  <EuiFormPrepend label={ltPrependLabel} tabIndex={0} />
                 </EuiToolTip>
               }
               compressed

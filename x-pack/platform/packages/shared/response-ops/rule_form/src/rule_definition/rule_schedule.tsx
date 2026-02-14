@@ -124,7 +124,7 @@ export const RuleSchedule = () => {
         <EuiFlexItem grow={2}>
           <EuiFieldNumber
             fullWidth
-            prepend={[SCHEDULE_TITLE_PREFIX]}
+            prepend={SCHEDULE_TITLE_PREFIX}
             isInvalid={hasIntervalError}
             value={intervalNumber}
             name="interval"

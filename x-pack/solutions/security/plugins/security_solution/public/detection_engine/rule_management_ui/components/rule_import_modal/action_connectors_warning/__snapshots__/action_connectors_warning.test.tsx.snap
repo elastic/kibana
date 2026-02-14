@@ -59,7 +59,7 @@ exports[`ActionConnectorWarnings should render if 1 connectors were imported and
                 class="emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate"
+                  class="eui-textTruncate css-13ifi6d-m"
                 >
                   Go to connectors
                 </span>
@@ -128,7 +128,7 @@ exports[`ActionConnectorWarnings should render if 2 connectors were imported and
                 class="emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate"
+                  class="eui-textTruncate css-13ifi6d-m"
                 >
                   Connectors
                 </span>
@@ -197,7 +197,7 @@ exports[`ActionConnectorWarnings should render if 2 connectors were imported and
                 class="emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate"
+                  class="eui-textTruncate css-13ifi6d-m"
                 >
                   Go to connectors
                 </span>

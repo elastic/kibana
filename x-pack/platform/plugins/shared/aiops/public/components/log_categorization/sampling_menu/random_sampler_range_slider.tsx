@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexItem, EuiFormRow, EuiRange, EuiSpacer } from '@elastic/eui';
+import { EuiFlexItem, EuiFormAppend, EuiFormRow, EuiRange, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isDefined } from '@kbn/ml-is-defined';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -91,20 +91,22 @@ export const RandomSamplerRangeSlider = ({
           step={RANDOM_SAMPLER_STEP}
           data-test-subj="dvRandomSamplerProbabilityRange"
           append={
-            <EuiButton
-              data-test-subj="aiopsRandomSamplerRangeSliderApplyButton"
+            <EuiFormAppend
+              element="button"
+              label={
+                <FormattedMessage
+                  id="xpack.aiops.logCategorization.randomSamplerSettingsPopUp.randomSamplerPercentageApply"
+                  defaultMessage="Apply"
+                />
+              }
               disabled={isInvalidSamplingProbabilityInput}
               onClick={() => {
                 if (setSamplingProbability && isDefined(samplingProbabilityInput)) {
                   setSamplingProbability(samplingProbabilityInput);
                 }
               }}
-            >
-              <FormattedMessage
-                id="xpack.aiops.logCategorization.randomSamplerSettingsPopUp.randomSamplerPercentageApply"
-                defaultMessage="Apply"
-              />
-            </EuiButton>
+              data-test-subj="aiopsRandomSamplerRangeSliderApplyButton"
+            />
           }
         />
       </EuiFormRow>
