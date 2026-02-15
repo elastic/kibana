@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FileEntry, DirEntry } from './filesystem';
+import type { DirEntry, FilestoreVersionedEntry, FilestoreEntry } from './filesystem';
 
 /**
  * Main interface for the public API of the file store.
@@ -15,8 +15,9 @@ export interface IFileStore {
    * Read a file entry from the store.
    *
    * @param path path of the file to read.
+   * @param options.version optional version to read (defaults to latest).
    */
-  read(path: string): Promise<FileEntry | undefined>;
+  read(path: string, options?: { version?: number }): Promise<FilestoreEntry | undefined>;
   /**
    * List files and directories at the given path.
    *
@@ -29,7 +30,7 @@ export interface IFileStore {
    *
    * @param pattern glob pattern to match.
    */
-  glob(pattern: string): Promise<FileEntry[]>;
+  glob(pattern: string): Promise<FilestoreEntry[]>;
   /**
    * Search files with text matching the given pattern.
    *
@@ -43,6 +44,12 @@ export interface IFileStore {
     glob: string,
     options?: { context?: number; fixed?: boolean }
   ): Promise<GrepMatch[]>;
+  /**
+   * Get a raw file entry (all versions) from the store.
+   *
+   * @param path path of the file to get.
+   */
+  getEntry(path: string): Promise<FilestoreVersionedEntry | undefined>;
 }
 
 /**
@@ -55,13 +62,13 @@ export interface DirEntryWithChildren extends DirEntry {
   children?: LsEntry[];
 }
 
-export type LsEntry = DirEntryWithChildren | FileEntry;
+export type LsEntry = DirEntryWithChildren | FilestoreEntry;
 
 export interface GrepMatch {
   /**
    * Reference to the file entry that matched.
    */
-  entry: FileEntry;
+  entry: FilestoreEntry;
   /**
    * Line number of the match.
    */

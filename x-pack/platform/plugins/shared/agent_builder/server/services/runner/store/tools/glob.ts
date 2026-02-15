@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
 import { filestoreTools } from '@kbn/agent-builder-common/tools';
 import { createOtherResult } from '@kbn/agent-builder-server';
-import type { IFileStore, FileEntry } from '@kbn/agent-builder-server/runner/filestore';
+import type { IFileStore, FilestoreEntry } from '@kbn/agent-builder-server/runner/filestore';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 
 const schema = z.object({
@@ -38,9 +38,9 @@ export const globTool = ({
   };
 };
 
-type FileEntrySummary = Omit<FileEntry, 'type' | 'content'>;
+type FileEntrySummary = Pick<FilestoreEntry, 'path' | 'metadata'>;
 
-function toSummary(entry: FileEntry): FileEntrySummary {
+function toSummary(entry: FilestoreEntry): FileEntrySummary {
   return {
     path: entry.path,
     metadata: entry.metadata,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
+import type { FileEntry, FilestoreEntry } from '@kbn/agent-builder-server/runner/filestore';
 
 export interface SkillEntryMeta {
   skill_name: string;
@@ -14,6 +14,10 @@ export interface SkillEntryMeta {
 }
 
 export type SkillFileEntry<TData extends object = object> = FileEntry<TData, SkillEntryMeta>;
+export type SkillFilestoreEntry<TData extends object = object> = FilestoreEntry<
+  TData,
+  SkillEntryMeta
+>;
 
 export interface SkillReferencedContentEntryMeta {
   skill_id: string;

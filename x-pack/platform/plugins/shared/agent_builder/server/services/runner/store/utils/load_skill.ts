@@ -11,7 +11,7 @@ import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { pickTools } from '../../../agents/modes/utils/select_tools';
-import type { SkillFileEntry } from '../volumes/skills/types';
+import type { SkillFilestoreEntry } from '../volumes/skills/types';
 
 export async function loadSkillTools({
   skillsService,
@@ -21,8 +21,8 @@ export async function loadSkillTools({
   toolManager,
   logger,
 }: {
+  entry: SkillFilestoreEntry;
   skillsService: SkillsService;
-  entry: SkillFileEntry;
   toolProvider: ToolProvider;
   request: KibanaRequest<unknown, unknown, unknown, any>;
   toolManager: ToolManager;

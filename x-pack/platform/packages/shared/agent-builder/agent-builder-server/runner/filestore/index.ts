@@ -7,10 +7,16 @@
 
 export {
   FileEntryType,
+  type FilestoreVersionedEntry,
   type FileEntry,
   type FsEntry,
   type FileEntryContent,
+  type FilestoreVersionedEntryMetadata,
   type FileEntryMetadata,
+  type FileEntryVersion,
+  type FileEntryVersionMetadata,
+  type FilestoreEntry,
+  type FilestoreEntryMetadata,
   type DirEntry,
 } from './filesystem';
 export type { IFileStore, IToolFileStore, LsEntry, DirEntryWithChildren, GrepMatch } from './store';

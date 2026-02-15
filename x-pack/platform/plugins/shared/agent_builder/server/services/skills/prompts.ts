@@ -7,7 +7,7 @@
 
 import type { IFileStore } from '@kbn/agent-builder-server/runner';
 import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils';
-import { isSkillFileEntry } from '../runner/store/volumes/skills/utils';
+import { isSkillFilestoreEntry } from '../runner/store/volumes/skills/utils';
 
 export const getSkillsInstructions = async ({
   filesystem,
@@ -16,7 +16,7 @@ export const getSkillsInstructions = async ({
 }): Promise<string> => {
   const fileEntries = await filesystem.glob('/**/SKILL.md');
   const skillsFileEntries = fileEntries
-    .filter(isSkillFileEntry)
+    .filter(isSkillFilestoreEntry)
     .toSorted((a, b) => a.path.localeCompare(b.path));
 
   const skillPrompt =
@@ -39,11 +39,9 @@ export const getSkillsInstructions = async ({
               tagName: 'skill',
               attributes: {
                 path: skillFileEntry.path,
+                name: skillFileEntry.metadata.skill_name,
+                description: skillFileEntry.metadata.skill_description,
               },
-              children: [
-                { tagName: 'name', children: [skillFileEntry.metadata.skill_name] },
-                { tagName: 'description', children: [skillFileEntry.metadata.skill_description] },
-              ],
             })),
           }),
         ].join('\n');

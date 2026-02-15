@@ -5,39 +5,16 @@
  * 2.0.
  */
 
-import type {
-  IFileStore,
-  LsEntry,
-  DirEntryWithChildren,
-  FileEntry,
-} from '@kbn/agent-builder-server/runner/filestore';
-import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
+import type { IFileStore, LsEntry } from '@kbn/agent-builder-server/runner/filestore';
+import { createFilestoreEntry, createDirEntry } from '../../../../test_utils/filestore';
+import { createFileSystemStoreMock } from '../../../../test_utils/runner';
 import { buildFolderTree } from './folder_tree';
 
-const createMockFileEntry = (path: string): FileEntry => ({
-  path,
-  type: 'file',
-  metadata: {
-    type: FileEntryType.toolResult,
-    id: path,
-    token_count: 100,
-    readonly: true,
-  },
-  content: { raw: { data: 'test' } },
-});
-
-const createMockDirEntry = (path: string, children?: LsEntry[]): DirEntryWithChildren => ({
-  path,
-  type: 'dir',
-  children,
-});
-
-const createMockStore = (lsResult: LsEntry[]): IFileStore => ({
-  read: jest.fn(),
-  ls: jest.fn().mockResolvedValue(lsResult),
-  glob: jest.fn(),
-  grep: jest.fn(),
-});
+const createMockStore = (lsResult: LsEntry[]): IFileStore => {
+  const store = createFileSystemStoreMock();
+  store.ls.mockResolvedValue(lsResult);
+  return store;
+};
 
 describe('buildFolderTree', () => {
   it('should return just the root path when there are no entries', async () => {
@@ -50,9 +27,9 @@ describe('buildFolderTree', () => {
 
   it('should show files at root level (up to maxFilesPerFolder)', async () => {
     const store = createMockStore([
-      createMockFileEntry('/file1.txt'),
-      createMockFileEntry('/file2.txt'),
-      createMockFileEntry('/file3.txt'),
+      createFilestoreEntry('/file1.txt'),
+      createFilestoreEntry('/file2.txt'),
+      createFilestoreEntry('/file3.txt'),
     ]);
 
     const result = await buildFolderTree(store);
@@ -64,7 +41,7 @@ describe('buildFolderTree', () => {
   });
 
   it('should show single file by name', async () => {
-    const store = createMockStore([createMockFileEntry('/file1.txt')]);
+    const store = createMockStore([createFilestoreEntry('/file1.txt')]);
 
     const result = await buildFolderTree(store);
 
@@ -74,11 +51,11 @@ describe('buildFolderTree', () => {
 
   it('should show "[X more files]" when exceeding maxFilesPerFolder', async () => {
     const store = createMockStore([
-      createMockFileEntry('/file1.txt'),
-      createMockFileEntry('/file2.txt'),
-      createMockFileEntry('/file3.txt'),
-      createMockFileEntry('/file4.txt'),
-      createMockFileEntry('/file5.txt'),
+      createFilestoreEntry('/file1.txt'),
+      createFilestoreEntry('/file2.txt'),
+      createFilestoreEntry('/file3.txt'),
+      createFilestoreEntry('/file4.txt'),
+      createFilestoreEntry('/file5.txt'),
     ]);
 
     const result = await buildFolderTree(store);
@@ -92,10 +69,10 @@ describe('buildFolderTree', () => {
 
   it('should show "[1 more file]" singular when only one more file', async () => {
     const store = createMockStore([
-      createMockFileEntry('/aaa.txt'),
-      createMockFileEntry('/bbb.txt'),
-      createMockFileEntry('/ccc.txt'),
-      createMockFileEntry('/ddd.txt'),
+      createFilestoreEntry('/aaa.txt'),
+      createFilestoreEntry('/bbb.txt'),
+      createFilestoreEntry('/ccc.txt'),
+      createFilestoreEntry('/ddd.txt'),
     ]);
 
     const result = await buildFolderTree(store);
@@ -109,11 +86,11 @@ describe('buildFolderTree', () => {
 
   it('should respect custom maxFilesPerFolder option', async () => {
     const store = createMockStore([
-      createMockFileEntry('/file1.txt'),
-      createMockFileEntry('/file2.txt'),
-      createMockFileEntry('/file3.txt'),
-      createMockFileEntry('/file4.txt'),
-      createMockFileEntry('/file5.txt'),
+      createFilestoreEntry('/file1.txt'),
+      createFilestoreEntry('/file2.txt'),
+      createFilestoreEntry('/file3.txt'),
+      createFilestoreEntry('/file4.txt'),
+      createFilestoreEntry('/file5.txt'),
     ]);
 
     const result = await buildFolderTree(store, { maxFilesPerFolder: 1 });
@@ -125,9 +102,9 @@ describe('buildFolderTree', () => {
 
   it('should sort files alphabetically', async () => {
     const store = createMockStore([
-      createMockFileEntry('/zebra.txt'),
-      createMockFileEntry('/alpha.txt'),
-      createMockFileEntry('/beta.txt'),
+      createFilestoreEntry('/zebra.txt'),
+      createFilestoreEntry('/alpha.txt'),
+      createFilestoreEntry('/beta.txt'),
     ]);
 
     const result = await buildFolderTree(store);
@@ -140,9 +117,9 @@ describe('buildFolderTree', () => {
 
   it('should show directories sorted alphabetically', async () => {
     const store = createMockStore([
-      createMockDirEntry('/zebra', [createMockFileEntry('/zebra/file.txt')]),
-      createMockDirEntry('/alpha', [createMockFileEntry('/alpha/file.txt')]),
-      createMockDirEntry('/beta', [createMockFileEntry('/beta/file.txt')]),
+      createDirEntry('/zebra', [createFilestoreEntry('/zebra/file.txt')]),
+      createDirEntry('/alpha', [createFilestoreEntry('/alpha/file.txt')]),
+      createDirEntry('/beta', [createFilestoreEntry('/beta/file.txt')]),
     ]);
 
     const result = await buildFolderTree(store);
@@ -158,8 +135,8 @@ describe('buildFolderTree', () => {
 
   it('should show directories before files', async () => {
     const store = createMockStore([
-      createMockDirEntry('/folder', [createMockFileEntry('/folder/nested.txt')]),
-      createMockFileEntry('/root_file.txt'),
+      createDirEntry('/folder', [createFilestoreEntry('/folder/nested.txt')]),
+      createFilestoreEntry('/root_file.txt'),
     ]);
 
     const result = await buildFolderTree(store);
@@ -172,12 +149,12 @@ describe('buildFolderTree', () => {
 
   it('should handle nested directories', async () => {
     const store = createMockStore([
-      createMockDirEntry('/parent', [
-        createMockDirEntry('/parent/child', [
-          createMockFileEntry('/parent/child/deep.txt'),
-          createMockFileEntry('/parent/child/deep2.txt'),
+      createDirEntry('/parent', [
+        createDirEntry('/parent/child', [
+          createFilestoreEntry('/parent/child/deep.txt'),
+          createFilestoreEntry('/parent/child/deep2.txt'),
         ]),
-        createMockFileEntry('/parent/file.txt'),
+        createFilestoreEntry('/parent/file.txt'),
       ]),
     ]);
 
@@ -193,16 +170,16 @@ describe('buildFolderTree', () => {
 
   it('should handle complex nested structure', async () => {
     const store = createMockStore([
-      createMockDirEntry('/src', [
-        createMockDirEntry('/src/components', [
-          createMockFileEntry('/src/components/Button.tsx'),
-          createMockFileEntry('/src/components/Input.tsx'),
+      createDirEntry('/src', [
+        createDirEntry('/src/components', [
+          createFilestoreEntry('/src/components/Button.tsx'),
+          createFilestoreEntry('/src/components/Input.tsx'),
         ]),
-        createMockDirEntry('/src/utils', [createMockFileEntry('/src/utils/helpers.ts')]),
-        createMockFileEntry('/src/index.ts'),
+        createDirEntry('/src/utils', [createFilestoreEntry('/src/utils/helpers.ts')]),
+        createFilestoreEntry('/src/index.ts'),
       ]),
-      createMockDirEntry('/docs', [createMockFileEntry('/docs/README.md')]),
-      createMockFileEntry('/package.json'),
+      createDirEntry('/docs', [createFilestoreEntry('/docs/README.md')]),
+      createFilestoreEntry('/package.json'),
     ]);
 
     const result = await buildFolderTree(store);
@@ -222,9 +199,9 @@ describe('buildFolderTree', () => {
 
   it('should use custom starting path', async () => {
     const store = createMockStore([
-      createMockFileEntry('/custom/path/file.txt'),
-      createMockDirEntry('/custom/path/subdir', [
-        createMockFileEntry('/custom/path/subdir/nested.txt'),
+      createFilestoreEntry('/custom/path/file.txt'),
+      createDirEntry('/custom/path/subdir', [
+        createFilestoreEntry('/custom/path/subdir/nested.txt'),
       ]),
     ]);
 
@@ -255,9 +232,9 @@ describe('buildFolderTree', () => {
 
   it('should handle directories with only subdirectories (no files)', async () => {
     const store = createMockStore([
-      createMockDirEntry('/parent', [
-        createMockDirEntry('/parent/child1', [createMockFileEntry('/parent/child1/file.txt')]),
-        createMockDirEntry('/parent/child2', [createMockFileEntry('/parent/child2/file.txt')]),
+      createDirEntry('/parent', [
+        createDirEntry('/parent/child1', [createFilestoreEntry('/parent/child1/file.txt')]),
+        createDirEntry('/parent/child2', [createFilestoreEntry('/parent/child2/file.txt')]),
       ]),
     ]);
 
@@ -273,12 +250,12 @@ describe('buildFolderTree', () => {
 
   it('should show more files entry in nested directories', async () => {
     const store = createMockStore([
-      createMockDirEntry('/folder', [
-        createMockFileEntry('/folder/a.txt'),
-        createMockFileEntry('/folder/b.txt'),
-        createMockFileEntry('/folder/c.txt'),
-        createMockFileEntry('/folder/d.txt'),
-        createMockFileEntry('/folder/e.txt'),
+      createDirEntry('/folder', [
+        createFilestoreEntry('/folder/a.txt'),
+        createFilestoreEntry('/folder/b.txt'),
+        createFilestoreEntry('/folder/c.txt'),
+        createFilestoreEntry('/folder/d.txt'),
+        createFilestoreEntry('/folder/e.txt'),
       ]),
     ]);
 
@@ -294,8 +271,8 @@ describe('buildFolderTree', () => {
 
   it('should apply initialIndent to all lines', async () => {
     const store = createMockStore([
-      createMockDirEntry('/folder', [createMockFileEntry('/folder/file.txt')]),
-      createMockFileEntry('/root.txt'),
+      createDirEntry('/folder', [createFilestoreEntry('/folder/file.txt')]),
+      createFilestoreEntry('/root.txt'),
     ]);
 
     const result = await buildFolderTree(store, { initialIndent: 2 });
@@ -307,7 +284,7 @@ describe('buildFolderTree', () => {
   });
 
   it('should apply larger initialIndent correctly', async () => {
-    const store = createMockStore([createMockFileEntry('/file.txt')]);
+    const store = createMockStore([createFilestoreEntry('/file.txt')]);
 
     const result = await buildFolderTree(store, { initialIndent: 4 });
 
@@ -316,7 +293,7 @@ describe('buildFolderTree', () => {
   });
 
   it('should default initialIndent to 0', async () => {
-    const store = createMockStore([createMockFileEntry('/file.txt')]);
+    const store = createMockStore([createFilestoreEntry('/file.txt')]);
 
     const result = await buildFolderTree(store);
 

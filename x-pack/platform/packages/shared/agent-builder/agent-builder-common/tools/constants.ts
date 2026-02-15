@@ -43,6 +43,8 @@ export const filestoreTools = {
   ls: `${internalNamespaces.filestore}.ls`,
   grep: `${internalNamespaces.filestore}.grep`,
   glob: `${internalNamespaces.filestore}.glob`,
+  diff: `${internalNamespaces.filestore}.diff`,
+  history: `${internalNamespaces.filestore}.history`,
 };
 
 /**
