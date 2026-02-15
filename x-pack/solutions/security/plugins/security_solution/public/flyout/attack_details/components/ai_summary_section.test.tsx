@@ -8,10 +8,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-
+import { useExpandSection } from '@kbn/flyout-ui';
 import { AISummarySection } from './ai_summary_section';
 import { useOverviewTabData } from '../hooks/use_overview_tab_data';
-import { useExpandSection } from '../../shared/hooks/use_expand_section';
 
 jest.mock('@kbn/i18n-react', () => ({
   FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => <>{defaultMessage}</>,
@@ -21,11 +20,7 @@ jest.mock('../hooks/use_overview_tab_data', () => ({
   useOverviewTabData: jest.fn(),
 }));
 
-jest.mock('../../shared/hooks/use_expand_section', () => ({
-  useExpandSection: jest.fn(),
-}));
-
-jest.mock('../../shared/components/expandable_section', () => ({
+jest.mock('@kbn/flyout-ui', () => ({
   ExpandableSection: ({
     title,
     children,
@@ -40,6 +35,7 @@ jest.mock('../../shared/components/expandable_section', () => ({
       {children}
     </section>
   ),
+  useExpandSection: jest.fn(),
 }));
 
 jest.mock('../../../attack_discovery/pages/results/attack_discovery_markdown_formatter', () => ({

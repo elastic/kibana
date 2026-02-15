@@ -7,14 +7,12 @@
 
 import React, { memo, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-
+import { ExpandableSection, useExpandSection } from '@kbn/flyout-ui';
 import { EuiIcon, EuiPanel, EuiSpacer, EuiSwitch, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
 import { useOverviewTabData } from '../hooks/use_overview_tab_data';
-import { ExpandableSection } from '../../shared/components/expandable_section';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
-import { useExpandSection } from '../../shared/hooks/use_expand_section';
 
 const KEY = 'aisummary';
 

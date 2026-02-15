@@ -6,3 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+export { AlertDescription } from './src/document_details/components/alert_description';
+export { PREFIX } from './src/shared/test_ids';

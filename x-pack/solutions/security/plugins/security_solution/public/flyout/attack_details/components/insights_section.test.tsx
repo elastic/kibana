@@ -12,7 +12,7 @@ import { EuiProvider } from '@elastic/eui';
 import { AttackDetailsContext } from '../context';
 import { INSIGHTS_ENTITIES_TEST_ID } from '../constants/test_ids';
 import { InsightsSection } from './insights_section';
-import { useExpandSection } from '../../shared/hooks/use_expand_section';
+import { useExpandSection } from '@kbn/flyout-ui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 jest.mock('@kbn/i18n-react', () => ({
@@ -21,7 +21,14 @@ jest.mock('@kbn/i18n-react', () => ({
   ),
 }));
 
-jest.mock('../../shared/hooks/use_expand_section', () => ({
+jest.mock('@kbn/flyout-ui', () => ({
+  ExpandableSection: ({
+    children,
+    'data-test-subj': dataTestSubj,
+  }: {
+    children: React.ReactNode;
+    'data-test-subj'?: string;
+  }) => <section data-test-subj={dataTestSubj}>{children}</section>,
   useExpandSection: jest.fn(),
 }));
 
@@ -36,16 +43,6 @@ jest.mock('../hooks/use_attack_entities_counts', () => ({
     loading: false,
     error: false,
   }),
-}));
-
-jest.mock('../../shared/components/expandable_section', () => ({
-  ExpandableSection: ({
-    children,
-    'data-test-subj': dataTestSubj,
-  }: {
-    children: React.ReactNode;
-    'data-test-subj'?: string;
-  }) => <section data-test-subj={dataTestSubj}>{children}</section>,
 }));
 
 const mockOpenLeftPanel = jest.fn();
