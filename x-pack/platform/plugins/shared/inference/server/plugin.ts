@@ -11,13 +11,16 @@ import type {
   BoundInferenceClient,
   InferenceClient,
   AnonymizationSettings,
+  ChatCompleteAnonymizationTarget,
 } from '@kbn/inference-common';
 import { aiAnonymizationSettings } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { AnonymizationPolicyService } from '@kbn/anonymization-plugin/server';
 import { createClient as createInferenceClient, createChatModel } from './inference_client';
 import { RegexWorkerService } from './chat_complete/anonymization/regex_worker_service';
 import { registerRoutes } from './routes';
 import type { InferenceConfig } from './config';
+import { ensureReplacementsIndex } from './chat_complete/anonymization/replacements/replacements_index';
 import type {
   InferenceBoundClientCreateOptions,
   InferenceClientCreateOptions,
@@ -43,6 +46,7 @@ export class InferencePlugin
   private logger: Logger;
   private config: InferenceConfig;
   private regexWorker?: RegexWorkerService;
+  private anonymizationPolicyService?: AnonymizationPolicyService;
 
   constructor(context: PluginInitializerContext<InferenceConfig>) {
     this.logger = context.logger.get();
@@ -59,6 +63,9 @@ export class InferencePlugin
       router,
       coreSetup,
       logger: this.logger,
+      replacements: {
+        encryptionKey: this.config.replacements.encryptionKey,
+      },
     });
 
     return {};
@@ -69,6 +76,59 @@ export class InferencePlugin
       this.config.workers.anonymization,
       this.logger.get('regex_worker')
     );
+
+    // Ensure replacements system index exists
+    const internalEsClient = core.elasticsearch.client.asInternalUser;
+    ensureReplacementsIndex({ esClient: internalEsClient, logger: this.logger }).catch((err) => {
+      this.logger.error(`Failed to ensure anonymization replacements index: ${err.message}`);
+    });
+    // Wire up anonymization policy service if the anonymization plugin is available
+    if (pluginsStart.anonymization) {
+      this.anonymizationPolicyService = pluginsStart.anonymization.getPolicyService();
+      this.logger.info('Anonymization policy service available — field-based policy enabled');
+    } else {
+      this.logger.info(
+        'Anonymization plugin not available — falling back to ai:anonymizationSettings'
+      );
+    }
+
+    const getSaltForRequest = async (request: KibanaRequest): Promise<string | undefined> => {
+      if (!this.anonymizationPolicyService) {
+        return undefined;
+      }
+      try {
+        const basePath = core.http.basePath.get(request);
+        const spaceMatch = basePath.match(/^\/s\/([^/]+)/);
+        const namespace = spaceMatch?.[1] ?? 'default';
+        return await this.anonymizationPolicyService.getSalt(namespace);
+      } catch (err) {
+        this.logger.error(`Failed to get anonymization salt: ${err.message}`);
+        return undefined;
+      }
+    };
+
+    const getEffectivePolicyForRequest = async (
+      request: KibanaRequest,
+      target?: ChatCompleteAnonymizationTarget
+    ) => {
+      if (!this.anonymizationPolicyService || !target) {
+        return undefined;
+      }
+
+      try {
+        const basePath = core.http.basePath.get(request);
+        const spaceMatch = basePath.match(/^\/s\/([^/]+)/);
+        const namespace = spaceMatch?.[1] ?? 'default';
+
+        return await this.anonymizationPolicyService.resolveEffectivePolicy(namespace, {
+          type: target.targetType,
+          id: target.targetId,
+        });
+      } catch (err) {
+        this.logger.error(`Failed to resolve effective anonymization policy: ${err.message}`);
+        return undefined;
+      }
+    };
 
     const createAnonymizationRulesPromise = async (request: KibanaRequest) => {
       const soClient = core.savedObjects.getScopedClient(request);
@@ -90,6 +150,7 @@ export class InferencePlugin
 
     return {
       getClient: <T extends InferenceClientCreateOptions>(options: T) => {
+        const saltPromise = getSaltForRequest(options.request);
         return createInferenceClient({
           ...options,
           anonymizationRulesPromise: createAnonymizationRulesPromise(options.request),
@@ -97,10 +158,14 @@ export class InferencePlugin
           actions: pluginsStart.actions,
           logger: this.logger.get('client'),
           esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
+          // Salt is resolved lazily — undefined when anonymization plugin is unavailable
+          saltPromise,
+          resolveEffectivePolicy: (target) => getEffectivePolicyForRequest(options.request, target),
         }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
 
       getChatModel: async (options) => {
+        const saltPromise = getSaltForRequest(options.request);
         return createChatModel({
           request: options.request,
           connectorId: options.connectorId,
@@ -110,6 +175,8 @@ export class InferencePlugin
           anonymizationRulesPromise: createAnonymizationRulesPromise(options.request),
           regexWorker: this.regexWorker!,
           esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
+          saltPromise,
+          resolveEffectivePolicy: (target) => getEffectivePolicyForRequest(options.request, target),
           logger: this.logger,
         });
       },

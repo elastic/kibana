@@ -56,6 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(stats.stack_stats.kibana.plugins.spaces.disabledFeatures).to.eql({
         actions: 0,
+        anonymization: 0,
         observabilityAIAssistant: 0,
         savedObjectsTagging: 0,
         graph: 0,

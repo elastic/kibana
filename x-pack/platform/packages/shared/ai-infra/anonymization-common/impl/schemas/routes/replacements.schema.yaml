@@ -1,0 +1,152 @@
+openapi: 3.0.0
+info:
+  title: Anonymization Replacements API
+  version: '2026-02-10'
+paths:
+  /api/inference/anonymization/replacements/{id}:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: GetAnonymizationReplacements
+      summary: Resolve replacements by id
+      tags: [Anonymization API]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successfully retrieved replacements set.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ReplacementsSetResponse'
+        404:
+          description: Replacements set was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'
+
+  /api/inference/anonymization/replacements/_by_scope:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: GetAnonymizationReplacementsByScope
+      summary: Resolve replacements by scope
+      tags: [Anonymization API]
+      parameters:
+        - in: query
+          name: type
+          required: true
+          schema:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/ReplacementsScopeType'
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: profile_id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successfully retrieved replacements set.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ReplacementsSetResponse'
+        404:
+          description: Replacements set was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'
+
+  /api/inference/anonymization/replacements/_deanonymize:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: DeanonymizeWithReplacements
+      summary: Deanonymize text using replacements
+      tags: [Anonymization API]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../common_attributes.schema.yaml#/components/schemas/DeanonymizeRequest'
+      responses:
+        200:
+          description: Successfully deanonymized text.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/DeanonymizeResponse'
+        404:
+          description: Replacements set was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'
+
+  /api/inference/anonymization/replacements/_import:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: ImportAnonymizationReplacements
+      summary: Import and merge replacements
+      tags: [Anonymization API]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../common_attributes.schema.yaml#/components/schemas/ImportReplacementsRequest'
+      responses:
+        200:
+          description: Successfully imported replacements.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ImportReplacementsResponse'
+        404:
+          description: Source or destination replacements set not found.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'
+        409:
+          description: Import conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'

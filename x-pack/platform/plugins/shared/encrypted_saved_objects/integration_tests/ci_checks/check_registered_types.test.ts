@@ -20,7 +20,7 @@ import type { EncryptedSavedObjectsService } from '../../server/crypto';
 import * as EncryptedSavedObjectsModule from '../../server/saved_objects';
 
 // This will only change if new ESOs are introduced. This number should never get smaller.
-export const ESO_TYPES_COUNT = 19 as const;
+export const ESO_TYPES_COUNT = 20 as const;
 
 describe('checking changes on all registered encrypted SO types', () => {
   let esServer: TestElasticsearchUtils;
@@ -68,6 +68,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "action_task_params": "06aa563283bdcd5c07ec433a7d0b8425019ad11d75595ee1431691667ecd2cec",
         "ad_hoc_run_params": "6539367aa4ae8340c62f123c3457c6b8d7873c92de68651c70d41028dfe7ed32",
         "alert": "d961ff113e2b7995a49483b8937fcbdccfe425ac82b59a050931cd620b043ed1",
+        "anonymization-salt": "ba5e0f3482a6617469cdb903f44b320861bc61e824b37fd8ddc23502ea5a60fa",
         "api_key_pending_invalidation": "ce3641d95c31bcc2880a294f0123060dcc5026f0a493befdda74924a7ea5c4a0",
         "cloud-connect-api-key": "8c0ae7a780c411145ae4aaf7a70235672c9ccfb56d011c322da3c4eeb258f32d",
         "connector_token": "16ca2154c13c5ee3d3a45b55d4ea6cd33aeaceaef3dc229b002d25470bfc9b3b",
@@ -123,6 +124,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "alert|3",
         "alert|2",
         "alert|1",
+        "anonymization-salt|1",
         "api_key_pending_invalidation|1",
         "cloud-connect-api-key|1",
         "connector_token|1",

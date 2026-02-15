@@ -321,4 +321,111 @@ describe('anonymizeRecords', () => {
     expect(numCount).toBe(0);
     expect(urlCount).toBe(1);
   });
+
+  it('applies field policy anonymize before regex/NER rules', async () => {
+    const input = [{ 'kibana.alert.host.name': 'my-host-01' }];
+
+    const result = await anonymizeRecords({
+      input,
+      anonymizationRules: [],
+      regexWorker,
+      esClient: mockEsClient,
+      salt: 'test-salt',
+      effectivePolicy: {
+        'kibana.alert.host.name': {
+          action: 'anonymize',
+          entityClass: 'HOST_NAME',
+        },
+      },
+    });
+
+    expect(result.records[0]['kibana.alert.host.name']).not.toBe('my-host-01');
+    expect(result.records[0]['kibana.alert.host.name']).toContain('HOST_NAME_');
+    expect(result.anonymizations).toHaveLength(1);
+    expect(result.anonymizations[0].rule.type).toBe('FieldPolicy');
+    expect(result.anonymizations[0].entity.value).toBe('my-host-01');
+  });
+
+  it('applies deny field policy by blanking matched values', async () => {
+    const input = [{ 'kibana.alert.user.name': 'alice' }];
+
+    const result = await anonymizeRecords({
+      input,
+      anonymizationRules: [],
+      regexWorker,
+      esClient: mockEsClient,
+      effectivePolicy: {
+        'kibana.alert.user.name': {
+          action: 'deny',
+        },
+      },
+    });
+
+    expect(result.records[0]['kibana.alert.user.name']).toBe('');
+    expect(result.anonymizations).toHaveLength(0);
+  });
+
+  it('matches field policy by JSON pointer path and stripped root segment', async () => {
+    const input = [{ '/response/kibana.alert.host.name': 'host-1' }];
+
+    const result = await anonymizeRecords({
+      input,
+      anonymizationRules: [],
+      regexWorker,
+      esClient: mockEsClient,
+      salt: 'test-salt',
+      effectivePolicy: {
+        'kibana.alert.host.name': {
+          action: 'anonymize',
+          entityClass: 'HOST_NAME',
+        },
+      },
+    });
+
+    expect(result.records[0]['/response/kibana.alert.host.name']).toContain('HOST_NAME_');
+    expect(result.anonymizations).toHaveLength(1);
+  });
+
+  it('anonymizes only the targeted JSON pointer field for common values', async () => {
+    const input = [
+      {
+        '/content/kibana.alert.host.name': 'and',
+        '/content/unrelated_field': 'and',
+      },
+    ];
+
+    const result = await anonymizeRecords({
+      input,
+      anonymizationRules: [],
+      regexWorker,
+      esClient: mockEsClient,
+      salt: 'test-salt',
+      effectivePolicy: {
+        'kibana.alert.host.name': {
+          action: 'anonymize',
+          entityClass: 'HOST_NAME',
+        },
+      },
+    });
+
+    expect(result.records[0]['/content/kibana.alert.host.name']).toContain('HOST_NAME_');
+    expect(result.records[0]['/content/unrelated_field']).toBe('and');
+  });
+
+  it('ignores missing NER model errors and continues with other rules', async () => {
+    const input = [{ content: 'Contact me at jane@example.com' }];
+    mockEsClient.ml.inferTrainedModel.mockRejectedValueOnce(
+      new Error("The NER model 'model-1' was not found. Please download and deploy the model.")
+    );
+
+    const result = await anonymizeRecords({
+      input,
+      anonymizationRules: [regexRule, nerRule],
+      regexWorker,
+      esClient: mockEsClient,
+    });
+
+    expect(result.records[0].content).toContain('EMAIL_');
+    expect(result.anonymizations.some((entry) => entry.rule.type === 'RegExp')).toBe(true);
+  });
 });

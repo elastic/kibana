@@ -158,6 +158,27 @@ describe('anonymizeMessages', () => {
     expect(mockEsClient.ml.inferTrainedModel).not.toHaveBeenCalled();
   });
 
+  it('applies effective policy when legacy rules are disabled', async () => {
+    const messages: Message[] = [{ role: MessageRole.User, content: 'sensitive host value' }];
+
+    const result = await anonymizeMessages({
+      messages,
+      anonymizationRules: [disabledRule],
+      regexWorker,
+      esClient: mockEsClient,
+      effectivePolicy: {
+        '/content': {
+          action: 'anonymize',
+          entityClass: 'HOST_NAME',
+        },
+      },
+    });
+
+    expect((result.messages[0] as UserMessage).content).not.toBe('sensitive host value');
+    expect(result.anonymizations).toHaveLength(1);
+    expect(mockEsClient.ml.inferTrainedModel).not.toHaveBeenCalled();
+  });
+
   it('maintains ordering with multiple messages', async () => {
     const messages: Message[] = [
       { role: MessageRole.User, content: 'First' },

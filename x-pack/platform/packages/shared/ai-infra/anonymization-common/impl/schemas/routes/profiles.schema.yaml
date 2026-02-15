@@ -1,0 +1,215 @@
+openapi: 3.0.0
+info:
+  title: Anonymization Profiles API
+  version: '2026-02-10'
+paths:
+  /api/anonymization/profiles:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: CreateAnonymizationProfile
+      summary: Create anonymization profile
+      tags: [Anonymization API]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../common_attributes.schema.yaml#/components/schemas/CreateAnonymizationProfileRequest'
+      responses:
+        200:
+          description: Successfully created profile.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/AnonymizationProfile'
+        400:
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'
+        409:
+          description: A profile for this target already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'
+
+  /api/anonymization/profiles/_find:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: FindAnonymizationProfiles
+      summary: Find anonymization profiles
+      tags: [Anonymization API]
+      parameters:
+        - in: query
+          name: filter
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: target_type
+          required: false
+          schema:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/AnonymizationTargetType'
+        - in: query
+          name: target_id
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: sort_field
+          required: false
+          schema:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/ProfileSortField'
+        - in: query
+          name: sort_order
+          required: false
+          schema:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/SortOrder'
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - in: query
+          name: per_page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+      responses:
+        200:
+          description: Successfully found profiles.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/FindProfilesResponse'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'
+
+  /api/anonymization/profiles/{id}:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: GetAnonymizationProfile
+      summary: Get anonymization profile by id
+      tags: [Anonymization API]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successfully retrieved profile.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/AnonymizationProfile'
+        404:
+          description: Profile was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'
+    put:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: UpdateAnonymizationProfile
+      summary: Update anonymization profile
+      tags: [Anonymization API]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../common_attributes.schema.yaml#/components/schemas/UpdateAnonymizationProfileRequest'
+      responses:
+        200:
+          description: Successfully updated profile.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/AnonymizationProfile'
+        400:
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'
+        404:
+          description: Profile was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'
+    delete:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: DeleteAnonymizationProfile
+      summary: Delete anonymization profile
+      tags: [Anonymization API]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successfully deleted profile.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [deleted]
+                properties:
+                  deleted:
+                    type: boolean
+                    example: true
+        404:
+          description: Profile was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'
+        500:
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '../common_attributes.schema.yaml#/components/schemas/ErrorResponse'

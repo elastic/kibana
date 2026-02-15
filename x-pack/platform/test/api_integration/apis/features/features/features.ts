@@ -100,6 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
             'dataQuality',
             'dev_tools',
             'actions',
+            'anonymization',
             'agentBuilder',
             'enterpriseSearch',
             'enterpriseSearchApplications',

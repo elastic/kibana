@@ -948,6 +948,7 @@ x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-act
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
+x-pack/platform/packages/shared/ai-infra/anonymization-common @elastic/workchat-eng @elastic/security-generative-ai @elastic/security-threat-hunting
 x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/inference-langchain @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks @elastic/appex-ai-infra
@@ -1075,6 +1076,7 @@ x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/plugins/shared/alerting @elastic/response-ops
+x-pack/platform/plugins/shared/anonymization @elastic/workchat-eng @elastic/security-generative-ai @elastic/security-threat-hunting
 x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-presentation-team
 x-pack/platform/plugins/shared/automatic_import @elastic/integration-experience
 x-pack/platform/plugins/shared/automatic_import_v2 @elastic/integration-experience
@@ -1811,7 +1813,7 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 /x-pack/solutions/observability/test/serverless/functional/test_suites @elastic/observability-ui
 /src/platform/test/functional/apps/discover/observability @elastic/observability-ui
 
-# obs-exploration-team 
+# obs-exploration-team
 /x-pack/solutions/observability/test/serverless/functional/test_suites/discover/logs/ @elastic/obs-exploration-team
 /x-pack/solutions/observability/test/serverless/functional/utils/ @elastic/obs-exploration-team
 /src/platform/test/functional/apps/discover/observability/logs/ @elastic/obs-exploration-team
@@ -3209,6 +3211,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/platform/test/examples/state_sync/*.ts @elastic/appex-sharedux
 /src/platform/test/examples/error_boundary/index.ts @elastic/appex-sharedux
 /src/platform/test/examples/content_management/*.ts @elastic/appex-sharedux
+/x-pack/platform/test/api_integration/apis/anonymization @elastic/security-generative-ai @elastic/workchat-eng @elastic/security-threat-hunting
 /x-pack/platform/test/api_integration/apis/content_management @elastic/appex-sharedux
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/intercepts @elastic/appex-sharedux
 /x-pack/platform/test/accessibility/apps/group3/tags.ts @elastic/appex-sharedux
