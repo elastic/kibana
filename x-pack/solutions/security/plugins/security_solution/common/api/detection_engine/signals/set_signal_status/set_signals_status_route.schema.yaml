@@ -124,19 +124,6 @@ paths:
 
 components:
   schemas:
-    ReasonEnum:
-      type: string
-      enum:
-        [
-          'false_positive',
-          'duplicate',
-          'true_positive',
-          'benign_positive',
-          'automated_closure',
-          'other'
-        ]
-      description: 'The reason for closing the alerts'
-
     SetAlertsStatusByIdsBase:
       type: object
       properties:
@@ -167,7 +154,10 @@ components:
           type: string
           enum: [closed]
         reason:
-          $ref: '#/components/schemas/ReasonEnum'
+          type: string
+          description: 'The reason for closing the alerts. Can be one of following default reasons:
+          [false_positive, duplicate, true_positive, benign_positive, automated_closure, other]
+          or a custom reason provided by the user through the advanced settings.'
       required: [signal_ids, status]
 
     SetAlertsStatusByIds:
@@ -211,7 +201,10 @@ components:
             - proceed
           default: abort
         reason:
-          $ref: '#/components/schemas/ReasonEnum'
+          type: string
+          description: 'The reason for closing the alerts. Can be one of following default reasons:
+          [false_positive, duplicate, true_positive, benign_positive, automated_closure, other]
+          or a custom reason provided by the user through the advanced settings.'
       required: [query, status]
 
     SetAlertsStatusByQuery:

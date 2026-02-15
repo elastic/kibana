@@ -5,23 +5,32 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButton, EuiSelectable } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { DEFAULT_ALERT_CLOSE_REASONS_KEY } from '../../../../../common/constants';
 import * as i18n from './translations';
-import { AlertClosingReasonValues } from '../../../../../common/types';
+import { AlertDefaultClosingReasonValues } from '../../../../../common/types';
 import type { AlertClosingReason } from '../../../../../common/types';
 
-export const closingReasons: EuiSelectableOption<{
+export const defaultClosingReasons: EuiSelectableOption<{
   key?: AlertClosingReason;
 }>[] = [
   { label: i18n.CLOSING_REASON_CLOSE_WITHOUT_REASON, key: undefined },
 
-  { label: i18n.CLOSING_REASON_DUPLICATE, key: AlertClosingReasonValues.duplicate },
-  { label: i18n.CLOSING_REASON_FALSE_POSITIVE, key: AlertClosingReasonValues.false_positive },
-  { label: i18n.CLOSING_REASON_TRUE_POSITIVE, key: AlertClosingReasonValues.true_positive },
-  { label: i18n.CLOSING_REASON_BENIGN_POSITIVE, key: AlertClosingReasonValues.benign_positive },
-  { label: i18n.CLOSING_REASON_OTHER, key: AlertClosingReasonValues.other },
+  { label: i18n.CLOSING_REASON_DUPLICATE, key: AlertDefaultClosingReasonValues.duplicate },
+  {
+    label: i18n.CLOSING_REASON_FALSE_POSITIVE,
+    key: AlertDefaultClosingReasonValues.false_positive,
+  },
+  { label: i18n.CLOSING_REASON_TRUE_POSITIVE, key: AlertDefaultClosingReasonValues.true_positive },
+  {
+    label: i18n.CLOSING_REASON_BENIGN_POSITIVE,
+    key: AlertDefaultClosingReasonValues.benign_positive,
+  },
+  { label: i18n.CLOSING_REASON_OTHER, key: AlertDefaultClosingReasonValues.other },
 ];
 
 interface BulkAlertClosingReasonComponentProps {
@@ -41,7 +50,10 @@ interface BulkAlertClosingReasonComponentProps {
 const BulkAlertClosingReasonComponent: React.FC<BulkAlertClosingReasonComponentProps> = ({
   onSubmit,
 }) => {
-  const [options, setOptions] = useState(closingReasons);
+  const [options, setOptions] = useState(defaultClosingReasons);
+  const {
+    services: { uiSettings },
+  } = useKibana<{ uiSettings: IUiSettingsClient }>();
 
   const selectedOption = useMemo(() => options.find((option) => option.checked), [options]);
 
@@ -50,6 +62,19 @@ const BulkAlertClosingReasonComponent: React.FC<BulkAlertClosingReasonComponentP
 
     onSubmit(selectedOption.key);
   }, [onSubmit, selectedOption]);
+
+  useEffect(() => {
+    const customClosingReasons = uiSettings.get<string[]>(DEFAULT_ALERT_CLOSE_REASONS_KEY);
+    setOptions([
+      ...defaultClosingReasons,
+      ...customClosingReasons.map((reason) => {
+        return {
+          label: reason,
+          key: reason,
+        };
+      }),
+    ]);
+  }, [uiSettings]);
 
   return (
     <>

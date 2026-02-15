@@ -4516,7 +4516,12 @@ components:
       type: object
       properties:
         reason:
-          $ref: '#/components/schemas/ReasonEnum'
+          description: >-
+            The reason for closing the alerts. Can be one of following default
+            reasons: [false_positive, duplicate, true_positive, benign_positive,
+            automated_closure, other] or a custom reason provided by the user
+            through the advanced settings.
+          type: string
         signal_ids:
           description: >-
             List of alert ids. Use field `_id` on alert document or
@@ -4547,7 +4552,12 @@ components:
           additionalProperties: true
           type: object
         reason:
-          $ref: '#/components/schemas/ReasonEnum'
+          description: >-
+            The reason for closing the alerts. Can be one of following default
+            reasons: [false_positive, duplicate, true_positive, benign_positive,
+            automated_closure, other] or a custom reason provided by the user
+            through the advanced settings.
+          type: string
         status:
           enum:
             - closed
@@ -7589,16 +7599,6 @@ components:
             - risk_score
             - severity
         - $ref: '#/components/schemas/QueryRuleCreateFields'
-    ReasonEnum:
-      description: The reason for closing the alerts
-      enum:
-        - false_positive
-        - duplicate
-        - true_positive
-        - benign_positive
-        - automated_closure
-        - other
-      type: string
     RelatedIntegration:
       description: >
         Related integration is a potential dependency of a rule. It's assumed
