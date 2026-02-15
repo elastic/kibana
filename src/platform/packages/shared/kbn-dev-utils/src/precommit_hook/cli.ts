@@ -15,33 +15,69 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { SCRIPT_SOURCE } from './script_source';
+import { PREPUSH_SCRIPT_SOURCE } from '../prepush_hook/script_source';
 import { getGitDir, isCorrectGitVersionInstalled } from './git_utils';
 
 const chmodAsync = promisify(chmod);
 const writeFileAsync = promisify(writeFile);
 
+async function installHook(
+  gitDir: string,
+  hookName: string,
+  scriptSource: string,
+  log: any
+): Promise<void> {
+  const installPath = Path.resolve(REPO_ROOT, gitDir, `hooks/${hookName}`);
+
+  log.info(`Registering Kibana ${hookName} git hook...`);
+  await writeFileAsync(installPath, scriptSource);
+  await chmodAsync(installPath, 0o755);
+  log.success(`Kibana ${hookName} git hook was installed successfully.`);
+}
+
 run(
-  async ({ log }) => {
+  async ({ log, flagsReader }) => {
     try {
       if (!(await isCorrectGitVersionInstalled())) {
         throw createFailError(
-          `We could not detect a git version in the required range. Please install a git version >= 2.5. Skipping Kibana pre-commit git hook installation.`
+          `We could not detect a git version in the required range. Please install a git version >= 2.5. Skipping Kibana git hook installation.`
         );
       }
 
       const gitDir = await getGitDir();
-      const installPath = Path.resolve(REPO_ROOT, gitDir, 'hooks/pre-commit');
 
-      log.info(`Registering Kibana pre-commit git hook...`);
-      await writeFileAsync(installPath, SCRIPT_SOURCE);
-      await chmodAsync(installPath, 0o755);
-      log.success(`Kibana pre-commit git hook was installed successfully.`);
+      const installPrecommit = flagsReader.boolean('precommit');
+      const installPrepush = flagsReader.boolean('prepush');
+
+      // If no specific hook is requested, install pre-commit by default (backward compatible)
+      const installAll = !installPrecommit && !installPrepush;
+
+      if (installAll || installPrecommit) {
+        await installHook(gitDir, 'pre-commit', SCRIPT_SOURCE, log);
+      }
+
+      if (installAll || installPrepush) {
+        await installHook(gitDir, 'pre-push', PREPUSH_SCRIPT_SOURCE, log);
+      }
     } catch (e) {
-      log.error(`Kibana pre-commit git hook was not installed as an error occur.`);
+      log.error(`Kibana git hook was not installed as an error occurred.`);
       throw e;
     }
   },
   {
     description: 'Register git hooks in the local repo',
+    flags: {
+      boolean: ['precommit', 'prepush'],
+      default: {
+        precommit: false,
+        prepush: false,
+      },
+      help: `
+        --precommit        Install only the pre-commit hook
+        --prepush          Install only the pre-push hook
+        
+        If no flags are specified, both hooks are installed.
+      `,
+    },
   }
 );

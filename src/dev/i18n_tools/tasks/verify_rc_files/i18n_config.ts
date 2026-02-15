@@ -85,3 +85,43 @@ export function filterConfigPaths(inputPaths: string[], config: I18nConfig) {
 
   return [...pathsForExtraction];
 }
+
+/**
+ * Filters config.paths to only include namespaces whose paths overlap with the input paths.
+ * This is used to scope i18n validation to specific directories.
+ * @param inputPaths List of paths to filter by.
+ * @param config I18n config instance.
+ * @returns A new config with filtered paths.
+ */
+export function filterConfigByPaths(inputPaths: string[], config: I18nConfig): I18nConfig {
+  const filteredPaths: Record<string, string[]> = {};
+
+  for (const [namespace, namespacePaths] of Object.entries(config.paths)) {
+    const paths = Array.isArray(namespacePaths) ? namespacePaths : [namespacePaths];
+
+    // Check if any of the namespace's paths overlap with any input path
+    const hasOverlap = paths.some((nsPath) =>
+      inputPaths.some((inputPath) => {
+        const normalizedInput = normalizePath(inputPath);
+        const normalizedNsPath = normalizePath(nsPath);
+        // Match if:
+        // 1. Input path is within or equal to namespace path
+        // 2. Namespace path is within input path
+        return (
+          normalizedInput.startsWith(`${normalizedNsPath}/`) ||
+          normalizedNsPath.startsWith(`${normalizedInput}/`) ||
+          normalizedInput === normalizedNsPath
+        );
+      })
+    );
+
+    if (hasOverlap) {
+      filteredPaths[namespace] = paths;
+    }
+  }
+
+  return {
+    ...config,
+    paths: filteredPaths,
+  };
+}

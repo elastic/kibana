@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { mergeConfigs, checkConfigs } from './verify_rc_files';
+export { mergeConfigs, checkConfigs, filterConfigByPaths } from './verify_rc_files';
 
 export { validateTranslationsTask } from './validate_translations';
 export { checkUntrackedNamespacesTask } from './check_untracked_namespaces';
