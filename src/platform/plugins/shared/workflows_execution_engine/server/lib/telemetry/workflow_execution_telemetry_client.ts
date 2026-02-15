@@ -10,7 +10,6 @@
 import type {
   AnalyticsServiceSetup,
   AnalyticsServiceStart,
-  EventTypeOpts,
   Logger,
 } from '@kbn/core/server';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
@@ -23,6 +22,7 @@ import {
   type WorkflowExecutionCancelledParams,
   type WorkflowExecutionCompletedParams,
   type WorkflowExecutionFailedParams,
+  type WorkflowExecutionTelemetryEventsMap,
   WorkflowExecutionTelemetryEventTypes,
 } from './events/workflows_execution/types';
 import { extractExecutionMetadata } from './utils/extract_execution_metadata';
@@ -54,12 +54,15 @@ export class WorkflowExecutionTelemetryClient {
   /**
    * Reports a telemetry event with error handling.
    */
-  protected reportEvent<T extends object>(eventTypeOpts: EventTypeOpts<T>, data: T): void {
+  protected reportEvent<T extends WorkflowExecutionTelemetryEventTypes>(
+    eventType: T,
+    data: WorkflowExecutionTelemetryEventsMap[T]
+  ): void {
     try {
-      this.telemetry.reportEvent(eventTypeOpts.eventType, data);
+      this.telemetry.reportEvent(eventType, data);
     } catch (e) {
       const error = e instanceof Error ? e : new Error(String(e));
-      this.logger.error(`Error reporting event ${eventTypeOpts.eventType}: ${error.message}`);
+      this.logger.error(`Error reporting event ${eventType}: ${error.message}`);
     }
   }
 
@@ -167,10 +170,7 @@ export class WorkflowExecutionTelemetryClient {
     };
 
     this.reportEvent(
-      {
-        eventType: WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCompleted,
-        schema: {} as EventTypeOpts<WorkflowExecutionCompletedParams>['schema'],
-      },
+      WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCompleted,
       eventData
     );
   }
@@ -255,10 +255,7 @@ export class WorkflowExecutionTelemetryClient {
     };
 
     this.reportEvent(
-      {
-        eventType: WorkflowExecutionTelemetryEventTypes.WorkflowExecutionFailed,
-        schema: {} as EventTypeOpts<WorkflowExecutionFailedParams>['schema'],
-      },
+      WorkflowExecutionTelemetryEventTypes.WorkflowExecutionFailed,
       eventData
     );
   }
@@ -335,10 +332,7 @@ export class WorkflowExecutionTelemetryClient {
     };
 
     this.reportEvent(
-      {
-        eventType: WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCancelled,
-        schema: {} as EventTypeOpts<WorkflowExecutionCancelledParams>['schema'],
-      },
+      WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCancelled,
       eventData
     );
   }

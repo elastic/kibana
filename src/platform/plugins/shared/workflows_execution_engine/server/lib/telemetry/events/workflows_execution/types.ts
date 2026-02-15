@@ -446,3 +446,13 @@ export type WorkflowExecutionTelemetryEventParams =
   | WorkflowExecutionCompletedParams
   | WorkflowExecutionFailedParams
   | WorkflowExecutionCancelledParams;
+
+/**
+ * Maps each workflow execution event type to its corresponding params type.
+ * Used to provide type-safe event reporting without needing schemas at call sites.
+ */
+export interface WorkflowExecutionTelemetryEventsMap {
+  [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCompleted]: WorkflowExecutionCompletedParams;
+  [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionFailed]: WorkflowExecutionFailedParams;
+  [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCancelled]: WorkflowExecutionCancelledParams;
+}
