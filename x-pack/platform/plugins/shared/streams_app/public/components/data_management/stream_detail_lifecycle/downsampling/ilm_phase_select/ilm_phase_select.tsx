@@ -36,6 +36,7 @@ export interface IlmPhaseSelectProps {
   renderButton: (props: IlmPhaseSelectRenderButtonProps) => React.ReactElement;
   selectedPhases: IlmPhaseSelectOption[];
   onSelect: (phase: IlmPhaseSelectOption) => void;
+  excludedPhases?: IlmPhaseSelectOption[];
   disabled?: boolean;
   initialIsOpen?: boolean;
   anchorPosition?: PopoverAnchorPosition;
@@ -64,6 +65,7 @@ export const IlmPhaseSelect = ({
   renderButton,
   selectedPhases,
   onSelect,
+  excludedPhases = [],
   disabled = false,
   initialIsOpen = false,
   anchorPosition = 'downCenter',
@@ -75,8 +77,11 @@ export const IlmPhaseSelect = ({
   const { ilmPhases } = useIlmPhasesColorAndDescription();
 
   const availableOptions = useMemo(
-    () => OPTIONS.filter((option) => !selectedPhases.includes(option)),
-    [selectedPhases]
+    () =>
+      OPTIONS.filter(
+        (option) => !selectedPhases.includes(option) && !excludedPhases.includes(option)
+      ),
+    [excludedPhases, selectedPhases]
   );
   const isDisabled = disabled || availableOptions.length === 0;
 

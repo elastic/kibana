@@ -66,6 +66,16 @@ const timeUnitsLabels = {
   },
 };
 
+export type StreamsTimeUnit = keyof typeof timeUnitsLabels;
+
+export const getTimeUnitLabel = (
+  unit: StreamsTimeUnit,
+  { plural = true }: { plural?: boolean } = {}
+): string => {
+  const labels = timeUnitsLabels[unit];
+  return plural ? labels.plural : labels.singular;
+};
+
 export const splitSizeAndUnits = (field: string): { size: string; unit: string } => {
   let size = '';
   let unit = '';
