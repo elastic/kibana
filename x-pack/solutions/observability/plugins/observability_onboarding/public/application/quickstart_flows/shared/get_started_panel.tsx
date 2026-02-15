@@ -74,7 +74,7 @@ export function GetStartedPanel({
 
   return (
     <>
-      <EuiFlexGroup alignItems="center" responsive={false}>
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           {isLoading ? (
             <EuiSkeletonRectangle width={162} height={117} />
