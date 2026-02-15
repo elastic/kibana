@@ -58,16 +58,16 @@ export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableP
       openAlertsPageWithFilters([
         {
           title: i18n.OPEN_IN_ALERTS_TITLE_HOSTNAME,
-          selectedOptions: [hostName],
-          fieldName: 'host.name',
+          selected_options: [hostName],
+          field_name: 'host.name',
         },
 
         ...(severity
           ? [
               {
                 title: i18n.OPEN_IN_ALERTS_TITLE_SEVERITY,
-                selectedOptions: [severity],
-                fieldName: ALERT_SEVERITY,
+                selected_options: [severity],
+                field_name: ALERT_SEVERITY,
               },
             ]
           : []),

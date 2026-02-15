@@ -74,7 +74,7 @@ const TestComponent: FC<Partial<FilterGroupProps>> = (props) => {
       defaultControls={[
         ...DEFAULT_CONTROLS,
         {
-          fieldName: 'host.name',
+          field_name: 'host.name',
           title: 'Host',
         },
       ]}
@@ -233,7 +233,7 @@ describe(' Filter Group Component ', () => {
 
       fireEvent.click(screen.getByTestId(TEST_IDS.ADD_CONTROL));
 
-      expect(returnValueWatcher.mock.calls[0][0].displaySettings).toBe(undefined);
+      expect(returnValueWatcher.mock.calls[0][0].display_settings).toBe(undefined);
     });
 
     it('should call controlGroupTransform which returns object WITH correct placeholder value when type = OPTION_LIST_CONTROL on opening Flyout', async () => {
@@ -268,7 +268,7 @@ describe(' Filter Group Component ', () => {
 
       fireEvent.click(screen.getByTestId(TEST_IDS.ADD_CONTROL));
 
-      expect(returnValueWatcher.mock.calls[0][0].displaySettings).toMatchObject(
+      expect(returnValueWatcher.mock.calls[0][0].display_settings).toMatchObject(
         expect.objectContaining({ placeholder: '' })
       );
     });
@@ -537,7 +537,7 @@ describe(' Filter Group Component ', () => {
         <TestComponent
           controlsUrlState={[
             {
-              fieldName: 'abc',
+              field_name: 'abc',
             },
           ]}
         />
@@ -556,7 +556,7 @@ describe(' Filter Group Component ', () => {
         <TestComponent
           controlsUrlState={[
             {
-              fieldName: 'abc',
+              field_name: 'abc',
             },
           ]}
         />
@@ -569,7 +569,7 @@ describe(' Filter Group Component ', () => {
       });
       expect(addOptionsListControlMock.mock.calls[1][1]).toMatchObject({
         ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
-        fieldName: 'abc',
+        field_name: 'abc',
       });
       await waitFor(() => {
         expect(screen.getByTestId(TEST_IDS.FILTERS_CHANGED_BANNER)).toBeVisible();
@@ -583,7 +583,7 @@ describe(' Filter Group Component ', () => {
         <TestComponent
           controlsUrlState={
             {
-              fieldName: 'abc',
+              field_name: 'abc',
             } as any
           }
         />
@@ -678,7 +678,7 @@ describe(' Filter Group Component ', () => {
           ...initialInputData.initialChildControlState,
           '2': {
             ...initialInputData.initialChildControlState['2'],
-            existsSelected: true,
+            exists_selected: true,
             exclude: false,
           },
         },
@@ -692,7 +692,7 @@ describe(' Filter Group Component ', () => {
         expect(addOptionsListControlMock.mock.calls.length).toBe(5);
         expect(addOptionsListControlMock.mock.calls[2][1]).toMatchObject(
           expect.objectContaining({
-            existsSelected: true,
+            exists_selected: true,
             exclude: false,
           })
         );
@@ -706,7 +706,7 @@ describe(' Filter Group Component ', () => {
           ...initialInputData.initialChildControlState,
           '2': {
             ...initialInputData.initialChildControlState['2'],
-            existsSelected: true,
+            exists_selected: true,
             exclude: true,
           },
         },
@@ -720,7 +720,7 @@ describe(' Filter Group Component ', () => {
         expect(addOptionsListControlMock.mock.calls.length).toBe(5);
         expect(addOptionsListControlMock.mock.calls[2][1]).toMatchObject(
           expect.objectContaining({
-            existsSelected: true,
+            exists_selected: true,
             exclude: true,
           })
         );
@@ -734,7 +734,7 @@ describe(' Filter Group Component ', () => {
           ...initialInputData.initialChildControlState,
           '2': {
             ...initialInputData.initialChildControlState['2'],
-            selectedOptions: ['abc'],
+            selected_options: ['abc'],
           },
         },
       };
@@ -747,7 +747,7 @@ describe(' Filter Group Component ', () => {
         expect(addOptionsListControlMock.mock.calls.length).toBe(5);
         expect(addOptionsListControlMock.mock.calls[2][1]).toMatchObject(
           expect.objectContaining({
-            selectedOptions: ['abc'],
+            selected_options: ['abc'],
           })
         );
       });

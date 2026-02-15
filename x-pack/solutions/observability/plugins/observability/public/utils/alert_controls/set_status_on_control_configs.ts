@@ -19,12 +19,12 @@ export function setStatusOnControlConfigs(
   const updateControlConfigs = controlConfigs
     ? [...controlConfigs]
     : (DEFAULT_CONTROLS as Writable<FilterControlConfig>[]);
-  const statusControl = updateControlConfigs.find((control) => control.fieldName === ALERT_STATUS);
+  const statusControl = updateControlConfigs.find((control) => control.field_name === ALERT_STATUS);
   if (statusControl) {
     if (status === ALERT_STATUS_ALL) {
-      statusControl.selectedOptions = [];
+      statusControl.selected_options = [];
     } else {
-      statusControl.selectedOptions = [status];
+      statusControl.selected_options = [status];
     }
   }
 

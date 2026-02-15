@@ -246,9 +246,9 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
 
                   if (!panels) {
                     builder.addOptionsListControl(initialState, {
-                      dataViewId: dataView?.id!,
+                      data_view_id: dataView?.id!,
                       title: fieldToFilterOn.name.split('.')[0],
-                      fieldName: fieldToFilterOn.name,
+                      field_name: fieldToFilterOn.name,
                       grow: false,
                       width: 'small',
                     });

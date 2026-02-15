@@ -266,7 +266,7 @@ export const OptionsListPopoverActionBar = ({
                   />
                 </EuiToolTip>
               </EuiFlexItem>
-              {!displaySettings.hideSort && (
+              {!displaySettings.hide_sort && (
                 <EuiFlexItem grow={false}>
                   <OptionsListPopoverSortingButton showOnlySelected={showOnlySelected} />
                 </EuiFlexItem>

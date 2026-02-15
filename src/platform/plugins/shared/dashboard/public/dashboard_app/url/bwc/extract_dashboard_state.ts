@@ -9,7 +9,7 @@
 
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { DashboardCreationOptions } from '../../../dashboard_api/types';
-import { extractControlGroupState } from './extract_control_group_state';
+import { extractPinnedPanelsState } from './extract_pinned_panels_state';
 import { extractOptions } from './extract_options';
 import { extractPanelsState } from './extract_panels_state';
 import { extractSearchState } from './extract_search_state';
@@ -21,7 +21,7 @@ export function extractDashboardState(
   if (state && typeof state === 'object') {
     const stateAsObject = state as { [key: string]: unknown };
 
-    const { pinned_panels, autoApplyFilters } = extractControlGroupState(stateAsObject);
+    const { pinned_panels, autoApplyFilters } = extractPinnedPanelsState(stateAsObject);
 
     if (pinned_panels) dashboardState.pinned_panels = pinned_panels;
     if (

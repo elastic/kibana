@@ -40,8 +40,8 @@ export const controlGroupStateBuilder = {
     controlId?: string
   ) => {
     const type = await getCompatibleControlType(
-      controlState.dataViewId,
-      controlState.fieldName,
+      controlState.data_view_id,
+      controlState.field_name,
       uiActionsService
     );
     if (!type)

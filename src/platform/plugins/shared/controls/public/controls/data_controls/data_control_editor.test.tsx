@@ -106,7 +106,7 @@ describe('Data control editor', () => {
           onSave={() => {}}
           parentApi={dashboardApi}
           initialState={{
-            dataViewId: mockDataView.id,
+            data_view_id: mockDataView.id,
             ...initialState,
           }}
           controlId={controlId}
@@ -213,7 +213,7 @@ describe('Data control editor', () => {
       test('auto-fills input with the default title', async () => {
         const controlEditor = await mountComponent({
           initialState: {
-            fieldName: 'machine.os.raw',
+            field_name: 'machine.os.raw',
           },
           controlType: 'optionsList',
           controlId: 'testId',
@@ -227,7 +227,7 @@ describe('Data control editor', () => {
       test('auto-fills input with the custom title', async () => {
         const controlEditor = await mountComponent({
           initialState: {
-            fieldName: 'machine.os.raw',
+            field_name: 'machine.os.raw',
             title: 'Custom title',
           },
           controlType: 'optionsList',
@@ -242,7 +242,7 @@ describe('Data control editor', () => {
     test('selects the provided control type', async () => {
       const controlEditor = await mountComponent({
         initialState: {
-          fieldName: 'bytes',
+          field_name: 'bytes',
         },
         controlType: 'rangeSlider',
         controlId: 'testId',
@@ -262,7 +262,7 @@ describe('Data control editor', () => {
     test('all elements are visible when no editor config', async () => {
       const controlEditor = await mountComponent({
         initialState: {
-          fieldName: 'machine.os.raw',
+          field_name: 'machine.os.raw',
         },
         controlType: 'optionsList',
         controlId: 'testId',
@@ -283,7 +283,7 @@ describe('Data control editor', () => {
 
       const controlEditor = await mountComponent({
         initialState: {
-          fieldName: 'machine.os.raw',
+          field_name: 'machine.os.raw',
         },
         controlType: 'optionsList',
         controlId: 'testId',

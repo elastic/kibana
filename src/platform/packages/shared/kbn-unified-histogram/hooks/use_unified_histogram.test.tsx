@@ -8,12 +8,8 @@
  */
 
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import {
-  type ESQLControlState,
-  type ESQLControlVariable,
-  ESQLVariableType,
-  EsqlControlType,
-} from '@kbn/esql-types';
+import { type ESQLControlVariable, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { act } from 'react-dom/test-utils';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
@@ -30,13 +26,13 @@ describe('useUnifiedHistogram', () => {
         order: 0,
         type: 'esqlControl',
         width: 'medium' as const,
-        selectedOptions: ['field-1'],
-        variableName: 'agent_keyword',
-        variableType: ESQLVariableType.VALUES,
-        controlType: EsqlControlType.VALUES_FROM_QUERY,
-        esqlQuery: 'FROM logstash* | STATS BY field',
+        selected_options: ['field-1'],
+        variable_name: 'agent_keyword',
+        variable_type: ESQLVariableType.VALUES,
+        control_type: EsqlControlType.VALUES_FROM_QUERY,
+        esql_query: 'FROM logstash* | STATS BY field',
         title: 'field',
-      } as ControlPanelState<ESQLControlState>,
+      } as ControlPanelState<OptionsListESQLControlState>,
     };
     const fetchParamsExternal: UnifiedHistogramFetchParamsExternal = {
       dataView: dataViewWithTimefieldMock,

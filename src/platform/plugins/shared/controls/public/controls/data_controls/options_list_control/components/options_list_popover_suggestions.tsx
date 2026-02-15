@@ -33,7 +33,7 @@ export const OptionsListPopoverSuggestions = ({
 }: OptionsListPopoverSuggestionsProps) => {
   const {
     componentApi,
-    displaySettings: { hideExists },
+    displaySettings: { hide_exists },
   } = useOptionsListContext();
 
   const { euiTheme } = useEuiTheme();
@@ -83,7 +83,7 @@ export const OptionsListPopoverSuggestions = ({
   }, [availableOptions, selectedOptions, showOnlySelected]);
 
   const existsSelectableOption = useMemo<EuiSelectableOption | undefined>(() => {
-    if (hideExists || (!existsSelected && (showOnlySelected || suggestions?.length === 0))) return;
+    if (hide_exists || (!existsSelected && (showOnlySelected || suggestions?.length === 0))) return;
 
     return {
       key: 'exists-option',
@@ -92,7 +92,7 @@ export const OptionsListPopoverSuggestions = ({
       css: styles.optionsListExistsFilter,
       'data-test-subj': 'optionsList-control-selection-exists',
     };
-  }, [suggestions, existsSelected, showOnlySelected, hideExists, styles]);
+  }, [suggestions, existsSelected, showOnlySelected, hide_exists, styles]);
 
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
   useEffect(() => {

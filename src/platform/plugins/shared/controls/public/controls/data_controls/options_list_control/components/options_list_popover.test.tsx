@@ -348,21 +348,21 @@ describe('Options list popover', () => {
 
     test('can hide exists option', async () => {
       ensureComponentIsHidden({
-        displaySettings: { hideExists: true },
+        displaySettings: { hide_exists: true },
         testSubject: 'optionsList-control-selection-exists',
       });
     });
 
     test('can hide include/exclude toggle', async () => {
       ensureComponentIsHidden({
-        displaySettings: { hideExclude: true },
+        displaySettings: { hide_exclude: true },
         testSubject: 'optionsList__includeExcludeButtonGroup',
       });
     });
 
     test('can hide sorting button', async () => {
       ensureComponentIsHidden({
-        displaySettings: { hideSort: true },
+        displaySettings: { hide_sort: true },
         testSubject: 'optionsListControl__sortingOptionsButton',
       });
     });

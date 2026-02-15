@@ -11,18 +11,18 @@ export const formatPageFilterSearchParam = (filters: FilterControlConfig[]) => {
   return filters.map(
     ({
       title,
-      fieldName,
-      selectedOptions = [],
-      existsSelected = false,
+      field_name,
+      selected_options = [],
+      exists_selected = false,
       exclude = false,
-      displaySettings = { hideActionBar: false },
+      display_settings = { hide_action_bar: false },
     }) => ({
-      title: title ?? fieldName,
-      selectedOptions,
-      fieldName,
-      existsSelected,
+      title: title ?? field_name,
+      selected_options,
+      field_name,
+      exists_selected,
       exclude,
-      displaySettings: { hideActionBar: displaySettings.hideActionBar },
+      display_settings: { hide_action_bar: display_settings.hide_action_bar },
     })
   );
 };

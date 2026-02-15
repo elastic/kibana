@@ -7,36 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
-
 import type { Reference } from '@kbn/content-management-utils';
-import type { DataControlState } from '@kbn/controls-schemas';
+import type { DataControlState, LegacyStoredDataControlState } from '@kbn/controls-schemas';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import type { StoredDataControlState } from './types';
+import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 
-export function extractReferences(
+export function transformDataControlIn(
   state: DataControlState,
   referenceName: string
-): { state: StoredDataControlState; references?: Reference[] } {
+): {
+  state: Omit<DataControlState, 'data_view_id'> & { dataViewRefName: string };
+  references?: Reference[];
+} {
+  const { data_view_id, ...rest } = state;
   return {
     state: {
-      ...omit(state, 'dataViewId'),
+      ...rest,
       dataViewRefName: referenceName,
     },
     references: [
       {
         name: referenceName,
         type: DATA_VIEW_SAVED_OBJECT_TYPE,
-        id: state.dataViewId,
+        id: data_view_id,
       },
     ],
   };
 }
 
-export function injectReferences(
+export function transformDataControlOut<
+  StoredStateType extends Partial<LegacyStoredDataControlState & DataControlState>
+>(
   id: string | undefined,
-  state: StoredDataControlState,
-  refNames: string[],
+  state: StoredStateType,
+  refNames: Readonly<string[]>,
   panelReferences: Reference[] = [],
   containerReferences: Reference[] = []
 ): DataControlState {
@@ -53,7 +57,22 @@ export function injectReferences(
   } else {
     dataViewRef = references.find(({ name }) => name === dataViewRefName);
   }
-  return { ...omit(state, 'dataViewRefName'), dataViewId: dataViewRef?.id ?? '' };
+
+  /**
+   * Pre 9.4 the control state was stored in camelCase; these transforms ensure they are converted to snake_case
+   */
+  const { title, use_global_filters, ignore_validations, field_name } =
+    convertCamelCasedKeysToSnakeCase<LegacyStoredDataControlState>(
+      state as LegacyStoredDataControlState
+    );
+
+  return {
+    title,
+    data_view_id: dataViewRef?.id ?? '', // get the data view ID from the reference
+    use_global_filters,
+    ignore_validations,
+    field_name: field_name ?? '',
+  };
 }
 
 function getLegacyReferenceName(controlId: string, refName: string) {

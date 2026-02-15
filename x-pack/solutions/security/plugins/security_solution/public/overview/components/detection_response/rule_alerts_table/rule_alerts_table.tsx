@@ -155,8 +155,8 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
     (ruleName: string) =>
       openAlertsPageWithFilter({
         title: i18n.OPEN_IN_ALERTS_TITLE_RULENAME,
-        selectedOptions: [ruleName],
-        fieldName: ALERT_RULE_NAME,
+        selected_options: [ruleName],
+        field_name: ALERT_RULE_NAME,
       }),
     [openAlertsPageWithFilter]
   );
@@ -164,8 +164,8 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
   const navigateToAlerts = useCallback(() => {
     openAlertsPageWithFilter({
       title: i18n.OPEN_IN_ALERTS_TITLE_STATUS,
-      selectedOptions: ['open'],
-      fieldName: ALERT_WORKFLOW_STATUS,
+      selected_options: ['open'],
+      field_name: ALERT_WORKFLOW_STATUS,
     });
   }, [openAlertsPageWithFilter]);
 

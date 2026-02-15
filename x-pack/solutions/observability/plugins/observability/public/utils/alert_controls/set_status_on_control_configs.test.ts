@@ -15,14 +15,14 @@ const defaultControls = DEFAULT_CONTROLS as Writable<FilterControlConfig>[];
 describe('setStatusOnControlConfigs()', () => {
   it('Should return a default controlConfig with status if controlConfig is undefined', () => {
     const updatedControlConfigs = defaultControls;
-    updatedControlConfigs[0].selectedOptions = ['recovered'];
+    updatedControlConfigs[0].selected_options = ['recovered'];
 
     expect(setStatusOnControlConfigs('recovered')).toEqual(updatedControlConfigs);
   });
 
   it('Should return empty selectedOptions if status is ALL', () => {
     const updatedControlConfigs = defaultControls;
-    updatedControlConfigs[0].selectedOptions = [];
+    updatedControlConfigs[0].selected_options = [];
 
     expect(setStatusOnControlConfigs('all')).toEqual(updatedControlConfigs);
   });
@@ -30,7 +30,7 @@ describe('setStatusOnControlConfigs()', () => {
   it('Should return controlConfig with current selectedOptions when status is not the first item in config', () => {
     const controlConfigs = [defaultControls[1], defaultControls[0]];
     const updatedControlConfigs = controlConfigs;
-    updatedControlConfigs[1].selectedOptions = ['active'];
+    updatedControlConfigs[1].selected_options = ['active'];
 
     expect(setStatusOnControlConfigs('active', controlConfigs)).toEqual(updatedControlConfigs);
   });

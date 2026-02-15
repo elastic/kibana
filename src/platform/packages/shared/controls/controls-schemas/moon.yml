@@ -20,6 +20,7 @@ project:
 dependsOn:
   - '@kbn/controls-constants'
   - '@kbn/config-schema'
+  - '@kbn/presentation-publishing-schemas'
 tags:
   - shared-server
   - package

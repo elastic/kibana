@@ -66,8 +66,8 @@ const EntityAnalyticsRiskScoresComponent = <T extends EntityType>({
       openAlertsPageWithFilters([
         {
           title: getRiskEntityTranslation(riskEntity),
-          selectedOptions: [entityName],
-          fieldName: entityNameField,
+          selected_options: [entityName],
+          field_name: entityNameField,
         },
       ]);
     },

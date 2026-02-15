@@ -136,7 +136,7 @@ describe('HostAlertsTable', () => {
     fireEvent.click(getByTestId('hostSeverityAlertsTable-totalAlertsLink'));
 
     expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
-      { fieldName: 'host.name', selectedOptions: ['Host-342m5gl1g2'], title: 'Host name' },
+      { field_name: 'host.name', selected_options: ['Host-342m5gl1g2'], title: 'Host name' },
     ]);
   });
 
@@ -148,13 +148,13 @@ describe('HostAlertsTable', () => {
 
     expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
       {
-        fieldName: 'host.name',
-        selectedOptions: ['Host-342m5gl1g2'],
+        field_name: 'host.name',
+        selected_options: ['Host-342m5gl1g2'],
         title: 'Host name',
       },
       {
-        fieldName: 'kibana.alert.severity',
-        selectedOptions: ['critical'],
+        field_name: 'kibana.alert.severity',
+        selected_options: ['critical'],
         title: 'Severity',
       },
     ]);

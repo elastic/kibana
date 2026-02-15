@@ -82,7 +82,7 @@ export const useESQLVariables = ({
         input.initialChildControlState as ControlPanelsState<OptionsListESQLControlState>;
       // drop unused keys for BWC
       const transformedState = Object.keys(controlGroupState).reduce((prev, key) => {
-        return { ...prev, [key]: omit(controlGroupState[key], ['id', 'useGlobalFilters']) };
+        return { ...prev, [key]: omit(controlGroupState[key], ['id', 'use_global_filters']) };
       }, {});
       const nextControlGroupState = transformedState;
       previousControlGroupStateRef.current = nextControlGroupState;

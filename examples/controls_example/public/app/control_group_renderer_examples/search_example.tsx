@@ -150,9 +150,9 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
             await builder.addDataControlFromField(
               initialState,
               {
-                dataViewId: dataView.id!,
+                data_view_id: dataView.id!,
                 title: 'Destintion country',
-                fieldName: 'geo.dest',
+                field_name: 'geo.dest',
                 width: 'medium',
                 grow: false,
               },
@@ -162,8 +162,8 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
             await builder.addDataControlFromField(
               initialState,
               {
-                dataViewId: dataView.id!,
-                fieldName: 'bytes',
+                data_view_id: dataView.id!,
+                field_name: 'bytes',
                 width: 'medium',
                 grow: true,
                 title: 'Bytes',

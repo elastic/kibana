@@ -31,7 +31,7 @@ export type ControlsGroupState = TypeOf<typeof controlsGroupSchema>;
 export type PinnedControlState = ControlsGroupState[number];
 export type PinnedControlLayoutState = TypeOf<typeof pinnedControlSchema> & {
   order: number;
-  type: PinnedControlState['type'];
+  type: string;
 };
 export type ControlWidth = TypeOf<typeof controlWidthSchema>;
 export type ControlState = TypeOf<typeof controlSchema>;
@@ -56,12 +56,4 @@ export type TimeSliderControlState = TypeOf<typeof timeSliderControlSchema>;
 
 export interface HasCustomPrepend {
   CustomPrependComponent: React.FC<{}>;
-}
-
-// This value only exists for control saved objects prior to version 9.4
-export interface LegacyIgnoreParentSettings {
-  ignoreFilters?: boolean;
-  ignoreQuery?: boolean;
-  ignoreTimerange?: boolean;
-  ignoreValidations?: boolean;
 }

@@ -23,8 +23,8 @@ jest.mock('../../../kibana_services', () => ({
 }));
 
 describe('transformDashboardOut', () => {
-  const controlGroupInputControlsSo = {
-    explicitInput: { anyKey: 'some value' },
+  const pinnedPanelSo = {
+    config: { anyKey: 'some value' },
     type: 'type1',
     order: 0,
   };
@@ -60,7 +60,7 @@ describe('transformDashboardOut', () => {
   test('should not supply defaults for optional nested properties', () => {
     const input: DashboardSavedObjectAttributes = {
       controlGroupInput: {
-        panelsJSON: JSON.stringify({ foo: controlGroupInputControlsSo }),
+        panelsJSON: JSON.stringify({ foo: pinnedPanelSo }),
       },
       panelsJSON: JSON.stringify(panelsSo),
       optionsJSON: JSON.stringify({
@@ -100,23 +100,21 @@ describe('transformDashboardOut', () => {
 
   test('should transform full attributes correctly', () => {
     const input: DashboardSavedObjectAttributes = {
-      controlGroupInput: {
-        panelsJSON: JSON.stringify({
+      pinned_panels: {
+        panels: {
           foo: {
-            ...controlGroupInputControlsSo,
+            ...pinnedPanelSo,
             grow: false,
             width: 'small',
           },
-        }),
-        ignoreParentSettingsJSON: JSON.stringify({ ignoreFilters: true }),
-        controlStyle: 'twoLine',
-        showApplySelections: true,
+        },
       },
       description: 'description',
       kibanaSavedObjectMeta: {
         searchSourceJSON: JSON.stringify({ query: { query: 'test', language: 'KQL' } }),
       },
       optionsJSON: JSON.stringify({
+        autoApplyFilters: false,
         hidePanelTitles: true,
         useMargins: false,
         syncColors: false,
@@ -195,6 +193,84 @@ describe('transformDashboardOut', () => {
         from: 'now-15m',
         to: 'now',
       },
+      title: 'title',
+    });
+  });
+
+  test('should transform <9.4 legacy attributes correctly', () => {
+    const input: DashboardSavedObjectAttributes = {
+      controlGroupInput: {
+        panelsJSON: JSON.stringify({
+          foo: {
+            ...pinnedPanelSo,
+            grow: false,
+            width: 'small',
+          },
+        }),
+        ignoreParentSettingsJSON: JSON.stringify({ ignoreFilters: true }),
+        controlStyle: 'twoLine',
+        showApplySelections: true,
+      },
+      description: 'description',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: JSON.stringify({ query: { query: 'test', language: 'KQL' } }),
+      },
+      optionsJSON: JSON.stringify({
+        hidePanelTitles: true,
+        useMargins: false,
+        syncColors: false,
+        syncTooltips: false,
+        syncCursor: false,
+      }),
+      panelsJSON: JSON.stringify(panelsSo),
+      title: 'title',
+    };
+    const references = [
+      {
+        type: 'index-pattern',
+        id: 'index-pattern1',
+        name: 'index-pattern-ref-index-pattern1',
+      },
+    ];
+    expect(transformDashboardOut(input, references)).toEqual<DashboardState>({
+      pinned_panels: [
+        {
+          uid: 'foo',
+          grow: false,
+          width: 'small',
+          config: {
+            anyKey: 'some value',
+          },
+          type: 'type1',
+        } as unknown as PinnedControlState,
+      ],
+      description: 'description',
+      query: { query: 'test', language: 'KQL' },
+      options: {
+        hide_panel_titles: true,
+        use_margins: false,
+        sync_colors: false,
+        sync_tooltips: false,
+        sync_cursor: false,
+        auto_apply_filters: false,
+      },
+      panels: [
+        {
+          config: {
+            enhancements: {},
+            title: 'title1',
+          },
+          grid: {
+            x: 0,
+            y: 0,
+            w: 10,
+            h: 10,
+          },
+          uid: '1',
+          type: 'type1',
+          version: '2',
+        },
+      ],
       title: 'title',
     });
   });
