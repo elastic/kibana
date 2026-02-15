@@ -227,6 +227,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       sort: timelineQuerySortField,
       startDate: start,
       timerangeKind,
+      dateRangeField: experimentalDataView.getTimeField()?.name ?? '@timestamp',
     });
 
   const { onLoad: loadNotesOnEventsLoad } = useFetchNotes();
