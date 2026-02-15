@@ -13,6 +13,9 @@ import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextWidget } from './text_widget';
+import { getMeta, setMeta } from '@kbn/connector-specs/src/connector_spec_ui';
+
+const meta = { getMeta, setMeta };
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -32,6 +35,7 @@ describe('TextWidget', () => {
     render(
       <TestFormWrapper>
         <TextWidget
+          meta={meta}
           formConfig={{}}
           path="username"
           schema={z.string()}
@@ -63,6 +67,7 @@ describe('TextWidget', () => {
       return (
         <Form form={form}>
           <TextWidget
+            meta={meta}
             formConfig={{}}
             path="username"
             schema={z.string()}
@@ -91,6 +96,7 @@ describe('TextWidget', () => {
       return (
         <Form form={form}>
           <TextWidget
+            meta={meta}
             formConfig={{}}
             path="username"
             schema={z.string()}
@@ -122,6 +128,7 @@ describe('TextWidget', () => {
       return (
         <Form form={form}>
           <TextWidget
+            meta={meta}
             formConfig={{}}
             path="username"
             schema={z.string().min(3, 'Username must be at least 3 characters')}
@@ -160,6 +167,7 @@ describe('TextWidget', () => {
       return (
         <Form form={form}>
           <TextWidget
+            meta={meta}
             formConfig={{}}
             path="username"
             schema={z.string().min(1, 'Username is required')}
