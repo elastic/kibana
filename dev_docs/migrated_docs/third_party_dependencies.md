@@ -3,7 +3,7 @@ id: kibThirdPartyDependencies
 slug: /kibana-dev-docs/third-party-dependencies
 title: Managing third-party dependencies
 description: Expectations for working with third-party dependencies
-date: 2024-10-01
+date: 2025-08-21
 tags: ['contributor', 'dev', 'kibana', 'npm', 'dependencies', 'third-party', 'dependency']
 ---
 
@@ -21,16 +21,16 @@ When the use of an external dependency is necessary, ensure there is sufficient 
 Except in specific cases where widespread consensus was gained and clear ownership is established, third party dependencies should not be exposed directly as features of Kibana, whether it be through the UI, HTTP API, or programmatic interfaces.
 
 
-<DocCallOut>
+:::important
 Treat third-party code as if it was your own. We share the responsibility for the efficacy, performance, and security of both the code we integrate and the code we develop.
-</DocCallOut>
+:::
 
 
 ## Adding new dependencies
 
 Looking for a dependency that isn't already available in Kibana? There are a few things to keep in mind before adding a new dependency.
 
-First, be sure you have read and are familiar with our <DocLink id="kibDevPrinciples" />. In particular, **Be wary of dependencies**
+First, be sure you have read and are familiar with our [development principles](https://docs.elastic.dev/kibana-dev-docs/contributing/dev-principles). In particular, **Be wary of dependencies**
 and **Prefer one way to do things** provide an overview of how we approach this question.
 
 In general, we have a bias toward **not** adding new dependencies unless there is a compelling reason to do so, as we want to
@@ -62,10 +62,9 @@ on Github:
 - **@elastic/kibana-operations**
 - **@elastic/kibana-security**
 
-<DocCallOut title="Internal only">
-  If you are unsure of which licenses are okay to use, refer to the
-  [Permitted Open Source Licenses list](https://github.com/elastic/open-source/blob/main/elastic-product-policy.md#permitted-licenses-list).
-</DocCallOut>
+:::note
+**Internal only:** If you are unsure of which licenses are okay to use, refer to the [Permitted Open Source Licenses list](https://github.com/elastic/open-source/blob/main/elastic-product-policy.md#permitted-licenses-list).
+:::
 
 ### Dependency evaluation
 
