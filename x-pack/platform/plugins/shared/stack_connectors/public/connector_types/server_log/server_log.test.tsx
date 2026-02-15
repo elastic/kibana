@@ -54,4 +54,9 @@ describe('action params validation', () => {
       },
     });
   });
+
+  test('connector provides the default params: ', async () => {
+    expect(connectorTypeModel.defaultActionParams).toBeDefined();
+    expect(connectorTypeModel.defaultRecoveredActionParams).toBeDefined();
+  });
 });
