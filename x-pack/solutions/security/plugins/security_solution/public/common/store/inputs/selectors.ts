@@ -11,7 +11,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import type { InputsState } from './reducer';
 import type { State } from '../types';
 
-import type { InputsModel, InputsRange, GlobalQuery } from './model';
+import type { GlobalQuery, InputsModel, InputsRange } from './model';
 
 const defaultQuery = {
   id: 'kql',
@@ -30,10 +30,6 @@ const selectGlobal = (state: State): InputsRange => state.inputs.global;
 const selectTimeline = (state: State): InputsRange => state.inputs.timeline;
 const selectValueReport = (state: State): InputsState['valueReport'] => state.inputs.valueReport;
 
-// TODO: remove undefined when socTrendsEnabled feature flag removed
-const selectSocTrends = (state: State): InputsState['socTrends'] | undefined =>
-  state.inputs.socTrends;
-
 const selectGlobalQuery = (state: State, id: string): GlobalQuery =>
   state.inputs.global.queries.find((q) => q.id === id) || defaultQuery;
 
@@ -47,12 +43,6 @@ export const timelineTimeRangeSelector = createSelector(
 export const valueReportTimeRangeSelector = createSelector(
   selectValueReport,
   (valueReport) => valueReport.timerange
-);
-
-// TODO: remove ? when socTrendsEnabled feature flag removed
-export const socTrendsTimeRangeSelector = createSelector(
-  selectSocTrends,
-  (socTrends) => socTrends?.timerange
 );
 
 export const globalFullScreenSelector = createSelector(selectGlobal, (global) => global.fullScreen);

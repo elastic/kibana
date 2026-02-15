@@ -302,7 +302,7 @@ describe('SearchBarComponent', () => {
         expect(mockUpdateUrlParam).toHaveBeenCalledWith(
           expect.objectContaining({
             global: {
-              linkTo: [InputsModelId.timeline, InputsModelId.socTrends],
+              linkTo: [InputsModelId.timeline],
               timerange: newTimerange,
             },
           })
@@ -338,7 +338,7 @@ describe('SearchBarComponent', () => {
         expect(mockUpdateUrlParam).toHaveBeenCalledWith(
           expect.objectContaining({
             timeline: {
-              linkTo: [InputsModelId.global, InputsModelId.socTrends],
+              linkTo: [InputsModelId.global],
               timerange: newTimerange,
             },
           })
