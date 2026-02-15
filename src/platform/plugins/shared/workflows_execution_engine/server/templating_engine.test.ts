@@ -511,4 +511,192 @@ describe('WorkflowTemplatingEngine', () => {
       expect(Array.isArray(rendered.items)).toBe(true);
     });
   });
+
+  describe('template engine restrictions', () => {
+    describe('in-memory filesystem', () => {
+      it('should reject file existence for any path', () => {
+        const fs = (templatingEngine as any).engine.options.fs;
+        expect(fs.existsSync('/any/path')).toBe(false);
+        expect(fs.existsSync('relative/path')).toBe(false);
+        expect(fs.existsSync('')).toBe(false);
+      });
+
+      it('should throw on readFileSync for any path', () => {
+        const fs = (templatingEngine as any).engine.options.fs;
+        expect(() => fs.readFileSync('/any/path')).toThrow();
+      });
+
+      it('should not have a fallback function', () => {
+        const fs = (templatingEngine as any).engine.options.fs;
+        expect(fs.fallback).toBeUndefined();
+      });
+    });
+
+    describe('unsupported tags', () => {
+      it('should reject {% block %} tag', () => {
+        expect(() => {
+          templatingEngine.render('{% block foo %}content{% endblock %}', {});
+        }).toThrow('not found');
+      });
+
+      it('should reject {% tablerow %} tag', () => {
+        expect(() => {
+          templatingEngine.render('{% tablerow item in items %}{{ item }}{% endtablerow %}', {
+            items: [1, 2],
+          });
+        }).toThrow('not found');
+      });
+
+      it('should allow {% assign %} tag', () => {
+        const result = templatingEngine.render('{% assign greeting = "hello" %}{{ greeting }}', {});
+        expect(result).toBe('hello');
+      });
+
+      it('should allow {% capture %} tag', () => {
+        const result = templatingEngine.render(
+          '{% capture msg %}hello {{ name }}{% endcapture %}{{ msg }}',
+          { name: 'world' }
+        );
+        expect(result).toBe('hello world');
+      });
+
+      it('should allow {% case %} tag', () => {
+        const result = templatingEngine.render(
+          '{% case val %}{% when "a" %}alpha{% when "b" %}beta{% endcase %}',
+          { val: 'b' }
+        );
+        expect(result).toBe('beta');
+      });
+    });
+
+    describe('unsupported tag patterns', () => {
+      it('should reject {% include %} tags', () => {
+        expect(() => {
+          templatingEngine.render("{% include 'some_file' %}", {});
+        }).toThrow('unsupported tags');
+      });
+
+      it('should reject {% render %} tags', () => {
+        expect(() => {
+          templatingEngine.render("{% render 'some_partial' %}", {});
+        }).toThrow('unsupported tags');
+      });
+
+      it('should reject {% layout %} tags', () => {
+        expect(() => {
+          templatingEngine.render("{% layout 'base' %}", {});
+        }).toThrow('unsupported tags');
+      });
+
+      it('should reject include tags with whitespace variations', () => {
+        expect(() => {
+          templatingEngine.render("{%   include 'some_file' %}", {});
+        }).toThrow('unsupported tags');
+      });
+
+      it('should reject include tags with Liquid whitespace trim syntax', () => {
+        expect(() => {
+          templatingEngine.render("{%- include 'some_file' -%}", {});
+        }).toThrow('unsupported tags');
+      });
+
+      it('should reject include tags embedded in larger templates', () => {
+        expect(() => {
+          templatingEngine.render("Hello {{ name }}, {% include 'some_file' %} done", {
+            name: 'test',
+          });
+        }).toThrow('unsupported tags');
+      });
+
+      it('should reject include tags in nested objects', () => {
+        expect(() => {
+          templatingEngine.render(
+            {
+              safe: '{{ name }}',
+              unsupported: "{% include 'some_file' %}",
+            },
+            { name: 'test' }
+          );
+        }).toThrow('unsupported tags');
+      });
+
+      it('should reject include tags in arrays', () => {
+        expect(() => {
+          templatingEngine.render(['{{ name }}', "{% include 'some_file' %}"], {
+            name: 'test',
+          });
+        }).toThrow('unsupported tags');
+      });
+    });
+
+    describe('ownPropertyOnly restrictions', () => {
+      it('should not expose constructor property', () => {
+        const result = templatingEngine.render('{{ obj.constructor }}', {
+          obj: { name: 'test' },
+        });
+        expect(result).toBe('');
+      });
+
+      it('should not expose __proto__ property', () => {
+        const result = templatingEngine.render('{{ obj.__proto__ }}', {
+          obj: { name: 'test' },
+        });
+        expect(result).toBe('');
+      });
+
+      it('should not expose toString from prototype', () => {
+        const result = templatingEngine.render('{{ obj.toString }}', {
+          obj: { name: 'test' },
+        });
+        expect(result).toBe('');
+      });
+
+      it('should still expose own properties', () => {
+        const result = templatingEngine.render('{{ obj.name }}', {
+          obj: { name: 'test' },
+        });
+        expect(result).toBe('test');
+      });
+    });
+
+    describe('engine limits', () => {
+      it('should reject templates exceeding parse limit', () => {
+        expect(() => {
+          templatingEngine.render('x'.repeat(200_000), {});
+        }).toThrow('parse length limit exceeded');
+      });
+
+      it('should reject templates that allocate too much memory', () => {
+        expect(() => {
+          templatingEngine.render('{% for i in (1..20000000) %}{{ i }}{% endfor %}', {});
+        }).toThrow('memory alloc limit exceeded');
+      });
+    });
+
+    describe('safe templates still work', () => {
+      it('should allow normal variable interpolation', () => {
+        const result = templatingEngine.render('Hello {{ name }}!', { name: 'World' });
+        expect(result).toBe('Hello World!');
+      });
+
+      it('should allow if/else control flow', () => {
+        const result = templatingEngine.render('{% if show %}visible{% else %}hidden{% endif %}', {
+          show: true,
+        });
+        expect(result).toBe('visible');
+      });
+
+      it('should allow for loops', () => {
+        const result = templatingEngine.render('{% for item in items %}{{ item }} {% endfor %}', {
+          items: ['a', 'b', 'c'],
+        });
+        expect(result).toBe('a b c ');
+      });
+
+      it('should allow filters', () => {
+        const result = templatingEngine.render('{{ name | upcase }}', { name: 'hello' });
+        expect(result).toBe('HELLO');
+      });
+    });
+  });
 });

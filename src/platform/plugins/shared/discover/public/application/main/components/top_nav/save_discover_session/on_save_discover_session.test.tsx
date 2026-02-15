@@ -169,7 +169,6 @@ describe('onSaveDiscoverSession', () => {
             serializedSearchSource: { index: dataViewMock.id },
           },
         }),
-        timeRestore: false,
         services,
       });
       const dataViewWithTimeFieldTab = fromTabStateToSavedObjectTab({
@@ -179,7 +178,6 @@ describe('onSaveDiscoverSession', () => {
             serializedSearchSource: { index: dataViewMockWithTimeField.id },
           },
         }),
-        timeRestore: false,
         services,
       });
       const adHocDataViewNoTimeFieldTab = fromTabStateToSavedObjectTab({
@@ -189,7 +187,6 @@ describe('onSaveDiscoverSession', () => {
             serializedSearchSource: { index: { title: 'adhoc' } },
           },
         }),
-        timeRestore: false,
         services,
       });
       const adHocDataViewWithTimeFieldTab = fromTabStateToSavedObjectTab({
@@ -198,8 +195,10 @@ describe('onSaveDiscoverSession', () => {
           initialInternalState: {
             serializedSearchSource: { index: { title: 'adhoc', timeFieldName: 'timestamp' } },
           },
+          attributes: {
+            timeRestore: true,
+          },
         }),
-        timeRestore: true,
         services,
       });
 
@@ -247,13 +246,11 @@ describe('onSaveDiscoverSession', () => {
     it("should set timeRestore to true if any tab's timeRestore is true", async () => {
       const services = createDiscoverServicesMock();
       const noTimeRestoreTab = fromTabStateToSavedObjectTab({
-        tab: getTabStateMock({ id: 'noTimeRestoreTab' }),
-        timeRestore: false,
+        tab: getTabStateMock({ id: 'noTimeRestoreTab', attributes: { timeRestore: false } }),
         services,
       });
       const timeRestoreTab = fromTabStateToSavedObjectTab({
-        tab: getTabStateMock({ id: 'timeRestoreTab' }),
-        timeRestore: true,
+        tab: getTabStateMock({ id: 'timeRestoreTab', attributes: { timeRestore: true } }),
         services,
       });
       let { saveModal } = await setup({

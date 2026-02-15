@@ -4,7 +4,6 @@ x-on-merge-gates: &on_merge_gates
 - checks
 - linting
 - linting_with_types
-- check_oas_snapshot
 - check_types
 
 steps:

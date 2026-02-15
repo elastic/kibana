@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryParams } from './types';
+import type { TemplatesFindRequest } from '../../../common/types/api/template/v1';
 
 export const PAGE_SIZE_OPTIONS: number[] = [10, 25, 50, 100];
 
@@ -13,7 +13,7 @@ export const TEMPLATES_STATE_URL_KEY = 'templates';
 
 export const SORT_ORDER_VALUES: Array<'asc' | 'desc'> = ['asc', 'desc'];
 
-export const DEFAULT_QUERY_PARAMS: QueryParams = {
+export const DEFAULT_QUERY_PARAMS: TemplatesFindRequest = {
   page: 1,
   perPage: PAGE_SIZE_OPTIONS[0],
   sortField: 'name',
@@ -21,6 +21,7 @@ export const DEFAULT_QUERY_PARAMS: QueryParams = {
   search: '',
   tags: [],
   author: [],
+  isDeleted: false,
 };
 
 export const LINE_CLAMP = 3;

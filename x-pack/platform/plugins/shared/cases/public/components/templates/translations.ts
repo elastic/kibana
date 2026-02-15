@@ -46,7 +46,7 @@ export const SEARCH_TEMPLATES = i18n.translate('xpack.cases.templates.searchTemp
 export const SEARCH_TEMPLATES_PLACEHOLDER = i18n.translate(
   'xpack.cases.templates.searchPlaceholder',
   {
-    defaultMessage: 'Search templates',
+    defaultMessage: 'Search by name, description, or field name',
   }
 );
 

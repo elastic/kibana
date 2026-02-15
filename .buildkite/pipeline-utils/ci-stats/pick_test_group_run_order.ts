@@ -21,9 +21,37 @@ import type { TestGroupRunOrderResponse } from './client';
 import { CiStatsClient } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
+import SHARDED_JEST_CONFIGS from '../../sharded_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';
 import { filterEmptyJestConfigs } from './get_tests_from_config';
 import { collectEnvFromLabels, expandAgentQueue, getRequiredEnv } from '#pipeline-utils';
+
+const SHARD_ANNOTATION_SEP = '||shard=';
+
+/**
+ * Expands configs that appear in the shard map into N shard-annotated entries.
+ * For example, if `fleet/jest.integration.config.js` has 2 shards, it becomes:
+ *   - `fleet/jest.integration.config.js||shard=1/2`
+ *   - `fleet/jest.integration.config.js||shard=2/2`
+ * Configs not in the shard map are passed through unchanged.
+ */
+function expandShardedJestConfigs(configs: string[]): string[] {
+  const shardMap = SHARDED_JEST_CONFIGS as Record<string, number>;
+  const expanded: string[] = [];
+
+  for (const config of configs) {
+    const shardCount = shardMap[config];
+    if (shardCount && shardCount > 1) {
+      for (let i = 1; i <= shardCount; i++) {
+        expanded.push(`${config}${SHARD_ANNOTATION_SEP}${i}/${shardCount}`);
+      }
+    } else {
+      expanded.push(config);
+    }
+  }
+
+  return expanded;
+}
 
 const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
 
@@ -167,18 +195,22 @@ export async function pickTestGroupRunOrder() {
         ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],
       })
     : [];
-  const jestUnitConfigs = await filterEmptyJestConfigs(
+  const jestUnitConfigsFiltered = await filterEmptyJestConfigs(
     jestUnitConfigsWithEmpties,
     os.availableParallelism()
   );
+  // Expand sharded unit configs (e.g. cases/jest.config.js) into shard-annotated entries
+  const jestUnitConfigs = expandShardedJestConfigs(jestUnitConfigsFiltered);
 
-  const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
-    ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.*js', '!**/__fixtures__/**']), {
+  const jestIntegrationConfigsRaw = LIMIT_CONFIG_TYPE.includes('integration')
+    ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.js', '!**/__fixtures__/**']), {
         cwd: process.cwd(),
         absolute: false,
         ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],
       })
     : [];
+  // Expand sharded integration configs into shard-annotated entries
+  const jestIntegrationConfigs = expandShardedJestConfigs(jestIntegrationConfigsRaw);
 
   if (!ftrConfigsByQueue.size && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
     throw new Error('unable to find any unit, integration, or FTR configs');
@@ -357,7 +389,8 @@ export async function pickTestGroupRunOrder() {
             label: 'Jest Integration Tests',
             command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
             parallelism: integration.count,
-            timeout_in_minutes: 120,
+            // TODO: Reduce once we have identified the cause of random long-running tests
+            timeout_in_minutes: 75,
             key: 'jest-integration',
             agents: expandAgentQueue('n2-4-spot', 105),
             depends_on: JEST_CONFIGS_DEPS,

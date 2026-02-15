@@ -180,6 +180,8 @@ export function telemetryTaskRunner(
                   totalCountAggregations.count_rules_with_linked_dashboards,
                 count_rules_with_investigation_guide:
                   totalCountAggregations.count_rules_with_investigation_guide,
+                count_rules_with_api_key_created_by_user:
+                  totalCountAggregations.count_rules_with_api_key_created_by_user,
                 count_mw_total: MWTelemetry.count_mw_total,
                 count_mw_with_repeat_toggle_on: MWTelemetry.count_mw_with_repeat_toggle_on,
                 count_mw_with_filter_alert_toggle_on:
