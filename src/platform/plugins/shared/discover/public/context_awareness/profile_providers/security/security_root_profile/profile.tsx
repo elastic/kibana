@@ -9,6 +9,7 @@
 
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import { createAppWrapperAccessor } from '../accessors/create_app_wrapper_accessor';
 import type { RootProfileProvider } from '../../../profiles';
 import { SolutionType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
@@ -17,6 +18,8 @@ import { createCellRendererAccessor } from '../accessors/get_cell_renderer_acces
 import { createDefaultSecuritySolutionAppStateGetter as createDefaultSecuritySolutionAppStateGetter } from '../accessors/get_default_app_state';
 import { getAlertEventRowIndicator } from '../accessors/get_row_indicator';
 import { ALERTS_INDEX_PATTERN, SECURITY_PROFILE_ID } from '../constants';
+
+const EmptyAppWrapper: FunctionComponent<PropsWithChildren<{}>> = ({ children }) => <>{children}</>;
 
 interface SecurityRootProfileContext {
   appWrapper?: FunctionComponent<PropsWithChildren<{}>>;
@@ -31,10 +34,19 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
   const { discoverShared } = services;
   const discoverFeaturesRegistry = discoverShared.features.registry;
   const cellRendererFeature = discoverFeaturesRegistry.getById('security-solution-cell-renderer');
+  const appWrapperFeature = discoverFeaturesRegistry.getById('security-solution-app-wrapper');
 
   return {
     profileId: SECURITY_PROFILE_ID.root,
     profile: {
+      getRenderAppWrapper: (PrevWrapper, params) => {
+        const AppWrapper = params.context.appWrapper ?? EmptyAppWrapper;
+        return ({ children }) => (
+          <PrevWrapper>
+            <AppWrapper>{children}</AppWrapper>
+          </PrevWrapper>
+        );
+      },
       getCellRenderers:
         (prev, { context }) =>
         (params) => {
@@ -58,12 +70,14 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
         };
       }
 
+      const getAppWrapper = await createAppWrapperAccessor(appWrapperFeature);
       const getCellRenderer = await createCellRendererAccessor(cellRendererFeature);
 
       return {
         isMatch: true,
         context: {
           solutionType: SolutionType.Security,
+          appWrapper: getAppWrapper?.(),
           getSecuritySolutionCellRenderer: getCellRenderer,
         },
       };
