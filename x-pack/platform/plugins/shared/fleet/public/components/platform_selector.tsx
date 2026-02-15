@@ -120,11 +120,11 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     />
   );
 
-  const macCallout = (
+  const unsupportedPlatformCallout = (
     <EuiCallOut
-      title={i18n.translate('xpack.fleet.enrollmentInstructions.macCallout', {
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.unsupportedPlatformCallout', {
         defaultMessage:
-          'We recommend against deploying this integration within Mac as it is currently not being supported.',
+          'Cloudbeat only supports Linux and Kubernetes deployments. This platform is currently not supported.',
       })}
       color="warning"
       iconType="warning"
@@ -214,13 +214,13 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             <EuiSpacer size="m" />
           </>
         )}
-        {['mac_aarch64', 'mac_x86_64'].includes(platform) &&
+        {['mac_aarch64', 'mac_x86_64', 'windows', 'windows_msi', 'deb_aarch64', 'deb_x86_64', 'rpm_aarch64', 'rpm_x86_64'].includes(platform) &&
           (cloudSecurityIntegration?.integrationType ===
             FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE ||
             cloudSecurityIntegration?.integrationType ===
               FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE) && (
             <>
-              {macCallout}
+              {unsupportedPlatformCallout}
               <EuiSpacer size="m" />
             </>
           )}
