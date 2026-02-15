@@ -144,8 +144,7 @@ const stateSchemaV6 = stateSchemaV5.extends({
 });
 
 const stateSchemaV7 = stateSchemaV6.extends({
-  count_rules_with_elasticagent_tag: schema.number(),
-  count_rules_with_elasticagent_tag_by_type: schema.recordOf(schema.string(), schema.number()),
+  count_rules_with_api_key_created_by_user: schema.number(),
 });
 
 export const stateSchemaByVersion = {
@@ -284,9 +283,7 @@ export const stateSchemaByVersion = {
   7: {
     up: (state: Record<string, unknown>) => ({
       ...stateSchemaByVersion[6].up(state),
-      count_rules_with_elasticagent_tag: state.count_rules_with_elasticagent_tag || 0,
-      count_rules_with_elasticagent_tag_by_type:
-        state.count_rules_with_elasticagent_tag_by_type || {},
+      count_rules_with_api_key_created_by_user: state.count_rules_with_api_key_created_by_user || 0,
     }),
     schema: stateSchemaV7,
   },
@@ -383,4 +380,5 @@ export const emptyState: LatestTaskStateSchema = {
   count_ignored_fields_by_rule_type: {},
   count_rules_with_linked_dashboards: 0,
   count_rules_with_investigation_guide: 0,
+  count_rules_with_api_key_created_by_user: 0,
 };
