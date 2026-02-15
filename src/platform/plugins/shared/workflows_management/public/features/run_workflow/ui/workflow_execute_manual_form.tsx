@@ -9,13 +9,14 @@
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import type { JSONSchema7 } from 'json-schema';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowYaml } from '@kbn/workflows';
 import {
   applyInputDefaults,
   normalizeInputsToJsonSchema,
+  normalizeInputsToJsonSchemaAsync,
   resolveRef,
 } from '@kbn/workflows/spec/lib/input_conversion';
 import { z } from '@kbn/zod/v4';
@@ -70,10 +71,12 @@ function convertJsonSchemaToZodWithRefs(
   return convertJsonSchemaToZod(schemaToConvert);
 }
 
-const makeWorkflowInputsValidator = (inputs: WorkflowYaml['inputs']) => {
-  // Normalize inputs to the new JSON Schema format (handles backward compatibility)
-  // This handles both array (legacy) and object (new) formats
-  const normalizedInputs = normalizeInputsToJsonSchema(inputs);
+const makeWorkflowInputsValidator = async (
+  inputs: WorkflowYaml['inputs'],
+  resolvedInputsSchema?: ReturnType<typeof normalizeInputsToJsonSchema>
+) => {
+  // Use resolved schema if provided, otherwise normalize synchronously (for backward compatibility)
+  const normalizedInputs = resolvedInputsSchema || normalizeInputsToJsonSchema(inputs);
 
   if (!normalizedInputs?.properties) {
     return z.object({});
@@ -84,7 +87,7 @@ const makeWorkflowInputsValidator = (inputs: WorkflowYaml['inputs']) => {
   for (const [propertyName, propertySchema] of Object.entries(normalizedInputs.properties)) {
     const jsonSchema = propertySchema as JSONSchema7;
 
-    // Resolve $ref to get the actual schema (for default extraction)
+    // For resolved schemas, $ref should already be inlined, but check anyway
     const resolvedSchema = jsonSchema.$ref
       ? resolveRef(jsonSchema.$ref, normalizedInputs) || jsonSchema
       : jsonSchema;
@@ -159,33 +162,6 @@ function generateSampleFromJsonSchema(schema: JSONSchema7): unknown {
   }
 }
 
-const getDefaultWorkflowInput = (definition: WorkflowYaml): string => {
-  // Normalize inputs to the new JSON Schema format (handles backward compatibility)
-  const normalizedInputs = normalizeInputsToJsonSchema(definition.inputs);
-
-  if (!normalizedInputs?.properties) {
-    return '{}';
-  }
-
-  // Use applyInputDefaults to get defaults with $ref resolution and nested object support
-  // This ensures the same behavior as legacy format and handles all JSON Schema features
-  const defaults = applyInputDefaults(undefined, normalizedInputs);
-
-  // If defaults were applied and not empty, use them; otherwise generate samples
-  if (defaults && typeof defaults === 'object' && Object.keys(defaults).length > 0) {
-    return JSON.stringify(defaults, null, 2);
-  }
-
-  // Fallback to generating samples if no defaults are available
-  const inputPlaceholder: Record<string, unknown> = {};
-  for (const [propertyName, propertySchema] of Object.entries(normalizedInputs.properties)) {
-    const jsonSchema = propertySchema as JSONSchema7;
-    inputPlaceholder[propertyName] = generateSampleFromJsonSchema(jsonSchema);
-  }
-
-  return JSON.stringify(inputPlaceholder, null, 2);
-};
-
 export const WorkflowExecuteManualForm = ({
   definition,
   value,
@@ -193,10 +169,33 @@ export const WorkflowExecuteManualForm = ({
   errors,
   setErrors,
 }: WorkflowExecuteManualFormProps): React.JSX.Element => {
-  const inputsValidator = useMemo(
-    () => makeWorkflowInputsValidator(definition?.inputs),
-    [definition?.inputs]
-  );
+  const [resolvedInputsSchema, setResolvedInputsSchema] = React.useState<
+    ReturnType<typeof normalizeInputsToJsonSchema> | undefined
+  >(undefined);
+  const [inputsValidator, setInputsValidator] = React.useState<z.ZodType>(z.object({}));
+
+  // Resolve inputs schema asynchronously and create validator
+  React.useEffect(() => {
+    const resolveAndCreateValidator = async () => {
+      if (definition?.inputs) {
+        try {
+          const resolved = await normalizeInputsToJsonSchemaAsync(definition.inputs);
+          setResolvedInputsSchema(resolved);
+          const validator = await makeWorkflowInputsValidator(definition.inputs, resolved);
+          setInputsValidator(validator);
+        } catch (error) {
+          // Fallback to sync version
+          const validator = await makeWorkflowInputsValidator(definition.inputs);
+          setInputsValidator(validator);
+          setResolvedInputsSchema(normalizeInputsToJsonSchema(definition.inputs));
+        }
+      } else {
+        setInputsValidator(z.object({}));
+        setResolvedInputsSchema(undefined);
+      }
+    };
+    resolveAndCreateValidator();
+  }, [definition?.inputs]);
 
   const handleChange = useCallback(
     (data: string) => {
@@ -248,14 +247,28 @@ export const WorkflowExecuteManualForm = ({
 
   // Set defaults if value is empty or only contains empty object
   useEffect(() => {
-    if (definition) {
+    if (definition && resolvedInputsSchema) {
       const isEmpty = !value || value.trim() === '' || value.trim() === '{}';
       if (isEmpty) {
-        handleChange(getDefaultWorkflowInput(definition));
+        // Use resolved schema for defaults
+        const defaults = applyInputDefaults(undefined, resolvedInputsSchema);
+        if (defaults && typeof defaults === 'object' && Object.keys(defaults).length > 0) {
+          handleChange(JSON.stringify(defaults, null, 2));
+        } else {
+          // Fallback to generating samples
+          const inputPlaceholder: Record<string, unknown> = {};
+          for (const [propertyName, propertySchema] of Object.entries(
+            resolvedInputsSchema.properties || {}
+          )) {
+            const jsonSchema = propertySchema as JSONSchema7;
+            inputPlaceholder[propertyName] = generateSampleFromJsonSchema(jsonSchema);
+          }
+          handleChange(JSON.stringify(inputPlaceholder, null, 2));
+        }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [definition]);
+  }, [definition, resolvedInputsSchema]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">

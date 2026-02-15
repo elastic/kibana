@@ -98,7 +98,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     return this.step.name;
   }
 
-  public getInput(): any {
+  public async getInput(): Promise<any> {
     return {};
   }
 

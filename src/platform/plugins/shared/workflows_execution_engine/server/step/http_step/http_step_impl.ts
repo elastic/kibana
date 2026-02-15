@@ -67,7 +67,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
     );
   }
 
-  public getInput() {
+  public async getInput() {
     const { url, method = 'GET', headers = {}, body, fetcher } = this.step.with;
 
     return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext({
@@ -81,7 +81,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
 
   protected async _run(input: any): Promise<RunStepResult> {
     try {
-      return await this.executeHttpRequest(input);
+      return this.executeHttpRequest(input);
     } catch (error) {
       return this.handleFailure(input, error);
     }

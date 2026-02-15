@@ -109,7 +109,7 @@ describe('buildWorkflowContext', () => {
   });
 
   describe('input default values', () => {
-    it('should merge default input values when inputs are not provided', () => {
+    it('should merge default input values when inputs are not provided', async () => {
       const workflowDefinition: WorkflowYaml = {
         name: 'Merge inputs into ctx',
         version: '1',
@@ -134,14 +134,14 @@ describe('buildWorkflowContext', () => {
         },
       };
 
-      const context = buildWorkflowContext(execution, undefined, dependencies);
+      const context = await buildWorkflowContext(execution, undefined, dependencies);
 
       expect(context.inputs).toEqual({
         inputWithDefault: 'defaultValue',
       });
     });
 
-    it('should override default values with provided inputs', () => {
+    it('should override default values with provided inputs', async () => {
       const workflowDefinition: WorkflowYaml = {
         name: 'Merge inputs into ctx',
         version: '1',
@@ -168,14 +168,14 @@ describe('buildWorkflowContext', () => {
         },
       };
 
-      const context = buildWorkflowContext(execution, undefined, dependencies);
+      const context = await buildWorkflowContext(execution, undefined, dependencies);
 
       expect(context.inputs).toEqual({
         inputWithDefault: 'customValue',
       });
     });
 
-    it('should apply defaults for missing inputs while preserving provided ones', () => {
+    it('should apply defaults for missing inputs while preserving provided ones', async () => {
       const workflowDefinition: WorkflowYaml = {
         name: 'Merge inputs into ctx',
         version: '1',
@@ -208,12 +208,63 @@ describe('buildWorkflowContext', () => {
         },
       };
 
-      const context = buildWorkflowContext(execution, undefined, dependencies);
+      const context = await buildWorkflowContext(execution, undefined, dependencies);
 
       expect(context.inputs).toEqual({
         inputWithDefault: 'customValue',
         anotherInput: 'anotherDefault',
       });
+    });
+
+    it('should apply defaults for simple legacy inputs workflow - regression test', async () => {
+      const workflowDefinition: WorkflowYaml = {
+        name: 'New workflow',
+        version: '1',
+        enabled: false,
+        description: 'This is a new workflow',
+        inputs: [
+          {
+            name: 'message',
+            type: 'string',
+            default: 'hello world',
+          },
+        ] as any,
+        consts: {},
+        triggers: [{ type: 'manual' }],
+        steps: [
+          {
+            name: 'hello_world_step',
+            type: 'console',
+            with: {
+              message: '{{ inputs.message }}',
+            },
+          } as any,
+        ],
+      };
+
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        workflowDefinition,
+        context: {
+          // No inputs provided - should use defaults
+        },
+      };
+
+      const context = await buildWorkflowContext(execution, undefined, dependencies);
+
+      // Verify inputs have default applied
+      expect(context.inputs).toEqual({
+        message: 'hello world',
+      });
+
+      // Verify the context can be used for template rendering
+      // This simulates what the console step does
+      const { WorkflowTemplatingEngine } = await import('../../templating_engine');
+      const templatingEngine = new WorkflowTemplatingEngine();
+      const renderedMessage = templatingEngine.render('{{ inputs.message }}', context);
+
+      // This is what the console step should receive
+      expect(renderedMessage).toBe('hello world');
     });
 
     it('should handle workflows without input defaults', () => {
@@ -243,14 +294,14 @@ describe('buildWorkflowContext', () => {
         },
       };
 
-      const context = buildWorkflowContext(execution, undefined, dependencies);
+      const context = await buildWorkflowContext(execution, undefined, dependencies);
 
       expect(context.inputs).toEqual({
         inputWithDefault: 'providedValue',
       });
     });
 
-    it('should return undefined inputs when there are no defaults and no provided inputs (backwards compatible)', () => {
+    it('should return undefined inputs when there are no defaults and no provided inputs (backwards compatible)', async () => {
       const workflowDefinition: WorkflowYaml = {
         name: 'Merge inputs into ctx',
         version: '1',
@@ -275,13 +326,13 @@ describe('buildWorkflowContext', () => {
         },
       };
 
-      const context = buildWorkflowContext(execution, undefined, dependencies);
+      const context = await buildWorkflowContext(execution, undefined, dependencies);
 
       // Backwards compatible: should return undefined when no defaults and no provided inputs
       expect(context.inputs).toBeUndefined();
     });
 
-    it('should handle empty inputs context', () => {
+    it('should handle empty inputs context', async () => {
       const workflowDefinition: WorkflowYaml = {
         name: 'Merge inputs into ctx',
         version: '1',
@@ -306,14 +357,14 @@ describe('buildWorkflowContext', () => {
         },
       };
 
-      const context = buildWorkflowContext(execution, undefined, dependencies);
+      const context = await buildWorkflowContext(execution, undefined, dependencies);
 
       expect(context.inputs).toEqual({
         inputWithDefault: 'defaultValue',
       });
     });
 
-    it('should handle different input types with defaults', () => {
+    it('should handle different input types with defaults', async () => {
       const workflowDefinition: WorkflowYaml = {
         name: 'Test Workflow',
         version: '1',
@@ -351,7 +402,7 @@ describe('buildWorkflowContext', () => {
         },
       };
 
-      const context = buildWorkflowContext(execution, undefined, dependencies);
+      const context = await buildWorkflowContext(execution, undefined, dependencies);
 
       expect(context.inputs).toEqual({
         count: 42,
@@ -360,7 +411,7 @@ describe('buildWorkflowContext', () => {
       });
     });
 
-    it('should handle empty provided inputs object (not undefined)', () => {
+    it('should handle empty provided inputs object (not undefined)', async () => {
       const workflowDefinition: WorkflowYaml = {
         name: 'Merge inputs into ctx',
         version: '1',
@@ -385,7 +436,7 @@ describe('buildWorkflowContext', () => {
         },
       };
 
-      const context = buildWorkflowContext(execution, undefined, dependencies);
+      const context = await buildWorkflowContext(execution, undefined, dependencies);
 
       // Should still apply defaults when providedInputs is empty object
       expect(context.inputs).toEqual({
@@ -393,7 +444,7 @@ describe('buildWorkflowContext', () => {
       });
     });
 
-    it('should handle workflow definition with undefined name and enabled', () => {
+    it('should handle workflow definition with undefined name and enabled', async () => {
       const execution: EsWorkflowExecution = {
         ...baseExecution,
         workflowDefinition: {
@@ -408,14 +459,14 @@ describe('buildWorkflowContext', () => {
         context: {},
       };
 
-      const context = buildWorkflowContext(execution, undefined, dependencies);
+      const context = await buildWorkflowContext(execution, undefined, dependencies);
 
       // Should use default values for undefined name and enabled
       expect(context.workflow.name).toBe('');
       expect(context.workflow.enabled).toBe(false);
     });
 
-    it('should handle workflow definition with undefined consts', () => {
+    it('should handle workflow definition with undefined consts', async () => {
       const execution: EsWorkflowExecution = {
         ...baseExecution,
         workflowDefinition: {
@@ -430,13 +481,13 @@ describe('buildWorkflowContext', () => {
         context: {},
       };
 
-      const context = buildWorkflowContext(execution, undefined, dependencies);
+      const context = await buildWorkflowContext(execution, undefined, dependencies);
 
       // Should use empty object for undefined consts
       expect(context.consts).toEqual({});
     });
 
-    it('should handle when workflowInputs parameter is undefined (uses default)', () => {
+    it('should handle when workflowInputs parameter is undefined (uses default)', async () => {
       const execution: EsWorkflowExecution = {
         ...baseExecution,
         workflowDefinition: {
@@ -455,7 +506,7 @@ describe('buildWorkflowContext', () => {
         },
       };
 
-      const context = buildWorkflowContext(execution, undefined, dependencies);
+      const context = await buildWorkflowContext(execution, undefined, dependencies);
 
       // Should handle undefined inputs array (uses default empty array)
       expect(context.inputs).toEqual({

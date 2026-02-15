@@ -1,0 +1,76 @@
+name: Remote Types Registry Reference Example
+description: Demonstrates remote JSON Schema reference using the local types registry
+enabled: true
+
+triggers:
+  - type: manual
+
+inputs:
+  properties:
+    # Example 1: Reference a type definition from the local types registry
+    # The registry is served at: http://localhost:5601/hdz/api/workflows/types-registry.json
+    # Note: Replace /hdz with your actual base path if different
+    user:
+      $ref: "http://localhost:5601/hdz/api/workflows/types-registry.json#/definitions/User"
+    
+    # Example 2: Reference another type from the registry
+    address:
+      $ref: "http://localhost:5601/hdz/api/workflows/types-registry.json#/definitions/Address"
+    
+    # Example 3: Reference contact information type
+    contact:
+      $ref: "http://localhost:5601/hdz/api/workflows/types-registry.json#/definitions/ContactInfo"
+    
+    # Example 4: Reference simple types
+    createdAt:
+      $ref: "http://localhost:5601/hdz/api/workflows/types-registry.json#/definitions/Timestamp"
+    
+    incidentId:
+      $ref: "http://localhost:5601/hdz/api/workflows/types-registry.json#/definitions/UUID"
+    
+    severity:
+      $ref: "http://localhost:5601/hdz/api/workflows/types-registry.json#/definitions/Severity"
+    
+    priority:
+      $ref: "http://localhost:5601/hdz/api/workflows/types-registry.json#/definitions/Priority"
+    
+    status:
+      $ref: "http://localhost:5601/hdz/api/workflows/types-registry.json#/definitions/Status"
+    
+    # Local reference example (still works alongside remote references)
+    localConfig:
+      $ref: "#/definitions/LocalConfig"
+  
+  definitions:
+    LocalConfig:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          default: true
+        timeout:
+          type: number
+          default: 30
+      required:
+        - enabled
+
+steps:
+  - name: print-user-info
+    type: console
+    with:
+      message: "User: {{ inputs.user.name }} ({{ inputs.user.email }}) - Role: {{ inputs.user.role }}"
+  
+  - name: print-address
+    type: console
+    with:
+      message: "Address: {{ inputs.address.street }}, {{ inputs.address.city }}, {{ inputs.address.state }} {{ inputs.address.zipCode }}"
+  
+  - name: print-contact
+    type: console
+    with:
+      message: "Contact: {{ inputs.contact.email }} - Website: {{ inputs.contact.website }}"
+  
+  - name: print-metadata
+    type: console
+    with:
+      message: "Incident ID: {{ inputs.incidentId }}, Severity: {{ inputs.severity }}, Priority: {{ inputs.priority }}, Status: {{ inputs.status }}, Created: {{ inputs.createdAt }}"

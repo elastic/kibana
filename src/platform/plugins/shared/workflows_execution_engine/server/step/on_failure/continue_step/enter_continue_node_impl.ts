@@ -24,8 +24,8 @@ export class EnterContinueNodeImpl implements NodeImplementation, NodeWithErrorC
     this.workflowRuntime.navigateToNextNode();
   }
 
-  public catchError(failedContext: StepExecutionRuntime): void {
-    const shouldContinue = failedContext.contextManager.evaluateBooleanExpressionInContext(
+  public async catchError(failedContext: StepExecutionRuntime): Promise<void> {
+    const shouldContinue = await failedContext.contextManager.evaluateBooleanExpressionInContext(
       this.node.configuration.condition,
       {
         error: failedContext.stepExecution?.error,

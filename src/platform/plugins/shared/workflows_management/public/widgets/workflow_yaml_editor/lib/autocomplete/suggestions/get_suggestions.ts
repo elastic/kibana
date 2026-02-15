@@ -24,6 +24,7 @@ import { getVariableSuggestions } from './variable/get_variable_suggestions';
 import { getPropertyHandler } from '../../../../../../common/schema';
 import type { ExtendedAutocompleteContext } from '../context/autocomplete.types';
 
+// eslint-disable-next-line complexity
 export async function getSuggestions(
   autocompleteContext: ExtendedAutocompleteContext
 ): Promise<monaco.languages.CompletionItem[]> {
@@ -160,7 +161,7 @@ export async function getSuggestions(
   //       enum: |<- (suggest enum values from schema)
   // This should be checked BEFORE other type completions to avoid conflicts
   // but AFTER variable/connector completions which are more specific
-  const jsonSchemaSuggestions = getJsonSchemaSuggestions(autocompleteContext);
+  const jsonSchemaSuggestions = await getJsonSchemaSuggestions(autocompleteContext);
   if (jsonSchemaSuggestions.length > 0) {
     return jsonSchemaSuggestions;
   }
