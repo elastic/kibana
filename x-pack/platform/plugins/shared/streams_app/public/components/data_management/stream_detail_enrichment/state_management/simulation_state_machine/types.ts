@@ -55,6 +55,7 @@ export type SimulationEvent =
   | { type: 'simulation.receive_steps'; steps: StreamlangStepWithUIAttributes[] }
   | { type: 'simulation.updateSteps'; steps: StreamlangStepWithUIAttributes[] }
   | { type: 'simulation.reset' }
+  | { type: 'simulation.fetchMore' }
   | { type: 'step.change'; steps: StreamlangStepWithUIAttributes[] }
   | { type: 'step.delete'; steps: StreamlangStepWithUIAttributes[] };
 

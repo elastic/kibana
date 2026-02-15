@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { flattenObjectNestedLast } from '@kbn/object-utils';
-import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import type { Condition, StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import { isConditionBlock } from '@kbn/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { isEmpty } from 'lodash';
@@ -314,3 +315,22 @@ export const createSimulationMachineImplementations = ({
     notifySimulationRunFailure: createSimulationRunFailureNotifier({ toasts }),
   },
 });
+
+/**
+ * Finds the condition from the steps based on the selected condition ID.
+ * This is used by the orchestrating layer (stream_enrichment_state_machine) to
+ * extract conditions before forwarding fetch more requests to the data source.
+ */
+export function findConditionById(
+  steps: StreamlangStepWithUIAttributes[],
+  conditionId: string
+): Condition | undefined {
+  for (const step of steps) {
+    if (isConditionBlock(step) && step.customIdentifier === conditionId) {
+      // Extract the condition without the nested steps
+      const { steps: _, ...conditionWithoutSteps } = step.condition;
+      return conditionWithoutSteps as Condition;
+    }
+  }
+  return undefined;
+}
