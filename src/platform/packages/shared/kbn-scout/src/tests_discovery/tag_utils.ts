@@ -7,18 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ScoutTargetArch, ScoutTargetDomain } from '@kbn/scout-info';
+import { ScoutTestTarget } from '@kbn/scout-info';
 import { tags } from '../playwright/tags';
 
 // Gets test tags for a given target type
 export const getTestTagsForTarget = (target: string): string[] => {
   switch (target) {
     case 'mki':
-      return tags.SERVERLESS_ONLY;
+      return tags.serverless.all;
     case 'ech':
-      return tags.ESS_ONLY;
+      return tags.stateful.all;
     case 'all':
     default:
-      return tags.DEPLOYMENT_AGNOSTIC;
+      return tags.deploymentAgnostic;
   }
 };
 
@@ -34,43 +36,34 @@ export const collectUniqueTags = (
       test.location?.file?.endsWith('.spec.ts') &&
       test.tags
     ) {
-      for (const tag of test.tags) {
-        tagSet.add(tag);
+      for (const testTag of test.tags) {
+        tagSet.add(testTag);
       }
     }
   }
   return Array.from(tagSet);
 };
 
-// Converts tags to server run flags (e.g., --stateful, --serverless=es)
+// Converts tags to server run flags
 export const getServerRunFlagsFromTags = (testTags: string[]): string[] => {
-  const flags: string[] = [];
-  const tagSet = new Set(testTags);
+  const supportedArchDomainCombos: [ScoutTargetArch, ScoutTargetDomain][] = [
+    ['stateful', 'classic'],
+    ['serverless', 'search'],
+    ['serverless', 'observability_complete'],
+    // ['serverless', 'observability_logs_essentials'],
+    ['serverless', 'security_complete'],
+    // ['serverless', 'security_essentials'],
+    // ['serverless', 'security_ease'],
+    // ['serverless', 'workplaceai'],
+  ];
+  // TODO: Uncomment above to run tests for these targets in CI
 
-  // Map tags to server run flags
-  if (tagSet.has('@ess')) {
-    flags.push('--stateful');
-  }
-  if (tagSet.has('@svlSearch')) {
-    flags.push('--serverless=es');
-  }
-  if (tagSet.has('@svlSecurity')) {
-    flags.push('--serverless=security');
-  }
-  if (tagSet.has('@svlOblt')) {
-    flags.push('--serverless=oblt');
-  }
-  // TODO: Uncomment to run tests for these targets in CI
-  //
-  // if (tagSet.has('@svlLogsEssentials')) {
-  //   flags.push('--serverless=oblt-logs-essentials');
-  // }
-  // if (tagSet.has('@svlSecurityEssentials')) {
-  //   flags.push('--serverless=security-essentials');
-  // }
-  // if (tagSet.has('@svlSecurityEase')) {
-  //   flags.push('--serverless=security-ease');
-  // }
-
-  return flags;
+  return [...new Set(testTags)]
+    .map((tag) => ScoutTestTarget.fromPlaywrightTag(tag))
+    .filter((target) =>
+      supportedArchDomainCombos.some(
+        ([arch, domain]) => target.arch === arch && target.domain === domain
+      )
+    )
+    .map((target) => `--arch ${target.arch} --domain ${target.domain}`);
 };

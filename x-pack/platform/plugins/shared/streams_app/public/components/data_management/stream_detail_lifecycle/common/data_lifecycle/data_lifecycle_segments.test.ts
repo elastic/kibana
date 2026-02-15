@@ -128,6 +128,30 @@ describe('Segment Utilities', () => {
       expect(segments[1]).toEqual({ grow: 3, leftValue: '30d', isDelete: undefined });
       expect(segments[2]).toEqual({ grow: false, leftValue: '60d', isDelete: true });
     });
+
+    it('should match the beginning value unit to the second non-delete phase min_age', () => {
+      const phases: SegmentPhase[] = [
+        { grow: 5, min_age: '0ms' },
+        { grow: 3, min_age: '30d' },
+        { grow: false, min_age: '90d', isDelete: true },
+      ];
+
+      const segments = buildPhaseTimelineSegments(phases);
+
+      expect(segments[0]).toEqual({ grow: 5, leftValue: '0d', isDelete: undefined });
+      expect(segments[1]).toEqual({ grow: 3, leftValue: '30d', isDelete: undefined });
+    });
+
+    it('should keep original min_age when there is only one non-delete phase', () => {
+      const phases: SegmentPhase[] = [
+        { grow: 5, min_age: '0ms' },
+        { grow: false, min_age: '30d', isDelete: true },
+      ];
+
+      const segments = buildPhaseTimelineSegments(phases);
+
+      expect(segments[0]).toEqual({ grow: 5, leftValue: '0ms', isDelete: undefined });
+    });
   });
 
   describe('buildDslSegments', () => {

@@ -184,6 +184,7 @@ export const FAAS_BILLED_DURATION = 'faas.billed_duration';
 export const METRIC_OTEL_SYSTEM_CPU_UTILIZATION = 'system.cpu.utilization';
 export const METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION = 'system.memory.utilization';
 
+// OTel JVM metrics - experimental semconv (process.runtime.jvm.*)
 export const METRIC_OTEL_JVM_PROCESS_CPU_PERCENT = 'process.runtime.jvm.cpu.utilization';
 export const METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE = 'process.runtime.jvm.memory.usage';
 export const METRIC_OTEL_JVM_PROCESS_MEMORY_COMMITTED = 'process.runtime.jvm.memory.committed';
@@ -191,8 +192,23 @@ export const METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT = 'process.runtime.jvm.memory.
 export const METRIC_OTEL_JVM_PROCESS_THREADS_COUNT = 'process.runtime.jvm.threads.count';
 export const METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT = 'process.runtime.jvm.system.cpu.utilization';
 export const METRIC_OTEL_JVM_GC_DURATION = 'process.runtime.jvm.gc.duration';
-export const VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP = 'heap';
-export const VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP = 'non_heap';
+
+// OTel JVM metrics - stable semconv (jvm.*)
+// https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/
+export const METRIC_OTEL_JVM_CPU_PERCENT = 'metrics.jvm.cpu.recent_utilization';
+export const METRIC_OTEL_JVM_MEMORY_USED = 'metrics.jvm.memory.used';
+export const METRIC_OTEL_JVM_MEMORY_COMMITTED = 'metrics.jvm.memory.committed';
+export const METRIC_OTEL_JVM_MEMORY_LIMIT = 'metrics.jvm.memory.limit';
+export const METRIC_OTEL_JVM_THREAD_COUNT = 'metrics.jvm.thread.count';
+export const METRIC_OTEL_JVM_SYSTEM_CPU = 'metrics.jvm.system.cpu.utilization';
+export const METRIC_OTEL_JVM_GC_DURATION_SECONDS = 'metrics.jvm.gc.duration';
+// OTel native ingest (EDOT Collector → ES) stores as attributes.*
+export const ATTRIBUTE_OTEL_JVM_MEMORY_TYPE = 'attributes.jvm.memory.type';
+// APM Server ingest (OTel SDK → APM Server → ES) stores as labels.* with dots → underscores
+// See: https://www.elastic.co/docs/solutions/observability/apm/opentelemetry/attributes
+export const LABEL_OTEL_JVM_MEMORY_TYPE = 'labels.jvm_memory_type';
+export const VALUE_OTEL_JVM_MEMORY_TYPE_HEAP = 'heap';
+export const VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP = 'non_heap';
 
 // OpenTelemetry semconv fields for AgentName https://opentelemetry.io/docs/specs/semconv/resource/#telemetry-sdk
 export const TELEMETRY_SDK_NAME = 'telemetry.sdk.name';
