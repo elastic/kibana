@@ -9,9 +9,8 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import type { PublishesDataViews, PublishingSubject } from '@kbn/presentation-publishing';
-import { apiPublishesDataViews } from '@kbn/presentation-publishing';
+import { apiPublishesDataViews, combineCompatibleChildrenApis } from '@kbn/presentation-publishing';
 import { uniqBy } from 'lodash';
 import { BehaviorSubject, switchMap } from 'rxjs';
 

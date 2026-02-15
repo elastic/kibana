@@ -14,14 +14,12 @@ import {
   type CanPinPanels,
   apiCanBePinned,
   apiCanPinPanels,
-} from '@kbn/presentation-containers';
-import {
   apiHasParentApi,
   apiHasUniqueId,
   type HasParentApi,
   type HasType,
+  type HasUniqueId,
 } from '@kbn/presentation-publishing';
-import type { HasUniqueId } from '@kbn/presentation-publishing';
 
 export type PinnableControlApi = HasType &
   HasUniqueId &

@@ -20,7 +20,7 @@ import {
   fetch$,
   titleComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject, map, merge } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import { StatusGridComponent } from './monitors_grid_component';

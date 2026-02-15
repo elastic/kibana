@@ -19,7 +19,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { getRuleTypeIdsForSolution } from '@kbn/response-ops-alerts-filters-form/utils/solutions';
 import { getInternalRuleTypesWithCache } from '../utils/get_internal_rule_types_with_cache';

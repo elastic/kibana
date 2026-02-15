@@ -84,7 +84,6 @@ dependsOn:
   - '@kbn/unified-field-list'
   - '@kbn/content-management-utils'
   - '@kbn/core-lifecycle-browser'
-  - '@kbn/presentation-containers'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/file-upload-common'
   - '@kbn/charts-theme'

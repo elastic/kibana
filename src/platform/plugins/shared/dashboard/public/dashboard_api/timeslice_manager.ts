@@ -9,9 +9,12 @@
 
 import type { TimeSlice } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
-import type { AppliesTimeslice } from '@kbn/presentation-publishing';
-import { apiAppliesTimeslice, type PublishingSubject } from '@kbn/presentation-publishing';
+import {
+  apiAppliesTimeslice,
+  combineCompatibleChildrenApis,
+  type PublishingSubject,
+  type AppliesTimeslice,
+} from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import {
   BehaviorSubject,

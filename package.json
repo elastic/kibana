@@ -858,7 +858,6 @@
     "@kbn/panel-loader": "link:src/platform/packages/private/kbn-panel-loader",
     "@kbn/portable-dashboards-example": "link:examples/portable_dashboards_example",
     "@kbn/preboot-example-plugin": "link:examples/preboot_example",
-    "@kbn/presentation-containers": "link:src/platform/packages/shared/presentation/presentation_containers",
     "@kbn/presentation-panel-plugin": "link:src/platform/plugins/private/presentation_panel",
     "@kbn/presentation-publishing": "link:src/platform/packages/shared/presentation/presentation_publishing",
     "@kbn/presentation-publishing-schemas": "link:src/platform/packages/shared/presentation/presentation_publishing_schemas",

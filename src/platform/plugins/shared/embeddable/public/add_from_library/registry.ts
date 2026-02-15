@@ -8,7 +8,7 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import type { CanAddNewPanel } from '@kbn/presentation-containers';
+import type { CanAddNewPanel } from '@kbn/presentation-publishing';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
 import { useMemo } from 'react';

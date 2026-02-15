@@ -33,7 +33,6 @@
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
     "@kbn/visualizations-plugin",
-    "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/presentation-publishing-schemas",
     "@kbn/react-kibana-context-render",

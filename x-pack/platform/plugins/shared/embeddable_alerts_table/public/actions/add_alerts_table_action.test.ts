@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { coreMock } from '@kbn/core/public/mocks';
-import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import type { InternalRuleType } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
 import { getInternalRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
 

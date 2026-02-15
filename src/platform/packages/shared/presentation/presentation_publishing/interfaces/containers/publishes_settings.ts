@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
-import type { PresentationContainer } from './interfaces/presentation_container';
+import type { PublishingSubject } from '../../publishing_subject';
 
-export const getMockPresentationContainer = (): PresentationContainer => {
-  return {
-    removePanel: jest.fn(),
-    addNewPanel: jest.fn(),
-    replacePanel: jest.fn(),
-    getChildApi: jest.fn(),
-    getPanelCount: jest.fn(),
-    children$: new BehaviorSubject<{ [key: string]: unknown }>({}),
-  };
+export interface PublishesSettings {
+  settings: Record<string, PublishingSubject<boolean | undefined>>;
+}
+
+export const apiPublishesSettings = (
+  unknownApi: null | unknown
+): unknownApi is PublishesSettings => {
+  return Boolean(unknownApi && typeof (unknownApi as PublishesSettings)?.settings === 'object');
 };

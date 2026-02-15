@@ -14,7 +14,7 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
-import type { PresentationContainer } from '@kbn/presentation-containers';
+import type { PresentationContainer } from '@kbn/presentation-publishing';
 import type { PhaseEvent, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { act, render, waitFor } from '@testing-library/react';

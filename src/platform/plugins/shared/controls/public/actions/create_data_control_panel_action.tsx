@@ -14,8 +14,9 @@ import {
   apiCanAddNewPanel,
   apiCanPinPanels,
   apiIsPresentationContainer,
-} from '@kbn/presentation-containers';
-import { apiPublishesDataViews, type EmbeddableApiContext } from '@kbn/presentation-publishing';
+  apiPublishesDataViews,
+  type EmbeddableApiContext,
+} from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { ACTION_CREATE_CONTROL } from '@kbn/controls-constants';

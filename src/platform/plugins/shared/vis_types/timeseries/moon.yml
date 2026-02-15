@@ -60,7 +60,6 @@ dependsOn:
   - '@kbn/event-annotation-common'
   - '@kbn/ui-actions-plugin'
   - '@kbn/presentation-publishing'
-  - '@kbn/presentation-containers'
   - '@kbn/kql'
 tags:
   - plugin

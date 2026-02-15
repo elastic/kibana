@@ -16,10 +16,10 @@ import {
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
+  apiPublishesSettings,
+  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, merge } from 'rxjs';
-import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import {
   APPLY_FILTER_TRIGGER,
   VALUE_CLICK_TRIGGER,

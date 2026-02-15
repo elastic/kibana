@@ -22,7 +22,7 @@ import {
   titleComparators,
   timeRangeComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 
 import fastIsEqual from 'fast-deep-equal';
 import React, { useMemo } from 'react';

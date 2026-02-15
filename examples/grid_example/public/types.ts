@@ -12,7 +12,7 @@ import type {
   CanExpandPanels,
   HasSerializedChildState,
   PresentationContainer,
-} from '@kbn/presentation-containers';
+} from '@kbn/presentation-publishing';
 import type { PublishesWritableViewMode } from '@kbn/presentation-publishing';
 import type { BehaviorSubject } from 'rxjs';
 

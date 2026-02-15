@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PublishingSubject } from '@kbn/presentation-publishing';
-import { apiHasParentApi, apiHasUniqueId } from '@kbn/presentation-publishing';
 import type { BehaviorSubject, Observable } from 'rxjs';
 import { combineLatest, isObservable, map, of, switchMap } from 'rxjs';
+import type { PublishingSubject } from '../../publishing_subject';
+import { apiHasParentApi } from '../has_parent_api';
+import { apiHasUniqueId } from '../has_uuid';
 import type { CanAddNewPanel } from './can_add_new_panel';
 import { apiCanAddNewPanel } from './can_add_new_panel';
 import type { CanAddNewSection } from './can_add_new_section';

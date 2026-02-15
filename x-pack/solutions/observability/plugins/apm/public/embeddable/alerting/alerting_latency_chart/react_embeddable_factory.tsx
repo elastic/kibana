@@ -12,7 +12,7 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import type { EmbeddableApmAlertingLatencyVizProps } from '../types';
 import type { EmbeddableDeps } from '../../types';

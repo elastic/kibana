@@ -14,7 +14,7 @@ import type {
   initializeTitleManager,
 } from '@kbn/presentation-publishing';
 import { titleComparators } from '@kbn/presentation-publishing';
-import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import type {

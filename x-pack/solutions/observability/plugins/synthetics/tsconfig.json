@@ -90,7 +90,6 @@
     "@kbn/search-types",
     "@kbn/core-lifecycle-browser",
     "@kbn/presentation-publishing",
-    "@kbn/presentation-containers",
     "@kbn/ui-actions-plugin",
     "@kbn/presentation-util-plugin",
     "@kbn/core-application-browser",

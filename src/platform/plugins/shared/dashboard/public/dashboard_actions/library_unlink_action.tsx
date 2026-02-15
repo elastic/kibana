@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PresentationContainer } from '@kbn/presentation-containers';
 import type {
   CanAccessViewMode,
   EmbeddableApiContext,
@@ -16,6 +15,7 @@ import type {
   HasType,
   HasUniqueId,
   PublishesTitle,
+  PresentationContainer,
 } from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
