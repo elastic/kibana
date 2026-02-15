@@ -82,9 +82,12 @@ export class PromptsConfigService {
         systemsPromptOverride:
           data.attributes.systemsPromptOverride || defaultsPrompts.systemsPromptOverride,
       };
-    } catch (err: any) {
+    } catch (err) {
       // saved objects client throws with statusCode 404 for not found
-      if (err?.output?.statusCode === 404 || err?.statusCode === 404) {
+      if (
+        (err as { output?: { statusCode?: number } })?.output?.statusCode === 404 ||
+        (err as { statusCode?: number })?.statusCode === 404
+      ) {
         // return the packaged default prompt on 404 as well
         return defaultsPrompts;
       }

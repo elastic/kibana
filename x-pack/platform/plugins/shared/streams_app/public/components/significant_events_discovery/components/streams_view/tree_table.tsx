@@ -108,7 +108,12 @@ export function StreamsTreeTable({
       ) ?? [];
     return qualityFiters.length > 0
       ? rows.filter((row) =>
-          qualityFiters.some((filter: any) => filter.value.includes(row.dataQuality))
+          qualityFiters.some(
+            (filter) =>
+              'value' in filter &&
+              typeof filter.value === 'string' &&
+              filter.value.includes(row.dataQuality)
+          )
         )
       : rows;
   }, [enrichedStreams, sortField, sortDirection, searchQuery?.ast?.clauses]);

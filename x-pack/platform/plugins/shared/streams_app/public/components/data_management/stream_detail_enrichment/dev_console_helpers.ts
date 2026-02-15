@@ -175,6 +175,7 @@ export function installDevConsoleHelpers(
     );
 
     // Add to window object
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).copyStreamsSuggestion = copyFn;
   }
 }
@@ -184,6 +185,7 @@ export function installDevConsoleHelpers(
  */
 export function cleanupDevConsoleHelpers() {
   if (typeof window !== 'undefined') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     delete (window as any).copyStreamsSuggestion;
   }
   // Clear any registered suggestions

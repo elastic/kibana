@@ -78,6 +78,7 @@ interface FakeModel {
 const createFakeModel = (lines: string[]): FakeModel => {
   const getLineContent = (line: number) => lines[line - 1] || '';
   const getLineMaxColumn = (line: number) => (lines[line - 1] ? lines[line - 1].length + 1 : 1);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getValueInRange = ({ startLineNumber, startColumn, endLineNumber, endColumn }: any) => {
     if (startLineNumber === endLineNumber) {
       const s = getLineContent(startLineNumber);
@@ -93,6 +94,7 @@ const createFakeModel = (lines: string[]): FakeModel => {
     parts.push(last.slice(0, Math.max(0, endColumn - 1)));
     return parts.join('\n');
   };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getWordUntilPosition = ({ column, lineNumber }: any) => ({
     word: '',
     startColumn: column,

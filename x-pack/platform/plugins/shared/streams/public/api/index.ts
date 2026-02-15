@@ -15,7 +15,7 @@ import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import type { StreamsRouteRepository } from '../../server';
 
 type FetchOptions = Omit<HttpFetchOptions, 'body'> & {
-  body?: any;
+  body?: unknown;
 };
 
 export type StreamsRepositoryClientOptions = Omit<

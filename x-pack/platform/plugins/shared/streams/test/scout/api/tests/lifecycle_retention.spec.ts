@@ -19,10 +19,17 @@ apiTest.describe(
     // The prefix 'lc' is used for cleanup matching
     const streamNamePrefix = 'logs.lc';
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type ApiClient = any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type CookieHeader = any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type StreamResponse = any;
+
     // Helper to create a stream and verify it was created
     async function createTestStream(
-      apiClient: any,
-      cookieHeader: any,
+      apiClient: ApiClient,
+      cookieHeader: CookieHeader,
       streamName: string,
       condition: { field: string; eq: string }
     ): Promise<{ success: boolean; error?: string }> {
@@ -50,10 +57,10 @@ apiTest.describe(
 
     // Helper to get a stream and verify it exists
     async function getStream(
-      apiClient: any,
-      cookieHeader: any,
+      apiClient: ApiClient,
+      cookieHeader: CookieHeader,
       streamName: string
-    ): Promise<{ success: boolean; stream?: any; error?: string }> {
+    ): Promise<{ success: boolean; stream?: StreamResponse; error?: string }> {
       const response = await apiClient.get(`api/streams/${streamName}`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         responseType: 'json',
@@ -79,7 +86,7 @@ apiTest.describe(
     }
 
     // Helper to extract writeable ingest config (removes read-only fields like 'updated_at')
-    function getWriteableIngest(streamResponse: any): any {
+    function getWriteableIngest(streamResponse: StreamResponse): StreamResponse {
       const ingest = streamResponse.stream.ingest;
       // Remove 'updated_at' from processing as it's a read-only field
       const { updated_at: _, ...processingWithoutUpdatedAt } = ingest.processing || {};

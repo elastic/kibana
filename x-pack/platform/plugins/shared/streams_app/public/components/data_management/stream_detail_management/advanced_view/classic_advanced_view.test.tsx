@@ -137,6 +137,7 @@ jest.mock('../../../../hooks/use_kibana', () => ({
       start: {
         licensing: {
           license$: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             subscribe: (observer: any) => {
               const license = { hasAtLeast: () => true };
               if (typeof observer === 'function') observer(license);
@@ -218,6 +219,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: true, available: true },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -236,6 +238,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: true, available: true },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -254,6 +257,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: false, available: true },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -272,6 +276,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: true, available: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -291,6 +296,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: undefined,
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -309,6 +315,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: true, available: undefined },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -329,6 +336,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -346,6 +354,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -363,6 +372,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -380,6 +390,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -397,6 +408,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -414,6 +426,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -433,6 +446,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -450,6 +464,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: true },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -469,6 +484,7 @@ describe('ClassicAdvancedView', () => {
         features: {
           significantEvents: { enabled: true, available: true },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(

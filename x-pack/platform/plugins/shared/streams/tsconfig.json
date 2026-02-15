@@ -1,7 +1,8 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types"
+    "outDir": "target/types",
+    "useUnknownInCatchVariables": true
   },
   "include": [
     "../../../../../typings/**/*",

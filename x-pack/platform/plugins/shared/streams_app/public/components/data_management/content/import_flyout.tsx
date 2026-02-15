@@ -127,11 +127,12 @@ export function ImportContentPackFlyout({
                 } catch (err) {
                   setFile(undefined);
 
-                  notifications.toasts.addError(err, {
+                  const formattedErr = getFormattedError(err);
+                  notifications.toasts.addError(formattedErr, {
                     title: i18n.translate('xpack.streams.failedToPreviewContentError', {
                       defaultMessage: 'Failed to preview content pack',
                     }),
-                    toastMessage: getFormattedError(err).message,
+                    toastMessage: formattedErr.message,
                   });
                 }
               } else {
@@ -230,11 +231,12 @@ export function ImportContentPackFlyout({
                 } catch (err) {
                   setIsLoading(false);
 
-                  notifications.toasts.addError(err, {
+                  const formattedErr = getFormattedError(err);
+                  notifications.toasts.addError(formattedErr, {
                     title: i18n.translate('xpack.streams.failedToImportContentError', {
                       defaultMessage: 'Failed to import content pack',
                     }),
-                    toastMessage: getFormattedError(err).message,
+                    toastMessage: formattedErr.message,
                   });
                 }
               }}

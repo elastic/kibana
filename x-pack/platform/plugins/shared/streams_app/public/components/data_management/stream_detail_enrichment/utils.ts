@@ -376,6 +376,7 @@ export const getFormStateFromActionStep = (
     const { customIdentifier, parentId, ...restStep } = step;
     return configDrivenProcessors[
       step.action as ConfigDrivenProcessorType
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ].convertProcessorToFormState(restStep as any);
   }
 
@@ -679,6 +680,7 @@ export const convertFormStateToProcessor = (
     if (configDrivenProcessors[formState.action]) {
       return {
         processorDefinition: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ...configDrivenProcessors[formState.action].convertFormStateToConfig(formState as any),
           description,
         },

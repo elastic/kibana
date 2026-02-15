@@ -156,7 +156,7 @@ export const getRulesByIds = async ({
     const { rules } = await rulesClient.bulkGetRules({ ids });
     return processRuleResults(rules);
   } catch (error) {
-    if (error.message === 'No rules found for bulk get') {
+    if (error instanceof Error && error.message === 'No rules found for bulk get') {
       return [];
     }
     throw error;

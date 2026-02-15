@@ -122,6 +122,7 @@ describe('updateDataStreamsFailureStore', () => {
           },
         }),
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
 
     mockLogger = {
@@ -129,6 +130,7 @@ describe('updateDataStreamsFailureStore', () => {
       error: jest.fn(),
       info: jest.fn(),
       warn: jest.fn(),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
   });
 
