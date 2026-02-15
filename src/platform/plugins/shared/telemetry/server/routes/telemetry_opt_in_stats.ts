@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fetch from 'node-fetch';
-
 import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type {

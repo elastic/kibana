@@ -136,7 +136,7 @@ describe('FetcherTask', () => {
           failureCount: 0,
           telemetryUrl: 'test-url',
         });
-        fetchMock.mockResolvedValue({});
+        fetchMock.mockResolvedValue(new Response());
         const subscription = fetcherTask['validateConnectivity']();
         advance(5 * 60 * 1000);
         await new Promise((resolve) => process.nextTick(resolve)); // Wait for the promise to fulfill
@@ -182,7 +182,7 @@ describe('FetcherTask', () => {
         expect(fetcherTask['isOnline$'].value).toBe(false);
 
         // Try again after 12 hours
-        fetchMock.mockResolvedValue({});
+        fetchMock.mockResolvedValue(new Response());
         advance(12 * 60 * 60 * 1000);
         await new Promise((resolve) => process.nextTick(resolve)); // Wait for the promise to fulfill
         expect(getCurrentConfigs).toHaveBeenCalledTimes(2);
@@ -204,7 +204,7 @@ describe('FetcherTask', () => {
           failureCount: 0,
           telemetryUrl: 'test-url',
         });
-        fetchMock.mockResolvedValue({});
+        fetchMock.mockResolvedValue(new Response());
 
         const subscription = fetcherTask['validateConnectivity']();
 

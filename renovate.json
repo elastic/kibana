@@ -975,7 +975,6 @@
         "json5",
         "load-json-file",
         "mock-fs",
-        "node-fetch",
         "react-intl",
         "reflect-metadata",
         "type-detect",
@@ -984,7 +983,6 @@
         "@types/getos",
         "@types/json5",
         "@types/mock-fs",
-        "@types/node-fetch",
         "@types/type-detect"
       ],
       "reviewers": [

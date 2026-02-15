@@ -10,20 +10,23 @@
 import { Server } from '@hapi/hapi';
 import { duration } from 'moment';
 import { URL } from 'url';
-import fetch, { Response } from 'node-fetch';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaConfig } from '../kibana_config';
 import { StatusHandler } from './status';
 
+const mockedFetch = jest.spyOn(global, 'fetch');
+
+// Helper to create Response - status 204 and 304 don't allow a body
+const createResponse = (body: string, init: ResponseInit) => {
+  const isNullBodyStatus = init.status === 204 || init.status === 304;
+  return new Response(isNullBodyStatus ? null : body, init);
+};
+
 describe('StatusHandler', () => {
   let kibanaConfig: KibanaConfig;
   let logger: MockedLogger;
   let server: Server;
-
-  beforeAll(async () => {
-    jest.spyOn(await import('node-fetch'), 'default');
-  });
 
   beforeEach(async () => {
     kibanaConfig = {
@@ -54,7 +57,7 @@ describe('StatusHandler', () => {
     const noContent = { status: 204 };
     const found = { status: 302 };
     const badRequest = { status: 400 };
-    const unauthorized = { status: 401, headers: { 'www-authenticate': '' } };
+    const unauthorized = { status: 401, headers: new Headers({ 'www-authenticate': '' }) };
     const forbidden = { status: 403 };
     const notFound = { status: 404 };
     const serverError = { status: 500 };
@@ -78,9 +81,7 @@ describe('StatusHandler', () => {
     `(
       "should return '$status' with $code when Kibana host returns $config.status",
       async ({ config, status, code }) => {
-        (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce(
-          new Response('', config)
-        );
+        mockedFetch.mockResolvedValueOnce(createResponse('', config));
 
         const response = server.inject({
           method: 'get',
@@ -106,7 +107,7 @@ describe('StatusHandler', () => {
     );
 
     it("should return 'failure' with 502 when `fetch` throws an error", async () => {
-      (fetch as jest.MockedFunction<typeof fetch>).mockRejectedValueOnce(new Error('Fetch Error'));
+      mockedFetch.mockRejectedValueOnce(new Error('Fetch Error'));
       const response = server.inject({
         method: 'get',
         url: '/',
@@ -129,17 +130,15 @@ describe('StatusHandler', () => {
     });
 
     it("should return 'timeout' with 504 when `fetch` timeouts", async () => {
-      (fetch as jest.MockedFunction<typeof fetch>).mockImplementationOnce(
-        (url, { signal } = {}) => {
-          return new Promise((resolve, reject) => {
-            signal?.addEventListener('abort', () => {
-              reject(new DOMException('Fetch Aborted', 'AbortError'));
-            });
-
-            jest.advanceTimersByTime(60000);
+      mockedFetch.mockImplementationOnce((url, options) => {
+        return new Promise((resolve, reject) => {
+          options?.signal?.addEventListener('abort', () => {
+            reject(new DOMException('Fetch Aborted', 'AbortError'));
           });
-        }
-      );
+
+          jest.advanceTimersByTime(60000);
+        });
+      });
 
       jest.useFakeTimers({ doNotFake: ['nextTick'] });
 
@@ -185,15 +184,15 @@ describe('StatusHandler', () => {
           }),
         })
       );
-      expect(fetch).not.toHaveBeenCalled();
+      expect(mockedFetch).not.toHaveBeenCalled();
     });
 
     it("should return 'healthy' only when all the hosts healthy", async () => {
       kibanaConfig.hosts.push('http://localhost:5602');
 
-      (fetch as jest.MockedFunction<typeof fetch>)
-        .mockResolvedValueOnce(new Response('', ok))
-        .mockResolvedValueOnce(new Response('', unauthorized));
+      mockedFetch
+        .mockResolvedValueOnce(createResponse('', ok))
+        .mockResolvedValueOnce(createResponse('', unauthorized));
 
       const response = server.inject({
         method: 'get',
@@ -225,9 +224,9 @@ describe('StatusHandler', () => {
     it("should return 'unhealthy' when at least one host is not healthy", async () => {
       kibanaConfig.hosts.push('http://localhost:5602');
 
-      (fetch as jest.MockedFunction<typeof fetch>)
-        .mockResolvedValueOnce(new Response('', ok))
-        .mockResolvedValueOnce(new Response('', serverError));
+      mockedFetch
+        .mockResolvedValueOnce(createResponse('', ok))
+        .mockResolvedValueOnce(createResponse('', serverError));
 
       const response = server.inject({
         method: 'get',
@@ -260,19 +259,19 @@ describe('StatusHandler', () => {
       kibanaConfig.hosts.splice(0, kibanaConfig.hosts.length);
       kibanaConfig.hosts.push('http://localhost:5601', 'http://localhost:5602');
 
-      (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue(new Response('', ok));
+      mockedFetch.mockResolvedValue(createResponse('', ok));
 
       await server.inject({
         method: 'get',
         url: '/',
       });
 
-      expect(fetch).toHaveBeenCalledTimes(2);
-      expect(fetch).toHaveBeenCalledWith(
+      expect(mockedFetch).toHaveBeenCalledTimes(2);
+      expect(mockedFetch).toHaveBeenCalledWith(
         new URL('http://localhost:5601/api/status'),
         expect.any(Object)
       );
-      expect(fetch).toHaveBeenCalledWith(
+      expect(mockedFetch).toHaveBeenCalledWith(
         new URL('http://localhost:5602/api/status'),
         expect.any(Object)
       );
@@ -282,19 +281,19 @@ describe('StatusHandler', () => {
       kibanaConfig.hosts.splice(0, kibanaConfig.hosts.length);
       kibanaConfig.hosts.push('http://localhost:5601/prefix', 'http://localhost:5602/other/path');
 
-      (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue(new Response('', ok));
+      mockedFetch.mockResolvedValue(createResponse('', ok));
 
       await server.inject({
         method: 'get',
         url: '/',
       });
 
-      expect(fetch).toHaveBeenCalledTimes(2);
-      expect(fetch).toHaveBeenCalledWith(
+      expect(mockedFetch).toHaveBeenCalledTimes(2);
+      expect(mockedFetch).toHaveBeenCalledWith(
         new URL('http://localhost:5601/prefix/api/status'),
         expect.any(Object)
       );
-      expect(fetch).toHaveBeenCalledWith(
+      expect(mockedFetch).toHaveBeenCalledWith(
         new URL('http://localhost:5602/other/path/api/status'),
         expect.any(Object)
       );

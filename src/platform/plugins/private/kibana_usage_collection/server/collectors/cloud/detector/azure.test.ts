@@ -8,11 +8,9 @@
  */
 
 /* eslint-disable dot-notation */
-jest.mock('node-fetch');
 import { AzureCloudService } from './azure';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const fetchMock = require('node-fetch') as jest.Mock;
+const fetchMock = jest.spyOn(global, 'fetch');
 
 describe('AzureCloudService', () => {
   const azureCloudService = new AzureCloudService();
@@ -28,11 +26,13 @@ describe('AzureCloudService', () => {
     it('handles expected response', async () => {
       const id = 'abcdef';
       fetchMock.mockResolvedValue({
-        json: () =>
-          `{"compute":{"vmId": "${id}","location":"fakeus","availabilityZone":"fakeus-2"}}`,
+        json: async () =>
+          JSON.parse(
+            `{"compute":{"vmId": "${id}","location":"fakeus","availabilityZone":"fakeus-2"}}`
+          ),
         status: 200,
         ok: true,
-      });
+      } as unknown as Response);
 
       const response = await azureCloudService['_checkIfService']();
 
@@ -69,7 +69,7 @@ describe('AzureCloudService', () => {
     });
 
     it('handles not running on Azure with 404 response by throwing error', async () => {
-      fetchMock.mockResolvedValue({ status: 404 });
+      fetchMock.mockResolvedValue({ status: 404 } as unknown as Response);
 
       await expect(() =>
         azureCloudService['_checkIfService']()
@@ -77,7 +77,7 @@ describe('AzureCloudService', () => {
     });
 
     it('handles not running on Azure with unexpected response by throwing error', async () => {
-      fetchMock.mockResolvedValue({ ok: false });
+      fetchMock.mockResolvedValue({ ok: false } as unknown as Response);
       await expect(() =>
         azureCloudService['_checkIfService']()
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Azure request failed"`);
