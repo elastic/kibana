@@ -8,6 +8,7 @@
  */
 
 import type { IUiSettingsClient } from '@kbn/core/public';
+import type { Query } from '@kbn/es-query';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { PersistedLog } from '../persisted_log';
 import { UI_SETTINGS } from '../../../common';
@@ -19,7 +20,7 @@ export function getQueryLog(
   appName: string,
   language: string
 ) {
-  return new PersistedLog(
+  return new PersistedLog<Query['query']>(
     `typeahead:${appName}-${language}`,
     {
       maxLength: uiSettings.get(UI_SETTINGS.HISTORY_LIMIT),

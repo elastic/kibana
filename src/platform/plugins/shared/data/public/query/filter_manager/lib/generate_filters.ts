@@ -8,7 +8,7 @@
  */
 
 import _ from 'lodash';
-import type { Filter, DataViewFieldBase, DataViewBase, RangeFilterParams } from '@kbn/es-query';
+import type { Filter, DataViewFieldBase, DataViewBase } from '@kbn/es-query';
 import {
   isExistsFilter,
   isPhraseFilter,
@@ -29,11 +29,11 @@ import type { FilterManager } from '../filter_manager';
 function getExistingFilter(
   appFilters: Filter[],
   fieldName: string,
-  value: any
+  value: Serializable
 ): Filter | undefined {
   // TODO: On array fields, negating does not negate the combination, rather all terms
-  return _.find(appFilters, function (filter) {
-    if (!filter) return;
+  return _.find(appFilters, function (filter): boolean {
+    if (!filter) return false;
 
     if (fieldName === '_exists_' && isExistsFilter(filter)) {
       return filter.query.exists!.field === value;
@@ -54,7 +54,9 @@ function getExistingFilter(
         getFilterField(filter) === fieldName && _.isEqual(filter.query.range[fieldName], value)
       );
     }
-  }) as any;
+
+    return false;
+  });
 }
 
 function updateExistingFilter(existingFilter: Filter, negate: boolean) {
@@ -70,7 +72,7 @@ function updateExistingFilter(existingFilter: Filter, negate: boolean) {
  *
  * @param {FilterManager} filterManager - The active filter manager to lookup for existing filters
  * @param {Field | string} field - The field for which filters should be generated
- * @param {any} values - One or more values to filter for.
+ * @param {unknown} values - One or more values to filter for.
  * @param {string} operation - "-" to create a negated filter
  * @param {string} index - Index string to generate filters for
  *
@@ -79,11 +81,13 @@ function updateExistingFilter(existingFilter: Filter, negate: boolean) {
 export function generateFilters(
   filterManager: FilterManager,
   field: DataViewFieldBase | string,
-  values: any,
+  values: unknown,
   operation: string,
   index: DataViewBase
 ): Filter[] {
-  values = Array.isArray(values) ? _.uniq(values) : [values];
+  const valuesArr: Serializable[] = (
+    Array.isArray(values) ? _.uniq(values) : [values]
+  ) as Serializable[];
 
   const fieldObj = (_.isObject(field) ? field : { name: field }) as DataViewFieldBase;
   const fieldName = fieldObj.name;
@@ -133,7 +137,7 @@ export function generateFilters(
    * strict_date_optional_time_nanos).
    * @param value
    */
-  function castValue(value: unknown): unknown | RangeFilterParams {
+  function castValue(value: Serializable): Serializable {
     if (fieldObj.type === KBN_FIELD_TYPES.DATE && typeof value === 'string') {
       const format = fieldObj.esTypes?.includes('date_nanos')
         ? 'strict_date_optional_time_nanos'
@@ -148,7 +152,7 @@ export function generateFilters(
     return value;
   }
 
-  return _.chain(values)
+  return _.chain(valuesArr)
     .map(castValue)
     .map((value) => {
       const existing = getExistingFilter(appFilters, fieldName, value);
@@ -156,7 +160,7 @@ export function generateFilters(
         updateExistingFilter(existing, negate);
       }
 
-      return existing ?? generateFilter(value as Serializable);
+      return existing ?? generateFilter(value);
     })
     .value();
 }

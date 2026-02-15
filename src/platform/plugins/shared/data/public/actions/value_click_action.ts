@@ -25,7 +25,7 @@ export interface ValueClickContext {
       table: Pick<Datatable, 'rows' | 'columns'>;
       column: number;
       row: number;
-      value: any;
+      value: string | number | boolean | null;
     }>;
     timeFieldName?: string;
     negate?: boolean;

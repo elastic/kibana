@@ -168,7 +168,7 @@ describe('CsvGenerator', () => {
         case 'index':
           return dataView;
       }
-    });
+    }) as typeof searchSourceMock.getField;
 
     mockLogger = loggingSystemMock.createLogger();
   });
