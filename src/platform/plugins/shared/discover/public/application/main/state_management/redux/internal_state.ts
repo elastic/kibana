@@ -32,6 +32,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
+import type { DiscoverContextAwarenessToolkit } from '../../../../context_awareness/toolkit';
 import { type RuntimeStateManager, selectTabRuntimeInternalState } from './runtime_state';
 import {
   TabsBarVisibility,
@@ -551,6 +552,10 @@ export interface InternalStateDependencies {
   urlStateStorage: IKbnUrlStateStorage;
   tabsStorageManager: TabsStorageManager;
   searchSessionManager: DiscoverSearchSessionManager;
+  createTabContextAwarenessToolkit: (params: {
+    tabId: string;
+    dispatch: InternalStateDispatch;
+  }) => DiscoverContextAwarenessToolkit;
   getInternalState$: () => Observable<DiscoverInternalState>;
 }
 
