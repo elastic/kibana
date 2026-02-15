@@ -80,7 +80,6 @@ export function collectDescendantProcessorIdsForCondition(
  */
 export function collectActiveDocumentsForSelectedCondition(
   documents: Simulation['documents'] | undefined,
-  steps: StreamlangStepWithUIAttributes[],
   selectedConditionId: string | undefined
 ): Simulation['documents'] {
   if (!documents) {
@@ -91,7 +90,10 @@ export function collectActiveDocumentsForSelectedCondition(
     return documents;
   }
 
-  const processorIds = collectDescendantProcessorIdsForCondition(steps, selectedConditionId);
+  // Condition filtering is based on the simulation-only noop processor that is tagged
+  // with the condition customIdentifier. This allows tracking match rates even when
+  // the subtree is empty or descendants are faulty.
+  const processorIds = [selectedConditionId];
 
   return collectDocumentsAffectedByProcessors(documents, processorIds);
 }

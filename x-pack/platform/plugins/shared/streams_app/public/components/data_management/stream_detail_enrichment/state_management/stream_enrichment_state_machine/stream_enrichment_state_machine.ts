@@ -284,11 +284,16 @@ export const streamEnrichmentMachine = setup({
         type: 'simulation.clearConditionFilter',
       });
     },
+    storeAutoSelectedConditionId: assign((_, params: { conditionId: string }) => ({
+      autoSelectedConditionId: params.conditionId,
+    })),
+    clearAutoSelectedConditionId: assign(() => ({ autoSelectedConditionId: undefined })),
   },
   guards: {
     /* Staged changes are determined by comparing previous and next DSL */
     hasManagePrivileges: ({ context }) => context.definition.privileges.manage,
     hasSimulatePrivileges: ({ context }) => context.definition.privileges.simulate,
+    hasAutoSelectedConditionId: ({ context }) => Boolean(context.autoSelectedConditionId),
     canUpdateStream: ({ context }) => {
       const hasSchemaErrors = context.schemaErrors.length > 0;
       const hasValidationErrors = context.validationErrors.size > 0;
@@ -329,6 +334,7 @@ export const streamEnrichmentMachine = setup({
       urlState: defaultEnrichmentUrlState,
       validationErrors: new Map(),
       fieldTypesByProcessor: new Map(),
+      autoSelectedConditionId: undefined,
       suggestedPipeline: undefined,
       simulatorRef: spawn('simulationMachine', {
         id: 'simulator',
@@ -549,8 +555,23 @@ export const streamEnrichmentMachine = setup({
                     'simulation.updateSteps': {
                       actions: forwardTo('simulator'),
                     },
+                    'simulation.filterByConditionAuto': {
+                      actions: [
+                        {
+                          type: 'storeAutoSelectedConditionId',
+                          params: ({ event }) => ({ conditionId: event.conditionId }),
+                        },
+                        {
+                          type: 'filterByCondition',
+                          params: ({ event }) => ({ conditionId: event.conditionId }),
+                        },
+                      ],
+                    },
                     'simulation.filterByCondition': {
                       actions: [
+                        {
+                          type: 'clearAutoSelectedConditionId',
+                        },
                         {
                           type: 'filterByCondition',
                           params: ({ event }) => ({ conditionId: event.conditionId }),
@@ -560,8 +581,18 @@ export const streamEnrichmentMachine = setup({
                     'simulation.clearConditionFilter': {
                       actions: [
                         {
+                          type: 'clearAutoSelectedConditionId',
+                        },
+                        {
                           type: 'clearConditionFilter',
                         },
+                      ],
+                    },
+                    'simulation.clearAutoConditionFilter': {
+                      guard: 'hasAutoSelectedConditionId',
+                      actions: [
+                        { type: 'clearConditionFilter' },
+                        { type: 'clearAutoSelectedConditionId' },
                       ],
                     },
                     // Forward other step events to interactive mode machine
