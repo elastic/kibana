@@ -581,7 +581,6 @@ function DiscoverDocumentsComponent({
             externalCustomRenderers={cellRenderers}
             dataGridDensityState={density}
             onUpdateDataGridDensity={onUpdateDensity}
-            onUpdateESQLQuery={onUpdateESQLQuery}
             query={query}
             cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER_ID}
             cellActionsMetadata={cellActionsMetadata}

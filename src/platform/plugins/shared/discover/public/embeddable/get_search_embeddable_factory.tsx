@@ -40,7 +40,7 @@ import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_ap
 import type { SearchEmbeddableState } from '../../common/embeddable/types';
 import type { SearchEmbeddableApi } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
-import { BaseAppWrapper, EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT } from '../context_awareness';
+import { BaseAppWrapper, type DiscoverContextAwarenessToolkit } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
 
@@ -76,10 +76,6 @@ export const getSearchEmbeddableFactory = ({
       });
       const AppWrapper = getRenderAppWrapper?.(BaseAppWrapper) ?? BaseAppWrapper;
       const scopedEbtManager = discoverServices.ebtManager.createScopedEBTManager();
-      const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager({
-        scopedEbtManager,
-        toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
-      });
 
       /** Specific by-reference state */
       const savedObjectId$ = new BehaviorSubject<string | undefined>(runtimeState?.savedObjectId);
@@ -221,6 +217,39 @@ export const getSearchEmbeddableFactory = ({
           // compatibilty check and ensure top-level drilldowns (e.g. URL) work as expected
           return [];
         },
+      });
+
+      const toolkit: DiscoverContextAwarenessToolkit = {
+        actions: {
+          addFilter: async (field, value, operator) => {
+            const dataView = api.dataViews$.getValue()?.[0];
+            if (!dataView || !field || isEsqlMode(api.savedSearch$.getValue())) {
+              return;
+            }
+
+            let newFilters = generateFilters(
+              discoverServices.filterManager,
+              field,
+              value,
+              operator,
+              dataView
+            );
+            newFilters = newFilters.map((filter) => ({
+              ...filter,
+              $state: { store: FilterStateStore.APP_STATE },
+            }));
+
+            await startServices.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+              embeddable: api,
+              filters: newFilters,
+            });
+          },
+        },
+      };
+
+      const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager({
+        scopedEbtManager,
+        toolkit,
       });
 
       const unsubscribeFromFetch = initializeFetch({

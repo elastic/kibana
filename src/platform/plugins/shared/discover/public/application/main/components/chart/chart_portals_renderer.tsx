@@ -16,24 +16,19 @@ import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { i18n } from '@kbn/i18n';
-import {
-  ContextAwarenessToolkitProvider,
-  type OpenInNewTabParams,
-  type UpdateESQLQueryFn,
-  useProfileAccessor,
-} from '../../../../context_awareness';
+import { useProfileAccessor } from '../../../../context_awareness';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import {
   CurrentTabProvider,
   type RuntimeStateManager,
   RuntimeStateProvider,
   selectTabRuntimeState,
+  internalStateActions,
   useInternalStateSelector,
+  useInternalStateDispatch,
   useRuntimeState,
   useCurrentTabSelector,
-  useInternalStateDispatch,
   useCurrentTabAction,
-  internalStateActions,
 } from '../../state_management/redux';
 import type { DiscoverMainContentProps } from '../layout/discover_main_content';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
@@ -144,34 +139,6 @@ type UnifiedHistogramChartProps = Pick<UnifiedHistogramGuardProps, 'panelsToggle
 };
 
 const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
-  const dispatch = useInternalStateDispatch();
-  const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
-  const onUpdateESQLQuery: UpdateESQLQueryFn = useCallback(
-    (queryOrUpdater) => {
-      dispatch(updateESQLQuery({ queryOrUpdater }));
-    },
-    [dispatch, updateESQLQuery]
-  );
-
-  const toolkitOverrides = useMemo(
-    () => ({
-      actions: {
-        openInNewTab: (params: OpenInNewTabParams) =>
-          dispatch(internalStateActions.openInNewTabExtPointAction(params)),
-        updateESQLQuery: onUpdateESQLQuery,
-      },
-    }),
-    [dispatch, onUpdateESQLQuery]
-  );
-
-  return (
-    <ContextAwarenessToolkitProvider value={toolkitOverrides}>
-      <ChartsWrapperInner stateContainer={stateContainer} panelsToggle={panelsToggle} />
-    </ContextAwarenessToolkitProvider>
-  );
-};
-
-const ChartsWrapperInner = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
   const getChartConfigAccessor = useProfileAccessor('getChartSectionConfiguration');
 
   const isEsqlMode = useIsEsqlMode();

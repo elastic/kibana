@@ -21,7 +21,7 @@ export const createContextAwarenessToolkit = ({
   return {
     actions: {
       openInNewTab: (params) => {
-        void internalState.dispatch(internalStateActions.openInNewTab(params));
+        void internalState.dispatch(internalStateActions.openInNewTabExtPointAction(params));
       },
       updateESQLQuery: (queryOrUpdater) => {
         internalState.dispatch(internalStateActions.updateESQLQuery({ tabId, queryOrUpdater }));
@@ -30,6 +30,7 @@ export const createContextAwarenessToolkit = ({
         internalState.dispatch(internalStateActions.addFilter({ tabId, field, value, mode }));
       },
       updateAdHocDataViews: async (adHocDataViews) => {
+        await internalState.dispatch(internalStateActions.loadDataViewList());
         internalState.dispatch(internalStateActions.setAdHocDataViews(adHocDataViews));
       },
       setExpandedDoc: (record, options) => {

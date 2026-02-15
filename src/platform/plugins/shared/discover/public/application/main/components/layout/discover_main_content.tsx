@@ -27,7 +27,6 @@ import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 import { PatternAnalysisTab } from '../pattern_analysis/pattern_analysis_tab';
 import { PATTERN_ANALYSIS_VIEW_CLICK } from '../pattern_analysis/constants';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { ContextAwarenessToolkitProvider } from '../../../../context_awareness';
 import {
   internalStateActions,
   useCurrentTabAction,
@@ -149,69 +148,55 @@ export const DiscoverMainContent = ({
 
   const showChart = useAppStateSelector((state) => !state.hideChart);
 
-  const toolkitOverrides = useMemo(
-    () =>
-      onAddFilter
-        ? {
-            actions: {
-              addFilter: onAddFilter,
-            },
-          }
-        : undefined,
-    [onAddFilter]
-  );
-
   return (
-    <ContextAwarenessToolkitProvider value={toolkitOverrides}>
-      <Droppable
-        dropTypes={isDropAllowed ? DROP_PROPS.types : undefined}
-        value={DROP_PROPS.value}
-        order={DROP_PROPS.order}
-        onDrop={onDropFieldToTable}
-      >
-        <DropOverlayWrapper isVisible={isDropAllowed}>
-          <EuiFlexGroup
-            className="eui-fullHeight"
-            direction="column"
-            gutterSize="none"
-            responsive={false}
-            data-test-subj="dscMainContent"
-          >
-            {showChart && isChartAvailable && <EuiHorizontalRule margin="none" />}
-            {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
-              <DiscoverDocuments
-                viewModeToggle={viewModeToggle}
+    <Droppable
+      dropTypes={isDropAllowed ? DROP_PROPS.types : undefined}
+      value={DROP_PROPS.value}
+      order={DROP_PROPS.order}
+      onDrop={onDropFieldToTable}
+    >
+      <DropOverlayWrapper isVisible={isDropAllowed}>
+        <EuiFlexGroup
+          className="eui-fullHeight"
+          direction="column"
+          gutterSize="none"
+          responsive={false}
+          data-test-subj="dscMainContent"
+        >
+          {showChart && isChartAvailable && <EuiHorizontalRule margin="none" />}
+          {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
+            <DiscoverDocuments
+              viewModeToggle={viewModeToggle}
+              dataView={dataView}
+              onAddFilter={onAddFilter}
+              stateContainer={stateContainer}
+              onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
+            />
+          ) : null}
+          {viewMode === VIEW_MODE.AGGREGATED_LEVEL ? (
+            <>
+              <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
+              <FieldStatisticsTab
                 dataView={dataView}
-                onAddFilter={onAddFilter}
+                columns={columns}
                 stateContainer={stateContainer}
-                onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
-              />
-            ) : null}
-            {viewMode === VIEW_MODE.AGGREGATED_LEVEL ? (
-              <>
-                <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
-                <FieldStatisticsTab
-                  dataView={dataView}
-                  columns={columns}
-                  stateContainer={stateContainer}
-                  onAddFilter={!isEsqlMode ? onAddFilter : undefined}
-                  trackUiMetric={trackUiMetric}
-                  isEsqlMode={isEsqlMode}
-                />
-              </>
-            ) : null}
-            {viewMode === VIEW_MODE.PATTERN_LEVEL ? (
-              <PatternAnalysisTab
-                dataView={dataView}
-                stateContainer={stateContainer}
-                switchToDocumentView={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL, true)}
+                onAddFilter={!isEsqlMode ? onAddFilter : undefined}
                 trackUiMetric={trackUiMetric}
-                renderViewModeToggle={renderViewModeToggle}
+                isEsqlMode={isEsqlMode}
               />
-            ) : null}
-          </EuiFlexGroup>
-        </DropOverlayWrapper>
-      </Droppable>
-    </ContextAwarenessToolkitProvider>
+            </>
+          ) : null}
+          {viewMode === VIEW_MODE.PATTERN_LEVEL ? (
+            <PatternAnalysisTab
+              dataView={dataView}
+              stateContainer={stateContainer}
+              switchToDocumentView={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL, true)}
+              trackUiMetric={trackUiMetric}
+              renderViewModeToggle={renderViewModeToggle}
+            />
+          ) : null}
+        </EuiFlexGroup>
+      </DropOverlayWrapper>
+    </Droppable>
   );
 };

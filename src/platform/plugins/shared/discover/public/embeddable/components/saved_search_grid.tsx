@@ -25,7 +25,7 @@ import { DiscoverGrid } from '../../components/discover_grid';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
-import { ContextAwarenessToolkitProvider, useProfileAccessor } from '../../context_awareness';
+import { useProfileAccessor } from '../../context_awareness';
 
 interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampleSizeState'> {
   sampleSizeState: number; // a required prop
@@ -40,26 +40,6 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
 }
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
-  const toolkitOverrides = useMemo(
-    () =>
-      props.onFilter
-        ? {
-            actions: {
-              addFilter: props.onFilter,
-            },
-          }
-        : undefined,
-    [props.onFilter]
-  );
-
-  return (
-    <ContextAwarenessToolkitProvider value={toolkitOverrides}>
-      <DiscoverGridEmbeddableInner {...props} />
-    </ContextAwarenessToolkitProvider>
-  );
-}
-
-function DiscoverGridEmbeddableInner(props: DiscoverGridEmbeddableProps) {
   const { interceptedWarnings, enableDocumentViewer, ...gridProps } = props;
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);

@@ -19,6 +19,8 @@ import { uiSettingsMock } from '../../__mocks__/ui_settings';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
+import { generateFilters } from '@kbn/data-plugin/public';
+import { popularizeField } from '@kbn/unified-data-table';
 
 const mockNavigationPlugin = {
   ui: { TopNavMenu: mockTopNavMenu, AggregateQueryTopNavMenu: mockTopNavMenu },
@@ -34,6 +36,22 @@ describe('ContextApp test', () => {
   const defaultProps: ContextAppProps = {
     dataView: dataViewMock,
     anchorId: 'mocked_anchor_id',
+    addFilter: (mapping, value, mode) => {
+      if (!mapping) {
+        return;
+      }
+
+      const fieldName = typeof mapping === 'string' ? mapping : mapping.name;
+      const newFilters = generateFilters(
+        services.filterManager,
+        fieldName,
+        value,
+        mode,
+        dataViewMock
+      );
+      services.filterManager.addFilters(newFilters);
+      void popularizeField(dataViewMock, fieldName, services.dataViews, services.capabilities);
+    },
   };
 
   const topNavProps = {

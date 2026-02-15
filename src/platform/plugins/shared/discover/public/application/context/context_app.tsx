@@ -20,13 +20,12 @@ import {
 import { css } from '@emotion/react';
 import { cloneDeep } from 'lodash';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import { generateFilters } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
-import { popularizeField, useColumns } from '@kbn/unified-data-table';
+import { useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
@@ -48,23 +47,16 @@ export interface ContextAppProps {
   dataView: DataView;
   anchorId: string;
   referrer?: string;
+  addFilter: DocViewFilterFn;
 }
 
-export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) => {
+export const ContextApp = ({ dataView, anchorId, referrer, addFilter }: ContextAppProps) => {
   const styles = useMemoCss(componentStyles);
 
   const services = useDiscoverServices();
   const { scopedEBTManager } = useScopedServices();
-  const {
-    locator,
-    uiSettings,
-    capabilities,
-    dataViews,
-    navigation,
-    filterManager,
-    core,
-    fieldsMetadata,
-  } = services;
+  const { locator, uiSettings, capabilities, dataViews, navigation, core, fieldsMetadata } =
+    services;
 
   /**
    * Context app state
@@ -197,23 +189,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
       fetchedState.anchorInterceptedWarnings,
       fetchedState.successorsInterceptedWarnings,
     ]
-  );
-
-  const addFilter = useCallback(
-    async (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
-      const newFilters = generateFilters(filterManager, field, values, operation, dataView);
-      filterManager.addFilters(newFilters);
-      if (dataViews) {
-        const fieldName = typeof field === 'string' ? field : field.name;
-        await popularizeField(dataView, fieldName, dataViews, capabilities);
-        void scopedEBTManager.trackFilterAddition({
-          fieldName: fieldName === '_exists_' ? String(values) : fieldName,
-          filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
-          fieldsMetadata,
-        });
-      }
-    },
-    [filterManager, dataView, dataViews, capabilities, scopedEBTManager, fieldsMetadata]
   );
 
   const onAddColumnWithTracking = useCallback(

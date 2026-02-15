@@ -24,30 +24,6 @@ export interface DiscoverContextAwarenessToolkit {
   readonly actions: DiscoverContextAwarenessToolkitActions;
 }
 
-export type DiscoverContextAwarenessToolkitOverrides = {
-  actions?: Partial<DiscoverContextAwarenessToolkitActions>;
-};
-
 export const EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT: DiscoverContextAwarenessToolkit = {
   actions: {},
-};
-
-export const mergeDiscoverContextAwarenessToolkits = (
-  parent: DiscoverContextAwarenessToolkit,
-  overrides?: DiscoverContextAwarenessToolkitOverrides
-): DiscoverContextAwarenessToolkit => {
-  if (!overrides) {
-    return parent;
-  }
-
-  if (!overrides.actions) {
-    return parent;
-  }
-
-  return {
-    actions: {
-      ...parent.actions,
-      ...overrides.actions,
-    },
-  };
 };
