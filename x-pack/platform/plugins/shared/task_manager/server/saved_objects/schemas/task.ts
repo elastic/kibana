@@ -81,3 +81,7 @@ export const taskSchemaV6 = taskSchemaV5.extends({
 export const taskSchemaV7 = taskSchemaV6.extends({
   schedule: schema.maybe(schema.oneOf([scheduleIntervalSchema, scheduleRruleSchemaV3])),
 });
+
+export const taskSchemaV8 = taskSchemaV7.extends({
+  cost: schema.maybe(schema.number()),
+});

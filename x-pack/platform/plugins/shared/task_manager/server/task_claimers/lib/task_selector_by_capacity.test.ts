@@ -7,14 +7,16 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { asLimited, asUnlimited } from '../../queries/task_claiming';
-import { selectTasksByCapacity } from './task_selector_by_capacity';
+import { selectTasksByCapacity, getTaskCost } from './task_selector_by_capacity';
 import type { ConcreteTaskInstance } from '../../task';
+import { TaskCost } from '../../task';
 import { TaskTypeDictionary } from '../../task_type_dictionary';
 import { mockLogger } from '../../test_utils';
 
 jest.mock('../../constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
     'limitedTaskType',
+    'limitedTaskTypeWithCost',
     'sampleTaskSharedConcurrencyType1',
     'sampleTaskSharedConcurrencyType2',
   ],
@@ -50,6 +52,12 @@ taskDefinitions.registerTaskDefinitions({
   limitedTaskType: {
     title: 'Limited Concurrency Task Type',
     maxConcurrency: 1,
+    createTaskRunner: jest.fn(),
+  },
+  limitedTaskTypeWithCost: {
+    title: 'Limited Concurrency Task Type with Cost',
+    maxConcurrency: 2,
+    cost: TaskCost.Normal,
     createTaskRunner: jest.fn(),
   },
   taskType1: {
@@ -124,5 +132,93 @@ describe('selectTasksByCapacity', () => {
       tasks[0],
       tasks[1],
     ]);
+  });
+
+  describe('getTaskCost', () => {
+    it('returns instance cost when set', () => {
+      const task = mockInstance({
+        taskType: 'limitedTaskTypeWithCost',
+        cost: TaskCost.ExtraLarge,
+      });
+      expect(getTaskCost(task, taskDefinitions)).toBe(TaskCost.ExtraLarge);
+    });
+
+    it('returns definition cost when instance cost is not set', () => {
+      const task = mockInstance({ taskType: 'limitedTaskTypeWithCost' });
+      expect(getTaskCost(task, taskDefinitions)).toBe(TaskCost.Normal);
+    });
+
+    it('returns TaskCost.Normal for type without definition cost', () => {
+      const task = mockInstance({ taskType: 'taskType1' });
+      expect(getTaskCost(task, taskDefinitions)).toBe(TaskCost.Normal);
+    });
+  });
+
+  describe('cost-based capacity', () => {
+    it('should limit by cost budget: maxConcurrency * defCost, each task consumes its cost', () => {
+      // limitedTaskTypeWithCost has maxConcurrency: 2, cost: Normal (2). Budget = 4.
+      // Two Normal (2) tasks fit; one ExtraLarge (10) would exceed.
+      const batches = [
+        asLimited('limitedTaskTypeWithCost'),
+        asUnlimited(new Set(['taskType1', 'taskType2'])),
+      ];
+      const tasks = [
+        mockInstance({
+          id: `id-1`,
+          taskType: 'limitedTaskTypeWithCost',
+        }),
+        mockInstance({
+          id: `id-2`,
+          taskType: 'limitedTaskTypeWithCost',
+        }),
+        mockInstance({
+          id: `id-3`,
+          taskType: 'limitedTaskTypeWithCost',
+          cost: TaskCost.ExtraLarge,
+        }),
+      ];
+
+      const selected = selectTasksByCapacity({
+        definitions: taskDefinitions,
+        tasks,
+        batches,
+      });
+      // Budget 4: first task cost 2 -> remaining 2; second task cost 2 -> remaining 0; third (cost 10) does not fit
+      expect(selected).toHaveLength(2);
+      expect(selected).toEqual([tasks[0], tasks[1]]);
+    });
+
+    it('should respect per-task cost override when selecting by capacity', () => {
+      const batches = [
+        asLimited('limitedTaskTypeWithCost'),
+        asUnlimited(new Set(['taskType1', 'taskType2'])),
+      ];
+      const tasks = [
+        mockInstance({
+          id: `id-1`,
+          taskType: 'limitedTaskTypeWithCost',
+          cost: TaskCost.Tiny,
+        }),
+        mockInstance({
+          id: `id-2`,
+          taskType: 'limitedTaskTypeWithCost',
+          cost: TaskCost.Tiny,
+        }),
+        mockInstance({
+          id: `id-3`,
+          taskType: 'limitedTaskTypeWithCost',
+          cost: TaskCost.Tiny,
+        }),
+      ];
+
+      const selected = selectTasksByCapacity({
+        definitions: taskDefinitions,
+        tasks,
+        batches,
+      });
+      // Budget 4 (maxConcurrency 2 * cost 2): three Tiny (1) tasks = 3, all fit
+      expect(selected).toHaveLength(3);
+      expect(selected).toEqual(tasks);
+    });
   });
 });

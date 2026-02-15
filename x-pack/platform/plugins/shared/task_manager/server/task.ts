@@ -429,6 +429,13 @@ export interface TaskInstance {
    * Optionally override the priority defined in the task type for this specific task instance
    */
   priority?: TaskPriority;
+
+  /**
+   * Optional cost for this task instance, overriding the task type's default cost.
+   * When set, must be one of the TaskCost enum values (Tiny, Normal, ExtraLarge).
+   * Used by the task selector and capacity logic to limit concurrent work.
+   */
+  cost?: number;
 }
 
 /**
