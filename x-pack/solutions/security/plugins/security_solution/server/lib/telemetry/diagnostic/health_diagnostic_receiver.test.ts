@@ -90,9 +90,9 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       const doc2 = { ...mockDocument, id: 2 };
 
       mockEsClient.search
-        .mockResolvedValueOnce(createMockSearchResponse([doc1]))
-        .mockResolvedValueOnce(createMockSearchResponse([doc2]))
-        .mockResolvedValueOnce(createMockSearchResponse([]));
+        .mockResolvedValueOnce(createMockSearchResponse([doc1], undefined, 'test-pit-id-1'))
+        .mockResolvedValueOnce(createMockSearchResponse([doc2], undefined, 'test-pit-id-2'))
+        .mockResolvedValueOnce(createMockSearchResponse([], undefined, 'test-pit-id-3'));
 
       executeObservableTest(
         queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }),
@@ -101,7 +101,22 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
           expect(results[0]).toEqual(doc1);
           expect(results[1]).toEqual(doc2);
           expect(mockEsClient.search).toHaveBeenCalledTimes(3);
-          done();
+
+          expect(mockEsClient.search.mock.calls[0][0]).toMatchObject({
+            pit: { id: 'test-pit-id' },
+          });
+          expect(mockEsClient.search.mock.calls[1][0]).toMatchObject({
+            pit: { id: 'test-pit-id-1' },
+          });
+          expect(mockEsClient.search.mock.calls[2][0]).toMatchObject({
+            pit: { id: 'test-pit-id-2' },
+          });
+
+          // small delay for finalize to execute
+          setTimeout(() => {
+            expect(mockEsClient.closePointInTime).toHaveBeenCalledWith({ id: 'test-pit-id-3' });
+            done();
+          }, 10);
         },
         done
       );

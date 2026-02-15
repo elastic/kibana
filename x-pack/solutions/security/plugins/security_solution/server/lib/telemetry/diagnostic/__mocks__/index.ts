@@ -137,10 +137,11 @@ enabled: ${config.enabled}`;
 
 // Helper functions for common test patterns
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const createMockSearchResponse = (hits: any[] = [], aggregations?: any) => ({
+export const createMockSearchResponse = (hits: any[] = [], aggregations?: any, pitId?: string) => ({
   hits: {
     hits: hits.map((hit) => ({ _source: hit, sort: ['sort1'] })),
   },
+  ...(pitId && { pit_id: pitId }),
   ...(aggregations && { aggregations }),
 });
 
