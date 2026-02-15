@@ -70,8 +70,10 @@ export async function createRequestHandlerContext({
       namespace,
       isServerless,
       logsExtractionClient,
+      security: startPlugins.security,
     }),
     featureFlags: new FeatureFlags(core.uiSettings.client),
     logsExtractionClient,
+    security: startPlugins.security,
   };
 }
