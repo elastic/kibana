@@ -20,8 +20,7 @@ interface OptionDisabledStateParams {
 
 const SORT_PRIORITY = {
   SELECTED: 0,
-  AVAILABLE: 1,
-  DISABLED: 2,
+  NOT_SELECTED: 1,
 } as const;
 
 /**
@@ -43,7 +42,7 @@ export const getOptionDisabledState = ({
 
 /**
  * Sorts dimension options: Selected first (in selection order),
- * then available (alphabetically), then disabled (alphabetically).
+ * then available and disabled together (alphabetically).
  */
 export const sortDimensionOptions = (
   options: SelectableEntry[],
@@ -54,8 +53,7 @@ export const sortDimensionOptions = (
   return sortBy(options, [
     (option) => {
       if (option.checked === 'on') return SORT_PRIORITY.SELECTED;
-      if (option.disabled) return SORT_PRIORITY.DISABLED;
-      return SORT_PRIORITY.AVAILABLE;
+      return SORT_PRIORITY.NOT_SELECTED;
     },
     (option) => {
       if (option.checked === 'on') {

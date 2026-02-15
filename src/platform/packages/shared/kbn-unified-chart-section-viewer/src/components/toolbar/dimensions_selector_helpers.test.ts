@@ -113,7 +113,7 @@ describe('dimensions_selector_helpers', () => {
       type: ES_FIELD_TYPES.KEYWORD,
     });
 
-    it('sorts selected options first, then available, then disabled', () => {
+    it('sorts selected options first, then available and disabled together alphabetically', () => {
       const options: SelectableEntry[] = [
         createOption('disabled1', undefined, true),
         createOption('available1'),
@@ -127,6 +127,7 @@ describe('dimensions_selector_helpers', () => {
 
       expect(result[0].value).toBe('selected1');
       expect(result[1].value).toBe('selected2');
+      // Available and disabled together, alphabetically
       expect(result[2].value).toBe('available1');
       expect(result[3].value).toBe('available2');
       expect(result[4].value).toBe('disabled1');
@@ -179,6 +180,23 @@ describe('dimensions_selector_helpers', () => {
       expect(result[0].value).toBe('alpha');
       expect(result[1].value).toBe('beta');
       expect(result[2].value).toBe('zebra');
+    });
+
+    it('sorts available and disabled options together alphabetically', () => {
+      const options: SelectableEntry[] = [
+        createOption('zebra', undefined, true),
+        createOption('alpha'),
+        createOption('beta', undefined, true),
+        createOption('gamma'),
+      ];
+
+      const result = sortDimensionOptions(options, []);
+
+      // All non-selected options sorted alphabetically together
+      expect(result[0].value).toBe('alpha');
+      expect(result[1].value).toBe('beta');
+      expect(result[2].value).toBe('gamma');
+      expect(result[3].value).toBe('zebra');
     });
 
     it('handles case-insensitive alphabetical sorting', () => {
@@ -261,11 +279,9 @@ describe('dimensions_selector_helpers', () => {
       expect(result[1].value).toBe('container.id');
       expect(result[2].value).toBe('host.name');
 
-      // Available next (alphabetically)
+      // Available and disabled together (alphabetically)
       expect(result[3].value).toBe('alpha');
       expect(result[4].value).toBe('beta');
-
-      // Disabled last (alphabetically)
       expect(result[5].value).toBe('gamma');
       expect(result[6].value).toBe('zebra');
     });

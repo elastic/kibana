@@ -12,6 +12,7 @@ import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import { euiLightVars } from '@kbn/ui-theme';
 import { getAccessorByDimension } from '@kbn/chart-expressions-common';
 import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
+import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
 import { isDataLayer } from './visualization';
 import type { CommonXYDataLayerConfig, CommonXYLayerConfig } from '../../common';
 import type {
@@ -40,14 +41,14 @@ function getSplitName(
   fieldFormats: LayerFieldFormats
 ) {
   return splitAccessors.reduce<string>((splitName, accessor) => {
-    if (!formattedDatatable.table.columns.length) return;
+    if (!formattedDatatable.table.columns.length) return splitName;
     const splitAccessor = getAccessorByDimension(accessor, formattedDatatable.table.columns);
     const splitFormatterObj = fieldFormats.splitSeriesAccessors[splitAccessor];
     const name = formattedDatatable.formattedColumns[splitAccessor]
       ? row[splitAccessor]
       : splitFormatterObj.formatter.convert(row[splitAccessor]);
     if (splitName) {
-      return `${splitName} - ${name}`;
+      return `${splitName}${MULTI_FIELD_KEY_SEPARATOR}${name}`;
     } else {
       return name;
     }

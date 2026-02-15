@@ -298,3 +298,195 @@ test('it generates xy chart with multiple reference lines', async () => {
     ],
   });
 });
+
+describe('breakdown handling', () => {
+  it('should not include splitAccessors when breakdown is undefined', async () => {
+    const result = await buildXY(
+      {
+        chartType: 'xy',
+        title: 'test',
+        dataset: {
+          esql: 'from test | count=count() by @timestamp',
+        },
+        layers: [
+          {
+            type: 'series',
+            seriesType: 'line',
+            xAxis: '@timestamp',
+            yAxis: [
+              {
+                label: 'test',
+                value: 'count',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        dataViewsAPI: mockDataViewsService() as any,
+      }
+    );
+
+    const xyState = result.state.visualization as XYState;
+    const dataLayer = xyState.layers[0] as any;
+
+    expect(dataLayer.splitAccessors).toBeUndefined();
+  });
+
+  it('should create single splitAccessor when breakdown is a string', async () => {
+    const result = await buildXY(
+      {
+        chartType: 'xy',
+        title: 'test',
+        dataset: {
+          esql: 'from test | count=count() by @timestamp, service.name',
+        },
+        layers: [
+          {
+            type: 'series',
+            seriesType: 'line',
+            xAxis: '@timestamp',
+            breakdown: 'service.name',
+            yAxis: [
+              {
+                label: 'test',
+                value: 'count',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        dataViewsAPI: mockDataViewsService() as any,
+      }
+    );
+
+    const xyState = result.state.visualization as XYState;
+    const dataLayer = xyState.layers[0] as any;
+
+    expect(dataLayer.splitAccessors).toEqual(['metric_formula_accessor0_breakdown_0']);
+  });
+
+  it('should create single splitAccessor when breakdown is an array with one item', async () => {
+    const result = await buildXY(
+      {
+        chartType: 'xy',
+        title: 'test',
+        dataset: {
+          esql: 'from test | count=count() by @timestamp, host.name',
+        },
+        layers: [
+          {
+            type: 'series',
+            seriesType: 'line',
+            xAxis: '@timestamp',
+            breakdown: ['host.name'],
+            yAxis: [
+              {
+                label: 'test',
+                value: 'count',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        dataViewsAPI: mockDataViewsService() as any,
+      }
+    );
+
+    const xyState = result.state.visualization as XYState;
+    const dataLayer = xyState.layers[0] as any;
+
+    expect(dataLayer.splitAccessors).toEqual(['metric_formula_accessor0_breakdown_0']);
+  });
+
+  it('should create multiple splitAccessors when breakdown is an array with multiple items', async () => {
+    const result = await buildXY(
+      {
+        chartType: 'xy',
+        title: 'test',
+        dataset: {
+          esql: 'from test | count=count() by @timestamp, host.name, service.name, container.id',
+        },
+        layers: [
+          {
+            type: 'series',
+            seriesType: 'line',
+            xAxis: '@timestamp',
+            breakdown: ['host.name', 'service.name', 'container.id'],
+            yAxis: [
+              {
+                label: 'test',
+                value: 'count',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        dataViewsAPI: mockDataViewsService() as any,
+      }
+    );
+
+    const xyState = result.state.visualization as XYState;
+    const dataLayer = xyState.layers[0] as any;
+
+    expect(dataLayer.splitAccessors).toEqual([
+      'metric_formula_accessor0_breakdown_0',
+      'metric_formula_accessor0_breakdown_1',
+      'metric_formula_accessor0_breakdown_2',
+    ]);
+  });
+
+  it('should create correct splitAccessors for multiple layers with different breakdowns', async () => {
+    const result = await buildXY(
+      {
+        chartType: 'xy',
+        title: 'test',
+        dataset: {
+          esql: 'from test | count=count() by @timestamp',
+        },
+        layers: [
+          {
+            type: 'series',
+            seriesType: 'line',
+            xAxis: '@timestamp',
+            breakdown: 'service.name',
+            yAxis: [
+              {
+                label: 'test',
+                value: 'count',
+              },
+            ],
+          },
+          {
+            type: 'series',
+            seriesType: 'bar',
+            xAxis: '@timestamp',
+            breakdown: ['host.name', 'container.id'],
+            yAxis: [
+              {
+                label: 'test2',
+                value: 'count',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        dataViewsAPI: mockDataViewsService() as any,
+      }
+    );
+
+    const xyState = result.state.visualization as XYState;
+    const layer0 = xyState.layers[0] as any;
+    const layer1 = xyState.layers[1] as any;
+
+    expect(layer0.splitAccessors).toEqual(['metric_formula_accessor0_breakdown_0']);
+    expect(layer1.splitAccessors).toEqual([
+      'metric_formula_accessor1_breakdown_0',
+      'metric_formula_accessor1_breakdown_1',
+    ]);
+  });
+});

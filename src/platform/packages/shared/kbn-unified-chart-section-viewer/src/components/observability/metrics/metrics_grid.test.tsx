@@ -147,7 +147,7 @@ describe('MetricsGrid', () => {
       expect.objectContaining({
         chartLayers: expect.arrayContaining([
           expect.objectContaining({
-            breakdown: 'host.name',
+            breakdown: ['host.name', 'service.name', 'container.id'],
           }),
         ]),
       }),

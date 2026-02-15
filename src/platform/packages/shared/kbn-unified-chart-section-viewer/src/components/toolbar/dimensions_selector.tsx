@@ -96,19 +96,52 @@ export const DimensionsSelector = ({
     const mappedOptions = dimensions.map<SelectableEntry>((dimension) => {
       const isSelected = selectedNamesSet.has(dimension.name);
       const isIntersecting = intersectingDimensions.has(dimension.name);
+      const isDisabled = getOptionDisabledState({
+        singleSelection,
+        isSelected,
+        isIntersecting,
+        isAtMaxLimit,
+      });
 
-      return {
+      const tooltipContent =
+        isAtMaxLimit && isDisabled ? (
+          <FormattedMessage
+            id="metricsExperience.dimensionsSelector.maxDimensionsWarning"
+            defaultMessage="Maximum of {maxDimensions} dimensions selected"
+            values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
+          />
+        ) : undefined;
+
+      const option: SelectableEntry = {
         value: dimension.name,
         label: dimension.name,
         checked: isSelected ? 'on' : undefined,
-        disabled: getOptionDisabledState({
-          singleSelection,
-          isSelected,
-          isIntersecting,
-          isAtMaxLimit,
-        }),
+        disabled: isDisabled,
         key: dimension.name,
       };
+
+      if (tooltipContent) {
+        option.prepend = (
+          <EuiToolTip
+            content={tooltipContent}
+            position="top"
+            anchorProps={{
+              css: css`
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: auto;
+                z-index: 1;
+              `,
+            }}
+          >
+            <div />
+          </EuiToolTip>
+        );
+      }
+
+      return option;
     });
 
     return sortDimensionOptions(mappedOptions, localSelectedDimensions);
@@ -176,7 +209,6 @@ export const DimensionsSelector = ({
 
   const buttonLabel = useMemo(() => {
     const count = localSelectedDimensions.length;
-    const isAtMaxDimensions = count >= MAX_DIMENSIONS_SELECTIONS;
 
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
@@ -193,7 +225,7 @@ export const DimensionsSelector = ({
               values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
             />
           ) : (
-            <EuiFlexGroup alignItems="center">
+            <EuiFlexGroup alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <FormattedMessage
                   id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabelWithSelection"
@@ -201,21 +233,7 @@ export const DimensionsSelector = ({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {isAtMaxDimensions ? (
-                  <EuiToolTip
-                    content={
-                      <FormattedMessage
-                        id="metricsExperience.dimensionsSelector.maxDimensionsWarning"
-                        defaultMessage="Maximum of {maxDimensions} dimensions selected"
-                        values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
-                      />
-                    }
-                  >
-                    <EuiNotificationBadge>{count}</EuiNotificationBadge>
-                  </EuiToolTip>
-                ) : (
-                  <EuiNotificationBadge>{count}</EuiNotificationBadge>
-                )}
+                <EuiNotificationBadge>{count}</EuiNotificationBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
@@ -229,18 +247,36 @@ export const DimensionsSelector = ({
     );
   }, [localSelectedDimensions, isLoading]);
 
+  // Create tooltip content for when at max dimensions
+  const buttonTooltipContent = useMemo(() => {
+    const count = localSelectedDimensions.length;
+    const isAtMaxDimensions = count >= MAX_DIMENSIONS_SELECTIONS;
+
+    if (isAtMaxDimensions) {
+      return (
+        <FormattedMessage
+          id="metricsExperience.dimensionsSelector.maxDimensionsWarning"
+          defaultMessage="Maximum of {maxDimensions} dimensions selected"
+          values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
+        />
+      );
+    }
+
+    return undefined;
+  }, [localSelectedDimensions]);
+
   const popoverContentBelowSearch = useMemo(() => {
     const count = localSelectedDimensions.length;
-    if (count === 0) {
-      return undefined;
-    }
     return (
       <EuiFlexGroup
-        direction="column"
         gutterSize="xs"
         css={css`
           padding: 8px 0;
+          min-height: 24px;
         `}
+        justifyContent="spaceBetween"
+        alignItems="center"
+        responsive={false}
       >
         <EuiFlexItem>
           <EuiText size="xs" color="subdued">
@@ -251,14 +287,16 @@ export const DimensionsSelector = ({
             />
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButtonEmpty size="xs" flush="left" onClick={handleClearAll}>
-            <FormattedMessage
-              id="metricsExperience.dimensionsSelector.clearSelection"
-              defaultMessage="Clear selection"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+        {count > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty size="xs" flush="right" onClick={handleClearAll}>
+              <FormattedMessage
+                id="metricsExperience.dimensionsSelector.clearSelection"
+                defaultMessage="Clear selection"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   }, [localSelectedDimensions.length, handleClearAll]);
@@ -269,6 +307,7 @@ export const DimensionsSelector = ({
       data-selected-value={[...selectedNamesSet]}
       searchable
       buttonLabel={buttonLabel}
+      buttonTooltipContent={buttonTooltipContent}
       popoverContentBelowSearch={popoverContentBelowSearch}
       optionMatcher={comboBoxFieldOptionMatcher}
       options={options}

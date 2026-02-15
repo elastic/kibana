@@ -34,6 +34,7 @@ export interface BaseToolbarProps {
   'data-test-subj': string;
   'data-selected-value'?: string | string[];
   buttonLabel: ReactElement | string;
+  buttonTooltipContent?: ReactElement | string;
   popoverContentBelowSearch?: ReactElement;
   popoverTitle?: string;
   options: SelectableEntry[];
@@ -61,6 +62,7 @@ export const ToolbarSelector = ({
   'data-test-subj': dataTestSubj,
   'data-selected-value': dataSelectedValue,
   buttonLabel,
+  buttonTooltipContent,
   popoverContentBelowSearch,
   popoverTitle,
   options,
@@ -204,7 +206,13 @@ export const ToolbarSelector = ({
         panelPaddingSize="none"
         button={
           <EuiToolTip
-            content={labelPopoverDisabled ? undefined : buttonLabel}
+            content={
+              labelPopoverDisabled
+                ? undefined
+                : buttonTooltipContent !== undefined
+                ? buttonTooltipContent
+                : buttonLabel
+            }
             delay="long"
             display="block"
           >
