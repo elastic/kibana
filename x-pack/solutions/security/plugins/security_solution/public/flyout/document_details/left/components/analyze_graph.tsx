@@ -10,12 +10,15 @@ import React, { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPanel,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
@@ -30,6 +33,7 @@ import { AnalyzerPreviewNoDataMessage } from '../../right/components/analyzer_pr
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER } from '../../../../../common/constants';
 
 export const ANALYZE_GRAPH_ID = 'analyze_graph';
 export const DATA_VIEW_LOADING_TEST_ID = 'analyzer-data-view-loading';
@@ -48,11 +52,28 @@ export const ANALYZER_PREVIEW_BANNER = {
   backgroundColor: 'warning',
   textColor: 'warning',
 };
+const COLD_FROZEN_TIER_CALLOUT_TITLE = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.left.visualizations.analyzer.excludeColdAndFrozenTiers.calloutTitle"
+    defaultMessage="Cold and frozen tiers"
+  />
+);
+const COLD_FROZEN_TIER_CALLOUT_DESCRIPTION = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.left.visualizations.analyzer.excludeColdAndFrozenTiers.calloutDescription"
+    defaultMessage="Cold and frozen tiers are currently excluded. To include them, go to Advanced Settings."
+  />
+);
 
 /**
  * Analyzer graph view displayed in the document details expandable flyout left section under the Visualize tab
  */
 export const AnalyzeGraph: FC = () => {
+  const { uiSettings } = useKibana().services;
+  const excludeColdAndFrozenTiers = uiSettings.get<boolean>(
+    EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER
+  );
+
   const { eventId, scopeId, dataAsNestedObject } = useDocumentDetailsContext();
   const isEnabled = useIsInvestigateInResolverActionEnabled(dataAsNestedObject);
 
@@ -110,18 +131,29 @@ export const AnalyzeGraph: FC = () => {
     );
   }
 
+  const coldFrozenTierCallout = (
+    <>
+      <EuiCallOut title={COLD_FROZEN_TIER_CALLOUT_TITLE} iconType="snowflake">
+        <p>{COLD_FROZEN_TIER_CALLOUT_DESCRIPTION}</p>
+      </EuiCallOut>
+    </>
+  );
+
   return (
-    <div data-test-subj={ANALYZER_GRAPH_TEST_ID}>
-      <Resolver
-        databaseDocumentID={eventId}
-        resolverComponentInstanceID={`${key}-${scopeId}`}
-        indices={selectedPatterns}
-        shouldUpdate={shouldUpdate}
-        filters={filters}
-        isSplitPanel
-        showPanelOnClick={onClick}
-      />
-    </div>
+    <EuiFlexGroup direction="column" responsive={false} data-test-subj={ANALYZER_GRAPH_TEST_ID}>
+      {excludeColdAndFrozenTiers && <EuiFlexItem grow={false}>{coldFrozenTierCallout}</EuiFlexItem>}
+      <EuiFlexItem grow={false}>
+        <Resolver
+          databaseDocumentID={eventId}
+          resolverComponentInstanceID={`${key}-${scopeId}`}
+          indices={selectedPatterns}
+          shouldUpdate={shouldUpdate}
+          filters={filters}
+          isSplitPanel
+          showPanelOnClick={onClick}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

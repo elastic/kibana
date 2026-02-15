@@ -208,6 +208,10 @@ export const DEFAULT_AI_CONNECTOR = 'securitySolution:defaultAIConnector' as con
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;
 
+/** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers */
+export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE =
+  'securitySolution:excludeColdAndFrozenTiersInPrevalence' as const;
+
 /** This Kibana Advanced Setting enables the warnings for CCS read permissions */
 export const ENABLE_CCS_READ_WARNING_SETTING = 'securitySolution:enableCcsWarning' as const;
 

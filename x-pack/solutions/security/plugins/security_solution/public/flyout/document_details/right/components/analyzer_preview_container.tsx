@@ -6,19 +6,39 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiLink, EuiMark } from '@elastic/eui';
+import { EuiBadge, EuiFlexItem, EuiLink, EuiMark, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { useNavigateToAnalyzer } from '../../shared/hooks/use_navigate_to_analyzer';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE } from '../../../../../common/constants';
+
+const COLD_FROZEN_TIER_LABEL = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.right.visualizations.analyzer.excludeColdAndFrozenTiers.badgeLabel"
+    defaultMessage="Cold/Frozen tiers excluded"
+  />
+);
+const COLD_FROZEN_TIER_TOOLTIP = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.right.visualizations.analyzer.excludeColdAndFrozenTiers.tooltipLabel"
+    defaultMessage="Cold and frozen tiers are currently excluded. To include them, go to Advanced Settings."
+  />
+);
 
 /**
  * Analyzer preview under Overview, Visualizations. It shows a tree representation of analyzer.
  */
 export const AnalyzerPreviewContainer: React.FC = () => {
+  const { uiSettings } = useKibana().services;
+  const excludeColdAndFrozenTiers = uiSettings.get<boolean>(
+    EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE
+  );
+
   const { dataAsNestedObject, isRulePreview, eventId, indexName, scopeId, isPreviewMode } =
     useDocumentDetailsContext();
 
@@ -49,6 +69,19 @@ export const AnalyzerPreviewContainer: React.FC = () => {
             id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.analyzerPreviewTitle"
             defaultMessage="Analyzer preview"
           />
+        ),
+        headerContent: (
+          <>
+            {excludeColdAndFrozenTiers && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={COLD_FROZEN_TIER_TOOLTIP}>
+                  <EuiBadge color="hollow" iconSide="left" iconType="snowflake" tabIndex={0}>
+                    {COLD_FROZEN_TIER_LABEL}
+                  </EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+          </>
         ),
         iconType,
         ...(isNavigationEnabled && {

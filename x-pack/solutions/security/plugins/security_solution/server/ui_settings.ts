@@ -40,6 +40,7 @@ import {
   ENABLE_NEWS_FEED_SETTING,
   ENABLE_SIEM_READINESS_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
+  EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE,
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
   EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
   EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
@@ -188,28 +189,6 @@ export const initUiSettings = (
         defaultMessage: '<p>Enables the News feed</p>',
         values: { p: (chunks) => `<p>${chunks}</p>` },
       }),
-      type: 'boolean',
-      category: [APP_ID],
-      requiresPageReload: true,
-      schema: schema.boolean(),
-      solutionViews: ['classic', 'security'],
-    },
-    [EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER]: {
-      name: i18n.translate(
-        'xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzer',
-        {
-          defaultMessage: 'Exclude cold and frozen tiers in Analyzer',
-        }
-      ),
-      value: false,
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzerDescription',
-        {
-          defaultMessage:
-            '<p>When enabled, cold and frozen tiers will be skipped in analyzer queries</p>',
-          values: { p: (chunks) => `<p>${chunks}</p>` },
-        }
-      ),
       type: 'boolean',
       category: [APP_ID],
       requiresPageReload: true,
@@ -467,32 +446,8 @@ export const initUiSettings = (
       schema: schema.arrayOf(schema.string()),
       solutionViews: ['classic', 'security'],
     },
-    [EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION]: {
-      name: i18n.translate(
-        'xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionLabel',
-        {
-          defaultMessage: 'Exclude cold or frozen data tier from rule execution',
-        }
-      ),
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionDescription',
-        {
-          defaultMessage: `
-          When configured, events from the specified data tiers are not searched during rules executions.
-          <br/>This might help to improve rule performance or reduce execution time.
-          <br/>If you specify multiple data tiers, separate values with commas. For example: data_frozen,data_cold`,
-        }
-      ),
-      type: 'array',
-      schema: schema.arrayOf(
-        schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')])
-      ),
-      value: [],
-      category: [APP_ID],
-      requiresPageReload: false,
-      solutionViews: ['classic', 'security'],
-    },
     ...getDefaultValueReportSettings(),
+    ...getDefaultColdAndFrozenTiersSettings(),
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
       ? {
           [EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING]: {
@@ -647,6 +602,75 @@ export const getDefaultValueReportSettings = (): SettingsConfig => ({
     category: [APP_ID],
     requiresPageReload: true,
     schema: schema.string(),
+    solutionViews: ['classic', 'security'],
+  },
+});
+
+export const getDefaultColdAndFrozenTiersSettings = (): SettingsConfig => ({
+  [EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzer', {
+      defaultMessage: 'Exclude cold and frozen tiers in Analyzer',
+    }),
+    value: false,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzerDescription',
+      {
+        defaultMessage:
+          '<p>When enabled, cold and frozen tiers will be skipped in analyzer queries</p>',
+        values: { p: (chunks) => `<p>${chunks}</p>` },
+      }
+    ),
+    type: 'boolean',
+    category: [APP_ID],
+    requiresPageReload: true,
+    schema: schema.boolean(),
+    solutionViews: ['classic', 'security'],
+  },
+  [EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE]: {
+    name: i18n.translate(
+      'xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInPrevalence',
+      {
+        defaultMessage: 'Exclude cold and frozen tiers in Prevalence',
+      }
+    ),
+    value: false,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInPrevalenceDescription',
+      {
+        defaultMessage:
+          '<p>When enabled, cold and frozen tiers will be skipped in prevalence queries</p>',
+        values: { p: (chunks) => `<p>${chunks}</p>` },
+      }
+    ),
+    type: 'boolean',
+    category: [APP_ID],
+    requiresPageReload: true,
+    schema: schema.boolean(),
+    solutionViews: ['classic', 'security'],
+  },
+  [EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION]: {
+    name: i18n.translate(
+      'xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionLabel',
+      {
+        defaultMessage: 'Exclude cold or frozen data tier from rule execution',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionDescription',
+      {
+        defaultMessage: `
+          When configured, events from the specified data tiers are not searched during rules executions.
+          <br/>This might help to improve rule performance or reduce execution time.
+          <br/>If you specify multiple data tiers, separate values with commas. For example: data_frozen,data_cold`,
+      }
+    ),
+    type: 'array',
+    schema: schema.arrayOf(
+      schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')])
+    ),
+    value: [],
+    category: [APP_ID],
+    requiresPageReload: false,
     solutionViews: ['classic', 'security'],
   },
 });
