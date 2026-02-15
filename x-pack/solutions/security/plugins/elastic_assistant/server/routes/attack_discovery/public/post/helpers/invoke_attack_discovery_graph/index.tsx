@@ -87,7 +87,6 @@ export const invokeAttackDiscoveryGraph = async ({
     llmType,
     logger,
     model,
-    temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
     timeout: connectorTimeout,
     traceOptions,
     telemetryMetadata: {
