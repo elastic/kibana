@@ -26,6 +26,7 @@ import {
   calculateActiveStickyIndex,
   type VirtualizedCascadeListProps,
 } from '../../lib/core/virtualizer';
+import { useExposePublicApi } from '../../lib/core/api';
 import {
   useRegisterCascadeAccessibilityHelpers,
   useTreeGridContainerARIAAttributes,
@@ -63,6 +64,8 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   enableRowSelection = false,
   enableStickyGroupHeader = true,
   allowMultipleRowToggle = false,
+  initialScrollOffset,
+  cascadeRef,
 }: DataCascadeImplProps<G, L>) {
   const rowElement = Children.only(children);
 
@@ -132,6 +135,11 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     rowCell: cascadeRowCell,
   });
 
+  const { collectVirtualizerStateChanges } = useExposePublicApi<G, L>(cascadeRef, {
+    rows,
+    enableStickyGroupHeader,
+  });
+
   // persist the virtualizer instance to ref, so that invocations of getVirtualizer will always return the latest instance
   virtualizerInstance.current = useCascadeVirtualizer<G>({
     rows,
@@ -139,6 +147,8 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     getScrollElement,
     enableStickyGroupHeader,
     estimatedRowHeight: size === 's' ? 32 : size === 'm' ? 40 : 48,
+    onStateChange: collectVirtualizerStateChanges,
+    initialOffset: initialScrollOffset,
   });
 
   const {
@@ -160,6 +170,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     enableStickyGroupHeader
   );
 
+  // register handlers for accessibility
   useRegisterCascadeAccessibilityHelpers<G>({
     tableRows: rows,
     tableWrapperElement: cascadeWrapperRef.current!,

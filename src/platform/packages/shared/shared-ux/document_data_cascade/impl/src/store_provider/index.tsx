@@ -22,6 +22,12 @@ export type { GroupNode, LeafNode, IStoreState } from './reducers';
 
 interface IDataCascadeProviderProps {
   initialGroupColumn?: string[];
+  /**
+   * Row ids (from rowData.id) to expand on mount. For a nested row to be visible,
+   * include the full path from root to that row (e.g. ['root-id', 'child-id', 'leaf-id']).
+   * Order in the array does not matter.
+   */
+  initialExpandedRowIds?: string[];
   cascadeGroups: string[];
 }
 
@@ -69,6 +75,7 @@ export function useCascadeLeafNode<G extends GroupNode, L extends LeafNode>(cach
 export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
   cascadeGroups,
   initialGroupColumn,
+  initialExpandedRowIds,
   children,
 }: PropsWithChildren<IDataCascadeProviderProps>) {
   const StoreContext = createStoreContext<G, L>();
@@ -79,9 +86,19 @@ export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
     return initialGroupColumn.filter((col) => cascadeGroups.includes(col));
   }, [initialGroupColumn, cascadeGroups]);
 
+  const initialTableState = useMemo<TableState>(() => {
+    if (initialExpandedRowIds?.length) {
+      return {
+        expanded: Object.fromEntries(initialExpandedRowIds.map((id) => [id, true])),
+      } as TableState;
+    }
+    return {} as TableState;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Intentionally empty: only use initialExpandedRowIds on mount
+  }, []);
+
   const { state, actions } = useCreateStore({
     initialState: {
-      table: {} as TableState,
+      table: initialTableState,
       groupNodes: [] as G[],
       leafNodes: new Map<string, L[]>(), // TODO: consider externalizing this so the consumer might provide their own external cache
       groupByColumns: cascadeGroups,
