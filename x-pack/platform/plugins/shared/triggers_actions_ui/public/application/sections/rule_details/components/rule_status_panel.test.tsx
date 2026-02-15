@@ -188,9 +188,7 @@ describe('rule status panel', () => {
         bulkDisableRules={bulkDisableRules}
       />
     );
-    const actionsElem = wrapper
-      .find('[data-test-subj="statusDropdown"] .euiBadge__childButton')
-      .first();
+    const actionsElem = wrapper.find('[data-test-subj="statusDropdown"] button').first();
     actionsElem.simulate('click');
 
     await act(async () => {
@@ -220,9 +218,7 @@ describe('rule status panel', () => {
         requestRefresh={requestRefresh}
       />
     );
-    const actionsElem = wrapper
-      .find('[data-test-subj="statusDropdown"] .euiBadge__childButton')
-      .first();
+    const actionsElem = wrapper.find('[data-test-subj="statusDropdown"] button').first();
     actionsElem.simulate('click');
 
     await act(async () => {
@@ -254,9 +250,7 @@ describe('rule status panel', () => {
         bulkEnableRules={bulkEnableRules}
       />
     );
-    const actionsElem = wrapper
-      .find('[data-test-subj="statusDropdown"] .euiBadge__childButton')
-      .first();
+    const actionsElem = wrapper.find('[data-test-subj="statusDropdown"] button').first();
     actionsElem.simulate('click');
 
     await act(async () => {

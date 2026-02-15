@@ -378,8 +378,6 @@ const getConflictBtn = (
         color="warning"
         iconType="warning"
         onClick={onClick}
-        iconOnClick={onClick}
-        iconOnClickAriaLabel={conflictDetailIconAria}
         onClickAriaLabel={conflictDetailIconAria}
       >
         {conflictType}

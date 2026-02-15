@@ -112,8 +112,6 @@ export const EuiBadgeTo: React.FC<ReactRouterEuiBadgeProps> = ({
 
   const badgeProps: EuiBadgeProps = {
     ...rest,
-    iconOnClick: routerProps.onClick,
-    iconOnClickAriaLabel: label,
     onClick: routerProps.onClick,
     onClickAriaLabel: label,
   };

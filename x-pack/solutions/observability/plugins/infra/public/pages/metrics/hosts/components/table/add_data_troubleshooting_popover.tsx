@@ -66,8 +66,6 @@ export const AddDataTroubleshootingPopover = () => {
           iconSide="left"
           onClick={onButtonClick}
           onClickAriaLabel={popoverContent.title}
-          iconOnClick={onButtonClick}
-          iconOnClickAriaLabel={popoverContent.title}
         >
           {badgeContent}
         </EuiBadge>
