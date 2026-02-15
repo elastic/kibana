@@ -20,7 +20,7 @@ export const ConfigSchema = z
     taskType: z.string(),
     inferenceId: z.string(),
     providerConfig: z.object({}).passthrough().default({}),
-    taskTypeConfig: z.object({}).passthrough().default({}),
+    taskTypeConfig: z.object({}).passthrough().default({}).optional(),
     contextWindowLength: z.coerce.number().optional(),
     headers: z.record(z.string(), z.string()).optional(),
     temperature: z.coerce.number().optional(),

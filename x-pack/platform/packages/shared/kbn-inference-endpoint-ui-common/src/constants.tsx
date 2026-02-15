@@ -78,6 +78,11 @@ export const internalProviderKeys: Array<ServiceProviderKeys | string> = [
 
 export const MAX_NUMBER_OF_ALLOCATIONS = 'max_number_of_allocations';
 export const CONTEXT_WINDOW_LENGTH = 'contextWindowLength';
+export const SERVICE_SETTINGS = 'service_settings';
+export const TASK_SETTINGS = 'task_settings';
+export const TASK_TYPE_CONFIG = 'taskTypeConfig';
+export const PROVIDER_CONFIG = 'providerConfig';
+export const PROVIDER_SECRETS = 'providerSecrets';
 
 // This is a temporaray solution to handle the internal overrides for field configurations that have not been updated in the services endpoint
 // defaultValues can be used to set default values for model_id fields for providers
@@ -104,6 +109,22 @@ export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
   // Default model values for providers
   [ServiceProviderKeys.openai]: {
     defaultValues: { model_id: OPENAI_DEFAULT_MODEL },
+    supplementalData: [
+      {
+        headers: {
+          location: TASK_SETTINGS,
+        },
+      },
+    ],
+  },
+  [ServiceProviderKeys.anthropic]: {
+    supplementalData: [
+      {
+        max_tokens: {
+          location: TASK_SETTINGS,
+        },
+      },
+    ],
   },
   [ServiceProviderKeys.amazonbedrock]: {
     defaultValues: { model: BEDROCK_DEFAULT_MODEL },
