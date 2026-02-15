@@ -10,7 +10,7 @@
 import { connectorsSpecs } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import type { BaseConnectorContract } from '@kbn/workflows';
-import { KibanaStepMetaSchema } from '@kbn/workflows';
+import { FetcherConfigSchema, KibanaStepMetaSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 
 import {
@@ -470,6 +470,7 @@ export const staticConnectors: BaseConnectorContract[] = [
       path: z.string(),
       body: z.any().optional(),
       headers: z.any().optional(),
+      fetcher: FetcherConfigSchema,
       ...KibanaStepMetaSchema,
     }),
     outputSchema: z.any(),
