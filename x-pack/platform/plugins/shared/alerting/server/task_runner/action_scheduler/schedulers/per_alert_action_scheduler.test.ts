@@ -1305,5 +1305,98 @@ describe('Per-Alert Action Scheduler', () => {
       // @ts-expect-error private variable
       expect(scheduler.skippedAlerts).toEqual({ '2': { reason: 'delayed' } });
     });
+
+    test('should skip creating actions when alert has conditional snooze entry but conditions are NOT met', async () => {
+      const scheduler = new PerAlertActionScheduler({
+        ...getSchedulerContext(),
+        rule: {
+          ...rule,
+          mutedInstanceIds: [],
+          snoozedAlerts: [
+            {
+              alertInstanceId: '2',
+              mutedAt: '2024-01-01T00:00:00.000Z',
+              expiresAt: '2099-12-31T00:00:00.000Z', // far future -- not expired
+              conditionOperator: 'any',
+            },
+          ],
+        },
+      });
+
+      const results = await scheduler.getActionsToSchedule({
+        activeAlerts: alerts,
+      });
+
+      // Alert 2 should be muted (conditions not met), alert 1 should fire
+      expect(results).toHaveLength(2);
+      expect(results).toEqual([
+        getResult('action-1', '1', '111-111'),
+        getResult('action-2', '1', '222-222'),
+      ]);
+
+      // @ts-expect-error private variable
+      expect(scheduler.skippedAlerts).toEqual({ '2': { reason: 'muted' } });
+      expect(scheduler.alertsToAutoUnmute).toHaveLength(0);
+    });
+
+    test('should allow actions and mark for auto-unmute when snooze conditions are met (expired)', async () => {
+      const scheduler = new PerAlertActionScheduler({
+        ...getSchedulerContext(),
+        rule: {
+          ...rule,
+          mutedInstanceIds: [],
+          snoozedAlerts: [
+            {
+              alertInstanceId: '2',
+              mutedAt: '2024-01-01T00:00:00.000Z',
+              expiresAt: '1969-01-01T00:00:00.000Z', // already expired (relative to epoch clock)
+              conditionOperator: 'any',
+            },
+          ],
+        },
+      });
+
+      const results = await scheduler.getActionsToSchedule({
+        activeAlerts: alerts,
+      });
+
+      // Both alerts should fire because alert 2's snooze expired
+      expect(results).toHaveLength(4);
+      expect(scheduler.alertsToAutoUnmute).toHaveLength(1);
+      expect(scheduler.alertsToAutoUnmute[0].alertInstanceId).toBe('2');
+      expect(scheduler.alertsToAutoUnmute[0].reason).toContain('Time expiry reached');
+    });
+
+    test('should mute alert in snoozedAlerts with no conditions (indefinite snooze)', async () => {
+      const scheduler = new PerAlertActionScheduler({
+        ...getSchedulerContext(),
+        rule: {
+          ...rule,
+          mutedInstanceIds: [],
+          snoozedAlerts: [
+            {
+              alertInstanceId: '2',
+              mutedAt: '2024-01-01T00:00:00.000Z',
+              conditionOperator: 'any',
+              // no expiresAt, no conditions -- indefinite
+            },
+          ],
+        },
+      });
+
+      const results = await scheduler.getActionsToSchedule({
+        activeAlerts: alerts,
+      });
+
+      // Alert 2 should be muted indefinitely
+      expect(results).toHaveLength(2);
+      expect(results).toEqual([
+        getResult('action-1', '1', '111-111'),
+        getResult('action-2', '1', '222-222'),
+      ]);
+      // @ts-expect-error private variable
+      expect(scheduler.skippedAlerts).toEqual({ '2': { reason: 'muted' } });
+      expect(scheduler.alertsToAutoUnmute).toHaveLength(0);
+    });
   });
 });

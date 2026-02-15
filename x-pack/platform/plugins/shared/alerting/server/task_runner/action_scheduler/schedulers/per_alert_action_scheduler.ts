@@ -6,9 +6,10 @@
  */
 
 import type { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
-import type { RuleAction, RuleTypeParams } from '@kbn/alerting-types';
+import type { RuleAction, RuleTypeParams, SnoozedAlertInstance } from '@kbn/alerting-types';
 import { RuleNotifyWhen } from '@kbn/alerting-types';
 import { compact } from 'lodash';
+import { evaluateSnoozeConditions } from '../../../lib/snooze';
 import type { RuleTypeState, RuleAlertData } from '../../../../common';
 import { parseDuration } from '../../../../common';
 import type { GetSummarizedAlertsParams } from '../../../alerts_client/types';
@@ -28,6 +29,7 @@ import type {
   ActionSchedulerOptions,
   ActionsToSchedule,
   AddSummarizedAlertsOpts,
+  AlertToAutoUnmute,
   GetActionsToScheduleOpts,
   HelperOpts,
   IActionScheduler,
@@ -57,9 +59,13 @@ export class PerAlertActionScheduler<
 > implements IActionScheduler<State, Context, ActionGroupIds, RecoveryActionGroupId>
 {
   private actions: RuleAction[] = [];
-  private mutedAlertIdsSet: Set<string> = new Set();
+  private snoozedAlertIdsSet: Set<string> = new Set();
+  private snoozedAlertsMap: Map<string, SnoozedAlertInstance> = new Map();
   private ruleTypeActionGroups?: Map<ActionGroupIds | RecoveryActionGroupId, string>;
   private skippedAlerts: { [key: string]: { reason: string } } = {};
+
+  /** Alert instance IDs whose mute conditions were met during this run and should be auto-unmuted. */
+  public alertsToAutoUnmute: AlertToAutoUnmute[] = [];
 
   constructor(
     private readonly context: ActionSchedulerOptions<
@@ -76,7 +82,15 @@ export class PerAlertActionScheduler<
     this.ruleTypeActionGroups = new Map(
       context.ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
     );
-    this.mutedAlertIdsSet = new Set(context.rule.mutedInstanceIds);
+    this.snoozedAlertIdsSet = new Set(context.rule.mutedInstanceIds);
+
+    // Build a lookup map for conditional snoozed alerts
+    const snoozedAlerts = context.rule.snoozedAlerts;
+    if (snoozedAlerts) {
+      for (const entry of snoozedAlerts) {
+        this.snoozedAlertsMap.set(entry.alertInstanceId, entry);
+      }
+    }
 
     const canGetSummarizedAlerts =
       !!context.ruleType.alerts && !!context.alertsClient.getSummarizedAlerts;
@@ -364,7 +378,51 @@ export class PerAlertActionScheduler<
     alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>
   ) {
     const alertId = alert.getId();
-    const muted = this.mutedAlertIdsSet.has(alertId);
+
+    // 1. Check conditional snoozed alerts first (snoozedAlerts array)
+    const snoozedAlertEntry = this.snoozedAlertsMap.get(alertId);
+    if (snoozedAlertEntry) {
+      const hasConditions =
+        snoozedAlertEntry.expiresAt ||
+        (snoozedAlertEntry.conditions && snoozedAlertEntry.conditions.length > 0);
+
+      if (hasConditions) {
+        // Build current alert data for condition evaluation
+        const alertData: Record<string, unknown> = alert.isAlertAsData()
+          ? (alert.getAlertAsData() as Record<string, unknown>) ?? {}
+          : {};
+
+        const evalResult = evaluateSnoozeConditions(snoozedAlertEntry, alertData);
+        if (evalResult.shouldUnmute) {
+          // Conditions met -- mark for auto-unmute (deduplicated), allow actions to fire
+          if (!this.alertsToAutoUnmute.some((a) => a.alertInstanceId === alertId)) {
+            this.alertsToAutoUnmute.push({
+              alertInstanceId: alertId,
+              reason: evalResult.reason ?? 'conditions met',
+            });
+          }
+          this.context.logger.debug(
+            `auto-unmuting alert '${alertId}' in rule ${this.context.ruleLabel}: ${evalResult.reason}`
+          );
+          return false;
+        }
+      }
+
+      // Conditions not met or no conditions -- alert is still muted
+      if (
+        !this.skippedAlerts[alertId] ||
+        (this.skippedAlerts[alertId] && this.skippedAlerts[alertId].reason !== Reasons.MUTED)
+      ) {
+        this.context.logger.debug(
+          `skipping scheduling of actions for '${alertId}' in rule ${this.context.ruleLabel}: alert is muted`
+        );
+      }
+      this.skippedAlerts[alertId] = { reason: Reasons.MUTED };
+      return true;
+    }
+
+    // 2. Fall back to legacy mutedInstanceIds (simple, indefinite mute)
+    const muted = this.snoozedAlertIdsSet.has(alertId);
     if (muted) {
       if (
         !this.skippedAlerts[alertId] ||

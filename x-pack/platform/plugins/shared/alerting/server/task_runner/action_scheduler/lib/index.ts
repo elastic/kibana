@@ -18,3 +18,4 @@ export {
   logNumberOfFilteredAlerts,
 } from './rule_action_helper';
 export { shouldScheduleAction } from './should_schedule_action';
+export { getAllSnoozedAlertInstanceIds } from './get_all_suppressed_alert_instance_ids';

@@ -6,6 +6,8 @@
  */
 
 import type { UnmuteAlertParams } from '../application/rule/methods/unmute_alert/types';
+import type { SnoozeAlertOptions } from '../application/rule/methods/snooze_alert/types';
+import type { UnsnoozeAlertParams } from '../application/rule/methods/unsnooze_alert/types';
 import type { RuleTagsParams } from '../application/rule/methods/tags';
 import { getRuleTags } from '../application/rule/methods/tags';
 import type { MuteAlertQuery, MuteAlertParams } from '../application/rule/methods/mute_alert/types';
@@ -67,6 +69,8 @@ import { muteInstance } from '../application/rule/methods/mute_alert/mute_instan
 import { unmuteAll } from '../application/rule/methods/unmute_all';
 import { muteAll } from '../application/rule/methods/mute_all';
 import { unmuteInstance } from '../application/rule/methods/unmute_alert/unmute_instance';
+import { snoozeInstance } from '../application/rule/methods/snooze_alert/snooze_instance';
+import { unsnoozeInstance } from '../application/rule/methods/unsnooze_alert/unsnooze_instance';
 import { bulkMuteUnmuteInstances } from '../application/rule/methods/bulk_mute_unmute_alerts/bulk_mute_unmute_instances';
 import type { BulkMuteUnmuteAlertsParams } from '../application/rule/types';
 import type { RunSoonParams } from '../application/rule/methods/run_soon';
@@ -228,6 +232,9 @@ export class RulesClient {
   public bulkUnmuteInstances = (options: BulkMuteUnmuteAlertsParams) =>
     bulkMuteUnmuteInstances(this.context, { params: options, mute: false });
   public unmuteInstance = (options: UnmuteAlertParams) => unmuteInstance(this.context, options);
+  public snoozeInstance = (options: SnoozeAlertOptions) => snoozeInstance(this.context, options);
+  public unsnoozeInstance = (options: UnsnoozeAlertParams) =>
+    unsnoozeInstance(this.context, options);
 
   public bulkUntrackAlerts = (options: BulkUntrackBody) => bulkUntrackAlerts(this.context, options);
 
