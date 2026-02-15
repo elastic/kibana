@@ -14,8 +14,16 @@ import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS } from '@kbn/cloud-secu
 import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '../../../common/constants';
 
 import type { Benchmark } from '../../../common/types/latest';
-import { getClusters } from '../compliance_dashboard/get_clusters';
-import { getStats } from '../compliance_dashboard/get_stats';
+import {
+  getClustersFromAggs,
+  getClustersQuery,
+  type ClusterBucket,
+} from '../compliance_dashboard/get_clusters';
+import {
+  getEvaluationsQuery,
+  getStatsFromFindingsEvaluationsAggs,
+  type FindingsEvaluationsQueryResult,
+} from '../compliance_dashboard/get_stats';
 import { getSafePostureTypeRuntimeMapping } from '../../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
 import { getMutedRulesFilterQuery } from '../benchmark_rules/get_states/v1';
 
@@ -56,56 +64,73 @@ export const getBenchmarksData = async (
   const benchmarkAgg: any = benchmarksResponse.aggregations;
   const rulesFilter = await getMutedRulesFilterQuery(encryptedSoClient);
 
-  const { id: pitId } = await esClient.openPointInTime({
-    index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
-    keep_alive: '30s',
-  });
+  let pitId = (
+    await esClient.openPointInTime({
+      index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+      keep_alive: '30s',
+    })
+  ).id;
   // Transform response to a benchmark row: {id, name, version}
   // For each Benchmark entry : Calculate Score, Get amount of enrolled agents
-  const result = await Promise.all(
-    benchmarkAgg.benchmark_id.buckets.flatMap(async (benchmark: any) => {
-      const benchmarkId = benchmark.key;
-      const benchmarkName = benchmark.name.buckets[0].key;
+  const result: Benchmark[] = [];
 
-      const benchmarksTableObjects = await Promise.all(
-        benchmark?.name?.buckets[0]?.version?.buckets.flatMap(async (benchmarkObj: any) => {
-          const benchmarkVersion = benchmarkObj.key;
-          const postureType =
-            benchmarkId === 'cis_eks' || benchmarkId === 'cis_k8s' ? 'kspm' : 'cspm';
-          const runtimeMappings: MappingRuntimeFields = getSafePostureTypeRuntimeMapping();
-          const query: QueryDslQueryContainer = {
-            bool: {
-              filter: [
-                { term: { 'rule.benchmark.id': benchmarkId } },
-                { term: { 'rule.benchmark.version': benchmarkVersion } },
-                { term: { safe_posture_type: postureType } },
-              ],
-              must_not: rulesFilter,
-            },
-          };
-          const benchmarkScore = await getStats(esClient, query, pitId, runtimeMappings, logger);
-          const benchmarkEvaluation = await getClusters(
-            esClient,
-            query,
-            pitId,
-            runtimeMappings,
-            logger
-          );
+  for (const benchmark of benchmarkAgg.benchmark_id.buckets) {
+    const benchmarkId = benchmark.key;
+    const benchmarkName = benchmark.name.buckets[0].key;
+    const versions = benchmark?.name?.buckets[0]?.version?.buckets ?? [];
 
-          return {
-            id: benchmarkId,
-            name: benchmarkName,
-            version: benchmarkVersion.replace('v', ''),
-            score: benchmarkScore,
-            evaluation: benchmarkEvaluation.length,
-          };
-        })
+    for (const benchmarkObj of versions) {
+      const benchmarkVersion = benchmarkObj.key;
+      const postureType = benchmarkId === 'cis_eks' || benchmarkId === 'cis_k8s' ? 'kspm' : 'cspm';
+      const runtimeMappings: MappingRuntimeFields = getSafePostureTypeRuntimeMapping();
+      const query: QueryDslQueryContainer = {
+        bool: {
+          filter: [
+            { term: { 'rule.benchmark.id': benchmarkId } },
+            { term: { 'rule.benchmark.version': benchmarkVersion } },
+            { term: { safe_posture_type: postureType } },
+          ],
+          must_not: rulesFilter,
+        },
+      };
+
+      const evaluationsQueryResult = await esClient.search<unknown, FindingsEvaluationsQueryResult>(
+        getEvaluationsQuery(query, pitId, runtimeMappings)
+      );
+      pitId = evaluationsQueryResult.pit_id ?? pitId;
+      if (!evaluationsQueryResult.aggregations) {
+        throw new Error('missing findings evaluations');
+      }
+      const { resourcesEvaluated = 0, ...benchmarkScore } = getStatsFromFindingsEvaluationsAggs(
+        evaluationsQueryResult.aggregations
       );
 
-      return benchmarksTableObjects;
-    })
-  );
-  return result.flat();
+      const clustersQueryResult = await esClient.search<
+        unknown,
+        { aggs_by_asset_identifier: { buckets: ClusterBucket[] } }
+      >(getClustersQuery(query, pitId, runtimeMappings));
+      pitId = clustersQueryResult.pit_id ?? pitId;
+      const clustersBuckets = clustersQueryResult.aggregations?.aggs_by_asset_identifier.buckets;
+      if (!Array.isArray(clustersBuckets)) {
+        throw new Error('missing aggs by cluster id');
+      }
+      const benchmarkEvaluation = getClustersFromAggs(clustersBuckets);
+
+      result.push({
+        id: benchmarkId,
+        name: benchmarkName,
+        version: benchmarkVersion.replace('v', ''),
+        score: { ...benchmarkScore, resourcesEvaluated },
+        evaluation: benchmarkEvaluation.length,
+      });
+    }
+  }
+
+  esClient.closePointInTime({ id: pitId }).catch((err) => {
+    logger.warn(`Could not close PIT for benchmarks endpoint: ${err}`);
+  });
+
+  return result;
 };
 
 export const getBenchmarks = async (
