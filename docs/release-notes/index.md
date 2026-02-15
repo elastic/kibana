@@ -21,6 +21,13 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
+:::{changelog} /releases/kibana
+:subsections:
+:config: /changelog.yml
+:product: kibana
+:::
+
+<!--
 ## 9.3.0 [kibana-9.3.0-release-notes]
 
 % ::::{NOTE}
@@ -331,7 +338,7 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Adds refusal field to AI Assistant conversations [#243423]({{kib-pull}}243423).
 * Turns off custom suggestions on the embedded console [#241516]({{kib-pull}}241516).
 * Fixes an issue where form fields were resetting automatically when editing ingest pipeline settings [#237509]({{kib-pull}}237509).
-
+-->
 
 ## 9.2.5 [kibana-9.2.5-release-notes]
 
