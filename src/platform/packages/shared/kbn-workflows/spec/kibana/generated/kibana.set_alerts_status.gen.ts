@@ -26,7 +26,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 // import all needed request and response schemas generated from the OpenAPI spec
 import type { InternalConnectorContract } from '../../../types/latest';
 
-import { FetcherConfigSchema } from '../../schema';
+import { FetcherConfigSchema, KibanaStepMetaSchema } from '../../schema';
 
 // export contract
 export const SET_ALERTS_STATUS_CONTRACT: InternalConnectorContract = {
@@ -53,6 +53,7 @@ Set the status of one or more detection alerts.`,
     ...getShapeAt(set_alerts_status_request, 'path'),
     ...getShapeAt(set_alerts_status_request, 'query'),
     fetcher: FetcherConfigSchema,
+    ...KibanaStepMetaSchema,
   }),
   outputSchema: set_alerts_status_response,
 };
