@@ -13,14 +13,16 @@ All APIs accept an optional `resourceType` parameter. When omitted, it defaults 
 
 ### Resource Types
 
-| Resource Type | Description | Versioning |
-|---------------|-------------|------------|
-| `product_doc` | Elastic product documentation | Kibana version (e.g., 8.18) |
+| Resource Type   | Description                   | Versioning                    |
+| --------------- | ----------------------------- | ----------------------------- |
+| `product_doc`   | Elastic product documentation | Kibana version (e.g., 8.18)   |
 | `security_labs` | Elastic Security Labs content | Date-based (e.g., 2024.12.11) |
+| `openapi_spec`  | Elastic open api spec         |                               |
 
 ### To install
 
 **Product Documentation (default):**
+
 ```
 POST kbn://internal/product_doc_base/install
 {
@@ -29,6 +31,7 @@ POST kbn://internal/product_doc_base/install
 ```
 
 **Security Labs:**
+
 ```
 POST kbn://internal/product_doc_base/install
 {
@@ -44,6 +47,7 @@ Passing `forceUpdate: true` will uninstall and install the product docs to the l
 Because the operation is expensive, by default, `forceUpdate` is set to false unless user explicitly wants to do that with the API.
 
 To force update all previously installed Inference IDs:
+
 ```
 POST kbn://internal/product_doc_base/update_all
 {
@@ -53,6 +57,7 @@ POST kbn://internal/product_doc_base/update_all
 ```
 
 Optionally, you can specify specific Inference IDs to update:
+
 ```
 POST kbn://internal/product_doc_base/update_all
 {
@@ -63,7 +68,9 @@ POST kbn://internal/product_doc_base/update_all
   ]
 }
 ```
+
 Omit `inferenceIds` if you want to update all previously installed docs, regardless of which Inference ID.
+
 - If ELSER was installed, but not E5 → ELSER docs will be updated
 - If E5 was installed, but not ELSER → E5 docs will be updated
 - If ELSER was installed, E5 was installed → ELSER & E5 docs will be updated
@@ -71,6 +78,7 @@ Omit `inferenceIds` if you want to update all previously installed docs, regardl
 ### To uninstall
 
 **Product Documentation (default):**
+
 ```
 POST kbn://internal/product_doc_base/uninstall
 {
@@ -79,6 +87,7 @@ POST kbn://internal/product_doc_base/uninstall
 ```
 
 **Security Labs:**
+
 ```
 POST kbn://internal/product_doc_base/uninstall
 {
@@ -90,11 +99,13 @@ POST kbn://internal/product_doc_base/uninstall
 ### To check status
 
 **Product Documentation (default):**
+
 ```
 GET kbn://internal/product_doc_base/status?inferenceId=.elser-2-elasticsearch
 ```
 
 **Security Labs:**
+
 ```
 GET kbn://internal/product_doc_base/status?inferenceId=.elser-2-elasticsearch&resourceType=security_labs
 ```
@@ -104,20 +115,24 @@ GET kbn://internal/product_doc_base/status?inferenceId=.elser-2-elasticsearch&re
 Both product documentation and Security Labs artifacts are hosted on the same CDN. The repository URL is configurable via:
 
 ```yaml
-xpack.productDocBase.artifactRepositoryUrl: "https://kibana-knowledge-base-artifacts.elastic.co"
+xpack.productDocBase.artifactRepositoryUrl: 'https://kibana-knowledge-base-artifacts.elastic.co'
 ```
 
 Artifact naming conventions:
+
 - Product docs: `kb-product-doc-{product}-{version}.zip`
 - Security Labs: `security-labs-{YYYY.MM.DD}.zip`
 
 ## Run tests
 
 Set up test server
+
 ```
 node scripts/functional_tests_server.js --config x-pack/platform/test/functional_gen_ai/inference/config.ts
 ```
+
 Run tests on different terminal
+
 ```
 node scripts/functional_tests_server.js --config x-pack/platform/test/functional_gen_ai/inference/config.ts --grep='product docs base'
 ```

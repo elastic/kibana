@@ -7,6 +7,7 @@
 
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
+export const LATEST_PRODUCT_VERSION = 'latest';
 export const productDocInstallStatusSavedObjectTypeName = 'product-doc-install-status';
 
 /**

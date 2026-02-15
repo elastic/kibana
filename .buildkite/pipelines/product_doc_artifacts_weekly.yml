@@ -1,0 +1,15 @@
+steps:
+  - command: .buildkite/scripts/steps/product_doc_artifacts/build.sh
+    label: Build Product Doc Artifacts
+    timeout_in_minutes: 120
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-8
+      preemptible: true
+      diskSizeGb: 200
+    env:
+      KIBANA_EMBEDDING_CLUSTER_URL: 'http://localhost:9200'
+      KIBANA_EMBEDDING_CLUSTER_USERNAME: 'elastic'
+      KIBANA_EMBEDDING_CLUSTER_PASSWORD: 'changeme'

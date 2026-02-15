@@ -29,7 +29,11 @@ import type { InternalServices } from '../types';
  * Schema for resourceType parameter validation.
  */
 const resourceTypeSchema = schema.oneOf(
-  [schema.literal(ResourceTypes.productDoc), schema.literal(ResourceTypes.securityLabs)],
+  [
+    schema.literal(ResourceTypes.productDoc),
+    schema.literal(ResourceTypes.securityLabs),
+    schema.literal(ResourceTypes.openapiSpec),
+  ],
   { defaultValue: ResourceTypes.productDoc }
 );
 
@@ -147,6 +151,28 @@ export const registerInstallationRoutes = ({
         });
       }
 
+      // Handle OpenAPI Spec installation
+      if (resourceType === ResourceTypes.openapiSpec) {
+        await documentationManager.installOpenApiSpec({
+          request: req,
+          wait: true,
+          inferenceId,
+        });
+
+        const openApiSpecStatus = await documentationManager.getOpenApiSpecStatus({
+          inferenceId,
+        });
+
+        return res.ok<PerformInstallResponse>({
+          body: {
+            installed: openApiSpecStatus.status === 'installed',
+            ...(openApiSpecStatus.failureReason
+              ? { failureReason: openApiSpecStatus.failureReason }
+              : {}),
+          },
+        });
+      }
+
       // Default: product documentation installation
       await documentationManager.install({
         request: req,
@@ -258,6 +284,7 @@ export const registerInstallationRoutes = ({
         request: req,
         wait: true,
         inferenceId: req.body?.inferenceId,
+        resourceType: req.body?.resourceType,
       });
 
       return res.ok<UninstallResponse>({
