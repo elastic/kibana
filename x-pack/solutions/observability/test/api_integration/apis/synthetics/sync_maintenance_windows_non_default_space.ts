@@ -150,7 +150,6 @@ export default function ({ getService }: FtrProviderContext) {
       const packagePolicy = await testPrivateLocations.getPackagePolicy({
         monitorId: newBrowserMonitorId,
         locId: loc.id,
-        spaceId,
       });
 
       expect(packagePolicy?.policy_id).eql(testFleetPolicyID);

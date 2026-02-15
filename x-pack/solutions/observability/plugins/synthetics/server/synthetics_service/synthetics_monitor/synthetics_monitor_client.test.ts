@@ -134,9 +134,13 @@ describe('SyntheticsMonitorClient', () => {
 
     const id = 'test-id-1';
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
-    client.privateLocationAPI.editMonitors = jest.fn().mockResolvedValue({});
+    const mockActivePolicyIds = [`${id}-loc-1`, `${id}-loc-2`];
+    client.privateLocationAPI.editMonitors = jest.fn().mockResolvedValue({
+      failedUpdates: [],
+      activePolicyIds: mockActivePolicyIds,
+    });
 
-    await client.editMonitors(
+    const result = await client.editMonitors(
       [
         {
           id,
@@ -150,6 +154,7 @@ describe('SyntheticsMonitorClient', () => {
 
     expect(syntheticsService.editConfig).toHaveBeenCalledTimes(1);
     expect(client.privateLocationAPI.editMonitors).toHaveBeenCalledTimes(1);
+    expect(result.activePolicyIds).toEqual(mockActivePolicyIds);
   });
 
   it('deletes a monitor from location, if location is removed from monitor', async () => {
@@ -158,7 +163,10 @@ describe('SyntheticsMonitorClient', () => {
     const id = 'test-id-1';
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
     syntheticsService.editConfig = jest.fn();
-    client.privateLocationAPI.editMonitors = jest.fn().mockResolvedValue({});
+    client.privateLocationAPI.editMonitors = jest.fn().mockResolvedValue({
+      failedUpdates: [],
+      activePolicyIds: [],
+    });
 
     monitor.locations = previousMonitor.attributes.locations.filter(
       (loc: any) => loc.id !== locations[0].id

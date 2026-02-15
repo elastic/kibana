@@ -54,6 +54,10 @@ describe('syncEditedMonitor', () => {
   syntheticsService.editConfig = jest.fn();
   syntheticsService.getMaintenanceWindows = jest.fn();
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('includes the isEdit flag', async () => {
     await syncEditedMonitor({
       normalizedMonitor: editedMonitor,
@@ -80,5 +84,53 @@ describe('syncEditedMonitor', () => {
         enabled: true,
       })
     );
+  });
+
+  it('updates monitor references with active package policies', async () => {
+    const activePolicyIds = ['7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d-loc-1'];
+
+    routeContext.syntheticsMonitorClient.editMonitors = jest.fn().mockResolvedValue({
+      failedPolicyUpdates: [],
+      publicSyncErrors: [],
+      activePolicyIds,
+    });
+
+    await syncEditedMonitor({
+      normalizedMonitor: editedMonitor,
+      decryptedPreviousMonitor:
+        previousMonitor as unknown as SavedObject<SyntheticsMonitorWithSecretsAttributes>,
+      routeContext,
+      spaceId: 'test-space',
+    });
+
+    expect(
+      routeContext.monitorConfigRepository.bulkUpdatePackagePolicyReferences
+    ).toHaveBeenCalledWith([
+      {
+        monitorId: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
+        packagePolicyIds: activePolicyIds,
+        savedObjectType: 'synthetics-monitor',
+      },
+    ]);
+  });
+
+  it('does not update references when no active policies are returned', async () => {
+    routeContext.syntheticsMonitorClient.editMonitors = jest.fn().mockResolvedValue({
+      failedPolicyUpdates: [],
+      publicSyncErrors: [],
+      activePolicyIds: [],
+    });
+
+    await syncEditedMonitor({
+      normalizedMonitor: editedMonitor,
+      decryptedPreviousMonitor:
+        previousMonitor as unknown as SavedObject<SyntheticsMonitorWithSecretsAttributes>,
+      routeContext,
+      spaceId: 'test-space',
+    });
+
+    expect(
+      routeContext.monitorConfigRepository.bulkUpdatePackagePolicyReferences
+    ).not.toHaveBeenCalled();
   });
 });

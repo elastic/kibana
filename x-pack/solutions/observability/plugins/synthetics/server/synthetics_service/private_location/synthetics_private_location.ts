@@ -9,7 +9,13 @@ import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/p
 import { cloneDeep } from 'lodash';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { DEFAULT_NAMESPACE_STRING } from '../../../common/constants/monitor_defaults';
+import {
+  syntheticsMonitorSOTypes,
+  syntheticsMonitorSavedObjectType,
+  legacySyntheticsMonitorTypeSingle,
+} from '../../../common/types/saved_objects';
 import {
   BROWSER_TEST_NOW_RUN,
   LIGHTWEIGHT_TEST_NOW_RUN,
@@ -65,11 +71,68 @@ export class SyntheticsPrivateLocation {
     return newPolicy;
   }
 
-  getPolicyId(config: { origin?: string; id: string }, locId: string, spaceId: string) {
-    if (config[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT) {
-      return `${config.id}-${locId}`;
+  /**
+   * Returns the new (space-agnostic) policy ID format.
+   * Format: `${configId}-${locationId}`
+   * This removes the spaceId dependency to support multispace monitors.
+   */
+  getPolicyId(config: { origin?: string; id: string }, locId: string, _spaceId?: string) {
+    return `${config.id}-${locId}`;
+  }
+
+  /**
+   * Returns the legacy policy ID format that included spaceId.
+   * Format: `${configId}-${locationId}-${spaceId}`
+   * Used for backward compatibility when looking up existing policies.
+   */
+  getLegacyPolicyId(configId: string, locId: string, spaceId: string) {
+    return `${configId}-${locId}-${spaceId}`;
+  }
+
+  /**
+   * Gets all unique spaces that have any synthetics monitors.
+   */
+  async getAllSpacesWithMonitors(): Promise<string[]> {
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+    const spaces = new Set<string>();
+
+    try {
+      const result = await soClient.find<
+        unknown,
+        {
+          namespaces: {
+            buckets: Array<{ key: string; doc_count: number }>;
+          };
+          legacyNamespaces: {
+            buckets: Array<{ key: string; doc_count: number }>;
+          };
+        }
+      >({
+        type: syntheticsMonitorSOTypes,
+        perPage: 0,
+        namespaces: [ALL_SPACES_ID],
+        fields: [],
+        aggs: {
+          namespaces: {
+            terms: { field: `${syntheticsMonitorSavedObjectType}.namespaces`, size: 1000 },
+          },
+          legacyNamespaces: {
+            terms: { field: `${legacySyntheticsMonitorTypeSingle}.namespaces`, size: 1000 },
+          },
+        },
+      });
+
+      result.aggregations?.namespaces?.buckets?.forEach((bucket) => {
+        spaces.add(bucket.key);
+      });
+      result.aggregations?.legacyNamespaces?.buckets?.forEach((bucket) => {
+        spaces.add(bucket.key);
+      });
+    } catch (e) {
+      this.server.logger.error(`Error fetching spaces with monitors: ${e.message}`);
     }
-    return `${config.id}-${locId}-${spaceId}`;
+
+    return [...spaces];
   }
 
   async generateNewPolicy(
@@ -97,7 +160,7 @@ export class SyntheticsPrivateLocation {
         if (config[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT) {
           newPolicy.name = `${config.id}-${locName}`;
         } else {
-          newPolicy.name = `${config[ConfigKey.NAME]}-${locName}-${spaceId}`;
+          newPolicy.name = `${config[ConfigKey.NAME]}-${locName}`;
         }
       }
       const configNamespace = config[ConfigKey.NAMESPACE];
@@ -188,7 +251,7 @@ export class SyntheticsPrivateLocation {
             } else {
               newPolicies.push({
                 ...newPolicy,
-                id: this.getPolicyId(config, location.id, spaceId),
+                id: this.getPolicyId(config, location.id),
               });
             }
           }
@@ -252,7 +315,7 @@ export class SyntheticsPrivateLocation {
 
       const pkgPolicy = {
         ...newPolicy,
-        id: this.getPolicyId(config, location.id, spaceId),
+        id: this.getPolicyId(config, location.id),
       } as NewPackagePolicyWithId;
 
       return await this.server.fleet.packagePolicyService.inspect(soClient, pkgPolicy);
@@ -294,8 +357,17 @@ export class SyntheticsPrivateLocation {
 
       for (const privateLocation of allPrivateLocations) {
         const hasLocation = monitorPrivateLocations?.some((loc) => loc.id === privateLocation.id);
-        const currId = this.getPolicyId(config, privateLocation.id, spaceId);
-        const hasPolicy = existingPolicies?.some((policy) => policy.id === currId);
+        const newId = this.getPolicyId(config, privateLocation.id);
+        const legacyIdPrefix = `${config.id}-${privateLocation.id}-`;
+
+        const hasNewFormatPolicy = existingPolicies?.some((policy) => policy.id === newId);
+        const legacyPolicyIds =
+          existingPolicies
+            ?.filter((policy) => policy.id.startsWith(legacyIdPrefix) && policy.id !== newId)
+            .map((policy) => policy.id) || [];
+        const hasAnyLegacyPolicy = legacyPolicyIds.length > 0;
+        const hasPolicy = hasNewFormatPolicy || hasAnyLegacyPolicy;
+
         try {
           if (hasLocation) {
             const newPolicy = await this.generateNewPolicy(
@@ -311,13 +383,20 @@ export class SyntheticsPrivateLocation {
               throwAddEditError(hasPolicy, privateLocation.label);
             }
 
-            if (hasPolicy) {
-              policiesToUpdate.push({ ...newPolicy, id: currId } as NewPackagePolicyWithId);
+            if (hasNewFormatPolicy) {
+              policiesToUpdate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
+              policiesToDelete.push(...legacyPolicyIds);
+            } else if (hasAnyLegacyPolicy) {
+              policiesToDelete.push(...legacyPolicyIds);
+              policiesToCreate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
             } else {
-              policiesToCreate.push({ ...newPolicy, id: currId } as NewPackagePolicyWithId);
+              policiesToCreate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
             }
-          } else if (hasPolicy) {
-            policiesToDelete.push(currId);
+          } else {
+            if (hasNewFormatPolicy) {
+              policiesToDelete.push(newId);
+            }
+            policiesToDelete.push(...legacyPolicyIds);
           }
         } catch (e) {
           this.server.logger.error(e);
@@ -326,14 +405,16 @@ export class SyntheticsPrivateLocation {
       }
     }
 
+    const uniqueToDelete = [...new Set(policiesToDelete)];
+
     this.server.logger.debug(
-      `[editingMonitors] Creating ${policiesToCreate.length} policies, updating ${policiesToUpdate.length} policies, and deleting ${policiesToDelete.length} policies`
+      `[editingMonitors] Creating ${policiesToCreate.length} policies, updating ${policiesToUpdate.length} policies, deleting ${uniqueToDelete.length} policies`
     );
 
-    const [_createResponse, failedUpdatesRes, _deleteResponse] = await Promise.all([
+    const [_createResponse, failedUpdatesRes] = await Promise.all([
       this.createPolicyBulk(policiesToCreate),
       this.updatePolicyBulk(policiesToUpdate),
-      this.deletePolicyBulk(policiesToDelete),
+      this.deletePolicyBulk(uniqueToDelete),
     ]);
 
     const failedUpdates = failedUpdatesRes?.map(({ packagePolicy, error }) => {
@@ -342,7 +423,7 @@ export class SyntheticsPrivateLocation {
 
         const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
         for (const privateLocation of monitorPrivateLocations) {
-          const currId = this.getPolicyId(config, privateLocation.id, spaceId);
+          const currId = this.getPolicyId(config, privateLocation.id);
           return currId === packagePolicy.id;
         }
       });
@@ -353,30 +434,44 @@ export class SyntheticsPrivateLocation {
       };
     });
 
+    const activePolicyIds = [
+      ...policiesToCreate.map((p) => p.id),
+      ...policiesToUpdate.map((p) => p.id),
+    ].filter((id): id is string => id !== undefined);
+
     return {
       failedUpdates,
+      activePolicyIds,
     };
   }
 
+  /**
+   * Fetches existing package policies for the given configs and locations.
+   * Looks for new (space-agnostic) format and legacy format for all spaces
+   * that have any synthetics monitors.
+   */
   async getExistingPolicies(
     configs: HeartbeatConfig[],
     allPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string
   ) {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+    const allSpacesWithMonitors = await this.getAllSpacesWithMonitors();
+    const allSpaces = new Set([spaceId, ...allSpacesWithMonitors]);
+    const policyIdsToFetch = new Set<string>();
 
-    const listOfPolicies: string[] = [];
     for (const config of configs) {
       for (const privateLocation of allPrivateLocations) {
-        const currId = this.getPolicyId(config, privateLocation.id, spaceId);
-        listOfPolicies.push(currId);
+        policyIdsToFetch.add(this.getPolicyId(config, privateLocation.id));
+        for (const space of allSpaces) {
+          policyIdsToFetch.add(this.getLegacyPolicyId(config.id, privateLocation.id, space));
+        }
       }
     }
-    return (
-      (await this.server.fleet.packagePolicyService.getByIDs(soClient, listOfPolicies, {
-        ignoreMissing: true,
-      })) ?? []
-    );
+
+    return await this.server.fleet.packagePolicyService.getByIDs(soClient, [...policyIdsToFetch], {
+      ignoreMissing: true,
+    });
   }
 
   async createPolicyBulk(newPolicies: NewPackagePolicyWithId[]) {
@@ -434,22 +529,27 @@ export class SyntheticsPrivateLocation {
   async deleteMonitors(configs: HeartbeatConfig[], spaceId: string) {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
     const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
+    const allSpacesWithMonitors = await this.getAllSpacesWithMonitors();
+    const allSpaces = new Set([spaceId, ...allSpacesWithMonitors]);
+    const policyIdsToDelete = new Set<string>();
 
-    const policyIdsToDelete = [];
     for (const config of configs) {
       const { locations } = config;
-
       const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
 
       for (const privateLocation of monitorPrivateLocations) {
-        policyIdsToDelete.push(this.getPolicyId(config, privateLocation.id, spaceId));
+        policyIdsToDelete.add(this.getPolicyId(config, privateLocation.id));
+        for (const space of allSpaces) {
+          policyIdsToDelete.add(this.getLegacyPolicyId(config.id, privateLocation.id, space));
+        }
       }
     }
-    if (policyIdsToDelete.length > 0) {
+
+    if (policyIdsToDelete.size > 0) {
       const result = await this.server.fleet.packagePolicyService.delete(
         soClient,
         esClient,
-        policyIdsToDelete,
+        [...policyIdsToDelete],
         {
           force: true,
           asyncDeploy: true,
@@ -458,7 +558,7 @@ export class SyntheticsPrivateLocation {
       const failedPolicies = result?.filter((policy) => {
         return !policy.success && policy?.statusCode !== 404;
       });
-      if (failedPolicies?.length === policyIdsToDelete.length) {
+      if (failedPolicies?.length > 0 && failedPolicies.length >= configs.length) {
         throw new Error(deletePolicyError(configs[0][ConfigKey.NAME]));
       }
       return result;

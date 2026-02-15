@@ -48,21 +48,20 @@ export async function cleanUpDuplicatedPackagePolicies(
 
     const privateLocationAPI = new SyntheticsPrivateLocation(serverSetup);
 
-    const expectedPackagePolicies = new Set<string>();
+    const expectedNewFormatIds = new Set<string>();
+
     for await (const result of finder.find()) {
       result.saved_objects.forEach((monitor) => {
         monitor.attributes.locations?.forEach((location) => {
-          const spaceId = monitor.namespaces?.[0];
-          if (!location.isServiceManaged && spaceId) {
-            const policyId = privateLocationAPI.getPolicyId(
+          if (!location.isServiceManaged) {
+            const newFormatId = privateLocationAPI.getPolicyId(
               {
                 origin: monitor.attributes.origin,
                 id: monitor.attributes.id,
               },
-              location.id,
-              spaceId
+              location.id
             );
-            expectedPackagePolicies.add(policyId);
+            expectedNewFormatIds.add(newFormatId);
           }
         });
       });
@@ -77,33 +76,35 @@ export async function cleanUpDuplicatedPackagePolicies(
       spaceIds: ['*'],
       perPage: 100,
     });
-    const packagePoliciesToDelete: string[] = [];
 
+    const allExistingPolicyIds: string[] = [];
     for await (const packagePoliciesIds of policiesIterator) {
-      for (const packagePolicyId of packagePoliciesIds) {
-        if (!expectedPackagePolicies.has(packagePolicyId)) {
-          packagePoliciesToDelete.push(packagePolicyId);
+      allExistingPolicyIds.push(...packagePoliciesIds);
+    }
+
+    const { policiesToKeep, policiesToDelete } = determinePoliciesToCleanup(
+      allExistingPolicyIds,
+      expectedNewFormatIds,
+      debugLog
+    );
+
+    const missingPolicies = new Set(expectedNewFormatIds);
+    for (const policyId of policiesToKeep) {
+      missingPolicies.delete(policyId);
+      for (const newFormatId of expectedNewFormatIds) {
+        if (policyId.startsWith(newFormatId + '-')) {
+          missingPolicies.delete(newFormatId);
         }
-        // remove it from the set to mark it as found
-        expectedPackagePolicies.delete(packagePolicyId);
       }
     }
 
-    // if we have any to delete or any expected that were not found we need to perform a sync
-    performCleanupSync = packagePoliciesToDelete.length > 0 || expectedPackagePolicies.size > 0;
+    performCleanupSync = policiesToDelete.length > 0 || missingPolicies.size > 0;
 
-    debugLog(`Found ${packagePoliciesToDelete.length} duplicate package policies to delete.`);
-    debugLog(
-      `Found ${expectedPackagePolicies.size} expected package policies that were not found.`
-    );
+    debugLog(`Found ${policiesToDelete.length} duplicate/legacy package policies to delete.`);
+    debugLog(`Found ${missingPolicies.size} expected package policies that were not found.`);
 
-    if (packagePoliciesToDelete.length > 0) {
-      await deleteDuplicatePackagePolicies(
-        packagePoliciesToDelete,
-        soClient,
-        esClient,
-        serverSetup
-      );
+    if (policiesToDelete.length > 0) {
+      await deleteDuplicatePackagePolicies(policiesToDelete, soClient, esClient, serverSetup);
     }
     taskState.hasAlreadyDoneCleanup = true;
     taskState.maxCleanUpRetries = 3;
@@ -121,6 +122,68 @@ export async function cleanUpDuplicatedPackagePolicies(
     );
     return { performCleanupSync };
   }
+}
+
+/**
+ * Determines which policies to keep and which to delete:
+ * 1. If new format policy exists, keep it and delete all legacy variants
+ * 2. If only legacy exists, keep ONE (first found) and delete others
+ * 3. If unknown policies (not matching any monitor) are found, delete them
+ */
+export function determinePoliciesToCleanup(
+  existingPolicyIds: string[],
+  expectedNewFormatIds: Set<string>,
+  debugLog: (msg: string) => void
+): { policiesToKeep: string[]; policiesToDelete: string[] } {
+  const policiesToKeep: string[] = [];
+  const policiesToDelete: string[] = [];
+  const foundNewFormat = new Set<string>();
+  const legacyPoliciesByNewId = new Map<string, string[]>();
+
+  for (const policyId of existingPolicyIds) {
+    if (expectedNewFormatIds.has(policyId)) {
+      foundNewFormat.add(policyId);
+      policiesToKeep.push(policyId);
+      continue;
+    }
+
+    let matchedNewFormatId: string | null = null;
+    for (const newFormatId of expectedNewFormatIds) {
+      if (policyId.startsWith(newFormatId + '-')) {
+        matchedNewFormatId = newFormatId;
+        break;
+      }
+    }
+
+    if (matchedNewFormatId) {
+      if (!legacyPoliciesByNewId.has(matchedNewFormatId)) {
+        legacyPoliciesByNewId.set(matchedNewFormatId, []);
+      }
+      legacyPoliciesByNewId.get(matchedNewFormatId)!.push(policyId);
+    } else {
+      policiesToDelete.push(policyId);
+      debugLog(`Marking unknown policy for deletion: ${policyId}`);
+    }
+  }
+
+  for (const [newFormatId, legacyIds] of legacyPoliciesByNewId) {
+    if (foundNewFormat.has(newFormatId)) {
+      policiesToDelete.push(...legacyIds);
+      debugLog(
+        `New format policy exists for ${newFormatId}, marking ${legacyIds.length} legacy policies for deletion`
+      );
+    } else {
+      const [firstLegacy, ...restLegacy] = legacyIds;
+      policiesToKeep.push(firstLegacy);
+      debugLog(`Keeping legacy policy: ${firstLegacy}`);
+      if (restLegacy.length > 0) {
+        policiesToDelete.push(...restLegacy);
+        debugLog(`Marking ${restLegacy.length} duplicate legacy policies for deletion`);
+      }
+    }
+  }
+
+  return { policiesToKeep, policiesToDelete };
 }
 
 export async function deleteDuplicatePackagePolicies(

@@ -74,6 +74,32 @@ export const syncNewMonitorBulk = async ({
       failedMonitors = await handlePrivateConfigErrors(routeContext, newMonitors, failedPolicies);
     }
 
+    // Update monitor references with created package policies
+    // Policy IDs are in format: {configId}-{locationId}
+    if (policiesResult?.created && policiesResult.created.length > 0 && newMonitors) {
+      const monitorIds = monitorsToCreate.map((m) => m.id);
+      const policyIdsByMonitor = new Map<string, string[]>();
+
+      for (const policy of policiesResult.created) {
+        // Find which monitor this policy belongs to by checking if policy ID starts with monitor ID
+        const monitorId = monitorIds.find((id) => policy.id.startsWith(id + '-'));
+        if (monitorId) {
+          if (!policyIdsByMonitor.has(monitorId)) {
+            policyIdsByMonitor.set(monitorId, []);
+          }
+          policyIdsByMonitor.get(monitorId)!.push(policy.id);
+        }
+      }
+
+      const updates = [...policyIdsByMonitor.entries()].map(([monitorId, policyIds]) => ({
+        monitorId,
+        packagePolicyIds: policyIds,
+        savedObjectType: query.savedObjectType,
+      }));
+
+      await monitorConfigRepository.bulkUpdatePackagePolicyReferences(updates);
+    }
+
     sendNewMonitorTelemetry(server, newMonitors, syncErrors);
 
     return { errors: syncErrors, newMonitors, failedMonitors };

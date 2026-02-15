@@ -98,6 +98,41 @@ describe('SyntheticsPrivateLocation', () => {
     });
   });
 
+  describe('getPolicyId', () => {
+    it('returns space-agnostic policy ID format', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = { id: 'monitor-123', origin: SourceType.UI };
+      const result = syntheticsPrivateLocation.getPolicyId(config, 'location-456');
+      expect(result).toEqual('monitor-123-location-456');
+    });
+
+    it('returns same format for project monitors', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = { id: 'project-monitor-123', origin: SourceType.PROJECT };
+      const result = syntheticsPrivateLocation.getPolicyId(config, 'location-456');
+      expect(result).toEqual('project-monitor-123-location-456');
+    });
+
+    it('ignores spaceId parameter (backward compatibility)', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = { id: 'monitor-123', origin: SourceType.UI };
+      const result = syntheticsPrivateLocation.getPolicyId(config, 'location-456', 'space-789');
+      expect(result).toEqual('monitor-123-location-456');
+    });
+  });
+
+  describe('getLegacyPolicyId', () => {
+    it('returns legacy policy ID format with spaceId', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const result = syntheticsPrivateLocation.getLegacyPolicyId(
+        'monitor-123',
+        'location-456',
+        'space-789'
+      );
+      expect(result).toEqual('monitor-123-location-456-space-789');
+    });
+  });
+
   it.each([['Unable to create Synthetics package policy template for private location']])(
     'throws errors for create monitor',
     async (error) => {

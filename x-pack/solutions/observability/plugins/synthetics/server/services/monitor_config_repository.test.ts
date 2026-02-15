@@ -14,6 +14,7 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { type SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import {
   legacyMonitorAttributes,
   legacySyntheticsMonitorTypeSingle,
@@ -869,6 +870,87 @@ describe('MonitorConfigRepository', () => {
   const mockLogger = {
     error: jest.fn(),
   };
+
+  describe('bulkUpdatePackagePolicyReferences', () => {
+    it('should update monitors with package policy references using bulkUpdate', async () => {
+      const updates = [
+        { monitorId: 'monitor-1', packagePolicyIds: ['policy-1', 'policy-2'] },
+        { monitorId: 'monitor-2', packagePolicyIds: ['policy-3'] },
+      ];
+
+      const mockBulkUpdateResult = {
+        saved_objects: [
+          {
+            id: 'monitor-1',
+            attributes: {},
+            type: syntheticsMonitorSavedObjectType,
+            references: [],
+          },
+          {
+            id: 'monitor-2',
+            attributes: {},
+            type: syntheticsMonitorSavedObjectType,
+            references: [],
+          },
+        ],
+      };
+
+      soClient.bulkUpdate.mockResolvedValue(mockBulkUpdateResult as any);
+
+      const result = await repository.bulkUpdatePackagePolicyReferences(updates);
+
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          type: syntheticsMonitorSavedObjectType,
+          id: 'monitor-1',
+          attributes: {},
+          references: [
+            { id: 'policy-1', name: 'policy-1', type: PACKAGE_POLICY_SAVED_OBJECT_TYPE },
+            { id: 'policy-2', name: 'policy-2', type: PACKAGE_POLICY_SAVED_OBJECT_TYPE },
+          ],
+          namespace: undefined,
+        },
+        {
+          type: syntheticsMonitorSavedObjectType,
+          id: 'monitor-2',
+          attributes: {},
+          references: [
+            { id: 'policy-3', name: 'policy-3', type: PACKAGE_POLICY_SAVED_OBJECT_TYPE },
+          ],
+          namespace: undefined,
+        },
+      ]);
+
+      expect(result).toBe(mockBulkUpdateResult);
+    });
+
+    it('should pass namespace for cross-space updates', async () => {
+      const updates = [{ monitorId: 'monitor-1', packagePolicyIds: ['policy-1'] }];
+
+      soClient.bulkUpdate.mockResolvedValue({ saved_objects: [] });
+
+      await repository.bulkUpdatePackagePolicyReferences(updates, 'other-space');
+
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          type: syntheticsMonitorSavedObjectType,
+          id: 'monitor-1',
+          attributes: {},
+          references: [
+            { id: 'policy-1', name: 'policy-1', type: PACKAGE_POLICY_SAVED_OBJECT_TYPE },
+          ],
+          namespace: 'other-space',
+        },
+      ]);
+    });
+
+    it('should return empty result for empty updates array', async () => {
+      const result = await repository.bulkUpdatePackagePolicyReferences([]);
+
+      expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(result).toEqual({ saved_objects: [] });
+    });
+  });
 
   describe('handleLegacyOptions', () => {
     // Clear mock history before each test

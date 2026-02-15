@@ -5,10 +5,101 @@
  * 2.0.
  */
 
-import { deleteDuplicatePackagePolicies } from './clean_up_duplicate_policies';
+import {
+  deleteDuplicatePackagePolicies,
+  determinePoliciesToCleanup,
+} from './clean_up_duplicate_policies';
 import type { SyntheticsServerSetup } from '../types';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+
+describe('determinePoliciesToCleanup', () => {
+  const noopDebugLog = () => {};
+
+  it('keeps new format policies and marks unknown policies for deletion', () => {
+    const existingPolicyIds = ['monitor1-loc1', 'unknown-policy'];
+    const expectedNewFormatIds = new Set(['monitor1-loc1']);
+
+    const result = determinePoliciesToCleanup(
+      existingPolicyIds,
+      expectedNewFormatIds,
+      noopDebugLog
+    );
+
+    expect(result.policiesToKeep).toEqual(['monitor1-loc1']);
+    expect(result.policiesToDelete).toEqual(['unknown-policy']);
+  });
+
+  it('deletes all legacy policies when new format exists', () => {
+    const existingPolicyIds = [
+      'monitor1-loc1',
+      'monitor1-loc1-space-a',
+      'monitor1-loc1-space-b',
+      'monitor1-loc1-space-c',
+    ];
+    const expectedNewFormatIds = new Set(['monitor1-loc1']);
+
+    const result = determinePoliciesToCleanup(
+      existingPolicyIds,
+      expectedNewFormatIds,
+      noopDebugLog
+    );
+
+    expect(result.policiesToKeep).toEqual(['monitor1-loc1']);
+    expect(result.policiesToDelete.sort()).toEqual([
+      'monitor1-loc1-space-a',
+      'monitor1-loc1-space-b',
+      'monitor1-loc1-space-c',
+    ]);
+  });
+
+  it('keeps first legacy when new format does not exist', () => {
+    const existingPolicyIds = [
+      'monitor1-loc1-space-a',
+      'monitor1-loc1-space-b',
+      'monitor1-loc1-space-c',
+    ];
+    const expectedNewFormatIds = new Set(['monitor1-loc1']);
+
+    const result = determinePoliciesToCleanup(
+      existingPolicyIds,
+      expectedNewFormatIds,
+      noopDebugLog
+    );
+
+    expect(result.policiesToKeep).toEqual(['monitor1-loc1-space-a']);
+    expect(result.policiesToDelete.sort()).toEqual([
+      'monitor1-loc1-space-b',
+      'monitor1-loc1-space-c',
+    ]);
+  });
+
+  it('handles multiple monitors with different scenarios', () => {
+    const existingPolicyIds = [
+      'monitor1-loc1',
+      'monitor1-loc1-space-a',
+      'monitor1-loc1-space-b',
+      'monitor2-loc1-space-a',
+      'monitor2-loc1-space-b',
+      'some-random-policy',
+    ];
+    const expectedNewFormatIds = new Set(['monitor1-loc1', 'monitor2-loc1']);
+
+    const result = determinePoliciesToCleanup(
+      existingPolicyIds,
+      expectedNewFormatIds,
+      noopDebugLog
+    );
+
+    expect(result.policiesToKeep.sort()).toEqual(['monitor1-loc1', 'monitor2-loc1-space-a']);
+    expect(result.policiesToDelete.sort()).toEqual([
+      'monitor1-loc1-space-a',
+      'monitor1-loc1-space-b',
+      'monitor2-loc1-space-b',
+      'some-random-policy',
+    ]);
+  });
+});
 
 describe('deleteDuplicatePackagePolicies', () => {
   const makeServerSetup = (deleteMock: jest.Mock) => {

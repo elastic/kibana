@@ -164,9 +164,9 @@ export class SyntheticsMonitorClient {
       privateEditPromise,
     ]);
 
-    const { failedUpdates: failedPolicyUpdates } = privateEditResponse;
+    const { failedUpdates: failedPolicyUpdates, activePolicyIds } = privateEditResponse;
 
-    return { failedPolicyUpdates, publicSyncErrors };
+    return { failedPolicyUpdates, publicSyncErrors, activePolicyIds };
   }
   async deleteMonitors(monitors: SyntheticsMonitorWithId[], spaceId: string) {
     const privateDeletePromise = this.privateLocationAPI.deleteMonitors(monitors, spaceId);

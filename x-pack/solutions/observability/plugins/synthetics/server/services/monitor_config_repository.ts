@@ -18,6 +18,7 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { isEmpty, isEqual } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
@@ -191,6 +192,38 @@ export class MonitorConfigRepository {
         ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
       });
     }
+  }
+
+  /**
+   * Updates the package policy references for monitors (single or bulk).
+   * This tracks which Fleet package policies are associated with each monitor
+   * using the built-in saved object references array.
+   */
+  async bulkUpdatePackagePolicyReferences(
+    updates: Array<{
+      monitorId: string;
+      packagePolicyIds: string[];
+      savedObjectType?: string;
+    }>,
+    namespace?: string
+  ) {
+    if (updates.length === 0) {
+      return { saved_objects: [] };
+    }
+
+    const bulkUpdateObjects = updates.map(({ monitorId, packagePolicyIds, savedObjectType }) => ({
+      type: savedObjectType ?? syntheticsMonitorSavedObjectType,
+      id: monitorId,
+      attributes: {},
+      references: packagePolicyIds.map((policyId) => ({
+        id: policyId,
+        name: policyId,
+        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      })),
+      namespace,
+    }));
+
+    return this.soClient.bulkUpdate(bulkUpdateObjects);
   }
 
   async bulkUpdate({
