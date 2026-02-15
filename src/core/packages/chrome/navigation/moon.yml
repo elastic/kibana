@@ -18,11 +18,11 @@ project:
   metadata:
     sourceRoot: src/core/packages/chrome/navigation
 dependsOn:
-  - '@kbn/core-chrome-layout-components'
-  - '@kbn/core-chrome-layout-constants'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
+  - '@kbn/core-chrome-layout-components'
   - '@kbn/core-chrome-layout-utils'
+  - '@kbn/core-chrome-layout-constants'
 tags:
   - shared-browser
   - package
@@ -35,6 +35,8 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
+    - '!packaging/target/**/*'
+    - '!packaging/example/**/*'
 tasks:
   jest:
     args:

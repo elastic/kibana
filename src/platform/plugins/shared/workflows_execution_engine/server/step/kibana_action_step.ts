@@ -52,12 +52,26 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
-    try {
-      // Support both direct step types (kibana.createCase) and atomic+configuration pattern
-      const stepType = this.step.type || (this.step as any).configuration?.type;
-      // Use rendered inputs if provided, otherwise fall back to raw step.with or configuration.with
-      const stepWith = withInputs || this.step.with || (this.step as any).configuration?.with;
+    // Support both direct step types (kibana.createCase) and atomic+configuration pattern
+    const stepType = this.step.type || (this.step as any).configuration?.type;
+    // Use rendered inputs if provided, otherwise fall back to raw step.with or configuration.with
+    const stepWith = withInputs || this.step.with || (this.step as any).configuration?.with;
+    // Extract meta params (not forwarded as HTTP request params)
+    const {
+      forceServerInfo = false,
+      forceLocalhost = false,
+      debug = false,
+      ...httpParams
+    } = stepWith;
 
+    if (forceServerInfo && forceLocalhost) {
+      throw new Error(
+        'Cannot set both forceServerInfo and forceLocalhost — they are mutually exclusive. ' +
+          'Use forceServerInfo to route via the internal server address, or forceLocalhost to route via localhost:5601.'
+      );
+    }
+
+    try {
       this.workflowLogger.logInfo(`Executing Kibana action: ${stepType}`, {
         event: { action: 'kibana-action', outcome: 'unknown' },
         tags: ['kibana', 'internal-action'],
@@ -68,12 +82,18 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         },
       });
 
-      // Get Kibana base URL and authentication
-      const kibanaUrl = this.getKibanaUrl();
+      // Get Kibana base URL (respecting force flags) and authentication
+      const kibanaUrl = this.getKibanaUrl(forceServerInfo, forceLocalhost);
       const authHeaders = this.getAuthHeaders();
 
       // Generic approach like Dev Console - just forward the request to Kibana
-      const result = await this.executeKibanaRequest(kibanaUrl, authHeaders, stepType, stepWith);
+      const result = await this.executeKibanaRequest(
+        kibanaUrl,
+        authHeaders,
+        stepType,
+        httpParams,
+        debug
+      );
 
       this.workflowLogger.logInfo(`Kibana action completed: ${stepType}`, {
         event: { action: 'kibana-action', outcome: 'success' },
@@ -87,9 +107,6 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
 
       return { input: stepWith, output: result, error: undefined };
     } catch (error) {
-      const stepType = (this.step as any).configuration?.type || this.step.type;
-      const stepWith = withInputs || this.step.with || (this.step as any).configuration?.with;
-
       this.workflowLogger.logError(`Kibana action failed: ${stepType}`, error as Error, {
         event: { action: 'kibana-action', outcome: 'failure' },
         tags: ['kibana', 'internal-action', 'error'],
@@ -99,14 +116,24 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
           action_type: 'kibana',
         },
       });
-      return this.handleFailure(stepWith, error);
+
+      const failure = this.handleFailure(stepWith, error);
+      if (debug && failure.error) {
+        const kibanaUrl = this.getKibanaUrl(forceServerInfo, forceLocalhost);
+        failure.error = {
+          type: failure.error.type,
+          message: failure.error.message,
+          details: { ...failure.error.details, _debug: { kibanaUrl } },
+        };
+      }
+      return failure;
     }
   }
 
-  private getKibanaUrl(): string {
+  private getKibanaUrl(forceServerInfo = false, forceLocalhost = false): string {
     const coreStart = this.stepExecutionRuntime.contextManager.getCoreStart();
     const { cloudSetup } = this.stepExecutionRuntime.contextManager.getDependencies();
-    return getKibanaUrl(coreStart, cloudSetup);
+    return getKibanaUrl(coreStart, cloudSetup, forceServerInfo, forceLocalhost);
   }
 
   private getAuthHeaders(): Record<string, string> {
@@ -131,7 +158,8 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     kibanaUrl: string,
     authHeaders: Record<string, string>,
     stepType: string,
-    params: any
+    params: any,
+    debug: boolean = false
   ): Promise<any> {
     // Get current space ID from workflow context
     const spaceId = this.stepExecutionRuntime.contextManager.getContext().workflow.spaceId;
@@ -139,21 +167,19 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     // Extract and remove fetcher configuration from params (it's only for our internal use)
     const { fetcher: fetcherOptions, ...cleanParams } = params;
 
-    // Support both raw API format and connector-driven syntax
+    // Build the request config from either raw API format or connector definitions
+    let requestConfig: {
+      method: string;
+      path: string;
+      body?: any;
+      query?: any;
+      headers?: Record<string, string>;
+    };
+
     if (cleanParams.request) {
       // Raw API format: { request: { method, path, body, query, headers } } - like Dev Console
       const { method = 'GET', path, body, query, headers: customHeaders } = cleanParams.request;
-      return this.makeHttpRequest(
-        kibanaUrl,
-        {
-          method,
-          path,
-          body,
-          query,
-          headers: { ...authHeaders, ...customHeaders },
-        },
-        fetcherOptions
-      );
+      requestConfig = { method, path, body, query, headers: { ...authHeaders, ...customHeaders } };
     } else {
       // Use generated connector definitions to determine method and path (covers all 454+ Kibana APIs)
       const {
@@ -163,19 +189,36 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         query,
         headers: connectorHeaders,
       } = buildKibanaRequest(stepType, cleanParams, spaceId);
-
-      return this.makeHttpRequest(
-        kibanaUrl,
-        {
-          method,
-          path,
-          body,
-          query,
-          headers: { ...authHeaders, ...connectorHeaders },
-        },
-        fetcherOptions
-      );
+      requestConfig = {
+        method,
+        path,
+        body,
+        query,
+        headers: { ...authHeaders, ...connectorHeaders },
+      };
     }
+
+    const result = await this.makeHttpRequest(kibanaUrl, requestConfig, fetcherOptions);
+
+    if (debug) {
+      return {
+        ...result,
+        _debug: {
+          fullUrl: this.buildFullUrl(kibanaUrl, requestConfig.path, requestConfig.query),
+          method: requestConfig.method,
+        },
+      };
+    }
+
+    return result;
+  }
+
+  private buildFullUrl(kibanaUrl: string, path: string, query?: Record<string, string>): string {
+    let fullUrl = `${kibanaUrl}${path}`;
+    if (query && Object.keys(query).length > 0) {
+      fullUrl = `${fullUrl}?${new URLSearchParams(query).toString()}`;
+    }
+    return fullUrl;
   }
 
   private async makeHttpRequest(
