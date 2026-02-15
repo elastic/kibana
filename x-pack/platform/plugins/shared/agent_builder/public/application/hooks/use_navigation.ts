@@ -12,6 +12,8 @@ import { useKibana } from './use_kibana';
 export interface LocationState {
   shouldStickToBottom?: boolean;
   initialMessage?: string;
+  agentId?: string;
+  connectorId?: string;
 }
 
 export const MANAGEMENT_APP_ID = 'management';

@@ -12,6 +12,7 @@ import type { EmbeddableConversationInternalProps } from './types';
 import { EmbeddableConversationsProvider } from '../application/context/conversation/embeddable_conversations_provider';
 import { Conversation } from '../application/components/conversations/conversation';
 import { ConversationHeader } from '../application/components/conversations/conversation_header/conversation_header';
+import { ConversationInput } from '../application/components/conversations/conversation_input';
 import {
   conversationBackgroundStyles,
   headerHeight,
@@ -23,7 +24,7 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
   props
 ) => {
   const { euiTheme } = useEuiTheme();
-  const { onClose, ariaLabelledBy } = props;
+  const { onClose, ariaLabelledBy, renderMode = 'full', onMessageSubmit } = props;
 
   const wrapperStyles = css`
     display: flex;
@@ -61,6 +62,24 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
     }
   `;
 
+  // Input-only mode: just render the conversation input without history
+  if (renderMode === 'input-only') {
+    const inputOnlyStyles = css`
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    `;
+
+    return (
+      <div css={inputOnlyStyles}>
+        <EmbeddableConversationsProvider {...props}>
+          <ConversationInput />
+        </EmbeddableConversationsProvider>
+      </div>
+    );
+  }
+
+  // Full mode: render complete conversation with header and history
   return (
     <div css={wrapperStyles}>
       <EmbeddableConversationsProvider {...props}>

@@ -205,7 +205,9 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
             <AppLeaveContext.Provider value={noopOnAppLeave}>
               <ConversationContext.Provider value={conversationContextValue}>
                 <AgentBuilderTourProvider>
-                  <SendMessageProvider>{children}</SendMessageProvider>
+                  <SendMessageProvider onMessageSubmit={currentProps.onMessageSubmit}>
+                    {children}
+                  </SendMessageProvider>
                 </AgentBuilderTourProvider>
               </ConversationContext.Provider>
             </AppLeaveContext.Provider>

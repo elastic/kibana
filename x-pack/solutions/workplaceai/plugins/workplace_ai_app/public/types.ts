@@ -11,6 +11,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkplaceAIAppPluginSetup {}
@@ -23,6 +24,7 @@ export interface WorkplaceAIAppPluginSetupDependencies {
 }
 
 export interface WorkplaceAIAppPluginStartDependencies {
+  agentBuilder: AgentBuilderPluginStart;
   inference: InferencePublicStart;
   spaces: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
