@@ -14,9 +14,10 @@ const searchSchema = z.object({
   query: z.string().describe('A natural language query expressing the search request'),
   index: z
     .string()
+    .min(1)
     .optional()
     .describe(
-      '(optional) Index to search against. If not provided, will automatically select the best index to use based on the query.'
+      'Index to search against. Omit this parameter entirely to let the tool automatically select the best index based on the query.'
     ),
 });
 
