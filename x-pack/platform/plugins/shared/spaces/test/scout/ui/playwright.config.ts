@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { createFieldTestingConfig } from '../base.jest.integration.config';
-
-export default createFieldTestingConfig({
-  testsDirectory: 'type_specific',
-  groupNumber: 1,
-  totalGroups: 2,
+import { createPlaywrightConfig } from '@kbn/scout';
+export default createPlaywrightConfig({
+  testDir: './tests',
 });

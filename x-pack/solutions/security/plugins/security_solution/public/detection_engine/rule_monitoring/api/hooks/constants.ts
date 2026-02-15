@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { createFieldTestingConfig } from '../base.jest.integration.config';
+const ONE_MINUTE = 60000;
 
-export default createFieldTestingConfig({
-  testsDirectory: 'common',
-  groupNumber: 2,
-  totalGroups: 2,
-});
+export const DEFAULT_QUERY_OPTIONS = {
+  refetchIntervalInBackground: false,
+  staleTime: ONE_MINUTE * 5,
+};
