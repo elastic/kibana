@@ -46,6 +46,34 @@ export class WorkflowTaskManager {
     };
   }
 
+  async scheduleImmediateResume({
+    executionId,
+    spaceId,
+    fakeRequest,
+  }: {
+    executionId: string;
+    spaceId: string;
+    fakeRequest: KibanaRequest;
+  }): Promise<{ taskId: string }> {
+    const task = await this.taskManager.schedule(
+      {
+        id: v4(),
+        taskType: 'workflow:resume',
+        params: {
+          workflowRunId: executionId,
+          spaceId,
+        } as ResumeWorkflowExecutionParams,
+        state: {},
+        scope: [`workflow:execution:${executionId}`],
+      },
+      { request: fakeRequest }
+    );
+
+    return {
+      taskId: task.id,
+    };
+  }
+
   async forceRunIdleTasks(workflowExecutionId: string): Promise<void> {
     const { docs: idleTasks } = await this.taskManager.fetch({
       query: {

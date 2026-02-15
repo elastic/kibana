@@ -23,6 +23,14 @@ jest.mock('./cancel_execution_button', () => ({
   ),
 }));
 
+jest.mock('./resume_execution_button', () => ({
+  ResumeExecutionButton: ({ executionId }: { executionId: string }) => (
+    <div data-test-subj="resume-execution-button">
+      {'Resume Execution'} {executionId}
+    </div>
+  ),
+}));
+
 jest.mock('./workflow_step_execution_tree', () => ({
   WorkflowStepExecutionTree: ({
     definition,
@@ -160,18 +168,18 @@ describe('WorkflowExecutionPanel', () => {
       expect(screen.getByTestId('cancel-execution-button')).toBeInTheDocument();
     });
 
-    it('should show cancel button for cancelable status (WAITING)', () => {
+    it('should show resume button for WAITING status', () => {
       renderComponent({
         execution: { ...mockExecution, status: ExecutionStatus.WAITING },
       });
-      expect(screen.getByTestId('cancel-execution-button')).toBeInTheDocument();
+      expect(screen.getByTestId('resume-execution-button')).toBeInTheDocument();
     });
 
-    it('should show cancel button for cancelable status (WAITING_FOR_INPUT)', () => {
+    it('should not show cancel button for WAITING status', () => {
       renderComponent({
-        execution: { ...mockExecution, status: ExecutionStatus.WAITING_FOR_INPUT },
+        execution: { ...mockExecution, status: ExecutionStatus.WAITING },
       });
-      expect(screen.getByTestId('cancel-execution-button')).toBeInTheDocument();
+      expect(screen.queryByTestId('cancel-execution-button')).not.toBeInTheDocument();
     });
 
     it('should show cancel button for cancelable status (PENDING)', () => {
@@ -198,6 +206,34 @@ describe('WorkflowExecutionPanel', () => {
     it('should not show cancel button when execution is null', () => {
       renderComponent({ execution: null });
       expect(screen.queryByTestId('cancel-execution-button')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('resume button', () => {
+    it('should show resume button when status is WAITING', () => {
+      renderComponent({
+        execution: { ...mockExecution, status: ExecutionStatus.WAITING },
+      });
+      expect(screen.getByTestId('resume-execution-button')).toBeInTheDocument();
+    });
+
+    it('should not show resume button for non-WAITING status', () => {
+      renderComponent({
+        execution: { ...mockExecution, status: ExecutionStatus.RUNNING },
+      });
+      expect(screen.queryByTestId('resume-execution-button')).not.toBeInTheDocument();
+    });
+
+    it('should not show resume button when execution is null', () => {
+      renderComponent({ execution: null });
+      expect(screen.queryByTestId('resume-execution-button')).not.toBeInTheDocument();
+    });
+
+    it('should pass executionId to ResumeExecutionButton', () => {
+      renderComponent({
+        execution: { ...mockExecution, status: ExecutionStatus.WAITING },
+      });
+      expect(screen.getByText('Resume Execution exec-123')).toBeInTheDocument();
     });
   });
 

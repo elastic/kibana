@@ -37,7 +37,8 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
   ({ executionId, onClose }) => {
     const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
 
-    const { activeTab, setSelectedStepExecution, selectedStepExecutionId } = useWorkflowUrlState();
+    const { activeTab, setSelectedStepExecution, selectedStepExecutionId, shouldAutoResume } =
+      useWorkflowUrlState();
     const [sidebarWidth = DefaultSidebarWidth, setSidebarWidth] = useLocalStorage(
       WidthStorageKey,
       DefaultSidebarWidth
@@ -99,6 +100,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               onClose={onClose}
               onStepExecutionClick={setSelectedStepExecutionId}
               selectedId={selectedStepExecutionId ?? null}
+              shouldAutoResume={shouldAutoResume}
             />
           }
           fixedPanelSize={sidebarWidth}
