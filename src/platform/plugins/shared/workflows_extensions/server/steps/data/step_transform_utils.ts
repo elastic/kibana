@@ -151,7 +151,7 @@ function listFormatToSpec(nodes: unknown[]): FieldsSpec {
  * Recursive merge of A and B as a union of fields at the same level
  */
 function deepMergeSpecs(a: FieldsSpec, b: FieldsSpec): FieldsSpec {
-  const result: Record<string, unknown> = { ...a };
+  const result: FieldsSpec = { ...a };
   for (const key of Object.keys(b)) {
     const bVal = b[key];
     if (!(key in result)) {
