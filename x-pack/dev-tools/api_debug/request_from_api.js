@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import fetch from 'node-fetch';
 import { resolve } from 'path';
 import pkg from '../../package.json';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common/src/constants';
@@ -43,12 +42,9 @@ function setIgnoreSSLErrors() {
 
 function logHeaders(res) {
   // use `--headers` to print the response headers
-  const headers = res.headers.raw();
-  for (const key in headers) {
-    if (Object.hasOwn(headers, key)) {
-      console.log(`${key}: ${headers[key]}`);
-    }
-  }
+  res.headers.forEach((value, key) => {
+    console.log(`${key}: ${value}`);
+  });
   console.log('\n');
 }
 

@@ -12,7 +12,6 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
 import fs from 'fs';
-import fetch from 'node-fetch';
 import path from 'path';
 import {
   type ChromeVersion,
