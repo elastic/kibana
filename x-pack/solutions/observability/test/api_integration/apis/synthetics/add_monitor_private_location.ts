@@ -8,6 +8,7 @@ import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   HTTPFields,
+  MonitorFields,
   PrivateLocation,
   ServiceLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
@@ -37,6 +38,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
+    let _browserMonitorJson: MonitorFields;
+    let browserMonitorJson: MonitorFields;
     const monitorTestService = new SyntheticsMonitorTestService(getService);
     const testPrivateLocations = new PrivateLocationTestService(getService);
     const security = getService('security');
@@ -46,10 +49,12 @@ export default function ({ getService }: FtrProviderContext) {
       await testPrivateLocations.installSyntheticsPackage();
 
       _httpMonitorJson = getFixtureJson('http_monitor');
+      _browserMonitorJson = getFixtureJson('browser_monitor');
     });
 
     beforeEach(() => {
       httpMonitorJson = _httpMonitorJson;
+      browserMonitorJson = _browserMonitorJson;
     });
 
     it('add a test private location', async () => {
@@ -64,6 +69,45 @@ export default function ({ getService }: FtrProviderContext) {
       ];
 
       expect(apiResponse.body.locations).eql(testResponse);
+    });
+
+    it('rejects browser timeout below 30s in private locations', async () => {
+      const monitor = {
+        ...browserMonitorJson,
+        name: `Browser timeout too low ${uuidv4()}`,
+        timeout: '29',
+        locations: [omit(pvtLoc, ['spaces'])],
+      };
+
+      const apiResponse = await supertestAPI
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send(monitor)
+        .expect(400);
+
+      expect(apiResponse.body.message).eql('Browser Monitor timeout is invalid');
+      expect(apiResponse.body.attributes.details).to.contain('Invalid timeout 29 seconds');
+    });
+
+    it('allows browser timeout at 30s in private locations', async () => {
+      const monitor = {
+        ...browserMonitorJson,
+        name: `Browser timeout ok ${uuidv4()}`,
+        timeout: '30',
+        locations: [omit(pvtLoc, ['spaces'])],
+      };
+
+      const apiResponse = await supertestAPI
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send(monitor)
+        .expect(200);
+
+      await supertestAPI
+        .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send({ ids: [apiResponse.body.id] })
+        .expect(200);
     });
 
     it('handles spaces', async () => {

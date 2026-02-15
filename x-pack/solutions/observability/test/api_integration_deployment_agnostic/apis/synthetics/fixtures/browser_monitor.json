@@ -15,7 +15,7 @@
   "service.name": "",
   "config_id": "",
   "tags": ["cookie-test", "browser"],
-  "timeout": "16",
+  "timeout": "30",
   "__ui": {
     "script_source": {
       "is_generated_script": false,

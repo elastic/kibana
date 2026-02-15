@@ -37,6 +37,7 @@ import {
 } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
+import { getBrowserTimeoutWarningForMonitor } from './monitor_warnings';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -180,13 +181,15 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
 
       editMonitorAPI.initDefaultAlerts(editedMonitorSavedObject.attributes.name);
 
-      return mapSavedObjectToMonitor({
+      const warning = getBrowserTimeoutWarningForMonitor(monitorWithRevision, monitorId);
+      const monitorResponse = mapSavedObjectToMonitor({
         internal: reqQuery.internal,
         monitor: {
           ...(editedMonitorSavedObject as SavedObject<EncryptedSyntheticsMonitorAttributes>),
           created_at: previousMonitor.created_at,
         },
       });
+      return warning ? { ...monitorResponse, warnings: [warning] } : monitorResponse;
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
         return getMonitorNotFoundResponse(response, monitorId);

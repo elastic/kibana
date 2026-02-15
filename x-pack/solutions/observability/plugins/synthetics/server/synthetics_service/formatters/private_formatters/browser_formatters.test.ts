@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ConfigKey } from '../../../../common/runtime_types';
+import { HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS } from '../../../../common/constants/monitor_defaults';
+import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
 import { throttlingFormatter } from './browser_formatters';
+import { privateTimeoutFormatter } from './formatting_utils';
 
 describe('formatters', () => {
   describe('throttling formatter', () => {
@@ -64,6 +66,76 @@ describe('formatters', () => {
           ConfigKey.THROTTLING_CONFIG
         )
       ).toEqual(JSON.stringify({ download: 1.25, upload: 0.75, latency: 150 }));
+    });
+  });
+
+  describe('timeout formatter', () => {
+    it('subtracts heartbeat overhead for browser monitors', () => {
+      expect(
+        privateTimeoutFormatter(
+          {
+            [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
+            [ConfigKey.TIMEOUT]: '60',
+          },
+          ConfigKey.TIMEOUT
+        )
+      ).toEqual('30s');
+    });
+
+    it('returns null for timeouts less than or equal to the Heartbeat overhead (safeguard against negative timeouts)', () => {
+      expect(
+        privateTimeoutFormatter(
+          {
+            [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
+            [ConfigKey.TIMEOUT]: '0',
+          },
+          ConfigKey.TIMEOUT
+        )
+      ).toEqual(null);
+
+      expect(
+        privateTimeoutFormatter(
+          {
+            [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
+            [ConfigKey.TIMEOUT]: HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS.toString(),
+          },
+          ConfigKey.TIMEOUT
+        )
+      ).toEqual(null);
+    });
+
+    it('returns null for invalid timeouts', () => {
+      expect(
+        privateTimeoutFormatter(
+          {
+            [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
+            [ConfigKey.TIMEOUT]: 's35',
+          },
+          ConfigKey.TIMEOUT
+        )
+      ).toEqual(null);
+
+      expect(
+        privateTimeoutFormatter(
+          {
+            [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
+            [ConfigKey.TIMEOUT]: HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS.toString(),
+          },
+          ConfigKey.TIMEOUT
+        )
+      ).toEqual(null);
+    });
+
+    it('returns raw timeout for non-browser monitors', () => {
+      expect(
+        privateTimeoutFormatter(
+          {
+            [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.HTTP,
+            [ConfigKey.TIMEOUT]: '45',
+          },
+          ConfigKey.TIMEOUT
+        )
+      ).toEqual('45s');
     });
   });
 });

@@ -19,6 +19,7 @@ import type { ProjectMonitor } from '../../../../common/runtime_types';
 
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { ProjectMonitorFormatter } from '../../../synthetics_service/project_monitor/project_monitor_formatter';
+import { getBrowserTimeoutWarningsForProjectMonitors } from '../monitor_warnings';
 
 const MAX_PAYLOAD_SIZE = 1048576 * 100; // 50MiB
 
@@ -94,10 +95,16 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
 
       await pushMonitorFormatter.configureAllProjectMonitors();
 
+      const warnings = getBrowserTimeoutWarningsForSucceededProjectMonitors(
+        monitors,
+        pushMonitorFormatter.failedMonitors.filter((m) => !!m.id).map((m) => m.id as string)
+      );
+
       return {
         createdMonitors: pushMonitorFormatter.createdMonitors,
         updatedMonitors: pushMonitorFormatter.updatedMonitors,
         failedMonitors: pushMonitorFormatter.failedMonitors,
+        ...(warnings.length > 0 ? { warnings } : {}),
       };
     } catch (error) {
       if (error.output?.statusCode === 404) {
@@ -216,6 +223,15 @@ export const checkPublicLocationsPermissions = async (
   if (!elasticManagedLocationsEnabled) {
     return ELASTIC_MANAGED_LOCATIONS_DISABLED;
   }
+};
+
+const getBrowserTimeoutWarningsForSucceededProjectMonitors = (
+  monitors: ProjectMonitor[],
+  failedMonitorsIds: string[]
+) => {
+  const failedIdsSet = new Set(failedMonitorsIds);
+  const succeededMonitors = monitors.filter((m) => !failedIdsSet.has(m.id));
+  return getBrowserTimeoutWarningsForProjectMonitors(succeededMonitors);
 };
 
 export const ELASTIC_MANAGED_LOCATIONS_DISABLED = i18n.translate(

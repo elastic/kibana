@@ -279,6 +279,22 @@ describe('validateMonitor', () => {
         details: 'Invalid value "invalid-location" supplied to "locations"',
       });
     });
+
+    it('when browser timeout is less than 30 seconds', () => {
+      const testMonitor = {
+        ...testBrowserFields,
+        [ConfigKey.SOURCE_INLINE]: 'step()',
+        [ConfigKey.TIMEOUT]: '29',
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Browser Monitor timeout is invalid',
+        details:
+          'Invalid timeout 29 seconds supplied. Minimum timeout for browser monitors is 30 seconds.',
+        payload: testMonitor,
+      });
+    });
   });
 
   describe('should validate', () => {

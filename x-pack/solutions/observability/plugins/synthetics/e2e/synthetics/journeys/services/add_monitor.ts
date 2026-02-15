@@ -96,7 +96,7 @@ export const testDataMonitor = {
   'service.name': '',
   config_id: '',
   tags: [],
-  timeout: '16',
+  timeout: '30',
   name: 'Monitor 2',
   locations: [{ id: 'us_central', isServiceManaged: true }],
   namespace: 'default',
