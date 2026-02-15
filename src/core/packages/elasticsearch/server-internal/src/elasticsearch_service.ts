@@ -26,6 +26,7 @@ import type {
 } from '@kbn/core-elasticsearch-server';
 import { ClusterClient, AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
 
+import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { ElasticsearchConfigType } from './elasticsearch_config';
 import { ElasticsearchConfig } from './elasticsearch_config';
@@ -47,6 +48,7 @@ export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
   http: InternalHttpServiceSetup;
   executionContext: InternalExecutionContextSetup;
+  security: InternalSecurityServiceSetup;
 }
 
 /** @internal */
@@ -66,6 +68,7 @@ export class ElasticsearchService
   private agentManager?: AgentManager;
   // @ts-expect-error - CPS is not yet implemented
   private cpsEnabled = false;
+  private security?: InternalSecurityServiceSetup;
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
@@ -100,6 +103,7 @@ export class ElasticsearchService
 
     this.authHeaders = deps.http.authRequestHeaders;
     this.executionContextClient = deps.executionContext;
+    this.security = deps.security;
     this.client = this.createClusterClient('data', config);
 
     const esNodesCompatibility$ = pollEsNodesVersion({
@@ -234,6 +238,7 @@ export class ElasticsearchService
       logger: this.coreContext.logger.get('elasticsearch'),
       type,
       authHeaders: this.authHeaders,
+      security: this.security,
       getExecutionContext: () => this.executionContextClient?.getAsHeader(),
       getUnauthorizedErrorHandler: () => this.unauthorizedErrorHandler,
       agentFactoryProvider: this.getAgentManager(baseConfig),

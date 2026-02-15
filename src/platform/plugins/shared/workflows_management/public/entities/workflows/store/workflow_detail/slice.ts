@@ -17,6 +17,7 @@ import { getWorkflowZodSchema } from '../../../../../common/schema';
 // Initial state
 const initialState: WorkflowDetailState = {
   yamlString: '',
+  isYamlSynced: true,
   computed: undefined,
   workflow: undefined,
   execution: undefined,
@@ -52,6 +53,9 @@ const workflowDetailSlice = createSlice({
     },
     setYamlString: (state, action: { payload: string }) => {
       state.yamlString = action.payload;
+    },
+    setIsYamlSynced: (state, action: { payload: boolean }) => {
+      state.isYamlSynced = action.payload;
     },
     setCursorPosition: (state, action: { payload: { lineNumber: number } }) => {
       if (!state.computed?.workflowLookup) {
@@ -131,6 +135,7 @@ export const {
   setWorkflow,
   updateWorkflow,
   setYamlString,
+  setIsYamlSynced,
   setCursorPosition,
   setHighlightedStepId,
   setIsTestModalOpen,

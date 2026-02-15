@@ -35,6 +35,10 @@ Labels can be added to a pull request to run conditional pipelines.  Build artif
 
 Some Cypress test suites are only run when code changes are made in certain files, typically files with overlapping test coverage.  Adding this label will cause all Cypress tests to run.
 
+#### `ci:all-ui-test-suites`
+
+Some UI/E2E test suites are only run when code changes are made in certain files. Adding this label will force all conditional UI/E2E suites to run.
+
 #### `ci:build-all-platforms`
 
 Build Windows, macOS, and Linux archives.

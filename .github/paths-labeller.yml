@@ -1,4 +1,18 @@
 ---
+- 'Team:One Workflow':
+    - 'examples/workflows_extensions_example/**/*.*'
+    - 'src/platform/packages/shared/deeplinks/workflows/**/*.*'
+    - 'src/platform/packages/shared/kbn-workflows/**/*.*'
+    - 'src/platform/packages/shared/kbn-workflows-ui/**/*.*'
+    - 'src/platform/plugins/shared/workflows_execution_engine/**/*.*'
+    - 'src/platform/plugins/shared/workflows_extensions/**/*.*'
+    - 'src/platform/plugins/shared/workflows_management/**/*.*'
+    - 'src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/**/*.*'
+    - 'src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/**/*.*'
+    - 'src/platform/packages/shared/kbn-connector-specs/src/specs/greynoise/**/*.*'
+    - 'src/platform/packages/shared/kbn-connector-specs/src/specs/shodan/**/*.*'
+    - 'src/platform/packages/shared/kbn-connector-specs/src/specs/urlvoid/**/*.*'
+    - 'src/platform/packages/shared/kbn-connector-specs/src/specs/virustotal/**/*.*'
 - 'Feature:Embedding':
     - 'src/platform/plugins/shared/embeddable/**/*.*'
     - 'src/plugins/dashboard_embeddable_container/**/*.*'

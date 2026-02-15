@@ -40,6 +40,7 @@ import {
   selectHasValidationErrors,
   selectIsExecutionsTab,
   selectIsSavingYaml,
+  selectIsYamlSynced,
   selectIsYamlSyntaxValid,
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -108,6 +109,7 @@ export const WorkflowDetailHeader = React.memo(
     const hasValidationErrors = useSelector(selectHasValidationErrors);
     const hasUnsavedChanges = useSelector(selectHasChanges);
     const isExecutionsTab = useSelector(selectIsExecutionsTab);
+    const isYamlSynced = useSelector(selectIsYamlSynced);
 
     const { name, isEnabled, lastUpdatedAt } = useMemo(
       () => ({
@@ -187,7 +189,7 @@ export const WorkflowDetailHeader = React.memo(
             paddingSize="m"
             alignItems="bottom"
           >
-            <EuiPageHeaderSection css={styles.headerSection}>
+            <EuiPageHeaderSection css={styles.headerSection} data-test-subj="workflowDetailHeader">
               <EuiButtonEmpty
                 iconType="sortLeft"
                 size="xs"
@@ -307,8 +309,11 @@ export const WorkflowDetailHeader = React.memo(
                     color="primary"
                     size="s"
                     onClick={handleSaveWorkflow}
-                    disabled={isExecutionsTab || !canSaveWorkflow || isLoading || isSaving}
+                    disabled={
+                      isExecutionsTab || !canSaveWorkflow || isLoading || isSaving || !isYamlSynced
+                    }
                     isLoading={isSaving}
+                    data-test-subj="saveWorkflowHeaderButton"
                   >
                     <FormattedMessage
                       id="keepWorkflows.buttonText"
@@ -323,6 +328,7 @@ export const WorkflowDetailHeader = React.memo(
         </EuiPageTemplate>
         {showRunConfirmation && (
           <EuiConfirmModal
+            data-test-subj="runWorkflowWithUnsavedChangesConfirmationModal"
             title={Translations.runWithUnsavedChangesQuestion}
             onCancel={handleCancelRun}
             onConfirm={handleConfirmRun}
