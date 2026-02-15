@@ -10,6 +10,7 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
+import type { WorkflowsMeteringService } from '../metering';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
@@ -21,6 +22,7 @@ export async function resumeWorkflow({
   logger,
   config,
   fakeRequest,
+  meteringService,
 }: {
   workflowRunId: string;
   spaceId: string;
@@ -29,6 +31,7 @@ export async function resumeWorkflow({
   config: WorkflowsExecutionEngineConfig;
   fakeRequest: KibanaRequest;
   dependencies: ContextDependencies;
+  meteringService?: WorkflowsMeteringService;
 }): Promise<void> {
   const {
     workflowRuntime,
@@ -58,4 +61,25 @@ export async function resumeWorkflow({
     taskAbortController,
     workflowTaskManager,
   });
+
+  // Report metering after execution completes and state is flushed.
+  // This is fire-and-forget: the metering service handles retries and
+  // will no-op for non-terminal states (e.g., WAITING for resume).
+  if (meteringService) {
+    try {
+      const finalExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+        workflowRunId,
+        spaceId
+      );
+      if (finalExecution) {
+        void meteringService.reportWorkflowExecution(finalExecution, dependencies.cloudSetup);
+      }
+    } catch (err) {
+      logger.warn(
+        `Failed to fetch execution for metering (execution=${workflowRunId}): ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
+  }
 }
