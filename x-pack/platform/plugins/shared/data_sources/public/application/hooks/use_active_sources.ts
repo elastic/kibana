@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
 import { API_BASE_PATH } from '../../../common/constants';
 import type { ActiveSource } from '../../types/connector';
 import { queryKeys } from '../query_keys';
+import { getPendingDeleteIds } from '../utils/pending_delete_storage';
 
 interface ListDataSourcesResponse {
   dataSources: ActiveSource[];
@@ -25,8 +27,15 @@ export const useActiveSources = () => {
     return await http.get<ListDataSourcesResponse>(API_BASE_PATH);
   });
 
+  const activeSources = useMemo(() => {
+    const sources = data?.dataSources ?? [];
+    const pendingDeleteIds = getPendingDeleteIds();
+    if (pendingDeleteIds.size === 0) return sources;
+    return sources.filter((source) => !pendingDeleteIds.has(source.id));
+  }, [data?.dataSources]);
+
   return {
-    activeSources: data?.dataSources ?? [],
+    activeSources,
     isLoading,
     error,
   };

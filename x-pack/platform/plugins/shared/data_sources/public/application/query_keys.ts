@@ -10,6 +10,7 @@ export const queryKeys = {
     all: ['dataSources'] as const,
     list: () => ['dataSources', 'list'] as const,
     byId: (id: string) => ['dataSources', 'detail', id] as const,
+    taskStatus: (taskId: string) => ['dataSources', 'taskStatus', taskId] as const,
   },
   connectorTypes: {
     all: ['connectorTypes'] as const,

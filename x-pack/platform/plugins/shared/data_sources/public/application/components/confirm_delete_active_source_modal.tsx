@@ -20,30 +20,49 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ActiveSource } from '../../types/connector';
 
-interface ConfirmDeleteActiveSourceModalProps {
+interface SingleDeleteProps {
   activeSource: ActiveSource;
+  count?: never;
+}
+
+interface BulkDeleteProps {
+  activeSource?: never;
+  count: number;
+}
+
+type ConfirmDeleteActiveSourceModalProps = (SingleDeleteProps | BulkDeleteProps) & {
   onConfirm: () => void;
   onCancel: () => void;
   isDeleting: boolean;
-}
+};
 
 export const ConfirmDeleteActiveSourceModal: React.FC<ConfirmDeleteActiveSourceModalProps> = ({
   activeSource,
+  count,
   onConfirm,
   onCancel,
   isDeleting,
 }) => {
   const modalTitleId = useGeneratedHtmlId({ prefix: 'deleteActiveSourceModalTitle' });
+  const isBulk = count !== undefined && count > 0;
 
   return (
     <EuiModal onClose={onCancel} aria-labelledby={modalTitleId} role="alertdialog">
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
-          <FormattedMessage
-            id="xpack.dataSources.deleteActiveSourceModal.title"
-            defaultMessage="Delete {name}"
-            values={{ name: activeSource.name }}
-          />
+          {isBulk ? (
+            <FormattedMessage
+              id="xpack.dataSources.deleteActiveSourceModal.bulkTitle"
+              defaultMessage="Delete {count} {count, plural, one {data source} other {data sources}}?"
+              values={{ count }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.dataSources.deleteActiveSourceModal.title"
+              defaultMessage="Delete {name}?"
+              values={{ name: activeSource!.name }}
+            />
+          )}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
@@ -51,7 +70,7 @@ export const ConfirmDeleteActiveSourceModal: React.FC<ConfirmDeleteActiveSourceM
           <p>
             <FormattedMessage
               id="xpack.dataSources.deleteActiveSourceModal.description"
-              defaultMessage="Are you sure you want to delete this data source? This action cannot be undone."
+              defaultMessage="This action cannot be undone."
             />
           </p>
         </EuiText>

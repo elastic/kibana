@@ -13,31 +13,33 @@ import { ActiveSourcesTable } from './active_sources_table';
 import { ConfirmDeleteActiveSourceModal } from './confirm_delete_active_source_modal';
 import { useActiveSources } from '../hooks/use_active_sources';
 import { useDeleteActiveSource } from '../hooks/use_delete_active_source';
+import { useBulkDeleteActiveSources } from '../hooks/use_bulk_delete_active_sources';
 import { useEditActiveSourceFlyout } from '../hooks/use_edit_active_source_flyout';
-import { useCloneActiveSourceFlyout } from '../hooks/use_clone_active_source_flyout';
 import type { ActiveSource } from '../../types/connector';
 
 export const ActiveSourcesView: React.FC = () => {
   const { activeSources, isLoading } = useActiveSources();
   const [selectedSource, setSelectedSource] = useState<ActiveSource | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [sourceIdsToBulkDelete, setSourceIdsToBulkDelete] = useState<string[]>([]);
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const [sourceToEdit, setSourceToEdit] = useState<ActiveSource | null>(null);
-  const [sourceToClone, setSourceToClone] = useState<ActiveSource | null>(null);
 
   const handleCancelDelete = useCallback(() => {
     setSelectedSource(null);
     setShowDeleteModal(false);
   }, []);
 
+  const handleCancelBulkDelete = useCallback(() => {
+    setSourceIdsToBulkDelete([]);
+    setShowBulkDeleteModal(false);
+  }, []);
+
   const { mutate: deleteActiveSource, isLoading: isDeleting } =
     useDeleteActiveSource(handleCancelDelete);
 
-  const { openFlyout: openCloneFlyout, flyout: cloneFlyout } = useCloneActiveSourceFlyout({
-    sourceToClone,
-    onConnectorCreated: () => {
-      setSourceToClone(null);
-    },
-  });
+  const { bulkDelete, isDeleting: isBulkDeleting } =
+    useBulkDeleteActiveSources(handleCancelBulkDelete);
 
   const handleCloseEditFlyout = useCallback(() => {
     setSourceToEdit(null);
@@ -56,16 +58,6 @@ export const ActiveSourcesView: React.FC = () => {
     [openEditFlyout]
   );
 
-  const handleClone = useCallback(
-    (source: ActiveSource) => {
-      setSourceToClone(source);
-      // Open the add connector flyout with pre-selected type
-      // User will need to select/create credentials (no secrets cloned)
-      openCloneFlyout();
-    },
-    [openCloneFlyout]
-  );
-
   const handleDelete = useCallback((source: ActiveSource) => {
     setSelectedSource(source);
     setShowDeleteModal(true);
@@ -76,6 +68,19 @@ export const ActiveSourcesView: React.FC = () => {
       deleteActiveSource(selectedSource.id);
     }
   }, [selectedSource, deleteActiveSource]);
+
+  const handleBulkDelete = useCallback((sources: ActiveSource[]) => {
+    setSourceIdsToBulkDelete(sources.map((source) => source.id));
+    setShowBulkDeleteModal(true);
+  }, []);
+
+  const handleConfirmBulkDelete = useCallback(() => {
+    if (sourceIdsToBulkDelete.length > 0) {
+      bulkDelete(sourceIdsToBulkDelete);
+      setShowBulkDeleteModal(false);
+      setSourceIdsToBulkDelete([]);
+    }
+  }, [sourceIdsToBulkDelete, bulkDelete]);
 
   if (isLoading) {
     return (
@@ -111,10 +116,9 @@ export const ActiveSourcesView: React.FC = () => {
         <ActiveSourcesTable
           sources={activeSources}
           isLoading={isLoading}
-          onReconnect={() => {}}
           onEdit={handleEdit}
-          onClone={handleClone}
           onDelete={handleDelete}
+          onBulkDelete={handleBulkDelete}
         />
       )}
       {showDeleteModal && selectedSource && (
@@ -125,8 +129,15 @@ export const ActiveSourcesView: React.FC = () => {
           isDeleting={isDeleting}
         />
       )}
+      {showBulkDeleteModal && sourceIdsToBulkDelete.length > 0 && (
+        <ConfirmDeleteActiveSourceModal
+          count={sourceIdsToBulkDelete.length}
+          onConfirm={handleConfirmBulkDelete}
+          onCancel={handleCancelBulkDelete}
+          isDeleting={isBulkDeleting}
+        />
+      )}
       {editFlyout}
-      {cloneFlyout}
     </>
   );
 };

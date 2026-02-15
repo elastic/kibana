@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { capitalize } from 'lodash';
 import {
   EuiBasicTable,
@@ -13,17 +13,19 @@ import {
   EuiFlexItem,
   EuiText,
   EuiButtonIcon,
+  EuiButtonEmpty,
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
-  EuiButton,
   EuiSpacer,
   EuiTablePagination,
   EuiLink,
   EuiIcon,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import type { ActiveSource } from '../../types/connector';
@@ -38,10 +40,9 @@ import { useKibana } from '../hooks/use_kibana';
 interface ActiveSourcesTableProps {
   sources: ActiveSource[];
   isLoading?: boolean;
-  onReconnect?: (source: ActiveSource) => void;
   onEdit?: (source: ActiveSource) => void;
-  onClone?: (source: ActiveSource) => void;
   onDelete?: (source: ActiveSource) => void;
+  onBulkDelete?: (sources: ActiveSource[]) => void;
 }
 
 const SourceIcon: React.FC<{ source: ActiveSource }> = ({ source }) => {
@@ -54,12 +55,10 @@ const SourceIcon: React.FC<{ source: ActiveSource }> = ({ source }) => {
 
 const ActionsCell: React.FC<{
   source: ActiveSource;
-  onReconnect?: (source: ActiveSource) => void;
   onEdit?: (source: ActiveSource) => void;
-  onClone?: (source: ActiveSource) => void;
   onDelete?: (source: ActiveSource) => void;
   disabled?: boolean;
-}> = ({ source, onReconnect, onEdit, onClone, onDelete, disabled = false }) => {
+}> = ({ source, onEdit, onDelete, disabled = false }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   // Menu items (ALL actions)
@@ -76,36 +75,6 @@ const ActionsCell: React.FC<{
       >
         {i18n.translate('xpack.dataSources.activeSources.editAction', {
           defaultMessage: 'Edit',
-        })}
-      </EuiContextMenuItem>
-    ),
-    onClone && (
-      <EuiContextMenuItem
-        key="clone"
-        icon="copy"
-        onClick={() => {
-          setIsPopoverOpen(false);
-          onClone(source);
-        }}
-        data-test-subj={`cloneActiveSource-${source.id}`}
-      >
-        {i18n.translate('xpack.dataConnectors.activeSources.cloneAction', {
-          defaultMessage: 'Clone',
-        })}
-      </EuiContextMenuItem>
-    ),
-    onReconnect && (
-      <EuiContextMenuItem
-        key="reconnect"
-        icon="link"
-        disabled
-        onClick={() => {
-          setIsPopoverOpen(false);
-          onReconnect(source);
-        }}
-      >
-        {i18n.translate('xpack.dataSources.activeSources.reconnectAction', {
-          defaultMessage: 'Reconnect',
         })}
       </EuiContextMenuItem>
     ),
@@ -190,15 +159,20 @@ const ActionsCell: React.FC<{
 export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
   sources,
   isLoading = false,
-  onReconnect,
   onEdit,
-  onClone,
   onDelete,
+  onBulkDelete,
 }) => {
   const {
     services: { application },
   } = useKibana();
   const [selectedItems, setSelectedItems] = useState<ActiveSource[]>([]);
+
+  // Sync selection with sources — remove selected items that no longer exist
+  useEffect(() => {
+    const sourceIds = new Set(sources.map((s) => s.id));
+    setSelectedItems((prev) => prev.filter((item) => sourceIds.has(item.id)));
+  }, [sources]);
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
 
@@ -314,16 +288,22 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
       width: '120px',
       align: 'center',
       render: (source: ActiveSource) => (
-        <ActionsCell
-          source={source}
-          onReconnect={onReconnect}
-          onEdit={onEdit}
-          onClone={onClone}
-          onDelete={onDelete}
-        />
+        <ActionsCell source={source} onEdit={onEdit} onDelete={onDelete} />
       ),
     },
   ];
+
+  const selectAll = useCallback(() => {
+    setSelectedItems([...paginatedSources]);
+  }, [paginatedSources]);
+
+  const clearSelection = useCallback(() => {
+    setSelectedItems([]);
+  }, []);
+
+  const deleteSelection = useCallback(() => {
+    onBulkDelete?.(selectedItems);
+  }, [onBulkDelete, selectedItems]);
 
   const selection = {
     selectable: () => true,
@@ -331,37 +311,112 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
     selected: selectedItems,
   };
 
+  const startItem = activePage * itemsPerPage + 1;
+  const endItem = Math.min((activePage + 1) * itemsPerPage, sources.length);
+
   return (
     <>
-      {selectedItems.length > 0 && (
-        <>
-          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                {i18n.translate('xpack.dataSources.activeSources.selectedCount', {
-                  defaultMessage: 'Sources selected: {count}',
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        css={css`
+          min-height: 24px;
+        `}
+      >
+        <EuiText size="xs">
+          <FormattedMessage
+            id="xpack.dataSources.activeSources.tableSummary"
+            defaultMessage="Showing {start}-{end} of {total} {sources}"
+            values={{
+              start: <strong>{startItem}</strong>,
+              end: <strong>{endItem}</strong>,
+              total: sources.length,
+              sources: (
+                <strong>
+                  {i18n.translate('xpack.dataSources.activeSources.sourcesLabel', {
+                    defaultMessage: 'Data Sources',
+                  })}
+                </strong>
+              ),
+            }}
+          />
+        </EuiText>
+        {selectedItems.length > 0 && (
+          <EuiFlexGroup gutterSize="none">
+            {onBulkDelete && (
+              <EuiButtonEmpty
+                aria-label={i18n.translate('xpack.dataSources.activeSources.deleteSelectedLabel', {
+                  defaultMessage:
+                    'Delete {count, plural, one {# Data Source} other {# Data Sources}}',
                   values: { count: selectedItems.length },
                 })}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                color="danger"
-                iconType="trash"
-                onClick={() => {}}
-                disabled
                 data-test-subj="bulkDeleteButton"
+                iconType="trash"
+                iconSize="m"
+                size="xs"
+                color="danger"
+                onClick={deleteSelection}
               >
-                {i18n.translate('xpack.dataSources.activeSources.deleteSelected', {
-                  defaultMessage: 'Delete selected',
+                <EuiText
+                  size="xs"
+                  css={({ euiTheme }) => ({
+                    fontWeight: euiTheme.font.weight.semiBold,
+                  })}
+                >
+                  {i18n.translate('xpack.dataSources.activeSources.deleteSelectedLabel', {
+                    defaultMessage:
+                      'Delete {count, plural, one {# Data Source} other {# Data Sources}}',
+                    values: { count: selectedItems.length },
+                  })}
+                </EuiText>
+              </EuiButtonEmpty>
+            )}
+            <EuiButtonEmpty
+              aria-label={i18n.translate('xpack.dataSources.activeSources.selectAllLabel', {
+                defaultMessage: 'Select all',
+              })}
+              data-test-subj="selectAllButton"
+              iconType="pagesSelect"
+              iconSize="m"
+              size="xs"
+              onClick={selectAll}
+            >
+              <EuiText
+                size="xs"
+                css={({ euiTheme }) => ({
+                  fontWeight: euiTheme.font.weight.semiBold,
                 })}
-              </EuiButton>
-            </EuiFlexItem>
+              >
+                {i18n.translate('xpack.dataSources.activeSources.selectAllLabel', {
+                  defaultMessage: 'Select all',
+                })}
+              </EuiText>
+            </EuiButtonEmpty>
+            <EuiButtonEmpty
+              aria-label={i18n.translate('xpack.dataSources.activeSources.clearSelectionLabel', {
+                defaultMessage: 'Clear selection',
+              })}
+              data-test-subj="clearSelectionButton"
+              iconType="cross"
+              iconSize="m"
+              size="xs"
+              onClick={clearSelection}
+            >
+              <EuiText
+                size="xs"
+                css={({ euiTheme }) => ({
+                  fontWeight: euiTheme.font.weight.semiBold,
+                })}
+              >
+                {i18n.translate('xpack.dataSources.activeSources.clearSelectionLabel', {
+                  defaultMessage: 'Clear selection',
+                })}
+              </EuiText>
+            </EuiButtonEmpty>
           </EuiFlexGroup>
-          <EuiSpacer size="m" />
-        </>
-      )}
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
       <EuiBasicTable
         items={paginatedSources}
         itemId="id"
