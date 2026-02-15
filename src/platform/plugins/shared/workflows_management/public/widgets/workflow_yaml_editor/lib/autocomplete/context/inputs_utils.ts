@@ -20,6 +20,7 @@ export function isInInputsPropertiesContext(path: (string | number)[]): boolean 
   return path[0] === 'inputs' && path[1] === 'properties';
 }
 
+
 /**
  * Check if we're at a property definition level within inputs.properties
  * @param path - The YAML path array
