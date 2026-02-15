@@ -1832,6 +1832,7 @@ describe('The custom threshold alert type', () => {
               },
             ],
             alertOnNoData,
+            ...(alertOnNoData === false ? { alertOnGroupDisappear: false } : {}),
           },
         });
       test('sends a No Data alert when configured to do so', async () => {
@@ -2374,6 +2375,346 @@ describe('The custom threshold alert type', () => {
           expect(getLastReportedAlert(instanceID)).toBe(undefined);
           expect(getLastReportedAlert(instanceIdA)).toHaveNoDataAction();
           expect(getLastReportedAlert(instanceIdB)).toHaveNoDataAction();
+        });
+      });
+    });
+
+    describe('noDataBehavior parameter', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+        clearInstances();
+      });
+      afterAll(() => clearInstances());
+      const instanceID = '*';
+
+      describe("noDataBehavior: 'recover' (default)", () => {
+        const execute = (sourceId: string = 'default') =>
+          executor({
+            ...mockOptions,
+            services,
+            params: {
+              ...mockOptions.params,
+              sourceId,
+              criteria: [
+                {
+                  ...customThresholdNonCountCriterion,
+                  comparator: COMPARATORS.GREATER_THAN,
+                  threshold: [1],
+                },
+              ],
+              noDataBehavior: 'recover',
+            },
+          });
+
+        test('should not report any alerts when there is no data', async () => {
+          setEvaluationResults([
+            {
+              '*': {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: null,
+                timestamp: new Date().toISOString(),
+                shouldFire: false,
+                isNoData: true,
+                bucketKey: { groupBy0: '*' },
+              },
+            },
+          ]);
+          await execute();
+          expect(getLastReportedAlert(instanceID)).toBe(undefined);
+        });
+
+        test('should report alert when condition is met', async () => {
+          setEvaluationResults([
+            {
+              '*': {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: 2,
+                timestamp: new Date().toISOString(),
+                shouldFire: true,
+                isNoData: false,
+                bucketKey: { groupBy0: '*' },
+              },
+            },
+          ]);
+          await execute();
+          const reportedAlert = getLastReportedAlert(instanceID);
+          expect(reportedAlert?.context?.reason).toEqual(
+            'Average test.metric.1 is 2, above the threshold of 1. (duration: 1 min, data view: mockedDataViewName)'
+          );
+          expect(reportedAlert).toHaveAlertAction();
+        });
+      });
+
+      describe("noDataBehavior: 'alertOnNoData'", () => {
+        const execute = (sourceId: string = 'default') =>
+          executor({
+            ...mockOptions,
+            services,
+            params: {
+              ...mockOptions.params,
+              sourceId,
+              criteria: [
+                {
+                  ...customThresholdNonCountCriterion,
+                  comparator: COMPARATORS.GREATER_THAN,
+                  threshold: [1],
+                },
+              ],
+              noDataBehavior: 'alertOnNoData',
+            },
+          });
+
+        test('should report NO_DATA alert when there is no data', async () => {
+          setEvaluationResults([
+            {
+              '*': {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: null,
+                timestamp: new Date().toISOString(),
+                shouldFire: false,
+                isNoData: true,
+                bucketKey: { groupBy0: '*' },
+              },
+            },
+          ]);
+          await execute();
+          const reportedAlert = getLastReportedAlert(instanceID);
+          expect(reportedAlert?.context?.reason).toEqual(
+            'Average test.metric.1 reported no data in the last 1m'
+          );
+          expect(reportedAlert).toHaveNoDataAction();
+        });
+      });
+
+      describe("noDataBehavior: 'remainActive'", () => {
+        const execute = (state?: any) =>
+          executor({
+            ...mockOptions,
+            services,
+            params: {
+              ...mockOptions.params,
+              criteria: [
+                {
+                  ...customThresholdNonCountCriterion,
+                  comparator: COMPARATORS.GREATER_THAN,
+                  threshold: [1],
+                },
+              ],
+              noDataBehavior: 'remainActive',
+            },
+            state: state ?? mockOptions.state.wrapped,
+          });
+
+        test('should keep alert in ALERT state when there is no data and alert was previously active', async () => {
+          services.alertsClient.isTrackedAlert.mockReturnValue(true);
+
+          setEvaluationResults([
+            {
+              '*': {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: null,
+                timestamp: new Date().toISOString(),
+                shouldFire: false,
+                isNoData: true,
+                bucketKey: { groupBy0: '*' },
+              },
+            },
+          ]);
+
+          await execute();
+          const reportedAlert = getLastReportedAlert(instanceID);
+          expect(reportedAlert?.context?.reason).toEqual(
+            'Average test.metric.1 reported no data in the last 1m'
+          );
+          expect(reportedAlert?.actionGroup).toEqual(FIRED_ACTION.id);
+          expect(reportedAlert?.context?.reason).toContain('no data');
+
+          services.alertsClient.isTrackedAlert.mockReturnValue(false);
+        });
+
+        test('should not create new alert when there is no data and alert was not previously active', async () => {
+          services.alertsClient.isTrackedAlert.mockReturnValue(false);
+
+          setEvaluationResults([
+            {
+              '*': {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: null,
+                timestamp: new Date().toISOString(),
+                shouldFire: false,
+                isNoData: true,
+                bucketKey: { groupBy0: '*' },
+              },
+            },
+          ]);
+
+          await execute();
+          expect(getLastReportedAlert(instanceID)).toBe(undefined);
+        });
+      });
+
+      describe('noDataBehavior takes precedence over alertOnNoData', () => {
+        test("noDataBehavior: 'recover' should override alertOnNoData: true", async () => {
+          setEvaluationResults([
+            {
+              '*': {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: null,
+                timestamp: new Date().toISOString(),
+                shouldFire: false,
+                isNoData: true,
+                bucketKey: { groupBy0: '*' },
+              },
+            },
+          ]);
+
+          await executor({
+            ...mockOptions,
+            services,
+            params: {
+              ...mockOptions.params,
+              criteria: [
+                {
+                  ...customThresholdNonCountCriterion,
+                  comparator: COMPARATORS.GREATER_THAN,
+                  threshold: [1],
+                },
+              ],
+              alertOnNoData: true,
+              noDataBehavior: 'recover',
+            },
+          });
+
+          expect(getLastReportedAlert(instanceID)).toBe(undefined);
+        });
+
+        test("noDataBehavior: 'alertOnNoData' should override alertOnNoData: false", async () => {
+          setEvaluationResults([
+            {
+              '*': {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: null,
+                timestamp: new Date().toISOString(),
+                shouldFire: false,
+                isNoData: true,
+                bucketKey: { groupBy0: '*' },
+              },
+            },
+          ]);
+
+          await executor({
+            ...mockOptions,
+            services,
+            params: {
+              ...mockOptions.params,
+              criteria: [
+                {
+                  ...customThresholdNonCountCriterion,
+                  comparator: COMPARATORS.GREATER_THAN,
+                  threshold: [1],
+                },
+              ],
+              alertOnNoData: false,
+              noDataBehavior: 'alertOnNoData',
+            },
+          });
+
+          const reportedAlert = getLastReportedAlert(instanceID);
+          expect(reportedAlert?.context?.reason).toEqual(
+            'Average test.metric.1 reported no data in the last 1m'
+          );
+          expect(reportedAlert).toHaveNoDataAction();
+        });
+      });
+
+      describe('backward compatibility - when noDataBehavior is not set', () => {
+        test('should use alertOnNoData: true behavior (trigger NO_DATA alert)', async () => {
+          setEvaluationResults([
+            {
+              '*': {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: null,
+                timestamp: new Date().toISOString(),
+                shouldFire: false,
+                isNoData: true,
+                bucketKey: { groupBy0: '*' },
+              },
+            },
+          ]);
+
+          await executor({
+            ...mockOptions,
+            services,
+            params: {
+              ...mockOptions.params,
+              criteria: [
+                {
+                  ...customThresholdNonCountCriterion,
+                  comparator: COMPARATORS.GREATER_THAN,
+                  threshold: [1],
+                },
+              ],
+              alertOnNoData: true,
+            },
+          });
+
+          const reportedAlert = getLastReportedAlert(instanceID);
+          expect(reportedAlert?.context?.reason).toEqual(
+            'Average test.metric.1 reported no data in the last 1m'
+          );
+          expect(reportedAlert).toHaveNoDataAction();
+        });
+
+        test('should use alertOnNoData: false behavior (recover/no alert)', async () => {
+          setEvaluationResults([
+            {
+              '*': {
+                ...customThresholdNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                currentValue: null,
+                timestamp: new Date().toISOString(),
+                shouldFire: false,
+                isNoData: true,
+                bucketKey: { groupBy0: '*' },
+              },
+            },
+          ]);
+
+          await executor({
+            ...mockOptions,
+            services,
+            params: {
+              ...mockOptions.params,
+              criteria: [
+                {
+                  ...customThresholdNonCountCriterion,
+                  comparator: COMPARATORS.GREATER_THAN,
+                  threshold: [1],
+                },
+              ],
+              alertOnNoData: false,
+              alertOnGroupDisappear: false,
+            },
+          });
+
+          expect(getLastReportedAlert(instanceID)).toBe(undefined);
         });
       });
     });
@@ -3582,6 +3923,7 @@ describe('The custom threshold alert type', () => {
               },
             ],
             alertOnNoData,
+            ...(alertOnNoData === false ? { alertOnGroupDisappear: false } : {}),
           },
         });
       test('sends a No Data alert when configured to do so', async () => {

@@ -113,7 +113,8 @@ export const createCustomThresholdExecutor = ({
     };
 
     // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
-    const alertOnGroupDisappear = _alertOnGroupDisappear !== false;
+    const alertOnGroupDisappear =
+      _alertOnGroupDisappear !== false && params.noDataBehavior !== 'recover';
     const compositeSize = config.customThresholdRule.groupByPageSize;
     const queryIsSame = isEqual(
       state.searchConfiguration?.query.query,
@@ -194,20 +195,32 @@ export const createCustomThresholdExecutor = ({
       const shouldAlertFire = alertResults.every((result) => result[group]?.shouldFire);
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
-      const isNoData = alertResults.some((result) => result[group]?.isNoData);
+      const isNoDataFound = alertResults.some((result) => result[group]?.isNoData);
 
-      if (isNoData && group !== UNGROUPED_FACTORY_KEY) {
+      if (isNoDataFound && group !== UNGROUPED_FACTORY_KEY) {
         nextMissingGroups.add({ key: group, bucketKey: alertResults[0][group].bucketKey });
       }
 
-      const nextState = isNoData
-        ? AlertStates.NO_DATA
-        : shouldAlertFire
-        ? AlertStates.ALERT
-        : AlertStates.OK;
+      const isIndeterminateState =
+        isNoDataFound &&
+        params.noDataBehavior === 'remainActive' &&
+        alertsClient.isTrackedAlert(group);
+
+      const isAlertOnNoDataEnabled = params.noDataBehavior
+        ? params.noDataBehavior === 'alertOnNoData'
+        : alertOnNoData || alertOnGroupDisappear;
+
+      const nextState =
+        isNoDataFound && isAlertOnNoDataEnabled
+          ? AlertStates.NO_DATA
+          : isIndeterminateState
+          ? AlertStates.ALERT
+          : shouldAlertFire
+          ? AlertStates.ALERT
+          : AlertStates.OK;
 
       let reason;
-      if (nextState === AlertStates.ALERT) {
+      if (nextState === AlertStates.ALERT && !isIndeterminateState) {
         reason = buildFiredAlertReason(alertResults, group, dataViewName);
       }
 
@@ -227,17 +240,16 @@ export const createCustomThresholdExecutor = ({
        * If `alertOnNoData` is true but `alertOnGroupDisappear` is false, we don't need to worry about the {a, b, c} possibility.
        * At this point in the function, a false `alertOnGroupDisappear` would already have prevented group 'a' from being evaluated at all.
        */
-      if (alertOnNoData || (alertOnGroupDisappear && hasGroups)) {
-        // In the previous line we've determined if the user is interested in No Data states, so only now do we actually
-        // check to see if a No Data state has occurred
-        if (nextState === AlertStates.NO_DATA) {
-          reason = alertResults
-            .filter((result) => result[group]?.isNoData)
-            .map((result) =>
-              buildNoDataAlertReason({ ...result[group], label: getLabel(result[group]), group })
-            )
-            .join('\n');
-        }
+      const shouldBuildNoDataReason = params.noDataBehavior
+        ? params.noDataBehavior !== 'recover'
+        : alertOnNoData || (alertOnGroupDisappear && hasGroups);
+      if (shouldBuildNoDataReason && (nextState === AlertStates.NO_DATA || isIndeterminateState)) {
+        reason = alertResults
+          .filter((result) => result[group]?.isNoData)
+          .map((result) =>
+            buildNoDataAlertReason({ ...result[group], label: getLabel(result[group]), group })
+          )
+          .join('\n');
       }
 
       if (reason) {

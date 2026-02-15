@@ -85,6 +85,13 @@ export const customThresholdParamsSchema = schema.object(
     groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
     alertOnNoData: schema.maybe(schema.boolean()),
     alertOnGroupDisappear: schema.maybe(schema.boolean()),
+    noDataBehavior: schema.maybe(
+      schema.oneOf([
+        schema.literal('recover'),
+        schema.literal('remainActive'),
+        schema.literal('alertOnNoData'),
+      ])
+    ),
     searchConfiguration: searchConfigSchema,
   },
   { unknowns: 'allow' }
