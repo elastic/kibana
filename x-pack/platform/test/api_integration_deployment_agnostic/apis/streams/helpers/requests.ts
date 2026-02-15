@@ -350,8 +350,7 @@ export async function importContent(
     include: ContentPackIncludedObjects;
     content: Readable;
     filename: string;
-  },
-  expectStatusCode: number = 200
+  }
 ) {
   return await apiClient
     .sendFile('POST /api/streams/{name}/content/import 2023-10-31', {
@@ -364,6 +363,5 @@ export async function importContent(
       },
       file: { key: 'content', filename: body.filename },
     })
-    .expect(expectStatusCode)
-    .then((response) => response.body);
+    .then((response) => ({ ...response.body, statusCode: response.status }));
 }
