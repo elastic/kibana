@@ -17,6 +17,7 @@ import type { ObservabilityOnboardingAppServices } from '../..';
 import { LogoIcon } from '../shared/logo_icon';
 import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
 import { useManagedOtlpServiceAvailability } from '../shared/use_managed_otlp_service_availability';
+import { useCloudForwarderAvailability } from '../shared/use_cloud_forwarder_availability';
 
 export function useCustomCards(
   createCollectionCardHandler: (query: string) => () => void
@@ -38,6 +39,7 @@ export function useCustomCards(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
   );
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
+  const isCloudForwarderAvailable = useCloudForwarderAvailability();
 
   const { href: autoDetectUrl } = reactRouterNavigate(history, `/auto-detect/${location.search}`);
   const { href: otelLogsUrl } = reactRouterNavigate(history, `/otel-logs/${location.search}`);
@@ -497,11 +499,12 @@ export function useCustomCards(
      */
     ...(isCloud || isDev ? [firehoseQuickstartCard] : []),
     /**
-     * The EDOT Cloud Forwarder card should only be visible on Serverless
-     * as it requires Elastic Cloud infrastructure.
-     * Also visible in dev mode for local development.
+     * The EDOT Cloud Forwarder card visibility is controlled by:
+     * - Always visible on Serverless (already deployed)
+     * - On Cloud (ECH), controlled by LaunchDarkly feature flag
+     * - Also visible in dev mode for local development
      */
-    ...(isServerless || isDev ? [cloudforwarderQuickstartCard] : []),
+    ...(isCloudForwarderAvailable || isDev ? [cloudforwarderQuickstartCard] : []),
   ];
 }
 
