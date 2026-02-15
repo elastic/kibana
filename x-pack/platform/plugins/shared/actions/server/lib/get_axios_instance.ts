@@ -33,6 +33,7 @@ export interface GetAxiosInstanceWithAuthFnOpts {
   connectorId: string;
   connectorTokenClient?: ConnectorTokenClientContract;
   secrets: ValidatedSecrets;
+  signal?: AbortSignal;
 }
 export type GetAxiosInstanceWithAuthFn = (
   opts: GetAxiosInstanceWithAuthFnOpts
@@ -47,6 +48,7 @@ export const getAxiosInstanceWithAuth = ({
     connectorId,
     secrets,
     connectorTokenClient,
+    signal,
   }: GetAxiosInstanceWithAuthFnOpts) => {
     let authTypeId: string | undefined;
     try {
@@ -63,6 +65,7 @@ export const getAxiosInstanceWithAuth = ({
         // should we allow a way for a connector type to specify a timeout override?
         timeout: settingsTimeout,
         beforeRedirect: getBeforeRedirectFn(configurationUtilities),
+        signal,
       });
 
       // add any additional headers that should be included in every request

@@ -96,6 +96,7 @@ export interface ActionTypeExecutorOptions<
   request?: KibanaRequest;
   connectorUsageCollector: ConnectorUsageCollector;
   connectorTokenClient?: ConnectorTokenClientContract;
+  signal?: AbortSignal;
 }
 
 export type ActionResult = Connector;

@@ -355,6 +355,7 @@ describe('Action Executor', () => {
         logger: loggerMock,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
         ...(executeUnsecure ? {} : { source: SOURCE }),
+        signal: undefined,
       });
 
       expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
@@ -399,8 +400,45 @@ describe('Action Executor', () => {
           'x-custom-header': 'custom-header-value',
         },
         ...(executeUnsecure ? {} : { source: SOURCE }),
+        signal: undefined,
       });
     });
+
+    if (!executeUnsecure) {
+      test(`successfully ${label} with abort signal`, async () => {
+        mockGetRequestBodyByte.mockReturnValue(300);
+        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+          connectorSavedObject
+        );
+        connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+        const abortController = new AbortController();
+        const executeParamsWithSignal = {
+          ...executeParams,
+          signal: abortController.signal,
+        };
+
+        await actionExecutor.execute(executeParamsWithSignal);
+
+        expect(connectorType.executor).toHaveBeenCalledWith(
+          expect.objectContaining({
+            actionId: CONNECTOR_ID,
+            services: expect.anything(),
+            config: {
+              bar: true,
+            },
+            secrets: {
+              baz: true,
+            },
+            params: { foo: true },
+            logger: loggerMock,
+            connectorUsageCollector: expect.any(ConnectorUsageCollector),
+            source: SOURCE,
+            signal: abortController.signal,
+          })
+        );
+      });
+    }
 
     for (const executionSource of [
       {
