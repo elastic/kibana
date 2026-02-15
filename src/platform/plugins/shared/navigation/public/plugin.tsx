@@ -166,6 +166,16 @@ export class NavigationPublicPlugin
         const { project } = this.coreStart.chrome as InternalChromeStart;
         project.clearTemporaryOrdering(id);
       },
+      setIsEditing: (isEditing) => {
+        if (!this.coreStart) throw new Error('coreStart is not available');
+        const { project } = this.coreStart.chrome as InternalChromeStart;
+        project.setIsEditing(isEditing);
+      },
+      getIsEditing$: () => {
+        if (!this.coreStart) throw new Error('coreStart is not available');
+        const { project } = this.coreStart.chrome as InternalChromeStart;
+        return project.getIsEditing$();
+      },
       getNavigationItems$: () => {
         if (!this.coreStart) throw new Error('coreStart is not available');
         const { project } = this.coreStart.chrome as InternalChromeStart;

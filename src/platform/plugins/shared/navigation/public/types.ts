@@ -63,6 +63,10 @@ export interface NavigationPublicStart {
   setTemporaryOrdering: (id: SolutionId, ordering: NavigationOrdering) => void;
   /** Clear the temporary navigation ordering and revert to persisted state. */
   clearTemporaryOrdering: (id: SolutionId) => void;
+  /** Set whether navigation is being edited (for portal rendering above modal). */
+  setIsEditing: (isEditing: boolean) => void;
+  /** Get observable for whether navigation is being edited. */
+  getIsEditing$: () => Observable<boolean>;
   /** Get a simplified list of navigation items (id, title, hidden) for the editor modal. */
   getNavigationItems$: () => Observable<NavigationItemInfo[]>;
 }

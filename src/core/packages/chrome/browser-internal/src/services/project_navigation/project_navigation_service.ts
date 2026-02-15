@@ -98,6 +98,8 @@ export class ProjectNavigationService {
   // The active solution navigation definition id that has been initiated and is currently active
   private readonly activeSolutionNavDefinitionId$ = new BehaviorSubject<SolutionId | null>(null);
   private readonly activeDataTestSubj$ = new BehaviorSubject<string | undefined>(undefined);
+  // Whether the navigation customization modal is open (for portal rendering)
+  private readonly isEditing$ = new BehaviorSubject<boolean>(false);
   private readonly location$ = new BehaviorSubject<Location>(createLocation('/'));
   private deepLinksMap$: Observable<Record<string, ChromeNavLink>> = of({});
   private cloudLinks$ = new BehaviorSubject<CloudLinks>({});
@@ -209,6 +211,10 @@ export class ProjectNavigationService {
       setNavigationOrdering: this.setNavigationOrdering.bind(this),
       setTemporaryOrdering: this.setTemporaryOrdering.bind(this),
       clearTemporaryOrdering: this.clearTemporaryOrdering.bind(this),
+      /** Set whether navigation is being edited (for portal rendering above modal) */
+      setIsEditing: (isEditing: boolean) => this.isEditing$.next(isEditing),
+      /** Get observable for whether navigation is being edited */
+      getIsEditing$: () => this.isEditing$.asObservable(),
       /** In stateful Kibana, change the active solution navigation */
       changeActiveSolutionNavigation: this.changeActiveSolutionNavigation.bind(this),
       /** In stateful Kibana, get the active solution navigation definition */

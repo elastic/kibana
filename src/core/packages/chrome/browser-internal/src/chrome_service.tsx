@@ -211,6 +211,7 @@ export class ChromeService {
         navigationTree$: navigationTreeUi$,
         activeNodes$,
         activeDataTestSubj$,
+        isEditing$: projectNavigation.getIsEditing$(),
       },
       loadingCount$,
       helpMenuLinks$,

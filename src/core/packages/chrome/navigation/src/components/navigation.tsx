@@ -44,6 +44,11 @@ export interface NavigationProps {
    */
   isCollapsed: boolean;
   /**
+   * Whether the navigation is being edited (customization modal is open).
+   * When true, the primary menu renders in a portal above the modal overlay.
+   */
+  isEditing?: boolean;
+  /**
    * The navigation structure containing primary, secondary, and footer items.
    */
   items: NavigationStructure;
@@ -79,6 +84,7 @@ export interface NavigationProps {
 export const Navigation = ({
   activeItemId,
   isCollapsed: isCollapsedProp,
+  isEditing = false,
   items,
   logo,
   onItemClick,
@@ -139,7 +145,7 @@ export const Navigation = ({
       data-test-subj={rest['data-test-subj'] ?? NAVIGATION_ROOT_SELECTOR}
       id={NAVIGATION_ROOT_SELECTOR}
     >
-      <SideNav isCollapsed={isCollapsed}>
+      <SideNav isCollapsed={isCollapsed} isEditing={isEditing}>
         <SideNav.Logo
           isCollapsed={isCollapsed}
           isCurrent={actualActiveItemId === logo.id}

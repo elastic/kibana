@@ -208,6 +208,19 @@ export interface InternalChromeStart extends ChromeStart {
     clearTemporaryOrdering(id: SolutionId): void;
 
     /**
+     * Set whether navigation is being edited (customization modal is open).
+     * When true, the primary menu renders in a portal above the modal overlay.
+     *
+     * @param isEditing Whether navigation editing mode is active.
+     */
+    setIsEditing(isEditing: boolean): void;
+
+    /**
+     * Get an observable for whether navigation is being edited.
+     */
+    getIsEditing$(): Observable<boolean>;
+
+    /**
      * Change the active solution navigation.
      *
      * @param id The id of the active solution navigation. If `null` is provided, the solution navigation

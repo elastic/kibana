@@ -42,6 +42,8 @@ export interface CustomizeNavigationModalProps {
   onPreview?: (ordering: NavigationOrdering) => void;
   /** Optional callback to cancel live preview - reverts to persisted state */
   onCancelPreview?: () => void;
+  /** Optional callback to set editing mode - triggers portal rendering for nav */
+  setIsEditing?: (isEditing: boolean) => void;
 }
 
 export const CustomizeNavigationModal = ({
@@ -51,6 +53,7 @@ export const CustomizeNavigationModal = ({
   setNavigationOrdering,
   onPreview,
   onCancelPreview,
+  setIsEditing,
 }: CustomizeNavigationModalProps) => {
   const initialItems = useObservable(useMemo(() => getNavigationItems$(), [getNavigationItems$]));
   const [localItems, setLocalItems] = useState<NavigationItemInfo[] | null>(null);
@@ -60,6 +63,12 @@ export const CustomizeNavigationModal = ({
   const modalCss = css`
     width: 576px;
   `;
+
+  // Enable editing mode for portal rendering in primary nav
+  useEffect(() => {
+    setIsEditing?.(true);
+    return () => setIsEditing?.(false);
+  }, [setIsEditing]);
 
   // Initialize local items from observed items once
   const items = useMemo(() => localItems ?? initialItems ?? [], [localItems, initialItems]);

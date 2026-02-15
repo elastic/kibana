@@ -49,6 +49,7 @@ interface ProjectNavigationObservables {
   navigationTree$: Observable<NavigationTreeDefinitionUI>;
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
   activeDataTestSubj$?: Observable<string | undefined>;
+  isEditing$: Observable<boolean>;
 }
 
 export interface ChromeComponentsDeps {
@@ -146,6 +147,7 @@ export const createChromeComponents = ({
       feedbackUrlParams$: state.feedback.urlParams$,
       onToggleCollapsed: state.sideNav.collapsed.set,
       isFeedbackEnabled$: state.feedback.isEnabled$,
+      isEditing$: projectNavigation.isEditing$,
     };
 
     return (

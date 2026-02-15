@@ -107,6 +107,8 @@ const createStartContractMock = () => {
       setNavigationOrdering: jest.fn(),
       setTemporaryOrdering: jest.fn(),
       clearTemporaryOrdering: jest.fn(),
+      setIsEditing: jest.fn(),
+      getIsEditing$: jest.fn().mockReturnValue(new BehaviorSubject(false)),
     }),
     setGlobalFooter: jest.fn(),
     getGlobalFooter$: jest.fn().mockReturnValue(new BehaviorSubject(null)),

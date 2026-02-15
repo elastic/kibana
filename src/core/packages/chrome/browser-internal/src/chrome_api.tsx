@@ -88,6 +88,8 @@ export function createChromeApi({
     changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,
     setTemporaryOrdering: projectNavigation.setTemporaryOrdering,
     clearTemporaryOrdering: projectNavigation.clearTemporaryOrdering,
+    setIsEditing: projectNavigation.setIsEditing,
+    getIsEditing$: projectNavigation.getIsEditing$,
   };
 
   return {

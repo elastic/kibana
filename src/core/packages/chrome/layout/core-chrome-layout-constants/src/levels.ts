@@ -27,6 +27,9 @@ export const layoutLevels = {
   applicationTopBar: 100,
   applicationBottomBar: 100,
 
+  // Navigation editing mode - needs to appear above mask (6000) but below modal (8000)
+  navigationEditing: 7000,
+
   // Debug and development tools - highest priority
   debug: 9999,
 };

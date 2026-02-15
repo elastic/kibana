@@ -40,6 +40,9 @@ export interface ChromeNavigationProps {
   navLinks$: Observable<Readonly<ChromeNavLink[]>>;
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
 
+  // editing state (for portal rendering)
+  isEditing$: Observable<boolean>;
+
   // feedback
   isFeedbackEnabled$: Observable<boolean>;
   feedbackUrlParams$: Observable<URLSearchParams | undefined>;
@@ -56,6 +59,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
   const dataTestSubj = useObservable(props.dataTestSubj$ ?? EMPTY, undefined);
   const feedbackUrlParams = useObservable(props.feedbackUrlParams$ ?? EMPTY, undefined);
   const isFeedbackEnabled = useObservable(props.isFeedbackEnabled$ ?? EMPTY, true);
+  const isEditing = useObservable(props.isEditing$, false);
 
   if (!state) {
     return null;
@@ -76,6 +80,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
           />
         }
         isCollapsed={props.isCollapsed}
+        isEditing={isEditing}
         setWidth={props.setWidth}
         onToggleCollapsed={props.onToggleCollapsed}
         activeItemId={activeItemId}
