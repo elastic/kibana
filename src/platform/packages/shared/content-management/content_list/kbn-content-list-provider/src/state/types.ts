@@ -8,8 +8,8 @@
  */
 
 import type { Dispatch } from 'react';
-import type { ContentListItem } from '../item';
 import type { ActiveFilters } from '../datasource';
+import type { ContentListItem } from '../item';
 
 /**
  * Action type constants for state reducer.
@@ -18,6 +18,8 @@ import type { ActiveFilters } from '../datasource';
  */
 export const CONTENT_LIST_ACTIONS = {
   SET_SORT: 'SET_SORT',
+  SET_SELECTION: 'SET_SELECTION',
+  CLEAR_SELECTION: 'CLEAR_SELECTION',
 } as const;
 
 /**
@@ -42,6 +44,11 @@ export interface ContentListClientState {
     field: string;
     /** Sort direction. */
     direction: 'asc' | 'desc';
+  };
+  /** Selection state - IDs of currently selected items. */
+  selection: {
+    /** IDs of selected items. */
+    selectedIds: string[];
   };
 }
 
@@ -73,10 +80,13 @@ export type ContentListState = ContentListClientState & ContentListQueryData;
  *
  * @internal Used by the state reducer and dispatch function.
  */
-export interface ContentListAction {
-  type: typeof CONTENT_LIST_ACTIONS.SET_SORT;
-  payload: { field: string; direction: 'asc' | 'desc' };
-}
+export type ContentListAction =
+  | {
+      type: typeof CONTENT_LIST_ACTIONS.SET_SORT;
+      payload: { field: string; direction: 'asc' | 'desc' };
+    }
+  | { type: typeof CONTENT_LIST_ACTIONS.SET_SELECTION; payload: { ids: string[] } }
+  | { type: typeof CONTENT_LIST_ACTIONS.CLEAR_SELECTION };
 
 /**
  * Context value provided by `ContentListStateProvider`.

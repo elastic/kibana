@@ -25,7 +25,7 @@ export type {
 
 // Hooks.
 export { useContentListItems } from './src/state';
-export { useContentListSort } from './src/features';
+export { useContentListSort, useContentListSelection } from './src/features';
 
 // Types.
 export type { ContentListItem, ContentListItemConfig } from './src/item';
@@ -36,6 +36,7 @@ export type {
   SortOption,
   SortingConfig,
   UseContentListSortReturn,
+  UseContentListSelectionReturn,
 } from './src/features';
 export type {
   FindItemsFn,

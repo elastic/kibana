@@ -15,6 +15,13 @@ import type { SortingConfig } from './sorting';
 export interface ContentListFeatures {
   /** Sorting configuration. */
   sorting?: SortingConfig | boolean;
+  /**
+   * Selection configuration.
+   * When `true` (default), row selection checkboxes are shown and bulk
+   * actions are enabled. Set to `false` to disable selection entirely.
+   * Selection is automatically disabled when `isReadOnly` is `true`.
+   */
+  selection?: boolean;
 }
 
 /**
@@ -52,4 +59,6 @@ export const isSortingConfig = (
 export interface ContentListSupports {
   /** Whether sorting is supported. */
   sorting: boolean;
+  /** Whether item selection and bulk actions are supported. */
+  selection: boolean;
 }
