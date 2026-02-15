@@ -230,7 +230,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message: `Request validation failed (✖ Invalid input: expected number, received nan\n  → at storyId)`,
+            service_message: `Request validation failed (✖ Invalid input: expected number, received NaN\n  → at storyId)`,
           });
         });
 
@@ -273,7 +273,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message: `Request validation failed (✖ Invalid input: expected number, received nan\n  → at webhook.storyId)`,
+            service_message: `Request validation failed (✖ Invalid input: expected number, received NaN\n  → at webhook.storyId)`,
           });
         });
 

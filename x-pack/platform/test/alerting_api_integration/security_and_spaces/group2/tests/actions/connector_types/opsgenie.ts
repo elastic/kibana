@@ -263,7 +263,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed (✖ Unrecognized key(s) in object: 'name', Unrecognized key(s) in object: 'name'\n  → at responders[0])`,
+                service_message: `Request validation failed (✖ Each responder must have a "type" (team|user|escalation|schedule) and one of "name", "id", or "username"\n  → at responders[0])`,
               });
             });
 
@@ -292,7 +292,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed (✖ Invalid input: expected string, received undefined\n  → at responders[0].name\n✖ Invalid input: expected string, received undefined\n  → at responders[0].id\n✖ Invalid input: expected string, received undefined\n  → at responders[0].username\n✖ Invalid input\n  → at responders[0].type)`,
+                service_message: `Request validation failed (✖ Each responder must have a "type" (team|user|escalation|schedule) and one of "name", "id", or "username"\n  → at responders[0])`,
               });
             });
 
@@ -394,7 +394,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed (✖ Unrecognized key(s) in object: 'name', Unrecognized key(s) in object: 'name', Unrecognized key(s) in object: 'name'\n  → at visibleTo[0])`,
+                service_message: `Request validation failed (✖ Each visible target must have a "type" (team|user) and one of "name", "id", or "username"\n  → at visibleTo[0])`,
               });
             });
 

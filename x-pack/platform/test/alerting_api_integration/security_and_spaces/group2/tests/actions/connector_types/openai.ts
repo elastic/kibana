@@ -147,7 +147,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at apiProvider\n✖ Invalid input: expected string, received undefined\n  → at defaultModel`,
+              message: `error validating connector type config: ✖ Invalid or missing apiProvider: expected one of "Azure OpenAI", "OpenAI", or "Other"\n  → at apiProvider`,
             });
           });
       });
@@ -167,7 +167,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: ✖ Invalid input: expected 'Azure OpenAI' | 'Other', received 'OpenAI'\n  → at apiProvider\n✖ Invalid input: expected string, received undefined\n  → at apiUrl\n✖ Invalid input: expected string, received undefined\n  → at defaultModel`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at apiUrl`,
             });
           });
       });

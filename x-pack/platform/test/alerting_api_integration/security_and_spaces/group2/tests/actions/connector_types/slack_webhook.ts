@@ -210,7 +210,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .expect(200);
       expect(result.status).to.eql('error');
       expect(result.message).to.eql(
-        `error validating action params: ✖ String must contain at least 1 character(s)\n  → at message`
+        `error validating action params: ✖ Too small: expected string to have >=1 characters\n  → at message`
       );
     });
 

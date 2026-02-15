@@ -17,41 +17,47 @@ export const TelemetryMetadataSchema = z
   .strict();
 
 // Connector schema
-export const ConfigSchema = z.union([
-  z
-    .object({
-      apiProvider: z.enum([OpenAiProviderType.AzureAi]),
-      apiUrl: z.string(),
-      headers: z.record(z.string(), z.string()).optional(),
-      contextWindowLength: z.coerce.number().optional(),
-      temperature: z.coerce.number().optional(),
-    })
-    .strict(),
-  z
-    .object({
-      apiProvider: z.enum([OpenAiProviderType.OpenAi]),
-      apiUrl: z.string(),
-      organizationId: z.string().optional(),
-      projectId: z.string().optional(),
-      defaultModel: z.string().default(DEFAULT_MODEL),
-      headers: z.record(z.string(), z.string()).optional(),
-      contextWindowLength: z.coerce.number().optional(),
-      temperature: z.coerce.number().optional(),
-    })
-    .strict(),
-  z
-    .object({
-      apiProvider: z.enum([OpenAiProviderType.Other]),
-      apiUrl: z.string(),
-      defaultModel: z.string(),
-      verificationMode: z.enum(['full', 'certificate', 'none']).optional(),
-      headers: z.record(z.string(), z.string()).optional(),
-      contextWindowLength: z.coerce.number().optional(),
-      temperature: z.coerce.number().optional(),
-      enableNativeFunctionCalling: z.boolean().optional(),
-    })
-    .strict(),
-]);
+export const ConfigSchema = z.discriminatedUnion(
+  'apiProvider',
+  [
+    z
+      .object({
+        apiProvider: z.enum([OpenAiProviderType.AzureAi]),
+        apiUrl: z.string(),
+        headers: z.record(z.string(), z.string()).optional(),
+        contextWindowLength: z.coerce.number().optional(),
+        temperature: z.coerce.number().optional(),
+      })
+      .strict(),
+    z
+      .object({
+        apiProvider: z.enum([OpenAiProviderType.OpenAi]),
+        apiUrl: z.string(),
+        organizationId: z.string().optional(),
+        projectId: z.string().optional(),
+        defaultModel: z.string().default(DEFAULT_MODEL),
+        headers: z.record(z.string(), z.string()).optional(),
+        contextWindowLength: z.coerce.number().optional(),
+        temperature: z.coerce.number().optional(),
+      })
+      .strict(),
+    z
+      .object({
+        apiProvider: z.enum([OpenAiProviderType.Other]),
+        apiUrl: z.string(),
+        defaultModel: z.string(),
+        verificationMode: z.enum(['full', 'certificate', 'none']).optional(),
+        headers: z.record(z.string(), z.string()).optional(),
+        contextWindowLength: z.coerce.number().optional(),
+        temperature: z.coerce.number().optional(),
+        enableNativeFunctionCalling: z.boolean().optional(),
+      })
+      .strict(),
+  ],
+  {
+    error: 'Invalid or missing apiProvider: expected one of "Azure OpenAI", "OpenAI", or "Other"',
+  }
+);
 
 export const SecretsSchema = z.union([
   z.object({ apiKey: z.string() }).strict(),

@@ -197,7 +197,7 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: theHiveActionId,
-            message: `error validating action params: ✖ Invalid input\n  → at subAction`,
+            message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subAction`,
             retry: false,
             errorSource: TaskErrorSource.USER,
           });
@@ -376,7 +376,7 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
             expect(body).to.eql({
               status: 'error',
               connector_id: theHiveActionId,
-              message: `error validating action params: ✖ Invalid input\n  → at subAction`,
+              message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subAction`,
               retry: false,
               errorSource: TaskErrorSource.USER,
             });

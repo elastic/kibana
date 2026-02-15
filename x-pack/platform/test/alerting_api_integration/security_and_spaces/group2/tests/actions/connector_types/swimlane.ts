@@ -292,7 +292,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: ✖ Invalid input\n  → at connectorType`,
+              message: `error validating connector type config: ✖ Invalid option: expected one of "all"|"alerts"|"cases"\n  → at connectorType`,
             });
           });
       });

@@ -110,7 +110,7 @@ apiTest.describe(
         };
 
         expect(() => transpile(streamlangDSL)).toThrowError(
-          /Convert processor must have the .to. parameter when there is a .where. condition/
+          /Convert processor must have the .*?to.*? parameter when there is a .*?where.*? condition/
         );
       }
     );

@@ -532,7 +532,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: ✖ Unrecognized key(s) in object: 'savedObjectId'\n  → at subActionParams`,
+                message: `error validating action params: ✖ Unrecognized key: "savedObjectId"\n  → at subActionParams\n✖ Invalid input: expected object, received undefined\n  → at subActionParams.incident`,
               });
             });
         });
