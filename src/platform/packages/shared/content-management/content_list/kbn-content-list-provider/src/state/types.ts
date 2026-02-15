@@ -18,6 +18,7 @@ import type { ActiveFilters } from '../datasource';
  */
 export const CONTENT_LIST_ACTIONS = {
   SET_SORT: 'SET_SORT',
+  SET_SEARCH: 'SET_SEARCH',
 } as const;
 
 /**
@@ -55,8 +56,25 @@ export interface ContentListQueryData {
   items: ContentListItem[];
   /** Total number of items matching the current query (for pagination). */
   totalItems: number;
-  /** Whether data is currently being fetched. */
+  /**
+   * Whether the initial data load is in progress (no data available yet).
+   *
+   * This is `true` only on the first fetch before any data has been received.
+   * Use this for hard loading states (e.g., skeletons, spinners) when there is
+   * nothing to show. Once data has been loaded, subsequent fetches triggered by
+   * filter or search changes keep `isLoading` as `false` while the previous
+   * data remains visible.
+   */
   isLoading: boolean;
+  /**
+   * Whether a fetch is currently in progress (including background refetches).
+   *
+   * Unlike `isLoading`, this is `true` during any fetch, including background
+   * refetches triggered by search, sort, or filter changes. Use this for subtle
+   * loading indicators (e.g., progress bar, reduced opacity) that should not
+   * hide existing content.
+   */
+  isFetching: boolean;
   /** Error from the most recent fetch attempt. */
   error?: Error;
 }
@@ -73,10 +91,12 @@ export type ContentListState = ContentListClientState & ContentListQueryData;
  *
  * @internal Used by the state reducer and dispatch function.
  */
-export interface ContentListAction {
-  type: typeof CONTENT_LIST_ACTIONS.SET_SORT;
-  payload: { field: string; direction: 'asc' | 'desc' };
-}
+export type ContentListAction =
+  | {
+      type: typeof CONTENT_LIST_ACTIONS.SET_SORT;
+      payload: { field: string; direction: 'asc' | 'desc' };
+    }
+  | { type: typeof CONTENT_LIST_ACTIONS.SET_SEARCH; payload: { search: string } };
 
 /**
  * Context value provided by `ContentListStateProvider`.

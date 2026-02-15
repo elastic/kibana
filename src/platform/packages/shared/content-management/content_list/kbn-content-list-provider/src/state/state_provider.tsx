@@ -13,7 +13,7 @@ import type { ContentListClientState, ContentListStateContextValue } from './typ
 import { DEFAULT_FILTERS } from './types';
 import { ContentListStateContext } from './use_content_list_state';
 import { useContentListConfig } from '../context';
-import { isSortingConfig } from '../features';
+import { isSortingConfig, isSearchConfig } from '../features';
 import { reducer } from './state_reducer';
 import { useContentListItemsQuery } from '../query';
 
@@ -33,14 +33,14 @@ export interface ContentListStateProviderProps {
  * - Uses React Query for data fetching with caching and deduplication.
  * - Combines client state with query data for a unified state interface.
  *
- * Note: Initial state is derived from `features.sorting` at mount and not updated
- * if configuration changes. See {@link ContentListProvider} for details.
+ * Note: Initial state is derived from `features.sorting` and `features.search` at mount
+ * and not updated if configuration changes. See {@link ContentListProvider} for details.
  *
  * @internal This is automatically included when using `ContentListProvider`.
  */
 export const ContentListStateProvider = ({ children }: ContentListStateProviderProps) => {
   const { features } = useContentListConfig();
-  const { sorting } = features;
+  const { sorting, search } = features;
 
   // Determine initial sort from sorting config (default: title ascending).
   const initialSort = useMemo(() => {
@@ -50,13 +50,21 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
     return { field: 'title', direction: 'asc' as const };
   }, [sorting]);
 
+  // Determine initial search from search config (default: undefined).
+  const initialSearch = useMemo(() => {
+    if (isSearchConfig(search) && search.initialSearch) {
+      return search.initialSearch;
+    }
+    return undefined;
+  }, [search]);
+
   // Initial client state (filters, sort).
   const initialClientState: ContentListClientState = useMemo(
     () => ({
-      filters: { ...DEFAULT_FILTERS },
+      filters: { ...DEFAULT_FILTERS, search: initialSearch },
       sort: initialSort,
     }),
-    [initialSort]
+    [initialSort, initialSearch]
   );
 
   const [clientState, dispatch] = useReducer(reducer, initialClientState);
@@ -66,6 +74,7 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
     items,
     totalItems,
     isLoading,
+    isFetching,
     error,
     refetch: queryRefetch,
   } = useContentListItemsQuery(clientState);
@@ -81,12 +90,13 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
         items,
         totalItems,
         isLoading,
+        isFetching,
         error,
       },
       dispatch,
       refetch,
     }),
-    [clientState, items, totalItems, isLoading, error, dispatch, refetch]
+    [clientState, items, totalItems, isLoading, isFetching, error, dispatch, refetch]
   );
 
   return (

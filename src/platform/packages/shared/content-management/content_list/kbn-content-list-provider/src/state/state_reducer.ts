@@ -34,6 +34,15 @@ export const reducer = (
         },
       };
 
+    case CONTENT_LIST_ACTIONS.SET_SEARCH:
+      return {
+        ...state,
+        filters: {
+          ...state.filters,
+          search: action.payload.search || undefined,
+        },
+      };
+
     default:
       return state;
   }
