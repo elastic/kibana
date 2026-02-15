@@ -42,7 +42,7 @@ export class WaitForInputStepImpl implements NodeImplementation {
 
     if (resumeInput !== undefined) {
       // We're resuming - complete the step with the provided input
-      this.workflowLogger.logInfo(
+      this.workflowLogger.logDebug(
         `Resume input received for step ${this.node.stepId}, continuing execution`
       );
 
@@ -58,7 +58,7 @@ export class WaitForInputStepImpl implements NodeImplementation {
     const farFutureDate = new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000);
 
     if (this.stepExecutionRuntime.tryEnterWaitUntil(farFutureDate)) {
-      this.workflowLogger.logInfo(`Step ${this.node.stepId} waiting for input: ${message}`);
+      this.workflowLogger.logDebug(`Step ${this.node.stepId} waiting for input: ${message}`);
       return;
     }
 

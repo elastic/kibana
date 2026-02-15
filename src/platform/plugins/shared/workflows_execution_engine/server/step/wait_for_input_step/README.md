@@ -11,7 +11,7 @@ steps:
   - name: fetch_data
     type: http
     with:
-      url: https://api.example.com/data
+      url: https://api.mamba/data
       method: GET
 
   - name: wait_for_approval
@@ -22,7 +22,7 @@ steps:
   - name: process_result
     type: http
     with:
-      url: https://api.example.com/process
+      url: https://api.mamba/process
       method: POST
       body:
         approved: "{{ steps.wait_for_approval.output.approved }}"
