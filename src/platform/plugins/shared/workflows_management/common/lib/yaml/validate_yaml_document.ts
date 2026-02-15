@@ -7,14 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Document, Node } from 'yaml';
+import type { Document, Node, Pair as YAMLPairType } from 'yaml';
 import { isAlias, isCollection, isDocument, isMap, isPair, isScalar, isSeq, visit } from 'yaml';
 import { InvalidYamlSyntaxError } from '../errors';
 
+export interface YamlDocumentError {
+  message: string;
+  /** Character offset range [start, valueEnd, nodeEnd] from the YAML node, if available */
+  range?: [number, number, number];
+}
+
 export function getYamlDocumentErrors(document: Document): InvalidYamlSyntaxError[] {
-  const errors: InvalidYamlSyntaxError[] = [];
+  return getYamlDocumentErrorsDetailed(document).map(
+    (err) => new InvalidYamlSyntaxError(err.message)
+  );
+}
+
+/**
+ * Returns detailed errors with range information for use in editor validation.
+ * Detects:
+ * - Non-scalar keys (e.g. flow mappings used as keys)
+ * - Double-brace flow mappings (e.g. `comment: {{ inputs.comment }}`) where
+ *   the outer flow map contains a pair with a non-scalar key (nested map).
+ * Note: Single-level flow mappings (`{ key: value }`), empty flow mappings
+ * (`{}`), and flow sequences (`[tag1, tag2]`) are all allowed.
+ */
+export function getYamlDocumentErrorsDetailed(document: Document): YamlDocumentError[] {
+  const errors: YamlDocumentError[] = [];
   if (document.errors.length > 0) {
-    errors.push(new InvalidYamlSyntaxError(document.errors.map((err) => err.message).join(', ')));
+    errors.push({
+      message: document.errors.map((err) => err.message).join(', '),
+    });
   }
 
   // Visit all pairs, and check if there're any non-scalar keys
@@ -22,6 +45,31 @@ export function getYamlDocumentErrors(document: Document): InvalidYamlSyntaxErro
   visit(document, {
     Pair(_, pair) {
       if (isScalar(pair.key)) {
+        // Detect double-brace template expressions like `{{ inputs.comment }}`.
+        // The YAML parser interprets `{{ x }}` as a flow mapping containing a
+        // nested flow mapping as a key — i.e. a Pair with a non-scalar key.
+        // We flag only this pattern; single-level flow mappings (`{ key: value }`),
+        // empty flow mappings (`{}`), and flow sequences (`[a, b]`) are allowed.
+        const value = pair.value as Node | null;
+        if (value && isMap(value)) {
+          const collection = value as {
+            flow?: boolean;
+            range?: [number, number, number] | null;
+            items?: YAMLPairType[];
+          };
+          const hasNonScalarKey =
+            collection.flow &&
+            collection.items?.some((item) => isPair(item) && !isScalar(item.key));
+          if (hasNonScalarKey) {
+            errors.push({
+              message: `Unquoted template expression. Use quotes for template expressions, e.g. "{{ inputs.comment }}"`,
+              range: collection.range ?? undefined,
+            });
+            // Skip visiting children of the flow mapping to avoid
+            // duplicate errors (e.g. non-scalar keys inside {{ }})
+            return visit.SKIP;
+          }
+        }
         return;
       }
       let actualType = 'unknown';
@@ -39,13 +87,10 @@ export function getYamlDocumentErrors(document: Document): InvalidYamlSyntaxErro
       } else if (isCollection(pair.key)) {
         actualType = 'collection';
       }
-      errors.push(
-        new InvalidYamlSyntaxError(
-          `Invalid key type: ${actualType} in ${range ? `range ${range}` : ''}`
-        )
-      );
-
-      return visit.BREAK;
+      errors.push({
+        message: `Invalid key type: ${actualType} in ${range ? `range ${range}` : ''}`,
+        range: range ?? undefined,
+      });
     },
   });
 

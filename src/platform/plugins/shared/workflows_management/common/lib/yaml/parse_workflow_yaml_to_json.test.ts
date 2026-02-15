@@ -107,7 +107,7 @@ describe('parseWorkflowYamlToJSON', () => {
       })
     );
     expect(result.success).toBe(false);
-    expect(result.error?.message).toContain('Invalid key type: map in range');
+    expect(result.error?.message).toContain('Unquoted template expression');
   });
 
   describe('dynamic value filtering (${{ }} syntax)', () => {
