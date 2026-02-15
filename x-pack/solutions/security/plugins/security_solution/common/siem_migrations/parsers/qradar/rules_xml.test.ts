@@ -91,6 +91,56 @@ describe('QradarRulesXmlParser', () => {
       expect(rules[0].rule_data).not.toContain('&lt;');
       expect(rules[0].rule_data).not.toContain('&gt;');
     });
+
+    it('should correctly handle double-escaped HTML entities (fixes double-escaping issue)', async () => {
+      // Test case for double-escaping: &amp;lt; should decode to < (not &lt;)
+      const ruleDataWithDoubleEscaped = `<rule buildingBlock="false">
+  <name>Test Rule</name>
+  <notes>Test notes</notes>
+  <testDefinitions>
+    <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+      <text>when &amp;lt;script&gt;alert(1)&amp;lt;/script&gt; is contained in any of Test List</text>
+    </test>
+  </testDefinitions>
+</rule>`;
+      const ruleDataBase64 = Buffer.from(ruleDataWithDoubleEscaped).toString('base64');
+      const xml = `<content><custom_rule><rule_data>${ruleDataBase64}</rule_data></custom_rule></content>`;
+      const parser = new QradarRulesXmlParser(xml);
+      const rules = await parser.getRules();
+
+      expect(rules).toHaveLength(1);
+      // Should decode &amp;lt; to < and remove the script tag
+      expect(rules[0].rule_data).toContain('<text>when alert(1) is contained in any of Test List</text>');
+      // Should NOT contain script tags or double-escaped entities
+      expect(rules[0].rule_data).not.toContain('<script');
+      expect(rules[0].rule_data).not.toContain('&amp;lt;');
+      expect(rules[0].rule_data).not.toContain('&lt;');
+    });
+
+    it('should handle nested tags and incomplete tag patterns (fixes incomplete sanitization issue)', async () => {
+      // Test case for incomplete sanitization: nested/malformed tags that might create new patterns
+      const ruleDataWithNestedTags = `<rule buildingBlock="false">
+  <name>Test Rule</name>
+  <notes>Test notes</notes>
+  <testDefinitions>
+    <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+      <text>when &lt;scrip&lt;script&gt;t&gt;alert(1)&lt;/scrip&lt;/script&gt;t&gt; is contained in any of Test List</text>
+    </test>
+  </testDefinitions>
+</rule>`;
+      const ruleDataBase64 = Buffer.from(ruleDataWithNestedTags).toString('base64');
+      const xml = `<content><custom_rule><rule_data>${ruleDataBase64}</rule_data></custom_rule></content>`;
+      const parser = new QradarRulesXmlParser(xml);
+      const rules = await parser.getRules();
+
+      expect(rules).toHaveLength(1);
+      // Should remove all script tags, including nested ones
+      expect(rules[0].rule_data).toContain('<text>when alert(1) is contained in any of Test List</text>');
+      // Should NOT contain any script tags
+      expect(rules[0].rule_data).not.toContain('<script');
+      expect(rules[0].rule_data).not.toContain('</script>');
+      expect(rules[0].rule_data).not.toContain('<scrip');
+    });
   });
 
   describe('getResources', () => {
