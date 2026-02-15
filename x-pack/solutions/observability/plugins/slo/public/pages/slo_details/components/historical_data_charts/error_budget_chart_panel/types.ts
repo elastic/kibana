@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { GetPreviewDataResponse } from '@kbn/slo-schema';
-import type { TimeBounds } from '../../types';
+import type { ChartData } from '../../../../../typings/slo';
+import type { TimeBounds } from '../../../types';
 
-export type GetPreviewDataResponseResults = GetPreviewDataResponse['results'];
-
-export interface EventsChartPanelProps {
-  range: { from: Date; to: Date };
-  hideRangeDurationLabel?: boolean;
+export interface ErrorBudgetChartPanelProps {
+  data: ChartData[];
+  isLoading: boolean;
   onBrushed?: (timeBounds: TimeBounds) => void;
+  hideHeaderDurationLabel?: boolean;
 }

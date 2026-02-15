@@ -6,17 +6,14 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { DashboardsPanel } from './dashboards_panel';
 import { IndicatorPanel } from './indicator_panel';
 import { SettingsPanel } from './settings_panel';
+import { useSloDetailsContext } from '../slo_details_context';
 
-export interface Props {
-  slo: SLOWithSummaryResponse;
-}
-
-export function Definition({ slo }: Props) {
+export function SloDetailsPageDefinition() {
+  const { slo } = useSloDetailsContext();
   return (
     <EuiFlexGroup
       direction={'row'}

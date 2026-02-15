@@ -14,6 +14,8 @@ import { useAlertsUrl } from '../../../../hooks/use_alerts_url';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { OverviewItem } from './overview_item';
 
+const KUERY = 'kibana.alert.rule.rule_type_id:("slo.rules.burnRate")';
+
 export function SLOOverviewAlerts({
   data,
   isLoading,
@@ -63,7 +65,12 @@ export function SLOOverviewAlerts({
           titleColor="danger"
           isLoading={isLoading}
           onClick={() => {
-            application.navigateToUrl(getAlertsUrl('active'));
+            application.navigateToUrl(
+              getAlertsUrl({
+                status: 'active',
+                kuery: KUERY,
+              })
+            );
           }}
         />
         <OverviewItem
@@ -74,7 +81,12 @@ export function SLOOverviewAlerts({
           titleColor="success"
           isLoading={isLoading}
           onClick={() => {
-            application.navigateToUrl(getAlertsUrl('recovered'));
+            application.navigateToUrl(
+              getAlertsUrl({
+                status: 'recovered',
+                kuery: KUERY,
+              })
+            );
           }}
         />
         <OverviewItem

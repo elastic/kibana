@@ -12,13 +12,19 @@ import { useKibana } from './use_kibana';
 export const useAlertsUrl = () => {
   const { basePath } = useKibana().services.http;
 
-  const kuery = 'kibana.alert.rule.rule_type_id:("slo.rules.burnRate")';
+  return (opts?: {
+    status?: 'active' | 'recovered';
+    kuery?: string;
+    rangeFrom?: string;
+    rangeTo?: string;
+  }) => {
+    const { status, kuery, rangeFrom = 'now-24h', rangeTo = 'now' } = opts ?? {};
 
-  return (status?: 'active' | 'recovered') =>
-    `${basePath.prepend(observabilityPaths.alerts)}?_a=${rison.encode({
+    return `${basePath.prepend(observabilityPaths.alerts)}?_a=${rison.encode({
       kuery,
-      rangeFrom: 'now-24h',
-      rangeTo: 'now',
+      rangeFrom,
+      rangeTo,
       status,
     })}`;
+  };
 };

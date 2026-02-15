@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import type { GetPreviewDataResponse } from '@kbn/slo-schema';
+import type { TimeRange } from '../../../../components/slo/error_rate_chart/use_lens_definition';
 import type { TimeBounds } from '../../types';
 
-export type GetPreviewDataResponseResults = GetPreviewDataResponse['results'];
-
-export interface EventsChartPanelProps {
-  range: { from: Date; to: Date };
-  hideRangeDurationLabel?: boolean;
+export interface ErrorRatePanelProps {
+  dataTimeRange: TimeRange;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }

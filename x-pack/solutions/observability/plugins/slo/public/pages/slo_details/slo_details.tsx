@@ -30,6 +30,7 @@ import { AutoRefreshButton } from './components/auto_refresh_button';
 import { HeaderControl } from './components/header_control';
 import { HeaderTitle } from './components/header_title';
 import { SloDetails } from './components/slo_details';
+import { SloDetailsContextProvider } from './components/slo_details_context';
 import { useAutoRefreshState } from './hooks/use_auto_refresh_state';
 import { useGetQueryParams } from './hooks/use_get_query_params';
 import { useSelectedTab } from './hooks/use_selected_tab';
@@ -146,7 +147,9 @@ export function SloDetailsPage() {
       {isLoading ? (
         <LoadingState dataTestSubj="sloDetailsLoading" />
       ) : (
-        <SloDetails slo={slo!} isAutoRefreshing={isAutoRefreshing} selectedTabId={selectedTabId} />
+        <SloDetailsContextProvider value={{ slo: slo!, isAutoRefreshing, isFlyout: false }}>
+          <SloDetails selectedTabId={selectedTabId} />
+        </SloDetailsContextProvider>
       )}
     </ObservabilityPageTemplate>
   );

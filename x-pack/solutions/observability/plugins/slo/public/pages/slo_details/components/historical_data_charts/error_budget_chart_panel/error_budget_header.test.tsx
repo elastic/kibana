@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
-import { useKibana } from '../../../hooks/use_kibana';
-import { render } from '../../../utils/test_helper';
-import { buildSlo } from '../../../data/slo/slo';
+import { useKibana } from '../../../../../hooks/use_kibana';
+import { render } from '../../../../../utils/test_helper';
+import { buildSlo } from '../../../../../data/slo/slo';
 import { ErrorBudgetHeader } from './error_budget_header';
 
-jest.mock('../../../hooks/use_kibana');
+jest.mock('../../../../../hooks/use_kibana');
 const useKibanaMock = useKibana as jest.Mock;
 
 describe('In Observability Context', () => {

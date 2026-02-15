@@ -10,11 +10,12 @@ import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useEffect, useRef, useState } from 'react';
+import { SloDetailsContextProvider } from '../../../pages/slo_details/components/slo_details_context';
 import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
-import { ErrorBudgetChart } from '../../../pages/slo_details/components/error_budget_chart';
-import { ErrorBudgetHeader } from '../../../pages/slo_details/components/error_budget_header';
+import { ErrorBudgetChart } from '../../../pages/slo_details/components/historical_data_charts/error_budget_chart_panel/error_budget_chart';
+import { ErrorBudgetHeader } from '../../../pages/slo_details/components/historical_data_charts/error_budget_chart_panel/error_budget_header';
 import { SLOGroupings } from '../../../pages/slos/components/common/slo_groupings';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { SloOverviewDetails } from '../common/slo_overview_details';
@@ -133,11 +134,9 @@ export function SloErrorBudget({
 
       <EuiFlexGroup direction="column" gutterSize="l">
         <ErrorBudgetHeader hideTitle={true} slo={slo} />
-        <ErrorBudgetChart
-          data={errorBudgetBurnDownData}
-          isLoading={historicalSummaryLoading}
-          slo={slo!}
-        />
+        <SloDetailsContextProvider value={{ slo, isAutoRefreshing: false, isFlyout: false }}>
+          <ErrorBudgetChart data={errorBudgetBurnDownData} isLoading={historicalSummaryLoading} />
+        </SloDetailsContextProvider>
       </EuiFlexGroup>
 
       <SloOverviewDetails slo={selectedSlo} setSelectedSlo={setSelectedSlo} />

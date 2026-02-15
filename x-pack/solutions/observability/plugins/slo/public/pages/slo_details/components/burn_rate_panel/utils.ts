@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import type { BurnRateWindow } from '../../hooks/use_fetch_burn_rate_windows';
 import type { Status } from './burn_rate_status';
 
 export function getStatus(
@@ -25,3 +27,9 @@ export function getStatus(
     ? 'INCREASING'
     : 'ACCEPTABLE';
 }
+
+export const burnRateWindowLabel = (option: BurnRateWindow) =>
+  i18n.translate('xpack.slo.burnRates.optionLabel', {
+    defaultMessage: '{duration, plural, one {# hour} other {# hours}}',
+    values: { duration: option.longWindow.value },
+  });

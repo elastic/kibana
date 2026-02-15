@@ -24,11 +24,12 @@ export interface Props {
   data: GetPreviewDataResponseResults;
   slo: SLOWithSummaryResponse;
   onBrushed?: (timeBounds: TimeBounds) => void;
+  showLegend?: boolean;
 }
 
 const DEFAULT_INTERVAL = 10 * 60 * 1_000; // 10 minutes in milliseconds
 
-export function GoodBadEventsChart({ data, slo, onBrushed }: Props) {
+export function GoodBadEventsChart({ data, slo, onBrushed, showLegend = true }: Props) {
   const { charts, uiSettings, discover } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
@@ -81,7 +82,7 @@ export function GoodBadEventsChart({ data, slo, onBrushed }: Props) {
           chartMargins: { top: 30 },
         }}
         baseTheme={baseTheme}
-        showLegend={true}
+        showLegend={showLegend}
         legendPosition={Position.Left}
         noResults={
           <EuiIcon

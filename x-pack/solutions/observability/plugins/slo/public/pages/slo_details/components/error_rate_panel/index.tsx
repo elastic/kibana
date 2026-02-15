@@ -1,0 +1,22 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { ErrorRateFlyoutPanel } from './error_rate_flyout_panel';
+import { ErrorRatePagePanel } from './error_rate_page_panel';
+import type { ErrorRatePanelProps } from './types';
+import { useSloDetailsContext } from '../slo_details_context';
+
+export function ErrorRatePanel(props: ErrorRatePanelProps) {
+  const { isFlyout } = useSloDetailsContext();
+
+  if (isFlyout) {
+    return <ErrorRateFlyoutPanel {...props} />;
+  }
+
+  return <ErrorRatePagePanel {...props} />;
+}
