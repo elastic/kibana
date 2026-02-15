@@ -1218,12 +1218,39 @@
       "integrationName": {
         "type": "keyword"
       },
+      "integrations": {
+        "dynamic": false,
+        "properties": {
+          "syncData": {
+            "dynamic": false,
+            "properties": {
+              "lastFullSync": {
+                "type": "date"
+              },
+              "lastUpdateProcessed": {
+                "type": "date"
+              }
+            },
+            "type": "object"
+          },
+          "syncMarkerIndex": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
       "managed": {
         "type": "boolean"
+      },
+      "managedVersion": {
+        "type": "integer"
       },
       "matchers": {
         "dynamic": false,
         "type": "object"
+      },
+      "matchersModifiedByUser": {
+        "type": "boolean"
       },
       "name": {
         "type": "keyword"

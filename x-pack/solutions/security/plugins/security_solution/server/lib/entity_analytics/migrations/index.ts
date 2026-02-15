@@ -37,7 +37,14 @@ export interface EntityAnalyticsMigrationsParams {
  * ### How to update the risk score transform config?
  * - Update the transform config [here](../risk_score/configurations.ts)
  * - Pump the `version` [here](../risk_score/configurations.ts)
- *
+ * 
+ * ### How to update managed entity sources (privmon/watchlist data sources)?
+ * 1. For entity source mappings:
+ *     - Update the mapping object [here](../privilege_monitoring/saved_objects/monitoring_entity_source_type.ts)
+ *     - Pump the `version` [here](../privilege_monitoring/saved_objects/monitoring_entity_source_type.ts)
+ * 2. For entity source matchers: 
+ *     - Update the matchers definitions [here](../privilege_monitoring/data_sources/constants.ts)
+ *     - Pump the `MANAGED_SOURCES_VERSION` [here](../privilege_monitoring/saved_objects/monitoring_entity_source_type.ts)
  * note: If you change the `latest` property, the transform will reinstall after the engine task runs.
  */
 export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMigrationsParams) => {

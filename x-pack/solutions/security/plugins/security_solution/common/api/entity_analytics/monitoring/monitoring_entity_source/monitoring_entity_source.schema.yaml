@@ -206,6 +206,10 @@ components:
             $ref: "#/components/schemas/MonitoringEntitySourceType"
           managed:
             type: boolean
+          managedVersion:
+            type: integer
+          matchersModifiedByUser: 
+            type: boolean
 
     Matcher:
       type: object
