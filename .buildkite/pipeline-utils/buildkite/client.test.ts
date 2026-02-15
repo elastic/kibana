@@ -256,4 +256,37 @@ describe('BuildkiteClient', () => {
       expect(result.success).toEqual(true);
     });
   });
+
+  describe('cancelStep', () => {
+    const originalBuildId = process.env.BUILDKITE_BUILD_ID;
+
+    afterEach(() => {
+      process.env.BUILDKITE_BUILD_ID = originalBuildId;
+      jest.restoreAllMocks();
+    });
+
+    it('calls buildkite-agent step cancel for the specified step', () => {
+      process.env.BUILDKITE_BUILD_ID = 'build-id-42';
+
+      const execSpy = jest.fn().mockReturnValue('' as never);
+      buildkite.exec = execSpy;
+
+      buildkite.cancelStep('step-id-1');
+
+      expect(execSpy).toHaveBeenCalledWith(
+        'buildkite-agent step cancel --build "build-id-42" --step "step-id-1"',
+        {
+          stdio: ['pipe', 'inherit', 'inherit'],
+        }
+      );
+    });
+
+    it('throws when required build context environment variables are missing', () => {
+      delete process.env.BUILDKITE_BUILD_ID;
+
+      expect(() => buildkite.cancelStep('step-id-1')).toThrow(
+        'BUILDKITE_BUILD_ID must be set to cancel a step'
+      );
+    });
+  });
 });

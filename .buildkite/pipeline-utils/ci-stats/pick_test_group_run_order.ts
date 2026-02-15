@@ -427,6 +427,7 @@ export async function pickTestGroupRunOrder() {
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
                   timeout_in_minutes: 120,
+                  key,
                   agents: expandAgentQueue(queue, 105),
                   env: {
                     FTR_CONFIG_GROUP_KEY: key,
@@ -447,6 +448,19 @@ export async function pickTestGroupRunOrder() {
         : [],
     ].flat()
   );
+
+  // Register dynamically uploaded steps for cancel-on-gate-failure so gate steps can cancel them.
+  if (unit.count > 0) {
+    bk.setMetadata('cancel_on_gate_failure:jest', 'true');
+  }
+  if (integration.count > 0) {
+    bk.setMetadata('cancel_on_gate_failure:jest-integration', 'true');
+  }
+  // Register child step keys (not the group key) because `buildkite-agent step cancel`
+  // does not work on group keys.
+  for (const fg of functionalGroups) {
+    bk.setMetadata(`cancel_on_gate_failure:${fg.key}`, 'true');
+  }
 }
 
 function getRunGroups(bk: BuildkiteClient, allTypes: RunGroup[], typeName: string): RunGroup[] {

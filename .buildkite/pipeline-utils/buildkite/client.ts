@@ -368,6 +368,30 @@ export class BuildkiteClient {
     return (await this.http.post(url, options)).data;
   };
 
+  cancelStep = (stepIdOrKey: string): void => {
+    if (!process.env.BUILDKITE_BUILD_ID) {
+      throw new Error('BUILDKITE_BUILD_ID must be set to cancel a step');
+    }
+
+    const buildId = JSON.stringify(process.env.BUILDKITE_BUILD_ID);
+    const step = JSON.stringify(stepIdOrKey);
+    this.exec(`buildkite-agent step cancel --build ${buildId} --step ${step}`, {
+      stdio: ['pipe', 'inherit', 'inherit'],
+    });
+  };
+
+  getMetadataKeys = (): string[] => {
+    const stdout = this.exec('buildkite-agent meta-data keys', {
+      stdio: ['pipe', 'pipe', 'inherit'],
+    });
+
+    if (!stdout) {
+      return [];
+    }
+
+    return stdout.toString().trim().split('\n').filter(Boolean);
+  };
+
   setMetadata = (key: string, value: string) => {
     this.exec(`buildkite-agent meta-data set '${key}'`, {
       input: value,

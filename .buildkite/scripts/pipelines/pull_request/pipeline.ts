@@ -15,6 +15,8 @@
             }
         ] */
 
+import { execFileSync } from 'child_process';
+
 import prConfigs from '../../../pull_requests.json';
 import { runPreBuild } from './pre_build';
 import {
@@ -23,11 +25,13 @@ import {
   getAgentImageConfig,
   emitPipeline,
   getPipeline,
+  type GetPipelineOptions,
   prHasFIPSLabel,
 } from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 const emptyStep = `steps: []`;
+const cancelable: GetPipelineOptions = { cancelOnGateFailure: true };
 
 if (!prConfig) {
   console.error(`'kibana-pull-request' pipeline not found in .buildkite/pull_requests.json`);
@@ -63,6 +67,16 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     await runPreBuild();
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
+    // Register build_scout_tests for cancel-on-gate-failure. This step is defined in base.yml
+    // but base.yml is not loaded with cancelOnGateFailure (it contains gate steps themselves),
+    // so we register it explicitly.
+    execFileSync('buildkite-agent', [
+      'meta-data',
+      'set',
+      'cancel_on_gate_failure:build_scout_tests',
+      'true',
+    ]);
+
     if (prHasFIPSLabel()) {
       pipeline.push(getPipeline('.buildkite/pipelines/fips/verify_fips_enabled.yml'));
     }
@@ -83,7 +97,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops.yml', cancelable));
     }
 
     if (
@@ -91,7 +105,9 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops_cases.yml'));
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/response_ops_cases.yml', cancelable)
+      );
     }
 
     if (
@@ -102,7 +118,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml', cancelable));
     }
 
     if (
@@ -113,7 +129,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml', cancelable));
     }
 
     if (
@@ -125,10 +141,14 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime_plugin.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/exploratory_view_plugin.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml', cancelable)
+      );
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime_plugin.yml', cancelable));
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/exploratory_view_plugin.yml', cancelable)
+      );
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml', cancelable));
     }
 
     const aiInfraPaths = [
@@ -152,7 +172,9 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       GITHUB_PR_LABELS.includes('ci:all-gen-ai-suites') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ai_infra_gen_ai.yml'));
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/ai_infra_gen_ai.yml', cancelable)
+      );
     }
 
     if (
@@ -161,7 +183,9 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       GITHUB_PR_LABELS.includes('ci:all-gen-ai-suites') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/agent_builder_smoke_tests.yml'));
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/agent_builder_smoke_tests.yml', cancelable)
+      );
     }
 
     if (
@@ -243,7 +267,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       ALL_UI_TEST_SUITES
     ) {
       pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/cypress_burn.yml')
+        getPipeline(
+          '.buildkite/pipelines/pull_request/security_solution/cypress_burn.yml',
+          cancelable
+        )
       );
     }
 
@@ -260,7 +287,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       ALL_UI_TEST_SUITES
     ) {
       pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/defend_workflows.yml')
+        getPipeline(
+          '.buildkite/pipelines/pull_request/security_solution/defend_workflows.yml',
+          cancelable
+        )
       );
     }
 
@@ -294,20 +324,37 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       ALL_UI_TEST_SUITES
     ) {
       pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/ai_assistant.yml')
-      );
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution/ai4dsoc.yml'));
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/automatic_import.yml')
-      );
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/detection_engine.yml')
+        getPipeline(
+          '.buildkite/pipelines/pull_request/security_solution/ai_assistant.yml',
+          cancelable
+        )
       );
       pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/entity_analytics.yml')
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/ai4dsoc.yml', cancelable)
       );
       pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/rule_management.yml')
+        getPipeline(
+          '.buildkite/pipelines/pull_request/security_solution/automatic_import.yml',
+          cancelable
+        )
+      );
+      pipeline.push(
+        getPipeline(
+          '.buildkite/pipelines/pull_request/security_solution/detection_engine.yml',
+          cancelable
+        )
+      );
+      pipeline.push(
+        getPipeline(
+          '.buildkite/pipelines/pull_request/security_solution/entity_analytics.yml',
+          cancelable
+        )
+      );
+      pipeline.push(
+        getPipeline(
+          '.buildkite/pipelines/pull_request/security_solution/rule_management.yml',
+          cancelable
+        )
       );
     }
 
@@ -375,7 +422,9 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution/explore.yml'));
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/explore.yml', cancelable)
+      );
     }
 
     if (
@@ -440,7 +489,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       ALL_UI_TEST_SUITES
     ) {
       pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/investigations.yml')
+        getPipeline(
+          '.buildkite/pipelines/pull_request/security_solution/investigations.yml',
+          cancelable
+        )
       );
     }
 
@@ -455,7 +507,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       !GITHUB_PR_LABELS.includes('ci:skip-cypress-osquery')
     ) {
       pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/osquery_cypress.yml')
+        getPipeline(
+          '.buildkite/pipelines/pull_request/security_solution/osquery_cypress.yml',
+          cancelable
+        )
       );
     }
 
@@ -471,7 +526,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     ) {
       pipeline.push(
         getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/cloud_security_posture.yml'
+          '.buildkite/pipelines/pull_request/security_solution/cloud_security_posture.yml',
+          cancelable
         )
       );
     }
@@ -488,7 +544,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       ALL_UI_TEST_SUITES
     ) {
       pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/cspm_agentless_scout.yml')
+        getPipeline(
+          '.buildkite/pipelines/pull_request/security_solution/cspm_agentless_scout.yml',
+          cancelable
+        )
       );
     }
 
@@ -498,7 +557,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       ALL_UI_TEST_SUITES
     ) {
       pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/gen_ai_evals.yml')
+        getPipeline(
+          '.buildkite/pipelines/pull_request/security_solution/gen_ai_evals.yml',
+          cancelable
+        )
       );
     }
 
@@ -511,7 +573,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       ALL_UI_TEST_SUITES
     ) {
       pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/asset_inventory.yml')
+        getPipeline(
+          '.buildkite/pipelines/pull_request/security_solution/asset_inventory.yml',
+          cancelable
+        )
       );
     }
 
@@ -538,37 +603,12 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml'));
     }
 
-    if (
-      (await doAnyChangesMatch([
-        /^packages\/kbn-babel-preset/,
-        /^packages\/kbn-repo-file-maps/,
-        /^src\/platform\/packages\/private\/kbn-babel-transform/,
-        /^src\/platform\/packages\/private\/kbn-import-resolver/,
-        /^src\/platform\/packages\/private\/kbn-jest-serializers/,
-        /^src\/platform\/packages\/private\/kbn-repo-packages/,
-        /^src\/platform\/packages\/shared\/kbn-babel-register/,
-        /^src\/platform\/packages\/shared\/kbn-jest-benchmarks/,
-        /^src\/platform\/packages\/shared\/kbn-repo-info/,
-        /^src\/platform\/packages\/shared\/kbn-test/,
-        /^src\/setup_node_env/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:bench-jest')
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/jest_bench.yml'));
+    if (GITHUB_PR_LABELS.includes('ci:bench-jest')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/jest_bench.yml', cancelable));
     }
 
-    if (
-      (await doAnyChangesMatch([
-        /^src\/platform\/packages\/shared\/kbn-es/,
-        /^src\/platform\/packages\/shared\/kbn-ftr-benchmarks/,
-        /^src\/platform\/packages\/shared\/kbn-ftr-common-functional-services/,
-        /^src\/platform\/packages\/shared\/kbn-ftr-common-functional-ui-services/,
-        /^src\/platform\/packages\/shared\/kbn-test/,
-        /^src\/setup_node_env/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:bench-ftr')
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ftr_bench.yml'));
+    if (GITHUB_PR_LABELS.includes('ci:bench-ftr')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ftr_bench.yml', cancelable));
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));

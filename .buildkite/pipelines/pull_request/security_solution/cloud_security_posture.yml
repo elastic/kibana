@@ -1,6 +1,7 @@
 steps:
   - command: .buildkite/scripts/steps/functional/cloud_security_posture.sh
     label: 'Cloud Security Posture Cypress Tests'
+    key: cloud-security-posture
     agents:
       machineType: n2-standard-4
       preemptible: true
@@ -21,6 +22,7 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/cloud_security_posture_serverless.sh
     label: 'Cloud Security Posture Cypress Tests on Serverless'
+    key: cloud-security-posture-serverless
     agents:
       machineType: n2-standard-4
       preemptible: true
