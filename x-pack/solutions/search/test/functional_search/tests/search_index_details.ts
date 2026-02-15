@@ -192,7 +192,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await pageObjects.searchIndexDetailsPage.expectQuickStatsAIMappingsToHaveVectorFields();
           });
         });
-        describe('has index actions enabled', () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/248780
+        describe.skip('has index actions enabled', () => {
           beforeEach(async () => {
             await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithDenseVectorName);
           });
