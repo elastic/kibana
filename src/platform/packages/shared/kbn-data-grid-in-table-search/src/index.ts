@@ -12,3 +12,11 @@ export {
   type UseDataGridInTableSearchProps,
   type UseDataGridInTableSearchReturn,
 } from './use_data_grid_in_table_search';
+
+export { InTableSearchControl } from './in_table_search_control';
+export {
+  InTableSearchProvider,
+  useInTableSearchContext,
+  type InTableSearchContextValue,
+  type InTableSearchProviderValue,
+} from './in_table_search_context';

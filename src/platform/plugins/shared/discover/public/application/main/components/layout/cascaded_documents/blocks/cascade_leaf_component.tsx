@@ -8,7 +8,8 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiPanel, EuiText, type EuiDataGridCustomBodyProps, useEuiTheme } from '@elastic/eui';
+import { createPortal } from 'react-dom';
+import { EuiText, type EuiDataGridCustomBodyProps, useEuiTheme } from '@elastic/eui';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   getRenderCustomToolbarWithElements,
@@ -16,6 +17,7 @@ import {
   DataLoadingState,
   DataGridDensity,
   type UnifiedDataTableProps,
+  type CustomGridBodyContext,
 } from '@kbn/unified-data-table';
 import type { DataCascadeRowCellProps } from '@kbn/shared-ux-document-data-cascade';
 import type { DataTableRecord, SortOrder } from '@kbn/discover-utils';
@@ -37,17 +39,25 @@ interface ESQLDataCascadeLeafCellProps
     >,
     Pick<
       Parameters<DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']>[0],
-      'getScrollElement' | 'getScrollMargin' | 'getScrollOffset' | 'preventSizeChangePropagation'
+      | 'stickyHeaderExtensionPoint'
+      | 'getScrollElement'
+      | 'getScrollMargin'
+      | 'getScrollOffset'
+      | 'preventSizeChangePropagation'
     > {
   cellData: DataTableRecord[];
   cellId: string;
 }
 
 interface CustomCascadeGridBodyProps
-  extends EuiDataGridCustomBodyProps,
+  extends CustomGridBodyContext,
+    EuiDataGridCustomBodyProps,
     Pick<
       ESQLDataCascadeLeafCellProps,
-      'getScrollElement' | 'getScrollMargin' | 'preventSizeChangePropagation'
+      | 'stickyHeaderExtensionPoint'
+      | 'getScrollElement'
+      | 'getScrollMargin'
+      | 'preventSizeChangePropagation'
     > {
   data: DataTableRecord[];
   isFullScreenMode?: boolean;
@@ -56,15 +66,6 @@ interface CustomCascadeGridBodyProps
 
 const EMPTY_SORT: SortOrder[] = [];
 
-/**
- * A custom grid body implementation for the unified data table to be used in the cascade leaf cells
- * that allows for nested cascade virtualization that's compatible with the EUI Data Grid.
- *
- * Key optimizations:
- * - Fixed row heights prevent measurement-triggered recalculations
- * - Stable scroll margin captured once to prevent position jumps
- * - Total size calculated from fixed heights (count * ROW_HEIGHT) for stability
- */
 export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGridBody({
   isFullScreenMode,
   initialOffset,
@@ -77,19 +78,23 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   visibleRowData,
   headerRow,
   footerRow,
+  stickyHeaderExtensionPoint,
+  renderedGridToolbarRef,
+  provideDataGridRefOverrides,
 }: CustomCascadeGridBodyProps) {
-  const visibleRows = useMemo(
-    () => data.slice(visibleRowData.startRow, visibleRowData.endRow),
-    [data, visibleRowData.startRow, visibleRowData.endRow]
-  );
-  const customGridBodyScrollContainerRef = useRef<HTMLDivElement | null>(null);
-
   const { euiTheme } = useEuiTheme();
 
   const customCascadeGridBodyStyle = useMemo(
     () => getCustomCascadeGridBodyStyle(euiTheme),
     [euiTheme]
   );
+
+  const visibleRows = useMemo(
+    () => data.slice(visibleRowData.startRow, visibleRowData.endRow),
+    [data, visibleRowData.startRow, visibleRowData.endRow]
+  );
+
+  const customGridBodyScrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   // create scroll element reference for custom nested virtualized grid
   const virtualizerScrollElementRef = useRef<Element | null>(getScrollElement());
@@ -140,10 +145,54 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
     return () => unregister?.();
   }, [preventSizeChangePropagation, scrollElementGetter, virtualizer.scrollElement]);
 
+  // Register custom scroll implementations with the parent data table.
+  // This enables features like in-table search to work correctly with
+  // our custom virtualization instead of EUI's built-in virtualization.
+  useEffect(() => {
+    provideDataGridRefOverrides({
+      scrollToItem: ({ rowIndex, align }) => {
+        if (rowIndex !== undefined) {
+          // Map EUI align values to tanstack-react-virtual compatible values
+          // EUI uses 'smart' which tanstack doesn't support, so we map it to 'auto'
+          const mappedAlign =
+            align === 'smart' ? 'auto' : (align as 'auto' | 'center' | 'start' | 'end' | undefined);
+          virtualizer.scrollToIndex(rowIndex, { align: mappedAlign ?? 'auto' });
+        }
+      },
+      scrollTo: ({ scrollTop }) => {
+        if (scrollTop !== undefined) {
+          virtualizer.scrollToOffset(scrollTop);
+        }
+      },
+    });
+  }, [virtualizer, provideDataGridRefOverrides]);
+
   const items = virtualizer.getVirtualItems();
 
   // Calculate transform using current scroll margin (now reactive from parent)
   const translateY = items.length > 0 ? items[0].start - getScrollMargin() : 0;
+
+  const renderHeaderRow = useMemo(() => {
+    return (
+      <>
+        {stickyHeaderExtensionPoint?.isActiveSticky &&
+        stickyHeaderExtensionPoint.extensionPointRef.current
+          ? createPortal(
+              <div css={customCascadeGridBodyStyle.stickyHeaderExtensionPointWrapper}>
+                <div>{renderedGridToolbarRef.current}</div>
+                <>{headerRow}</>
+              </div>,
+              stickyHeaderExtensionPoint.extensionPointRef.current
+            )
+          : headerRow}
+      </>
+    );
+  }, [
+    stickyHeaderExtensionPoint,
+    customCascadeGridBodyStyle.stickyHeaderExtensionPointWrapper,
+    renderedGridToolbarRef,
+    headerRow,
+  ]);
 
   return (
     <div
@@ -151,7 +200,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
       role="rowgroup"
       css={customCascadeGridBodyStyle.wrapper}
     >
-      <>{headerRow}</>
+      {renderHeaderRow}
       <div
         ref={customGridBodyScrollContainerRef}
         css={customCascadeGridBodyStyle.virtualizerContainer}
@@ -203,6 +252,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
     getScrollOffset,
     preventSizeChangePropagation,
     onUpdateDataGridDensity,
+    stickyHeaderExtensionPoint,
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
@@ -249,15 +299,18 @@ export const ESQLDataCascadeLeafCell = React.memo(
     const renderCustomCascadeGridBodyCallback = useCallback<
       NonNullable<UnifiedDataTableProps['renderCustomGridBody']>
     >(
-      ({
-        Cell,
-        visibleColumns,
-        visibleRowData,
-        setCustomGridBodyProps,
-        gridWidth,
-        headerRow,
-        footerRow,
-      }) => (
+      (
+        {
+          Cell,
+          visibleColumns,
+          visibleRowData,
+          setCustomGridBodyProps,
+          gridWidth,
+          headerRow,
+          footerRow,
+        },
+        context
+      ) => (
         <CustomCascadeGridBodyMemoized
           key={isCellInFullScreenMode ? `full-screen-${cellId}` : cellId}
           Cell={Cell}
@@ -273,6 +326,9 @@ export const ESQLDataCascadeLeafCell = React.memo(
           preventSizeChangePropagation={preventSizeChangePropagation}
           initialOffset={getScrollOffset}
           isFullScreenMode={isCellInFullScreenMode}
+          stickyHeaderExtensionPoint={stickyHeaderExtensionPoint}
+          renderedGridToolbarRef={context.renderedGridToolbarRef}
+          provideDataGridRefOverrides={context.provideDataGridRefOverrides}
         />
       ),
       [
@@ -283,39 +339,38 @@ export const ESQLDataCascadeLeafCell = React.memo(
         getScrollMargin,
         getScrollOffset,
         isCellInFullScreenMode,
+        stickyHeaderExtensionPoint,
       ]
     );
 
     return (
-      <EuiPanel paddingSize="none">
-        <UnifiedDataTable
-          isPlainRecord
-          dataView={dataView}
-          showTimeCol={showTimeCol}
-          showKeyboardShortcuts={showKeyboardShortcuts}
-          services={services}
-          sort={EMPTY_SORT}
-          isSortEnabled={false}
-          enableInTableSearch
-          ariaLabelledBy="data-cascade-leaf-cell"
-          consumer={`discover_esql_cascade_row_leaf_${cellId}`}
-          rows={cellData}
-          loadingState={DataLoadingState.loaded}
-          columns={selectedColumns}
-          onSetColumns={setSelectedColumns}
-          renderCustomToolbar={renderCustomToolbarWithElements}
-          expandedDoc={expandedDoc}
-          setExpandedDoc={setExpandedDocFn}
-          dataGridDensityState={cascadeDataGridDensityState}
-          onUpdateDataGridDensity={setCascadeDataGridDensityState}
-          renderDocumentView={renderDocumentView}
-          renderCustomGridBody={renderCustomCascadeGridBodyCallback}
-          onFullScreenChange={setIsCellInFullScreenMode}
-          externalCustomRenderers={externalCustomRenderers}
-          paginationMode="infinite"
-          sampleSizeState={cellData.length}
-        />
-      </EuiPanel>
+      <UnifiedDataTable
+        isPlainRecord
+        dataView={dataView}
+        showTimeCol={showTimeCol}
+        showKeyboardShortcuts={showKeyboardShortcuts}
+        services={services}
+        sort={EMPTY_SORT}
+        isSortEnabled={false}
+        enableInTableSearch
+        ariaLabelledBy="data-cascade-leaf-cell"
+        consumer={`discover_esql_cascade_row_leaf_${cellId}`}
+        rows={cellData}
+        loadingState={DataLoadingState.loaded}
+        columns={selectedColumns}
+        onSetColumns={setSelectedColumns}
+        renderCustomToolbar={renderCustomToolbarWithElements}
+        expandedDoc={expandedDoc}
+        setExpandedDoc={setExpandedDocFn}
+        dataGridDensityState={cascadeDataGridDensityState}
+        onUpdateDataGridDensity={setCascadeDataGridDensityState}
+        renderDocumentView={renderDocumentView}
+        renderCustomGridBody={renderCustomCascadeGridBodyCallback}
+        onFullScreenChange={setIsCellInFullScreenMode}
+        externalCustomRenderers={externalCustomRenderers}
+        paginationMode="infinite"
+        sampleSizeState={cellData.length}
+      />
     );
   }
 );

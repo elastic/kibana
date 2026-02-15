@@ -30,7 +30,7 @@ import {
   useRegisterCascadeAccessibilityHelpers,
   useTreeGridContainerARIAAttributes,
 } from '../../lib/core/accessibility';
-import { ScrollSyncProvider } from '../../lib/core/scroll_sync';
+import { ScrollSyncProvider } from '../helpers/scroll_sync';
 import { dataCascadeImplStyles, relativePosition } from './data_cascade_impl.styles';
 import type { DataCascadeImplProps, DataCascadeRowProps, DataCascadeRowCellProps } from './types';
 

@@ -13,3 +13,8 @@ export {
   getCascadeRowLeafDataCacheKey,
   getLeafIdFromCacheKey,
 } from './utils';
+
+export {
+  useStickyHeaderExtensionPoint,
+  type StickyHeaderExtensionPointContextValue,
+} from '../components/helpers/sticky_header_extension_point';

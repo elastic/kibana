@@ -8,10 +8,13 @@
  */
 
 import type { FunctionComponent } from 'react';
+import type { MutableRefObject } from 'react';
 import type {
   EuiContextMenuItem,
   EuiDataGridCellValueElementProps,
   EuiDataGridColumn,
+  EuiDataGridRefProps,
+  EuiDataGridToolbarProps,
 } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -71,3 +74,43 @@ export type CustomBulkActions = Array<
     key: string;
   }
 >;
+
+/**
+ * Scroll-related methods from EuiDataGridRefProps that can be overridden
+ * by custom grid body implementations using their own virtualization.
+ */
+export type DataGridScrollOverrides = Pick<EuiDataGridRefProps, 'scrollToItem' | 'scrollTo'>;
+
+/**
+ * Context object passed to the second argument of renderCustomGridBody.
+ * Allows custom grid body implementations to integrate with UnifiedDataTable features.
+ */
+export interface CustomGridBodyContext {
+  /**
+   * A mutable ref that custom grid body implementations can use to provide
+   * their own scroll functions. These will override the default EUI data grid
+   * scroll methods when set, enabling features like in-table search to work
+   * with custom virtualization implementations.
+   *
+   * Example usage in a custom grid body:
+   * ```ts
+   * useEffect(() => {
+   *   dataGridOverridesRef.current = {
+   *     scrollToItem: ({ rowIndex, columnIndex, align }) => {
+   *       virtualizer.scrollToIndex(rowIndex ?? 0, { align: align ?? 'auto' });
+   *     },
+   *   };
+   *   return () => { dataGridOverridesRef.current = {}; };
+   * }, [virtualizer, dataGridOverridesRef]);
+   * ```
+   */
+  provideDataGridRefOverrides: (overrides: DataGridScrollOverrides) => void;
+  /**
+   * Ref holding the rendered grid toolbar by the grid.
+   * Populated when EUI renders the toolbar. Custom grid bodies (e.g. sticky headers) can
+   * use this to render the same toolbar with the same control elements.
+   */
+  renderedGridToolbarRef: MutableRefObject<ReturnType<
+    NonNullable<EuiDataGridToolbarProps['renderCustomToolbar']>
+  > | null>;
+}

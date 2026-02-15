@@ -29,6 +29,22 @@ export const getCustomCascadeGridBodyStyle = (euiTheme: UseEuiTheme['euiTheme'])
         backgroundColor: euiTheme.colors.backgroundBasePlain,
       },
   }),
+  stickyHeaderExtensionPointWrapper: css({
+    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+
+    '& [class*="euiDataGridHeader"]': {
+      backgroundColor: 'transparent',
+      border: 'none',
+    },
+
+    '& .unifiedDataTableToolbarControlGroup': {
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+    },
+
+    '& .euiDataGridHeaderCell': {
+      paddingLeft: euiTheme.size.xs,
+    },
+  }),
   virtualizerContainer: css({
     width: '100%',
     height: '100%',

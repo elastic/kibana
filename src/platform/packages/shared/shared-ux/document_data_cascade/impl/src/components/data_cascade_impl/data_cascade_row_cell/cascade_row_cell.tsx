@@ -21,6 +21,7 @@ import {
   useDataCascadeState,
   useDataCascadeActions,
 } from '../../../store_provider';
+import { useStickyHeaderExtensionPoint } from '../../helpers/sticky_header_extension_point';
 import { useVirtualizedRowScrollState } from '../../../lib/core/virtualizer';
 import { cascadeRowCellStyles } from './cascade_row_cell.styles';
 
@@ -37,6 +38,8 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
   const actions = useDataCascadeActions<G, L>();
   const hasPendingRequest = useRef<boolean>(false);
   const [isPendingRowLeafDataFetch, setRowLeafDataFetch] = useState<boolean>(false);
+
+  const stickyHeaderExtensionPoint = useStickyHeaderExtensionPoint();
 
   const styles = useMemo(() => cascadeRowCellStyles(euiTheme), [euiTheme]);
 
@@ -163,6 +166,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
       getScrollOffset,
       getScrollMargin,
       preventSizeChangePropagation,
+      stickyHeaderExtensionPoint,
     });
   }, [
     children,
@@ -173,6 +177,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
     getScrollOffset,
     getScrollMargin,
     preventSizeChangePropagation,
+    stickyHeaderExtensionPoint,
   ]);
 
   return (

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
+import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { AllCellsMatchesCounter } from './all_cells_matches_counter';
 import type {
   ActiveMatch,
@@ -17,8 +17,12 @@ import type {
   UseFindMatchesReturn,
   AllCellsProps,
 } from '../types';
+import {
+  useInTableSearchControlProps,
+  useInTableSearchMatchContext,
+} from '../in_table_search_context';
 
-const INITIAL_STATE: UseFindMatchesState = {
+export const INITIAL_STATE: UseFindMatchesState = {
   term: '',
   matchesList: [],
   matchesCount: null,
@@ -31,21 +35,19 @@ const INITIAL_STATE: UseFindMatchesState = {
 const FIRST_ACTIVE_MATCH_POSITION = 1;
 
 export const useFindMatches = (props: UseFindMatchesProps): UseFindMatchesReturn => {
-  const {
-    initialState,
-    onInitialStateChange,
-    inTableSearchTerm,
-    visibleColumns,
-    rows,
-    renderCellValue,
-    onScrollToActiveMatch,
-  } = props;
+  const { initialState, onScrollToActiveMatch } = props;
+  const controlProps = useInTableSearchControlProps();
+  const { matchState: state, setMatchState: setState } = useInTableSearchMatchContext();
+  const { inTableSearchTerm, visibleColumns, rows, renderCellValue, onInitialStateChange } =
+    controlProps;
+
   const initialActiveMatchPositionRef = useRef<number | undefined>(
-    initialState?.activeMatch?.matchPosition && initialState?.searchTerm === inTableSearchTerm
-      ? initialState.activeMatch.matchPosition
+    initialState?.current?.activeMatch?.matchPosition &&
+      initialState?.current?.searchTerm === inTableSearchTerm
+      ? initialState.current?.activeMatch?.matchPosition
       : undefined
   );
-  const [state, setState] = useState<UseFindMatchesState>(INITIAL_STATE);
+
   const { matchesCount, activeMatchPosition, isProcessing, renderCellsShadowPortal } = state;
   const numberOfRunsRef = useRef<number>(0);
 
@@ -57,7 +59,14 @@ export const useFindMatches = (props: UseFindMatchesProps): UseFindMatchesReturn
       return;
     }
 
-    // const startTime = window.performance.now();
+    // if the search term from the restorable state matches the context term and we already have results (state.term set),
+    // Skip redundant processing because we've already run for this term.
+    if (
+      initialState?.current?.searchTerm === inTableSearchTerm &&
+      state.term === inTableSearchTerm
+    ) {
+      return;
+    }
 
     const numberOfRuns = numberOfRunsRef.current;
 
@@ -132,6 +141,8 @@ export const useFindMatches = (props: UseFindMatchesProps): UseFindMatchesReturn
     inTableSearchTerm,
     onScrollToActiveMatch,
     onInitialStateChange,
+    initialState,
+    state.term,
   ]);
 
   const goToPrevMatch = useCallback(() => {
@@ -156,6 +167,7 @@ export const useFindMatches = (props: UseFindMatchesProps): UseFindMatchesReturn
 
   return useMemo(
     () => ({
+      term: state.term,
       matchesCount,
       activeMatchPosition,
       goToPrevMatch,
@@ -165,6 +177,7 @@ export const useFindMatches = (props: UseFindMatchesProps): UseFindMatchesReturn
       renderCellsShadowPortal,
     }),
     [
+      state.term,
       matchesCount,
       activeMatchPosition,
       goToPrevMatch,
