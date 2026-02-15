@@ -214,6 +214,17 @@ describe('getRuleIdsWithGaps', () => {
         total: 2,
         ruleIds: ['rule-1', 'rule-2'],
         latestGapTimestamp: 1704067200000,
+        summary: {
+          totalUnfilledDurationMs: 100,
+          totalInProgressDurationMs: 50,
+          totalFilledDurationMs: 0,
+          totalDurationMs: 150,
+          rulesByGapFillStatus: {
+            unfilled: 1,
+            inProgress: 1,
+            filled: 0,
+          },
+        },
       });
     });
 
@@ -249,6 +260,17 @@ describe('getRuleIdsWithGaps', () => {
         total: 0,
         ruleIds: [],
         latestGapTimestamp: undefined,
+        summary: {
+          totalUnfilledDurationMs: 0,
+          totalInProgressDurationMs: 0,
+          totalFilledDurationMs: 0,
+          totalDurationMs: 0,
+          rulesByGapFillStatus: {
+            unfilled: 0,
+            inProgress: 0,
+            filled: 0,
+          },
+        },
       });
     });
 
