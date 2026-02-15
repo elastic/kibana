@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject } from 'rxjs';
+import { Subject, firstValueFrom } from 'rxjs';
 import { unmountComponentAtNode } from 'react-dom';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 
@@ -17,18 +17,22 @@ import type { OverlayRef } from '@kbn/core-mount-utils-browser';
  */
 export class SystemFlyoutRef implements OverlayRef {
   public readonly onClose: Promise<void>;
+  private _isClosed = false;
   private closeSubject = new Subject<void>();
   private container: HTMLElement;
-  private isClosed = false;
 
   constructor(container: HTMLElement) {
     this.container = container;
-    this.onClose = this.closeSubject.toPromise();
+    this.onClose = firstValueFrom(this.closeSubject);
+  }
+
+  public get isClosed(): boolean {
+    return this._isClosed;
   }
 
   public close(): Promise<void> {
-    if (!this.isClosed) {
-      this.isClosed = true;
+    if (!this._isClosed) {
+      this._isClosed = true;
       unmountComponentAtNode(this.container);
       this.container.remove();
 
