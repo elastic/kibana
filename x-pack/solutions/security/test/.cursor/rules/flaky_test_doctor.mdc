@@ -1021,9 +1021,49 @@ export const EntityStoreUtils = (getService: FtrProviderContext['getService']) =
 };
 ```
 
+### Best Practice: Diagnostic Logging in Retry Loops
+
+When writing retry loops, add `log.debug()` calls to understand what's happening during CI failures:
+
+```typescript
+await retry.waitForWithTimeout('Resource to be ready', TIMEOUT_MS, async () => {
+  try {
+    const { body } = await api.getStatus();
+    
+    // Log current state on each poll
+    log.debug(`Status check: ${body.status}, components: ${body.components?.length}`);
+    
+    if (body.status === 'error') {
+      log.error(`Error state reached: ${JSON.stringify(body)}`);
+      return true; // Exit to handle error
+    }
+    
+    if (body.status !== 'running') {
+      log.debug(`Not ready yet, current status: ${body.status}`);
+      return false; // Continue polling
+    }
+    
+    log.debug('Resource is now ready');
+    return true;
+  } catch (e: any) {
+    if (e.message?.includes('expected_error_type')) {
+      log.debug(`Expected error during polling: ${e.message}`);
+      return false; // Continue polling
+    }
+    throw e; // Unexpected error - fail immediately
+  }
+});
+```
+
+**Benefits:**
+- CI logs show exactly where the retry stopped
+- Helps identify if retries are happening or timing out
+- Makes reproducing issues locally easier
+- Reveals patterns (always fails on attempt 3, always timeout, etc.)
+
 ### Entity Store Test Patterns
 
-Common patterns for Entity Store API tests based on lessons learned from PR #252853:
+Common patterns for Entity Store API tests based on lessons learned from PRs #252853 and #253024:
 
 | Issue | Solution |
 |-------|----------|
@@ -1031,6 +1071,9 @@ Common patterns for Entity Store API tests based on lessons learned from PR #252
 | Transform not found | Wait for transform existence with retry, handle `resource_not_found_exception` |
 | Components not installed | Poll until all components have `installed: true` |
 | Status 'running' but not ready | Check both status AND component states |
+| Transform stats check fails | Use two-phase polling: existence first, then execution |
+| Retry loop exits too early | Use conditional `return false` instead of `expect()` assertions |
+| Hard to debug CI failures | Add `log.debug()` statements showing state at each poll |
 
 **Recommended `enableEntityStore` parameters:**
 
@@ -1664,6 +1707,123 @@ await retry.waitForWithTimeout(
 ```
 
 **Real Example:** PR #252853 - `host_transform.ts` test failed with `resource_not_found_exception` because `createDocumentsAndTriggerTransform` tried to get transform stats before the transform existed. Fix: Added retry loop that catches `resource_not_found_exception` and continues polling.
+
+### API Pattern: Two-Phase Transform Polling
+
+**Symptoms:**
+- Transform operations fail intermittently
+- Test passes locally but fails in CI
+- Assertions on transform stats fail even though transform should exist
+
+**Root Cause:** Transform operations require two distinct waits:
+1. Wait for transform to *exist* (creation)
+2. Wait for transform to *execute* (processing documents)
+
+Testing immediately after engine initialization may catch the transform in either pre-existence or mid-execution state.
+
+**Fix:** Implement a two-phase polling pattern:
+
+```typescript
+// Phase 1: Wait for transform to exist
+let transform: any;
+let triggerCount: number = 0;
+let docsProcessed: number = 0;
+
+await retry.waitForWithTimeout(
+  `Transform ${TRANSFORM_ID} to exist`,
+  TIMEOUT_MS,
+  async () => {
+    try {
+      const { count, transforms } = await es.transform.getTransformStats({
+        transform_id: TRANSFORM_ID,
+      });
+      if (count !== 1) {
+        log.debug(`Waiting for transform, count: ${count}`);
+        return false;
+      }
+      transform = transforms[0];
+      triggerCount = transform.stats.trigger_count;
+      docsProcessed = transform.stats.documents_processed;
+      return true;
+    } catch (e: any) {
+      if (e.message?.includes('resource_not_found_exception')) {
+        log.debug(`Transform not found yet, waiting...`);
+        return false;
+      }
+      throw e;
+    }
+  }
+);
+
+// Phase 2: Wait for transform to execute
+await retry.waitForWithTimeout('Transform to run', TIMEOUT_MS, async () => {
+  const response = await es.transform.getTransformStats({ transform_id: TRANSFORM_ID });
+  if (!response.transforms[0]) {
+    log.debug(`Transform not in stats response, retrying...`);
+    return false;
+  }
+  transform = response.transforms[0];
+  if (transform.stats.trigger_count <= triggerCount) {
+    log.debug(`trigger_count ${transform.stats.trigger_count} not greater than ${triggerCount}`);
+    return false;
+  }
+  if (transform.stats.documents_processed <= docsProcessed) {
+    log.debug(`docs_processed not greater than ${docsProcessed}`);
+    return false;
+  }
+  return true;
+});
+```
+
+**Real Example:** PR #253024 - `snapshots.ts` test failed because `createDocumentsAndTriggerTransform` didn't wait for the transform to exist before checking its stats. Fix: Added two-phase polling - first wait for existence, then wait for execution.
+
+### API Pattern: Conditional Returns vs Assertions in Retry Loops
+
+**Symptoms:**
+- Retry loops exit prematurely with assertion errors
+- Test fails with `expect(X).to.eql(Y)` inside `waitForWithTimeout`
+- Retry doesn't happen even though condition isn't met yet
+
+**Root Cause:** Inside `retry.waitForWithTimeout()` callbacks, using assertion functions like `expect()` throws an error when the condition isn't met. This causes the retry to fail immediately instead of continuing to poll.
+
+```typescript
+// ❌ Flaky - assertion throws, stops retry immediately
+await retry.waitForWithTimeout('Transform to run', TIMEOUT_MS, async () => {
+  const response = await es.transform.getTransformStats({ transform_id: id });
+  transform = response.transforms[0];
+  expect(transform.stats.trigger_count).to.greaterThan(triggerCount); // THROWS!
+  expect(transform.stats.documents_processed).to.greaterThan(docsProcessed); // Never reached
+  return true;
+});
+
+// ✅ Stable - conditional returns allow retry to continue
+await retry.waitForWithTimeout('Transform to run', TIMEOUT_MS, async () => {
+  const response = await es.transform.getTransformStats({ transform_id: id });
+  if (!response.transforms[0]) {
+    log.debug('Transform not found in response, retrying...');
+    return false; // Continue polling
+  }
+  transform = response.transforms[0];
+  if (transform.stats.trigger_count <= triggerCount) {
+    log.debug(`trigger_count not ready yet: ${transform.stats.trigger_count}`);
+    return false; // Continue polling
+  }
+  if (transform.stats.documents_processed <= docsProcessed) {
+    log.debug(`docs_processed not ready yet`);
+    return false; // Continue polling
+  }
+  log.debug('Transform execution complete');
+  return true; // Success - exit loop
+});
+```
+
+**Key principle:** Inside retry callbacks:
+- Return `false` to continue polling
+- Return `true` to exit successfully  
+- `throw` only for unexpected errors that should fail immediately
+- Save assertions for *after* the retry loop completes
+
+**Real Example:** PR #253024 - The `createDocumentsAndTriggerTransform` function used `expect()` assertions inside the retry loop. When conditions weren't met, the assertions threw errors and stopped the retry. Fix: Changed to conditional returns with diagnostic logging.
 
 ### API Pattern: Task Conflict During Concurrent Initialization
 
