@@ -32,7 +32,8 @@ export interface TestServerlessUtils {
 }
 
 const ES_BASE_PATH_DIR = Path.join(REPO_ROOT, '.es/es_test_serverless');
-const projectType: ServerlessProjectType = 'es';
+const DEFAULT_PROJECT_TYPE: ServerlessProjectType = 'es';
+const DEFAULT_KIBANA_URL = 'http://localhost:5601/';
 
 /**
  * See docs in {@link TestUtils}. This function provides the same utilities but
@@ -44,6 +45,9 @@ export function createTestServerlessInstances({
   adjustTimeout,
   kibana = {},
   enableCPS = false,
+  esArgs = [],
+  projectType = DEFAULT_PROJECT_TYPE,
+  kibanaUrl = DEFAULT_KIBANA_URL,
 }: {
   kibana?: {
     settings?: {};
@@ -57,26 +61,70 @@ export function createTestServerlessInstances({
    *  - `remote_cluster_server.enabled=true`
    *
    * Equivalent to running:
-   *  `yarn es serverless --uiam -E serverless.cross_project.enabled=true -E remote_cluster_server.enabled=true`
+   *  `yarn es serverless --projectType observability --uiam --kill --clean \
+   *    --kibanaUrl http://localhost:5601/ \
+   *    -E serverless.cross_project.enabled=true -E remote_cluster_server.enabled=true`
    *
    * @default false
    */
   enableCPS?: boolean;
+  /**
+   * Additional Elasticsearch arguments to pass when starting the cluster.
+   * These will be appended to the default esArgs when enableCPS is true.
+   *
+   * Example: `['xpack.ccs.projects={"origin": {...}}']`
+   *
+   * @default []
+   */
+  esArgs?: string[];
+  /**
+   * The serverless project type to run (`yarn es serverless --projectType`).
+   *
+   * Defaults to `es` for existing tests.
+   */
+  projectType?: ServerlessProjectType;
+  /**
+   * Passed through to the `@kbn/es` serverless docker runner as `--kibanaUrl`.
+   *
+   * This is important for UIAM mode: the serverless runner only applies the
+   * UIAM-related ES args (including project metadata) when `kibanaUrl` is set.
+   *
+   * See `resolveEsArgs()` in `src/platform/packages/shared/kbn-es/src/utils/docker.ts`.
+   */
+  kibanaUrl?: string;
 } = {}): TestServerlessUtils {
   adjustTimeout?.(150_000);
 
-  const esUtils = createServerlessES({ enableCPS });
+  const esUtils = createServerlessES({
+    enableCPS,
+    esArgs,
+    projectType,
+    // Ensure the serverless runner configures mock IDP/UIAM settings when CPS is enabled.
+    kibanaUrl: enableCPS ? kibanaUrl : undefined,
+  });
 
   if (enableCPS) {
     if (!kibana.settings) kibana.settings = {};
     set(kibana.settings, 'cps.cpsEnabled', true);
-    set(kibana.settings, 'elasticsearch', {
-      hosts: [`https://localhost:${esTestConfig.getPort()}`],
-      serviceAccountToken: kibanaDevServiceAccount.token,
-      ssl: {
-        certificateAuthorities: CA_CERT_PATH,
-      },
-    });
+    // Match the default `yarn es serverless --uiam` setup, but allow tests to override
+    // auth by pre-setting `elasticsearch.username/password` (e.g. use `system_indices_superuser`).
+    const existingEsSettings = (kibana.settings as any).elasticsearch ?? {};
+    set(kibana.settings, 'elasticsearch.hosts', [`https://localhost:${esTestConfig.getPort()}`]);
+    set(kibana.settings, 'elasticsearch.ssl.certificateAuthorities', CA_CERT_PATH);
+    if (
+      (existingEsSettings.username || existingEsSettings.password) &&
+      existingEsSettings.serviceAccountToken
+    ) {
+      // Config schema forbids specifying both serviceAccountToken and username/password.
+      delete (kibana.settings as any).elasticsearch.serviceAccountToken;
+    }
+    if (
+      !existingEsSettings.serviceAccountToken &&
+      !existingEsSettings.username &&
+      !existingEsSettings.password
+    ) {
+      set(kibana.settings, 'elasticsearch.serviceAccountToken', kibanaDevServiceAccount.token);
+    }
     kibana.cliArgs = { ...kibana.cliArgs, uiam: true, serverless: true };
   }
   const kbUtils = createServerlessKibana(kibana.settings, kibana.cliArgs);
@@ -105,7 +153,17 @@ export function createTestServerlessInstances({
   };
 }
 
-function createServerlessES({ enableCPS = false }: { enableCPS?: boolean } = {}) {
+function createServerlessES({
+  enableCPS = false,
+  esArgs = [],
+  projectType = DEFAULT_PROJECT_TYPE,
+  kibanaUrl,
+}: {
+  enableCPS?: boolean;
+  esArgs?: string[];
+  projectType?: ServerlessProjectType;
+  kibanaUrl?: string;
+} = {}) {
   const log = new ToolingLog({
     level: 'info',
     writeTo: process.stdout,
@@ -115,6 +173,10 @@ function createServerlessES({ enableCPS = false }: { enableCPS?: boolean } = {})
   const esServerlessImageParams = parseEsServerlessImageOverride(
     esTestConfig.getESServerlessImage()
   );
+  const baseArgs = enableCPS
+    ? ['serverless.cross_project.enabled=true', 'remote_cluster_server.enabled=true']
+    : [];
+
   return {
     es,
     start: async () => {
@@ -126,16 +188,13 @@ function createServerlessES({ enableCPS = false }: { enableCPS?: boolean } = {})
         clean: true,
         kill: true,
         waitForReady: true,
+        ...(kibanaUrl ? { kibanaUrl } : {}),
         ...esServerlessImageParams,
         ...(enableCPS
           ? {
-              kibanaUrl: 'http://localhost:5601/',
               ssl: true,
               uiam: true,
-              esArgs: [
-                'serverless.cross_project.enabled=true',
-                'remote_cluster_server.enabled=true',
-              ],
+              esArgs: [...baseArgs, ...esArgs],
             }
           : {}),
       });
@@ -202,7 +261,16 @@ const getServerlessDefault = () => {
 };
 
 export function createServerlessKibana(settings = {}, cliArgs: Partial<CliArgs> = {}) {
-  return createRoot(defaultsDeep(settings, getServerlessDefault()), {
+  // Serverless defaults include `elasticsearch.serviceAccountToken`, but some tests may want
+  // to run with basic auth (`elasticsearch.username/password`). Kibana config schema forbids
+  // specifying both, so if username/password are provided, drop the token from defaults.
+  const defaults = getServerlessDefault();
+  const esOverrides = (settings as any)?.elasticsearch;
+  if (esOverrides?.username || esOverrides?.password) {
+    delete (defaults as any).elasticsearch.serviceAccountToken;
+  }
+
+  return createRoot(defaultsDeep(settings, defaults), {
     ...cliArgs,
     serverless: true,
   });

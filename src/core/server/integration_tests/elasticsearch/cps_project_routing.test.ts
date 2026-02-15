@@ -17,9 +17,24 @@ import type {
 } from '@kbn/core-test-helpers-kbn-server';
 import { createTestServerlessInstances } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { systemIndicesSuperuser } from '@kbn/test';
 
 const TEST_INDEX = '.kibana_cps-routing-integration-test';
 const LOCAL_PROJECT_ROUTING = '_alias:_origin';
+
+// Pre-configured project for serverless ES tests
+// This matches the structure expected by the xpack.ccs.projects configuration
+const LOCAL_PROJECT_CONFIG = {
+  origin: {
+    abcde1234567890: {
+      _alias: 'local_project',
+      _id: 'abcde1234567890',
+      _organization: 'org1234567890',
+      _type: 'observability',
+      env: 'local',
+    },
+  },
+};
 
 // Test documents - defined at module scope so we can derive counts from them
 const TEST_DOCUMENTS = [
@@ -62,10 +77,38 @@ describe('CPS project_routing on serverless ES', () => {
     const { startES, startKibana } = createTestServerlessInstances({
       adjustTimeout: (timeout: number) => jest.setTimeout(timeout),
       enableCPS: true,
+      // Match `yarn es serverless --projectType observability ...`
+      projectType: 'oblt',
+      // Required to apply the UIAM/serverless ES args block (mock IDP/project metadata).
+      kibanaUrl: 'http://localhost:5601/',
+      // Setup-only: use superuser so tests can create temp indices.
+      kibana: {
+        settings: {
+          elasticsearch: {
+            username: systemIndicesSuperuser.username,
+            password: systemIndicesSuperuser.password,
+          },
+        },
+      },
     });
     serverlessES = await startES();
     serverlessKibana = await startKibana();
     client = serverlessKibana.coreStart.elasticsearch.client.asInternalUser;
+
+    // Wait for ES/UIAM to fully initialize and establish project state
+    // The CPS team mentioned there's a brief window where ES returns errors after startup.
+    // We need to wait long enough for:
+    // 1. UIAM service to fully start and connect to CosmosDB
+    // 2. ES to sync project state from UIAM
+    // 3. Origin project state to be established
+    await new Promise((resolve) => setTimeout(resolve, 60000)); // Increased to 60 seconds
+
+    // Make an initial ping to establish connection
+    try {
+      await client.ping();
+    } catch (e) {
+      // Ignore ping errors
+    }
 
     await client.indices.create({
       index: TEST_INDEX,
@@ -85,6 +128,11 @@ describe('CPS project_routing on serverless ES', () => {
     }
 
     await client.indices.refresh({ index: TEST_INDEX });
+  });
+
+  afterEach(async () => {
+    // Make mutations from tests deterministic (index/delete/update become visible).
+    await client?.indices.refresh({ index: TEST_INDEX }).catch(() => {});
   });
 
   afterAll(async () => {
@@ -705,4 +753,106 @@ describe('CPS project_routing on serverless ES', () => {
       expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
     });
   });
+
+  /**
+   * Tests for project_routing with the Kibana service account.
+   * According to the CPS team, the Kibana service account can access the origin project
+   * without needing UIAM credentials. UIAM is only required for cross-project access.
+   */
+  describe('project_routing with origin project access', () => {
+    it('search works with project_routing to origin project', async () => {
+      const response: any = await client.transport.request({
+        method: 'POST',
+        path: `/${TEST_INDEX}/_search`,
+        body: {
+          project_routing: LOCAL_PROJECT_ROUTING,
+          query: { match_all: {} },
+        },
+      });
+
+      expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
+    });
+
+    it('search with filters works with project_routing', async () => {
+      const response: any = await client.transport.request({
+        method: 'POST',
+        path: `/${TEST_INDEX}/_search`,
+        body: {
+          project_routing: LOCAL_PROJECT_ROUTING,
+          query: { term: { category: 'alpha' } },
+        },
+      });
+
+      expect(response.hits.hits.length).toBe(ALPHA_CATEGORY_DOCS_COUNT);
+    });
+
+    it('count works with project_routing', async () => {
+      const response: any = await client.transport.request({
+        method: 'POST',
+        path: `/${TEST_INDEX}/_count`,
+        body: {
+          project_routing: LOCAL_PROJECT_ROUTING,
+          query: { match_all: {} },
+        },
+      });
+
+      expect(response.count).toBe(TOTAL_DOCS_COUNT);
+    });
+
+    it('msearch works with project_routing', async () => {
+      // msearch uses newline-delimited JSON (NDJSON) format
+      const ndjson =
+        JSON.stringify({ index: TEST_INDEX }) +
+        '\n' +
+        JSON.stringify({ project_routing: LOCAL_PROJECT_ROUTING, query: { match_all: {} } }) +
+        '\n' +
+        JSON.stringify({ index: TEST_INDEX }) +
+        '\n' +
+        JSON.stringify({
+          project_routing: LOCAL_PROJECT_ROUTING,
+          query: { term: { category: 'beta' } },
+        }) +
+        '\n';
+
+      const response: any = await client.transport.request({
+        method: 'POST',
+        path: '/_msearch',
+        body: ndjson,
+      });
+
+      expect(response.responses.length).toBe(2);
+      expect(response.responses[0].hits.hits.length).toBe(TOTAL_DOCS_COUNT);
+      expect(response.responses[1].hits.hits.length).toBe(BETA_CATEGORY_DOCS_COUNT);
+    });
+
+    it('search with match query works with project_routing', async () => {
+      const response: any = await client.transport.request({
+        method: 'POST',
+        path: `/${TEST_INDEX}/_search`,
+        body: {
+          project_routing: LOCAL_PROJECT_ROUTING,
+          query: { match: { title: 'document' } },
+        },
+      });
+
+      expect(response.hits.hits.length).toBe(DOCS_WITH_DOCUMENT_IN_TITLE);
+    });
+
+    it('search with sort works with project_routing', async () => {
+      const response: any = await client.transport.request({
+        method: 'POST',
+        path: `/${TEST_INDEX}/_search`,
+        body: {
+          project_routing: LOCAL_PROJECT_ROUTING,
+          query: { match_all: {} },
+          sort: [{ count: { order: 'desc' } }],
+        },
+      });
+
+      expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
+      const counts = response.hits.hits.map((hit: any) => hit._source.count);
+      expect(counts).toEqual(SORTED_COUNTS_DESC);
+    });
+  });
 });
+
