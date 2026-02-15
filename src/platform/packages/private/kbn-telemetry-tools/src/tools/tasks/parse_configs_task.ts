@@ -11,7 +11,29 @@ import * as path from 'path';
 import { parseTelemetryRC } from '../config';
 import type { TaskContext } from './task_context';
 
-export function parseConfigsTask() {
+/**
+ * Check if a config root matches any of the filter patterns
+ */
+function matchesRootFilter(configRoot: string, rootFilter: string[] | undefined): boolean {
+  if (!rootFilter || rootFilter.length === 0) {
+    return true; // No filter, include all
+  }
+
+  // Normalize the config root for comparison
+  const normalizedConfigRoot = configRoot.replace(/\\/g, '/');
+
+  return rootFilter.some((filter) => {
+    const normalizedFilter = filter.replace(/\\/g, '/');
+    // Check if the config root contains the filter pattern
+    return (
+      normalizedConfigRoot.includes(normalizedFilter) ||
+      normalizedConfigRoot.endsWith(normalizedFilter) ||
+      normalizedFilter.includes(normalizedConfigRoot)
+    );
+  });
+}
+
+export function parseConfigsTask(rootFilter?: string[]) {
   const kibanaRoot = process.cwd();
   const xpackRoot = path.join(kibanaRoot, 'x-pack');
 
@@ -22,7 +44,10 @@ export function parseConfigsTask() {
       try {
         const configs = await parseTelemetryRC(configRoot);
         configs.forEach((config) => {
-          context.roots.push({ config });
+          // Apply root filter if provided
+          if (matchesRootFilter(config.root, rootFilter)) {
+            context.roots.push({ config });
+          }
         });
       } catch (err) {
         const { reporter } = context;

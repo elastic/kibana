@@ -15,11 +15,15 @@ import dedent from 'dedent';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
 
-import { generateNoticeFromSource } from './generate_notice_from_source';
+import {
+  generateNoticeFromSource,
+  checkFilesForNoticeComments,
+} from './generate_notice_from_source';
 
 const unknownFlags = [];
 const opts = getopts(process.argv.slice(2), {
   boolean: ['help', 'validate', 'verbose', 'debug'],
+  string: ['files'],
   unknown(flag) {
     unknownFlags.push(flag);
   },
@@ -48,6 +52,8 @@ if (opts.help) {
     Options:
       --help      Show this help info
       --validate  Don't write the NOTICE.txt, just fail if updates would have been made
+      --files     Comma-separated list of files to check for @notice comments.
+                  If provided and none contain @notice, the full scan is skipped.
       --verbose   Set logging level to verbose
       --debug     Set logging level to debug
   ` +
@@ -57,6 +63,21 @@ if (opts.help) {
 }
 
 (async function run() {
+  // If specific files are provided, first check if any contain @notice comments
+  // If none do, we can skip the full scan since NOTICE.txt wouldn't change
+  if (opts.files) {
+    const filesToCheck = opts.files.split(',').filter(Boolean);
+    if (filesToCheck.length > 0) {
+      log.info(`Checking ${filesToCheck.length} file(s) for @notice comments...`);
+      const hasNoticeComments = await checkFilesForNoticeComments(filesToCheck, log);
+      if (!hasNoticeComments) {
+        log.success('No @notice comments in changed files. NOTICE.txt check skipped.');
+        return;
+      }
+      log.info('Found @notice comments in changed files. Running full NOTICE.txt validation...');
+    }
+  }
+
   const path = resolve(REPO_ROOT, 'NOTICE.txt');
   const newContent = await generateNoticeFromSource({
     productName: 'Kibana source code with Kibana X-Pack source code',

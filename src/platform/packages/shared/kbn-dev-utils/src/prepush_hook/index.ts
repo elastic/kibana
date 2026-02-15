@@ -7,15 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Entry point for the quick checks script.
- *
- * Usage:
- *   node scripts/quick_checks [options]
- *
- * See --help for available options.
- */
-
-import { runQuickChecks } from './quick_checks';
-
-runQuickChecks();
+export { PREPUSH_SCRIPT_SOURCE } from './script_source';
