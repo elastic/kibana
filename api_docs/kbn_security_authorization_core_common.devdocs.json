@@ -44,7 +44,7 @@
             "tags": [],
             "label": "privilegeId",
             "description": [
-              "The privilege ID to get the minimal privilege ID for. Only `all` and `read`\nprivileges have \"minimal\" equivalents."
+              "The privilege ID to get the minimal privilege ID for. Only `all` and `read`"
             ],
             "signature": [
               "string"

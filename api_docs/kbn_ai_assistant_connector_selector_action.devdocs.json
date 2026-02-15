@@ -380,7 +380,7 @@
               "Selectable footer component"
             ],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
+              "React.ReactElement<any> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
             "lineNumber": 32,

@@ -108,7 +108,7 @@
             "tags": [],
             "label": "fields",
             "description": [
-              "A list of {@link FieldDefinition } objects."
+              "A list of {@link FieldDefinition} objects."
             ],
             "signature": [
               {
@@ -197,7 +197,7 @@
             "tags": [],
             "label": "field",
             "description": [
-              "The `array` {@link FieldDefinition } to compare."
+              "The `array` {@link FieldDefinition} to compare."
             ],
             "signature": [
               "F<\"array\">"
@@ -257,7 +257,7 @@
             "tags": [],
             "label": "field",
             "description": [
-              "The `color` {@link FieldDefinition } to compare."
+              "The `color` {@link FieldDefinition} to compare."
             ],
             "signature": [
               "F<\"color\">"
@@ -317,7 +317,7 @@
             "tags": [],
             "label": "field",
             "description": [
-              "The `boolean` {@link FieldDefinition } to compare."
+              "The `boolean` {@link FieldDefinition} to compare."
             ],
             "signature": [
               "F<\"boolean\">"
@@ -377,7 +377,7 @@
             "tags": [],
             "label": "field",
             "description": [
-              "The `image` {@link FieldDefinition } to compare."
+              "The `image` {@link FieldDefinition} to compare."
             ],
             "signature": [
               "F<\"image\">"
@@ -437,7 +437,7 @@
             "tags": [],
             "label": "field",
             "description": [
-              "The `json` {@link FieldDefinition } to compare."
+              "The `json` {@link FieldDefinition} to compare."
             ],
             "signature": [
               "F<\"json\">"
@@ -497,7 +497,7 @@
             "tags": [],
             "label": "field",
             "description": [
-              "The `markdown` {@link FieldDefinition } to compare."
+              "The `markdown` {@link FieldDefinition} to compare."
             ],
             "signature": [
               "F<\"markdown\">"
@@ -557,7 +557,7 @@
             "tags": [],
             "label": "field",
             "description": [
-              "The `number` {@link FieldDefinition } to compare."
+              "The `number` {@link FieldDefinition} to compare."
             ],
             "signature": [
               "F<\"number\">"
@@ -617,7 +617,7 @@
             "tags": [],
             "label": "field",
             "description": [
-              "The `select` {@link FieldDefinition } to compare."
+              "The `select` {@link FieldDefinition} to compare."
             ],
             "signature": [
               "F<\"select\">"
@@ -677,7 +677,7 @@
             "tags": [],
             "label": "field",
             "description": [
-              "The `string` {@link FieldDefinition } to compare."
+              "The `string` {@link FieldDefinition} to compare."
             ],
             "signature": [
               "F<\"string\">"
@@ -737,7 +737,7 @@
             "tags": [],
             "label": "field",
             "description": [
-              "The `undefined` {@link FieldDefinition } to compare."
+              "The `undefined` {@link FieldDefinition} to compare."
             ],
             "signature": [
               "F<\"undefined\">"
@@ -805,7 +805,7 @@
             "tags": [],
             "label": "field",
             "description": [
-              "The {@link FieldDefinition } to compare."
+              "The {@link FieldDefinition} to compare."
             ],
             "signature": [
               "F<S>"
@@ -824,7 +824,7 @@
             "tags": [],
             "label": "change",
             "description": [
-              "The {@link UnsavedFieldChange } to compare."
+              "The {@link UnsavedFieldChange} to compare."
             ],
             "signature": [
               "C<S> | undefined"
@@ -1053,7 +1053,7 @@
             "tags": [],
             "label": "setting",
             "description": [
-              "The source {@link UiSettingMetadata } object."
+              "The source {@link UiSettingMetadata} object."
             ],
             "signature": [
               {
@@ -1081,7 +1081,7 @@
             "tags": [],
             "label": "userValue",
             "description": [
-              "The value to compare to the setting's default value.  Default is the\n{@link UiSettingMetadata }'s user value."
+              "The value to compare to the setting's default value. Default is the"
             ],
             "signature": [
               {
@@ -1140,7 +1140,7 @@
             "tags": [],
             "label": "rawSettings",
             "description": [
-              "The raw settings retrieved from the {@link IUiSettingsClient }, which\nmay be missing the `type` or `value` properties."
+              "The raw settings retrieved from the {@link IUiSettingsClient}, which"
             ],
             "signature": [
               "RawSettings"
@@ -1201,7 +1201,7 @@
             "tags": [],
             "label": "params",
             "description": [
-              "The {@link UseUpdateParameters } to use."
+              "The {@link UseUpdateParameters} to use."
             ],
             "signature": [
               {

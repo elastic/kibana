@@ -1999,6 +1999,82 @@
       },
       {
         "parentPluginId": "@kbn/std",
+        "id": "def-common.prettyCompactStringify",
+        "type": "Function",
+        "tags": [],
+        "label": "prettyCompactStringify",
+        "description": [
+          "\nPretty-prints JSON in a compact format that balances readability with space efficiency.\n\nShort objects and arrays are kept on a single line when they fit within `maxLength`.\nLonger structures are broken across multiple lines with proper indentation.\n\nThis is useful for displaying JSON in editors or logs where both readability\nand compact output are desired.\n"
+        ],
+        "signature": [
+          "(value: unknown, options: ",
+          {
+            "pluginId": "@kbn/std",
+            "scope": "common",
+            "docId": "kibKbnStdPluginApi",
+            "section": "def-common.PrettyCompactStringifyOptions",
+            "text": "PrettyCompactStringifyOptions"
+          },
+          ") => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/pretty_compact_stringify.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.prettyCompactStringify.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "- The value to stringify"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/pretty_compact_stringify.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.prettyCompactStringify.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- Configuration options for formatting"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/std",
+                "scope": "common",
+                "docId": "kibKbnStdPluginApi",
+                "section": "def-common.PrettyCompactStringifyOptions",
+                "text": "PrettyCompactStringifyOptions"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/pretty_compact_stringify.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "A formatted JSON string"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
         "id": "def-common.safeJsonParse",
         "type": "Function",
         "tags": [],
@@ -2041,7 +2117,7 @@
             "tags": [],
             "label": "handleError",
             "description": [
-              "Optional callback that is called when an error\nduring parsing. Its return value is returned from the\nfunction."
+              "Optional callback that is called when an error"
             ],
             "signature": [
               "(error: Error) => T"
@@ -2066,13 +2142,13 @@
         "tags": [],
         "label": "safeJsonStringify",
         "description": [
-          "\nSafely stringifies a value to JSON. If the value cannot be stringified,\nfor instance if it contains circular references, it will return `undefined`.\nIf `handleError` is defined, it will be called with the error, and the\nresponse will be returned. This allows consumers to wrap the JSON.stringify\nerror.\n"
+          "\nSafely stringifies a value to JSON. Handles circular references by omitting\nthem from the output (treating them as `undefined`).\n\nIf an unexpected error occurs during stringification, `handleError` will be\ncalled if provided, otherwise `undefined` is returned.\n"
         ],
         "signature": [
           "(value: unknown, handleError: (error: Error) => string | undefined) => string | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/safe_json_stringify.ts",
-        "lineNumber": 14,
+        "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2090,7 +2166,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/safe_json_stringify.ts",
-            "lineNumber": 28,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2103,13 +2179,13 @@
             "tags": [],
             "label": "handleError",
             "description": [
-              "Optional callback that is called when an error occurs during\nstringifying."
+              "Optional callback that is called when an error occurs during"
             ],
             "signature": [
               "(error: Error) => string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/safe_json_stringify.ts",
-            "lineNumber": 29,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2118,6 +2194,83 @@
         ],
         "returnComment": [
           "The JSON string representation of the value, or `undefined`\nif an error occurs."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
+        "id": "def-common.stableStringify",
+        "type": "Function",
+        "tags": [],
+        "label": "stableStringify",
+        "description": [
+          "\nDeterministically stringifies a value to JSON with sorted keys.\nThis ensures consistent output regardless of property insertion order,\nmaking it ideal for:\n- Generating cache keys\n- Creating hashes for comparison\n- Cryptographic operations requiring deterministic input\n\nAlso handles circular references safely by replacing them with \"[Circular]\".\n"
+        ],
+        "signature": [
+          "(value: unknown, options: ",
+          {
+            "pluginId": "@kbn/std",
+            "scope": "common",
+            "docId": "kibKbnStdPluginApi",
+            "section": "def-common.StableStringifyOptions",
+            "text": "StableStringifyOptions"
+          },
+          " | undefined) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/stable_stringify.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.stableStringify.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "- The value to stringify"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/stable_stringify.ts",
+            "lineNumber": 37,
+            "columnNumber": 33,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.stableStringify.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- Optional configuration for formatting"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/std",
+                "scope": "common",
+                "docId": "kibKbnStdPluginApi",
+                "section": "def-common.StableStringifyOptions",
+                "text": "StableStringifyOptions"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/stable_stringify.ts",
+            "lineNumber": 37,
+            "columnNumber": 49,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "A JSON string with keys sorted alphabetically"
         ],
         "initialIsOpen": false
       },
@@ -2226,6 +2379,132 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/std",
+        "id": "def-common.PrettyCompactStringifyOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "PrettyCompactStringifyOptions",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-std/src/pretty_compact_stringify.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.PrettyCompactStringifyOptions.maxLength",
+            "type": "number",
+            "tags": [
+              "default"
+            ],
+            "label": "maxLength",
+            "description": [
+              "\nMaximum line length before breaking to multiple lines."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/pretty_compact_stringify.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.PrettyCompactStringifyOptions.indent",
+            "type": "number",
+            "tags": [
+              "default"
+            ],
+            "label": "indent",
+            "description": [
+              "\nNumber of spaces for indentation."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/pretty_compact_stringify.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.PrettyCompactStringifyOptions.replacer",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "replacer",
+            "description": [
+              "\nA function that alters the behavior of the stringification process,\nor an array of strings/numbers to filter properties."
+            ],
+            "signature": [
+              "(string | number)[] | ((key: string, value: unknown) => unknown) | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/pretty_compact_stringify.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
+        "id": "def-common.StableStringifyOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "StableStringifyOptions",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-std/src/stable_stringify.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.StableStringifyOptions.space",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "space",
+            "description": [
+              "\nAdds indentation for pretty-printing. Can be a number of spaces or a string."
+            ],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/stable_stringify.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.StableStringifyOptions.replacer",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "replacer",
+            "description": [
+              "\nA function or array to filter/transform values during stringification."
+            ],
+            "signature": [
+              "(string | number)[] | ((key: string, value: unknown) => unknown) | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/stable_stringify.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/std",
         "id": "def-common.URLMeaningfulParts",

@@ -143,7 +143,7 @@
               "\nIcon type from EUI icon library.\nUsed to visually represent this step type in the UI.\nkibana icon will be used if not provided\nTODO: add support for EuiIconType"
             ],
             "signature": [
-              "React.ComponentType<{}> | undefined"
+              "React.ComponentType | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
             "lineNumber": 52,

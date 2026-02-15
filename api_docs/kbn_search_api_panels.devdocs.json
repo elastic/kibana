@@ -212,7 +212,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
-        "lineNumber": 35,
+        "lineNumber": 36,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -234,7 +234,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
-            "lineNumber": 35,
+            "lineNumber": 36,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
@@ -551,7 +551,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
-        "lineNumber": 57,
+        "lineNumber": 58,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -573,7 +573,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
@@ -650,7 +650,7 @@
             "label": "direction",
             "description": [],
             "signature": [
-              "\"row\" | \"column\""
+              "\"column\" | \"row\""
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
             "lineNumber": 29,
@@ -783,7 +783,7 @@
             "label": "children",
             "description": [],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              "React.ReactElement<any>"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
             "lineNumber": 60,
@@ -854,7 +854,7 @@
             "label": "direction",
             "description": [],
             "signature": [
-              "\"row\" | \"column\""
+              "\"column\" | \"row\""
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
             "lineNumber": 32,
@@ -873,7 +873,7 @@
         "label": "EisPromotionalTourProps",
         "description": [],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
-        "lineNumber": 27,
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -889,7 +889,7 @@
               "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -905,7 +905,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -918,7 +918,7 @@
             "label": "promoId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
-            "lineNumber": 30,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -931,7 +931,7 @@
             "label": "isCloudEnabled",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -944,10 +944,10 @@
             "label": "children",
             "description": [],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              "React.ReactElement<any>"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1043,7 +1043,7 @@
             "label": "direction",
             "description": [],
             "signature": [
-              "\"row\" | \"column\""
+              "\"column\" | \"row\""
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
             "lineNumber": 55,
@@ -1103,7 +1103,7 @@
           "\nProps for the InferenceCostsTransparencyTour component.\n"
         ],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
-        "lineNumber": 24,
+        "lineNumber": 25,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1119,7 +1119,7 @@
               "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1135,7 +1135,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
-            "lineNumber": 50,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1148,7 +1148,7 @@
             "label": "promoId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
-            "lineNumber": 51,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1161,7 +1161,7 @@
             "label": "isCloudEnabled",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
-            "lineNumber": 52,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1177,7 +1177,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
-            "lineNumber": 53,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1190,10 +1190,10 @@
             "label": "children",
             "description": [],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              "React.ReactElement<any>"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/inference_costs_transparency_tour.tsx",
-            "lineNumber": 54,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
