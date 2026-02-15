@@ -23,6 +23,7 @@ import { type as signalsMigrationType } from './lib/detection_engine/migrations/
 import { manifestType, unifiedManifestType } from './endpoint/lib/artifacts/saved_object_mappings';
 import { riskEngineConfigurationType } from './lib/entity_analytics/risk_engine/saved_object';
 import { entityEngineDescriptorType } from './lib/entity_analytics/entity_store/saved_object';
+import { malwareAnalysisResultType } from './lib/malware_analysis/saved_object_mappings';
 import {
   privilegeMonitoringType,
   monitoringEntitySourceType,
@@ -57,6 +58,7 @@ const types = [
   promptType,
   referenceDataSavedObjectType,
   trialCompanionNBASavedObjectType,
+  malwareAnalysisResultType,
 ];
 
 export const savedObjectTypes = types.map((type) => type.name);

@@ -232,6 +232,30 @@ export const configSchema = schema.object({
       }),
     })
   ),
+  /**
+   * Configuration for the Malware RE Analysis feature.
+   * This connects to the Arbiter orchestrator service for AI-powered malware analysis.
+   * See: https://github.com/elastic/malware_agent
+   */
+  malwareAnalysis: schema.maybe(
+    schema.object({
+      /**
+       * URL of the malware analysis orchestrator service
+       * @example 'http://localhost:8080' or 'http://malware-orchestrator:8080'
+       */
+      orchestratorUrl: schema.string({ defaultValue: 'http://localhost:8080' }),
+      /**
+       * API token for authenticating with the orchestrator.
+       * Create this token via the orchestrator's auth API or web UI.
+       */
+      apiToken: schema.maybe(schema.string()),
+      /**
+       * Request timeout in milliseconds for orchestrator API calls.
+       * Analysis can take several minutes, so this should be generous.
+       */
+      timeout: schema.number({ defaultValue: 60000 }),
+    })
+  ),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

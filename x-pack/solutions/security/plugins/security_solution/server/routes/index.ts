@@ -59,6 +59,7 @@ import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
 import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
 import type { TrialCompanionRoutesDeps } from '../lib/trial_companion/types';
 import { registerDataGeneratorRoutes } from './data_generator/register_data_generator_routes';
+import { registerMalwareAnalysisRoutes } from '../lib/malware_analysis';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -156,6 +157,15 @@ export const initRoutes = (
   registerSiemReadinessRoutes({ router, logger });
 
   registerTrialCompanionRoutes(trialCompanionDeps);
+
+  // Malware RE Analysis routes - connects to the Arbiter orchestrator
+  if (config.malwareAnalysis) {
+    registerMalwareAnalysisRoutes(router, logger, {
+      orchestratorUrl: config.malwareAnalysis.orchestratorUrl,
+      apiToken: config.malwareAnalysis.apiToken,
+      timeout: config.malwareAnalysis.timeout,
+    });
+  }
 
   if (enableDataGeneratorRoutes) {
     registerDataGeneratorRoutes(router, getStartServices);
