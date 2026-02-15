@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Filter } from '@kbn/es-query';
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import { dashboardClient } from '../../dashboard_client';
+import { applyControlFiltersToPanels } from '../../dashboard_app/url/bwc/apply_control_filters_to_panels';
 import { getPanelSettings } from '../../panel_placement/get_panel_placement_settings';
 import { DEFAULT_PANEL_PLACEMENT_SETTINGS } from '../../plugin_constants';
 import { getAccessControlClient } from '../../services/access_control_service';
@@ -77,13 +79,46 @@ export async function loadDashboardApi({
     getDashboardBackupService().storeViewMode(viewMode);
   }
 
+  // Get the base state from saved dashboard
+  const lastSavedState = getLastSavedState(readResult);
+
+  // Apply control filters from navigation to matching controls on this dashboard.
+  // This allows control selections to persist when navigating between dashboards
+  // that have the same controls (same field and data view), rather than appearing
+  // as top-level filters in the filter bar.
+  //
+  // When overrideState.filters is defined (even if empty), we use the saved state
+  // for pinned_panels rather than unsaved changes. This ensures that navigating
+  // without filters doesn't retain control selections from previous navigations.
+  const controlFilterOverrides: {
+    pinned_panels?: typeof lastSavedState.pinned_panels;
+    filters?: Filter[];
+  } = {};
+
+  if (overrideState.filters !== undefined) {
+    // Start with saved state for controls (not unsaved changes)
+    controlFilterOverrides.pinned_panels = lastSavedState?.pinned_panels;
+
+    // Apply any incoming filters to matching controls
+    if (overrideState.filters.length && lastSavedState?.pinned_panels?.length) {
+      const { updatedPinnedPanels, remainingFilters } = applyControlFiltersToPanels(
+        overrideState.filters as Filter[],
+        lastSavedState.pinned_panels
+      );
+      controlFilterOverrides.pinned_panels = updatedPinnedPanels;
+      controlFilterOverrides.filters = remainingFilters;
+    }
+  }
+
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
     incomingEmbeddables,
     initialState: {
-      ...getLastSavedState(readResult),
+      ...lastSavedState,
       ...unsavedChanges,
       ...overrideState,
+      // Override with the merged values after applying control filters (only if we processed any)
+      ...controlFilterOverrides,
     },
     readResult,
     savedObjectId,
