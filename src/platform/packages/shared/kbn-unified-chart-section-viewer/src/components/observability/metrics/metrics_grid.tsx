@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -22,10 +22,11 @@ import { FieldsMetadataProvider } from '../../../context/fields_metadata';
 import { createESQLQuery } from '../../../common/utils';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
+import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 
 export type MetricsGridProps = Pick<
   UnifiedMetricsGridProps,
-  'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
+  'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions' | 'isTabSelected'
 > & {
   dimensions: Dimension[];
   searchTerm?: string;
@@ -50,18 +51,35 @@ export const MetricsGrid = ({
   fetchParams,
   discoverFetch$,
   searchTerm,
+  isTabSelected,
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
+  const { flyoutState, onFlyoutStateChange } = useMetricsExperienceState();
 
-  const [expandedMetric, setExpandedMetric] = useState<
-    | {
-        index: number;
-        metric: MetricField;
-        esqlQuery: string;
-      }
-    | undefined
-  >();
+  const flyoutData = useMemo(() => {
+    if (!flyoutState?.metricUniqueKey) return undefined;
+
+    const metricData = fields[flyoutState.gridPosition];
+    if (metricData?.uniqueKey !== flyoutState.metricUniqueKey) return undefined;
+
+    return {
+      gridPosition: flyoutState.gridPosition,
+      metric: metricData,
+      esqlQuery: flyoutState.esqlQuery,
+    };
+  }, [flyoutState, fields]);
+
+  // TODO: Remove this cleanup once we have metrics_info that provides consistent
+  // metric identification across pages. Currently needed because flyoutState may
+  // persist with a gridPosition that references a metric from a different page
+  // (e.g., when duplicating a tab from page 2, the new tab resets to page 0 but
+  // flyoutState still references a metric from page 2).
+  useEffect(() => {
+    if (flyoutState?.metricUniqueKey && fields.length > 0 && !flyoutData) {
+      onFlyoutStateChange(undefined);
+    }
+  }, [flyoutState?.metricUniqueKey, fields.length, flyoutData, onFlyoutStateChange]);
 
   const gridColumns = columns || 1;
   const gridRows = Math.ceil(fields.length / gridColumns);
@@ -74,22 +92,29 @@ export const MetricsGrid = ({
       gridRef,
     });
 
-  const handleViewDetails = useCallback((index: number, esqlQuery: string, metric: MetricField) => {
-    setExpandedMetric({ index, metric, esqlQuery });
-  }, []);
+  const handleViewDetails = useCallback(
+    (gridPosition: number, esqlQuery: string, metric: MetricField) => {
+      onFlyoutStateChange({
+        gridPosition,
+        metricUniqueKey: metric.uniqueKey,
+        esqlQuery,
+      });
+    },
+    [onFlyoutStateChange]
+  );
 
   const handleCloseFlyout = useCallback(() => {
-    if (!expandedMetric) {
+    if (!flyoutData) {
       return;
     }
 
-    const { rowIndex, colIndex } = getRowColFromIndex(expandedMetric.index);
-    setExpandedMetric(undefined);
+    const { rowIndex, colIndex } = getRowColFromIndex(flyoutData.gridPosition);
+    onFlyoutStateChange(undefined);
     // Use requestAnimationFrame to ensure the flyout is fully closed before focusing
     requestAnimationFrame(() => {
       focusCell(rowIndex, colIndex);
     });
-  }, [expandedMetric, focusCell, getRowColFromIndex]);
+  }, [flyoutData, focusCell, getRowColFromIndex, onFlyoutStateChange]);
 
   if (fields.length === 0) {
     return <EmptyState />;
@@ -155,10 +180,10 @@ export const MetricsGrid = ({
           })}
         </EuiFlexGrid>
       </A11yGridWrapper>
-      {expandedMetric && (
+      {flyoutData && isTabSelected && (
         <MetricInsightsFlyout
-          metric={expandedMetric.metric}
-          esqlQuery={expandedMetric.esqlQuery}
+          metric={flyoutData.metric}
+          esqlQuery={flyoutData.esqlQuery}
           onClose={handleCloseFlyout}
         />
       )}

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { hasValue } from '.';
+import { hasValue, getMetricKey } from '.';
 
 describe('hasValue', () => {
   describe('null and undefined', () => {
@@ -78,5 +78,26 @@ describe('hasValue', () => {
     it('returns false for arrays with only NaN values', () => {
       expect(hasValue([NaN, NaN])).toBe(false);
     });
+  });
+});
+
+describe('getMetricKey', () => {
+  it('should generate key in format index::metricName', () => {
+    expect(getMetricKey('metrics-*', 'system.cpu.user.pct')).toBe('metrics-*::system.cpu.user.pct');
+  });
+
+  it('should handle special characters in names', () => {
+    expect(getMetricKey('logs-kubernetes-*', 'kubernetes.pod.cpu.usage.node.pct')).toBe(
+      'logs-kubernetes-*::kubernetes.pod.cpu.usage.node.pct'
+    );
+  });
+
+  it('should generate different keys for same metric name in different data views', () => {
+    const key1 = getMetricKey('metrics-system-*', 'cpu.usage');
+    const key2 = getMetricKey('metrics-kubernetes-*', 'cpu.usage');
+
+    expect(key1).not.toBe(key2);
+    expect(key1).toBe('metrics-system-*::cpu.usage');
+    expect(key2).toBe('metrics-kubernetes-*::cpu.usage');
   });
 });

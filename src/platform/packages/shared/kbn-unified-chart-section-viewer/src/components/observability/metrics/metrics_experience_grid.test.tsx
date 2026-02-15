@@ -23,6 +23,7 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
 import * as metricsExperienceFieldsCapsProvider from './context/metrics_experience_fields_provider';
+import { getMetricKey } from '../../../common/utils/fields';
 
 jest.mock('./context/metrics_experience_state_provider');
 jest.mock('./context/metrics_experience_fields_provider');
@@ -84,12 +85,14 @@ const allFields: MetricField[] = [
     dimensions: [dimensions[0]],
     index: 'metrics-*',
     type: ES_FIELD_TYPES.LONG,
+    uniqueKey: getMetricKey('metrics-*', 'field1'),
   },
   {
     name: 'field2',
     dimensions: [dimensions[1]],
     index: 'metrics-*',
     type: ES_FIELD_TYPES.LONG,
+    uniqueKey: getMetricKey('metrics-*', 'field2'),
   },
 ];
 
@@ -137,6 +140,9 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutTabChange: jest.fn(),
     });
 
     useMetricsGridFullScreenMock.mockReturnValue({
@@ -237,6 +243,9 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange,
       onToggleFullscreen: jest.fn(),
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutTabChange: jest.fn(),
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -279,6 +288,9 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen,
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutTabChange: jest.fn(),
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {

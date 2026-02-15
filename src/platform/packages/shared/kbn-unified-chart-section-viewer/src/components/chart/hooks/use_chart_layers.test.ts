@@ -25,6 +25,7 @@ describe('useChartLayers', () => {
     instrument: 'gauge',
     unit: 'percent',
     index: 'metrics-*',
+    uniqueKey: 'metrics-*::system.cpu.total.norm.pct',
     dimensions: [],
   };
 

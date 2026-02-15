@@ -14,6 +14,7 @@ import { Chart } from '../../chart';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { getThroughputChart } from './trace_charts_definition';
+import { getMetricKey } from '../../../common/utils/fields';
 
 type ThroughputChartContentProps = NonNullable<ReturnType<typeof getThroughputChart>>;
 
@@ -35,6 +36,7 @@ const ThroughputChartContent = ({
       index: indexes,
       dimensions: [],
       type: ES_FIELD_TYPES.DOUBLE,
+      uniqueKey: getMetricKey(indexes, 'id'),
     },
     color,
     seriesType,

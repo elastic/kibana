@@ -321,4 +321,8 @@ export interface ChartSectionProps {
    * Controls whether or not the chart is visible (used for Show and Hide toggle)
    */
   isComponentVisible: boolean;
+  /**
+   * Indicates whether the current tab is selected/active.
+   */
+  isTabSelected?: boolean;
 }

@@ -56,6 +56,7 @@ describe('fields_parser', () => {
         type: 'double',
         instrument: 'gauge',
         dimensions: [],
+        uniqueKey: 'metrics-*::system.cpu.utilization',
       });
     });
 

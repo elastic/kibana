@@ -12,6 +12,8 @@ import { createContext } from 'react';
 import type { Dimension } from '../../../../../types';
 import {
   type MetricsExperienceRestorableState,
+  type FlyoutState,
+  type FlyoutTabId,
   useRestorableState,
 } from '../../../../../restorable_state';
 
@@ -20,16 +22,25 @@ export interface MetricsExperienceStateContextValue extends MetricsExperienceRes
   onDimensionsChange: (value: Dimension[]) => void;
   onSearchTermChange: (value: string) => void;
   onToggleFullscreen: () => void;
+  onFlyoutStateChange: (value: FlyoutState | undefined) => void;
+  onFlyoutTabChange: (value: FlyoutTabId) => void;
 }
 
 export const MetricsExperienceStateContext =
   createContext<MetricsExperienceStateContextValue | null>(null);
 
 export function MetricsExperienceStateProvider({ children }: { children: React.ReactNode }) {
-  const [currentPage, setCurrentPage] = useRestorableState('currentPage', 0);
+  const [currentPage, setCurrentPage] = useRestorableState('currentPage', 0, {
+    // Never restore currentPage on tab duplication.
+    // The page index is relative to the query results, which may differ between tabs
+    // TODO: Once we have consistent query results across duplicated tabs, we can
+    // reconsider restoring the page if the data is identical.
+    shouldIgnoredRestoredValue: () => true,
+  });
   const [selectedDimensions, setSelectedDimensions] = useRestorableState('selectedDimensions', []);
   const [searchTerm, setSearchTerm] = useRestorableState('searchTerm', '');
   const [isFullscreen, setIsFullscreen] = useRestorableState('isFullscreen', false);
+  const [flyoutState, setFlyoutState] = useRestorableState('flyoutState', undefined);
 
   const onDimensionsChange = useCallback(
     (nextDimensions: Dimension[]) => {
@@ -53,6 +64,23 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
     setIsFullscreen((prev) => !prev);
   }, [setIsFullscreen]);
 
+  const onFlyoutStateChange = useCallback(
+    (value: FlyoutState | undefined) => {
+      setFlyoutState(value);
+    },
+    [setFlyoutState]
+  );
+
+  const onFlyoutTabChange = useCallback(
+    (value: FlyoutTabId) => {
+      setFlyoutState((prev) => {
+        if (!prev) return prev;
+        return { ...prev, selectedTabId: value };
+      });
+    },
+    [setFlyoutState]
+  );
+
   return (
     <MetricsExperienceStateContext.Provider
       value={{
@@ -60,10 +88,13 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
         isFullscreen,
         searchTerm,
         selectedDimensions,
+        flyoutState,
         onPageChange,
         onDimensionsChange,
         onSearchTermChange,
         onToggleFullscreen,
+        onFlyoutStateChange,
+        onFlyoutTabChange,
       }}
     >
       {children}
