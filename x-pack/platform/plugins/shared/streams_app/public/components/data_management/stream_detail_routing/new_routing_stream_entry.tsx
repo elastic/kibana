@@ -22,7 +22,7 @@ export function NewRoutingStreamEntry() {
   const panelRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
 
-  const { changeRule, changeRuleDebounced } = useStreamRoutingEvents();
+  const { changeRule, changeRuleDebounced, setConditionEditorValidity } = useStreamRoutingEvents();
   const currentRule = useStreamsRoutingSelector((snapshot) => selectCurrentRule(snapshot.context));
 
   useEffect(() => {
@@ -61,6 +61,7 @@ export function NewRoutingStreamEntry() {
               condition={currentRule.where}
               status={currentRule.status}
               onConditionChange={(cond) => changeRule({ where: cond })}
+              onValidityChange={setConditionEditorValidity}
               onStatusChange={(status) => changeRule({ status })}
             />
             <EuiText size="xs" color="GrayText">

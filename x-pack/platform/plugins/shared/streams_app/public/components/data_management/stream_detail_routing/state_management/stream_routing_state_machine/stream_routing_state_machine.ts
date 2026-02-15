@@ -85,6 +85,7 @@ export const streamRoutingMachine = setup({
     resetRoutingChanges: assign(({ context }) => ({
       currentRuleId: null,
       routing: context.initialRouting,
+      isConditionEditorValid: true,
     })),
     setupRouting: assign((_, params: { definition: Streams.WiredStream.GetResponse }) => {
       const routing = params.definition.stream.ingest.wired.routing.map(
@@ -125,22 +126,47 @@ export const streamRoutingMachine = setup({
     clearEditingSuggestion: assign(() => ({
       editingSuggestionIndex: null,
       editedSuggestion: null,
+      isConditionEditorValid: true,
     })),
     setRefreshing: assign(() => ({ isRefreshing: true })),
     clearRefreshing: assign(() => ({ isRefreshing: false })),
+    setConditionEditorValidity: assign((_, params: { isValid: boolean }) => ({
+      isConditionEditorValid: params.isValid,
+    })),
     notifyQueryStreamSuccess: getPlaceholderFor(createQueryStreamSuccessNotifier),
   },
   guards: {
-    canForkStream: and(['hasManagePrivileges', 'isValidRouting', 'isValidChild']),
+    canForkStream: and([
+      'hasManagePrivileges',
+      'isValidRouting',
+      'isValidChild',
+      'isConditionEditorValid',
+    ]),
     canReorderRules: and(['hasManagePrivileges', 'hasMultipleRoutingRules']),
-    canUpdateStream: and(['hasManagePrivileges', 'isValidRouting']),
-    canSaveSuggestion: and(['hasManagePrivileges', 'isValidEditedSuggestion']),
+    canUpdateStream: and([
+      'hasManagePrivileges',
+      'isValidRouting',
+      'hasRoutingChanges',
+      'isConditionEditorValid',
+    ]),
+    canSaveSuggestion: and([
+      'hasManagePrivileges',
+      'isValidEditedSuggestion',
+      'isConditionEditorValid',
+    ]),
     hasMultipleRoutingRules: ({ context }) => context.routing.length > 1,
     hasManagePrivileges: ({ context }) => context.definition.privileges.manage,
     hasSimulatePrivileges: ({ context }) => context.definition.privileges.simulate,
     isAlreadyEditing: ({ context }, params: { id: string }) => context.currentRuleId === params.id,
+    isConditionEditorValid: ({ context }) => context.isConditionEditorValid,
     isValidRouting: ({ context }) =>
       isSchema(routingDefinitionListSchema, context.routing.map(routingConverter.toAPIDefinition)),
+    hasRoutingChanges: ({ context }) => {
+      // Compare current routing with initial routing to detect changes
+      const currentRouting = context.routing.map(routingConverter.toAPIDefinition);
+      const initialRouting = context.initialRouting.map(routingConverter.toAPIDefinition);
+      return JSON.stringify(currentRouting) !== JSON.stringify(initialRouting);
+    },
     isValidEditedSuggestion: ({ context }) => {
       if (!context.editedSuggestion) return false;
       const { name, condition } = context.editedSuggestion;
@@ -169,6 +195,7 @@ export const streamRoutingMachine = setup({
     editingSuggestionIndex: null,
     editedSuggestion: null,
     isRefreshing: false,
+    isConditionEditorValid: true,
   }),
   initial: 'initializing',
   states: {
@@ -182,6 +209,9 @@ export const streamRoutingMachine = setup({
         { type: 'setupRouting', params: ({ context }) => ({ definition: context.definition }) },
       ],
       on: {
+        'routingRule.setConditionEditorValidity': {
+          actions: [{ type: 'setConditionEditorValidity', params: ({ event }) => event }],
+        },
         'stream.received': {
           target: '#ready',
           actions: [

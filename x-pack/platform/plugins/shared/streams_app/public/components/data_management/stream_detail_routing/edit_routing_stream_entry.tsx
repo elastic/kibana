@@ -12,6 +12,7 @@ import { RoutingConditionEditor } from './routing_condition_editor';
 import { EditRoutingRuleControls } from './control_bars';
 import { StreamNameFormRow, useChildStreamInput } from '../../stream_name_form_row';
 import type { RoutingDefinitionWithUIAttributes } from './types';
+import { useStreamRoutingEvents } from './state_management/stream_routing_state_machine';
 
 export function EditRoutingStreamEntry({
   onChange,
@@ -22,6 +23,7 @@ export function EditRoutingStreamEntry({
 }) {
   const { euiTheme } = useEuiTheme();
   const { partitionName, prefix } = useChildStreamInput(routingRule.destination, true);
+  const { setConditionEditorValidity } = useStreamRoutingEvents();
 
   return (
     <EuiPanel
@@ -40,6 +42,7 @@ export function EditRoutingStreamEntry({
           condition={routingRule.where}
           status={routingRule.status}
           onConditionChange={(cond) => onChange({ where: cond })}
+          onValidityChange={setConditionEditorValidity}
           onStatusChange={(status) => onChange({ status })}
         />
         <EuiFlexItem

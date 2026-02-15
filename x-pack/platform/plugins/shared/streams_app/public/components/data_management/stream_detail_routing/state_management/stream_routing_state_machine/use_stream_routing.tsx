@@ -105,6 +105,9 @@ export const useStreamRoutingEvents = () => {
       saveChanges: () => {
         service.send({ type: 'routingRule.save' });
       },
+      setConditionEditorValidity: (isValid: boolean) => {
+        service.send({ type: 'routingRule.setConditionEditorValidity', isValid });
+      },
       setDocumentMatchFilter: (filter: DocumentMatchFilterOptions) => {
         service.send({ type: 'routingSamples.setDocumentMatchFilter', filter });
       },
