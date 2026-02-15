@@ -60,6 +60,7 @@ import { SetProcessorForm } from './set';
 import { TransformStringProcessorForm } from './transform_string';
 import { ConcatProcessorForm } from './concat';
 import { JoinProcessorForm } from './join';
+import { NetworkDirectionProcessorForm } from './network_direction';
 
 export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((props, ref) => {
   const { processorMetrics, stepRef } = props;
@@ -203,6 +204,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                 )}
                 {type === 'concat' && <ConcatProcessorForm />}
                 {type === 'join' && <JoinProcessorForm />}
+                {type === 'network_direction' && <NetworkDirectionProcessorForm />}
                 {!SPECIALISED_TYPES.includes(type) && (
                   <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
                 )}

@@ -519,6 +519,37 @@ const getAvailableProcessors: (
       );
     },
   },
+  network_direction: {
+    type: 'network_direction' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.networkDirectionInputDisplay',
+      {
+        defaultMessage: 'Network direction',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.networkDirectionHelpText"
+          defaultMessage="Calculate the {networkDirectionLink} given a source IP address, destination IP address and a list of internal networks."
+          values={{
+            networkDirectionLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsNetworkDirectionLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.network}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.networkDirectionLinkLabel', {
+                  defaultMessage: 'Network direction',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
   ...configDrivenProcessors,
   ...(isWired
     ? {}
@@ -565,6 +596,7 @@ const PROCESSOR_GROUP_MAP: Record<
   trim: 'set',
   join: 'set',
   concat: 'set',
+  network_direction: 'set',
 };
 
 const getProcessorDescription =

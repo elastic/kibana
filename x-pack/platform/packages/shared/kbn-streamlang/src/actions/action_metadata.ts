@@ -696,6 +696,36 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     ],
   },
 
+  network_direction: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.networkDirection.name', {
+      defaultMessage: 'Network Direction',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.networkDirection.description', {
+      defaultMessage:
+        'Calculates the network direction given a source IP address, destination IP address, and a list of internal networks.',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.networkDirection.usage', {
+      defaultMessage:
+        'Provide a `source_ip` and `destination_ip` field to specify the source and destination IP addresses. Use `internal_networks` or `internal_networks_field` to specify the list of internal networks.',
+    }),
+    examples: [
+      {
+        description: i18n.translate(
+          'xpack.streamlang.actionMetadata.networkDirection.examples.simple',
+          {
+            defaultMessage:
+              'Calculate the network direction from a source IP address to a destination IP address',
+          }
+        ),
+        yaml: `action: network_direction
+    source_ip: attributes.source_ip
+    destination_ip: attributes.destination_ip
+    internal_networks:
+      - private`,
+      },
+    ],
+  },
+
   manual_ingest_pipeline: {
     name: i18n.translate('xpack.streamlang.actionMetadata.manualIngestPipeline.name', {
       defaultMessage: 'Manual Ingest Pipeline',

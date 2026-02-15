@@ -557,6 +557,53 @@ export const concatProcessorSchema = processorBaseWithWhereSchema.extend({
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<ConcatProcessor>;
 
+/**
+ * Network direction processor
+ */
+
+export interface NetworkDirectionWithInternalNetworks {
+  internal_networks: string[];
+}
+
+const networkDirectionWithInternalNetworksSchema = z.object({
+  internal_networks: z.array(z.string()),
+}) satisfies z.Schema<NetworkDirectionWithInternalNetworks>;
+
+export interface NetworkDirectionWithInternalNetworksField {
+  internal_networks_field: string;
+}
+
+const networkDirectionWithInternalNetworksFieldSchema = z.object({
+  internal_networks_field: StreamlangSourceField,
+}) satisfies z.Schema<NetworkDirectionWithInternalNetworksField>;
+
+export interface NetworkDirectionCommonFields extends ProcessorBaseWithWhere {
+  action: 'network_direction';
+  source_ip: string;
+  destination_ip: string;
+  target_field?: string;
+  ignore_missing?: boolean;
+}
+
+const networkDirectionCommonFieldsSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('network_direction'),
+  source_ip: StreamlangSourceField,
+  destination_ip: StreamlangSourceField,
+  target_field: z.optional(StreamlangTargetField),
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<NetworkDirectionCommonFields>;
+
+export type NetworkDirectionProcessor = NetworkDirectionCommonFields &
+  (NetworkDirectionWithInternalNetworks | NetworkDirectionWithInternalNetworksField);
+
+export const networkDirectionProcessorSchema = z.intersection(
+  networkDirectionCommonFieldsSchema,
+  z.union([
+    networkDirectionWithInternalNetworksSchema,
+    networkDirectionWithInternalNetworksFieldSchema,
+  ])
+) satisfies z.Schema<NetworkDirectionProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
@@ -576,6 +623,7 @@ export type StreamlangProcessorDefinition =
   | TrimProcessor
   | JoinProcessor
   | ConcatProcessor
+  | NetworkDirectionProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
@@ -597,6 +645,7 @@ export const streamlangProcessorSchema = z.union([
   joinProcessorSchema,
   convertProcessorSchema,
   concatProcessorSchema,
+  networkDirectionProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
 
@@ -653,6 +702,11 @@ export const processorTypes: ProcessorType[] = (
 ).map((schema) => {
   // Handle ZodEffects (from .refine()) by unwrapping to get the base schema
   let baseSchema = '_def' in schema && 'schema' in schema._def ? schema._def.schema : schema;
+
+  // Handle ZodIntersection (from z.intersection()) by getting the left side which contains the action
+  if ('_def' in baseSchema && 'left' in baseSchema._def) {
+    baseSchema = baseSchema._def.left;
+  }
 
   // Handle ZodUnion (from z.union()) by getting the first option's action
   // All options in the union should have the same action value
