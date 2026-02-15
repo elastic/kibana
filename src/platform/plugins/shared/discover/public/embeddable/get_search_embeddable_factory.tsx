@@ -40,7 +40,7 @@ import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_ap
 import type { SearchEmbeddableState } from '../../common/embeddable/types';
 import type { SearchEmbeddableApi } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
-import { BaseAppWrapper } from '../context_awareness';
+import { BaseAppWrapper, EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
 
@@ -78,6 +78,7 @@ export const getSearchEmbeddableFactory = ({
       const scopedEbtManager = discoverServices.ebtManager.createScopedEBTManager();
       const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager({
         scopedEbtManager,
+        toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
       });
 
       /** Specific by-reference state */

@@ -16,7 +16,7 @@ import {
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 import type { UpdateESQLQueryFn } from '../../context_awareness';
-import { useProfileAccessor } from '../../context_awareness';
+import { ContextAwarenessToolkitProvider, useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
 import type { CascadedDocumentsContext } from '../../application/main/components/layout/cascaded_documents';
 import {
@@ -35,116 +35,126 @@ export interface DiscoverGridProps extends UnifiedDataTableProps {
  * Customized version of the UnifiedDataTable
  * @constructor
  */
-export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
-  ({
-    query,
-    cascadedDocumentsContext,
-    externalAdditionalControls: customExternalAdditionalControls,
-    rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
-    onUpdateESQLQuery,
-    onFullScreenChange,
-    ...props
-  }) => {
-    const { dataView, setExpandedDoc, renderDocumentView } = props;
-    const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
-    const getRowIndicator = useMemo(() => {
-      return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
-    }, [getRowIndicatorProvider, props.dataView]);
+const DiscoverGridInner: React.FC<DiscoverGridProps> = ({
+  query,
+  cascadedDocumentsContext,
+  externalAdditionalControls: customExternalAdditionalControls,
+  rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
+  onUpdateESQLQuery: _onUpdateESQLQuery,
+  onFullScreenChange,
+  ...props
+}) => {
+  const { dataView } = props;
+  const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
+  const getRowIndicator = useMemo(() => {
+    return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
+  }, [getRowIndicatorProvider, props.dataView]);
 
-    const getRowAdditionalLeadingControlsAccessor = useProfileAccessor(
-      'getRowAdditionalLeadingControls'
-    );
-    const rowAdditionalLeadingControls = useMemo(() => {
-      return getRowAdditionalLeadingControlsAccessor(() => customRowAdditionalLeadingControls)({
-        actions: {
-          updateESQLQuery: onUpdateESQLQuery,
-          setExpandedDoc: renderDocumentView ? setExpandedDoc : undefined,
-        },
-        dataView,
-        query,
-      });
-    }, [
-      customRowAdditionalLeadingControls,
+  const getRowAdditionalLeadingControlsAccessor = useProfileAccessor(
+    'getRowAdditionalLeadingControls'
+  );
+  const rowAdditionalLeadingControls = useMemo(() => {
+    return getRowAdditionalLeadingControlsAccessor(() => customRowAdditionalLeadingControls)({
       dataView,
-      getRowAdditionalLeadingControlsAccessor,
-      onUpdateESQLQuery,
       query,
-      setExpandedDoc,
-      renderDocumentView,
-    ]);
-
-    const getPaginationConfigAccessor = useProfileAccessor('getPaginationConfig');
-    const paginationModeConfig = useMemo(() => {
-      return getPaginationConfigAccessor(() => ({
-        paginationMode: DEFAULT_PAGINATION_MODE,
-      }))();
-    }, [getPaginationConfigAccessor]);
-
-    const getColumnsConfigurationAccessor = useProfileAccessor('getColumnsConfiguration');
-
-    const customGridColumnsConfiguration = useMemo(() => {
-      return getColumnsConfigurationAccessor(() => ({}))();
-    }, [getColumnsConfigurationAccessor]);
-
-    const cascadeGroupingChangeHandler = useCallback(
-      (cascadeGrouping: string[]) => {
-        return cascadedDocumentsContext?.cascadeGroupingChangeHandler(cascadeGrouping);
-      },
-      [cascadedDocumentsContext]
-    );
-
-    const groupBySelectorRenderer = useGetGroupBySelectorRenderer({
-      cascadeGroupingChangeHandler,
     });
+  }, [
+    customRowAdditionalLeadingControls,
+    dataView,
+    getRowAdditionalLeadingControlsAccessor,
+    query,
+  ]);
 
-    const isCascadedDocumentsAvailable =
-      props.isPlainRecord && !!cascadedDocumentsContext?.availableCascadeGroups.length;
+  const getPaginationConfigAccessor = useProfileAccessor('getPaginationConfig');
+  const paginationModeConfig = useMemo(() => {
+    return getPaginationConfigAccessor(() => ({
+      paginationMode: DEFAULT_PAGINATION_MODE,
+    }))();
+  }, [getPaginationConfigAccessor]);
 
-    const externalAdditionalControls = useMemo(() => {
-      const additionalControls: ReactNode[] = [];
+  const getColumnsConfigurationAccessor = useProfileAccessor('getColumnsConfiguration');
 
-      if (customExternalAdditionalControls) {
-        additionalControls.push(customExternalAdditionalControls);
-      }
+  const customGridColumnsConfiguration = useMemo(() => {
+    return getColumnsConfigurationAccessor(() => ({}))();
+  }, [getColumnsConfigurationAccessor]);
 
-      if (isCascadedDocumentsAvailable) {
-        additionalControls.push(
-          groupBySelectorRenderer(
-            cascadedDocumentsContext.availableCascadeGroups,
-            cascadedDocumentsContext.selectedCascadeGroups
-          )
-        );
-      }
+  const cascadeGroupingChangeHandler = useCallback(
+    (cascadeGrouping: string[]) => {
+      return cascadedDocumentsContext?.cascadeGroupingChangeHandler(cascadeGrouping);
+    },
+    [cascadedDocumentsContext]
+  );
 
-      return additionalControls.length ? additionalControls : undefined;
-    }, [
-      cascadedDocumentsContext,
-      customExternalAdditionalControls,
-      groupBySelectorRenderer,
-      isCascadedDocumentsAvailable,
-    ]);
+  const groupBySelectorRenderer = useGetGroupBySelectorRenderer({
+    cascadeGroupingChangeHandler,
+  });
 
-    return isCascadedDocumentsAvailable && cascadedDocumentsContext.selectedCascadeGroups.length ? (
-      <CascadedDocumentsProvider value={cascadedDocumentsContext}>
-        <LazyCascadedDocumentsLayout {...props} />
-      </CascadedDocumentsProvider>
-    ) : (
-      <UnifiedDataTable
-        showColumnTokens
-        canDragAndDropColumns
-        enableComparisonMode
-        enableInTableSearch
-        renderCustomToolbar={renderCustomToolbar}
-        getRowIndicator={getRowIndicator}
-        rowAdditionalLeadingControls={rowAdditionalLeadingControls}
-        visibleCellActions={3} // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
-        paginationMode={paginationModeConfig.paginationMode}
-        customGridColumnsConfiguration={customGridColumnsConfiguration}
-        shouldKeepAdHocDataViewImmutable
-        externalAdditionalControls={externalAdditionalControls}
-        onFullScreenChange={onFullScreenChange}
-        {...props}
-      />
-    );
-  }
-);
+  const isCascadedDocumentsAvailable =
+    props.isPlainRecord && !!cascadedDocumentsContext?.availableCascadeGroups.length;
+
+  const externalAdditionalControls = useMemo(() => {
+    const additionalControls: ReactNode[] = [];
+
+    if (customExternalAdditionalControls) {
+      additionalControls.push(customExternalAdditionalControls);
+    }
+
+    if (isCascadedDocumentsAvailable) {
+      additionalControls.push(
+        groupBySelectorRenderer(
+          cascadedDocumentsContext.availableCascadeGroups,
+          cascadedDocumentsContext.selectedCascadeGroups
+        )
+      );
+    }
+
+    return additionalControls.length ? additionalControls : undefined;
+  }, [
+    cascadedDocumentsContext,
+    customExternalAdditionalControls,
+    groupBySelectorRenderer,
+    isCascadedDocumentsAvailable,
+  ]);
+
+  return isCascadedDocumentsAvailable && cascadedDocumentsContext.selectedCascadeGroups.length ? (
+    <CascadedDocumentsProvider value={cascadedDocumentsContext}>
+      <LazyCascadedDocumentsLayout {...props} />
+    </CascadedDocumentsProvider>
+  ) : (
+    <UnifiedDataTable
+      showColumnTokens
+      canDragAndDropColumns
+      enableComparisonMode
+      enableInTableSearch
+      renderCustomToolbar={renderCustomToolbar}
+      getRowIndicator={getRowIndicator}
+      rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+      visibleCellActions={3} // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
+      paginationMode={paginationModeConfig.paginationMode}
+      customGridColumnsConfiguration={customGridColumnsConfiguration}
+      shouldKeepAdHocDataViewImmutable
+      externalAdditionalControls={externalAdditionalControls}
+      onFullScreenChange={onFullScreenChange}
+      {...props}
+    />
+  );
+};
+
+export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo((props) => {
+  const { onUpdateESQLQuery, renderDocumentView, setExpandedDoc } = props;
+
+  const toolkitOverrides = useMemo(() => {
+    const actions = {
+      ...(onUpdateESQLQuery ? { updateESQLQuery: onUpdateESQLQuery } : {}),
+      ...(renderDocumentView ? { setExpandedDoc } : {}),
+    };
+
+    return Object.keys(actions).length ? { actions } : undefined;
+  }, [onUpdateESQLQuery, renderDocumentView, setExpandedDoc]);
+
+  return (
+    <ContextAwarenessToolkitProvider value={toolkitOverrides}>
+      <DiscoverGridInner {...props} />
+    </ContextAwarenessToolkitProvider>
+  );
+});

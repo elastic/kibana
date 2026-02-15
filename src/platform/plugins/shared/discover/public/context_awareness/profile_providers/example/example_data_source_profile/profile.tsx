@@ -77,9 +77,9 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       },
     }),
     getDocViewer:
-      (prev, { context }) =>
+      (prev, { context, toolkit }) =>
       (params) => {
-        const { openInNewTab, updateESQLQuery } = params.actions;
+        const { openInNewTab, updateESQLQuery } = toolkit.actions;
         const recordId = params.record.id;
         const prevValue = prev(params);
 
@@ -174,7 +174,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
               // This is an example of a custom action that opens a flyout or any other custom modal.
               // To do so, simply return a React element and call onFinishAction when you're done.
               return (
-                <EuiFlyout onClose={onFinishAction}>
+                <EuiFlyout aria-label="Example custom action" onClose={onFinishAction}>
                   <div>Example custom action clicked</div>
                 </EuiFlyout>
               );
@@ -284,16 +284,24 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
         recommendedFields: exampleRecommendedFieldNames,
       };
     },
-    getChartSectionConfiguration: (prev) => (params) => {
-      return {
-        ...prev(params),
-        renderChartSection: (props) => (
-          <ChartWithCustomButtons {...props} actions={params.actions} />
-        ),
-        localStorageKeyPrefix: 'discover:exampleDataSource',
-        replaceDefaultChart: true,
-      };
-    },
+    getChartSectionConfiguration:
+      (prev, { toolkit }) =>
+      (params) => {
+        return {
+          ...prev(params),
+          renderChartSection: (props) => (
+            <ChartWithCustomButtons
+              {...props}
+              actions={{
+                openInNewTab: toolkit.actions.openInNewTab,
+                updateESQLQuery: toolkit.actions.updateESQLQuery,
+              }}
+            />
+          ),
+          localStorageKeyPrefix: 'discover:exampleDataSource',
+          replaceDefaultChart: true,
+        };
+      },
   },
   resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);

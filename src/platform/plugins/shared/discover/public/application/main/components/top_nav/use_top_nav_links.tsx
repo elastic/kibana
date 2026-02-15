@@ -98,14 +98,8 @@ export const useTopNavLinks = ({
       dataView,
       adHocDataViews,
       authorizedRuleTypeIds: getAuthorizedWriteConsumerIds(authorizedRuleTypes),
-      actions: {
-        updateAdHocDataViews: async (adHocDataViewList) => {
-          await dispatch(internalStateActions.loadDataViewList());
-          dispatch(internalStateActions.setAdHocDataViews(adHocDataViewList));
-        },
-      },
     }),
-    [isEsqlMode, dataView, adHocDataViews, dispatch, authorizedRuleTypes]
+    [isEsqlMode, dataView, adHocDataViews, authorizedRuleTypes]
   );
 
   const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {

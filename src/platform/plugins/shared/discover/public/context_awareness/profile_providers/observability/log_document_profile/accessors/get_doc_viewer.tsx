@@ -28,7 +28,7 @@ import type { LogDocumentProfileProvider } from '../profile';
 
 export const createGetDocViewer =
   (services: ProfileProviderServices): LogDocumentProfileProvider['profile']['getDocViewer'] =>
-  (prev, { context }) =>
+  (prev, { context, toolkit }) =>
   (params) => {
     const prevDocViewer = prev(params);
 
@@ -67,7 +67,10 @@ export const createGetDocViewer =
                 logsAIInsightFeature={logsAIInsightFeature}
                 streamsFeature={streamsFeature}
                 indexes={indexes}
-                docViewActions={params.actions}
+                docViewActions={{
+                  openInNewTab: toolkit.actions.openInNewTab,
+                  updateESQLQuery: toolkit.actions.updateESQLQuery,
+                }}
                 {...props}
               />
             );

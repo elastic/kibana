@@ -13,6 +13,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { dataViewWithTimefieldMock } from '../../../../../../__mocks__/data_view_with_timefield';
 import { discoverServiceMock } from '../../../../../../__mocks__/services';
+import { EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT } from '../../../../../../context_awareness';
 import {
   useGroupedCascadeData,
   useScopedESQLQueryFetchClient,
@@ -222,6 +223,7 @@ describe('data_fetching related hooks', () => {
   describe('useScopedESQLQueryFetchClient', () => {
     const scopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager({
       scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
     });
 
     const defaultProps = {

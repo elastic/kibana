@@ -47,6 +47,7 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
 import { useAdditionalCellActions, useProfileAccessor } from '../../context_awareness';
+import { ContextAwarenessToolkitProvider } from '../../context_awareness';
 import { createDataSource } from '../../../common/data_sources';
 
 export interface ContextAppContentProps {
@@ -77,7 +78,15 @@ export function clamp(value: number) {
 
 const ActionBarMemoized = React.memo(ActionBar);
 
-export function ContextAppContent({
+export function ContextAppContent({ ...props }: ContextAppContentProps) {
+  return (
+    <ContextAwarenessToolkitProvider value={{ actions: { addFilter: props.addFilter } }}>
+      <ContextAppContentInner {...props} />
+    </ContextAwarenessToolkitProvider>
+  );
+}
+
+function ContextAppContentInner({
   columns,
   grid,
   onAddColumn,
@@ -172,7 +181,6 @@ export function ContextAppContent({
   const cellRenderers = useMemo(() => {
     const getCellRenderers = getCellRenderersAccessor(() => ({}));
     return getCellRenderers({
-      actions: { addFilter },
       dataView,
       density: getDataGridDensity(services.storage, 'discover'),
       rowHeight: getRowHeight({
@@ -181,7 +189,7 @@ export function ContextAppContent({
         configRowHeight,
       }),
     });
-  }, [addFilter, configRowHeight, dataView, getCellRenderersAccessor, services.storage]);
+  }, [configRowHeight, dataView, getCellRenderersAccessor, services.storage]);
 
   const dataSource = useMemo(() => createDataSource({ dataView, query: undefined }), [dataView]);
   const { filters } = useQuerySubscriber({ data: services.data });

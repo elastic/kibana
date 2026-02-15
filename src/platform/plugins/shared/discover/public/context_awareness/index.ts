@@ -8,6 +8,11 @@
  */
 
 export type * from './types';
+export type * from './toolkit';
+export {
+  EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+  mergeDiscoverContextAwarenessToolkits,
+} from './toolkit';
 export * from './profiles';
 export { getMergedAccessor } from './composable_profile';
 export {
@@ -25,3 +30,5 @@ export {
   BaseAppWrapper,
   type RootProfileState,
 } from './hooks';
+
+export { ContextAwarenessToolkitProvider, useContextAwarenessToolkit } from './toolkit_provider';

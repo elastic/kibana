@@ -18,6 +18,7 @@ import { DataSourceCategory, SolutionType } from '../../../profiles';
 import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { createObservabilityLogDocumentProfileProvider } from './profile';
 import type { ContextWithProfileId } from '../../../profile_service';
+import { EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 import { RESOLUTION_MATCH } from './__mocks__';
 
@@ -168,10 +169,9 @@ describe('logDocumentProfileProvider', () => {
           title: 'test title',
           docViewsRegistry: (registry) => registry,
         }),
-        { context: RESOLUTION_MATCH.context }
+        { context: RESOLUTION_MATCH.context, toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT }
       );
       const docViewer = getDocViewer({
-        actions: {},
         record: buildDataTableRecord({}),
       });
       const registry = new DocViewsRegistry();

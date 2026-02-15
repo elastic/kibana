@@ -15,6 +15,7 @@ import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { mockControlState } from '../../../../../__mocks__/esql_controls';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
+import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
 
 const setup = async () => {
   const services = createDiscoverServicesMock();
@@ -44,6 +45,7 @@ const setup = async () => {
   return {
     ...toolkit,
     tabId: persistedTab.id,
+    services,
   };
 };
 
@@ -319,6 +321,32 @@ describe('tab_state actions', () => {
       expect(state).toBe(stateAfterFirstUpdate);
       // Verify the visContext attribute remains the same
       expect(tab.attributes.visContext).toBe(visContext);
+    });
+  });
+
+  describe('addFilter', () => {
+    it('should append a WHERE clause in ES|QL mode', async () => {
+      const { internalState, tabId, services } = await setup();
+
+      const state = internalState.getState();
+      const tab = selectTab(state, tabId);
+
+      expect(tab.appState.query).toStrictEqual({ esql: 'FROM test-index' });
+
+      const setQuerySpy = jest.spyOn(services.data.query.queryString, 'setQuery');
+
+      internalState.dispatch(
+        internalStateActions.addFilter({
+          tabId,
+          field: 'status',
+          value: 200,
+          mode: '+',
+        })
+      );
+
+      expect(setQuerySpy).toHaveBeenCalledWith({
+        esql: appendWhereClauseToESQLQuery('FROM test-index', 'status', 200, '+'),
+      });
     });
   });
 });

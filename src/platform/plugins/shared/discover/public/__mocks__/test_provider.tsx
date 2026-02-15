@@ -22,7 +22,10 @@ import {
   type DiscoverCustomizationService,
 } from '../customizations';
 import { DiscoverMainProvider } from '../application/main/state_management/discover_state_provider';
-import { type ScopedProfilesManager } from '../context_awareness';
+import {
+  EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+  type ScopedProfilesManager,
+} from '../context_awareness';
 import type { DiscoverServices } from '../build_services';
 import { createDiscoverServicesMock } from './services';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
@@ -113,7 +116,10 @@ export const DiscoverTestProvider = ({
   const scopedProfilesManager = useMemo(
     () =>
       originalScopedProfilesManager ??
-      services.profilesManager.createScopedProfilesManager({ scopedEbtManager }),
+      services.profilesManager.createScopedProfilesManager({
+        scopedEbtManager,
+        toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+      }),
     [originalScopedProfilesManager, scopedEbtManager, services.profilesManager]
   );
   const currentTabId = originalCurrentTabId ?? stateContainer?.getCurrentTab().id;

@@ -15,7 +15,11 @@ import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram'
 import { useCurrentTabContext } from './hooks';
 import type { DiscoverStateContainer } from '../discover_state';
 import type { ConnectedCustomizationService } from '../../../../customizations';
-import type { ProfilesManager, ScopedProfilesManager } from '../../../../context_awareness';
+import type {
+  DiscoverContextAwarenessToolkit,
+  ProfilesManager,
+  ScopedProfilesManager,
+} from '../../../../context_awareness';
 import type { TabState } from './types';
 import type { DiscoverEBTManager, ScopedDiscoverEBTManager } from '../../../../ebt_manager';
 import { selectTab } from './selectors';
@@ -73,10 +77,12 @@ type InitialUnifiedHistogramLayoutPropsMap = Record<
 export const createTabRuntimeState = ({
   profilesManager,
   ebtManager,
+  toolkit,
   initialValues,
 }: {
   profilesManager: ProfilesManager;
   ebtManager: DiscoverEBTManager;
+  toolkit: DiscoverContextAwarenessToolkit;
   initialValues?: {
     unifiedHistogramLayoutPropsMap?: InitialUnifiedHistogramLayoutPropsMap;
   };
@@ -93,7 +99,7 @@ export const createTabRuntimeState = ({
       layoutPropsMap: initialValues?.unifiedHistogramLayoutPropsMap ?? {},
     }),
     scopedProfilesManager$: new BehaviorSubject(
-      profilesManager.createScopedProfilesManager({ scopedEbtManager })
+      profilesManager.createScopedProfilesManager({ scopedEbtManager, toolkit })
     ),
     scopedEbtManager$: new BehaviorSubject(scopedEbtManager),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),

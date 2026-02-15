@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, map, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, map } from 'rxjs';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -18,7 +18,9 @@ import type {
   DataSourceProfileProviderParams,
   DataSourceProfileService,
 } from '../profiles/data_source_profile';
+import type { RootProfileService } from '../profiles/root_profile';
 import type { AppliedProfile } from '../composable_profile';
+import type { DiscoverContextAwarenessToolkit } from '../toolkit';
 import type {
   DocumentContext,
   DocumentProfileProviderParams,
@@ -52,26 +54,27 @@ export interface GetProfilesOptions {
 
 export class ScopedProfilesManager {
   private readonly dataSourceContext$: BehaviorSubject<ContextWithProfileId<DataSourceContext>>;
-
-  private dataSourceProfile: AppliedProfile;
   private prevDataSourceProfileParams?: SerializedDataSourceProfileParams;
   private dataSourceProfileAbortController?: AbortController;
 
+  private cachedRootContext?: ContextWithProfileId<RootContext>;
+  private cachedRootProfile?: AppliedProfile;
+
+  private cachedDataSourceContext?: ContextWithProfileId<DataSourceContext>;
+  private cachedDataSourceProfile?: AppliedProfile;
+
+  private cachedDocumentContext?: ContextWithProfileId<DocumentContext>;
+  private cachedDocumentProfile?: AppliedProfile;
+
   constructor(
     private readonly rootContext$: BehaviorSubject<ContextWithProfileId<RootContext>>,
-    private readonly getRootProfile: () => AppliedProfile,
+    private readonly rootProfileService: RootProfileService,
     private readonly dataSourceProfileService: DataSourceProfileService,
     private readonly documentProfileService: DocumentProfileService,
-    private readonly scopedEbtManager: ScopedDiscoverEBTManager
+    private readonly scopedEbtManager: ScopedDiscoverEBTManager,
+    private readonly toolkit: DiscoverContextAwarenessToolkit
   ) {
     this.dataSourceContext$ = new BehaviorSubject(dataSourceProfileService.defaultContext);
-    this.dataSourceProfile = dataSourceProfileService.getProfile({
-      context: this.dataSourceContext$.getValue(),
-    });
-
-    this.dataSourceContext$.pipe(skip(1)).subscribe((context) => {
-      this.dataSourceProfile = dataSourceProfileService.getProfile({ context });
-    });
   }
 
   /**
@@ -123,6 +126,8 @@ export class ScopedProfilesManager {
     params: Omit<DocumentProfileProviderParams, 'rootContext' | 'dataSourceContext'>
   ) {
     let context: ContextWithProfileId<DocumentContext> | undefined;
+    let cachedRootContext: ContextWithProfileId<RootContext> | undefined;
+    let cachedDataSourceContext: ContextWithProfileId<DataSourceContext> | undefined;
 
     return new Proxy(params.record, {
       has: (target, prop) => prop === 'context' || Reflect.has(target, prop),
@@ -131,12 +136,19 @@ export class ScopedProfilesManager {
           return Reflect.get(target, prop, receiver);
         }
 
-        if (!context) {
+        const rootContext = this.rootContext$.getValue();
+        const dataSourceContext = this.dataSourceContext$.getValue();
+
+        if (
+          !context ||
+          cachedRootContext !== rootContext ||
+          cachedDataSourceContext !== dataSourceContext
+        ) {
           try {
             context = this.documentProfileService.resolve({
               ...params,
-              rootContext: this.rootContext$.getValue(),
-              dataSourceContext: this.dataSourceContext$.getValue(),
+              rootContext,
+              dataSourceContext,
             });
           } catch (e) {
             logResolutionError(
@@ -146,12 +158,15 @@ export class ScopedProfilesManager {
             );
             context = this.documentProfileService.defaultContext;
           }
-        }
 
-        this.scopedEbtManager.trackContextualProfileResolvedEvent({
-          contextLevel: ContextualProfileLevel.documentLevel,
-          profileId: context.profileId,
-        });
+          cachedRootContext = rootContext;
+          cachedDataSourceContext = dataSourceContext;
+
+          this.scopedEbtManager.trackContextualProfileResolvedEvent({
+            contextLevel: ContextualProfileLevel.documentLevel,
+            profileId: context.profileId,
+          });
+        }
 
         return context;
       },
@@ -164,15 +179,37 @@ export class ScopedProfilesManager {
    * @returns The resolved profiles
    */
   public getProfiles({ record }: GetProfilesOptions = {}) {
-    return [
-      this.getRootProfile(),
-      this.dataSourceProfile,
-      this.documentProfileService.getProfile({
-        context: recordHasContext(record)
-          ? record.context
-          : this.documentProfileService.defaultContext,
-      }),
-    ];
+    const rootContext = this.rootContext$.getValue();
+    const dataSourceContext = this.dataSourceContext$.getValue();
+    const documentContext = recordHasContext(record)
+      ? record.context
+      : this.documentProfileService.defaultContext;
+
+    if (this.cachedRootContext !== rootContext || !this.cachedRootProfile) {
+      this.cachedRootContext = rootContext;
+      this.cachedRootProfile = this.rootProfileService.getProfile({
+        context: rootContext,
+        toolkit: this.toolkit,
+      });
+    }
+
+    if (this.cachedDataSourceContext !== dataSourceContext || !this.cachedDataSourceProfile) {
+      this.cachedDataSourceContext = dataSourceContext;
+      this.cachedDataSourceProfile = this.dataSourceProfileService.getProfile({
+        context: dataSourceContext,
+        toolkit: this.toolkit,
+      });
+    }
+
+    if (this.cachedDocumentContext !== documentContext || !this.cachedDocumentProfile) {
+      this.cachedDocumentContext = documentContext;
+      this.cachedDocumentProfile = this.documentProfileService.getProfile({
+        context: documentContext,
+        toolkit: this.toolkit,
+      });
+    }
+
+    return [this.cachedRootProfile, this.cachedDataSourceProfile, this.cachedDocumentProfile];
   }
 
   /**
@@ -180,7 +217,7 @@ export class ScopedProfilesManager {
    * @param options Options for getting the profiles
    * @returns The resolved profiles as an observable
    */
-  public getProfiles$(options: GetProfilesOptions = {}) {
+  public getProfiles$(options: GetProfilesOptions) {
     return combineLatest([this.rootContext$, this.dataSourceContext$]).pipe(
       map(() => this.getProfiles(options))
     );

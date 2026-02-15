@@ -52,7 +52,12 @@ export const setTabs: InternalStateThunkActionCreator<
   function setTabsThunkFn(
     dispatch,
     getState,
-    { runtimeStateManager, tabsStorageManager, services: { profilesManager, ebtManager } }
+    {
+      runtimeStateManager,
+      tabsStorageManager,
+      getContextAwarenessToolkit,
+      services: { profilesManager, ebtManager },
+    }
   ) {
     const previousState = getState();
     const discoverSessionChanged =
@@ -88,6 +93,7 @@ export const setTabs: InternalStateThunkActionCreator<
       runtimeStateManager.tabs.byId[tab.id] = createTabRuntimeState({
         profilesManager,
         ebtManager,
+        toolkit: getContextAwarenessToolkit(tab.id),
         initialValues: {
           unifiedHistogramLayoutPropsMap: tab.duplicatedFromId
             ? selectInitialUnifiedHistogramLayoutPropsMap(runtimeStateManager, tab.duplicatedFromId)

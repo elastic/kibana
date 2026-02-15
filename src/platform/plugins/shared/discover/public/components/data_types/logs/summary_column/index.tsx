@@ -12,19 +12,23 @@ import { getShouldShowFieldHandler } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SummaryColumnProps } from '@kbn/discover-contextual-components';
 import type { CellRenderersExtensionParams } from '../../../../context_awareness';
+import type { DiscoverContextAwarenessToolkit } from '../../../../context_awareness';
 import { SummaryColumn } from './summary_column';
 
 export type SummaryColumnGetterDeps = CellRenderersExtensionParams;
 
-export const getSummaryColumn = (params: SummaryColumnGetterDeps) => {
-  const { actions, dataView, density, rowHeight } = params;
+export const getSummaryColumn = (
+  params: SummaryColumnGetterDeps,
+  toolkit: DiscoverContextAwarenessToolkit
+) => {
+  const { dataView, density, rowHeight } = params;
   const shouldShowFieldHandler = createGetShouldShowFieldHandler(dataView);
 
   return (props: Omit<SummaryColumnProps, 'core' | 'share'>) => (
     <SummaryColumn
       {...props}
       density={density}
-      onFilter={actions.addFilter}
+      onFilter={toolkit.actions.addFilter}
       rowHeight={rowHeight}
       shouldShowFieldHandler={shouldShowFieldHandler}
     />

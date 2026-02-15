@@ -15,17 +15,14 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { BasicPrettyPrinter, mutate, parse } from '@kbn/esql-language';
 import { IGNORED_FIELD } from '@kbn/discover-utils/src/field_constants';
 import type { LogsDataSourceProfileProvider } from '../profile';
-import type { RowControlsExtensionParams } from '../../../../types';
 
 export const getRowAdditionalLeadingControls: LogsDataSourceProfileProvider['profile']['getRowAdditionalLeadingControls'] =
 
-    (prev, { context }) =>
+    (prev, { context, toolkit }) =>
     (params) => {
       const additionalControls = prev(params) || [];
-      const {
-        actions: { updateESQLQuery, setExpandedDoc },
-        query,
-      } = params;
+      const { query } = params;
+      const { updateESQLQuery, setExpandedDoc } = toolkit.actions;
 
       const isDegradedDocsControlEnabled = isOfAggregateQueryType(query)
         ? queryContainsMetadataIgnored(query)
@@ -45,7 +42,7 @@ export const getRowAdditionalLeadingControls: LogsDataSourceProfileProvider['pro
 
       const leadingControlClick =
         (
-          openDocViewer: NonNullable<RowControlsExtensionParams['actions']['setExpandedDoc']>,
+          openDocViewer: NonNullable<typeof setExpandedDoc>,
           actionName: 'stacktrace' | 'quality_issues'
         ) =>
         (props: RowControlRowProps) => {

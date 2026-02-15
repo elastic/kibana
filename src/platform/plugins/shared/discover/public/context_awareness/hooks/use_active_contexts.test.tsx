@@ -20,6 +20,7 @@ import {
   getDataTableRecordWithContextMock as _getDataTableRecordWithContextMock,
 } from '../__mocks__';
 import { DocumentType } from '../profiles';
+import { EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT } from '../toolkit';
 
 const { profilesManagerMock, scopedEbtManagerMock } = createContextAwarenessMocks();
 
@@ -45,6 +46,7 @@ const setup = (attrs: { hookAttrs?: Parameters<typeof useActiveContexts>[0] } = 
 
   const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager({
     scopedEbtManager: scopedEbtManagerMock,
+    toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
   });
 
   const renderResults = renderHook(() => useActiveContexts({ dataDocuments$: documents$ }), {

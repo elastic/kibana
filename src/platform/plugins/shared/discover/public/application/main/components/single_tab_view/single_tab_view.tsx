@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
@@ -46,6 +46,11 @@ import { ScopedServicesProvider } from '../../../../components/scoped_services_p
 import { HideTabsBar } from '../tabs_view/hide_tabs_bar';
 import { InitializationError } from './initialization_error';
 import type { DiscoverSearchSessionManager } from '../../state_management/discover_search_session';
+import {
+  ContextAwarenessToolkitProvider,
+  type OpenInNewTabParams,
+  type UpdateESQLQueryFn,
+} from '../../../../context_awareness';
 
 export interface SingleTabViewProps {
   customizationContext: DiscoverCustomizationContext;
@@ -91,6 +96,29 @@ export const SingleTabView = ({
     (tab) => tab.currentDataView$
   );
   const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
+
+  const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
+  const onUpdateESQLQuery: UpdateESQLQueryFn = useCallback(
+    (queryOrUpdater) => {
+      dispatch(updateESQLQuery({ queryOrUpdater }));
+    },
+    [dispatch, updateESQLQuery]
+  );
+
+  const toolkitOverrides = useMemo(
+    () => ({
+      actions: {
+        openInNewTab: (params: OpenInNewTabParams) =>
+          dispatch(internalStateActions.openInNewTabExtPointAction(params)),
+        updateESQLQuery: onUpdateESQLQuery,
+        updateAdHocDataViews: async (adHocDataViewList: DataView[]) => {
+          await dispatch(internalStateActions.loadDataViewList());
+          dispatch(internalStateActions.setAdHocDataViews(adHocDataViewList));
+        },
+      },
+    }),
+    [dispatch, onUpdateESQLQuery]
+  );
 
   const initializeSingleTab = useCurrentTabAction(internalStateActions.initializeSingleTab);
   const initializeTab = useLatest(
@@ -190,7 +218,9 @@ export const SingleTabView = ({
             scopedProfilesManager={scopedProfilesManager}
             scopedEBTManager={scopedEbtManager}
           >
-            <DiscoverMainApp stateContainer={currentStateContainer} />
+            <ContextAwarenessToolkitProvider value={toolkitOverrides}>
+              <DiscoverMainApp stateContainer={currentStateContainer} />
+            </ContextAwarenessToolkitProvider>
           </ScopedServicesProvider>
         </RuntimeStateProvider>
       </DiscoverMainProvider>
