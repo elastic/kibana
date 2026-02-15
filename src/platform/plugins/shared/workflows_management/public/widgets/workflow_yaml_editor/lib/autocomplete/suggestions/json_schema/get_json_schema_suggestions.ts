@@ -279,6 +279,47 @@ function shouldProvidePropertyKeySuggestions(
 }
 
 /**
+ * Check if a line is under an `inputs:` root-level key by walking backward
+ * to find a 0-indent `inputs:` key before hitting any other root-level key.
+ */
+function isUnderInputsRoot(
+  model: monaco.editor.ITextModel,
+  fromLineNum: number
+): boolean {
+  for (let lineNum = fromLineNum - 1; lineNum >= 1; lineNum--) {
+    const line = model.getLineContent(lineNum);
+    if (line.trim() === '') continue;
+    // If we hit a root-level key (0 or 1 space indent), check if it's `inputs:`
+    if (/^\s{0,1}[a-zA-Z]/.test(line)) {
+      return /^inputs\s*:/.test(line);
+    }
+  }
+  return false;
+}
+
+/**
+ * Check if a line is under `inputs.properties` by walking backward
+ * to find `properties:` at 2-space indent, then `inputs:` at root.
+ */
+function isUnderInputsProperties(
+  model: monaco.editor.ITextModel,
+  fromLineNum: number
+): boolean {
+  for (let lineNum = fromLineNum - 1; lineNum >= 1; lineNum--) {
+    const line = model.getLineContent(lineNum);
+    if (line.trim() === '') continue;
+    if (/^\s{2}properties\s*:/.test(line)) {
+      return isUnderInputsRoot(model, lineNum);
+    }
+    // If we hit a root-level key or a key with less than 2-space indent, stop
+    if (/^\s{0,1}[a-zA-Z]/.test(line)) {
+      return false;
+    }
+  }
+  return false;
+}
+
+/**
  * Get JSON Schema autocompletion suggestions
  */
 export function getJsonSchemaSuggestions(
@@ -295,12 +336,16 @@ export function getJsonSchemaSuggestions(
         const prevLine = autocompleteContext.model.getLineContent(prevLineNum);
         if (prevLine.trim() !== '') {
           if (prevLine.match(/^\s{2}properties\s*:/)) {
-            inferredPath = ['inputs', 'properties'];
+            if (isUnderInputsRoot(autocompleteContext.model, prevLineNum)) {
+              inferredPath = ['inputs', 'properties'];
+            }
             break;
           }
           const propertyMatch = prevLine.match(/^\s{4}([a-zA-Z_][a-zA-Z0-9_-]*)\s*:/);
           if (propertyMatch && indentLevel >= 6) {
-            inferredPath = ['inputs', 'properties', propertyMatch[1]];
+            if (isUnderInputsProperties(autocompleteContext.model, prevLineNum)) {
+              inferredPath = ['inputs', 'properties', propertyMatch[1]];
+            }
             break;
           }
           if (prevLine.match(/^\s{0,2}[a-zA-Z]/)) {

@@ -133,18 +133,20 @@ describe('getJsonSchemaSuggestions', () => {
   });
 
   describe('empty path inference', () => {
-    it('should infer path from indentation when path is empty on empty line after property', () => {
+    it('should infer path from indentation when path is empty on empty line after property under inputs.properties', () => {
       const mockModel = {
         getLineContent: (lineNum: number) => {
-          if (lineNum === 1) return '    x:';
-          if (lineNum === 2) return '      ';
+          if (lineNum === 1) return 'inputs:';
+          if (lineNum === 2) return '  properties:';
+          if (lineNum === 3) return '    x:';
+          if (lineNum === 4) return '      ';
           return '';
         },
       } as any;
 
       const context = createMockContext([], '      ', '      ');
       context.model = mockModel;
-      context.position = { lineNumber: 2, column: 7 } as any;
+      context.position = { lineNumber: 4, column: 7 } as any;
 
       const suggestions = getJsonSchemaSuggestions(context);
 
@@ -153,22 +155,84 @@ describe('getJsonSchemaSuggestions', () => {
       expect(suggestions.some((s) => s.label === 'default')).toBe(true);
     });
 
-    it('should infer path from properties line when path is empty', () => {
+    it('should infer path from properties line when path is empty under inputs', () => {
       const mockModel = {
         getLineContent: (lineNum: number) => {
-          if (lineNum === 1) return '  properties:';
-          if (lineNum === 2) return '      ';
+          if (lineNum === 1) return 'inputs:';
+          if (lineNum === 2) return '  properties:';
+          if (lineNum === 3) return '      ';
           return '';
         },
       } as any;
 
       const context = createMockContext([], '      ', '      ');
       context.model = mockModel;
-      context.position = { lineNumber: 2, column: 7 } as any;
+      context.position = { lineNumber: 3, column: 7 } as any;
 
       const suggestions = getJsonSchemaSuggestions(context);
 
       expect(suggestions.length).toBeGreaterThan(0);
+    });
+
+    it('should NOT infer path when property key is under steps context (not inputs.properties)', () => {
+      const mockModel = {
+        getLineContent: (lineNum: number) => {
+          if (lineNum === 1) return 'steps:';
+          if (lineNum === 2) return '  - name: my-step';
+          if (lineNum === 3) return '    type: webhook';
+          if (lineNum === 4) return '    with:';
+          if (lineNum === 5) return '      url:';
+          if (lineNum === 6) return '        ';
+          return '';
+        },
+      } as any;
+
+      const context = createMockContext([], '        ', '        ');
+      context.model = mockModel;
+      context.position = { lineNumber: 6, column: 9 } as any;
+
+      const suggestions = getJsonSchemaSuggestions(context);
+
+      expect(suggestions).toEqual([]);
+    });
+
+    it('should NOT infer path when 4-space key is under triggers context', () => {
+      const mockModel = {
+        getLineContent: (lineNum: number) => {
+          if (lineNum === 1) return 'triggers:';
+          if (lineNum === 2) return '  - type: scheduled';
+          if (lineNum === 3) return '    with:';
+          if (lineNum === 4) return '      ';
+          return '';
+        },
+      } as any;
+
+      const context = createMockContext([], '      ', '      ');
+      context.model = mockModel;
+      context.position = { lineNumber: 4, column: 7 } as any;
+
+      const suggestions = getJsonSchemaSuggestions(context);
+
+      expect(suggestions).toEqual([]);
+    });
+
+    it('should NOT infer path when properties: is under a non-inputs root key', () => {
+      const mockModel = {
+        getLineContent: (lineNum: number) => {
+          if (lineNum === 1) return 'steps:';
+          if (lineNum === 2) return '  properties:';
+          if (lineNum === 3) return '      ';
+          return '';
+        },
+      } as any;
+
+      const context = createMockContext([], '      ', '      ');
+      context.model = mockModel;
+      context.position = { lineNumber: 3, column: 7 } as any;
+
+      const suggestions = getJsonSchemaSuggestions(context);
+
+      expect(suggestions).toEqual([]);
     });
   });
 
