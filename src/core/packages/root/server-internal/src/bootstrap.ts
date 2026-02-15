@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import * as v8 from 'v8';
 import chalk from 'chalk';
 import { getPackages } from '@kbn/repo-packages';
 import type { CliArgs } from '@kbn/config';
@@ -98,32 +99,47 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
 
   try {
     const prebootContract = await root.preboot();
-    let isSetupOnHold = false;
 
-    if (prebootContract) {
-      const { preboot } = prebootContract;
-      // If setup is on hold then preboot server is supposed to serve user requests and we can let
-      // dev parent process know that we are ready for dev mode.
-      isSetupOnHold = preboot.isSetupOnHold();
-      if (process.send && isSetupOnHold) {
-        process.send(['SERVER_LISTENING']);
-      }
+    async function continueBootstrap() {
+      let isSetupOnHold = false;
+      try {
+        if (prebootContract) {
+          const { preboot } = prebootContract;
+          // If setup is on hold then preboot server is supposed to serve user requests and we can let
+          // dev parent process know that we are ready for dev mode.
+          isSetupOnHold = preboot.isSetupOnHold();
+          if (process.send && isSetupOnHold) {
+            process.send(['SERVER_LISTENING']);
+          }
 
-      if (isSetupOnHold) {
-        rootLogger.info('Holding setup until preboot stage is completed.');
-        const { shouldReloadConfig } = await preboot.waitUntilCanSetup();
-        if (shouldReloadConfig) {
-          await reloadConfiguration('configuration might have changed during preboot stage');
+          if (isSetupOnHold) {
+            rootLogger.info('Holding setup until preboot stage is completed.');
+            const { shouldReloadConfig } = await preboot.waitUntilCanSetup();
+            if (shouldReloadConfig) {
+              await reloadConfiguration('configuration might have changed during preboot stage');
+            }
+          }
         }
+
+        await root.setup();
+        await root.start();
+
+        // Notify parent process if we haven't done that yet during preboot stage.
+        if (process.send && !isSetupOnHold) {
+          process.send(['SERVER_LISTENING']);
+        }
+      } catch (err) {
+        await shutdown(err);
       }
     }
 
-    await root.setup();
-    await root.start();
-
-    // Notify parent process if we haven't done that yet during preboot stage.
-    if (process.send && !isSetupOnHold) {
-      process.send(['SERVER_LISTENING']);
+    if (v8.startupSnapshot.isBuildingSnapshot()) {
+      v8.startupSnapshot.setDeserializeMainFunction(async () => {
+        await reloadConfiguration('Configuration might have changed after creating the snapshot.');
+        await continueBootstrap();
+      });
+    } else {
+      await continueBootstrap();
     }
   } catch (err) {
     await shutdown(err);
