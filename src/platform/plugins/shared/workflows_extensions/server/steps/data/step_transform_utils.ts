@@ -73,7 +73,7 @@ function applyPickRecursive(value: unknown, pick: unknown, recurseDepth: number)
     return value.map((item) => applyPickRecursive(item, spec, recurseDepth + 1));
   }
   if (isPlainObject(value)) {
-    const result: Record<string, unknown> = {};
+    const result: FieldsSpec = {};
     for (const key of Object.keys(spec)) {
       if (key in value) {
         const childSpec = spec[key];
