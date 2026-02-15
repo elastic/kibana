@@ -115,6 +115,7 @@ jest.doMock('@kbn/core-status-server-internal', () => ({
 
 export const mockLoggingService = loggingServiceMock.create();
 jest.doMock('@kbn/core-logging-server-internal', () => ({
+  ...jest.requireActual('@kbn/core-logging-server-internal'),
   LoggingService: jest.fn(() => mockLoggingService),
 }));
 

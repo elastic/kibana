@@ -49,6 +49,7 @@ dependsOn:
   - '@kbn/core-di-mocks'
   - '@kbn/core-data-streams-server-mocks'
   - '@kbn/lazy-object'
+  - '@kbn/core-user-activity-server-mocks'
 tags:
   - shared-server
   - package

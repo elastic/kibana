@@ -24,6 +24,13 @@ describe('getDefaultSecurityImplementation', () => {
     });
   });
 
+  describe('authc.getRedactedSessionId', () => {
+    it('returns undefined', async () => {
+      const sessionId = await implementation.authc.getRedactedSessionId({} as any);
+      expect(sessionId).toBeUndefined();
+    });
+  });
+
   describe('authc.apiKeys', () => {
     it('returns stub object', async () => {
       const { apiKeys } = implementation.authc;
