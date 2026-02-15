@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type { DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import moment from 'moment';
 
+import type { EndpointMetadataService } from '../../metadata';
 import type { BuildWorkflowInsightParams } from '.';
-
 import {
   Category,
   SourceType,
@@ -18,10 +17,9 @@ import {
   ActionType,
 } from '../../../../../common/endpoint/types/workflow_insights';
 import { createMockEndpointAppContext } from '../../../mocks';
-import type { EndpointMetadataService } from '../../metadata';
-import { buildPolicyResponseFailureWorkflowInsights } from './policy_response_failure';
+import { buildCustomWorkflowInsights } from './custom';
 
-describe('buildPolicyResponseFailureWorkflowInsights', () => {
+describe('buildCustomWorkflowInsights', () => {
   const mockEndpointAppContextService = createMockEndpointAppContext().service;
   mockEndpointAppContextService.getEndpointMetadataService = jest.fn().mockReturnValue({
     getMetadataForEndpoints: jest.fn(),
@@ -48,19 +46,12 @@ describe('buildPolicyResponseFailureWorkflowInsights', () => {
     ]
   ): BuildWorkflowInsightParams => ({
     defendInsights,
-    request: {
-      body: {
-        insightType: 'policy_response_failure',
-        endpointIds: ['endpoint-1', 'endpoint-2'],
-        apiConfig: {
-          connectorId: 'connector-id-1',
-          actionTypeId: 'action-type-id-1',
-          model: 'gpt-4',
-        },
-        anonymizationFields: [],
-        subAction: 'invokeAI',
-      },
-    } as unknown as KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>,
+    options: {
+      insightType: 'policy_response_failure',
+      endpointIds: ['endpoint-1', 'endpoint-2'],
+      connectorId: 'connector-id-1',
+      model: 'gpt-4',
+    },
     endpointMetadataService,
     esClient: {
       search: jest.fn().mockResolvedValue({
@@ -114,7 +105,7 @@ describe('buildPolicyResponseFailureWorkflowInsights', () => {
 
   it('should correctly build workflow insights with valid remediation', async () => {
     const params = generateParams();
-    const result = await buildPolicyResponseFailureWorkflowInsights(params);
+    const result = await buildCustomWorkflowInsights(params);
 
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual(
@@ -155,7 +146,7 @@ describe('buildPolicyResponseFailureWorkflowInsights', () => {
       },
     ]);
 
-    const result = await buildPolicyResponseFailureWorkflowInsights(params);
+    const result = await buildCustomWorkflowInsights(params);
 
     expect(result).toHaveLength(2);
     expect(result[0]).toEqual(
@@ -200,7 +191,7 @@ describe('buildPolicyResponseFailureWorkflowInsights', () => {
       },
     ]);
 
-    const result = await buildPolicyResponseFailureWorkflowInsights(params);
+    const result = await buildCustomWorkflowInsights(params);
 
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual(
@@ -241,7 +232,7 @@ describe('buildPolicyResponseFailureWorkflowInsights', () => {
       },
     ]);
 
-    const result = await buildPolicyResponseFailureWorkflowInsights(params);
+    const result = await buildCustomWorkflowInsights(params);
 
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual(
@@ -282,7 +273,7 @@ describe('buildPolicyResponseFailureWorkflowInsights', () => {
       },
     ]);
 
-    const result = await buildPolicyResponseFailureWorkflowInsights(params);
+    const result = await buildCustomWorkflowInsights(params);
 
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual(
@@ -321,46 +312,46 @@ describe('buildPolicyResponseFailureWorkflowInsights', () => {
       },
     ]);
 
-    const result = await buildPolicyResponseFailureWorkflowInsights(params);
+    const result = await buildCustomWorkflowInsights(params);
 
     expect(result).toHaveLength(0);
   });
 
-  it('should handle missing model in apiConfig', async () => {
+  it('should handle missing model', async () => {
     const params = generateParams();
-    params.request.body.apiConfig.model = undefined;
+    params.options.model = undefined;
 
-    const result = await buildPolicyResponseFailureWorkflowInsights(params);
+    const result = await buildCustomWorkflowInsights(params);
 
     expect(result).toHaveLength(1);
     expect(result[0].metadata?.notes?.llm_model).toBe('');
   });
 
-  it('should use correct endpoint IDs from request body', async () => {
+  it('should use correct endpointIds', async () => {
     const params = generateParams();
-    params.request.body.endpointIds = ['endpoint-a', 'endpoint-b', 'endpoint-c'];
+    params.options.endpointIds = ['endpoint-a', 'endpoint-b', 'endpoint-c'];
 
-    const result = await buildPolicyResponseFailureWorkflowInsights(params);
+    const result = await buildCustomWorkflowInsights(params);
 
     expect(result).toHaveLength(1);
     expect(result[0].target.ids).toEqual(['endpoint-a', 'endpoint-b', 'endpoint-c']);
   });
 
-  it('should use correct connector ID from apiConfig', async () => {
+  it('should use correct connectorId', async () => {
     const params = generateParams();
-    params.request.body.apiConfig.connectorId = 'custom-connector-id';
+    params.options.connectorId = 'custom-connector-id';
 
-    const result = await buildPolicyResponseFailureWorkflowInsights(params);
+    const result = await buildCustomWorkflowInsights(params);
 
     expect(result).toHaveLength(1);
     expect(result[0].source.id).toBe('custom-connector-id');
   });
 
-  it('should use correct insight type from request body', async () => {
+  it('should use correct insight type', async () => {
     const params = generateParams();
-    params.request.body.insightType = 'policy_response_failure';
+    params.options.insightType = 'policy_response_failure';
 
-    const result = await buildPolicyResponseFailureWorkflowInsights(params);
+    const result = await buildCustomWorkflowInsights(params);
 
     expect(result).toHaveLength(1);
     expect(result[0].type).toBe('policy_response_failure');
