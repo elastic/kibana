@@ -70,14 +70,27 @@ export const toolsToConverseBedrock = (tools: ToolOptions['tools'], messages: Me
 
 /**
  * Strips JSON Schema keywords that are not supported by the
- * Bedrock Converse API (e.g. `propertyNames` from JSON Schema 2020-12,
- * which Zod v4's `toJSONSchema` emits for `z.record()` types).
+ * Bedrock Converse API. According to AWS documentation:
+ *  - `propertyNames` is not supported
+ *  - `additionalProperties` is not supported for object types
+ *  - `$schema` is not supported
+ *
+ * Also ensures object-typed schemas always have a `properties`
+ * field, which the Converse API requires for object types.
  */
 function stripUnsupportedSchemaKeywords<T extends ToolSchemaType>(schemaPart: T): T {
-  const { propertyNames: _propertyNames, ...rest } = schemaPart as unknown as Record<
-    string,
-    unknown
-  >;
+  const {
+    propertyNames: _propertyNames,
+    additionalProperties: _additionalProperties,
+    $schema: _$schema,
+    ...rest
+  } = schemaPart as unknown as Record<string, unknown>;
+
+  // Bedrock requires `properties` on object types
+  if (rest.type === 'object' && !rest.properties) {
+    rest.properties = {};
+  }
+
   return rest as unknown as T;
 }
 
@@ -87,7 +100,8 @@ function stripUnsupportedSchemaKeywords<T extends ToolSchemaType>(schemaPart: T)
  * array property to explicitly state that the value should
  * be returned as a json array.
  *
- * Also strips JSON Schema keywords unsupported by Bedrock (e.g. `propertyNames`).
+ * Also strips JSON Schema keywords unsupported by Bedrock
+ * (e.g. `propertyNames`, `additionalProperties`).
  */
 export function fixSchemaArrayProperties<T extends ToolSchemaType>(schemaPart: T): T {
   const cleaned = stripUnsupportedSchemaKeywords(schemaPart);
