@@ -36,6 +36,7 @@ export async function analyzeFile(
     {
       body: data,
       ecs_compatibility: 'v1',
+      should_parse_recursively: true,
       ...overrides,
     },
     { maxRetries: 0, signal: abortSignal }
