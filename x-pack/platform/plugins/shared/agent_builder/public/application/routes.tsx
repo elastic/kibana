@@ -15,6 +15,7 @@ import { AgentBuilderToolCreatePage } from './pages/tool_create';
 import { AgentBuilderToolDetailsPage } from './pages/tool_details';
 import { AgentBuilderToolsPage } from './pages/tools';
 import { AgentBuilderBulkImportMcpToolsPage } from './pages/bulk_import_mcp_tools';
+import { AgentBuilderPromptsPage } from './pages/prompts';
 
 export const AgentBuilderRoutes: React.FC<{}> = () => {
   return (
@@ -49,6 +50,10 @@ export const AgentBuilderRoutes: React.FC<{}> = () => {
 
       <Route path="/tools">
         <AgentBuilderToolsPage />
+      </Route>
+
+      <Route path="/prompts">
+        <AgentBuilderPromptsPage />
       </Route>
 
       {/* Default to conversations page */}

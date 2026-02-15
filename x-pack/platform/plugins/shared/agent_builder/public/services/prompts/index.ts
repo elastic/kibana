@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export const searchParamNames = {
-  agentId: 'agent_id',
-  sourceId: 'source_id',
-  promptId: 'prompt',
-} as const;
+export { PromptsService } from './prompts_service';

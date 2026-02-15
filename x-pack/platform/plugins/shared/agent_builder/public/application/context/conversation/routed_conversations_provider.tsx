@@ -18,6 +18,7 @@ import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useAgentBuilderAgents } from '../../hooks/agents/use_agents';
 import { searchParamNames } from '../../search_param_names';
 import { useConversationActions } from './use_conversation_actions';
+import { usePrompt } from '../../hooks/prompts/use_prompt';
 
 interface RoutedConversationsProviderProps {
   children: React.ReactNode;
@@ -36,11 +37,28 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
 
   const location = useLocation<LocationState>();
   const shouldStickToBottom = location.state?.shouldStickToBottom ?? true;
-  const initialMessage = location.state?.initialMessage;
+  const initialMessageFromState = location.state?.initialMessage;
 
-  // Get search params for agent ID syncing
+  // Get search params for agent ID syncing and prompt
   const [searchParams] = useSearchParams();
   const { agents } = useAgentBuilderAgents();
+  const promptIdParam = searchParams.get(searchParamNames.promptId);
+
+  // Fetch prompt if promptId is in query params
+  const { prompt } = usePrompt({
+    promptId: promptIdParam ?? undefined,
+  });
+
+  // Use prompt content as initial message if prompt param exists, otherwise use state initialMessage
+  const initialMessage = useMemo(() => {
+    if (promptIdParam && prompt?.content) {
+      return prompt.content;
+    }
+    return initialMessageFromState;
+  }, [promptIdParam, prompt?.content, initialMessageFromState]);
+
+  // Set autoSendInitialMessage to false when using a prompt (to prefill instead of auto-send)
+  const autoSendInitialMessage = !promptIdParam;
 
   const { navigateToAgentBuilderUrl } = useNavigation();
   const shouldAllowConversationRedirectRef = useRef(true);
@@ -116,9 +134,15 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       isEmbeddedContext: false,
       conversationActions,
       initialMessage,
-      autoSendInitialMessage: true,
+      autoSendInitialMessage,
     }),
-    [conversationId, shouldStickToBottom, conversationActions, initialMessage]
+    [
+      conversationId,
+      shouldStickToBottom,
+      conversationActions,
+      initialMessage,
+      autoSendInitialMessage,
+    ]
   );
 
   return (

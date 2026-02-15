@@ -484,4 +484,110 @@ export const labels = {
       defaultMessage: 'Yes, abort',
     }),
   },
+  prompts: {
+    title: i18n.translate('xpack.agentBuilder.prompts.title', { defaultMessage: 'Prompts' }),
+    newPromptButton: i18n.translate('xpack.agentBuilder.prompts.newPromptButton', {
+      defaultMessage: 'New prompt',
+    }),
+    promptsTableCaption: (promptsCount: number) =>
+      i18n.translate('xpack.agentBuilder.prompts.promptsTableCaption', {
+        defaultMessage: 'Available prompts: {promptsCount} prompts',
+        values: { promptsCount },
+      }),
+    searchPromptsPlaceholder: i18n.translate(
+      'xpack.agentBuilder.prompts.searchPromptsPlaceholder',
+      {
+        defaultMessage: 'Search',
+      }
+    ),
+    noPromptsMatchMessage: i18n.translate('xpack.agentBuilder.prompts.noPromptsMatchMessage', {
+      defaultMessage: 'No prompts match your search.',
+    }),
+    noPromptsMessage: i18n.translate('xpack.agentBuilder.prompts.noPromptsMessage', {
+      defaultMessage: "It looks like you don't have any prompts defined yet.",
+    }),
+    listPromptsErrorMessage: i18n.translate('xpack.agentBuilder.prompts.listPromptsErrorMessage', {
+      defaultMessage: 'Failed to fetch prompts',
+    }),
+    newPromptButtonLabel: i18n.translate('xpack.agentBuilder.prompts.newPromptButtonLabel', {
+      defaultMessage: 'New prompt',
+    }),
+    // Table columns
+    nameLabel: i18n.translate('xpack.agentBuilder.prompts.nameLabel', {
+      defaultMessage: 'Name',
+    }),
+    contentLabel: i18n.translate('xpack.agentBuilder.prompts.contentLabel', {
+      defaultMessage: 'Content',
+    }),
+    updatedAtLabel: i18n.translate('xpack.agentBuilder.prompts.updatedAtLabel', {
+      defaultMessage: 'Last updated',
+    }),
+    // Actions
+    startChatButtonLabel: i18n.translate('xpack.agentBuilder.prompts.startChatButtonLabel', {
+      defaultMessage: 'Start chat with prompt',
+    }),
+    editPromptButtonLabel: i18n.translate('xpack.agentBuilder.prompts.editPromptButtonLabel', {
+      defaultMessage: 'Edit prompt',
+    }),
+    deletePromptButtonLabel: i18n.translate('xpack.agentBuilder.prompts.deletePromptButtonLabel', {
+      defaultMessage: 'Delete prompt',
+    }),
+    // Toast messages
+    createPromptSuccessToast: (promptId: string) =>
+      i18n.translate('xpack.agentBuilder.prompts.createPromptSuccessToast', {
+        defaultMessage: 'Prompt "{promptId}" created successfully',
+        values: { promptId },
+      }),
+    createPromptErrorToast: i18n.translate('xpack.agentBuilder.prompts.createPromptErrorToast', {
+      defaultMessage: 'Failed to create prompt',
+    }),
+    updatePromptSuccessToast: (promptId: string) =>
+      i18n.translate('xpack.agentBuilder.prompts.updatePromptSuccessToast', {
+        defaultMessage: 'Prompt "{promptId}" updated successfully',
+        values: { promptId },
+      }),
+    updatePromptErrorToast: i18n.translate('xpack.agentBuilder.prompts.updatePromptErrorToast', {
+      defaultMessage: 'Failed to update prompt',
+    }),
+    deletePromptSuccessToast: (promptId: string) =>
+      i18n.translate('xpack.agentBuilder.prompts.deletePromptSuccessToast', {
+        defaultMessage: 'Prompt "{promptId}" deleted successfully',
+        values: { promptId },
+      }),
+    deletePromptErrorToast: i18n.translate('xpack.agentBuilder.prompts.deletePromptErrorToast', {
+      defaultMessage: 'Failed to delete prompt',
+    }),
+    // Modal labels
+    idLabel: i18n.translate('xpack.agentBuilder.prompts.idLabel', {
+      defaultMessage: 'ID',
+    }),
+    idPlaceholder: i18n.translate('xpack.agentBuilder.prompts.idPlaceholder', {
+      defaultMessage: 'Enter prompt ID',
+    }),
+    namePlaceholder: i18n.translate('xpack.agentBuilder.prompts.namePlaceholder', {
+      defaultMessage: 'Enter prompt name',
+    }),
+    contentPlaceholder: i18n.translate('xpack.agentBuilder.prompts.contentPlaceholder', {
+      defaultMessage: 'Enter prompt content',
+    }),
+    deleteModalTitle: (promptName: string) =>
+      i18n.translate('xpack.agentBuilder.prompts.deleteModal.title', {
+        defaultMessage: 'Delete {promptName}',
+        values: { promptName },
+      }),
+    deleteModalCancelButton: i18n.translate('xpack.agentBuilder.prompts.deleteModal.cancelButton', {
+      defaultMessage: 'Cancel',
+    }),
+    deleteModalConfirmButton: i18n.translate(
+      'xpack.agentBuilder.prompts.deleteModal.confirmButton',
+      {
+        defaultMessage: 'Delete',
+      }
+    ),
+    loadPromptErrorToast: (promptId: string) =>
+      i18n.translate('xpack.agentBuilder.prompts.loadPromptErrorToast', {
+        defaultMessage: 'Failed to load prompt "{promptId}"',
+        values: { promptId },
+      }),
+  },
 };

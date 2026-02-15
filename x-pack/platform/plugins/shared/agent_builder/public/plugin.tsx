@@ -26,6 +26,7 @@ import {
   DocLinksService,
   NavigationService,
   ToolsService,
+  PromptsService,
   EventsService,
   type AgentBuilderInternalService,
 } from './services';
@@ -113,6 +114,7 @@ export class AgentBuilderPlugin
     const conversationsService = new ConversationsService({ http });
     const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
+    const promptsService = new PromptsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
     if (!this.setupServices) {
@@ -129,6 +131,7 @@ export class AgentBuilderPlugin
       docLinksService,
       navigationService,
       toolsService,
+      promptsService,
       startDependencies,
       accessChecker,
       eventsService,
