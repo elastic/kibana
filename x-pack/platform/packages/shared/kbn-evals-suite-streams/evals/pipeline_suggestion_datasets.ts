@@ -7380,54 +7380,23 @@ export const PIPELINE_SUGGESTION_DATASETS: PipelineSuggestionEvaluationDataset[]
           source_id: 'unknown-custom-2026-01-30',
           system: 'unknown',
           expected_processors: {
-            parsing: {
-              type: 'grok' as const,
-              should_parse_field: 'body.text',
-              expected_fields: ['log.level', 'message'],
-            },
-            normalization: [
-              {
-                type: 'convert',
-                target_field: 'log.level',
-                description: 'Converts "log.level" field value to "string" type',
-              },
-              {
-                type: 'convert',
-                target_field: 'service.name',
-                description: 'Converts "service.name" field value to "string" type',
-              },
-              {
-                type: 'convert',
-                target_field: 'host.name',
-                description: 'Converts "host.name" field value to "string" type',
-              },
-              {
-                type: 'date',
-                target_field: '@timestamp',
-                description: "@timestamp • yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-              },
-            ],
+            parsing: undefined,
+            normalization: [],
           },
           quality_thresholds: {
-            min_parse_rate: 0.8,
-            min_field_count: 3,
-            max_field_count: 15,
-            required_semantic_fields: ['@timestamp', 'log.level', 'service.name', 'host.name'],
+            min_parse_rate: 0,
+            min_field_count: 0,
+            max_field_count: 0,
+            required_semantic_fields: [],
           },
           schema_expectations: {
-            expected_schema_fields: [
-              '@timestamp',
-              'log.level',
-              'service.name',
-              'host.name',
-              'body.text',
-            ],
+            expected_schema_fields: [],
           },
         },
         metadata: {
-          difficulty: 'medium' as const,
+          difficulty: 'easy' as const,
           notes:
-            'Generated from copyStreamsSuggestion() on 2026-01-30. Review and complete expected fields and thresholds.',
+            'Data already structured - no pipeline needed. LLM should correctly decline to suggest processing.',
         },
       },
       // 🔧 NEW DATASETS GO HERE - Added by create_dataset_from_clipboard.ts
