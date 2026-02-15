@@ -196,6 +196,18 @@ export const commaCompleteItem = buildCharCompleteItem(
 
 export const promqlByCompleteItem: ISuggestionItem = withAutoSuggest({
   label: 'by',
+  text: 'by ($1) ($0) ',
+  asSnippet: true,
+  kind: 'Reference',
+  category: SuggestionCategory.LANGUAGE_KEYWORD,
+  detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.byDoc', {
+    defaultMessage: 'Group by labels',
+  }),
+  command: { id: 'esql.promql.bySnippetInserted', title: 'PromQL By Snippet' },
+});
+
+export const promqlByAfterArgsCompleteItem: ISuggestionItem = withAutoSuggest({
+  label: 'by',
   text: 'by ($0) ',
   asSnippet: true,
   kind: 'Reference',
@@ -229,6 +241,16 @@ export const promqlRangeSelectorItem: ISuggestionItem = withAutoSuggest({
     defaultMessage: 'Range selector (duration)',
   }),
   category: SuggestionCategory.PROMQL_METRIC_QUALIFIER,
+});
+
+export const promqlOpenParensCompleteItem: ISuggestionItem = withAutoSuggest({
+  label: '()',
+  text: '($0) ',
+  asSnippet: true,
+  kind: 'Snippet',
+  detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.addFunctionArguments', {
+    defaultMessage: 'Add function arguments',
+  }),
 });
 
 export const byCompleteItem: ISuggestionItem = withAutoSuggest({

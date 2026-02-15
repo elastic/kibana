@@ -56,6 +56,7 @@ interface PromqlPosition {
   type: PromqlPositionType;
   currentParam?: string; // param name being edited (e.g. 'step' for after_param_equals)
   canAddGrouping?: boolean; // whether by/without can be appended to the the query
+  isAfterAggregationName?: boolean; // whether cursor is after agg name before opening args, e.g. `sum |`
   selector?: PromQLSelector; // selector node at cursor (for duration/label checks)
   canSuggestRangeSelector?: boolean; // whether [5m] range selector can be suggested
   isCompleteLabel?: boolean; // label at cursor is complete (suggest comma instead of new label)
@@ -157,36 +158,54 @@ function getQueryZonePosition(
   };
   const parsed = parseQueryAst();
 
-  // Computes canAddGrouping from the parsed AST
-  const computeCanAddGrouping = (): boolean => {
+  // Computes canAddGrouping and whether cursor is right after an aggregation name.
+  const computeGroupingContext = (): {
+    canAddGrouping: boolean;
+    isAfterAggregationName: boolean;
+  } => {
     if (!parsed) {
-      return false;
+      return { canAddGrouping: false, isAfterAggregationName: false };
     }
 
     const { root, cursor } = parsed;
     const textBeforeCursor = querySlice!.text.slice(0, cursor).trimEnd();
     const logicalCursor = textBeforeCursor.length;
+    const afterAggregationName = isAfterAggregationName(textBeforeCursor);
 
     if (logicalCursor === 0) {
-      return false;
+      return { canAddGrouping: false, isAfterAggregationName: false };
     }
 
     const nearest = findNearestAggregation(root, logicalCursor);
 
-    return nearest?.location.max === logicalCursor - 1;
+    return {
+      canAddGrouping: nearest?.location.max === logicalCursor - 1 || afterAggregationName,
+      isAfterAggregationName: afterAggregationName,
+    };
   };
 
   // Zone 1: cursor past everything (including wrapper parens if any)
   if (cursorPosition > (queryBounds.wrappedEnd ?? queryBounds.queryEnd)) {
+    const groupingContext =
+      queryBounds.wrappedEnd === undefined
+        ? computeGroupingContext()
+        : { canAddGrouping: false, isAfterAggregationName: false };
+
     return {
       type: 'after_query',
-      canAddGrouping: queryBounds.wrappedEnd === undefined && computeCanAddGrouping(),
+      canAddGrouping: groupingContext.canAddGrouping,
+      isAfterAggregationName: groupingContext.isAfterAggregationName,
     };
   }
 
   // Zone 2: cursor between inner expression and outer parens wrapper
   if (queryBounds.wrappedEnd !== undefined && cursorPosition > queryBounds.queryEnd) {
-    return { type: 'inside_query', canAddGrouping: computeCanAddGrouping() };
+    const groupingContext = computeGroupingContext();
+    return {
+      type: 'inside_query',
+      canAddGrouping: groupingContext.canAddGrouping,
+      isAfterAggregationName: groupingContext.isAfterAggregationName,
+    };
   }
 
   // Inside query zone: delegate to cursor-first resolver
@@ -354,6 +373,13 @@ function findNearestAggregation(
   return nearest;
 }
 
+/** Returns true when cursor is after an aggregation function name before `(`, e.g. `sum |`. */
+function isAfterAggregationName(textBeforeCursor: string): boolean {
+  const trailingIdentifier = getTrailingIdentifier(textBeforeCursor.trimEnd());
+
+  return trailingIdentifier ? isPromqlAcrossSeriesFunction(trailingIdentifier) : false;
+}
+
 /** Resolves signature types by walking up to the enclosing function. */
 function getSignatureTypesFromAncestors(
   text: string,
@@ -414,9 +440,13 @@ function findSelectorArgPosition(
     }
 
     const selector = arg as PromQLSelector;
+    const selectorMetricName = selector.metric?.name;
+    const isFunctionLikeMetric =
+      !!selectorMetricName && !!getPromqlFunctionDefinition(selectorMetricName);
 
     // After metric, no labels/duration yet
     if (
+      !isFunctionLikeMetric &&
       selector.metric &&
       !selector.labelMap &&
       !selector.duration &&
@@ -636,9 +666,16 @@ function resolveSelectorPosition(
   signatureTypes: PromQLFunctionParamType[]
 ): PromqlPosition | undefined {
   const { metric, labelMap } = selector;
+  const metricName = metric?.name;
+  const isFunctionLikeMetric = !!metricName && !!getPromqlFunctionDefinition(metricName);
 
   // Cursor after metric, before labelMap → after_metric
-  if (metric && cursor > metric.location.max && (!labelMap || cursor < labelMap.location.min)) {
+  if (
+    !isFunctionLikeMetric &&
+    metric &&
+    cursor > metric.location.max &&
+    (!labelMap || cursor < labelMap.location.min)
+  ) {
     return { type: 'after_metric', selector };
   }
 
@@ -848,15 +885,21 @@ function resolveTopLevelPosition(
   textBeforeCursorArg?: string
 ): PromqlPosition {
   if (precomputedCanAddGrouping !== undefined) {
-    return { type: 'inside_query', canAddGrouping: precomputedCanAddGrouping };
+    return {
+      type: 'inside_query',
+      canAddGrouping: precomputedCanAddGrouping,
+      isAfterAggregationName: isAfterAggregationName(textBeforeCursorArg ?? text.slice(0, cursor)),
+    };
   }
 
   const textBeforeCursor = textBeforeCursorArg ?? text.slice(0, cursor).trimEnd();
   const logicalCursor = textBeforeCursor.length;
   const nearest = findNearestAggregation(root, logicalCursor);
-  const canAddGrouping = logicalCursor > 0 && nearest?.location.max === logicalCursor - 1;
+  const afterAggregationName = isAfterAggregationName(textBeforeCursor);
+  const canAddGrouping =
+    logicalCursor > 0 && (nearest?.location.max === logicalCursor - 1 || afterAggregationName);
 
-  return { type: 'inside_query', canAddGrouping };
+  return { type: 'inside_query', canAddGrouping, isAfterAggregationName: afterAggregationName };
 }
 
 /** Gets the binary-expression node nearest to cursor, if present in match chain. */
@@ -1031,6 +1074,12 @@ function getQueryPosition(
     }
   }
 
+  // Prefer argument-start context after grouping/label resolution.
+  // This avoids selector fallthrough in constructs like `sum by (...) (|)`.
+  if (lastChar === '(' || lastChar === '=') {
+    return { type: 'after_open_paren', signatureTypes: getSignatureTypes() };
+  }
+
   // Selector context: also triggers when cursor is on metric identifier inside selector
   // Also handles cursor after a selector in binary RHS (e.g., "a * bytes |")
   let selectorNode: PromQLSelector | undefined;
@@ -1057,6 +1106,7 @@ function getQueryPosition(
 
     // Cursor on metric identifier: use after_metric when at or past metric end
     if (
+      !getPromqlFunctionDefinition(selectorNode.metric?.name) &&
       selectorNode.metric &&
       cursor >= selectorNode.metric.location.max &&
       (!selectorNode.labelMap || cursor < selectorNode.labelMap.location.min)
@@ -1091,10 +1141,12 @@ function getQueryPosition(
   // canAddGrouping takes precedence over function args (matches old priority chain)
   const logicalCursor = textBeforeCursor.length;
   const nearestAgg = findNearestAggregation(root, logicalCursor);
-  const canAddGrouping = logicalCursor > 0 && nearestAgg?.location.max === logicalCursor - 1;
+  const afterAggregationName = isAfterAggregationName(textBeforeCursor);
+  const canAddGrouping =
+    logicalCursor > 0 && (nearestAgg?.location.max === logicalCursor - 1 || afterAggregationName);
 
   if (canAddGrouping || isAfterCompleteExpression(root, cursor)) {
-    return { type: 'inside_query', canAddGrouping };
+    return { type: 'inside_query', canAddGrouping, isAfterAggregationName: afterAggregationName };
   }
 
   // Function context

@@ -25,10 +25,12 @@ import {
   buildAddValuePlaceholder,
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
+  promqlByAfterArgsCompleteItem,
   getPromqlParamKeySuggestions,
   pipeCompleteItem,
   promqlByCompleteItem,
   promqlLabelSelectorItem,
+  promqlOpenParensCompleteItem,
   promqlRangeSelectorItem,
   valuePlaceholderConstant,
 } from '../complete_items';
@@ -123,7 +125,7 @@ export async function autocomplete(
     case 'inside_grouping':
       return position.isCompleteLabel
         ? [getCommaWithAutoSuggest()]
-        : buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain');
+        : buildGroupingLabelSuggestions(context);
 
     case 'after_label_brace':
       return position.isCompleteLabel
@@ -178,10 +180,14 @@ export async function autocomplete(
     }
 
     case 'inside_query': {
+      if (position.isAfterAggregationName) {
+        return [promqlByCompleteItem, promqlOpenParensCompleteItem];
+      }
+
       const insideQuerySuggestions: ISuggestionItem[] = [...getPromqlOperatorSuggestions()];
 
       if (position.canAddGrouping) {
-        insideQuerySuggestions.push(promqlByCompleteItem);
+        insideQuerySuggestions.push(promqlByAfterArgsCompleteItem);
       }
 
       return insideQuerySuggestions;
@@ -224,10 +230,14 @@ export async function autocomplete(
     }
 
     case 'after_query': {
+      if (position.isAfterAggregationName) {
+        return [promqlByCompleteItem, promqlOpenParensCompleteItem];
+      }
+
       const suggestions: ISuggestionItem[] = [...getPromqlOperatorSuggestions(), pipeCompleteItem];
 
       if (position.canAddGrouping) {
-        suggestions.unshift(promqlByCompleteItem);
+        suggestions.unshift(promqlByAfterArgsCompleteItem);
       }
 
       return suggestions;
@@ -415,4 +425,24 @@ function buildFieldSuggestions(
         category: SuggestionCategory.FIELD,
       });
     });
+}
+
+function buildGroupingLabelSuggestions(context: ICommandContext | undefined): ISuggestionItem[] {
+  if (!context?.columns) {
+    return [];
+  }
+
+  const stringTypes = new Set<string>(ESQL_STRING_TYPES);
+
+  return Array.from(context.columns.values())
+    .filter((column) => !column.userDefined && stringTypes.has(column.type))
+    .map((column) =>
+      withAutoSuggest({
+        label: column.name,
+        text: column.name,
+        kind: 'Field',
+        detail: column.type,
+        category: SuggestionCategory.FIELD,
+      })
+    );
 }
