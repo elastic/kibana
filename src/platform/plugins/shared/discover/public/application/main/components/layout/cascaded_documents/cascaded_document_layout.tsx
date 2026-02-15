@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback, Fragment, useRef, useEffect } from 'react';
+import React, { useMemo, useCallback, Fragment, useRef } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import {
   DataCascade,
@@ -15,15 +15,12 @@ import {
   DataCascadeRowCell,
   type DataCascadeRowCellProps,
 } from '@kbn/shared-ux-document-data-cascade';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { EsqlQuery } from '@kbn/esql-language';
 import { type ESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { getStatsCommandToOperateOn } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers/utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
-import { useScopedServices } from '../../../../../components/scoped_services_provider/scoped_services_provider';
 import {
   useEsqlDataCascadeRowHeaderComponents,
   useEsqlDataCascadeHeaderComponent,
@@ -32,11 +29,7 @@ import {
 } from './blocks';
 import { cascadedDocumentsStyles } from './cascaded_documents.styles';
 import { useEsqlDataCascadeRowActionHelpers } from './blocks/use_row_header_components';
-import {
-  useDataCascadeRowExpansionHandlers,
-  useGroupedCascadeData,
-  useScopedESQLQueryFetchClient,
-} from './hooks';
+import { useDataCascadeRowExpansionHandlers, useGroupedCascadeData } from './hooks';
 import { useCascadedDocumentsContext } from './cascaded_documents_provider';
 
 export interface ESQLDataCascadeProps
@@ -61,21 +54,10 @@ const ESQLDataCascade = React.memo(
     const {
       availableCascadeGroups,
       selectedCascadeGroups,
-      esqlQuery,
       esqlVariables,
-      timeRange,
       viewModeToggle,
       cascadeGroupingChangeHandler,
-      registerCascadeRequestsInspectorAdapter,
     } = useCascadedDocumentsContext();
-    const { scopedProfilesManager } = useScopedServices();
-    const { data, expressions } = useDiscoverServices();
-
-    const cascadeRequestsInspectorAdapter = useRef<RequestAdapter>(new RequestAdapter());
-
-    useEffect(() => {
-      registerCascadeRequestsInspectorAdapter(cascadeRequestsInspectorAdapter.current);
-    }, [registerCascadeRequestsInspectorAdapter]);
 
     const cascadeGroupData = useGroupedCascadeData({
       selectedCascadeGroups,
@@ -84,23 +66,12 @@ const ESQLDataCascade = React.memo(
       esqlVariables,
     });
 
-    const fetchCascadeData = useScopedESQLQueryFetchClient({
-      query: esqlQuery,
-      dataView,
-      data,
-      esqlVariables,
-      expressions,
-      timeRange,
-      scopedProfilesManager,
-      inspectorAdapters: { requests: cascadeRequestsInspectorAdapter.current },
-    });
-
     const {
       onCascadeGroupNodeExpanded,
       onCascadeGroupNodeCollapsed,
       onCascadeLeafNodeExpanded,
       onCascadeLeafNodeCollapsed,
-    } = useDataCascadeRowExpansionHandlers({ cascadeFetchClient: fetchCascadeData });
+    } = useDataCascadeRowExpansionHandlers({ dataView });
 
     const customTableHeading = useEsqlDataCascadeHeaderComponent({
       viewModeToggle,
