@@ -22,6 +22,8 @@
 
 ## Testing
 
+- After changes, run `scripts/llm.sh` and resolve failures
+
 ### Jest unit
 `yarn test:jest [--config=<pathToConfigFile>] [TestPathPattern]`
 - Config is auto-discovered from the test file path (walks up to nearest `jest.config.js`). Simplest usage:
