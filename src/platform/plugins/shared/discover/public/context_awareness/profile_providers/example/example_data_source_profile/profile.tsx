@@ -17,7 +17,7 @@ import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import { useExampleContext } from '../example_context';
-import { ChartWithCustomButtons } from './components';
+import { ChartWithCustomButtons, CustomDocViewerHeader } from './components';
 import { CustomDocView } from './components/custom_doc_view';
 import { RestorableStateDocView } from './components/restorable_state_doc_view';
 
@@ -108,6 +108,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
 
             return prevValue.docViewsRegistry(registry);
           },
+          renderCustomHeader: (props) => <CustomDocViewerHeader {...props} />,
         };
       },
     /**

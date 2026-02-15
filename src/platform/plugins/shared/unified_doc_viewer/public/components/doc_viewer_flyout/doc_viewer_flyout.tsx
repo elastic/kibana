@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback, useRef, type ComponentType } from 'react';
+import React, { useMemo, useCallback, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EuiFlyoutProps } from '@elastic/eui';
@@ -23,6 +23,7 @@ import {
   useEuiTheme,
   useIsWithinMinBreakpoint,
   isDOMNode,
+  EuiSpacer,
 } from '@elastic/eui';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -37,7 +38,10 @@ import { useFlyoutA11y } from './use_flyout_a11y';
 export interface UnifiedDocViewerFlyoutProps
   extends Pick<
     DocViewerProps,
-    'initialDocViewerState' | 'onInitialDocViewerStateChange' | 'onUpdateSelectedTabId'
+    | 'initialTabId'
+    | 'initialDocViewerState'
+    | 'onInitialDocViewerStateChange'
+    | 'onUpdateSelectedTabId'
   > {
   docViewerRef?: DocViewerProps['ref'];
   'data-test-subj'?: string;
@@ -46,11 +50,6 @@ export interface UnifiedDocViewerFlyoutProps
   flyoutActions?: React.ReactNode;
   flyoutType?: 'push' | 'overlay';
   flyoutWidthLocalStorageKey?: string;
-  FlyoutCustomBody?: ComponentType<{
-    actions: Pick<DocViewRenderProps, 'filter' | 'onAddColumn' | 'onRemoveColumn'>;
-    doc: DataTableRecord;
-    renderDefaultContent: () => React.ReactNode;
-  }>;
   services: {
     toastNotifications?: ToastsStart;
     chrome: ChromeStart;
@@ -62,13 +61,13 @@ export interface UnifiedDocViewerFlyoutProps
   hit: DataTableRecord;
   hits?: DataTableRecord[];
   dataView: DataView;
-  onAddColumn: (column: string) => void;
-  onClose: () => void;
-  onFilter?: DocViewFilterFn;
-  onRemoveColumn: (column: string) => void;
-  setExpandedDoc: (doc?: DataTableRecord) => void;
-  initialTabId?: string;
   hideFilteringOnComputedColumns?: boolean;
+  renderCustomHeader?: (props: DocViewRenderProps) => React.ReactElement;
+  setExpandedDoc: (doc?: DataTableRecord) => void;
+  onClose: () => void;
+  onAddColumn: (column: string) => void;
+  onRemoveColumn: (column: string) => void;
+  onFilter?: DocViewFilterFn;
 }
 
 function getIndexByDocId(hits: DataTableRecord[], id: string) {
@@ -89,29 +88,29 @@ export function UnifiedDocViewerFlyout({
   docViewerRef,
   'data-test-subj': dataTestSubj,
   flyoutTitle,
-  flyoutActions,
   flyoutDefaultWidth,
+  flyoutActions,
   flyoutType,
   flyoutWidthLocalStorageKey,
-  FlyoutCustomBody,
   services,
   docViewsRegistry,
   isEsqlQuery,
+  columns,
+  columnsMeta,
   hit,
   hits,
   dataView,
-  columns,
-  columnsMeta,
-  onFilter,
-  onClose,
-  onRemoveColumn,
-  onAddColumn,
-  setExpandedDoc,
+  hideFilteringOnComputedColumns,
   initialTabId,
   initialDocViewerState,
+  renderCustomHeader,
+  setExpandedDoc,
+  onClose,
+  onAddColumn,
+  onRemoveColumn,
+  onFilter,
   onInitialDocViewerStateChange,
   onUpdateSelectedTabId,
-  hideFilteringOnComputedColumns,
 }: UnifiedDocViewerFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const isXlScreen = useIsWithinMinBreakpoint('xl');
@@ -215,68 +214,37 @@ export function UnifiedDocViewerFlyout({
     [onRemoveColumn, services.toastNotifications]
   );
 
-  const renderDefaultContent = useCallback(
-    () => (
-      <UnifiedDocViewer
-        ref={docViewerRef}
-        columns={columns}
-        columnsMeta={columnsMeta}
-        dataView={dataView}
-        filter={onFilter}
-        hit={actualHit}
-        onAddColumn={addColumn}
-        onRemoveColumn={removeColumn}
-        textBasedHits={isEsqlQuery ? hits : undefined}
-        docViewsRegistry={docViewsRegistry}
-        decreaseAvailableHeightBy={
-          isProjectStyle ? euiTheme.base + PROJECT_VIEW_MARGIN_BOTTOM : euiTheme.base
-        }
-        initialTabId={initialTabId}
-        initialDocViewerState={initialDocViewerState}
-        onInitialDocViewerStateChange={onInitialDocViewerStateChange}
-        onUpdateSelectedTabId={onUpdateSelectedTabId}
-        hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
-      />
-    ),
-    [
-      docViewerRef,
+  const docViewRenderProps = useMemo<DocViewRenderProps>(
+    () => ({
+      hit: actualHit,
+      dataView,
       columns,
       columnsMeta,
-      dataView,
-      onFilter,
-      actualHit,
-      addColumn,
-      removeColumn,
-      isEsqlQuery,
-      hits,
-      docViewsRegistry,
-      euiTheme.base,
-      initialTabId,
-      initialDocViewerState,
-      hideFilteringOnComputedColumns,
-      onInitialDocViewerStateChange,
-      onUpdateSelectedTabId,
-      isProjectStyle,
-    ]
-  );
-
-  const contentActions = useMemo(
-    () => ({
+      textBasedHits: isEsqlQuery ? hits : undefined,
       filter: onFilter,
       onAddColumn: addColumn,
       onRemoveColumn: removeColumn,
+      docViewsRegistry,
+      decreaseAvailableHeightBy: isProjectStyle
+        ? euiTheme.base + PROJECT_VIEW_MARGIN_BOTTOM
+        : euiTheme.base,
+      hideFilteringOnComputedColumns,
     }),
-    [onFilter, addColumn, removeColumn]
-  );
-
-  const bodyContent = FlyoutCustomBody ? (
-    <FlyoutCustomBody
-      actions={contentActions}
-      doc={actualHit}
-      renderDefaultContent={renderDefaultContent}
-    />
-  ) : (
-    renderDefaultContent()
+    [
+      actualHit,
+      dataView,
+      columns,
+      columnsMeta,
+      isEsqlQuery,
+      hits,
+      onFilter,
+      addColumn,
+      removeColumn,
+      docViewsRegistry,
+      isProjectStyle,
+      euiTheme.base,
+      hideFilteringOnComputedColumns,
+    ]
   );
 
   const defaultFlyoutTitle = isEsqlQuery
@@ -350,7 +318,22 @@ export function UnifiedDocViewerFlyout({
             <EuiHorizontalRule margin="none" />
           </>
         )}
-        <EuiFlyoutBody>{bodyContent}</EuiFlyoutBody>
+        <EuiFlyoutBody>
+          {renderCustomHeader && (
+            <>
+              {renderCustomHeader(docViewRenderProps)}
+              <EuiSpacer size="m" />
+            </>
+          )}
+          <UnifiedDocViewer
+            ref={docViewerRef}
+            initialTabId={initialTabId}
+            initialDocViewerState={initialDocViewerState}
+            onInitialDocViewerStateChange={onInitialDocViewerStateChange}
+            onUpdateSelectedTabId={onUpdateSelectedTabId}
+            {...docViewRenderProps}
+          />
+        </EuiFlyoutBody>
       </EuiFlyout>
     </EuiPortal>
   );

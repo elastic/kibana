@@ -61,7 +61,6 @@ export interface DocViewRenderProps {
    * For displaying text-based search results, define column types (which are available separately in the fetch request) here.
    */
   columnsMeta?: DataTableColumnsMeta;
-  query?: Query | AggregateQuery;
   textBasedHits?: DataTableRecord[];
   hideActionsColumn?: boolean;
   filter?: DocViewFilterFn;

@@ -56,6 +56,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be('Record #0');
       });
 
+      it('should render custom doc viewer header', async () => {
+        const state = kbnRison.encode({
+          dataSource: { type: 'esql' },
+          query: { esql: 'from my-example-logs | sort @timestamp desc' },
+        });
+        await common.navigateToActualUrl('discover', `?_a=${state}`, {
+          ensureCurrentUrl: false,
+        });
+        await discover.waitUntilTabIsLoaded();
+        await dataGrid.clickRowToggle({ rowIndex: 0 });
+        await testSubjects.existOrFail('exampleCustomDocViewerHeader');
+        expect(await testSubjects.getVisibleText('exampleCustomDocViewerHeader')).to.contain(
+          'Example custom header'
+        );
+      });
+
       it('should preserve counter state for restorable state doc viewer', async () => {
         const state = kbnRison.encode({
           dataSource: { type: 'esql' },
@@ -154,6 +170,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('docViewerTab-doc_view_restorable_state_example');
         expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be(
           'Record #my-example-logs::XdQFDpABfGznVC1bCHLo::'
+        );
+      });
+
+      it('should render custom doc viewer header', async () => {
+        await common.navigateToActualUrl('discover', undefined, {
+          ensureCurrentUrl: false,
+        });
+        await dataViews.switchTo('my-example-logs');
+        await discover.waitUntilTabIsLoaded();
+        await dataGrid.clickRowToggle({ rowIndex: 0 });
+        await testSubjects.existOrFail('exampleCustomDocViewerHeader');
+        expect(await testSubjects.getVisibleText('exampleCustomDocViewerHeader')).to.contain(
+          'Example custom header'
         );
       });
 
