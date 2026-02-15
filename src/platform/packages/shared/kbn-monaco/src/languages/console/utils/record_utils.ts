@@ -7,21 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConstantComponent } from './constant_component';
-import type { SharedComponent } from './shared_component';
-
-export class FullRequestComponent extends ConstantComponent {
-  readonly name: string;
-  constructor(
-    name: string,
-    parent: SharedComponent | undefined,
-    private readonly template: string
-  ) {
-    super(name, parent);
-    this.name = name;
-  }
-
-  getTerms() {
-    return [{ name: this.name, snippet: this.template }];
-  }
-}
+/**
+ * Type guard for values that are safe to treat as "object-like" during traversal.
+ *
+ * Note: Intentionally includes arrays. Use this as a traversal guard
+ * (`typeof value === 'object' && value !== null`), not as a "plain object" check.
+ */
+export const isRecordLike = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;

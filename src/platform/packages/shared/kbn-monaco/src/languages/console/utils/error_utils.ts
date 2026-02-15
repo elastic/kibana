@@ -7,21 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConstantComponent } from './constant_component';
-import type { SharedComponent } from './shared_component';
+import { isRecordLike } from './record_utils';
 
-export class FullRequestComponent extends ConstantComponent {
-  readonly name: string;
-  constructor(
-    name: string,
-    parent: SharedComponent | undefined,
-    private readonly template: string
-  ) {
-    super(name, parent);
-    this.name = name;
+export const getErrorMessage = (error: unknown): string => {
+  if (isRecordLike(error) && typeof error.message === 'string') {
+    return error.message;
   }
-
-  getTerms() {
-    return [{ name: this.name, snippet: this.template }];
-  }
-}
+  return String(error);
+};
