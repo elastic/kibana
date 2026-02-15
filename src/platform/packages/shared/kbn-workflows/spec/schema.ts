@@ -519,7 +519,7 @@ const WorkflowSchemaForAutocompleteBase = z
     name: z.string().min(1).optional(),
     description: z.string().optional(),
     settings: WorkflowSettingsSchema.optional(),
-    enabled: z.boolean().default(true).optional(),
+    enabled: z.boolean().optional(),
     tags: z.array(z.string()).optional(),
     triggers: z
       .array(z.object({ type: z.string().catch('') }).passthrough())

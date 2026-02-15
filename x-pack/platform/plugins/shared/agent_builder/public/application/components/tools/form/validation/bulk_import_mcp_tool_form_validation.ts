@@ -12,7 +12,7 @@ import {
 } from '@kbn/agent-builder-common/base/namespaces';
 import { toolIdRegexp, toolIdMaxLength } from '@kbn/agent-builder-common/tools';
 import { useQueryClient } from '@kbn/react-query';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import { queryKeys } from '../../../../query_keys';
 
@@ -93,12 +93,16 @@ export const useBulkImportMcpToolFormValidationSchema = () => {
         .min(1, { message: bulkImportMcpI18nMessages.namespace.requiredError })
         .max(toolIdMaxLength, { message: bulkImportMcpI18nMessages.namespace.tooLongError })
         .regex(toolIdRegexp, { message: bulkImportMcpI18nMessages.namespace.formatError })
-        .refine(
-          (name) => !isInProtectedNamespace(name) && !hasNamespaceName(name),
-          (name) => ({
-            message: bulkImportMcpI18nMessages.namespace.protectedNamespaceError(name),
-          })
-        ),
+        .check((ctx) => {
+          const name = ctx.value as string;
+          if (isInProtectedNamespace(name) || hasNamespaceName(name)) {
+            ctx.issues.push({
+              code: 'custom',
+              message: bulkImportMcpI18nMessages.namespace.protectedNamespaceError(name),
+              input: name,
+            });
+          }
+        }),
       labels: z.array(z.string()),
     })
     .superRefine(async (data, ctx) => {

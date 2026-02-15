@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { ReviewDissectFieldsPrompt } from '@kbn/dissect-heuristics';
 import type { InferenceClient, ToolOptionsOfPrompt } from '@kbn/inference-common';

@@ -6,7 +6,7 @@
  */
 
 import { conditionSchema, type Condition } from '@kbn/streamlang';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export interface System {
   type: 'system';

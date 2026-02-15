@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { JsonSchema7ObjectType } from 'zod-to-json-schema';
-import zodToJsonSchema from 'zod-to-json-schema';
-import type { ZodObject } from '@kbn/zod';
+import { z, type ZodObject } from '@kbn/zod/v4';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDefinitionWithSchema, ToolDefinition, ToolType } from '@kbn/agent-builder-common';
 import type { Runner, ExecutableTool, InternalToolDefinition } from '@kbn/agent-builder-server';
@@ -50,7 +49,19 @@ export const toDescriptorWithSchema = async (
 ): Promise<ToolDefinitionWithSchema> => {
   const descriptor = toDescriptor(tool);
   const schema = await tool.getSchema();
-  const jsonSchema = zodToJsonSchema(schema) as JsonSchema7ObjectType;
+  let jsonSchema: Record<string, any>;
+  if (schema && typeof schema === 'object' && '_zod' in schema) {
+    // Zod v4 schema
+    const { $schema, ...rest } = z.toJSONSchema(schema, {
+      unrepresentable: 'any',
+      io: 'input',
+    }) as Record<string, any>;
+    jsonSchema = rest;
+  } else {
+    // Zod v3 schema
+    const { $schema, ...rest } = zodToJsonSchema(schema as any) as Record<string, any>;
+    jsonSchema = rest;
+  }
   return { ...descriptor, schema: jsonSchema };
 };
 

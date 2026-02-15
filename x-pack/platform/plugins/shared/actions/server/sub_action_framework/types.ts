@@ -41,7 +41,7 @@ export interface ServiceParams<Config, Secrets> {
 
 export type SubActionRequestParams<R> = {
   url: string;
-  responseSchema: z3.ZodType<R>;
+  responseSchema: z3.ZodType<R> | z4.ZodType<R>;
   method?: Method;
   sslOverrides?: SSLSettings;
 } & AxiosRequestConfig;
@@ -56,7 +56,7 @@ export type IServiceAbstract<Config, Secrets> = abstract new (
 
 export type ICaseServiceAbstract<Config, Secrets, Incident, GetIncidentResponse> = abstract new (
   params: ServiceParams<Config, Secrets>,
-  pushToServiceIncidentParamsSchema: Record<string, z3.ZodType<unknown>>
+  pushToServiceIncidentParamsSchema: Record<string, z4.ZodType<unknown>>
 ) => SubActionConnector<Config, Secrets>;
 
 export enum ValidatorType {
@@ -117,7 +117,7 @@ export interface SubActionConnectorType<Config, Secrets> {
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
   schema: {
-    config: z3.ZodType<Config> | z4.ZodType;
+    config: z3.ZodType<Config> | z4.ZodType<Config>;
     secrets: z3.ZodType<Secrets, z3.ZodTypeDef, Secrets | undefined> | z4.ZodType;
   };
   validators?: Array<ConfigValidator<Config> | SecretsValidator<Secrets>>;
@@ -146,7 +146,7 @@ export type ExtractFunctionKeys<T> = {
 export interface SubAction {
   name: string;
   method: string;
-  schema: z3.ZodType<unknown> | null;
+  schema: z3.ZodType<unknown> | z4.ZodType<unknown> | null;
 }
 
 export interface PushToServiceParams {

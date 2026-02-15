@@ -9,6 +9,7 @@ import type {
   CustomToolChoice,
   InferenceClient,
   Prompt,
+  PromptOptions,
   PromptVersion,
   ToolCallOfToolDefinitions,
 } from '@kbn/inference-common';
@@ -50,7 +51,7 @@ export async function determineOtelFieldNameUsage(
  */
 export async function callInferenceWithPrompt<
   TPrompt extends Prompt<
-    any,
+    { sample_messages: string[]; review_fields: string },
     Array<Omit<PromptVersion, 'toolChoice'> & { toolChoice: CustomToolChoice }>
   >
 >(
@@ -67,7 +68,7 @@ export async function callInferenceWithPrompt<
     input: {
       sample_messages: sampleMessages,
       review_fields: JSON.stringify(reviewFields),
-    },
+    } as PromptOptions<TPrompt>['input'],
     abortSignal: signal,
   });
 

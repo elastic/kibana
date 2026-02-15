@@ -7,6 +7,7 @@
 
 import { INDICATOR_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import type { z } from '@kbn/zod/v4';
 
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
@@ -41,7 +42,11 @@ export const createIndicatorMatchAlertType = (): SecurityAlertType<ThreatRulePar
       },
     },
     schemas: {
-      params: { type: 'zod', schema: ThreatRuleParams },
+      params: {
+        type: 'zod',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        schema: ThreatRuleParams as unknown as z.ZodObject<any>,
+      },
     },
     actionGroups: [
       {

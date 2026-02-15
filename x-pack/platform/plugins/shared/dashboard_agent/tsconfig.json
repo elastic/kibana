@@ -23,7 +23,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
     "@kbn/deeplinks-analytics",
-    "@kbn/dashboard-markdown"
+    "@kbn/dashboard-markdown",
   ],
   "exclude": ["target/**/*"]
 }

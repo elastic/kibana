@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import { createReasoningEvent } from '@kbn/agent-builder-genai-utils/langchain';
@@ -19,13 +19,20 @@ import { tags } from './constants';
 import type { StateType } from './state';
 import { processStructuredAnswerResponse } from './action_utils';
 
-export const structuredOutputSchema = z.object({
+const structuredOutputZodSchema = z.object({
   response: z.string().describe("The response to the user's query"),
   data: z
-    .record(z.unknown())
+    .record(z.string(), z.unknown())
     .optional()
     .describe('Optional structured data to include in the response'),
 });
+
+const { $schema: _$schema, ...structuredOutputSchema } = z.toJSONSchema(structuredOutputZodSchema, {
+  io: 'input',
+  unrepresentable: 'any',
+}) as Record<string, unknown>;
+
+export { structuredOutputSchema };
 
 const wrappedSchemaProp = 'response';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { BooleanFromString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { deleteEntityDiscoveryAPIKey, readEntityDiscoveryAPIKey } from '../../lib/auth';
 import { canDisableEntityDiscovery } from '../../lib/auth/privileges';
 import { uninstallBuiltInEntityDefinitions } from '../../lib/entities/uninstall_entity_definition';

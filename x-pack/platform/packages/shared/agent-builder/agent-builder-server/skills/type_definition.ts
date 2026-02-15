@@ -6,7 +6,7 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { SkillBoundedTool } from './tools';
 import type {
   Directory,

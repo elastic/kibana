@@ -11,7 +11,7 @@ import { get } from 'lodash';
 const MAX_ERRORS = 5;
 const MAX_RECURSION = 20;
 
-export function formatZodError(err: ZodError) {
+export function formatZodV3Error(err: ZodError) {
   const formatted = err.format();
   const errorMessages: string[] = [...formatted._errors];
 

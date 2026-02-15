@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { IngestBase, IngestBaseStream, IngestBaseUpsertRequest } from './base';
 import type { RoutingDefinition } from './routing';
 import { routingDefinitionListSchema } from './routing';
@@ -14,7 +14,7 @@ import type { FieldDefinition, InheritedFieldDefinition } from '../../fields';
 import { fieldDefinitionSchema, inheritedFieldDefinitionSchema } from '../../fields';
 import type { Validation } from '../validation/validation';
 import { validation } from '../validation/validation';
-import type { ModelOfSchema, ModelValidation } from '../validation/model_validation';
+import type { ModelValidation } from '../validation/model_validation';
 import { modelValidation } from '../validation/model_validation';
 import { BaseStream } from '../base';
 import type { WiredIngestStreamEffectiveSettings } from './settings';
@@ -71,15 +71,16 @@ type OmitWiredStreamUpsertProps<
   };
 };
 
-type WiredStreamsDefaults = {
-  Source: z.input<IWiredStreamSchema['Definition']>;
+interface WiredStreamsDefaults {
+  Definition: z.output<IWiredStreamSchema['Definition']>;
+  Source: z.output<IWiredStreamSchema['Definition']>;
   GetResponse: {
-    stream: z.input<IWiredStreamSchema['Definition']>;
-  };
+    stream: z.output<IWiredStreamSchema['Definition']>;
+  } & z.output<IWiredStreamSchema['GetResponse']>;
   UpsertRequest: {
-    stream: OmitWiredStreamUpsertProps<{} & z.input<IWiredStreamSchema['Definition']>>;
+    stream: OmitWiredStreamUpsertProps<{} & z.output<IWiredStreamSchema['Definition']>>;
   };
-} & ModelOfSchema<IWiredStreamSchema>;
+}
 
 export namespace WiredStream {
   export interface Model {

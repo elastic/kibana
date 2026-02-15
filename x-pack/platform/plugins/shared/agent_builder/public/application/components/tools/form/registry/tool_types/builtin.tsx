@@ -6,7 +6,7 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { transformBuiltInToolToFormData } from '../../../../../utils/transform_built_in_form_data';
 import { zodResolver } from '../../../../../utils/zod_resolver';
@@ -33,5 +33,5 @@ export const builtinToolRegistryEntry: ToolTypeRegistryEntry<BuiltinToolFormData
   formDataToUpdatePayload: () => {
     throw new Error('Built-in tools cannot be updated');
   },
-  getValidationResolver: () => zodResolver(z.any({})),
+  getValidationResolver: () => zodResolver(z.any()),
 };

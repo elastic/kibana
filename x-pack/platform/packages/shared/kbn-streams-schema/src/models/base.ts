@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { IModel, OmitUpsertProps } from './core';
 import type { StreamQuery } from '../queries';
 import { streamQuerySchema } from '../queries';
@@ -57,7 +57,7 @@ export const BaseStream: ModelValidation<IModel, BaseStream.Model> = modelValida
   Definition: z.object({
     name: z.string(),
     description: z.string(),
-    updated_at: z.string().datetime(),
+    updated_at: z.iso.datetime(),
     query_streams: z
       .array(
         z.object({

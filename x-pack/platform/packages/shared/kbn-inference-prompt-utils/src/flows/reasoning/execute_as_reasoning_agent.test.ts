@@ -8,7 +8,7 @@
 import type { BoundInferenceClient, Prompt, ToolMessage } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from './execute_as_reasoning_agent';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { END_INTERNAL_REASONING_MARKER } from './markers';
 
 function makePrompt() {

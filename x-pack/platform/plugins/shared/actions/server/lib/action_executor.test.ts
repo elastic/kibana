@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { KibanaRequest } from '@kbn/core/server';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -922,7 +922,7 @@ describe('Action Executor', () => {
         actionId: '1',
         status: 'error',
         retry: false,
-        message: `error validating connector type config: Required`,
+        message: `error validating connector type config: ✖ Invalid input: expected object, received undefined`,
         errorSource: TaskErrorSource.FRAMEWORK,
       });
     });
@@ -980,7 +980,7 @@ describe('Action Executor', () => {
         actionId: '1',
         status: 'error',
         retry: false,
-        message: `error validating connector type config: Required`,
+        message: `error validating connector type config: ✖ Invalid input: expected object, received undefined`,
 
         errorSource: TaskErrorSource.FRAMEWORK,
       });
@@ -1015,7 +1015,8 @@ describe('Action Executor', () => {
         actionId: '1',
         status: 'error',
         retry: false,
-        message: `error validating action params: Field \"param1\": Required`,
+        message: `error validating action params: ✖ Invalid input: expected string, received undefined
+  → at param1`,
         errorSource: TaskErrorSource.USER,
       });
     });

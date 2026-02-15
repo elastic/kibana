@@ -110,18 +110,7 @@ apiTest.describe(
         };
 
         expect(() => transpile(streamlangDSL)).toThrowError(
-          JSON.stringify(
-            [
-              {
-                code: 'custom',
-                message:
-                  'Convert processor must have the "to" parameter when there is a "where" condition. It should not be the same as the source field.',
-                path: ['steps', 0, 'to', 'where'],
-              },
-            ],
-            null,
-            2
-          )
+          /Convert processor must have the .*?to.*? parameter when there is a .*?where.*? condition/
         );
       }
     );

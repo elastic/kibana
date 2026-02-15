@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ExternalServiceIncidentResponse, PushToServiceResponse } from './types';
 import { SubActionConnector } from './sub_action_connector';
 import type { ServiceParams } from './types';

@@ -5,38 +5,28 @@
  * 2.0.
  */
 
-// NOTE: Some of the workaround logic in this file (for fixBrokenSchemaReferencesAndEnforceStrictValidation) is similar
-// to that found in src/platform/packages/shared/kbn-workflows/spec/lib/get_json_schema_from_yaml_schema.ts
-// from Workflows. We may be able to align / share these utilities in the future once both projects aren't
-// in flux.
-import type { JsonSchema7Type } from 'zod-to-json-schema';
-import { zodToJsonSchema } from 'zod-to-json-schema';
-import type { z } from '@kbn/zod';
+// NOTE: This file uses Zod v4's native z.toJSONSchema() for JSON Schema conversion.
+// The fixup pipeline enforces strict additionalProperties and enhances the schema
+// with editor-friendly metadata (titles, snippets, etc.) for Monaco YAML.
+import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import { ACTION_METADATA_MAP } from '../actions/action_metadata';
 import type { StreamType } from '../../types/streamlang';
 
 /**
- * JSON Schema scaffold produced from the Streamlang Zod schema. The converter
- * always emits a root `$ref` that points into `definitions.StreamlangSchema`,
- * so we capture that structure here to provide type safety when we later
- * mutate the generated schema tree.
+ * JSON Schema produced by Zod v4's native `z.toJSONSchema()`. The output is a
+ * flat JSON Schema object (no `definitions` wrapper). We use a loose record
+ * type here since the downstream fixup pipeline accesses fields dynamically.
  */
-type StreamlangJsonSchema = JsonSchema7Type & {
-  $ref: '#/definitions/StreamlangSchema';
-  $schema: 'http://json-schema.org/draft-07/schema#';
-  definitions: {
-    StreamlangSchema: JsonSchema7Type;
-  };
-};
+type StreamlangJsonSchema = Record<string, unknown>;
 
 /**
  * Convert the Streamlang Zod schema into JSON Schema and run our fixup pipeline
  * so the result is consumable by Monaco YAML and other validation tooling.
  *
- * The raw output of `zod-to-json-schema` contains recursive references that
- * Monaco cannot resolve, and it omits strict `additionalProperties` flags.
- * This helper normalises those quirks before returning the schema artifact.
+ * Uses Zod v4's native `z.toJSONSchema()` for the conversion. The fixup
+ * pipeline enforces strict `additionalProperties` and enhances the schema
+ * with editor-friendly metadata (titles, snippets, etc.).
  *
  * @param streamlangSchema - The Zod schema to convert
  * @param streamType - Optional stream type to filter available actions (e.g., exclude manual_ingest_pipeline for wired streams)
@@ -45,10 +35,10 @@ export function getJsonSchemaFromStreamlangSchema(
   streamlangSchema: z.ZodType,
   streamType?: StreamType
 ): StreamlangJsonSchema {
-  // Generate the json schema from zod schema
-  const jsonSchema = zodToJsonSchema(streamlangSchema, {
-    name: 'StreamlangSchema',
-    target: 'jsonSchema7',
+  // Generate the JSON schema using Zod v4's native conversion
+  const jsonSchema = z.toJSONSchema(streamlangSchema, {
+    target: 'draft-7',
+    unrepresentable: 'any',
   });
 
   // Apply targeted fixes to make it valid for JSON Schema validators
@@ -126,9 +116,8 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(
   let fixedSchemaString = schemaString;
 
   // Fix 1: Remove duplicate enum values
-  // zod-to-json-schema occasionally emits duplicated enum entries when multiple
-  // refinements point at the same literal. Validators dislike this, so we dedupe
-  // the list while preserving the original order.
+  // Deduplicates enum entries that can occur when multiple refinements point at the
+  // same literal. Validators dislike duplicate entries, so we dedupe while preserving order.
   fixedSchemaString = fixedSchemaString.replace(/"enum":\s*\[([^\]]+)\]/g, (match, enumValues) => {
     try {
       const values = JSON.parse(`[${enumValues}]`);
@@ -139,40 +128,8 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(
     }
   });
 
-  // Fix 2: Break deeply nested references that cause infinite loops
-  fixedSchemaString = fixedSchemaString.replace(
-    /"\$ref":"#\/definitions\/StreamlangSchema\/properties\/steps\/items\/anyOf\/\d+\/properties\/where\/properties\/steps\/items\/anyOf\/\d+\/properties\/where\/properties\/steps"/g,
-    '"type": "array", "description": "Nested steps (recursion limited to prevent infinite loops)", "items": {"type": "object", "additionalProperties": false}'
-  );
-
-  // Fix 3: Fix bare allOf references
-  fixedSchemaString = fixedSchemaString.replace(
-    /"\$ref":"#\/definitions\/StreamlangSchema\/properties\/steps\/items\/anyOf\/\d+\/allOf\/\d+\/allOf\/\d+(?:\/allOf\/\d+)*"/g,
-    '"type": "object", "properties": {}, "additionalProperties": false, "description": "Complex schema intersection (simplified due to broken allOf reference)"'
-  );
-
-  // Fix 4: Fix deeply nested allOf references with properties
-  fixedSchemaString = fixedSchemaString.replace(
-    /"\$ref":"#\/definitions\/StreamlangSchema\/properties\/steps\/items\/anyOf\/\d+\/allOf\/\d+\/allOf\/\d+\/properties\/[^"]+"/g,
-    '"type": "object", "properties": {}, "additionalProperties": false, "description": "Nested configuration (simplified)"'
-  );
-
-  // Fix 5: Fix any remaining deeply nested broken references
-  fixedSchemaString = fixedSchemaString.replace(
-    /"\$ref":"#\/definitions\/[^"]*\/allOf\/\d+\/allOf\/\d+\/allOf\/\d+\/properties\/[^"]+"/g,
-    '"type": "object", "properties": {}, "additionalProperties": false, "description": "Complex object (validation simplified)"'
-  );
-
-  // Fix 6: Fix any remaining bare allOf references (catch-all)
-  fixedSchemaString = fixedSchemaString.replace(
-    /"\$ref":"#\/definitions\/[^"]*\/allOf\/\d+\/allOf\/\d+(?:\/allOf\/\d+)*"/g,
-    '"type": "object", "properties": {}, "additionalProperties": false, "description": "Schema intersection (simplified due to broken reference)"'
-  );
-
   // Enforce strict validation: ensure all objects have additionalProperties: false
   try {
-    // After applying all text replacements we round-trip through JSON to obtain
-    // a mutable object graph again before running the recursive post-processors.
     const fixedSchema = JSON.parse(fixedSchemaString);
     fixAdditionalPropertiesInSchema(fixedSchema);
     enhanceStreamlangSchemaForEditor(fixedSchema, streamType);
@@ -193,7 +150,14 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(
  */
 
 function enhanceStreamlangSchemaForEditor(schema: any, streamType?: StreamType): void {
-  const stepsItems = schema?.definitions?.StreamlangSchema?.properties?.steps?.items;
+  // Zod v4's toJSONSchema produces a flat schema. The steps items may be a
+  // $ref pointer (for recursive schemas) rather than an inline definition,
+  // so we resolve it before processing.
+  let stepsItems = schema?.properties?.steps?.items;
+
+  if (stepsItems?.$ref) {
+    stepsItems = resolveJsonPointer(schema, stepsItems.$ref);
+  }
 
   if (!stepsItems || typeof stepsItems !== 'object') {
     // The steps array schema is missing or malformed; nothing to enhance.

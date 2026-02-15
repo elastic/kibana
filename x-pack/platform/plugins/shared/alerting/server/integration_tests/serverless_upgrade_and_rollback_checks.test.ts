@@ -10,6 +10,7 @@ import {
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import { uniq } from 'lodash';
+import { z } from '@kbn/zod/v4';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { setupTestServers } from './lib';
 import type { RuleTypeRegistry } from '../rule_type_registry';
@@ -105,10 +106,23 @@ describe('Serverless upgrade and rollback checks', () => {
       }
       const schemaType = ruleType.schemas.params.type;
       if (schemaType === 'config-schema') {
-        // @ts-ignore-next-line getSchema() exists..
         expect(ruleType.schemas.params.schema.getSchema().describe()).toMatchSnapshot();
       } else if (schemaType === 'zod') {
-        expect(zodToJsonSchema(ruleType.schemas.params.schema)).toMatchSnapshot();
+        const schema = ruleType.schemas.params.schema;
+        let jsonSchema: Record<string, unknown>;
+        if (schema && typeof schema === 'object' && '_zod' in schema) {
+          // Zod v4 schema
+          const { $schema, ...rest } = z.toJSONSchema(schema as z.ZodType, {
+            unrepresentable: 'any',
+            io: 'input',
+          }) as Record<string, unknown>;
+          jsonSchema = rest;
+        } else {
+          // Zod v3 schema — use zod-to-json-schema
+          const { $schema, ...rest } = zodToJsonSchema(schema) as Record<string, unknown>;
+          jsonSchema = rest;
+        }
+        expect(jsonSchema).toMatchSnapshot();
       } else {
         throw new Error(`Support for ${schemaType} missing`);
       }

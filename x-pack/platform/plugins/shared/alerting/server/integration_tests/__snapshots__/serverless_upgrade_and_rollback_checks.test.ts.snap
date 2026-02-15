@@ -5773,7 +5773,6 @@ Object {
 
 exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.eqlRule 1`] = `
 Object {
-  "$schema": "http://json-schema.org/draft-07/schema#",
   "allOf": Array [
     Object {
       "properties": Object {
@@ -6463,7 +6462,6 @@ Object {
 
 exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.indicatorRule 1`] = `
 Object {
-  "$schema": "http://json-schema.org/draft-07/schema#",
   "allOf": Array [
     Object {
       "properties": Object {
@@ -7219,7 +7217,6 @@ Object {
 
 exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.mlRule 1`] = `
 Object {
-  "$schema": "http://json-schema.org/draft-07/schema#",
   "allOf": Array [
     Object {
       "properties": Object {
@@ -7890,7 +7887,6 @@ Object {
 
 exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.newTermsRule 1`] = `
 Object {
-  "$schema": "http://json-schema.org/draft-07/schema#",
   "allOf": Array [
     Object {
       "properties": Object {
@@ -8617,7 +8613,6 @@ Object {
 
 exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.queryRule 1`] = `
 Object {
-  "$schema": "http://json-schema.org/draft-07/schema#",
   "allOf": Array [
     Object {
       "properties": Object {
@@ -9345,7 +9340,6 @@ Object {
 
 exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.savedQueryRule 1`] = `
 Object {
-  "$schema": "http://json-schema.org/draft-07/schema#",
   "allOf": Array [
     Object {
       "properties": Object {
@@ -10073,7 +10067,6 @@ Object {
 
 exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.thresholdRule 1`] = `
 Object {
-  "$schema": "http://json-schema.org/draft-07/schema#",
   "allOf": Array [
     Object {
       "properties": Object {

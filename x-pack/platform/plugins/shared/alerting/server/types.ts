@@ -16,7 +16,7 @@ import type {
   IUiSettingsClient,
   KibanaRequest,
 } from '@kbn/core/server';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type {
   ENHANCED_ES_SEARCH_STRATEGY,

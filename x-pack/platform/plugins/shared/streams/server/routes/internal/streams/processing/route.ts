@@ -12,7 +12,7 @@ import {
   namedFieldDefinitionConfigSchema,
 } from '@kbn/streams-schema';
 import type { DataStreamWithFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { streamlangDSLSchema } from '@kbn/streamlang';
 import { from, map } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';

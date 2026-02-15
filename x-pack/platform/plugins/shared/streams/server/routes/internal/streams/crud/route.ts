@@ -6,7 +6,7 @@
  */
 
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';

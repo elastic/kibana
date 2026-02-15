@@ -11,7 +11,7 @@ import {
   type SignificantEventsGetResponse,
   type SignificantEventsPreviewResponse,
 } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { catchError, from as fromRxjs, map } from 'rxjs';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { PromptsConfigService } from '../../../lib/saved_objects/significant_events/prompts_config_service';

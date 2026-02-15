@@ -10,7 +10,7 @@ import {
   type SignificantEventsQueriesGenerationTaskResult,
   type SignificantEventsGetResponse,
 } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import {
   getSignificantEventsQueriesGenerationTaskId,
@@ -164,10 +164,8 @@ const readAllSignificantEventsRoute = createServerRoute({
       bucketSize: z.string().describe('Size of time buckets for aggregation'),
       query: z.string().optional().describe('Query string to filter significant events queries'),
       streamNames: z
-        .preprocess(
-          (val) => (typeof val === 'string' ? [val] : val),
-          z.array(z.string()).optional()
-        )
+        .union([z.string().transform((val) => [val]), z.array(z.string())])
+        .optional()
         .describe('Stream names to filter significant events'),
     }),
   }),

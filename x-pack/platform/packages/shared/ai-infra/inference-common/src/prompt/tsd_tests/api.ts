@@ -6,7 +6,7 @@
  */
 
 import { expectAssignable, expectType } from 'tsd';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { Assign } from 'utility-types';
 import type {
   PromptAPI,

@@ -269,7 +269,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: Field \"apiUrl\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at apiUrl`,
             });
           });
       });
@@ -291,7 +291,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: Field \"apiUrl\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at apiUrl`,
             });
           });
       });
@@ -491,7 +491,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: Field \"subAction\": Invalid discriminator value. Expected 'getFields' | 'getIncident' | 'handshake' | 'pushToService' | 'getChoices'`,
+                message: `error validating action params: ✖ Invalid input\n  → at subAction`,
               });
             });
         });
@@ -509,7 +509,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: Field \"subActionParams\": Required`,
+                message: `error validating action params: ✖ Invalid input: expected object, received undefined\n  → at subActionParams`,
               });
             });
         });
@@ -532,7 +532,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: Field \"subActionParams\": Unrecognized key(s) in object: 'savedObjectId'`,
+                message: `error validating action params: ✖ Unrecognized key: "savedObjectId"\n  → at subActionParams\n✖ Invalid input: expected object, received undefined\n  → at subActionParams.incident`,
               });
             });
         });
@@ -559,7 +559,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: Field \"subActionParams.comments.0.commentId\": Required`,
+                message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subActionParams.comments[0].commentId`,
               });
             });
         });
@@ -586,7 +586,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: Field \"subActionParams.comments.0.comment\": Required`,
+                message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subActionParams.comments[0].comment`,
               });
             });
         });
@@ -683,7 +683,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                   status: 'error',
                   retry: false,
                   errorSource: TaskErrorSource.USER,
-                  message: `error validating action params: Field \"subActionParams.fields\": Required`,
+                  message: `error validating action params: ✖ Invalid input: expected array, received undefined\n  → at subActionParams.fields`,
                 });
               });
           });

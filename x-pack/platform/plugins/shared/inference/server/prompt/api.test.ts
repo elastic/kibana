@@ -21,7 +21,7 @@ import {
   createPrompt,
   ChatCompletionEventType,
 } from '@kbn/inference-common';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import type {
   ChatCompleteApiWithCallback,
