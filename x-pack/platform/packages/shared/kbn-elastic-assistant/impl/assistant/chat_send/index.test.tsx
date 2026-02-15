@@ -58,4 +58,34 @@ describe('ChatSend', () => {
     });
     expect(getByTestId('prompt-textarea')).toHaveTextContent('');
   });
+
+  it('does not submit form during IME composition', async () => {
+    const promptText = 'test message';
+    const { getByTestId } = render(<ChatSend {...testProps} userPrompt={promptText} />, {
+      wrapper: TestProviders,
+    });
+    const promptTextArea = getByTestId('prompt-textarea');
+
+    // Start IME composition
+    fireEvent.compositionStart(promptTextArea);
+
+    // Press Enter during composition (should not submit)
+    fireEvent.keyDown(promptTextArea, {
+      keyCode: 13,
+      shiftKey: false,
+    });
+    expect(handleChatSend).not.toHaveBeenCalled();
+
+    // End IME composition
+    fireEvent.compositionEnd(promptTextArea);
+
+    // Press Enter after composition (should submit)
+    fireEvent.keyDown(promptTextArea, {
+      keyCode: 13,
+      shiftKey: false,
+    });
+    await waitFor(() => {
+      expect(handleChatSend).toHaveBeenCalled();
+    });
+  });
 });
