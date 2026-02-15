@@ -8,19 +8,17 @@
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
-import { useGetGapAutoFillScheduler } from '../../api/hooks/use_gap_auto_fill_scheduler';
 import { GAP_AUTO_FILL_DESCRIPTION } from '../../translations';
 import * as i18n from './translations';
 import { RuleSettingsModal } from '../rule_settings_modal';
-import { useGapAutoFillCapabilities } from '../../logic/use_gap_auto_fill_capabilities';
+import { useGapAutoFillSchedulerContext } from '../../context/gap_auto_fill_scheduler_context';
 
 export const GapAutoFillStatus = React.memo(() => {
-  const { canAccessGapAutoFill } = useGapAutoFillCapabilities();
-  const { data: gapAutoFillScheduler, isLoading: isGapAutoFillSchedulerLoading } =
-    useGetGapAutoFillScheduler({ enabled: canAccessGapAutoFill });
+  const { canAccessGapAutoFill, scheduler, isSchedulerLoading } = useGapAutoFillSchedulerContext();
+
   const [isRuleSettingsModalOpen, openRuleSettingsModal, closeRuleSettingsModal] = useBoolState();
-  const isStatusLoading = isGapAutoFillSchedulerLoading && !gapAutoFillScheduler;
-  const isEnabled = gapAutoFillScheduler?.enabled ?? false;
+  const isStatusLoading = isSchedulerLoading && !scheduler;
+  const isEnabled = scheduler?.enabled ?? false;
 
   if (!canAccessGapAutoFill) {
     return null;

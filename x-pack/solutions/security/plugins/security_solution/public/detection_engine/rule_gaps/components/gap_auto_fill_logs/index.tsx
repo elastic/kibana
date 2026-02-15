@@ -30,10 +30,8 @@ import { GAP_AUTO_FILL_STATUS, type GapAutoFillStatus } from '@kbn/alerting-plug
 import { CallOutSwitcher } from '../../../../common/components/callouts';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import * as i18n from './translations';
-import {
-  useGetGapAutoFillScheduler,
-  useFindGapAutoFillSchedulerLogs,
-} from '../../api/hooks/use_gap_auto_fill_scheduler';
+import { useFindGapAutoFillSchedulerLogs } from '../../api/hooks/use_gap_auto_fill_scheduler';
+import { useGapAutoFillSchedulerContext } from '../../context/gap_auto_fill_scheduler_context';
 import { MultiselectFilter } from '../../../../common/components/multiselect_filter';
 
 type SchedulerLog = GapAutoFillSchedulerLogsResponseBodyV1['data'][number];
@@ -102,7 +100,8 @@ const statuses: GapAutoFillStatus[] = [
 ];
 
 export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyoutProps) => {
-  const { data: scheduler } = useGetGapAutoFillScheduler({ enabled: isOpen });
+  const { scheduler } = useGapAutoFillSchedulerContext();
+
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([
