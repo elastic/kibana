@@ -37,6 +37,7 @@
     "@kbn/fleet-plugin",
     "@kbn/serverless-security-settings",
     "@kbn/core-elasticsearch-server",
+    "@kbn/cloud-defend-plugin",
     "@kbn/core-logging-server-mocks",
     "@kbn/actions-plugin",
     "@kbn/discover-plugin",
