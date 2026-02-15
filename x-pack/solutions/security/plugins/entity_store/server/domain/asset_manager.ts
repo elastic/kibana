@@ -19,7 +19,7 @@ import type {
   ManagedEntityDefinition,
 } from '../../common/domain/definitions/entity_schema';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
-import { scheduleEntityMaintainerTask } from '../tasks/entity_maintainer_task';
+import { scheduleEntityMaintainerTasks } from '../tasks/entity_maintainer_task';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
 import type {
   EngineDescriptor,
@@ -102,7 +102,7 @@ export class AssetManager {
         request,
       });
 
-      await scheduleEntityMaintainerTask({
+      await scheduleEntityMaintainerTasks({
         logger: this.logger,
         taskManager: this.taskManager,
         namespace: this.namespace,

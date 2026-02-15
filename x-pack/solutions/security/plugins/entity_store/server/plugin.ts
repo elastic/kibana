@@ -24,6 +24,7 @@ import {
   EntityMaintainersTasksType,
 } from './domain/definitions/saved_objects';
 import { registerEntityMaintainerTask } from './tasks/entity_maintainer_task';
+import { RegisterEntityMaintainerConfig } from './tasks/entity_maintainer_task/types';
 
 export class EntityStorePlugin
   implements
@@ -75,8 +76,8 @@ export class EntityStorePlugin
       config: {
         description: 'Entity Maintainer Task',
         id: 'entity-maintainer-task-test',
-        interval: '1m',
-        initialState: {a: 'a'},
+        interval: '20s',
+        initialState: {a: 'a', d: 'd'},
         run: async ({ status }) => {
           this.logger.debug(' =================> Running entity maintainer RUN task status ==== ' + JSON.stringify(status));
           return { ...status.state, b: 'b' };
@@ -88,8 +89,14 @@ export class EntityStorePlugin
       },
       core,
     }));
+    
     return {
-      registerEntityMaintainer: (_config: any) => {},
+      registerEntityMaintainer: (config: RegisterEntityMaintainerConfig) => registerEntityMaintainerTask({
+        taskManager: plugins.taskManager,
+        logger: this.logger,
+        config,
+        core
+      }),
     };
   }
 

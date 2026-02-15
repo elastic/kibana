@@ -10,7 +10,7 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
 export const EntityMaintainersTasksTypeName = 'entity-maintainers-tasks';
-export const EntityMaintainersTasksSingletonId = 'entity-maintainers-tasks';
+export const EntityMaintainersTasksId = 'entity-maintainers-tasks';
 
 export const EntityMaintainersTasksTypeMappings: SavedObjectsType['mappings'] = {
   dynamic: false,

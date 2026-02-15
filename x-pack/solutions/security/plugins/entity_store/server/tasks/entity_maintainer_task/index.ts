@@ -14,7 +14,7 @@ import type { Logger } from '@kbn/logging';
 import { EntityStoreCoreSetup } from '../../types';
 import {
   EntityMaintainersTasksTypeName,
-  EntityMaintainersTasksSingletonId,
+  EntityMaintainersTasksId,
 } from '../../domain/definitions/saved_objects';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { KibanaRequest, ISavedObjectsRepository } from '@kbn/core/server';
@@ -23,7 +23,11 @@ function getTaskType(id: string): string {
   return `${TasksConfig[EntityStoreTaskType.Values.entityMaintainer].type}:${id}`;
 }
 
-export async function scheduleEntityMaintainerTask({
+function getTaskId(id: string, namespace: string): string {
+  return `${id}:${namespace}`;
+}
+
+export async function scheduleEntityMaintainerTasks({
   logger,
   taskManager,
   namespace,
@@ -40,17 +44,17 @@ export async function scheduleEntityMaintainerTask({
     logger.debug(` =================> Scheduling entity maintainer tasks`);
     const doc = await entityMaintainersTasksRepo.get<{
       'entity-maintainers-tasks': Array<{ id: string; interval: string }>;
-    }>(EntityMaintainersTasksTypeName, EntityMaintainersTasksSingletonId);
+    }>(EntityMaintainersTasksTypeName, EntityMaintainersTasksId);
     logger.debug(` =================> Doc: ${JSON.stringify(doc)}`);
     const tasks = doc.attributes['entity-maintainers-tasks'] ?? [];
     logger.debug(` =================> Tasks: ${JSON.stringify(tasks)}`);
     for (const { id, interval } of tasks) {
       await taskManager.ensureScheduled(
         {
-          id,
+          id: getTaskId(id, namespace),
           taskType: getTaskType(id),
           schedule: { interval },
-          state: { namespace },
+          state: {},
           params: {},
         },
         { request }
@@ -77,7 +81,7 @@ export function registerEntityMaintainerTask({
   core: EntityStoreCoreSetup;
 }): void {
   try {
-    
+
     const { title } = TasksConfig[EntityStoreTaskType.Values.entityMaintainer];
     const { run, interval, initialState, description, id, setup } = config;
     const type = getTaskType(id);
@@ -90,25 +94,25 @@ export function registerEntityMaintainerTask({
       internalRepo
         .get<{ 'entity-maintainers-tasks': Array<{ id: string; interval: string }> }>(
           EntityMaintainersTasksTypeName,
-          EntityMaintainersTasksSingletonId
+          EntityMaintainersTasksId
         )
         .then((existing) => {
           const tasks = existing.attributes['entity-maintainers-tasks'] ?? [];
-          if (tasks.some((t) => t.id === id)) {
-            return;
-          }
+          logger.debug(` =================> Tasks registered: ${JSON.stringify(tasks)}`);
+          const filteredTasks = tasks.filter((t) => t.id !== id);
           return internalRepo.update(
             EntityMaintainersTasksTypeName,
-            EntityMaintainersTasksSingletonId,
-            { 'entity-maintainers-tasks': [...tasks, newEntry] }
+            EntityMaintainersTasksId,
+            { 'entity-maintainers-tasks': [...filteredTasks, newEntry] }
           );
         })
         .catch((err: Error) => {
+          logger.debug(` =================> Error fetching saved objects: ${JSON.stringify(err)}`);
           if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
             return internalRepo.create(
               EntityMaintainersTasksTypeName,
               { 'entity-maintainers-tasks': [newEntry] },
-              { id: EntityMaintainersTasksSingletonId }
+              { id: EntityMaintainersTasksId }
             );
           }
           logger.error(`Failed to register entity maintainer task in saved object: ${err.message}`);
