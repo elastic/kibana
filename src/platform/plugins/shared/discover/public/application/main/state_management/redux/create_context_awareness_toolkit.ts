@@ -26,6 +26,9 @@ export const createContextAwarenessToolkit = ({
       updateESQLQuery: (queryOrUpdater) => {
         internalState.dispatch(internalStateActions.updateESQLQuery({ tabId, queryOrUpdater }));
       },
+      addFilter: (field, value, mode) => {
+        internalState.dispatch(internalStateActions.addFilter({ tabId, field, value, mode }));
+      },
       updateAdHocDataViews: async (adHocDataViews) => {
         internalState.dispatch(internalStateActions.setAdHocDataViews(adHocDataViews));
       },
