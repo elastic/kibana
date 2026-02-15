@@ -304,7 +304,7 @@ export const BulkActionEditPayloadRuleActions = z.object({
 });
 
 /**
-  * Overwrites schedule of rules. 
+  * Overwrites schedule of rules.
 
 - `set_schedule` sets a schedule for rules. If the same schedule already exists for a rule, no changes are made.
 

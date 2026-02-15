@@ -288,8 +288,9 @@ paths:
 
         > When used with [API
         key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
-        the user's key gets assigned to the affected rules. If the user's key
-        gets deleted or the user becomes inactive, the rules will stop running.
+        the user's key gets assigned to the affected rules and invalidates the
+        old API key. If the user's key gets deleted or the user becomes
+        inactive, the rules will stop running.
 
 
         > If the API key that is used for authorization has different privileges
@@ -347,7 +348,7 @@ paths:
                     | STATS count = COUNT(*), min_timestamp = MIN(@timestamp)
 
                     | EVAL event_rate = count / DATE_DIFF("seconds",
-                    min_timestamp, NOW()) 
+                    min_timestamp, NOW())
 
                     | KEEP event_rate
               example6:
@@ -1278,8 +1279,9 @@ paths:
 
         > When used with [API
         key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
-        the user's key gets assigned to the affected rules. If the user's key
-        gets deleted or the user becomes inactive, the rules will stop running.
+        the user's key gets assigned to the affected rules and invalidates the
+        old API key. If the user's key gets deleted or the user becomes
+        inactive, the rules will stop running.
 
 
         > If the API key that is used for authorization has different privileges
@@ -1480,7 +1482,7 @@ paths:
 
         The edit action allows you to add, delete, or set tags, index patterns,
         investigation fields, rule actions and schedules for multiple rules at
-        once. 
+        once.
 
         The edit action is idempotent, meaning that if you add a tag to a rule
         that already has that tag, no changes are made. The same is true for
@@ -1497,6 +1499,12 @@ paths:
         key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
         the user's key gets assigned to the affected rules. If the user's key
         gets deleted or the user becomes inactive, the rules will stop running.
+
+
+        >Invalidation of the old API key is dependent on the bulk action. Refer
+        to the [API key
+        behavior](https://www.elastic.co/guide/en/security/current/detections-api-key-behavior.html)
+        for more details.
 
 
         > If the API key that is used for authorization has different privileges
@@ -3040,8 +3048,9 @@ paths:
 
         > When used with [API
         key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
-        the user's key gets assigned to the affected rules. If the user's key
-        gets deleted or the user becomes inactive, the rules will stop running.
+        the user's key gets assigned to the affected rules and invalidates the
+        old API key. If the user's key gets deleted or the user becomes
+        inactive, the rules will stop running.
 
 
         > If the API key that is used for authorization has different privileges
@@ -3951,7 +3960,7 @@ components:
         - value
     BulkActionEditPayloadSchedule:
       description: >
-        Overwrites schedule of rules. 
+        Overwrites schedule of rules.
 
 
         - `set_schedule` sets a schedule for rules. If the same schedule already
@@ -10409,7 +10418,7 @@ tags:
 
 
       To use basic authentication, provide a username and password; this
-      automatically creates an API key that matches the current user’s
+      automatically creates an API key that matches the current user's
       privileges.
 
 
@@ -10431,5 +10440,83 @@ tags:
       Kibana space. Refer to the [Detections
       requirements](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html)
       for a complete list of requirements.
+
+
+
+      ## Security Detections API Alerting API Key Behavior
+
+
+      The following table shows how Security Solution Detections APIs affect the
+      rule's API key:
+
+
+      | Security Solution API | API key behavior |
+
+      |----------------------|------------------|
+
+      | Create Rule (enabled) (`POST /api/detection_engine/rules`) | Creates new
+      key |
+
+      | Create Rule (disabled) (`POST /api/detection_engine/rules`) | No effect
+      |
+
+      | Update Rule (`PUT /api/detection_engine/rules`) | Regenerates if exists*
+      |
+
+      | Patch Rule (`PATCH /api/detection_engine/rules`) | Regenerates if
+      exists* |
+
+      | Delete Rule (`DELETE /api/detection_engine/rules`) | Deletes with rule |
+
+      | Bulk Enable (`POST /api/detection_engine/rules/_bulk_action`, action:
+      enable) | Creates if missing |
+
+      | Bulk Disable (`POST /api/detection_engine/rules/_bulk_action`, action:
+      disable) | No effect |
+
+      | Bulk Delete (`POST /api/detection_engine/rules/_bulk_action`, action:
+      delete) | Deletes with rule |
+
+      | Bulk Duplicate (`POST /api/detection_engine/rules/_bulk_action`, action:
+      duplicate) | Creates new key |
+
+      | Bulk Edit (`POST /api/detection_engine/rules/_bulk_action`, action:
+      edit) | Regenerates if exists* |
+
+      | Bulk Export (`POST /api/detection_engine/rules/_bulk_action`, action:
+      export) | No effect |
+
+      | Bulk Run (`POST /api/detection_engine/rules/_bulk_action`, action: run)
+      | No effect |
+
+      | Import Rules - new (`POST /api/detection_engine/rules/_import`) |
+      Creates new key |
+
+      | Import Rules - overwrite (`POST /api/detection_engine/rules/_import`) |
+      Regenerates if exists* |
+
+      | Install Prebuilt Rules (`POST
+      /api/detection_engine/rules/prepackaged/_perform`) | No effect |
+
+      | Upgrade Prebuilt Rules - same type (`POST
+      /api/detection_engine/prebuilt_rules/upgrade/_perform`) | Regenerates if
+      exists* |
+
+      | Upgrade Prebuilt Rules - type change (`POST
+      /api/detection_engine/prebuilt_rules/upgrade/_perform`) | Creates new key
+      |
+
+
+      ### \* Notes
+
+      - **Exception list changes (9.2+)**: After version 9.2, editing only
+      exception list parameters will not regenerate the API key.
+
+      - **Enabling during update**: If an update, patch, or import operation
+      also enables the rule (changes `enabled` from `false` to `true`), and no
+      API key exists, a new key will be created.
+
+      - **Exported rules**: Rules are exported with `enabled: false` and API key
+      values are stripped. When re-imported, the enable behavior applies.
     name: Security Detections API
     x-displayName: Security detections
