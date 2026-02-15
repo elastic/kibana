@@ -105,6 +105,8 @@ function recentFieldStats(fields: EntityField[]) {
           return `${recentDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD})`;
         case 'prefer_oldest_value':
           return `${recentDest} = FIRST(${castedSrc}, ${TIMESTAMP_FIELD})`;
+        case 'prefer_newest_list':
+          return `${recentDest} = MV_DEDUPE(LAST(${castedSrc}, ${TIMESTAMP_FIELD}))`;
         default:
           throw new Error('unknown field operation');
       }
@@ -125,6 +127,7 @@ function mergedFieldStats(idFieldName: string, fields: EntityField[]) {
         case 'collect_values':
           return `${dest} = MV_DEDUPE(COALESCE(MV_APPEND(${recentDest}, ${dest}), ${recentDest}))`;
         case 'prefer_newest_value':
+        case 'prefer_newest_list':
           return `${dest} = COALESCE(${recentDest}, ${dest})`;
         case 'prefer_oldest_value':
           return `${dest} = COALESCE(${dest}, ${recentDest})`;
