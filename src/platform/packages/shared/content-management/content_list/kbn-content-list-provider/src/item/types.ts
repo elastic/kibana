@@ -38,4 +38,11 @@ export interface ContentListItemConfig {
    * When provided, item titles become clickable links.
    */
   getHref?: (item: ContentListItem) => string;
+
+  /**
+   * Callback invoked to delete one or more items.
+   * When provided, enables the delete action on rows and the bulk-delete flow.
+   * The callback should handle the actual deletion and return a resolved promise on success.
+   */
+  onDelete?: (items: ContentListItem[]) => Promise<void>;
 }

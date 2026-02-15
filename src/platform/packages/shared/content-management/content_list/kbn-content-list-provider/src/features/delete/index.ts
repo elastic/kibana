@@ -7,14 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Feature types.
-export type { ContentListFeatures, ContentListSupports } from './types';
-export { isSortingConfig } from './types';
-
-// Sorting feature.
-export type { SortField, SortOption, SortingConfig, UseContentListSortReturn } from './sorting';
-export { useContentListSort } from './sorting';
-
-// Delete feature.
-export type { UseDeleteActionReturn } from './delete';
-export { useDeleteAction, LazyDeleteConfirmation } from './delete';
+export type { UseDeleteActionReturn } from './types';
+export { useDeleteAction } from './use_delete_action';
+export { LazyDeleteConfirmation } from './lazy_delete_confirmation';

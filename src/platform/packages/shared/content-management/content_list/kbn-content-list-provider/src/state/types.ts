@@ -18,6 +18,10 @@ import type { ActiveFilters } from '../datasource';
  */
 export const CONTENT_LIST_ACTIONS = {
   SET_SORT: 'SET_SORT',
+  REQUEST_DELETE: 'REQUEST_DELETE',
+  CONFIRM_DELETE_START: 'CONFIRM_DELETE_START',
+  CANCEL_DELETE: 'CANCEL_DELETE',
+  DELETE_COMPLETED: 'DELETE_COMPLETED',
 } as const;
 
 /**
@@ -43,6 +47,10 @@ export interface ContentListClientState {
     /** Sort direction. */
     direction: 'asc' | 'desc';
   };
+  /** Pending delete request, or `null` when no delete is in progress. */
+  deleteRequest: { items: ContentListItem[] } | null;
+  /** Whether a delete operation is currently executing. */
+  isDeleting: boolean;
 }
 
 /**
@@ -73,10 +81,15 @@ export type ContentListState = ContentListClientState & ContentListQueryData;
  *
  * @internal Used by the state reducer and dispatch function.
  */
-export interface ContentListAction {
-  type: typeof CONTENT_LIST_ACTIONS.SET_SORT;
-  payload: { field: string; direction: 'asc' | 'desc' };
-}
+export type ContentListAction =
+  | {
+      type: typeof CONTENT_LIST_ACTIONS.SET_SORT;
+      payload: { field: string; direction: 'asc' | 'desc' };
+    }
+  | { type: typeof CONTENT_LIST_ACTIONS.REQUEST_DELETE; payload: { items: ContentListItem[] } }
+  | { type: typeof CONTENT_LIST_ACTIONS.CONFIRM_DELETE_START }
+  | { type: typeof CONTENT_LIST_ACTIONS.CANCEL_DELETE }
+  | { type: typeof CONTENT_LIST_ACTIONS.DELETE_COMPLETED };
 
 /**
  * Context value provided by `ContentListStateProvider`.

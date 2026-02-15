@@ -10,6 +10,7 @@
 import React, { useMemo, createContext, useContext, type ReactNode } from 'react';
 import type { ContentListCoreConfig, ContentListConfig, ContentListServices } from './types';
 import type { ContentListFeatures, ContentListSupports } from '../features';
+import { LazyDeleteConfirmation } from '../features/delete';
 import type { DataSourceConfig } from '../datasource';
 import { ContentListStateProvider } from '../state';
 import { QueryClientProvider, contentListQueryClient } from '../query';
@@ -78,8 +79,9 @@ export const ContentListProvider = ({
   const supports: ContentListSupports = useMemo(
     () => ({
       sorting: features.sorting !== false,
+      delete: typeof item?.onDelete === 'function' && !isReadOnly,
     }),
-    [features.sorting]
+    [features.sorting, item?.onDelete, isReadOnly]
   );
 
   // Create context value.
@@ -100,7 +102,10 @@ export const ContentListProvider = ({
   return (
     <QueryClientProvider client={contentListQueryClient}>
       <ContentListContext.Provider value={value}>
-        <ContentListStateProvider>{children}</ContentListStateProvider>
+        <ContentListStateProvider>
+          {children}
+          {supports.delete && <LazyDeleteConfirmation />}
+        </ContentListStateProvider>
       </ContentListContext.Provider>
     </QueryClientProvider>
   );
