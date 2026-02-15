@@ -24,11 +24,20 @@ import type { GetElser } from '../types';
  * @param ml
  */
 export const createGetElserId =
-  (trainedModelsProvider: MlPluginSetup['trainedModelsProvider']): GetElser =>
-  async () =>
+  (
+    trainedModelsProvider: MlPluginSetup['trainedModelsProvider'],
+    elserInferenceId?: string
+  ): GetElser =>
+  async () => {
+    if (elserInferenceId && elserInferenceId !== defaultInferenceEndpoints.ELSER) {
+      return elserInferenceId;
+    }
+
     // Force check to happen as internal user
-    (await trainedModelsProvider({} as KibanaRequest, {} as SavedObjectsClientContract).getELSER())
-      .model_id;
+    return (
+      await trainedModelsProvider({} as KibanaRequest, {} as SavedObjectsClientContract).getELSER()
+    ).model_id;
+  };
 
 interface PipelineExistsParams {
   esClient: ElasticsearchClient;
