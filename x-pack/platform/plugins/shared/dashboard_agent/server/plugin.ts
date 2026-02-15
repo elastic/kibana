@@ -13,8 +13,7 @@ import type {
   DashboardAgentPluginSetup,
   DashboardAgentPluginStart,
 } from './types';
-import { registerDashboardAgent } from './register_agent';
-import { manageDashboardTool } from './tools';
+import { registerSkills } from './skills';
 import { getIsDashboardAgentEnabled } from './utils/get_is_dashboard_agent_enabled';
 import { DASHBOARD_AGENT_FEATURE_FLAG } from '../common/constants';
 import { createDashboardAttachmentType } from './attachment_types';
@@ -44,14 +43,12 @@ export class DashboardAgentPlugin
       .then((isDashboardAgentEnabled) => {
         if (!isDashboardAgentEnabled) {
           this.logger.debug(
-            `Skipping dashboard agent registration because feature flag "${DASHBOARD_AGENT_FEATURE_FLAG}" is set to false`
+            `Skipping dashboard skill and tools registration because feature flag "${DASHBOARD_AGENT_FEATURE_FLAG}" is set to false`
           );
           return;
         }
 
-        this.registerToolsAndAgent(coreSetup, setupDeps).catch((error) => {
-          this.logger.error(`Error registering dashboard agent and tools: ${error}`);
-        });
+        this.registerToolsAndSkills(setupDeps);
       })
       .catch((error) => {
         this.logger.error(`Error checking whether the dashboard agent is enabled: ${error}`);
@@ -60,18 +57,12 @@ export class DashboardAgentPlugin
     return {};
   }
 
-  private async registerToolsAndAgent(
-    coreSetup: CoreSetup<DashboardAgentStartDependencies, DashboardAgentPluginStart>,
-    setupDeps: DashboardAgentSetupDependencies
-  ) {
+  private registerToolsAndSkills(setupDeps: DashboardAgentSetupDependencies) {
     // Register the dashboard attachment type
     setupDeps.agentBuilder.attachments.registerType(createDashboardAttachmentType() as any);
 
-    // Register the consolidated manage_dashboard tool
-    setupDeps.agentBuilder.tools.register(manageDashboardTool({}));
-
-    // Register the dashboard agent
-    registerDashboardAgent(setupDeps.agentBuilder);
+    // Register dashboard skills for the default agent.
+    registerSkills(setupDeps.agentBuilder);
   }
 
   start(

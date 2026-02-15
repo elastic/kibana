@@ -63,7 +63,7 @@ export const buildVisualizationsFromQueriesWithLLM = async ({
   for (let i = 0; i < queries.length; i++) {
     const { query: nlQuery, index, chartType, esql } = queries[i];
 
-    events.reportProgress?.(`Creating visualization ${i + 1} of ${queries.length}: "${nlQuery}"`);
+    events.reportProgress(`Creating visualization ${i + 1} of ${queries.length}: "${nlQuery}"`);
 
     try {
       let selectedChartType: SupportedChartType = chartType || SupportedChartType.Metric;

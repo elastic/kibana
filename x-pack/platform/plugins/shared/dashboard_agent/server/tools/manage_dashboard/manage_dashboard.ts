@@ -9,7 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { getToolResultId } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   DASHBOARD_PANEL_ADDED_EVENT,
@@ -21,7 +22,6 @@ import {
 } from '@kbn/dashboard-agent-common';
 
 import { dashboardTools } from '../../../common';
-import { checkDashboardToolsAvailability } from '../utils';
 import {
   retrieveLatestVersion,
   getErrorMessage,
@@ -83,16 +83,10 @@ const manageDashboardSchema = z.object({
     .describe('(optional) Array of panel IDs to remove from the dashboard.'),
 });
 
-export const manageDashboardTool = ({}: {}): BuiltinToolDefinition<
-  typeof manageDashboardSchema
-> => {
+export const manageDashboardTool = (): BuiltinSkillBoundedTool<typeof manageDashboardSchema> => {
   return {
     id: dashboardTools.manageDashboard,
     type: ToolType.builtin,
-    availability: {
-      cacheMode: 'space',
-      handler: checkDashboardToolsAvailability,
-    },
     description: `Create or update an in-memory dashboard with visualizations.
 
 This tool can:
@@ -108,7 +102,6 @@ When updating, all fields are optional and only the provided ones are updated.
 
 The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) that can be used by the dashboard app to update its state in real-time.`,
     schema: manageDashboardSchema,
-    tags: [],
     handler: async (
       {
         dashboardAttachmentId: previousAttachmentId,
