@@ -44,7 +44,7 @@ export const handler: RequestHandler<{}, { indices: string | string[] }, string[
     const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
     const indexPatterns = new IndexPatternsFetcher(elasticsearchClient);
 
-    const response: string[] = await indexPatterns.getExistingIndices(indexArray);
+    const response: string[] = await indexPatterns.getIndexPatternsWithMatches(indexArray);
     return res.ok({ body: response });
   } catch (error) {
     return res.badRequest();

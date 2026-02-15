@@ -20,10 +20,9 @@ import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
 import type { FormatAlert } from '@kbn/alerting-plugin/server/types';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
-  checkPrivilegesFromEsClient,
+  checkForNoReadableIndices,
   getExceptions,
   getRuleRangeTuples,
-  hasReadIndexPrivileges,
   hasTimestampFields,
   isMachineLearningParams,
   isEsqlParams,
@@ -182,13 +181,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           const {
             savedObjectsClient,
             scopedClusterClient,
-            uiSettingsClient,
             ruleMonitoringService,
             ruleResultService,
           } = services;
           const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
-
-          const esClient = scopedClusterClient.asCurrentUser;
 
           const ruleExecutionLogger = await ruleExecutionLoggerFactory({
             savedObjectsClient,
@@ -304,28 +300,35 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           if (!isMachineLearningParams(params)) {
             try {
-              const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asInternalUser);
-              const existingIndices = await indexPatterns.getExistingIndices(inputIndex);
+              const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asCurrentUser);
+              const indexPatternsWithMatches = await indexPatterns.getIndexPatternsWithMatches(
+                inputIndex
+              );
 
-              if (existingIndices.length > 0) {
-                const privileges = await checkPrivilegesFromEsClient(esClient, existingIndices);
-                const readIndexWarningMessage = await hasReadIndexPrivileges({
-                  privileges,
-                  ruleExecutionLogger,
-                  uiSettingsClient,
-                  docLinks,
-                });
-
-                if (readIndexWarningMessage != null) {
-                  wrapperWarnings.push(readIndexWarningMessage);
-                }
+              if (indexPatternsWithMatches.length === 0) {
+                const warningMessage = `No matching indices found for rule ${rule.name}. This warning will continue to appear until a matching index is created or this rule is disabled.`;
+                wrapperWarnings.push(warningMessage);
+              } else {
+                ruleExecutionLogger.debug(
+                  `Number of indices found: ${indexPatternsWithMatches.length}`
+                );
+                ruleExecutionLogger.debug(
+                  `Number of index patterns that did not match any indices: ${
+                    inputIndex.length - indexPatternsWithMatches.length
+                  }`
+                );
+                ruleExecutionLogger.debug(
+                  `Index patterns that did not match any indices: ${inputIndex
+                    .filter((index) => !indexPatternsWithMatches.includes(index))
+                    .join(', ')}`
+                );
               }
             } catch (exc) {
               wrapperWarnings.push(`Check privileges failed to execute ${exc}`);
             }
 
             try {
-              const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
+              const fieldCapsResponse = await withSecuritySpan('fieldCaps', () =>
                 services.scopedClusterClient.asCurrentUser.fieldCaps(
                   {
                     index: inputIndex,
@@ -340,17 +343,27 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 )
               );
 
-              const { foundNoIndices, warningMessage: warningMissingTimestampFieldsMessage } =
-                await hasTimestampFields({
-                  timestampField: primaryTimestamp,
-                  timestampFieldCapsResponse: timestampFieldCaps,
+              const { foundNoIndices, warningMessage: noIndicesWarning } =
+                await checkForNoReadableIndices({
+                  fieldCapsResponse,
                   inputIndices: inputIndex,
                   ruleExecutionLogger,
                 });
-              if (warningMissingTimestampFieldsMessage != null) {
-                wrapperWarnings.push(warningMissingTimestampFieldsMessage);
+              if (noIndicesWarning) {
+                wrapperWarnings.push(noIndicesWarning);
               }
               skipExecution = foundNoIndices;
+
+              if (!foundNoIndices) {
+                const { warningMessage: missingTimestampWarning } = await hasTimestampFields({
+                  timestampField: primaryTimestamp,
+                  timestampFieldCapsResponse: fieldCapsResponse,
+                  ruleExecutionLogger,
+                });
+                if (missingTimestampWarning) {
+                  wrapperWarnings.push(missingTimestampWarning);
+                }
+              }
             } catch (exc) {
               wrapperWarnings.push(`Timestamp fields check failed to execute ${exc}`);
             }

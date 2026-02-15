@@ -7,12 +7,11 @@
 
 import agent from 'elastic-apm-node';
 import { createHash } from 'crypto';
-import { get, invert, isArray, isEmpty, merge, partition } from 'lodash';
+import { get, invert, isArray, isEmpty, merge } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 
 import dateMath from '@kbn/datemath';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
 import type { estypes, TransportResult } from '@elastic/elasticsearch';
 import {
   ALERT_UUID,
@@ -31,11 +30,7 @@ import type {
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type {
-  DocLinksServiceSetup,
-  ElasticsearchClient,
-  IUiSettingsClient,
-} from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
@@ -75,7 +70,6 @@ import type {
   EqlShellAlertLatest,
   WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
 import type {
   ExtraFieldsForShellAlert,
@@ -92,59 +86,22 @@ import {
 import { buildTimeRangeFilter } from './build_events_query';
 export const MAX_RULE_GAP_RATIO = 4;
 
-export const hasReadIndexPrivileges = async (args: {
-  privileges: Privilege;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  uiSettingsClient: IUiSettingsClient;
-  docLinks: DocLinksServiceSetup;
-}): Promise<string | undefined> => {
-  const { privileges, ruleExecutionLogger, uiSettingsClient, docLinks } = args;
-  const apiKeyDocs = docLinks.links.alerting.authorization;
-  const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
-  const indexNames = Object.keys(privileges.index);
-  const filteredIndexNames = isCcsPermissionWarningEnabled
-    ? indexNames
-    : indexNames.filter((indexName) => {
-        return !isCCSRemoteIndexName(indexName);
-      });
-  const [, indexesWithNoReadPrivileges] = partition(
-    filteredIndexNames,
-    (indexName) => privileges.index[indexName].read
-  );
-  let warningStatusMessage;
-
-  // Some indices have read privileges others do not.
-  if (indexesWithNoReadPrivileges.length > 0) {
-    const indexesString = JSON.stringify(indexesWithNoReadPrivileges);
-    warningStatusMessage = `This rule's API key is unable to access all indices that match the ${indexesString} pattern. To learn how to update and manage API keys, refer to ${apiKeyDocs}.`;
-    await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatusEnum['partial failure'],
-      message: warningStatusMessage,
-    });
-  }
-  return warningStatusMessage;
-};
-
-export const hasTimestampFields = async (args: {
-  timestampField: string;
-  // any is derived from here
-  // node_modules/@elastic/elasticsearch/lib/api/kibana.d.ts
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  timestampFieldCapsResponse: TransportResult<Record<string, any>, unknown>;
+export const checkForNoReadableIndices = async (args: {
+  fieldCapsResponse: TransportResult<estypes.FieldCapsResponse, unknown>;
   inputIndices: string[];
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }): Promise<{
   foundNoIndices: boolean;
   warningMessage: string | undefined;
 }> => {
-  const { timestampField, timestampFieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
+  const { fieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
   const { ruleName } = ruleExecutionLogger.context;
 
   agent.setCustomContext({
-    [SECURITY_NUM_INDICES_MATCHING_PATTERN]: timestampFieldCapsResponse.body.indices?.length,
+    [SECURITY_NUM_INDICES_MATCHING_PATTERN]: fieldCapsResponse.body.indices.length,
   });
 
-  if (isEmpty(timestampFieldCapsResponse.body.indices)) {
+  if (isEmpty(fieldCapsResponse.body.indices)) {
     const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ${JSON.stringify(
       inputIndices
     )} was found. This warning will continue to appear until a matching index is created or this rule is disabled. ${
@@ -152,7 +109,6 @@ export const hasTimestampFields = async (args: {
         ? 'If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.'
         : ''
     }`;
-
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatusEnum['partial failure'],
       message: errorString.trimEnd(),
@@ -162,7 +118,22 @@ export const hasTimestampFields = async (args: {
       foundNoIndices: true,
       warningMessage: errorString.trimEnd(),
     };
-  } else if (
+  }
+
+  return { foundNoIndices: false, warningMessage: undefined };
+};
+
+export const hasTimestampFields = async (args: {
+  timestampField: string;
+  timestampFieldCapsResponse: TransportResult<estypes.FieldCapsResponse, unknown>;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+}): Promise<{
+  foundNoIndices: boolean;
+  warningMessage: string | undefined;
+}> => {
+  const { timestampField, timestampFieldCapsResponse, ruleExecutionLogger } = args;
+
+  if (
     isEmpty(timestampFieldCapsResponse.body.fields) ||
     timestampFieldCapsResponse.body.fields[timestampField] == null ||
     timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices != null
