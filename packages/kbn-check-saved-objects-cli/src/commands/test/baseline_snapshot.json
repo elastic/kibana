@@ -10,7 +10,7 @@
     "old-type-no-migrations": {
       "name": "old-type-no-migrations",
       "migrationVersions": [],
-      "hash": "4631898d09a686928fabbbe1ad0b7f2b22c44b565443408ab5d20b4dcae64e35",
+      "hash": "2491dd0321b2bb36278a0a7fab9adb9575d1f960cdbab5a4a8a2ed26d1f9370c",
       "modelVersions": [],
       "schemaVersions": [],
       "mappings": {
@@ -24,7 +24,7 @@
       "migrationVersions": [
         "8.7.0"
       ],
-      "hash": "a7916755843d9ed712ccefb6888ebcbdd2f2f3628e058bfd174454aef644437a",
+      "hash": "7090f00c3ce9bf5bbce821b5b14c48ab538abe1d2f87ccc8d022cb96dde43ce1",
       "modelVersions": [],
       "schemaVersions": [
         "8.7.0"
@@ -38,11 +38,11 @@
     "person-so-type": {
       "name": "person-so-type",
       "migrationVersions": [],
-      "hash": "b8a80c7a77c2d5f4d7964af4ef584a490a83d92012099e0d943ce566f9d52cfc",
+      "hash": "65702f72482adb0d4ab4c64978ef9510dc51766b483cc8f8525ab5aa5c8003ad",
       "modelVersions": [
         {
           "version": "1",
-          "modelVersionHash": "e851da8aa62ba712eaa3e27bd787a982393fdde9a5627a779f48168edb0f86b0",
+          "modelVersionHash": "b7ee7569250dc40b80214f4d346caf2a3be065bb3059d7d69a4619af4c593bca",
           "changeTypes": [
             "mappings_addition"
           ],
@@ -52,8 +52,8 @@
             "lastName.type"
           ],
           "schemas": {
-            "forwardCompatibility": "2fc7b480e391f573cce65c0da1991d8925fa9d1aa998c89b50181a47f10e71e4",
-            "create": "79a184ebeb6bdecdae9b2314c5ded4c9f3379da264b3512ab561a12d917de3f6"
+            "forwardCompatibility": "68d31f32c675678cb718a4792259243c033963a22d647960e8f7052d86476f44",
+            "create": "8de56583fdfc0dec65578fffec6bd929ae763d63f1aa56fd2d3b6828379ec2dc"
           }
         }
       ],
