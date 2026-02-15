@@ -17,6 +17,7 @@ import { AssetManager } from './domain/asset_manager';
 import { FeatureFlags } from './infra/feature_flags';
 import {
   EngineDescriptorClient,
+  EntityMaintainersTasksClient,
   EntityMaintainersTasksTypeName,
 } from './domain/definitions/saved_objects';
 import { LogsExtractionClient } from './domain/logs_extraction_client';
@@ -42,6 +43,10 @@ export async function createRequestHandlerContext({
   const entityMaintainersTasksRepo = coreStart.savedObjects.createInternalRepository([
     EntityMaintainersTasksTypeName,
   ]);
+  const entityMaintainersTasksClient = new EntityMaintainersTasksClient(
+    entityMaintainersTasksRepo,
+    logger
+  );
 
   const namespace = startPlugins.spaces.spacesService.getSpaceId(request);
 
@@ -76,9 +81,9 @@ export async function createRequestHandlerContext({
       namespace,
       isServerless,
       logsExtractionClient,
-      entityMaintainersTasksRepo,
+      entityMaintainersTasksClient,
     }),
     featureFlags: new FeatureFlags(core.uiSettings.client),
-    logsExtractionClient,
+    logsExtractionClient
   };
 }

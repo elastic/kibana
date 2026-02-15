@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { KibanaRequest } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 
 export interface EntityMaintainerWriter { }
 
@@ -29,6 +30,9 @@ export interface EntityMaintainerStatus extends Record<string, unknown> {
 
 interface EntityMaintainerTaskMethodContext {
   status: EntityMaintainerStatus;
+  abortController: AbortController;
+  logger: Logger;
+  fakeRequest: KibanaRequest;
 }
 
 export type EntityMaintainerTaskMethod = (context: EntityMaintainerTaskMethodContext) => Promise<EntityMaintainerState>;

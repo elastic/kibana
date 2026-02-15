@@ -34,7 +34,7 @@ export const LogExtractionState = z.object({
   frequency: z
     .string()
     .regex(/[smdh]$/)
-    .default(TasksConfig[EntityStoreTaskType.Values.extractEntity].interval),
+    .default(TasksConfig[EntityStoreTaskType.Values.extractEntity].interval || '30s'),
   paginationTimestamp: z.string().optional(),
   lastExecutionTimestamp: z.string().optional(),
 });
@@ -59,4 +59,10 @@ export const EngineDescriptor = z.object({
   logExtractionState: LogExtractionState,
   error: EngineError.optional(),
   versionState: VersionState,
+});
+
+export type EntityMaintainerTaskEntry = z.infer<typeof EntityMaintainerTaskEntry>;
+export const EntityMaintainerTaskEntry = z.object({
+  id: z.string(),
+  interval: z.string().regex(/[smdh]$/),
 });

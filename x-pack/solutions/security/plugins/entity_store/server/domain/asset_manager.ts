@@ -6,11 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type {
-  ElasticsearchClient,
-  KibanaRequest,
-  ISavedObjectsRepository,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { getEntityDefinition } from '../../common/domain/definitions/registry';
@@ -24,6 +20,7 @@ import { installElasticsearchAssets, uninstallElasticsearchAssets } from './asse
 import type {
   EngineDescriptor,
   EngineDescriptorClient,
+  EntityMaintainersTasksClient,
   LogExtractionState,
 } from './definitions/saved_objects';
 import type { LogExtractionBodyParams } from '../routes/constants';
@@ -53,7 +50,7 @@ interface AssetManagerDependencies {
   namespace: string;
   isServerless: boolean;
   logsExtractionClient: LogsExtractionClient;
-  entityMaintainersTasksRepo: ISavedObjectsRepository;
+  entityMaintainersTasksClient: EntityMaintainersTasksClient;
 }
 
 export class AssetManager {
@@ -64,7 +61,7 @@ export class AssetManager {
   private readonly namespace: string;
   private readonly isServerless: boolean;
   private readonly logsExtractionClient: LogsExtractionClient;
-  private readonly entityMaintainersTasksRepo: ISavedObjectsRepository;
+  private readonly entityMaintainersTasksClient: EntityMaintainersTasksClient;
 
   constructor(deps: AssetManagerDependencies) {
     this.logger = deps.logger;
@@ -74,16 +71,26 @@ export class AssetManager {
     this.namespace = deps.namespace;
     this.isServerless = deps.isServerless;
     this.logsExtractionClient = deps.logsExtractionClient;
-    this.entityMaintainersTasksRepo = deps.entityMaintainersTasksRepo;
+    this.entityMaintainersTasksClient = deps.entityMaintainersTasksClient;
   }
 
-  public async initEntity(
-    request: KibanaRequest,
-    type: EntityType,
-    logExtractionParams?: LogExtractionBodyParams
-  ) {
-    await this.install(type, logExtractionParams); // TODO: async
-    await this.start(request, type);
+  public async init(request: KibanaRequest, entityTypes: EntityType[], logExtractionParams?: LogExtractionBodyParams) {
+    try {
+      await Promise.all(
+        entityTypes.map((type) => this.initEntity(request, type, logExtractionParams))
+      );
+
+      await scheduleEntityMaintainerTasks({
+        logger: this.logger,
+        taskManager: this.taskManager,
+        namespace: this.namespace,
+        request,
+        entityMaintainersTasksClient: this.entityMaintainersTasksClient,
+      });
+    } catch (error) {
+      this.logger.error('Error during entity store init:', error);
+      throw error;
+    }
   }
 
   public async start(request: KibanaRequest, type: EntityType) {
@@ -102,14 +109,6 @@ export class AssetManager {
         request,
       });
 
-      await scheduleEntityMaintainerTasks({
-        logger: this.logger,
-        taskManager: this.taskManager,
-        namespace: this.namespace,
-        request,
-        entityMaintainersTasksRepo: this.entityMaintainersTasksRepo,
-      });
-
     } catch (error) {
       this.logger.get(type).error(`Error starting extract entity task for type ${type}:`, error);
       throw error;
@@ -126,37 +125,6 @@ export class AssetManager {
       });
     } catch (error) {
       this.logger.get(type).error(`Error stopping extract entity task for type ${type}:`, error);
-      throw error;
-    }
-  }
-
-  public async install(
-    type: EntityType,
-    logExtractionParams?: LogExtractionBodyParams
-  ): Promise<ManagedEntityDefinition> {
-    // TODO: return early if already installed
-    try {
-      this.logger.get(type).debug(`Installing assets for entity type: ${type}`);
-      const definition = getEntityDefinition(type, this.namespace);
-      const initialState: Partial<LogExtractionState> = logExtractionParams ?? {};
-
-      await Promise.all([
-        this.engineDescriptorClient.init(type, initialState),
-        installElasticsearchAssets({
-          esClient: this.esClient,
-          logger: this.logger,
-          definition,
-          namespace: this.namespace,
-        }),
-      ]);
-
-      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
-
-      this.logger.debug(`Installed definition: ${type}`);
-
-      return definition;
-    } catch (error) {
-      this.logger.error(`Error installing assets for entity type ${type}`, { error });
       throw error;
     }
   }
@@ -198,6 +166,46 @@ export class AssetManager {
       return { status, engines };
     } catch (error) {
       this.logger.error('Error getting status', { error });
+      throw error;
+    }
+  }
+
+  private async initEntity(
+    request: KibanaRequest,
+    type: EntityType,
+    logExtractionParams?: LogExtractionBodyParams
+  ) {
+    await this.install(type, logExtractionParams);
+    await this.start(request, type);
+  }
+
+  private async install(
+    type: EntityType,
+    logExtractionParams?: LogExtractionBodyParams
+  ): Promise<ManagedEntityDefinition> {
+    // TODO: return early if already installed
+    try {
+      this.logger.get(type).debug(`Installing assets for entity type: ${type}`);
+      const definition = getEntityDefinition(type, this.namespace);
+      const initialState: Partial<LogExtractionState> = logExtractionParams ?? {};
+
+      await Promise.all([
+        this.engineDescriptorClient.init(type, initialState),
+        installElasticsearchAssets({
+          esClient: this.esClient,
+          logger: this.logger,
+          definition,
+          namespace: this.namespace,
+        }),
+      ]);
+
+      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
+
+      this.logger.debug(`Installed definition: ${type}`);
+
+      return definition;
+    } catch (error) {
+      this.logger.error(`Error installing assets for entity type ${type}`, { error });
       throw error;
     }
   }
