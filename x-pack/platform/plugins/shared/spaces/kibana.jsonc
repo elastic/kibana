@@ -23,7 +23,8 @@
       "home",
       "management",
       "usageCollection",
-      "cloud"
+      "cloud",
+      "cps"
     ],
     "requiredBundles": [
       "esUiShared",

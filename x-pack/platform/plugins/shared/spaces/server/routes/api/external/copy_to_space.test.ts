@@ -73,7 +73,11 @@ describe('copy to space', () => {
       usageStatsServiceMock.createSetupContract(usageStatsClient)
     );
 
-    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
+    const clientServiceStart = clientService.start(
+      coreStart,
+      featuresPluginMock.createStart(),
+      undefined
+    );
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,
