@@ -259,9 +259,7 @@ describe('context predecessors', function () {
 
       return fetchPredecessors(ANCHOR_TIMESTAMP_3000, '_doc', 0, 3).then(({ rows }) => {
         const setFieldsSpy = mockSearchSource.setField.withArgs('fields');
-        const removeFieldsSpy = mockSearchSource.removeField.withArgs('fieldsFromSource');
         expect(mockSearchSource.fetch$.calledOnce).toBe(true);
-        expect(removeFieldsSpy.calledOnce).toBe(true);
         expect(setFieldsSpy.calledOnce).toBe(true);
         expect(rows).toEqual(
           buildDataTableRecordList({

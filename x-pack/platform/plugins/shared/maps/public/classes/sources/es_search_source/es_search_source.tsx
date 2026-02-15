@@ -468,7 +468,10 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       initialSearchContext
     );
     searchSource.setField('trackTotalHits', maxResultWindow + 1);
-    searchSource.setField('fieldsFromSource', requestMeta.fieldNames); // Setting "fields" filters out unused scripted fields
+    // TODO: fieldsFromSource was removed from SearchSource.
+    // Previously, setting 'fieldsFromSource' would filter out unused scripted fields
+    // from the request, reducing response payload size.
+    // Previously: searchSource.setField('fieldsFromSource', requestMeta.fieldNames);
     if (sourceOnlyFields.length === 0) {
       searchSource.setField('source', false); // do not need anything from _source
     } else {
@@ -663,12 +666,14 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     };
     searchSource.setField('query', query);
 
-    // searchSource calls dataView.getComputedFields to seed docvalueFields
-    // dataView.getComputedFields adds each date field in the dataView to docvalueFields to ensure standardized date format across kibana
-    // we don't need these as they request unneeded fields and bloat responses
-    // setting fieldsFromSource notifies searchSource to filterout unused docvalueFields
-    // '_id' is used since the value of 'fieldsFromSource' is irreverent because '_source: false'.
-    searchSource.setField('fieldsFromSource', ['_id']);
+    // TODO: fieldsFromSource was removed from SearchSource.
+    // searchSource calls dataView.getComputedFields to seed docvalueFields.
+    // dataView.getComputedFields adds each date field in the dataView to docvalueFields
+    // to ensure standardized date format across Kibana.
+    // We don't need these as they request unneeded fields and bloat responses.
+    // Previously, setting 'fieldsFromSource' notified searchSource to filter out unused docvalueFields.
+    // '_id' was used since the value of 'fieldsFromSource' was irrelevant because '_source: false'.
+    // Previously: searchSource.setField('fieldsFromSource', ['_id']);
     searchSource.setField('source', false);
 
     // Get all tooltip properties from fields API
@@ -911,12 +916,14 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       requestMeta,
       indexSettings.maxResultWindow
     );
-    // searchSource calls dataView.getComputedFields to seed docvalueFields
-    // dataView.getComputedFields adds each date field in the dataView to docvalueFields to ensure standardized date format across kibana
-    // we don't need these as they request unneeded fields and bloat responses
-    // setting fieldsFromSource notifies searchSource to filterout unused docvalueFields
-    // '_id' is used since the value of 'fieldsFromSource' is irreverent because '_source: false'.
-    searchSource.setField('fieldsFromSource', ['_id']);
+    // TODO: fieldsFromSource was removed from SearchSource.
+    // searchSource calls dataView.getComputedFields to seed docvalueFields.
+    // dataView.getComputedFields adds each date field in the dataView to docvalueFields
+    // to ensure standardized date format across Kibana.
+    // We don't need these as they request unneeded fields and bloat responses.
+    // Previously, setting 'fieldsFromSource' notified searchSource to filter out unused docvalueFields.
+    // '_id' was used since the value of 'fieldsFromSource' was irrelevant because '_source: false'.
+    // Previously: searchSource.setField('fieldsFromSource', ['_id']);
     searchSource.setField('source', false);
     if (this._hasSort()) {
       searchSource.setField('sort', this._buildEsSort());
