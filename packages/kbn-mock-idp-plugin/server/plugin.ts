@@ -262,7 +262,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
             }),
           },
           security: {
-            authc: { enabled: 'optional' },
+            authc: { enabled: 'optional', reason: 'Mock IDP plugin for testing' },
             authz: { enabled: false, reason: 'Mock IDP plugin for testing' },
           },
         },

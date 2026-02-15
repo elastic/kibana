@@ -157,6 +157,38 @@ export function initRoutes(
     }
   );
 
+  router.get(
+    {
+      path: '/authentication/fast/me',
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to Core's security service; there must be an authenticated user for this route to return information`,
+        },
+        authc: {
+          enabled: 'minimal',
+          reason: `This route is optimized for performant retrieval of the current user's information`,
+        },
+      },
+      validate: false,
+      options: {
+        access: 'public',
+        excludeFromOAS: true,
+      },
+    },
+    async (context, request, response) => {
+      const { security: coreSecurity, elasticsearch } = await context.core;
+      return response.ok({
+        body: {
+          principal: coreSecurity.authc.getCurrentUser()!,
+          hasManage: await elasticsearch.client.asCurrentUser.security.hasPrivileges({
+            cluster: ['manage'],
+          }),
+        },
+      });
+    }
+  );
+
   router.post(
     {
       path: '/api_keys/_grant',

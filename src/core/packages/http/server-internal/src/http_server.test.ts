@@ -2139,7 +2139,7 @@ test('exposes authentication details of incoming request to a route handler', as
       path: '/foo',
       validate: false,
       security: {
-        authc: { enabled: 'optional' },
+        authc: { enabled: 'optional', reason: 'test' },
         authz: { enabled: false, reason: 'test' },
       },
     },
@@ -2181,7 +2181,48 @@ test('exposes authentication details of incoming request to a route handler', as
         tags: [],
         timeout: {},
         security: {
-          authc: { enabled: 'optional' },
+          authc: { enabled: 'optional', reason: 'test' },
+          authz: { enabled: false, reason: 'test' },
+        },
+      },
+    });
+});
+
+test('properly treats minimal authentication as required', async () => {
+  const { registerRouter, registerAuth, server: innerServer } = await server.setup({ config$ });
+
+  const router = new Router('', logger, enhanceWithContext, routerOptions);
+  router.get(
+    {
+      path: '/',
+      validate: false,
+      security: {
+        authc: { enabled: 'minimal', reason: 'test' },
+        authz: { enabled: false, reason: 'test' },
+      },
+    },
+    (context, req, res) => res.ok({ body: req.route })
+  );
+
+  // mocking to have `authRegistered` filed set to true
+  registerAuth((req, res, auth) => auth.authenticated({ state: { alpha: 'beta' } }));
+  registerRouter(router);
+
+  await server.start();
+  await supertest(innerServer.listener)
+    .get('/')
+    .expect(200, {
+      method: 'get',
+      path: '/',
+      routePath: '/',
+      options: {
+        authRequired: true,
+        xsrfRequired: false,
+        access: 'internal',
+        tags: [],
+        timeout: {},
+        security: {
+          authc: { enabled: 'minimal', reason: 'test' },
           authz: { enabled: false, reason: 'test' },
         },
       },

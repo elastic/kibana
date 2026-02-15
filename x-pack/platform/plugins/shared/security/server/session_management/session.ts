@@ -29,7 +29,7 @@ import type { ConfigType } from '../config';
 /**
  * The shape of the value that represents user's session information.
  */
-export interface SessionValue {
+export interface SessionValue<TState = unknown> {
   /**
    * Unique session ID.
    */
@@ -68,7 +68,7 @@ export interface SessionValue {
    * Session value that is fed to the authentication provider. The shape is unknown upfront and
    * entirely determined by the authentication provider that owns the current session.
    */
-  state: unknown;
+  state: TState;
 
   /**
    * Unique identifier of the user profile, if any. Not all users that have session will have an associated user
