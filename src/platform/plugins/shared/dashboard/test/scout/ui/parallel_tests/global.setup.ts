@@ -18,7 +18,7 @@ const ES_ARCHIVES = {
 
 globalSetupHook(
   'Ingest ES data needed for Dashboard tests',
-  { tag: tags.DEPLOYMENT_AGNOSTIC },
+  { tag: tags.deploymentAgnostic },
   async ({ esArchiver, log }) => {
     log.info('[setup] Loading ES archives for Dashboard Scout tests...');
 

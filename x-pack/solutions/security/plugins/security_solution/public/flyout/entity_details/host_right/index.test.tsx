@@ -83,13 +83,14 @@ describe('HostPanel', () => {
       isLoading: true,
     });
 
-    const { getByTestId } = render(
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <HostPanel {...mockProps} />
       </TestProviders>
     );
 
-    expect(getByTestId('securitySolutionFlyoutLoading')).toBeInTheDocument();
+    expect(queryByTestId('securitySolutionFlyoutLoading')).not.toBeInTheDocument();
+    expect(getByTestId('observedDataSectionLoadingSpinner')).toBeInTheDocument();
   });
 
   it('renders preview panel', () => {

@@ -8,7 +8,6 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 import type { GrantAPIKeyResult, InvalidateAPIKeyResult } from '../api_keys';
 
@@ -39,18 +38,6 @@ export interface UiamAPIKeysType {
     request: KibanaRequest,
     params: InvalidateUiamAPIKeyParams
   ): Promise<InvalidateAPIKeyResult | null>;
-
-  /**
-   * Creates a scoped Elasticsearch client authenticated with an API key.
-   *
-   * This method creates a scoped cluster client that authenticates using the provided API key.
-   * If the API key is a UIAM credential (starts with 'essu_'), it adds the appropriate UIAM
-   * authentication headers.
-   *
-   * @param apiKey The API key secret.
-   * @returns A scoped cluster client configured with API key authentication
-   */
-  getScopedClusterClientWithApiKey(apiKey: string): IScopedClusterClient | null;
 }
 
 /**
