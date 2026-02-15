@@ -18,6 +18,7 @@ plugins:
     - maps
     - observability
     - observability_onboarding
+    - osquery
     - painless_lab
     - profiling
     - search_getting_started

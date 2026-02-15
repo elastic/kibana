@@ -174,14 +174,15 @@ const handleFlattenedOutput = (
   logFlattenedConfigs(flattenedConfigs, log);
 };
 
-// Splits 'streams_app' module by 'serverRunFlags' so CI can run each arch/domain as a
-// separate job (e.g. streams_app-stateful-classic, streams_app-serverless-search).
-const splitStreamsTestsByServerRunFlags = (
-  modules: ModuleDiscoveryInfo[]
-): ModuleDiscoveryInfo[] => {
+// Modules whose tests are time-consuming enough to benefit from being split
+// into separate Buildkite jobs per serverRunFlag (e.g. stateful, serverless-security).
+const MODULES_TO_SPLIT_BY_SERVER_RUN_FLAGS = ['streams_app', 'dashboard', 'osquery'];
+
+// Splits modules by 'serverRunFlags' to have a better control over
+// test execution, e.g.: osquery-stateful, osquery-serverless-security
+const splitModulesByServerRunFlags = (modules: ModuleDiscoveryInfo[]): ModuleDiscoveryInfo[] => {
   return modules.flatMap((module) => {
-    // It is a temp workaround. Only split modules that include 'streams_app', 'dashboard'  in their name
-    if (!module.name.includes('streams_app') && !module.name.includes('dashboard')) {
+    if (!MODULES_TO_SPLIT_BY_SERVER_RUN_FLAGS.some((name) => module.name.includes(name))) {
       return [module];
     }
 
@@ -222,8 +223,8 @@ const handleNonFlattenedOutput = (
 ): void => {
   if (flagsReader.boolean('save')) {
     const filteredForCiModules = filterModulesByScoutCiConfig(log, filteredModules);
-    // 'streams_app' tests are quite time consuming, let's split run by 'serverRunFlags' before saving
-    const splitModules = splitStreamsTestsByServerRunFlags(filteredForCiModules);
+    // Split time-consuming modules by 'serverRunFlags' into separate Buildkite jobs
+    const splitModules = splitModulesByServerRunFlags(filteredForCiModules);
     saveModuleDiscoveryInfo(splitModules, log);
 
     const { plugins: savedPluginCount, packages: savedPackageCount } =
