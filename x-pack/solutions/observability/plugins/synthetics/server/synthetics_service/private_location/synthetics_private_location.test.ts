@@ -248,7 +248,11 @@ describe('SyntheticsPrivateLocation', () => {
         'source.inline.script': {
           type: 'yaml',
           value:
-            "\"step('Go to https://www.elastic.co/', async () => {\\n  await page.goto('https://www.elastic.co/');\\n});\"",
+            'c3RlcCgnR28gdG8gaHR0cHM6Ly93d3cuZWxhc3RpYy5jby8nLCBhc3luYyAoKSA9PiB7CiAgYXdhaXQgcGFnZS5nb3RvKCdodHRwczovL3d3dy5lbGFzdGljLmNvLycpOwp9KTs=',
+        },
+        'source.inline.encoding': {
+          type: 'text',
+          value: 'base64',
         },
         synthetics_args: {
           type: 'text',
