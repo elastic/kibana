@@ -7,5 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { registerGetStepDefinitionsRoute } from './get_step_definitions';
-export { registerGetTriggerDefinitionsRoute } from './get_trigger_definitions';
+import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
+import {
+  ENTITY_UPDATED_TRIGGER_ID,
+  entityUpdatedTriggerEventSchema,
+} from '../../common/triggers/entity_updated_trigger';
+
+export const entityUpdatedTriggerDefinition: ServerTriggerDefinition<
+  typeof entityUpdatedTriggerEventSchema
+> = {
+  id: ENTITY_UPDATED_TRIGGER_ID,
+  eventSchema: entityUpdatedTriggerEventSchema,
+};

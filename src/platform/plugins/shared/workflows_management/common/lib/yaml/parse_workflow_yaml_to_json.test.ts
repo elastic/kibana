@@ -27,7 +27,7 @@ describe('parseWorkflowYamlToJSON', () => {
       description: null,
     },
   ];
-  const yamlSchemaLoose = generateYamlSchemaFromConnectors(mockConnectors, true);
+  const yamlSchemaLoose = generateYamlSchemaFromConnectors(mockConnectors, [], true);
 
   it('should parse yaml to json according to partial zod schema', () => {
     const yaml = `steps:

@@ -7,5 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { registerGetStepDefinitionsRoute } from './get_step_definitions';
-export { registerGetTriggerDefinitionsRoute } from './get_trigger_definitions';
+import { z } from '@kbn/zod/v4';
+
+export const ENTITY_UPDATED_TRIGGER_ID = 'entity.updated' as const;
+
+export const entityUpdatedTriggerEventSchema = z.object({
+  message: z.string(),
+  source: z.string().optional(),
+});
+
+export type EntityUpdatedTriggerEvent = z.infer<typeof entityUpdatedTriggerEventSchema>;

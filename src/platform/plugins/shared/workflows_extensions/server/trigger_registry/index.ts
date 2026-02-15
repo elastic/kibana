@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { registerGetStepDefinitionsRoute } from './get_step_definitions';
-export { registerGetTriggerDefinitionsRoute } from './get_trigger_definitions';
+export { TriggerRegistry } from './trigger_registry';

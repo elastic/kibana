@@ -10,6 +10,7 @@
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import { registerStepDefinitions } from './step_types';
+import { registerTriggers } from './triggers';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsExtensionsExamplePluginSetup {
@@ -41,8 +42,9 @@ export class WorkflowsExtensionsExamplePlugin
     _core: CoreSetup,
     plugins: WorkflowsExtensionsExamplePluginSetupDeps
   ): WorkflowsExtensionsExamplePluginSetup {
-    // Register steps on setup phase
+    // Register steps and triggers on setup phase
     registerStepDefinitions(plugins.workflowsExtensions);
+    registerTriggers(plugins.workflowsExtensions);
 
     return {};
   }

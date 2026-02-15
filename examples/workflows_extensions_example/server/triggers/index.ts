@@ -7,5 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { registerGetStepDefinitionsRoute } from './get_step_definitions';
-export { registerGetTriggerDefinitionsRoute } from './get_trigger_definitions';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import { customTriggerDefinition } from './custom_trigger';
+import { entityUpdatedTriggerDefinition } from './entity_updated_trigger';
+
+export const registerTriggers = (workflowsExtensions: WorkflowsExtensionsServerPluginSetup) => {
+  workflowsExtensions.registerTrigger(customTriggerDefinition);
+  workflowsExtensions.registerTrigger(entityUpdatedTriggerDefinition);
+};

@@ -9,8 +9,6 @@
 
 import type { ToStringOptions } from 'yaml';
 import { stringify } from 'yaml';
-import type { TriggerType } from '@kbn/workflows';
-
 interface GenerateTriggerSnippetOptions {
   full?: boolean;
   monacoSuggestionFormat?: boolean;
@@ -27,7 +25,7 @@ interface GenerateTriggerSnippetOptions {
  * @returns The formatted YAML trigger snippet as a string
  */
 export function generateTriggerSnippet(
-  triggerType: TriggerType,
+  triggerType: string,
   { full, monacoSuggestionFormat, withTriggersSection }: GenerateTriggerSnippetOptions = {}
 ): string {
   const stringifyOptions: ToStringOptions = { indent: 2 };

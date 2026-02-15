@@ -31,6 +31,7 @@ import type {
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { stepSchemas } from '../common/step_schemas';
+import { triggerSchemas } from '../common/trigger_schemas';
 
 const VisibleIn: AppDeepLinkLocations[] = ['globalSearch', 'home', 'kibanaOverview', 'sideNav'];
 
@@ -101,8 +102,9 @@ export class WorkflowsPlugin
     _core: CoreStart,
     plugins: WorkflowsPublicPluginStartDependencies
   ): WorkflowsPublicPluginStart {
-    // Initialize StepSchemas singleton with workflowExtensions
+    // Initialize singletons with workflowsExtensions
     stepSchemas.initialize(plugins.workflowsExtensions);
+    triggerSchemas.initialize(plugins.workflowsExtensions);
 
     // License check to set app status
     plugins.licensing.license$.subscribe((license) => {

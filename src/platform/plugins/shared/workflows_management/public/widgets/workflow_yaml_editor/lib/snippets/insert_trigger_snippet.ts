@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Document, parseDocument } from 'yaml';
-import { isSeq } from 'yaml';
+import { type Document, isSeq, parseDocument } from 'yaml';
 import type { monaco } from '@kbn/monaco';
-import type { TriggerType } from '@kbn/workflows';
 import { generateTriggerSnippet } from './generate_trigger_snippet';
 import {
   createReplacementRange,
@@ -31,7 +29,7 @@ import { getMonacoRangeFromYamlNode } from '../utils';
 export function insertTriggerSnippet(
   model: monaco.editor.ITextModel,
   yamlDocument: Document | null,
-  triggerType: TriggerType,
+  triggerType: string,
   editor?: monaco.editor.IStandaloneCodeEditor
 ) {
   let document: Document;
