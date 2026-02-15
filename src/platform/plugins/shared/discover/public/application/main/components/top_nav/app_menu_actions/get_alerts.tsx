@@ -42,16 +42,8 @@ const CreateAlertFlyout: React.FC<{
   onFinishAction: () => void;
   stateContainer: DiscoverStateContainer;
 }> = ({ stateContainer, discoverParams, services, onFinishAction = () => {} }) => {
-  const { dataView, isEsqlMode, adHocDataViews } = discoverParams;
-
   const dispatch = useInternalStateDispatch();
-  const updateAdHocDataViews = useCallback(
-    async (adHocDataViewList: DataView[]) => {
-      await dispatch(internalStateActions.loadDataViewList());
-      dispatch(internalStateActions.setAdHocDataViews(adHocDataViewList));
-    },
-    [dispatch]
-  );
+  const { dataView, isEsqlMode, adHocDataViews } = discoverParams;
   const {
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
   } = services;
@@ -103,9 +95,9 @@ const CreateAlertFlyout: React.FC<{
       consumer={'alerts'}
       onCancel={onFinishAction}
       onSubmit={onFinishAction}
-      onChangeMetaData={(metadata: EsQueryAlertMetaData) =>
-        updateAdHocDataViews(metadata.adHocDataViewList)
-      }
+      onChangeMetaData={(metadata: EsQueryAlertMetaData) => {
+        void dispatch(internalStateActions.updateAdHocDataViews(metadata.adHocDataViewList));
+      }}
       ruleTypeId={ES_QUERY_ID}
       initialValues={{ params: getParams() }}
       validConsumers={EsQueryValidConsumer}

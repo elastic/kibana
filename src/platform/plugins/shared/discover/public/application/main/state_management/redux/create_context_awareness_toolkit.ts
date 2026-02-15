@@ -30,8 +30,7 @@ export const createContextAwarenessToolkit = ({
         internalState.dispatch(internalStateActions.addFilter({ tabId, field, value, mode }));
       },
       updateAdHocDataViews: async (adHocDataViews) => {
-        await internalState.dispatch(internalStateActions.loadDataViewList());
-        internalState.dispatch(internalStateActions.setAdHocDataViews(adHocDataViews));
+        await internalState.dispatch(internalStateActions.updateAdHocDataViews(adHocDataViews));
       },
       setExpandedDoc: (record, options) => {
         internalState.dispatch(
