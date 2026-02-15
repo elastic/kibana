@@ -51,8 +51,6 @@ const getNavLinksService = (ids: Readonly<string[]> = []) => {
     has: jest.fn(),
     get: jest.fn(),
     getAll: jest.fn().mockReturnValue(navLinks),
-    enableForcedAppSwitcherNavigation: jest.fn(),
-    getForceAppSwitcherNavigation$: jest.fn(),
   };
   return navLinksMock;
 };

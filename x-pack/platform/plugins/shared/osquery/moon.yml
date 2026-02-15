@@ -78,6 +78,7 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/react-query'
   - '@kbn/react-kibana-mount'
+  - '@kbn/tooling-log'
 tags:
   - plugin
   - prod

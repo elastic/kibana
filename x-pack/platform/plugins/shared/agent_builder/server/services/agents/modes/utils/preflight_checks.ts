@@ -6,16 +6,23 @@
  */
 
 import { createBadRequestError } from '@kbn/agent-builder-common/base/errors';
-import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
+import type { Conversation, ConverseInput, ConversationAction } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 
 export const ensureValidInput = ({
   input,
   conversation,
+  action,
 }: {
   input: ConverseInput;
   conversation?: Conversation;
+  action?: ConversationAction;
 }) => {
+  // Regenerate uses the last round's input via prepareConversation - skip standard input check
+  if (action === 'regenerate') {
+    return;
+  }
+
   const lastRound = conversation?.rounds[conversation?.rounds.length - 1];
   const lastRoundStatus = lastRound?.status ?? ConversationRoundStatus.completed;
 

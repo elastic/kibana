@@ -33,7 +33,8 @@ import { login } from '../../../tasks/login';
 
 const URL = '/app/security/threat_intelligence/indicators';
 
-describe('Cases with invalid indicators', { tags: ['@ess'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/244231
+describe.skip('Cases with invalid indicators', { tags: ['@ess'] }, () => {
   before(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_invalid' }));
 
   after(() => cy.task('esArchiverUnload', { archiveName: 'ti_indicators_data_invalid' }));

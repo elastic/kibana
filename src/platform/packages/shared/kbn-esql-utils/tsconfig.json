@@ -33,5 +33,10 @@
     "@kbn/projects-solutions-groups",
     "@kbn/index-management-shared-types",
     "@kbn/licensing-types",
+    "@kbn/controls-constants",
+    "@kbn/presentation-containers",
+    "@kbn/utility-types",
+    "@kbn/presentation-publishing",
+    "@kbn/controls-schemas",
   ]
 }
