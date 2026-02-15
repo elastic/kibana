@@ -30,9 +30,9 @@ export async function registerAttachments({
 }) {
   const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [
     createAiInsightAttachmentType(),
-    createErrorAttachmentType({ core, logger, dataRegistry }),
+    createErrorAttachmentType({ logger, dataRegistry }),
     createAlertAttachmentType({ core, logger }),
-    createLogAttachmentType({ core, logger, dataRegistry }),
+    createLogAttachmentType({ core, logger }),
   ];
 
   for (const attachment of attachmentTypes) {
