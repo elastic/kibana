@@ -8,7 +8,6 @@
  */
 
 import type { ValueSuggestionsMethod } from '@kbn/data-plugin/common';
-// for replace IIndexPattern => DataView need to fix the issue https://github.com/elastic/kibana/issues/131292
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { SuggestionsAbstraction } from '../../components/typeahead/suggestions_component';
 
