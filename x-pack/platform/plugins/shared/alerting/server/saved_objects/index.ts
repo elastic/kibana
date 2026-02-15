@@ -13,7 +13,11 @@ import type {
 } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { triggersActionsRoute, createRuleFromTemplateRoute } from '@kbn/rule-data-utils';
+import {
+  triggersActionsRoute,
+  createRuleFromTemplateRoute,
+  getRuleDetailsRoute,
+} from '@kbn/rule-data-utils';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { alertMappings } from '../../common/saved_objects/rules/mappings';
 import { rulesSettingsMappings } from './rules_settings_mappings';
@@ -118,6 +122,12 @@ export function setupSavedObjects(
       importableAndExportable: true,
       getTitle(ruleSavedObject: SavedObject<RawRule>) {
         return `Rule: [${ruleSavedObject.attributes.name}]`;
+      },
+      getInAppUrl: (savedObject: SavedObject<RawRule>) => {
+        return {
+          path: `${triggersActionsRoute}${getRuleDetailsRoute(encodeURIComponent(savedObject.id))}`,
+          uiCapabilitiesPath: 'management.insightsAndAlerting.triggersActions',
+        };
       },
       onImport(ruleSavedObjects) {
         return {
