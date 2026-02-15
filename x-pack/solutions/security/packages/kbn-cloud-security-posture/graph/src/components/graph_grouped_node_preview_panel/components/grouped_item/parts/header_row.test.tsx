@@ -8,7 +8,6 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
-import { groupedItemClick$, __resetGroupedItemClickDedupe } from '../../../events';
 import {
   GROUPED_ITEM_TITLE_TEST_ID_LINK,
   GROUPED_ITEM_TITLE_TEST_ID_TEXT,
@@ -16,12 +15,31 @@ import {
 } from '../../../test_ids';
 import { HeaderRow } from './header_row';
 import type { EntityItem } from '../types';
+import { getOrCreateFilterStore, destroyFilterStore } from '../../../../filters/filter_store';
+
+const mockOpenPreviewPanel = jest.fn();
+
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: () => ({
+    openPreviewPanel: mockOpenPreviewPanel,
+  }),
+}));
 
 const flushMicrotasks = () => new Promise((r) => setTimeout(r, 0));
 
+// Use unique scopeId per test run to prevent cross-test pollution
+let TEST_SCOPE_ID: string;
+
 describe('<HeaderRow />', () => {
   beforeEach(() => {
-    __resetGroupedItemClickDedupe();
+    // Generate unique scopeId for each test
+    TEST_SCOPE_ID = `test-scope-${Math.random().toString(36).substring(7)}`;
+    getOrCreateFilterStore(TEST_SCOPE_ID);
+    mockOpenPreviewPanel.mockClear();
+  });
+
+  afterEach(() => {
+    destroyFilterStore(TEST_SCOPE_ID);
   });
 
   describe('enriched entities', () => {
@@ -33,49 +51,47 @@ describe('<HeaderRow />', () => {
         availableInEntityStore: true,
       };
 
-      const { getByTestId } = render(<HeaderRow item={item} />);
+      const { getByTestId } = render(<HeaderRow scopeId={TEST_SCOPE_ID} item={item} />);
       const element = getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK);
       expect(element).toBeInTheDocument();
     });
 
-    it('emits click event once for a single click on enriched entity', async () => {
+    it('calls openPreviewPanel for a single click on enriched entity', async () => {
       const item: EntityItem = {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-1',
         label: 'Entity One',
         availableInEntityStore: true,
       };
-      const next = jest.fn();
-      const sub = groupedItemClick$.subscribe(next);
 
-      const { getByTestId } = render(<HeaderRow item={item} />);
+      const { getByTestId } = render(<HeaderRow scopeId={TEST_SCOPE_ID} item={item} />);
 
       fireEvent.click(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK));
       await flushMicrotasks();
 
-      expect(next).toHaveBeenCalledTimes(1);
-      expect(next.mock.calls[0][0]).toMatchObject({ id: 'entity-1' });
-      sub.unsubscribe();
+      expect(mockOpenPreviewPanel).toHaveBeenCalledTimes(1);
+      expect(mockOpenPreviewPanel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ entityId: 'entity-1' }),
+        })
+      );
     });
 
-    it('suppresses rapid duplicate clicks within dedupe window for enriched entity', async () => {
+    it('calls openPreviewPanel for each click on enriched entity', async () => {
       const item: EntityItem = {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-dup',
         label: 'Dup',
         availableInEntityStore: true,
       };
-      const next = jest.fn();
-      const sub = groupedItemClick$.subscribe(next);
 
-      const { getByTestId } = render(<HeaderRow item={item} />);
+      const { getByTestId } = render(<HeaderRow scopeId={TEST_SCOPE_ID} item={item} />);
 
       const link = getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK);
       Array.from({ length: 3 }).forEach(() => fireEvent.click(link));
       await flushMicrotasks();
 
-      expect(next).toHaveBeenCalledTimes(1);
-      sub.unsubscribe();
+      expect(mockOpenPreviewPanel).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -88,7 +104,9 @@ describe('<HeaderRow />', () => {
         availableInEntityStore: false,
       };
 
-      const { getByTestId, queryByTestId } = render(<HeaderRow item={item} />);
+      const { getByTestId, queryByTestId } = render(
+        <HeaderRow scopeId={TEST_SCOPE_ID} item={item} />
+      );
       const element = getByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT);
       expect(element).toBeInTheDocument();
 
@@ -103,23 +121,20 @@ describe('<HeaderRow />', () => {
       });
     });
 
-    it('does not emit click event for non-enriched entity', async () => {
+    it('does not call openPreviewPanel for non-enriched entity', async () => {
       const item: EntityItem = {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-2',
         label: 'Entity Two',
         availableInEntityStore: false,
       };
-      const next = jest.fn();
-      const sub = groupedItemClick$.subscribe(next);
 
-      const { getByTestId } = render(<HeaderRow item={item} />);
+      const { getByTestId } = render(<HeaderRow scopeId={TEST_SCOPE_ID} item={item} />);
 
       fireEvent.click(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT));
       await flushMicrotasks();
 
-      expect(next).not.toHaveBeenCalled();
-      sub.unsubscribe();
+      expect(mockOpenPreviewPanel).not.toHaveBeenCalled();
     });
 
     it('renders EuiText when availableInEntityStore is undefined', () => {
@@ -129,7 +144,7 @@ describe('<HeaderRow />', () => {
         label: 'Entity Three',
       };
 
-      const { getByTestId } = render(<HeaderRow item={item} />);
+      const { getByTestId } = render(<HeaderRow scopeId={TEST_SCOPE_ID} item={item} />);
       const element = getByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT);
       expect(element).toBeInTheDocument();
     });

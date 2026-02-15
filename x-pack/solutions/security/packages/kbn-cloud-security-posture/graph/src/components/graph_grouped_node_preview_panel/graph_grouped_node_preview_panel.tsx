@@ -49,6 +49,10 @@ const translateEntityType = (type?: string): string => {
 export interface GraphGroupedNodePreviewPanelProps {
   showLoadingState?: boolean;
   docMode: 'grouped-entities' | 'grouped-events';
+  /**
+   * Unique identifier for the graph instance, used to scope filter state.
+   */
+  scopeId: string;
   // events/alerts IDs to fetch details from ES
   dataViewId: DataView['id'];
   documentIds: string[];
@@ -123,7 +127,7 @@ const useContentMetadata = (
  * Panel to be displayed in the document details expandable flyout on top of right section
  */
 export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps> = memo(
-  ({ docMode, dataViewId, documentIds, entityItems }) => {
+  ({ docMode, scopeId, dataViewId, documentIds, entityItems }) => {
     // Initialize pagination state with localStorage persistence
     // - For 'grouped-entities': Pass entityItems.length to enable client-side pagination validation
     // - For 'grouped-events': Pass 0 since events use server-side pagination (handled by useFetchDocumentDetails)
@@ -157,6 +161,7 @@ export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps>
         icon={icon}
         groupedItemsType={groupedItemsType}
         pagination={pagination}
+        scopeId={scopeId}
       />
     );
   }

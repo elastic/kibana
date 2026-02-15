@@ -17,7 +17,7 @@ import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import { Graph, isEntityNode, type NodeProps } from '../../..';
+import { Graph, isEntityNode } from '../../..';
 import { Callout } from '../callout/callout';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
 import { useGraphCallout } from '../../hooks/use_graph_callout';
@@ -30,24 +30,21 @@ import { analyzeDocuments } from '../node/label_node/analyze_documents';
 import { EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
-import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from './search_filters';
+import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from '../filters/search_filters';
 import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
 import type { NodeViewModel } from '../types';
 import { isLabelNode, showErrorToast } from '../utils';
 import { GRAPH_SCOPE_ID } from '../constants';
+import { useGraphFilters } from '../filters/use_graph_filters';
 
 const useGraphPopovers = ({
-  dataViewId,
-  searchFilters,
-  setSearchFilters,
-  nodeDetailsClickHandler,
+  scopeId,
+  onOpenEventPreview,
   onOpenNetworkPreview,
 }: {
-  dataViewId: string;
-  searchFilters: Filter[];
-  setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>;
-  nodeDetailsClickHandler?: (node: NodeProps) => void;
+  scopeId: string;
+  onOpenEventPreview?: (node: NodeViewModel) => void;
   onOpenNetworkPreview?: (ip: string, scopeId: string) => void;
 }) => {
   const [currentIps, setCurrentIps] = useState<string[]>([]);
@@ -56,18 +53,8 @@ const useGraphPopovers = ({
     null
   );
   const [currentEventText, setCurrentEventText] = useState<string>('');
-  const nodeExpandPopover = useEntityNodeExpandPopover(
-    setSearchFilters,
-    dataViewId,
-    searchFilters,
-    nodeDetailsClickHandler
-  );
-  const labelExpandPopover = useLabelNodeExpandPopover(
-    setSearchFilters,
-    dataViewId,
-    searchFilters,
-    nodeDetailsClickHandler
-  );
+  const nodeExpandPopover = useEntityNodeExpandPopover(scopeId, onOpenEventPreview);
+  const labelExpandPopover = useLabelNodeExpandPopover(scopeId, onOpenEventPreview);
   const ipPopover = useIpPopover(currentIps, GRAPH_SCOPE_ID);
   const countryFlagsPopover = useCountryFlagsPopover(currentCountryCodes);
   const eventPopover = useEventDetailsPopover(currentEventAnalysis, currentEventText);
@@ -148,6 +135,12 @@ const NEGATED_FILTER_SEARCH_WARNING_MESSAGE = {
 
 export interface GraphInvestigationProps {
   /**
+   * Unique identifier for this graph instance, used to scope filter state.
+   * When multiple graphs are open simultaneously, each should have a distinct scopeId.
+   */
+  scopeId: string;
+
+  /**
    * The initial state to use for the graph investigation view.
    */
   initialState: {
@@ -221,6 +214,7 @@ type EsQuery = UseFetchGraphDataParams['req']['query']['esQuery'];
  */
 export const GraphInvestigation = memo<GraphInvestigationProps>(
   ({
+    scopeId,
     initialState: { indexPatterns, dataView, originEventIds, timeRange: initialTimeRange },
     showInvestigateInTimeline = false,
     showToggleSearch = false,
@@ -228,7 +222,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     onOpenEventPreview,
     onOpenNetworkPreview,
   }: GraphInvestigationProps) => {
-    const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
+    const { searchFilters, setSearchFilters } = useGraphFilters(scopeId, dataView?.id ?? '');
     const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
     const [searchToggled, setSearchToggled] = useSessionStorage(
       TOGGLE_SEARCH_BAR_STORAGE_KEY,
@@ -308,13 +302,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       }
     }, [error, isError, notifications]);
 
-    const nodeDetailsClickHandler = useCallback(
-      (node: NodeProps) => {
-        onOpenEventPreview?.(node.data);
-      },
-      [onOpenEventPreview]
-    );
-
     const {
       nodeExpandPopover,
       labelExpandPopover,
@@ -326,10 +313,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       createCountryClickHandler,
       createEventClickHandler,
     } = useGraphPopovers({
-      dataViewId: dataView?.id ?? '',
-      searchFilters,
-      setSearchFilters,
-      nodeDetailsClickHandler: onOpenEventPreview ? nodeDetailsClickHandler : undefined,
+      scopeId,
+      onOpenEventPreview,
       onOpenNetworkPreview,
     });
 
