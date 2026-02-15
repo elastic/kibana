@@ -60,6 +60,22 @@ export const CreateAgentlessPolicyRequestSchema = {
             },
           })
         ),
+        target_csp: schema.maybe(
+          schema.oneOf([schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')], {
+            meta: {
+              description:
+                'Target cloud service provider. If not provided, will be auto-detected from inputs.',
+            },
+          })
+        ),
+        account_type: schema.maybe(
+          schema.oneOf([schema.literal('single-account'), schema.literal('organization-account')], {
+            meta: {
+              description:
+                'Account type for the cloud connector (single-account or organization-account).',
+            },
+          })
+        ),
       })
     ),
   }),

@@ -28,9 +28,14 @@ import {
 import styled from 'styled-components';
 
 import { NamespaceComboBox } from '../../../../../../../components/namespace_combo_box';
+import { CloudConnectorSetup } from '../../../../../../../components/cloud_connector';
 import type { PackageInfo, NewPackagePolicy, RegistryVarsEntry } from '../../../../../types';
 import { Loading } from '../../../../../components';
-import { useGetEpmDatastreams, useStartServices } from '../../../../../hooks';
+import {
+  useGetEpmDatastreams,
+  useStartServices,
+  useVarGroupCloudConnector,
+} from '../../../../../hooks';
 
 import { isAdvancedVar, shouldShowVar, isVarRequiredByVarGroup } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
@@ -69,19 +74,35 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     isEditPage = false,
     isAgentlessSelected = false,
   }) => {
-    const { docLinks } = useStartServices();
+    const { docLinks, cloud } = useStartServices();
 
     // Form show/hide states
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(noAdvancedToggle);
 
-    // Var group selections - derives from policy, initializes defaults, handles changes
+    // Var group selections - derives from policy, initializes defaults, handles changes.
+    // packagePolicy is passed so that policy effects (e.g., supports_cloud_connector flag
+    // and supports_cloud_connectors var) are computed when the selection changes.
     const { selections: varGroupSelections, handleSelectionChange: handleVarGroupSelectionChange } =
       useVarGroupSelections({
         varGroups: packageInfo.var_groups,
         savedSelections: packagePolicy.var_group_selections,
         isAgentlessEnabled: isAgentlessSelected,
         onSelectionsChange: updatePackagePolicy,
+        packagePolicy,
       });
+
+    // Cloud connector state from var_group selections
+    const {
+      isCloudConnector,
+      cloudProvider,
+      iacTemplateUrl,
+      cloudConnectorVars,
+      handleCloudConnectorUpdate,
+    } = useVarGroupCloudConnector({
+      varGroups: packageInfo.var_groups,
+      varGroupSelections,
+      updatePackagePolicy,
+    });
 
     // Package-level vars, filtered by var_group visibility
     const { requiredVars, advancedVars } = useMemo(() => {
@@ -90,6 +111,11 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
 
       if (packageInfo.vars) {
         packageInfo.vars.forEach((varDef) => {
+          // Skip vars handled by cloud connector (they render their own fields)
+          if (cloudConnectorVars.has(varDef.name)) {
+            return;
+          }
+
           // Check if var should be shown based on var_group selections
           if (
             packageInfo.var_groups &&
@@ -108,7 +134,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       }
 
       return { requiredVars: _requiredVars, advancedVars: _advancedVars };
-    }, [packageInfo.vars, packageInfo.var_groups, varGroupSelections]);
+    }, [packageInfo.vars, packageInfo.var_groups, varGroupSelections, cloudConnectorVars]);
 
     // Outputs
     const {
@@ -267,9 +293,27 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                   selectedOptionName={varGroupSelections[varGroup.name]}
                   onSelectionChange={handleVarGroupSelectionChange}
                   isAgentlessEnabled={isAgentlessSelected}
+                  disabled={isEditPage && isCloudConnector}
                 />
               </EuiFlexItem>
             ))}
+
+            {/* Cloud Connector Setup - shown when a cloud connector option is selected */}
+            {isCloudConnector && cloudProvider && (
+              <EuiFlexItem>
+                <CloudConnectorSetup
+                  newPolicy={packagePolicy}
+                  packageInfo={packageInfo}
+                  updatePolicy={handleCloudConnectorUpdate}
+                  isEditPage={isEditPage}
+                  hasInvalidRequiredVars={submitAttempted && !!validationResults?.vars}
+                  cloud={cloud}
+                  cloudProvider={cloudProvider}
+                  templateName={packageInfo.name}
+                  iacTemplateUrl={iacTemplateUrl}
+                />
+              </EuiFlexItem>
+            )}
 
             {/* Required vars */}
             {requiredVars.map((varDef) => {

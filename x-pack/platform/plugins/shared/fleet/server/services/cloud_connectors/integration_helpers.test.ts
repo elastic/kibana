@@ -82,6 +82,44 @@ describe('cloud connector integration helpers', () => {
       ],
     });
 
+    describe('cloud_connector_account_type field (priority)', () => {
+      it('should use cloud_connector_account_type when set on policy', () => {
+        const packagePolicy: NewPackagePolicy = {
+          ...createMockPackagePolicy({}),
+          cloud_connector_account_type: ORGANIZATION_ACCOUNT,
+        };
+
+        expect(extractAccountType('aws', packagePolicy, mockPackageInfo)).toBe(
+          ORGANIZATION_ACCOUNT
+        );
+      });
+
+      it('should prioritize cloud_connector_account_type over input vars', () => {
+        const packagePolicy: NewPackagePolicy = {
+          ...createMockPackagePolicy({
+            'aws.account_type': { value: SINGLE_ACCOUNT },
+          }),
+          cloud_connector_account_type: ORGANIZATION_ACCOUNT,
+        };
+
+        // cloud_connector_account_type should take priority
+        expect(extractAccountType('aws', packagePolicy, mockPackageInfo)).toBe(
+          ORGANIZATION_ACCOUNT
+        );
+      });
+
+      it('should fall back to input vars when cloud_connector_account_type is null', () => {
+        const packagePolicy: NewPackagePolicy = {
+          ...createMockPackagePolicy({
+            'aws.account_type': { value: SINGLE_ACCOUNT },
+          }),
+          cloud_connector_account_type: null,
+        };
+
+        expect(extractAccountType('aws', packagePolicy, mockPackageInfo)).toBe(SINGLE_ACCOUNT);
+      });
+    });
+
     describe('AWS account type extraction', () => {
       it('should extract and validate AWS single-account', () => {
         const packagePolicy = createMockPackagePolicy({

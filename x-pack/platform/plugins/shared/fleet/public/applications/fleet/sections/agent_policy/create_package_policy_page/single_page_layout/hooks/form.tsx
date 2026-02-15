@@ -47,10 +47,7 @@ import {
   sendCreatePackagePolicyForRq,
 } from '../../../../../hooks';
 import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
-import type {
-  CreatePackagePolicyResponse,
-  NewPackagePolicyInput,
-} from '../../../../../../../../common';
+import type { CreatePackagePolicyResponse } from '../../../../../../../../common';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SYSTEM_PACKAGE,
@@ -60,9 +57,15 @@ import {
 import { getMaxPackageName } from '../../../../../../../../common/services';
 import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
 import { useConfirmForceInstall } from '../../../../../../integrations/hooks';
-import { validatePackagePolicy, validationHasErrors } from '../../services';
+import { detectTargetCsp } from '../../../../../../../../common/services/cloud_connectors';
+import {
+  validatePackagePolicy,
+  validationHasErrors,
+  isInputVisibleForVarGroupSelections,
+} from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
 import type { PackagePolicyFormState } from '../../types';
+import type { RegistryVarGroup } from '../../../../../types';
 import { SelectedPolicyTab } from '../../components';
 import { useOnSaveNavigate } from '../../hooks';
 import { prepareInputPackagePolicyDataset } from '../../services/prepare_input_pkg_policy_dataset';
@@ -145,7 +148,10 @@ export const createAgentPolicyIfNeeded = async ({
   }
 };
 
-async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) {
+async function savePackagePolicy(
+  pkgPolicy: CreatePackagePolicyRequest['body'],
+  varGroups?: RegistryVarGroup[]
+) {
   const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(pkgPolicy);
 
   // If agentless use agentless policies API
@@ -153,6 +159,9 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
     function formatPackage(pkg: NewPackagePolicy['package']) {
       return omit(pkg, 'title');
     }
+
+    // Detect target cloud provider from var_groups or inputs
+    const targetCsp = detectTargetCsp(pkgPolicy as NewPackagePolicy, varGroups);
 
     const agentlessRequestBody = {
       package: formatPackage(pkgPolicy.package),
@@ -167,7 +176,8 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
         'supports_agentless',
         'supports_cloud_connector',
         'cloud_connector_id',
-        'cloud_connector_name'
+        'cloud_connector_name',
+        'cloud_connector_account_type'
       ),
       id: pkgPolicy.id ? String(pkgPolicy.id) : undefined,
       inputs: formatInputs(pkgPolicy.inputs),
@@ -176,6 +186,8 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
       ...(pkgPolicy.supports_cloud_connector && {
         cloud_connector: {
           enabled: true,
+          // Include target_csp if detected (required for var_groups packages)
+          ...(targetCsp && { target_csp: targetCsp }),
           ...(pkgPolicy.cloud_connector_id && {
             cloud_connector_id: pkgPolicy.cloud_connector_id,
           }),
@@ -184,6 +196,10 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
             pkgPolicy.cloud_connector_name && {
               name: pkgPolicy.cloud_connector_name,
             }),
+          // Pass account type if set (from CloudConnectorSetup UI selector)
+          ...(pkgPolicy.cloud_connector_account_type && {
+            account_type: pkgPolicy.cloud_connector_account_type,
+          }),
         },
       }),
     };
@@ -202,19 +218,18 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
 
   return result;
 }
+
 // Update the agentless policy with cloud connector info in the new agent policy when the package policy input `aws.support_cloud_connectors is updated
 export const updateAgentlessCloudConnectorConfig = (
   packagePolicy: NewPackagePolicy,
   newAgentPolicy: NewAgentPolicy,
   setNewAgentPolicy: (policy: NewAgentPolicy) => void,
-  setPackagePolicy: (policy: NewPackagePolicy) => void
+  setPackagePolicy: (policy: NewPackagePolicy) => void,
+  varGroups?: RegistryVarGroup[]
 ) => {
-  const input = packagePolicy.inputs?.find(
-    (pinput: NewPackagePolicyInput) => pinput.enabled === true
-  );
-  const targetCsp = input?.type.match(/aws|azure/)?.[0];
+  const targetCsp = detectTargetCsp(packagePolicy, varGroups);
 
-  // Making sure that the cloud connector is disabled when switching to GCP
+  // Making sure that the cloud connector is disabled when switching to GCP or unsupported provider
   if (
     !targetCsp &&
     (newAgentPolicy.agentless?.cloud_connectors || packagePolicy.supports_cloud_connector)
@@ -508,34 +523,58 @@ export function useOnSubmit({
     isAgentlessIntegration(packageInfo) && selectedSetupTechnology === SetupTechnology.AGENTLESS;
 
   const newInputs = useMemo(() => {
-    return packagePolicy.inputs.map((input, i) => {
-      if (
-        isInputAllowedForDeploymentMode(
-          input,
-          isAgentlessSelected ? 'agentless' : 'default',
-          packageInfo
-        )
-      ) {
+    const varGroupSelections = packagePolicy.var_group_selections ?? {};
+    return packagePolicy.inputs.map((input) => {
+      const allowedForDeploymentMode = isInputAllowedForDeploymentMode(
+        input,
+        isAgentlessSelected ? 'agentless' : 'default',
+        packageInfo
+      );
+      const visibleForVarGroup = isInputVisibleForVarGroupSelections(
+        input,
+        packageInfo,
+        varGroupSelections
+      );
+      if (allowedForDeploymentMode && visibleForVarGroup) {
         return input;
-      } else {
-        return { ...input, enabled: false };
       }
+      return { ...input, enabled: false };
     });
-  }, [packagePolicy.inputs, isAgentlessSelected, packageInfo]);
+  }, [packagePolicy.inputs, packagePolicy.var_group_selections, isAgentlessSelected, packageInfo]);
+
+  // Compare current vs desired input enabled states so the effect below only fires
+  // when a var_group selection actually hides or reveals an input, preventing
+  // infinite update loops from new array references.
+  const inputsEnablingDiffer = useMemo(() => {
+    if (packagePolicy.inputs.length !== newInputs.length) return true;
+    return packagePolicy.inputs.some((input, i) => input.enabled !== newInputs[i]?.enabled);
+  }, [packagePolicy.inputs, newInputs]);
 
   useEffect(() => {
-    if (prevSetupTechnology !== selectedSetupTechnology) {
+    const shouldApplyInputs =
+      prevSetupTechnology !== selectedSetupTechnology ||
+      (packageInfo?.var_groups?.length && inputsEnablingDiffer);
+    if (shouldApplyInputs) {
       updatePackagePolicy({
         inputs: newInputs,
       });
     }
-  }, [newInputs, prevSetupTechnology, selectedSetupTechnology, updatePackagePolicy, packagePolicy]);
+  }, [
+    newInputs,
+    prevSetupTechnology,
+    selectedSetupTechnology,
+    updatePackagePolicy,
+    packagePolicy,
+    inputsEnablingDiffer,
+    packageInfo?.var_groups?.length,
+  ]);
 
   updateAgentlessCloudConnectorConfig(
     packagePolicy,
     newAgentPolicy,
     setNewAgentPolicy,
-    setPackagePolicy
+    setPackagePolicy,
+    packageInfo?.var_groups
   );
 
   const onSaveNavigate = useOnSaveNavigate({
@@ -676,11 +715,14 @@ export function useOnSubmit({
       setFormState('LOADING');
       try {
         // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
-        const data = await savePackagePolicy({
-          ...packagePolicy,
-          policy_ids: agentPolicyIdToSave,
-          force: forceInstall,
-        });
+        const data = await savePackagePolicy(
+          {
+            ...packagePolicy,
+            policy_ids: agentPolicyIdToSave,
+            force: forceInstall,
+          },
+          packageInfo?.var_groups
+        );
 
         if (data?.item.package) {
           await ensurePackageKibanaAssetsInstalled({

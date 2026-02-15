@@ -46,3 +46,10 @@ export const CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS = {
   DELETE_CONFIRM_MODAL: 'cloudConnectorDeleteConfirmModal',
   DELETE_MODAL_CALLOUT: 'cloudConnectorDeleteModalCallout',
 };
+
+// Account Type Selector test subjects
+export const ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS = {
+  SELECTOR: 'cloudConnectorAccountTypeSelector',
+  ORGANIZATION: 'cloudConnectorAccountTypeOrganization',
+  SINGLE_ACCOUNT: 'cloudConnectorAccountTypeSingleAccount',
+};

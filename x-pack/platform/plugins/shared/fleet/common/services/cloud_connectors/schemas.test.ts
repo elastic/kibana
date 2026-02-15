@@ -13,6 +13,7 @@ import {
   getCredentialSchema,
   getAllVarKeys,
   getAllSupportedVarNames,
+  getCredentialKeyFromVarName,
 } from './schemas';
 
 describe('Cloud Connector Schemas', () => {
@@ -55,10 +56,12 @@ describe('Cloud Connector Schemas', () => {
       expect(clientId.isSecret).toBe(true);
     });
 
-    it('should have azureCredentialsCloudConnectorId field with correct keys', () => {
-      const { azureCredentialsCloudConnectorId } = AZURE_CREDENTIAL_SCHEMA.fields;
-      expect(azureCredentialsCloudConnectorId.primary).toBe('azure_credentials_cloud_connector_id');
-      expect(azureCredentialsCloudConnectorId.isSecret).toBe(false);
+    it('should have azure_credentials_cloud_connector_id field with correct keys', () => {
+      const { azure_credentials_cloud_connector_id } = AZURE_CREDENTIAL_SCHEMA.fields;
+      expect(azure_credentials_cloud_connector_id.primary).toBe(
+        'azure_credentials_cloud_connector_id'
+      );
+      expect(azure_credentials_cloud_connector_id.isSecret).toBe(false);
     });
   });
 
@@ -142,6 +145,76 @@ describe('Cloud Connector Schemas', () => {
     it('should return a non-empty array', () => {
       const allVarNames = getAllSupportedVarNames();
       expect(allVarNames.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('getCredentialKeyFromVarName', () => {
+    describe('AWS provider', () => {
+      it('should return roleArn for primary key role_arn', () => {
+        expect(getCredentialKeyFromVarName('aws', 'role_arn')).toBe('roleArn');
+      });
+
+      it('should return roleArn for alias aws.role_arn', () => {
+        expect(getCredentialKeyFromVarName('aws', 'aws.role_arn')).toBe('roleArn');
+      });
+
+      it('should return externalId for primary key external_id', () => {
+        expect(getCredentialKeyFromVarName('aws', 'external_id')).toBe('externalId');
+      });
+
+      it('should return externalId for alias aws.credentials.external_id', () => {
+        expect(getCredentialKeyFromVarName('aws', 'aws.credentials.external_id')).toBe(
+          'externalId'
+        );
+      });
+
+      it('should return undefined for unknown var name', () => {
+        expect(getCredentialKeyFromVarName('aws', 'unknown_var')).toBeUndefined();
+      });
+    });
+
+    describe('Azure provider', () => {
+      it('should return tenantId for primary key tenant_id', () => {
+        expect(getCredentialKeyFromVarName('azure', 'tenant_id')).toBe('tenantId');
+      });
+
+      it('should return tenantId for alias azure.credentials.tenant_id', () => {
+        expect(getCredentialKeyFromVarName('azure', 'azure.credentials.tenant_id')).toBe(
+          'tenantId'
+        );
+      });
+
+      it('should return clientId for primary key client_id', () => {
+        expect(getCredentialKeyFromVarName('azure', 'client_id')).toBe('clientId');
+      });
+
+      it('should return clientId for alias azure.credentials.client_id', () => {
+        expect(getCredentialKeyFromVarName('azure', 'azure.credentials.client_id')).toBe(
+          'clientId'
+        );
+      });
+
+      it('should return azure_credentials_cloud_connector_id for its primary key', () => {
+        expect(getCredentialKeyFromVarName('azure', 'azure_credentials_cloud_connector_id')).toBe(
+          'azure_credentials_cloud_connector_id'
+        );
+      });
+    });
+
+    describe('GCP provider', () => {
+      it('should return projectId for primary key project_id', () => {
+        expect(getCredentialKeyFromVarName('gcp', 'project_id')).toBe('projectId');
+      });
+
+      it('should return serviceAccountKey for primary key service_account_key', () => {
+        expect(getCredentialKeyFromVarName('gcp', 'service_account_key')).toBe('serviceAccountKey');
+      });
+    });
+
+    describe('Unknown provider', () => {
+      it('should return undefined for unknown provider', () => {
+        expect(getCredentialKeyFromVarName('unknown' as any, 'role_arn')).toBeUndefined();
+      });
     });
   });
 });

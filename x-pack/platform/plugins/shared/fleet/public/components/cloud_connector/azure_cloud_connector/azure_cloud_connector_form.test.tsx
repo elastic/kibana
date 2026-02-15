@@ -157,7 +157,6 @@ describe('AzureCloudConnectorForm', () => {
   };
 
   const defaultProps: CloudConnectorFormProps = {
-    input: createMockInput(),
     newPolicy: createMockPolicy(),
     packageInfo: createMockPackageInfo(),
     updatePolicy: mockUpdatePolicy,
@@ -211,8 +210,8 @@ describe('AzureCloudConnectorForm', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('should not render Deploy to Azure button when templateName is undefined', () => {
-      renderComponent({ templateName: undefined });
+    it('should not render Deploy to Azure button when iacTemplateUrl is undefined', () => {
+      renderComponent({ iacTemplateUrl: undefined });
 
       expect(
         screen.queryByTestId(AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ)

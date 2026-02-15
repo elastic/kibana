@@ -265,9 +265,9 @@ function readAzureCredentials(
   return {
     tenantId: findVarValue(vars, getAllVarKeys(schema.fields.tenantId)),
     clientId: findVarValue(vars, getAllVarKeys(schema.fields.clientId)),
-    azureCredentialsCloudConnectorId: findVarValue(
+    azure_credentials_cloud_connector_id: findVarValue(
       vars,
-      getAllVarKeys(schema.fields.azureCredentialsCloudConnectorId)
+      getAllVarKeys(schema.fields.azure_credentials_cloud_connector_id)
     ) as string | undefined,
   };
 }
@@ -395,13 +395,13 @@ function writeAzureCredentials(
     };
   }
 
-  // Write azureCredentialsCloudConnectorId
-  if (credentials.azureCredentialsCloudConnectorId !== undefined) {
-    const connectorIdKeys = getAllVarKeys(schema.fields.azureCredentialsCloudConnectorId);
+  // Write azure_credentials_cloud_connector_id
+  if (credentials.azure_credentials_cloud_connector_id !== undefined) {
+    const connectorIdKeys = getAllVarKeys(schema.fields.azure_credentials_cloud_connector_id);
     const existingKey = findExistingVarKey(vars, connectorIdKeys) || connectorIdKeys[0];
     updatedVars[existingKey] = {
       ...vars[existingKey],
-      value: credentials.azureCredentialsCloudConnectorId,
+      value: credentials.azure_credentials_cloud_connector_id,
     };
   }
 

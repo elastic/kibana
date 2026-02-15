@@ -36,6 +36,8 @@ export const AWS_CLOUD_CONNECTOR_FIELD_NAMES = {
   AWS_EXTERNAL_ID: 'aws.credentials.external_id',
 } as const;
 
+export const SUPPORTS_CLOUD_CONNECTORS_VAR_NAME = 'supports_cloud_connectors';
+
 export const AZURE_CLOUD_CONNECTOR_FIELD_NAMES = {
   TENANT_ID: 'tenant_id',
   CLIENT_ID: 'client_id',
