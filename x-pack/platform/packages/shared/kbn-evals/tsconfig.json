@@ -32,5 +32,6 @@
     "@kbn/inference-prompt-utils",
     "@kbn/tracing-utils",
     "@kbn/dev-cli-errors",
+    "@kbn/config-schema",
   ]
 }

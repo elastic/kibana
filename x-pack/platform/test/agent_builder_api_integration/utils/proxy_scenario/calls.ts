@@ -9,18 +9,47 @@ import { last } from 'lodash';
 import type { LlmProxy, LLmError } from '@kbn/ftr-llm-proxy';
 import { createToolCallMessage } from '../llm_proxy';
 
+const getToolChoiceFunctionName = (toolChoice: unknown): string | undefined => {
+  if (!toolChoice || typeof toolChoice !== 'object') return undefined;
+  const maybe = toolChoice as { function?: { name?: unknown } };
+  return typeof maybe.function?.name === 'string' ? maybe.function.name : undefined;
+};
+
 export const mockTitleGeneration = (llmProxy: LlmProxy, title: string) => {
-  void llmProxy.interceptors.toolChoice({
-    name: 'set_title',
-    response: createToolCallMessage('set_title', { title }),
-  });
+  // Title generation is implemented via structured output (a tool call named "set_title").
+  // Different model adapters may shape `tool_choice` differently, so match the request via
+  // either the tool choice name or the stable system prompt text.
+  void llmProxy
+    .intercept({
+      name: 'set_title',
+      when: (body) => {
+        const systemMessage = body.messages.find((m) => m.role === 'system');
+        const systemText = String(systemMessage?.content ?? '');
+        return (
+          getToolChoiceFunctionName(body.tool_choice) === 'set_title' ||
+          systemText.includes('You are a title-generation utility')
+        );
+      },
+      responseMock: createToolCallMessage('set_title', { title }),
+    })
+    .completeAfterIntercept();
 };
 
 export const mockTitleGenerationWithError = (llmProxy: LlmProxy, error: LLmError) => {
-  void llmProxy.interceptors.toolChoice({
-    name: 'set_title',
-    response: error,
-  });
+  void llmProxy
+    .intercept({
+      name: 'set_title',
+      when: (body) => {
+        const systemMessage = body.messages.find((m) => m.role === 'system');
+        const systemText = String(systemMessage?.content ?? '');
+        return (
+          getToolChoiceFunctionName(body.tool_choice) === 'set_title' ||
+          systemText.includes('You are a title-generation utility')
+        );
+      },
+      responseMock: error,
+    })
+    .completeAfterIntercept();
 };
 
 export const mockAgentToolCall = ({
@@ -36,10 +65,12 @@ export const mockAgentToolCall = ({
 }) => {
   void llmProxy.interceptors.userMessage({
     name,
-    // when: ({ messages }) => {
-    //   const lastMessage = last(messages)?.content as string;
-    //   return lastMessage.includes(options.userPrompt);
-    // },
+    // Avoid accidentally intercepting title generation (it also ends with a user message).
+    when: ({ messages }) => {
+      const systemMessage = messages.find((message) => message.role === 'system');
+      const systemText = String(systemMessage?.content ?? '');
+      return !systemText.includes('You are a title-generation utility');
+    },
     response: createToolCallMessage(toolName, toolArg),
   });
 };

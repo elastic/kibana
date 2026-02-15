@@ -15,6 +15,8 @@
             }
         ] */
 
+import Fs from 'fs';
+import Path from 'path';
 import prConfigs from '../../../pull_requests.json';
 import { runPreBuild } from './pre_build';
 import {
@@ -38,6 +40,142 @@ const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
 const ALL_UI_TEST_SUITES = GITHUB_PR_LABELS.includes('ci:all-ui-test-suites');
 const REQUIRED_PATHS = prConfig.always_require_ci_on_changed!.map((r) => new RegExp(r, 'i'));
 const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new RegExp(r, 'i'));
+
+const EVALS_SUITES_METADATA_RELATIVE_PATH =
+  'x-pack/platform/packages/shared/kbn-evals/evals.suites.json';
+
+interface EvalsSuiteMetadataEntry {
+  id: string;
+  name?: string;
+  ciLabels?: string[];
+  configPath?: string;
+}
+
+function readEvalsSuiteMetadata(): EvalsSuiteMetadataEntry[] {
+  try {
+    const filePath = Path.resolve(process.cwd(), EVALS_SUITES_METADATA_RELATIVE_PATH);
+    const raw = Fs.readFileSync(filePath, 'utf-8');
+    const parsed = JSON.parse(raw) as { suites?: EvalsSuiteMetadataEntry[] };
+    const suites = Array.isArray(parsed.suites) ? parsed.suites : [];
+    // Ignore suites whose configPath does not exist to avoid "ghost suites" from stale metadata.
+    return suites.filter((suite) => {
+      if (!suite?.configPath) return true;
+      try {
+        return Fs.existsSync(Path.resolve(process.cwd(), suite.configPath));
+      } catch {
+        return false;
+      }
+    });
+  } catch {
+    return [];
+  }
+}
+
+function normalizeBuildkiteKey(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function normalizeEisConnectorIdFromModelId(modelId: string): string {
+  return `eis-${normalizeBuildkiteKey(modelId)}`;
+}
+
+function normalizeLitellmConnectorIdFromModelGroup(modelGroup: string): string {
+  return `litellm-${normalizeBuildkiteKey(modelGroup)}`;
+}
+
+function parseGithubPrLabels(raw: string): string[] {
+  // Historically this env var has been provided as a comma/newline separated string,
+  // but some contexts may pass JSON (e.g. ["a","b"]). Handle both.
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (Array.isArray(parsed)) {
+      return parsed
+        .map(String)
+        .map((label) => label.trim())
+        .filter(Boolean);
+    }
+  } catch {
+    // fall through
+  }
+
+  return raw
+    .split(/[\n,]+/g)
+    .map((label) => label.trim())
+    .filter(Boolean);
+}
+
+function buildEvalsYaml({
+  selectedSuites,
+  modelGroups,
+  evaluationConnectorId,
+  includeEisModels,
+}: {
+  selectedSuites: EvalsSuiteMetadataEntry[];
+  modelGroups: string[] | undefined;
+  evaluationConnectorId: string | undefined;
+  includeEisModels: boolean;
+}): string {
+  const suiteSteps = selectedSuites
+    .map((suite) => {
+      const key = `kbn-evals-${normalizeBuildkiteKey(suite.id)}`;
+      const label = suite.name ? `Evals: ${suite.name}` : `Evals: ${suite.id}`;
+      const modelGroupsEnv =
+        modelGroups && modelGroups.length > 0
+          ? `          EVAL_MODEL_GROUPS: '${modelGroups.join(',')}'`
+          : null;
+      const evaluationConnectorIdEnv = evaluationConnectorId
+        ? `          EVALUATION_CONNECTOR_ID: '${evaluationConnectorId}'`
+        : null;
+      const includeEisModelsEnv = includeEisModels
+        ? `          EVAL_INCLUDE_EIS_MODELS: '1'`
+        : null;
+      return [
+        `      - label: '${label}'`,
+        `        key: ${key}`,
+        `        command: bash .buildkite/scripts/steps/evals/run_suite.sh`,
+        `        env:`,
+        `          KBN_EVALS: '1'`,
+        `          FTR_EIS_CCM: '1'`,
+        `          EVAL_SUITE_ID: '${suite.id}'`,
+        `          EVAL_FANOUT: '1'`,
+        ...(evaluationConnectorIdEnv ? [evaluationConnectorIdEnv] : []),
+        ...(includeEisModelsEnv ? [includeEisModelsEnv] : []),
+        ...(modelGroupsEnv ? [modelGroupsEnv] : []),
+        `        timeout_in_minutes: 60`,
+        `        agents:`,
+        `          machineType: n2-standard-8`,
+        `          preemptible: true`,
+        `        retry:`,
+        `          automatic:`,
+        `            - exit_status: '-1'`,
+        `              limit: 3`,
+        `            - exit_status: '*'`,
+        `              limit: 1`,
+      ].join('\n');
+    })
+    .join('\n');
+
+  return [
+    // NOTE: `getPipeline()` strips `steps:` from YAML fragments so they can be concatenated
+    // under the single top-level `steps:` key. This must follow that convention.
+    `  - group: LLM Evals`,
+    `    key: kibana-evals`,
+    `    depends_on:`,
+    `      - build`,
+    `      - quick_checks`,
+    `      - checks`,
+    `      - linting`,
+    `      - linting_with_types`,
+    `      - check_oas_snapshot`,
+    `      - check_types`,
+    `    steps:`,
+    suiteSteps,
+  ].join('\n');
+}
 
 (async () => {
   const pipeline: string[] = [];
@@ -499,6 +637,54 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/gen_ai_evals.yml')
+      );
+    }
+
+    // Run eval suite(s) when their GH label(s) are present (see `evals.suites.json`).
+    const evalSuites = readEvalsSuiteMetadata();
+    const runAllEvals = GITHUB_PR_LABELS.includes('evals:all');
+    const selectedEvalSuites = runAllEvals
+      ? evalSuites
+      : evalSuites.filter((suite) => {
+          const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
+          return labels.some((label) => GITHUB_PR_LABELS.includes(label));
+        });
+
+    // Optional model filtering for eval fanout (models:* labels).
+    // - No `models:*` labels => run all models returned by LiteLLM (current behavior).
+    // - One or more `models:<model-group>` labels => only run connectors whose `defaultModel`
+    //   matches one of those model groups.
+    // - `models:all` can be used to explicitly opt into all models (ignored if combined with specifics).
+    const parsedLabels = parseGithubPrLabels(GITHUB_PR_LABELS);
+    const rawEvaluationConnectorId = parsedLabels
+      .find((label) => label.startsWith('models:judge:'))
+      ?.slice('models:judge:'.length)
+      ?.trim();
+    const evaluationConnectorId =
+      rawEvaluationConnectorId && rawEvaluationConnectorId.startsWith('eis/')
+        ? normalizeEisConnectorIdFromModelId(rawEvaluationConnectorId.slice('eis/'.length))
+        : rawEvaluationConnectorId && rawEvaluationConnectorId.includes('/')
+        ? normalizeLitellmConnectorIdFromModelGroup(rawEvaluationConnectorId)
+        : rawEvaluationConnectorId;
+    const includeEisModels =
+      parsedLabels.includes('models:all') ||
+      parsedLabels.some((label) => label.startsWith('models:eis/')) ||
+      (typeof evaluationConnectorId === 'string' && evaluationConnectorId.startsWith('eis-'));
+    const selectedModelGroups = parsedLabels
+      .filter((label) => label.startsWith('models:') && !label.startsWith('models:judge:'))
+      .map((label) => label.slice('models:'.length))
+      .map((value) => value.trim())
+      .filter(Boolean)
+      .filter((value) => value !== 'all');
+
+    if (selectedEvalSuites.length > 0) {
+      pipeline.push(
+        buildEvalsYaml({
+          selectedSuites: selectedEvalSuites,
+          modelGroups: selectedModelGroups.length > 0 ? selectedModelGroups : undefined,
+          evaluationConnectorId,
+          includeEisModels,
+        })
       );
     }
 

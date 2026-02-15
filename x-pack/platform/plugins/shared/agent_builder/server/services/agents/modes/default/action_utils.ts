@@ -82,6 +82,23 @@ export const processToolNodeResponse = (
 };
 
 export const processAnswerResponse = (message: AIMessageChunk): AnswerAction | AgentErrorAction => {
+  // The answering agent should not call tools. Some models/providers can still emit tool calls
+  // unexpectedly, so we treat that as a recoverable error and retry with an explicit tool-result
+  // error message in the prompt history.
+  if (message.tool_calls?.length) {
+    const [firstToolCall] = extractToolCalls(message);
+    const toolName = firstToolCall?.toolName ?? 'unknown';
+    const toolArgs = firstToolCall?.args ?? {};
+
+    return errorAction(
+      createAgentExecutionError(
+        `Answer agent attempted to call tool "${toolName}"`,
+        AgentExecutionErrorCode.toolNotFound,
+        { toolName, toolArgs }
+      )
+    );
+  }
+
   const textContent = extractTextContent(message);
   if (textContent) {
     return answerAction(extractTextContent(message));

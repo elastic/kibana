@@ -1,0 +1,23 @@
+{
+  "description": "kbn-evals CI config",
+  "contact": "#evals",
+  "owner": "@elastic/obs-ai-team",
+  "environment": "CI",
+  "refresh_interval": "168h",
+  "litellm": {
+    "baseUrl": "https://litellm.example.com",
+    "virtualKey": "REDACTED",
+    "teamId": "exampleTeamId",
+    "teamName": "kibana-ci-evals"
+  },
+  "evaluationConnectorId": "litellm-llm-gateway-gpt-4o",
+  "evaluationsEs": {
+    "url": "https://example.es.evaluations.elastic-cloud.com",
+    "apiKey": "REDACTED"
+  },
+  "tracingEs": {
+    "url": "https://example.es.tracing.elastic-cloud.com",
+    "apiKey": "REDACTED"
+  }
+}
+

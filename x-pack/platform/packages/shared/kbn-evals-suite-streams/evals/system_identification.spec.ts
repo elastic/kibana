@@ -24,7 +24,9 @@ import { SYSTEM_IDENTIFICATION_DATASETS } from './system_identification_datasets
 
 evaluate.describe.configure({ timeout: 600_000 });
 
-evaluate.describe(
+// Skipped as part of https://github.com/elastic/kibana/pull/245064 which adds support for running evals on CI
+// TODO: Re-enable this once the prerequisite data is able to be loaded on CI. See: https://github.com/elastic/streams-program/issues/771
+evaluate.describe.skip(
   'Streams systems identification',
   { tag: tags.serverless.observability.complete },
   () => {

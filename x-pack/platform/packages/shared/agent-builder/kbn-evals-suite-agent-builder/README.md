@@ -112,28 +112,31 @@ Then run the evaluations:
 
 ```bash
 # Run all AgentBuilder evaluations
-node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts
 
 # Run specific test file
-node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts evals/kb/kb.spec.ts
+node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts evals/kb/kb.spec.ts
 
 # Run with specific connector
-node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts --project="my-connector"
+node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts --project="my-connector"
 
 # Run with LLM-as-a-judge for consistent evaluation results
-EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts
 
 # Run only selected evaluators
-SELECTED_EVALUATORS="Factuality,Relevance,Groundedness" node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+SELECTED_EVALUATORS="Factuality,Relevance,Groundedness" node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts
+
+# Override RAG evaluator K value (takes priority over config)
+RAG_EVAL_K=5 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts
 
 # Run RAG evaluators with multiple K values using patterns (Precision@K matches Precision@5, Precision@10, etc.)
-SELECTED_EVALUATORS="Precision@K,Recall@K,F1@K,Factuality" RAG_EVAL_K=5,10,20 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+SELECTED_EVALUATORS="Precision@K,Recall@K,F1@K,Factuality" RAG_EVAL_K=5,10,20 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts
 
 # Override RAG evaluator K value (supports comma-separated values for multi-K evaluation)
-RAG_EVAL_K=5,10,20 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+RAG_EVAL_K=5,10,20 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts
 
 # Retrieve traces from another (monitoring) cluster
-TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts
 
 ```
 
@@ -143,7 +146,7 @@ If you want to run evaluations against a dataset that exists in Phoenix and not 
 
 ```bash
 DATASET_NAME="my-phoenix-dataset" \
-node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts evals/external/external_dataset.spec.ts
+node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts evals/external/external_dataset.spec.ts
 ```
 
 Notes:
@@ -152,54 +155,39 @@ Notes:
 - In this mode, the suite **does not** create or upsert datasets/examples- Phoenix dataset is the source of truth.
 - Dataset examples must match the example schema already using in the eval suite (at minimum `input.question`, plus any `output.expected` / `output.groundTruth` needed by evaluators).
 
-### Run Evaluation Comparisons
+### Evaluation comparisons
 
-You can compare evaluation results between different runs using the comparison functionality. This allows you to track performance changes across different model versions, configurations, or time periods.
+Use the evals CLI to compare two evaluation runs (persisted to the `.kibana-evaluations` data stream) using paired t-tests.
+
+Run the suite twice and capture the two run IDs. Scout will generate a `TEST_RUN_ID` automatically, but it's easiest to set it explicitly. **Important:** run a **single** Playwright project (connector/model) per run (use `--project`), otherwise multiple models can collide under the same run id.
 
 ```bash
-# Compare current run against a reference run
-EVALUATION_RUN_ID=<evaluation-run-id> REFERENCE_EVALUATION_RUN_ID=<reference-evaluation-run-id> \
-node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/reporting.playwright.config.ts
+# This must point at the cluster where eval scores were exported.
+# (The default Scout test ES is typically http://elastic:changeme@localhost:9220)
+export EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9220
+
+# LLM-as-a-judge connector (required by @kbn/evals)
+export EVALUATION_CONNECTOR_ID=<llm-judge-connector-id>
+
+# Run A
+TEST_RUN_ID=agent-builder-baseline \
+  node scripts/evals run --suite agent-builder --project <task-connector-id>
+
+# Run B
+TEST_RUN_ID=agent-builder-change \
+  node scripts/evals run --suite agent-builder --project <task-connector-id>
 ```
 
-#### Environment Variables
+Tip: the run id is also printed at the end of the run in the export message containing `run_id:"..."`.
 
-- `EVALUATION_RUN_ID`: The run ID of the current evaluation you want to analyze
-- `REFERENCE_EVALUATION_RUN_ID`: The run ID of the baseline/reference evaluation to compare against
+Then compare:
 
-#### Example Comparison Output
-
-When you run a comparison, you'll get detailed analysis showing:
-
-```text
-📋 Run Metadata:
-Current Run: 161de0d567799670 (2025-08-28T14:17:07.396Z) - Model: us.anthropic.claude-3-7-sonnet-20250219-v1:0
-Reference Run: 026c5060fbfc7dcb (2025-08-28T14:21:35.886Z) - Model: us.anthropic.claude-3-7-sonnet-20250219-v1:0
-
-📈 ambiguous-queries Performance Comparison:
-
-╔═══════════════════╤═════════╤═══════════╤════════════╤══════════╤═════════════╗
-║ Evaluator         │ Current │ Reference │ Difference │ % Change │ Status      ║
-╟───────────────────┼─────────┼───────────┼────────────┼──────────┼─────────────╢
-║ Factuality        │   0.318 │     0.139 │     +0.179 │  +129.3% │ 📈 IMPROVED ║
-╟───────────────────┼─────────┼───────────┼────────────┼──────────┼─────────────╢
-║ Relevance         │   0.622 │     0.660 │     -0.037 │    -5.6% │ 📉 DECLINED ║
-╟───────────────────┼─────────┼───────────┼────────────┼──────────┼─────────────╢
-║ Sequence Accuracy │   1.000 │     1.000 │      0.000 │     0.0% │ ➡️ SAME     ║
-╚═══════════════════╧═════════╧═══════════╧════════════╧══════════╧═════════════╝
-
-🎯 Overall Performance Analysis:
-⚖️  Current run shows mixed results.
-  • Equal improvements and regressions
+```bash
+export EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9220
+node scripts/evals compare agent-builder-baseline agent-builder-change
 ```
 
-#### Finding Run IDs
+Notes:
 
-Run IDs are automatically generated and displayed in the evaluation logs. Look for entries like:
-
-```text
-Successfully indexed evaluation results to a datastream: .kibana-evaluations
-Query filter: environment.hostname:"your-hostname" AND model.id:"model-id" AND run_id:"161de0d567799670"
-```
-
-You can also query the `.kibana-evaluations` datastream in Elasticsearch/Kibana to find historical run IDs for comparison.
+- The two runs must use the same executor/orchestrator (default in-Kibana vs `KBN_EVALS_EXECUTOR=phoenix`).
+- `compare` reads from `EVALUATIONS_ES_URL` (defaults to `http://elastic:changeme@localhost:9220`).

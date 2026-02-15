@@ -26,7 +26,7 @@ Run evaluations using the following base command:
 ```bash
 EVALUATION_CONNECTOR_ID=llm-judge-connector-id \
   node scripts/playwright test \
-  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
+  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/test/scout/ui/playwright.config.ts
 ```
 
 #### Configuration Options
@@ -52,7 +52,7 @@ USE_QUALITATIVE_EVALUATORS=true \
 SCENARIO_REPORTING=true \
 EVALUATION_CONNECTOR_ID=llm-judge-connector-id \
   node scripts/playwright test \
-  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts \
+  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/test/scout/ui/playwright.config.ts \
     evals/alerts/alerts.spec.ts \
   --project="my-connector" \
 ```
@@ -118,7 +118,7 @@ EVALUATION_CLIENT="agent_builder" \
 AGENT_BUILDER_AGENT_ID="observability.agent" \
 EVALUATION_CONNECTOR_ID="your-connector-id" \
   node scripts/playwright test \
-  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts \
+  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/test/scout/ui/playwright.config.ts \
     evals/esql/esql.spec.ts \
   --project="your-connector" \
   --debug

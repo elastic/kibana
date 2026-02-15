@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/inference-prompt-utils'
   - '@kbn/tracing-utils'
   - '@kbn/dev-cli-errors'
+  - '@kbn/config-schema'
 tags:
   - test-helper
   - package
