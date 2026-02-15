@@ -6,38 +6,48 @@
  */
 
 import { useMemo } from 'react';
-import { useBulkAttackInvestigateInTimelineItems } from '../bulk_action_items/use_bulk_attack_investigate_in_timeline_items';
-import { ALERT_ATTACK_DISCOVERY_ALERT_IDS } from '../constants';
+import { useBulkAttackCaseItems } from '../bulk_action_items/use_bulk_attack_case_items';
+import {
+  ALERT_ATTACK_DISCOVERY_ALERT_IDS,
+  ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT,
+} from '../constants';
 import { transformBulkActionsToContextMenuItems } from '../utils/transform_bulk_actions_to_context_menu_items';
 import type {
-  AttackWithTimelineAlerts,
+  AttackWithCase,
   BaseAttackContextMenuItemsProps,
   BulkAttackContextMenuItems,
 } from '../types';
 
-export interface UseAttackInvestigateInTimelineContextMenuItemsProps
-  extends BaseAttackContextMenuItemsProps {
-  /** Array of attacks with alert ids used to investigate in Timeline */
-  attacksWithTimelineAlerts: AttackWithTimelineAlerts[];
+export interface UseAttackCaseContextMenuItemsProps extends BaseAttackContextMenuItemsProps {
+  /** Array of attacks with alert ids and markdown comments */
+  attacksWithCase: AttackWithCase[];
+  /** Title used to initialize "create case" flyout */
+  title: string;
 }
 
-export const useAttackInvestigateInTimelineContextMenuItems = ({
-  attacksWithTimelineAlerts,
+export const useAttackCaseContextMenuItems = ({
+  attacksWithCase,
+  title,
   closePopover,
   clearSelection,
   setIsLoading,
   refresh,
-}: UseAttackInvestigateInTimelineContextMenuItemsProps): BulkAttackContextMenuItems => {
-  const bulkActionItems = useBulkAttackInvestigateInTimelineItems();
+}: UseAttackCaseContextMenuItemsProps): BulkAttackContextMenuItems => {
+  const bulkActionItems = useBulkAttackCaseItems({
+    title,
+  });
 
   const alertItems = useMemo(
     () =>
-      attacksWithTimelineAlerts.map((attack) => ({
+      attacksWithCase.map((attack) => ({
         _id: attack.attackId,
-        data: [{ field: ALERT_ATTACK_DISCOVERY_ALERT_IDS, value: attack.relatedAlertIds }],
+        data: [
+          { field: ALERT_ATTACK_DISCOVERY_ALERT_IDS, value: attack.relatedAlertIds },
+          { field: ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT, value: [attack.markdownComment] },
+        ],
         ecs: { _id: attack.attackId },
       })),
-    [attacksWithTimelineAlerts]
+    [attacksWithCase]
   );
 
   const contextMenuItems = useMemo(
@@ -56,6 +66,7 @@ export const useAttackInvestigateInTimelineContextMenuItems = ({
   return useMemo(
     () => ({
       ...contextMenuItems,
+      // Add-to-case opens another flyout/modal so we close the current popover immediately.
       items: contextMenuItems.items.map((item) => ({
         ...item,
         onClick: item.onClick
