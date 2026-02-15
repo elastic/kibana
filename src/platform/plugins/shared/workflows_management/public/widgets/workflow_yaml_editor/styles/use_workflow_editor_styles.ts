@@ -45,8 +45,10 @@ export const useWorkflowEditorStyles = () => {
           backgroundColor: transparentize(euiTheme.colors.vis.euiColorVisWarning1, 0.24),
           borderRadius: '2px',
         },
-
-        // After text (shadow) decorations
+        '.workflow-name-decoration': {
+          color: euiTheme.colors.textSubdued,
+          fontStyle: 'italic',
+        },
         '.after-text': {
           marginLeft: '10px',
           color: euiTheme.colors.textDisabled,

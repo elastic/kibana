@@ -29,6 +29,7 @@ import {
   useLineDifferencesDecorations,
   useStepDecorationsInExecution,
   useTriggerTypeDecorations,
+  useWorkflowIdDecorations,
 } from './decorations';
 import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
 import { StepActions } from './step_actions';
@@ -423,6 +424,12 @@ export const WorkflowYAMLEditor = ({
     yamlDocument: yamlDocument || null,
     isEditorMounted,
     readOnly: isExecutionYaml,
+  });
+
+  useWorkflowIdDecorations({
+    editor: editorRef.current,
+    yamlDocument: yamlDocument || null,
+    isEditorMounted,
   });
 
   const updateContainerPosition = (

@@ -43,6 +43,10 @@ describe('getJsonSchemaSuggestions', () => {
       isInScheduledTriggerWithBlock: false,
       isInStepsContext: false,
       dynamicConnectorTypes: null,
+      workflows: {
+        workflows: {},
+        totalWorkflows: 0,
+      },
       workflowDefinition: null,
       model: {} as any,
       position: {
