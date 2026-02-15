@@ -15,9 +15,10 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { ExecutionContextSearch } from '@kbn/es-query';
 import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
 import classNames from 'classnames';
+import { Global } from '@emotion/react';
 import type { UserMessage, LensInspector } from '@kbn/lens-common';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
-import { lnsExpressionRendererStyle } from '../expression_renderer_styles';
+import { lnsExpressionRendererStyle, lnsGlobalChartStyles } from '../expression_renderer_styles';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
@@ -75,40 +76,43 @@ export function ExpressionWrapper({
 }: ExpressionWrapperProps) {
   if (!expression) return null;
   return (
-    <div
-      className={classNames('lnsExpressionRenderer', 'eui-scrollBar', className)}
-      css={lnsExpressionRendererStyle}
-      style={style}
-      data-test-subj="lens-embeddable"
-    >
-      <ExpressionRendererComponent
-        padding={noPadding ? undefined : 's'}
-        variables={variables}
-        allowCache={true}
-        expression={expression}
-        interactive={interactive}
-        searchContext={searchContext}
-        searchSessionId={searchSessionId}
-        // @ts-expect-error upgrade typescript v4.9.5
-        onData$={onData$}
-        onRender$={onRender$}
-        inspectorAdapters={lensInspector.getInspectorAdapters()}
-        renderMode={renderMode}
-        syncColors={syncColors}
-        syncTooltips={syncTooltips}
-        syncCursor={syncCursor}
-        executionContext={executionContext}
-        abortController={abortController}
-        renderError={(errorMessage, error) => {
-          const messages = getOriginalRequestErrorMessages(error || null);
-          addUserMessages(messages);
-          onRuntimeError(error?.original || new Error(errorMessage ? errorMessage : ''));
-          return <></>; // the embeddable will take care of displaying the messages
-        }}
-        onEvent={handleEvent}
-        hasCompatibleActions={hasCompatibleActions}
-        getCompatibleCellValueActions={getCompatibleCellValueActions}
-      />
-    </div>
+    <>
+      <Global styles={lnsGlobalChartStyles} />
+      <div
+        className={classNames('lnsExpressionRenderer', 'eui-scrollBar', className)}
+        css={lnsExpressionRendererStyle}
+        style={style}
+        data-test-subj="lens-embeddable"
+      >
+        <ExpressionRendererComponent
+          padding={noPadding ? undefined : 's'}
+          variables={variables}
+          allowCache={true}
+          expression={expression}
+          interactive={interactive}
+          searchContext={searchContext}
+          searchSessionId={searchSessionId}
+          // @ts-expect-error upgrade typescript v4.9.5
+          onData$={onData$}
+          onRender$={onRender$}
+          inspectorAdapters={lensInspector.getInspectorAdapters()}
+          renderMode={renderMode}
+          syncColors={syncColors}
+          syncTooltips={syncTooltips}
+          syncCursor={syncCursor}
+          executionContext={executionContext}
+          abortController={abortController}
+          renderError={(errorMessage, error) => {
+            const messages = getOriginalRequestErrorMessages(error || null);
+            addUserMessages(messages);
+            onRuntimeError(error?.original || new Error(errorMessage ? errorMessage : ''));
+            return <></>; // the embeddable will take care of displaying the messages
+          }}
+          onEvent={handleEvent}
+          hasCompatibleActions={hasCompatibleActions}
+          getCompatibleCellValueActions={getCompatibleCellValueActions}
+        />
+      </div>
+    </>
   );
 }
