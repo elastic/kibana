@@ -45,8 +45,8 @@ export interface RenderRemoteClustersResult extends RenderResult {
   store: Store;
 }
 
-export function renderRemoteClustersRoute(
-  Component: React.ComponentType,
+export function renderRemoteClustersRoute<P extends object>(
+  Component: React.ComponentType<P>,
   {
     httpSetup,
     contextOverrides = {},

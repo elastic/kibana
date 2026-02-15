@@ -11,7 +11,8 @@ import { act, screen, waitFor, within } from '@testing-library/react';
 import { getRouter } from '../../../public/application/services';
 import { getRemoteClusterMock } from '../../../fixtures/remote_cluster';
 
-import { PROXY_MODE } from '../../../common/constants';
+import { PROXY_MODE, SECURITY_MODEL } from '../../../common/constants';
+import type { Cluster } from '../../../common/lib';
 
 import { EuiPaginationTestHarness, EuiTableTestHarness } from '@kbn/test-eui-helpers';
 import { getRandomString } from '@kbn/test-jest-helpers';
@@ -22,7 +23,7 @@ import { renderRemoteClustersRoute } from '../helpers/render';
 
 jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
   return {
-    EuiSearchBox: (props) => (
+    EuiSearchBox: (props: { 'data-test-subj'?: string; onSearch: (value: string) => void }) => (
       <input
         data-test-subj={props['data-test-subj'] || 'mockSearchBox'}
         onChange={(event) => {
@@ -38,7 +39,7 @@ describe('<RemoteClusterList />', () => {
 
   httpRequestsMockHelpers.setLoadRemoteClustersResponse([]);
 
-  const renderList = (overrides) =>
+  const renderList = (overrides?: Record<string, unknown>) =>
     renderRemoteClustersRoute(RemoteClusterList, {
       httpSetup,
       contextOverrides: overrides,
@@ -78,7 +79,7 @@ describe('<RemoteClusterList />', () => {
         proxyAddress: '192.168.0.1:80',
         mode: PROXY_MODE,
       },
-    ];
+    ] satisfies Array<Partial<Cluster>>;
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
@@ -117,7 +118,7 @@ describe('<RemoteClusterList />', () => {
   });
 
   describe('when there are multiple pages of remote clusters', () => {
-    const remoteClusters = [
+    const remoteClusters: Array<Partial<Cluster>> = [
       {
         name: 'unique',
         seeds: [],
@@ -183,8 +184,8 @@ describe('<RemoteClusterList />', () => {
       proxyAddress: 'localhost:9500',
       isConfiguredByNode: true,
       mode: PROXY_MODE,
-      seeds: null,
-      connectedNodesCount: null,
+      seeds: undefined,
+      connectedNodesCount: undefined,
     });
     const remoteCluster3 = getRemoteClusterMock({
       name: `c${getRandomString()}`,
@@ -194,9 +195,9 @@ describe('<RemoteClusterList />', () => {
       isConfiguredByNode: false,
       mode: PROXY_MODE,
       hasDeprecatedProxySetting: true,
-      seeds: null,
-      connectedNodesCount: null,
-      securityModel: 'api_keys',
+      seeds: undefined,
+      connectedNodesCount: undefined,
+      securityModel: SECURITY_MODEL.API,
     });
 
     const remoteClusters = [remoteCluster1, remoteCluster2, remoteCluster3];
@@ -241,22 +242,22 @@ describe('<RemoteClusterList />', () => {
         ],
         [
           '',
-          remoteCluster2.name.concat('Info'), //Tests include the word "info" to account for the rendered text coming from EuiIcon
+          remoteCluster2.name.concat('Info'), // Tests include the word "info" to account for the rendered text coming from EuiIcon
           'Not connected',
           PROXY_MODE,
           remoteCluster2.proxyAddress,
           'CertificateInfo',
-          remoteCluster2.connectedSocketsCount.toString(),
+          String(remoteCluster2.connectedSocketsCount ?? 0),
           '',
         ],
         [
           '',
-          remoteCluster3.name.concat('Info'), //Tests include the word "info" to account for the rendered text coming from EuiIcon
+          remoteCluster3.name.concat('Info'), // Tests include the word "info" to account for the rendered text coming from EuiIcon
           'Not connected',
           PROXY_MODE,
           remoteCluster2.proxyAddress,
-          'api_keysInfo',
-          remoteCluster2.connectedSocketsCount.toString(),
+          'API key',
+          String(remoteCluster2.connectedSocketsCount ?? 0),
           '',
         ],
       ]);
@@ -266,7 +267,7 @@ describe('<RemoteClusterList />', () => {
       renderList();
       await screen.findByTestId('remoteClusterListTable');
       const table = new EuiTableTestHarness('remoteClusterListTable');
-      const secondRow = table.getRowByCellText(remoteCluster2.name);
+      const secondRow = table.getRowByCellText(remoteCluster2.name)!;
       expect(
         within(secondRow).getByTestId('remoteClustersTableListClusterDefinedByNodeTooltip')
       ).toBeInTheDocument();
@@ -276,7 +277,7 @@ describe('<RemoteClusterList />', () => {
       renderList();
       await screen.findByTestId('remoteClusterListTable');
       const table = new EuiTableTestHarness('remoteClusterListTable');
-      const thirdRow = table.getRowByCellText(remoteCluster3.name);
+      const thirdRow = table.getRowByCellText(remoteCluster3.name)!;
       expect(
         within(thirdRow).getByTestId('remoteClustersTableListClusterWithDeprecatedSettingTooltip')
       ).toBeInTheDocument();
@@ -286,7 +287,7 @@ describe('<RemoteClusterList />', () => {
       renderList();
       await screen.findByTestId('remoteClusterListTable');
       const table = new EuiTableTestHarness('remoteClusterListTable');
-      const secondRow = table.getRowByCellText(remoteCluster2.name);
+      const secondRow = table.getRowByCellText(remoteCluster2.name)!;
       expect(within(secondRow).getByTestId('authenticationTypeWarning')).toBeInTheDocument();
     });
 
@@ -298,7 +299,7 @@ describe('<RemoteClusterList />', () => {
 
         expect(screen.queryByTestId('remoteClusterBulkDeleteButton')).not.toBeInTheDocument();
 
-        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        const firstRow = table.getRowByCellText(remoteCluster1.name)!;
         await user.click(within(firstRow).getByRole('checkbox'));
 
         expect(screen.getByTestId('remoteClusterBulkDeleteButton')).toBeInTheDocument();
@@ -309,7 +310,7 @@ describe('<RemoteClusterList />', () => {
         await screen.findByTestId('remoteClusterListTable');
         const table = new EuiTableTestHarness('remoteClusterListTable');
 
-        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        const firstRow = table.getRowByCellText(remoteCluster1.name)!;
         await user.click(within(firstRow).getByRole('checkbox'));
 
         expect(screen.getByTestId('remoteClusterBulkDeleteButton')).toHaveTextContent(
@@ -317,7 +318,7 @@ describe('<RemoteClusterList />', () => {
         );
 
         // The second cluster is not selectable (defined by node). Select the third one instead.
-        const thirdRow = table.getRowByCellText(remoteCluster3.name);
+        const thirdRow = table.getRowByCellText(remoteCluster3.name)!;
         await user.click(within(thirdRow).getByRole('checkbox'));
 
         expect(screen.getByTestId('remoteClusterBulkDeleteButton')).toHaveTextContent(
@@ -332,7 +333,7 @@ describe('<RemoteClusterList />', () => {
 
         expect(screen.queryByTestId('remoteClustersDeleteConfirmModal')).not.toBeInTheDocument();
 
-        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        const firstRow = table.getRowByCellText(remoteCluster1.name)!;
         await user.click(within(firstRow).getByRole('checkbox'));
         await user.click(screen.getByTestId('remoteClusterBulkDeleteButton'));
 
@@ -345,7 +346,7 @@ describe('<RemoteClusterList />', () => {
         renderList();
         await screen.findByTestId('remoteClusterListTable');
         const table = new EuiTableTestHarness('remoteClusterListTable');
-        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        const firstRow = table.getRowByCellText(remoteCluster1.name)!;
 
         expect(
           within(firstRow).getByTestId('remoteClusterTableRowRemoveButton')
@@ -360,7 +361,7 @@ describe('<RemoteClusterList />', () => {
 
         expect(screen.queryByTestId('remoteClustersDeleteConfirmModal')).not.toBeInTheDocument();
 
-        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        const firstRow = table.getRowByCellText(remoteCluster1.name)!;
         await user.click(within(firstRow).getByTestId('remoteClusterTableRowRemoveButton'));
 
         expect(screen.getByTestId('remoteClustersDeleteConfirmModal')).toBeInTheDocument();
@@ -383,7 +384,7 @@ describe('<RemoteClusterList />', () => {
         // Make sure that we have our 3 remote clusters in the table
         expect(table.getCellValues().length).toBe(3);
 
-        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        const firstRow = table.getRowByCellText(remoteCluster1.name)!;
         await user.click(within(firstRow).getByRole('checkbox'));
         await user.click(screen.getByTestId('remoteClusterBulkDeleteButton'));
 
@@ -406,7 +407,7 @@ describe('<RemoteClusterList />', () => {
 
         expect(screen.queryByTestId('remoteClusterDetailFlyout')).not.toBeInTheDocument();
 
-        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        const firstRow = table.getRowByCellText(remoteCluster1.name)!;
         await user.click(within(firstRow).getByTestId('remoteClustersTableListClusterLink'));
 
         expect(await screen.findByTestId('remoteClusterDetailFlyout')).toBeInTheDocument();
@@ -417,7 +418,7 @@ describe('<RemoteClusterList />', () => {
         await screen.findByTestId('remoteClusterListTable');
         const table = new EuiTableTestHarness('remoteClusterListTable');
 
-        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        const firstRow = table.getRowByCellText(remoteCluster1.name)!;
         await user.click(within(firstRow).getByTestId('remoteClustersTableListClusterLink'));
 
         expect(await screen.findByTestId('remoteClusterDetailsFlyoutTitle')).toHaveTextContent(
@@ -430,7 +431,7 @@ describe('<RemoteClusterList />', () => {
         await screen.findByTestId('remoteClusterListTable');
         const table = new EuiTableTestHarness('remoteClusterListTable');
 
-        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        const firstRow = table.getRowByCellText(remoteCluster1.name)!;
         await user.click(within(firstRow).getByTestId('remoteClustersTableListClusterLink'));
 
         const section = await screen.findByTestId('remoteClusterDetailPanelStatusSection');
@@ -443,7 +444,7 @@ describe('<RemoteClusterList />', () => {
         await screen.findByTestId('remoteClusterListTable');
         const table = new EuiTableTestHarness('remoteClusterListTable');
 
-        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        const firstRow = table.getRowByCellText(remoteCluster1.name)!;
         await user.click(within(firstRow).getByTestId('remoteClustersTableListClusterLink'));
 
         expect(await screen.findByTestId('remoteClusterDetailIsConnected')).toHaveTextContent(
@@ -469,7 +470,7 @@ describe('<RemoteClusterList />', () => {
         await screen.findByTestId('remoteClusterListTable');
         const table = new EuiTableTestHarness('remoteClusterListTable');
 
-        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        const firstRow = table.getRowByCellText(remoteCluster1.name)!;
         await user.click(within(firstRow).getByTestId('remoteClustersTableListClusterLink'));
 
         expect(
@@ -484,7 +485,7 @@ describe('<RemoteClusterList />', () => {
         await screen.findByTestId('remoteClusterListTable');
         const table = new EuiTableTestHarness('remoteClusterListTable');
 
-        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        const firstRow = table.getRowByCellText(remoteCluster1.name)!;
         await user.click(within(firstRow).getByTestId('remoteClustersTableListClusterLink'));
 
         expect(await screen.findByTestId('remoteClusterDetailFlyout')).toBeInTheDocument();
@@ -501,7 +502,7 @@ describe('<RemoteClusterList />', () => {
         await screen.findByTestId('remoteClusterListTable');
         const table = new EuiTableTestHarness('remoteClusterListTable');
 
-        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        const firstRow = table.getRowByCellText(remoteCluster1.name)!;
         await user.click(within(firstRow).getByTestId('remoteClustersTableListClusterLink'));
 
         expect(screen.queryByTestId('remoteClustersDeleteConfirmModal')).not.toBeInTheDocument();
@@ -528,7 +529,7 @@ describe('<RemoteClusterList />', () => {
         await screen.findByTestId('remoteClusterListTable');
         const table = new EuiTableTestHarness('remoteClusterListTable');
 
-        const firstRow = table.getRowByCellText(remoteCluster1.name);
+        const firstRow = table.getRowByCellText(remoteCluster1.name)!;
         await user.click(within(firstRow).getByTestId('remoteClustersTableListClusterLink'));
         expect(
           screen.queryByTestId('remoteClusterConfiguredByNodeWarning')
@@ -539,7 +540,7 @@ describe('<RemoteClusterList />', () => {
           expect(screen.queryByTestId('remoteClusterDetailFlyout')).not.toBeInTheDocument();
         });
 
-        const secondRow = table.getRowByCellText(remoteCluster2.name);
+        const secondRow = table.getRowByCellText(remoteCluster2.name)!;
         await user.click(within(secondRow).getByTestId('remoteClustersTableListClusterLink'));
         expect(
           await screen.findByTestId('remoteClusterConfiguredByNodeWarning')
@@ -551,7 +552,7 @@ describe('<RemoteClusterList />', () => {
         await screen.findByTestId('remoteClusterListTable');
         const table = new EuiTableTestHarness('remoteClusterListTable');
 
-        const thirdRow = table.getRowByCellText(remoteCluster3.name);
+        const thirdRow = table.getRowByCellText(remoteCluster3.name)!;
         await user.click(within(thirdRow).getByTestId('remoteClustersTableListClusterLink'));
         expect(await screen.findByTestId('remoteClusterDetailAuthType')).toBeInTheDocument();
       });

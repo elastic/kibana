@@ -6,24 +6,21 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
 import { Route, Routes, Router } from '@kbn/shared-ux-router';
+import type { ScopedHistory } from '@kbn/core/public';
 
 import { UIM_APP_LOAD } from './constants';
 import { registerRouter, setUserHasLeftApp, trackUiMetric, METRIC_TYPE } from './services';
 import { RemoteClusterList, RemoteClusterAdd, RemoteClusterEdit } from './sections';
 
-class AppComponent extends Component {
-  static propTypes = {
-    history: PropTypes.shape({
-      push: PropTypes.func.isRequired,
-      createHref: PropTypes.func.isRequired,
-    }).isRequired,
-  };
+interface Props {
+  history: ScopedHistory;
+}
 
-  constructor(...args) {
-    super(...args);
+class AppComponent extends Component<Props> {
+  constructor(props: Props) {
+    super(props);
     setUserHasLeftApp(false);
     this.registerRouter();
   }

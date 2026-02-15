@@ -4,8 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ComponentType } from 'react';
 
-export declare const RemoteClusterEdit: ComponentType;
-export declare const RemoteClusterAdd: ComponentType;
-export declare const RemoteClusterList: ComponentType;
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('remote clusters', () => {
+    loadTestFile(require.resolve('./remote_clusters'));
+  });
+}

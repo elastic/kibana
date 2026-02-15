@@ -6,24 +6,27 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiConfirmModal, htmlIdGenerator } from '@elastic/eui';
 
-export class RemoveClusterButtonProvider extends Component {
-  static propTypes = {
-    removeClusters: PropTypes.func.isRequired,
-    clusterNames: PropTypes.array.isRequired,
-    children: PropTypes.func.isRequired,
-  };
+export interface Props {
+  removeClusters: (names: string[]) => void;
+  clusterNames: string[];
+  children: (showModal: () => void) => React.ReactNode;
+}
 
-  state = {
+interface State {
+  isModalOpen: boolean;
+}
+
+export class RemoveClusterButtonProvider extends Component<Props, State> {
+  state: State = {
     isModalOpen: false,
   };
 
-  onMouseOverModal = (event) => {
+  onMouseOverModal = (event: React.MouseEvent) => {
     // This component can sometimes be used inside of an EuiToolTip, in which case mousing over
     // the modal can trigger the tooltip. Stopping propagation prevents this.
     event.stopPropagation();
@@ -87,7 +90,6 @@ export class RemoveClusterButtonProvider extends Component {
 
       modal = (
         <>
-          {/* eslint-disable-next-line jsx-a11y/mouse-events-have-key-events */}
           <EuiConfirmModal
             data-test-subj="remoteClustersDeleteConfirmModal"
             aria-labelledby={modalTitleId}

@@ -11,16 +11,15 @@ import {
   ADD_CLUSTER_FAILURE,
   CLEAR_ADD_CLUSTER_ERRORS,
 } from '../action_types';
+import type { AddClusterState, RemoteClustersAction } from '../types';
 
-const initialState = {
+const initialState: AddClusterState = {
   isAdding: false,
   error: undefined,
 };
 
-export function addCluster(state = initialState, action) {
-  const { type, payload } = action;
-
-  switch (type) {
+export function addCluster(state = initialState, action: RemoteClustersAction): AddClusterState {
+  switch (action.type) {
     case ADD_CLUSTER_START:
       return {
         isAdding: true,
@@ -36,7 +35,7 @@ export function addCluster(state = initialState, action) {
     case ADD_CLUSTER_FAILURE:
       return {
         ...state,
-        error: payload.error,
+        error: action.payload.error,
         isAdding: false,
       };
 

@@ -8,21 +8,18 @@
 import { connect } from 'react-redux';
 
 import { removeClusters } from '../../../../store/actions';
+import type { AppDispatch } from '../../../../store/types';
 
 import { RemoveClusterButtonProvider as RemoveClusterButtonProviderComponent } from './remove_cluster_button_provider';
 
-/** @type {import('react-redux').MapDispatchToProps<any, any>} */
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = (dispatch: AppDispatch) => {
   return {
-    removeClusters: (names) => {
+    removeClusters: (names: string[]) => {
       dispatch(removeClusters(names));
     },
   };
 };
 
-/**
- * @type {import('react-redux').ConnectedComponent<typeof RemoveClusterButtonProviderComponent, {}>}
- */
 export const RemoveClusterButtonProvider = connect(
   undefined,
   mapDispatchToProps

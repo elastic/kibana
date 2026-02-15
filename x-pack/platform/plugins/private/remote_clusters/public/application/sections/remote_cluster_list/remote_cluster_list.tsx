@@ -8,6 +8,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { ScopedHistory } from '@kbn/core/public';
 
 import {
   EuiButton,
@@ -23,10 +24,11 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { remoteClustersUrl } from '../../services/documentation';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { remoteClustersUrl } from '../../services/documentation';
 import { extractQueryParams, SectionLoading } from '../../../shared_imports';
 import { setBreadcrumbs } from '../../services/breadcrumb';
+import type { RemoteCluster } from '../../store/types';
 
 import { RemoteClusterTable } from './remote_cluster_table';
 
@@ -34,7 +36,45 @@ import { DetailPanel } from './detail_panel';
 
 const REFRESH_RATE_MS = 30000;
 
-export class RemoteClusterList extends Component {
+export interface Props {
+  loadClusters: () => void;
+  refreshClusters: () => void;
+  openDetailPanel: (clusterName: string) => void;
+  closeDetailPanel: () => void;
+  isDetailPanelOpen: boolean;
+  clusters: RemoteCluster[];
+  isLoading: boolean;
+  isCopyingCluster: boolean;
+  isRemovingCluster: boolean;
+  clusterLoadError: unknown;
+  history: ScopedHistory;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function getHttpErrorStatus(error: unknown): number | undefined {
+  if (!isRecord(error)) return undefined;
+  if (typeof error.status === 'number') return error.status;
+
+  if (isRecord(error.body) && typeof error.body.statusCode === 'number') {
+    return error.body.statusCode;
+  }
+
+  return undefined;
+}
+
+function getHttpErrorBody(error: unknown): { statusCode: number; error: string } | undefined {
+  if (!isRecord(error) || !isRecord(error.body)) return undefined;
+
+  const { statusCode, error: errorString } = error.body;
+  if (typeof statusCode !== 'number' || typeof errorString !== 'string') return undefined;
+
+  return { statusCode, error: errorString };
+}
+
+export class RemoteClusterList extends Component<Props> {
   static propTypes = {
     loadClusters: PropTypes.func.isRequired,
     refreshClusters: PropTypes.func.isRequired,
@@ -46,6 +86,8 @@ export class RemoteClusterList extends Component {
     isCopyingCluster: PropTypes.bool,
     isRemovingCluster: PropTypes.bool,
   };
+
+  interval?: ReturnType<typeof setInterval>;
 
   componentDidUpdate() {
     const {
@@ -60,8 +102,10 @@ export class RemoteClusterList extends Component {
     const { cluster: clusterName } = extractQueryParams(search);
 
     // Show deeplinked remoteCluster whenever remoteClusters get loaded or the URL changes.
-    if (clusterName != null) {
+    if (typeof clusterName === 'string') {
       openDetailPanel(clusterName);
+    } else if (Array.isArray(clusterName) && typeof clusterName[0] === 'string') {
+      openDetailPanel(clusterName[0]);
     } else if (isDetailPanelOpen) {
       closeDetailPanel();
     }
@@ -116,10 +160,12 @@ export class RemoteClusterList extends Component {
     );
   }
 
-  renderError(error) {
+  renderError(error: unknown) {
     // We can safely depend upon the shape of this error coming from http service, because we
     // handle unexpected error shapes in the API action.
-    const { statusCode, error: errorString } = error.body;
+    const body = getHttpErrorBody(error);
+    const statusCode = body?.statusCode;
+    const errorString = body?.error;
 
     return (
       <EuiPageTemplate.EmptyPrompt
@@ -251,7 +297,8 @@ export class RemoteClusterList extends Component {
   render() {
     const { isLoading, clusters, clusterLoadError } = this.props;
     const isEmpty = !isLoading && !clusters.length;
-    const isAuthorized = !clusterLoadError || clusterLoadError.status !== 403;
+    const status = getHttpErrorStatus(clusterLoadError);
+    const isAuthorized = status !== 403;
 
     let content;
 
