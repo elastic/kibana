@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import fetch from 'node-fetch';
-import { format as formatUrl } from 'url';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import expect from '@kbn/expect';
@@ -22,7 +20,16 @@ const API_VERSIONS: ApiVersion[] = ['3'];
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const config = getService('config');
-  const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
+  const kibanaServer = new URL(config.get('servers.kibana'));
+  // Native fetch doesn't support credentials in URLs, so we need to extract them
+  const { username, password } = kibanaServer;
+  kibanaServer.username = '';
+  kibanaServer.password = '';
+  const kibanaServerUrl = kibanaServer.toString();
+  const authHeader: Record<string, string> =
+    username && password
+      ? { Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}` }
+      : {};
 
   describe('POST /internal/aiops/log_rate_analysis', () => {
     API_VERSIONS.forEach((apiVersion) => {
@@ -55,6 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
               'Content-Type': 'application/json',
               'kbn-xsrf': 'stream',
               [ELASTIC_HTTP_VERSION_HEADER]: apiVersion,
+              ...authHeader,
             },
             body: JSON.stringify(requestBody),
           });
