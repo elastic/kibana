@@ -6,14 +6,12 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { errors } from '@elastic/elasticsearch';
-import { omit } from 'lodash';
 import type { Condition } from '@kbn/streamlang';
 import type { Insight } from '@kbn/streams-schema';
 import type { Query } from '../../../../common/queries';
 import { getRuleIdFromQueryLink } from '../../streams/assets/query/helpers/query';
-import { SecurityError } from '../../streams/errors/security_error';
 import { SUBMIT_INSIGHTS_TOOL_NAME, parseInsightsWithErrors } from './schema';
+import { fetchAlertSampleDocuments } from './sample_documents';
 
 export interface QueryData {
   title: string;
@@ -24,6 +22,17 @@ export interface QueryData {
   };
   currentCount: number;
   sampleEvents: string[];
+}
+
+/**
+ * Query data enriched with change detection information.
+ * Used by the change-filtered pipeline.
+ */
+export interface EnrichedQueryData extends QueryData {
+  /** Percentage change detected (positive = increase, negative = decrease) */
+  percentageChange: number;
+  /** Type of change detected (e.g., 'spike', 'dip', 'step_change') */
+  changeType?: string;
 }
 
 const SAMPLE_EVENTS_COUNT = 5;
@@ -68,54 +77,23 @@ export async function collectQueryData({
 }): Promise<QueryData | undefined> {
   const ruleId = getRuleIdFromQueryLink(query);
 
-  const currentResponse = await esClient
-    .search<{ original_source: Record<string, unknown> }>({
-      index: '.alerts-streams.alerts-default',
-      size: SAMPLE_EVENTS_COUNT,
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: `now-${CURRENT_WINDOW_MINUTES}m`,
-                  lte: 'now',
-                },
-              },
-            },
-            {
-              term: {
-                'kibana.alert.rule.uuid': ruleId,
-              },
-            },
-          ],
-        },
-      },
-      track_total_hits: true,
-    })
-    .catch((err) => {
-      const isResponseError = err instanceof errors.ResponseError;
-      if (isResponseError && err?.body?.error?.type === 'security_exception') {
-        throw new SecurityError(
-          `Cannot read Significant events, insufficient privileges: ${err.message}`,
-          { cause: err }
-        );
-      }
-      throw err;
-    });
+  // Use shared sample documents abstraction
+  const now = new Date();
+  const from = new Date(now.getTime() - CURRENT_WINDOW_MINUTES * 60 * 1000);
 
-  const currentCount =
-    typeof currentResponse.hits.total === 'number'
-      ? currentResponse.hits.total
-      : currentResponse.hits.total?.value ?? 0;
+  const { documents, totalCount } = await fetchAlertSampleDocuments(
+    ruleId,
+    from,
+    now,
+    esClient,
+    { size: SAMPLE_EVENTS_COUNT }
+  );
 
-  if (currentCount === 0) {
+  if (totalCount === 0) {
     return undefined;
   }
 
-  const sampleEvents = currentResponse.hits.hits.map((hit) =>
-    JSON.stringify(omit(hit._source?.original_source ?? {}, '_id'))
-  );
+  const sampleEvents = documents.map((doc) => JSON.stringify(doc));
 
   return {
     title: query.query.title,
@@ -123,7 +101,7 @@ export async function collectQueryData({
     feature: query.query.feature
       ? { name: query.query.feature.name, filter: query.query.feature.filter }
       : undefined,
-    currentCount,
+    currentCount: totalCount,
     sampleEvents,
   };
 }

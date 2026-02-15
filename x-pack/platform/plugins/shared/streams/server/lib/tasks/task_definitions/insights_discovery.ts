@@ -17,6 +17,9 @@ import { formatInferenceProviderError } from '../../../routes/utils/create_conne
 
 export interface InsightsDiscoveryTaskParams {
   connectorId: string;
+  streamNames?: string[];
+  from?: number;
+  to?: number;
 }
 
 export const STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE = 'streams_insights_discovery';
@@ -32,7 +35,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, _task } = runContext.taskInstance
+              const { connectorId, streamNames, from, to, _task } = runContext.taskInstance
                 .params as TaskParams<InsightsDiscoveryTaskParams>;
 
               const {
@@ -46,15 +49,20 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
               });
 
               const boundInferenceClient = inferenceClient.bindTo({ connectorId });
+              const logger = taskContext.logger.get('insights_discovery');
 
               try {
                 const result = await generateInsights({
                   streamsClient,
                   queryClient,
                   esClient: scopedClusterClient.asCurrentUser,
+                  scopedClusterClient,
                   inferenceClient: boundInferenceClient,
                   signal: runContext.abortController.signal,
-                  logger: taskContext.logger.get('insights_discovery'),
+                  logger,
+                  streamNames,
+                  from,
+                  to,
                 });
 
                 taskContext.telemetry.trackInsightsGenerated({
