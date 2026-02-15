@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
         ]);
 
         // should reset the profiles when navigating away from Discover
-        await common.navigateToApp('home');
+        await testSubjects.click('logo');
         await retry.waitFor('home page to open', async () => {
           return await testSubjects.exists('homeApp');
         });
