@@ -35,12 +35,6 @@ spec:
           cronline: 0 5 * * * America/New_York
           env:
             TEST_ENABLE_FIPS_VERSION: '140-2'
-        '140-2 Daily build (9.3)':
-          message: 140-2 Daily build
-          branch: '9.3'
-          cronline: 0 5 * * * America/New_York
-          env:
-            TEST_ENABLE_FIPS_VERSION: '140-2'
         '140-2 Daily build (8.19)':
           message: 140-2 Daily build
           branch: '8.19'
@@ -50,12 +44,6 @@ spec:
         '140-3 Daily build (main)':
           message: 140-3 Daily build
           branch: main
-          cronline: 0 5 * * * America/New_York
-          env:
-            TEST_ENABLE_FIPS_VERSION: '140-3'
-        '140-3 Daily build (9.3)':
-          message: 140-3 Daily build
-          branch: '9.3'
           cronline: 0 5 * * * America/New_York
           env:
             TEST_ENABLE_FIPS_VERSION: '140-3'

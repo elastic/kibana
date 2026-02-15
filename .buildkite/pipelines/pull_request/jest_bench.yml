@@ -4,6 +4,7 @@ steps:
     agents:
       machineType: c4d-standard-16
       diskType: hyperdisk-balanced
+      zones: us-central1-c,us-central1-a
       diskSizeGb: 100
     key: jest_bench
     timeout_in_minutes: 60
