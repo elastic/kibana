@@ -77,6 +77,8 @@ import type {
   CustomGridColumnsConfiguration,
   DataGridPaginationMode,
   CustomBulkActions,
+  CustomGridBodyContext,
+  DataGridScrollOverrides,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -382,9 +384,17 @@ interface InternalUnifiedDataTableProps {
    *
    * Behind the scenes, this function is treated as a React component,
    * allowing hooks, context, and other React concepts to be used.
-   * It receives #EuiDataGridCustomBodyProps as its only argument.
+   * It receives #EuiDataGridCustomBodyProps as its first argument and a context object
+   * as the second argument that allows integration with UnifiedDataTable features.
+   *
+   * The context includes `scrollOverridesRef` which custom grid bodies can use to provide
+   * their own scroll implementations for features like in-table search to work correctly
+   * with custom virtualization.
    */
-  renderCustomGridBody?: (args: EuiDataGridCustomBodyProps) => React.ReactNode;
+  renderCustomGridBody?: (
+    args: EuiDataGridCustomBodyProps,
+    context: CustomGridBodyContext
+  ) => React.ReactNode;
   /**
    * Optional render for the grid toolbar
    * @param toolbarProps
@@ -1150,11 +1160,11 @@ const InternalUnifiedDataTable = React.forwardRef<
       customBulkActions,
     ]);
 
-    const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
+    const renderCustomToolbarFn = useMemo<EuiDataGridProps['renderCustomToolbar']>(
       () =>
         renderCustomToolbar
-          ? (toolbarProps) =>
-              renderCustomToolbar({
+          ? (toolbarProps) => {
+              return renderCustomToolbar({
                 toolbarProps,
                 gridProps: {
                   additionalControls:
@@ -1163,10 +1173,26 @@ const InternalUnifiedDataTable = React.forwardRef<
                       : additionalControls,
                   inTableSearchControl,
                 },
-              })
+              });
+            }
           : undefined,
       [renderCustomToolbar, additionalControls, inTableSearchControl]
     );
+
+    const wrappedRenderCustomGridBody = useMemo(() => {
+      if (!renderCustomGridBody) return undefined;
+
+      // This allows us to pass functions internal
+      // to the data table in a way that's accessible within the custom grid body
+      return (euiCustomGridBodyProps: EuiDataGridCustomBodyProps) => {
+        return renderCustomGridBody(euiCustomGridBodyProps, {
+          provideDataGridRefOverrides: (overrides: DataGridScrollOverrides) => {
+            if (!dataGridRef.current) return;
+            Object.assign(dataGridRef.current, overrides);
+          },
+        });
+      };
+    }, [renderCustomGridBody]);
 
     const showDisplaySelector = useMemo(():
       | EuiDataGridToolBarVisibilityDisplaySelectorOptions
@@ -1406,7 +1432,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 toolbarVisibility={toolbarVisibility}
                 rowHeightsOptions={rowHeightsOptions}
                 gridStyle={gridStyle}
-                renderCustomGridBody={renderCustomGridBody}
+                renderCustomGridBody={wrappedRenderCustomGridBody}
                 renderCustomToolbar={renderCustomToolbarFn}
                 trailingControlColumns={trailingControlColumns}
                 cellContext={cellContextWithInTableSearchSupport}
