@@ -29,10 +29,8 @@ export const transformMaintenanceWindowAttributesToMaintenanceWindow = (
     id,
     title: attributes.title,
     enabled: attributes.enabled,
-    duration: attributes.duration,
     expirationDate: attributes.expirationDate,
     events: attributes.events,
-    rRule: attributes.rRule,
     createdBy: attributes.createdBy,
     updatedBy: attributes.updatedBy,
     createdAt: attributes.createdAt,
@@ -41,7 +39,6 @@ export const transformMaintenanceWindowAttributesToMaintenanceWindow = (
     eventEndTime,
     status,
     ...(attributes.categoryIds !== undefined ? { categoryIds: attributes.categoryIds } : {}),
-    ...(attributes.scopedQuery !== undefined ? { scopedQuery: attributes.scopedQuery } : {}),
     schedule: attributes.schedule,
     ...(attributes.scope !== undefined ? { scope: attributes.scope } : {}),
   };

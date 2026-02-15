@@ -606,7 +606,7 @@ export async function getMWTelemetry({
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       namespaces: ['*'],
       perPage: 100,
-      fields: ['rRule', 'scopedQuery'],
+      fields: ['schedule', 'scope'],
     });
 
     let countMWTotal = 0;
@@ -617,11 +617,11 @@ export async function getMWTelemetry({
         if (countMWTotal > maxDocuments) break mwLoop;
         countMWTotal = countMWTotal + 1;
         // scopedQuery property will be null if "Filter alerts" toggle will be off
-        if (mwSavedObject.attributes.scopedQuery) {
+        if (mwSavedObject.attributes.scope?.alerting) {
           countMWWithFilterAlertToggleON = countMWWithFilterAlertToggleON + 1;
         }
         // interval property will be not in place if "Repeat" toggle will be off
-        if (Object.hasOwn(mwSavedObject.attributes.rRule, 'interval')) {
+        if (Object.hasOwn(mwSavedObject.attributes.schedule.custom, 'recurring')) {
           countMWWithRepeatToggleON = countMWWithRepeatToggleON + 1;
         }
       }

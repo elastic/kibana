@@ -6,6 +6,9 @@
  */
 
 import type { MaintenanceWindow } from '../server/application/types';
+import type { RRule } from '../server/application/types';
+import type { MaintenanceWindowCategoryIds } from '../server/routes/schemas/maintenance_window/shared';
+import type { ScopedQueryAttributes } from './types';
 
 export type {
   MaintenanceWindowModificationMetadata,
@@ -35,12 +38,19 @@ export {
   MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE,
 } from './constants';
 
-export type MaintenanceWindowUI = Omit<MaintenanceWindow, 'schedule' | 'scope'>;
+export type MaintenanceWindowUI = Omit<MaintenanceWindow, 'schedule' | 'scope'> & {
+  duration: number;
+  rRule: RRule;
+  categoryIds?: MaintenanceWindowCategoryIds | null;
+  scopedQuery?: ScopedQueryAttributes | null;
+};
 
 export {
   getScopedQueryErrorMessage,
   isScopedQueryError,
 } from './maintenance_window_scoped_query_error_message';
+export { getDurationInMilliseconds } from '../server/lib/transforms/custom_to_rrule/util';
+export { transformCustomScheduleToRRule } from '../server/lib/transforms/custom_to_rrule/v1';
 
 export type { MaintenanceWindowAttributes } from '../server/data/types/maintenance_window_attributes';
 

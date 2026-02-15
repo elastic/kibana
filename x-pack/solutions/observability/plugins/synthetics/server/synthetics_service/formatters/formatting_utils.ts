@@ -8,6 +8,8 @@
 import type { Logger } from '@kbn/logging';
 import { isEmpty } from 'lodash';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
+import { transformCustomScheduleToRRule } from '@kbn/maintenance-windows-plugin/common';
+import { getDurationInMilliseconds } from '@kbn/maintenance-windows-plugin/common';
 import { type ConfigKey, type MonitorFields } from '../../../common/runtime_types';
 import type { ParsedVars } from './lightweight_param_formatter';
 import { replaceVarsWithParams } from './lightweight_param_formatter';
@@ -111,12 +113,16 @@ export const formatMWs = (mws?: MaintenanceWindow[], strRes = true) => {
     return;
   }
   const formatted = mws.map((mw) => {
-    const mwRule = mw?.rRule;
+    const { rRule: mwRule } = mw?.schedule?.custom
+      ? transformCustomScheduleToRRule(mw.schedule.custom)
+      : {};
+    const durationInMilliseconds = getDurationInMilliseconds(mw.schedule.custom.duration);
+
     if (mw && mwRule) {
       return {
         ...mwRule,
         freq: frequencyToString(mwRule.freq),
-        duration: `${mw.duration}ms`,
+        duration: `${durationInMilliseconds}ms`,
       };
     }
   });

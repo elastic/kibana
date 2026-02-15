@@ -6,6 +6,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
+import { Frequency } from '@kbn/rrule';
 import { licenseStateMock } from '../../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
@@ -79,7 +80,17 @@ describe('archiveMaintenanceWindowRoute', () => {
       archive: true,
     });
     expect(res.ok).toHaveBeenLastCalledWith({
-      body: rewritePartialMaintenanceBodyRes(mwWithoutSchedule),
+      body: {
+        ...rewritePartialMaintenanceBodyRes(mwWithoutSchedule),
+        r_rule: {
+          tzid: 'UTC',
+          dtstart: '2023-02-26T00:00:00.000Z',
+          freq: Frequency.WEEKLY,
+          interval: 1,
+          count: 2,
+        },
+        duration: 3600000,
+      },
     });
   });
 

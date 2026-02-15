@@ -82,7 +82,17 @@ describe('findMaintenanceWindowsRoute', () => {
       body: {
         data: mockMaintenanceWindows.data.map((data) => {
           const { schedule, ...mwWithoutSchedule } = data; // internal api response doesn't have schedule
-          return rewritePartialMaintenanceBodyRes(mwWithoutSchedule);
+          return {
+            ...rewritePartialMaintenanceBodyRes(mwWithoutSchedule),
+            r_rule: {
+              count: 2,
+              dtstart: '2023-02-26T00:00:00.000Z',
+              freq: 2,
+              interval: 1,
+              tzid: 'UTC',
+            },
+            duration: 3600000,
+          };
         }),
         total: 2,
         page: 1,
@@ -140,7 +150,17 @@ describe('findMaintenanceWindowsRoute', () => {
       body: {
         data: mockMaintenanceWindows.data.map((data) => {
           const { schedule, ...mwWithoutSchedule } = data; // internal api response doesn't have schedule
-          return rewritePartialMaintenanceBodyRes(mwWithoutSchedule);
+          return {
+            ...rewritePartialMaintenanceBodyRes(mwWithoutSchedule),
+            r_rule: {
+              count: 2,
+              dtstart: '2023-02-26T00:00:00.000Z',
+              freq: 2,
+              interval: 1,
+              tzid: 'UTC',
+            },
+            duration: 3600000,
+          };
         }),
         total: 2,
         page: 1,

@@ -29,12 +29,6 @@ const transformCreateBodySchema = (
     title: createParams.title,
     duration: createParams.duration,
     r_rule: createParams.rRule as CreateMaintenanceWindowRequestBody['r_rule'],
-    ...(createParams.categoryIds !== undefined
-      ? {
-          category_ids:
-            createParams.categoryIds as CreateMaintenanceWindowRequestBody['category_ids'],
-        }
-      : {}),
     ...(createParams.scopedQuery !== undefined ? { scoped_query: createParams.scopedQuery } : {}),
   };
 };

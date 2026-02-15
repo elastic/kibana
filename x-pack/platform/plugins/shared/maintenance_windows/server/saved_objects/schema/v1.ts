@@ -68,7 +68,7 @@ export const rRuleSchema = schema.object({
   bysecond: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
 });
 
-const rawMaintenanceWindowEventsSchema = schema.object({
+export const rawMaintenanceWindowEventsSchema = schema.object({
   gte: schema.string(),
   lte: schema.string(),
 });

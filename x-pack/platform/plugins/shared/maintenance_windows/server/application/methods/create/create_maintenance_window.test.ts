@@ -20,7 +20,6 @@ import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../../common';
 import { getMockMaintenanceWindow } from '../../../data/test_helpers';
 import type { MaintenanceWindow } from '../../types';
 import { createMaintenanceWindow } from './create_maintenance_window';
-import type { CreateMaintenanceWindowParams } from './types';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 const uiSettings = uiSettingsServiceMock.createClient();
@@ -79,8 +78,6 @@ describe('MaintenanceWindowClient - create', () => {
     const result = await createMaintenanceWindow(mockContext, {
       data: {
         title: mockMaintenanceWindow.title,
-        duration: mockMaintenanceWindow.duration,
-        rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
         schedule: mockMaintenanceWindow.schedule,
       },
     });
@@ -89,58 +86,9 @@ describe('MaintenanceWindowClient - create', () => {
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       expect.objectContaining({
         title: mockMaintenanceWindow.title,
-        duration: mockMaintenanceWindow.duration,
-        rRule: mockMaintenanceWindow.rRule,
         schedule: mockMaintenanceWindow.schedule,
         enabled: true,
         expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
-        ...updatedMetadata,
-      }),
-      {
-        id: expect.any(String),
-      }
-    );
-
-    expect(result).toEqual(
-      expect.objectContaining({
-        id: 'test-id',
-      })
-    );
-  });
-
-  it('should create maintenance window with category ids', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
-
-    const mockMaintenanceWindow = getMockMaintenanceWindow({
-      expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
-    });
-
-    savedObjectsClient.create.mockResolvedValueOnce({
-      attributes: mockMaintenanceWindow,
-      version: '123',
-      id: 'test-id',
-    } as unknown as SavedObject);
-
-    const result = await createMaintenanceWindow(mockContext, {
-      data: {
-        title: mockMaintenanceWindow.title,
-        duration: mockMaintenanceWindow.duration,
-        rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
-        schedule: mockMaintenanceWindow.schedule,
-        categoryIds: ['observability', 'securitySolution'],
-      },
-    });
-
-    expect(savedObjectsClient.create).toHaveBeenLastCalledWith(
-      MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-      expect.objectContaining({
-        title: mockMaintenanceWindow.title,
-        duration: mockMaintenanceWindow.duration,
-        rRule: mockMaintenanceWindow.rRule,
-        schedule: mockMaintenanceWindow.schedule,
-        enabled: true,
-        expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
-        categoryIds: ['observability', 'securitySolution'],
         ...updatedMetadata,
       }),
       {
@@ -198,11 +146,7 @@ describe('MaintenanceWindowClient - create', () => {
     await createMaintenanceWindow(mockContext, {
       data: {
         title: mockMaintenanceWindow.title,
-        duration: mockMaintenanceWindow.duration,
-        rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
         schedule: mockMaintenanceWindow.schedule,
-        categoryIds: ['securitySolution'],
-        scopedQuery: query,
         scope: { alerting: query },
       },
     });
@@ -211,12 +155,9 @@ describe('MaintenanceWindowClient - create', () => {
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       expect.objectContaining({
         title: mockMaintenanceWindow.title,
-        duration: mockMaintenanceWindow.duration,
-        rRule: mockMaintenanceWindow.rRule,
         schedule: mockMaintenanceWindow.schedule,
         enabled: true,
         expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
-        categoryIds: ['securitySolution'],
         ...updatedMetadata,
       }),
       {
@@ -277,10 +218,7 @@ describe('MaintenanceWindowClient - create', () => {
       await createMaintenanceWindow(mockContext, {
         data: {
           title: mockMaintenanceWindow.title,
-          duration: mockMaintenanceWindow.duration,
-          rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
           schedule: mockMaintenanceWindow.schedule,
-          categoryIds: ['observability', 'securitySolution'],
           scope: {
             alerting: {
               kql: 'invalid: ',
@@ -296,7 +234,7 @@ describe('MaintenanceWindowClient - create', () => {
     `);
   });
 
-  it('should throw if trying to create a maintenance window with invalid category ids', async () => {
+  it('should throw if trying to create a maintenance window with category ids', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 
     const mockMaintenanceWindow = getMockMaintenanceWindow({
@@ -307,19 +245,13 @@ describe('MaintenanceWindowClient - create', () => {
       await createMaintenanceWindow(mockContext, {
         data: {
           title: mockMaintenanceWindow.title,
-          duration: mockMaintenanceWindow.duration,
-          rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
           schedule: mockMaintenanceWindow.schedule,
-          categoryIds: ['invalid_id'] as unknown as MaintenanceWindow['categoryIds'],
+          // @ts-expect-error Testing  category ids
+          categoryIds: ['observability'] as unknown as MaintenanceWindow['categoryIds'],
         },
       });
-    }).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Error validating create maintenance window data - [data.categoryIds]: types that failed validation:
-      - [data.categoryIds.0.0]: types that failed validation:
-       - [data.categoryIds.0.0]: expected value to equal [observability]
-       - [data.categoryIds.0.1]: expected value to equal [securitySolution]
-       - [data.categoryIds.0.2]: expected value to equal [management]
-      - [data.categoryIds.1]: expected value to equal [null]"
-    `);
+    }).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error validating create maintenance window data - [data.categoryIds]: definition for this key is missing"`
+    );
   });
 });

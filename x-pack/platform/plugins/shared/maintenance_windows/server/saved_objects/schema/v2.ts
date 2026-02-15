@@ -11,7 +11,7 @@ import {
   rawMaintenanceWindowSchema as rawMaintenanceWindowSchemaV1,
 } from './v1';
 
-const scheduleSchema = schema.object({
+export const scheduleSchema = schema.object({
   start: schema.string(),
   duration: schema.string(),
   timezone: schema.maybe(schema.string()),

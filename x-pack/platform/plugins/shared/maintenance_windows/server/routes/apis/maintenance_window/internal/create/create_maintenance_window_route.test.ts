@@ -6,6 +6,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
+import { Frequency } from '@kbn/rrule';
 import { licenseStateMock } from '../../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
@@ -16,6 +17,7 @@ import { MaintenanceWindowStatus } from '../../../../../../common';
 
 import type { MaintenanceWindow } from '../../../../../application/types';
 import type { CreateMaintenanceWindowRequestBody } from '../../../../schemas/maintenance_window/internal/request/create';
+import { createBodySchemaV1 } from '../../../../schemas/maintenance_window/internal/request/create';
 import { transformCreateBody } from './transforms';
 import { transformInternalMaintenanceWindowToExternal } from '../transforms';
 
@@ -36,8 +38,12 @@ const mockMaintenanceWindow = {
 const createParams = {
   title: 'test-title',
   duration: 1000,
-  r_rule: mockMaintenanceWindow.rRule,
-  category_ids: ['observability'],
+  r_rule: {
+    tzid: 'UTC',
+    dtstart: '2023-02-26T00:00:00.000Z',
+    freq: Frequency.WEEKLY,
+    count: 2,
+  },
 } as CreateMaintenanceWindowRequestBody;
 
 describe('createMaintenanceWindowRoute', () => {
@@ -136,11 +142,21 @@ describe('createMaintenanceWindowRoute', () => {
   test('should create the maintenance window with hourly frequency', async () => {
     const createParamsV2 = {
       ...createParams,
-      r_rule: { ...mockMaintenanceWindow.rRule, freq: 4 },
+      r_rule: {
+        tzid: 'UTC',
+        dtstart: '2023-02-26T00:00:00.000Z',
+        freq: Frequency.HOURLY,
+        count: 2,
+      },
     } as CreateMaintenanceWindowRequestBody;
     const mockMaintenanceWindow2 = {
       ...mockMaintenanceWindow,
-      rRule: { ...mockMaintenanceWindow.rRule, freq: 4 },
+      rRule: {
+        tzid: 'UTC',
+        dtstart: '2023-02-26T00:00:00.000Z',
+        freq: Frequency.HOURLY,
+        count: 2,
+      },
     } as MaintenanceWindow;
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
@@ -179,5 +195,23 @@ describe('createMaintenanceWindowRoute', () => {
     expect(res.ok).toHaveBeenLastCalledWith({
       body: transformInternalMaintenanceWindowToExternal(mockMaintenanceWindow2),
     });
+  });
+
+  test('should reject request with category_ids field', () => {
+    const invalidParams = {
+      title: 'test-title',
+      duration: 1000,
+      r_rule: {
+        tzid: 'UTC',
+        dtstart: '2023-02-26T00:00:00.000Z',
+        freq: Frequency.WEEKLY,
+        count: 2,
+      },
+      category_ids: ['observability'],
+    };
+
+    expect(() => createBodySchemaV1.validate(invalidParams)).toThrow(
+      '[category_ids]: definition for this key is missing'
+    );
   });
 });
