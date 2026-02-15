@@ -73,7 +73,14 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
     }, [selected, onClick, styles]);
 
     return (
-      <EuiPanel onClick={onClick} hasShadow={false} paddingSize="m" hasBorder css={panelCss}>
+      <EuiPanel
+        onClick={onClick}
+        hasShadow={false}
+        paddingSize="m"
+        hasBorder
+        css={panelCss}
+        data-test-subj="workflowExecutionListItem"
+      >
         <EuiFlexGroup
           gutterSize="m"
           alignItems="center"

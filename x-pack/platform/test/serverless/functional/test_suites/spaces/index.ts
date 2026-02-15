@@ -12,6 +12,5 @@ export default ({ loadTestFile }: FtrProviderContext) => {
     this.tags(['esGate']);
 
     loadTestFile(require.resolve('./spaces_management.ts'));
-    loadTestFile(require.resolve('./spaces_selection.ts'));
   });
 };

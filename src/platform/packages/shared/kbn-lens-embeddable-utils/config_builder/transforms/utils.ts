@@ -428,12 +428,18 @@ export const addLayerColumn = (
 ) => {
   const [column, referenceColumn] = Array.isArray(config) ? config : [config];
   const name = columnName + postfix;
-  const referenceColumnId = `${name}_reference`;
+
   layer.columns = {
     ...layer.columns,
     [name]: column,
-    ...(referenceColumn ? { [referenceColumnId]: referenceColumn } : {}),
   };
+
+  const referenceColumnId = `${name}_reference`;
+  if (referenceColumn && 'references' in column) {
+    column.references = [referenceColumnId];
+    layer.columns[referenceColumnId] = referenceColumn;
+  }
+
   if (first) {
     layer.columnOrder.unshift(name);
     if (referenceColumn) {
