@@ -15,11 +15,11 @@
  * Registry groups: 142
  * Metric groups: 497
  * Hardcoded fields: 34
- * Total fields: 1191
+ * Total fields: 1196
  *
  * @internal
  *
- * WARNING: This object contains 1191+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1196+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -1812,6 +1812,26 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'instance-1',
   },
+  'gcp.gce.instance_group_manager.name': {
+    name: 'gcp.gce.instance_group_manager.name',
+    description: 'The name of the Instance Group Manager (IGM) that manages this VM, if any.',
+    type: 'keyword',
+    example: 'web-igm',
+  },
+  'gcp.gce.instance_group_manager.region': {
+    name: 'gcp.gce.instance_group_manager.region',
+    description:
+      'The region of a **regional** Instance Group Manager (e.g., `us-central1`). Set this **only** when the IGM is regional.',
+    type: 'keyword',
+    example: 'us-central1',
+  },
+  'gcp.gce.instance_group_manager.zone': {
+    name: 'gcp.gce.instance_group_manager.zone',
+    description:
+      'The zone of a **zonal** Instance Group Manager (e.g., `us-central1-a`). Set this **only** when the IGM is zonal.',
+    type: 'keyword',
+    example: 'us-central1-a',
+  },
   'gen_ai.agent.description': {
     name: 'gen_ai.agent.description',
     description: 'Free-form description of the GenAI agent provided by the application.',
@@ -2067,6 +2087,18 @@ export const semconvFlat = {
     description: 'Type of the tool utilized by the agent',
     type: 'keyword',
     example: 'function',
+  },
+  'gen_ai.usage.cache_creation.input_tokens': {
+    name: 'gen_ai.usage.cache_creation.input_tokens',
+    description: 'The number of input tokens written to a provider-managed cache.',
+    type: 'long',
+    example: '25',
+  },
+  'gen_ai.usage.cache_read.input_tokens': {
+    name: 'gen_ai.usage.cache_read.input_tokens',
+    description: 'The number of input tokens served from a provider-managed cache.',
+    type: 'long',
+    example: '50',
   },
   'gen_ai.usage.input_tokens': {
     name: 'gen_ai.usage.input_tokens',
@@ -5245,12 +5277,12 @@ export const semconvFlat = {
   },
   'metrics.rpc.client.call.duration': {
     name: 'metrics.rpc.client.call.duration',
-    description: 'Measures the duration of outbound remote procedure calls (RPC).',
+    description: 'Measures the duration of an outgoing Remote Procedure Call (RPC).',
     type: 'double',
   },
   'metrics.rpc.server.call.duration': {
     name: 'metrics.rpc.server.call.duration',
-    description: 'Measures the duration of inbound remote procedure calls (RPC).',
+    description: 'Measures the duration of an incoming Remote Procedure Call (RPC).',
     type: 'double',
   },
   'metrics.signalr.server.active_connections': {
