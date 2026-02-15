@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/core'
+  - '@kbn/core-http-browser'
 tags:
   - shared-browser
   - package

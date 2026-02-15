@@ -16,6 +16,7 @@ import type {
   BulkActionsPanelConfig,
   ItemsPanelConfig,
 } from '@kbn/response-ops-alerts-table/types';
+import { useBulkRunAlertWorkflowPanel } from './use_bulk_run_alert_workflow_panel';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useBulkAlertAssigneesItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
 import { useBulkAlertTagsItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
@@ -132,10 +133,25 @@ export const useBulkActionsByTableType = (
 
   const { alertTagsItems, alertTagsPanels } = useBulkAlertTagsItems(bulkAlertTagParams);
 
+  const { runWorkflowItems, runWorkflowPanels } = useBulkRunAlertWorkflowPanel();
+
   const items = useMemo(() => {
-    return [...alertActions, ...timelineActions, ...alertTagsItems, ...alertAssigneesItems];
-  }, [alertActions, alertTagsItems, timelineActions, alertAssigneesItems]);
+    return [
+      ...alertActions,
+      ...runWorkflowItems,
+      ...timelineActions,
+      ...alertTagsItems,
+      ...alertAssigneesItems,
+    ];
+  }, [alertActions, alertTagsItems, timelineActions, alertAssigneesItems, runWorkflowItems]);
+
   return useMemo(() => {
-    return [{ id: 0, items }, ...alertActionsPanels, ...alertTagsPanels, ...alertAssigneesPanels];
-  }, [alertActionsPanels, alertTagsPanels, items, alertAssigneesPanels]);
+    return [
+      { id: 0, items },
+      ...alertActionsPanels,
+      ...runWorkflowPanels,
+      ...alertTagsPanels,
+      ...alertAssigneesPanels,
+    ];
+  }, [alertActionsPanels, alertTagsPanels, items, alertAssigneesPanels, runWorkflowPanels]);
 };

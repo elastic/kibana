@@ -275,6 +275,11 @@
     "@kbn/kql",
     "@kbn/babel-register",
     "@kbn/core-security-common",
-    "@kbn/entity-store"
+    "@kbn/entity-store",
+    "@kbn/workflows-ui",
+    "@kbn/workflows-management-plugin",
+    "@kbn/workflows",
+    "@kbn/deeplinks-workflows",
+    "@kbn/core-rendering-browser"
   ]
 }

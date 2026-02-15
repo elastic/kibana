@@ -7,19 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import { useMutation, useQueryClient } from '@kbn/react-query';
-import type {
-  RunStepCommand,
-  RunWorkflowCommand,
-  RunWorkflowResponseDto,
-  WorkflowDetailDto,
-  WorkflowListDto,
-} from '@kbn/workflows';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useQueryClient } from '@kbn/react-query';
+import type { WorkflowDetailDto, WorkflowListDto } from '@kbn/workflows';
+import {
+  useCloneWorkflowAction,
+  useDeleteWorkflowsAction,
+  useRunWorkflowAction,
+  useRunWorkflowStepAction,
+  useUpdateWorkflowAction,
+} from '@kbn/workflows-ui';
 import { useTelemetry } from '../../../hooks/use_telemetry';
-
-type HttpError = IHttpFetchError<ResponseErrorBody>;
 
 export interface UpdateWorkflowParams {
   id: string;
@@ -38,16 +35,9 @@ interface OptimisticContext {
 
 export function useWorkflowActions() {
   const queryClient = useQueryClient();
-  const { http } = useKibana().services;
   const telemetry = useTelemetry();
 
-  const updateWorkflow = useMutation<void, HttpError, UpdateWorkflowParams, OptimisticContext>({
-    mutationKey: ['PUT', 'workflows', 'id'],
-    mutationFn: ({ id, workflow }: UpdateWorkflowParams) => {
-      return http.put<void>(`/api/workflows/${id}`, {
-        body: JSON.stringify(workflow),
-      });
-    },
+  const updateWorkflow = useUpdateWorkflowAction<UpdateWorkflowParams, OptimisticContext>({
     // Optimistic update: immediately update UI before server responds
     onMutate: async ({ id, workflow }) => {
       // Cancel any outgoing refetches to avoid overwriting optimistic update
@@ -146,13 +136,7 @@ export function useWorkflowActions() {
     },
   });
 
-  const deleteWorkflows = useMutation<void, HttpError, { ids: string[] }, OptimisticContext>({
-    mutationKey: ['DELETE', 'workflows'],
-    mutationFn: ({ ids }: { ids: string[] }) => {
-      return http.delete(`/api/workflows`, {
-        body: JSON.stringify({ ids }),
-      });
-    },
+  const deleteWorkflows = useDeleteWorkflowsAction<OptimisticContext>({
     // Optimistic update: immediately remove workflows from UI before server responds
     onMutate: async ({ ids }) => {
       // Cancel any outgoing refetches to avoid overwriting optimistic update
@@ -220,17 +204,7 @@ export function useWorkflowActions() {
     },
   });
 
-  const runWorkflow = useMutation<
-    RunWorkflowResponseDto,
-    HttpError,
-    RunWorkflowCommand & { id: string; triggerTab?: 'manual' | 'alert' | 'index' }
-  >({
-    mutationKey: ['POST', 'workflows', 'id', 'run'],
-    mutationFn: ({ id, inputs }) => {
-      return http.post(`/api/workflows/${id}/run`, {
-        body: JSON.stringify({ inputs }),
-      });
-    },
+  const runWorkflow = useRunWorkflowAction({
     onSuccess: (_, variables) => {
       const inputCount = Object.keys(variables.inputs || {}).length;
 
@@ -265,13 +239,7 @@ export function useWorkflowActions() {
     },
   });
 
-  const runIndividualStep = useMutation<RunWorkflowResponseDto, HttpError, RunStepCommand>({
-    mutationKey: ['POST', 'workflows', 'stepId', 'run'],
-    mutationFn: ({ stepId, contextOverride, workflowYaml }) => {
-      return http.post(`/api/workflows/testStep`, {
-        body: JSON.stringify({ stepId, contextOverride, workflowYaml }),
-      });
-    },
+  const runIndividualStep = useRunWorkflowStepAction({
     onSuccess: ({ workflowExecutionId }, variables) => {
       // Report telemetry for successful step test run
       telemetry.reportWorkflowStepTestRunInitiated({
@@ -295,11 +263,7 @@ export function useWorkflowActions() {
     },
   });
 
-  const cloneWorkflow = useMutation<WorkflowDetailDto, HttpError, { id: string }>({
-    mutationKey: ['POST', 'workflows', 'id', 'clone'],
-    mutationFn: ({ id }: { id: string }) => {
-      return http.post<WorkflowDetailDto>(`/api/workflows/${id}/clone`);
-    },
+  const cloneWorkflow = useCloneWorkflowAction({
     onSuccess: (clonedWorkflow, variables) => {
       // Report telemetry for successful clone
       telemetry.reportWorkflowCloned({
