@@ -17,6 +17,8 @@ import { formatInferenceProviderError } from '../../../routes/utils/create_conne
 
 export interface InsightsDiscoveryTaskParams {
   connectorId: string;
+  /** When provided, only generate insights for these stream names. Otherwise all streams are used. */
+  streamNames?: string[];
 }
 
 export const STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE = 'streams_insights_discovery';
@@ -32,7 +34,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, _task } = runContext.taskInstance
+              const { connectorId, streamNames, _task } = runContext.taskInstance
                 .params as TaskParams<InsightsDiscoveryTaskParams>;
 
               const {
@@ -55,6 +57,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                   inferenceClient: boundInferenceClient,
                   signal: runContext.abortController.signal,
                   logger: taskContext.logger.get('insights_discovery'),
+                  streamNames,
                 });
 
                 taskContext.telemetry.trackInsightsGenerated({
@@ -65,7 +68,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
 
                 await taskClient.complete<InsightsDiscoveryTaskParams, InsightsResult>(
                   _task,
-                  { connectorId },
+                  { connectorId, streamNames },
                   result
                 );
               } catch (error) {
@@ -89,7 +92,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
 
                 await taskClient.fail<InsightsDiscoveryTaskParams>(
                   _task,
-                  { connectorId },
+                  { connectorId, streamNames },
                   errorMessage
                 );
                 return getDeleteTaskRunResult();

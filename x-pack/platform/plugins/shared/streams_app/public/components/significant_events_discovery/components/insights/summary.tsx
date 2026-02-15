@@ -19,6 +19,7 @@ import { TaskStatus } from '@kbn/streams-schema';
 import React, { useEffect, useRef, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { Insight } from '@kbn/streams-schema';
+import type { InsightsTaskResult } from './tab';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
 import { useInsightsDiscoveryApi } from '../../../../hooks/use_insights_discovery_api';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -28,7 +29,14 @@ import { ConnectorListButton } from '../../../connector_list_button/connector_li
 import { FeedbackButtons } from './feedback_buttons';
 import { InsightCard } from './insight_card';
 
-export function Summary({ count }: { count: number }) {
+interface SummaryProps {
+  count: number;
+  /** When provided (e.g. from page-level polling), task state is controlled by parent. */
+  insightsTask?: InsightsTaskResult;
+  refreshInsightsTask?: () => void;
+}
+
+export function Summary({ count, insightsTask, refreshInsightsTask }: SummaryProps) {
   const aiFeatures = useAIFeatures();
   const {
     core: { notifications },
@@ -41,7 +49,12 @@ export function Summary({ count }: { count: number }) {
     cancelInsightsDiscoveryTask,
   } = useInsightsDiscoveryApi(aiFeatures?.genAiConnectors.selectedConnector);
 
-  const [{ value: task }, getTaskStatus] = useAsyncFn(getInsightsDiscoveryTaskStatus);
+  const [{ value: localTask }, getLocalTaskStatus] = useAsyncFn(getInsightsDiscoveryTaskStatus);
+
+  const isControlled = insightsTask !== undefined && refreshInsightsTask !== undefined;
+  const task = isControlled ? insightsTask : localTask;
+  const getTaskStatus = isControlled ? refreshInsightsTask! : getLocalTaskStatus;
+
   const [{ loading: isSchedulingTask }, scheduleTask] = useAsyncFn(async () => {
     /**
      * Combining scheduling and immediate status update to prevent
@@ -52,8 +65,10 @@ export function Summary({ count }: { count: number }) {
   }, [scheduleInsightsDiscoveryTask, getTaskStatus]);
 
   useEffect(() => {
-    getTaskStatus();
-  }, [getTaskStatus]);
+    if (!isControlled) {
+      getLocalTaskStatus();
+    }
+  }, [isControlled, getLocalTaskStatus]);
 
   const previousTaskStatusRef = useRef<TaskStatus | undefined>(undefined);
 
@@ -61,7 +76,7 @@ export function Summary({ count }: { count: number }) {
     const previousStatus = previousTaskStatusRef.current;
     previousTaskStatusRef.current = task?.status;
 
-    if (task?.status === TaskStatus.Failed) {
+    if (task?.status === TaskStatus.Failed && !isControlled) {
       notifications.toasts.addError(getFormattedError(new Error(task.error)), {
         title: i18n.translate('xpack.streams.insights.errorTitle', {
           defaultMessage: 'Error generating insights',
@@ -71,7 +86,7 @@ export function Summary({ count }: { count: number }) {
     }
 
     if (task?.status === TaskStatus.Completed) {
-      if (previousStatus === TaskStatus.InProgress && task.insights.length === 0) {
+      if (!isControlled && previousStatus === TaskStatus.InProgress && task.insights.length === 0) {
         notifications.toasts.addInfo({
           title: i18n.translate('xpack.streams.insights.noInsightsTitle', {
             defaultMessage: 'No insights found',
@@ -84,9 +99,13 @@ export function Summary({ count }: { count: number }) {
       }
       setInsights(task.insights);
     }
-  }, [task, notifications.toasts]);
+  }, [task, isControlled, notifications.toasts]);
 
-  useTaskPolling(task, getInsightsDiscoveryTaskStatus, getTaskStatus);
+  useTaskPolling(
+    isControlled ? undefined : localTask,
+    getInsightsDiscoveryTaskStatus,
+    getLocalTaskStatus
+  );
 
   const [insights, setInsights] = useState<Insight[] | null>(null);
 
@@ -103,7 +122,7 @@ export function Summary({ count }: { count: number }) {
 
   const onCancelClick = async () => {
     await cancelInsightsDiscoveryTask();
-    getTaskStatus();
+    getTaskStatus?.();
   };
 
   const isGenerateButtonPending =

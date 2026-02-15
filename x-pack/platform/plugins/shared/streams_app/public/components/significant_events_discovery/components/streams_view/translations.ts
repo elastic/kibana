@@ -65,6 +65,28 @@ export const STREAMS_TABLE_CAPTION_ARIA_LABEL = i18n.translate(
   }
 );
 
+export const DISCOVER_INSIGHTS_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.discoverInsightsButtonLabel',
+  {
+    defaultMessage: 'Discover insights',
+  }
+);
+
+export const DISCOVER_INSIGHTS_DISABLED_NO_EVENTS_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.discoverInsightsDisabledNoEventsTitle',
+  {
+    defaultMessage: 'No significant events yet',
+  }
+);
+
+export const DISCOVER_INSIGHTS_DISABLED_NO_EVENTS_DESCRIPTION = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.discoverInsightsDisabledNoEventsDescription',
+  {
+    defaultMessage:
+      'Insights are generated from significant events. Run onboarding on streams and wait for events to be detected before discovering insights.',
+  }
+);
+
 export const RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.runBulkStreamOnboardingButtonEmptyLabel',
   {
