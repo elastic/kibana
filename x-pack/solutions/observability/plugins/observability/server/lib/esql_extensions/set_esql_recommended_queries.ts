@@ -106,6 +106,15 @@ const LOGS_AND_METRICS_ESQL_RECOMMENDED_QUERIES = [
         'Counts error occurrences by host name and shows the top 50 hosts with the most errors',
     }),
   },
+  {
+    name: i18n.translate('xpack.observability.esqlQueries.searchAllMetrics.name', {
+      defaultMessage: 'Search all metrics',
+    }),
+    query: `TS ${METRICS_INDEX_PATTERN}`,
+    description: i18n.translate('xpack.observability.esqlQueries.searchAllMetrics.description', {
+      defaultMessage: 'Searches all available metrics',
+    }),
+  },
 ];
 
 export function setEsqlRecommendedQueries(esqlPlugin: ESQLSetup) {
