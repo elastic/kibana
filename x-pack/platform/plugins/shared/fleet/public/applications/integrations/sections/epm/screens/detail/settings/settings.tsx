@@ -48,6 +48,10 @@ import { useChangelog } from '../hooks';
 
 import { ExperimentalFeaturesService } from '../../../../../services';
 
+import { DeprecationCallout } from '../overview/overview';
+
+import { wrapTitleWithDeprecated } from '../../../components/utils';
+
 import { InstallButton } from './install_button';
 import { ReinstallButton } from './reinstall_button';
 import { UpdateButton } from './update_button';
@@ -249,6 +253,7 @@ export const SettingsPage: React.FC<Props> = memo(
                 </h3>
               </EuiTitle>
               <EuiSpacer size="s" />
+              <DeprecationCallout packageInfo={packageInfo} />
               {installedVersion !== null && (
                 <div>
                   <EuiTitle>
@@ -325,6 +330,8 @@ export const SettingsPage: React.FC<Props> = memo(
                       <p>
                         <UpdateButton
                           {...packageInfo}
+                          name={packageInfo.name}
+                          title={wrapTitleWithDeprecated({ packageInfo })}
                           version={latestVersion}
                           agentPolicyIds={agentPolicyIds}
                           packagePolicyIds={packagePolicyIds}

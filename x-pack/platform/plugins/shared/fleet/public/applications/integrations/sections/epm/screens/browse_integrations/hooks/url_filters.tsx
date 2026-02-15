@@ -11,7 +11,17 @@ import { omit } from 'lodash';
 
 import { useUrlParams } from '../../../../../../../hooks';
 
-import type { BrowseIntegrationsFilter, BrowseIntegrationSortType } from '../types';
+import type {
+  BrowseIntegrationsFilter,
+  BrowseIntegrationSortType,
+  IntegrationStatusFilterType,
+} from '../types';
+
+const VALID_STATUSES: IntegrationStatusFilterType[] = ['beta', 'deprecated'];
+
+function isValidStatus(value: string): value is IntegrationStatusFilterType {
+  return (VALID_STATUSES as string[]).includes(value);
+}
 
 export function useAddUrlFilters() {
   const urlFilters = useUrlFilters();
@@ -27,9 +37,12 @@ export function useAddUrlFilters() {
       method.call(history, {
         search: toUrlParams(
           {
-            ...omit(urlParams, 'q', 'sort'),
-            ...(Object.hasOwn(newFilters, 'q') ? { q: newFilters.q } : {}),
-            ...(Object.hasOwn(newFilters, 'sort') ? { sort: newFilters.sort } : {}),
+            ...omit(urlParams, 'q', 'sort', 'status'),
+            ...(newFilters.q ? { q: newFilters.q } : {}),
+            ...(newFilters.sort ? { sort: newFilters.sort } : {}),
+            ...(newFilters.status && newFilters.status.length > 0
+              ? { status: newFilters.status }
+              : {}),
           },
           {
             skipEmptyString: true,
@@ -55,9 +68,27 @@ export function useUrlFilters(): BrowseIntegrationsFilter {
       sort = urlParams.sort;
     }
 
+    let status: BrowseIntegrationsFilter['status'];
+    const rawStatus = urlParams.status;
+    if (typeof rawStatus === 'string') {
+      // Single value: ?status=beta
+      if (isValidStatus(rawStatus)) {
+        status = [rawStatus];
+      }
+    } else if (Array.isArray(rawStatus)) {
+      // Multiple values: ?status=beta&status=deprecated
+      const validStatuses = rawStatus.filter(
+        (s): s is IntegrationStatusFilterType => typeof s === 'string' && isValidStatus(s)
+      );
+      if (validStatuses.length > 0) {
+        status = validStatuses;
+      }
+    }
+
     return {
       q,
       sort,
+      status,
     };
   }, [urlParams]);
 }

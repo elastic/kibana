@@ -241,6 +241,11 @@ export interface ConfigurationLink {
   type: Action | NextStep;
   content?: string;
 }
+export interface DeprecationInfo {
+  description: string;
+  since?: string;
+  replaced_by?: Record<'package' | 'policyTemplate' | 'input' | 'dataStream' | 'variable', string>;
+}
 
 export enum RegistryPolicyTemplateKeys {
   categories = 'categories',
@@ -262,6 +267,7 @@ export enum RegistryPolicyTemplateKeys {
   configuration_links = 'configuration_links',
   fips_compatible = 'fips_compatible',
   dynamic_signal_types = 'dynamic_signal_types',
+  deprecated = 'deprecated',
 }
 interface BaseTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
@@ -273,6 +279,7 @@ interface BaseTemplate {
   [RegistryPolicyTemplateKeys.deployment_modes]?: DeploymentsModes;
   [RegistryPolicyTemplateKeys.configuration_links]?: ConfigurationLink[];
   [RegistryPolicyTemplateKeys.fips_compatible]?: boolean | undefined;
+  [RegistryPolicyTemplateKeys.deprecated]?: DeprecationInfo;
 }
 export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;
@@ -370,6 +377,7 @@ export type RegistrySearchResult = Pick<
   | 'policy_templates'
   | 'categories'
   | 'discovery'
+  | 'deprecated'
 >;
 
 // from /categories

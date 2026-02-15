@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { RegistryElasticsearch, RegistryPolicyTemplate, RegistryVarsEntry } from './epm';
+import type {
+  DeprecationInfo,
+  RegistryElasticsearch,
+  RegistryPolicyTemplate,
+  RegistryVarsEntry,
+} from './epm';
 
 export interface RegistryVarGroupOption {
   name: string;
@@ -62,6 +67,7 @@ export interface PackageSpecManifest {
     }>;
     datasets?: DiscoveryDataset[];
   };
+  deprecated?: DeprecationInfo;
 }
 export interface DiscoveryDataset {
   name: string;
@@ -149,6 +155,7 @@ export type PackageSpecCategory =
   | 'workplace_search_content_source';
 
 export interface PackageSpecConditions {
+  deprecated?: DeprecationInfo;
   kibana?: {
     version?: string;
   };

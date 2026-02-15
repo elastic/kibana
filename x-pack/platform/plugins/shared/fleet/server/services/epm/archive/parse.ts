@@ -133,6 +133,7 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'format_version',
   'discovery',
   'var_groups',
+  'deprecated',
 ] as const;
 
 const registryInputProps = Object.values(RegistryInputKeys);
