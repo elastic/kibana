@@ -14,10 +14,12 @@ apiTest.describe(
   'Stream lifecycle - retention API',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    // Stream names must be exactly one level deep when forking from 'logs'
-    // Format: logs.<name> where name uses hyphens, not dots
+    // Stream names must be exactly one level deep when forking from 'logs.otel'
+    // Format: logs.otel.<name> where name uses hyphens, not dots
     // The prefix 'lc' is used for cleanup matching
-    const streamNamePrefix = 'logs.lc';
+    // Note: Using logs.otel as it's created by default in fresh installs
+    const rootStream = 'logs.otel';
+    const streamNamePrefix = `${rootStream}.lc`;
 
     // Helper to create a stream and verify it was created
     async function createTestStream(
@@ -26,7 +28,7 @@ apiTest.describe(
       streamName: string,
       condition: { field: string; eq: string }
     ): Promise<{ success: boolean; error?: string }> {
-      const forkResponse = await apiClient.post('api/streams/logs/_fork', {
+      const forkResponse = await apiClient.post(`api/streams/${rootStream}/_fork`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           stream: { name: streamName },
@@ -588,12 +590,12 @@ apiTest.describe(
     // Test: Child stream inherits lifecycle from parent stream
     apiTest('should inherit lifecycle from parent stream', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
-      // Parent is one level: logs.lc-parent
+      // Parent stream: logs.otel.lc-parent (forked from logs.otel)
       const parentStream = `${streamNamePrefix}-parent`;
-      // Child is two levels: logs.lc-parent.child (forked from logs.lc-parent)
+      // Child stream: logs.otel.lc-parent.child (forked from logs.otel.lc-parent)
       const childStream = `${parentStream}.child`;
 
-      // Create parent stream (forked from logs)
+      // Create parent stream (forked from logs.otel)
       const createParentResult = await createTestStream(apiClient, cookieHeader, parentStream, {
         field: 'service.name',
         eq: 'parent-service',

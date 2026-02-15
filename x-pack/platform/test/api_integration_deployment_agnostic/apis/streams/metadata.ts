@@ -51,9 +51,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         };
-        await putStream(apiClient, 'logs.test', body, 200);
+        await putStream(apiClient, 'logs.otel.test', body, 200);
 
-        const response = await getStream(apiClient, 'logs.test');
+        const response = await getStream(apiClient, 'logs.otel.test');
         expect(response.stream).to.have.property('description', 'This is a test stream');
       });
 
@@ -74,8 +74,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         };
-        await putStream(apiClient, 'logs.test', body, 200);
-        const response = await getStream(apiClient, 'logs.test');
+        await putStream(apiClient, 'logs.otel.test', body, 200);
+        const response = await getStream(apiClient, 'logs.otel.test');
         expect(response.stream).to.have.property('description', 'Updated test stream description');
       });
     });
@@ -98,14 +98,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         };
-        await putStream(apiClient, 'logs.updated_at', body, 200);
+        await putStream(apiClient, 'logs.otel.updated_at', body, 200);
 
-        const response = await getStream(apiClient, 'logs.updated_at');
+        const response = await getStream(apiClient, 'logs.otel.updated_at');
         expect(response.stream).to.have.property('updated_at');
       });
 
       it('should update the updated_at timestamp for existing streams', async () => {
-        const oldStream = await getStream(apiClient, 'logs.updated_at');
+        const oldStream = await getStream(apiClient, 'logs.otel.updated_at');
         const oldUpdatedAt = oldStream.stream.updated_at;
 
         const body: Streams.WiredStream.UpsertRequest = {
@@ -124,25 +124,29 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         };
-        await putStream(apiClient, 'logs.updated_at', body, 200);
+        await putStream(apiClient, 'logs.otel.updated_at', body, 200);
 
-        const response = await getStream(apiClient, 'logs.updated_at');
+        const response = await getStream(apiClient, 'logs.otel.updated_at');
         expect(response.stream).to.have.property('updated_at');
         expect(response.stream.updated_at).to.not.equal(oldUpdatedAt);
       });
 
       it('should update the updated_at timestamp of the parent when a child stream is forked', async () => {
-        const oldParent = await getStream(apiClient, 'logs.updated_at');
+        const oldParent = await getStream(apiClient, 'logs.otel.updated_at');
         const oldParentUpdatedAt = oldParent.stream.updated_at;
 
         await forkStream(
           apiClient,
-          'logs.updated_at',
-          { stream: { name: 'logs.updated_at.child' }, where: { always: {} }, status: 'enabled' },
+          'logs.otel.updated_at',
+          {
+            stream: { name: 'logs.otel.updated_at.child' },
+            where: { always: {} },
+            status: 'enabled',
+          },
           200
         );
 
-        const updatedParent = await getStream(apiClient, 'logs.updated_at');
+        const updatedParent = await getStream(apiClient, 'logs.otel.updated_at');
         expect(updatedParent.stream).to.have.property('updated_at');
         expect(updatedParent.stream.updated_at).to.not.equal(oldParentUpdatedAt);
       });
@@ -166,11 +170,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         };
-        await putStream(apiClient, 'logs.ingest.processing.updated_at', body, 200);
+        await putStream(apiClient, 'logs.otel.ingest.processing.updated_at', body, 200);
 
         const response = (await getStream(
           apiClient,
-          'logs.ingest.processing.updated_at'
+          'logs.otel.ingest.processing.updated_at'
         )) as Streams.WiredStream.GetResponse;
 
         expect(response.stream.ingest.processing).to.have.property('updated_at');
@@ -179,7 +183,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should not update the timestamp for existing streams when processing does not change', async () => {
         const oldStream = (await getStream(
           apiClient,
-          'logs.ingest.processing.updated_at'
+          'logs.otel.ingest.processing.updated_at'
         )) as Streams.WiredStream.GetResponse;
         const oldUpdatedAt = oldStream.stream.ingest.processing.updated_at;
 
@@ -199,11 +203,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         };
-        await putStream(apiClient, 'logs.ingest.processing.updated_at', body, 200);
+        await putStream(apiClient, 'logs.otel.ingest.processing.updated_at', body, 200);
 
         const response = (await getStream(
           apiClient,
-          'logs.ingest.processing.updated_at'
+          'logs.otel.ingest.processing.updated_at'
         )) as Streams.WiredStream.GetResponse;
 
         expect(response.stream.ingest.processing).to.have.property('updated_at');
@@ -213,7 +217,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should update the timestamp for existing streams when processing does change', async () => {
         const oldStream = (await getStream(
           apiClient,
-          'logs.ingest.processing.updated_at'
+          'logs.otel.ingest.processing.updated_at'
         )) as Streams.WiredStream.GetResponse;
         const oldUpdatedAt = oldStream.stream.ingest.processing.updated_at;
 
@@ -241,11 +245,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         };
-        await putStream(apiClient, 'logs.ingest.processing.updated_at', body, 200);
+        await putStream(apiClient, 'logs.otel.ingest.processing.updated_at', body, 200);
 
         const response = (await getStream(
           apiClient,
-          'logs.ingest.processing.updated_at'
+          'logs.otel.ingest.processing.updated_at'
         )) as Streams.WiredStream.GetResponse;
 
         expect(response.stream.ingest.processing).to.have.property('updated_at');

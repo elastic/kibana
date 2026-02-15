@@ -11,6 +11,7 @@ import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/interna
 import {
   getAncestors,
   getSegments,
+  isDescendantOf,
   isDslLifecycle,
   isIlmLifecycle,
   isRootStreamDefinition,
@@ -39,10 +40,6 @@ export type TableRow = EnrichedStream & {
 };
 export interface StreamTree extends ListStreamDetail {
   children: StreamTree[];
-}
-
-export function isParentName(parent: string, descendant: string) {
-  return parent !== descendant && descendant.startsWith(parent + '.');
 }
 
 export function shouldComposeTree(sortField: SortableField) {
@@ -160,7 +157,7 @@ export function asTrees(streams: ListStreamDetail[]): StreamTree[] {
     let existingNode: StreamTree | undefined;
     while (
       (existingNode = currentTree.find((node) =>
-        isParentName(node.stream.name, streamDetail.stream.name)
+        isDescendantOf(node.stream.name, streamDetail.stream.name)
       ))
     ) {
       currentTree = existingNode.children;

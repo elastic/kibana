@@ -115,7 +115,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       // Reset root stream to a sensible default state before disabling streams
       // This ensures subsequent test files don't inherit a bad state if they run before cleanup
       try {
-        await updateFailureStore('logs', {
+        await updateFailureStore('logs.otel', {
           lifecycle: { enabled: { data_retention: '90d' } },
         });
       } catch (error) {
@@ -141,9 +141,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('Wired streams failure store', () => {
       it('updates failure store configuration', async () => {
-        const rootDefinition = await getStream(apiClient, 'logs');
+        const rootDefinition = await getStream(apiClient, 'logs.otel');
 
-        const response = await putStream(apiClient, 'logs', {
+        const response = await putStream(apiClient, 'logs.otel', {
           ...emptyAssets,
           stream: {
             description: '',
@@ -161,21 +161,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         expect(response).to.have.property('acknowledged', true);
 
-        const updatedRootDefinition = await getStream(apiClient, 'logs');
+        const updatedRootDefinition = await getStream(apiClient, 'logs.otel');
         const failureStore = (updatedRootDefinition as Streams.WiredStream.GetResponse).stream
           .ingest.failure_store;
         expect(failureStore).to.eql({
           lifecycle: { enabled: { data_retention: '60d' } },
         });
 
-        await expectFailureStore(['logs'], {
+        await expectFailureStore(['logs.otel'], {
           lifecycle: { enabled: { data_retention: '60d', is_default_retention: false } },
-          from: 'logs',
+          from: 'logs.otel',
         });
       });
 
       it('disables failure store', async () => {
-        await putStream(apiClient, 'logs.disabled-fs', {
+        await putStream(apiClient, 'logs.otel.disabled-fs', {
           ...emptyAssets,
           stream: {
             description: '',
@@ -190,12 +190,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        await expectFailureStore(['logs.disabled-fs'], { disabled: {}, from: 'logs.disabled-fs' });
+        await expectFailureStore(['logs.otel.disabled-fs'], {
+          disabled: {},
+          from: 'logs.otel.disabled-fs',
+        });
       });
 
       it('inherits failure store from parent on creation', async () => {
-        const rootDefinition = await getStream(apiClient, 'logs');
-        await putStream(apiClient, 'logs', {
+        const rootDefinition = await getStream(apiClient, 'logs.otel');
+        await putStream(apiClient, 'logs.otel', {
           ...emptyAssets,
           stream: {
             description: '',
@@ -212,20 +215,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        await putStream(apiClient, 'logs.inherits-fs', wiredPutBody);
+        await putStream(apiClient, 'logs.otel.inherits-fs', wiredPutBody);
 
         // Child should inherit parent's failure store configuration
-        await expectFailureStore(['logs.inherits-fs'], {
+        await expectFailureStore(['logs.otel.inherits-fs'], {
           lifecycle: { enabled: { data_retention: '45d', is_default_retention: false } },
-          from: 'logs',
+          from: 'logs.otel',
         });
       });
 
       it('inherits failure store configuration', async () => {
-        await putStream(apiClient, 'logs.fs-inherits', wiredPutBody);
-        await putStream(apiClient, 'logs.fs-inherits.child', wiredPutBody);
+        await putStream(apiClient, 'logs.otel.fs-inherits', wiredPutBody);
+        await putStream(apiClient, 'logs.otel.fs-inherits.child', wiredPutBody);
 
-        await putStream(apiClient, 'logs.fs-overrides', {
+        await putStream(apiClient, 'logs.otel.fs-overrides', {
           ...emptyAssets,
           stream: {
             description: '',
@@ -235,7 +238,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 fields: {},
                 routing: [
                   {
-                    destination: 'logs.fs-overrides.child',
+                    destination: 'logs.otel.fs-overrides.child',
                     where: { never: {} },
                     status: 'disabled',
                   },
@@ -247,10 +250,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         });
-        await putStream(apiClient, 'logs.fs-overrides.child', wiredPutBody);
+        await putStream(apiClient, 'logs.otel.fs-overrides.child', wiredPutBody);
 
-        const rootDefinition = await getStream(apiClient, 'logs');
-        await putStream(apiClient, 'logs', {
+        const rootDefinition = await getStream(apiClient, 'logs.otel');
+        await putStream(apiClient, 'logs.otel', {
           ...emptyAssets,
           stream: {
             description: '',
@@ -268,20 +271,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         // Inheriting streams should get root's config
-        await expectFailureStore(['logs.fs-inherits', 'logs.fs-inherits.child'], {
+        await expectFailureStore(['logs.otel.fs-inherits', 'logs.otel.fs-inherits.child'], {
           lifecycle: { enabled: { data_retention: '90d', is_default_retention: false } },
-          from: 'logs',
+          from: 'logs.otel',
         });
 
         // Overriding streams should keep their own config
-        await expectFailureStore(['logs.fs-overrides', 'logs.fs-overrides.child'], {
+        await expectFailureStore(['logs.otel.fs-overrides', 'logs.otel.fs-overrides.child'], {
           lifecycle: { enabled: { data_retention: '15d', is_default_retention: false } },
-          from: 'logs.fs-overrides',
+          from: 'logs.otel.fs-overrides',
         });
       });
 
       it('applies the nearest parent failure store when reset to inherit', async () => {
-        await putStream(apiClient, 'logs.fs-30d', {
+        await putStream(apiClient, 'logs.otel.fs-30d', {
           ...emptyAssets,
           stream: {
             description: '',
@@ -293,7 +296,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         });
-        await putStream(apiClient, 'logs.fs-30d.fs-60d', {
+        await putStream(apiClient, 'logs.otel.fs-30d.fs-60d', {
           ...emptyAssets,
           stream: {
             description: '',
@@ -305,14 +308,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         });
-        await putStream(apiClient, 'logs.fs-30d.fs-60d.inherits', wiredPutBody);
+        await putStream(apiClient, 'logs.otel.fs-30d.fs-60d.inherits', wiredPutBody);
 
-        await expectFailureStore(['logs.fs-30d.fs-60d.inherits'], {
+        await expectFailureStore(['logs.otel.fs-30d.fs-60d.inherits'], {
           lifecycle: { enabled: { data_retention: '60d', is_default_retention: false } },
-          from: 'logs.fs-30d.fs-60d',
+          from: 'logs.otel.fs-30d.fs-60d',
         });
 
-        await putStream(apiClient, 'logs.fs-30d.fs-60d', {
+        await putStream(apiClient, 'logs.otel.fs-30d.fs-60d', {
           ...emptyAssets,
           stream: {
             description: '',
@@ -322,7 +325,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 fields: {},
                 routing: [
                   {
-                    destination: 'logs.fs-30d.fs-60d.inherits',
+                    destination: 'logs.otel.fs-30d.fs-60d.inherits',
                     where: { never: {} },
                     status: 'disabled',
                   },
@@ -333,18 +336,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        // All should now inherit from logs.fs-30d
+        // All should now inherit from logs.otel.fs-30d
         await expectFailureStore(
-          ['logs.fs-30d', 'logs.fs-30d.fs-60d', 'logs.fs-30d.fs-60d.inherits'],
+          ['logs.otel.fs-30d', 'logs.otel.fs-30d.fs-60d', 'logs.otel.fs-30d.fs-60d.inherits'],
           {
             lifecycle: { enabled: { data_retention: '30d', is_default_retention: false } },
-            from: 'logs.fs-30d',
+            from: 'logs.otel.fs-30d',
           }
         );
       });
 
       it('can enable failure store with lifecycle', async () => {
-        await putStream(apiClient, 'logs.fs-enabled-with-lifecycle', {
+        await putStream(apiClient, 'logs.otel.fs-enabled-with-lifecycle', {
           ...emptyAssets,
           stream: {
             description: '',
@@ -361,14 +364,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        await expectFailureStore(['logs.fs-enabled-with-lifecycle'], {
+        await expectFailureStore(['logs.otel.fs-enabled-with-lifecycle'], {
           lifecycle: { enabled: { data_retention: '7d', is_default_retention: false } },
-          from: 'logs.fs-enabled-with-lifecycle',
+          from: 'logs.otel.fs-enabled-with-lifecycle',
         });
       });
 
       it('updates failure store retention', async () => {
-        const streamName = 'logs.fs-update-retention';
+        const streamName = 'logs.otel.fs-update-retention';
         await putStream(apiClient, streamName, {
           ...emptyAssets,
           stream: {
@@ -415,7 +418,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('disables lifecycle on failure store only for not serverless', async () => {
-        const streamName = 'logs.fs-disabled-lifecycle';
+        const streamName = 'logs.otel.fs-disabled-lifecycle';
 
         if (isServerless) {
           // In serverless, disabling failure store lifecycle is not allowed
@@ -474,8 +477,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('inherits disabled lifecycle from parent only for not serverless', async () => {
-        const parentStream = 'logs.parent-disabled-lifecycle';
-        const childStream = 'logs.parent-disabled-lifecycle.child';
+        const parentStream = 'logs.otel.parent-disabled-lifecycle';
+        const childStream = 'logs.otel.parent-disabled-lifecycle.child';
 
         if (isServerless) {
           // In serverless, disabling failure store lifecycle is not allowed
@@ -574,7 +577,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       before(async () => {
         // Reset root stream to a known state before classic streams tests
-        await updateFailureStore('logs', {
+        await updateFailureStore('logs.otel', {
           disabled: {},
         });
       });
@@ -786,9 +789,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('Root stream failure store', () => {
       it('allows updating root stream failure store', async () => {
-        const rootDefinition = await getStream(apiClient, 'logs');
+        const rootDefinition = await getStream(apiClient, 'logs.otel');
 
-        await putStream(apiClient, 'logs', {
+        await putStream(apiClient, 'logs.otel', {
           ...emptyAssets,
           stream: {
             description: '',
@@ -805,7 +808,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        const updatedDefinition = await getStream(apiClient, 'logs');
+        const updatedDefinition = await getStream(apiClient, 'logs.otel');
         const failureStore = (updatedDefinition as Streams.WiredStream.GetResponse).stream.ingest
           .failure_store;
         expect(failureStore).to.eql({
@@ -814,13 +817,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('allows disabling lifecycle on root stream failure store only for not serverless', async () => {
-        const rootDefinition = await getStream(apiClient, 'logs');
+        const rootDefinition = await getStream(apiClient, 'logs.otel');
 
         if (isServerless) {
           // In serverless, disabling failure store lifecycle is not allowed
           await putStream(
             apiClient,
-            'logs',
+            'logs.otel',
             {
               ...emptyAssets,
               stream: {
@@ -842,7 +845,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           return;
         }
 
-        await putStream(apiClient, 'logs', {
+        await putStream(apiClient, 'logs.otel', {
           ...emptyAssets,
           stream: {
             description: '',
@@ -859,7 +862,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        const updatedDefinition = await getStream(apiClient, 'logs');
+        const updatedDefinition = await getStream(apiClient, 'logs.otel');
         const parsedDefinition = Streams.WiredStream.GetResponse.parse(updatedDefinition);
 
         const failureStore = parsedDefinition.stream.ingest.failure_store;
@@ -869,11 +872,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(parsedDefinition.effective_failure_store).to.eql({
           lifecycle: { disabled: {} },
-          from: 'logs',
+          from: 'logs.otel',
         });
 
         // Verify failure store is enabled but lifecycle is disabled
-        const dataStreams = await esClient.indices.getDataStream({ name: ['logs'] });
+        const dataStreams = await esClient.indices.getDataStream({ name: ['logs.otel'] });
         expect(dataStreams.data_streams[0].failure_store?.enabled).to.eql(true);
       });
     });

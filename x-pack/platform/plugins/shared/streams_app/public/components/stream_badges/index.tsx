@@ -103,6 +103,45 @@ export function QueryStreamBadge() {
   );
 }
 
+export function DeprecatedLogsBadge({
+  openFlyout,
+  hasNewStreams,
+}: {
+  openFlyout?: () => void;
+  hasNewStreams: boolean;
+}) {
+  const badge =
+    openFlyout && !hasNewStreams ? (
+      <EuiBadge
+        color="warning"
+        onClick={openFlyout}
+        onClickAriaLabel={i18n.translate('xpack.streams.badges.deprecatedLogs.ariaLabel', {
+          defaultMessage: 'The logs root stream is deprecated.',
+        })}
+      >
+        {i18n.translate('xpack.streams.badges.deprecatedLogs.label', {
+          defaultMessage: 'Deprecated',
+        })}
+      </EuiBadge>
+    ) : (
+      <EuiBadge color="warning">
+        {i18n.translate('xpack.streams.badges.deprecatedLogs.label', {
+          defaultMessage: 'Deprecated',
+        })}
+      </EuiBadge>
+    );
+
+  return (
+    <EuiToolTip
+      content={i18n.translate('xpack.streams.badges.deprecatedLogs.tooltip', {
+        defaultMessage: 'The logs root stream is deprecated.',
+      })}
+    >
+      {badge}
+    </EuiToolTip>
+  );
+}
+
 export function LifecycleBadge({
   lifecycle,
   dataTestSubj,

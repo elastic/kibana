@@ -29,15 +29,17 @@ test.describe(
         // Already disabled, that's fine
       }
 
-      // Ensure logs index/data stream doesn't exist
-      try {
-        await esClient.indices.deleteDataStream({ name: 'logs' });
-      } catch {
-        // Data stream doesn't exist, try regular index
+      // Ensure logs.otel and logs.ecs data streams don't exist
+      for (const stream of ['logs.otel', 'logs.ecs']) {
         try {
-          await esClient.indices.delete({ index: 'logs' });
+          await esClient.indices.deleteDataStream({ name: stream });
         } catch {
-          // Nothing exists, that's fine
+          // Data stream doesn't exist, try regular index
+          try {
+            await esClient.indices.delete({ index: stream });
+          } catch {
+            // Nothing exists, that's fine
+          }
         }
       }
 
@@ -49,16 +51,18 @@ test.describe(
       await apiServices.streams.enable();
     });
 
-    test('should enable wired streams and show logs stream in the UI', async ({
+    test('should enable wired streams and show logs.otel and logs.ecs streams in the UI', async ({
       page,
       pageObjects,
       esClient,
     }) => {
       const settingsFlyoutTitle = page.locator('#streamsSettingsFlyoutTitle');
 
-      // Verify logs index doesn't exist
-      const logsExists = await esClient.indices.exists({ index: 'logs' });
-      expect(logsExists).toBe(false);
+      // Verify logs.otel and logs.ecs indices don't exist
+      const logsOtelExists = await esClient.indices.exists({ index: 'logs.otel' });
+      const logsEcsExists = await esClient.indices.exists({ index: 'logs.ecs' });
+      expect(logsOtelExists).toBe(false);
+      expect(logsEcsExists).toBe(false);
 
       // Open settings and enable wired streams
       await page.getByRole('button', { name: 'Settings' }).click();
@@ -73,20 +77,25 @@ test.describe(
       await page.keyboard.press('Escape');
       await expect(settingsFlyoutTitle).toBeHidden();
 
-      // Verify logs index was created
+      // Verify logs.otel and logs.ecs indices were created
       await expect
-        .poll(() => esClient.indices.exists({ index: 'logs' }), {
-          message: 'logs index should be created after enabling wired streams',
+        .poll(() => esClient.indices.exists({ index: 'logs.otel' }), {
+          message: 'logs.otel index should be created after enabling wired streams',
+        })
+        .toBe(true);
+      await expect
+        .poll(() => esClient.indices.exists({ index: 'logs.ecs' }), {
+          message: 'logs.ecs index should be created after enabling wired streams',
         })
         .toBe(true);
 
-      // Verify logs stream appears in the UI
+      // Verify logs.otel and logs.ecs streams appear in the UI
       await pageObjects.streams.goto();
       await pageObjects.streams.expectStreamsTableVisible();
-      await pageObjects.streams.verifyStreamsAreInTable(['logs']);
+      await pageObjects.streams.verifyStreamsAreInTable(['logs.otel', 'logs.ecs']);
     });
 
-    test('should show the root logs stream after enabling wired streams', async ({
+    test('should show the root logs.otel and logs.ecs streams after enabling wired streams', async ({
       page,
       pageObjects,
     }) => {
@@ -106,8 +115,8 @@ test.describe(
       await pageObjects.streams.goto();
       await pageObjects.streams.expectStreamsTableVisible();
 
-      // Verify logs stream is visible with data
-      await pageObjects.streams.verifyStreamsAreInTable(['logs']);
+      // Verify logs.otel and logs.ecs streams are visible
+      await pageObjects.streams.verifyStreamsAreInTable(['logs.otel', 'logs.ecs']);
     });
 
     test('should disable wired streams and show empty state', async ({ page, pageObjects }) => {
@@ -122,10 +131,10 @@ test.describe(
       await page.keyboard.press('Escape');
       await expect(settingsFlyoutTitle).toBeHidden();
 
-      // Verify logs stream is visible
+      // Verify logs.otel and logs.ecs streams are visible
       await pageObjects.streams.goto();
       await pageObjects.streams.expectStreamsTableVisible();
-      await pageObjects.streams.verifyStreamsAreInTable(['logs']);
+      await pageObjects.streams.verifyStreamsAreInTable(['logs.otel', 'logs.ecs']);
 
       // Now disable wired streams
       await page.getByRole('button', { name: 'Settings' }).click();
@@ -149,9 +158,9 @@ test.describe(
       await page.keyboard.press('Escape');
       await expect(settingsFlyoutTitle).toBeHidden();
 
-      // Verify UI now shows empty state (no logs stream)
+      // Verify UI now shows empty state (no logs.otel or logs.ecs streams)
       await pageObjects.streams.goto();
-      await pageObjects.streams.verifyStreamsAreNotInTable(['logs']);
+      await pageObjects.streams.verifyStreamsAreNotInTable(['logs.otel', 'logs.ecs']);
     });
   }
 );

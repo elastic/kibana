@@ -18,7 +18,9 @@ export interface StreamsNavigationStatus {
 }
 
 export interface WiredStreamsStatus {
-  enabled: boolean | 'conflict' | 'unknown';
+  logs: boolean | 'conflict' | 'unknown';
+  'logs.otel': boolean | 'conflict' | 'unknown';
+  'logs.ecs': boolean | 'conflict' | 'unknown';
   can_manage: boolean;
 }
 

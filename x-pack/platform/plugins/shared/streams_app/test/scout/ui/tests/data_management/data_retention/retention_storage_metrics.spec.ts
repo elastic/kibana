@@ -24,11 +24,11 @@ test.describe(
   () => {
     test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
 
-      // Reset parent 'logs' stream to default indefinite retention (DSL with no data_retention)
-      const logsDefinition = await apiServices.streams.getStreamDefinition('logs');
-      await apiServices.streams.updateStream('logs', {
+      // Reset parent 'logs.otel' stream to default indefinite retention (DSL with no data_retention)
+      const logsDefinition = await apiServices.streams.getStreamDefinition('logs.otel');
+      await apiServices.streams.updateStream('logs.otel', {
         ingest: {
           ...logsDefinition.stream.ingest,
           processing: omit(logsDefinition.stream.ingest.processing, 'updated_at'),
@@ -36,21 +36,21 @@ test.describe(
         },
       });
 
-      await apiServices.streams.forkStream('logs', 'logs.nginx', {
+      await apiServices.streams.forkStream('logs.otel', 'logs.otel.nginx', {
         field: 'service.name',
         eq: 'nginx',
       });
-      await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
     });
 
     test.afterEach(async ({ apiServices, page }) => {
       await closeToastsIfPresent(page);
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
     });
 
     test.afterAll(async ({ apiServices }) => {
       // Clear existing rules
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
     });
 
     test('should update retention without affecting storage display', async ({ page }) => {
@@ -77,8 +77,8 @@ test.describe(
       await saveRetentionChanges(page);
 
       // Navigate away and back
-      await pageObjects.streams.gotoPartitioningTab('logs.nginx');
-      await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+      await pageObjects.streams.gotoPartitioningTab('logs.otel.nginx');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
       // Retention should still be displayed correctly
       await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('14 days');

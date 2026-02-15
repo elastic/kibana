@@ -26,11 +26,11 @@ test.describe(
   () => {
     test.beforeEach(async ({ apiServices, browserAuth }) => {
       await browserAuth.loginAsAdmin();
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
 
-      // Reset parent 'logs' stream to default indefinite retention (DSL with no data_retention)
-      const logsDefinition = await apiServices.streams.getStreamDefinition('logs');
-      await apiServices.streams.updateStream('logs', {
+      // Reset parent 'logs.otel' stream to default indefinite retention (DSL with no data_retention)
+      const logsDefinition = await apiServices.streams.getStreamDefinition('logs.otel');
+      await apiServices.streams.updateStream('logs.otel', {
         ingest: {
           ...logsDefinition.stream.ingest,
           processing: omit(logsDefinition.stream.ingest.processing, 'updated_at'),
@@ -41,12 +41,12 @@ test.describe(
 
     test.afterEach(async ({ apiServices, page }) => {
       await closeToastsIfPresent(page);
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
     });
 
     test.afterAll(async ({ apiServices }) => {
       // Clear existing rules
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
     });
 
     test('should show inherit toggle and inherit by default', async ({
@@ -54,11 +54,11 @@ test.describe(
       pageObjects,
       page,
     }) => {
-      await apiServices.streams.forkStream('logs', 'logs.nginx', {
+      await apiServices.streams.forkStream('logs.otel', 'logs.otel.nginx', {
         field: 'service.name',
         eq: 'nginx',
       });
-      await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
       // Child should inherit indefinite from parent by default
       await verifyRetentionDisplay(page, '∞');
@@ -71,11 +71,11 @@ test.describe(
     });
 
     test('should toggle inherit mode on and off', async ({ apiServices, pageObjects, page }) => {
-      await apiServices.streams.forkStream('logs', 'logs.nginx', {
+      await apiServices.streams.forkStream('logs.otel', 'logs.otel.nginx', {
         field: 'service.name',
         eq: 'nginx',
       });
-      await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
       // Disable inherit - set custom
       await openRetentionModal(page);
@@ -97,18 +97,18 @@ test.describe(
       page,
     }) => {
       // Create parent child
-      await apiServices.streams.forkStream('logs', 'logs.nginx', {
+      await apiServices.streams.forkStream('logs.otel', 'logs.otel.nginx', {
         field: 'service.name',
         eq: 'nginx',
       });
 
       // Create nested child
-      await apiServices.streams.forkStream('logs.nginx', 'logs.nginx.access', {
+      await apiServices.streams.forkStream('logs.otel.nginx', 'logs.otel.nginx.access', {
         field: 'log.level',
         eq: 'info',
       });
 
-      await pageObjects.streams.gotoDataRetentionTab('logs.nginx.access');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx.access');
       await verifyRetentionDisplay(page, '∞');
 
       // Should have inherit toggle
@@ -121,16 +121,16 @@ test.describe(
       pageObjects,
       page,
     }) => {
-      await apiServices.streams.forkStream('logs', 'logs.nginx', {
+      await apiServices.streams.forkStream('logs.otel', 'logs.otel.nginx', {
         field: 'service.name',
         eq: 'nginx',
       });
-      await apiServices.streams.forkStream('logs.nginx', 'logs.nginx.access', {
+      await apiServices.streams.forkStream('logs.otel.nginx', 'logs.otel.nginx.access', {
         field: 'log.level',
         eq: 'info',
       });
 
-      await pageObjects.streams.gotoDataRetentionTab('logs.nginx.access');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx.access');
 
       // Override retention
       await openRetentionModal(page);
@@ -145,20 +145,20 @@ test.describe(
       pageObjects,
       page,
     }) => {
-      await apiServices.streams.forkStream('logs', 'logs.nginx', {
+      await apiServices.streams.forkStream('logs.otel', 'logs.otel.nginx', {
         field: 'service.name',
         eq: 'nginx',
       });
-      await apiServices.streams.forkStream('logs', 'logs.apache', {
+      await apiServices.streams.forkStream('logs.otel', 'logs.otel.apache', {
         field: 'service.name',
         eq: 'apache',
       });
 
       // Both should inherit from logs
-      await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
       await verifyRetentionDisplay(page, '∞');
 
-      await pageObjects.streams.gotoDataRetentionTab('logs.apache');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.apache');
       await verifyRetentionDisplay(page, '∞');
     });
 
@@ -167,19 +167,19 @@ test.describe(
       pageObjects,
       page,
     }) => {
-      await apiServices.streams.forkStream('logs', 'logs.nginx', {
+      await apiServices.streams.forkStream('logs.otel', 'logs.otel.nginx', {
         field: 'service.name',
         eq: 'nginx',
       });
 
       // Set parent retention
-      await pageObjects.streams.gotoDataRetentionTab('logs');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel');
       await openRetentionModal(page);
       await setCustomRetention(page, '30', 'd');
       await saveRetentionChanges(page);
 
       // Check child inherits the value
-      await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
       await verifyRetentionDisplay(page, '30 days');
     });
   }

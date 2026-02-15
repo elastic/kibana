@@ -7,7 +7,7 @@
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 
-export const getLogsDefaultPipelineProcessors = (): IngestProcessorContainer[] => [
+export const getLogsOtelPipelineProcessors = (): IngestProcessorContainer[] => [
   {
     set: {
       description: "If '@timestamp' is missing, set it with the ingest timestamp",
@@ -21,3 +21,18 @@ export const getLogsDefaultPipelineProcessors = (): IngestProcessorContainer[] =
     normalize_for_stream: {},
   },
 ];
+
+export const getLogsEcsPipelineProcessors = (): IngestProcessorContainer[] => [
+  {
+    set: {
+      description: "If '@timestamp' is missing, set it with the ingest timestamp",
+      field: '@timestamp',
+      override: false,
+      copy_from: '_ingest.timestamp',
+    },
+  },
+  // No normalize_for_stream processor - ECS data is expected in correct format
+];
+
+// Maintains backward compatibility
+export const getLogsDefaultPipelineProcessors = getLogsOtelPipelineProcessors;

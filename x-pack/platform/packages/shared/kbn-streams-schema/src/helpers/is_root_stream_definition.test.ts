@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { isRootStreamDefinition } from './is_root';
+import { isRootStreamDefinition } from './is_root_stream_definition';
 
 describe('isRootStreamDefinition', () => {
-  it('returns true for a valid root wired stream definition', () => {
+  it('returns true for a valid root wired stream definition (logs)', () => {
     const validWired = {
       name: 'logs',
       description: '',
@@ -22,6 +22,38 @@ describe('isRootStreamDefinition', () => {
       },
     };
     expect(isRootStreamDefinition(validWired)).toBe(true);
+  });
+
+  it('returns true for logs.otel root stream', () => {
+    const validLogsOtel = {
+      name: 'logs.otel',
+      description: '',
+      updated_at: new Date().toISOString(),
+      ingest: {
+        lifecycle: { inherit: {} },
+        processing: { steps: [], updated_at: new Date().toISOString() },
+        settings: {},
+        wired: { fields: {}, routing: [] },
+        failure_store: { inherit: {} },
+      },
+    };
+    expect(isRootStreamDefinition(validLogsOtel)).toBe(true);
+  });
+
+  it('returns true for logs.ecs root stream', () => {
+    const validLogsEcs = {
+      name: 'logs.ecs',
+      description: '',
+      updated_at: new Date().toISOString(),
+      ingest: {
+        lifecycle: { inherit: {} },
+        processing: { steps: [], updated_at: new Date().toISOString() },
+        settings: {},
+        wired: { fields: {}, routing: [] },
+        failure_store: { inherit: {} },
+      },
+    };
+    expect(isRootStreamDefinition(validLogsEcs)).toBe(true);
   });
 
   it('returns false for a wired stream definition with a non-root name', () => {

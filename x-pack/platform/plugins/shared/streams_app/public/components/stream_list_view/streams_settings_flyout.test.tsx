@@ -30,21 +30,19 @@ const renderWithProviders = (ui: React.ReactElement) => {
 };
 
 describe('StreamsSettingsFlyout', () => {
-  const mockGetWiredStatus = jest.fn();
   const mockEnableWiredMode = jest.fn();
   const mockDisableWiredMode = jest.fn();
   const mockOnClose = jest.fn();
   const mockRefreshStreams = jest.fn();
+  const mockOnRefreshStatus = jest.fn();
   const mockAddError = jest.fn();
+  const mockAddSuccess = jest.fn();
   const mockTrackWiredStreamsStatusChanged = jest.fn();
-  const mockGetClassicStatus = jest.fn();
 
   const defaultKibanaMock = {
     dependencies: {
       start: {
         streams: {
-          getWiredStatus: mockGetWiredStatus,
-          getClassicStatus: mockGetClassicStatus,
           enableWiredMode: mockEnableWiredMode,
           disableWiredMode: mockDisableWiredMode,
         },
@@ -54,7 +52,13 @@ describe('StreamsSettingsFlyout', () => {
       notifications: {
         toasts: {
           addError: mockAddError,
+          addSuccess: mockAddSuccess,
         },
+      },
+      uiSettings: {
+        get: jest.fn(),
+        set: jest.fn(),
+        isOverridden: jest.fn().mockReturnValue(false),
       },
       docLinks: {
         links: {
@@ -80,44 +84,29 @@ describe('StreamsSettingsFlyout', () => {
     } as any);
 
     mockUseKibana.mockReturnValue(defaultKibanaMock as any);
+
+    // Default mock implementations
+    mockOnRefreshStatus.mockResolvedValue(undefined);
+    mockEnableWiredMode.mockResolvedValue({});
+    mockDisableWiredMode.mockResolvedValue({});
   });
 
-  describe('Initial Load', () => {
-    it('should fetch wired status on mount', async () => {
-      mockGetWiredStatus.mockResolvedValue({
-        enabled: true,
+  describe('Initial State', () => {
+    it('should display switch as checked when both new streams are enabled', async () => {
+      const streamsStatus = {
+        logs: false,
+        'logs.otel': true,
+        'logs.ecs': true,
         can_manage: true,
-      });
+      };
 
       renderWithProviders(
-        <StreamsSettingsFlyout onClose={mockOnClose} refreshStreams={mockRefreshStreams} />
-      );
-
-      await waitFor(() => {
-        expect(mockGetWiredStatus).toHaveBeenCalledTimes(1);
-      });
-    });
-
-    it('should show loading spinner initially', () => {
-      mockGetWiredStatus.mockImplementation(
-        () => new Promise(() => {}) // Never resolves
-      );
-
-      renderWithProviders(
-        <StreamsSettingsFlyout onClose={mockOnClose} refreshStreams={mockRefreshStreams} />
-      );
-
-      expect(screen.getByRole('progressbar')).toBeInTheDocument();
-    });
-
-    it('should display switch as checked when wired streams is enabled', async () => {
-      mockGetWiredStatus.mockResolvedValue({
-        enabled: true,
-        can_manage: true,
-      });
-
-      renderWithProviders(
-        <StreamsSettingsFlyout onClose={mockOnClose} refreshStreams={mockRefreshStreams} />
+        <StreamsSettingsFlyout
+          onClose={mockOnClose}
+          refreshStreams={mockRefreshStreams}
+          streamsStatus={streamsStatus}
+          onRefreshStatus={mockOnRefreshStatus}
+        />
       );
 
       await waitFor(() => {
@@ -127,14 +116,21 @@ describe('StreamsSettingsFlyout', () => {
       expect(screen.getByTestId('streamsWiredSwitch')).toBeChecked();
     });
 
-    it('should display switch as unchecked when wired streams is disabled', async () => {
-      mockGetWiredStatus.mockResolvedValue({
-        enabled: false,
+    it('should display switch as unchecked when new streams are disabled', async () => {
+      const streamsStatus = {
+        logs: false,
+        'logs.otel': false,
+        'logs.ecs': false,
         can_manage: true,
-      });
+      };
 
       renderWithProviders(
-        <StreamsSettingsFlyout onClose={mockOnClose} refreshStreams={mockRefreshStreams} />
+        <StreamsSettingsFlyout
+          onClose={mockOnClose}
+          refreshStreams={mockRefreshStreams}
+          streamsStatus={streamsStatus}
+          onRefreshStatus={mockOnRefreshStatus}
+        />
       );
 
       await waitFor(() => {
@@ -144,35 +140,71 @@ describe('StreamsSettingsFlyout', () => {
       expect(screen.getByTestId('streamsWiredSwitch')).not.toBeChecked();
     });
 
-    it('should handle fetch errors gracefully', async () => {
-      mockGetWiredStatus.mockRejectedValue(new Error('Network error'));
+    it('should display switch as unchecked when only one new stream is enabled', async () => {
+      const streamsStatus = {
+        logs: false,
+        'logs.otel': true,
+        'logs.ecs': false,
+        can_manage: true,
+      };
 
       renderWithProviders(
-        <StreamsSettingsFlyout onClose={mockOnClose} refreshStreams={mockRefreshStreams} />
+        <StreamsSettingsFlyout
+          onClose={mockOnClose}
+          refreshStreams={mockRefreshStreams}
+          streamsStatus={streamsStatus}
+          onRefreshStatus={mockOnRefreshStatus}
+        />
       );
 
       await waitFor(() => {
-        expect(mockAddError).toHaveBeenCalledWith(
-          expect.any(Error),
-          expect.objectContaining({
-            title: 'Error fetching wired streams status',
-          })
-        );
+        expect(screen.getByTestId('streamsWiredSwitch')).toBeInTheDocument();
       });
+
+      expect(screen.getByTestId('streamsWiredSwitch')).not.toBeChecked();
+    });
+
+    it('should display switch as unchecked when there is a conflict', async () => {
+      const streamsStatus = {
+        logs: false,
+        'logs.otel': 'conflict' as const,
+        'logs.ecs': true,
+        can_manage: true,
+      };
+
+      renderWithProviders(
+        <StreamsSettingsFlyout
+          onClose={mockOnClose}
+          refreshStreams={mockRefreshStreams}
+          streamsStatus={streamsStatus}
+          onRefreshStatus={mockOnRefreshStatus}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('streamsWiredSwitch')).toBeInTheDocument();
+      });
+
+      expect(screen.getByTestId('streamsWiredSwitch')).not.toBeChecked();
     });
   });
 
   describe('Enabling Wired Streams', () => {
     it('should enable wired mode when switch is clicked from disabled state', async () => {
-      mockGetWiredStatus.mockResolvedValue({
-        enabled: false,
+      const streamsStatus = {
+        logs: false,
+        'logs.otel': false,
+        'logs.ecs': false,
         can_manage: true,
-      });
-
-      mockEnableWiredMode.mockResolvedValue({});
+      };
 
       renderWithProviders(
-        <StreamsSettingsFlyout onClose={mockOnClose} refreshStreams={mockRefreshStreams} />
+        <StreamsSettingsFlyout
+          onClose={mockOnClose}
+          refreshStreams={mockRefreshStreams}
+          streamsStatus={streamsStatus}
+          onRefreshStatus={mockOnRefreshStatus}
+        />
       );
 
       await waitFor(() => {
@@ -183,23 +215,32 @@ describe('StreamsSettingsFlyout', () => {
 
       await waitFor(() => {
         expect(mockEnableWiredMode).toHaveBeenCalled();
-        expect(mockGetWiredStatus).toHaveBeenCalledTimes(1); // Only on initial mount
+        expect(mockOnRefreshStatus).toHaveBeenCalled();
         expect(mockTrackWiredStreamsStatusChanged).toHaveBeenCalledWith({ is_enabled: true });
         expect(mockRefreshStreams).toHaveBeenCalled();
-        expect(screen.getByTestId('streamsWiredSwitch')).toBeChecked();
+        expect(mockAddSuccess).toHaveBeenCalledWith({
+          title: 'Wired streams have been enabled successfully',
+        });
       });
     });
 
     it('should show error toast if enabling fails', async () => {
-      mockGetWiredStatus.mockResolvedValue({
-        enabled: false,
+      const streamsStatus = {
+        logs: false,
+        'logs.otel': false,
+        'logs.ecs': false,
         can_manage: true,
-      });
+      };
 
       mockEnableWiredMode.mockRejectedValue(new Error('Enable failed'));
 
       renderWithProviders(
-        <StreamsSettingsFlyout onClose={mockOnClose} refreshStreams={mockRefreshStreams} />
+        <StreamsSettingsFlyout
+          onClose={mockOnClose}
+          refreshStreams={mockRefreshStreams}
+          streamsStatus={streamsStatus}
+          onRefreshStatus={mockOnRefreshStatus}
+        />
       );
 
       await waitFor(() => {
@@ -215,19 +256,27 @@ describe('StreamsSettingsFlyout', () => {
             title: 'Error updating wired streams setting',
           })
         );
+        expect(mockOnClose).not.toHaveBeenCalled(); // Should NOT close on error
       });
     });
   });
 
   describe('Disabling Wired Streams - Confirmation Modal', () => {
     it('should show confirmation modal when trying to disable wired streams', async () => {
-      mockGetWiredStatus.mockResolvedValue({
-        enabled: true,
+      const streamsStatus = {
+        logs: false,
+        'logs.otel': true,
+        'logs.ecs': true,
         can_manage: true,
-      });
+      };
 
       renderWithProviders(
-        <StreamsSettingsFlyout onClose={mockOnClose} refreshStreams={mockRefreshStreams} />
+        <StreamsSettingsFlyout
+          onClose={mockOnClose}
+          refreshStreams={mockRefreshStreams}
+          streamsStatus={streamsStatus}
+          onRefreshStatus={mockOnRefreshStatus}
+        />
       );
 
       await waitFor(() => {
@@ -238,21 +287,29 @@ describe('StreamsSettingsFlyout', () => {
       await userEvent.click(screen.getByTestId('streamsWiredSwitch'));
 
       // Modal should be visible
-      expect(screen.getByTestId('streamsWiredDisableModal')).toBeInTheDocument();
-      expect(screen.getByText('Disable Wired Streams?')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Disable Wired Streams?')).toBeInTheDocument();
+      });
 
       // Should NOT have called disable yet
       expect(mockDisableWiredMode).not.toHaveBeenCalled();
     });
 
     it('should close modal when cancel button is clicked', async () => {
-      mockGetWiredStatus.mockResolvedValue({
-        enabled: true,
+      const streamsStatus = {
+        logs: false,
+        'logs.otel': true,
+        'logs.ecs': true,
         can_manage: true,
-      });
+      };
 
       renderWithProviders(
-        <StreamsSettingsFlyout onClose={mockOnClose} refreshStreams={mockRefreshStreams} />
+        <StreamsSettingsFlyout
+          onClose={mockOnClose}
+          refreshStreams={mockRefreshStreams}
+          streamsStatus={streamsStatus}
+          onRefreshStatus={mockOnRefreshStatus}
+        />
       );
 
       await waitFor(() => {
@@ -261,14 +318,17 @@ describe('StreamsSettingsFlyout', () => {
 
       // Open modal
       await userEvent.click(screen.getByTestId('streamsWiredSwitch'));
-      expect(screen.getByTestId('streamsWiredDisableModal')).toBeInTheDocument();
+
+      await waitFor(() => {
+        expect(screen.getByText('Disable Wired Streams?')).toBeInTheDocument();
+      });
 
       // Click cancel
-      await userEvent.click(screen.getByTestId('streamsWiredDisableCancelButton'));
+      await userEvent.click(screen.getByText('Cancel'));
 
       // Modal should be closed
       await waitFor(() => {
-        expect(screen.queryByTestId('streamsWiredDisableModal')).not.toBeInTheDocument();
+        expect(screen.queryByText('Disable Wired Streams?')).not.toBeInTheDocument();
       });
 
       // Should NOT have disabled
@@ -276,13 +336,20 @@ describe('StreamsSettingsFlyout', () => {
     });
 
     it('should keep confirm button disabled until checkbox is checked', async () => {
-      mockGetWiredStatus.mockResolvedValue({
-        enabled: true,
+      const streamsStatus = {
+        logs: false,
+        'logs.otel': true,
+        'logs.ecs': true,
         can_manage: true,
-      });
+      };
 
       renderWithProviders(
-        <StreamsSettingsFlyout onClose={mockOnClose} refreshStreams={mockRefreshStreams} />
+        <StreamsSettingsFlyout
+          onClose={mockOnClose}
+          refreshStreams={mockRefreshStreams}
+          streamsStatus={streamsStatus}
+          onRefreshStatus={mockOnRefreshStatus}
+        />
       );
 
       await waitFor(() => {
@@ -293,26 +360,32 @@ describe('StreamsSettingsFlyout', () => {
       await userEvent.click(screen.getByTestId('streamsWiredSwitch'));
 
       // Confirm button should be disabled
-      const confirmButton = screen.getByTestId('streamsWiredDisableConfirmButton');
+      const confirmButton = screen.getByRole('button', { name: /disable/i });
       expect(confirmButton).toBeDisabled();
 
       // Check the confirmation checkbox
-      await userEvent.click(screen.getByTestId('streamsWiredDisableConfirmCheckbox'));
+      const checkbox = screen.getByRole('checkbox');
+      await userEvent.click(checkbox);
 
       // Now confirm button should be enabled
       expect(confirmButton).not.toBeDisabled();
     });
 
     it('should disable wired streams when confirmed', async () => {
-      mockGetWiredStatus.mockResolvedValue({
-        enabled: true,
+      const streamsStatus = {
+        logs: false,
+        'logs.otel': true,
+        'logs.ecs': true,
         can_manage: true,
-      });
-
-      mockDisableWiredMode.mockResolvedValue({});
+      };
 
       renderWithProviders(
-        <StreamsSettingsFlyout onClose={mockOnClose} refreshStreams={mockRefreshStreams} />
+        <StreamsSettingsFlyout
+          onClose={mockOnClose}
+          refreshStreams={mockRefreshStreams}
+          streamsStatus={streamsStatus}
+          onRefreshStatus={mockOnRefreshStatus}
+        />
       );
 
       await waitFor(() => {
@@ -323,35 +396,43 @@ describe('StreamsSettingsFlyout', () => {
       await userEvent.click(screen.getByTestId('streamsWiredSwitch'));
 
       // Check confirmation
-      await userEvent.click(screen.getByTestId('streamsWiredDisableConfirmCheckbox'));
+      const checkbox = screen.getByRole('checkbox');
+      await userEvent.click(checkbox);
 
       // Click confirm
-      await userEvent.click(screen.getByTestId('streamsWiredDisableConfirmButton'));
+      const confirmButton = screen.getByRole('button', { name: /disable/i });
+      await userEvent.click(confirmButton);
 
       await waitFor(() => {
         expect(mockDisableWiredMode).toHaveBeenCalled();
-        expect(mockGetWiredStatus).toHaveBeenCalledTimes(1); // Only on initial mount
+        expect(mockOnRefreshStatus).toHaveBeenCalled();
         expect(mockTrackWiredStreamsStatusChanged).toHaveBeenCalledWith({ is_enabled: false });
         expect(mockRefreshStreams).toHaveBeenCalled();
-        expect(screen.getByTestId('streamsWiredSwitch')).not.toBeChecked();
       });
 
       // Modal should be closed
       await waitFor(() => {
-        expect(screen.queryByTestId('streamsWiredDisableModal')).not.toBeInTheDocument();
+        expect(screen.queryByText('Disable Wired Streams?')).not.toBeInTheDocument();
       });
     });
 
     it('should show error toast if disabling fails', async () => {
-      mockGetWiredStatus.mockResolvedValue({
-        enabled: true,
+      const streamsStatus = {
+        logs: false,
+        'logs.otel': true,
+        'logs.ecs': true,
         can_manage: true,
-      });
+      };
 
       mockDisableWiredMode.mockRejectedValue(new Error('Disable failed'));
 
       renderWithProviders(
-        <StreamsSettingsFlyout onClose={mockOnClose} refreshStreams={mockRefreshStreams} />
+        <StreamsSettingsFlyout
+          onClose={mockOnClose}
+          refreshStreams={mockRefreshStreams}
+          streamsStatus={streamsStatus}
+          onRefreshStatus={mockOnRefreshStatus}
+        />
       );
 
       await waitFor(() => {
@@ -362,8 +443,10 @@ describe('StreamsSettingsFlyout', () => {
       await userEvent.click(screen.getByTestId('streamsWiredSwitch'));
 
       // Check and confirm
-      await userEvent.click(screen.getByTestId('streamsWiredDisableConfirmCheckbox'));
-      await userEvent.click(screen.getByTestId('streamsWiredDisableConfirmButton'));
+      const checkbox = screen.getByRole('checkbox');
+      await userEvent.click(checkbox);
+      const confirmButton = screen.getByRole('button', { name: /disable/i });
+      await userEvent.click(confirmButton);
 
       await waitFor(() => {
         expect(mockAddError).toHaveBeenCalledWith(
@@ -383,13 +466,20 @@ describe('StreamsSettingsFlyout', () => {
         features: {},
       } as any);
 
-      mockGetWiredStatus.mockResolvedValue({
-        enabled: true,
+      const streamsStatus = {
+        logs: false,
+        'logs.otel': true,
+        'logs.ecs': true,
         can_manage: true,
-      });
+      };
 
       renderWithProviders(
-        <StreamsSettingsFlyout onClose={mockOnClose} refreshStreams={mockRefreshStreams} />
+        <StreamsSettingsFlyout
+          onClose={mockOnClose}
+          refreshStreams={mockRefreshStreams}
+          streamsStatus={streamsStatus}
+          onRefreshStatus={mockOnRefreshStatus}
+        />
       );
 
       await waitFor(() => {
@@ -400,13 +490,20 @@ describe('StreamsSettingsFlyout', () => {
     });
 
     it('should disable switch when Elasticsearch permissions are insufficient', async () => {
-      mockGetWiredStatus.mockResolvedValue({
-        enabled: true,
+      const streamsStatus = {
+        logs: false,
+        'logs.otel': true,
+        'logs.ecs': true,
         can_manage: false, // No ES permissions
-      });
+      };
 
       renderWithProviders(
-        <StreamsSettingsFlyout onClose={mockOnClose} refreshStreams={mockRefreshStreams} />
+        <StreamsSettingsFlyout
+          onClose={mockOnClose}
+          refreshStreams={mockRefreshStreams}
+          streamsStatus={streamsStatus}
+          onRefreshStatus={mockOnRefreshStatus}
+        />
       );
 
       await waitFor(() => {

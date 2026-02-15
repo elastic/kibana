@@ -89,6 +89,32 @@ describe('validateStreamlang', () => {
       expect(result.errors[0].field).toBe('field1');
       expect(result.errors[1].field).toBe('field2');
     });
+
+    it('should allow non-namespaced fields when skipNamespaceValidation is true (logs.ecs streams)', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'set',
+            to: 'test_field',
+            value: 'test',
+          },
+          {
+            action: 'set',
+            to: 'host.name',
+            value: 'my-host',
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+        streamType: 'wired',
+        skipNamespaceValidation: true,
+      });
+
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
   });
 
   describe('reserved field validation', () => {

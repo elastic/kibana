@@ -14,6 +14,9 @@ apiTest.describe(
   'Stream data processing - simulate processing API',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    // Use logs.otel as it's guaranteed to exist after enableStreams() in fresh installs
+    const testStream = 'logs.otel';
+
     // Grok processor tests
     apiTest(
       'should simulate grok pattern with HTTP log format',
@@ -27,7 +30,7 @@ apiTest.describe(
         ];
 
         const { statusCode, body } = await apiClient.post(
-          'internal/streams/logs/processing/_simulate',
+          `internal/streams/${testStream}/processing/_simulate`,
           {
             headers: {
               ...COMMON_API_HEADERS,
@@ -62,7 +65,7 @@ apiTest.describe(
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
       const { statusCode, body } = await apiClient.post(
-        'internal/streams/logs/processing/_simulate',
+        `internal/streams/${testStream}/processing/_simulate`,
         {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },
           body: {
@@ -93,7 +96,7 @@ apiTest.describe(
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
         const { statusCode, body } = await apiClient.post(
-          'internal/streams/logs/processing/_simulate',
+          `internal/streams/${testStream}/processing/_simulate`,
           {
             headers: { ...COMMON_API_HEADERS, ...cookieHeader },
             body: {
@@ -132,7 +135,7 @@ apiTest.describe(
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
         const { statusCode, body } = await apiClient.post(
-          'internal/streams/logs/processing/_simulate',
+          `internal/streams/${testStream}/processing/_simulate`,
           {
             headers: { ...COMMON_API_HEADERS, ...cookieHeader },
             body: {
@@ -168,7 +171,7 @@ apiTest.describe(
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
         const { statusCode, body } = await apiClient.post(
-          'internal/streams/logs/processing/_simulate',
+          `internal/streams/${testStream}/processing/_simulate`,
           {
             headers: { ...COMMON_API_HEADERS, ...cookieHeader },
             body: {
@@ -198,23 +201,26 @@ apiTest.describe(
     apiTest('should simulate grok with ignore_missing option', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-      const { statusCode } = await apiClient.post('internal/streams/logs/processing/_simulate', {
-        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: {
-          processing: {
-            steps: [
-              {
-                action: 'grok',
-                from: 'nonexistent_field',
-                patterns: ['%{WORD:attributes.word}'],
-                ignore_missing: true,
-              },
-            ],
+      const { statusCode } = await apiClient.post(
+        `internal/streams/${testStream}/processing/_simulate`,
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            processing: {
+              steps: [
+                {
+                  action: 'grok',
+                  from: 'nonexistent_field',
+                  patterns: ['%{WORD:attributes.word}'],
+                  ignore_missing: true,
+                },
+              ],
+            },
+            documents: [{ 'body.text': 'test', '@timestamp': new Date().toISOString() }],
           },
-          documents: [{ 'body.text': 'test', '@timestamp': new Date().toISOString() }],
-        },
-        responseType: 'json',
-      });
+          responseType: 'json',
+        }
+      );
 
       expect(statusCode).toBe(200);
     });
@@ -226,7 +232,7 @@ apiTest.describe(
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
         const { statusCode, body } = await apiClient.post(
-          'internal/streams/logs/processing/_simulate',
+          `internal/streams/${testStream}/processing/_simulate`,
           {
             headers: { ...COMMON_API_HEADERS, ...cookieHeader },
             body: {
@@ -257,28 +263,31 @@ apiTest.describe(
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-        const { statusCode } = await apiClient.post('internal/streams/logs/processing/_simulate', {
-          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-          body: {
-            processing: {
-              steps: [
+        const { statusCode } = await apiClient.post(
+          `internal/streams/${testStream}/processing/_simulate`,
+          {
+            headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+            body: {
+              processing: {
+                steps: [
+                  {
+                    action: 'dissect',
+                    from: 'body.text',
+                    pattern:
+                      '%{attributes.timestamp}|%{attributes.level}|%{attributes.component}|%{attributes.message_text}',
+                  },
+                ],
+              },
+              documents: [
                 {
-                  action: 'dissect',
-                  from: 'body.text',
-                  pattern:
-                    '%{attributes.timestamp}|%{attributes.level}|%{attributes.component}|%{attributes.message_text}',
+                  'body.text': '2026-01-19|ERROR|auth|Login failed',
+                  '@timestamp': new Date().toISOString(),
                 },
               ],
             },
-            documents: [
-              {
-                'body.text': '2026-01-19|ERROR|auth|Login failed',
-                '@timestamp': new Date().toISOString(),
-              },
-            ],
-          },
-          responseType: 'json',
-        });
+            responseType: 'json',
+          }
+        );
 
         expect(statusCode).toBe(200);
       }
@@ -287,23 +296,26 @@ apiTest.describe(
     apiTest('should simulate dissect with append separator', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-      const { statusCode } = await apiClient.post('internal/streams/logs/processing/_simulate', {
-        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: {
-          processing: {
-            steps: [
-              {
-                action: 'dissect',
-                from: 'body.text',
-                pattern: '%{+attributes.name} %{+attributes.name}',
-                append_separator: ' ',
-              },
-            ],
+      const { statusCode } = await apiClient.post(
+        `internal/streams/${testStream}/processing/_simulate`,
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            processing: {
+              steps: [
+                {
+                  action: 'dissect',
+                  from: 'body.text',
+                  pattern: '%{+attributes.name} %{+attributes.name}',
+                  append_separator: ' ',
+                },
+              ],
+            },
+            documents: [{ 'body.text': 'John Doe', '@timestamp': new Date().toISOString() }],
           },
-          documents: [{ 'body.text': 'John Doe', '@timestamp': new Date().toISOString() }],
-        },
-        responseType: 'json',
-      });
+          responseType: 'json',
+        }
+      );
 
       expect(statusCode).toBe(200);
     });
@@ -311,23 +323,26 @@ apiTest.describe(
     apiTest('should handle dissect with ignore_missing option', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-      const { statusCode } = await apiClient.post('internal/streams/logs/processing/_simulate', {
-        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: {
-          processing: {
-            steps: [
-              {
-                action: 'dissect',
-                from: 'nonexistent',
-                pattern: '%{attributes.field}',
-                ignore_missing: true,
-              },
-            ],
+      const { statusCode } = await apiClient.post(
+        `internal/streams/${testStream}/processing/_simulate`,
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            processing: {
+              steps: [
+                {
+                  action: 'dissect',
+                  from: 'nonexistent',
+                  pattern: '%{attributes.field}',
+                  ignore_missing: true,
+                },
+              ],
+            },
+            documents: [{ 'body.text': 'test', '@timestamp': new Date().toISOString() }],
           },
-          documents: [{ 'body.text': 'test', '@timestamp': new Date().toISOString() }],
-        },
-        responseType: 'json',
-      });
+          responseType: 'json',
+        }
+      );
 
       expect(statusCode).toBe(200);
     });
@@ -336,28 +351,31 @@ apiTest.describe(
     apiTest('should simulate date parsing with ISO format', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-      const { statusCode } = await apiClient.post('internal/streams/logs/processing/_simulate', {
-        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: {
-          processing: {
-            steps: [
+      const { statusCode } = await apiClient.post(
+        `internal/streams/${testStream}/processing/_simulate`,
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            processing: {
+              steps: [
+                {
+                  action: 'date',
+                  from: 'timestamp_string',
+                  formats: ['ISO8601'],
+                },
+              ],
+            },
+            documents: [
               {
-                action: 'date',
-                from: 'timestamp_string',
-                formats: ['ISO8601'],
+                timestamp_string: '2026-01-19T12:00:00.000Z',
+                'body.text': 'test',
+                '@timestamp': new Date().toISOString(),
               },
             ],
           },
-          documents: [
-            {
-              timestamp_string: '2026-01-19T12:00:00.000Z',
-              'body.text': 'test',
-              '@timestamp': new Date().toISOString(),
-            },
-          ],
-        },
-        responseType: 'json',
-      });
+          responseType: 'json',
+        }
+      );
 
       expect(statusCode).toBe(200);
     });
@@ -367,7 +385,42 @@ apiTest.describe(
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-        const { statusCode } = await apiClient.post('internal/streams/logs/processing/_simulate', {
+        const { statusCode } = await apiClient.post(
+          `internal/streams/${testStream}/processing/_simulate`,
+          {
+            headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+            body: {
+              processing: {
+                steps: [
+                  {
+                    action: 'date',
+                    from: 'timestamp_string',
+                    formats: ['yyyy-MM-dd HH:mm:ss', 'yyyy/MM/dd HH:mm:ss', 'ISO8601'],
+                  },
+                ],
+              },
+              documents: [
+                {
+                  timestamp_string: '2026-01-19 12:00:00',
+                  'body.text': 'test',
+                  '@timestamp': new Date().toISOString(),
+                },
+              ],
+            },
+            responseType: 'json',
+          }
+        );
+
+        expect(statusCode).toBe(200);
+      }
+    );
+
+    apiTest('should simulate date parsing with timezone', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asStreamsAdmin();
+
+      const { statusCode } = await apiClient.post(
+        `internal/streams/${testStream}/processing/_simulate`,
+        {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },
           body: {
             processing: {
@@ -375,7 +428,8 @@ apiTest.describe(
                 {
                   action: 'date',
                   from: 'timestamp_string',
-                  formats: ['yyyy-MM-dd HH:mm:ss', 'yyyy/MM/dd HH:mm:ss', 'ISO8601'],
+                  formats: ['yyyy-MM-dd HH:mm:ss'],
+                  timezone: 'America/New_York',
                 },
               ],
             },
@@ -388,38 +442,8 @@ apiTest.describe(
             ],
           },
           responseType: 'json',
-        });
-
-        expect(statusCode).toBe(200);
-      }
-    );
-
-    apiTest('should simulate date parsing with timezone', async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asStreamsAdmin();
-
-      const { statusCode } = await apiClient.post('internal/streams/logs/processing/_simulate', {
-        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: {
-          processing: {
-            steps: [
-              {
-                action: 'date',
-                from: 'timestamp_string',
-                formats: ['yyyy-MM-dd HH:mm:ss'],
-                timezone: 'America/New_York',
-              },
-            ],
-          },
-          documents: [
-            {
-              timestamp_string: '2026-01-19 12:00:00',
-              'body.text': 'test',
-              '@timestamp': new Date().toISOString(),
-            },
-          ],
-        },
-        responseType: 'json',
-      });
+        }
+      );
 
       expect(statusCode).toBe(200);
     });
@@ -428,24 +452,27 @@ apiTest.describe(
     apiTest('should simulate rename processor', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-      const { statusCode } = await apiClient.post('internal/streams/logs/processing/_simulate', {
-        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: {
-          processing: {
-            steps: [
-              {
-                action: 'rename',
-                from: 'old_field',
-                to: 'new_field',
-              },
+      const { statusCode } = await apiClient.post(
+        `internal/streams/${testStream}/processing/_simulate`,
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            processing: {
+              steps: [
+                {
+                  action: 'rename',
+                  from: 'old_field',
+                  to: 'new_field',
+                },
+              ],
+            },
+            documents: [
+              { old_field: 'value', 'body.text': 'test', '@timestamp': new Date().toISOString() },
             ],
           },
-          documents: [
-            { old_field: 'value', 'body.text': 'test', '@timestamp': new Date().toISOString() },
-          ],
-        },
-        responseType: 'json',
-      });
+          responseType: 'json',
+        }
+      );
 
       expect(statusCode).toBe(200);
     });
@@ -453,22 +480,25 @@ apiTest.describe(
     apiTest('should simulate set processor with literal value', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-      const { statusCode } = await apiClient.post('internal/streams/logs/processing/_simulate', {
-        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: {
-          processing: {
-            steps: [
-              {
-                action: 'set',
-                to: 'environment',
-                value: 'production',
-              },
-            ],
+      const { statusCode } = await apiClient.post(
+        `internal/streams/${testStream}/processing/_simulate`,
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            processing: {
+              steps: [
+                {
+                  action: 'set',
+                  to: 'environment',
+                  value: 'production',
+                },
+              ],
+            },
+            documents: [{ 'body.text': 'test', '@timestamp': new Date().toISOString() }],
           },
-          documents: [{ 'body.text': 'test', '@timestamp': new Date().toISOString() }],
-        },
-        responseType: 'json',
-      });
+          responseType: 'json',
+        }
+      );
 
       expect(statusCode).toBe(200);
     });
@@ -476,22 +506,25 @@ apiTest.describe(
     apiTest('should simulate set processor with copy_from', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-      const { statusCode } = await apiClient.post('internal/streams/logs/processing/_simulate', {
-        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: {
-          processing: {
-            steps: [
-              {
-                action: 'set',
-                to: 'backup_message',
-                copy_from: 'body.text',
-              },
-            ],
+      const { statusCode } = await apiClient.post(
+        `internal/streams/${testStream}/processing/_simulate`,
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            processing: {
+              steps: [
+                {
+                  action: 'set',
+                  to: 'backup_message',
+                  copy_from: 'body.text',
+                },
+              ],
+            },
+            documents: [{ 'body.text': 'original', '@timestamp': new Date().toISOString() }],
           },
-          documents: [{ 'body.text': 'original', '@timestamp': new Date().toISOString() }],
-        },
-        responseType: 'json',
-      });
+          responseType: 'json',
+        }
+      );
 
       expect(statusCode).toBe(200);
     });
@@ -499,27 +532,30 @@ apiTest.describe(
     apiTest('should simulate remove processor', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-      const { statusCode } = await apiClient.post('internal/streams/logs/processing/_simulate', {
-        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: {
-          processing: {
-            steps: [
+      const { statusCode } = await apiClient.post(
+        `internal/streams/${testStream}/processing/_simulate`,
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            processing: {
+              steps: [
+                {
+                  action: 'remove',
+                  from: 'sensitive_data',
+                },
+              ],
+            },
+            documents: [
               {
-                action: 'remove',
-                from: 'sensitive_data',
+                'body.text': 'test',
+                sensitive_data: 'secret',
+                '@timestamp': new Date().toISOString(),
               },
             ],
           },
-          documents: [
-            {
-              'body.text': 'test',
-              sensitive_data: 'secret',
-              '@timestamp': new Date().toISOString(),
-            },
-          ],
-        },
-        responseType: 'json',
-      });
+          responseType: 'json',
+        }
+      );
 
       expect(statusCode).toBe(200);
     });
@@ -527,23 +563,26 @@ apiTest.describe(
     apiTest('should simulate uppercase processor', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-      const { statusCode } = await apiClient.post('internal/streams/logs/processing/_simulate', {
-        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: {
-          processing: {
-            steps: [
-              {
-                action: 'uppercase',
-                from: 'level',
-              },
+      const { statusCode } = await apiClient.post(
+        `internal/streams/${testStream}/processing/_simulate`,
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            processing: {
+              steps: [
+                {
+                  action: 'uppercase',
+                  from: 'level',
+                },
+              ],
+            },
+            documents: [
+              { level: 'error', 'body.text': 'test', '@timestamp': new Date().toISOString() },
             ],
           },
-          documents: [
-            { level: 'error', 'body.text': 'test', '@timestamp': new Date().toISOString() },
-          ],
-        },
-        responseType: 'json',
-      });
+          responseType: 'json',
+        }
+      );
 
       expect(statusCode).toBe(200);
     });
@@ -551,23 +590,26 @@ apiTest.describe(
     apiTest('should simulate lowercase processor', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-      const { statusCode } = await apiClient.post('internal/streams/logs/processing/_simulate', {
-        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: {
-          processing: {
-            steps: [
-              {
-                action: 'lowercase',
-                from: 'level',
-              },
+      const { statusCode } = await apiClient.post(
+        `internal/streams/${testStream}/processing/_simulate`,
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            processing: {
+              steps: [
+                {
+                  action: 'lowercase',
+                  from: 'level',
+                },
+              ],
+            },
+            documents: [
+              { level: 'ERROR', 'body.text': 'test', '@timestamp': new Date().toISOString() },
             ],
           },
-          documents: [
-            { level: 'ERROR', 'body.text': 'test', '@timestamp': new Date().toISOString() },
-          ],
-        },
-        responseType: 'json',
-      });
+          responseType: 'json',
+        }
+      );
 
       expect(statusCode).toBe(200);
     });
@@ -575,27 +617,30 @@ apiTest.describe(
     apiTest('should simulate trim processor', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-      const { statusCode } = await apiClient.post('internal/streams/logs/processing/_simulate', {
-        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: {
-          processing: {
-            steps: [
+      const { statusCode } = await apiClient.post(
+        `internal/streams/${testStream}/processing/_simulate`,
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            processing: {
+              steps: [
+                {
+                  action: 'trim',
+                  from: 'padded_value',
+                },
+              ],
+            },
+            documents: [
               {
-                action: 'trim',
-                from: 'padded_value',
+                padded_value: '  trimmed  ',
+                'body.text': 'test',
+                '@timestamp': new Date().toISOString(),
               },
             ],
           },
-          documents: [
-            {
-              padded_value: '  trimmed  ',
-              'body.text': 'test',
-              '@timestamp': new Date().toISOString(),
-            },
-          ],
-        },
-        responseType: 'json',
-      });
+          responseType: 'json',
+        }
+      );
 
       expect(statusCode).toBe(200);
     });
@@ -603,24 +648,27 @@ apiTest.describe(
     apiTest('should simulate convert processor', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-      const { statusCode } = await apiClient.post('internal/streams/logs/processing/_simulate', {
-        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: {
-          processing: {
-            steps: [
-              {
-                action: 'convert',
-                from: 'status_code',
-                type: 'integer',
-              },
+      const { statusCode } = await apiClient.post(
+        `internal/streams/${testStream}/processing/_simulate`,
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            processing: {
+              steps: [
+                {
+                  action: 'convert',
+                  from: 'status_code',
+                  type: 'integer',
+                },
+              ],
+            },
+            documents: [
+              { status_code: '200', 'body.text': 'test', '@timestamp': new Date().toISOString() },
             ],
           },
-          documents: [
-            { status_code: '200', 'body.text': 'test', '@timestamp': new Date().toISOString() },
-          ],
-        },
-        responseType: 'json',
-      });
+          responseType: 'json',
+        }
+      );
 
       expect(statusCode).toBe(200);
     });
@@ -628,28 +676,31 @@ apiTest.describe(
     apiTest('should simulate replace processor', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-      const { statusCode } = await apiClient.post('internal/streams/logs/processing/_simulate', {
-        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: {
-          processing: {
-            steps: [
+      const { statusCode } = await apiClient.post(
+        `internal/streams/${testStream}/processing/_simulate`,
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            processing: {
+              steps: [
+                {
+                  action: 'replace',
+                  from: 'body.text',
+                  pattern: 'password=[^&]+',
+                  replacement: 'password=***',
+                },
+              ],
+            },
+            documents: [
               {
-                action: 'replace',
-                from: 'body.text',
-                pattern: 'password=[^&]+',
-                replacement: 'password=***',
+                'body.text': 'login?user=john&password=secret123',
+                '@timestamp': new Date().toISOString(),
               },
             ],
           },
-          documents: [
-            {
-              'body.text': 'login?user=john&password=secret123',
-              '@timestamp': new Date().toISOString(),
-            },
-          ],
-        },
-        responseType: 'json',
-      });
+          responseType: 'json',
+        }
+      );
 
       expect(statusCode).toBe(200);
     });
@@ -659,7 +710,7 @@ apiTest.describe(
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
       const { statusCode, body } = await apiClient.post(
-        'internal/streams/logs/processing/_simulate',
+        `internal/streams/${testStream}/processing/_simulate`,
         {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },
           body: {
@@ -703,26 +754,29 @@ apiTest.describe(
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-        const { statusCode } = await apiClient.post('internal/streams/logs/processing/_simulate', {
-          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-          body: {
-            processing: {
-              steps: [
-                {
-                  action: 'set',
-                  to: 'severity',
-                  value: 'high',
-                  where: { field: 'level', eq: 'error' },
-                },
+        const { statusCode } = await apiClient.post(
+          `internal/streams/${testStream}/processing/_simulate`,
+          {
+            headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+            body: {
+              processing: {
+                steps: [
+                  {
+                    action: 'set',
+                    to: 'severity',
+                    value: 'high',
+                    where: { field: 'level', eq: 'error' },
+                  },
+                ],
+              },
+              documents: [
+                { level: 'error', 'body.text': 'test', '@timestamp': new Date().toISOString() },
+                { level: 'info', 'body.text': 'test', '@timestamp': new Date().toISOString() },
               ],
             },
-            documents: [
-              { level: 'error', 'body.text': 'test', '@timestamp': new Date().toISOString() },
-              { level: 'info', 'body.text': 'test', '@timestamp': new Date().toISOString() },
-            ],
-          },
-          responseType: 'json',
-        });
+            responseType: 'json',
+          }
+        );
 
         expect(statusCode).toBe(200);
       }
@@ -734,21 +788,24 @@ apiTest.describe(
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-        const { statusCode } = await apiClient.post('internal/streams/logs/processing/_simulate', {
-          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-          body: {
-            processing: {
-              steps: [
-                {
-                  action: 'grok',
-                  // Missing 'from' and 'patterns'
-                },
-              ],
+        const { statusCode } = await apiClient.post(
+          `internal/streams/${testStream}/processing/_simulate`,
+          {
+            headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+            body: {
+              processing: {
+                steps: [
+                  {
+                    action: 'grok',
+                    // Missing 'from' and 'patterns'
+                  },
+                ],
+              },
+              documents: [],
             },
-            documents: [],
-          },
-          responseType: 'json',
-        });
+            responseType: 'json',
+          }
+        );
 
         expect(statusCode).toBe(400);
       }
@@ -757,21 +814,24 @@ apiTest.describe(
     apiTest('should return 400 for invalid action type', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-      const { statusCode } = await apiClient.post('internal/streams/logs/processing/_simulate', {
-        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: {
-          processing: {
-            steps: [
-              {
-                action: 'invalid_action',
-                from: 'message',
-              },
-            ],
+      const { statusCode } = await apiClient.post(
+        `internal/streams/${testStream}/processing/_simulate`,
+        {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            processing: {
+              steps: [
+                {
+                  action: 'invalid_action',
+                  from: 'message',
+                },
+              ],
+            },
+            documents: [],
           },
-          documents: [],
-        },
-        responseType: 'json',
-      });
+          responseType: 'json',
+        }
+      );
 
       expect(statusCode).toBe(400);
     });
@@ -780,7 +840,7 @@ apiTest.describe(
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
       const { statusCode, body } = await apiClient.post(
-        'internal/streams/logs/processing/_simulate',
+        `internal/streams/${testStream}/processing/_simulate`,
         {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },
           body: {
@@ -807,7 +867,7 @@ apiTest.describe(
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
       const { statusCode, body } = await apiClient.post(
-        'internal/streams/logs/processing/_simulate',
+        `internal/streams/${testStream}/processing/_simulate`,
         {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },
           body: {
@@ -829,7 +889,7 @@ apiTest.describe(
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
       const { statusCode, body } = await apiClient.post(
-        'internal/streams/logs/processing/_simulate',
+        `internal/streams/${testStream}/processing/_simulate`,
         {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },
           body: {
