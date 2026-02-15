@@ -13,7 +13,6 @@ steps:
       - linting
       - linting_with_types
       - check_types
-      - check_oas_snapshot
     retry:
       automatic:
         - exit_status: '*'
