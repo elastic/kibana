@@ -16,6 +16,7 @@ const categories = [
   { key: 'missingComplexTypeInfo', title: 'missing complex type info' },
   { key: 'isAnyType', title: 'any usage' },
   { key: 'noReferences', title: 'no references' },
+  { key: 'unnamedExports', title: 'unnamed exports' },
 ];
 
 /**
@@ -64,11 +65,14 @@ const formatCategory = (title, entries) => {
   const sorted = [...entries].sort((a, b) => {
     const lineA = a.lineNumber ?? Number.MAX_SAFE_INTEGER;
     const lineB = b.lineNumber ?? Number.MAX_SAFE_INTEGER;
-    return lineA === lineB ? a.label.localeCompare(b.label) : lineA - lineB;
+    const labelA = a.label || a.textSnippet || '';
+    const labelB = b.label || b.textSnippet || '';
+    return lineA === lineB ? labelA.localeCompare(labelB) : lineA - lineB;
   });
   sorted.forEach((entry) => {
     const lineInfo = entry.lineNumber != null ? `line ${entry.lineNumber}` : 'unknown line';
-    lines.push(`//     ${lineInfo} - ${entry.label}`);
+    const label = entry.label || entry.textSnippet || '(unnamed)';
+    lines.push(`//     ${lineInfo} - ${label}`);
   });
   return lines.join('\n');
 };

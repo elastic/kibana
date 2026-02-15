@@ -45,6 +45,7 @@ export function buildApiMap(
     unreferencedDeprecations,
     referencedDeprecations,
     adoptionTrackedAPIs,
+    unnamedExports,
   } = getPluginApiMap(project, plugins, log, {
     collectReferences: options.collectReferences,
     pluginFilter: options.pluginFilter,
@@ -58,5 +59,6 @@ export function buildApiMap(
     referencedDeprecations,
     unreferencedDeprecations,
     adoptionTrackedAPIs,
+    unnamedExports,
   };
 }

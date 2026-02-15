@@ -6,7 +6,8 @@
     "paramDocMismatches": 13,
     "missingComplexTypeInfo": 15,
     "isAnyType": 1,
-    "noReferences": 135
+    "noReferences": 135,
+    "unnamedExports": 0
   },
   "missingComments": [
     {
@@ -1841,5 +1842,6 @@
       "lineNumber": 12,
       "columnNumber": 1
     }
-  ]
+  ],
+  "unnamedExports": []
 }

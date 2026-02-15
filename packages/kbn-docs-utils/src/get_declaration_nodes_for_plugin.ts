@@ -10,8 +10,16 @@
 import Path from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Project, SourceFile, Node } from 'ts-morph';
-import type { ApiScope, PluginOrPackage } from './types';
+import { type ApiScope, type PluginOrPackage, type UnnamedExport } from './types';
 import { isNamedNode, getSourceFileMatching } from './tsmorph_utils';
+
+/**
+ * Result of collecting declaration nodes, including any unnamed exports found.
+ */
+export interface DeclarationNodesResult {
+  nodes: Node[];
+  unnamedExports: UnnamedExport[];
+}
 
 /**
  * Determines which file in the project to grab nodes from, depending on the plugin and scope, then returns those nodes.
@@ -21,17 +29,20 @@ import { isNamedNode, getSourceFileMatching } from './tsmorph_utils';
  * @param scope - The "scope"  of the API we want to extract: public, server or common.
  * @param log - logging utility.
  *
- * @return Every publically exported Node from the given plugin and scope (public, server, common).
+ * @return Every publicly exported Node from the given plugin and scope (public, server, common),
+ *         along with any unnamed exports that were encountered.
  */
 export function getDeclarationNodesForPluginScope(
   project: Project,
   plugin: PluginOrPackage,
   scope: ApiScope,
   log: ToolingLog
-): Node[] {
+): DeclarationNodesResult {
   // Packages specify the intended scope in the package.json, while plugins specify the scope
   // using folder structure.
-  if (!plugin.isPlugin && scope !== plugin.scope) return [];
+  if (!plugin.isPlugin && scope !== plugin.scope) {
+    return { nodes: [], unnamedExports: [] };
+  }
 
   const path = plugin.isPlugin
     ? Path.join(`${plugin.directory}`, scope.toString(), 'index.ts')
@@ -39,20 +50,30 @@ export function getDeclarationNodesForPluginScope(
   const file = getSourceFileMatching(project, path);
 
   if (file) {
-    return getExportedFileDeclarations(file, log);
+    return getExportedFileDeclarations(file, plugin.id, scope, log);
   } else {
     log.debug(`No file found: ${path}`);
-    return [];
+    return { nodes: [], unnamedExports: [] };
   }
 }
 
 /**
+ * Extracts exported declaration nodes from a source file.
  *
- * @param source the file we want to extract exported declaration nodes from.
- * @param log
+ * @param source - The file we want to extract exported declaration nodes from.
+ * @param pluginId - The plugin or package ID for tracking unnamed exports.
+ * @param scope - The API scope (client, server, common).
+ * @param log - Logging utility.
+ * @returns The extracted nodes and any unnamed exports encountered.
  */
-function getExportedFileDeclarations(source: SourceFile, log: ToolingLog): Node[] {
+function getExportedFileDeclarations(
+  source: SourceFile,
+  pluginId: string,
+  scope: ApiScope,
+  log: ToolingLog
+): DeclarationNodesResult {
   const nodes: Node[] = [];
+  const unnamedExports: UnnamedExport[] = [];
   const exported = source.getExportedDeclarations();
 
   // Filter out the exported declarations that exist only for the plugin system itself.
@@ -70,11 +91,29 @@ function getExportedFileDeclarations(source: SourceFile, log: ToolingLog): Node[
       if (name && name !== '') {
         nodes.push(ed);
       } else {
-        log.warning(`API with missing name encountered, text is ` + ed.getText().substring(0, 50));
+        const filePath = source.getFilePath();
+        const lineNumber = ed.getStartLineNumber();
+        const textSnippet = ed.getText().substring(0, 100).replace(/\n/g, ' ');
+        unnamedExports.push({
+          pluginId,
+          scope,
+          path: filePath,
+          lineNumber,
+          textSnippet,
+        });
+        log.debug(
+          `Unnamed export in ${pluginId} at ${filePath}:${lineNumber}: ${textSnippet.substring(
+            0,
+            50
+          )}`
+        );
       }
     });
   });
 
   log.debug(`Collected ${nodes.length} exports from file ${source.getFilePath()}`);
-  return nodes;
+  if (unnamedExports.length > 0) {
+    log.debug(`Found ${unnamedExports.length} unnamed exports in ${source.getFilePath()}`);
+  }
+  return { nodes, unnamedExports };
 }

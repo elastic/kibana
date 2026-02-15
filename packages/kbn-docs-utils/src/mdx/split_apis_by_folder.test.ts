@@ -38,7 +38,8 @@ beforeAll(() => {
   pluginA.manifest.serviceFolders = ['foo'];
   const plugins: PluginOrPackage[] = [pluginA];
 
-  doc = getPluginApi(project, plugins[0], plugins, log, false);
+  const { pluginApi } = getPluginApi(project, plugins[0], plugins, log, false);
+  doc = pluginApi;
 });
 
 test('foo service has all exports', () => {
