@@ -12,6 +12,7 @@ import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions/entity_schema';
+import { ENGINE_STATUS } from '../../domain/constants';
 
 const bodySchema = z.object({
   entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
@@ -43,7 +44,13 @@ export function registerStop(router: EntityStorePluginRouter) {
 
         logger.debug('Stop API invoked');
 
-        await Promise.all(entityTypes.map((type) => assetManager.stop(type)));
+        const { engines } = await assetManager.getStatus();
+        const startedTypes = new Set(
+          engines.filter((e) => e.status === ENGINE_STATUS.STARTED).map((e) => e.type)
+        );
+        const toStop = entityTypes.filter((type) => startedTypes.has(type));
+
+        await Promise.all(toStop.map((type) => assetManager.stop(type)));
 
         return res.ok({
           body: {

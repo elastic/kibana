@@ -30,7 +30,7 @@ function createMockEngineDescriptor(
 ) {
   const logExtractionState = LogExtractionState.parse({
     docsLimit: 10000,
-    additionalIndexPattern: '',
+    additionalIndexPatterns: [],
     lookbackPeriod: overrides?.lookbackPeriod ?? '3h',
     delay: overrides?.delay ?? '1m',
     paginationTimestamp: overrides?.paginationTimestamp,
