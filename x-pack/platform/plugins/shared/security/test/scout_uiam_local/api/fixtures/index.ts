@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-import { createFieldTestingConfig } from '../base.jest.integration.config';
-
-export default createFieldTestingConfig({
-  testsDirectory: 'type_specific',
-  groupNumber: 1,
-  totalGroups: 2,
-});
+export { extractAttributeValue } from './utils';
+export { COMMON_HEADERS, COMMON_UNSAFE_HEADERS } from './constants';
