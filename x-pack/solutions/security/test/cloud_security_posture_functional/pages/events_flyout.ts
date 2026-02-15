@@ -37,8 +37,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
   const expandedFlyoutGraph = pageObjects.expandedFlyoutGraph;
   const timelinePage = pageObjects.timeline;
 
-  // Failing: See https://github.com/elastic/kibana/issues/247414
-  describe.skip('Security Network Page - Graph visualization', function () {
+  describe('Security Network Page - Graph visualization', function () {
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {
@@ -118,7 +117,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       // Show events with the same action
       await expandedFlyoutGraph.showEventsOfSameAction(
-        'label(google.iam.admin.v1.CreateRole)ln(1)oe(1)oa(0)'
+        'label(google.iam.admin.v1.CreateRole)ln(d417ea74f69263353ca1f98e8269b8a6)oe(1)oa(0)'
       );
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
@@ -133,7 +132,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       // Hide events with the same action
       await expandedFlyoutGraph.hideEventsOfSameAction(
-        'label(google.iam.admin.v1.CreateRole)ln(1)oe(1)oa(0)'
+        'label(google.iam.admin.v1.CreateRole)ln(d417ea74f69263353ca1f98e8269b8a6)oe(1)oa(0)'
       );
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
@@ -309,7 +308,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.showEventOrAlertDetails(
-        'label(google.iam.admin.v1.CreateRole2)ln(6)oe(1)oa(0)'
+        'label(google.iam.admin.v1.CreateRole2)ln(528a070f7bdd4fdac70ee28fbe835f04)oe(1)oa(0)'
       );
       // An alert is always coupled with an event, so we open the group preview panel instead of the alert panel
       await networkEventsPage.flyout.assertPreviewPanelIsOpen('group');
@@ -377,8 +376,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           // - 1 grouped actor node (2 actors: multi-actor-1, multi-actor-2 - same Identity/GCP IAM User)
           // - 1 grouped storage node (2 buckets: target-bucket-1, target-bucket-2 - same Storage/GCP Storage Bucket)
           // - 1 grouped service node (2 service accounts: target-multi-service-1, target-multi-service-2 - same Service/GCP Service Account)
-          // - 2 label nodes (actor group -> storage group, actor group -> service group)
-          const expectedNodes = 5;
+          // - 1 label node (actor group -> storage group and service group)
+          const expectedNodes = 4;
           await networkEventsPage.flyout.assertGraphNodesNumber(expectedNodes);
 
           await expandedFlyoutGraph.expandGraph();
@@ -445,26 +444,29 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           // Verify actor node
           const actorNodeId = 'mv-expand-test-actor@example.com';
           await expandedFlyoutGraph.assertNodeEntityTag(actorNodeId, 'Identity');
-          await expandedFlyoutGraph.assertNodeEntityDetails(actorNodeId, 'GCP IAM User');
+          await expandedFlyoutGraph.assertNodeEntityDetails(actorNodeId, 'MvExpandTestActor');
 
           // Verify first target (Identity type)
           const identityTargetNodeId = 'mv-expand-target-identity';
           await expandedFlyoutGraph.assertNodeEntityTag(identityTargetNodeId, 'Identity');
-          await expandedFlyoutGraph.assertNodeEntityDetails(identityTargetNodeId, 'GCP IAM User');
+          await expandedFlyoutGraph.assertNodeEntityDetails(
+            identityTargetNodeId,
+            'MvExpandTargetIdentity'
+          );
 
           // Verify second target (Storage type - different from first target!)
           const storageTargetNodeId = 'mv-expand-target-storage';
           await expandedFlyoutGraph.assertNodeEntityTag(storageTargetNodeId, 'Storage');
           await expandedFlyoutGraph.assertNodeEntityDetails(
             storageTargetNodeId,
-            'GCP Storage Bucket'
+            'MvExpandTargetStorage'
           );
 
           // Verify the label node exists
           // Format: label(action)ln(labelNodeId)oe(isOrigin)oa(isOriginAlert)
           // The labelNodeId is the document ID since there's only one document
           const labelNodeId =
-            'label(google.iam.admin.v1.MvExpandTest)ln(MvExpandBugTest123)oe(0)oa(0)';
+            'label(google.iam.admin.v1.MvExpandTest)ln(MvExpandBugTest123)oe(1)oa(0)';
           await expandedFlyoutGraph.assertNodeExists(labelNodeId);
         });
       };

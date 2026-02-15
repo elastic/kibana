@@ -115,7 +115,19 @@ export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';
  * Entity store latest index pattern for LOOKUP JOIN queries.
  * The <space> placeholder should be replaced with the actual space ID.
  */
-export const ENTITIES_LATEST_INDEX = '.entities.v2.latest.security_generic_<space>';
+export const ENTITIES_LATEST_INDEX = '.entities.v2.latest.security_<space>';
+
+/**
+ * Relationship fields available in the generic entities index.
+ * These represent static/configuration-based relationships between entities.
+ */
+export const ENTITY_RELATIONSHIP_FIELDS = [
+  'Accesses_frequently',
+  'Communicates_with',
+  'Depends_on',
+  'Owns',
+  'Supervises',
+] as const;
 
 /**
  * ECS entity actor fields used for graph visualization.

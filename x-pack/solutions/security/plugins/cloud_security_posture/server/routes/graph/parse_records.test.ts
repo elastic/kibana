@@ -12,7 +12,7 @@ import {
   type GroupNodeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { parseRecords } from './parse_records';
-import type { GraphEdge } from './types';
+import type { EventEdge, RelationshipEdge } from './types';
 
 const mockLogger = {
   trace: jest.fn(),
@@ -25,14 +25,14 @@ describe('parseRecords', () => {
   });
 
   it('returns empty nodes and edges for empty input', () => {
-    const result = parseRecords(mockLogger, []);
+    const result = parseRecords(mockLogger, [], []);
     expect(result.nodes).toEqual([]);
     expect(result.edges).toEqual([]);
     expect(result.messages).toBeUndefined();
   });
 
   it('creates nodes and edges for a single actor-target-action with entity groups', () => {
-    const records: GraphEdge[] = [
+    const records: EventEdge[] = [
       {
         action: 'login',
         actorNodeId: 'actor1',
@@ -63,7 +63,7 @@ describe('parseRecords', () => {
         labelNodeId: 'doc-id-1',
       },
     ];
-    const result = parseRecords(mockLogger, records);
+    const result = parseRecords(mockLogger, records, []);
 
     // Should have 3 nodes: actor (entity ID), target (entity ID), label
     expect(result.nodes.length).toBe(3);
@@ -110,7 +110,7 @@ describe('parseRecords', () => {
   });
 
   it('handles docs as a single string', () => {
-    const records: GraphEdge[] = [
+    const records: EventEdge[] = [
       {
         action: 'foo',
         actorNodeId: 'actor1',
@@ -139,7 +139,7 @@ describe('parseRecords', () => {
         labelNodeId: 'doc-id-1',
       },
     ];
-    const result = parseRecords(mockLogger, records);
+    const result = parseRecords(mockLogger, records, []);
     const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
     expect(labelNode).toBeDefined();
     expect(labelNode).toHaveProperty('documentsData', [{ a: 1 }]);
@@ -152,7 +152,7 @@ describe('parseRecords', () => {
   });
 
   it('creates group node when multiple actions between same actor and target groups', () => {
-    const records: GraphEdge[] = [
+    const records: EventEdge[] = [
       {
         action: 'login',
         actorNodeId: 'actor1',
@@ -212,7 +212,7 @@ describe('parseRecords', () => {
         labelNodeId: 'doc-id-1',
       },
     ];
-    const result = parseRecords(mockLogger, records);
+    const result = parseRecords(mockLogger, records, []);
 
     // Event 1 creates: test-actor-hash (MD5), test-target-hash (MD5)
     // Event 2 creates: test-actor-hash (reused), test-target-hash (reused)
@@ -243,7 +243,7 @@ describe('parseRecords', () => {
 
   describe('color assignment', () => {
     it('sets color to danger for isOriginAlert', () => {
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           actorNodeId: 'actor1',
           targetNodeId: 'target1',
@@ -272,7 +272,7 @@ describe('parseRecords', () => {
           labelNodeId: 'doc-id-1',
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
       const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
       expect(labelNode).toBeDefined();
       expect(labelNode).toHaveProperty('color', 'danger');
@@ -280,7 +280,7 @@ describe('parseRecords', () => {
     });
 
     it('sets color to danger for isAlert', () => {
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           actorNodeId: 'actor1',
           targetNodeId: 'target1',
@@ -309,7 +309,7 @@ describe('parseRecords', () => {
           labelNodeId: 'doc-id-1',
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
       const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
       expect(labelNode).toBeDefined();
       expect(labelNode).toHaveProperty('color', 'danger');
@@ -342,7 +342,7 @@ describe('parseRecords', () => {
       sourceCountryCodes: [],
     };
 
-    const records: GraphEdge[] = [
+    const records: EventEdge[] = [
       {
         ...baseLabelNodeData,
         action: 'action1',
@@ -372,7 +372,7 @@ describe('parseRecords', () => {
         labelNodeId: 'doc-id-4',
       },
     ];
-    const result = parseRecords(mockLogger, records);
+    const result = parseRecords(mockLogger, records, []);
     const labelNodes = result.nodes.filter((n) => n.shape === 'label') as LabelNodeDataModel[];
 
     // All events use MD5 hashes for actor and target groups
@@ -386,7 +386,7 @@ describe('parseRecords', () => {
   });
 
   it('limits nodes and sets message when nodesLimit is reached', () => {
-    const records: GraphEdge[] = [
+    const records: EventEdge[] = [
       {
         action: 'foo',
         actorNodeId: 'md5hash-a1-a2',
@@ -446,15 +446,118 @@ describe('parseRecords', () => {
     ];
     // nodesLimit = 2, so only first record should be processed
     // First record creates 3 nodes (actor group, target group, label)
-    const result = parseRecords(mockLogger, records, 2);
+    const result = parseRecords(mockLogger, records, [], 2);
     expect(result.nodes.length).toBeLessThanOrEqual(3);
+    expect(result.messages).toContain(ApiMessageCode.ReachedNodesLimit);
+  });
+
+  it('enforces a shared node limit across event and relationship records', () => {
+    // Event record: creates actor (actor-1), target (target-1), and label node = 3 nodes
+    const eventRecords: EventEdge[] = [
+      {
+        action: 'Login',
+        actorNodeId: 'actor-1',
+        targetNodeId: 'target-1',
+        actorEntityType: 'user',
+        targetEntityType: 'host',
+        actorIdsCount: 1,
+        targetIdsCount: 1,
+        actorsDocData: [
+          '{"id":"actor-1","type":"entity","entity":{"name":"Actor 1","type":"user","sub_type":"Identity Users","ecsParentField":"user","availableInEntityStore":true}}',
+        ],
+        targetsDocData: [
+          '{"id":"target-1","type":"entity","entity":{"name":"Target 1","type":"host","sub_type":"Server","ecsParentField":"host","availableInEntityStore":true}}',
+        ],
+        badge: 1,
+        uniqueEventsCount: 1,
+        uniqueAlertsCount: 0,
+        docs: ['{"foo":"bar"}'],
+        isAlert: false,
+        isOrigin: true,
+        isOriginAlert: false,
+        actorHostIps: [],
+        targetHostIps: [],
+        sourceIps: [],
+        sourceCountryCodes: [],
+        labelNodeId: 'doc-shared-limit',
+      },
+    ];
+
+    // Relationship records: each would create actor, target, and relationship connector nodes
+    const relationshipRecords: RelationshipEdge[] = [
+      {
+        relationship: 'Owns',
+        relationshipNodeId: 'rel-actor-1-Owns',
+        actorNodeId: 'rel-actor-1',
+        actorIds: ['rel-actor-1'],
+        actorIdsCount: 1,
+        actorEntityType: 'user',
+        actorEntitySubType: 'Identity Users',
+        actorEntityName: 'Rel Actor 1',
+        actorsDocData: [
+          '{"id":"rel-actor-1","type":"entity","entity":{"name":"Rel Actor 1","type":"user","sub_type":"Identity Users","ecsParentField":"user","availableInEntityStore":true}}',
+        ],
+        targetNodeId: 'rel-target-1',
+        targetIds: ['rel-target-1'],
+        targetIdsCount: 1,
+        targetEntityType: 'host',
+        targetEntitySubType: 'Server',
+        targetEntityName: 'Rel Target 1',
+        targetsDocData: [
+          '{"id":"rel-target-1","type":"entity","entity":{"name":"Rel Target 1","type":"host","sub_type":"Server","ecsParentField":"host","availableInEntityStore":true}}',
+        ],
+        badge: 1,
+      },
+      {
+        relationship: 'Communicates_with',
+        relationshipNodeId: 'rel-actor-2-Communicates_with',
+        actorNodeId: 'rel-actor-2',
+        actorIds: ['rel-actor-2'],
+        actorIdsCount: 1,
+        actorEntityType: 'service',
+        actorEntitySubType: 'Services',
+        actorEntityName: 'Rel Actor 2',
+        actorsDocData: [
+          '{"id":"rel-actor-2","type":"entity","entity":{"name":"Rel Actor 2","type":"service","sub_type":"Services","ecsParentField":"service","availableInEntityStore":true}}',
+        ],
+        targetNodeId: 'rel-target-2',
+        targetIds: ['rel-target-2'],
+        targetIdsCount: 1,
+        targetEntityType: 'host',
+        targetEntitySubType: 'Server',
+        targetEntityName: 'Rel Target 2',
+        targetsDocData: [
+          '{"id":"rel-target-2","type":"entity","entity":{"name":"Rel Target 2","type":"host","sub_type":"Server","ecsParentField":"host","availableInEntityStore":true}}',
+        ],
+        badge: 1,
+      },
+    ];
+
+    // Set nodesLimit to 5:
+    // - Event record creates 3 nodes (actor-1, target-1, label)
+    // - First relationship record would add 3 more nodes (rel-actor-1, rel-target-1, rel(Owns))
+    //   reaching 6 nodes total, but the limit check before the 2nd relationship stops further processing
+    // - Second relationship record should NOT be processed
+    const result = parseRecords(mockLogger, eventRecords, relationshipRecords, 5);
+
+    // Verify that the second relationship record was skipped due to the shared limit
+    const nodeIds = result.nodes.map((n) => n.id);
+    expect(nodeIds).toContain('actor-1'); // from event
+    expect(nodeIds).toContain('target-1'); // from event
+    expect(nodeIds).toContain('rel-actor-1'); // from 1st relationship
+    expect(nodeIds).toContain('rel-target-1'); // from 1st relationship
+
+    // Second relationship's nodes should NOT be present
+    expect(nodeIds).not.toContain('rel-actor-2');
+    expect(nodeIds).not.toContain('rel-target-2');
+
     expect(result.messages).toContain(ApiMessageCode.ReachedNodesLimit);
   });
 
   // Test for entity grouping by type and sub_type
   describe('enriched entities grouping', () => {
     it('groups actors and targets by type and sub_type', () => {
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           action: 'connect',
           actorNodeId: 'md5hash-user1-user2',
@@ -486,7 +589,7 @@ describe('parseRecords', () => {
           labelNodeId: 'doc-id-1',
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       // Should have actor group with both type and sub_type entities
       const actorNode = result.nodes.find(
@@ -518,7 +621,7 @@ describe('parseRecords', () => {
     });
 
     it('groups actors and targets by type only when sub_type is missing', () => {
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           action: 'access',
           actorNodeId: 'md5hash-service1-service2',
@@ -550,7 +653,7 @@ describe('parseRecords', () => {
           labelNodeId: 'doc-id-1',
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       const actorNode = result.nodes.find((n) => n.label === 'Services') as EntityNodeDataModel;
       expect(actorNode).toBeDefined();
@@ -594,7 +697,7 @@ describe('parseRecords', () => {
     });
 
     it('properly processes unknown targets with processUnknownTargetGroup', () => {
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           action: 'suspicious_activity',
           actorNodeId: 'actor1',
@@ -622,7 +725,7 @@ describe('parseRecords', () => {
           labelNodeId: 'doc-id-1',
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       // Should create unknown target node
       const unknownNode = result.nodes.find((n) => n.label === 'Unknown') as EntityNodeDataModel;
@@ -652,7 +755,7 @@ describe('parseRecords', () => {
 
   describe('event and alert grouping', () => {
     it('creates label node with one event', () => {
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           action: 'file_access',
           actorNodeId: 'actor1',
@@ -681,7 +784,7 @@ describe('parseRecords', () => {
           labelNodeId: 'doc-id-1',
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
       expect(labelNode).toBeDefined();
@@ -694,7 +797,7 @@ describe('parseRecords', () => {
     });
 
     it('creates label node with one alert', () => {
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           action: 'malware_detected',
           actorNodeId: 'actor1',
@@ -723,7 +826,7 @@ describe('parseRecords', () => {
           labelNodeId: 'doc-id-1',
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
       expect(labelNode).toBeDefined();
@@ -736,7 +839,7 @@ describe('parseRecords', () => {
     });
 
     it('creates label node with multiple events', () => {
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           action: 'network_activity',
           actorNodeId: 'actor1',
@@ -769,7 +872,7 @@ describe('parseRecords', () => {
           labelNodeId: 'doc-id-1',
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
       expect(labelNode).toBeDefined();
@@ -782,7 +885,7 @@ describe('parseRecords', () => {
     });
 
     it('creates label node with mixed events and alerts', () => {
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           action: 'suspicious_login',
           actorNodeId: 'actor1',
@@ -817,7 +920,7 @@ describe('parseRecords', () => {
           labelNodeId: 'doc-id-1',
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
       expect(labelNode).toBeDefined();
@@ -833,7 +936,7 @@ describe('parseRecords', () => {
   // Test for geographic data (multiple IPs and country codes)
   describe('geographic data handling', () => {
     it('properly handles nodes with multiple IPs and country codes', () => {
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           action: 'global_access',
           actorNodeId: 'actor1',
@@ -864,7 +967,7 @@ describe('parseRecords', () => {
           labelNodeId: 'doc-id-1',
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       // Check actor node has host IPs
       const actorNode = result.nodes.find((n) => n.label === 'Global Users') as EntityNodeDataModel;
@@ -886,7 +989,7 @@ describe('parseRecords', () => {
     });
 
     it('handles empty geographic data arrays', () => {
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           action: 'local_access',
           actorNodeId: 'actor1',
@@ -917,7 +1020,7 @@ describe('parseRecords', () => {
           labelNodeId: 'doc-id-1',
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       // Nodes should not have IP or country code properties when arrays are empty
       const actorNode = result.nodes.find((n) => n.label === 'Local Users') as EntityNodeDataModel;
@@ -939,7 +1042,7 @@ describe('parseRecords', () => {
 
   describe('additional edge cases', () => {
     it('handles minimal documentsData when no entity enrichment exists', () => {
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           action: 'login',
           actorNodeId: 'actor1',
@@ -970,7 +1073,7 @@ describe('parseRecords', () => {
           labelNodeId: 'doc-id-1',
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       const userNode = result.nodes.find((n) => n.label === 'actor1') as EntityNodeDataModel;
       expect(userNode).toBeDefined();
@@ -996,7 +1099,7 @@ describe('parseRecords', () => {
 
   describe('entities enrichment', () => {
     it('should create single non-enriched entity node with tag "Entity", label as entity.id, and no count', () => {
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           action: 'test.action',
           actorNodeId: 'non-enriched-actor-123',
@@ -1026,7 +1129,7 @@ describe('parseRecords', () => {
         },
       ];
 
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       // Find actor and target nodes by group ID (which is entity ID for single entities)
       const actorNode = result.nodes.find(
@@ -1052,7 +1155,7 @@ describe('parseRecords', () => {
     });
 
     it('should create group non-enriched entity node with tag "Entities", label undefined, and count', () => {
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           action: 'test.action.multiple',
           actorNodeId: 'md5hash-entity1-entity2-entity3',
@@ -1091,7 +1194,7 @@ describe('parseRecords', () => {
         },
       ];
 
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       const actorNode = result.nodes.find(
         (n) => n.id === 'md5hash-entity1-entity2-entity3'
@@ -1116,7 +1219,7 @@ describe('parseRecords', () => {
     });
 
     it('should create single enriched entity node with tag as entity.type, label as entity.name, and no count', () => {
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           action: 'test.action',
           actorNodeId: 'actor1',
@@ -1148,7 +1251,7 @@ describe('parseRecords', () => {
         },
       ];
 
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       // Find actor and target nodes by MD5 hash (nodes always use actorNodeId/targetNodeId)
       const actorNode = result.nodes.find((n) => n.id === 'actor1') as EntityNodeDataModel;
@@ -1170,7 +1273,7 @@ describe('parseRecords', () => {
     });
 
     it('should create group enriched entity node with tag as entity.type, label as entity.sub_type, and count', () => {
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           action: 'test.action',
           actorNodeId: 'md5hash-user1-user2-user3',
@@ -1211,7 +1314,7 @@ describe('parseRecords', () => {
         },
       ];
 
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       const actorNode = result.nodes.find(
         (n) => n.id === 'md5hash-user1-user2-user3'
@@ -1236,7 +1339,7 @@ describe('parseRecords', () => {
     });
 
     it('should create group enriched entity node with type only (no sub_type), label undefined, and count', () => {
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           action: 'test.action',
           actorNodeId: 'md5hash-user1-user2-user3',
@@ -1275,7 +1378,7 @@ describe('parseRecords', () => {
         },
       ];
 
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       const actorNode = result.nodes.find(
         (n) => n.id === 'md5hash-user1-user2-user3'
@@ -1302,7 +1405,7 @@ describe('parseRecords', () => {
 
   describe('ecsParentField handling', () => {
     it('returns actor and target documentsData with ecsParentField when there is no matching entity enrichment - single actor and target', () => {
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           action: 'login',
           actorNodeId: 'actor1',
@@ -1333,7 +1436,7 @@ describe('parseRecords', () => {
           labelNodeId: 'doc-id-1',
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
       const actorNode = result.nodes.find((n) => n.id === 'actor1') as EntityNodeDataModel;
       expect(actorNode).toBeDefined();
       expect(actorNode.documentsData).toHaveLength(1);
@@ -1353,7 +1456,7 @@ describe('parseRecords', () => {
     });
 
     it('returns target documentData with ecsParentField when the target has matching entity enrichment - multiple targets', () => {
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           action: 'login',
           actorNodeId: 'user1',
@@ -1387,7 +1490,7 @@ describe('parseRecords', () => {
           labelNodeId: 'doc-id-1',
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       const targetNode = result.nodes.find(
         (n) => n.id === '63861393ae85888aeb59aab1672b3957'
@@ -1431,7 +1534,7 @@ describe('parseRecords', () => {
     });
 
     it('returns multiple actors and targets documentsData with ecsParentField when there is no entity enrichment', () => {
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           action: 'access',
           actorNodeId: 'md5hash-actor1-actor2-actor3',
@@ -1465,7 +1568,7 @@ describe('parseRecords', () => {
           labelNodeId: 'doc-id-1',
         },
       ];
-      const result = parseRecords(mockLogger, records);
+      const result = parseRecords(mockLogger, records, []);
 
       const actorNode = result.nodes.find(
         (n) => n.id === 'md5hash-actor1-actor2-actor3'
@@ -1520,7 +1623,7 @@ describe('parseRecords', () => {
     it('stacks labels with same actor-target pair under a group node even with different labelNodeIds', () => {
       // Two different documents (different labelNodeIds) with the same actor-target pair
       // should be stacked together under a group node
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           action: 'action1',
           actorNodeId: 'actor1',
@@ -1594,7 +1697,7 @@ describe('parseRecords', () => {
 
     it('does not stack labels with different actor-target pairs', () => {
       // Two different actor-target pairs should NOT be stacked together
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           action: 'action1',
           actorNodeId: 'actor1',

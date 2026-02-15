@@ -4,7 +4,7 @@
     "aliases": {
       "entities-generic-latest": {}
     },
-    "index": ".entities.v2.latest.security_generic_entities-space",
+    "index": ".entities.v2.latest.security_entities-space",
     "settings": {
       "index": {
         "mode": "lookup"
@@ -416,6 +416,25 @@
             },
             "url": {
               "type": "keyword"
+            },
+            "relationships": {
+              "properties": {
+                "Accesses_frequently": {
+                  "type": "keyword"
+                },
+                "Communicates_with": {
+                  "type": "keyword"
+                },
+                "Depends_on": {
+                  "type": "keyword"
+                },
+                "Owns": {
+                  "type": "keyword"
+                },
+                "Supervises": {
+                  "type": "keyword"
+                }
+              }
             }
           }
         },
