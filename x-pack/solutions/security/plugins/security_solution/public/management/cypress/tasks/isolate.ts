@@ -73,6 +73,7 @@ export const waitForReleaseOption = (alertId: string): void => {
 export const visitRuleAlerts = (ruleName: string) => {
   loadPage('/app/security/rules');
   cy.contains(ruleName).click();
+  cy.getByTestSubj('navigation-alerts').click();
 };
 
 export const checkFlyoutEndpointIsolation = (): void => {

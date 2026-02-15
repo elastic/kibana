@@ -158,10 +158,10 @@ import { TIMELINE } from '../screens/timelines';
 import { COMBO_BOX_INPUT, EUI_FILTER_SELECT_ITEM } from '../screens/common/controls';
 import { ruleFields } from '../data/detection_engine';
 import { waitForAlerts } from './alerts';
-import { refreshPage } from './security_header';
 import { COMBO_BOX_OPTION, TOOLTIP } from '../screens/common';
 import { EMPTY_ALERT_TABLE } from '../screens/alerts';
 import { fillComboBox } from './eui_form_interactions';
+import { refreshPage } from './security_header';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click();

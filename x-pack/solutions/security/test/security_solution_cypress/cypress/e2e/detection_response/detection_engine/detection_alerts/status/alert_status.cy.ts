@@ -41,7 +41,7 @@ describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
       login();
       deleteAlertsAndRules();
       createRule(getNewRule()).then((createdRule) => {
-        visit(ruleDetailsUrl(createdRule.body.id));
+        visit(ruleDetailsUrl(createdRule.body.id, 'alerts'));
       });
       waitForAlertsToPopulate();
       selectNumberOfAlerts(3);
@@ -119,7 +119,7 @@ describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
       login();
       deleteAlertsAndRules();
       createRule(getNewRule()).then((createdRule) => {
-        visit(ruleDetailsUrl(createdRule.body.id));
+        visit(ruleDetailsUrl(createdRule.body.id, 'alerts'));
       });
       waitForAlertsToPopulate();
     });
@@ -171,7 +171,7 @@ describe('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
       login();
       deleteAlertsAndRules();
       createRule(getNewRule()).then((createdRule) => {
-        visit(ruleDetailsUrl(createdRule.body.id));
+        visit(ruleDetailsUrl(createdRule.body.id, 'alerts'));
       });
       waitForAlertsToPopulate();
     });
