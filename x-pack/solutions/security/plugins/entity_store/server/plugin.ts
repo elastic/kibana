@@ -69,26 +69,6 @@ export class EntityStorePlugin
     this.logger.debug('Registering saved objects types');
     core.savedObjects.registerType(EngineDescriptorType);
     core.savedObjects.registerType(EntityMaintainersTasksType);
-
-    registerEntityMaintainerTask(({
-      taskManager: plugins.taskManager,
-      logger: this.logger,
-      config: {
-        description: 'Entity Maintainer Task',
-        id: 'entity-maintainer-task-test',
-        interval: '20s',
-        initialState: {a: 'a', d: 'd'},
-        run: async ({ status }) => {
-          this.logger.debug(' =================> Running entity maintainer RUN task status ==== ' + JSON.stringify(status));
-          return { ...status.state, b: 'b' };
-        },
-        setup: async ({ status }) => {
-          this.logger.debug(' =================> Running entity maintainer SETUP task');
-          return { ...status.state, b: 'b' };
-        },
-      },
-      core,
-    }));
     
     return {
       registerEntityMaintainer: (config: RegisterEntityMaintainerConfig) => registerEntityMaintainerTask({
