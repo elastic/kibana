@@ -33,8 +33,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.observability}.get_runtime_metrics`,
 
   // Dashboards
-  'platform.dashboard.create_dashboard',
-  'platform.dashboard.update_dashboard',
+  'platform.dashboard.manage_dashboard',
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.create_detection_rule`,

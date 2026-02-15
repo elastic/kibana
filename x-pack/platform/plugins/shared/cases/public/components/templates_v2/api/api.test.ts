@@ -11,6 +11,7 @@ import {
   INTERNAL_BULK_EXPORT_TEMPLATES_URL,
   INTERNAL_TEMPLATE_CREATORS_URL,
   INTERNAL_TEMPLATE_TAGS_URL,
+  INTERNAL_TEMPLATES_URL,
 } from '../../../../common/constants';
 
 jest.mock('../../../common/lib/kibana', () => {
@@ -31,6 +32,7 @@ jest.mock('../utils/templates_to_yaml', () => {
 import { KibanaServices } from '../../../common/lib/kibana';
 import { templatesToYaml } from '../utils/templates_to_yaml';
 import {
+  getTemplates,
   bulkDeleteTemplates,
   bulkExportTemplates,
   getTemplateTags,
@@ -51,6 +53,87 @@ describe('templates_v2 api bulk actions', () => {
         fetch: fetchMock,
       },
     } as unknown as ReturnType<typeof KibanaServices.get>);
+  });
+
+  describe('getTemplates', () => {
+    it('calls the templates endpoint with query params', async () => {
+      const signal = new AbortController().signal;
+      const mockResponse = {
+        templates: [],
+        page: 1,
+        perPage: 10,
+        total: 0,
+      };
+      fetchMock.mockResolvedValue(mockResponse);
+
+      const queryParams = {
+        page: 1,
+        perPage: 10,
+        search: 'test',
+        sortField: 'name' as const,
+        sortOrder: 'asc' as const,
+        tags: ['security'],
+        author: ['alice'],
+        isDeleted: false,
+      };
+
+      const res = await getTemplates({ signal, queryParams });
+
+      expect(fetchMock).toHaveBeenCalledWith(INTERNAL_TEMPLATES_URL, {
+        method: 'GET',
+        query: {
+          page: 1,
+          perPage: 10,
+          search: 'test',
+          sortField: 'name',
+          sortOrder: 'asc',
+          tags: ['security'],
+          author: ['alice'],
+          isDeleted: false,
+        },
+        signal,
+      });
+
+      expect(res).toEqual(mockResponse);
+    });
+
+    it('passes default query params correctly', async () => {
+      const mockResponse = {
+        templates: [],
+        page: 1,
+        perPage: 10,
+        total: 0,
+      };
+      fetchMock.mockResolvedValue(mockResponse);
+
+      const queryParams = {
+        page: 1,
+        perPage: 10,
+        search: '',
+        sortField: 'name' as const,
+        sortOrder: 'asc' as const,
+        tags: [] as string[],
+        author: [] as string[],
+        isDeleted: false,
+      };
+
+      const res = await getTemplates({ queryParams });
+
+      expect(fetchMock).toHaveBeenCalledWith(INTERNAL_TEMPLATES_URL, {
+        method: 'GET',
+        query: {
+          page: 1,
+          perPage: 10,
+          search: '',
+          sortField: 'name',
+          sortOrder: 'asc',
+          isDeleted: false,
+        },
+        signal: undefined,
+      });
+
+      expect(res).toEqual(mockResponse);
+    });
   });
 
   describe('bulkDeleteTemplates', () => {
