@@ -400,7 +400,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
     });
 
     describe('artifacts', () => {
-      it('does not return artifacts when present', async () => {
+      it('returns artifacts when present', async () => {
         const expectedArtifacts = {
           artifacts: {
             investigation_guide: { blob: 'Sample investigation guide' },
@@ -425,7 +425,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         const foundAlert = response.body.data.find((obj: any) => obj.id === id);
         expect(foundAlert).not.to.be(undefined);
-        expect(foundAlert.artifacts).to.be(undefined);
+        expect(foundAlert.artifacts).to.eql(expectedArtifacts.artifacts);
       });
     });
   });

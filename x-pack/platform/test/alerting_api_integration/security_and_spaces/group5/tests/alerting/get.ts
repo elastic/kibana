@@ -383,27 +383,25 @@ const getTestUtils = (
     it('should return the artifacts correctly', async () => {
       const { user, space } = SuperuserAtSpace1;
 
+      const expectedArtifacts = {
+        dashboards: [
+          {
+            id: 'dashboard-1',
+          },
+          {
+            id: 'dashboard-2',
+          },
+        ],
+        investigation_guide: { blob: '# Summary' },
+      };
+
       const { body: createdAlert } = await supertest
         .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestRuleData({
             enabled: true,
-            ...(describeType === 'internal'
-              ? {
-                  artifacts: {
-                    dashboards: [
-                      {
-                        id: 'dashboard-1',
-                      },
-                      {
-                        id: 'dashboard-2',
-                      },
-                    ],
-                    investigation_guide: { blob: '# Summary' },
-                  },
-                }
-              : {}),
+            artifacts: expectedArtifacts,
           })
         )
         .expect(200);
@@ -418,21 +416,7 @@ const getTestUtils = (
         )
         .auth(user.username, user.password);
 
-      if (describeType === 'public') {
-        expect(response.body.artifacts).to.be(undefined);
-      } else if (describeType === 'internal') {
-        expect(response.body.artifacts).to.eql({
-          dashboards: [
-            {
-              id: 'dashboard-1',
-            },
-            {
-              id: 'dashboard-2',
-            },
-          ],
-          investigation_guide: { blob: '# Summary' },
-        });
-      }
+      expect(response.body.artifacts).to.eql(expectedArtifacts);
     });
   });
 };
