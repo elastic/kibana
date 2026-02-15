@@ -23,4 +23,37 @@ describe('buildLogsExtractionEsqlQuery', () => {
       expect(query).toMatchSnapshot();
     });
   });
+
+  it(`generates the expected query for host with pagination`, () => {
+    const query = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['test-index-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: getEntityDefinition('host', 'default'),
+      docsLimit: 10000,
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
+      pagination: {
+        timestampCursor: '2022-01-01T00:00:00.000Z',
+        idCursor: '123',
+      },
+    });
+    expect(query).toMatchSnapshot();
+  });
+
+  it(`generates the expected query for host with recoveryId`, () => {
+    const query = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['test-index-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: getEntityDefinition('host', 'default'),
+      docsLimit: 10000,
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
+      recoveryId: 'recover',
+      pagination: {
+        timestampCursor: '2022-01-01T00:00:00.000Z',
+        idCursor: 'TO BE IGNORED',
+      },
+    });
+    expect(query).toMatchSnapshot();
+  });
 });

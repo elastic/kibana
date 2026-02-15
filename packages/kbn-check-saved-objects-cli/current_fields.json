@@ -391,6 +391,7 @@
     "logExtractionState.frequency",
     "logExtractionState.lastExecutionTimestamp",
     "logExtractionState.lookbackPeriod",
+    "logExtractionState.paginationId",
     "logExtractionState.paginationTimestamp",
     "logExtractionState.timeout",
     "status",

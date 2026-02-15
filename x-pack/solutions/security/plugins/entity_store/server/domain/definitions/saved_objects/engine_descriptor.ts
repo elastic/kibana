@@ -16,6 +16,10 @@ import { LogExtractionState, VersionState } from './constants';
 import { EngineDescriptorTypeName } from './engine_descriptor_type';
 import { ENGINE_STATUS } from '../../constants';
 
+interface UpdateOptions {
+  mergeAttributes?: boolean;
+}
+
 export class EngineDescriptorClient {
   constructor(
     private readonly soClient: SavedObjectsClientContract,
@@ -77,7 +81,8 @@ export class EngineDescriptorClient {
 
   async update(
     entityType: EntityType,
-    state: Partial<EngineDescriptor>
+    state: Partial<EngineDescriptor>,
+    { mergeAttributes = true }: UpdateOptions = {}
   ): Promise<Partial<EngineDescriptor>> {
     await this.findOrThrow(entityType);
 
@@ -86,7 +91,10 @@ export class EngineDescriptorClient {
       EngineDescriptorTypeName,
       id,
       state,
-      { refresh: 'wait_for' }
+      {
+        refresh: 'wait_for',
+        mergeAttributes,
+      }
     );
 
     return attributes;
