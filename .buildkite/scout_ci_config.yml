@@ -36,6 +36,7 @@ plugins:
     - intercepts
     - custom_branding
     - share
+    - navigation
   disabled:
 
 packages:
