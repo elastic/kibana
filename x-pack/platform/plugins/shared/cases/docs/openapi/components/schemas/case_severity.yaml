@@ -5,4 +5,3 @@ enum:
   - high
   - low
   - medium
-default: low
