@@ -13,6 +13,7 @@ import { createStartServicesAccessorMock, createMetricsClientMock } from '../tes
 import { createLazyPodMetricsTable } from './create_lazy_pod_metrics_table';
 import IntegratedPodMetricsTable from './integrated_pod_metrics_table';
 import { PodMetricsTable } from './pod_metrics_table';
+import { ECS_POD_CPU_USAGE_LIMIT_PCT, MEMORY_LIMIT_UTILIZATION } from '../shared/constants';
 import { metricByField } from './use_pod_metrics_table';
 
 jest.mock('../../../pages/link_to/use_asset_details_redirect', () => ({
@@ -145,8 +146,8 @@ function createPod(
     keys: [id, name],
     rows: [
       {
-        [metricByField['kubernetes.pod.cpu.usage.limit.pct']]: cpuUsagePct,
-        [metricByField['kubernetes.pod.memory.usage.bytes']]: memoryUsageBytes,
+        [metricByField[ECS_POD_CPU_USAGE_LIMIT_PCT]]: cpuUsagePct,
+        [metricByField[MEMORY_LIMIT_UTILIZATION]]: memoryUsageBytes,
       } as MetricsExplorerSeries['rows'][number],
     ],
   };

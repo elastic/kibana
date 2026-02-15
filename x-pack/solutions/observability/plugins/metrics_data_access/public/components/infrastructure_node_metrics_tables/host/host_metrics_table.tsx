@@ -35,12 +35,26 @@ export interface HostMetricsTableProps {
     from: string;
     to: string;
   };
+  isOtel?: boolean;
+  metricIndices?: string;
 }
 
 export const HostMetricsTable = (props: HostMetricsTableProps) => {
-  const { data, isLoading, setCurrentPageIndex, setSortState, sortState, timerange } = props;
+  const {
+    data,
+    isLoading,
+    setCurrentPageIndex,
+    setSortState,
+    sortState,
+    timerange,
+    isOtel,
+    metricIndices,
+  } = props;
 
-  const columns = useMemo(() => hostMetricsColumns(timerange), [timerange]);
+  const columns = useMemo(
+    () => hostMetricsColumns(timerange, isOtel, metricIndices),
+    [timerange, isOtel, metricIndices]
+  );
 
   const sortSettings: EuiTableSortingType<HostNodeMetricsRow> = {
     enableAllColumns: true,
@@ -110,7 +124,9 @@ export const HostMetricsTable = (props: HostMetricsTableProps) => {
 };
 
 function hostMetricsColumns(
-  timerange: HostMetricsTableProps['timerange']
+  timerange: HostMetricsTableProps['timerange'],
+  isOtel?: HostMetricsTableProps['isOtel'],
+  metricIndices?: HostMetricsTableProps['metricIndices']
 ): Array<EuiBasicTableColumn<HostNodeMetricsRow>> {
   return [
     {
@@ -121,7 +137,14 @@ function hostMetricsColumns(
       truncateText: true,
       textOnly: true,
       render: (name: string) => (
-        <MetricsNodeDetailsLink id={name} label={name} nodeType={'host'} timerange={timerange} />
+        <MetricsNodeDetailsLink
+          id={name}
+          label={name}
+          nodeType="host"
+          timerange={timerange}
+          isOtel={isOtel}
+          metricsIndices={metricIndices}
+        />
       ),
     },
     {

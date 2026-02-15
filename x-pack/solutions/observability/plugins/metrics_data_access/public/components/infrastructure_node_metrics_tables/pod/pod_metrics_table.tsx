@@ -10,7 +10,7 @@ import type {
   EuiBasicTableColumn,
   EuiTableSortingType,
 } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import type { SortState, NodeMetricsTableData } from '../shared';
@@ -23,6 +23,10 @@ import {
   NumberCell,
   StepwisePagination,
 } from '../shared';
+import {
+  SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
+  SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
+} from '../shared/constants';
 import type { PodNodeMetricsRow } from './use_pod_metrics_table';
 
 export interface PodMetricsTableProps {
@@ -35,12 +39,26 @@ export interface PodMetricsTableProps {
     from: string;
     to: string;
   };
+  isOtel?: boolean;
+  metricIndices?: string;
 }
 
 export const PodMetricsTable = (props: PodMetricsTableProps) => {
-  const { data, isLoading, setCurrentPageIndex, setSortState, sortState, timerange } = props;
+  const {
+    data,
+    isLoading,
+    setCurrentPageIndex,
+    setSortState,
+    sortState,
+    timerange,
+    isOtel,
+    metricIndices,
+  } = props;
 
-  const columns = useMemo(() => podNodeColumns(timerange), [timerange]);
+  const columns = useMemo(
+    () => podNodeColumns(timerange, isOtel, metricIndices),
+    [timerange, isOtel, metricIndices]
+  );
 
   const sorting: EuiTableSortingType<PodNodeMetricsRow> = {
     enableAllColumns: true,
@@ -108,7 +126,9 @@ export const PodMetricsTable = (props: PodMetricsTableProps) => {
 };
 
 function podNodeColumns(
-  timerange: PodMetricsTableProps['timerange']
+  timerange: PodMetricsTableProps['timerange'],
+  isOtel?: PodMetricsTableProps['isOtel'],
+  metricIndices?: PodMetricsTableProps['metricIndices']
 ): Array<EuiBasicTableColumn<PodNodeMetricsRow>> {
   return [
     {
@@ -120,16 +140,45 @@ function podNodeColumns(
       textOnly: true,
       render: (_, { id, name }) => {
         return (
-          <MetricsNodeDetailsLink id={id} label={name} nodeType={'pod'} timerange={timerange} />
+          <MetricsNodeDetailsLink
+            id={id}
+            label={name}
+            nodeType={'pod'}
+            timerange={timerange}
+            isOtel={isOtel}
+            metricsIndices={metricIndices}
+          />
         );
       },
     },
     {
-      name: i18n.translate(
-        'xpack.metricsData.metricsTable.pod.averageCpuUsagePercentColumnHeader',
-        {
-          defaultMessage: 'CPU usage (avg.)',
-        }
+      name: (
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false}>
+            {i18n.translate(
+              'xpack.metricsData.metricsTable.pod.averageCpuUsagePercentColumnHeader',
+              {
+                defaultMessage: 'CPU usage (avg.)',
+              }
+            )}
+          </EuiFlexItem>
+          {isOtel ? (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={i18n.translate(
+                  'xpack.metricsData.metricsTable.pod.metricsOptionalTooltip',
+                  {
+                    defaultMessage:
+                      '{metricName} is optional and may not appear for all pods. Visibility depends on your Kubernetes metrics collection setup.',
+                    values: {
+                      metricName: SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
+                    },
+                  }
+                )}
+              />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       ),
       field: 'averageCpuUsagePercent',
       align: 'right',
@@ -138,16 +187,38 @@ function podNodeColumns(
       ),
     },
     {
-      name: i18n.translate(
-        'xpack.metricsData.metricsTable.pod.averageMemoryUsageMegabytesColumnHeader',
-        {
-          defaultMessage: 'Memory usage (avg.)',
-        }
+      name: (
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false}>
+            {i18n.translate(
+              'xpack.metricsData.metricsTable.pod.averageMemoryUsagePercentColumnHeader',
+              {
+                defaultMessage: 'Memory usage (avg.)',
+              }
+            )}
+          </EuiFlexItem>
+          {isOtel ? (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={i18n.translate(
+                  'xpack.metricsData.metricsTable.pod.metricsOptionalTooltip',
+                  {
+                    defaultMessage:
+                      '{metricName} is optional and may not appear for all pods. Visibility depends on your Kubernetes metrics collection setup.',
+                    values: {
+                      metricName: SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
+                    },
+                  }
+                )}
+              />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       ),
-      field: 'averageMemoryUsageMegabytes',
+      field: 'averageMemoryUsagePercent',
       align: 'right',
-      render: (averageMemoryUsageMegabytes: number) => (
-        <NumberCell value={averageMemoryUsageMegabytes} unit=" MB" />
+      render: (averageMemoryUsagePercent: number) => (
+        <NumberCell value={averageMemoryUsagePercent} unit="%" />
       ),
     },
   ];

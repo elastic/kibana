@@ -7,36 +7,61 @@
 
 import React from 'react';
 import { CoreProviders } from '../../../apps/common_providers';
-import type { IntegratedNodeMetricsTableProps, UseNodeMetricsTableOptions } from '../shared';
+import type { IntegratedNodeMetricsTableProps } from '../shared';
 import { ContainerMetricsTable } from './container_metrics_table';
 import { useContainerMetricsTable } from './use_container_metrics_table';
+import type { ContainerSemconvRuntime } from './container_metrics_configs';
+
+type ContainerIntegratedProps = IntegratedNodeMetricsTableProps & {
+  semconvRuntime?: ContainerSemconvRuntime;
+};
+
+type HookedContainerMetricsTableProps = Pick<
+  ContainerIntegratedProps,
+  'timerange' | 'kuery' | 'isOtel' | 'semconvRuntime' | 'metricsClient'
+>;
 
 function HookedContainerMetricsTable({
   timerange,
   kuery,
+  isOtel,
+  semconvRuntime,
   metricsClient,
-}: UseNodeMetricsTableOptions) {
+}: HookedContainerMetricsTableProps) {
   const containerMetricsTableProps = useContainerMetricsTable({
     timerange,
     kuery,
+    isOtel,
+    semconvRuntime,
     metricsClient,
   });
-  return <ContainerMetricsTable {...containerMetricsTableProps} />;
+  return (
+    <ContainerMetricsTable
+      {...containerMetricsTableProps}
+      isOtel={isOtel}
+      metricsIndices={containerMetricsTableProps.metricIndices}
+      semconvRuntime={semconvRuntime}
+    />
+  );
 }
 
 function ContainerMetricsTableWithProviders({
   timerange,
   kuery,
   sourceId,
+  isOtel,
+  semconvRuntime,
   metricsClient,
   ...coreProvidersProps
-}: IntegratedNodeMetricsTableProps) {
+}: ContainerIntegratedProps) {
   return (
     <CoreProviders {...coreProvidersProps}>
       <HookedContainerMetricsTable
         timerange={timerange}
         kuery={kuery}
+        isOtel={isOtel}
         metricsClient={metricsClient}
+        semconvRuntime={semconvRuntime}
       />
     </CoreProviders>
   );

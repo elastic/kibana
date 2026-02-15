@@ -5,22 +5,28 @@
  * 2.0.
  */
 
-import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
 import { RX_LABEL, TX_LABEL } from '../../../shared/charts/constants';
+import type { SchemaBasedFormula } from '../../../shared/metrics/types';
 
-export const dockerContainerNetworkRx: LensBaseLayer = {
+export const dockerContainerNetworkRx: SchemaBasedFormula = {
   label: RX_LABEL,
-  value:
-    "average(docker.network.inbound.bytes) * 8 / (max(metricset.period, kql='docker.network.inbound.bytes: *') / 1000)",
+  value: {
+    ecs: "average(docker.network.inbound.bytes) * 8 / (max(metricset.period, kql='docker.network.inbound.bytes: *') / 1000)",
+    semconv:
+      'average(metrics.container.network.io, kql="metric.network.io.direction: receive") * 8',
+  },
   format: 'bits',
   decimals: 1,
   normalizeByUnit: 's',
 };
 
-export const dockerContainerNetworkTx: LensBaseLayer = {
+export const dockerContainerNetworkTx: SchemaBasedFormula = {
   label: TX_LABEL,
-  value:
-    "average(docker.network.outbound.bytes) * 8 / (max(metricset.period, kql='docker.network.outbound.bytes: *') / 1000)",
+  value: {
+    ecs: "average(docker.network.outbound.bytes) * 8 / (max(metricset.period, kql='docker.network.outbound.bytes: *') / 1000)",
+    semconv:
+      'average(metrics.container.network.io, kql="metric.network.io.direction: transmit") * 8',
+  },
   format: 'bits',
   decimals: 1,
   normalizeByUnit: 's',

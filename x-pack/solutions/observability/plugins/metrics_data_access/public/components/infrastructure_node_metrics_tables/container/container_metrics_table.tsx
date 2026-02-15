@@ -10,7 +10,7 @@ import type {
   EuiBasicTableColumn,
   EuiTableSortingType,
 } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 import type { SortState, NodeMetricsTableData } from '../shared';
@@ -23,6 +23,11 @@ import {
   NumberCell,
   StepwisePagination,
 } from '../shared';
+import type { ContainerSemconvRuntime } from './container_metrics_configs';
+import {
+  SEMCONV_CONTAINER_CPU_LIMIT_UTILIZATION_DISPLAY,
+  SEMCONV_CONTAINER_MEMORY_LIMIT_UTILIZATION_DISPLAY,
+} from '../shared/constants';
 import type { ContainerNodeMetricsRow } from './use_container_metrics_table';
 
 export interface ContainerMetricsTableProps {
@@ -35,12 +40,30 @@ export interface ContainerMetricsTableProps {
     from: string;
     to: string;
   };
+  /** When true, use OpenTelemetry SemConv metrics (equivalent to schema === 'semconv'). */
+  isOtel?: boolean;
+  metricsIndices?: string;
+  /** When isOtel is true, used to choose correct unit for memory (e.g. % for k8s, MB for docker). */
+  semconvRuntime?: ContainerSemconvRuntime;
 }
 
 export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
-  const { data, isLoading, setCurrentPageIndex, setSortState, sortState, timerange } = props;
+  const {
+    data,
+    isLoading,
+    setCurrentPageIndex,
+    setSortState,
+    sortState,
+    timerange,
+    isOtel,
+    metricsIndices,
+    semconvRuntime,
+  } = props;
 
-  const columns = useMemo(() => containerNodeColumns(timerange), [timerange]);
+  const columns = useMemo(
+    () => containerNodeColumns({ timerange, isOtel, metricsIndices, semconvRuntime }),
+    [timerange, isOtel, metricsIndices, semconvRuntime]
+  );
 
   const sortSettings: EuiTableSortingType<ContainerNodeMetricsRow> = {
     enableAllColumns: true,
@@ -112,9 +135,16 @@ export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
   }
 };
 
-function containerNodeColumns(
-  timerange: ContainerMetricsTableProps['timerange']
-): Array<EuiBasicTableColumn<ContainerNodeMetricsRow>> {
+function containerNodeColumns({
+  timerange,
+  isOtel,
+  metricsIndices,
+  semconvRuntime,
+}: Pick<
+  ContainerMetricsTableProps,
+  'timerange' | 'isOtel' | 'metricsIndices' | 'semconvRuntime'
+>): Array<EuiBasicTableColumn<ContainerNodeMetricsRow>> {
+  const memoryUnit = isOtel && semconvRuntime === 'k8s' ? '%' : ' MB';
   return [
     {
       name: i18n.translate('xpack.metricsData.metricsTable.container.idColumnHeader', {
@@ -125,16 +155,45 @@ function containerNodeColumns(
       textOnly: true,
       render: (id: string) => {
         return (
-          <MetricsNodeDetailsLink id={id} label={id} nodeType={'container'} timerange={timerange} />
+          <MetricsNodeDetailsLink
+            id={id}
+            label={id}
+            nodeType={'container'}
+            timerange={timerange}
+            isOtel={isOtel}
+            metricsIndices={metricsIndices}
+          />
         );
       },
     },
     {
-      name: i18n.translate(
-        'xpack.metricsData.metricsTable.container.averageCpuUsagePercentColumnHeader',
-        {
-          defaultMessage: 'CPU usage (avg.)',
-        }
+      name: (
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false}>
+            {i18n.translate(
+              'xpack.metricsData.metricsTable.container.averageCpuUsagePercentColumnHeader',
+              {
+                defaultMessage: 'CPU usage (avg.)',
+              }
+            )}
+          </EuiFlexItem>
+          {isOtel ? (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={i18n.translate(
+                  'xpack.metricsData.metricsTable.container.metricsOptionalTooltip',
+                  {
+                    defaultMessage:
+                      '{metricName} is optional and may not appear for all containers. Visibility depends on your container metrics collection setup.',
+                    values: {
+                      metricName: SEMCONV_CONTAINER_CPU_LIMIT_UTILIZATION_DISPLAY,
+                    },
+                  }
+                )}
+              />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       ),
       field: 'averageCpuUsagePercent',
       align: 'right',
@@ -143,16 +202,38 @@ function containerNodeColumns(
       ),
     },
     {
-      name: i18n.translate(
-        'xpack.metricsData.metricsTable.container.averageMemoryUsageMegabytesColumnHeader',
-        {
-          defaultMessage: 'Memory usage(avg.)',
-        }
+      name: (
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false}>
+            {i18n.translate(
+              'xpack.metricsData.metricsTable.container.averageMemoryUsageMegabytesColumnHeader',
+              {
+                defaultMessage: 'Memory usage(avg.)',
+              }
+            )}
+          </EuiFlexItem>
+          {isOtel ? (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={i18n.translate(
+                  'xpack.metricsData.metricsTable.container.metricsOptionalTooltip',
+                  {
+                    defaultMessage:
+                      '{metricName} is optional and may not appear for all containers. Visibility depends on your container metrics collection setup.',
+                    values: {
+                      metricName: SEMCONV_CONTAINER_MEMORY_LIMIT_UTILIZATION_DISPLAY,
+                    },
+                  }
+                )}
+              />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       ),
       field: 'averageMemoryUsageMegabytes',
       align: 'right',
       render: (averageMemoryUsageMegabytes: number) => (
-        <NumberCell value={averageMemoryUsageMegabytes} unit=" MB" />
+        <NumberCell value={averageMemoryUsageMegabytes} unit={memoryUnit} />
       ),
     },
   ];

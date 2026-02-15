@@ -17,12 +17,18 @@ import type { PodNodeMetricsRow } from './use_pod_metrics_table';
 
 const mockServices = {
   application: {
+    currentAppId$: {
+      subscribe: (callback: (appId: string) => void) => {
+        callback('mock-app-id');
+        return { unsubscribe: () => {} };
+      },
+    },
     getUrlForApp: (app: string, { path }: { path: string }) => `your-kibana/app/${app}/${path}`,
   },
 };
 
 export default {
-  title: 'infra/Node Metrics Tables/Pod',
+  title: 'metrics_data_access/Node Metrics Tables/Pod',
   decorators: [
     (wrappedStory) => <EuiCard title="Pod metrics">{wrappedStory()}</EuiCard>,
     (wrappedStory) => (
@@ -62,31 +68,31 @@ const loadedPods: PodNodeMetricsRow[] = [
     id: '358d96e3-026f-4440-a487-f6c2301884c0',
     name: 'gke-edge-oblt-pool-1-9a60016d-lgg1',
     averageCpuUsagePercent: 99,
-    averageMemoryUsageMegabytes: 34,
+    averageMemoryUsagePercent: 34,
   },
   {
     id: '358d96e3-026f-4440-a487-f6c2301884c1',
     name: 'gke-edge-oblt-pool-1-9a60016d-lgg2',
     averageCpuUsagePercent: 72,
-    averageMemoryUsageMegabytes: 68,
+    averageMemoryUsagePercent: 68,
   },
   {
     id: '358d96e3-026f-4440-a487-f6c2301884c0',
     name: 'gke-edge-oblt-pool-1-9a60016d-lgg3',
     averageCpuUsagePercent: 54,
-    averageMemoryUsageMegabytes: 132,
+    averageMemoryUsagePercent: 132,
   },
   {
     id: '358d96e3-026f-4440-a487-f6c2301884c0',
     name: 'gke-edge-oblt-pool-1-9a60016d-lgg4',
     averageCpuUsagePercent: 34,
-    averageMemoryUsageMegabytes: 264,
+    averageMemoryUsagePercent: 264,
   },
   {
     id: '358d96e3-026f-4440-a487-f6c2301884c0',
     name: 'gke-edge-oblt-pool-1-9a60016d-lgg5',
     averageCpuUsagePercent: 13,
-    averageMemoryUsageMegabytes: 512,
+    averageMemoryUsagePercent: 512,
   },
 ];
 
@@ -101,7 +107,7 @@ export const Basic = {
     data: {
       state: 'data',
       currentPageIndex: 1,
-      pageCount: 10,
+      pageCount: 1,
       rows: loadedPods,
     },
   },
@@ -168,5 +174,28 @@ export const FailedToLoadMetrics = {
       state: 'error',
       errors: [new Error('Failed to load metrics')],
     },
+  },
+};
+
+export const BasicWithSemconv = {
+  render: Template,
+
+  args: {
+    data: {
+      state: 'data',
+      currentPageIndex: 1,
+      pageCount: 10,
+      rows: loadedPods,
+    },
+    isOtel: true,
+  },
+};
+
+export const LoadingWithSemconv = {
+  render: Template,
+
+  args: {
+    isLoading: true,
+    isOtel: true,
   },
 };

@@ -6,23 +6,28 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import type { SchemaBasedFormula } from '../../../../shared/metrics/types';
 
-export const nodePodCapacity: LensBaseLayer = {
+export const nodePodCapacity: SchemaBasedFormula = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.kubernetes.capacity', {
     defaultMessage: 'Capacity',
   }),
-  value:
-    "last_value(kubernetes.node.pod.allocatable.total,  kql='kubernetes.node.pod.allocatable.total: *')",
+  value: {
+    ecs: "last_value(kubernetes.node.pod.allocatable.total,  kql='kubernetes.node.pod.allocatable.total: *')",
+    semconv: 'last_value(metrics.k8s.node.pod.allocatable)',
+  },
   format: 'number',
   decimals: 0,
 };
 
-export const nodePodUsed: LensBaseLayer = {
+export const nodePodUsed: SchemaBasedFormula = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.kubernetes.used', {
     defaultMessage: 'Used',
   }),
-  value: 'unique_count(kubernetes.pod.uid)',
+  value: {
+    ecs: 'unique_count(kubernetes.pod.uid)',
+    semconv: 'unique_count(metrics.k8s.pod.uid)',
+  },
   format: 'number',
   decimals: 0,
 };

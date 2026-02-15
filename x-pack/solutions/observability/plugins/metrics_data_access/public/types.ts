@@ -8,6 +8,7 @@ import type { Search } from 'history';
 import type { Plugin as PluginClass } from '@kbn/core/public';
 import type { MetricsDataClient } from './lib/metrics_client';
 import type { NodeMetricsTableProps } from './components/infrastructure_node_metrics_tables/shared';
+import type { ContainerSemconvRuntime } from './components/infrastructure_node_metrics_tables';
 
 export interface MetricsDataPluginSetup {
   metricsClient: MetricsDataClient;
@@ -17,7 +18,9 @@ export interface MetricsDataPluginStart {
   metricsClient: MetricsDataClient;
   HostMetricsTable: (props: NodeMetricsTableProps) => JSX.Element;
   PodMetricsTable: (props: NodeMetricsTableProps) => JSX.Element;
-  ContainerMetricsTable: (props: NodeMetricsTableProps) => JSX.Element;
+  ContainerMetricsTable: (
+    props: NodeMetricsTableProps & { semconvRuntime?: ContainerSemconvRuntime }
+  ) => JSX.Element;
 }
 
 export type MetricsDataPluginClass = PluginClass<MetricsDataPluginSetup, MetricsDataPluginStart>;

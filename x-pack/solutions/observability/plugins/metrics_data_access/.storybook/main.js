@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export { ContainerMetricsTable } from './container_metrics_table';
-export {
-  useContainerMetricsTable,
-  type ContainerSemconvRuntime,
-} from './use_container_metrics_table';
+module.exports = require('@kbn/storybook').defaultConfig;

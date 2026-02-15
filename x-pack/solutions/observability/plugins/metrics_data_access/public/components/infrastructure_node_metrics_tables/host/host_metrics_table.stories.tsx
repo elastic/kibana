@@ -17,12 +17,18 @@ import type { HostNodeMetricsRow } from './use_host_metrics_table';
 
 const mockServices = {
   application: {
+    currentAppId$: {
+      subscribe: (callback: (appId: string) => void) => {
+        callback('mock-app-id');
+        return { unsubscribe: () => {} };
+      },
+    },
     getUrlForApp: (app: string, { path }: { path: string }) => `your-kibana/app/${app}/${path}`,
   },
 };
 
 export default {
-  title: 'infra/Node Metrics Tables/Host',
+  title: 'metrics_data_access/Node Metrics Tables/Host',
   decorators: [
     (wrappedStory) => <EuiCard title="Host metrics">{wrappedStory()}</EuiCard>,
     (wrappedStory) => (
@@ -173,5 +179,28 @@ export const FailedToLoadMetrics = {
       state: 'error',
       errors: [new Error('Failed to load metrics')],
     },
+  },
+};
+
+export const BasicWithSemconv = {
+  render: Template,
+
+  args: {
+    data: {
+      state: 'data',
+      currentPageIndex: 1,
+      pageCount: 10,
+      rows: loadedHosts,
+    },
+    isOtel: true,
+  },
+};
+
+export const LoadingWithSemconv = {
+  render: Template,
+
+  args: {
+    isLoading: true,
+    isOtel: true,
   },
 };
