@@ -40,6 +40,10 @@ export const API_DOCUMENTATION_LINK = i18n.translate(
   }
 );
 
+export const GET_STARTED_LINK = i18n.translate('xpack.searchInferenceEndpoints.getStartedLink', {
+  defaultMessage: 'Get started',
+});
+
 export const ADD_ENDPOINT_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.addConnectorButtonLabel',
   {
