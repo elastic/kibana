@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  AnalyticsServiceSetup,
-  AnalyticsServiceStart,
-  Logger,
-} from '@kbn/core/server';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
@@ -169,10 +165,7 @@ export class WorkflowExecutionTelemetryClient {
         }),
     };
 
-    this.reportEvent(
-      WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCompleted,
-      eventData
-    );
+    this.reportEvent(WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCompleted, eventData);
   }
 
   /**
@@ -254,10 +247,7 @@ export class WorkflowExecutionTelemetryClient {
         }),
     };
 
-    this.reportEvent(
-      WorkflowExecutionTelemetryEventTypes.WorkflowExecutionFailed,
-      eventData
-    );
+    this.reportEvent(WorkflowExecutionTelemetryEventTypes.WorkflowExecutionFailed, eventData);
   }
 
   /**
@@ -331,9 +321,6 @@ export class WorkflowExecutionTelemetryClient {
         }),
     };
 
-    this.reportEvent(
-      WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCancelled,
-      eventData
-    );
+    this.reportEvent(WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCancelled, eventData);
   }
 }
