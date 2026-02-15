@@ -30,13 +30,67 @@ export const INDICATOR_APM_LATENCY = i18n.translate('xpack.slo.indicators.apmLat
   defaultMessage: 'APM latency',
 });
 
+export const INDICATOR_APM_LATENCY_DESCRIPTION = i18n.translate(
+  'xpack.slo.indicators.apmLatency.description',
+  {
+    defaultMessage:
+      'Define an SLO based on the latency of requests for your service so you can take action if your service is not handling requests quickly enough.',
+  }
+);
+
 export const INDICATOR_APM_AVAILABILITY = i18n.translate('xpack.slo.indicators.apmAvailability', {
   defaultMessage: 'APM availability',
 });
 
+export const INDICATOR_APM_AVAILABILITY_DESCRIPTION = i18n.translate(
+  'xpack.slo.indicators.apmAvailability.description',
+  {
+    defaultMessage:
+      'Define an SLO based on % of successful requests for your service so you can take action if your service is not meeting your availability targets.',
+  }
+);
+
 export const INDICATOR_SYNTHETICS_AVAILABILITY = i18n.translate(
   'xpack.slo.indicators.syntheticsAvailability',
   { defaultMessage: 'Synthetics availability' }
+);
+
+export const INDICATOR_SYNTHETICS_AVAILABILITY_DESCRIPTION = i18n.translate(
+  'xpack.slo.indicators.syntheticsAvailability.description',
+  {
+    defaultMessage:
+      'Define an SLO based on the uptime and availability of your synthetic monitors over time.',
+  }
+);
+
+export const INDICATOR_CUSTOM_KQL_DESCRIPTION = i18n.translate(
+  'xpack.slo.indicators.customKql.description',
+  {
+    defaultMessage: 'Define an SLO based on any of your Elasticsearch indices or data views.',
+  }
+);
+
+export const INDICATOR_CUSTOM_METRIC_DESCRIPTION = i18n.translate(
+  'xpack.slo.indicators.customMetric.description',
+  {
+    defaultMessage: 'Define an SLO based on custom equations from metric fields in your indices.',
+  }
+);
+
+export const INDICATOR_TIMESLICE_METRIC_DESCRIPTION = i18n.translate(
+  'xpack.slo.indicators.timesliceMetric.description',
+  {
+    defaultMessage:
+      'Define an SLO based on a custom equation that uses statistical aggregations and a threshold to determine whether a slice is good or bad.',
+  }
+);
+
+export const INDICATOR_HISTOGRAM_DESCRIPTION = i18n.translate(
+  'xpack.slo.indicators.histogram.description',
+  {
+    defaultMessage:
+      'Define an SLO based on histogram metrics using a range aggregation or a value_count aggregation for both the good and total events.',
+  }
 );
 
 export function toIndicatorTypeLabel(
@@ -63,6 +117,36 @@ export function toIndicatorTypeLabel(
 
     case 'sli.metric.timeslice':
       return INDICATOR_TIMESLICE_METRIC;
+
+    default:
+      assertNever(indicatorType as never);
+  }
+}
+
+export function toIndicatorTypeDescription(
+  indicatorType: SLOWithSummaryResponse['indicator']['type']
+): string {
+  switch (indicatorType) {
+    case 'sli.kql.custom':
+      return INDICATOR_CUSTOM_KQL_DESCRIPTION;
+
+    case 'sli.apm.transactionDuration':
+      return INDICATOR_APM_LATENCY_DESCRIPTION;
+
+    case 'sli.apm.transactionErrorRate':
+      return INDICATOR_APM_AVAILABILITY_DESCRIPTION;
+
+    case 'sli.synthetics.availability':
+      return INDICATOR_SYNTHETICS_AVAILABILITY_DESCRIPTION;
+
+    case 'sli.metric.custom':
+      return INDICATOR_CUSTOM_METRIC_DESCRIPTION;
+
+    case 'sli.histogram.custom':
+      return INDICATOR_HISTOGRAM_DESCRIPTION;
+
+    case 'sli.metric.timeslice':
+      return INDICATOR_TIMESLICE_METRIC_DESCRIPTION;
 
     default:
       assertNever(indicatorType as never);

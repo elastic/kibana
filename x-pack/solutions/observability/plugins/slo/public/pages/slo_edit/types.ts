@@ -41,5 +41,6 @@ export interface CreateSLOForm<IndicatorType = Indicator> {
 
 export interface FormSettings {
   isEditMode?: boolean;
+  isFlyout?: boolean;
   allowedIndicatorTypes?: IndicatorTypeSchema[];
 }

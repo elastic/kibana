@@ -5,7 +5,6 @@
  * 2.0.
  */
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlyout,
@@ -93,7 +92,14 @@ export function SLOInspect({ slo, disabled }: Props) {
   let flyout;
   if (isFlyoutVisible) {
     flyout = (
-      <EuiFlyout ownFocus onClose={closeFlyout} aria-labelledby="flyoutTitle">
+      <EuiFlyout
+        ownFocus
+        onClose={closeFlyout}
+        aria-labelledby="flyoutTitle"
+        session="start"
+        size={620}
+        resizable
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2 id="flyoutTitle">
@@ -236,15 +242,14 @@ export function SLOInspect({ slo, disabled }: Props) {
           )}
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
-          <EuiButton
+          <EuiButtonEmpty
             data-test-subj="syntheticsMonitorInspectCloseButton"
             onClick={closeFlyout}
-            fill
           >
             {i18n.translate('xpack.slo.sLOInspect.closeButtonLabel', {
               defaultMessage: 'Close',
             })}
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlyoutFooter>
       </EuiFlyout>
     );

@@ -10,8 +10,9 @@ import type { StoryFn } from '@storybook/react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import { SloEditFormDescriptionSection as Component } from './slo_edit_form_description_section';
+import { SloEditFormDescriptionSection as Component } from './description_section';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
+import { SloFormContextProvider } from './slo_form_context';
 
 export default {
   component: Component,
@@ -19,18 +20,31 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: StoryFn<typeof Component> = () => {
+interface StoryArgs {
+  isFlyout?: boolean;
+}
+
+const Template: StoryFn<StoryArgs> = ({ isFlyout = false }) => {
   const methods = useForm({ defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES });
   return (
     <FormProvider {...methods}>
-      <Component />
+      <SloFormContextProvider value={{ isFlyout }}>
+        <Component />
+      </SloFormContextProvider>
     </FormProvider>
   );
 };
 
-const defaultProps = {};
-
-export const SloEditFormDescription = {
+export const FullPage = {
   render: Template,
-  args: defaultProps,
+  args: {
+    isFlyout: false,
+  },
+};
+
+export const Flyout = {
+  render: Template,
+  args: {
+    isFlyout: true,
+  },
 };

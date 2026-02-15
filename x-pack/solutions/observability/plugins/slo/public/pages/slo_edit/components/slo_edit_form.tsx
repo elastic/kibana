@@ -14,10 +14,11 @@ import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 import { useSectionFormValidation } from '../hooks/use_section_form_validation';
 import { useShowSections } from '../hooks/use_show_sections';
 import type { CreateSLOForm, FormSettings } from '../types';
-import { SloEditFormDescriptionSection } from './slo_edit_form_description_section';
+import { SloFormContextProvider } from './slo_form_context';
+import { SloEditFormDescriptionSection } from './description_section';
 import { SloEditFormFooter } from './slo_edit_form_footer';
-import { SloEditFormIndicatorSection } from './slo_edit_form_indicator_section';
-import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
+import { SloEditFormIndicatorSection } from './indicator_section';
+import { SloEditFormObjectiveSection } from './objective_section';
 
 export interface Props {
   initialValues?: CreateSLOForm;
@@ -38,6 +39,7 @@ export function SloEditForm({
   formSettings = DEFAULT_FORM_SETTINGS,
 }: Props) {
   const { isEditMode = false } = formSettings;
+  const isFlyout = Boolean(onFlyoutClose);
   assertValidProps({ isEditMode, slo, onFlyoutClose });
 
   const form = useForm<CreateSLOForm>({
@@ -64,36 +66,38 @@ export function SloEditForm({
 
   return (
     <FormProvider {...form}>
-      <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloForm">
-        <EuiSteps
-          steps={[
-            {
-              title: i18n.translate('xpack.slo.sloEdit.definition.title', {
-                defaultMessage: 'Define SLI',
-              }),
-              children: <SloEditFormIndicatorSection formSettings={formSettings} />,
-              status: isIndicatorSectionValid ? 'complete' : 'incomplete',
-            },
-            {
-              title: i18n.translate('xpack.slo.sloEdit.objectives.title', {
-                defaultMessage: 'Set objectives',
-              }),
-              children: showObjectiveSection ? <SloEditFormObjectiveSection /> : null,
-              status: showObjectiveSection && isObjectiveSectionValid ? 'complete' : 'incomplete',
-            },
-            {
-              title: i18n.translate('xpack.slo.sloEdit.description.title', {
-                defaultMessage: 'Describe SLO',
-              }),
-              children: showDescriptionSection ? <SloEditFormDescriptionSection /> : null,
-              status:
-                showDescriptionSection && isDescriptionSectionValid ? 'complete' : 'incomplete',
-            },
-          ]}
-        />
+      <SloFormContextProvider value={{ ...formSettings, isFlyout }}>
+        <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloForm">
+          <EuiSteps
+            steps={[
+              {
+                title: i18n.translate('xpack.slo.sloEdit.definition.title', {
+                  defaultMessage: 'Define SLI',
+                }),
+                children: <SloEditFormIndicatorSection />,
+                status: isIndicatorSectionValid ? 'complete' : 'incomplete',
+              },
+              {
+                title: i18n.translate('xpack.slo.sloEdit.objectives.title', {
+                  defaultMessage: 'Set objectives',
+                }),
+                children: showObjectiveSection ? <SloEditFormObjectiveSection /> : null,
+                status: showObjectiveSection && isObjectiveSectionValid ? 'complete' : 'incomplete',
+              },
+              {
+                title: i18n.translate('xpack.slo.sloEdit.description.title', {
+                  defaultMessage: 'Describe SLO',
+                }),
+                children: showDescriptionSection ? <SloEditFormDescriptionSection /> : null,
+                status:
+                  showDescriptionSection && isDescriptionSectionValid ? 'complete' : 'incomplete',
+              },
+            ]}
+          />
 
-        <SloEditFormFooter slo={slo} onFlyoutClose={onFlyoutClose} isEditMode={isEditMode} />
-      </EuiFlexGroup>
+          <SloEditFormFooter slo={slo} onFlyoutClose={onFlyoutClose} isEditMode={isEditMode} />
+        </EuiFlexGroup>
+      </SloFormContextProvider>
     </FormProvider>
   );
 }

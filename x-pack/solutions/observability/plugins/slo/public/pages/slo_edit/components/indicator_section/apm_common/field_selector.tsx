@@ -26,6 +26,7 @@ interface Option {
 export interface Props {
   dataTestSubj: string;
   fieldName: string;
+  fullWidth?: boolean;
   label: string;
   name: FieldPath<CreateSLOForm>;
   placeholder: string;
@@ -35,6 +36,7 @@ export interface Props {
 export function FieldSelector({
   dataTestSubj,
   fieldName,
+  fullWidth,
   label,
   name,
   placeholder,
@@ -72,6 +74,7 @@ export function FieldSelector({
             label
           )
         }
+        fullWidth
         isInvalid={getFieldState(name).invalid}
       >
         <Controller
@@ -85,6 +88,7 @@ export function FieldSelector({
               aria-label={placeholder}
               async
               data-test-subj={dataTestSubj}
+              fullWidth={fullWidth}
               isClearable
               isInvalid={fieldState.invalid}
               isLoading={isLoading}

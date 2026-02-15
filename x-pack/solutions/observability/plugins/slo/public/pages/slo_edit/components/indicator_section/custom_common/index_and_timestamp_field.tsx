@@ -12,6 +12,7 @@ import { useFormContext } from 'react-hook-form';
 import type { CreateSLOForm } from '../../../types';
 import { TimestampFieldSelector } from '../../common/timestamp_field_selector';
 import { IndexSelection } from './index_selection';
+import { useSloFormContext } from '../../slo_form_context';
 
 interface Props {
   dataView?: DataView;
@@ -19,17 +20,23 @@ interface Props {
 }
 
 export function IndexAndTimestampField({ dataView, isLoading }: Props) {
+  const { isFlyout } = useSloFormContext();
   const { watch } = useFormContext<CreateSLOForm>();
   const index = watch('indicator.params.index');
 
   const timestampFields = dataView?.fields?.filter((field) => field.type === 'date') ?? [];
 
   return (
-    <EuiFlexGroup gutterSize="m" css={{ paddingRight: 34 }}>
-      <EuiFlexItem grow={5}>
+    <EuiFlexGroup
+      direction={isFlyout ? 'column' : 'row'}
+      gutterSize="m"
+      css={isFlyout ? undefined : { paddingRight: 34 }}
+    >
+      {/* minWidth is used to prevent the flex items from growing too wide */}
+      <EuiFlexItem grow={isFlyout ? true : 5} css={{ minWidth: 0 }}>
         <IndexSelection selectedDataView={dataView} />
       </EuiFlexItem>
-      <EuiFlexItem grow={2}>
+      <EuiFlexItem grow={isFlyout ? true : 2} css={{ minWidth: 0 }}>
         <TimestampFieldSelector
           fields={timestampFields}
           isLoading={!!index && isLoading}
