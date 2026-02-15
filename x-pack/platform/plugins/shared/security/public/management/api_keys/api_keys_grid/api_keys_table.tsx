@@ -16,6 +16,7 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiButton,
+  EuiButtonEmpty,
   EuiFilterButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -38,14 +39,6 @@ import { UserAvatar, UserProfilesPopover } from '@kbn/user-profile-components';
 import { ApiKeysEmptyPrompt, doesErrorIndicateBadQuery } from './api_keys_empty_prompt';
 import type { AuthenticatedUser } from '../../../../common';
 
-export interface TablePagination {
-  pageIndex: number;
-  pageSize?: number;
-  totalItemCount: number;
-  pageSizeOptions?: number[];
-  showPerPageOptions?: boolean;
-}
-
 export interface ApiKeysTableProps {
   apiKeys: CategorizedApiKey[];
   queryFilters: QueryFilters;
@@ -60,14 +53,18 @@ export interface ApiKeysTableProps {
   onClick(apiKey: CategorizedApiKey): void;
   onDelete(apiKeys: CategorizedApiKey[]): void;
   totalItemCount?: number;
-  onTableChange: ({ page, sort }: Criteria<CategorizedApiKey>) => void;
-  pagination: TablePagination;
+  onTableChange: ({ sort }: Criteria<CategorizedApiKey>) => void;
   onSearchChange: (args: EuiSearchBarOnChangeArgs) => boolean | void;
   aggregations?: ApiKeyAggregations;
   sortingOptions: QueryApiKeySortOptions;
   queryErrors?: Error;
   resetQuery: () => void;
   onFilterChange: (filters: QueryFilters) => void;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  onNextPage: () => void;
+  onPreviousPage: () => void;
+  onRefresh: () => void;
 }
 
 export interface QueryFilters {
@@ -75,8 +72,6 @@ export interface QueryFilters {
   type?: 'rest' | 'managed' | 'cross_cluster';
   expired?: boolean;
 }
-
-export const MAX_PAGINATED_ITEMS = 10000;
 const FiltersContext = createContext<{
   types: string[];
   usernames: string[];
@@ -96,7 +91,6 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   loading = false,
   totalItemCount = 0,
   onTableChange,
-  pagination,
   onSearchChange,
   aggregations,
   sortingOptions,
@@ -105,6 +99,11 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   query,
   queryFilters,
   onFilterChange,
+  hasNextPage,
+  hasPreviousPage,
+  onNextPage,
+  onPreviousPage,
+  onRefresh,
 }) => {
   const columns: Array<EuiBasicTableColumn<CategorizedApiKey>> = [];
   const [selectedItems, setSelectedItems] = useState<CategorizedApiKey[]>([]);
@@ -259,8 +258,6 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
     });
   }
 
-  const exceededResultCount = totalItemCount > MAX_PAGINATED_ITEMS;
-
   return (
     <>
       <FiltersContext.Provider
@@ -336,18 +333,6 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
         </ApiKeysEmptyPrompt>
       ) : (
         <>
-          {exceededResultCount && (
-            <>
-              <EuiText color="subdued" size="s" data-test-subj="apiKeysTableTooManyResultsLabel">
-                <FormattedMessage
-                  id="xpack.security.management.apiKeys.table.tooManyResultsLabel"
-                  defaultMessage="Showing {limit} of {totalItemCount, plural, one {# api key} other {# api keys}}"
-                  values={{ totalItemCount, limit: MAX_PAGINATED_ITEMS }}
-                />
-              </EuiText>
-              <EuiSpacer size="s" />
-            </>
-          )}
           <EuiBasicTable
             tableCaption={i18n.translate('xpack.security.management.apiKeys.table.caption', {
               defaultMessage: 'API keys list',
@@ -356,7 +341,6 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
             itemId="id"
             columns={columns}
             loading={loading}
-            pagination={pagination}
             onChange={onTableChange}
             selection={
               readOnly
@@ -373,6 +357,72 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
               },
             }}
           />
+          <EuiSpacer size="m" />
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiText color="subdued" size="s">
+                    <FormattedMessage
+                      id="xpack.security.management.apiKeys.table.totalCountLabel"
+                      defaultMessage="{totalItemCount, plural, one {# api key} other {# api keys}}"
+                      values={{ totalItemCount }}
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="apiKeysTableRefreshButton"
+                    size="xs"
+                    iconType="refresh"
+                    onClick={onRefresh}
+                    isLoading={loading}
+                    aria-label={i18n.translate(
+                      'xpack.security.management.apiKeys.table.refreshButtonAriaLabel',
+                      { defaultMessage: 'Refresh API keys' }
+                    )}
+                  >
+                    <FormattedMessage
+                      id="xpack.security.management.apiKeys.table.refreshButtonLabel"
+                      defaultMessage="Refresh"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="apiKeysTablePreviousPageButton"
+                    disabled={!hasPreviousPage || loading}
+                    onClick={onPreviousPage}
+                    iconType="arrowLeft"
+                    iconSide="left"
+                  >
+                    <FormattedMessage
+                      id="xpack.security.management.apiKeys.table.previousPageButtonLabel"
+                      defaultMessage="Previous"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="apiKeysTableNextPageButton"
+                    disabled={!hasNextPage || loading}
+                    onClick={onNextPage}
+                    iconType="arrowRight"
+                    iconSide="right"
+                  >
+                    <FormattedMessage
+                      id="xpack.security.management.apiKeys.table.nextPageButtonLabel"
+                      defaultMessage="Next"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </>
       )}
     </>
