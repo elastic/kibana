@@ -15,6 +15,8 @@ import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/
 import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import { descriptionPrompt } from '@kbn/streams-ai/src/description/prompt';
 import { systemsPrompt } from '@kbn/streams-ai/src/systems/prompt';
+import summarizeQueriesPrompt from '../../significant_events/insights/prompts/summarize_queries/system_prompt.text';
+import summarizeStreamsPrompt from '../../significant_events/insights/prompts/summarize_streams/system_prompt.text';
 import { streamsPromptsSOType } from './prompts_config';
 import type { PromptsConfigAttributes } from './prompts_config';
 
@@ -25,6 +27,8 @@ const defaultsPrompts = {
   significantEventsPromptOverride: significantEventsPrompt,
   descriptionPromptOverride: descriptionPrompt,
   systemsPromptOverride: systemsPrompt,
+  summarizeQueriesPromptOverride: summarizeQueriesPrompt,
+  summarizeStreamsPromptOverride: summarizeStreamsPrompt,
 };
 
 const SINGLETON_PROMPTS_ID = 'streams-prompts-config-id';
@@ -81,6 +85,12 @@ export class PromptsConfigService {
           data.attributes.descriptionPromptOverride || defaultsPrompts.descriptionPromptOverride,
         systemsPromptOverride:
           data.attributes.systemsPromptOverride || defaultsPrompts.systemsPromptOverride,
+        summarizeQueriesPromptOverride:
+          data.attributes.summarizeQueriesPromptOverride ||
+          defaultsPrompts.summarizeQueriesPromptOverride,
+        summarizeStreamsPromptOverride:
+          data.attributes.summarizeStreamsPromptOverride ||
+          defaultsPrompts.summarizeStreamsPromptOverride,
       };
     } catch (err: any) {
       // saved objects client throws with statusCode 404 for not found
