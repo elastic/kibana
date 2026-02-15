@@ -18,13 +18,15 @@ import { useTabs } from './use_tabs';
 import { push } from '../../../shared/links/url_helpers';
 
 const INITIAL_STATE = {
-  containerIds: [],
-  hostNames: [],
-  podNames: [],
+  containerIds: [] as string[],
+  hostNames: [] as string[],
+  podNames: [] as string[],
+  deploymentNames: [] as string[],
+  nodeNames: [] as string[],
 };
 
 export function InfraTabs() {
-  const { serviceName } = useApmServiceContext();
+  const { serviceName, agentName } = useApmServiceContext();
   const history = useHistory();
   const {
     query: { environment, kuery, rangeFrom, rangeTo, detailTab },
@@ -42,20 +44,23 @@ export function InfraTabs() {
               kuery,
               start,
               end,
+              agentName: agentName ?? undefined,
             },
           },
         });
       }
     },
-    [environment, kuery, serviceName, start, end]
+    [agentName, environment, kuery, serviceName, start, end]
   );
 
-  const { containerIds, podNames, hostNames } = data;
+  const { containerIds, hostNames, podNames, deploymentNames, nodeNames } = data;
 
   const tabs = useTabs({
     containerIds,
-    podNames,
     hostNames,
+    podNames,
+    deploymentNames,
+    nodeNames,
     start,
     end,
   });
@@ -79,8 +84,8 @@ export function InfraTabs() {
   if (
     status === FETCH_STATUS.SUCCESS &&
     !containerIds.length &&
-    !podNames.length &&
-    !hostNames.length
+    !hostNames.length &&
+    !podNames.length
   ) {
     return (
       <div style={{ textAlign: 'center' }}>
@@ -97,6 +102,7 @@ export function InfraTabs() {
         {tabs.map(({ id, name }) => {
           return (
             <EuiTab
+              key={id}
               onClick={() => {
                 push(history, {
                   query: {

@@ -1,0 +1,1327 @@
+{
+  "panels": [
+    {
+      "title": "Node Summary",
+      "collapsed": false,
+      "grid": {
+        "y": 0
+      },
+      "uid": "1ab3aa4e-f17c-4d79-ad30-b853968f3113",
+      "panels": [
+        {
+          "type": "lens",
+          "grid": {
+            "x": 0,
+            "y": 13,
+            "w": 48,
+            "h": 15
+          },
+          "uid": "18e8b34a-98ee-4672-b197-1d786273083b",
+          "config": {
+            "title": "All Pods per Node",
+            "syncColors": false,
+            "syncCursor": true,
+            "syncTooltips": false,
+            "filters": [],
+            "query": {
+              "query": "",
+              "language": "kuery"
+            },
+            "attributes": {
+              "title": "",
+              "visualizationType": "lnsPie",
+              "type": "lens",
+              "references": [
+                {
+                  "type": "index-pattern",
+                  "id": "metrics-*",
+                  "name": "indexpattern-datasource-layer-900f8326-9c5c-4a5b-9de6-cb5c6c37c7f7"
+                }
+              ],
+              "state": {
+                "visualization": {
+                  "shape": "treemap",
+                  "layers": [
+                    {
+                      "layerId": "900f8326-9c5c-4a5b-9de6-cb5c6c37c7f7",
+                      "primaryGroups": [
+                        "4471aebb-fedc-4861-9de3-33f8956ce546",
+                        "673b51fa-567b-4c22-b4b7-e8e95c63e771"
+                      ],
+                      "secondaryGroups": [
+                        "673b51fa-567b-4c22-b4b7-e8e95c63e771"
+                      ],
+                      "metrics": [
+                        "faae6ad8-1223-483e-baeb-61f0823e23fd"
+                      ],
+                      "numberDisplay": "percent",
+                      "categoryDisplay": "default",
+                      "legendDisplay": "default",
+                      "nestedLegend": false,
+                      "layerType": "data",
+                      "colorMapping": {
+                        "assignments": [],
+                        "specialAssignments": [
+                          {
+                            "rules": [
+                              {
+                                "type": "other"
+                              }
+                            ],
+                            "color": {
+                              "type": "loop"
+                            },
+                            "touched": false
+                          }
+                        ],
+                        "paletteId": "default",
+                        "colorMode": {
+                          "type": "categorical"
+                        }
+                      },
+                      "allowMultipleMetrics": false
+                    }
+                  ]
+                },
+                "query": {
+                  "query": "",
+                  "language": "kuery"
+                },
+                "filters": [],
+                "datasourceStates": {
+                  "formBased": {
+                    "layers": {
+                      "900f8326-9c5c-4a5b-9de6-cb5c6c37c7f7": {
+                        "columns": {
+                          "4471aebb-fedc-4861-9de3-33f8956ce546": {
+                            "label": "Top 50 values of k8s.node.name",
+                            "dataType": "string",
+                            "operationType": "terms",
+                            "sourceField": "k8s.node.name",
+                            "isBucketed": true,
+                            "params": {
+                              "size": 50,
+                              "orderBy": {
+                                "type": "column",
+                                "columnId": "faae6ad8-1223-483e-baeb-61f0823e23fd"
+                              },
+                              "orderDirection": "desc",
+                              "otherBucket": true,
+                              "missingBucket": false,
+                              "parentFormat": {
+                                "id": "terms"
+                              },
+                              "include": [],
+                              "exclude": [],
+                              "includeIsRegex": false,
+                              "excludeIsRegex": false
+                            }
+                          },
+                          "673b51fa-567b-4c22-b4b7-e8e95c63e771": {
+                            "label": "Top 50 values of k8s.pod.name",
+                            "dataType": "string",
+                            "operationType": "terms",
+                            "sourceField": "k8s.pod.name",
+                            "isBucketed": true,
+                            "params": {
+                              "size": 50,
+                              "orderBy": {
+                                "type": "column",
+                                "columnId": "faae6ad8-1223-483e-baeb-61f0823e23fd"
+                              },
+                              "orderDirection": "desc",
+                              "otherBucket": true,
+                              "missingBucket": false,
+                              "parentFormat": {
+                                "id": "terms"
+                              },
+                              "include": [],
+                              "exclude": [],
+                              "includeIsRegex": false,
+                              "excludeIsRegex": false
+                            }
+                          },
+                          "faae6ad8-1223-483e-baeb-61f0823e23fd": {
+                            "label": "Unique count of k8s.pod.name",
+                            "dataType": "number",
+                            "operationType": "unique_count",
+                            "sourceField": "k8s.pod.name",
+                            "isBucketed": false,
+                            "params": {
+                              "emptyAsNull": true
+                            }
+                          }
+                        },
+                        "columnOrder": [
+                          "4471aebb-fedc-4861-9de3-33f8956ce546",
+                          "673b51fa-567b-4c22-b4b7-e8e95c63e771",
+                          "faae6ad8-1223-483e-baeb-61f0823e23fd"
+                        ],
+                        "sampling": 1,
+                        "ignoreGlobalFilters": false,
+                        "incompleteColumns": {}
+                      }
+                    }
+                  },
+                  "indexpattern": {
+                    "layers": {}
+                  },
+                  "textBased": {
+                    "layers": {}
+                  }
+                },
+                "internalReferences": [],
+                "adHocDataViews": {}
+              },
+              "version": 2
+            }
+          }
+        },
+        {
+          "type": "lens",
+          "grid": {
+            "x": 0,
+            "y": 0,
+            "w": 23,
+            "h": 13
+          },
+          "uid": "210c1d14-6baf-42a0-8d08-78eb7c571f6b",
+          "config": {
+            "title": "Latest Pod Counts per Node",
+            "syncColors": false,
+            "syncCursor": true,
+            "syncTooltips": false,
+            "filters": [],
+            "query": {
+              "esql": "FROM metrics-*\n| WHERE k8s.pod.name IS NOT NULL AND k8s.node.name IS NOT NULL AND k8s.pod.phase == 2\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    podCount = COUNT_DISTINCT(k8s.pod.name) BY Node=k8s.node.name\n| EVAL last_update = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| KEEP Node, podCount,last_update\n| SORT podCount DESC"
+            },
+            "attributes": {
+              "title": "Bar vertical stacked",
+              "references": [],
+              "state": {
+                "datasourceStates": {
+                  "textBased": {
+                    "layers": {
+                      "8a3ab66f-1ce5-46c8-86a3-872efa3c06d2": {
+                        "index": "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa",
+                        "query": {
+                          "esql": "FROM metrics-*\n| WHERE k8s.pod.name IS NOT NULL AND k8s.node.name IS NOT NULL AND k8s.pod.phase == 2\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    podCount = COUNT_DISTINCT(k8s.pod.name) BY Node=k8s.node.name\n| EVAL last_update = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| KEEP Node, podCount,last_update\n| SORT podCount DESC"
+                        },
+                        "columns": [
+                          {
+                            "columnId": "Node",
+                            "fieldName": "Node",
+                            "label": "Node",
+                            "customLabel": false,
+                            "meta": {
+                              "type": "string",
+                              "esType": "keyword"
+                            }
+                          },
+                          {
+                            "columnId": "podCount",
+                            "fieldName": "podCount",
+                            "label": "Pod Count",
+                            "customLabel": true,
+                            "meta": {
+                              "type": "number",
+                              "esType": "long"
+                            },
+                            "inMetricDimension": true
+                          },
+                          {
+                            "columnId": "b4e7c3ea-ad37-44cc-b1fd-8ae7db98cbe6",
+                            "fieldName": "last_update",
+                            "meta": {
+                              "type": "number",
+                              "esType": "integer",
+                              "sourceParams": {
+                                "indexPattern": "metrics-*",
+                                "sourceField": "last_update"
+                              },
+                              "params": {
+                                "id": "number"
+                              }
+                            },
+                            "label": "Last Seen",
+                            "params": {
+                              "format": {
+                                "id": "duration",
+                                "params": {
+                                  "decimals": 0,
+                                  "suffix": " ago"
+                                }
+                              }
+                            },
+                            "customLabel": true
+                          }
+                        ],
+                        "timeField": "@timestamp",
+                        "allColumns": [
+                          {
+                            "columnId": "Node",
+                            "fieldName": "Node",
+                            "label": "Node",
+                            "customLabel": false,
+                            "meta": {
+                              "type": "string",
+                              "esType": "keyword"
+                            }
+                          },
+                          {
+                            "columnId": "podCount",
+                            "fieldName": "podCount",
+                            "label": "Pod Count",
+                            "customLabel": true,
+                            "meta": {
+                              "type": "number",
+                              "esType": "long"
+                            },
+                            "inMetricDimension": true
+                          },
+                          {
+                            "columnId": "b4e7c3ea-ad37-44cc-b1fd-8ae7db98cbe6",
+                            "fieldName": "last_update",
+                            "meta": {
+                              "type": "number",
+                              "esType": "integer",
+                              "sourceParams": {
+                                "indexPattern": "metrics-*",
+                                "sourceField": "last_update"
+                              },
+                              "params": {
+                                "id": "number"
+                              }
+                            },
+                            "label": "Last Seen",
+                            "params": {
+                              "format": {
+                                "id": "duration",
+                                "params": {
+                                  "decimals": 0,
+                                  "suffix": " ago"
+                                }
+                              }
+                            },
+                            "customLabel": true
+                          },
+                          {
+                            "columnId": "b8330441-567e-4b8f-8703-a393c7fc41da",
+                            "fieldName": "Namespace",
+                            "meta": {
+                              "type": "string",
+                              "esType": "keyword",
+                              "sourceParams": {
+                                "indexPattern": "metrics-*",
+                                "sourceField": "Namespace"
+                              },
+                              "params": {
+                                "id": "string"
+                              }
+                            },
+                            "label": "Namespace"
+                          },
+                          {
+                            "columnId": "Namespace",
+                            "fieldName": "Namespace",
+                            "label": "Namespace",
+                            "meta": {
+                              "type": "string",
+                              "esType": "keyword"
+                            }
+                          },
+                          {
+                            "columnId": "last_update",
+                            "fieldName": "last_update",
+                            "label": "last_update",
+                            "meta": {
+                              "type": "number",
+                              "esType": "integer"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "indexPatternRefs": [
+                      {
+                        "id": "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa",
+                        "title": "metrics-*",
+                        "timeField": "@timestamp"
+                      }
+                    ]
+                  }
+                },
+                "filters": [],
+                "query": {
+                  "esql": "FROM metrics-*\n| WHERE k8s.pod.name IS NOT NULL AND k8s.node.name IS NOT NULL AND k8s.pod.phase == 2\n| STATS \n    last_seen_ts = MAX(@timestamp),\n    podCount = COUNT_DISTINCT(k8s.pod.name) BY Node=k8s.node.name\n| EVAL last_update = DATE_DIFF(\"seconds\", last_seen_ts, NOW())\n| KEEP Node, podCount,last_update\n| SORT podCount DESC"
+                },
+                "visualization": {
+                  "layerId": "8a3ab66f-1ce5-46c8-86a3-872efa3c06d2",
+                  "layerType": "data",
+                  "metricAccessor": "podCount",
+                  "breakdownByAccessor": "Node",
+                  "palette": {
+                    "name": "custom",
+                    "type": "palette",
+                    "params": {
+                      "steps": 3,
+                      "name": "custom",
+                      "reverse": false,
+                      "rangeType": "number",
+                      "rangeMin": null,
+                      "rangeMax": null,
+                      "progression": "fixed",
+                      "stops": [
+                        {
+                          "color": "#24c292",
+                          "stop": 14
+                        },
+                        {
+                          "color": "#fcd883",
+                          "stop": 15
+                        },
+                        {
+                          "color": "#f6726a",
+                          "stop": 16
+                        }
+                      ],
+                      "colorStops": [
+                        {
+                          "color": "#24c292",
+                          "stop": null
+                        },
+                        {
+                          "color": "#fcd883",
+                          "stop": 14
+                        },
+                        {
+                          "color": "#f6726a",
+                          "stop": 15
+                        }
+                      ],
+                      "continuity": "all",
+                      "maxSteps": 5
+                    }
+                  }
+                },
+                "adHocDataViews": {
+                  "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa": {
+                    "id": "d3b7e528216ce7ef65e68e07a803b7ab53e440cafdb52d9d7ee1ef4bbf5d8afa",
+                    "title": "metrics-*",
+                    "timeFieldName": "@timestamp",
+                    "sourceFilters": [],
+                    "type": "esql",
+                    "fieldFormats": {},
+                    "runtimeFieldMap": {},
+                    "allowNoIndex": false,
+                    "name": "metrics-*",
+                    "allowHidden": false,
+                    "managed": false
+                  }
+                },
+                "needsRefresh": false
+              },
+              "visualizationType": "lnsMetric",
+              "version": 2
+            }
+          }
+        },
+        {
+          "type": "lens",
+          "grid": {
+            "x": 23,
+            "y": 0,
+            "w": 25,
+            "h": 13
+          },
+          "uid": "f8462e57-8094-4672-8331-ee6cb519f7f2",
+          "config": {
+            "title": "Pod Counts by Node",
+            "syncColors": false,
+            "syncCursor": true,
+            "syncTooltips": false,
+            "filters": [],
+            "query": {
+              "query": "k8s.pod.name : * AND k8s.node.name : *\n",
+              "language": "kuery"
+            },
+            "attributes": {
+              "title": "",
+              "visualizationType": "lnsXY",
+              "type": "lens",
+              "references": [
+                {
+                  "type": "index-pattern",
+                  "id": "metrics-*",
+                  "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
+                },
+                {
+                  "type": "index-pattern",
+                  "id": "metrics-*",
+                  "name": "indexpattern-datasource-layer-86a019c1-473c-4536-837f-51e793b52534"
+                }
+              ],
+              "state": {
+                "visualization": {
+                  "legend": {
+                    "isVisible": true,
+                    "position": "bottom",
+                    "legendStats": [
+                      "average",
+                      "min",
+                      "max",
+                      "lastValue"
+                    ],
+                    "showSingleSeries": true
+                  },
+                  "valueLabels": "hide",
+                  "fittingFunction": "Linear",
+                  "axisTitlesVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "tickLabelsVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "labelsOrientation": {
+                    "x": 0,
+                    "yLeft": 0,
+                    "yRight": 0
+                  },
+                  "gridlinesVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "preferredSeriesType": "area",
+                  "layers": [
+                    {
+                      "layerId": "0c02b254-96e3-4af2-875d-79e425428b12",
+                      "seriesType": "line",
+                      "accessors": [
+                        "0ab814ca-9945-42cd-8093-d33df9005a34"
+                      ],
+                      "layerType": "data",
+                      "colorMapping": {
+                        "assignments": [],
+                        "specialAssignments": [
+                          {
+                            "rules": [
+                              {
+                                "type": "other"
+                              }
+                            ],
+                            "color": {
+                              "type": "loop"
+                            },
+                            "touched": false
+                          }
+                        ],
+                        "paletteId": "default",
+                        "colorMode": {
+                          "type": "categorical"
+                        }
+                      },
+                      "xAccessor": "1a832403-1bcd-45d8-b496-ec5fcd583cbe",
+                      "splitAccessors": [
+                        "f02e9890-a54d-4d79-8e53-f9e55694ed79"
+                      ]
+                    },
+                    {
+                      "layerId": "86a019c1-473c-4536-837f-51e793b52534",
+                      "layerType": "data",
+                      "accessors": [
+                        "f03fc771-5a9a-42ba-ae42-d3c3f31c905b"
+                      ],
+                      "seriesType": "area",
+                      "xAccessor": "24fb321d-625a-4f79-bede-27f16a636cbc",
+                      "yConfig": [
+                        {
+                          "forAccessor": "f03fc771-5a9a-42ba-ae42-d3c3f31c905b",
+                          "color": "#ffdcda"
+                        }
+                      ]
+                    }
+                  ],
+                  "pointVisibility": "never"
+                },
+                "query": {
+                  "query": "k8s.pod.name : * AND k8s.node.name : *\n",
+                  "language": "kuery"
+                },
+                "filters": [],
+                "datasourceStates": {
+                  "formBased": {
+                    "layers": {
+                      "0c02b254-96e3-4af2-875d-79e425428b12": {
+                        "columns": {
+                          "f02e9890-a54d-4d79-8e53-f9e55694ed79": {
+                            "label": "Node",
+                            "dataType": "string",
+                            "operationType": "terms",
+                            "sourceField": "k8s.node.name",
+                            "isBucketed": true,
+                            "params": {
+                              "size": 20,
+                              "orderBy": {
+                                "type": "column",
+                                "columnId": "0ab814ca-9945-42cd-8093-d33df9005a34"
+                              },
+                              "orderDirection": "desc",
+                              "otherBucket": true,
+                              "missingBucket": false,
+                              "parentFormat": {
+                                "id": "terms"
+                              },
+                              "include": [],
+                              "exclude": [],
+                              "includeIsRegex": false,
+                              "excludeIsRegex": false
+                            },
+                            "customLabel": true
+                          },
+                          "1a832403-1bcd-45d8-b496-ec5fcd583cbe": {
+                            "label": "@timestamp",
+                            "dataType": "date",
+                            "operationType": "date_histogram",
+                            "sourceField": "@timestamp",
+                            "isBucketed": true,
+                            "params": {
+                              "interval": "1m",
+                              "includeEmptyRows": true,
+                              "dropPartials": false
+                            }
+                          },
+                          "0ab814ca-9945-42cd-8093-d33df9005a34": {
+                            "label": "Assigned Pods",
+                            "dataType": "number",
+                            "operationType": "unique_count",
+                            "sourceField": "k8s.pod.name",
+                            "isBucketed": false,
+                            "params": {
+                              "format": {
+                                "id": "number",
+                                "params": {
+                                  "decimals": 1
+                                }
+                              },
+                              "emptyAsNull": true
+                            },
+                            "customLabel": true
+                          }
+                        },
+                        "columnOrder": [
+                          "f02e9890-a54d-4d79-8e53-f9e55694ed79",
+                          "1a832403-1bcd-45d8-b496-ec5fcd583cbe",
+                          "0ab814ca-9945-42cd-8093-d33df9005a34"
+                        ],
+                        "sampling": 1,
+                        "ignoreGlobalFilters": false,
+                        "incompleteColumns": {},
+                        "indexPatternId": "metrics-*"
+                      },
+                      "86a019c1-473c-4536-837f-51e793b52534": {
+                        "indexPatternId": "metrics-*",
+                        "linkToLayers": [],
+                        "columns": {
+                          "24fb321d-625a-4f79-bede-27f16a636cbc": {
+                            "label": "@timestamp",
+                            "dataType": "date",
+                            "operationType": "date_histogram",
+                            "sourceField": "@timestamp",
+                            "isBucketed": true,
+                            "params": {
+                              "interval": "auto",
+                              "includeEmptyRows": true,
+                              "dropPartials": false
+                            }
+                          },
+                          "f03fc771-5a9a-42ba-ae42-d3c3f31c905b": {
+                            "label": "Total Pods",
+                            "dataType": "number",
+                            "operationType": "unique_count",
+                            "sourceField": "k8s.pod.name",
+                            "isBucketed": false,
+                            "params": {
+                              "emptyAsNull": true,
+                              "format": {
+                                "id": "number",
+                                "params": {
+                                  "decimals": 0
+                                }
+                              }
+                            },
+                            "customLabel": true
+                          }
+                        },
+                        "columnOrder": [
+                          "24fb321d-625a-4f79-bede-27f16a636cbc",
+                          "f03fc771-5a9a-42ba-ae42-d3c3f31c905b"
+                        ],
+                        "sampling": 1,
+                        "ignoreGlobalFilters": false,
+                        "incompleteColumns": {}
+                      }
+                    },
+                    "currentIndexPatternId": "metrics-*"
+                  },
+                  "indexpattern": {
+                    "layers": {},
+                    "currentIndexPatternId": "metrics-*"
+                  },
+                  "textBased": {
+                    "layers": {},
+                    "indexPatternRefs": [
+                      {
+                        "id": "metrics-*",
+                        "title": "metrics-*",
+                        "timeField": "@timestamp"
+                      }
+                    ]
+                  }
+                },
+                "internalReferences": [],
+                "adHocDataViews": {}
+              },
+              "version": 2
+            },
+            "drilldowns": []
+          }
+        }
+      ]
+    },
+    {
+      "title": "Node Metrics",
+      "collapsed": false,
+      "grid": {
+        "y": 1
+      },
+      "uid": "998c188a-4736-4e90-aee1-f10873bf5e17",
+      "panels": [
+        {
+          "type": "lens",
+          "grid": {
+            "x": 0,
+            "y": 0,
+            "w": 48,
+            "h": 22
+          },
+          "uid": "dc7d4bf2-1f31-4cc7-9f43-33d72e14f13a",
+          "config": {
+            "title": "Node CPU",
+            "syncColors": false,
+            "syncCursor": true,
+            "syncTooltips": false,
+            "filters": [],
+            "query": {
+              "query": "k8s.node.name : * AND k8s.node.cpu.usage : *",
+              "language": "kuery"
+            },
+            "attributes": {
+              "title": "",
+              "visualizationType": "lnsXY",
+              "type": "lens",
+              "references": [
+                {
+                  "type": "index-pattern",
+                  "id": "metrics-*",
+                  "name": "indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
+                }
+              ],
+              "state": {
+                "visualization": {
+                  "legend": {
+                    "isVisible": true,
+                    "position": "bottom",
+                    "legendStats": [
+                      "average",
+                      "min",
+                      "max"
+                    ],
+                    "showSingleSeries": true
+                  },
+                  "valueLabels": "hide",
+                  "fittingFunction": "Linear",
+                  "yLeftExtent": {
+                    "mode": "full"
+                  },
+                  "axisTitlesVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "tickLabelsVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "labelsOrientation": {
+                    "x": 0,
+                    "yLeft": 0,
+                    "yRight": 0
+                  },
+                  "gridlinesVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "preferredSeriesType": "line",
+                  "layers": [
+                    {
+                      "layerId": "0c02b254-96e3-4af2-875d-79e425428b12",
+                      "seriesType": "line",
+                      "xAccessor": "45148fea-00b8-43c1-92db-60ebf27b3f92",
+                      "accessors": [
+                        "3e829468-e8e0-449d-a994-1a2df6314124"
+                      ],
+                      "layerType": "data",
+                      "colorMapping": {
+                        "assignments": [],
+                        "specialAssignments": [
+                          {
+                            "rules": [
+                              {
+                                "type": "other"
+                              }
+                            ],
+                            "color": {
+                              "type": "loop"
+                            },
+                            "touched": false
+                          }
+                        ],
+                        "paletteId": "default",
+                        "colorMode": {
+                          "type": "categorical"
+                        }
+                      },
+                      "yConfig": [
+                        {
+                          "forAccessor": "3e829468-e8e0-449d-a994-1a2df6314124",
+                          "axisMode": "left"
+                        }
+                      ],
+                      "splitAccessors": [
+                        "6c0c864a-5e5e-4ff2-87da-d600c7d6edef"
+                      ]
+                    }
+                  ]
+                },
+                "query": {
+                  "query": "k8s.node.name : * AND k8s.node.cpu.usage : *",
+                  "language": "kuery"
+                },
+                "filters": [],
+                "datasourceStates": {
+                  "formBased": {
+                    "layers": {
+                      "0c02b254-96e3-4af2-875d-79e425428b12": {
+                        "columns": {
+                          "6c0c864a-5e5e-4ff2-87da-d600c7d6edef": {
+                            "label": "Nodes",
+                            "dataType": "string",
+                            "operationType": "terms",
+                            "sourceField": "k8s.node.name",
+                            "isBucketed": true,
+                            "params": {
+                              "size": 20,
+                              "orderBy": {
+                                "type": "column",
+                                "columnId": "3e829468-e8e0-449d-a994-1a2df6314124"
+                              },
+                              "orderDirection": "desc",
+                              "otherBucket": true,
+                              "missingBucket": false,
+                              "parentFormat": {
+                                "id": "terms"
+                              },
+                              "include": [],
+                              "exclude": [],
+                              "includeIsRegex": false,
+                              "excludeIsRegex": false,
+                              "secondaryFields": []
+                            },
+                            "customLabel": true
+                          },
+                          "45148fea-00b8-43c1-92db-60ebf27b3f92": {
+                            "label": "@timestamp",
+                            "dataType": "date",
+                            "operationType": "date_histogram",
+                            "sourceField": "@timestamp",
+                            "isBucketed": true,
+                            "params": {
+                              "interval": "auto",
+                              "includeEmptyRows": true,
+                              "dropPartials": false
+                            }
+                          },
+                          "3e829468-e8e0-449d-a994-1a2df6314124": {
+                            "label": "CPU Usage (cores)",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "k8s.node.cpu.usage",
+                            "isBucketed": false,
+                            "params": {
+                              "emptyAsNull": true,
+                              "format": {
+                                "id": "number",
+                                "params": {
+                                  "decimals": 2,
+                                  "suffix": " cores"
+                                }
+                              }
+                            },
+                            "customLabel": true
+                          }
+                        },
+                        "columnOrder": [
+                          "6c0c864a-5e5e-4ff2-87da-d600c7d6edef",
+                          "45148fea-00b8-43c1-92db-60ebf27b3f92",
+                          "3e829468-e8e0-449d-a994-1a2df6314124"
+                        ],
+                        "sampling": 1,
+                        "ignoreGlobalFilters": false,
+                        "incompleteColumns": {},
+                        "indexPatternId": "metrics-*"
+                      }
+                    },
+                    "currentIndexPatternId": "metrics-*"
+                  }
+                },
+                "internalReferences": [],
+                "adHocDataViews": {}
+              },
+              "version": 2
+            },
+            "drilldowns": []
+          }
+        },
+        {
+          "type": "lens",
+          "grid": {
+            "x": 0,
+            "y": 22,
+            "w": 24,
+            "h": 18
+          },
+          "uid": "074c9659-801c-471d-9a3b-5268c8315776",
+          "config": {
+            "syncColors": false,
+            "syncCursor": true,
+            "syncTooltips": false,
+            "filters": [],
+            "query": {
+              "query": "",
+              "language": "kuery"
+            },
+            "attributes": {
+              "title": "Node Memory Available",
+              "description": "",
+              "visualizationType": "lnsXY",
+              "type": "lens",
+              "references": [
+                {
+                  "type": "index-pattern",
+                  "id": "metrics-*",
+                  "name": "indexpattern-datasource-layer-layer_0"
+                }
+              ],
+              "state": {
+                "visualization": {
+                  "axisTitlesVisibilitySettings": {
+                    "x": false,
+                    "yLeft": false,
+                    "yRight": true
+                  },
+                  "legend": {
+                    "isVisible": true,
+                    "position": "bottom",
+                    "showSingleSeries": true,
+                    "legendStats": [
+                      "average",
+                      "min",
+                      "max"
+                    ]
+                  },
+                  "hideEndzones": true,
+                  "preferredSeriesType": "line",
+                  "valueLabels": "hide",
+                  "emphasizeFitting": true,
+                  "fittingFunction": "Linear",
+                  "yLeftExtent": {
+                    "mode": "full"
+                  },
+                  "tickLabelsVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "labelsOrientation": {
+                    "x": 0,
+                    "yLeft": 0,
+                    "yRight": 0
+                  },
+                  "gridlinesVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "layers": [
+                    {
+                      "layerId": "layer_0",
+                      "layerType": "data",
+                      "xAccessor": "x_metric_formula_accessor0",
+                      "accessors": [
+                        "metric_formula_accessor0_0"
+                      ],
+                      "seriesType": "line",
+                      "yConfig": [
+                        {
+                          "forAccessor": "metric_formula_accessor0_0"
+                        }
+                      ],
+                      "splitAccessors": [
+                        "metric_formula_accessor0_breakdown"
+                      ]
+                    }
+                  ]
+                },
+                "query": {
+                  "query": "",
+                  "language": "kuery"
+                },
+                "filters": [],
+                "datasourceStates": {
+                  "formBased": {
+                    "layers": {
+                      "layer_0": {
+                        "columnOrder": [
+                          "metric_formula_accessor0_breakdown",
+                          "x_metric_formula_accessor0",
+                          "metric_formula_accessor0_0"
+                        ],
+                        "columns": {
+                          "metric_formula_accessor0_0": {
+                            "label": "Memory Available",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "k8s.node.memory.available",
+                            "isBucketed": false,
+                            "params": {
+                              "format": {
+                                "id": "bytes",
+                                "params": {
+                                  "decimals": 1
+                                }
+                              },
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "x_metric_formula_accessor0": {
+                            "dataType": "date",
+                            "isBucketed": true,
+                            "label": "@timestamp",
+                            "operationType": "date_histogram",
+                            "scale": "interval",
+                            "sourceField": "@timestamp",
+                            "params": {
+                              "interval": "auto"
+                            }
+                          },
+                          "metric_formula_accessor0_breakdown": {
+                            "label": "Top 20 values of k8s.node.name",
+                            "dataType": "string",
+                            "operationType": "terms",
+                            "scale": "ordinal",
+                            "sourceField": "k8s.node.name",
+                            "isBucketed": true,
+                            "params": {
+                              "size": 20,
+                              "orderBy": {
+                                "type": "alphabetical",
+                                "fallback": false
+                              },
+                              "orderDirection": "asc",
+                              "otherBucket": false,
+                              "missingBucket": false,
+                              "parentFormat": {
+                                "id": "terms"
+                              },
+                              "include": [],
+                              "exclude": [],
+                              "includeIsRegex": false,
+                              "excludeIsRegex": false
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "internalReferences": [],
+                "adHocDataViews": {
+                  "metrics-*,metricbeat-*": {
+                    "id": "metrics-*,metricbeat-*",
+                    "title": "metrics-*,metricbeat-*",
+                    "timeFieldName": "@timestamp",
+                    "sourceFilters": [],
+                    "fieldFormats": {},
+                    "runtimeFieldMap": {},
+                    "fieldAttrs": {},
+                    "allowNoIndex": false,
+                    "name": "Metrics View",
+                    "allowHidden": false,
+                    "managed": false
+                  }
+                }
+              },
+              "version": 2
+            },
+            "drilldowns": []
+          }
+        },
+        {
+          "type": "lens",
+          "grid": {
+            "x": 24,
+            "y": 22,
+            "w": 24,
+            "h": 18
+          },
+          "uid": "9cddee08-c2f1-43d0-8fdb-b4ad0cd5c419",
+          "config": {
+            "syncColors": false,
+            "syncCursor": true,
+            "syncTooltips": false,
+            "filters": [],
+            "query": {
+              "query": "",
+              "language": "kuery"
+            },
+            "attributes": {
+              "title": "Node Memory Working Set",
+              "description": "",
+              "visualizationType": "lnsXY",
+              "type": "lens",
+              "references": [
+                {
+                  "type": "index-pattern",
+                  "id": "metrics-*",
+                  "name": "indexpattern-datasource-layer-layer_0"
+                }
+              ],
+              "state": {
+                "visualization": {
+                  "axisTitlesVisibilitySettings": {
+                    "x": false,
+                    "yLeft": false,
+                    "yRight": true
+                  },
+                  "legend": {
+                    "isVisible": true,
+                    "position": "bottom",
+                    "showSingleSeries": true,
+                    "legendStats": [
+                      "average",
+                      "min",
+                      "max"
+                    ]
+                  },
+                  "hideEndzones": true,
+                  "preferredSeriesType": "line",
+                  "valueLabels": "hide",
+                  "emphasizeFitting": true,
+                  "fittingFunction": "Linear",
+                  "yLeftExtent": {
+                    "mode": "full"
+                  },
+                  "tickLabelsVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "labelsOrientation": {
+                    "x": 0,
+                    "yLeft": 0,
+                    "yRight": 0
+                  },
+                  "gridlinesVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                  },
+                  "layers": [
+                    {
+                      "layerId": "layer_0",
+                      "layerType": "data",
+                      "xAccessor": "x_metric_formula_accessor0",
+                      "accessors": [
+                        "metric_formula_accessor0_0"
+                      ],
+                      "seriesType": "line",
+                      "yConfig": [
+                        {
+                          "forAccessor": "metric_formula_accessor0_0"
+                        }
+                      ],
+                      "splitAccessors": [
+                        "metric_formula_accessor0_breakdown"
+                      ]
+                    }
+                  ]
+                },
+                "query": {
+                  "query": "",
+                  "language": "kuery"
+                },
+                "filters": [],
+                "datasourceStates": {
+                  "formBased": {
+                    "layers": {
+                      "layer_0": {
+                        "columnOrder": [
+                          "metric_formula_accessor0_breakdown",
+                          "x_metric_formula_accessor0",
+                          "metric_formula_accessor0_0"
+                        ],
+                        "columns": {
+                          "metric_formula_accessor0_0": {
+                            "label": "Memory Working Set",
+                            "dataType": "number",
+                            "operationType": "average",
+                            "sourceField": "k8s.node.memory.working_set",
+                            "isBucketed": false,
+                            "params": {
+                              "format": {
+                                "id": "bytes",
+                                "params": {
+                                  "decimals": 1
+                                }
+                              },
+                              "emptyAsNull": false
+                            },
+                            "customLabel": true
+                          },
+                          "x_metric_formula_accessor0": {
+                            "dataType": "date",
+                            "isBucketed": true,
+                            "label": "@timestamp",
+                            "operationType": "date_histogram",
+                            "scale": "interval",
+                            "sourceField": "@timestamp",
+                            "params": {
+                              "interval": "auto"
+                            }
+                          },
+                          "metric_formula_accessor0_breakdown": {
+                            "label": "Top 20 values of k8s.node.name",
+                            "dataType": "string",
+                            "operationType": "terms",
+                            "scale": "ordinal",
+                            "sourceField": "k8s.node.name",
+                            "isBucketed": true,
+                            "params": {
+                              "size": 20,
+                              "orderBy": {
+                                "type": "alphabetical",
+                                "fallback": false
+                              },
+                              "orderDirection": "asc",
+                              "otherBucket": false,
+                              "missingBucket": false,
+                              "parentFormat": {
+                                "id": "terms"
+                              },
+                              "include": [],
+                              "exclude": [],
+                              "includeIsRegex": false,
+                              "excludeIsRegex": false
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "internalReferences": [],
+                "adHocDataViews": {
+                  "metrics-*,metricbeat-*": {
+                    "id": "metrics-*,metricbeat-*",
+                    "title": "metrics-*,metricbeat-*",
+                    "timeFieldName": "@timestamp",
+                    "sourceFilters": [],
+                    "fieldFormats": {},
+                    "runtimeFieldMap": {},
+                    "fieldAttrs": {},
+                    "allowNoIndex": false,
+                    "name": "Metrics View",
+                    "allowHidden": false,
+                    "managed": false
+                  }
+                }
+              },
+              "version": 2
+            },
+            "drilldowns": []
+          }
+        }
+      ]
+    }
+  ],
+  "references": [
+    {
+      "type": "index-pattern",
+      "id": "metrics-*",
+      "name": "18e8b34a-98ee-4672-b197-1d786273083b:indexpattern-datasource-layer-900f8326-9c5c-4a5b-9de6-cb5c6c37c7f7"
+    },
+    {
+      "type": "index-pattern",
+      "id": "metrics-*",
+      "name": "f8462e57-8094-4672-8331-ee6cb519f7f2:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
+    },
+    {
+      "type": "index-pattern",
+      "id": "metrics-*",
+      "name": "f8462e57-8094-4672-8331-ee6cb519f7f2:indexpattern-datasource-layer-86a019c1-473c-4536-837f-51e793b52534"
+    },
+    {
+      "type": "index-pattern",
+      "id": "metrics-*",
+      "name": "dc7d4bf2-1f31-4cc7-9f43-33d72e14f13a:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
+    },
+    {
+      "type": "index-pattern",
+      "id": "metrics-*",
+      "name": "dc7d4bf2-1f31-4cc7-9f43-33d72e14f13a:indexpattern-datasource-layer-4082bc12-07bf-4ae6-8cbc-f9a03fe02c8b"
+    },
+    {
+      "type": "index-pattern",
+      "id": "metrics-*",
+      "name": "074c9659-801c-471d-9a3b-5268c8315776:indexpattern-datasource-layer-layer_0"
+    },
+    {
+      "type": "index-pattern",
+      "id": "metrics-*",
+      "name": "25885250-e8e7-466e-98e0-9db9a4df851f:indexpattern-datasource-layer-0c02b254-96e3-4af2-875d-79e425428b12"
+    },
+    {
+      "type": "index-pattern",
+      "id": "metrics-*",
+      "name": "25885250-e8e7-466e-98e0-9db9a4df851f:indexpattern-datasource-layer-b99e512c-7819-43c0-8d16-c7be5e788a65"
+    },
+    {
+      "type": "index-pattern",
+      "id": "metrics-*",
+      "name": "9cddee08-c2f1-43d0-8fdb-b4ad0cd5c419:indexpattern-datasource-layer-layer_0"
+    },
+    {
+      "name": "149587b4-2aac-4286-b661-b5f5b98d84f8:optionsListDataView",
+      "type": "index-pattern",
+      "id": "metrics-*"
+    }
+  ]
+}
