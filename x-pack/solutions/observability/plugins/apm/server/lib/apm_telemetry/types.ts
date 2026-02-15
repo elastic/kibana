@@ -77,6 +77,38 @@ export interface APMUsage {
   has_any_services_per_official_agent: boolean;
   has_any_services: boolean;
   services_per_agent: Record<AgentName, number>;
+  otel_1d_docs: number;
+  otel_1d_size_bytes: number;
+  otel_docs_per_agent: Record<string, number>;
+  otel_size_per_agent: Record<string, number>;
+  otel_by_signal: {
+    traces: {
+      docs_per_agent: Record<string, number>;
+      size_per_agent: Record<string, number>;
+      docs_1d: number;
+      size_1d_bytes: number;
+    };
+    metrics: {
+      docs_per_agent: Record<string, number>;
+      size_per_agent: Record<string, number>;
+      docs_1d: number;
+      size_1d_bytes: number;
+    };
+    logs: {
+      docs_per_agent: Record<string, number>;
+      size_per_agent: Record<string, number>;
+      docs_1d: number;
+      size_1d_bytes: number;
+    };
+  };
+  otel_sdk: Record<
+    string,
+    { total_docs: number; docs_per_version: Record<string, number>; services_per_version: Record<string, number> }
+  >;
+  otel_distro: Record<
+    string,
+    { total_docs: number; docs_per_version: Record<string, number>; services_per_version: Record<string, number> }
+  >;
   version: {
     apm_server: {
       minor: number;
@@ -244,7 +276,10 @@ export interface APMUsage {
     | 'custom_dashboards'
     | 'per_service'
     | 'top_traces'
-    | 'per_agent_config_settings',
+    | 'per_agent_config_settings'
+    | 'otel_agents'
+    | 'otel_agents_by_signal'
+    | 'otel_sdk_distro',
     { took: { ms: number } }
   >;
 }
