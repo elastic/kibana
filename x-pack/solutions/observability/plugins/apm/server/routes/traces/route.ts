@@ -9,6 +9,7 @@ import { toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import type { Error } from '@kbn/apm-types';
 import { type ErrorsByTraceId, type UnifiedSpanDocument, type TraceRootSpan } from '@kbn/apm-types';
+import { UNIFIED_TRACES_BY_ID_ENDPOINT, unifiedTracesByIdParams } from '@kbn/apm-routes-contract';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 import { TraceSearchType } from '../../../common/trace_explorer';
 import type { Span } from '../../../typings/es_schemas/ui/span';
@@ -133,16 +134,8 @@ const tracesByIdRoute = createApmServerRoute({
 });
 
 const unifiedTracesByIdRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/unified_traces/{traceId}',
-  params: t.type({
-    path: t.type({
-      traceId: t.string,
-    }),
-    query: t.intersection([
-      rangeRt,
-      t.partial({ maxTraceItems: toNumberRt, serviceName: t.string }),
-    ]),
-  }),
+  endpoint: UNIFIED_TRACES_BY_ID_ENDPOINT,
+  params: unifiedTracesByIdParams,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
