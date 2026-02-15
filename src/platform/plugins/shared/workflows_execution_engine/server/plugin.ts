@@ -32,6 +32,7 @@ import {
 } from './execution_functions';
 import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';
+import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
@@ -82,6 +83,9 @@ export class WorkflowsExecutionEnginePlugin
     plugins: WorkflowsExecutionEnginePluginSetupDeps
   ) {
     this.logger.debug('workflows-execution-engine: Setup');
+
+    // Register telemetry event schemas
+    WorkflowExecutionTelemetryClient.setup(core.analytics);
 
     const logger = this.logger;
     const config = this.config;
