@@ -28,9 +28,7 @@ export const toolDefinitionToInference = (
     if (isLangChainTool(tool)) {
       definitions[tool.name] = {
         description: tool.description ?? tool.name,
-        schema: tool.schema
-          ? resolveToolSchema(tool.schema)
-          : undefined,
+        schema: tool.schema ? resolveToolSchema(tool.schema) : undefined,
       };
     } else if (isToolDefinition(tool)) {
       definitions[tool.function.name] = {
