@@ -279,6 +279,9 @@ async function runConfigs(
         const shardSuffix = shard ? `_shard_${shard.replace('/', '_')}` : '';
         const slowTestsFile = `${slowTestsDir}/slow-tests-${configHash}${shardSuffix}-${Date.now()}.json`;
 
+        const relConfig = relative(REPO_ROOT, config);
+        log.info(`Starting ${relConfig}`);
+
         const args = [
           'scripts/jest',
           '--config',
