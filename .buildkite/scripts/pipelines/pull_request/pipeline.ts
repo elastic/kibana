@@ -62,6 +62,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     await runPreBuild();
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/api_contracts.yml'));
 
     if (prHasFIPSLabel()) {
       pipeline.push(getPipeline('.buildkite/pipelines/fips/verify_fips_enabled.yml'));

@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "API Contracts Allowlist",
+  "description": "Schema for allowlisted API breaking changes",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the allowlist file"
+    },
+    "entries": {
+      "type": "array",
+      "description": "List of approved breaking changes to ignore",
+      "items": {
+        "type": "object",
+        "required": ["path", "method", "reason", "approvedBy"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "API path (e.g., /api/saved_objects/{type}/{id})"
+          },
+          "method": {
+            "type": "string",
+            "enum": ["get", "post", "put", "delete", "patch", "options", "head", "all"],
+            "description": "HTTP method (lowercase), or 'all' for path-level changes"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Explanation for why this breaking change is approved"
+          },
+          "approvedBy": {
+            "type": "string",
+            "description": "GitHub username or team that approved this exception"
+          },
+          "prUrl": {
+            "type": "string",
+            "description": "URL to the PR where this was approved"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date",
+            "description": "Optional expiration date (ISO 8601) after which this entry should be reviewed"
+          }
+        }
+      }
+    }
+  },
+  "required": ["entries"]
+}

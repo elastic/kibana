@@ -11,6 +11,8 @@
     "@redocly/cli": "^2.17.0"
   },
   "scripts": {
+    "bump": "bump",
+    "bump:diff": "bump diff",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
