@@ -27,7 +27,7 @@ import {
   useRuntimeState,
   useCurrentTabSelector,
   useInternalStateDispatch,
-  useCurrentTabAction,
+  useCurrentTabDispatch,
   internalStateActions,
 } from '../../state_management/redux';
 import type { DiscoverMainContentProps } from '../layout/discover_main_content';
@@ -144,13 +144,13 @@ type UnifiedHistogramChartProps = Pick<UnifiedHistogramGuardProps, 'panelsToggle
 const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
   const dispatch = useInternalStateDispatch();
   const getChartConfigAccessor = useProfileAccessor('getChartSectionConfiguration');
+  const dispatchCurrentTab = useCurrentTabDispatch();
 
-  const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
   const onUpdateESQLQuery: UpdateESQLQueryFn = useCallback(
     (queryOrUpdater) => {
-      dispatch(updateESQLQuery({ queryOrUpdater }));
+      dispatchCurrentTab(internalStateActions.updateESQLQuery, { queryOrUpdater });
     },
-    [dispatch, updateESQLQuery]
+    [dispatchCurrentTab]
   );
   const chartSectionConfigurationExtParams: ChartSectionConfigurationExtensionParams =
     useMemo(() => {
@@ -237,7 +237,7 @@ const CustomChartSectionWrapper = ({
 }: UnifiedHistogramChartProps & {
   chartSectionConfig: Extract<ChartSectionConfiguration, { replaceDefaultChart: true }>;
 }) => {
-  const dispatch = useInternalStateDispatch();
+  const dispatchCurrentTab = useCurrentTabDispatch();
   const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState(
     stateContainer,
     chartSectionConfig.localStorageKeyPrefix
@@ -253,12 +253,13 @@ const CustomChartSectionWrapper = ({
   });
 
   const metricsGridState = useCurrentTabSelector((state) => state.uiState.metricsGrid);
-  const setMetricsGridState = useCurrentTabAction(internalStateActions.setMetricsGridState);
   const onInitialStateChange = useCallback(
     (newMetricsGridState: Partial<UnifiedMetricsGridRestorableState>) => {
-      dispatch(setMetricsGridState({ metricsGridState: newMetricsGridState }));
+      dispatchCurrentTab(internalStateActions.setMetricsGridState, {
+        metricsGridState: newMetricsGridState,
+      });
     },
-    [setMetricsGridState, dispatch]
+    [dispatchCurrentTab]
   );
 
   useEffect(() => {

@@ -44,9 +44,8 @@ import {
   type InitialUnifiedHistogramLayoutProps,
   internalStateActions,
   useCurrentDataView,
-  useCurrentTabAction,
+  useCurrentTabDispatch,
   useCurrentTabSelector,
-  useInternalStateDispatch,
 } from '../../state_management/redux';
 import { useDataState } from '../../hooks/use_data_state';
 import { getDefinedControlGroupState } from '../../state_management/utils/get_defined_control_group_state';
@@ -74,8 +73,7 @@ export const useDiscoverHistogram = (
     getAbortController,
   } = stateContainer.dataState;
   const isEsqlMode = useIsEsqlMode();
-  const dispatch = useInternalStateDispatch();
-  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
+  const dispatchCurrentTab = useCurrentTabDispatch();
   const documentsState = useDataState(documents$);
   const isChartLoading = useMemo(() => {
     return isEsqlMode && documentsState?.fetchStatus === FetchStatus.LOADING;
@@ -104,20 +102,18 @@ export const useDiscoverHistogram = (
 
       if (typeof hideChart === 'boolean') {
         // `updateAppState`checks internally for value changes before dispatching any action
-        dispatch(
-          updateAppState({
-            appState: {
-              hideChart,
-            },
-          })
-        );
+        dispatchCurrentTab(internalStateActions.updateAppState, {
+          appState: {
+            hideChart,
+          },
+        });
       }
     });
 
     return () => {
       subscription?.unsubscribe();
     };
-  }, [dispatch, inspectorAdapters, unifiedHistogramApi?.state$, updateAppState]);
+  }, [dispatchCurrentTab, inspectorAdapters, unifiedHistogramApi?.state$]);
 
   /**
    * Sync URL query params with Unified Histogram
@@ -318,11 +314,6 @@ export const useDiscoverHistogram = (
     }
   }, [collectedFetchParams, triggerUnifiedHistogramFetch]);
 
-  const updateAttributes = useCurrentTabAction(internalStateActions.updateAttributes);
-  const setOverriddenVisContextAfterInvalidation = useCurrentTabAction(
-    internalStateActions.setOverriddenVisContextAfterInvalidation
-  );
-
   const onVisContextChanged = useCallback(
     (
       nextVisContext: UnifiedHistogramVisContext | undefined,
@@ -332,46 +323,36 @@ export const useDiscoverHistogram = (
         case UnifiedHistogramExternalVisContextStatus.manuallyCustomized:
           // if user customized the visualization manually
           // (only this action should trigger Unsaved changes badge)
-          dispatch(
-            updateAttributes({
-              attributes: { visContext: nextVisContext },
-            })
-          );
-          dispatch(
-            setOverriddenVisContextAfterInvalidation({
-              overriddenVisContextAfterInvalidation: undefined,
-            })
-          );
+          dispatchCurrentTab(internalStateActions.updateAttributes, {
+            attributes: { visContext: nextVisContext },
+          });
+          dispatchCurrentTab(internalStateActions.setOverriddenVisContextAfterInvalidation, {
+            overriddenVisContextAfterInvalidation: undefined,
+          });
           break;
         case UnifiedHistogramExternalVisContextStatus.automaticallyOverridden:
           // if the visualization was invalidated as incompatible and rebuilt
           // (it will be used later for saving the visualization via Save button)
-          dispatch(
-            setOverriddenVisContextAfterInvalidation({
-              overriddenVisContextAfterInvalidation: nextVisContext,
-            })
-          );
+          dispatchCurrentTab(internalStateActions.setOverriddenVisContextAfterInvalidation, {
+            overriddenVisContextAfterInvalidation: nextVisContext,
+          });
           break;
         case UnifiedHistogramExternalVisContextStatus.automaticallyCreated:
         case UnifiedHistogramExternalVisContextStatus.applied:
           // clearing the value in the internal state so we don't use it during saved search saving
-          dispatch(
-            setOverriddenVisContextAfterInvalidation({
-              overriddenVisContextAfterInvalidation: undefined,
-            })
-          );
+          dispatchCurrentTab(internalStateActions.setOverriddenVisContextAfterInvalidation, {
+            overriddenVisContextAfterInvalidation: undefined,
+          });
           break;
         case UnifiedHistogramExternalVisContextStatus.unknown:
           // using `{}` to overwrite the value inside the saved search SO during saving
-          dispatch(
-            setOverriddenVisContextAfterInvalidation({
-              overriddenVisContextAfterInvalidation: {},
-            })
-          );
+          dispatchCurrentTab(internalStateActions.setOverriddenVisContextAfterInvalidation, {
+            overriddenVisContextAfterInvalidation: {},
+          });
           break;
       }
     },
-    [dispatch, setOverriddenVisContextAfterInvalidation, updateAttributes]
+    [dispatchCurrentTab]
   );
 
   const onBreakdownFieldChange = useCallback<
@@ -379,10 +360,12 @@ export const useDiscoverHistogram = (
   >(
     (nextBreakdownField) => {
       if (nextBreakdownField !== breakdownField) {
-        dispatch(updateAppState({ appState: { breakdownField: nextBreakdownField } }));
+        dispatchCurrentTab(internalStateActions.updateAppState, {
+          appState: { breakdownField: nextBreakdownField },
+        });
       }
     },
-    [breakdownField, dispatch, updateAppState]
+    [breakdownField, dispatchCurrentTab]
   );
 
   const onTimeIntervalChange = useCallback<
@@ -390,10 +373,12 @@ export const useDiscoverHistogram = (
   >(
     (nextTimeInterval) => {
       if (nextTimeInterval !== timeInterval) {
-        dispatch(updateAppState({ appState: { interval: nextTimeInterval } }));
+        dispatchCurrentTab(internalStateActions.updateAppState, {
+          appState: { interval: nextTimeInterval },
+        });
       }
     },
-    [timeInterval, dispatch, updateAppState]
+    [timeInterval, dispatchCurrentTab]
   );
 
   return useMemo(

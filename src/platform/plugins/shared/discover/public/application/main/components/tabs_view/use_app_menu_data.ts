@@ -19,7 +19,7 @@ import {
   internalStateActions,
   useInternalStateDispatch,
   useInternalStateSelector,
-  useCurrentTabAction,
+  useCurrentTabDispatch,
   selectAllTabs,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -50,10 +50,7 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
     (state) => state.persistedDiscoverSession
   );
   const [shouldCollapseAppMenu, setShouldCollapseAppMenu] = useState(false);
-
-  const transitionFromESQLToDataView = useCurrentTabAction(
-    internalStateActions.transitionFromESQLToDataView
-  );
+  const dispatchCurrentTab = useCurrentTabDispatch();
 
   const onResize: EuiResizeObserverProps['onResize'] = useCallback((dimensions) => {
     if (!dimensions) return;
@@ -96,7 +93,9 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
             ) {
               dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
             } else {
-              dispatch(transitionFromESQLToDataView({ dataViewId: currentDataView?.id ?? '' }));
+              dispatchCurrentTab(internalStateActions.transitionFromESQLToDataView, {
+                dataViewId: currentDataView?.id ?? '',
+              });
             }
           },
         },
@@ -107,9 +106,9 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
       currentDataView?.id,
       currentTabId,
       dispatch,
+      dispatchCurrentTab,
       persistedDiscoverSession,
       services,
-      transitionFromESQLToDataView,
       unsavedTabIds,
     ]
   );

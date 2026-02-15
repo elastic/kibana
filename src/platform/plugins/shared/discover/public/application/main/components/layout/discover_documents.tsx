@@ -77,7 +77,7 @@ import type {
 import { useAdditionalCellActions, useProfileAccessor } from '../../../../context_awareness';
 import {
   internalStateActions,
-  useCurrentTabAction,
+  useCurrentTabDispatch,
   useCurrentTabSelector,
   useInternalStateDispatch,
   useInternalStateSelector,
@@ -117,7 +117,7 @@ function DiscoverDocumentsComponent({
   const services = useDiscoverServices();
   const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
-  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
+  const dispatchCurrentTab = useCurrentTabDispatch();
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
@@ -177,9 +177,11 @@ function DiscoverDocumentsComponent({
 
   const setAppState = useCallback<UseColumnsProps['setAppState']>(
     ({ settings, ...rest }) => {
-      dispatch(updateAppState({ appState: { ...rest, grid: settings as DiscoverGridSettings } }));
+      dispatchCurrentTab(internalStateActions.updateAppState, {
+        appState: { ...rest, grid: settings as DiscoverGridSettings },
+      });
     },
-    [dispatch, updateAppState]
+    [dispatchCurrentTab]
   );
 
   const {
@@ -215,7 +217,6 @@ function DiscoverDocumentsComponent({
   );
 
   const docViewerRef = useRef<DocViewerApi>(null);
-  const setExpandedDocAction = useCurrentTabAction(internalStateActions.setExpandedDoc);
   const setExpandedDoc = useCallback(
     (
       doc: DataTableRecord | undefined,
@@ -224,70 +225,78 @@ function DiscoverDocumentsComponent({
         initialTabState?: object;
       }
     ) => {
-      dispatch(
-        setExpandedDocAction({
-          expandedDoc: doc,
-          initialDocViewerTabId: options?.initialTabId,
-          initialDocViewerTabState: options?.initialTabState,
-        })
-      );
+      dispatchCurrentTab(internalStateActions.setExpandedDoc, {
+        expandedDoc: doc,
+        initialDocViewerTabId: options?.initialTabId,
+        initialDocViewerTabState: options?.initialTabState,
+      });
       if (options?.initialTabId) {
         docViewerRef.current?.setSelectedTabId(options.initialTabId);
       }
     },
-    [dispatch, setExpandedDocAction]
+    [dispatchCurrentTab]
   );
 
   const latestGrid = useLatest(grid);
   const onResizeDataGrid = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
     (colSettings) => {
       onResize(colSettings, latestGrid.current, (nextGrid) => {
-        dispatch(updateAppState({ appState: { grid: nextGrid } }));
+        dispatchCurrentTab(internalStateActions.updateAppState, { appState: { grid: nextGrid } });
       });
     },
-    [dispatch, latestGrid, updateAppState]
+    [dispatchCurrentTab, latestGrid]
   );
 
   const onUpdateRowsPerPage = useCallback(
     (nextRowsPerPage: number) => {
-      dispatch(updateAppState({ appState: { rowsPerPage: nextRowsPerPage } }));
+      dispatchCurrentTab(internalStateActions.updateAppState, {
+        appState: { rowsPerPage: nextRowsPerPage },
+      });
     },
-    [dispatch, updateAppState]
+    [dispatchCurrentTab]
   );
 
   const onUpdateSampleSize = useCallback(
     (newSampleSize: number) => {
-      dispatch(updateAppState({ appState: { sampleSize: newSampleSize } }));
+      dispatchCurrentTab(internalStateActions.updateAppState, {
+        appState: { sampleSize: newSampleSize },
+      });
     },
-    [dispatch, updateAppState]
+    [dispatchCurrentTab]
   );
 
   const onSort = useCallback(
     (nextSort: string[][]) => {
-      dispatch(updateAppState({ appState: { sort: nextSort } }));
+      dispatchCurrentTab(internalStateActions.updateAppState, { appState: { sort: nextSort } });
     },
-    [dispatch, updateAppState]
+    [dispatchCurrentTab]
   );
 
   const onUpdateRowHeight = useCallback(
     (newRowHeight: number) => {
-      dispatch(updateAppState({ appState: { rowHeight: newRowHeight } }));
+      dispatchCurrentTab(internalStateActions.updateAppState, {
+        appState: { rowHeight: newRowHeight },
+      });
     },
-    [dispatch, updateAppState]
+    [dispatchCurrentTab]
   );
 
   const onUpdateHeaderRowHeight = useCallback(
     (newHeaderRowHeight: number) => {
-      dispatch(updateAppState({ appState: { headerRowHeight: newHeaderRowHeight } }));
+      dispatchCurrentTab(internalStateActions.updateAppState, {
+        appState: { headerRowHeight: newHeaderRowHeight },
+      });
     },
-    [dispatch, updateAppState]
+    [dispatchCurrentTab]
   );
 
   const onUpdateDensity = useCallback(
     (newDensity: DataGridDensity) => {
-      dispatch(updateAppState({ appState: { density: newDensity } }));
+      dispatchCurrentTab(internalStateActions.updateAppState, {
+        appState: { density: newDensity },
+      });
     },
-    [dispatch, updateAppState]
+    [dispatchCurrentTab]
   );
 
   // should be aligned with embeddable `showTimeCol` prop
@@ -323,12 +332,11 @@ function DiscoverDocumentsComponent({
     extensionActions,
   });
 
-  const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
   const onUpdateESQLQuery: UpdateESQLQueryFn = useCallback(
     (queryOrUpdater) => {
-      dispatch(updateESQLQuery({ queryOrUpdater }));
+      dispatchCurrentTab(internalStateActions.updateESQLQuery, { queryOrUpdater });
     },
-    [dispatch, updateESQLQuery]
+    [dispatchCurrentTab]
   );
 
   const docViewerExtensionActions = useMemo<DocViewerExtensionParams['actions']>(
@@ -340,24 +348,23 @@ function DiscoverDocumentsComponent({
   );
 
   const docViewerUiState = useCurrentTabSelector((state) => state.uiState.docViewer);
-  const setDocViewerUiState = useCurrentTabAction(internalStateActions.setDocViewerUiState);
 
   const onInitialDocViewerStateChange = useCallback(
     (newDocViewerUiState: Partial<DocViewerRestorableState>) => {
-      dispatch(setDocViewerUiState({ docViewerUiState: newDocViewerUiState }));
+      dispatchCurrentTab(internalStateActions.setDocViewerUiState, {
+        docViewerUiState: newDocViewerUiState,
+      });
     },
-    [dispatch, setDocViewerUiState]
-  );
-
-  const setInitialDocViewerTabIdAction = useCurrentTabAction(
-    internalStateActions.setInitialDocViewerTabId
+    [dispatchCurrentTab]
   );
 
   const onUpdateSelectedTabId = useCallback(
     (tabId: string | undefined) => {
-      dispatch(setInitialDocViewerTabIdAction({ initialDocViewerTabId: tabId }));
+      dispatchCurrentTab(internalStateActions.setInitialDocViewerTabId, {
+        initialDocViewerTabId: tabId,
+      });
     },
-    [dispatch, setInitialDocViewerTabIdAction]
+    [dispatchCurrentTab]
   );
 
   const renderDocumentView = useCallback(
@@ -406,12 +413,13 @@ function DiscoverDocumentsComponent({
   );
 
   const dataGridUiState = useCurrentTabSelector((state) => state.uiState.dataGrid);
-  const setDataGridUiState = useCurrentTabAction(internalStateActions.setDataGridUiState);
   const onInitialStateChange = useCallback(
     (newDataGridUiState: Partial<UnifiedDataTableRestorableState>) => {
-      dispatch(setDataGridUiState({ dataGridUiState: newDataGridUiState }));
+      dispatchCurrentTab(internalStateActions.setDataGridUiState, {
+        dataGridUiState: newDataGridUiState,
+      });
     },
-    [dispatch, setDataGridUiState]
+    [dispatchCurrentTab]
   );
 
   const configRowHeight = uiSettings.get(ROW_HEIGHT_OPTION);
@@ -491,9 +499,6 @@ function DiscoverDocumentsComponent({
   const { availableCascadeGroups, selectedCascadeGroups } = useCurrentTabSelector(
     (tab) => tab.cascadedDocumentsState
   );
-  const setSelectedCascadeGroups = useCurrentTabAction(
-    internalStateActions.setSelectedCascadeGroups
-  );
   const cascadedDocumentsContext = useMemo<CascadedDocumentsContext | undefined>(() => {
     if (
       !isCascadedDocumentsVisible(availableCascadeGroups, query) ||
@@ -510,7 +515,9 @@ function DiscoverDocumentsComponent({
       timeRange: requestParams.timeRangeAbsolute,
       viewModeToggle,
       cascadeGroupingChangeHandler: (newSelectedCascadeGroups) => {
-        dispatch(setSelectedCascadeGroups({ selectedCascadeGroups: newSelectedCascadeGroups }));
+        dispatchCurrentTab(internalStateActions.setSelectedCascadeGroups, {
+          selectedCascadeGroups: newSelectedCascadeGroups,
+        });
       },
       onUpdateESQLQuery,
       openInNewTab: (params) => dispatch(internalStateActions.openInNewTab(params)),
@@ -521,12 +528,12 @@ function DiscoverDocumentsComponent({
   }, [
     availableCascadeGroups,
     dispatch,
+    dispatchCurrentTab,
     esqlVariables,
     onUpdateESQLQuery,
     query,
     requestParams.timeRangeAbsolute,
     selectedCascadeGroups,
-    setSelectedCascadeGroups,
     stateContainer.dataState.inspectorAdapters,
     viewModeToggle,
   ]);

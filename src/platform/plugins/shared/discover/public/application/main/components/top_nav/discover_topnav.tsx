@@ -35,7 +35,7 @@ import {
   internalStateActions,
   useAppStateSelector,
   useCurrentDataView,
-  useCurrentTabAction,
+  useCurrentTabDispatch,
   useCurrentTabSelector,
   useDataViewsForPicker,
   useInternalStateDispatch,
@@ -73,6 +73,7 @@ export const DiscoverTopNav = ({
   onCancelClick,
 }: DiscoverTopNavProps) => {
   const dispatch = useInternalStateDispatch();
+  const dispatchCurrentTab = useCurrentTabDispatch();
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupRendererApi | undefined>();
@@ -111,21 +112,19 @@ export const DiscoverTopNav = ({
 
   const closeFieldEditor = useRef<() => void | undefined>();
 
-  const onQuerySubmitAction = useCurrentTabAction(internalStateActions.onQuerySubmit);
   const onQuerySubmit = useCallback(
     (payload: { dateRange: TimeRange; query?: AggregateQuery | Query }, isUpdate?: boolean) => {
-      dispatch(onQuerySubmitAction({ payload, isUpdate }));
+      dispatchCurrentTab(internalStateActions.onQuerySubmit, { payload, isUpdate });
     },
-    [dispatch, onQuerySubmitAction]
+    [dispatchCurrentTab]
   );
 
   // ES|QL controls logic
-  const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
   const onUpdateESQLQuery: UpdateESQLQueryFn = useCallback(
     (queryOrUpdater) => {
-      dispatch(updateESQLQuery({ queryOrUpdater }));
+      dispatchCurrentTab(internalStateActions.updateESQLQuery, { queryOrUpdater });
     },
-    [dispatch, updateESQLQuery]
+    [dispatchCurrentTab]
   );
   const { onSaveControl, getActivePanels } = useESQLVariables({
     isEsqlMode,
@@ -189,21 +188,20 @@ export const DiscoverTopNav = ({
     [editField, canEditDataView]
   );
 
-  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
-  const setAppState = useCurrentTabAction(internalStateActions.setAppState);
-
   const updateSavedQueryId = useCallback(
     (newSavedQueryId: string | undefined) => {
       if (newSavedQueryId) {
-        dispatch(updateAppState({ appState: { savedQuery: newSavedQueryId } }));
+        dispatchCurrentTab(internalStateActions.updateAppState, {
+          appState: { savedQuery: newSavedQueryId },
+        });
       } else {
         // remove savedQueryId from state
         const newState = { ...stateContainer.getCurrentTab().appState };
         delete newState.savedQuery;
-        dispatch(setAppState({ appState: newState }));
+        dispatchCurrentTab(internalStateActions.setAppState, { appState: newState });
       }
     },
-    [dispatch, setAppState, stateContainer, updateAppState]
+    [dispatchCurrentTab, stateContainer]
   );
 
   const esqlQueryStats = useESQLQueryStats(
@@ -211,9 +209,6 @@ export const DiscoverTopNav = ({
     stateContainer.dataState.inspectorAdapters.requests
   );
 
-  const transitionFromESQLToDataView = useCurrentTabAction(
-    internalStateActions.transitionFromESQLToDataView
-  );
   const onESQLToDataViewTransitionModalClose = useCallback(
     (shouldDismissModal?: boolean, needsSave?: boolean) => {
       if (shouldDismissModal) {
@@ -231,14 +226,18 @@ export const DiscoverTopNav = ({
           onClose: () =>
             dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(false)),
           onSaveCb: () => {
-            dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
+            dispatchCurrentTab(internalStateActions.transitionFromESQLToDataView, {
+              dataViewId: dataView.id ?? '',
+            });
           },
         });
       } else {
-        dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
+        dispatchCurrentTab(internalStateActions.transitionFromESQLToDataView, {
+          dataViewId: dataView.id ?? '',
+        });
       }
     },
-    [dataView.id, dispatch, services, stateContainer, transitionFromESQLToDataView]
+    [dataView.id, dispatch, dispatchCurrentTab, services, stateContainer]
   );
 
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({
@@ -246,35 +245,29 @@ export const DiscoverTopNav = ({
     persistedDiscoverSession,
   });
 
-  const changeDataView = useCurrentTabAction(internalStateActions.changeDataView);
   const onChangeDataView = useCallback(
     (dataViewOrDataViewId: string | DataView) => {
-      dispatch(changeDataView({ dataViewOrDataViewId }));
+      dispatchCurrentTab(internalStateActions.changeDataView, { dataViewOrDataViewId });
     },
-    [dispatch, changeDataView]
+    [dispatchCurrentTab]
   );
-  const onDataViewCreatedAction = useCurrentTabAction(internalStateActions.onDataViewCreated);
   const onDataViewCreated = useCallback(
     (nextDataView: DataView) => {
-      dispatch(onDataViewCreatedAction({ nextDataView }));
+      dispatchCurrentTab(internalStateActions.onDataViewCreated, { nextDataView });
     },
-    [dispatch, onDataViewCreatedAction]
+    [dispatchCurrentTab]
   );
-  const onDataViewEditedAction = useCurrentTabAction(internalStateActions.onDataViewEdited);
   const onDataViewEdited = useCallback(
     (editedDataView: DataView) => {
-      dispatch(onDataViewEditedAction({ editedDataView }));
+      dispatchCurrentTab(internalStateActions.onDataViewEdited, { editedDataView });
     },
-    [dispatch, onDataViewEditedAction]
-  );
-  const createAndAppendAdHocDataView = useCurrentTabAction(
-    internalStateActions.createAndAppendAdHocDataView
+    [dispatchCurrentTab]
   );
   const onCreateDefaultAdHocDataView = useCallback(
     (dataViewSpec: DataViewSpec) => {
-      dispatch(createAndAppendAdHocDataView({ dataViewSpec }));
+      dispatchCurrentTab(internalStateActions.createAndAppendAdHocDataView, { dataViewSpec });
     },
-    [dispatch, createAndAppendAdHocDataView]
+    [dispatchCurrentTab]
   );
   const dataViewPickerProps: DataViewPickerProps = useMemo(() => {
     return {
@@ -317,29 +310,23 @@ export const DiscoverTopNav = ({
   );
 
   const searchDraftUiState = useCurrentTabSelector((state) => state.uiState.searchDraft);
-  const setSearchDraftUiState = useCurrentTabAction(internalStateActions.setSearchDraftUiState);
   const onSearchDraftChange = useCallback(
     (newSearchDraftUiState: UnifiedSearchDraft | undefined) => {
-      dispatch(
-        setSearchDraftUiState({
-          searchDraftUiState: newSearchDraftUiState,
-        })
-      );
+      dispatchCurrentTab(internalStateActions.setSearchDraftUiState, {
+        searchDraftUiState: newSearchDraftUiState,
+      });
     },
-    [dispatch, setSearchDraftUiState]
+    [dispatchCurrentTab]
   );
 
   const esqlEditorUiState = useCurrentTabSelector((state) => state.uiState.esqlEditor);
-  const setEsqlEditorUiState = useCurrentTabAction(internalStateActions.setESQLEditorUiState);
   const onEsqlEditorInitialStateChange = useCallback(
     (newEsqlEditorUiState: Partial<ESQLEditorRestorableState>) => {
-      dispatch(
-        setEsqlEditorUiState({
-          esqlEditorUiState: newEsqlEditorUiState,
-        })
-      );
+      dispatchCurrentTab(internalStateActions.setESQLEditorUiState, {
+        esqlEditorUiState: newEsqlEditorUiState,
+      });
     },
-    [dispatch, setEsqlEditorUiState]
+    [dispatchCurrentTab]
   );
 
   const shouldHideDefaultDataviewPicker =

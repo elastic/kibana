@@ -16,8 +16,7 @@ import { useAppStateSelector } from '../../application/main/state_management/red
 import type { SidebarToggleState } from '../../application/types';
 import {
   internalStateActions,
-  useCurrentTabAction,
-  useInternalStateDispatch,
+  useCurrentTabDispatch,
 } from '../../application/main/state_management/redux';
 
 export interface PanelsToggleProps {
@@ -39,13 +38,14 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   renderedFor,
   isChartAvailable,
 }) => {
-  const dispatch = useInternalStateDispatch();
-  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
+  const dispatchCurrentTab = useCurrentTabDispatch();
   const isChartHidden = useAppStateSelector((state) => Boolean(state.hideChart));
 
   const onToggleChart = useCallback(() => {
-    dispatch(updateAppState({ appState: { hideChart: !isChartHidden } }));
-  }, [dispatch, isChartHidden, updateAppState]);
+    dispatchCurrentTab(internalStateActions.updateAppState, {
+      appState: { hideChart: !isChartHidden },
+    });
+  }, [dispatchCurrentTab, isChartHidden]);
 
   const sidebarToggleState = useObservable(sidebarToggleState$);
   const isSidebarCollapsed = sidebarToggleState?.isCollapsed ?? false;

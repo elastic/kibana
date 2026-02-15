@@ -19,11 +19,7 @@ import { useAppStateSelector } from '../../state_management/redux';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { FetchStatus } from '../../../types';
 import type { FieldStatisticsTableProps } from './types';
-import {
-  internalStateActions,
-  useCurrentTabAction,
-  useInternalStateDispatch,
-} from '../../state_management/redux';
+import { internalStateActions, useCurrentTabDispatch } from '../../state_management/redux';
 
 type FieldStatisticsTabProps = Omit<FieldStatisticsTableProps, 'query' | 'filters'> & {
   stateContainer: DiscoverStateContainer;
@@ -50,17 +46,16 @@ export const FieldStatisticsTab: React.FC<FieldStatisticsTabProps> = React.memo(
   }, [props.stateContainer]);
   const totalHits = useObservable(totalHitsComplete$);
 
-  const dispatch = useInternalStateDispatch();
-  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
+  const dispatchCurrentTab = useCurrentTabDispatch();
   const updateState = useCallback(
     (changes: Partial<DataVisualizerTableState>) => {
       if (changes.showDistributions !== undefined) {
-        dispatch(
-          updateAppState({ appState: { hideAggregatedPreview: !changes.showDistributions } })
-        );
+        dispatchCurrentTab(internalStateActions.updateAppState, {
+          appState: { hideAggregatedPreview: !changes.showDistributions },
+        });
       }
     },
-    [dispatch, updateAppState]
+    [dispatchCurrentTab]
   );
 
   // Quit early if we know it's in ES|QL mode

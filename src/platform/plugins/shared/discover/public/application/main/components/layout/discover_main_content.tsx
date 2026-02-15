@@ -27,11 +27,7 @@ import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 import { PatternAnalysisTab } from '../pattern_analysis/pattern_analysis_tab';
 import { PATTERN_ANALYSIS_VIEW_CLICK } from '../pattern_analysis/constants';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import {
-  internalStateActions,
-  useCurrentTabAction,
-  useInternalStateDispatch,
-} from '../../state_management/redux';
+import { internalStateActions, useCurrentTabDispatch } from '../../state_management/redux';
 
 const DROP_PROPS = {
   value: {
@@ -73,11 +69,7 @@ export const DiscoverMainContent = ({
   isChartAvailable,
 }: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
-  const dispatch = useInternalStateDispatch();
-  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
-  const updateAppStateAndReplaceUrl = useCurrentTabAction(
-    internalStateActions.updateAppStateAndReplaceUrl
-  );
+  const dispatchCurrentTab = useCurrentTabDispatch();
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE, replace?: boolean) => {
@@ -92,13 +84,15 @@ export const DiscoverMainContent = ({
       }
 
       if (!replace) {
-        dispatch(updateAppState({ appState: { viewMode: mode } }));
+        dispatchCurrentTab(internalStateActions.updateAppState, { appState: { viewMode: mode } });
         return Promise.resolve(mode);
       }
 
       return new Promise<VIEW_MODE>((resolve, reject) => {
         // return a promise to report when the view mode has been updated
-        dispatch(updateAppStateAndReplaceUrl({ appState: { viewMode: mode } })).then(() => {
+        dispatchCurrentTab(internalStateActions.updateAppStateAndReplaceUrl, {
+          appState: { viewMode: mode },
+        }).then(() => {
           const appState = stateContainer.getCurrentTab().appState;
 
           if (appState.viewMode === mode) {
@@ -109,7 +103,7 @@ export const DiscoverMainContent = ({
         });
       });
     },
-    [dispatch, updateAppStateAndReplaceUrl, stateContainer, trackUiMetric, updateAppState]
+    [dispatchCurrentTab, stateContainer, trackUiMetric]
   );
 
   const isEsqlMode = useIsEsqlMode();

@@ -40,7 +40,7 @@ import { useProfileAccessor } from '../../../../context_awareness';
 import {
   internalStateActions,
   useCurrentDataView,
-  useCurrentTabAction,
+  useCurrentTabDispatch,
   useCurrentTabSelector,
   useInternalStateDispatch,
 } from '../../state_management/redux';
@@ -74,6 +74,7 @@ export const useTopNavLinks = ({
 }): AppMenuConfig => {
   const intl = useI18n();
   const dispatch = useInternalStateDispatch();
+  const dispatchCurrentTab = useCurrentTabDispatch();
   const currentDataView = useCurrentDataView();
   const appId = useObservable(services.application.currentAppId$);
   const currentTab = useCurrentTabSelector((tabState) => tabState);
@@ -207,10 +208,6 @@ export const useTopNavLinks = ({
     intl,
   ]);
 
-  const transitionFromDataViewToESQL = useCurrentTabAction(
-    internalStateActions.transitionFromDataViewToESQL
-  );
-
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');
   const appMenuRegistry = useMemo(() => {
     const newAppMenuRegistry = new AppMenuRegistry();
@@ -232,7 +229,7 @@ export const useTopNavLinks = ({
         }),
         run: () => {
           if (dataView) {
-            dispatch(transitionFromDataViewToESQL({ dataView }));
+            dispatchCurrentTab(internalStateActions.transitionFromDataViewToESQL, { dataView });
             services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
           }
         },
@@ -349,9 +346,9 @@ export const useTopNavLinks = ({
     isEsqlMode,
     dataView,
     dispatch,
+    dispatchCurrentTab,
     state,
     hasUnsavedChanges,
-    transitionFromDataViewToESQL,
   ]);
 
   return useMemo((): AppMenuConfig => {

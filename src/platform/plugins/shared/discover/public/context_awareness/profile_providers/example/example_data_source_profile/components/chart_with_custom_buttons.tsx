@@ -22,10 +22,7 @@ import {
 } from '@elastic/eui';
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import type { ChartSectionConfigurationExtensionParams } from '../../../../types';
-import {
-  useCurrentTabAction,
-  useInternalStateDispatch,
-} from '../../../../../application/main/state_management/redux';
+import { useCurrentTabDispatch } from '../../../../../application/main/state_management/redux';
 import { internalStateActions } from '../../../../../application/main/state_management/redux';
 
 interface ChartWithCustomButtonsProps extends ChartSectionProps {
@@ -39,14 +36,15 @@ export const ChartWithCustomButtons = ({ actions, ...props }: ChartWithCustomBut
   const euiPalette = euiPaletteColorBlind();
   const { openInNewTab, updateESQLQuery } = actions;
 
-  const dispatch = useInternalStateDispatch();
-  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
+  const dispatchCurrentTab = useCurrentTabDispatch();
 
   const handleBreakdownFieldChange = useCallback(
     (breakdownField: DataViewField | undefined) => {
-      dispatch(updateAppState({ appState: { breakdownField: breakdownField?.name } }));
+      dispatchCurrentTab(internalStateActions.updateAppState, {
+        appState: { breakdownField: breakdownField?.name },
+      });
     },
-    [dispatch, updateAppState]
+    [dispatchCurrentTab]
   );
 
   const lensAttributes = useMemo(() => {

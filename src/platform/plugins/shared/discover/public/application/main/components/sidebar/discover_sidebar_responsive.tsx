@@ -42,10 +42,9 @@ import { useDiscoverCustomization } from '../../../../customizations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   internalStateActions,
-  useCurrentTabAction,
+  useCurrentTabDispatch,
   useCurrentTabSelector,
   useDataViewsForPicker,
-  useInternalStateDispatch,
 } from '../../state_management/redux';
 
 const EMPTY_FIELD_COUNTS = {};
@@ -371,35 +370,27 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     });
   }, [isSidebarCollapsed, unifiedFieldListSidebarContainerApi, sidebarToggleState$]);
 
-  const dispatch = useInternalStateDispatch();
+  const dispatchCurrentTab = useCurrentTabDispatch();
   const fieldListUiState = useCurrentTabSelector((state) => state.uiState.fieldList);
-  const setFieldListUiState = useCurrentTabAction(internalStateActions.setFieldListUiState);
   const onInitialStateChange = useCallback(
     (newFieldListUiState: Partial<UnifiedFieldListRestorableState>) => {
-      dispatch(
-        setFieldListUiState({
-          fieldListUiState: newFieldListUiState,
-        })
-      );
+      dispatchCurrentTab(internalStateActions.setFieldListUiState, {
+        fieldListUiState: newFieldListUiState,
+      });
     },
-    [dispatch, setFieldListUiState]
+    [dispatchCurrentTab]
   );
 
   const fieldListExistingFieldsInfoUiState = useCurrentTabSelector(
     (state) => state.uiState.fieldListExistingFieldsInfo
   );
-  const setFieldListExistingFieldsInfoUiState = useCurrentTabAction(
-    internalStateActions.setFieldListExistingFieldsInfoUiState
-  );
   const onInitialExistingFieldsInfoChange = useCallback(
     (newUiState: UnifiedFieldListSidebarContainerProps['initialExistingFieldsInfo']) => {
-      dispatch(
-        setFieldListExistingFieldsInfoUiState({
-          fieldListExistingFieldsInfo: newUiState,
-        })
-      );
+      dispatchCurrentTab(internalStateActions.setFieldListExistingFieldsInfoUiState, {
+        fieldListExistingFieldsInfo: newUiState,
+      });
     },
-    [dispatch, setFieldListExistingFieldsInfoUiState]
+    [dispatchCurrentTab]
   );
 
   return (

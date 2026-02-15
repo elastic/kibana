@@ -38,7 +38,7 @@ export {
   CurrentTabProvider,
   useCurrentTabSelector,
   useAppStateSelector,
-  useCurrentTabAction,
+  useCurrentTabDispatch,
   useCurrentChartPortalNode,
   useDataViewsForPicker,
 } from './hooks';

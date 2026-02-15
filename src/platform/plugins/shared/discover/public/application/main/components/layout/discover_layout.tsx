@@ -64,7 +64,7 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   internalStateActions,
   useCurrentDataView,
-  useCurrentTabAction,
+  useCurrentTabDispatch,
   useCurrentTabSelector,
   useInternalStateDispatch,
   useInternalStateSelector,
@@ -104,7 +104,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   } = useDiscoverServices();
   const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
-  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
+  const dispatchCurrentTab = useCurrentTabDispatch();
   const styles = useMemoCss(componentStyles);
   const globalQueryState = data.query.getState();
   const { main$ } = stateContainer.dataState.data$;
@@ -159,9 +159,11 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const setAppState = useCallback<UseColumnsProps['setAppState']>(
     ({ settings, ...rest }) => {
-      dispatch(updateAppState({ appState: { ...rest, grid: settings as DiscoverGridSettings } }));
+      dispatchCurrentTab(internalStateActions.updateAppState, {
+        appState: { ...rest, grid: settings as DiscoverGridSettings },
+      });
     },
-    [dispatch, updateAppState]
+    [dispatchCurrentTab]
   );
 
   const {
@@ -302,12 +304,13 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const onAddBreakdownField = useCallback(
     (field: DataViewField | undefined) => {
-      dispatch(updateAppState({ appState: { breakdownField: field?.name } }));
+      dispatchCurrentTab(internalStateActions.updateAppState, {
+        appState: { breakdownField: field?.name },
+      });
     },
-    [dispatch, updateAppState]
+    [dispatchCurrentTab]
   );
 
-  const updateAdHocDataViewId = useCurrentTabAction(internalStateActions.updateAdHocDataViewId);
   const onFieldEdited: (options: {
     editedDataView: DataView;
     removedFieldName?: string;
@@ -320,11 +323,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         onRemoveColumn(removedFieldName);
       }
       if (!editedDataView.isPersisted()) {
-        await dispatch(
-          updateAdHocDataViewId({
-            editedDataView,
-          })
-        );
+        await dispatchCurrentTab(internalStateActions.updateAdHocDataViewId, { editedDataView });
       }
       if (editedDataView?.id) {
         // `tab.uiState.fieldListExistingFieldsInfo` needs to be reset when user edits fields,
@@ -338,7 +337,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       }
       stateContainer.dataState.refetch$.next('reset');
     },
-    [dataView, stateContainer, currentColumns, onRemoveColumn, dispatch, updateAdHocDataViewId]
+    [dataView, stateContainer, currentColumns, onRemoveColumn, dispatch, dispatchCurrentTab]
   );
 
   const onDisableFilters = useCallback(() => {
@@ -430,32 +429,27 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   }, [stateContainer.dataState]);
 
   const layoutUiState = useCurrentTabSelector((state) => state.uiState.layout);
-  const setLayoutUiState = useCurrentTabAction(internalStateActions.setLayoutUiState);
   const onInitialStateChange = useCallback(
     (newLayoutUiState: Partial<DiscoverLayoutRestorableState>) => {
-      dispatch(
-        setLayoutUiState({
-          layoutUiState: newLayoutUiState,
-        })
-      );
+      dispatchCurrentTab(internalStateActions.setLayoutUiState, {
+        layoutUiState: newLayoutUiState,
+      });
     },
-    [dispatch, setLayoutUiState]
+    [dispatchCurrentTab]
   );
 
-  const changeDataView = useCurrentTabAction(internalStateActions.changeDataView);
   const onChangeDataView = useCallback(
     (dataViewOrDataViewId: string | DataView) => {
-      dispatch(changeDataView({ dataViewOrDataViewId }));
+      dispatchCurrentTab(internalStateActions.changeDataView, { dataViewOrDataViewId });
     },
-    [dispatch, changeDataView]
+    [dispatchCurrentTab]
   );
 
-  const onDataViewCreatedAction = useCurrentTabAction(internalStateActions.onDataViewCreated);
   const onDataViewCreated = useCallback(
     (nextDataView: DataView) => {
-      dispatch(onDataViewCreatedAction({ nextDataView }));
+      dispatchCurrentTab(internalStateActions.onDataViewCreated, { nextDataView });
     },
-    [dispatch, onDataViewCreatedAction]
+    [dispatchCurrentTab]
   );
 
   return (

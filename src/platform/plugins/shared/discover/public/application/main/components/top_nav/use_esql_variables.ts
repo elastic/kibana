@@ -15,9 +15,8 @@ import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import {
   extractEsqlVariables,
   internalStateActions,
-  useCurrentTabAction,
+  useCurrentTabDispatch,
   useCurrentTabSelector,
-  useInternalStateDispatch,
 } from '../../state_management/redux';
 import { getDefinedControlGroupState } from '../../state_management/utils/get_defined_control_group_state';
 
@@ -50,10 +49,7 @@ export const useESQLVariables = ({
   onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
   getActivePanels: () => ControlPanelsState<OptionsListESQLControlState> | undefined;
 } => {
-  const dispatch = useInternalStateDispatch();
-  const fetchData = useCurrentTabAction(internalStateActions.fetchData);
-  const updateAttributes = useCurrentTabAction(internalStateActions.updateAttributes);
-  const setEsqlVariables = useCurrentTabAction(internalStateActions.setEsqlVariables);
+  const dispatchCurrentTab = useCurrentTabDispatch();
   const currentControlGroupState = useCurrentTabSelector((tab) => tab.attributes.controlGroupState);
   const previousControlGroupStateRef = useRef(currentControlGroupState);
   const pendingQueryUpdate = useRef<string>();
@@ -86,13 +82,11 @@ export const useESQLVariables = ({
       }, {});
       const nextControlGroupState = transformedState;
       previousControlGroupStateRef.current = nextControlGroupState;
-      dispatch(
-        updateAttributes({
-          attributes: {
-            controlGroupState: nextControlGroupState,
-          },
-        })
-      );
+      dispatchCurrentTab(internalStateActions.updateAttributes, {
+        attributes: {
+          controlGroupState: nextControlGroupState,
+        },
+      });
 
       if (pendingQueryUpdate.current) {
         onUpdateESQLQuery(pendingQueryUpdate.current);
@@ -102,24 +96,15 @@ export const useESQLVariables = ({
       const newVariables = extractEsqlVariables(controlGroupState);
       if (!isEqual(newVariables, currentEsqlVariables)) {
         // Update the ESQL variables in the internal state
-        dispatch(setEsqlVariables({ esqlVariables: newVariables }));
-        dispatch(fetchData({}));
+        dispatchCurrentTab(internalStateActions.setEsqlVariables, { esqlVariables: newVariables });
+        dispatchCurrentTab(internalStateActions.fetchData, {});
       }
     });
 
     return () => {
       inputSubscription.unsubscribe();
     };
-  }, [
-    controlGroupApi,
-    currentEsqlVariables,
-    dispatch,
-    isEsqlMode,
-    onUpdateESQLQuery,
-    updateAttributes,
-    setEsqlVariables,
-    fetchData,
-  ]);
+  }, [controlGroupApi, currentEsqlVariables, dispatchCurrentTab, isEsqlMode, onUpdateESQLQuery]);
 
   const onSaveControl = useCallback(
     async (controlState: Record<string, unknown>, updatedQuery: string) => {

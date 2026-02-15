@@ -26,7 +26,7 @@ import {
   useRuntimeState,
   useCurrentTabRuntimeState,
   useCurrentTabSelector,
-  useCurrentTabAction,
+  useCurrentTabDispatch,
   TabInitializationStatus,
 } from '../../state_management/redux';
 import type {
@@ -65,6 +65,7 @@ export const SingleTabView = ({
   searchSessionManager,
 }: SingleTabViewProps) => {
   const dispatch = useInternalStateDispatch();
+  const dispatchCurrentTab = useCurrentTabDispatch();
   const services = useDiscoverServices();
 
   const appInitializationState = useInternalStateSelector((state) => state.initializationState);
@@ -92,7 +93,6 @@ export const SingleTabView = ({
   );
   const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
 
-  const initializeSingleTab = useCurrentTabAction(internalStateActions.initializeSingleTab);
   const initializeTab = useLatest(
     async ({
       dataViewSpec,
@@ -118,17 +118,15 @@ export const SingleTabView = ({
         services,
       });
 
-      dispatch(
-        initializeSingleTab({
-          initializeSingleTabParams: {
-            stateContainer,
-            customizationService,
-            dataViewSpec,
-            esqlControls,
-            defaultUrlState,
-          },
-        })
-      );
+      dispatchCurrentTab(internalStateActions.initializeSingleTab, {
+        initializeSingleTabParams: {
+          stateContainer,
+          customizationService,
+          dataViewSpec,
+          esqlControls,
+          defaultUrlState,
+        },
+      });
     }
   );
 

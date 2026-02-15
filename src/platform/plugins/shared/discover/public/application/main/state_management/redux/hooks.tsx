@@ -28,6 +28,12 @@ import { selectTab } from './selectors';
 import { type TabActionInjector, createTabActionInjector } from './utils';
 import type { ChartPortalNode } from '../../components/chart';
 
+type WithoutTabId<TPayload extends TabActionPayload> = Omit<TPayload, 'tabId'>;
+type DispatchCurrentTabArgs<TPayload extends TabActionPayload> =
+  keyof WithoutTabId<TPayload> extends never ? [] : [payload: WithoutTabId<TPayload>];
+
+type DispatchReturn<TReturn> = TReturn extends (...args: infer _Args) => infer R ? R : TReturn;
+
 const internalStateContext = createContext<ReactReduxContextValue>(
   // Recommended approach for versions of Redux prior to v9:
   // https://github.com/reduxjs/react-redux/issues/1565#issuecomment-867143221
@@ -93,11 +99,20 @@ export const useCurrentTabSelector: TypedUseSelectorHook<TabState> = (selector, 
 export const useAppStateSelector = <T,>(selector: (state: DiscoverAppState) => T): T =>
   useCurrentTabSelector((tab) => selector(tab.appState), defaultComparator);
 
-export const useCurrentTabAction = <TPayload extends TabActionPayload, TReturn>(
-  actionCreator: (params: TPayload) => TReturn
-) => {
+export const useCurrentTabDispatch = () => {
+  const dispatch = useInternalStateDispatch();
   const { injectCurrentTab } = useCurrentTabContext();
-  return useMemo(() => injectCurrentTab(actionCreator), [actionCreator, injectCurrentTab]);
+
+  return useMemo(() => {
+    return function dispatchCurrentTab<TPayload extends TabActionPayload, TReturn>(
+      actionCreator: (params: TPayload) => TReturn,
+      ...args: DispatchCurrentTabArgs<TPayload>
+    ): DispatchReturn<TReturn> {
+      const injected = injectCurrentTab(actionCreator);
+      const actionOrThunk = (injected as (...a: unknown[]) => unknown)(...args) as TReturn;
+      return dispatch(actionOrThunk as never) as DispatchReturn<TReturn>;
+    };
+  }, [dispatch, injectCurrentTab]);
 };
 
 export const useCurrentChartPortalNode = () => useCurrentTabContext().currentChartPortalNode;
