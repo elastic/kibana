@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import type { Condition } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
 import { useSelector } from '@xstate5/react';
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import type { ActionBlockProps } from '.';
 import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
 import { selectValidationErrors } from '../../../state_management/stream_enrichment_state_machine/selectors';
@@ -52,12 +52,35 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
 
   const hasValidationErrors = validationErrors.length > 0;
 
+  // Truncation detection for action name
+  const actionTextRef = useRef<HTMLSpanElement>(null);
+  const [isActionTruncated, setIsActionTruncated] = useState(false);
+
+  useEffect(() => {
+    const checkTruncation = () => {
+      const element = actionTextRef.current;
+      if (element) {
+        setIsActionTruncated(element.scrollWidth > element.clientWidth);
+      }
+    };
+
+    checkTruncation();
+
+    const resizeObserver = new ResizeObserver(checkTruncation);
+    if (actionTextRef.current) {
+      resizeObserver.observe(actionTextRef.current);
+    }
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
   // For the inner description we once again invert the colours
   const descriptionPanelColour = getStepPanelColour(level + 1);
 
   if (!isActionBlock(step)) return null;
 
   const stepDescription = getStepDescription(step);
+  const actionDisplayName = step.action.toUpperCase();
 
   const handleTitleClick = () => {
     stepRef.send({ type: 'step.edit' });
@@ -93,45 +116,74 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                 margin-right: ${euiTheme.size.s};
               `}
             >
-              <EuiFlexGroup alignItems="center" gutterSize="xs">
-                <EuiToolTip
-                  position="top"
-                  content={
-                    <p>
-                      {i18n.translate(
-                        'xpack.streams.actionBlockListItem.tooltip.editProcessorLabel',
-                        {
-                          defaultMessage: 'Edit {stepAction} processor',
-                          values: {
-                            stepAction: step.action,
-                          },
-                        }
-                      )}
-                    </p>
-                  }
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="xs"
+                css={css`
+                  min-width: 0;
+                `}
+              >
+                <EuiFlexItem
+                  grow={false}
+                  css={css`
+                    min-width: 0;
+                    max-width: 100%;
+                  `}
                 >
-                  <EuiButtonEmpty
-                    onClick={handleTitleClick}
-                    color="text"
-                    aria-label={i18n.translate(
-                      'xpack.streams.actionBlockListItem.euiButtonEmpty.editProcessorLabel',
-                      { defaultMessage: 'Edit processor' }
-                    )}
-                    size="xs"
-                    data-test-subj="streamsAppProcessorTitleEditButton"
+                  <EuiToolTip
+                    position="top"
+                    content={
+                      <>
+                        {isActionTruncated && (
+                          <p>
+                            <strong>{actionDisplayName}</strong>
+                          </p>
+                        )}
+                        <p>
+                          {i18n.translate(
+                            'xpack.streams.actionBlockListItem.tooltip.editProcessorLabel',
+                            {
+                              defaultMessage: 'Edit {stepAction} processor',
+                              values: {
+                                stepAction: step.action,
+                              },
+                            }
+                          )}
+                        </p>
+                      </>
+                    }
                   >
-                    <EuiText
-                      size="s"
-                      style={{ fontWeight: euiTheme.font.weight.bold }}
+                    <EuiButtonEmpty
+                      onClick={handleTitleClick}
+                      color="text"
+                      aria-label={i18n.translate(
+                        'xpack.streams.actionBlockListItem.euiButtonEmpty.editProcessorLabel',
+                        { defaultMessage: 'Edit processor' }
+                      )}
+                      size="xs"
+                      data-test-subj="streamsAppProcessorTitleEditButton"
                       css={css`
-                        display: block;
-                        ${euiTextTruncate()}
+                        max-width: 100%;
                       `}
                     >
-                      {step.action.toUpperCase()}
-                    </EuiText>
-                  </EuiButtonEmpty>
-                </EuiToolTip>
+                      <span
+                        ref={actionTextRef}
+                        css={css`
+                          display: block;
+                          ${euiTextTruncate()}
+                        `}
+                      >
+                        <EuiText
+                          size="s"
+                          component="span"
+                          style={{ fontWeight: euiTheme.font.weight.bold }}
+                        >
+                          {actionDisplayName}
+                        </EuiText>
+                      </span>
+                    </EuiButtonEmpty>
+                  </EuiToolTip>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
             {(processorMetrics || hasValidationErrors || isUnsaved || !readOnly) && (
