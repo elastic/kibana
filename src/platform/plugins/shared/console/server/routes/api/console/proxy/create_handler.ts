@@ -21,7 +21,7 @@ import { getElasticsearchProxyConfig, proxyRequest, setHeaders } from '../../../
 import type { RouteDependencies } from '../../..';
 
 import type { Body, Query } from './validation_config';
-import { toURL } from '../../../../lib/utils';
+import { toURL, stripCredentialsFromUrl } from '../../../../lib/utils';
 
 function filterHeaders(originalHeaders: object, headersToKeep: string[]): object {
   const normalizeHeader = function (header: string) {
@@ -89,8 +89,20 @@ export const createHandler =
     const { hosts } = legacyConfig;
     let esIncomingMessage: IncomingMessage;
 
-    // Use the requested host if provided, otherwise use the first configured host
-    const host = requestHost || hosts[0];
+    // Validate that the requested host is one of the configured Elasticsearch hosts.
+    // The client receives URLs with credentials stripped, so we match by comparing
+    // stripped versions to find the original configured host (which may contain
+    // credentials needed for auth). Reject any host not in the allowlist to prevent SSRF.
+    let host = hosts[0];
+    if (requestHost) {
+      const match = hosts.find((h) => stripCredentialsFromUrl(h) === requestHost);
+      if (!match) {
+        return response.badRequest({
+          body: 'Host is not configured in elasticsearch.hosts',
+        });
+      }
+      host = match;
+    }
     try {
       const uri = toURL(host, path);
 
