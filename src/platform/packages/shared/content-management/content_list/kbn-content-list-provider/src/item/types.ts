@@ -38,4 +38,33 @@ export interface ContentListItemConfig {
    * When provided, item titles become clickable links.
    */
   getHref?: (item: ContentListItem) => string;
+
+  /**
+   * Function to generate the edit URL for an item.
+   * When provided, the edit action renders as an `<a>` link with this `href`,
+   * preserving native link behavior (right-click, middle-click, screen reader
+   * announcement).
+   *
+   * Composable with `onEdit`: when both are provided, the action renders as a
+   * link (`href`) and also calls `onEdit` on click (e.g., for analytics tracking).
+   */
+  getEditUrl?: (item: ContentListItem) => string;
+
+  /**
+   * Callback invoked when the edit action is clicked.
+   * Use this for side effects such as opening a flyout, tracking analytics,
+   * or programmatic navigation.
+   *
+   * When provided alone, the action renders as a button with an `onClick` handler.
+   * When provided alongside `getEditUrl`, both are applied: the action renders
+   * as a link and the callback fires on click.
+   */
+  onEdit?: (item: ContentListItem) => void;
+
+  /**
+   * Callback invoked to delete one or more items.
+   * When provided, enables the delete action on rows.
+   * The callback should handle the actual deletion and return a resolved promise on success.
+   */
+  onDelete?: (items: ContentListItem[]) => Promise<void>;
 }
