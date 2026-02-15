@@ -298,6 +298,11 @@ export function getWebpackConfig(
       alias: {
         'react-dom$': 'react-dom/profiling',
         'scheduler/tracing': 'scheduler/tracing-profiling',
+        '@dagrejs/dagre': Path.join(
+          Path.dirname(require.resolve('@dagrejs/dagre/package.json')),
+          'dist',
+          'dagre.cjs.js'
+        ),
         buffer: [
           Path.resolve(worker.repoRoot, 'node_modules/node-stdlib-browser/node_modules/buffer'),
           require.resolve('buffer'),

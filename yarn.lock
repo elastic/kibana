@@ -2448,10 +2448,10 @@
     enabled "2.0.x"
     kuler "^2.0.0"
 
-"@dagrejs/dagre@1.1.8":
-  version "1.1.8"
-  resolved "https://registry.yarnpkg.com/@dagrejs/dagre/-/dagre-1.1.8.tgz#fcbee59344c7b4f48b711ba30783543b70029310"
-  integrity sha512-5SEDlndt4W/LaVzPYJW+bSmSEZc9EzTf8rJ20WCKvjS5EAZAN0b+x0Yww7VMT4R3Wootkg+X9bUfUxazYw6Blw==
+"@dagrejs/dagre@2.0.3":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@dagrejs/dagre/-/dagre-2.0.3.tgz#45c6cc3ccdb26eb169776e34ca2802d4548b60fd"
+  integrity sha512-ig9Vg52tsijTIKNgW9BAeUVBhDRvqlZ2a6FQ6i41YcPpoAy7VXXt2qye22PXRecGSjAp0OEEVUBhJ4oS9BnBzQ==
   dependencies:
     "@dagrejs/graphlib" "2.2.4"
 

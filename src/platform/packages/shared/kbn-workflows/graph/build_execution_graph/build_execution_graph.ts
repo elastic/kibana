@@ -422,9 +422,9 @@ function handleTimeout(
   stepId: string,
   stepType: 'workflow_level_timeout' | 'step_level_timeout',
   timeout: string,
-  innerGraph: graphlib.Graph<GraphNodeUnion>,
+  innerGraph: graphlib.Graph,
   context: GraphBuildContext
-): graphlib.Graph<GraphNodeUnion> {
+): graphlib.Graph {
   const enterTimeoutZone: EnterTimeoutZoneNode = {
     id: `enterTimeoutZone_${stepId}`,
     type: 'enter-timeout-zone',
@@ -438,7 +438,7 @@ function handleTimeout(
     stepId,
     stepType,
   };
-  const graph = new graphlib.Graph<GraphNodeUnion>({ directed: true });
+  const graph = new graphlib.Graph({ directed: true });
   graph.setNode(enterTimeoutZone.id, enterTimeoutZone);
   graph.setNode(exitTimeoutZone.id, exitTimeoutZone);
   context.stack.push(enterTimeoutZone);
@@ -450,7 +450,7 @@ function handleTimeout(
 function handleStepLevelOnFailure(
   step: BaseStep,
   context: GraphBuildContext
-): graphlib.Graph<GraphNodeUnion> | null {
+): graphlib.Graph | null {
   const stackEntry: GraphNodeUnion = {
     id: `stepLevelOnFailure_${getStepId(step, context)}`,
     type: 'step-level-on-failure',
@@ -470,7 +470,7 @@ function handleStepLevelOnFailure(
 function handleWorkflowLevelOnFailure(
   step: BaseStep,
   context: GraphBuildContext
-): graphlib.Graph<GraphNodeUnion> | null {
+): graphlib.Graph | null {
   const onFailureConfiguration = context.settings?.['on-failure'];
   if (
     flowControlStepTypes.has(step.type) ||
@@ -670,13 +670,10 @@ function createFallback(
   return graph;
 }
 
-function createStepsSequence(
-  steps: BaseStep[],
-  context: GraphBuildContext
-): graphlib.Graph<GraphNodeUnion> {
+function createStepsSequence(steps: BaseStep[], context: GraphBuildContext): graphlib.Graph {
   const graph = createTypedGraph({ directed: true });
 
-  let previousGraph: graphlib.Graph<GraphNodeUnion> | null = null;
+  let previousGraph: graphlib.Graph | null = null;
 
   for (let i = 0; i < steps.length; i++) {
     const currentGraph = visitAbstractStep(steps[i], context);
@@ -793,7 +790,7 @@ function createForeachGraphForStepWithForeach(
 export function convertToWorkflowGraph(
   workflowSchema: WorkflowYaml,
   defaultSettings?: WorkflowSettings
-): graphlib.Graph<GraphNodeUnion> {
+): graphlib.Graph {
   const resolvedSettings = resolveWorklfowSettings(workflowSchema.settings, defaultSettings);
   const context: GraphBuildContext = {
     settings: resolvedSettings,
