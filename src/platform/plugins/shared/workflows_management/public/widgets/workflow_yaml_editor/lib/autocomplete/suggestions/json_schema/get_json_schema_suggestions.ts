@@ -282,10 +282,7 @@ function shouldProvidePropertyKeySuggestions(
  * Check if a line is under an `inputs:` root-level key by walking backward
  * to find a 0-indent `inputs:` key before hitting any other root-level key.
  */
-function isUnderInputsRoot(
-  model: monaco.editor.ITextModel,
-  fromLineNum: number
-): boolean {
+function isUnderInputsRoot(model: monaco.editor.ITextModel, fromLineNum: number): boolean {
   for (let lineNum = fromLineNum - 1; lineNum >= 1; lineNum--) {
     const line = model.getLineContent(lineNum);
     if (line.trim() === '') continue;
@@ -301,10 +298,7 @@ function isUnderInputsRoot(
  * Check if a line is under `inputs.properties` by walking backward
  * to find `properties:` at 2-space indent, then `inputs:` at root.
  */
-function isUnderInputsProperties(
-  model: monaco.editor.ITextModel,
-  fromLineNum: number
-): boolean {
+function isUnderInputsProperties(model: monaco.editor.ITextModel, fromLineNum: number): boolean {
   for (let lineNum = fromLineNum - 1; lineNum >= 1; lineNum--) {
     const line = model.getLineContent(lineNum);
     if (line.trim() === '') continue;
