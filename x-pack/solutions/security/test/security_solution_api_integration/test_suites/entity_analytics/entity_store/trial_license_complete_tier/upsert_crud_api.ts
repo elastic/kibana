@@ -25,7 +25,7 @@ import {
 } from './infra/constants';
 import { triggerTransform } from './infra/transforms';
 
-const LOCAL_TIMEOUT_MS = 3600; // 60s
+const LOCAL_TIMEOUT_MS = 60000; // 60s
 
 export default function (providerContext: FtrProviderContext) {
   const supertest = providerContext.getService('supertest');
@@ -35,8 +35,7 @@ export default function (providerContext: FtrProviderContext) {
   const dataView = dataViewRouteHelpersFactory(supertest);
   const securitySolutionApi = providerContext.getService('entityAnalyticsApi');
 
-  // Failing: See https://github.com/elastic/kibana/issues/236172
-  describe.skip('@ess CRUD API - Upsert', () => {
+  describe('@ess CRUD API - Upsert', () => {
     describe('upsert user', () => {
       before(async () => {
         await cleanUpEntityStore(providerContext);
@@ -57,7 +56,8 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await enableEntityStore(providerContext);
+        // This test only validates user entity behavior, so enable only the user engine
+        await enableEntityStore(providerContext, { entityTypes: ['user'] });
         log.info('beforeEach complete');
       });
 
@@ -176,7 +176,8 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await enableEntityStore(providerContext);
+        // This test validates bulk upsert across all entity types (host, user, service)
+        await enableEntityStore(providerContext, { entityTypes: ['host', 'user', 'service'] });
         log.info('beforeEach complete');
       });
 
