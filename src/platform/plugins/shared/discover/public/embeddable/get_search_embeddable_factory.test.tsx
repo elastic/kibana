@@ -24,7 +24,7 @@ import { createDataViewDataSource } from '../../common/data_sources';
 import { discoverServiceMock } from '../__mocks__/services';
 import { getSearchEmbeddableFactory } from './get_search_embeddable_factory';
 import type { SearchEmbeddableApi, SearchEmbeddableRuntimeState } from './types';
-import { SolutionType } from '../context_awareness';
+import { EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT, SolutionType } from '../context_awareness';
 
 jest.mock('./utils/serialization_utils', () => ({}));
 
@@ -258,6 +258,7 @@ describe('saved search embeddable', () => {
       const scopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager(
         {
           scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+          toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
         }
       );
       const resolveDataSourceProfileSpy = jest.spyOn(

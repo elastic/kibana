@@ -10,6 +10,7 @@
 import { fieldList } from '@kbn/data-views-plugin/common';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
+import { EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT } from '../../../../context_awareness/toolkit';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { getDefaultProfileState } from './get_default_profile_state';
 
@@ -20,6 +21,7 @@ const emptyDataView = buildDataViewMock({
 const { profilesManagerMock, scopedEbtManagerMock } = createContextAwarenessMocks();
 const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager({
   scopedEbtManager: scopedEbtManagerMock,
+  toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
 });
 
 scopedProfilesManager.resolveDataSourceProfile({});

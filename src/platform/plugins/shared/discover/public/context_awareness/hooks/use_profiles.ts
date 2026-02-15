@@ -10,7 +10,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { type GetProfilesOptions } from '../profiles_manager';
 import { useScopedServices } from '../../components/scoped_services_provider';
-import { useContextAwarenessToolkit } from '../toolkit_provider';
 
 /**
  * Hook to retreive the resolved profiles
@@ -19,14 +18,11 @@ import { useContextAwarenessToolkit } from '../toolkit_provider';
  */
 export const useProfiles = ({ record }: GetProfilesOptions = {}) => {
   const { scopedProfilesManager } = useScopedServices();
-  const toolkit = useContextAwarenessToolkit();
 
-  const [profiles, setProfiles] = useState(() =>
-    scopedProfilesManager.getProfiles({ record, toolkit })
-  );
+  const [profiles, setProfiles] = useState(() => scopedProfilesManager.getProfiles({ record }));
   const profiles$ = useMemo(
-    () => scopedProfilesManager.getProfiles$({ record, toolkit }),
-    [scopedProfilesManager, record, toolkit]
+    () => scopedProfilesManager.getProfiles$({ record }),
+    [scopedProfilesManager, record]
   );
 
   useEffect(() => {

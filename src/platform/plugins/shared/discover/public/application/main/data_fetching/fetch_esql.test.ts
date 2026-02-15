@@ -15,6 +15,7 @@ import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_tim
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchEsql, getTextBasedQueryStateToAstProps } from './fetch_esql';
 import type { TimeRange } from '@kbn/es-query';
+import { EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT } from '../../../context_awareness';
 
 describe('fetchEsql', () => {
   beforeEach(() => {
@@ -23,6 +24,7 @@ describe('fetchEsql', () => {
 
   const scopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager({
     scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+    toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
   });
   const fetchEsqlMockProps = {
     query: { esql: 'from *' },

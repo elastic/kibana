@@ -19,7 +19,7 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDataView } from '../../hooks/use_data_view';
 import type { DocHistoryLocationState } from './locator';
-import { useRootProfile } from '../../context_awareness';
+import { EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT, useRootProfile } from '../../context_awareness';
 import { ScopedServicesProvider } from '../../components/scoped_services_provider';
 
 export interface DocUrlParams {
@@ -56,7 +56,10 @@ export const SingleDocRoute = () => {
   });
   const [scopedEbtManager] = useState(() => ebtManager.createScopedEBTManager());
   const [scopedProfilesManager] = useState(() =>
-    profilesManager.createScopedProfilesManager({ scopedEbtManager })
+    profilesManager.createScopedProfilesManager({
+      scopedEbtManager,
+      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+    })
   );
   const rootProfileState = useRootProfile();
 

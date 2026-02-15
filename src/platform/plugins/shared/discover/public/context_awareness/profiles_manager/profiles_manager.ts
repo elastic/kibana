@@ -20,6 +20,7 @@ import type {
 import type { ContextWithProfileId } from '../profile_service';
 import type { ScopedDiscoverEBTManager } from '../../ebt_manager';
 import type { AppliedProfile } from '../composable_profile';
+import type { DiscoverContextAwarenessToolkit } from '../toolkit';
 import { EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT } from '../toolkit';
 import { logResolutionError } from './utils';
 import { ScopedProfilesManager } from './scoped_profiles_manager';
@@ -119,15 +120,18 @@ export class ProfilesManager {
    */
   public createScopedProfilesManager({
     scopedEbtManager,
+    toolkit,
   }: {
     scopedEbtManager: ScopedDiscoverEBTManager;
+    toolkit: DiscoverContextAwarenessToolkit;
   }) {
     return new ScopedProfilesManager(
       this.rootContext$,
       this.rootProfileService,
       this.dataSourceProfileService,
       this.documentProfileService,
-      scopedEbtManager
+      scopedEbtManager,
+      toolkit
     );
   }
 }

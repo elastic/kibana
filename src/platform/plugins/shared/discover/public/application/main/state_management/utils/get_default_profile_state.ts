@@ -12,10 +12,7 @@ import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { uniqBy } from 'lodash';
 import type { DiscoverAppState } from '../redux';
 import type { DefaultAppStateColumn, ScopedProfilesManager } from '../../../../context_awareness';
-import {
-  EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
-  getMergedAccessor,
-} from '../../../../context_awareness';
+import { getMergedAccessor } from '../../../../context_awareness';
 import type { DataDocumentsMsg } from '../discover_data_state_container';
 import type { TabState } from '../redux';
 
@@ -103,7 +100,7 @@ export const getDefaultProfileState = ({
 
 const getDefaultState = (scopedProfilesManager: ScopedProfilesManager, dataView: DataView) => {
   const getDefaultAppState = getMergedAccessor(
-    scopedProfilesManager.getProfiles({ toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT }),
+    scopedProfilesManager.getProfiles(),
     'getDefaultAppState',
     () => ({})
   );

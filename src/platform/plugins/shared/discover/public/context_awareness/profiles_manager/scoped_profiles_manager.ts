@@ -21,7 +21,6 @@ import type {
 import type { RootProfileService } from '../profiles/root_profile';
 import type { AppliedProfile } from '../composable_profile';
 import type { DiscoverContextAwarenessToolkit } from '../toolkit';
-import { EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT } from '../toolkit';
 import type {
   DocumentContext,
   DocumentProfileProviderParams,
@@ -58,8 +57,6 @@ export class ScopedProfilesManager {
   private prevDataSourceProfileParams?: SerializedDataSourceProfileParams;
   private dataSourceProfileAbortController?: AbortController;
 
-  private cachedToolkit?: DiscoverContextAwarenessToolkit;
-
   private cachedRootContext?: ContextWithProfileId<RootContext>;
   private cachedRootProfile?: AppliedProfile;
 
@@ -74,7 +71,8 @@ export class ScopedProfilesManager {
     private readonly rootProfileService: RootProfileService,
     private readonly dataSourceProfileService: DataSourceProfileService,
     private readonly documentProfileService: DocumentProfileService,
-    private readonly scopedEbtManager: ScopedDiscoverEBTManager
+    private readonly scopedEbtManager: ScopedDiscoverEBTManager,
+    private readonly toolkit: DiscoverContextAwarenessToolkit
   ) {
     this.dataSourceContext$ = new BehaviorSubject(dataSourceProfileService.defaultContext);
   }
@@ -180,51 +178,34 @@ export class ScopedProfilesManager {
    * @param options Options for getting the profiles
    * @returns The resolved profiles
    */
-  public getProfiles({
-    record,
-    toolkit = EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
-  }: GetProfilesOptions & { toolkit?: DiscoverContextAwarenessToolkit } = {}) {
+  public getProfiles({ record }: GetProfilesOptions = {}) {
     const rootContext = this.rootContext$.getValue();
     const dataSourceContext = this.dataSourceContext$.getValue();
     const documentContext = recordHasContext(record)
       ? record.context
       : this.documentProfileService.defaultContext;
 
-    const toolkitChanged = this.cachedToolkit !== toolkit;
-
-    if (toolkitChanged) {
-      this.cachedToolkit = toolkit;
-    }
-
-    if (toolkitChanged || this.cachedRootContext !== rootContext || !this.cachedRootProfile) {
+    if (this.cachedRootContext !== rootContext || !this.cachedRootProfile) {
       this.cachedRootContext = rootContext;
       this.cachedRootProfile = this.rootProfileService.getProfile({
         context: rootContext,
-        toolkit,
+        toolkit: this.toolkit,
       });
     }
 
-    if (
-      toolkitChanged ||
-      this.cachedDataSourceContext !== dataSourceContext ||
-      !this.cachedDataSourceProfile
-    ) {
+    if (this.cachedDataSourceContext !== dataSourceContext || !this.cachedDataSourceProfile) {
       this.cachedDataSourceContext = dataSourceContext;
       this.cachedDataSourceProfile = this.dataSourceProfileService.getProfile({
         context: dataSourceContext,
-        toolkit,
+        toolkit: this.toolkit,
       });
     }
 
-    if (
-      toolkitChanged ||
-      this.cachedDocumentContext !== documentContext ||
-      !this.cachedDocumentProfile
-    ) {
+    if (this.cachedDocumentContext !== documentContext || !this.cachedDocumentProfile) {
       this.cachedDocumentContext = documentContext;
       this.cachedDocumentProfile = this.documentProfileService.getProfile({
         context: documentContext,
-        toolkit,
+        toolkit: this.toolkit,
       });
     }
 
@@ -236,7 +217,7 @@ export class ScopedProfilesManager {
    * @param options Options for getting the profiles
    * @returns The resolved profiles as an observable
    */
-  public getProfiles$(options: GetProfilesOptions & { toolkit?: DiscoverContextAwarenessToolkit }) {
+  public getProfiles$(options: GetProfilesOptions) {
     return combineLatest([this.rootContext$, this.dataSourceContext$]).pipe(
       map(() => this.getProfiles(options))
     );

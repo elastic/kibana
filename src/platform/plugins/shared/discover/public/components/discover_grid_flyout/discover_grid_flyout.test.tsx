@@ -27,6 +27,7 @@ import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/pub
 import { discoverServiceMock } from '../../__mocks__/services';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { UnifiedDocViewerFlyoutProps } from '@kbn/unified-doc-viewer-plugin/public';
+import { EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT } from '../../context_awareness';
 
 let mockFlyoutCustomBody: ComponentType | undefined;
 
@@ -277,6 +278,7 @@ describe('Discover flyout', function () {
       ];
       const scopedProfilesManager = services.profilesManager.createScopedProfilesManager({
         scopedEbtManager: services.ebtManager.createScopedEBTManager(),
+        toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
       });
       const records = buildDataTableRecordList({
         records: hits as EsHitRecord[],

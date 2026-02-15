@@ -16,6 +16,7 @@ import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-respons
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 import type { DiscoverServices } from '../../../build_services';
+import { EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT } from '../../../context_awareness';
 
 describe('context app', function () {
   let searchSourceStub: ReturnType<typeof createSearchSourceStub>;
@@ -36,6 +37,7 @@ describe('context app', function () {
       discoverServices,
       discoverServices.profilesManager.createScopedProfilesManager({
         scopedEbtManager: discoverServices.ebtManager.createScopedEBTManager(),
+        toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
       })
     );
 

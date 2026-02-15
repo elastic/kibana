@@ -18,6 +18,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { buildDataTableRecord, buildDataTableRecordList } from '@kbn/discover-utils';
 import { discoverServiceMock } from '../../../__mocks__/services';
+import { EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT } from '../../../context_awareness';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();
@@ -73,7 +74,7 @@ describe('context predecessors', function () {
               [dataView.timeFieldName!]: timeValIso,
             },
             sort: [timeValIso, tieBreakerValue],
-          } as EsHitRecord,
+          },
           dataView,
           true
         );
@@ -90,6 +91,7 @@ describe('context predecessors', function () {
           discoverServiceMock,
           discoverServiceMock.profilesManager.createScopedProfilesManager({
             scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+            toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
           })
         );
       };
@@ -243,6 +245,7 @@ describe('context predecessors', function () {
           discoverServiceMock,
           discoverServiceMock.profilesManager.createScopedProfilesManager({
             scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+            toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
           })
         );
       };

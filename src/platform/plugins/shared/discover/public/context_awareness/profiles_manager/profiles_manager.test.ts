@@ -13,6 +13,7 @@ import { addLog } from '../../utils/add_log';
 import { SolutionType } from '../profiles/root_profile';
 import { createContextAwarenessMocks } from '../__mocks__';
 import type { ComposableProfile } from '../composable_profile';
+import { EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT } from '../toolkit';
 
 jest.mock('../../utils/add_log');
 
@@ -32,6 +33,7 @@ describe('ProfilesManager', () => {
   it('should return default profiles', () => {
     const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
       scopedEbtManager: mocks.scopedEbtManagerMock,
+      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
     });
     const profiles = scopedProfilesManager.getProfiles();
     expect(profiles).toEqual([{}, {}, {}]);
@@ -41,6 +43,7 @@ describe('ProfilesManager', () => {
     await mocks.profilesManagerMock.resolveRootProfile({});
     const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
       scopedEbtManager: mocks.scopedEbtManagerMock,
+      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
     });
     const profiles = scopedProfilesManager.getProfiles();
     expect(profiles).toEqual([toAppliedProfile(mocks.rootProfileProviderMock.profile), {}, {}]);
@@ -49,6 +52,7 @@ describe('ProfilesManager', () => {
   it('should resolve data source profile', async () => {
     const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
       scopedEbtManager: mocks.scopedEbtManagerMock,
+      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
     });
     await scopedProfilesManager.resolveDataSourceProfile({});
     const profiles = scopedProfilesManager.getProfiles();
@@ -62,6 +66,7 @@ describe('ProfilesManager', () => {
   it('should resolve document profile', async () => {
     const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
       scopedEbtManager: mocks.scopedEbtManagerMock,
+      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
     });
     const record = scopedProfilesManager.resolveDocumentProfile({
       record: mocks.contextRecordMock,
@@ -74,6 +79,7 @@ describe('ProfilesManager', () => {
     await mocks.profilesManagerMock.resolveRootProfile({});
     const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
       scopedEbtManager: mocks.scopedEbtManagerMock,
+      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
     });
     await scopedProfilesManager.resolveDataSourceProfile({});
     const record = scopedProfilesManager.resolveDocumentProfile({
@@ -110,6 +116,7 @@ describe('ProfilesManager', () => {
   it('should expose profiles as an observable', async () => {
     const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
       scopedEbtManager: mocks.scopedEbtManagerMock,
+      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
     });
     const getProfilesSpy = jest.spyOn(scopedProfilesManager, 'getProfiles');
     const record = scopedProfilesManager.resolveDocumentProfile({
@@ -155,6 +162,7 @@ describe('ProfilesManager', () => {
   it('should not resolve data source profile again if params have not changed', async () => {
     const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
       scopedEbtManager: mocks.scopedEbtManagerMock,
+      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
     });
     await scopedProfilesManager.resolveDataSourceProfile({
       dataSource: createEsqlDataSource(),
@@ -171,6 +179,7 @@ describe('ProfilesManager', () => {
   it('should resolve data source profile again if params have changed', async () => {
     const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
       scopedEbtManager: mocks.scopedEbtManagerMock,
+      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
     });
     await scopedProfilesManager.resolveDataSourceProfile({
       dataSource: createEsqlDataSource(),
@@ -188,6 +197,7 @@ describe('ProfilesManager', () => {
     await mocks.profilesManagerMock.resolveRootProfile({ solutionNavId: 'solutionNavId' });
     const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
       scopedEbtManager: mocks.scopedEbtManagerMock,
+      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
     });
     let profiles = scopedProfilesManager.getProfiles();
     expect(profiles).toEqual([toAppliedProfile(mocks.rootProfileProviderMock.profile), {}, {}]);
@@ -205,6 +215,7 @@ describe('ProfilesManager', () => {
   it('should log an error and fall back to the default profile if data source profile resolution fails', async () => {
     const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
       scopedEbtManager: mocks.scopedEbtManagerMock,
+      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
     });
     await scopedProfilesManager.resolveDataSourceProfile({
       dataSource: createEsqlDataSource(),
@@ -233,6 +244,7 @@ describe('ProfilesManager', () => {
   it('should log an error and fall back to the default profile if document profile resolution fails', () => {
     const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
       scopedEbtManager: mocks.scopedEbtManagerMock,
+      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
     });
     const record = scopedProfilesManager.resolveDocumentProfile({
       record: mocks.contextRecordMock,
@@ -275,6 +287,7 @@ describe('ProfilesManager', () => {
     expect(resolveSpy).toHaveLastReturnedWith(deferredResult);
     const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
       scopedEbtManager: mocks.scopedEbtManagerMock,
+      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
     });
     expect(scopedProfilesManager.getProfiles()).toEqual([{}, {}, {}]);
     const resolvedDeferredResult2$ = new Subject();
@@ -316,6 +329,7 @@ describe('ProfilesManager', () => {
     resolveSpy.mockResolvedValueOnce(deferredResult);
     const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
       scopedEbtManager: mocks.scopedEbtManagerMock,
+      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
     });
     const promise1 = scopedProfilesManager.resolveDataSourceProfile({
       dataSource: createEsqlDataSource(),

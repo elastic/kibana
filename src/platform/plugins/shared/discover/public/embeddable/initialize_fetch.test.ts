@@ -17,6 +17,7 @@ import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { discoverServiceMock } from '../__mocks__/services';
 import { initializeFetch } from './initialize_fetch';
 import { getMockedSearchApi } from './__mocks__/get_mocked_api';
+import { EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT } from '../context_awareness';
 
 describe('initialize fetch', () => {
   const searchSource = createSearchSourceMock({ index: dataViewMock });
@@ -44,6 +45,7 @@ describe('initialize fetch', () => {
       discoverServices: discoverServiceMock,
       scopedProfilesManager: discoverServiceMock.profilesManager.createScopedProfilesManager({
         scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+        toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
       }),
       ...setters,
     });
