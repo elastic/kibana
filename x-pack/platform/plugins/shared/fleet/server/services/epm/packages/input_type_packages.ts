@@ -14,6 +14,7 @@ import type {
   NewPackagePolicyInput,
   PackageInfo,
   PackagePolicy,
+  RegistryDataStream,
   RegistryPolicyInputOnlyTemplate,
 } from '../../../types';
 import {
@@ -128,6 +129,7 @@ export async function installAssetsForInputPackagePolicy(opts: {
       logger,
       datasetName,
       dataStreamType,
+      inputType: packagePolicy.inputs[0].type,
       esClient,
       soClient,
       force,
@@ -140,11 +142,13 @@ async function installAssetsForDataStreamType(opts: {
   logger: Logger;
   datasetName: string;
   dataStreamType: string;
+  inputType: string;
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   force: boolean;
 }) {
-  const { pkgInfo, logger, datasetName, dataStreamType, esClient, soClient, force } = opts;
+  const { pkgInfo, logger, datasetName, dataStreamType, inputType, esClient, soClient, force } =
+    opts;
 
   const { dataStream, existingDataStreams } = await findDataStreamsFromDifferentPackages(
     datasetName,
@@ -152,6 +156,14 @@ async function installAssetsForDataStreamType(opts: {
     esClient,
     dataStreamType
   );
+
+  applyTimeSeriesIndexMode({
+    dataStream,
+    inputType,
+    dataStreamType,
+    pkgName: pkgInfo.name,
+    logger,
+  });
 
   if (existingDataStreams.length) {
     const existingDataStreamsAreFromDifferentPackage =
@@ -313,3 +325,55 @@ export async function removeAssetsForInputPackagePolicy(opts: {
     }
   }
 }
+
+/**
+ * Applies time_series index mode rules to a data stream:
+ * - Removes time_series index mode for non-metrics data streams
+ * - Adds time_series index mode for OTel metrics data streams if not present
+ * - Preserves existing time_series index mode for metrics data streams
+ */
+export const applyTimeSeriesIndexMode = ({
+  dataStream,
+  inputType,
+  dataStreamType,
+  pkgName,
+  logger,
+}: {
+  dataStream: RegistryDataStream;
+  inputType: string;
+  dataStreamType: string;
+  pkgName: string;
+  logger: Logger;
+}): void => {
+  const isOTelInput = inputType === OTEL_COLLECTOR_INPUT_TYPE;
+  const isMetricsType = dataStreamType === 'metrics';
+
+  // For OTel inputs with metrics type, preserve time_series index mode
+  // For all other cases, only preserve time_series for metrics type
+  const shouldRemoveTimeSeries =
+    !isMetricsType && dataStream.elasticsearch?.index_mode === 'time_series';
+
+  if (shouldRemoveTimeSeries) {
+    logger.debug(
+      `Ignoring time_series index mode for package "${pkgName}" ` +
+        `because data stream type is "${dataStreamType}" (time_series only wanted with "metrics" type)`
+    );
+
+    // Remove time_series index mode from dataStream.
+    if (dataStream.elasticsearch) {
+      const { index_mode, ...restElasticsearch } = dataStream.elasticsearch;
+      dataStream.elasticsearch = restElasticsearch;
+    }
+  } else if (isOTelInput && isMetricsType && !dataStream.elasticsearch?.index_mode) {
+    // For OTel metrics data streams, add time_series index mode if not already present
+    logger.debug(
+      `Adding time_series index mode for OTel package "${pkgName}" ` +
+        `because data stream type is "${dataStreamType}"`
+    );
+
+    if (!dataStream.elasticsearch) {
+      dataStream.elasticsearch = {};
+    }
+    dataStream.elasticsearch.index_mode = 'time_series';
+  }
+};
