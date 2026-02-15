@@ -30,7 +30,6 @@ import {
   EuiLink,
   EuiHighlight,
   EuiBadge,
-  EuiToolTip,
 } from '@elastic/eui';
 import { MaintenanceWindowsLink } from '../fields/maintenance_windows/create_maintenance_windows_btn';
 import type { MaintenanceWindowsFieldProps } from '../fields/maintenance_windows/maintenance_windows';
@@ -471,43 +470,29 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         isDisabled: readOnly,
         renderOption: (option: FormLocation, searchValue: string) => {
           return (
-            <EuiToolTip
-              anchorProps={{
-                style: { width: '100%' },
-              }}
-              content={
-                option.isInvalid
-                  ? i18n.translate('xpack.synthetics.monitorConfig.locations.attachedPolicy', {
-                      defaultMessage:
-                        'The attached agent policy for this location has been deleted.',
-                    })
-                  : ''
-              }
-            >
-              <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem>
-                  <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+            <EuiFlexGroup gutterSize="s" alignItems="center" component="span" responsive={false}>
+              <EuiFlexItem component="span">
+                <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+              </EuiFlexItem>
+              {option.isInvalid && (
+                <EuiFlexItem grow={false} component="span">
+                  <EuiBadge color="danger">
+                    {i18n.translate('xpack.synthetics.monitorConfig.locations.invalid', {
+                      defaultMessage: 'Invalid',
+                    })}
+                  </EuiBadge>
                 </EuiFlexItem>
-                {option.isInvalid && (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="danger">
-                      {i18n.translate('xpack.synthetics.monitorConfig.locations.invalid', {
-                        defaultMessage: 'Invalid',
-                      })}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                )}
-                {!option.isServiceManaged && (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="primary">
-                      {i18n.translate('xpack.synthetics.monitorConfig.locations.private', {
-                        defaultMessage: 'Private',
-                      })}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </EuiToolTip>
+              )}
+              {!option.isServiceManaged && (
+                <EuiFlexItem grow={false} component="span">
+                  <EuiBadge color="primary">
+                    {i18n.translate('xpack.synthetics.monitorConfig.locations.private', {
+                      defaultMessage: 'Private',
+                    })}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           );
         },
       };
