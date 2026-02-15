@@ -247,14 +247,17 @@ export const StepsEditor = React.memo(() => {
   );
 
   // Pipeline suggestion state
-  const isLoadingSuggestion = useInteractiveModeSelector((snapshot) =>
-    snapshot.matches({ pipelineSuggestion: 'generatingSuggestion' })
+  const isLoadingSuggestion = useInteractiveModeSelector(
+    (snapshot) =>
+      snapshot.matches({ pipelineSuggestion: 'submittingSuggestionTask' }) ||
+      snapshot.matches({ pipelineSuggestion: 'checkingSuggestionStatus' }) ||
+      snapshot.matches({ pipelineSuggestion: 'waitingForCompletion' })
   );
   const suggestedPipeline = useInteractiveModeSelector(
     (snapshot) => snapshot.context.suggestedPipeline
   );
   const isViewingSuggestion = useInteractiveModeSelector((snapshot) =>
-    snapshot.matches({ pipelineSuggestion: 'viewingSuggestion' })
+    snapshot.matches({ pipelineSuggestion: 'completed' })
   );
   const isNoSuggestionsFound = useInteractiveModeSelector((snapshot) =>
     snapshot.matches({ pipelineSuggestion: 'noSuggestionsFound' })
@@ -284,6 +287,8 @@ export const StepsEditor = React.memo(() => {
   const canUsePipelineSuggestionsPending = !aiFeatures || (aiFeatures.enabled && isLoadingSamples);
 
   if (aiFeatures && aiFeatures.enabled) {
+    // Show loading prompt only once we know there's an in-progress task.
+    // Don't show during the initial existing-task status check to avoid a flash.
     if (isLoadingSuggestion) {
       return (
         <SuggestionLoadingPrompt

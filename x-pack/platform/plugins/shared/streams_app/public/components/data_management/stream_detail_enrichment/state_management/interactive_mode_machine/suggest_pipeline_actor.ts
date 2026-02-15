@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { lastValueFrom, map } from 'rxjs';
 import { fromPromise } from 'xstate5';
 import type { IToasts, NotificationsStart } from '@kbn/core/public';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { streamlangDSLSchema, type StreamlangDSL } from '@kbn/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
+import { TaskStatus, type TaskResult } from '@kbn/streams-schema';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import {
   extractGrokPatternDangerouslySlow,
@@ -18,24 +18,18 @@ import {
 } from '@kbn/grok-heuristics';
 
 import { i18n } from '@kbn/i18n';
+import { isRequestAbortedError } from '@kbn/server-route-repository-client';
 import { getFormattedError } from '../../../../../util/errors';
 import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
-import {
-  NoSuggestionsError,
-  isNoSuggestionsError,
-} from '../../steps/blocks/action/utils/no_suggestions_error';
+import { isNoSuggestionsError } from '../../steps/blocks/action/utils/no_suggestions_error';
 import { PRIORITIZED_CONTENT_FIELDS, getDefaultTextField } from '../../utils';
 import { extractMessagesFromField } from '../../steps/blocks/action/utils/pattern_suggestion_helpers';
 import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine/types';
 
-// Minimal input needed from state machine (services injected in implementation)
-export interface SuggestPipelineInputMinimal {
+export interface SuggestPipelineInput {
   streamName: string;
   connectorId: string;
   documents: SampleDocumentWithUIAttributes[];
-}
-
-export interface SuggestPipelineInput extends SuggestPipelineInputMinimal {
   signal: AbortSignal;
   streamsRepositoryClient: StreamsRepositoryClient;
   telemetryClient: StreamsTelemetryClient;
@@ -51,73 +45,6 @@ interface ExtractedGrokPattern {
     messages: string[];
     nodes: GrokPatternNode[];
   }>;
-}
-
-export async function suggestPipelineLogic(input: SuggestPipelineInput): Promise<StreamlangDSL> {
-  // Extract FlattenRecord documents from SampleDocumentWithUIAttributes
-  const documents: FlattenRecord[] = input.documents.map(
-    (doc) => flattenObjectNestedLast(doc.document) as FlattenRecord
-  );
-
-  // Step 1: CLIENT-SIDE - Extract patterns from documents
-  // This is compute-intensive and synchronous, so it stays client-side
-  const fieldName = getDefaultTextField(documents, PRIORITIZED_CONTENT_FIELDS);
-  const messages = extractMessagesFromField(documents, fieldName);
-
-  // Only grok extraction is CPU-intensive enough to warrant client-side processing
-  const grokPatterns = await extractGrokPatternsClientSide(messages, fieldName);
-
-  // Step 2: SERVER-SIDE - Pass extracted grok patterns and raw messages to server for:
-  // - Dissect pattern extraction (cheap, can run server-side)
-  // - LLM review of patterns
-  // - Simulation to pick best processor
-  // - Full pipeline generation
-  const pipeline = await lastValueFrom(
-    input.streamsRepositoryClient
-      .stream('POST /internal/streams/{name}/_suggest_processing_pipeline', {
-        signal: input.signal,
-        params: {
-          path: { name: input.streamName },
-          body: {
-            connector_id: input.connectorId,
-            documents,
-            extracted_patterns: {
-              grok: grokPatterns
-                ? {
-                    fieldName: grokPatterns.fieldName,
-                    patternGroups: grokPatterns.patternGroups,
-                  }
-                : null,
-              dissect:
-                messages.length > 0
-                  ? {
-                      fieldName,
-                      messages,
-                    }
-                  : null,
-            },
-          },
-        },
-      })
-      .pipe(
-        map((event) => {
-          // Handle case where LLM couldn't generate suggestions
-          if (event.pipeline === null) {
-            throw new NoSuggestionsError(
-              i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.noSuggestionsError',
-                {
-                  defaultMessage: 'Could not generate suggestions',
-                }
-              )
-            );
-          }
-          return streamlangDSLSchema.parse(event.pipeline);
-        })
-      )
-  );
-
-  return pipeline;
 }
 
 /**
@@ -156,7 +83,63 @@ async function extractGrokPatternsClientSide(
   }
 }
 
-export const createSuggestPipelineActor = ({
+export async function schedulePipelineSuggestionTaskLogic(
+  input: SuggestPipelineInput
+): Promise<void> {
+  const { streamName, connectorId, signal, streamsRepositoryClient } = input;
+
+  // Extract FlattenRecord documents from SampleDocumentWithUIAttributes
+  const documents: FlattenRecord[] = input.documents.map(
+    (doc) => flattenObjectNestedLast(doc.document) as FlattenRecord
+  );
+
+  // CLIENT-SIDE - Extract patterns from documents
+  const fieldName = getDefaultTextField(documents, PRIORITIZED_CONTENT_FIELDS);
+  const messages = extractMessagesFromField(documents, fieldName);
+
+  // Only grok extraction is CPU-intensive enough to warrant client-side processing
+  const grokPatterns = await extractGrokPatternsClientSide(messages, fieldName);
+
+  // Schedule background task for server-side processing
+  const extractedPatterns = {
+    grok: grokPatterns
+      ? {
+          fieldName: grokPatterns.fieldName,
+          patternGroups: grokPatterns.patternGroups,
+        }
+      : null,
+    dissect:
+      messages.length > 0
+        ? {
+            fieldName,
+            messages,
+          }
+        : null,
+  };
+
+  await streamsRepositoryClient.fetch('POST /internal/streams/{name}/_pipeline_suggestion/_task', {
+    signal,
+    params: {
+      path: { name: streamName },
+      body: {
+        action: 'schedule' as const,
+        connectorId,
+        documents,
+        extractedPatterns,
+      },
+    },
+  });
+}
+
+// --- Schedule Suggestion Task Actor ---
+
+export interface SchedulePipelineSuggestionTaskInputMinimal {
+  streamName: string;
+  connectorId: string;
+  documents: SampleDocumentWithUIAttributes[];
+}
+
+export const createSchedulePipelineSuggestionTaskActor = ({
   streamsRepositoryClient,
   telemetryClient,
   notifications,
@@ -165,14 +148,60 @@ export const createSuggestPipelineActor = ({
   telemetryClient: StreamsTelemetryClient;
   notifications: NotificationsStart;
 }) => {
-  return fromPromise<StreamlangDSL, SuggestPipelineInputMinimal>(async ({ input, signal }) =>
-    suggestPipelineLogic({
+  return fromPromise<void, SchedulePipelineSuggestionTaskInputMinimal>(async ({ input, signal }) =>
+    schedulePipelineSuggestionTaskLogic({
       ...input,
       signal,
       streamsRepositoryClient,
       telemetryClient,
       notifications,
     })
+  );
+};
+
+// --- Get Suggestion Status Actor ---
+
+interface PipelineSuggestionStatusPayload {
+  pipeline: unknown | null;
+}
+export type PipelineSuggestionTaskStatusResult = TaskResult<PipelineSuggestionStatusPayload>;
+
+export interface GetPipelineSuggestionStatusInputMinimal {
+  streamName: string;
+}
+
+export async function getPipelineSuggestionStatusLogic({
+  streamName,
+  signal,
+  streamsRepositoryClient,
+}: {
+  streamName: string;
+  signal: AbortSignal;
+  streamsRepositoryClient: StreamsRepositoryClient;
+}): Promise<PipelineSuggestionTaskStatusResult> {
+  return await streamsRepositoryClient.fetch(
+    'POST /internal/streams/{name}/_pipeline_suggestion/_status',
+    {
+      signal,
+      params: {
+        path: { name: streamName },
+      },
+    }
+  );
+}
+
+export const createGetPipelineSuggestionStatusActor = ({
+  streamsRepositoryClient,
+}: {
+  streamsRepositoryClient: StreamsRepositoryClient;
+}) => {
+  return fromPromise<PipelineSuggestionTaskStatusResult, GetPipelineSuggestionStatusInputMinimal>(
+    async ({ input, signal }) =>
+      getPipelineSuggestionStatusLogic({
+        streamName: input.streamName,
+        signal,
+        streamsRepositoryClient,
+      })
   );
 };
 
@@ -186,6 +215,11 @@ export const createNotifySuggestionFailureNotifier =
       return;
     }
 
+    // Don't show toast for abort errors - they're expected when user cancels or switches streams
+    if (isRequestAbortedError(event.error)) {
+      return;
+    }
+
     const formattedError = getFormattedError(event.error);
     toasts.addError(formattedError, {
       title: i18n.translate(
@@ -194,3 +228,114 @@ export const createNotifySuggestionFailureNotifier =
       ),
     });
   };
+
+// --- Load Existing Suggestion Actor ---
+
+/**
+ * Input for loading existing suggestion from task status
+ */
+export interface LoadExistingSuggestionInputMinimal {
+  streamName: string;
+}
+
+export interface LoadExistingSuggestionInput extends LoadExistingSuggestionInputMinimal {
+  signal: AbortSignal;
+  streamsRepositoryClient: StreamsRepositoryClient;
+}
+
+/**
+ * Result from loading existing suggestion
+ */
+export type LoadExistingSuggestionResult =
+  | { type: 'completed'; pipeline: StreamlangDSL }
+  | { type: 'in_progress' }
+  | { type: 'failed'; error: string }
+  | { type: 'none' };
+
+/**
+ * Load existing pipeline suggestion state from the task status endpoint.
+ * - If completed: returns the pipeline
+ * - If in_progress: returns in_progress (caller can decide whether to poll)
+ * - If failed/stale/not_started: returns appropriate state
+ */
+export async function loadExistingSuggestionLogic(
+  input: LoadExistingSuggestionInput
+): Promise<LoadExistingSuggestionResult> {
+  const { streamName, signal, streamsRepositoryClient } = input;
+
+  const getStatus = async () => {
+    return streamsRepositoryClient.fetch(
+      'POST /internal/streams/{name}/_pipeline_suggestion/_status',
+      {
+        signal,
+        params: {
+          path: { name: streamName },
+        },
+      }
+    );
+  };
+
+  let taskResult;
+  try {
+    taskResult = await getStatus();
+  } catch (error) {
+    // If aborted during initial fetch, return 'none' gracefully
+    if (isRequestAbortedError(error)) {
+      return { type: 'none' };
+    }
+    throw error;
+  }
+
+  if (
+    taskResult.status === TaskStatus.InProgress ||
+    taskResult.status === TaskStatus.BeingCanceled
+  ) {
+    return { type: 'in_progress' };
+  }
+
+  // Handle terminal states
+  switch (taskResult.status) {
+    case TaskStatus.Completed:
+      // Only show suggestions for completed (not yet acknowledged) tasks
+      if (taskResult.pipeline) {
+        return {
+          type: 'completed',
+          pipeline: streamlangDSLSchema.parse(taskResult.pipeline),
+        };
+      }
+      // Task completed but no pipeline (NoSuggestionsError case)
+      return { type: 'none' };
+
+    case TaskStatus.Failed:
+      return { type: 'failed', error: taskResult.error };
+
+    case TaskStatus.Acknowledged:
+      // Acknowledged tasks have already been accepted/rejected/dismissed - don't show again
+      return { type: 'none' };
+
+    case TaskStatus.NotStarted:
+    case TaskStatus.Stale:
+    case TaskStatus.Canceled:
+    default:
+      return { type: 'none' };
+  }
+}
+
+/**
+ * Actor factory for loading existing suggestion state.
+ * Used on mount to restore previous suggestion state.
+ */
+export const createLoadExistingSuggestionActor = ({
+  streamsRepositoryClient,
+}: {
+  streamsRepositoryClient: StreamsRepositoryClient;
+}) => {
+  return fromPromise<LoadExistingSuggestionResult, LoadExistingSuggestionInputMinimal>(
+    async ({ input, signal }) =>
+      loadExistingSuggestionLogic({
+        ...input,
+        signal,
+        streamsRepositoryClient,
+      })
+  );
+};

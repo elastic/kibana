@@ -19,6 +19,7 @@ import type {
 } from '@kbn/streamlang';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { Streams } from '@kbn/streams-schema';
+import type { StateValue } from 'xstate5';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import type { MappedSchemaField } from '../../../schema_editor/types';
@@ -30,6 +31,18 @@ import type {
   SimulationContext,
 } from '../simulation_state_machine';
 import type { YamlModeActorRef } from '../yaml_mode_machine';
+
+/**
+ * Manually defined snapshot type for the StreamEnrichmentMachine.
+ * This is needed because the machine uses AnyStateMachine to avoid TS7056 error,
+ * since the internal type got too complex to serialize.
+ */
+export interface StreamEnrichmentActorSnapshot {
+  context: StreamEnrichmentContextType;
+  value: StateValue;
+  matches: (stateValue: StateValue) => boolean;
+  can: (event: StreamEnrichmentEvent) => boolean;
+}
 
 export interface StreamPrivileges {
   manage: boolean;

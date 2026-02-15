@@ -14,11 +14,12 @@ import {
   EuiSkeletonText,
   EuiCallOut,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export interface SuggestionLoadingPromptProps {
-  onCancel(): void;
+  onCancel?(): void;
 }
 
 export function SuggestionLoadingPrompt({ onCancel }: SuggestionLoadingPromptProps) {
@@ -45,11 +46,22 @@ export function SuggestionLoadingPrompt({ onCancel }: SuggestionLoadingPromptPro
       <EuiSpacer size="s" />
       <EuiProgress size="s" color="accent" />
       <EuiSpacer size="s" />
-      <EuiLink onClick={onCancel} data-test-subj="streamsAppPipelineSuggestionCancelButton">
-        {i18n.translate('xpack.streams.stepsEditor.cancelLabel', {
-          defaultMessage: 'Cancel',
+      <EuiText size="s" color="subdued">
+        {i18n.translate('xpack.streams.stepsEditor.backgroundProcessingMessage', {
+          defaultMessage:
+            "You don't need to stay on this page. The suggestion will be available when you return.",
         })}
-      </EuiLink>
+      </EuiText>
+      {onCancel && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiLink onClick={onCancel} data-test-subj="streamsAppPipelineSuggestionCancelButton">
+            {i18n.translate('xpack.streams.stepsEditor.cancelLabel', {
+              defaultMessage: 'Cancel',
+            })}
+          </EuiLink>
+        </>
+      )}
     </EuiCallOut>
   );
 }
