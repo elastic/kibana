@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import {
+  DETECTION_ENGINE_RULES_URL,
   NOTIFICATION_DEFAULT_FREQUENCY,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
@@ -23,6 +24,15 @@ import {
   deleteAllAlerts,
   createRule,
 } from '@kbn/detections-response-ftr-services';
+import type TestAgent from 'supertest/lib/agent';
+import type {
+  RuleResponse,
+  RuleUpdateProps,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { v4 as uuidV4 } from 'uuid';
+import { createSupertestErrorLogger } from '../../../../edr_workflows/utils';
+import { ROLE } from '../../../../../config/services/security_solution_edr_workflows_roles_users';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
@@ -41,8 +51,8 @@ import {
   getActionsWithFrequencies,
   getActionsWithoutFrequencies,
   getSomeActionsWithFrequencies,
+  getCustomQueryRuleParams,
 } from '../../../utils';
-import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -50,6 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
+  const rolesUsersProvider = getService('rolesUsersProvider');
 
   describe('@ess @serverless @skipInServerlessMKI update_rules', () => {
     describe('update rules', () => {
@@ -757,6 +768,100 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await detectionsApi.updateRule({ body: ruleUpdate }).expect(200);
 
           expect(body.investigation_fields).to.eql(undefined);
+        });
+      });
+
+      describe('with endpoint response actions', () => {
+        let superTestResponseActionsNoAuthz: TestAgent;
+        let ruleToUpdate: RuleResponse;
+        let updatePayload: RuleUpdateProps;
+
+        before(async () => {
+          superTestResponseActionsNoAuthz = await utils.createSuperTestWithCustomRole({
+            name: ROLE.endpoint_response_actions_no_access,
+            privileges: rolesUsersProvider.loader.getPreDefinedRole(
+              ROLE.endpoint_response_actions_no_access
+            ),
+          });
+        });
+
+        beforeEach(async () => {
+          ruleToUpdate = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({
+              rule_id: uuidV4(),
+              response_actions: [
+                {
+                  action_type_id: '.endpoint',
+                  params: { command: 'kill-process', config: { field: '', overwrite: true } },
+                },
+              ],
+            })
+          );
+
+          updatePayload = {
+            ...ruleToUpdate,
+            response_actions: [
+              {
+                action_type_id: '.endpoint',
+                params: { command: 'isolate', comment: 'test isolation' },
+              },
+            ],
+          };
+          delete updatePayload.rule_id;
+        });
+
+        afterEach(async () => {
+          await deleteAllRules(supertest, log);
+        });
+
+        it('should update rule response actions when user has authz', async () => {
+          const { body } = await supertest
+            .put(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .on('error', createSupertestErrorLogger(log))
+            .send(updatePayload)
+            .expect(200);
+
+          expect(body.response_actions).to.eql([
+            {
+              action_type_id: '.endpoint',
+              params: { command: 'isolate', comment: 'test isolation' },
+            },
+          ]);
+        });
+
+        it('should error if updating response actions and user DOES NOT have authz', async () => {
+          const { body } = await superTestResponseActionsNoAuthz
+            .put(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+            .send(updatePayload)
+            .expect(403);
+
+          expect(body).to.eql({
+            message: 'User is not authorized to create/update isolate response action',
+            status_code: 403,
+          });
+        });
+
+        it('should update rule when user DOES NOT have authz, but response actions are unchanged', async () => {
+          updatePayload.name = 'updated rule name';
+          updatePayload.response_actions = ruleToUpdate.response_actions;
+
+          const { body } = await superTestResponseActionsNoAuthz
+            .put(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .on('error', createSupertestErrorLogger(log))
+            .send(updatePayload)
+            .expect(200);
+
+          expect(body.name).to.eql('updated rule name');
+          expect(body.response_actions).to.eql(ruleToUpdate.response_actions);
         });
       });
     });

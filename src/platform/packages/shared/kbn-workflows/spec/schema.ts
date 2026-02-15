@@ -96,7 +96,7 @@ export const TimeoutPropSchema = z.object({
 export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
 
 const StepWithForEachSchema = z.object({
-  foreach: z.string().optional(),
+  foreach: z.union([z.string(), z.array(z.unknown())]).optional(),
 });
 export type StepWithForeach = z.infer<typeof StepWithForEachSchema>;
 
@@ -210,6 +210,22 @@ export const ElasticsearchStepSchema = BaseStepSchema.extend({
 });
 export type ElasticsearchStep = z.infer<typeof ElasticsearchStepSchema>;
 
+// Kibana step meta options that control routing and debugging (not forwarded as HTTP params)
+export const KibanaStepMetaSchema = {
+  forceServerInfo: z
+    .boolean()
+    .optional()
+    .describe('Force using the server info URL (internal host:port) instead of the public URL'),
+  forceLocalhost: z
+    .boolean()
+    .optional()
+    .describe('Force using localhost:5601 instead of the configured URL'),
+  debug: z
+    .boolean()
+    .optional()
+    .describe('Include the resolved full URL in the step output for debugging'),
+};
+
 // Generic Kibana step schema for backend validation
 export const KibanaStepSchema = BaseStepSchema.extend({
   type: z.string().refine((val) => val.startsWith('kibana.'), {
@@ -225,6 +241,7 @@ export const KibanaStepSchema = BaseStepSchema.extend({
         headers: z.record(z.string(), z.string()).optional(),
       }),
       fetcher: FetcherConfigSchema,
+      ...KibanaStepMetaSchema,
     }),
     // Sugar syntax for common Kibana operations
     z
@@ -246,6 +263,7 @@ export const KibanaStepSchema = BaseStepSchema.extend({
         perPage: z.number().optional(),
         status: z.string().optional(),
         fetcher: FetcherConfigSchema,
+        ...KibanaStepMetaSchema,
       })
       .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
   ]),
@@ -267,7 +285,7 @@ export function getHttpStepSchema(stepSchema: z.ZodType, loose: boolean = false)
 
 export const ForEachStepSchema = BaseStepSchema.extend({
   type: z.literal('foreach'),
-  foreach: z.string(),
+  foreach: z.union([z.string(), z.array(z.unknown())]),
   steps: z.array(BaseStepSchema).min(1),
 }).merge(StepWithIfConditionSchema);
 export type ForEachStep = z.infer<typeof ForEachStepSchema>;

@@ -6,12 +6,9 @@
  */
 
 import rison from '@kbn/rison';
-import {
-  APPLY_FILTER_TRIGGER,
-  type RefreshInterval,
-  type TimeRange,
-} from '@kbn/data-plugin/common';
+import { type RefreshInterval, type TimeRange } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
+import { APPLY_FILTER_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 export const PLUGIN_ID = 'lens';
 export const APP_ID = PLUGIN_ID;

@@ -19,7 +19,7 @@ import { getConnectorProvider, getConnectorModel } from '@kbn/inference-common';
 import type { InferenceCompleteCallbackHandler } from '@kbn/inference-common/src/chat_complete';
 import type { TrackingService } from '../../telemetry';
 import { MODEL_TELEMETRY_METADATA } from '../../telemetry';
-import { resolveSelectedConnectorId } from '../chat/utils/resolve_selected_connector_id';
+import { resolveSelectedConnectorId } from '../../utils/resolve_selected_connector_id';
 
 export interface CreateModelProviderOpts {
   inference: InferenceServerStart;

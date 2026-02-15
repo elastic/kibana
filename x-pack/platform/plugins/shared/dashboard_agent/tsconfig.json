@@ -3,21 +3,27 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/logging",
+    "@kbn/i18n",
     "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",
     "@kbn/dashboard-plugin",
+    "@kbn/dashboard-agent-common",
     "@kbn/zod",
-    "@kbn/spaces-plugin",
     "@kbn/management-settings-ids",
     "@kbn/lens-embeddable-utils",
     "@kbn/lens-common-2",
     "@kbn/share-plugin",
-    "@kbn/dashboard-markdown",
+    "@kbn/agent-builder-platform-plugin",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-kibana-context-render",
+    "@kbn/deeplinks-analytics",
+    "@kbn/dashboard-markdown"
   ],
   "exclude": ["target/**/*"]
 }

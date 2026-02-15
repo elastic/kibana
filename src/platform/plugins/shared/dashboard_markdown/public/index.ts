@@ -11,6 +11,8 @@ import type { PluginInitializerContext } from '@kbn/core/public';
 
 import { DashboardMarkdownPlugin } from './plugin';
 
+export { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardMarkdownPlugin();
 }
