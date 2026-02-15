@@ -15,7 +15,7 @@ import type {
   Platform,
   TutorialContext,
 } from '../../services/tutorials/lib/tutorials_registry_types';
-import { cloudPasswordAndResetLink } from './cloud_instructions';
+import { cloudPasswordAndResetLink, cloudServerlessApiKeyNote } from './cloud_instructions';
 
 export const createHeartbeatInstructions = (context: TutorialContext) => {
   const SSL_DOC_URL = `https://www.elastic.co/guide/en/beats/heartbeat/${context.kibanaBranch}/configuration-ssl.html#ca-sha256`;
@@ -394,6 +394,107 @@ export const createHeartbeatCloudInstructions = () => ({
   },
 });
 
+export const createHeartbeatCloudInstructionsServerless = () => ({
+  CONFIG: {
+    OSX: {
+      title: i18n.translate(
+        'home.tutorials.common.heartbeatCloudInstructionsServerless.config.osxTitle',
+        {
+          defaultMessage: 'Edit the configuration',
+        }
+      ),
+      textPre: i18n.translate(
+        'home.tutorials.common.heartbeatCloudInstructionsServerless.config.osxTextPre',
+        {
+          defaultMessage:
+            'Modify {path} to set the connection information for Elastic Cloud Serverless:',
+          values: {
+            path: '`heartbeat.yml`',
+          },
+        }
+      ),
+      commands: [
+        'output.elasticsearch:',
+        '  hosts: ["<elasticsearch_endpoint_url>"]',
+        '  api_key: "<your_api_key>"',
+      ],
+      textPost: cloudServerlessApiKeyNote,
+    },
+    DEB: {
+      title: i18n.translate(
+        'home.tutorials.common.heartbeatCloudInstructionsServerless.config.debTitle',
+        {
+          defaultMessage: 'Edit the configuration',
+        }
+      ),
+      textPre: i18n.translate(
+        'home.tutorials.common.heartbeatCloudInstructionsServerless.config.debTextPre',
+        {
+          defaultMessage:
+            'Modify {path} to set the connection information for Elastic Cloud Serverless:',
+          values: {
+            path: '`/etc/heartbeat/heartbeat.yml`',
+          },
+        }
+      ),
+      commands: [
+        'output.elasticsearch:',
+        '  hosts: ["<elasticsearch_endpoint_url>"]',
+        '  api_key: "<your_api_key>"',
+      ],
+      textPost: cloudServerlessApiKeyNote,
+    },
+    RPM: {
+      title: i18n.translate(
+        'home.tutorials.common.heartbeatCloudInstructionsServerless.config.rpmTitle',
+        {
+          defaultMessage: 'Edit the configuration',
+        }
+      ),
+      textPre: i18n.translate(
+        'home.tutorials.common.heartbeatCloudInstructionsServerless.config.rpmTextPre',
+        {
+          defaultMessage:
+            'Modify {path} to set the connection information for Elastic Cloud Serverless:',
+          values: {
+            path: '`/etc/heartbeat/heartbeat.yml`',
+          },
+        }
+      ),
+      commands: [
+        'output.elasticsearch:',
+        '  hosts: ["<elasticsearch_endpoint_url>"]',
+        '  api_key: "<your_api_key>"',
+      ],
+      textPost: cloudServerlessApiKeyNote,
+    },
+    WINDOWS: {
+      title: i18n.translate(
+        'home.tutorials.common.heartbeatCloudInstructionsServerless.config.windowsTitle',
+        {
+          defaultMessage: 'Edit the configuration',
+        }
+      ),
+      textPre: i18n.translate(
+        'home.tutorials.common.heartbeatCloudInstructionsServerless.config.windowsTextPre',
+        {
+          defaultMessage:
+            'Modify {path} to set the connection information for Elastic Cloud Serverless:',
+          values: {
+            path: '`C:\\Program Files\\Heartbeat\\heartbeat.yml`',
+          },
+        }
+      ),
+      commands: [
+        'output.elasticsearch:',
+        '  hosts: ["<elasticsearch_endpoint_url>"]',
+        '  api_key: "<your_api_key>"',
+      ],
+      textPost: cloudServerlessApiKeyNote,
+    },
+  },
+});
+
 export function heartbeatEnableInstructionsOnPrem() {
   const defaultTitle = i18n.translate(
     'home.tutorials.common.heartbeatEnableOnPremInstructions.defaultTitle',
@@ -677,7 +778,9 @@ export function onPremCloudInstructions(context: TutorialContext) {
 
 export function cloudInstructions(context: TutorialContext) {
   const HEARTBEAT_INSTRUCTIONS = createHeartbeatInstructions(context);
-  const HEARTBEAT_CLOUD_INSTRUCTIONS = createHeartbeatCloudInstructions();
+  const HEARTBEAT_CLOUD_INSTRUCTIONS = context.isServerless
+    ? createHeartbeatCloudInstructionsServerless()
+    : createHeartbeatCloudInstructions();
 
   return {
     instructionSets: [
