@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { emptyAssets, type RoutingStatus } from '@kbn/streams-schema';
+import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
 import { disableStreams, enableStreams, forkStream, indexDocument } from './helpers/requests';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -201,6 +202,113 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.body.status).to.be('unknown');
         expect(response.body.simulationError).to.be(null);
         expect(response.body.documentsWithRuntimeFieldsApplied).to.be(null);
+      });
+
+      it('Works when time_series_dimension is present on non-TSDB mappings (no runtime_mappings fallback)', async () => {
+        const dataStreamName = 'logs';
+        const componentTemplateName = 'streams_tsdim_non_tsdb_test';
+        const shadowedField = 'attributes.tsdim_runtime_shadow';
+        // Streams index templates use a max-long priority; keep it as a string to avoid JS precision loss.
+        const safeMaxPriority = `${MAX_PRIORITY}` as unknown as number;
+
+        const { data_streams: dataStreams } = await esClient.indices.getDataStream({
+          name: dataStreamName,
+        });
+        const indexTemplateName = dataStreams[0].template;
+
+        const existingIndexTemplateResponse = await esClient.indices.getIndexTemplate({
+          name: indexTemplateName,
+        });
+        const existingIndexTemplate =
+          existingIndexTemplateResponse.index_templates[0].index_template;
+
+        const ignoreMissingComponentTemplates: string[] | undefined = Array.isArray(
+          existingIndexTemplate.ignore_missing_component_templates
+        )
+          ? existingIndexTemplate.ignore_missing_component_templates
+          : existingIndexTemplate.ignore_missing_component_templates
+          ? [existingIndexTemplate.ignore_missing_component_templates]
+          : undefined;
+
+        // `getIndexTemplate` returns extra fields (e.g. `created_date`) that are not allowed
+        // when updating templates. Build a "put-safe" body from the known writable properties.
+        const putSafeIndexTemplateBody = {
+          index_patterns: existingIndexTemplate.index_patterns,
+          template: existingIndexTemplate.template,
+          composed_of: existingIndexTemplate.composed_of,
+          priority: safeMaxPriority,
+          version: existingIndexTemplate.version,
+          _meta: existingIndexTemplate._meta,
+          data_stream: existingIndexTemplate.data_stream,
+          allow_auto_create: existingIndexTemplate.allow_auto_create,
+          ignore_missing_component_templates: ignoreMissingComponentTemplates,
+        };
+
+        await esClient.cluster.putComponentTemplate({
+          name: componentTemplateName,
+          template: {
+            mappings: {
+              properties: {
+                [shadowedField]: {
+                  type: 'keyword',
+                  time_series_dimension: true,
+                },
+              },
+            },
+          },
+          _meta: {
+            description:
+              'Test-only component template for non-TSDB indices with time_series_dimension: true',
+          },
+        });
+
+        const patchedIndexTemplateBody = {
+          ...putSafeIndexTemplateBody,
+          composed_of: [...(existingIndexTemplate.composed_of ?? []), componentTemplateName],
+        };
+
+        // NOTE: `getIndexTemplate` wraps the response under `index_template`, but `putIndexTemplate`
+        // expects the template fields at the top-level request body.
+        await esClient.indices.putIndexTemplate({
+          name: indexTemplateName,
+          ...patchedIndexTemplateBody,
+        });
+
+        try {
+          // Force a new backing index so the updated template is applied.
+          await esClient.indices.rollover({ alias: dataStreamName });
+
+          await indexDocument(esClient, dataStreamName, {
+            '@timestamp': '2024-01-01T00:00:17.000Z',
+            message: 'time_series_dimension runtime shadow test',
+            tsdim_runtime_shadow: 'abc',
+          });
+
+          const response = await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: {
+                  name: dataStreamName,
+                },
+                body: {
+                  field_definitions: [{ name: shadowedField, type: 'keyword' }],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(response.body.status).to.be('success');
+          expect(response.body.simulationError).to.be(null);
+          expect(response.body.documentsWithRuntimeFieldsApplied).to.be.an('array');
+          expect(response.body.documentsWithRuntimeFieldsApplied).not.to.be.empty();
+        } finally {
+          await esClient.indices.putIndexTemplate({
+            name: indexTemplateName,
+            ...putSafeIndexTemplateBody,
+            composed_of: existingIndexTemplate.composed_of,
+          });
+          await esClient.cluster.deleteComponentTemplate({ name: componentTemplateName });
+        }
       });
 
       describe('Geo point fields', () => {
