@@ -1883,7 +1883,7 @@
             "tags": [],
             "label": "history",
             "description": [
-              "- {@link History } instance"
+              "- {@link History} instance"
             ],
             "signature": [
               "History",
@@ -2427,7 +2427,7 @@
             "tags": [],
             "label": "history",
             "description": [
-              "- {@link History } instance"
+              "- {@link History} instance"
             ],
             "signature": [
               "History",
@@ -2494,7 +2494,7 @@
             "tags": [],
             "label": "history",
             "description": [
-              "- {@link History } instance"
+              "- {@link History} instance"
             ],
             "signature": [
               "History",
@@ -2543,7 +2543,7 @@
             "tags": [],
             "label": "storage",
             "description": [
-              "- Option {@link Storage } to use for storing state. By default window.sessionStorage."
+              "- Option {@link Storage} to use for storing state. By default window.sessionStorage."
             ],
             "signature": [
               "Storage"
@@ -2718,7 +2718,7 @@
             "tags": [],
             "label": "pureTransitions",
             "description": [
-              "- state transitions configuration object. Map of {@link PureTransition }."
+              "- state transitions configuration object. Map of {@link PureTransition}."
             ],
             "signature": [
               "PureTransitions"
@@ -2794,7 +2794,7 @@
             "tags": [],
             "label": "pureTransitions",
             "description": [
-              "- state transitions configuration object. Map of {@link PureTransition }."
+              "- state transitions configuration object. Map of {@link PureTransition}."
             ],
             "signature": [
               "PureTransitions"
@@ -2813,7 +2813,7 @@
             "tags": [],
             "label": "pureSelectors",
             "description": [
-              "- state selectors configuration object. Map of {@link PureSelectors }."
+              "- state selectors configuration object. Map of {@link PureSelectors}."
             ],
             "signature": [
               "PureSelectors"
@@ -2832,7 +2832,7 @@
             "tags": [],
             "label": "options",
             "description": [
-              "- state container options {@link CreateStateContainerOptions }"
+              "- state container options {@link CreateStateContainerOptions}"
             ],
             "signature": [
               {
@@ -4181,7 +4181,7 @@
             "tags": [],
             "label": "stateSyncConfigs",
             "description": [
-              "- Array of {@link IStateSyncConfig } to sync"
+              "- Array of {@link IStateSyncConfig} to sync"
             ],
             "signature": [
               {
@@ -4348,7 +4348,7 @@
             "tags": [],
             "label": "container",
             "description": [
-              "- {@link StateContainer } which state to track."
+              "- {@link StateContainer} which state to track."
             ],
             "signature": [
               "Container"
@@ -4394,7 +4394,7 @@
             "tags": [],
             "label": "comparator",
             "description": [
-              "- {@link Comparator } function used to memoize previous result, to not\nre-render React component if state did not change. By default uses\n`fast-deep-equal` package."
+              "- {@link Comparator} function used to memoize previous result, to not"
             ],
             "signature": [
               {
@@ -4460,7 +4460,7 @@
             "tags": [],
             "label": "container",
             "description": [
-              "- {@link StateContainer } which state to track."
+              "- {@link StateContainer} which state to track."
             ],
             "signature": [
               "Container"
@@ -9514,7 +9514,7 @@
             "tags": [],
             "label": "pureTransitions",
             "description": [
-              "- state transitions configuration object. Map of {@link PureTransition }."
+              "- state transitions configuration object. Map of {@link PureTransition}."
             ],
             "signature": [
               "PureTransitions"
@@ -9590,7 +9590,7 @@
             "tags": [],
             "label": "pureTransitions",
             "description": [
-              "- state transitions configuration object. Map of {@link PureTransition }."
+              "- state transitions configuration object. Map of {@link PureTransition}."
             ],
             "signature": [
               "PureTransitions"
@@ -9609,7 +9609,7 @@
             "tags": [],
             "label": "pureSelectors",
             "description": [
-              "- state selectors configuration object. Map of {@link PureSelectors }."
+              "- state selectors configuration object. Map of {@link PureSelectors}."
             ],
             "signature": [
               "PureSelectors"
@@ -9628,7 +9628,7 @@
             "tags": [],
             "label": "options",
             "description": [
-              "- state container options {@link CreateStateContainerOptions }"
+              "- state container options {@link CreateStateContainerOptions}"
             ],
             "signature": [
               {
@@ -10458,7 +10458,7 @@
             "tags": [],
             "label": "container",
             "description": [
-              "- {@link StateContainer } which state to track."
+              "- {@link StateContainer} which state to track."
             ],
             "signature": [
               "Container"
@@ -10504,7 +10504,7 @@
             "tags": [],
             "label": "comparator",
             "description": [
-              "- {@link Comparator } function used to memoize previous result, to not\nre-render React component if state did not change. By default uses\n`fast-deep-equal` package."
+              "- {@link Comparator} function used to memoize previous result, to not"
             ],
             "signature": [
               {
@@ -10570,7 +10570,7 @@
             "tags": [],
             "label": "container",
             "description": [
-              "- {@link StateContainer } which state to track."
+              "- {@link StateContainer} which state to track."
             ],
             "signature": [
               "Container"
@@ -10894,7 +10894,7 @@
                 "tags": [],
                 "label": "stats",
                 "description": [
-                  "Stats object containing the stats which were already\ncollected. This `stats` object shall not be mutated in-line."
+                  "Stats object containing the stats which were already"
                 ],
                 "signature": [
                   "Record<string, any>"

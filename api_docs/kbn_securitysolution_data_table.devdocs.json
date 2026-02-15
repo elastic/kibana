@@ -475,7 +475,7 @@
               "EuiDataGridColumn",
               ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
               "EuiDataGridColumn",
-              ", \"id\" | \"actions\" | \"display\" | \"schema\" | \"isExpandable\" | \"isResizable\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
+              ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"isExpandable\" | \"isResizable\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
               "ColumnHeaderType",
               "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: ",
               {
@@ -999,7 +999,7 @@
         "tags": [],
         "label": "Direction",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
         "lineNumber": 25,
         "columnNumber": 1,
         "deprecated": false,
@@ -1098,11 +1098,11 @@
         "signature": [
           "{ readonly sort: ",
           "SortColumnTable",
-          "[]; readonly title: string; readonly columns: (Pick<",
+          "[]; readonly columns: (Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"actions\" | \"display\" | \"schema\" | \"isExpandable\" | \"isResizable\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
+          ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"isExpandable\" | \"isResizable\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
           "ColumnHeaderType",
           "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: ",
           {
@@ -1128,9 +1128,7 @@
             "section": "def-common.IFieldSubType",
             "text": "IFieldSubType"
           },
-          " | undefined; type?: string | undefined; })[]; readonly viewMode: ",
-          "ViewSelection",
-          "; readonly filters?: ",
+          " | undefined; type?: string | undefined; })[]; readonly title: string; readonly filters?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1138,13 +1136,15 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; readonly initialized?: boolean | undefined; readonly isLoading: boolean; readonly dataViewId: string | null; readonly totalCount: number; readonly additionalFilters: Record<",
+          "[] | undefined; readonly viewMode: ",
+          "ViewSelection",
+          "; readonly dataViewId: string | null; readonly initialized?: boolean | undefined; readonly isLoading: boolean; readonly totalCount: number; readonly additionalFilters: Record<",
           "AlertPageFilterType",
           ", boolean>; readonly defaultColumns: (Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"actions\" | \"display\" | \"schema\" | \"isExpandable\" | \"isResizable\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
+          ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"isExpandable\" | \"isResizable\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
           "ColumnHeaderType",
           "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: ",
           {

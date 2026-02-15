@@ -35,7 +35,7 @@
             "tags": [],
             "label": "tourId",
             "description": [
-              "- The ID of the tour. Must be a valid ID from {@link TOURS }"
+              "- The ID of the tour. Must be a valid ID from {@link TOURS}"
             ],
             "signature": [
               "\"siemMigrationSetupTour\""

@@ -242,7 +242,7 @@
         "label": "FileUploadTelemetryService",
         "description": [],
         "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
-        "lineNumber": 59,
+        "lineNumber": 60,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -258,7 +258,7 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
-            "lineNumber": 60,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -274,7 +274,7 @@
                   "AnalyticsServiceStart"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
-                "lineNumber": 60,
+                "lineNumber": 61,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -291,8 +291,62 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
-                "lineNumber": 60,
+                "lineNumber": 61,
                 "columnNumber": 57,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileUploadTelemetryService.generateId",
+            "type": "Function",
+            "tags": [],
+            "label": "generateId",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileUploadTelemetryService.getFileExtension",
+            "type": "Function",
+            "tags": [],
+            "label": "getFileExtension",
+            "description": [],
+            "signature": [
+              "(fileName: string) => string"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.FileUploadTelemetryService.getFileExtension.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fileName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+                "lineNumber": 67,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -311,7 +365,7 @@
               "(fileUploadEvent: FileAnalysisEvent) => void"
             ],
             "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
-            "lineNumber": 71,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -327,7 +381,7 @@
                   "FileAnalysisEvent"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
-                "lineNumber": 71,
+                "lineNumber": 80,
                 "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -347,7 +401,7 @@
               "(fileUploadEvent: FileUploadEvent) => void"
             ],
             "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
-            "lineNumber": 78,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -363,7 +417,7 @@
                   "FileUploadEvent"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
-                "lineNumber": 78,
+                "lineNumber": 87,
                 "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -383,7 +437,7 @@
               "(uploadSessionEvent: UploadSessionEvent) => void"
             ],
             "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
-            "lineNumber": 85,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -399,7 +453,7 @@
                   "UploadSessionEvent"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
-                "lineNumber": 85,
+                "lineNumber": 94,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3362,7 +3416,7 @@
           "\"0,0.[0] b\""
         ],
         "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
-        "lineNumber": 23,
+        "lineNumber": 20,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3456,7 +3510,7 @@
           "\"file-data-visualizer\""
         ],
         "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
-        "lineNumber": 30,
+        "lineNumber": 27,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3487,7 +3541,7 @@
         "label": "MB",
         "description": [],
         "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
-        "lineNumber": 27,
+        "lineNumber": 24,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3504,7 +3558,7 @@
           "\"null\""
         ],
         "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
-        "lineNumber": 26,
+        "lineNumber": 23,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3529,23 +3583,6 @@
       },
       {
         "parentPluginId": "@kbn/file-upload-common",
-        "id": "def-common.OPEN_FILE_UPLOAD_LITE_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "OPEN_FILE_UPLOAD_LITE_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"OPEN_FILE_UPLOAD_LITE_TRIGGER\""
-        ],
-        "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
-        "lineNumber": 10,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/file-upload-common",
         "id": "def-common.TIKA_PREVIEW_CHARS",
         "type": "number",
         "tags": [],
@@ -3555,7 +3592,7 @@
           "100000"
         ],
         "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
-        "lineNumber": 29,
+        "lineNumber": 26,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3571,7 +3608,7 @@
         "label": "FILE_FORMATS",
         "description": [],
         "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
-        "lineNumber": 12,
+        "lineNumber": 10,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3584,7 +3621,7 @@
             "label": "DELIMITED",
             "description": [],
             "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
-            "lineNumber": 13,
+            "lineNumber": 11,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3597,7 +3634,7 @@
             "label": "NDJSON",
             "description": [],
             "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
-            "lineNumber": 14,
+            "lineNumber": 12,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3610,7 +3647,7 @@
             "label": "SEMI_STRUCTURED_TEXT",
             "description": [],
             "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
-            "lineNumber": 15,
+            "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3623,7 +3660,7 @@
             "label": "TIKA",
             "description": [],
             "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
-            "lineNumber": 16,
+            "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

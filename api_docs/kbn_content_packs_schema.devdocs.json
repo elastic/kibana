@@ -1082,7 +1082,7 @@
         "description": [],
         "signature": [
           "SavedObject",
-          "<{ version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+          "<{ version?: 2 | undefined; description?: string | undefined; title: string; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1154,7 +1154,7 @@
             "section": "def-common.XYState",
             "text": "XYState"
           },
-          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1226,7 +1226,7 @@
             "section": "def-common.LensPartitionVisualizationState",
             "text": "LensPartitionVisualizationState"
           },
-          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1298,7 +1298,7 @@
             "section": "def-common.HeatmapVisualizationState",
             "text": "HeatmapVisualizationState"
           },
-          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1370,7 +1370,7 @@
             "section": "def-common.GaugeVisualizationState",
             "text": "GaugeVisualizationState"
           },
-          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1442,7 +1442,7 @@
             "section": "def-common.DatatableVisualizationState",
             "text": "DatatableVisualizationState"
           },
-          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1556,7 +1556,7 @@
             "section": "def-common.CustomPaletteParams",
             "text": "CustomPaletteParams"
           },
-          "> | undefined; }; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+          "> | undefined; }; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1628,7 +1628,7 @@
             "section": "def-common.MetricVisualizationState",
             "text": "MetricVisualizationState"
           },
-          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1700,7 +1700,7 @@
             "section": "def-common.ChoroplethChartState",
             "text": "ChoroplethChartState"
           },
-          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1772,7 +1772,7 @@
             "section": "def-common.LensTagCloudState",
             "text": "LensTagCloudState"
           },
-          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",

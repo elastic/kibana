@@ -422,7 +422,7 @@
           "; }) => void"
         ],
         "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
-        "lineNumber": 21,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -435,7 +435,7 @@
             "label": "{\n  resource,\n  tracingConfig,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
-            "lineNumber": 29,
+            "lineNumber": 38,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -451,7 +451,7 @@
                   "Resource"
                 ],
                 "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
-                "lineNumber": 30,
+                "lineNumber": 39,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -473,7 +473,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
-                "lineNumber": 31,
+                "lineNumber": 40,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false

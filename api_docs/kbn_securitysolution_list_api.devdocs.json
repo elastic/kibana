@@ -2367,7 +2367,7 @@
         "label": "ApiPayload",
         "description": [],
         "signature": [
-          "{ [P in Exclude<keyof T, \"http\" | \"signal\">]: T[P]; }"
+          "{ [P in Exclude<keyof T, \"signal\" | \"http\">]: T[P]; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-api/src/types.ts",
         "lineNumber": 28,

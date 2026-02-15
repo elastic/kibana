@@ -484,7 +484,7 @@
         "label": "BuildIntegrationRequestBody",
         "description": [],
         "signature": [
-          "{ integration: { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          "{ integration: { name: string; description: string; title: string; dataStreams: { name: string; description: string; title: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -657,7 +657,7 @@
         "label": "CelInputRequestBody",
         "description": [],
         "signature": [
-          "{ connectorId: string; dataStreamTitle: string; celDetails: { path: string; auth: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; openApiDetails?: { schemas: string; operation: string; auth?: string | undefined; } | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }"
+          "{ connectorId: string; dataStreamTitle: string; celDetails: { path: string; auth: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; openApiDetails?: { operation: string; schemas: string; auth?: string | undefined; } | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/cel/cel_input_route.gen.ts",
         "lineNumber": 23,
@@ -761,7 +761,7 @@
           "\nThe dataStream object."
         ],
         "signature": [
-          "{ name: string; title: string; description: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          "{ name: string; description: string; title: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -834,11 +834,11 @@
         "label": "EcsMappingRequestBody",
         "description": [],
         "signature": [
-          "{ connectorId: string; packageName: string; rawSamples: string[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; dataStreamName: string; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; mapping?: ",
+          "{ connectorId: string; packageName: string; rawSamples: string[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; dataStreamName: string; mapping?: ",
           "objectOutputType",
           "<{}, ",
           "ZodUnknown",
-          ", \"strip\"> | undefined; additionalProcessors?: ",
+          ", \"strip\"> | undefined; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; additionalProcessors?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -863,7 +863,7 @@
         "label": "EcsMappingResponse",
         "description": [],
         "signature": [
-          "{ results: { pipeline: { processors: ",
+          "{ results: { mapping: {} & { [k: string]: unknown; }; pipeline: { processors: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -879,7 +879,7 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }; mapping: {} & { [k: string]: unknown; }; }; }"
+          "[] | undefined; }; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/ecs/ecs_route.gen.ts",
         "lineNumber": 44,
@@ -917,7 +917,7 @@
           "\nThe integration object."
         ],
         "signature": [
-          "{ name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          "{ name: string; description: string; title: string; dataStreams: { name: string; description: string; title: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -1544,7 +1544,7 @@
           "ZodTypeAny",
           ", { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; }, { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; }>>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { name: string; title: string; description: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          ", { name: string; description: string; title: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -1564,7 +1564,7 @@
           "objectOutputType",
           "<{}, ",
           "ZodUnknown",
-          ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }, { name: string; title: string; description: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }, { name: string; description: string; title: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           "ESProcessorItemInput",
           "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
@@ -1578,7 +1578,7 @@
           "ZodString",
           ">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          ", { name: string; description: string; title: string; dataStreams: { name: string; description: string; title: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -1598,7 +1598,7 @@
           "objectOutputType",
           "<{}, ",
           "ZodUnknown",
-          ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }[]; logo?: string | undefined; }, { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }[]; logo?: string | undefined; }, { name: string; description: string; title: string; dataStreams: { name: string; description: string; title: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           "ESProcessorItemInput",
           "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
@@ -1608,7 +1608,7 @@
           "ZodUnknown",
           ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }[]; logo?: string | undefined; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { integration: { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          ", { integration: { name: string; description: string; title: string; dataStreams: { name: string; description: string; title: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -1628,7 +1628,7 @@
           "objectOutputType",
           "<{}, ",
           "ZodUnknown",
-          ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }[]; logo?: string | undefined; }; }, { integration: { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }[]; logo?: string | undefined; }; }, { integration: { name: string; description: string; title: string; dataStreams: { name: string; description: string; title: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           "ESProcessorItemInput",
           "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
@@ -2070,9 +2070,9 @@
           "ZodString",
           ">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { schemas: string; operation: string; auth?: string | undefined; }, { schemas: string; operation: string; auth?: string | undefined; }>>; }, \"strip\", ",
+          ", { operation: string; schemas: string; auth?: string | undefined; }, { operation: string; schemas: string; auth?: string | undefined; }>>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { path: string; auth: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; openApiDetails?: { schemas: string; operation: string; auth?: string | undefined; } | undefined; }, { path: string; auth: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; openApiDetails?: { schemas: string; operation: string; auth?: string | undefined; } | undefined; }>; connectorId: ",
+          ", { path: string; auth: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; openApiDetails?: { operation: string; schemas: string; auth?: string | undefined; } | undefined; }, { path: string; auth: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; openApiDetails?: { operation: string; schemas: string; auth?: string | undefined; } | undefined; }>; connectorId: ",
           "ZodString",
           "; langSmithOptions: ",
           "ZodOptional",
@@ -2086,7 +2086,7 @@
           "ZodTypeAny",
           ", { apiKey: string; projectName: string; }, { apiKey: string; projectName: string; }>>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { connectorId: string; dataStreamTitle: string; celDetails: { path: string; auth: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; openApiDetails?: { schemas: string; operation: string; auth?: string | undefined; } | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }, { connectorId: string; dataStreamTitle: string; celDetails: { path: string; auth: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; openApiDetails?: { schemas: string; operation: string; auth?: string | undefined; } | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }>"
+          ", { connectorId: string; dataStreamTitle: string; celDetails: { path: string; auth: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; openApiDetails?: { operation: string; schemas: string; auth?: string | undefined; } | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }, { connectorId: string; dataStreamTitle: string; celDetails: { path: string; auth: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; openApiDetails?: { operation: string; schemas: string; auth?: string | undefined; } | undefined; }; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/cel/cel_input_route.gen.ts",
         "lineNumber": 24,
@@ -2496,7 +2496,7 @@
           "ZodTypeAny",
           ", { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; }, { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; }>>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { name: string; title: string; description: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          ", { name: string; description: string; title: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -2516,7 +2516,7 @@
           "objectOutputType",
           "<{}, ",
           "ZodUnknown",
-          ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }, { name: string; title: string; description: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }, { name: string; description: string; title: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           "ESProcessorItemInput",
           "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
@@ -2652,11 +2652,11 @@
           "ZodTypeAny",
           ", { apiKey: string; projectName: string; }, { apiKey: string; projectName: string; }>>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { connectorId: string; packageName: string; rawSamples: string[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; dataStreamName: string; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; mapping?: ",
+          ", { connectorId: string; packageName: string; rawSamples: string[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; dataStreamName: string; mapping?: ",
           "objectOutputType",
           "<{}, ",
           "ZodUnknown",
-          ", \"strip\"> | undefined; additionalProcessors?: ",
+          ", \"strip\"> | undefined; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; additionalProcessors?: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -2664,11 +2664,11 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }, { connectorId: string; packageName: string; rawSamples: string[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; dataStreamName: string; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; mapping?: ",
+          "[] | undefined; }, { connectorId: string; packageName: string; rawSamples: string[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; dataStreamName: string; mapping?: ",
           "objectInputType",
           "<{}, ",
           "ZodUnknown",
-          ", \"strip\"> | undefined; additionalProcessors?: ",
+          ", \"strip\"> | undefined; langSmithOptions?: { apiKey: string; projectName: string; } | undefined; additionalProcessors?: ",
           "ESProcessorItemInput",
           "[] | undefined; }>"
         ],
@@ -2774,7 +2774,7 @@
           "ESProcessorItemInput",
           "[] | undefined; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { pipeline: { processors: ",
+          ", { mapping: {} & { [k: string]: unknown; }; pipeline: { processors: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -2790,13 +2790,13 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }; mapping: {} & { [k: string]: unknown; }; }, { pipeline: { processors: ",
+          "[] | undefined; }; }, { mapping: {} & { [k: string]: unknown; }; pipeline: { processors: ",
           "ESProcessorItemInput",
           "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
-          "[] | undefined; }; mapping: {} & { [k: string]: unknown; }; }>; }, \"strip\", ",
+          "[] | undefined; }; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { results: { pipeline: { processors: ",
+          ", { results: { mapping: {} & { [k: string]: unknown; }; pipeline: { processors: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -2812,11 +2812,11 @@
             "section": "def-common.ESProcessorItem",
             "text": "ESProcessorItem"
           },
-          "[] | undefined; }; mapping: {} & { [k: string]: unknown; }; }; }, { results: { pipeline: { processors: ",
+          "[] | undefined; }; }; }, { results: { mapping: {} & { [k: string]: unknown; }; pipeline: { processors: ",
           "ESProcessorItemInput",
           "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
-          "[] | undefined; }; mapping: {} & { [k: string]: unknown; }; }; }>"
+          "[] | undefined; }; }; }>"
         ],
         "path": "x-pack/platform/plugins/shared/automatic_import/common/api/ecs/ecs_route.gen.ts",
         "lineNumber": 45,
@@ -3060,7 +3060,7 @@
           "ZodTypeAny",
           ", { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; }, { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; }>>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { name: string; title: string; description: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          ", { name: string; description: string; title: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -3080,7 +3080,7 @@
           "objectOutputType",
           "<{}, ",
           "ZodUnknown",
-          ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }, { name: string; title: string; description: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }, { name: string; description: string; title: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           "ESProcessorItemInput",
           "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",
@@ -3094,7 +3094,7 @@
           "ZodString",
           ">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          ", { name: string; description: string; title: string; dataStreams: { name: string; description: string; title: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           {
             "pluginId": "automaticImport",
             "scope": "common",
@@ -3114,7 +3114,7 @@
           "objectOutputType",
           "<{}, ",
           "ZodUnknown",
-          ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }[]; logo?: string | undefined; }, { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          ", \"strip\">[]; samplesFormat: { name: \"unsupported\" | \"ndjson\" | \"json\" | \"csv\" | \"structured\" | \"unstructured\" | \"cef\" | \"leef\" | \"fix\"; columns?: string[] | undefined; header?: boolean | undefined; multiline?: boolean | undefined; json_path?: string[] | undefined; }; celInput?: { url: string; authType: \"basic\" | \"header\" | \"digest\" | \"oauth2\"; configFields: {} & { [k: string]: unknown; }; needsAuthConfigBlock: boolean; program: string; stateSettings: {} & { [k: string]: unknown; }; redactVars: string[]; } | undefined; }[]; logo?: string | undefined; }, { name: string; description: string; title: string; dataStreams: { name: string; description: string; title: string; inputTypes: (\"aws-cloudwatch\" | \"aws-s3\" | \"azure-blob-storage\" | \"azure-eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp-pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"kafka\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
           "ESProcessorItemInput",
           "[]; name?: string | undefined; version?: number | undefined; description?: string | undefined; on_failure?: ",
           "ESProcessorItemInput",

@@ -31,7 +31,7 @@
         "label": "consoleTutorials",
         "description": [],
         "path": "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials/index.ts",
-        "lineNumber": 18,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -44,7 +44,7 @@
             "label": "basics",
             "description": [],
             "path": "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials/index.ts",
-            "lineNumber": 19,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -57,7 +57,7 @@
             "label": "queryDSL",
             "description": [],
             "path": "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials/index.ts",
-            "lineNumber": 20,
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -70,7 +70,7 @@
             "label": "esql",
             "description": [],
             "path": "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials/index.ts",
-            "lineNumber": 21,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -83,7 +83,7 @@
             "label": "aggregations",
             "description": [],
             "path": "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials/index.ts",
-            "lineNumber": 22,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -96,7 +96,7 @@
             "label": "semanticSearch",
             "description": [],
             "path": "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials/index.ts",
-            "lineNumber": 23,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -109,7 +109,7 @@
             "label": "timeSeriesDataStreams",
             "description": [],
             "path": "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials/index.ts",
-            "lineNumber": 24,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -122,7 +122,7 @@
             "label": "hybridSearch",
             "description": [],
             "path": "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials/index.ts",
-            "lineNumber": 25,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -135,7 +135,20 @@
             "label": "vectorSearch",
             "description": [],
             "path": "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials/index.ts",
-            "lineNumber": 26,
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-code-examples",
+            "id": "def-common.consoleTutorials.agentBuilder",
+            "type": "string",
+            "tags": [],
+            "label": "agentBuilder",
+            "description": [],
+            "path": "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials/index.ts",
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

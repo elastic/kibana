@@ -762,7 +762,7 @@
             "label": "ticksPosition",
             "description": [],
             "signature": [
-              "\"auto\" | \"hidden\" | \"bands\""
+              "\"auto\" | \"bands\" | \"hidden\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "lineNumber": 46,
@@ -778,7 +778,7 @@
             "label": "labelMajorMode",
             "description": [],
             "signature": [
-              "\"none\" | \"auto\" | \"custom\""
+              "\"none\" | \"custom\" | \"auto\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "lineNumber": 47,
@@ -880,7 +880,7 @@
             "label": "shape",
             "description": [],
             "signature": [
-              "\"arc\" | \"circle\" | \"horizontalBullet\" | \"verticalBullet\" | \"semiCircle\""
+              "\"arc\" | \"circle\" | \"semiCircle\" | \"horizontalBullet\" | \"verticalBullet\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "lineNumber": 52,
@@ -1003,7 +1003,7 @@
         "label": "AllowedGaugeOverrides",
         "description": [],
         "signature": [
-          "{ gauge?: { id: string; target?: number | undefined; subtype: ",
+          "{ gauge?: { id: string; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; target?: number | undefined; subtype: ",
           "GoalSubtype",
           "; domain: ",
           {
@@ -1015,7 +1015,7 @@
           },
           "<",
           "GoalDomainRange",
-          ">; ticks?: number | number[] | undefined; bands?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+          ">; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
@@ -1276,7 +1276,7 @@
         "label": "GaugeLabelMajorMode",
         "description": [],
         "signature": [
-          "\"none\" | \"auto\" | \"custom\""
+          "\"none\" | \"custom\" | \"auto\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "lineNumber": 37,
@@ -1326,7 +1326,7 @@
             "section": "def-common.PersistedState",
             "text": "PersistedState"
           },
-          "; overrides?: (Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
+          "; overrides?: (Partial<Record<\"gauge\", { id: string; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; target?: number | undefined; subtype: ",
           "GoalSubtype",
           "; domain: ",
           {
@@ -1338,7 +1338,7 @@
           },
           "<",
           "GoalDomainRange",
-          ">; ticks?: number | number[] | undefined; bands?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+          ">; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
@@ -1354,7 +1354,7 @@
             "section": "def-common.MakeOverridesSerializable",
             "text": "MakeOverridesSerializable"
           },
-          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> & Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> & Partial<Record<\"settings\", { legendSize?: number | undefined; onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -1386,13 +1386,13 @@
           "MakeOverridesSerializable",
           "<",
           "LegendValue",
-          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
+          "[] | undefined>; legendMaxDepth?: number | undefined; flatLegend?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
           "MakeOverridesSerializable",
           "<",
           "CustomXDomain",
-          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
+          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
           "LegendStrategy",
-          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> & Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>>) | undefined; setChartSize: (d: ",
+          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> & Partial<Record<\"chart\", { description?: string | undefined; title?: string | undefined; }>>) | undefined; setChartSize: (d: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -1417,7 +1417,7 @@
         "label": "GaugeShape",
         "description": [],
         "signature": [
-          "\"arc\" | \"circle\" | \"horizontalBullet\" | \"verticalBullet\" | \"semiCircle\""
+          "\"arc\" | \"circle\" | \"semiCircle\" | \"horizontalBullet\" | \"verticalBullet\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "lineNumber": 36,
@@ -1434,7 +1434,7 @@
         "label": "GaugeTicksPosition",
         "description": [],
         "signature": [
-          "\"auto\" | \"hidden\" | \"bands\""
+          "\"auto\" | \"bands\" | \"hidden\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "lineNumber": 39,
