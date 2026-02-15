@@ -1092,7 +1092,6 @@ x-pack/platform/plugins/shared/stack_connectors @elastic/response-ops
 x-pack/platform/plugins/shared/streams @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams_app @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
-x-pack/platform/plugins/shared/timelines @elastic/security-threat-hunting-investigations
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
 x-pack/platform/test
 x-pack/platform/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
@@ -1236,6 +1235,7 @@ x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
 x-pack/solutions/security/plugins/session_view @elastic/contextual-security-apps
+x-pack/solutions/security/plugins/timelines @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/test
 x-pack/solutions/security/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 x-pack/solutions/security/test/security_solution_api_integration @elastic/security-detection-engine
