@@ -264,7 +264,82 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "dataCatalog",
+        "id": "def-common.loadWorkflows",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "loadWorkflows",
+        "description": [
+          "\nLoads workflow YAML files from a directory and converts them to WorkflowInfo objects.\n"
+        ],
+        "signature": [
+          "(config: ",
+          "WorkflowsConfig",
+          ", stackConnectorIds: Record<string, string> | undefined) => Promise<",
+          {
+            "pluginId": "dataCatalog",
+            "scope": "common",
+            "docId": "kibDataCatalogPluginApi",
+            "section": "def-common.WorkflowInfo",
+            "text": "WorkflowInfo"
+          },
+          "[]>"
+        ],
+        "path": "x-pack/platform/plugins/shared/data_catalog/common/workflow_loader.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataCatalog",
+            "id": "def-common.loadWorkflows.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [
+              "- Workflow configuration containing directory path and template inputs"
+            ],
+            "signature": [
+              "WorkflowsConfig"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_catalog/common/workflow_loader.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "dataCatalog",
+            "id": "def-common.loadWorkflows.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "stackConnectorIds",
+            "description": [
+              "- Stack connector IDs to inject into the workflows"
+            ],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_catalog/common/workflow_loader.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "Array of WorkflowInfo objects"
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "dataCatalog",
@@ -318,7 +393,7 @@
           "\nAbstraction defining a federated data source (\"fetcher\").\nThis defines:\n- Connectivity (OAuth) configuration\n- What workflows should be created\n- How to interact with data stored in third-party systems\n"
         ],
         "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts",
-        "lineNumber": 66,
+        "lineNumber": 82,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -333,7 +408,7 @@
               "Unique identifier for the data type"
             ],
             "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts",
-            "lineNumber": 75,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -348,7 +423,7 @@
               "Display name for the data type"
             ],
             "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts",
-            "lineNumber": 77,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -366,7 +441,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts",
-            "lineNumber": 79,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -381,65 +456,37 @@
               "\nIcon type for UI display (e.g., '.github', '.notion', '.salesforce').\nThis determines which icon to show in the UI and is separate from the stack connector type.\nMust correspond to an icon registered in @kbn/connector-specs ConnectorIconsMap."
             ],
             "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts",
-            "lineNumber": 81,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "dataCatalog",
-            "id": "def-common.DataSource.generateWorkflows",
-            "type": "Function",
+            "id": "def-common.DataSource.workflows",
+            "type": "Object",
             "tags": [],
-            "label": "generateWorkflows",
+            "label": "workflows",
             "description": [
-              "\nGenerates workflows for interacting with the third-party data source.\nWorkflows are the only model for \"taking action\" against the third party."
+              "\nHow to load up workflows definitions for this data source type.\nWorkflows are the only model for \"taking action\" against the third party."
             ],
             "signature": [
-              "(stackConnectorId?: string | undefined) => ",
-              {
-                "pluginId": "dataCatalog",
-                "scope": "common",
-                "docId": "kibDataCatalogPluginApi",
-                "section": "def-common.WorkflowInfo",
-                "text": "WorkflowInfo"
-              },
-              "[]"
+              "WorkflowsConfig"
             ],
             "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts",
-            "lineNumber": 88,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataCatalog",
-                "id": "def-common.DataSource.generateWorkflows.$1",
-                "type": "string",
-                "tags": [],
-                "label": "stackConnectorId",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts",
-                "lineNumber": 92,
-                "columnNumber": 21,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataCatalog",
-            "id": "def-common.DataSource.stackConnector",
-            "type": "Object",
+            "id": "def-common.DataSource.stackConnectors",
+            "type": "Array",
             "tags": [],
-            "label": "stackConnector",
+            "label": "stackConnectors",
             "description": [
-              "\nStack connector configuration.\nStack connectors are the only model for executing workflow actions against the third party."
+              "\nStack connector configuration.\nStack connectors are the only model for executing workflow actions against the third party.\nMore than one stack connector can be associated with a data source type."
             ],
             "signature": [
               {
@@ -448,10 +495,11 @@
                 "docId": "kibDataCatalogPluginApi",
                 "section": "def-common.StackConnectorConfig",
                 "text": "StackConnectorConfig"
-              }
+              },
+              "[]"
             ],
             "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts",
-            "lineNumber": 94,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -484,7 +532,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts",
-            "lineNumber": 100,
+            "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -639,7 +687,8 @@
             "label": "importedTools",
             "description": [],
             "signature": [
-              "string[] | undefined"
+              "ImportedTool",
+              "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts",
             "lineNumber": 63,

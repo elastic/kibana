@@ -722,7 +722,7 @@
         "label": "FlyoutPanelHistory",
         "description": [],
         "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
-        "lineNumber": 90,
+        "lineNumber": 94,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -737,7 +737,7 @@
               "\nTime at which the flyout was last opened"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
-            "lineNumber": 91,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -761,7 +761,7 @@
               }
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
-            "lineNumber": 95,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

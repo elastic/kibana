@@ -30,7 +30,7 @@
           "(templateId: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
-        "lineNumber": 23,
+        "lineNumber": 24,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -46,7 +46,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
-            "lineNumber": 23,
+            "lineNumber": 24,
             "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
@@ -67,7 +67,7 @@
           "(ruleTypeId: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
-        "lineNumber": 21,
+        "lineNumber": 22,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -83,7 +83,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
-            "lineNumber": 21,
+            "lineNumber": 22,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
@@ -104,7 +104,7 @@
           "(ruleId: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
-        "lineNumber": 25,
+        "lineNumber": 26,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -120,7 +120,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
-            "lineNumber": 25,
+            "lineNumber": 26,
             "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
@@ -185,7 +185,7 @@
           "(ruleId: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
-        "lineNumber": 18,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -201,7 +201,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
-            "lineNumber": 18,
+            "lineNumber": 19,
             "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
@@ -222,7 +222,7 @@
           "(ruleId: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
-        "lineNumber": 19,
+        "lineNumber": 20,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -238,7 +238,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
-            "lineNumber": 19,
+            "lineNumber": 20,
             "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
@@ -1640,6 +1640,23 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.ALERT_STATUS_DELAYED",
+        "type": "string",
+        "tags": [],
+        "label": "ALERT_STATUS_DELAYED",
+        "description": [],
+        "signature": [
+          "\"delayed\""
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_status.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.ALERT_STATUS_RECOVERED",
         "type": "string",
         "tags": [],
@@ -2207,10 +2224,10 @@
         "label": "AlertStatus",
         "description": [],
         "signature": [
-          "\"active\" | \"recovered\" | \"untracked\""
+          "\"active\" | \"recovered\" | \"untracked\" | \"delayed\""
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_status.ts",
-        "lineNumber": 14,
+        "lineNumber": 15,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2636,6 +2653,23 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.PublicAlertStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "PublicAlertStatus",
+        "description": [],
+        "signature": [
+          "\"active\" | \"recovered\" | \"untracked\""
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_status.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.RuleCreationValidConsumer",
         "type": "Type",
         "tags": [],
@@ -2697,6 +2731,23 @@
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
         "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.rulesAppRoute",
+        "type": "string",
+        "tags": [],
+        "label": "rulesAppRoute",
+        "description": [],
+        "signature": [
+          "\"/app/rules\""
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
+        "lineNumber": 17,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

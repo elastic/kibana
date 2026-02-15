@@ -176,7 +176,7 @@
             "signature": [
               "Partial<Omit<",
               "EuiCallOutProps",
-              ", \"children\" | \"title\" | \"onDismiss\">> | undefined"
+              ", \"title\" | \"children\" | \"onDismiss\">> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
             "lineNumber": 20,

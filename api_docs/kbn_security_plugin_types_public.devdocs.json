@@ -1116,7 +1116,7 @@
             "label": "iconType",
             "description": [],
             "signature": [
-              "string | React.ComponentType<{}>"
+              "string | React.ComponentType"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "lineNumber": 14,
