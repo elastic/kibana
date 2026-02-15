@@ -74,6 +74,15 @@ export const ACCESS_CONTROL_CONFIG: AccessControlConfig = {
   maps: {
     defaultAccess: ProjectRoutingAccess.EDITABLE,
   },
+  management: {
+    defaultAccess: ProjectRoutingAccess.DISABLED,
+    routeRules: [
+      {
+        pattern: /\/ml\/anomaly_detection/,
+        access: ProjectRoutingAccess.EDITABLE,
+      },
+    ],
+  },
 };
 
 /**

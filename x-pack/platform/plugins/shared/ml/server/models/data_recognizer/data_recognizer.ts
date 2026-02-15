@@ -553,7 +553,8 @@ export class DataRecognizer {
     jobOverrides?: JobOverride | JobOverride[],
     datafeedOverrides?: DatafeedOverride | DatafeedOverride[],
     estimateModelMemory?: boolean,
-    applyToAllSpaces: boolean = false
+    applyToAllSpaces: boolean = false,
+    projectRouting?: string
   ) {
     // load the config from disk
     const moduleConfig = await this.getModule(moduleId, undefined, jobPrefix);
@@ -625,6 +626,10 @@ export class DataRecognizer {
       if (typeof query === 'object' && query !== null) {
         moduleConfig.datafeeds.forEach((df) => {
           df.config.query = query;
+          if (projectRouting !== undefined) {
+            // @ts-expect-error update to Datafeed type needed
+            df.config.project_routing = projectRouting;
+          }
         });
       }
       saveResults.datafeeds = await this._saveDatafeeds(moduleConfig.datafeeds);

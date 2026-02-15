@@ -111,6 +111,7 @@ export const App: FC<AppProps> = ({
       spaces: deps.spaces,
       fieldsMetadata: deps.fieldsMetadata,
       fileUpload: deps.fileUpload,
+      cps: deps.cps,
     };
   }, [deps, coreStart]);
 

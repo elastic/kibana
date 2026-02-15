@@ -24,6 +24,8 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
 import { TIME_FORMAT } from '@kbn/ml-date-utils';
 import { type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import useObservable from 'react-use/lib/useObservable';
+import { EMPTY } from 'rxjs';
 import type { Module } from '../../../../../common/types/modules';
 import { useDataSource } from '../../../contexts/ml';
 import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
@@ -77,6 +79,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       mlServices: {
         mlApi: { getTimeFieldRange, setupDataRecognizerConfig, getDataRecognizerModule },
       },
+      cps,
     },
   } = useMlKibana();
   const locator = useMlLocator();
@@ -104,6 +107,11 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       });
   const displayQueryWarning = selectedSavedSearch !== null;
   const tempQuery = selectedSavedSearch === null ? undefined : combinedQuery;
+
+  const projectRouting = useObservable(
+    cps?.cpsManager?.getProjectRouting$() ?? EMPTY,
+    cps?.cpsManager?.getProjectRouting()
+  );
 
   /**
    * Loads recognizer module configuration.
@@ -138,6 +146,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
           // By default we want to use full non-frozen time range
           query: addExcludeFrozenToQuery(combinedQuery),
           ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
+          projectRouting,
         });
         return {
           start,
@@ -147,7 +156,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         return Promise.resolve(timeRange);
       }
     },
-    [combinedQuery, dataView, getTimeFieldRange]
+    [dataView, getTimeFieldRange, combinedQuery, projectRouting]
   );
 
   useEffect(() => {
@@ -167,7 +176,6 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         useFullIndexData,
         timeRange,
       } = formValues;
-
       const resultTimeRange = await getTimeRange(useFullIndexData, timeRange);
 
       try {
@@ -183,6 +191,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
           startDatafeed: startDatafeedAfterSave,
           ...(jobOverridesPayload !== null ? { jobOverrides: jobOverridesPayload } : {}),
           ...resultTimeRange,
+          projectRouting: cps?.cpsManager?.getProjectRouting(),
         });
         const {
           datafeeds: datafeedsResponse,
@@ -258,6 +267,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       }
     },
     [
+      cps,
       dataView,
       getTimeRange,
       jobOverrides,
@@ -289,15 +299,27 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   return (
     <>
       <MlPageHeader>
-        <PageTitle
-          title={
-            <FormattedMessage
-              id="xpack.ml.newJob.recognize.newJobFromTitle"
-              defaultMessage="New job from {pageTitle}"
-              values={{ pageTitle }}
-            />
-          }
-        />
+        <>
+          <PageTitle
+            title={
+              <FormattedMessage
+                id="xpack.ml.newJob.recognize.newJobFromTitle"
+                defaultMessage="New job from {pageTitle}"
+                values={{ pageTitle }}
+              />
+            }
+          />
+          {projectRouting ? (
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.ml.newJob.recognize.projectRouting"
+                defaultMessage="Project routing: {projectRouting}"
+                values={{ projectRouting }}
+              />
+            </EuiText>
+          ) : null}
+        </>
+        <EuiSpacer size="s" />
       </MlPageHeader>
 
       {displayQueryWarning && (

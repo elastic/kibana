@@ -184,6 +184,11 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       },
       aggs,
       ...runtimeMappings,
+      // @ts-expect-error datafeed types need updating
+      ...(datafeedConfig?.project_routing
+        ? // @ts-expect-error datafeed types need updating
+          { project_routing: datafeedConfig.project_routing }
+        : {}),
     };
 
     const { aggregations } = await asCurrentUser.search(
@@ -224,7 +229,8 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     query: any,
     runtimeMappings?: RuntimeMappings,
     indicesOptions?: IndicesOptions,
-    allowFutureTime = false
+    allowFutureTime = false,
+    projectRouting?: string
   ): Promise<{
     success: boolean;
     start: number;
@@ -257,6 +263,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
         },
         ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
         ...(indicesOptions ?? {}),
+        ...(projectRouting ? { project_routing: projectRouting } : {}),
       },
       { maxRetries: 0 }
     );
@@ -417,6 +424,11 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
         index,
         ...body,
         ...getIndicesOptions(datafeedConfig),
+        // @ts-expect-error datafeed types need updating
+        ...(datafeedConfig?.project_routing
+          ? // @ts-expect-error datafeed types need updating
+            { project_routing: datafeedConfig.project_routing }
+          : {}),
       },
       { maxRetries: 0 }
     );

@@ -30,6 +30,7 @@ export function createCategoryRequest(
   timeRange: { from: number; to: number } | undefined,
   queryIn: QueryDslQueryContainer,
   runtimeMappings: MappingRuntimeFields | undefined,
+  projectRouting: string | undefined,
   wrap: ReturnType<typeof createRandomSamplerWrapper>['wrap'],
   intervalMs?: number,
   additionalFilter?: CategorizationAdditionalFilter,
@@ -114,6 +115,7 @@ export function createCategoryRequest(
       query,
       aggs: wrap(aggs),
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
       size: 0,
     },
   };

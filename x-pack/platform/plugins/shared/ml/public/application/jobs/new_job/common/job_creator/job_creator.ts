@@ -554,6 +554,21 @@ export class JobCreator {
     }
   }
 
+  public set projectRouting(projectRouting: string | null) {
+    if (projectRouting !== null) {
+      // @ts-expect-error project_routing is not in the Datafeed type
+      this._datafeed_config.project_routing = projectRouting;
+    } else {
+      // @ts-expect-error project_routing is not in the Datafeed type
+      delete this._datafeed_config.project_routing;
+    }
+  }
+
+  public get projectRouting(): string | null {
+    // @ts-expect-error project_routing is not in the Datafeed type
+    return this._datafeed_config.project_routing ?? null;
+  }
+
   public get indices(): string[] {
     return this._datafeed_config.indices;
   }
@@ -854,6 +869,7 @@ export class JobCreator {
       query: excludeFrozenData ? addExcludeFrozenToQuery(this.query) : this.query,
       runtimeMappings: this.datafeedConfig.runtime_mappings,
       indicesOptions: this.datafeedConfig.indices_options,
+      projectRouting: this.projectRouting ?? undefined,
     });
 
     this.setTimeRange(start, end);

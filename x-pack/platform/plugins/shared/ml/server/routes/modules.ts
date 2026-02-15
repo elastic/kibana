@@ -282,6 +282,7 @@ export function dataRecognizer(
               datafeedOverrides,
               estimateModelMemory,
               applyToAllSpaces,
+              projectRouting,
             } = request.body as TypeOf<typeof setupModuleBodySchema>;
             const soClient = (await context.core).savedObjects.client;
             const dataViewsService = await getDataViewsService();
@@ -308,7 +309,8 @@ export function dataRecognizer(
               jobOverrides,
               datafeedOverrides,
               estimateModelMemory,
-              applyToAllSpaces
+              applyToAllSpaces,
+              projectRouting
             );
 
             return response.ok({ body: result });

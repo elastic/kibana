@@ -57,6 +57,7 @@ export const getTimeFieldRangeSchema = schema.object({
   allowFutureTime: schema.maybe(
     schema.boolean({ meta: { description: 'Return times from the future' } })
   ),
+  projectRouting: schema.maybe(schema.string()),
 });
 
 export const getCardinalityOfFieldsResponse = () => {

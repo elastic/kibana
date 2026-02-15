@@ -56,6 +56,22 @@ describe('Access Control Configuration', () => {
           ProjectRoutingAccess.EDITABLE
         );
       });
+
+      it('should return EDITABLE for ML anomaly detection wizards', () => {
+        expect(
+          getProjectRoutingAccess(
+            'management',
+            'app/management/ml/anomaly_detection/jobs/new_job/step/single_metric'
+          )
+        ).toBe(ProjectRoutingAccess.EDITABLE);
+      });
+
+      it('should return DISABLED for ML anomaly detection results pages', () => {
+        expect(getProjectRoutingAccess('ml', 'app/ml/explorer')).toBe(
+          ProjectRoutingAccess.DISABLED
+        );
+      });
+
       it('should return DISABLED for unknown apps', () => {
         expect(getProjectRoutingAccess('management', '#/')).toBe(ProjectRoutingAccess.DISABLED);
       });
