@@ -190,6 +190,12 @@ export async function runJestAll() {
 
   await writeSummary(results, log, totalMs);
 
+  // Dedicated failure summary as the very last thing in the log — easy to spot
+  const failedResults = results.filter((r) => r.code !== 0);
+  if (failedResults.length > 0) {
+    writeFailureSummary(failedResults, log);
+  }
+
   process.exit(globalExit);
 }
 
@@ -279,10 +285,17 @@ async function runConfigs(
         const shardSuffix = shard ? `_shard_${shard.replace('/', '_')}` : '';
         const slowTestsFile = `${slowTestsDir}/slow-tests-${configHash}${shardSuffix}-${Date.now()}.json`;
 
+        const relConfig = relative(REPO_ROOT, config);
+        log.info(`Starting ${relConfig}`);
+
         const args = [
           'scripts/jest',
           '--config',
+<<<<<<< HEAD
+          relConfig,
+=======
           relative(REPO_ROOT, cleanConfig),
+>>>>>>> upstream/main
           '--runInBand',
           '--coverage=false',
           '--passWithNoTests',
@@ -317,17 +330,18 @@ async function runConfigs(
 
           results.push({ config, code, durationMs, slowTestsFile, failedTests });
 
-          // Print buffered output after completion to keep logs grouped per config
+          // Print buffered output after completion, using Buildkite collapsible sections:
+          //   +++ (collapsed) for passing configs — full output preserved but hidden
+          //   --- (expanded) for failing configs — immediately visible
           const sec = Math.round(durationMs / 1000);
 
           const relConfigPath = relative(REPO_ROOT, config);
-          log.info(
-            `Output for ${relConfigPath} (exit ${code} - ${
-              code === 0 ? 'success' : 'failure'
-            }, ${sec}s)\n` +
-              buffer +
-              '\n'
-          );
+          if (code === 0) {
+            log.write(`+++ ✅ ${relConfigPath} (${sec}s)\n`);
+          } else {
+            log.write(`--- ❌ ${relConfigPath} (${sec}s) - FAILED\n`);
+          }
+          log.write(buffer + '\n');
 
           const proceed = () => {
             // Log how many configs are left to complete (after checkpoint is written)
@@ -405,6 +419,41 @@ function parseFailedTests(output: string): FailedTest[] {
   }
 
   return failedTests;
+}
+
+function writeFailureSummary(failedResults: JestConfigResult[], log: ToolingLog) {
+  const cwd = process.cwd();
+
+  log.write(`--- ❌ Failed Tests Summary (${failedResults.length} config${failedResults.length > 1 ? 's' : ''} failed)\n`);
+
+  for (const r of failedResults) {
+    const relativePath = relative(cwd, r.config);
+    const sec = Math.round(r.durationMs / 1000);
+    log.info(`\n  ${relativePath} (${sec}s)`);
+
+    if (r.failedTests && r.failedTests.length > 0) {
+      // Group failed tests by file path
+      const failedTestsByFile = new Map<string, FailedTest[]>();
+      for (const test of r.failedTests) {
+        const testRelativePath = relative(cwd, test.filePath);
+        if (!failedTestsByFile.has(testRelativePath)) {
+          failedTestsByFile.set(testRelativePath, []);
+        }
+        failedTestsByFile.get(testRelativePath)!.push(test);
+      }
+
+      for (const [filePath, tests] of failedTestsByFile) {
+        log.info(`    ${filePath}`);
+        for (const test of tests) {
+          log.info(`      ● ${test.fullName}`);
+        }
+      }
+    } else {
+      log.info('    (no individual test failures parsed — check the full output above)');
+    }
+  }
+
+  log.info('');
 }
 
 async function writeSummary(results: JestConfigResult[], log: ToolingLog, totalMs: number) {
