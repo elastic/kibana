@@ -15,7 +15,8 @@ import type { ReportDisplayOptions } from '../../types';
 export type EvaluationReporter = (
   scoreRepository: EvaluationScoreRepository,
   runId: string,
-  log: SomeDevLog
+  log: SomeDevLog,
+  options?: { taskModelId?: string; suiteId?: string }
 ) => Promise<void>;
 
 function buildReportHeader(taskModel: Model, evaluatorModel: Model): string[] {
@@ -29,11 +30,27 @@ function buildReportHeader(taskModel: Model, evaluatorModel: Model): string[] {
 export function createDefaultTerminalReporter(
   options: { reportDisplayOptions?: ReportDisplayOptions } = {}
 ): EvaluationReporter {
-  return async (scoreRepository: EvaluationScoreRepository, runId: string, log: SomeDevLog) => {
-    const runStats = await scoreRepository.getStatsByRunId(runId);
+  return async (
+    scoreRepository: EvaluationScoreRepository,
+    runId: string,
+    log: SomeDevLog,
+    filter
+  ) => {
+    const runStats = await scoreRepository.getStatsByRunId(runId, filter);
 
     if (!runStats || runStats.stats.length === 0) {
-      log.error(`No evaluation results found for run ID: ${runId}`);
+      const filterSuffix = [
+        filter?.taskModelId ? `task.model.id=${filter.taskModelId}` : null,
+        filter?.suiteId ? `suite.id=${filter.suiteId}` : null,
+      ]
+        .filter(Boolean)
+        .join(', ');
+
+      log.error(
+        `No evaluation results found for run ID: ${runId}${
+          filterSuffix ? ` (${filterSuffix})` : ''
+        }`
+      );
       return;
     }
 

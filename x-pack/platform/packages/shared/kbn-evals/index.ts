@@ -26,6 +26,7 @@ export { createQuantitativeCorrectnessEvaluators } from './src/evaluators/correc
 export { createQuantitativeGroundednessEvaluator } from './src/evaluators/groundedness';
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';
 export { withEvaluatorSpan, withTaskSpan, getCurrentTraceId } from './src/utils/tracing';
+export { withRetry, type RetryOptions } from './src/utils/retry_utils';
 export {
   containsAllTerms,
   extractAllStrings,
@@ -70,6 +71,7 @@ export type {
   GroundTruthExtractor,
   RetrievedDoc,
 } from './src/evaluators/rag/types';
+export { createEsqlEquivalenceEvaluator } from './src/evaluators/esql';
 
 // Re-export Scout tags here to avoid requiring a direct dependency on @kbn/scout for modules using @kbn/evals
 export { tags } from '@kbn/scout';

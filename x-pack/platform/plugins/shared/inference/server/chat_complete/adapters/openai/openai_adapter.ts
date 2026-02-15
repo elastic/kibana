@@ -64,13 +64,22 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
       };
     } else {
+      const openAiTools = toolsToOpenAI(tools);
+      const hasTools = Array.isArray(openAiTools) && openAiTools.length > 0;
+
       request = {
         stream,
         ...getTemperatureIfValid(temperature, { connector, modelName }),
         model: modelName,
         messages: messagesToOpenAI({ system, messages }),
-        tool_choice: toolChoiceToOpenAI(toolChoice, { connector, tools }),
-        tools: toolsToOpenAI(tools),
+        // Some OpenAI-compatible gateways (notably for Anthropic models) reject tool calling
+        // params when the tools list is empty. Only forward tools/tool_choice when tools exist.
+        ...(hasTools
+          ? {
+              tool_choice: toolChoiceToOpenAI(toolChoice, { connector, tools }),
+              tools: openAiTools,
+            }
+          : {}),
       };
     }
 

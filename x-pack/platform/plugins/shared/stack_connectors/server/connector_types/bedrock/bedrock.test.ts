@@ -62,14 +62,12 @@ const DEFAULT_PAYLOAD = {
 const DEFAULT_CONVERSE_REQUEST_PAYLOAD = {
   messages: DEFAULT_MESSAGES,
   inferenceConfig: { stopSequences: ['\n\nHuman:'] },
-  toolConfig: {},
   modelId: DEFAULT_MODEL,
 };
 
 const DEFAULT_CONVERSE_STREAM_REQUEST_PAYLOAD = {
   messages: DEFAULT_MESSAGES,
   inferenceConfig: { stopSequences: ['\n\nHuman:'] },
-  toolConfig: {},
   modelId: DEFAULT_MODEL,
 };
 
@@ -859,7 +857,6 @@ describe('BedrockConnector', () => {
                 },
               ],
               inferenceConfig: {},
-              toolConfig: {},
               system: [{ type: 'text', text: 'This is a system message' }],
               modelId: DEFAULT_MODEL,
             }),
@@ -924,7 +921,6 @@ describe('BedrockConnector', () => {
                 },
               ],
               inferenceConfig: {},
-              toolConfig: {},
               system: [{ type: 'text', text: 'This is a system message' }],
               modelId: DEFAULT_MODEL,
             }),
@@ -949,7 +945,6 @@ describe('BedrockConnector', () => {
             data: JSON.stringify({
               messages: [{ role: 'user', content: 'Hello world' }],
               inferenceConfig: { stopSequences: ['\n\nHuman:'] },
-              toolConfig: {},
               modelId: DEFAULT_MODEL,
             }),
             timeout,
@@ -1042,7 +1037,6 @@ describe('BedrockConnector', () => {
               inferenceConfig: {
                 stopSequences: ['\n\nHuman:'],
               },
-              toolConfig: {},
               modelId: DEFAULT_MODEL,
             }),
             timeout,
