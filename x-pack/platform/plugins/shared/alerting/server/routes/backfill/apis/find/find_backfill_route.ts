@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IRouter } from '@kbn/core/server';
+import type { IRouter, RouteConfigOptions, RouteMethod } from '@kbn/core/server';
 import type {
   FindBackfillRequestQueryV1,
   FindBackfillResponseV1,
@@ -13,23 +13,33 @@ import { findQuerySchemaV1 } from '../../../../../common/routes/backfill/apis/fi
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
-import { INTERNAL_ALERTING_BACKFILL_FIND_API_PATH } from '../../../../types';
+import {
+  INTERNAL_ALERTING_BACKFILL_FIND_API_PATH,
+  ALERTING_BACKFILL_FIND_API_PATH,
+} from '../../../../types';
 import { transformRequestV1, transformResponseV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
-export const findBackfillRoute = (
-  router: IRouter<AlertingRequestHandlerContext>,
-  licenseState: ILicenseState
-) => {
+interface BuildFindBackfillRouteParams {
+  licenseState: ILicenseState;
+  path: string;
+  router: IRouter<AlertingRequestHandlerContext>;
+  options: RouteConfigOptions<RouteMethod>;
+}
+
+const buildFindBackfillRoute = ({
+  licenseState,
+  path,
+  router,
+  options,
+}: BuildFindBackfillRouteParams) => {
   router.post(
     {
-      path: `${INTERNAL_ALERTING_BACKFILL_FIND_API_PATH}`,
+      path,
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
+      options,
       validate: {
         query: findQuerySchemaV1,
-      },
-      options: {
-        access: 'internal',
       },
     },
     router.handleLegacyErrors(
@@ -47,3 +57,29 @@ export const findBackfillRoute = (
     )
   );
 };
+
+export const findBackfillRoute = (
+  router: IRouter<AlertingRequestHandlerContext>,
+  licenseState: ILicenseState
+) =>
+  buildFindBackfillRoute({
+    licenseState,
+    path: INTERNAL_ALERTING_BACKFILL_FIND_API_PATH,
+    router,
+    options: { access: 'internal' },
+  });
+
+export const findBackfillPublicRoute = (
+  router: IRouter<AlertingRequestHandlerContext>,
+  licenseState: ILicenseState
+) =>
+  buildFindBackfillRoute({
+    licenseState,
+    path: ALERTING_BACKFILL_FIND_API_PATH,
+    router,
+    options: {
+      access: 'public',
+      summary: 'Find backfills for rules',
+      tags: ['oas-tag:alerting'],
+    },
+  });
