@@ -17,6 +17,7 @@ import {
   type FeaturesIdentificationTaskParams,
   getFeaturesIdentificationTaskId,
   FEATURES_IDENTIFICATION_TASK_TYPE,
+  getPreviousDiscoveredPatterns,
 } from '../../../../lib/tasks/task_definitions/features_identification';
 import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 import { handleTaskAction } from '../../../utils/task_helpers';
@@ -331,11 +332,15 @@ export const featuresTaskRoute = createServerRoute({
                   uiSettingsClient,
                   logger,
                 });
+
+                const patternState = await getPreviousDiscoveredPatterns(name, taskClient);
+
                 return {
                   connectorId,
                   start: body.from.getTime(),
                   end: body.to.getTime(),
                   streamName: name,
+                  ...patternState,
                 };
               })(),
               request,

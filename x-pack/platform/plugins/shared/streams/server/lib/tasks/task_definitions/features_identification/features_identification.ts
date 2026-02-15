@@ -10,27 +10,65 @@ import { isInferenceProviderError } from '@kbn/inference-common';
 import type { IdentifyFeaturesResult } from '@kbn/streams-schema';
 import { isComputedFeature, type BaseFeature } from '@kbn/streams-schema';
 import { identifyFeatures, generateAllComputedFeatures } from '@kbn/streams-ai';
-import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
-import type { TaskContext } from '.';
-import type { TaskParams } from '../types';
-import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
-import { cancellableTask } from '../cancellable_task';
-import { MAX_FEATURE_AGE_MS } from '../../streams/feature/feature_client';
+import { formatInferenceProviderError } from '../../../../routes/utils/create_connector_sse_error';
+import type { StreamsTaskType, TaskContext } from '..';
+import type { TaskClient } from '../../task_client';
+import type { TaskParams } from '../../types';
+import { PromptsConfigService } from '../../../saved_objects/significant_events/prompts_config_service';
+import { cancellableTask } from '../../cancellable_task';
+import { MAX_FEATURE_AGE_MS } from '../../../streams/feature/feature_client';
+import { getSampleDocuments } from './get_sample_documents';
+import type { FeaturesIdentificationTaskParams, PreviousPatternState } from './types';
 
-export interface FeaturesIdentificationTaskParams {
-  connectorId: string;
-  start: number;
-  end: number;
-  streamName: string;
-}
+/**
+ * Maximum age of the discovered-patterns set before it is cleared and
+ * accumulation restarts from scratch.
+ */
+export const PATTERN_RESET_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 export const FEATURES_IDENTIFICATION_TASK_TYPE = 'streams_features_identification';
 
 export function getFeaturesIdentificationTaskId(streamName: string) {
   return `${FEATURES_IDENTIFICATION_TASK_TYPE}_${streamName}`;
+}
+
+const getDefaultPatternState = (): PreviousPatternState => {
+  return {
+    discoveredPatterns: [],
+    lastPatternResetAt: Date.now(),
+  };
+};
+
+/**
+ * Retrieves the discovered-pattern state from the previous features
+ * identification task for the given stream. If the stored pattern set
+ * has expired (older than {@link PATTERN_RESET_MS}), an empty set with
+ * a fresh `lastPatternResetAt` is returned.
+ */
+export async function getPreviousDiscoveredPatterns(
+  streamName: string,
+  taskClient: TaskClient<StreamsTaskType>
+): Promise<PreviousPatternState> {
+  try {
+    const taskId = getFeaturesIdentificationTaskId(streamName);
+    const previousTask = await taskClient.get<FeaturesIdentificationTaskParams>(taskId);
+    const { discoveredPatterns, lastPatternResetAt } = previousTask.task.params;
+
+    if (!discoveredPatterns || !lastPatternResetAt) {
+      return getDefaultPatternState();
+    }
+
+    const now = Date.now();
+    if (now - lastPatternResetAt >= PATTERN_RESET_MS) {
+      return getDefaultPatternState();
+    }
+
+    return { discoveredPatterns, lastPatternResetAt };
+  } catch {
+    return getDefaultPatternState();
+  }
 }
 
 export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext) {
@@ -44,8 +82,15 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, start, end, streamName, _task } = runContext.taskInstance
-                .params as TaskParams<FeaturesIdentificationTaskParams>;
+              const {
+                connectorId,
+                start,
+                end,
+                streamName,
+                discoveredPatterns,
+                lastPatternResetAt,
+                _task,
+              } = runContext.taskInstance.params as TaskParams<FeaturesIdentificationTaskParams>;
 
               const {
                 taskClient,
@@ -69,13 +114,17 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
                 const esClient = scopedClusterClient.asCurrentUser;
-
-                const { hits: sampleDocuments } = await getSampleDocuments({
+                const {
+                  sampleDocuments,
+                  updatedPatterns,
+                  lastPatternResetAt: updatedResetAt,
+                } = await getSampleDocuments({
                   esClient,
                   index: stream.name,
                   start,
                   end,
-                  size: 20,
+                  discoveredPatterns: discoveredPatterns ?? [],
+                  lastPatternResetAt: lastPatternResetAt ?? Date.now(),
                 });
 
                 const [{ features: inferredBaseFeatures }, computedFeatures] = await Promise.all([
@@ -135,7 +184,14 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 await taskClient.complete<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
                   _task,
-                  { connectorId, start, end, streamName },
+                  {
+                    connectorId,
+                    start,
+                    end,
+                    streamName,
+                    discoveredPatterns: updatedPatterns,
+                    lastPatternResetAt: updatedResetAt,
+                  },
                   { features }
                 );
               } catch (error) {
@@ -160,7 +216,14 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 await taskClient.fail<FeaturesIdentificationTaskParams>(
                   _task,
-                  { connectorId, start, end, streamName },
+                  {
+                    connectorId,
+                    start,
+                    end,
+                    streamName,
+                    discoveredPatterns,
+                    lastPatternResetAt,
+                  },
                   errorMessage
                 );
 

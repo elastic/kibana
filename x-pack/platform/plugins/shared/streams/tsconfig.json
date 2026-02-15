@@ -76,6 +76,8 @@
     "@kbn/alerting-types",
     "@kbn/core-http-common",
     "@kbn/scout",
+    "@kbn/core-lifecycle-server-internal",
+    "@kbn/core-test-helpers-kbn-server",
     "@kbn/esql-language",
   ]
 }
