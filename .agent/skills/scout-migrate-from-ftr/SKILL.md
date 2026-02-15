@@ -1,5 +1,5 @@
 ---
-name: Scout Migrate From FTR
+name: scout-migrate-from-ftr
 description: Use when migrating Kibana Functional Test Runner (FTR) tests to Scout, including decisions about UI vs API tests, mapping FTR services/page objects/hooks to Scout fixtures, and splitting loadTestFile patterns.
 ---
 

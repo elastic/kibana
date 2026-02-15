@@ -37,34 +37,31 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     } as StepHandlerContext;
   };
 
-  it('creates and persists a conversation when create_conversation is true, and emits conversation_id', async () => {
-    const chat = {
-      converse: jest.fn().mockReturnValue(
-        of(
-          {
-            type: ChatEventType.conversationCreated,
-            data: { conversation_id: 'c-1', title: 't' },
-          },
-          {
-            type: ChatEventType.roundComplete,
-            data: {
-              round: {
-                id: 'r-1',
-                response: { message: 'ok', structured_output: { foo: 'bar' } },
-              },
-            },
-          }
-        )
-      ),
-    };
+  const createExecutionMock = (events$: any) => ({
+    executeAgent: jest.fn().mockResolvedValue({ executionId: 'exec-1', events$ }),
+  });
 
-    const runner = { runAgent: jest.fn() };
+  it('creates and persists a conversation when create_conversation is true, and emits conversation_id', async () => {
+    const events$ = of(
+      {
+        type: ChatEventType.conversationCreated,
+        data: { conversation_id: 'c-1', title: 't' },
+      },
+      {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'r-1',
+            response: { message: 'ok', structured_output: { foo: 'bar' } },
+          },
+        },
+      }
+    );
+
+    const execution = createExecutionMock(events$);
 
     const serviceManager = {
-      internalStart: {
-        runnerFactory: { getRunner: () => runner },
-        chat,
-      },
+      internalStart: { execution },
     } as any;
 
     const step = getRunAgentStepDefinition(serviceManager);
@@ -78,39 +75,32 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     });
     const res = await step.handler(context);
 
-    expect(chat.converse).toHaveBeenCalledTimes(1);
-    expect(runner.runAgent).not.toHaveBeenCalled();
+    expect(execution.executeAgent).toHaveBeenCalledTimes(1);
     expect(res).toHaveProperty('output.conversation_id');
     expect(res.output?.conversation_id).toBe('c-1');
   });
 
   it('uses conversation_id from input (with:) and create-conversation from config (static)', async () => {
-    const chat = {
-      converse: jest.fn().mockReturnValue(
-        of(
-          {
-            type: ChatEventType.conversationCreated,
-            data: { conversation_id: 'c-dash', title: 't' },
+    const events$ = of(
+      {
+        type: ChatEventType.conversationCreated,
+        data: { conversation_id: 'c-dash', title: 't' },
+      },
+      {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'r-1',
+            response: { message: 'ok' },
           },
-          {
-            type: ChatEventType.roundComplete,
-            data: {
-              round: {
-                id: 'r-1',
-                response: { message: 'ok' },
-              },
-            },
-          }
-        )
-      ),
-    };
-    const runner = { runAgent: jest.fn() };
+        },
+      }
+    );
+
+    const execution = createExecutionMock(events$);
 
     const serviceManager = {
-      internalStart: {
-        runnerFactory: { getRunner: () => runner },
-        chat,
-      },
+      internalStart: { execution },
     } as any;
 
     const step = getRunAgentStepDefinition(serviceManager);
@@ -126,38 +116,31 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       })
     );
 
-    expect(chat.converse).toHaveBeenCalledTimes(1);
-    expect(runner.runAgent).not.toHaveBeenCalled();
+    expect(execution.executeAgent).toHaveBeenCalledTimes(1);
     expect(res).toHaveProperty('output.conversation_id', 'c-dash');
   });
 
   it('reuses an existing conversation_id and updates it for follow-up prompts', async () => {
-    const chat = {
-      converse: jest.fn().mockReturnValue(
-        of(
-          {
-            type: ChatEventType.conversationUpdated,
-            data: { conversation_id: 'c-1', title: 't' },
+    const events$ = of(
+      {
+        type: ChatEventType.conversationUpdated,
+        data: { conversation_id: 'c-1', title: 't' },
+      },
+      {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'r-1',
+            response: { message: 'ok' },
           },
-          {
-            type: ChatEventType.roundComplete,
-            data: {
-              round: {
-                id: 'r-1',
-                response: { message: 'ok' },
-              },
-            },
-          }
-        )
-      ),
-    };
-    const runner = { runAgent: jest.fn() };
+        },
+      }
+    );
+
+    const execution = createExecutionMock(events$);
 
     const serviceManager = {
-      internalStart: {
-        runnerFactory: { getRunner: () => runner },
-        chat,
-      },
+      internalStart: { execution },
     } as any;
 
     const step = getRunAgentStepDefinition(serviceManager);
@@ -170,31 +153,25 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       })
     );
 
-    expect(chat.converse).toHaveBeenCalledTimes(1);
-    expect(runner.runAgent).not.toHaveBeenCalled();
+    expect(execution.executeAgent).toHaveBeenCalledTimes(1);
     expect(res.output?.conversation_id).toBe('c-1');
   });
 
   it('does not create a conversation when create_conversation is false and no conversation_id is provided', async () => {
-    const runner = { runAgent: jest.fn() };
-
-    const serviceManager = {
-      internalStart: {
-        runnerFactory: { getRunner: () => runner },
-        chat: {
-          converse: jest.fn().mockReturnValue(
-            of({
-              type: ChatEventType.roundComplete,
-              data: {
-                round: {
-                  id: 'r-1',
-                  response: { message: 'ok' },
-                },
-              },
-            })
-          ),
+    const events$ = of({
+      type: ChatEventType.roundComplete,
+      data: {
+        round: {
+          id: 'r-1',
+          response: { message: 'ok' },
         },
       },
+    });
+
+    const execution = createExecutionMock(events$);
+
+    const serviceManager = {
+      internalStart: { execution },
     } as any;
 
     const step = getRunAgentStepDefinition(serviceManager);
@@ -206,23 +183,18 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       })
     );
 
-    expect(serviceManager.internalStart.chat.converse).toHaveBeenCalledTimes(1);
+    expect(execution.executeAgent).toHaveBeenCalledTimes(1);
     expect(res.output?.conversation_id).toBeUndefined();
-    expect(runner.runAgent).not.toHaveBeenCalled();
   });
 
-  it('propagates chat service errors (e.g., missing connector)', async () => {
-    const chatError = new Error('No LLM connector configured');
-    const chat = {
-      converse: jest.fn().mockReturnValue(throwError(() => chatError)),
-    };
-    const runner = { runAgent: jest.fn() };
+  it('propagates execution service errors (e.g., missing connector)', async () => {
+    const execError = new Error('No LLM connector configured');
+    const events$ = throwError(() => execError);
+
+    const execution = createExecutionMock(events$);
 
     const serviceManager = {
-      internalStart: {
-        runnerFactory: { getRunner: () => runner },
-        chat,
-      },
+      internalStart: { execution },
     } as any;
 
     const step = getRunAgentStepDefinition(serviceManager);
@@ -234,26 +206,20 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       })
     );
 
-    expect(chat.converse).toHaveBeenCalledTimes(1);
-    expect(res.error).toBe(chatError);
+    expect(execution.executeAgent).toHaveBeenCalledTimes(1);
+    expect(res.error).toBe(execError);
   });
 
   it('returns an error when no round_complete event is emitted', async () => {
-    const chat = {
-      converse: jest.fn().mockReturnValue(
-        of({
-          type: ChatEventType.conversationCreated,
-          data: { conversation_id: 'c-1', title: 't' },
-        })
-      ),
-    };
-    const runner = { runAgent: jest.fn() };
+    const events$ = of({
+      type: ChatEventType.conversationCreated,
+      data: { conversation_id: 'c-1', title: 't' },
+    });
+
+    const execution = createExecutionMock(events$);
 
     const serviceManager = {
-      internalStart: {
-        runnerFactory: { getRunner: () => runner },
-        chat,
-      },
+      internalStart: { execution },
     } as any;
 
     const step = getRunAgentStepDefinition(serviceManager);
@@ -265,28 +231,20 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       })
     );
 
-    expect(chat.converse).toHaveBeenCalledTimes(1);
+    expect(execution.executeAgent).toHaveBeenCalledTimes(1);
     expect(res.error).toBeInstanceOf(Error);
     expect(res.error?.message).toContain('No round_complete event');
   });
 
   it('fails when the workflow abort signal is already aborted', async () => {
-    const chat = {
-      converse: jest
-        .fn()
-        .mockReturnValue(
-          throwError(() => createRequestAbortedError('Converse request was aborted'))
-        ),
-    };
-    const runner = { runAgent: jest.fn() };
+    const events$ = throwError(() => createRequestAbortedError('Converse request was aborted'));
+
+    const execution = createExecutionMock(events$);
     const abortController = new AbortController();
     abortController.abort();
 
     const serviceManager = {
-      internalStart: {
-        runnerFactory: { getRunner: () => runner },
-        chat,
-      },
+      internalStart: { execution },
     } as any;
 
     const step = getRunAgentStepDefinition(serviceManager);
@@ -299,7 +257,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       })
     );
 
-    expect(chat.converse).toHaveBeenCalledTimes(1);
+    expect(execution.executeAgent).toHaveBeenCalledTimes(1);
     expect(res.error).toBeInstanceOf(Error);
     expect(res.error?.message).toContain('aborted');
   });

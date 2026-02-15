@@ -9,7 +9,7 @@
 
 import getopts from 'getopts';
 import { promises as fs } from 'fs';
-import { relative, dirname } from 'path';
+import { relative } from 'path';
 import { spawn } from 'child_process';
 import Table from 'cli-table3';
 import chalk from 'chalk';
@@ -18,6 +18,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { tmpdir } from 'os';
 import { getJestConfigs } from './configs/get_jest_configs';
+import { isInBuildkite, markConfigCompleted, isConfigCompleted } from './buildkite_checkpoint';
+import { parseShardAnnotation, annotateConfigWithShard } from './shard_config';
 
 interface JestConfigResult {
   config: string;
@@ -69,25 +71,60 @@ export async function runJestAll() {
       .map((c) => c.trim())
       .filter(Boolean);
 
-    const { configsWithTests, emptyConfigs } = await getJestConfigs(passedConfigs);
+    // CI path: configs may have shard annotations (e.g., config.js||shard=1/2).
+    // Strip annotations before passing to getJestConfigs, then re-annotate.
+    const shardAnnotations = new Map<string, string[]>(); // cleanRelPath -> ['1/2', '2/2']
+    const cleanPassedConfigs: string[] = [];
 
-    writeConfigDiscoverySummary(passedConfigs, configsWithTests, emptyConfigs, log);
+    for (const entry of passedConfigs) {
+      const { config: cleanConfig, shard } = parseShardAnnotation(entry);
+      if (!cleanPassedConfigs.includes(cleanConfig)) {
+        cleanPassedConfigs.push(cleanConfig);
+      }
+      if (shard) {
+        const shards = shardAnnotations.get(cleanConfig) || [];
+        shards.push(shard);
+        shardAnnotations.set(cleanConfig, shards);
+      }
+    }
+
+    const { configsWithTests, emptyConfigs } = await getJestConfigs(cleanPassedConfigs);
+
+    writeConfigDiscoverySummary(cleanPassedConfigs, configsWithTests, emptyConfigs, log);
 
     hasAnyConfigs = Boolean(configsWithTests.length || emptyConfigs.length);
 
-    configs = configsWithTests.map((c) => c.config);
+    // Re-expand configs with their shard annotations from CI.
+    // On CI, annotations are pre-embedded by pick_test_group_run_order.ts.
+    // Locally (no annotations), configs run without sharding.
+    for (const { config: absPath } of configsWithTests) {
+      const relPath = relative(REPO_ROOT, absPath);
+      const shards = shardAnnotations.get(relPath);
+      if (shards && shards.length > 0) {
+        // CI path: use the explicit annotations provided upstream
+        for (const shard of shards) {
+          configs.push(annotateConfigWithShard(absPath, shard));
+        }
+      } else {
+        configs.push(absPath);
+      }
+    }
   } else {
     log.info('--configs flag is not passed. Finding and running all configs in the repo.');
 
     const { configsWithTests, emptyConfigs } = await getJestConfigs();
 
-    configs = configsWithTests.map((c) => c.config);
+    const rawConfigs = configsWithTests.map((c) => c.config);
 
-    hasAnyConfigs = Boolean(configs.length);
+    hasAnyConfigs = Boolean(rawConfigs.length);
 
     log.info(
-      `Found ${configs.length} configs to run. Found ${emptyConfigs.length} configs with no tests. Skipping them.`
+      `Found ${rawConfigs.length} configs to run. Found ${emptyConfigs.length} configs with no tests. Skipping them.`
     );
+
+    // Locally, run all discovered configs without auto-sharding.
+    // Sharding is only applied on CI via pick_test_group_run_order.ts annotations.
+    configs = rawConfigs;
   }
 
   log.info(
@@ -149,23 +186,6 @@ export async function runJestAll() {
     testFiles: results.map((r) => relative(process.cwd(), r.config)),
   });
 
-  // Persist failed configs for retry logic if requested
-  if (process.env.JEST_ALL_FAILED_CONFIGS_PATH) {
-    const failed = results.filter((r) => r.code !== 0).map((r) => r.config);
-
-    try {
-      await fs.mkdir(dirname(process.env.JEST_ALL_FAILED_CONFIGS_PATH), { recursive: true });
-
-      await fs.writeFile(
-        process.env.JEST_ALL_FAILED_CONFIGS_PATH,
-        JSON.stringify(failed, null, 2),
-        'utf8'
-      );
-    } catch (err) {
-      log.warning(`Unable to write failed configs file: ${(err as Error).message}`);
-    }
-  }
-
   log.write('--- Combined Jest run summary');
 
   await writeSummary(results, log, totalMs);
@@ -174,10 +194,55 @@ export async function runJestAll() {
 }
 
 async function runConfigs(
-  configs: string[],
+  allConfigs: string[],
   maxParallel: number,
   log: ToolingLog
 ): Promise<JestConfigResult[]> {
+  const skippedResults: JestConfigResult[] = [];
+  let configs = allConfigs;
+
+  // In Buildkite, skip configs already completed on a previous attempt (checkpoint resume)
+  if (isInBuildkite()) {
+    log.info(
+      `[jest-checkpoint] Checking ${allConfigs.length} configs for prior completion (step=${
+        process.env.BUILDKITE_STEP_ID || ''
+      }, job=${process.env.BUILDKITE_PARALLEL_JOB || '0'}, retry=${
+        process.env.BUILDKITE_RETRY_COUNT || '0'
+      })`
+    );
+
+    const completionStatus = await Promise.all(
+      allConfigs.map(async (config) => {
+        // Use relative path for checkpoint key so it's stable across different CI agents
+        const relConfig = relative(REPO_ROOT, config);
+        const completed = await isConfigCompleted(relConfig);
+        log.info(`[jest-checkpoint]   ${completed ? 'SKIP' : 'RUN '} ${relConfig}`);
+        return { config, completed };
+      })
+    );
+
+    const skipped = completionStatus.filter((c) => c.completed);
+    configs = completionStatus.filter((c) => !c.completed).map((c) => c.config);
+
+    for (const { config } of skipped) {
+      skippedResults.push({ config, code: 0, durationMs: 0 });
+    }
+
+    if (skipped.length > 0) {
+      log.info(
+        `[jest-checkpoint] Resumed: skipped ${skipped.length} already-completed, ${configs.length} remaining`
+      );
+    } else {
+      log.info(
+        `[jest-checkpoint] No prior checkpoints found, running all ${configs.length} configs`
+      );
+    }
+  }
+
+  if (configs.length === 0) {
+    return skippedResults;
+  }
+
   const results: JestConfigResult[] = [];
   let active = 0;
   let index = 0;
@@ -186,23 +251,42 @@ async function runConfigs(
   await fs.mkdir(slowTestsDir, { recursive: true });
 
   await new Promise<void>((resolveAll) => {
+    const wallStart = Date.now();
+
+    // Periodic heartbeat so CI logs show progress even when no config has finished yet
+    const heartbeat = setInterval(() => {
+      const elapsedSec = Math.round((Date.now() - wallStart) / 1000);
+      const min = Math.floor(elapsedSec / 60);
+      const sec = elapsedSec % 60;
+      const queued = configs.length - index;
+      log.info(
+        `[jest-progress] ${active} running, ${results.length} completed, ${queued} queued (elapsed ${min}m ${sec}s)`
+      );
+    }, 60_000);
+    heartbeat.unref(); // don't keep the process alive just for the timer
+
     const launchNext = () => {
       while (active < maxParallel && index < configs.length) {
         const config = configs[index++];
         const start = Date.now();
         active += 1;
 
+        // Parse shard annotation if present (e.g., "/abs/path/config.js||shard=1/2")
+        const { config: cleanConfig, shard } = parseShardAnnotation(config);
+
         // Create unique output file for this config's slow tests
-        const configHash = config.replace(/[^a-zA-Z0-9]/g, '_');
-        const slowTestsFile = `${slowTestsDir}/slow-tests-${configHash}-${Date.now()}.json`;
+        const configHash = cleanConfig.replace(/[^a-zA-Z0-9]/g, '_');
+        const shardSuffix = shard ? `_shard_${shard.replace('/', '_')}` : '';
+        const slowTestsFile = `${slowTestsDir}/slow-tests-${configHash}${shardSuffix}-${Date.now()}.json`;
 
         const args = [
           'scripts/jest',
           '--config',
-          relative(REPO_ROOT, config),
+          relative(REPO_ROOT, cleanConfig),
           '--runInBand',
           '--coverage=false',
           '--passWithNoTests',
+          ...(shard ? [`--shard=${shard}`] : []),
         ];
 
         const proc = spawn(process.execPath, args, {
@@ -236,23 +320,36 @@ async function runConfigs(
           // Print buffered output after completion to keep logs grouped per config
           const sec = Math.round(durationMs / 1000);
 
+          const relConfigPath = relative(REPO_ROOT, config);
           log.info(
-            `Output for ${config} (exit ${code} - ${
+            `Output for ${relConfigPath} (exit ${code} - ${
               code === 0 ? 'success' : 'failure'
             }, ${sec}s)\n` +
               buffer +
               '\n'
           );
 
-          // Log how many configs are left to complete
-          const remaining = configs.length - results.length;
-          log.info(`Configs left: ${remaining}`);
+          const proceed = () => {
+            // Log how many configs are left to complete (after checkpoint is written)
+            const remaining = configs.length - results.length;
+            log.info(`Configs left: ${remaining}`);
 
-          active -= 1;
-          if (index < configs.length) {
-            launchNext();
-          } else if (active === 0) {
-            resolveAll();
+            active -= 1;
+            if (index < configs.length) {
+              launchNext();
+            } else if (active === 0) {
+              clearInterval(heartbeat);
+              resolveAll();
+            }
+          };
+
+          // Write checkpoint for successful configs before proceeding
+          // Use relative path for stable keys across CI agents
+          if (code === 0 && isInBuildkite()) {
+            log.info(`[jest-checkpoint] Marking ${relConfigPath} as completed`);
+            markConfigCompleted(relConfigPath).then(proceed, proceed);
+          } else {
+            proceed();
           }
         });
       }
@@ -260,7 +357,7 @@ async function runConfigs(
     launchNext();
   });
 
-  return results;
+  return [...skippedResults, ...results];
 }
 
 function parseFailedTests(output: string): FailedTest[] {

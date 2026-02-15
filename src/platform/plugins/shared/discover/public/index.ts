@@ -28,7 +28,6 @@ export type {
 } from './customizations';
 export {
   SEARCH_EMBEDDABLE_TYPE,
-  SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
   apiPublishesSavedSearch,
   type PublishesSavedSearch,
   type PublishesWritableSavedSearch,
