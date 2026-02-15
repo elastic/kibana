@@ -11,8 +11,8 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Kibana connector definitions generated from Kibana OpenAPI specification.
- * Generated at: 2026-01-20T11:22:36.325Z
- * Source: /oas_docs/output/kibana.yaml (6 APIs)
+ * Generated at: 2026-02-06T11:56:32.250Z
+ * Source: /oas_docs/output/kibana.yaml (9 APIs)
  *
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
@@ -27,6 +27,9 @@ import { GET_CASE_CONTRACT } from './kibana.get_case.gen';
 import { ADD_CASE_COMMENT_CONTRACT } from './kibana.add_case_comment.gen';
 import { SET_ALERTS_STATUS_CONTRACT } from './kibana.set_alerts_status.gen';
 import { SET_ALERT_TAGS_CONTRACT } from './kibana.set_alert_tags.gen';
+import { GET_STREAMS_CONTRACT } from './kibana.get_streams.gen';
+import { GET_STREAMS_NAME_CONTRACT } from './kibana.get_streams_name.gen';
+import { GET_STREAMS_NAME_SIGNIFICANT_EVENTS_CONTRACT } from './kibana.get_streams_name_significant_events.gen';
 
 // export contracts
 export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
@@ -36,4 +39,7 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
   ADD_CASE_COMMENT_CONTRACT,
   SET_ALERTS_STATUS_CONTRACT,
   SET_ALERT_TAGS_CONTRACT,
+  GET_STREAMS_CONTRACT,
+  GET_STREAMS_NAME_CONTRACT,
+  GET_STREAMS_NAME_SIGNIFICANT_EVENTS_CONTRACT,
 ];
