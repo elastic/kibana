@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type EsClient, type ApiServicesFixture } from '@kbn/scout';
+import { type EsClient, type ApiServicesFixture, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { Locator } from '@kbn/scout';
 import { test } from '../../fixtures';
@@ -89,60 +89,64 @@ async function cleanupClassicStreamCreation({
   }
 }
 
-test.describe('Streams list view - classic stream creation', { tag: ['@ess', '@svlOblt'] }, () => {
-  test('creates a classic stream via the creation flyout', async ({
-    apiServices,
-    browserAuth,
-    esClient,
-    page,
-    pageObjects,
-  }, testInfo) => {
-    const { templateName, indexPattern } = buildUniqueTemplateConfig(testInfo);
-    let createdStreamName: string | undefined;
+test.describe(
+  'Streams list view - classic stream creation',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test('creates a classic stream via the creation flyout', async ({
+      apiServices,
+      browserAuth,
+      esClient,
+      page,
+      pageObjects,
+    }, testInfo) => {
+      const { templateName, indexPattern } = buildUniqueTemplateConfig(testInfo);
+      let createdStreamName: string | undefined;
 
-    await browserAuth.loginAsAdmin();
-    await pageObjects.streams.gotoStreamMainPage();
+      await browserAuth.loginAsAdmin();
+      await pageObjects.streams.gotoStreamMainPage();
 
-    try {
-      await ensureClassicStreamIndexTemplate(esClient, templateName, indexPattern);
+      try {
+        await ensureClassicStreamIndexTemplate(esClient, templateName, indexPattern);
 
-      await page.getByRole('button', { name: 'Create classic stream' }).click();
+        await page.getByRole('button', { name: 'Create classic stream' }).click();
 
-      const flyout = page.getByTestId('create-classic-stream-flyout');
-      await expect(flyout).toBeVisible();
+        const flyout = page.getByTestId('create-classic-stream-flyout');
+        await expect(flyout).toBeVisible();
 
-      // Step 1: Select template
-      await selectClassicStreamTemplate(flyout, templateName);
+        // Step 1: Select template
+        await selectClassicStreamTemplate(flyout, templateName);
 
-      // Step 2: Name and confirm (fill the single wildcard part)
-      const wildcardInput = flyout.getByTestId('streamNameInput-wildcard-0');
-      await expect(wildcardInput).toBeVisible();
-      await wildcardInput.fill(`test-${templateName}`);
+        // Step 2: Name and confirm (fill the single wildcard part)
+        const wildcardInput = flyout.getByTestId('streamNameInput-wildcard-0');
+        await expect(wildcardInput).toBeVisible();
+        await wildcardInput.fill(`test-${templateName}`);
 
-      await flyout.getByTestId('createButton').click();
+        await flyout.getByTestId('createButton').click();
 
-      // Flyout closes on successful creation + navigation to the stream management page.
-      await expect(flyout).toBeHidden({ timeout: 30000 });
+        // Flyout closes on successful creation + navigation to the stream management page.
+        await expect(flyout).toBeHidden({ timeout: 30000 });
 
-      // Wait for navigation to the created stream management page.
-      await expect(page).toHaveURL(/\/app\/streams\/.+\/management\/retention/);
+        // Wait for navigation to the created stream management page.
+        await expect(page).toHaveURL(/\/app\/streams\/.+\/management\/retention/);
 
-      // Derive created stream name from the URL.
-      createdStreamName = getCreatedStreamNameFromUrl(page.url());
-      expect(createdStreamName, 'Expected created stream name to be present in URL').toBeTruthy();
+        // Derive created stream name from the URL.
+        createdStreamName = getCreatedStreamNameFromUrl(page.url());
+        expect(createdStreamName, 'Expected created stream name to be present in URL').toBeTruthy();
 
-      // Basic assertion that we landed on a classic stream.
-      await pageObjects.streams.verifyClassicBadge();
+        // Basic assertion that we landed on a classic stream.
+        await pageObjects.streams.verifyClassicBadge();
 
-      // Assert we are on the created stream page.
-      await expect(page.getByRole('heading', { level: 1 })).toContainText(createdStreamName);
-    } finally {
-      await cleanupClassicStreamCreation({
-        apiServices,
-        esClient,
-        templateName,
-        createdStreamName,
-      });
-    }
-  });
-});
+        // Assert we are on the created stream page.
+        await expect(page.getByRole('heading', { level: 1 })).toContainText(createdStreamName);
+      } finally {
+        await cleanupClassicStreamCreation({
+          apiServices,
+          esClient,
+          templateName,
+          createdStreamName,
+        });
+      }
+    });
+  }
+);

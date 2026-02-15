@@ -6,8 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import type { inlineCastsMapping } from './commands/definitions/generated/inline_casts_mapping';
 import type { PromQLAstQueryExpression } from './embedded_languages/promql/types';
 
 /**
@@ -151,6 +149,13 @@ export interface ESQLAstRerankCommand extends ESQLCommand<'rerank'> {
 
 export interface ESQLAstForkCommand extends ESQLCommand<'fork'> {
   args: ESQLForkParens[];
+}
+
+export interface ESQLAstMmrCommand extends ESQLCommand<'mmr'> {
+  queryVector?: ESQLSingleAstItem;
+  diversifyField: ESQLSingleAstItem;
+  limit: ESQLSingleAstItem;
+  namedParameters?: ESQLSingleAstItem;
 }
 
 /**
@@ -352,12 +357,10 @@ export type BinaryExpressionMatchOperator = ':';
 export type BinaryExpressionIn = 'in' | 'not in';
 export type BinaryExpressionLogical = 'and' | 'or';
 
-export type InlineCastingType = keyof typeof inlineCastsMapping;
-
 export interface ESQLInlineCast<ValueType = ESQLAstItem> extends ESQLAstBaseItem {
   type: 'inlineCast';
   value: ValueType;
-  castType: InlineCastingType;
+  castType: string;
 }
 
 /**
