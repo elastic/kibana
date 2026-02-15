@@ -47,6 +47,7 @@ import {
   getConfigurationRequest,
   createConfiguration,
   createComment,
+  elasticUserProfileId,
 } from '../../../../../common/lib/api';
 import { getPostCaseRequest, postCommentAlertReq } from '../../../../../common/lib/mock';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
@@ -335,11 +336,7 @@ export default ({ getService }: FtrProviderContext): void => {
               name: 'none',
               type: '.none',
             },
-            created_by: {
-              email: null,
-              full_name: null,
-              username: 'elastic',
-            },
+            created_by: expectedUser,
             customFields: [],
             description:
               "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id).",
@@ -358,11 +355,7 @@ export default ({ getService }: FtrProviderContext): void => {
             totalAlerts: 5,
             totalComment: 0,
             totalEvents: 0,
-            updated_by: {
-              email: null,
-              full_name: null,
-              username: 'elastic',
-            },
+            updated_by: expectedUser,
             observables: [],
             total_observables: 0,
           });
@@ -446,11 +439,7 @@ export default ({ getService }: FtrProviderContext): void => {
               name: 'Jira',
               type: '.jira',
             },
-            created_by: {
-              email: null,
-              full_name: null,
-              username: 'elastic',
-            },
+            created_by: expectedUser,
             customFields: [
               {
                 key: 'first_custom_field_key',
@@ -474,11 +463,7 @@ export default ({ getService }: FtrProviderContext): void => {
             totalAlerts: 5,
             totalComment: 0,
             totalEvents: 0,
-            updated_by: {
-              email: null,
-              full_name: null,
-              username: 'elastic',
-            },
+            updated_by: expectedUser,
             observables: [],
             total_observables: 0,
           });
@@ -825,11 +810,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'none',
                 type: '.none',
               },
-              created_by: {
-                email: null,
-                full_name: null,
-                username: 'elastic',
-              },
+              created_by: expectedUser,
               customFields: [],
               description:
                 "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `host.name: A`.",
@@ -855,11 +836,7 @@ export default ({ getService }: FtrProviderContext): void => {
               totalAlerts: 3,
               totalComment: 0,
               totalEvents: 0,
-              updated_by: {
-                email: null,
-                full_name: null,
-                username: 'elastic',
-              },
+              updated_by: expectedUser,
               observables: [],
               total_observables: 0,
             });
@@ -876,11 +853,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'none',
                 type: '.none',
               },
-              created_by: {
-                email: null,
-                full_name: null,
-                username: 'elastic',
-              },
+              created_by: expectedUser,
               customFields: [],
               description:
                 "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `host.name: B`.",
@@ -906,11 +879,7 @@ export default ({ getService }: FtrProviderContext): void => {
               totalAlerts: 2,
               totalComment: 0,
               totalEvents: 0,
-              updated_by: {
-                email: null,
-                full_name: null,
-                username: 'elastic',
-              },
+              updated_by: expectedUser,
               observables: [],
               total_observables: 0,
             });
@@ -1346,11 +1315,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'none',
                 type: '.none',
               },
-              created_by: {
-                email: null,
-                full_name: null,
-                username: 'elastic',
-              },
+              created_by: expectedUser,
               customFields: [],
               description:
                 "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `field_name_1: field_value_1`.",
@@ -1376,11 +1341,7 @@ export default ({ getService }: FtrProviderContext): void => {
               totalEvents: 0,
               totalAlerts: 2,
               totalComment: 1,
-              updated_by: {
-                email: null,
-                full_name: null,
-                username: 'elastic',
-              },
+              updated_by: expectedUser,
               observables: [],
               total_observables: 0,
             });
@@ -1397,11 +1358,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'none',
                 type: '.none',
               },
-              created_by: {
-                email: null,
-                full_name: null,
-                username: 'elastic',
-              },
+              created_by: expectedUser,
               customFields: [],
               description:
                 "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `field_name_2: field_value_2`.",
@@ -1427,11 +1384,7 @@ export default ({ getService }: FtrProviderContext): void => {
               totalAlerts: 2,
               totalComment: 2,
               totalEvents: 0,
-              updated_by: {
-                email: null,
-                full_name: null,
-                username: 'elastic',
-              },
+              updated_by: expectedUser,
               observables: [],
               total_observables: 0,
             });
@@ -1448,11 +1401,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 name: 'none',
                 type: '.none',
               },
-              created_by: {
-                email: null,
-                full_name: null,
-                username: 'elastic',
-              },
+              created_by: expectedUser,
               customFields: [],
               description:
                 "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `field_name_1: field_value_3`.",
@@ -1478,11 +1427,7 @@ export default ({ getService }: FtrProviderContext): void => {
               totalAlerts: 1,
               totalComment: 0,
               totalEvents: 0,
-              updated_by: {
-                email: null,
-                full_name: null,
-                username: 'elastic',
-              },
+              updated_by: expectedUser,
               observables: [],
               total_observables: 0,
             });
@@ -1906,6 +1851,13 @@ const verifyAlertsAttachedToCase = ({
   }
 };
 
+const expectedUser = {
+  username: 'elastic',
+  full_name: null,
+  email: null,
+  profile_uid: elasticUserProfileId,
+};
+
 const createCaseWithId = async ({
   kibanaServer,
   caseId,
@@ -1940,7 +1892,7 @@ const createCaseWithId = async ({
       updated_at: null,
       updated_by: null,
       created_at: new Date().toISOString(),
-      created_by: { username: 'elastic', full_name: null, email: null },
+      created_by: expectedUser,
       duration: 0,
       external_service: null,
       total_alerts: 0,

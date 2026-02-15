@@ -21,7 +21,11 @@ export const setupAuth = ({
   headers: Record<string, unknown>;
   auth?: { user: User; space: string | null } | null;
 }): SuperTest.Test => {
-  if (!Object.hasOwn(headers, 'Cookie') && auth != null) {
+  if (
+    !Object.hasOwn(headers, 'Cookie') &&
+    !Object.hasOwn(headers, 'Authorization') &&
+    auth != null
+  ) {
     return apiCall.auth(auth.user.username, auth.user.password);
   }
 
