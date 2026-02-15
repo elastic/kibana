@@ -52,7 +52,7 @@ export class I18nService {
     const { locale, translationHash } = await this.initTranslations(pluginPaths);
     const { dist: isDist } = this.coreContext.env.packageInfo;
     http.registerRoutes('', (router) =>
-      registerRoutes({ router, locale, isDist, translationHash })
+      registerRoutes({ router, pluginPaths, isDist, defaultLocale: locale })
     );
 
     return {
@@ -65,7 +65,7 @@ export class I18nService {
 
     const router = http.createRouter('');
     const { dist: isDist } = this.coreContext.env.packageInfo;
-    registerRoutes({ router, locale, isDist, translationHash });
+    registerRoutes({ router, pluginPaths, isDist, defaultLocale: locale });
 
     return {
       getLocale: () => locale,
