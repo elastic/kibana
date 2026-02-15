@@ -11,7 +11,6 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('delete_index_pattern', () => {
-    loadTestFile(require.resolve('./errors'));
     loadTestFile(require.resolve('./main'));
   });
 }

@@ -6,7 +6,7 @@ plugins:
     - cloud_security_posture
     - console
     - dashboard
-    - dashboard
+    - data_views
     - discover_enhanced
     - entity_store
     - fleet
