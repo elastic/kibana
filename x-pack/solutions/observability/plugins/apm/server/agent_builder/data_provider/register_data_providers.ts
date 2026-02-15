@@ -7,13 +7,18 @@
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { getRollupIntervalForTimeRange } from '@kbn/apm-data-access-plugin/server/utils';
+import { termQuery } from '@kbn/observability-plugin/server';
+import type { APMConfig } from '../..';
 import { getErrorSampleDetails } from '../../routes/errors/get_error_groups/get_error_sample_details';
 import { parseDatemath } from '../utils/time';
 import { getApmServiceSummary } from './get_apm_service_summary';
 import { getApmDownstreamDependencies } from './get_apm_downstream_dependencies';
+import { getApmServiceTopology } from './get_apm_service_topology';
 import { getServicesItems } from '../../routes/services/get_services/get_services_items';
 import { ApmDocumentType } from '../../../common/document_type';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { SERVICE_NAME } from '../../../common/es_fields/apm';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { getExitSpanChangePoints, getServiceChangePoints } from './get_change_points';
 import { buildApmToolResources } from '../utils/build_apm_tool_resources';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
@@ -21,10 +26,12 @@ import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../
 export function registerDataProviders({
   core,
   plugins,
+  config,
   logger,
 }: {
   core: CoreSetup<APMPluginStartDependencies>;
   plugins: APMPluginSetupDependencies;
+  config: APMConfig;
   logger: Logger;
 }) {
   const { observabilityAgentBuilder } = plugins;
@@ -69,15 +76,19 @@ export function registerDataProviders({
         logger,
       });
 
+      const startMs = parseDatemath(start);
+      const endMs = parseDatemath(end);
+      const filter = [
+        ...termQuery(SERVICE_NAME, serviceName),
+        ...environmentQuery(serviceEnvironment ?? ENVIRONMENT_ALL.value),
+      ];
+
       return getApmDownstreamDependencies({
         apmEventClient,
         randomSampler,
-        arguments: {
-          serviceName,
-          serviceEnvironment: serviceEnvironment ? serviceEnvironment : ENVIRONMENT_ALL.value,
-          start,
-          end,
-        },
+        start: startMs,
+        end: endMs,
+        filter,
       });
     }
   );
@@ -168,6 +179,28 @@ export function registerDataProviders({
         rollupInterval: getRollupIntervalForTimeRange(startMs, endMs),
         useDurationSummary: true, // Note: This will not work for pre 8.7 data. See: https://github.com/elastic/kibana/issues/167578
         searchQuery,
+      });
+    }
+  );
+
+  observabilityAgentBuilder.registerDataProvider(
+    'apmServiceTopology',
+    async ({ request, serviceName, direction, start, end }) => {
+      const { apmEventClient } = await buildApmToolResources({
+        core,
+        plugins,
+        request,
+        logger,
+      });
+
+      return getApmServiceTopology({
+        apmEventClient,
+        config,
+        logger,
+        serviceName,
+        direction: direction ?? 'downstream',
+        start,
+        end,
       });
     }
   );

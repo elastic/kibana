@@ -21,4 +21,6 @@ export * from './tools/get_index_info/field_discovery';
 export * from './tools/get_log_change_points/log_change_points';
 export * from './tools/get_metric_change_points/metric_change_points';
 export * from './tools/get_trace_change_points/trace_change_points';
+export * from './tools/get_service_topology/topology';
+export * from './tools/get_service_topology/topology_trace_isolation';
 export * from './tools/get_runtime_metrics/runtime_metrics';

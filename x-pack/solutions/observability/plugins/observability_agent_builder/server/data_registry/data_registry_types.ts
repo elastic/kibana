@@ -38,14 +38,17 @@ interface ServiceSummary {
   deployments: Array<{ '@timestamp': string }>;
 }
 
-export interface APMDownstreamDependency {
+interface ConnectionMetricValues {
+  errorRate?: number;
+  latencyMs?: number;
+  throughputPerMin?: number;
+}
+
+export interface APMDownstreamDependency extends ConnectionMetricValues {
   'service.name'?: string;
   'span.destination.service.resource': string;
   'span.type'?: string;
   'span.subtype'?: string;
-  errorRate?: number;
-  latencyMs?: number;
-  throughputPerMin?: number;
 }
 
 interface APMErrorSample {
@@ -132,6 +135,26 @@ interface InfraHostsResponse {
   nodes: InfraEntityMetricsItem[];
 }
 
+interface ServiceTopologyNode {
+  'service.name': string;
+}
+
+interface ExternalNode {
+  'span.destination.service.resource': string;
+  'span.type': string;
+  'span.subtype': string;
+}
+
+interface ServiceTopologyConnection {
+  source: ServiceTopologyNode | ExternalNode;
+  target: ServiceTopologyNode | ExternalNode;
+  metrics?: ConnectionMetricValues;
+}
+
+export interface ServiceTopologyResponse {
+  connections: ServiceTopologyConnection[];
+}
+
 export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrorDetails: (params: {
     request: KibanaRequest;
@@ -195,4 +218,12 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     query: Record<string, unknown> | undefined;
     hostNames?: string[];
   }) => Promise<InfraHostsResponse>;
+
+  apmServiceTopology: (params: {
+    request: KibanaRequest;
+    serviceName: string;
+    direction?: 'downstream' | 'upstream' | 'both';
+    start: string;
+    end: string;
+  }) => Promise<ServiceTopologyResponse>;
 }
