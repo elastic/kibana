@@ -34,6 +34,7 @@ export const bulkCreate = async (
     authorization,
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
+    unifiedAttachmentTypeRegistry,
     services: { userActionService },
   } = clientArgs;
 
@@ -51,6 +52,7 @@ export const bulkCreate = async (
         query: attachment,
         persistableStateAttachmentTypeRegistry,
         externalReferenceAttachmentTypeRegistry,
+        unifiedAttachmentTypeRegistry,
       });
     });
 

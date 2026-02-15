@@ -32,6 +32,7 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
     authorization,
     persistableStateAttachmentTypeRegistry,
     externalReferenceAttachmentTypeRegistry,
+    unifiedAttachmentTypeRegistry,
     services: { userActionService },
   } = clientArgs;
 
@@ -52,6 +53,7 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
       query,
       persistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry,
     });
 
     const createdDate = new Date().toISOString();
