@@ -19,6 +19,8 @@ import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/
 
 import kbnDatemath from '@kbn/datemath';
 import { tags } from '@kbn/scout';
+import type { EvaluatorParams } from '@kbn/evals/src/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { evaluate } from '../src/evaluate';
 import type { SignificantEventsEvaluationExample } from './significant_events_datasets';
 import { SIGNIFICANT_EVENTS_DATASETS } from './significant_events_datasets';
@@ -31,10 +33,24 @@ const ALLOWED_CATEGORIES = [
   SIGNIFICANT_EVENT_TYPE_SECURITY,
 ];
 
+type SignificantEventsQuery = Awaited<
+  ReturnType<typeof generateSignificantEvents>
+>['queries'][number];
+
 const codeBasedEvaluator = {
   name: 'significant_events_code_evaluator',
   kind: 'CODE' as const,
-  evaluate: async ({ output, esClient, input, metadata }: any) => {
+  evaluate: async ({
+    output,
+    esClient,
+    input,
+    metadata,
+  }: EvaluatorParams<
+    SignificantEventsEvaluationExample,
+    SignificantEventsQuery | SignificantEventsQuery[]
+  > & {
+    esClient: ElasticsearchClient;
+  }) => {
     const queries = Array.isArray(output) ? output : [output];
 
     if (queries.length === 0 || !queries[0] || !queries[0].kql) {
@@ -73,7 +89,8 @@ const codeBasedEvaluator = {
           index: metadata.test_index,
           q: kql,
         });
-        const hits = searchResult.hits.total.value;
+        const total = searchResult.hits.total;
+        const hits = typeof total === 'number' ? total : total?.value ?? 0;
         if (hits > 0) {
           isExecutionHit = true;
           executionHitCount++;
@@ -148,7 +165,7 @@ evaluate.describe(
           evaluate(
             example.input.stream_name,
             async ({
-              phoenixClient,
+              executorClient,
               evaluators,
               esClient,
               inferenceClient,
@@ -161,7 +178,7 @@ evaluate.describe(
               await esClient.indices.createDataStream({ name: testIndex });
 
               let bulkBody;
-              if ((example.input as any).ingest_mode === 'single_doc') {
+              if (example.input.ingest_mode === 'single_doc') {
                 const message = example.input.sample_logs.join('\n');
                 bulkBody = [
                   { create: { _index: testIndex } },
@@ -179,15 +196,15 @@ evaluate.describe(
               }
               await esClient.bulk({ refresh: true, body: bulkBody });
 
-              await phoenixClient.runExperiment(
+              await executorClient.runExperiment(
                 {
                   dataset: {
                     name: `sig_events: ${example.input.stream_name}`,
-                    description: example.input.feature_description,
+                    description: example.input.stream_description,
                     examples: [
                       {
                         input: example.input,
-                        output: example.output as unknown as Record<string, unknown>,
+                        output: example.output,
                         metadata: {
                           ...example.metadata,
                           test_index: testIndex,
@@ -206,7 +223,7 @@ evaluate.describe(
                       logger,
                       signal: new AbortController().signal,
                       systemPrompt: significantEventsPrompt,
-                      features: [],
+                      features: example.input.features,
                     });
 
                     // The task should return the array of generated queries
@@ -248,10 +265,10 @@ evaluate.describe(
 
     evaluate(
       'empty datastream',
-      async ({ phoenixClient, evaluators, esClient, inferenceClient, logger, apiServices }) => {
+      async ({ executorClient, evaluators, esClient, inferenceClient, logger, apiServices }) => {
         const testIndex = `logs-sig-events-test-${Date.now()}`;
         await esClient.indices.createDataStream({ name: testIndex });
-        await phoenixClient.runExperiment(
+        await executorClient.runExperiment(
           {
             dataset: {
               name: 'sig_events: empty datastream',
