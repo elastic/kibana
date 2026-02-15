@@ -55,7 +55,7 @@ export const setTabs: InternalStateThunkActionCreator<
     {
       runtimeStateManager,
       tabsStorageManager,
-      createTabContextAwarenessToolkit,
+      getContextAwarenessToolkit,
       services: { profilesManager, ebtManager },
     }
   ) {
@@ -93,7 +93,7 @@ export const setTabs: InternalStateThunkActionCreator<
       runtimeStateManager.tabs.byId[tab.id] = createTabRuntimeState({
         profilesManager,
         ebtManager,
-        toolkit: createTabContextAwarenessToolkit({ tabId: tab.id, dispatch }),
+        toolkit: getContextAwarenessToolkit(tab.id),
         initialValues: {
           unifiedHistogramLayoutPropsMap: tab.duplicatedFromId
             ? selectInitialUnifiedHistogramLayoutPropsMap(runtimeStateManager, tab.duplicatedFromId)

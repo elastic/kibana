@@ -34,6 +34,7 @@ import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverContextAwarenessToolkit } from '../../../../context_awareness/toolkit';
 import { type RuntimeStateManager, selectTabRuntimeInternalState } from './runtime_state';
+import { createContextAwarenessToolkit } from './create_context_awareness_toolkit';
 import {
   TabsBarVisibility,
   type DiscoverInternalState,
@@ -552,21 +553,24 @@ export interface InternalStateDependencies {
   urlStateStorage: IKbnUrlStateStorage;
   tabsStorageManager: TabsStorageManager;
   searchSessionManager: DiscoverSearchSessionManager;
-  createTabContextAwarenessToolkit: (params: {
-    tabId: string;
-    dispatch: InternalStateDispatch;
-  }) => DiscoverContextAwarenessToolkit;
   getInternalState$: () => Observable<DiscoverInternalState>;
+  getContextAwarenessToolkit: (tabId: string) => DiscoverContextAwarenessToolkit;
 }
 
 const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
 
 export const createInternalStateStore = (
-  options: Omit<InternalStateDependencies, 'getInternalState$'>
+  options: Omit<InternalStateDependencies, 'getInternalState$' | 'getContextAwarenessToolkit'>
 ) => {
   const optionsWithStore: InternalStateDependencies = {
     ...options,
     getInternalState$: () => from(internalState),
+    getContextAwarenessToolkit: (tabId: string) => {
+      return createContextAwarenessToolkit({
+        internalState,
+        tabId,
+      });
+    },
   };
 
   const internalState = configureStore({

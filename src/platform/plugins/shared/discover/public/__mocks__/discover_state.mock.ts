@@ -83,28 +83,6 @@ function createInternalStateStoreMock({
     urlStateStorage: stateStorageContainer,
     tabsStorageManager,
     searchSessionManager,
-    createTabContextAwarenessToolkit: ({ tabId, dispatch }) => ({
-      actions: {
-        openInNewTab: (params) => {
-          void dispatch(internalStateActions.openInNewTab(params));
-        },
-        updateESQLQuery: (queryOrUpdater) => {
-          dispatch(internalStateActions.updateESQLQuery({ tabId, queryOrUpdater }));
-        },
-        updateAdHocDataViews: async (adHocDataViews) => {
-          dispatch(internalStateActions.setAdHocDataViews(adHocDataViews));
-        },
-        setExpandedDoc: (record, options) => {
-          dispatch(
-            internalStateActions.setExpandedDoc({
-              tabId,
-              expandedDoc: record,
-              initialDocViewerTabId: options?.initialTabId,
-            })
-          );
-        },
-      },
-    }),
   });
 
   return {
