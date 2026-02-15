@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 
 import { GrokdebuggerRequest } from '../../../models/grokdebugger_request';
@@ -47,8 +48,16 @@ export function registerGrokSimulateRoute(framework: KibanaFramework) {
         return response.ok({
           body: grokdebuggerResponse,
         });
-      } catch (error) {
-        return handleEsError({ error, response });
+      } catch (error: unknown) {
+        if (error instanceof errors.ElasticsearchClientError) {
+          return handleEsError({ error, response });
+        }
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: error instanceof Error ? error.message : String(error),
+          },
+        });
       }
     }
   );

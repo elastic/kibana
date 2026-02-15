@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { registerGrokSimulateRoute } from './register_grok_simulate_route';
+import type { PluginInitializerContext } from '@kbn/core/public';
 
-export function registerGrokdebuggerRoutes(framework) {
-  registerGrokSimulateRoute(framework);
+import { GrokDebuggerUIPlugin } from './plugin';
+
+export function plugin(_initializerContext: PluginInitializerContext) {
+  return new GrokDebuggerUIPlugin();
 }
