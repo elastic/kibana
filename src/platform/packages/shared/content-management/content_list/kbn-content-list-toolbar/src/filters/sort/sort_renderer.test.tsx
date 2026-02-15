@@ -183,7 +183,7 @@ describe('SortRenderer', () => {
       expect(screen.getByText('Active → Draft')).toBeInTheDocument();
     });
 
-    it('uses generic labels for non-title fields when labels are not provided', () => {
+    it('uses date labels for date-like fields when labels are not provided', () => {
       const Wrapper = createWrapper({
         sortFields: [{ field: 'updatedAt', name: 'Last updated' }],
       });
@@ -195,16 +195,51 @@ describe('SortRenderer', () => {
 
       fireEvent.click(screen.getByTestId('contentListSortRenderer'));
 
-      // Without explicit labels, non-title fields get generic labels.
+      // Date-like fields get date-specific labels.
+      expect(screen.getByRole('option', { name: /Oldest first/i })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: /Newest first/i })).toBeInTheDocument();
+      // No generic ascending/descending labels.
       expect(
-        screen.getByRole('option', { name: /Last updated \(ascending\)/i })
-      ).toBeInTheDocument();
+        screen.queryByRole('option', { name: /Last updated \(ascending\)/i })
+      ).not.toBeInTheDocument();
       expect(
-        screen.getByRole('option', { name: /Last updated \(descending\)/i })
-      ).toBeInTheDocument();
-      // No heuristic date labels.
-      expect(screen.queryByRole('option', { name: /Old-Recent/i })).not.toBeInTheDocument();
-      expect(screen.queryByRole('option', { name: /Recent-Old/i })).not.toBeInTheDocument();
+        screen.queryByRole('option', { name: /Last updated \(descending\)/i })
+      ).not.toBeInTheDocument();
+    });
+
+    it('uses generic labels for non-title, non-date fields', () => {
+      const Wrapper = createWrapper({
+        sortFields: [{ field: 'status', name: 'Status' }],
+      });
+      render(
+        <Wrapper>
+          <SortRenderer query={mockQuery} />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('contentListSortRenderer'));
+
+      // Non-title, non-date fields get generic labels.
+      expect(screen.getByRole('option', { name: /Status \(ascending\)/i })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: /Status \(descending\)/i })).toBeInTheDocument();
+    });
+
+    it('does not apply date labels to fields that merely end with lowercase "at"', () => {
+      const Wrapper = createWrapper({
+        sortFields: [{ field: 'format', name: 'Format' }],
+      });
+      render(
+        <Wrapper>
+          <SortRenderer query={mockQuery} />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('contentListSortRenderer'));
+
+      // "format" ends in "at" but is not a date field — should use generic labels.
+      expect(screen.getByRole('option', { name: /Format \(ascending\)/i })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: /Format \(descending\)/i })).toBeInTheDocument();
+      expect(screen.queryByRole('option', { name: /Oldest first/i })).not.toBeInTheDocument();
     });
   });
 
