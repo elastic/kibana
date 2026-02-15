@@ -3903,44 +3903,56 @@
     react-redux "^9.2.0"
     redux "^5.0.1"
 
-"@hey-api/codegen-core@^0.5.2":
-  version "0.5.5"
-  resolved "https://registry.yarnpkg.com/@hey-api/codegen-core/-/codegen-core-0.5.5.tgz#f59e233442c9f151d8a6a4c32c13ee684ad06c38"
-  integrity sha512-f2ZHucnA2wBGAY8ipB4wn/mrEYW+WUxU2huJmUvfDO6AE2vfILSHeF3wCO39Pz4wUYPoAWZByaauftLrOfC12Q==
+"@hey-api/codegen-core@0.6.1":
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/@hey-api/codegen-core/-/codegen-core-0.6.1.tgz#90d477d525cf7f50ef49416f90d81416a69eba04"
+  integrity sha512-khTIpxhKEAqmRmeLUnAFJQs4Sbg9RPokovJk9rRcC8B5MWH1j3/BRSqfpAIiJUBDU1+nbVg2RVCV+eQ174cdvw==
   dependencies:
-    "@hey-api/types" "0.1.2"
+    "@hey-api/types" "0.1.3"
     ansi-colors "4.1.3"
     c12 "3.3.3"
     color-support "1.1.3"
 
-"@hey-api/json-schema-ref-parser@1.2.2":
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/@hey-api/json-schema-ref-parser/-/json-schema-ref-parser-1.2.2.tgz#9609373215dd868d42d89561c9b906c64f5d9239"
-  integrity sha512-oS+5yAdwnK20lSeFO1d53Ku+yaGCsY8PcrmSq2GtSs3bsBfRnHAbpPKSVzQcaxAOrzj5NB+f34WhZglVrNayBA==
+"@hey-api/json-schema-ref-parser@1.2.3":
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/@hey-api/json-schema-ref-parser/-/json-schema-ref-parser-1.2.3.tgz#2029a7d1a5ee5d901534225e7189ed6dfcc56c37"
+  integrity sha512-gRbyyTjzpFVNmbD+Upn3w4dWV+bCXGJbff3A7leDO/tfNxSz1xIb6Ad/5UKtvEW9kDt/2Uyc3XkFZ6rpafvbfQ==
   dependencies:
     "@jsdevtools/ono" "^7.1.3"
     "@types/json-schema" "^7.0.15"
     js-yaml "^4.1.1"
     lodash "^4.17.21"
 
-"@hey-api/openapi-ts@0.90.3":
-  version "0.90.3"
-  resolved "https://registry.yarnpkg.com/@hey-api/openapi-ts/-/openapi-ts-0.90.3.tgz#df0e65cbbe70e4e6456a0e95441426ccb0829b59"
-  integrity sha512-9UT347hVQaph/jwAJJI2l+istWDLw540PTIHUevq9xzRYnHAxC1Aprtv4CYoWkeFv9aMcMrmAbNH7ANPoxEK2A==
+"@hey-api/openapi-ts@0.91.1":
+  version "0.91.1"
+  resolved "https://registry.yarnpkg.com/@hey-api/openapi-ts/-/openapi-ts-0.91.1.tgz#8820d76678b9bc61d7b1e47dd3512f8f406abd1f"
+  integrity sha512-d16WR35UtthK/ihAIwJaKxrj/zvb5LbYwtVJCyZFFMin2qzDU8Y3Lpk78ensAykrLoaDLzpd0iIyt9JCP5Qmww==
   dependencies:
-    "@hey-api/codegen-core" "^0.5.2"
-    "@hey-api/json-schema-ref-parser" "1.2.2"
+    "@hey-api/codegen-core" "0.6.1"
+    "@hey-api/json-schema-ref-parser" "1.2.3"
+    "@hey-api/shared" "0.1.1"
+    "@hey-api/types" "0.1.3"
     ansi-colors "4.1.3"
-    c12 "3.3.3"
     color-support "1.1.3"
     commander "14.0.2"
+
+"@hey-api/shared@0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@hey-api/shared/-/shared-0.1.1.tgz#0f5b591c81a931da0fda837338b866bb07e2c3fd"
+  integrity sha512-/irgNGXw9TL5aKB3S7jCLgh07vgDFkYjSjz7vEWO9xEe6MUhx76zSFzkPspk2UrLghYayvmaKPf1ky4XjNI9ZQ==
+  dependencies:
+    "@hey-api/codegen-core" "0.6.1"
+    "@hey-api/json-schema-ref-parser" "1.2.3"
+    "@hey-api/types" "0.1.3"
+    ansi-colors "4.1.3"
+    cross-spawn "7.0.6"
     open "11.0.0"
     semver "7.7.3"
 
-"@hey-api/types@0.1.2":
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/@hey-api/types/-/types-0.1.2.tgz#85dc7d034241a65ff1898d6cfce6f567d4fd6589"
-  integrity sha512-uNNtiVAWL7XNrV/tFXx7GLY9lwaaDazx1173cGW3+UEaw4RUPsHEmiB4DSpcjNxMIcrctfz2sGKLnVx5PBG2RA==
+"@hey-api/types@0.1.3":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@hey-api/types/-/types-0.1.3.tgz#4bd16f4e6eb27a0bd1f0da8a96e8b991b92b99c4"
+  integrity sha512-mZaiPOWH761yD4GjDQvtjS2ZYLu5o5pI1TVSvV/u7cmbybv51/FVtinFBeaE1kFQCKZ8OQpn2ezjLBJrKsGATw==
 
 "@hono/node-server@^1.19.7":
   version "1.19.9"
@@ -18599,7 +18611,7 @@ cronstrue@3.9.0:
   resolved "https://registry.yarnpkg.com/cronstrue/-/cronstrue-3.9.0.tgz#a3c3ae3e218235a123c80de8db95a93e45a9d8ba"
   integrity sha512-T3S35zmD0Ai2B4ko6+mEM+k9C6tipe2nB9RLiGT6QL2Wn0Vsn2cCZAC8Oeuf4CaE00GZWVdpYitbpWCNlIWqdA==
 
-cross-spawn@^7.0.0, cross-spawn@^7.0.2, cross-spawn@^7.0.3, cross-spawn@^7.0.5, cross-spawn@^7.0.6:
+cross-spawn@7.0.6, cross-spawn@^7.0.0, cross-spawn@^7.0.2, cross-spawn@^7.0.3, cross-spawn@^7.0.5, cross-spawn@^7.0.6:
   version "7.0.6"
   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-7.0.6.tgz#8a58fe78f00dcd70c370451759dfbfaf03e8ee9f"
   integrity sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==
