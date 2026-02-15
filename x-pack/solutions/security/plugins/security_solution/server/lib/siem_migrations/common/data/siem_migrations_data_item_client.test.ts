@@ -30,7 +30,9 @@ describe('SiemMigrationsDataItemClient', () => {
     elasticsearchServiceMock.createCustomClusterClient() as unknown as IScopedClusterClient;
 
   const logger = loggingSystemMock.createLogger();
-  const indexNameProvider = jest.fn().mockReturnValue('.kibana-siem-rule-migrations-rules-default');
+  const indexNameProvider = jest
+    .fn()
+    .mockResolvedValue('.kibana-siem-rule-migrations-rules-default');
   const currentUser = {
     userName: 'testUser',
     profile_uid: 'testProfileUid',
@@ -117,6 +119,57 @@ describe('SiemMigrationsDataItemClient', () => {
         },
         _source: false,
       });
+    });
+  });
+
+  describe('searchBatches', () => {
+    it('rolls forward PIT id between pages', async () => {
+      (esClient.asInternalUser.openPointInTime as jest.Mock).mockResolvedValue({ id: 'pit-1' });
+
+      const searchMock = esClient.asInternalUser.search as unknown as jest.MockedFn<
+        typeof SearchApi
+      >;
+      searchMock
+        .mockResolvedValueOnce({
+          pit_id: 'pit-2',
+          hits: {
+            total: { value: 2 },
+            hits: [
+              { _id: '1', _source: { migration_id: 'mig-1' }, sort: ['a'] },
+              { _id: '2', _source: { migration_id: 'mig-1' }, sort: ['b'] },
+            ],
+          },
+        } as unknown as SearchApiResponse)
+        .mockResolvedValueOnce({
+          pit_id: 'pit-3',
+          hits: {
+            total: { value: 0 },
+            hits: [],
+          },
+        } as unknown as SearchApiResponse);
+
+      const { next } = client.searchBatches('mig-1');
+
+      const firstPage = await next();
+      expect(firstPage).toHaveLength(2);
+      expect(searchMock).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ pit: { id: 'pit-1', keep_alive: '30s' } })
+      );
+
+      const secondPage = await next();
+      expect(secondPage).toEqual([]);
+      expect(searchMock).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          pit: { id: 'pit-2', keep_alive: '30s' },
+          search_after: ['b'],
+        })
+      );
+
+      const thirdPage = await next();
+      expect(thirdPage).toEqual([]);
+      expect(searchMock).toHaveBeenCalledTimes(2);
     });
   });
 });
