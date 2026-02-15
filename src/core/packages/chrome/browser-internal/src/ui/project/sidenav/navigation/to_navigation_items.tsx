@@ -129,9 +129,8 @@ export const toNavigationItems = (
   const toMenuItem = (navNode: ChromeProjectNavigationNode): MenuItem[] | MenuItem | null => {
     if (!navNode) return null;
 
-    if (navNode.sideNavStatus === 'hidden') {
-      return null;
-    }
+    // Track if this item should be forced to overflow ("More" menu)
+    const forceOverflow = navNode.sideNavStatus === 'hidden';
 
     // This was like a sub-section title without a link in the old navigation.
     // In the new navigation, just flatten it into its children, since we must have links in the primary items.
@@ -243,6 +242,7 @@ export const toNavigationItems = (
       sections: secondarySections,
       'data-test-subj': getTestSubj(navNode),
       badgeType: navNode.badgeType,
+      forceOverflow,
     } as MenuItem;
   };
 

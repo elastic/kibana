@@ -284,6 +284,39 @@ export type SolutionNavigationDefinitions = {
 };
 
 /**
+ * Ordering and visibility configuration for navigation items.
+ * Used to reorder and hide top-level navigation items without modifying the tree structure.
+ */
+export interface NavigationOrdering {
+  /** Ordered array of top-level navigation item IDs. Items not in this list appear at the end. */
+  order: string[];
+  /** IDs of items to hide from the main navigation (moved to "More" menu). */
+  hiddenIds: string[];
+}
+
+/**
+ * Per-solution navigation ordering configurations.
+ */
+export type SolutionNavigationOrderings = {
+  [id in SolutionId]?: NavigationOrdering;
+};
+
+/**
+ * Simplified navigation item info for UI components that only need basic item data.
+ * Used by the navigation editor modal.
+ */
+export interface NavigationItemInfo {
+  /** Unique identifier for the navigation item */
+  id: string;
+  /** Display title of the item */
+  title: string;
+  /** Whether the item is hidden (moved to "More" menu) */
+  hidden: boolean;
+  /** Whether this is a core item that cannot be reordered or hidden */
+  locked: boolean;
+}
+
+/**
  * Temporary helper interface while we have to maintain both the legacy side navigation
  * and the new "solution view" one. The legacy uses EuiSideNavItemType and its properties are not fully compatible
  * with the NodeDefinition. Solution teams declare their "classic" navigation using the EuiSideNavItemType.

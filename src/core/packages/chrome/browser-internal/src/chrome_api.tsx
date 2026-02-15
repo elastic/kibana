@@ -78,12 +78,16 @@ export function createChromeApi({
       projectNavigation.initNavigation(id, navigationTree$, config);
     },
     getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),
+    getNavigationItems$: () => projectNavigation.getNavigationItems$(),
     setBreadcrumbs: (breadcrumbs, params) =>
       projectNavigation.setProjectBreadcrumbs(breadcrumbs, params),
     getBreadcrumbs$: () => projectNavigation.getProjectBreadcrumbs$(),
     getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
     updateSolutionNavigations: projectNavigation.updateSolutionNavigations,
+    setNavigationOrdering: projectNavigation.setNavigationOrdering,
     changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,
+    setTemporaryOrdering: projectNavigation.setTemporaryOrdering,
+    clearTemporaryOrdering: projectNavigation.clearTemporaryOrdering,
   };
 
   return {

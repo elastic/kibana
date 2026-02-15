@@ -17,6 +17,8 @@ import type {
   AppDeepLinkId,
   NavigationTreeDefinition,
   NavigationTreeDefinitionUI,
+  NavigationOrdering,
+  NavigationItemInfo,
   CloudURLs,
   SolutionNavigationDefinitions,
   SolutionId,
@@ -147,6 +149,11 @@ export interface InternalChromeStart extends ChromeStart {
     getNavigationTreeUi$: () => Observable<NavigationTreeDefinitionUI>;
 
     /**
+     * Returns a simplified list of navigation items for the customize navigation modal.
+     */
+    getNavigationItems$: () => Observable<NavigationItemInfo[]>;
+
+    /**
      * Returns an observable of the active nodes in the project navigation.
      */
     getActiveNavigationNodes$(): Observable<ChromeProjectNavigationNode[][]>;
@@ -174,6 +181,31 @@ export interface InternalChromeStart extends ChromeStart {
      * If `false`, the new solution navigation definitions will be merged with the existing ones.
      */
     updateSolutionNavigations(solutionNavs: SolutionNavigationDefinitions, replace?: boolean): void;
+
+    /**
+     * Set navigation ordering for a solution.
+     * Pass undefined to clear the ordering and revert to the original order.
+     *
+     * @param id The solution id to set the ordering for.
+     * @param ordering The ordering configuration (order array and hidden IDs), or undefined to reset.
+     */
+    setNavigationOrdering(id: SolutionId, ordering: NavigationOrdering | undefined): void;
+
+    /**
+     * Set a temporary navigation ordering for live preview without persisting to storage.
+     * Call clearTemporaryOrdering to revert, or setNavigationOrdering to persist.
+     *
+     * @param id The solution id to set the temporary ordering for.
+     * @param ordering The ordering configuration for preview.
+     */
+    setTemporaryOrdering(id: SolutionId, ordering: NavigationOrdering): void;
+
+    /**
+     * Clear the temporary navigation ordering and revert to the persisted state.
+     *
+     * @param id The solution id to clear the temporary ordering for.
+     */
+    clearTemporaryOrdering(id: SolutionId): void;
 
     /**
      * Change the active solution navigation.

@@ -94,6 +94,11 @@ export interface MenuItem {
    * (optional) The secondary menu sections belonging to the menu item.
    */
   sections?: SecondaryMenuSection[];
+  /**
+   * (optional) If true, this item will always appear in the "More" overflow menu,
+   * regardless of available space. Used to let users hide items from the primary nav.
+   */
+  forceOverflow?: boolean;
 }
 
 /**

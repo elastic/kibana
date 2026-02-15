@@ -145,6 +145,32 @@ export class NavigationPublicPlugin
           );
         })
       ),
+      setNavigationOrdering: (id, ordering) => {
+        if (!this.isSolutionNavEnabled) return;
+        if (!this.coreStart) throw new Error('coreStart is not available');
+
+        const { project } = this.coreStart.chrome as InternalChromeStart;
+        project.setNavigationOrdering(id, ordering);
+      },
+      setTemporaryOrdering: (id, ordering) => {
+        if (!this.isSolutionNavEnabled) return;
+        if (!this.coreStart) throw new Error('coreStart is not available');
+
+        const { project } = this.coreStart.chrome as InternalChromeStart;
+        project.setTemporaryOrdering(id, ordering);
+      },
+      clearTemporaryOrdering: (id) => {
+        if (!this.isSolutionNavEnabled) return;
+        if (!this.coreStart) throw new Error('coreStart is not available');
+
+        const { project } = this.coreStart.chrome as InternalChromeStart;
+        project.clearTemporaryOrdering(id);
+      },
+      getNavigationItems$: () => {
+        if (!this.coreStart) throw new Error('coreStart is not available');
+        const { project } = this.coreStart.chrome as InternalChromeStart;
+        return project.getNavigationItems$();
+      },
     };
   }
 

@@ -7,17 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Navigation, type NavigationProps } from './src/components/navigation';
 export {
   CustomizeNavigationModal,
   type CustomizeNavigationModalProps,
-} from './src/components/customize_navigation_modal';
-export { useNavigation } from './src/hooks/use_navigation';
-export type {
-  BadgeType,
-  MenuItem,
-  NavigationStructure,
-  SecondaryMenuItem,
-  SecondaryMenuSection,
-  SideNavLogo,
-} from './types';
+} from './customize_navigation_modal';

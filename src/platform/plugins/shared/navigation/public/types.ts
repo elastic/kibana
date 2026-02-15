@@ -10,7 +10,12 @@
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { Observable } from 'rxjs';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
+import type {
+  SolutionNavigationDefinition,
+  NavigationOrdering,
+  NavigationItemInfo,
+  SolutionId,
+} from '@kbn/core-chrome-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
@@ -52,6 +57,14 @@ export interface NavigationPublicStart {
   addSolutionNavigation: (solutionNavigationAgg: AddSolutionNavigationArg) => void;
   /** Flag to indicate if the solution navigation is enabled.*/
   isSolutionNavEnabled$: Observable<boolean>;
+  /** Set navigation ordering for an existing solution. Pass undefined to reset to original order. */
+  setNavigationOrdering: (id: SolutionId, ordering: NavigationOrdering | undefined) => void;
+  /** Set a temporary navigation ordering for live preview without persisting. */
+  setTemporaryOrdering: (id: SolutionId, ordering: NavigationOrdering) => void;
+  /** Clear the temporary navigation ordering and revert to persisted state. */
+  clearTemporaryOrdering: (id: SolutionId) => void;
+  /** Get a simplified list of navigation items (id, title, hidden) for the editor modal. */
+  getNavigationItems$: () => Observable<NavigationItemInfo[]>;
 }
 
 export interface NavigationPublicSetupDependencies {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, type ReactNode } from 'react';
+import React, { useMemo, useState, type ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -109,7 +109,17 @@ export const Navigation = ({
     items.primaryItems
   );
 
-  const setSize = visibleMenuItems.length + (overflowMenuItems.length > 0 ? 1 : 0);
+  // Apply forceOverflow filtering after responsive calculation to keep height cache stable
+  const filteredVisibleMenuItems = useMemo(
+    () => visibleMenuItems.filter((item) => !item.forceOverflow),
+    [visibleMenuItems]
+  );
+  const filteredOverflowMenuItems = useMemo(
+    () => [...visibleMenuItems.filter((item) => item.forceOverflow), ...overflowMenuItems],
+    [visibleMenuItems, overflowMenuItems]
+  );
+
+  const setSize = filteredVisibleMenuItems.length + (filteredOverflowMenuItems.length > 0 ? 1 : 0);
 
   const { getIsNewPrimary, getIsNewSecondary } = useNewItems(
     [...items.primaryItems, ...items.footerItems],
@@ -141,7 +151,7 @@ export const Navigation = ({
         <SideNav.PrimaryMenu ref={primaryMenuRef} isCollapsed={isCollapsed}>
           {({ mainNavigationInstructionsId }) => (
             <>
-              {visibleMenuItems.map((item, index) => {
+              {filteredVisibleMenuItems.map((item, index) => {
                 const { sections, ...itemProps } = item;
                 const isFirstItem = index === 0;
                 const ariaDescribedBy = isFirstItem ? mainNavigationInstructionsId : undefined;
@@ -218,7 +228,7 @@ export const Navigation = ({
                 );
               })}
 
-              {overflowMenuItems.length > 0 && (
+              {filteredOverflowMenuItems.length > 0 && (
                 <SideNav.Popover
                   hasContent
                   isSidePanelOpen={false}
@@ -230,17 +240,17 @@ export const Navigation = ({
                   persistent
                   trigger={
                     <SideNav.PrimaryMenu.Item
-                      aria-posinset={visibleMenuItems.length + 1}
+                      aria-posinset={filteredVisibleMenuItems.length + 1}
                       aria-setsize={setSize}
                       data-test-subj={moreMenuTriggerTestSubj}
                       hasContent
                       iconType="boxesVertical"
                       id={MORE_MENU_ID}
                       isCollapsed={isCollapsed}
-                      isHighlighted={overflowMenuItems.some(
+                      isHighlighted={filteredOverflowMenuItems.some(
                         (item) => item.id === visuallyActivePageId
                       )}
-                      isNew={overflowMenuItems.some((item) => getIsNewPrimary(item.id))}
+                      isNew={filteredOverflowMenuItems.some((item) => getIsNewPrimary(item.id))}
                       label={i18n.translate('core.ui.chrome.sideNavigation.moreMenuItemLabel', {
                         defaultMessage: 'More',
                       })}
@@ -263,7 +273,7 @@ export const Navigation = ({
                       >
                         {({ panelNavigationInstructionsId, panelEnterSubmenuInstructionsId }) => (
                           <SideNav.NestedSecondaryMenu.Section>
-                            {overflowMenuItems.map((item, index) => {
+                            {filteredOverflowMenuItems.map((item, index) => {
                               const hasSubmenu = getHasSubmenu(item);
                               const { sections, ...itemProps } = item;
                               const isFirstItem = index === 0;
@@ -297,7 +307,7 @@ export const Navigation = ({
                           </SideNav.NestedSecondaryMenu.Section>
                         )}
                       </SideNav.NestedSecondaryMenu.Panel>
-                      {overflowMenuItems.filter(getHasSubmenu).map((item) => (
+                      {filteredOverflowMenuItems.filter(getHasSubmenu).map((item) => (
                         <SideNav.NestedSecondaryMenu.Panel key={`submenu-${item.id}`} id={item.id}>
                           {({ panelNavigationInstructionsId }) => (
                             <>
