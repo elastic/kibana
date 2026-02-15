@@ -27,7 +27,8 @@ const KBN_ARCHIVES = {
     'x-pack/platform/plugins/shared/lens/test/scout/ui/fixtures/esql_conversion_dashboard.json',
 };
 const ESQL_CONVERSION_DASHBOARD_TEST_ID = 'dashboardListingTitleLink-ES|QL-Conversion-Dashboard';
-const METRIC_VISUALIZATION_ID = 'fb4626b8-d8ce-42d3-913a-081af94cfb51';
+const INLINE_METRIC_PANEL_ID = 'fb4626b8-d8ce-42d3-913a-081af94cfb51';
+const SAVED_METRIC_PANEL_ID = '3aef33a1-bcbc-4cd7-b2d9-fa678b2fefa5';
 
 test.describe('Lens ES|QL', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient, uiSettings, apiServices }) => {
@@ -50,22 +51,21 @@ test.describe('Lens ES|QL', { tag: tags.stateful.classic }, () => {
     await kbnClient.savedObjects.cleanStandardList();
   });
 
-  test('should display ES|QL conversion modal', async ({ browserAuth, page, pageObjects }) => {
+  test('should display ES|QL conversion modal for inline visualizations', async ({
+    browserAuth,
+    page,
+    pageObjects,
+  }) => {
     await browserAuth.loginAsPrivilegedUser();
 
     const { dashboard, lens } = pageObjects;
 
-    // Navigate to the test dashboard
     await dashboard.goto();
     await page.getByTestId(ESQL_CONVERSION_DASHBOARD_TEST_ID).click();
-
-    // Verify dashboard loaded with the test visualization
-    await dashboard.waitForPanelsToLoad(1);
-
-    // Enter edit mode to access visualization actions
+    await dashboard.waitForPanelsToLoad(2);
     await dashboard.switchToEditMode();
 
-    await dashboard.openInlineEditor(METRIC_VISUALIZATION_ID);
+    await dashboard.openInlineEditor(INLINE_METRIC_PANEL_ID);
 
     await lens.getConvertToEsqlButton().click();
 
@@ -75,7 +75,27 @@ test.describe('Lens ES|QL', { tag: tags.stateful.classic }, () => {
 
     await expect(lens.getConvertToEsqModal()).toBeHidden();
 
+    await lens.getApplyFlyoutButton().click();
+
     // TODO: Add conversion assertions once logic is implemented (https://github.com/elastic/kibana/pull/248078)
-    // For now, this test only verifies the UI flow up to modal interaction
+  });
+
+  test('should disable Convert to ES|QL button for visualizations saved to library', async ({
+    browserAuth,
+    page,
+    pageObjects,
+  }) => {
+    await browserAuth.loginAsPrivilegedUser();
+
+    const { dashboard, lens } = pageObjects;
+
+    await dashboard.goto();
+    await page.getByTestId(ESQL_CONVERSION_DASHBOARD_TEST_ID).click();
+    await dashboard.waitForPanelsToLoad(2);
+    await dashboard.switchToEditMode();
+
+    await dashboard.openInlineEditor(SAVED_METRIC_PANEL_ID);
+
+    await expect(lens.getConvertToEsqlButton()).toBeDisabled();
   });
 });
