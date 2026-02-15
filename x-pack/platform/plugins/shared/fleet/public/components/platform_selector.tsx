@@ -124,7 +124,29 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     <EuiCallOut
       title={i18n.translate('xpack.fleet.enrollmentInstructions.macCallout', {
         defaultMessage:
-          'We recommend against deploying this integration within Mac as it is currently not being supported.',
+          'Cloudbeat does not support macOS. This integration only supports Linux and Kubernetes deployments.',
+      })}
+      color="warning"
+      iconType="warning"
+    />
+  );
+
+  const windowsCallout = (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.windowsCallout', {
+        defaultMessage:
+          'Cloudbeat does not support Windows. This integration only supports Linux and Kubernetes deployments.',
+      })}
+      color="warning"
+      iconType="warning"
+    />
+  );
+
+  const debRpmCallout = (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.debRpmCallout', {
+        defaultMessage:
+          'While system packages (DEB/RPM) can be used for manual deployment, note that Cloudbeat only supports Linux and Kubernetes environments. For better upgrade capabilities, consider using TAR installers instead.',
       })}
       color="warning"
       iconType="warning"
@@ -208,12 +230,26 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
           </EuiFilterGroup>
         )}
         <EuiSpacer size="m" />
-        {['deb_aarch64', 'deb_x86_64', 'rpm_aarch64', 'rpm_x86_64'].includes(platform) && (
-          <>
-            {systemPackageCallout}
-            <EuiSpacer size="m" />
-          </>
-        )}
+        {['deb_aarch64', 'deb_x86_64', 'rpm_aarch64', 'rpm_x86_64'].includes(platform) &&
+          !(cloudSecurityIntegration?.integrationType ===
+            FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE ||
+            cloudSecurityIntegration?.integrationType ===
+              FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE) && (
+            <>
+              {systemPackageCallout}
+              <EuiSpacer size="m" />
+            </>
+          )}
+        {['deb_aarch64', 'deb_x86_64', 'rpm_aarch64', 'rpm_x86_64'].includes(platform) &&
+          (cloudSecurityIntegration?.integrationType ===
+            FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE ||
+            cloudSecurityIntegration?.integrationType ===
+              FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE) && (
+            <>
+              {debRpmCallout}
+              <EuiSpacer size="m" />
+            </>
+          )}
         {['mac_aarch64', 'mac_x86_64'].includes(platform) &&
           (cloudSecurityIntegration?.integrationType ===
             FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE ||
@@ -221,6 +257,16 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE) && (
             <>
               {macCallout}
+              <EuiSpacer size="m" />
+            </>
+          )}
+        {['windows', 'windows_msi'].includes(platform) &&
+          (cloudSecurityIntegration?.integrationType ===
+            FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE ||
+            cloudSecurityIntegration?.integrationType ===
+              FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE) && (
+            <>
+              {windowsCallout}
               <EuiSpacer size="m" />
             </>
           )}
