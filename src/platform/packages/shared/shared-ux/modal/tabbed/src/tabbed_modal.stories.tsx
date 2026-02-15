@@ -17,13 +17,16 @@ import {
 
 import { TabbedModal, type IModalTabDeclaration } from './tabbed_modal';
 
+const mock = new TabbedModalStorybookMock();
+const argTypes = mock.getArgumentTypes();
+const args = mock.getArguments();
+
 export default {
   title: 'Modal/Tabbed Modal',
   description: 'A controlled modal component that renders tabs',
+  args,
+  argTypes,
 };
-
-const mock = new TabbedModalStorybookMock();
-const argTypes = mock.getArgumentTypes();
 
 export const TrivialExample = {
   render: (params: TabbedModalStorybookParams) => {
@@ -181,6 +184,4 @@ const NonTrivialExampleComponent = (params: TabbedModalStorybookParams) => {
 
 export const NonTrivialExample = {
   render: (params: TabbedModalStorybookParams) => <NonTrivialExampleComponent {...params} />,
-
-  argTypes,
 };

@@ -17,6 +17,10 @@ import { KibanaNoDataPage as Component } from './kibana_no_data_page';
 import { KibanaNoDataPageProvider } from './services';
 import mdx from '../README.mdx';
 
+const mock = new KibanaNoDataPageStorybookMock();
+const args = mock.getArguments();
+const argTypes = mock.getArgumentTypes();
+
 export default {
   title: 'No Data/Page/Kibana',
   description: 'A component to display when there is no data available',
@@ -25,9 +29,9 @@ export default {
       page: mdx,
     },
   },
+  args,
+  argTypes,
 };
-
-const mock = new KibanaNoDataPageStorybookMock();
 
 export const Kibana = {
   render: (params: KibanaNoDataPageStorybookParams) => {
@@ -37,8 +41,6 @@ export const Kibana = {
       </KibanaNoDataPageProvider>
     );
   },
-
-  argTypes: mock.getArgumentTypes(),
 };
 
 export const LoadingState = {

@@ -16,6 +16,8 @@ import { AnalyticsNoDataPageProvider } from './services';
 import mdx from '../README.mdx';
 
 const mock = new AnalyticsNoDataPageStorybookMock();
+const args = mock.getArguments();
+const argTypes = mock.getArgumentTypes();
 
 export default {
   title: 'No Data/Page/Kibana',
@@ -25,6 +27,8 @@ export default {
       page: mdx,
     },
   },
+  args,
+  argTypes,
 };
 
 export const Analytics = {
@@ -35,6 +39,4 @@ export const Analytics = {
       </AnalyticsNoDataPageProvider>
     );
   },
-
-  argTypes: mock.getArgumentTypes(),
 };
