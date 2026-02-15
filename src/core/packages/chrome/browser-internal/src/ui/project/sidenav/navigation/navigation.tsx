@@ -30,6 +30,7 @@ export interface ChromeNavigationProps {
   // sidenav state
   isCollapsed: boolean;
   setWidth: (width: number) => void;
+  isEditing$: Observable<boolean>;
 
   // kibana deps
   basePath: BasePath;
@@ -39,9 +40,6 @@ export interface ChromeNavigationProps {
   navigationTree$: Observable<NavigationTreeDefinitionUI>;
   navLinks$: Observable<Readonly<ChromeNavLink[]>>;
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
-
-  // editing state (for portal rendering)
-  isEditing$: Observable<boolean>;
 
   // feedback
   isFeedbackEnabled$: Observable<boolean>;

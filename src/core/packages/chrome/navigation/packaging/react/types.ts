@@ -72,8 +72,6 @@ export interface MenuItem {
   badgeType?: BadgeType;
   /** Optional array of secondary menu sections for nested navigation. */
   sections?: SecondaryMenuSection[];
-  /** If true, item will always appear in the "More" overflow menu. */
-  forceOverflow?: boolean;
 }
 
 /**

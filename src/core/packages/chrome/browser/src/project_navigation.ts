@@ -106,7 +106,7 @@ export type CloudLinks = {
   [id in CloudLinkId]?: CloudLink;
 };
 
-export type SideNavNodeStatus = 'hidden' | 'visible';
+export type SideNavNodeStatus = 'hidden' | 'visible' | 'hiddenByUser';
 
 export type RenderAs = 'home' | 'panelOpener';
 
@@ -140,7 +140,9 @@ interface NodeDefinitionBase {
   breadcrumbStatus?: 'hidden' | 'visible';
   /**
    * Optional status to indicate if the node should be hidden in the side nav (but still present in the navigation tree).
-   * @default 'visible'
+   * - 'visible' (default): Node is shown normally
+   * - 'hidden': Node is completely hidden
+   * - 'hiddenByUser': Node is hidden by user customization (shown in overflow menu)
    */
   sideNavStatus?: SideNavNodeStatus;
   /**
@@ -158,6 +160,11 @@ interface NodeDefinitionBase {
    * (optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`, `new`).
    */
   badgeType?: BadgeType;
+
+  /**
+   * (optional) Whether this item is locked (cannot be reordered or hidden by user customization).
+   */
+  locked?: boolean;
 }
 
 /** @public */
@@ -284,33 +291,32 @@ export type SolutionNavigationDefinitions = {
 };
 
 /**
- * Ordering and visibility configuration for navigation items.
+ * Customization configuration for navigation items.
  * Used to reorder and hide top-level navigation items without modifying the tree structure.
  */
-export interface NavigationOrdering {
-  /** Ordered array of top-level navigation item IDs. Items not in this list appear at the end. */
+export interface NavigationCustomization {
+  /** Ordered array of top-level navigation item IDs. */
   order: string[];
-  /** IDs of items to hide from the main navigation (moved to "More" menu). */
+  /** IDs of items to hide from the main navigation (moved to overflow menu). */
   hiddenIds: string[];
 }
 
 /**
- * Per-solution navigation ordering configurations.
+ * Per-solution navigation customization configurations.
  */
-export type SolutionNavigationOrderings = {
-  [id in SolutionId]?: NavigationOrdering;
+export type SolutionNavigationCustomizations = {
+  [id in SolutionId]?: NavigationCustomization;
 };
 
 /**
- * Simplified navigation item info for UI components that only need basic item data.
- * Used by the navigation editor modal.
+ * Simplified navigation item info.
  */
 export interface NavigationItemInfo {
   /** Unique identifier for the navigation item */
   id: string;
-  /** Display title of the item */
+  /** Display title of the item. */
   title: string;
-  /** Whether the item is hidden (moved to "More" menu) */
+  /** Whether the item is hidden (moved to overflow menu). */
   hidden: boolean;
   /** Whether this is a core item that cannot be reordered or hidden */
   locked: boolean;

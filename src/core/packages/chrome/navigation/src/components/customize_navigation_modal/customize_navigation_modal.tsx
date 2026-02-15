@@ -15,7 +15,6 @@ import {
   EuiDroppable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -25,9 +24,11 @@ import {
   useGeneratedHtmlId,
   type DropResult,
 } from '@elastic/eui';
-import type { SolutionId, NavigationItemInfo, NavigationOrdering } from '@kbn/core-chrome-browser';
-import type { Observable } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
+import type {
+  SolutionId,
+  NavigationItemInfo,
+  NavigationCustomization,
+} from '@kbn/core-chrome-browser';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LockedItem } from './locked_item';
@@ -36,27 +37,22 @@ import { DraggableItem } from './draggable_item';
 export interface CustomizeNavigationModalProps {
   solutionId: SolutionId;
   onClose: () => void;
-  getNavigationItems$: () => Observable<NavigationItemInfo[]>;
-  setNavigationOrdering: (id: SolutionId, ordering: NavigationOrdering | undefined) => void;
-  /** Optional callback for live preview - updates nav without persisting */
-  onPreview?: (ordering: NavigationOrdering) => void;
-  /** Optional callback to cancel live preview - reverts to persisted state */
-  onCancelPreview?: () => void;
-  /** Optional callback to set editing mode - triggers portal rendering for nav */
-  setIsEditing?: (isEditing: boolean) => void;
+  getNavigationPrimaryItems: () => NavigationItemInfo[];
+  setNavigationCustomization: (
+    id: SolutionId,
+    customization: NavigationCustomization | undefined
+  ) => void;
+  setIsEditingNavigation: (isEditing: boolean) => void;
 }
 
 export const CustomizeNavigationModal = ({
   solutionId,
   onClose,
-  getNavigationItems$,
-  setNavigationOrdering,
-  onPreview,
-  onCancelPreview,
-  setIsEditing,
+  getNavigationPrimaryItems,
+  setNavigationCustomization,
+  setIsEditingNavigation,
 }: CustomizeNavigationModalProps) => {
-  const initialItems = useObservable(useMemo(() => getNavigationItems$(), [getNavigationItems$]));
-  const [localItems, setLocalItems] = useState<NavigationItemInfo[] | null>(null);
+  const [items, setItems] = useState<NavigationItemInfo[]>(() => getNavigationPrimaryItems());
   const [isSaving, setIsSaving] = useState(false);
   const modalTitleId = useGeneratedHtmlId();
 
@@ -64,45 +60,32 @@ export const CustomizeNavigationModal = ({
     width: 576px;
   `;
 
-  // Enable editing mode for portal rendering in primary nav
+  // Enable editing mode
   useEffect(() => {
-    setIsEditing?.(true);
-    return () => setIsEditing?.(false);
-  }, [setIsEditing]);
-
-  // Initialize local items from observed items once
-  const items = useMemo(() => localItems ?? initialItems ?? [], [localItems, initialItems]);
-  const isLoading = !initialItems;
-
-  // Copy initial items to local state for editing when they first load
-  useEffect(() => {
-    if (initialItems && !localItems) {
-      setLocalItems(initialItems);
-    }
-  }, [initialItems, localItems]);
+    setIsEditingNavigation(true);
+    return () => setIsEditingNavigation(false);
+  }, [setIsEditingNavigation]);
 
   const lockedItems = useMemo(() => items.filter((item) => item.locked), [items]);
   const reorderableItems = useMemo(() => items.filter((item) => !item.locked), [items]);
 
-  // Send live preview to nav when items change
+  // Send live preview to nav when items change (not persisted while editing)
   useEffect(() => {
-    if (!localItems || !onPreview) return;
-
-    const order = localItems.map((item) => item.id);
-    const hiddenIds = localItems.filter((item) => item.hidden).map((item) => item.id);
-    onPreview({ order, hiddenIds });
-  }, [localItems, onPreview]);
+    const order = items.map((item) => item.id);
+    const hiddenIds = items.filter((item) => item.hidden).map((item) => item.id);
+    setNavigationCustomization(solutionId, { order, hiddenIds });
+  }, [items, setNavigationCustomization, solutionId]);
 
   const handleClose = useCallback(() => {
-    onCancelPreview?.();
+    // Exit editing mode (reverts to persisted state)
+    setIsEditingNavigation(false);
     onClose();
-  }, [onClose, onCancelPreview]);
+  }, [onClose, setIsEditingNavigation]);
 
   const onDragEnd = useCallback(({ source, destination }: DropResult) => {
     if (!destination || source.index === destination.index) return;
 
-    setLocalItems((prev) => {
-      if (!prev) return prev;
+    setItems((prev) => {
       const locked = prev.filter((item) => item.locked);
       const reorderable = prev.filter((item) => !item.locked);
       const reordered = euiDragDropReorder(reorderable, source.index, destination.index);
@@ -111,28 +94,30 @@ export const CustomizeNavigationModal = ({
   }, []);
 
   const toggleItemVisibility = useCallback((itemId: string) => {
-    setLocalItems(
-      (prev) =>
-        prev?.map((item) => (item.id === itemId ? { ...item, hidden: !item.hidden } : item)) ?? null
+    setItems((prev) =>
+      prev.map((item) => (item.id === itemId ? { ...item, hidden: !item.hidden } : item))
     );
   }, []);
 
   const handleSave = useCallback(() => {
     setIsSaving(true);
 
+    // Exit editing mode first so the customization gets persisted
+    setIsEditingNavigation(false);
+
     const order = items.map((item) => item.id);
     const hiddenIds = items.filter((item) => item.hidden).map((item) => item.id);
+    setNavigationCustomization(solutionId, { order, hiddenIds });
 
-    setNavigationOrdering(solutionId, { order, hiddenIds });
     setIsSaving(false);
     onClose();
-  }, [items, solutionId, onClose, setNavigationOrdering]);
+  }, [items, solutionId, onClose, setNavigationCustomization, setIsEditingNavigation]);
 
   const handleReset = useCallback(() => {
-    onCancelPreview?.(); // Revert preview before resetting
-    setNavigationOrdering(solutionId, undefined);
-    onClose();
-  }, [solutionId, onClose, setNavigationOrdering, onCancelPreview]);
+    // Reset to defaults (persist) and refresh items
+    setNavigationCustomization(solutionId, undefined);
+    setItems(getNavigationPrimaryItems());
+  }, [solutionId, setNavigationCustomization, getNavigationPrimaryItems]);
 
   return (
     <EuiModal onClose={handleClose} aria-labelledby={modalTitleId} css={modalCss}>
@@ -145,35 +130,27 @@ export const CustomizeNavigationModal = ({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        {isLoading ? (
-          <EuiFlexGroup justifyContent="center" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="l" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          <>
-            {lockedItems.length > 0 && (
-              <>
-                {lockedItems.map((item) => (
-                  <LockedItem key={item.id} item={item} />
-                ))}
-              </>
-            )}
-            <EuiDragDropContext onDragEnd={onDragEnd}>
-              <EuiDroppable droppableId="nav-items" spacing="none">
-                {reorderableItems.map((item, index) => (
-                  <DraggableItem
-                    key={item.id}
-                    item={item}
-                    index={index}
-                    toggleItemVisibility={toggleItemVisibility}
-                  />
-                ))}
-              </EuiDroppable>
-            </EuiDragDropContext>
-          </>
-        )}
+        <>
+          {lockedItems.length > 0 && (
+            <>
+              {lockedItems.map((item) => (
+                <LockedItem key={item.id} item={item} />
+              ))}
+            </>
+          )}
+          <EuiDragDropContext onDragEnd={onDragEnd}>
+            <EuiDroppable droppableId="nav-items" spacing="none">
+              {reorderableItems.map((item, index) => (
+                <DraggableItem
+                  key={item.id}
+                  item={item}
+                  index={index}
+                  toggleItemVisibility={toggleItemVisibility}
+                />
+              ))}
+            </EuiDroppable>
+          </EuiDragDropContext>
+        </>
       </EuiModalBody>
       <EuiModalFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -182,7 +159,7 @@ export const CustomizeNavigationModal = ({
               iconType="refresh"
               color="danger"
               onClick={handleReset}
-              disabled={isLoading || isSaving}
+              disabled={isSaving}
             >
               <FormattedMessage
                 id="core.ui.chrome.sideNavigation.customizeNavigation.resetButtonText"
@@ -194,7 +171,6 @@ export const CustomizeNavigationModal = ({
             <EuiButton
               fill
               onClick={handleSave}
-              disabled={isLoading}
               isLoading={isSaving}
               data-test-subj="customizeNavigationSaveButton"
             >

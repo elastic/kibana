@@ -145,41 +145,24 @@ export class NavigationPublicPlugin
           );
         })
       ),
-      setNavigationOrdering: (id, ordering) => {
+      setNavigationCustomization: (id, customization) => {
         if (!this.isSolutionNavEnabled) return;
         if (!this.coreStart) throw new Error('coreStart is not available');
 
         const { project } = this.coreStart.chrome as InternalChromeStart;
-        project.setNavigationOrdering(id, ordering);
+        project.setNavigationCustomization(id, customization);
       },
-      setTemporaryOrdering: (id, ordering) => {
+      setIsEditingNavigation: (isEditing) => {
         if (!this.isSolutionNavEnabled) return;
         if (!this.coreStart) throw new Error('coreStart is not available');
 
         const { project } = this.coreStart.chrome as InternalChromeStart;
-        project.setTemporaryOrdering(id, ordering);
+        project.setIsEditingNavigation(isEditing);
       },
-      clearTemporaryOrdering: (id) => {
-        if (!this.isSolutionNavEnabled) return;
-        if (!this.coreStart) throw new Error('coreStart is not available');
-
-        const { project } = this.coreStart.chrome as InternalChromeStart;
-        project.clearTemporaryOrdering(id);
-      },
-      setIsEditing: (isEditing) => {
+      getNavigationPrimaryItems: () => {
         if (!this.coreStart) throw new Error('coreStart is not available');
         const { project } = this.coreStart.chrome as InternalChromeStart;
-        project.setIsEditing(isEditing);
-      },
-      getIsEditing$: () => {
-        if (!this.coreStart) throw new Error('coreStart is not available');
-        const { project } = this.coreStart.chrome as InternalChromeStart;
-        return project.getIsEditing$();
-      },
-      getNavigationItems$: () => {
-        if (!this.coreStart) throw new Error('coreStart is not available');
-        const { project } = this.coreStart.chrome as InternalChromeStart;
-        return project.getNavigationItems$();
+        return project.getNavigationPrimaryItems();
       },
     };
   }

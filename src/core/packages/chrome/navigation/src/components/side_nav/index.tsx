@@ -39,17 +39,9 @@ const getEditingStyles = (position: DOMRect, theme: UseEuiTheme['euiTheme']) => 
   position: fixed;
   top: ${position.top}px;
   left: ${position.left}px;
-  width: ${position.width}px;
-  height: ${position.height}px;
   z-index: ${layoutLevels.navigationEditing};
   background: ${theme.colors.backgroundBasePlain};
   pointer-events: none;
-`;
-
-const getPlaceholderStyles = (position: DOMRect) => css`
-  width: ${position.width}px;
-  height: ${position.height}px;
-  flex-shrink: 0;
 `;
 
 export interface SideNavProps {
@@ -81,7 +73,7 @@ interface SideNavComponent extends FC<SideNavProps> {
 export const SideNav: SideNavComponent = ({ children, isCollapsed, isEditing = false }) => {
   const { euiTheme } = useEuiTheme();
   const [navPosition, setNavPosition] = useState<DOMRect | null>(null);
-  // Don't portal on mobile/small screens where modal goes fullscreen
+  // Don't portal on mobile/small screens where customize navigation modal goes fullscreen
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const shouldPortal = isEditing && !isMobile;
 
@@ -93,11 +85,6 @@ export const SideNav: SideNavComponent = ({ children, isCollapsed, isEditing = f
   const editingStyles = useMemo(
     () => (navPosition ? getEditingStyles(navPosition, euiTheme) : null),
     [navPosition, euiTheme]
-  );
-
-  const placeholderStyles = useMemo(
-    () => (navPosition ? getPlaceholderStyles(navPosition) : null),
-    [navPosition]
   );
 
   // Capture position when entering portal mode
@@ -123,11 +110,11 @@ export const SideNav: SideNavComponent = ({ children, isCollapsed, isEditing = f
     </div>
   );
 
-  // When portaling, render placeholder to preserve space + portal for the nav above the modal
+  // When portaling, render empty placeholder to hold space + portal above the modal
   if (shouldPortal && navPosition) {
     return (
       <>
-        <div css={placeholderStyles} />
+        <div css={wrapperStyles} />
         {createPortal(navContent, document.body)}
       </>
     );

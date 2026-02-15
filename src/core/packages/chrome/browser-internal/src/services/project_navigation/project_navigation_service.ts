@@ -15,8 +15,8 @@ import type {
   ChromeProjectNavigationNode,
   NavigationTreeDefinition,
   SolutionNavigationDefinitions,
-  SolutionNavigationOrderings,
-  NavigationOrdering,
+  SolutionNavigationCustomizations,
+  NavigationCustomization,
   CloudLinks,
   SolutionId,
 } from '@kbn/core-chrome-browser';
@@ -66,8 +66,9 @@ interface StartDeps {
 }
 
 export class ProjectNavigationService {
-  private static readonly CUSTOM_NAV_STORAGE_KEY = 'kibana.solutionNavigationOrdering';
-  private static readonly LOCKED_ITEM_IDS = new Set(['discover', 'dashboards']);
+  private static readonly CUSTOM_NAV_STORAGE_KEY = 'kibana.solutionNavigationCustomization';
+  /** Default locked item IDs that are always locked regardless of nav definition */
+  private static readonly DEFAULT_LOCKED_ITEM_IDS = new Set(['discover', 'dashboards']);
 
   private logger: Logger | undefined;
   private projectHome$ = new BehaviorSubject<string | undefined>(undefined);
@@ -88,17 +89,15 @@ export class ProjectNavigationService {
   }>({ breadcrumbs: [], params: { absolute: false } });
   private readonly stop$ = new ReplaySubject<void>(1);
   private readonly solutionNavDefinitions$ = new BehaviorSubject<SolutionNavigationDefinitions>({});
-  // Per-solution navigation ordering configurations
-  private readonly solutionNavigationOrderings$ = new BehaviorSubject<SolutionNavigationOrderings>(
-    {}
-  );
+  private readonly solutionNavigationCustomizations$ =
+    new BehaviorSubject<SolutionNavigationCustomizations>({});
   // As the active definition **id** and the definitions are set independently, one before the other without
   // any guarantee of order, we need to store the next active definition id in a separate BehaviorSubject
   private readonly nextSolutionNavDefinitionId$ = new BehaviorSubject<SolutionId | null>(null);
   // The active solution navigation definition id that has been initiated and is currently active
   private readonly activeSolutionNavDefinitionId$ = new BehaviorSubject<SolutionId | null>(null);
   private readonly activeDataTestSubj$ = new BehaviorSubject<string | undefined>(undefined);
-  // Whether the navigation customization modal is open (for portal rendering)
+  // Whether the navigation is being edited
   private readonly isEditing$ = new BehaviorSubject<boolean>(false);
   private readonly location$ = new BehaviorSubject<Location>(createLocation('/'));
   private deepLinksMap$: Observable<Record<string, ChromeNavLink>> = of({});
@@ -171,7 +170,7 @@ export class ProjectNavigationService {
         this.initNavigation(id, navTreeDefinition$, config);
       },
       getNavigationTreeUi$: this.getNavigationTreeUi$.bind(this),
-      getNavigationItems$: this.getNavigationItems$.bind(this),
+      getNavigationPrimaryItems: this.getNavigationPrimaryItems.bind(this),
       getActiveNodes$: () => {
         return this.activeNodes$.pipe(takeUntil(this.stop$), distinctUntilChanged(deepEqual));
       },
@@ -206,14 +205,11 @@ export class ProjectNavigationService {
       },
       /** In stateful Kibana, get the registered solution navigations */
       getSolutionsNavDefinitions$: this.getSolutionsNavDefinitions$.bind(this),
-      /** In stateful Kibana, register solution navigations */
+      /** In stateful Kibana, update the registered solution navigations */
       updateSolutionNavigations: this.updateSolutionNavigations.bind(this),
-      setNavigationOrdering: this.setNavigationOrdering.bind(this),
-      setTemporaryOrdering: this.setTemporaryOrdering.bind(this),
-      clearTemporaryOrdering: this.clearTemporaryOrdering.bind(this),
-      /** Set whether navigation is being edited (for portal rendering above modal) */
-      setIsEditing: (isEditing: boolean) => this.isEditing$.next(isEditing),
-      /** Get observable for whether navigation is being edited */
+      setNavigationCustomization: this.setNavigationCustomization.bind(this),
+      setIsEditingNavigation: this.setIsEditingNavigation.bind(this),
+      /** Whether navigation is being edited  */
       getIsEditing$: () => this.isEditing$.asObservable(),
       /** In stateful Kibana, change the active solution navigation */
       changeActiveSolutionNavigation: this.changeActiveSolutionNavigation.bind(this),
@@ -290,23 +286,21 @@ export class ProjectNavigationService {
   }
 
   /**
-   * Returns a simplified list of navigation items for the editor modal.
-   * Only includes id, title, and hidden status.
+   * Returns a simplified list of primary navigation items for the editor modal.
+   * Only includes id, title, hidden status (from user customization), and locked status.
    */
-  private getNavigationItems$(): Observable<NavigationItemInfo[]> {
-    return this.navigationTreeUi$.pipe(
-      filter((tree): tree is NavigationTreeDefinitionUI => tree !== null),
-      map((tree) =>
-        tree.body
-          .filter((node) => node.renderAs !== 'home') // Exclude the solution home/logo item
-          .map((node) => ({
-            id: node.id,
-            title: node.title || node.id,
-            hidden: node.sideNavStatus === 'hidden',
-            locked: ProjectNavigationService.LOCKED_ITEM_IDS.has(node.id),
-          }))
-      )
-    );
+  private getNavigationPrimaryItems(): NavigationItemInfo[] {
+    const tree = this.navigationTreeUi$.getValue();
+    if (!tree) return [];
+
+    return tree.body
+      .filter((node) => node.renderAs !== 'home') // Exclude the solution home/logo item
+      .map((node) => ({
+        id: node.id,
+        title: node.title || node.id,
+        hidden: node.sideNavStatus === 'hiddenByUser',
+        locked: node.locked || ProjectNavigationService.DEFAULT_LOCKED_ITEM_IDS.has(node.id),
+      }));
   }
 
   private findActiveNodes({
@@ -394,15 +388,15 @@ export class ProjectNavigationService {
           this.setProjectHome(navLink.href);
         });
 
-        // Merge original tree with ordering configuration if it exists for this solution
+        // Merge original tree with customization configuration if it exists for this solution
         const effectiveTree$ = combineLatest([
           definition.navigationTree$,
-          this.solutionNavigationOrderings$,
+          this.solutionNavigationCustomizations$,
         ]).pipe(
-          map(([original, orderings]) => {
-            const ordering = orderings[nextId];
-            if (!ordering) return original;
-            return this.applyOrdering(original, ordering);
+          map(([original, customizations]) => {
+            const customization = customizations[nextId];
+            if (!customization) return original;
+            return this.applyCustomization(original, customization);
           })
         );
 
@@ -486,29 +480,40 @@ export class ProjectNavigationService {
   }
 
   /**
-   * Apply ordering configuration to a navigation tree.
-   * Reorders top-level items and marks hidden items with sideNavStatus: 'hidden'.
-   * Note: Core items (discover, dashboards) are always kept at the top and cannot be hidden.
+   * Apply customization configuration to a navigation tree.
+   * Reorders top-level items and marks hidden items with sideNavStatus: 'hiddenByUser'.
+   * Locked items (from definition or defaults) are kept at the top and cannot be hidden.
    */
-  private applyOrdering(
+  private applyCustomization(
     tree: NavigationTreeDefinition,
-    ordering: NavigationOrdering
+    customization: NavigationCustomization
   ): NavigationTreeDefinition {
-    const { order, hiddenIds } = ordering;
-    // Filter out locked items from hidden set - they cannot be hidden
-    const hiddenSet = new Set(
-      hiddenIds.filter((id) => !ProjectNavigationService.LOCKED_ITEM_IDS.has(id))
-    );
+    const { order, hiddenIds } = customization;
 
     const getItemId = (item: (typeof tree.body)[number]): string | undefined =>
       item.id ?? item.link;
+
+    const isLocked = (item: (typeof tree.body)[number]): boolean => {
+      const itemId = getItemId(item);
+      return (
+        item.locked === true ||
+        (itemId !== undefined && ProjectNavigationService.DEFAULT_LOCKED_ITEM_IDS.has(itemId))
+      );
+    };
+
+    // Filter out locked items from hidden set - they cannot be hidden
+    const hiddenSet = new Set(
+      hiddenIds.filter((id) => {
+        const item = tree.body.find((i) => getItemId(i) === id);
+        return !item || !isLocked(item);
+      })
+    );
 
     const lockedItems: typeof tree.body = [];
     const regularItems: typeof tree.body = [];
 
     for (const item of tree.body) {
-      const itemId = getItemId(item);
-      if (itemId && ProjectNavigationService.LOCKED_ITEM_IDS.has(itemId)) {
+      if (isLocked(item)) {
         lockedItems.push(item);
       } else {
         regularItems.push(item);
@@ -519,13 +524,12 @@ export class ProjectNavigationService {
 
     const orderedRegularItems: typeof tree.body = [];
     for (const id of order) {
-      if (ProjectNavigationService.LOCKED_ITEM_IDS.has(id)) continue;
-
       const item = itemMap.get(id);
-      if (item) {
-        orderedRegularItems.push(item);
-        itemMap.delete(id);
-      }
+      // Skip if item is locked or not found
+      if (!item || isLocked(item)) continue;
+
+      orderedRegularItems.push(item);
+      itemMap.delete(id);
     }
 
     for (const item of itemMap.values()) {
@@ -536,7 +540,7 @@ export class ProjectNavigationService {
     const processedRegularItems = orderedRegularItems.map((item) => {
       const itemId = getItemId(item);
       if (itemId && hiddenSet.has(itemId)) {
-        return { ...item, sideNavStatus: 'hidden' as const };
+        return { ...item, sideNavStatus: 'hiddenByUser' as const };
       }
       return item;
     });
@@ -547,28 +551,32 @@ export class ProjectNavigationService {
     };
   }
 
-  private setNavigationOrdering(id: SolutionId, ordering: NavigationOrdering | undefined) {
-    const current = this.solutionNavigationOrderings$.getValue();
+  private setNavigationCustomization(
+    id: SolutionId,
+    customization: NavigationCustomization | undefined
+  ) {
+    const current = this.solutionNavigationCustomizations$.getValue();
 
-    if (ordering === undefined) {
+    if (customization === undefined) {
       const { [id]: _, ...rest } = current;
-      this.solutionNavigationOrderings$.next(rest);
+      this.solutionNavigationCustomizations$.next(rest);
     } else {
-      this.solutionNavigationOrderings$.next({ ...current, [id]: ordering });
+      this.solutionNavigationCustomizations$.next({ ...current, [id]: customization });
     }
 
-    this.persistNavigationOrderings();
+    // Don't persist while in edit mode
+    if (!this.isEditing$.getValue()) {
+      this.persistNavigationCustomizations();
+    }
   }
 
-  private setTemporaryOrdering(id: SolutionId, ordering: NavigationOrdering) {
-    const current = this.solutionNavigationOrderings$.getValue();
-    this.solutionNavigationOrderings$.next({ ...current, [id]: ordering });
-    // No persistence - this is for live preview only
-  }
+  private setIsEditingNavigation(isEditing: boolean) {
+    this.isEditing$.next(isEditing);
 
-  private clearTemporaryOrdering(_id: SolutionId) {
-    // Restore from localStorage
-    this.initCustomNavigationFromStorage();
+    // When exiting edit mode, restore from storage (discard unpersisted changes)
+    if (!isEditing) {
+      this.initCustomNavigationFromStorage();
+    }
   }
 
   private initCustomNavigationFromStorage() {
@@ -576,16 +584,16 @@ export class ProjectNavigationService {
       const stored = localStorage.getItem(ProjectNavigationService.CUSTOM_NAV_STORAGE_KEY);
       if (!stored) return;
 
-      const data = JSON.parse(stored) as SolutionNavigationOrderings;
-      this.solutionNavigationOrderings$.next(data);
+      const data = JSON.parse(stored) as SolutionNavigationCustomizations;
+      this.solutionNavigationCustomizations$.next(data);
     } catch (e) {
-      // Invalid stored data, ignore
+      // Silently fail
     }
   }
 
-  private persistNavigationOrderings() {
+  private persistNavigationCustomizations() {
     try {
-      const current = this.solutionNavigationOrderings$.getValue();
+      const current = this.solutionNavigationCustomizations$.getValue();
 
       if (Object.keys(current).length === 0) {
         localStorage.removeItem(ProjectNavigationService.CUSTOM_NAV_STORAGE_KEY);
@@ -596,7 +604,7 @@ export class ProjectNavigationService {
         );
       }
     } catch (e) {
-      this.logger?.warn('Failed to persist navigation orderings to localStorage');
+      // Silently fail
     }
   }
 

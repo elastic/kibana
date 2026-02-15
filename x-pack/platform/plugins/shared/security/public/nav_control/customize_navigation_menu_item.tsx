@@ -10,7 +10,6 @@ import React, { useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { CoreStart } from '@kbn/core/public';
-import type { NavigationOrdering } from '@kbn/core-chrome-browser';
 import { CustomizeNavigationModal } from '@kbn/core-chrome-navigation';
 import { i18n } from '@kbn/i18n';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
@@ -33,24 +32,14 @@ export const CustomizeNavigationMenuItem: React.FC<CustomizeNavigationMenuItemPr
     if (!solutionId) return;
     closePopover();
 
-    const handlePreview = (ordering: NavigationOrdering) => {
-      navigation.setTemporaryOrdering(solutionId, ordering);
-    };
-
-    const handleCancelPreview = () => {
-      navigation.clearTemporaryOrdering(solutionId);
-    };
-
     const session = core.overlays.openModal(
       toMountPoint(
         <CustomizeNavigationModal
           solutionId={solutionId}
           onClose={() => session.close()}
-          getNavigationItems$={navigation.getNavigationItems$}
-          setNavigationOrdering={navigation.setNavigationOrdering}
-          onPreview={handlePreview}
-          onCancelPreview={handleCancelPreview}
-          setIsEditing={navigation.setIsEditing}
+          getNavigationPrimaryItems={navigation.getNavigationPrimaryItems}
+          setNavigationCustomization={navigation.setNavigationCustomization}
+          setIsEditingNavigation={navigation.setIsEditingNavigation}
         />,
         core
       ),

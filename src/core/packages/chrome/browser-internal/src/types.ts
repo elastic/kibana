@@ -17,7 +17,7 @@ import type {
   AppDeepLinkId,
   NavigationTreeDefinition,
   NavigationTreeDefinitionUI,
-  NavigationOrdering,
+  NavigationCustomization,
   NavigationItemInfo,
   CloudURLs,
   SolutionNavigationDefinitions,
@@ -149,9 +149,9 @@ export interface InternalChromeStart extends ChromeStart {
     getNavigationTreeUi$: () => Observable<NavigationTreeDefinitionUI>;
 
     /**
-     * Returns a simplified list of navigation items for the customize navigation modal.
+     * Returns a simplified list of primary navigation items.
      */
-    getNavigationItems$: () => Observable<NavigationItemInfo[]>;
+    getNavigationPrimaryItems: () => NavigationItemInfo[];
 
     /**
      * Returns an observable of the active nodes in the project navigation.
@@ -183,40 +183,30 @@ export interface InternalChromeStart extends ChromeStart {
     updateSolutionNavigations(solutionNavs: SolutionNavigationDefinitions, replace?: boolean): void;
 
     /**
-     * Set navigation ordering for a solution.
-     * Pass undefined to clear the ordering and revert to the original order.
+     * Set navigation customization for a solution.
+     * Pass undefined to clear the customization and revert to the original order.
+     * Changes are persisted unless editing mode is active (see setIsEditingNavigation).
      *
-     * @param id The solution id to set the ordering for.
-     * @param ordering The ordering configuration (order array and hidden IDs), or undefined to reset.
+     * @param id The solution id to set the customization for.
+     * @param customization The customization configuration, or undefined to reset.
      */
-    setNavigationOrdering(id: SolutionId, ordering: NavigationOrdering | undefined): void;
+    setNavigationCustomization(
+      id: SolutionId,
+      customization: NavigationCustomization | undefined
+    ): void;
 
     /**
-     * Set a temporary navigation ordering for live preview without persisting to storage.
-     * Call clearTemporaryOrdering to revert, or setNavigationOrdering to persist.
+     * Set navigation editing mode.
+     * When editing, customization changes are previewed but not persisted.
+     * When exiting edit mode, reverts to the last persisted state.
      *
-     * @param id The solution id to set the temporary ordering for.
-     * @param ordering The ordering configuration for preview.
+     * @param isEditing Whether editing mode is active.
      */
-    setTemporaryOrdering(id: SolutionId, ordering: NavigationOrdering): void;
+    setIsEditingNavigation(isEditing: boolean): void;
 
     /**
-     * Clear the temporary navigation ordering and revert to the persisted state.
-     *
-     * @param id The solution id to clear the temporary ordering for.
-     */
-    clearTemporaryOrdering(id: SolutionId): void;
-
-    /**
-     * Set whether navigation is being edited (customization modal is open).
-     * When true, the primary menu renders in a portal above the modal overlay.
-     *
-     * @param isEditing Whether navigation editing mode is active.
-     */
-    setIsEditing(isEditing: boolean): void;
-
-    /**
-     * Get an observable for whether navigation is being edited.
+     * Get navigation editing state.
+     * @internal
      */
     getIsEditing$(): Observable<boolean>;
 

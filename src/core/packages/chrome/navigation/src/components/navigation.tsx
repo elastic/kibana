@@ -44,11 +44,6 @@ export interface NavigationProps {
    */
   isCollapsed: boolean;
   /**
-   * Whether the navigation is being edited (customization modal is open).
-   * When true, the primary menu renders in a portal above the modal overlay.
-   */
-  isEditing?: boolean;
-  /**
    * The navigation structure containing primary, secondary, and footer items.
    */
   items: NavigationStructure;
@@ -84,7 +79,6 @@ export interface NavigationProps {
 export const Navigation = ({
   activeItemId,
   isCollapsed: isCollapsedProp,
-  isEditing = false,
   items,
   logo,
   onItemClick,
@@ -110,22 +104,23 @@ export const Navigation = ({
 
   const [isAnyPopoverLocked, setIsAnyPopoverLocked] = useState(false);
 
-  const { overflowMenuItems, primaryMenuRef, visibleMenuItems } = useResponsiveMenu(
-    isCollapsed,
-    items.primaryItems
-  );
+  const {
+    overflowMenuItems: responsiveOverflowItems,
+    primaryMenuRef,
+    visibleMenuItems: responsiveVisibleItems,
+  } = useResponsiveMenu(isCollapsed, items.primaryItems);
 
-  // Apply forceOverflow filtering after responsive calculation to keep height cache stable
-  const filteredVisibleMenuItems = useMemo(
-    () => visibleMenuItems.filter((item) => !item.forceOverflow),
-    [visibleMenuItems]
+  // Items hidden by user go to overflow menu
+  const visibleMenuItems = useMemo(
+    () => responsiveVisibleItems.filter((item) => !item.hiddenByUser),
+    [responsiveVisibleItems]
   );
-  const filteredOverflowMenuItems = useMemo(
-    () => [...visibleMenuItems.filter((item) => item.forceOverflow), ...overflowMenuItems],
-    [visibleMenuItems, overflowMenuItems]
-  );
+  const overflowMenuItems = useMemo(() => {
+    const hiddenByUserItems = responsiveVisibleItems.filter((item) => item.hiddenByUser);
+    return [...hiddenByUserItems, ...responsiveOverflowItems];
+  }, [responsiveVisibleItems, responsiveOverflowItems]);
 
-  const setSize = filteredVisibleMenuItems.length + (filteredOverflowMenuItems.length > 0 ? 1 : 0);
+  const setSize = visibleMenuItems.length + (overflowMenuItems.length > 0 ? 1 : 0);
 
   const { getIsNewPrimary, getIsNewSecondary } = useNewItems(
     [...items.primaryItems, ...items.footerItems],
@@ -145,7 +140,7 @@ export const Navigation = ({
       data-test-subj={rest['data-test-subj'] ?? NAVIGATION_ROOT_SELECTOR}
       id={NAVIGATION_ROOT_SELECTOR}
     >
-      <SideNav isCollapsed={isCollapsed} isEditing={isEditing}>
+      <SideNav isCollapsed={isCollapsed}>
         <SideNav.Logo
           isCollapsed={isCollapsed}
           isCurrent={actualActiveItemId === logo.id}
@@ -157,7 +152,7 @@ export const Navigation = ({
         <SideNav.PrimaryMenu ref={primaryMenuRef} isCollapsed={isCollapsed}>
           {({ mainNavigationInstructionsId }) => (
             <>
-              {filteredVisibleMenuItems.map((item, index) => {
+              {visibleMenuItems.map((item, index) => {
                 const { sections, ...itemProps } = item;
                 const isFirstItem = index === 0;
                 const ariaDescribedBy = isFirstItem ? mainNavigationInstructionsId : undefined;
@@ -234,7 +229,7 @@ export const Navigation = ({
                 );
               })}
 
-              {filteredOverflowMenuItems.length > 0 && (
+              {overflowMenuItems.length > 0 && (
                 <SideNav.Popover
                   hasContent
                   isSidePanelOpen={false}
@@ -246,17 +241,17 @@ export const Navigation = ({
                   persistent
                   trigger={
                     <SideNav.PrimaryMenu.Item
-                      aria-posinset={filteredVisibleMenuItems.length + 1}
+                      aria-posinset={visibleMenuItems.length + 1}
                       aria-setsize={setSize}
                       data-test-subj={moreMenuTriggerTestSubj}
                       hasContent
                       iconType="boxesVertical"
                       id={MORE_MENU_ID}
                       isCollapsed={isCollapsed}
-                      isHighlighted={filteredOverflowMenuItems.some(
+                      isHighlighted={overflowMenuItems.some(
                         (item) => item.id === visuallyActivePageId
                       )}
-                      isNew={filteredOverflowMenuItems.some((item) => getIsNewPrimary(item.id))}
+                      isNew={overflowMenuItems.some((item) => getIsNewPrimary(item.id))}
                       label={i18n.translate('core.ui.chrome.sideNavigation.moreMenuItemLabel', {
                         defaultMessage: 'More',
                       })}
@@ -279,7 +274,7 @@ export const Navigation = ({
                       >
                         {({ panelNavigationInstructionsId, panelEnterSubmenuInstructionsId }) => (
                           <SideNav.NestedSecondaryMenu.Section>
-                            {filteredOverflowMenuItems.map((item, index) => {
+                            {overflowMenuItems.map((item, index) => {
                               const hasSubmenu = getHasSubmenu(item);
                               const { sections, ...itemProps } = item;
                               const isFirstItem = index === 0;
@@ -313,7 +308,7 @@ export const Navigation = ({
                           </SideNav.NestedSecondaryMenu.Section>
                         )}
                       </SideNav.NestedSecondaryMenu.Panel>
-                      {filteredOverflowMenuItems.filter(getHasSubmenu).map((item) => (
+                      {overflowMenuItems.filter(getHasSubmenu).map((item) => (
                         <SideNav.NestedSecondaryMenu.Panel key={`submenu-${item.id}`} id={item.id}>
                           {({ panelNavigationInstructionsId }) => (
                             <>

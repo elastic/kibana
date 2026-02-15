@@ -12,7 +12,7 @@ import type { Observable } from 'rxjs';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type {
   SolutionNavigationDefinition,
-  NavigationOrdering,
+  NavigationCustomization,
   NavigationItemInfo,
   SolutionId,
 } from '@kbn/core-chrome-browser';
@@ -57,18 +57,22 @@ export interface NavigationPublicStart {
   addSolutionNavigation: (solutionNavigationAgg: AddSolutionNavigationArg) => void;
   /** Flag to indicate if the solution navigation is enabled.*/
   isSolutionNavEnabled$: Observable<boolean>;
-  /** Set navigation ordering for an existing solution. Pass undefined to reset to original order. */
-  setNavigationOrdering: (id: SolutionId, ordering: NavigationOrdering | undefined) => void;
-  /** Set a temporary navigation ordering for live preview without persisting. */
-  setTemporaryOrdering: (id: SolutionId, ordering: NavigationOrdering) => void;
-  /** Clear the temporary navigation ordering and revert to persisted state. */
-  clearTemporaryOrdering: (id: SolutionId) => void;
-  /** Set whether navigation is being edited (for portal rendering above modal). */
-  setIsEditing: (isEditing: boolean) => void;
-  /** Get observable for whether navigation is being edited. */
-  getIsEditing$: () => Observable<boolean>;
-  /** Get a simplified list of navigation items (id, title, hidden) for the editor modal. */
-  getNavigationItems$: () => Observable<NavigationItemInfo[]>;
+  /**
+   * Set navigation customization for an existing solution. Pass undefined to reset to original order.
+   * Changes are persisted unless editing mode is active (see setIsEditingNavigation).
+   */
+  setNavigationCustomization: (
+    id: SolutionId,
+    customization: NavigationCustomization | undefined
+  ) => void;
+  /**
+   * Set navigation editing mode.
+   * When editing, customization changes are previewed but not persisted.
+   * When exiting edit mode, reverts to the last persisted state.
+   */
+  setIsEditingNavigation: (isEditing: boolean) => void;
+  /** Get a simplified list of primary navigation items. */
+  getNavigationPrimaryItems: () => NavigationItemInfo[];
 }
 
 export interface NavigationPublicSetupDependencies {
