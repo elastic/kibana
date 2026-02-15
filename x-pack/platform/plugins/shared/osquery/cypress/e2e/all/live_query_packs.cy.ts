@@ -18,8 +18,7 @@ import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import { loadPack, cleanupPack, cleanupCase, loadCase } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
-// FLAKY: https://github.com/elastic/kibana/issues/169888
-describe.skip('ALL - Live Query Packs', { tags: ['@ess', '@serverless'] }, () => {
+describe('ALL - Live Query Packs', { tags: ['@ess', '@serverless'] }, () => {
   let packName: string;
   let packId: string;
   let caseId: string;
@@ -73,7 +72,6 @@ describe.skip('ALL - Live Query Packs', { tags: ['@ess', '@serverless'] }, () =>
     cy.contains('Run a set of queries in a pack.').click();
     cy.getBySel(LIVE_QUERY_EDITOR).should('not.exist');
     cy.getBySel('select-live-pack').click().type(`${packName}{downArrow}{enter}`);
-    cy.contains('This table contains 3 rows.');
     cy.contains('system_memory_linux_elastic');
     cy.contains('system_info_elastic');
     cy.contains('failingQuery');
@@ -93,14 +91,13 @@ describe.skip('ALL - Live Query Packs', { tags: ['@ess', '@serverless'] }, () =>
     cy.getBySel('tableHeaderCell__source.action_response.osquery.count_2').should('exist');
     cy.getBySel('tableHeaderCell_fields.error[0]_3').should('exist');
 
-    // TODO check why this is always PENDING
     cy.getBySel('toggleIcon-system_memory_linux_elastic').click();
-    // cy.getBySel('toggleIcon-failingQuery').click();
-    // cy.contains('Status').click();
-    // cy.contains('query failed, code: 1, message: no such table: opera_extensions', {
-    //   timeout: 120000,
-    // });
-    // cy.getBySel('toggleIcon-failingQuery').click();
+    cy.getBySel('toggleIcon-failingQuery').click();
+    cy.contains('Status').click();
+    cy.contains('query failed, code: 1, message: no such table: opera_extensions', {
+      timeout: 120000,
+    });
+    cy.getBySel('toggleIcon-failingQuery').click();
     cy.getBySel('toggleIcon-system_memory_linux_elastic').click();
     addToCase(caseId);
     viewRecentCaseAndCheckResults();

@@ -27,7 +27,7 @@ import {
 } from '../../tasks/live_query';
 import { changePackActiveStatus, cleanupAllPrebuiltPacks } from '../../tasks/packs';
 import {
-  addIntegration,
+  closeFleetTourIfVisible,
   closeModalIfVisible,
   closeToastIfVisible,
   generateRandomStringName,
@@ -40,11 +40,7 @@ import { cleanupPack, cleanupAgentPolicy } from '../../tasks/api_fixtures';
 import { request } from '../../tasks/common';
 import { ServerlessRoleName } from '../../support/roles';
 
-// Failing: See https://github.com/elastic/kibana/issues/171279
-// Failing: See https://github.com/elastic/kibana/issues/180424
-describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
-  const integration = 'Osquery Manager';
-
+describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
   describe(
     'Validate that agent policy is getting removed from pack if we remove agent policy',
     { tags: ['@ess'] },
@@ -60,17 +56,21 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
 
       it('add integration', () => {
         cy.visit(FLEET_AGENT_POLICIES);
+        closeFleetTourIfVisible();
         cy.contains('Create agent policy').click();
-        cy.get('input[placeholder*="Choose a name"]').type(AGENT_POLICY_NAME);
-        cy.get('.euiFlyoutFooter').contains('Create agent policy').click();
+        cy.getBySel('createAgentPolicyNameField').type(AGENT_POLICY_NAME);
+        cy.getBySel('createAgentPolicyFlyoutBtn').click();
         cy.contains(`Agent policy '${AGENT_POLICY_NAME}' created`);
-        cy.visit(FLEET_AGENT_POLICIES);
-        cy.contains(AGENT_POLICY_NAME).click();
-        cy.contains('Add integration').click();
-        cy.getBySel('epmList.searchBar').type('osquery');
-        cy.contains(integration).click();
-        addIntegration(AGENT_POLICY_NAME);
-        cy.contains('Add Elastic Agent later').click();
+        closeToastIfVisible();
+        closeFleetTourIfVisible();
+        cy.getBySel('agentPolicyNameLink').contains(AGENT_POLICY_NAME).click();
+        closeFleetTourIfVisible();
+        cy.getBySel('addPackagePolicyButton').click();
+        cy.getBySel('addIntegrationFlyout').should('exist');
+        cy.getBySel('comboBoxInput').type('osquery manager{downArrow}{enter}');
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
+        cy.getBySel('addIntegrationFlyout.submitBtn').click();
+        closeModalIfVisible();
         navigateTo('app/osquery/packs');
         cy.getBySel(ADD_PACK_HEADER_BUTTON).click();
         cy.get(formFieldInputSelector('name')).type(`${REMOVING_PACK}{downArrow}{enter}`);
@@ -86,7 +86,9 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.getBySel('comboBoxInput').contains(AGENT_POLICY_NAME).should('exist');
 
         cy.visit(FLEET_AGENT_POLICIES);
+        closeFleetTourIfVisible();
         cy.contains(AGENT_POLICY_NAME).click();
+        closeFleetTourIfVisible();
         cy.get('.euiTableCellContent')
           .get('.euiPopover')
           .get(`[aria-label="Open"]`)
@@ -98,7 +100,7 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         navigateTo('app/osquery/packs');
         cy.contains(REMOVING_PACK).click();
         cy.contains(`${REMOVING_PACK} details`).should('exist');
-        cy.wait(1000);
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
         cy.get('span').contains('Edit').click();
 
         cy.getBySel('comboBoxInput').should('have.value', '');
@@ -110,7 +112,7 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
     afterEach(() => {
       cleanupAllPrebuiltPacks();
     });
-    const PREBUILD_PACK_NAME = 'it-compliance';
+    const PREBUILD_PACK_NAME = 'forensic-credential-access';
 
     describe('', () => {
       beforeEach(() => {
@@ -120,7 +122,7 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
       it('should load prebuilt packs', () => {
         cy.contains('Load Elastic prebuilt packs').click();
         cy.contains('Load Elastic prebuilt packs').should('not.exist');
-        cy.wait(1000);
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
         cy.get(TABLE_ROWS).should('have.length.above', 5);
       });
 
@@ -225,17 +227,20 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         closeToastIfVisible();
 
         cy.visit(FLEET_AGENT_POLICIES);
+        closeFleetTourIfVisible();
         cy.contains('Create agent policy').click();
         cy.getBySel('createAgentPolicyNameField').type(agentPolicy);
         cy.getBySel('createAgentPolicyFlyoutBtn').click();
-        cy.contains(`Agent policy '${agentPolicy}' created`).click();
+        cy.contains(`Agent policy '${agentPolicy}' created`);
         closeToastIfVisible();
-        cy.contains(agentPolicy).click();
-        cy.contains('Add integration').click();
-        cy.getBySel('epmList.searchBar').type('osquery');
-        cy.contains(integration).click();
-        addIntegration(agentPolicy);
-        cy.contains('Add Elastic Agent later').click();
+        closeFleetTourIfVisible();
+        cy.getBySel('agentPolicyNameLink').contains(agentPolicy).click();
+        closeFleetTourIfVisible();
+        cy.getBySel('addPackagePolicyButton').click();
+        cy.getBySel('comboBoxInput').type('osquery manager{downArrow}{enter}');
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
+        cy.getBySel('addIntegrationFlyout.submitBtn').click();
+        closeModalIfVisible();
         cy.contains('osquery_manager-');
         request<{ items: PackagePolicy[] }>({
           url: '/internal/osquery/fleet_wrapper/package_policies',
@@ -251,6 +256,7 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
           });
         });
         cy.visit('/app/fleet/policies');
+        closeFleetTourIfVisible();
         cy.contains('td', agentPolicy)
           .parent()
           .within(() => {

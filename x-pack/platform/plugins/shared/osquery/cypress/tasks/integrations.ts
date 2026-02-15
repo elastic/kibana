@@ -46,7 +46,9 @@ export const addCustomIntegration = (integrationName: string, policyName: string
 
 export const policyContainsIntegration = (integrationName: string, policyName: string) => {
   cy.visit('app/fleet/policies');
+  closeFleetTourIfVisible();
   cy.contains(policyName).click();
+  closeFleetTourIfVisible();
   integrationExistsWithinPolicyDetails(integrationName);
 };
 
@@ -131,6 +133,14 @@ export function closeToastIfVisible() {
       } else {
         cy.getBySel(TOAST_CLOSE_BTN).click();
       }
+    }
+  });
+}
+
+export function closeFleetTourIfVisible() {
+  cy.get('body').then(($body) => {
+    if ($body.find('button:contains("Got it")').length > 0) {
+      cy.contains('button', 'Got it').click();
     }
   });
 }

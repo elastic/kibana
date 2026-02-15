@@ -10,8 +10,7 @@ import { takeOsqueryActionWithParams } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
 import { disableNewFeaturesTours } from '../../tasks/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/229432
-describe.skip('ALL - Timelines', { tags: ['@ess'] }, () => {
+describe('ALL - Timelines', { tags: ['@ess'] }, () => {
   before(() => {
     initializeDataViews();
   });
