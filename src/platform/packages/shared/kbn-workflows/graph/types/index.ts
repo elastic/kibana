@@ -20,6 +20,8 @@ export type {
   ElasticsearchGraphNodeSchema,
   KibanaGraphNode,
   KibanaGraphNodeSchema,
+  WorkflowExecuteGraphNode,
+  WorkflowExecuteGraphNodeSchema,
 } from './nodes/base';
 export type {
   EnterConditionBranchNode,

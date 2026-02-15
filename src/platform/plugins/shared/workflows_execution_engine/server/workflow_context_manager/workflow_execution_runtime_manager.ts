@@ -204,8 +204,10 @@ export class WorkflowExecutionRuntimeManager {
 
   public setWorkflowError(error: Error | undefined): void {
     const executionError = error ? ExecutionError.fromError(error) : undefined;
+    const serializedError = executionError ? executionError.toSerializableObject() : undefined;
+
     this.workflowExecutionState.updateWorkflowExecution({
-      error: executionError ? executionError.toSerializableObject() : undefined,
+      error: serializedError,
     });
   }
 
@@ -384,12 +386,14 @@ export class WorkflowExecutionRuntimeManager {
     const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
       currentNodeId: this.nextNodeId,
     };
-    if (!this.nextNodeId) {
-      workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
-    }
 
-    if (workflowExecution.error) {
+    if (isTerminalStatus(workflowExecution.status)) {
+      workflowExecutionUpdate.status = workflowExecution.status;
+    } else if (workflowExecution.error) {
       workflowExecutionUpdate.status = ExecutionStatus.FAILED;
+      workflowExecutionUpdate.error = workflowExecution.error;
+    } else if (!this.nextNodeId) {
+      workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
     }
 
     if (

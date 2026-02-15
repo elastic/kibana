@@ -15,6 +15,7 @@ import {
   HttpGraphNodeSchema,
   KibanaGraphNodeSchema,
   WaitGraphNodeSchema,
+  WorkflowExecuteGraphNodeSchema,
 } from './base';
 import {
   EnterConditionBranchNodeSchema,
@@ -48,6 +49,7 @@ const GraphNodeUnionSchema = z.discriminatedUnion('type', [
   KibanaGraphNodeSchema,
   HttpGraphNodeSchema,
   WaitGraphNodeSchema,
+  WorkflowExecuteGraphNodeSchema,
   EnterIfNodeSchema,
   ExitIfNodeSchema,
   EnterConditionBranchNodeSchema,
