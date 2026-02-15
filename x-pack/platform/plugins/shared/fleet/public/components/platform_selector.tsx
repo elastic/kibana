@@ -25,6 +25,8 @@ import { css } from '@emotion/react';
 import {
   FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
   FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
+  FLEET_CLOUD_SECURITY_POSTURE_ASSET_INVENTORY_POLICY_TEMPLATE,
+  FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE,
 } from '../../common/constants/epm';
 import {
   usePlatform,
@@ -120,11 +122,11 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     />
   );
 
-  const macCallout = (
+  const unsupportedPlatformCallout = (
     <EuiCallOut
-      title={i18n.translate('xpack.fleet.enrollmentInstructions.macCallout', {
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.unsupportedPlatformCallout', {
         defaultMessage:
-          'We recommend against deploying this integration within Mac as it is currently not being supported.',
+          'Cloudbeat cannot be deployed on macOS and Windows platforms. This integration only works on Linux and Kubernetes environments.',
       })}
       color="warning"
       iconType="warning"
@@ -214,13 +216,17 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             <EuiSpacer size="m" />
           </>
         )}
-        {['mac_aarch64', 'mac_x86_64'].includes(platform) &&
+        {['mac_aarch64', 'mac_x86_64', 'windows', 'windows_msi'].includes(platform) &&
           (cloudSecurityIntegration?.integrationType ===
             FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE ||
             cloudSecurityIntegration?.integrationType ===
-              FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE) && (
+              FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE ||
+            cloudSecurityIntegration?.integrationType ===
+              FLEET_CLOUD_SECURITY_POSTURE_ASSET_INVENTORY_POLICY_TEMPLATE ||
+            cloudSecurityIntegration?.integrationType ===
+              FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE) && (
             <>
-              {macCallout}
+              {unsupportedPlatformCallout}
               <EuiSpacer size="m" />
             </>
           )}
