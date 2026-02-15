@@ -418,7 +418,7 @@ export class AlertingPlugin {
 
     this.uiamApiKeyProvisioningTask = new UiamApiKeyProvisioningTask({
       logger: this.logger,
-      isServerless: true,
+      isServerless: this.isServerless,
     });
     this.uiamApiKeyProvisioningTask.register({ core, taskManager: plugins.taskManager });
 

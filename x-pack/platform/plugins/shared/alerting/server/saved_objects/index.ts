@@ -278,6 +278,9 @@ export function setupSavedObjects(
         status: {
           type: 'keyword',
         },
+        message: {
+          type: 'text',
+        },
       },
     },
     modelVersions: uiamApiKeysProvisioningStatusModelVersions,

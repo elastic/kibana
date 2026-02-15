@@ -33,4 +33,5 @@ export const rawUiamApiKeysProvisioningStatusSchema = schema.object({
   entityId: schema.string(),
   entityType,
   status,
+  message: schema.maybe(schema.string()),
 });
