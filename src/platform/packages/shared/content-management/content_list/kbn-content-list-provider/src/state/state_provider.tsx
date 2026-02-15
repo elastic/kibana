@@ -14,7 +14,7 @@ import { DEFAULT_FILTERS } from './types';
 import { ContentListStateContext } from './use_content_list_state';
 import { useContentListConfig } from '../context';
 import { isSortingConfig } from '../features';
-import { reducer } from './state_reducer';
+import { reducer, DEFAULT_DELETE_STATE } from './state_reducer';
 import { useContentListItemsQuery } from '../query';
 
 /**
@@ -50,11 +50,12 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
     return { field: 'title', direction: 'asc' as const };
   }, [sorting]);
 
-  // Initial client state (filters, sort).
+  // Initial client state (filters, sort, delete).
   const initialClientState: ContentListClientState = useMemo(
     () => ({
       filters: { ...DEFAULT_FILTERS },
       sort: initialSort,
+      ...DEFAULT_DELETE_STATE,
     }),
     [initialSort]
   );

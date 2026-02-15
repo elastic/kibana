@@ -52,4 +52,6 @@ export const isSortingConfig = (
 export interface ContentListSupports {
   /** Whether sorting is supported. */
   sorting: boolean;
+  /** Whether delete is supported (requires `item.onDelete` and `!isReadOnly`). */
+  delete: boolean;
 }
