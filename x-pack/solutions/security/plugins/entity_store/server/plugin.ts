@@ -12,20 +12,25 @@ import type {
   EntityStoreRequestHandlerContext,
   EntityStoreSetupPlugins,
   EntityStoreStartPlugins,
-  PluginStartContract,
-  PluginSetupContract,
+  EntityStoreStartContract,
+  EntityStoreSetupContract,
 } from './types';
 import { createRequestHandlerContext } from './request_context_factory';
 import { PLUGIN_ID } from '../common';
 import { registerTasks } from './tasks/register_tasks';
 import { registerUiSettings } from './infra/feature_flags/register';
-import { EngineDescriptorType } from './domain/definitions/saved_objects';
+import {
+  EngineDescriptorType,
+  EntityMaintainersTasksType,
+} from './domain/definitions/saved_objects';
+import { registerEntityMaintainerTask } from './tasks/entity_maintainer_task';
+import { RegisterEntityMaintainerConfig } from './tasks/entity_maintainer_task/types';
 
 export class EntityStorePlugin
   implements
     Plugin<
-      PluginSetupContract,
-      PluginStartContract,
+      EntityStoreSetupContract,
+      EntityStoreStartContract,
       EntityStoreSetupPlugins,
       EntityStoreStartPlugins
     >
@@ -61,8 +66,18 @@ export class EntityStorePlugin
     this.logger.debug('Registering ui settings');
     registerUiSettings(core.uiSettings);
 
-    this.logger.debug('Registering saved objects type');
+    this.logger.debug('Registering saved objects types');
     core.savedObjects.registerType(EngineDescriptorType);
+    core.savedObjects.registerType(EntityMaintainersTasksType);
+    
+    return {
+      registerEntityMaintainer: (config: RegisterEntityMaintainerConfig) => registerEntityMaintainerTask({
+        taskManager: plugins.taskManager,
+        logger: this.logger,
+        config,
+        core
+      }),
+    };
   }
 
   public start(core: CoreStart, plugins: EntityStoreStartPlugins) {

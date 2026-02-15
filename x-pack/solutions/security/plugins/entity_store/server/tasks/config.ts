@@ -8,7 +8,7 @@
 import type { IntervalSchedule, TaskRegisterDefinition } from '@kbn/task-manager-plugin/server';
 import { EntityStoreTaskType } from './constants';
 
-type TaskScheduleConfig = Omit<TaskRegisterDefinition, 'createTaskRunner'> & IntervalSchedule;
+type TaskScheduleConfig = Omit<TaskRegisterDefinition, 'createTaskRunner'> & Partial<IntervalSchedule>;
 
 export interface EntityStoreTaskConfig extends TaskScheduleConfig {
   type: string;
@@ -20,5 +20,9 @@ export const TasksConfig: Record<EntityStoreTaskType, EntityStoreTaskConfig> = {
     type: 'entity_store:v2:extract_entity_task',
     timeout: '25s',
     interval: '30s',
+  },
+  [EntityStoreTaskType.Values.entityMaintainer]: {
+    title: 'Entity Store - Entity Maintainer Task',
+    type: 'entity_store:v2:entity_maintainer_task',
   },
 };

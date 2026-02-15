@@ -21,7 +21,7 @@ export class EngineDescriptorClient {
     private readonly soClient: SavedObjectsClientContract,
     private readonly namespace: string,
     private readonly logger: Logger
-  ) {}
+  ) { }
 
   async getAll(): Promise<EngineDescriptor[]> {
     const { saved_objects } = await this.soClient.find<EngineDescriptor>({
