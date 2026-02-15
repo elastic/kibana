@@ -9,7 +9,6 @@ import { promisify } from 'util';
 
 import fs from 'fs';
 
-import fetch from 'node-fetch';
 import { createEsClientForTesting } from '@kbn/test';
 
 import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';

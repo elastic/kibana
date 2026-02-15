@@ -7,7 +7,6 @@
 
 import { readFile } from 'fs/promises';
 
-import fetch from 'node-fetch';
 import type { DeepPartial } from 'utility-types';
 
 import type { FleetConfigType } from '../../../public/plugin';
@@ -33,10 +32,9 @@ jest.mock('../app_context', () => {
 });
 
 jest.mock('fs/promises');
-jest.mock('node-fetch');
 
 const mockedReadFile = readFile as jest.MockedFunction<typeof readFile>;
-const mockedFetch = fetch as jest.MockedFunction<typeof fetch>;
+const mockedFetch = jest.spyOn(global, 'fetch');
 
 const emptyResponse = {
   status: 200,

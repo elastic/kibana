@@ -8,7 +8,6 @@
 import { readFile } from 'fs/promises';
 import Path from 'path';
 
-import fetch from 'node-fetch';
 import pRetry from 'p-retry';
 import { uniq } from 'lodash';
 import semverGte from 'semver/functions/gte';
