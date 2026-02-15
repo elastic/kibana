@@ -64,6 +64,7 @@ export interface InternalInjectedMetadataSetup {
         initialFeatureFlags: Record<string, unknown>;
       }
     | undefined;
+  getCpsEnabled: () => boolean;
 }
 
 /** @internal */

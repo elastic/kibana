@@ -200,6 +200,11 @@ export const configSchema = schema.object({
   ),
   dnsCacheTtl: schema.duration({ defaultValue: 0, min: 0 }),
   publicBaseUrl: schema.maybe(hostURISchema),
+  cpsEnabled: offeringBasedSchema({
+    serverless: schema.boolean({ defaultValue: false }),
+    traditional: schema.literal(false),
+    options: { defaultValue: false },
+  }),
 });
 
 const deprecations: ConfigDeprecationProvider = () => [
@@ -486,6 +491,11 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
    */
   public readonly dnsCacheTtl: Duration;
 
+  /**
+   * Whether CPS (Cross Project Search) is enabled. Only applies to serverless.
+   */
+  public readonly cpsEnabled: boolean;
+
   constructor(rawConfig: ElasticsearchConfigType) {
     this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
     this.apiVersion = rawConfig.apiVersion;
@@ -515,6 +525,7 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.apisToRedactInLogs = rawConfig.apisToRedactInLogs;
     this.dnsCacheTtl = rawConfig.dnsCacheTtl;
     this.publicBaseUrl = rawConfig.publicBaseUrl;
+    this.cpsEnabled = rawConfig.cpsEnabled;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);

@@ -76,6 +76,7 @@ export function createPluginSetupContext<
 }): CoreSetup {
   return {
     analytics: deps.analytics,
+    elasticsearch: deps.elasticsearch,
     application: {
       register: (app) => deps.application.register(plugin.opaqueId, app),
       registerAppUpdater: (statusUpdater$) => deps.application.registerAppUpdater(statusUpdater$),
@@ -140,6 +141,7 @@ export function createPluginStartContext<
 }): CoreStart {
   return {
     analytics: deps.analytics,
+    elasticsearch: deps.elasticsearch,
     application: {
       applications$: deps.application.applications$,
       currentAppId$: deps.application.currentAppId$,

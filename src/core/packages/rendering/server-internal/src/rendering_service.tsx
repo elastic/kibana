@@ -307,6 +307,7 @@ export class RenderingService {
           overrides: featureFlags?.getOverrides() || {},
           initialFeatureFlags: (await featureFlags?.getInitialFeatureFlags()) || {},
         },
+        cpsEnabled: elasticsearch?.getCpsEnabled() ?? false,
         clusterInfo,
         apmConfig,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,

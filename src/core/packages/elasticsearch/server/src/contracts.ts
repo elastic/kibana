@@ -99,15 +99,9 @@ export interface ElasticsearchServiceSetup {
   readonly publicBaseUrl?: string;
 
   /**
-   * Sets the CPS feature flag in the Elasticsearch service.
-   * This should only be called from the CPS plugin.
-   *
-   * @example
-   * ```ts
-   * core.elasticsearch.setCpsFeatureFlag(true);
-   * ```
+   * Returns whether CPS (Cross Project Search) is enabled.
    */
-  setCpsFeatureFlag: (enabled: boolean) => void;
+  getCpsEnabled: () => boolean;
 }
 
 /**

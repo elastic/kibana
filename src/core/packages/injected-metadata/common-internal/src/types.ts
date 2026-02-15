@@ -69,6 +69,7 @@ export interface InjectedMetadata {
     overrides: Record<string, unknown>;
     initialFeatureFlags: Record<string, unknown>;
   };
+  cpsEnabled?: boolean;
   anonymousStatusPage: boolean;
   i18n: {
     translationsUrl: string;

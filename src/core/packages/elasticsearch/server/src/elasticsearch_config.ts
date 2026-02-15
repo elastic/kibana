@@ -156,6 +156,11 @@ export interface IElasticsearchConfig {
    * Set to 0 to disable the cache (default Node.js behavior)
    */
   readonly dnsCacheTtl: Duration;
+
+  /**
+   * Whether CPS (Cross Project Search) is enabled. Only applies to serverless.
+   */
+  readonly cpsEnabled: boolean;
 }
 
 /**

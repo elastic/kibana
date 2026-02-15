@@ -43,6 +43,7 @@ const INJECTED_METADATA = {
   branch: expect.any(String),
   buildNumber: expect.any(Number),
   logging: expect.any(Object),
+  cpsEnabled: expect.any(Boolean),
   env: {
     mode: {
       name: expect.any(String),
@@ -349,6 +350,17 @@ function renderTestCases(
       expect(data.i18n.translationsUrl).toEqual(
         '/mock-server-basepath/translations/MOCK_HASH/en.json'
       );
+    });
+
+    it('renders "core" with CPS', async () => {
+      mockRenderingSetupDeps.elasticsearch.getCpsEnabled.mockReturnValueOnce(true);
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: false,
+      });
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+      expect(data).toMatchSnapshot(INJECTED_METADATA);
     });
   });
 }

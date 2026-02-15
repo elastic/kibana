@@ -195,3 +195,25 @@ describe('setup.getFeatureFlags()', () => {
     expect(contract.getFeatureFlags()).toBeUndefined();
   });
 });
+
+describe('setup.getCpsEnabled()', () => {
+  it('returns injectedMetadata.cpsEnabled', () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {
+        cpsEnabled: true,
+      },
+    } as unknown as InjectedMetadataParams);
+
+    const contract = injectedMetadata.setup();
+    expect(contract.getCpsEnabled()).toBe(true);
+  });
+
+  it('returns false when injectedMetadata.cpsEnabled is undefined', () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {},
+    } as unknown as InjectedMetadataParams);
+
+    const contract = injectedMetadata.setup();
+    expect(contract.getCpsEnabled()).toBe(false);
+  });
+});

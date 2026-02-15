@@ -221,7 +221,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       legacy: deps.elasticsearch.legacy,
       publicBaseUrl: deps.elasticsearch.publicBaseUrl,
       setUnauthorizedErrorHandler: deps.elasticsearch.setUnauthorizedErrorHandler,
-      setCpsFeatureFlag: deps.elasticsearch.setCpsFeatureFlag,
+      getCpsEnabled: deps.elasticsearch.getCpsEnabled,
     },
     executionContext: {
       withContext: deps.executionContext.withContext,

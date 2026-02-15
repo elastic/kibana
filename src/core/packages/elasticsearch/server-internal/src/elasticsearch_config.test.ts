@@ -33,6 +33,7 @@ test('set correct defaults', () => {
       "apiVersion": "master",
       "apisToRedactInLogs": Array [],
       "compression": false,
+      "cpsEnabled": false,
       "customHeaders": Object {},
       "dnsCacheTtl": "P0D",
       "healthCheckDelay": "PT2.5S",
@@ -79,6 +80,7 @@ test('set correct defaults (serverless)', () => {
       "apiVersion": "master",
       "apisToRedactInLogs": Array [],
       "compression": false,
+      "cpsEnabled": false,
       "customHeaders": Object {},
       "dnsCacheTtl": "P0D",
       "healthCheckDelay": "PT2.5S",
@@ -527,5 +529,41 @@ describe('skipStartupConnectionCheck', () => {
     expect(() => config.schema.validate(obj, { dist: true })).toThrowErrorMatchingInlineSnapshot(
       `"[skipStartupConnectionCheck]: \\"skipStartupConnectionCheck\\" can only be set to true when running from source to allow integration tests to run without an ES server"`
     );
+  });
+});
+
+describe('#cpsEnabled', () => {
+  test('defaults to false for traditional', () => {
+    const configValue = new ElasticsearchConfig(config.schema.validate({}));
+    expect(configValue.cpsEnabled).toBe(false);
+  });
+
+  test('defaults to false for serverless', () => {
+    const configValue = new ElasticsearchConfig(config.schema.validate({}, { serverless: true }));
+    expect(configValue.cpsEnabled).toBe(false);
+  });
+
+  test('accepts true for serverless', () => {
+    const configValue = new ElasticsearchConfig(
+      config.schema.validate({ cpsEnabled: true }, { serverless: true })
+    );
+    expect(configValue.cpsEnabled).toBe(true);
+  });
+
+  test('accepts false for serverless', () => {
+    const configValue = new ElasticsearchConfig(
+      config.schema.validate({ cpsEnabled: false }, { serverless: true })
+    );
+    expect(configValue.cpsEnabled).toBe(false);
+  });
+
+  test('is always false for traditional (not configurable)', () => {
+    expect(() =>
+      config.schema.validate({ cpsEnabled: true }, { serverless: false })
+    ).toThrowErrorMatchingInlineSnapshot(`"[cpsEnabled]: expected value to equal [false]"`);
+
+    expect(() =>
+      config.schema.validate({ cpsEnabled: false }, { serverless: false })
+    ).not.toThrow();
   });
 });

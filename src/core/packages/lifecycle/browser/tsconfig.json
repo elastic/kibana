@@ -32,6 +32,7 @@
     "@kbn/core-feature-flags-browser",
     "@kbn/core-rendering-browser",
     "@kbn/core-pricing-browser",
+    "@kbn/core-elasticsearch-browser",
     "@kbn/core-di",
   ],
   "exclude": [

@@ -7,21 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ICPSManager } from '@kbn/cps-utils';
-
-export interface CPSPluginSetup {
-  cpsEnabled: boolean;
+/**
+ * @public
+ */
+export interface ElasticsearchServiceSetup {
+  /**
+   * Returns whether CPS (Cross Project Search) is enabled.
+   */
+  getCpsEnabled: () => boolean;
 }
 
-export interface CPSConfigType {
-  cpsEnabled: boolean;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CPSServerStart {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CPSServerStop {}
-
-export interface CPSPluginStart {
-  cpsManager?: ICPSManager;
-}
+/**
+ * @public
+ */
+export type ElasticsearchServiceStart = ElasticsearchServiceSetup;

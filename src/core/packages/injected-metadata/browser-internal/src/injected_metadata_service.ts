@@ -30,11 +30,11 @@ export class InjectedMetadataService {
     this.state = deepFreeze(this.params.injectedMetadata) as InjectedMetadata;
   }
 
-  public start(): InternalInjectedMetadataSetup {
+  public start(): InternalInjectedMetadataStart {
     return this.setup();
   }
 
-  public setup(): InternalInjectedMetadataStart {
+  public setup(): InternalInjectedMetadataSetup {
     return {
       getBasePath: () => {
         return this.state.basePath;
@@ -98,6 +98,10 @@ export class InjectedMetadataService {
 
       getFeatureFlags: () => {
         return this.state.featureFlags;
+      },
+
+      getCpsEnabled: () => {
+        return this.state.cpsEnabled ?? false;
       },
     };
   }

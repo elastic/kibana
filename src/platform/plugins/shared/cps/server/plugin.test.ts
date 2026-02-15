@@ -26,8 +26,9 @@ describe('CPSServerPlugin', () => {
 
   describe('when cpsEnabled is true', () => {
     beforeEach(() => {
-      mockInitContext = coreMock.createPluginInitializerContext({ cpsEnabled: true });
+      mockInitContext = coreMock.createPluginInitializerContext();
       (mockInitContext.env.packageInfo as any).buildFlavor = 'serverless';
+      (mockCoreSetup.elasticsearch.getCpsEnabled as jest.Mock).mockReturnValue(true);
       plugin = new CPSServerPlugin(mockInitContext);
     });
 
@@ -35,28 +36,19 @@ describe('CPSServerPlugin', () => {
       const setup = plugin.setup(mockCoreSetup);
       expect(setup.getCpsEnabled()).toBe(true);
     });
-
-    it('should call setCpsFeatureFlag with true', () => {
-      plugin.setup(mockCoreSetup);
-      expect(mockCoreSetup.elasticsearch.setCpsFeatureFlag).toHaveBeenCalledWith(true);
-    });
   });
 
   describe('when cpsEnabled is false', () => {
     beforeEach(() => {
-      mockInitContext = coreMock.createPluginInitializerContext({ cpsEnabled: false });
+      mockInitContext = coreMock.createPluginInitializerContext();
       (mockInitContext.env.packageInfo as any).buildFlavor = 'serverless';
+      (mockCoreSetup.elasticsearch.getCpsEnabled as jest.Mock).mockReturnValue(false);
       plugin = new CPSServerPlugin(mockInitContext);
     });
 
     it('should return false from getCpsEnabled', () => {
       const setup = plugin.setup(mockCoreSetup);
       expect(setup.getCpsEnabled()).toBe(false);
-    });
-
-    it('should call setCpsFeatureFlag with false', () => {
-      plugin.setup(mockCoreSetup);
-      expect(mockCoreSetup.elasticsearch.setCpsFeatureFlag).toHaveBeenCalledWith(false);
     });
   });
 

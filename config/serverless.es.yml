@@ -4,8 +4,8 @@
 plugins.allowlistPluginGroups: ['platform', 'search']
 
 # Cross Project Search
+elasticsearch.cpsEnabled: false
 cps.enabled: true
-cps.cpsEnabled: false
 
 xpack.search.enabled: false
 xpack.osquery.enabled: false
