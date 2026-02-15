@@ -173,7 +173,7 @@ function handleCompleteOperator(
         hasMoreParams: analyzer.hasMoreParams,
         isVariadic: analyzer.isVariadic,
         hasMoreMandatoryArgs: analyzer.getHasMoreMandatoryArgs(),
-        functionSignatures: analyzer.getValidSignatures(),
+        isExpressionHeavy: analyzer.acceptsArbitraryExpressions,
         isCursorFollowedByComma: false,
       });
     }

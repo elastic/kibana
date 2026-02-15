@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { suggestForExpression } from '../suggestion_engine';
 import type { ExpressionContext, FunctionParameterContext } from '../types';
 import { getFunctionDefinition } from '../../../functions';
 import type { ISuggestionItem } from '../../../../../registry/types';
@@ -53,7 +52,7 @@ export async function suggestInFunction(ctx: ExpressionContext): Promise<ISugges
     ? existing
     : [...existing, functionExpression.name];
 
-  const { suggestions } = await suggestForExpression({
+  const { suggestions } = await ctx.recursiveSuggest({
     query,
     command,
     cursorPosition,

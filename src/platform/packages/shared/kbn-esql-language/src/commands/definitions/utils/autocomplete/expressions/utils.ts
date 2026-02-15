@@ -11,40 +11,13 @@ import type { ESQLFunction } from '../../../../../types';
 import { nullCheckOperators, inOperators } from '../../../all_operators';
 import type { ExpressionContext, FunctionParameterContext } from './types';
 import type { ICommandContext, ISuggestionItem } from '../../../../registry/types';
-import { getFunctionDefinition } from '../..';
+import { getFunctionDefinition } from '../../functions';
 import { SignatureAnalyzer } from './signature_analyzer';
-import type { Signature } from '../../../types';
 
 export type SpecialFunctionName = 'case' | 'count' | 'bucket';
 
 /** IN, NOT IN, IS NULL, IS NOT NULL operators requiring special autocomplete handling */
 export const specialOperators = [...inOperators, ...nullCheckOperators];
-
-/**
- * Detects if function signatures accept arbitrary/complex expressions in parameters.
- *
- * This pattern indicates functions where parameters can contain complex expressions
- * (not just simple values), characterized by:
- * - Variadic with multiple parameters (minParams >= 2)
- * - Unknown return type (depends on arguments)
- * - Mixed parameter types (boolean + any)
- *
- * Examples: CASE(condition1, value1, condition2, value2, ..., default)
- */
-export function acceptsArbitraryExpressions(signatures: Signature[]): boolean {
-  if (!signatures || signatures.length === 0) {
-    return false;
-  }
-
-  return signatures.some((sig) => {
-    const isVariadicWithMultipleParams = sig.minParams != null && sig.minParams >= 2;
-    const hasUnknownReturn = sig.returnType === 'unknown';
-    const hasMixedBooleanAndAny =
-      sig.params.some(({ type }) => type === 'boolean') && sig.params.some((p) => p.type === 'any');
-
-    return isVariadicWithMultipleParams && hasUnknownReturn && hasMixedBooleanAndAny;
-  });
-}
 
 /** Checks if operator is a NULL check (IS NULL, IS NOT NULL) */
 export function isNullCheckOperator(name: string) {

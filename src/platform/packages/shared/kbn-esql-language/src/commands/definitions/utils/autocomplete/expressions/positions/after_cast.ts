@@ -8,13 +8,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SupportedDataType } from '../../../../..';
+import type { SupportedDataType } from '../../../../types';
 import type { ESQLInlineCast } from '../../../../../../types';
 import { Walker, within } from '../../../../../../ast';
 import type { ISuggestionItem } from '../../../../../registry/types';
 import { getFunctionDefinition } from '../../../functions';
 import type { ExpressionContext } from '../types';
-import { getExpressionType } from '../../..';
+import { getExpressionType } from '../../../expressions';
 import { inlineCastsMapping } from '../../../../generated/inline_casts_mapping';
 import { getMatchingSignatures } from '../../../expressions';
 

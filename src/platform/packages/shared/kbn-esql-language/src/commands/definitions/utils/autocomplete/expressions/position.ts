@@ -14,14 +14,7 @@ import type { ESQLColumnData } from '../../../../registry/types';
 import { isNullCheckOperator } from './utils';
 import { checkFunctionInvocationComplete } from '../../functions';
 import { getExpressionType } from '../../expressions';
-
-export type ExpressionPosition =
-  | 'in_function'
-  | 'after_not'
-  | 'after_operator'
-  | 'after_complete'
-  | 'after_cast'
-  | 'empty_expression';
+import type { ExpressionPosition } from './types';
 
 /** Matches " not" at end of string (case insensitive) */
 const NOT_PATTERN = / not$/i;
