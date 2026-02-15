@@ -121,7 +121,8 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       if (debug && failure.error) {
         const kibanaUrl = this.getKibanaUrl(forceServerInfo, forceLocalhost);
         failure.error = {
-          ...failure.error,
+          type: failure.error.type,
+          message: failure.error.message,
           details: { ...failure.error.details, _debug: { kibanaUrl } },
         };
       }
