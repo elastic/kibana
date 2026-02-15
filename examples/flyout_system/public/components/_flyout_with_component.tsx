@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
-import { css } from '@emotion/react';
+import React, { useCallback, useRef, useState } from 'react';
 
 import {
   EuiButton,
@@ -50,6 +49,11 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
   const [isChildFlyoutAOpen, setIsChildFlyoutAOpen] = useState(false);
   const [isChildFlyoutBOpen, setIsChildFlyoutBOpen] = useState(false);
 
+  // Refs for manual focus management
+  const mainTriggerRef = useRef<HTMLButtonElement>(null);
+  const childTriggerARef = useRef<HTMLButtonElement>(null);
+  const childTriggerBRef = useRef<HTMLButtonElement>(null);
+
   // Handlers for "Open" buttons
 
   const handleOpenMainFlyout = () => {
@@ -81,16 +85,33 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
     setIsFlyoutOpen(false);
     setIsChildFlyoutAOpen(false);
     setIsChildFlyoutBOpen(false);
+
+    // Return focus to main trigger button after closing main flyout
+    // TODO: clean this up if EUI adds internal support for returning focus to the trigger element on close
+    // https://github.com/elastic/eui/issues/9365
+    setTimeout(() => {
+      mainTriggerRef.current?.focus();
+    }, 100);
   }, [title]);
 
   const handleCloseChildFlyoutA = useCallback(() => {
     console.log('close child flyout A', title); // eslint-disable-line no-console
     setIsChildFlyoutAOpen(false);
+
+    // Return focus to child trigger button after closing child flyout A
+    setTimeout(() => {
+      childTriggerARef.current?.focus();
+    }, 100);
   }, [title]);
 
   const handleCloseChildFlyoutB = useCallback(() => {
     console.log('close child flyout B', title); // eslint-disable-line no-console
     setIsChildFlyoutBOpen(false);
+
+    // Return focus to child trigger button after closing child flyout B
+    setTimeout(() => {
+      childTriggerBRef.current?.focus();
+    }, 100);
   }, [title]);
 
   // Render
@@ -119,7 +140,11 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText>
-            <EuiButton disabled={isFlyoutOpen} onClick={handleOpenMainFlyout}>
+            <EuiButton
+              buttonRef={mainTriggerRef}
+              disabled={isFlyoutOpen}
+              onClick={handleOpenMainFlyout}
+            >
               Open {title}
             </EuiButton>
           </EuiText>
@@ -205,10 +230,18 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
             {childSize && (
               <>
                 <EuiSpacer size="m" />
-                <EuiButton onClick={handleOpenChildFlyoutA} disabled={isChildFlyoutAOpen}>
+                <EuiButton
+                  buttonRef={childTriggerARef}
+                  onClick={handleOpenChildFlyoutA}
+                  disabled={isChildFlyoutAOpen}
+                >
                   Open child flyout A
                 </EuiButton>{' '}
-                <EuiButton onClick={handleOpenChildFlyoutB} disabled={isChildFlyoutBOpen}>
+                <EuiButton
+                  buttonRef={childTriggerBRef}
+                  onClick={handleOpenChildFlyoutB}
+                  disabled={isChildFlyoutBOpen}
+                >
                   Open child flyout B
                 </EuiButton>
               </>
@@ -318,6 +351,9 @@ const NonSessionFlyout: React.FC = React.memo(() => {
   const [flyoutOwnFocus, setFlyoutOwnFocus] = useState<boolean>(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
+  // Refs for manual focus management
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
   const handleOpenFlyout = () => {
     setIsFlyoutVisible(true);
   };
@@ -330,6 +366,11 @@ const NonSessionFlyout: React.FC = React.memo(() => {
   const flyoutOnClose = useCallback(() => {
     console.log('close non-session flyout'); // eslint-disable-line no-console
     setIsFlyoutVisible(false);
+
+    // Return focus to trigger button after closing flyout
+    setTimeout(() => {
+      triggerRef.current?.focus();
+    }, 100);
   }, []);
 
   return (
@@ -356,7 +397,7 @@ const NonSessionFlyout: React.FC = React.memo(() => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText>
-            <EuiButton disabled={isFlyoutVisible} onClick={handleOpenFlyout}>
+            <EuiButton buttonRef={triggerRef} disabled={isFlyoutVisible} onClick={handleOpenFlyout}>
               Open Non-session Flyout
             </EuiButton>
           </EuiText>
@@ -433,11 +474,6 @@ export const FlyoutWithComponent: React.FC = () => (
             description: <SessionFlyout title="Session L" mainSize="fill" />,
           },
         ]}
-        css={css`
-          dt {
-            min-width: 25em;
-          }
-        `}
       />
 
       <EuiSpacer size="m" />
@@ -456,11 +492,6 @@ export const FlyoutWithComponent: React.FC = () => (
             description: <NonSessionFlyout />,
           },
         ]}
-        css={css`
-          dt {
-            min-width: 25em;
-          }
-        `}
       />
     </EuiPanel>
   </>
