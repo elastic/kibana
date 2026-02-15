@@ -176,6 +176,12 @@ export const SIEM_MIGRATIONS_LANDING_PATH = `${SIEM_MIGRATIONS_PATH}/landing` as
 export const SIEM_MIGRATIONS_RULES_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as const;
 export const SIEM_MIGRATIONS_DASHBOARDS_PATH = `${SIEM_MIGRATIONS_PATH}/dashboards` as const;
 
+/**
+ * Detection engine Health UI paths
+ */
+export const DE_SPACE_RULES_HEALTH_PATH = `${RULES_PATH}/health` as const;
+export const DE_RULE_HEALTH_PATH = `${RULES_PATH}/id/:ruleId/health` as const;
+
 // EASE exclusive paths
 export const CONFIGURATIONS_PATH = '/configurations' as const;
 export const CONFIGURATIONS_INTEGRATIONS_PATH =
@@ -222,6 +228,10 @@ export enum SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM {
 
 /** This Kibana Advanced Setting sets the auto refresh interval for the detections all rules table */
 export const DEFAULT_RULES_TABLE_REFRESH_SETTING = 'securitySolution:rulesTableRefresh' as const;
+
+/** This Kibana Advanced Setting enables the Detection Engine Health UI */
+export const ENABLE_DE_HEALTH_UI_SETTING =
+  'securitySolution:enableDetectionEngineHealthUI' as const;
 
 /** This Kibana Advanced Setting specifies the URL of the News feed widget */
 export const NEWS_FEED_URL_SETTING = 'securitySolution:newsFeedUrl' as const;

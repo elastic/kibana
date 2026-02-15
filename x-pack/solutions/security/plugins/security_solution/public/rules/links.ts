@@ -14,6 +14,7 @@ import {
 } from '@kbn/security-solution-features/constants';
 import {
   COVERAGE_OVERVIEW_PATH,
+  DE_SPACE_RULES_HEALTH_PATH,
   EXCEPTIONS_PATH,
   RULES_ADD_PATH,
   RULES_CREATE_PATH,
@@ -27,6 +28,7 @@ import {
   COVERAGE_OVERVIEW,
   CREATE_NEW_RULE,
   AI_RULE_CREATE,
+  DE_SPACE_RULES_HEALTH,
   EXCEPTIONS,
   RULES,
   SIEM_RULES,
@@ -82,6 +84,14 @@ export const links: LinkItem = {
           path: AI_RULE_CREATION_PATH,
           skipUrlState: true,
           hideTimeline: false,
+        },
+        {
+          id: SecurityPageName.spaceRulesHealth,
+          title: DE_SPACE_RULES_HEALTH,
+          path: DE_SPACE_RULES_HEALTH_PATH,
+          skipUrlState: true,
+          hideTimeline: true,
+          globalSearchDisabled: true,
         },
       ],
     },

@@ -230,3 +230,10 @@ export const AI_RULE_CREATE = i18n.translate(
     defaultMessage: 'AI rule creation',
   }
 );
+
+export const DE_SPACE_RULES_HEALTH = i18n.translate(
+  'xpack.securitySolution.navigation.spaceRulesHealthTitle',
+  {
+    defaultMessage: 'Health',
+  }
+);
