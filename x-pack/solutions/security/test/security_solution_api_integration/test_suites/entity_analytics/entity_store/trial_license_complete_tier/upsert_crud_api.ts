@@ -60,6 +60,23 @@ export default function (providerContext: FtrProviderContext) {
         // Note: COMMON_DATASTREAM_NAME (logs-elastic_agent.cloudbeat-test) is already covered
         // by the default Entity Store patterns (logs-*), so no extraIndexPatterns needed
         await enableEntityStore(providerContext, { entityTypes: ['user'] });
+
+        // Diagnostic: Log entity store status to verify user engine is running
+        const statusResponse = await supertest
+          .get('/api/entity_store/status')
+          .query({ include_components: true })
+          .expect(200);
+        log.info(`Entity Store status: ${statusResponse.body.status}`);
+        log.info(
+          `Entity Store engines: ${JSON.stringify(
+            statusResponse.body.engines?.map((e: any) => ({
+              type: e.type,
+              status: e.status,
+              indexPattern: e.indexPattern,
+            }))
+          )}`
+        );
+
         log.info('beforeEach complete');
       });
 
@@ -79,10 +96,41 @@ export default function (providerContext: FtrProviderContext) {
           COMMON_DATASTREAM_NAME
         );
 
+        // Diagnostic: Check what's in the source datastream after transform trigger
+        const sourceDocsResult = await es.search({
+          index: COMMON_DATASTREAM_NAME,
+          query: { match_all: {} },
+          size: 10,
+        });
+        log.info(
+          `Source datastream ${COMMON_DATASTREAM_NAME} has ${
+            (sourceDocsResult.hits.total as any).value
+          } documents`
+        );
+        if (sourceDocsResult.hits.hits.length > 0) {
+          log.info(`Sample source doc: ${JSON.stringify(sourceDocsResult.hits.hits[0]._source)}`);
+        }
+
         await retry.waitForWithTimeout(
           'Document to be processed and transformed',
           LOCAL_TIMEOUT_MS,
           async () => {
+            // Diagnostic: Check what's in the user index
+            const userIndexResult = await es.search({
+              index: USER_INDEX_NAME,
+              query: { match_all: {} },
+              size: 10,
+            });
+            const userIndexTotal = (userIndexResult.hits.total as any).value;
+            log.debug(`User index ${USER_INDEX_NAME} has ${userIndexTotal} documents`);
+            if (userIndexResult.hits.hits.length > 0) {
+              log.debug(
+                `User index docs: ${userIndexResult.hits.hits
+                  .map((h) => JSON.stringify(h._source))
+                  .join(', ')}`
+              );
+            }
+
             await assertEntityFromES(es, userName, USER_INDEX_NAME, (hit) => {
               expect(hit._source?.user?.name).toEqual(userName);
               expect(hit._source?.user?.domain).toEqual(['domain.com']);

@@ -63,6 +63,25 @@ export async function createDocumentsAndTriggerTransform(
         log.debug(
           `Transform ${USER_TRANSFORM_ID} found, trigger_count: ${triggerCount}, docs_processed: ${docsProcessed}`
         );
+
+        // Log transform source configuration for debugging
+        try {
+          const transformConfig = await es.transform.getTransform({
+            transform_id: USER_TRANSFORM_ID,
+          });
+          if (transformConfig.transforms?.[0]?.source) {
+            const source = transformConfig.transforms[0].source;
+            log.info(
+              `Transform ${USER_TRANSFORM_ID} source indices: ${JSON.stringify(source.index)}`
+            );
+            log.debug(
+              `Transform ${USER_TRANSFORM_ID} source query: ${JSON.stringify(source.query)}`
+            );
+          }
+        } catch (configErr) {
+          log.debug(`Could not fetch transform config: ${configErr}`);
+        }
+
         return true;
       } catch (e: any) {
         if (e.message?.includes('resource_not_found_exception')) {
