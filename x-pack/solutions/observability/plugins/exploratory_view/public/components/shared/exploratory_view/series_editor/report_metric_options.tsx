@@ -141,6 +141,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
               iconSide="right"
               iconOnClick={() => onChange(undefined)}
               iconOnClickAriaLabel={REMOVE_REPORT_METRIC_LABEL}
+              data-test-subj={`reportMetricOptionsBadge-${series.selectedMetricField}`}
               tabIndex={0}
             >
               {seriesConfig?.metricOptions?.find(
