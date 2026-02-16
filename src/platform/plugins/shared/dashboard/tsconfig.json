@@ -103,7 +103,6 @@
     "@kbn/core-chrome-app-menu",
     "@kbn/test-jest-helpers",
     "@kbn/scout",
-    "@kbn/image-embeddable-plugin"
   ],
   "exclude": ["target/**/*"]
 }
