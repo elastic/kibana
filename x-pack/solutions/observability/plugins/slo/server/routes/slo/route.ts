@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { aiBulkCreateSlosRoute } from './ai_bulk_create_slos';
+import { aiDiscoverSlosRoute } from './ai_discover_slos';
+import { aiGenerateSloRoute } from './ai_generate_slo';
+import { aiSuggestSloRoute } from './ai_suggest_slo';
 import { bulkDeleteSLORoute, getBulkDeleteStatusRoute } from './bulk_delete';
 import { bulkPurgeRollupRoute } from './bulk_purge_rollup';
 import { createSLORoute } from './create_slo';
@@ -22,6 +26,7 @@ import { getDiagnosisRoute } from './get_diagnosis';
 import { getPreviewData } from './get_preview_data';
 import { getSLORoute } from './get_slo';
 import { getSloBurnRates } from './get_slo_burn_rates';
+import { getSloTimeseriesRoute } from './get_slo_timeseries';
 import { getSloSettingsRoute } from './get_slo_settings';
 import { getSLOStatsOverview } from './get_slo_stats_overview';
 import { getSLOGroupedStatsRoute } from './get_grouped_stats';
@@ -55,6 +60,7 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...updateSLORoute,
     ...getDiagnosisRoute,
     ...getSloBurnRates,
+    ...getSloTimeseriesRoute,
     ...getPreviewData,
     ...resetSLORoute,
     ...findSLOGroupsRoute,
@@ -71,5 +77,9 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...findSLOTemplatesRoute,
     ...healthScanRoutes,
     ...searchSloDefinitionsRoute,
+    ...aiBulkCreateSlosRoute,
+    ...aiDiscoverSlosRoute,
+    ...aiGenerateSloRoute,
+    ...aiSuggestSloRoute,
   };
 };

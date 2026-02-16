@@ -31,3 +31,4 @@ export * from './slo_templates';
 export * from './health_scan';
 export * from './search_slo_definitions';
 export * from './get_grouped_stats';
+export * from './get_slo_timeseries';

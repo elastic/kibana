@@ -87,6 +87,14 @@ export const sloKeys = {
     };
     groupBy?: string[];
   }) => [...sloKeys.all, 'preview', params] as const,
+  timeseries: (params: {
+    sloId: string;
+    from: Date;
+    to: Date;
+    instanceId?: string;
+    bucketInterval?: string;
+    includeRaw?: boolean;
+  }) => [...sloKeys.all, 'timeseries', params] as const,
   burnRateRules: (search: string) => [...sloKeys.all, 'burnRateRules', search],
   instances: (params: {
     sloId: string;
