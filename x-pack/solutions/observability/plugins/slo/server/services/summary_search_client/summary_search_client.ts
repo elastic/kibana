@@ -43,7 +43,8 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     filters: string,
     sort: Sort,
     pagination: Pagination,
-    hideStale: boolean = false
+    hideStale: boolean = false,
+    metadataFilters: Array<{ term: Record<string, string> }> = []
   ): Promise<Paginated<SummaryResult>> {
     const parsedFilters = parseStringFilters(filters, this.logger);
 
@@ -66,6 +67,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
             }),
             getElasticsearchQueryOrThrow(kqlQuery),
             ...(parsedFilters.filter ?? []),
+            ...metadataFilters,
           ],
           must_not: [...(parsedFilters.must_not ?? [])],
         },

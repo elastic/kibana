@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { aggregateSLORoute } from './aggregate_slo';
 import { bulkDeleteSLORoute, getBulkDeleteStatusRoute } from './bulk_delete';
 import { bulkPurgeRollupRoute } from './bulk_purge_rollup';
 import { createSLORoute } from './create_slo';
@@ -71,5 +72,6 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...findSLOTemplatesRoute,
     ...healthScanRoutes,
     ...searchSloDefinitionsRoute,
+    ...aggregateSLORoute,
   };
 };

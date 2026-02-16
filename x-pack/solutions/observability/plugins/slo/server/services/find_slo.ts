@@ -35,7 +35,8 @@ export class FindSLO {
       params.filters ?? '',
       toSort(params),
       toPagination(params),
-      params.hideStale
+      params.hideStale,
+      parseMetadataFilter(params.metadata)
     );
 
     const localSloDefinitions = await this.repository.findAllByIds(
@@ -118,4 +119,20 @@ function toSort(params: FindSLOParams): Sort {
     field: params.sortBy ?? 'status',
     direction: params.sortDirection ?? 'asc',
   };
+}
+
+function parseMetadataFilter(
+  metadata?: string
+): Array<{ term: Record<string, string> }> {
+  if (!metadata) return [];
+  return metadata
+    .split(',')
+    .map((pair) => pair.trim())
+    .filter((pair) => pair.includes(':'))
+    .map((pair) => {
+      const colonIndex = pair.indexOf(':');
+      const key = pair.substring(0, colonIndex).trim();
+      const value = pair.substring(colonIndex + 1).trim();
+      return { term: { [`slo.metadata.${key}`]: value } };
+    });
 }

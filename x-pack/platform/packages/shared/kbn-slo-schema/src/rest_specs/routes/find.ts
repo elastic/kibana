@@ -57,6 +57,8 @@ const findSLOParamsSchema = t.partial({
   query: t.partial({
     filters: t.string,
     kqlQuery: t.string,
+    // Structured metadata filter: comma-separated key:value pairs (e.g. "team:platform,env:prod")
+    metadata: t.string,
     // Used for page pagination
     page: t.string,
     perPage: t.string,

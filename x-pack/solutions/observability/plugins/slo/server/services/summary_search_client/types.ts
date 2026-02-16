@@ -71,7 +71,8 @@ interface SummarySearchClient {
     filters: string,
     sort: Sort,
     pagination: Pagination,
-    hideStale?: boolean
+    hideStale?: boolean,
+    metadataFilters?: Array<{ term: Record<string, string> }>
   ): Promise<Paginated<SummaryResult>>;
 }
 
