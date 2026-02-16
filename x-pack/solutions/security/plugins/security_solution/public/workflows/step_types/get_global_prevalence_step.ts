@@ -47,10 +47,10 @@ export const getGlobalPrevalenceStepDefinition: PublicStepDefinition = {
   id: 'security.getGlobalPrevalence',
   inputSchema,
   outputSchema,
-  label: i18n.translate('securitySolution.workflows.steps.getGlobalPrevalence.label', {
+  label: i18n.translate('xpack.securitySolution.workflows.steps.getGlobalPrevalence.label', {
     defaultMessage: 'Get Global Prevalence',
   }),
-  description: i18n.translate('securitySolution.workflows.steps.getGlobalPrevalence.description', {
+  description: i18n.translate('xpack.securitySolution.workflows.steps.getGlobalPrevalence.description', {
     defaultMessage: 'Check if a rule is triggering across many hosts to determine prevalence level',
   }),
   icon: React.lazy(() =>
@@ -59,7 +59,7 @@ export const getGlobalPrevalenceStepDefinition: PublicStepDefinition = {
     )
   ),
   documentation: {
-    details: i18n.translate('securitySolution.workflows.steps.getGlobalPrevalence.documentation.details', {
+    details: i18n.translate('xpack.securitySolution.workflows.steps.getGlobalPrevalence.documentation.details', {
       defaultMessage:
         'Returns the count of unique hosts and users affected by a rule, along with a prevalence level (low, medium, high, very_high) and top affected hosts. Prevalence is calculated over a lookback window of [timestamp - time_range, timestamp] (or [now - time_range, now] if timestamp is omitted).',
     }),

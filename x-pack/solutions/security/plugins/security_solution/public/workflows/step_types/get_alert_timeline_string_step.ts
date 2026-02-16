@@ -26,10 +26,10 @@ export const getAlertTimelineStringStepDefinition: PublicStepDefinition = {
   id: 'security.getAlertTimelineString',
   inputSchema,
   outputSchema,
-  label: i18n.translate('securitySolution.workflows.steps.getAlertTimelineString.label', {
+  label: i18n.translate('xpack.securitySolution.workflows.steps.getAlertTimelineString.label', {
     defaultMessage: 'Get Alert Timeline String',
   }),
-  description: i18n.translate('securitySolution.workflows.steps.getAlertTimelineString.description', {
+  description: i18n.translate('xpack.securitySolution.workflows.steps.getAlertTimelineString.description', {
     defaultMessage:
       'Generate a Timeline-like English string for an alert (based on common alert + process fields)',
   }),
@@ -39,7 +39,7 @@ export const getAlertTimelineStringStepDefinition: PublicStepDefinition = {
     )
   ),
   documentation: {
-    details: i18n.translate('securitySolution.workflows.steps.getAlertTimelineString.documentation.details', {
+    details: i18n.translate('xpack.securitySolution.workflows.steps.getAlertTimelineString.documentation.details', {
       defaultMessage:
         'Fetches the alert from Elasticsearch and produces a Timeline-like plain-English string that summarizes the event and (when present) associated process context. The output is designed for use in workflows (e.g., notes, summaries, LLM prompts).',
     }),

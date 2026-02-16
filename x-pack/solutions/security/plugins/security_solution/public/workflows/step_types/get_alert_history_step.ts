@@ -31,15 +31,15 @@ export const getAlertHistoryStepDefinition: PublicStepDefinition = {
   id: 'security.getAlertHistory',
   inputSchema,
   outputSchema,
-  label: i18n.translate('securitySolution.workflows.steps.getAlertHistory.label', {
+  label: i18n.translate('xpack.securitySolution.workflows.steps.getAlertHistory.label', {
     defaultMessage: 'Get Alert History',
   }),
-  description: i18n.translate('securitySolution.workflows.steps.getAlertHistory.description', {
+  description: i18n.translate('xpack.securitySolution.workflows.steps.getAlertHistory.description', {
     defaultMessage: 'Get historical trigger rates for a rule showing how often it fired over time',
   }),
   // Icon will default to 'kibana' if not provided
   documentation: {
-    details: i18n.translate('securitySolution.workflows.steps.getAlertHistory.documentation.details', {
+    details: i18n.translate('xpack.securitySolution.workflows.steps.getAlertHistory.documentation.details', {
       defaultMessage: 'Returns a date histogram of alerts for the specified rule within the given time range.',
     }),
     examples: [

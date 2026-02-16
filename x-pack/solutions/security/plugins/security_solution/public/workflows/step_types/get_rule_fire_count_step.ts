@@ -32,10 +32,10 @@ export const getRuleFireCountStepDefinition: PublicStepDefinition = {
   id: 'security.getRuleFireCount',
   inputSchema,
   outputSchema,
-  label: i18n.translate('securitySolution.workflows.steps.getRuleFireCount.label', {
+  label: i18n.translate('xpack.securitySolution.workflows.steps.getRuleFireCount.label', {
     defaultMessage: 'Get Rule Fire Count',
   }),
-  description: i18n.translate('securitySolution.workflows.steps.getRuleFireCount.description', {
+  description: i18n.translate('xpack.securitySolution.workflows.steps.getRuleFireCount.description', {
     defaultMessage: 'Get the count of how many times a rule fired within a specified time range',
   }),
   icon: React.lazy(() =>
@@ -44,7 +44,7 @@ export const getRuleFireCountStepDefinition: PublicStepDefinition = {
     )
   ),
   documentation: {
-    details: i18n.translate('securitySolution.workflows.steps.getRuleFireCount.documentation.details', {
+    details: i18n.translate('xpack.securitySolution.workflows.steps.getRuleFireCount.documentation.details', {
       defaultMessage: 'Returns the total number of times a rule fired within the lookback window [timestamp - time_range, timestamp] (or [now - time_range, now] if timestamp is omitted).',
     }),
     examples: [

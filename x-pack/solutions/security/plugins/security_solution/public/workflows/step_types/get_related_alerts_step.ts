@@ -146,10 +146,10 @@ export const getRelatedAlertsStepDefinition: PublicStepDefinition = {
   id: 'security.getRelatedAlerts',
   inputSchema,
   outputSchema,
-  label: i18n.translate('securitySolution.workflows.steps.getRelatedAlerts.label', {
+  label: i18n.translate('xpack.securitySolution.workflows.steps.getRelatedAlerts.label', {
     defaultMessage: 'Get Related Alerts',
   }),
-  description: i18n.translate('securitySolution.workflows.steps.getRelatedAlerts.description', {
+  description: i18n.translate('xpack.securitySolution.workflows.steps.getRelatedAlerts.description', {
     defaultMessage: 'Build a graph of alerts related by shared entities (or score threshold) within an expanding time window',
   }),
   icon: React.lazy(() =>
@@ -158,7 +158,7 @@ export const getRelatedAlertsStepDefinition: PublicStepDefinition = {
     )
   ),
   documentation: {
-    details: i18n.translate('securitySolution.workflows.steps.getRelatedAlerts.documentation.details', {
+    details: i18n.translate('xpack.securitySolution.workflows.steps.getRelatedAlerts.documentation.details', {
       defaultMessage:
         'Recursively discovers alerts related by shared entities (e.g. host, user, service) within a configurable, expanding time window and returns a nodes/edges graph. Relatedness is controlled by a score threshold (min_entity_score + per-field score overrides; sums per-label scores).',
     }),

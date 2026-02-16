@@ -53,10 +53,10 @@ consts:
 
   # --- Auto-close settings ---------------------------------------------------
   # Automatically close alerts classified as false_positive when their
-  # confidence score AND confidence level fall within the defined thresholds.
+  # confidence score falls within the defined thresholds.
   auto_close_enabled: true
 
-  # Confidence thresholds (0–1 scale) — reserved for future use
+  # Confidence score thresholds (0–1 scale)
   auto_close_confidence_score_min_threshold: 0.85
   auto_close_confidence_score_max_threshold: 1.0
 
@@ -524,7 +524,6 @@ steps:
                     {{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S' }}
 
                     {% if steps.onechat_runAgent_step.output.conversation_id -%}
-                    ### Conversation
                     [Continue conversation](/app/agent_builder/conversations/{{ steps.onechat_runAgent_step.output.conversation_id }})
                     {%- endif %}
 

@@ -63,17 +63,17 @@ export const getCloseHistoryStepDefinition: PublicStepDefinition = {
   id: 'security.getCloseHistory',
   inputSchema,
   outputSchema,
-  label: i18n.translate('securitySolution.workflows.steps.getCloseHistory.label', {
+  label: i18n.translate('xpack.securitySolution.workflows.steps.getCloseHistory.label', {
     defaultMessage: 'Get Close History',
   }),
-  description: i18n.translate('securitySolution.workflows.steps.getCloseHistory.description', {
+  description: i18n.translate('xpack.securitySolution.workflows.steps.getCloseHistory.description', {
     defaultMessage: 'Get previous close reasons and false positive designations for similar alerts',
   }),
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/search').then(({ icon }) => ({ default: icon }))
   ),
   documentation: {
-    details: i18n.translate('securitySolution.workflows.steps.getCloseHistory.documentation.details', {
+    details: i18n.translate('xpack.securitySolution.workflows.steps.getCloseHistory.documentation.details', {
       defaultMessage: 'Returns historical close information for alerts matching the same rule (and optionally the same entities) to help understand how similar alerts were handled.',
     }),
     examples: [

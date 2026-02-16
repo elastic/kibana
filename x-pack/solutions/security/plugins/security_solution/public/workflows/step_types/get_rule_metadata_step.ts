@@ -47,17 +47,17 @@ export const getRuleMetadataStepDefinition: PublicStepDefinition = {
   id: 'security.getRuleMetadata',
   inputSchema,
   outputSchema,
-  label: i18n.translate('securitySolution.workflows.steps.getRuleMetadata.label', {
+  label: i18n.translate('xpack.securitySolution.workflows.steps.getRuleMetadata.label', {
     defaultMessage: 'Get Rule Metadata',
   }),
-  description: i18n.translate('securitySolution.workflows.steps.getRuleMetadata.description', {
+  description: i18n.translate('xpack.securitySolution.workflows.steps.getRuleMetadata.description', {
     defaultMessage: 'Get rule metadata including severity, rule type, category, and other rule information',
   }),
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/list').then(({ icon }) => ({ default: icon }))
   ),
   documentation: {
-    details: i18n.translate('securitySolution.workflows.steps.getRuleMetadata.documentation.details', {
+    details: i18n.translate('xpack.securitySolution.workflows.steps.getRuleMetadata.documentation.details', {
       defaultMessage: 'Retrieves metadata about a rule including its name, description, category, severity, and MITRE ATT&CK mappings.',
     }),
     examples: [
