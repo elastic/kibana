@@ -55,7 +55,7 @@ export class DirectorStep implements RuleExecutionStep {
     }
 
     try {
-      const alertsWithNextEpisode = await this.director.run({ ruleId: input.ruleId, alertEvents });
+      const alertsWithNextEpisode = await this.director.run({ rule, alertEvents });
 
       this.logger.debug({
         message: `[${this.name}] Director completed for rule ${input.ruleId}`,

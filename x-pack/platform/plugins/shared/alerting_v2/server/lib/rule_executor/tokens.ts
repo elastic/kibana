@@ -10,11 +10,12 @@ import type { RuleExecutionStep } from './types';
 import type { RuleExecutionMiddleware } from './middleware';
 
 /**
- * Token for injecting the ordered steps array.
+ * Token for multi-injecting the ordered execution steps.
+ * Binding order defines execution order.
  */
 export const RuleExecutionStepsToken = Symbol.for(
   'alerting_v2.RuleExecutionSteps'
-) as ServiceIdentifier<RuleExecutionStep[]>;
+) as ServiceIdentifier<RuleExecutionStep>;
 
 /**
  * DI token for the array of step middleware.

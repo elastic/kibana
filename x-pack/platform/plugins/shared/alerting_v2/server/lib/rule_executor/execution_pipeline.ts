@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { inject, injectable } from 'inversify';
+import { inject, injectable, multiInject } from 'inversify';
 import type {
   RuleExecutionInput,
   RuleExecutionStep,
@@ -34,7 +34,7 @@ export interface RuleExecutionPipelineContract {
 export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
   constructor(
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
-    @inject(RuleExecutionStepsToken) private readonly steps: RuleExecutionStep[],
+    @multiInject(RuleExecutionStepsToken) private readonly steps: RuleExecutionStep[],
     @inject(RuleExecutionMiddlewaresToken) private readonly middlewares: RuleExecutionMiddleware[]
   ) {}
 
