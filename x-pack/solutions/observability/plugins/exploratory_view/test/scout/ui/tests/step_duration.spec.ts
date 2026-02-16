@@ -14,9 +14,10 @@ import { createExploratoryViewUrl } from '../../../../public/components/shared/e
 import { test } from '../fixtures';
 
 test.describe('Step Duration series', { tag: tags.stateful.classic }, () => {
-  test.setTimeout(300_000);
-  test('builds series with step duration metric', async ({ pageObjects, page }) => {
+  test('builds series with step duration metric', async ({ pageObjects, page, browserAuth }) => {
     await test.step('Go to Exploratory view', async () => {
+      await browserAuth.loginAsAdmin();
+
       const testUrl = createExploratoryViewUrl({
         reportType: 'kpi-over-time',
         allSeries: [
@@ -38,7 +39,6 @@ test.describe('Step Duration series', { tag: tags.stateful.classic }, () => {
       });
 
       await pageObjects.exploratoryView.goto(testUrl);
-      await pageObjects.login.loginWithRole('admin');
       await pageObjects.exploratoryView.waitForLoadingToFinish();
     });
 
