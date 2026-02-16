@@ -7,7 +7,7 @@
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-import { isUiamApiKey } from '@kbn/security-plugin/server/uiam/utils';
+import { isUiamCredential } from '@kbn/core-security-server';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
 
 export const bulkMarkApiKeysForInvalidation = async (
@@ -26,7 +26,7 @@ export const bulkMarkApiKeysForInvalidation = async (
 
       const [id, apiKey] = Buffer.from(key, 'base64').toString().split(':');
 
-      if (apiKey && isUiamApiKey(apiKey)) {
+      if (apiKey && isUiamCredential(apiKey)) {
         apiKeyId = id;
         apiKeyValue = apiKey;
       } else {

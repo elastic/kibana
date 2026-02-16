@@ -19,7 +19,7 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-p
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { IEventLogClientService, IEventLogger } from '@kbn/event-log-plugin/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import { HTTPAuthorizationHeader, isUiamApiKey } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import type { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
@@ -280,11 +280,11 @@ export class RulesClientFactory {
             );
           }
 
-          if (isUiamApiKey(apiKey) && !this.isServerless) {
+          if (isUiamCredential(apiKey) && !this.isServerless) {
             throw new Error('UIAM API keys should only be used in serverless environments');
           }
 
-          if (isUiamApiKey(apiKey)) {
+          if (isUiamCredential(apiKey)) {
             return {
               apiKeysEnabled: true,
               uiamResult: {

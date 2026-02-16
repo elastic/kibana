@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isUiamApiKey, isUiamCredential } from './utils';
+import { isUiamCredential } from './utils';
 import { HTTPAuthorizationHeader } from '../authentication';
 
 describe('#isUiamCredential()', () => {
@@ -27,25 +27,6 @@ describe('#isUiamCredential()', () => {
     ]) {
       expect(isUiamCredential(new HTTPAuthorizationHeader('ApiKey', credential))).toBe(false);
       expect(isUiamCredential(credential)).toBe(false);
-    }
-  });
-});
-
-describe('#isUiamApiKey()', () => {
-  it('returns `true` when API key is a valid UIAM API key', () => {
-    for (const credential of ['essu_credential_123', 'essu_dev_credential_123']) {
-      expect(isUiamApiKey(credential)).toBe(true);
-    }
-  });
-
-  it('returns `false` when API key is NOT a valid UIAM API key', () => {
-    for (const credential of [
-      'ess_credential_123',
-      'regular_credential_123',
-      '_essu_credential_123',
-      '',
-    ]) {
-      expect(isUiamApiKey(credential)).toBe(false);
     }
   });
 });
