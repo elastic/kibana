@@ -30,7 +30,8 @@ export interface OnRequestContext {
 export type OnRequestHandler = (
   ctx: OnRequestContext,
   params: TransportRequestParams,
-  options?: TransportRequestOptions
+  //  guaranteed to exist because the transport layer normalizes it before handler invocation
+  options: TransportRequestOptions
 ) => void;
 
 const noop = () => undefined;

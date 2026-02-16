@@ -517,3 +517,266 @@ describe('#stop', () => {
     );
   });
 });
+
+describe('CPS onRequest handler', () => {
+  describe('in non-serverless mode', () => {
+    it('does not pass onRequest handler to ClusterClient', async () => {
+      await elasticsearchService.setup(setupDeps);
+
+      expect(MockClusterClient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          onRequest: undefined,
+        })
+      );
+    });
+  });
+
+  describe('in serverless mode', () => {
+    let serverlessEnv: Env;
+    let serverlessCoreContext: CoreContext;
+    let serverlessElasticsearchService: ElasticsearchService;
+
+    beforeEach(() => {
+      serverlessEnv = Env.createDefault(
+        REPO_ROOT,
+        getEnvOptions({ cliArgs: { serverless: true } })
+      );
+      const logger = loggingSystemMock.create();
+      serverlessCoreContext = {
+        coreId: Symbol(),
+        env: serverlessEnv,
+        logger,
+        configService: configService as any,
+      };
+      serverlessElasticsearchService = new ElasticsearchService(serverlessCoreContext);
+    });
+
+    afterEach(async () => {
+      await serverlessElasticsearchService?.stop();
+    });
+
+    describe('onRequest handler behavior', () => {
+      type OnRequestHandler = (ctx: { scoped: boolean }, params: any, options?: any) => void;
+      let onRequestHandler: OnRequestHandler;
+
+      const setCpsEnabled = (enabled: boolean) => {
+        // Access private property for testing
+        (serverlessElasticsearchService as any).cpsEnabled = enabled;
+      };
+
+      beforeEach(async () => {
+        MockClusterClient.mockClear();
+        await serverlessElasticsearchService.setup(setupDeps);
+        onRequestHandler = MockClusterClient.mock.calls[0][0].onRequest;
+      });
+
+      it('does not inject project_routing for unscoped requests', () => {
+        const options: any = { querystring: {} };
+        const params = {
+          method: 'GET',
+          path: '/_search',
+          meta: { acceptedParams: ['project_routing'] },
+        };
+
+        setCpsEnabled(true);
+
+        onRequestHandler({ scoped: false }, params, options);
+
+        expect(options.querystring.project_routing).toBeUndefined();
+      });
+
+      it('does not inject project_routing when CPS is disabled', () => {
+        const options: any = { querystring: {} };
+        const params = {
+          method: 'GET',
+          path: '/_search',
+          meta: { acceptedParams: ['project_routing'] },
+        };
+
+        onRequestHandler({ scoped: true }, params, options);
+
+        expect(options.querystring.project_routing).toBeUndefined();
+      });
+
+      it('does not inject project_routing when API does not support it', () => {
+        const options: any = { querystring: {} };
+        const params = {
+          method: 'GET',
+          path: '/_cat/indices',
+          meta: { acceptedParams: [] },
+        };
+
+        setCpsEnabled(true);
+
+        onRequestHandler({ scoped: true }, params, options);
+
+        expect(options.querystring.project_routing).toBeUndefined();
+      });
+
+      it('does not inject project_routing when it is already set', () => {
+        const options: any = { querystring: { project_routing: 'custom-value' } };
+        const params = {
+          method: 'GET',
+          path: '/_search',
+          meta: { acceptedParams: ['project_routing'] },
+        };
+
+        setCpsEnabled(true);
+
+        onRequestHandler({ scoped: true }, params, options);
+
+        expect(options.querystring.project_routing).toBe('custom-value');
+      });
+
+      it('does not inject project_routing for PIT requests', () => {
+        const options: any = { querystring: {} };
+        const params = {
+          method: 'POST',
+          path: '/_search',
+          body: { pit: { id: 'abc123' } },
+          meta: { acceptedParams: ['project_routing'] },
+        };
+
+        setCpsEnabled(true);
+
+        onRequestHandler({ scoped: true }, params, options);
+
+        expect(options.querystring.project_routing).toBeUndefined();
+      });
+
+      it('injects project_routing when all conditions are met', () => {
+        const options: any = { querystring: {} };
+        const params = {
+          method: 'GET',
+          path: '/_search',
+          meta: { acceptedParams: ['project_routing'] },
+        };
+
+        setCpsEnabled(true);
+
+        onRequestHandler({ scoped: true }, params, options);
+
+        expect(options.querystring.project_routing).toBe('_tag._alias:_local');
+      });
+
+      it('preserves existing querystring parameters when injecting project_routing', () => {
+        const options: any = { querystring: { pretty: true, format: 'json' } };
+        const params = {
+          method: 'GET',
+          path: '/_search',
+          meta: { acceptedParams: ['project_routing'] },
+        };
+
+        setCpsEnabled(true);
+
+        onRequestHandler({ scoped: true }, params, options);
+
+        expect(options.querystring).toEqual({
+          pretty: true,
+          format: 'json',
+          project_routing: '_tag._alias:_local',
+        });
+      });
+
+      describe('defensive stripping of project_routing', () => {
+        it('strips project_routing when API does not support it', () => {
+          const options: any = { querystring: { project_routing: 'explicit-value' } };
+          const params = {
+            method: 'GET',
+            path: '/_cluster/health',
+            meta: { acceptedParams: ['level', 'timeout'] },
+          };
+
+          setCpsEnabled(true);
+
+          onRequestHandler({ scoped: true }, params, options);
+
+          expect(options.querystring).toBeUndefined();
+        });
+
+        it('strips project_routing but preserves other querystring params when API does not support it', () => {
+          const options: any = {
+            querystring: {
+              project_routing: 'explicit-value',
+              pretty: true,
+              timeout: '30s',
+            },
+          };
+          const params = {
+            method: 'GET',
+            path: '/_cluster/health',
+            meta: { acceptedParams: ['level', 'timeout'] },
+          };
+
+          setCpsEnabled(true);
+
+          onRequestHandler({ scoped: true }, params, options);
+
+          expect(options.querystring).toEqual({
+            pretty: true,
+            timeout: '30s',
+          });
+        });
+
+        it('strips project_routing when acceptedParams is undefined', () => {
+          const options: any = { querystring: { project_routing: 'explicit-value' } };
+          const params = {
+            method: 'GET',
+            path: '/_cluster/health',
+            meta: {},
+          };
+
+          setCpsEnabled(true);
+
+          onRequestHandler({ scoped: true }, params, options);
+
+          expect(options.querystring).toBeUndefined();
+        });
+
+        it('strips project_routing when meta is undefined', () => {
+          const options: any = { querystring: { project_routing: 'explicit-value' } };
+          const params = {
+            method: 'GET',
+            path: '/_cluster/health',
+          };
+
+          setCpsEnabled(true);
+
+          onRequestHandler({ scoped: true }, params, options);
+
+          expect(options.querystring).toBeUndefined();
+        });
+
+        it('does not strip project_routing when CPS is disabled', () => {
+          const options: any = { querystring: { project_routing: 'explicit-value' } };
+          const params = {
+            method: 'GET',
+            path: '/_cluster/health',
+            meta: { acceptedParams: [] },
+          };
+
+          setCpsEnabled(false);
+
+          onRequestHandler({ scoped: true }, params, options);
+
+          expect(options.querystring.project_routing).toBe('explicit-value');
+        });
+
+        it('does not strip project_routing for unscoped requests', () => {
+          const options: any = { querystring: { project_routing: 'explicit-value' } };
+          const params = {
+            method: 'GET',
+            path: '/_cluster/health',
+            meta: { acceptedParams: [] },
+          };
+
+          setCpsEnabled(true);
+
+          onRequestHandler({ scoped: false }, params, options);
+
+          expect(options.querystring.project_routing).toBe('explicit-value');
+        });
+      });
+    });
+  });
+});

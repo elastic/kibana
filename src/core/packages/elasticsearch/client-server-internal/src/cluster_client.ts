@@ -92,6 +92,7 @@ export class ClusterClient implements ICustomClusterClient {
       getExecutionContext,
       agentFactoryProvider,
       kibanaVersion,
+      onRequest,
     });
     this.rootScopedClient = configureClient(config, {
       scoped: true,
