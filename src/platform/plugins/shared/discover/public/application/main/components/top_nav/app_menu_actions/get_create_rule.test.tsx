@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
+import { render, act } from '@testing-library/react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { AppMenuActionId } from '@kbn/discover-utils';
-import { getCreateRuleMenuItem } from './get_create_rule';
+import { getCreateRuleMenuItem, CreateESQLRuleFlyout } from './get_create_rule';
 import { discoverServiceMock } from '../../../../../__mocks__/services';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
@@ -18,6 +20,18 @@ import { getDiscoverStateMock } from '../../../../../__mocks__/discover_state.mo
 import type { AppMenuExtensionParams } from '../../../../../context_awareness';
 import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
 import { internalStateActions } from '../../../state_management/redux';
+
+// Mock the DynamicRuleFormFlyout since we're testing the wrapper behavior
+jest.mock('@kbn/alerting-v2-rule-form', () => ({
+  DynamicRuleFormFlyout: ({ query, onClose }: { query: string; onClose: () => void }) => (
+    <div data-test-subj="mockDynamicRuleFormFlyout">
+      <span data-test-subj="flyoutQuery">{query}</span>
+      <button data-test-subj="closeFlyout" onClick={onClose}>
+        Close
+      </button>
+    </div>
+  ),
+}));
 
 const getCreateRuleMenu = (
   dataView = dataViewMock,
@@ -257,5 +271,68 @@ describe('getCreateRuleMenuItem', () => {
       expect(searchThresholdItem?.run).toBeDefined();
       expect(typeof searchThresholdItem?.run).toBe('function');
     });
+  });
+});
+
+describe('CreateESQLRuleFlyout', () => {
+  beforeEach(() => {
+    // Reset history to a known state before each test
+    discoverServiceMock.history.push('/app/discover');
+  });
+
+  it('should NOT close flyout when query parameters change but pathname stays the same', () => {
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const onClose = jest.fn();
+
+    render(
+      <CreateESQLRuleFlyout
+        discoverParams={{
+          dataView: dataViewMock,
+          adHocDataViews: [],
+          isEsqlMode: true,
+          authorizedRuleTypeIds: [ES_QUERY_ID],
+          actions: { updateAdHocDataViews: jest.fn() },
+        }}
+        services={discoverServiceMock}
+        stateContainer={stateContainer}
+        onClose={onClose}
+      />
+    );
+
+    // Simulate query parameter change (same pathname, different search params)
+    act(() => {
+      discoverServiceMock.history.push('/app/discover?_a=(query:(esql:newQuery))');
+    });
+
+    // Flyout should NOT close because pathname is still '/app/discover'
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('should close flyout when pathname changes (actual navigation)', () => {
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const onClose = jest.fn();
+
+    render(
+      <CreateESQLRuleFlyout
+        discoverParams={{
+          dataView: dataViewMock,
+          adHocDataViews: [],
+          isEsqlMode: true,
+          authorizedRuleTypeIds: [ES_QUERY_ID],
+          actions: { updateAdHocDataViews: jest.fn() },
+        }}
+        services={discoverServiceMock}
+        stateContainer={stateContainer}
+        onClose={onClose}
+      />
+    );
+
+    // Simulate actual navigation to a different route
+    act(() => {
+      discoverServiceMock.history.push('/app/dashboards');
+    });
+
+    // Flyout SHOULD close because pathname changed
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

@@ -228,8 +228,14 @@ describe('DynamicRuleForm', () => {
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith(
         expect.objectContaining({
-          name: 'Test Rule',
-          query: 'FROM logs-* | STATS count = COUNT(*)',
+          metadata: expect.objectContaining({
+            name: 'Test Rule',
+          }),
+          evaluation: expect.objectContaining({
+            query: expect.objectContaining({
+              base: 'FROM logs-* | STATS count = COUNT(*)',
+            }),
+          }),
         }),
         expect.anything()
       );

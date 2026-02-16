@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import type { FormValues } from './types';
 import { RuleForm, type RuleFormServices } from './rule_form';
-import { getGroupByColumnsFromQuery } from './hooks/use_default_group_by';
+import { useFormDefaults } from './hooks/use_form_defaults';
 
 export interface DynamicRuleFormProps {
   /** Form ID for submission */
   formId: string;
   /** The query that drives form values - changes will sync to form state */
   query: string;
-  /** Optional default time field */
-  defaultTimeField?: string;
   /** Whether the query has validation errors from the parent (e.g., Discover) */
   isQueryInvalid?: boolean;
   /** Services required for form fields */
@@ -33,38 +31,21 @@ export interface DynamicRuleFormProps {
  * Use this component when the form needs to react to external state changes,
  * such as when embedded in Discover where the query can change.
  *
+ * The time field is automatically derived from the query's available date fields
+ * by the TimeFieldSelect component (preferring @timestamp if available).
+ *
  * Uses react-hook-form's `values` prop to sync form state on each prop change,
  * with `resetOptions: { keepDirtyValues: true }` to preserve user input.
  */
 export const DynamicRuleForm: React.FC<DynamicRuleFormProps> = ({
   formId,
   query,
-  defaultTimeField,
   isQueryInvalid,
   services,
   onSubmit,
 }) => {
-  // Compute derived values from props
-  const groupingKey = useMemo(() => getGroupByColumnsFromQuery(query), [query]);
-
-  // Form values that sync with props
-  const formValues: FormValues = useMemo(
-    () => ({
-      kind: 'alert',
-      name: '',
-      description: '',
-      tags: [],
-      schedule: {
-        custom: '5m',
-      },
-      lookbackWindow: '5m',
-      timeField: defaultTimeField ?? '',
-      enabled: true,
-      query,
-      groupingKey,
-    }),
-    [query, defaultTimeField, groupingKey]
-  );
+  // Get default form values derived from the query
+  const formValues = useFormDefaults({ query });
 
   const methods = useForm<FormValues>({
     mode: 'onBlur',
@@ -79,7 +60,7 @@ export const DynamicRuleForm: React.FC<DynamicRuleFormProps> = ({
   // Handle query validation errors from the parent
   useEffect(() => {
     if (isQueryInvalid) {
-      setError('query', {
+      setError('evaluation.query.base', {
         type: 'manual',
         message: i18n.translate('xpack.alertingV2.ruleForm.invalidQueryError', {
           defaultMessage:
@@ -87,7 +68,7 @@ export const DynamicRuleForm: React.FC<DynamicRuleFormProps> = ({
         }),
       });
     } else {
-      clearErrors('query');
+      clearErrors('evaluation.query.base');
     }
   }, [isQueryInvalid, setError, clearErrors]);
 

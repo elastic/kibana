@@ -20,7 +20,7 @@ export const ScheduleField: React.FC = () => {
   return (
     <Controller
       control={control}
-      name="schedule.custom"
+      name="schedule.every"
       render={({ field, fieldState: { error } }) => (
         <EuiFormRow
           id={SCHEDULE_ROW_ID}

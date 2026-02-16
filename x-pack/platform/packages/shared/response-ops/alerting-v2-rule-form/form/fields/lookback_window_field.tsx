@@ -20,7 +20,7 @@ export const LookbackWindowField: React.FC = () => {
   return (
     <Controller
       control={control}
-      name="lookbackWindow"
+      name="schedule.lookback"
       render={({ field, fieldState: { error } }) => (
         <EuiFormRow
           id={LOOKBACK_WINDOW_ROW_ID}

@@ -32,15 +32,38 @@ const createWrapper = () => {
 describe('useCreateRule', () => {
   const validFormData: FormValues = {
     kind: 'signal',
-    name: 'Test Rule',
-    description: 'Test Rule Description',
-    tags: ['tag1', 'tag2'],
-    schedule: { custom: '5m' },
-    enabled: true,
-    query: 'FROM logs | LIMIT 10',
+    metadata: {
+      name: 'Test Rule',
+      enabled: true,
+      labels: ['tag1', 'tag2'],
+    },
     timeField: '@timestamp',
-    lookbackWindow: '15m',
-    groupingKey: ['host.name'],
+    schedule: { every: '5m', lookback: '1m' },
+    evaluation: {
+      query: {
+        base: 'FROM logs | LIMIT 10',
+      },
+    },
+    grouping: { fields: ['host.name'] },
+  };
+
+  // Expected API payload after mapping FormValues to CreateRuleData
+  // Note: timeField in form is mapped to time_field in API
+  const expectedApiPayload = {
+    kind: 'signal',
+    time_field: '@timestamp',
+    metadata: {
+      name: 'Test Rule',
+      labels: ['tag1', 'tag2'],
+    },
+    schedule: { every: '5m', lookback: '1m' },
+    evaluation: {
+      query: {
+        base: 'FROM logs | LIMIT 10',
+        condition: '',
+      },
+    },
+    grouping: { fields: ['host.name'] },
   };
 
   it('calls the correct API endpoint', async () => {
@@ -48,7 +71,7 @@ describe('useCreateRule', () => {
     const notifications = notificationServiceMock.createStartContract();
     const onSuccess = jest.fn();
 
-    http.post.mockResolvedValue({ id: 'rule-123', name: 'Test Rule' });
+    http.post.mockResolvedValue({ id: 'rule-123', metadata: { name: 'Test Rule' } });
 
     const { result } = renderHook(
       () =>
@@ -74,7 +97,7 @@ describe('useCreateRule', () => {
     const notifications = notificationServiceMock.createStartContract();
     const onSuccess = jest.fn();
 
-    http.post.mockResolvedValue({ id: 'rule-123', name: 'Test Rule' });
+    http.post.mockResolvedValue({ id: 'rule-123', metadata: { name: 'Test Rule' } });
 
     const { result } = renderHook(
       () =>
@@ -92,17 +115,7 @@ describe('useCreateRule', () => {
 
     await waitFor(() => {
       expect(http.post).toHaveBeenCalledWith('/internal/alerting/v2/rule', {
-        body: JSON.stringify({
-          kind: 'signal',
-          name: 'Test Rule',
-          tags: ['tag1', 'tag2'],
-          schedule: { custom: '5m' },
-          enabled: true,
-          query: 'FROM logs | LIMIT 10',
-          timeField: '@timestamp',
-          lookbackWindow: '15m',
-          groupingKey: ['host.name'],
-        }),
+        body: JSON.stringify(expectedApiPayload),
       });
     });
   });
@@ -112,7 +125,7 @@ describe('useCreateRule', () => {
     const notifications = notificationServiceMock.createStartContract();
     const onSuccess = jest.fn();
 
-    http.post.mockResolvedValue({ id: 'rule-123', name: 'My New Rule' });
+    http.post.mockResolvedValue({ id: 'rule-123', metadata: { name: 'My New Rule' } });
 
     const { result } = renderHook(
       () =>
@@ -175,7 +188,7 @@ describe('useCreateRule', () => {
     const notifications = notificationServiceMock.createStartContract();
     const onSuccess = jest.fn();
 
-    http.post.mockResolvedValue({ id: 'rule-456', name: 'Complex Rule' });
+    http.post.mockResolvedValue({ id: 'rule-456', metadata: { name: 'Complex Rule' } });
 
     const { result } = renderHook(
       () =>
@@ -189,15 +202,38 @@ describe('useCreateRule', () => {
 
     const formData: FormValues = {
       kind: 'signal',
-      name: 'Complex Rule',
-      description: 'Complex Rule Description',
-      tags: ['production', 'critical'],
-      schedule: { custom: '1m' },
-      enabled: false,
-      query: 'FROM metrics | WHERE cpu > 90',
+      metadata: {
+        name: 'Complex Rule',
+        enabled: false,
+        description: 'A complex rule',
+        labels: ['production', 'critical'],
+      },
       timeField: 'event.timestamp',
-      lookbackWindow: '30m',
-      groupingKey: ['host.name', 'service.name'],
+      schedule: { every: '1m', lookback: '1m' },
+      evaluation: {
+        query: {
+          base: 'FROM metrics | WHERE cpu > 90',
+        },
+      },
+      grouping: { fields: ['host.name', 'service.name'] },
+    };
+
+    // Note: timeField in form is mapped to time_field in API
+    const expectedPayload = {
+      kind: 'signal',
+      time_field: 'event.timestamp',
+      metadata: {
+        name: 'Complex Rule',
+        labels: ['production', 'critical'],
+      },
+      schedule: { every: '1m', lookback: '1m' },
+      evaluation: {
+        query: {
+          base: 'FROM metrics | WHERE cpu > 90',
+          condition: '',
+        },
+      },
+      grouping: { fields: ['host.name', 'service.name'] },
     };
 
     await act(async () => {
@@ -206,17 +242,7 @@ describe('useCreateRule', () => {
 
     await waitFor(() => {
       expect(http.post).toHaveBeenCalledWith('/internal/alerting/v2/rule', {
-        body: JSON.stringify({
-          kind: 'signal',
-          name: 'Complex Rule',
-          tags: ['production', 'critical'],
-          schedule: { custom: '1m' },
-          enabled: false,
-          query: 'FROM metrics | WHERE cpu > 90',
-          timeField: 'event.timestamp',
-          lookbackWindow: '30m',
-          groupingKey: ['host.name', 'service.name'],
-        }),
+        body: JSON.stringify(expectedPayload),
       });
     });
   });

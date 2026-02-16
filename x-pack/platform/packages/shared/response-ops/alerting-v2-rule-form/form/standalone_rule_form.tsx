@@ -16,8 +16,6 @@ export interface StandaloneRuleFormProps {
   formId: string;
   /** Initial query for the rule */
   query: string;
-  /** Optional default time field */
-  defaultTimeField?: string;
   /** Services required for form fields */
   services: RuleFormServices;
   /** Submit handler */
@@ -31,15 +29,15 @@ export interface StandaloneRuleFormProps {
  * everything from the form after initial mount. External prop changes are ignored.
  *
  * Uses react-hook-form's `defaultValues` for static initialization.
+ * Time field is auto-selected by TimeFieldSelect based on available date fields.
  */
 export const StandaloneRuleForm: React.FC<StandaloneRuleFormProps> = ({
   formId,
   query,
-  defaultTimeField,
   services,
   onSubmit,
 }) => {
-  const defaultValues = useFormDefaults({ query, defaultTimeField });
+  const defaultValues = useFormDefaults({ query });
 
   const methods = useForm<FormValues>({
     mode: 'onBlur',

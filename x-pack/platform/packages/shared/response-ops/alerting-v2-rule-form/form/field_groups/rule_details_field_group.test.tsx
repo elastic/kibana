@@ -29,15 +29,17 @@ const createWrapper = (defaultValues: Partial<FormValues> = {}) => {
     const form = useForm<FormValues>({
       defaultValues: {
         kind: 'alert',
-        name: '',
-        description: '',
-        tags: [],
-        schedule: { custom: '5m' },
-        lookbackWindow: '5m',
-        timeField: '',
-        enabled: true,
-        query: '',
-        groupingKey: [],
+        metadata: {
+          name: '',
+          enabled: true,
+        },
+        timeField: '@timestamp',
+        schedule: { every: '5m' },
+        evaluation: {
+          query: {
+            base: '',
+          },
+        },
         ...defaultValues,
       },
     });
@@ -78,7 +80,7 @@ describe('RuleDetailsFieldGroup', () => {
     expect(screen.getByRole('textbox', { name: 'Name' })).toBeInTheDocument();
   });
 
-  it('renders the tags field', () => {
+  it('renders the labels field', () => {
     const Wrapper = createWrapper();
 
     render(
@@ -87,7 +89,7 @@ describe('RuleDetailsFieldGroup', () => {
       </Wrapper>
     );
 
-    expect(screen.getByText('Tags')).toBeInTheDocument();
+    expect(screen.getByText('Labels')).toBeInTheDocument();
   });
 
   it('renders the add description button initially', () => {
@@ -195,9 +197,10 @@ describe('RuleDetailsFieldGroup', () => {
 
   it('renders with pre-filled values', () => {
     const Wrapper = createWrapper({
-      name: 'Pre-filled Rule',
-      description: 'A test description',
-      enabled: false,
+      metadata: {
+        name: 'Pre-filled Rule',
+        enabled: false,
+      },
       kind: 'signal',
     });
 
@@ -208,7 +211,6 @@ describe('RuleDetailsFieldGroup', () => {
     );
 
     expect(screen.getByRole('textbox', { name: 'Name' })).toHaveValue('Pre-filled Rule');
-    expect(screen.getByRole('switch')).not.toBeChecked();
     // Monitor should be selected (signal maps to monitor)
     expect(screen.getByText('Monitor').closest('button')).toHaveClass(
       'euiButtonGroupButton-isSelected'

@@ -16,6 +16,8 @@ import type { FormValues } from '../types';
 import { firstFieldOption, getTimeFieldOptions } from '../../flyout/utils';
 import { useDataFields } from '../hooks/use_data_fields';
 
+const PREFERRED_TIME_FIELD = '@timestamp';
+
 interface TimeFieldSelectProps {
   services: {
     http: HttpStart;
@@ -25,13 +27,32 @@ interface TimeFieldSelectProps {
 
 export const TimeFieldSelect: React.FC<TimeFieldSelectProps> = ({ services }) => {
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
-  const { control } = useFormContext<FormValues>();
-  const query = useWatch({ name: 'query', control });
+  const { control, setValue, getValues } = useFormContext<FormValues>();
+  const query = useWatch({ name: 'evaluation.query.base', control });
 
-  const handleFieldsSuccess = useCallback((fields: DataViewFieldMap) => {
-    const newTimeFieldOptions = getTimeFieldOptions(fields);
-    setTimeFieldOptions([firstFieldOption, ...newTimeFieldOptions]);
-  }, []);
+  const handleFieldsSuccess = useCallback(
+    (fields: DataViewFieldMap) => {
+      const newTimeFieldOptions = getTimeFieldOptions(fields);
+      setTimeFieldOptions([firstFieldOption, ...newTimeFieldOptions]);
+
+      // Auto-select a time field when options load
+      const currentValue = getValues('timeField');
+      const isCurrentValueValid = newTimeFieldOptions.some((opt) => opt.value === currentValue);
+
+      // Only auto-select if current value is empty or invalid
+      if (!currentValue || !isCurrentValueValid) {
+        const preferredField = newTimeFieldOptions.find(
+          (opt) => opt.value === PREFERRED_TIME_FIELD
+        );
+        const selectedField = preferredField?.value || newTimeFieldOptions[0]?.value || '';
+
+        if (selectedField) {
+          setValue('timeField', selectedField);
+        }
+      }
+    },
+    [getValues, setValue]
+  );
 
   const { isLoading } = useDataFields({
     query,
@@ -45,16 +66,9 @@ export const TimeFieldSelect: React.FC<TimeFieldSelectProps> = ({ services }) =>
       name="timeField"
       control={control}
       render={({ field: { value, onChange, ref }, fieldState: { error } }) => {
-        // If current value is not in options, reset it
-        const isValueValid = !value || timeFieldOptions.some((option) => option.value === value);
         const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
           onChange(e.target.value);
         };
-
-        // Auto-reset invalid value when options change
-        if (!isValueValid && value) {
-          onChange('');
-        }
 
         return (
           <EuiFormRow
@@ -66,7 +80,7 @@ export const TimeFieldSelect: React.FC<TimeFieldSelectProps> = ({ services }) =>
           >
             <EuiSelect
               options={timeFieldOptions}
-              value={isValueValid ? value : ''}
+              value={value ?? ''}
               onChange={handleChange}
               aria-label={i18n.translate('xpack.alertingV2.ruleForm.timeFieldSelect.ariaLabel', {
                 defaultMessage: 'Select time field for rule execution',

@@ -21,7 +21,7 @@ interface GroupBySelectProps {
 
 export const GroupFieldSelect: React.FC<GroupBySelectProps> = ({ services }) => {
   const { control, setValue, watch } = useFormContext<FormValues>();
-  const query = watch('query');
+  const query = watch('evaluation.query.base');
   const { data: columns, isLoading } = useQueryColumns({
     query,
     search: services.data.search.search,
@@ -33,22 +33,22 @@ export const GroupFieldSelect: React.FC<GroupBySelectProps> = ({ services }) => 
   const columnNames = useMemo(() => new Set(columns.map((col) => col.name)), [columns]);
   const groupByRowId = 'ruleV2FormGroupByField';
 
-  // Watch for changes to groupingKey
-  const currentGroupingKey = useWatch({ control, name: 'groupingKey' });
+  // Watch for changes to grouping.fields
+  const currentGroupingFields = useWatch({ control, name: 'grouping.fields' });
 
   // When columns change, filter out any invalid selections
   useEffect(() => {
-    if (currentGroupingKey && currentGroupingKey.length > 0 && columnNames.size > 0) {
-      const validValues = currentGroupingKey.filter((val) => columnNames.has(val));
-      if (validValues.length !== currentGroupingKey.length) {
-        setValue('groupingKey', validValues);
+    if (currentGroupingFields && currentGroupingFields.length > 0 && columnNames.size > 0) {
+      const validValues = currentGroupingFields.filter((val) => columnNames.has(val));
+      if (validValues.length !== currentGroupingFields.length) {
+        setValue('grouping.fields', validValues);
       }
     }
-  }, [columnNames, currentGroupingKey, setValue]);
+  }, [columnNames, currentGroupingFields, setValue]);
 
   return (
     <Controller
-      name="groupingKey"
+      name="grouping.fields"
       control={control}
       render={({ field, fieldState: { error } }) => {
         const selectedOptions = (field.value ?? []).map((val) => ({ label: val }));

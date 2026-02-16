@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { RuleFormFlyout } from './rule_form_flyout';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { RuleFormFlyout, RULE_FORM_ID } from './rule_form_flyout';
 import { DynamicRuleForm } from '../form/dynamic_rule_form';
+import { useCreateRule } from '../form/hooks/use_create_rule';
+import type { FormValues } from '../form/types';
 
 export interface DynamicRuleFormFlyoutProps {
   /** Whether to use push flyout or overlay */
@@ -19,8 +22,6 @@ export interface DynamicRuleFormFlyoutProps {
   onClose?: () => void;
   /** The query that drives form values - changes will sync to form state */
   query: string;
-  /** Optional default time field */
-  defaultTimeField?: string;
   /** Whether the query has validation errors from the parent (e.g., Discover) */
   isQueryInvalid?: boolean;
   /** Required services */
@@ -37,27 +38,46 @@ export interface DynamicRuleFormFlyoutProps {
  *
  * Use this for Discover integration where the form needs to react to external
  * query changes while preserving user-modified fields.
+ *
+ * The time field is automatically derived from the query's available date fields.
  */
-export const DynamicRuleFormFlyout: React.FC<DynamicRuleFormFlyoutProps> = ({
+const DynamicRuleFormFlyoutInner: React.FC<DynamicRuleFormFlyoutProps> = ({
   push,
   onClose,
   query,
-  defaultTimeField,
   isQueryInvalid,
   services,
 }) => {
   const { http, notifications, data, dataViews } = services;
 
+  const { createRule, isLoading } = useCreateRule({
+    http,
+    notifications,
+    onSuccess: onClose ?? (() => {}),
+  });
+
+  const handleSubmit = (values: FormValues) => {
+    createRule(values);
+  };
+
   return (
-    <RuleFormFlyout push={push} onClose={onClose} services={{ http, notifications }}>
+    <RuleFormFlyout push={push} onClose={onClose} isLoading={isLoading}>
       <DynamicRuleForm
-        formId=""
-        onSubmit={() => {}}
+        formId={RULE_FORM_ID}
+        onSubmit={handleSubmit}
         query={query}
-        defaultTimeField={defaultTimeField}
         isQueryInvalid={isQueryInvalid}
         services={{ http, data, dataViews }}
       />
     </RuleFormFlyout>
+  );
+};
+
+export const DynamicRuleFormFlyout: React.FC<DynamicRuleFormFlyoutProps> = (props) => {
+  const queryClient = useMemo(() => new QueryClient(), []);
+  return (
+    <QueryClientProvider client={queryClient}>
+      <DynamicRuleFormFlyoutInner {...props} />
+    </QueryClientProvider>
   );
 };

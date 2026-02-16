@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { RuleFormFlyout } from './rule_form_flyout';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { RuleFormFlyout, RULE_FORM_ID } from './rule_form_flyout';
 import { StandaloneRuleForm } from '../form/standalone_rule_form';
+import { useCreateRule } from '../form/hooks/use_create_rule';
+import type { FormValues } from '../form/types';
 
 export interface StandaloneRuleFormFlyoutProps {
   /** Whether to use push flyout or overlay */
@@ -19,8 +22,6 @@ export interface StandaloneRuleFormFlyoutProps {
   onClose?: () => void;
   /** Initial query for the rule (only used on mount) */
   query: string;
-  /** Optional default time field */
-  defaultTimeField?: string;
   /** Required services */
   services: {
     http: HttpStart;
@@ -35,25 +36,44 @@ export interface StandaloneRuleFormFlyoutProps {
  *
  * Use this for a classic flyout experience where the user controls everything
  * from the form after initial mount. External prop changes are ignored.
+ *
+ * Time field is auto-selected by TimeFieldSelect based on available date fields.
  */
-export const StandaloneRuleFormFlyout: React.FC<StandaloneRuleFormFlyoutProps> = ({
+const StandaloneRuleFormFlyoutInner: React.FC<StandaloneRuleFormFlyoutProps> = ({
   push,
   onClose,
   query,
-  defaultTimeField,
   services,
 }) => {
   const { http, notifications, data, dataViews } = services;
 
+  const { createRule, isLoading } = useCreateRule({
+    http,
+    notifications,
+    onSuccess: onClose ?? (() => {}),
+  });
+
+  const handleSubmit = (values: FormValues) => {
+    createRule(values);
+  };
+
   return (
-    <RuleFormFlyout push={push} onClose={onClose} services={{ http, notifications }}>
+    <RuleFormFlyout push={push} onClose={onClose} isLoading={isLoading}>
       <StandaloneRuleForm
-        formId=""
-        onSubmit={() => {}}
+        formId={RULE_FORM_ID}
+        onSubmit={handleSubmit}
         query={query}
-        defaultTimeField={defaultTimeField}
         services={{ http, data, dataViews }}
       />
     </RuleFormFlyout>
+  );
+};
+
+export const StandaloneRuleFormFlyout: React.FC<StandaloneRuleFormFlyoutProps> = (props) => {
+  const queryClient = useMemo(() => new QueryClient(), []);
+  return (
+    <QueryClientProvider client={queryClient}>
+      <StandaloneRuleFormFlyoutInner {...props} />
+    </QueryClientProvider>
   );
 };

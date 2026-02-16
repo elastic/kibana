@@ -14,55 +14,51 @@ describe('useFormDefaults', () => {
 
     expect(result.current).toEqual({
       kind: 'alert',
-      name: '',
-      description: '',
-      tags: [],
-      schedule: { custom: '5m' },
-      lookbackWindow: '5m',
-      timeField: '',
-      enabled: true,
-      query: '',
-      groupingKey: [],
+      metadata: {
+        name: '',
+        enabled: true,
+        description: '',
+      },
+      timeField: '', // Auto-selected by TimeFieldSelect component
+      schedule: { every: '5m', lookback: '1m' },
+      evaluation: {
+        query: {
+          base: '',
+        },
+      },
+      grouping: undefined,
     });
   });
 
-  it('uses provided defaultTimeField', () => {
-    const { result } = renderHook(() =>
-      useFormDefaults({ query: '', defaultTimeField: '@timestamp' })
-    );
-
-    expect(result.current.timeField).toBe('@timestamp');
-  });
-
-  it('extracts groupingKey from STATS BY clause', () => {
+  it('extracts grouping fields from STATS BY clause', () => {
     const { result } = renderHook(() =>
       useFormDefaults({ query: 'FROM logs-* | STATS count() BY host.name' })
     );
 
-    expect(result.current.groupingKey).toEqual(['host.name']);
+    expect(result.current.grouping).toEqual({ fields: ['host.name'] });
   });
 
-  it('extracts multiple groupingKey columns', () => {
+  it('extracts multiple grouping fields', () => {
     const { result } = renderHook(() =>
       useFormDefaults({ query: 'FROM logs-* | STATS count() BY host.name, service.name' })
     );
 
-    expect(result.current.groupingKey).toEqual(['host.name', 'service.name']);
+    expect(result.current.grouping).toEqual({ fields: ['host.name', 'service.name'] });
   });
 
-  it('includes the query in returned values', () => {
+  it('includes the query in evaluation.query.base', () => {
     const query = 'FROM logs-* | STATS count() BY host.name';
     const { result } = renderHook(() => useFormDefaults({ query }));
 
-    expect(result.current.query).toBe(query);
+    expect(result.current.evaluation.query.base).toBe(query);
   });
 
-  it('returns empty groupingKey for query without STATS BY', () => {
+  it('returns undefined grouping for query without STATS BY', () => {
     const { result } = renderHook(() =>
       useFormDefaults({ query: 'FROM logs-* | WHERE status = 200' })
     );
 
-    expect(result.current.groupingKey).toEqual([]);
+    expect(result.current.grouping).toBeUndefined();
   });
 
   it('memoizes the result', () => {
@@ -81,25 +77,14 @@ describe('useFormDefaults', () => {
       initialProps: { query: 'FROM logs-* | STATS count() BY host.name' },
     });
 
-    expect(result.current.groupingKey).toEqual(['host.name']);
-    expect(result.current.query).toBe('FROM logs-* | STATS count() BY host.name');
+    expect(result.current.grouping).toEqual({ fields: ['host.name'] });
+    expect(result.current.evaluation.query.base).toBe('FROM logs-* | STATS count() BY host.name');
 
     rerender({ query: 'FROM logs-* | STATS count() BY service.name' });
 
-    expect(result.current.groupingKey).toEqual(['service.name']);
-    expect(result.current.query).toBe('FROM logs-* | STATS count() BY service.name');
-  });
-
-  it('updates when defaultTimeField changes', () => {
-    const { result, rerender } = renderHook(
-      ({ query, defaultTimeField }) => useFormDefaults({ query, defaultTimeField }),
-      { initialProps: { query: '', defaultTimeField: '@timestamp' } }
+    expect(result.current.grouping).toEqual({ fields: ['service.name'] });
+    expect(result.current.evaluation.query.base).toBe(
+      'FROM logs-* | STATS count() BY service.name'
     );
-
-    expect(result.current.timeField).toBe('@timestamp');
-
-    rerender({ query: '', defaultTimeField: 'event.timestamp' });
-
-    expect(result.current.timeField).toBe('event.timestamp');
   });
 });

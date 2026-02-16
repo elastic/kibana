@@ -10,7 +10,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { DynamicRuleFormFlyout } from '../dynamic_rule_form_flyout';
 import { StandaloneRuleFormFlyout } from '../standalone_rule_form_flyout';
-import { RuleFormFlyout } from '../rule_form_flyout';
+import { RuleFormFlyout, RULE_FORM_ID } from '../rule_form_flyout';
 import { DynamicRuleForm } from '../../form/dynamic_rule_form';
 import { StandaloneRuleForm } from '../../form/standalone_rule_form';
 import type { RuleFormServices } from '../../form/rule_form';
@@ -19,7 +19,7 @@ const mockServices = {
   http: {
     post: async (path: string, options: any) => {
       action('http.post')(path, options);
-      return { id: 'mock-rule-id', name: 'Mock Rule' };
+      return { id: 'mock-rule-id', metadata: { name: 'Mock Rule' } };
     },
   } as any,
   notifications: {
@@ -54,11 +54,6 @@ const mockServices = {
   } as any,
 };
 
-const mockFlyoutServices = {
-  http: mockServices.http,
-  notifications: mockServices.notifications,
-};
-
 const mockFormServices: RuleFormServices = {
   http: mockServices.http,
   data: mockServices.data,
@@ -84,13 +79,13 @@ type StandaloneStory = StoryObj<typeof StandaloneRuleFormFlyout>;
 
 /**
  * DynamicRuleFormFlyout - For Discover integration
- * Syncs with external query changes while preserving user input
+ * Syncs with external query changes while preserving user input.
+ * Time field is auto-selected from available date fields.
  */
 export const Dynamic: DynamicStory = {
   args: {
     services: mockServices,
     query: 'FROM logs-* | WHERE @timestamp > NOW() - 5m | STATS count = COUNT(*) BY host.name',
-    defaultTimeField: '@timestamp',
     isQueryInvalid: false,
     push: true,
     onClose: action('onClose'),
@@ -99,14 +94,14 @@ export const Dynamic: DynamicStory = {
 
 /**
  * StandaloneRuleFormFlyout - For plugin integration
- * Static initialization, ignores prop changes after mount
+ * Static initialization, ignores prop changes after mount.
+ * Time field is auto-selected from available date fields.
  */
 export const Standalone: StandaloneStory = {
-  render: (args) => (
+  render: () => (
     <StandaloneRuleFormFlyout
       services={mockServices}
       query="FROM metrics-* | STATS avg_cpu = AVG(system.cpu.usage)"
-      defaultTimeField="@timestamp"
       push={true}
       onClose={action('onClose')}
     />
@@ -120,7 +115,6 @@ export const WithInvalidQuery: DynamicStory = {
   args: {
     services: mockServices,
     query: 'INVALID QUERY',
-    defaultTimeField: '@timestamp',
     isQueryInvalid: true,
     push: true,
     onClose: action('onClose'),
@@ -129,21 +123,22 @@ export const WithInvalidQuery: DynamicStory = {
 
 // =============================================================================
 // Composable Pattern (Advanced)
+// Use RuleFormFlyout as a presentation wrapper with your own form
 // =============================================================================
 
 type ComposableStory = StoryObj<typeof RuleFormFlyout>;
 
 /**
- * Composable: Dynamic form with custom flyout wrapper
+ * Composable: RuleFormFlyout is a pure presentation wrapper.
+ * You control formId, onSubmit, and isLoading directly.
  */
 export const ComposableDynamic: ComposableStory = {
   render: () => (
-    <RuleFormFlyout services={mockFlyoutServices} push={true} onClose={action('onClose')}>
+    <RuleFormFlyout push={true} onClose={action('onClose')} isLoading={false}>
       <DynamicRuleForm
-        formId=""
-        onSubmit={() => {}}
+        formId={RULE_FORM_ID}
+        onSubmit={action('onSubmit')}
         query="FROM logs-* | STATS count = COUNT(*) BY host.name"
-        defaultTimeField="@timestamp"
         isQueryInvalid={false}
         services={mockFormServices}
       />
@@ -156,12 +151,11 @@ export const ComposableDynamic: ComposableStory = {
  */
 export const ComposableStandalone: ComposableStory = {
   render: () => (
-    <RuleFormFlyout services={mockFlyoutServices} push={true} onClose={action('onClose')}>
+    <RuleFormFlyout push={true} onClose={action('onClose')} isLoading={false}>
       <StandaloneRuleForm
-        formId=""
-        onSubmit={() => {}}
+        formId={RULE_FORM_ID}
+        onSubmit={action('onSubmit')}
         query="FROM metrics-*"
-        defaultTimeField="@timestamp"
         services={mockFormServices}
       />
     </RuleFormFlyout>
@@ -173,10 +167,10 @@ export const ComposableStandalone: ComposableStory = {
  */
 export const OverlayMode: ComposableStory = {
   render: () => (
-    <RuleFormFlyout services={mockFlyoutServices} push={false} onClose={action('onClose')}>
+    <RuleFormFlyout push={false} onClose={action('onClose')} isLoading={false}>
       <StandaloneRuleForm
-        formId=""
-        onSubmit={() => {}}
+        formId={RULE_FORM_ID}
+        onSubmit={action('onSubmit')}
         query="FROM logs-*"
         services={mockFormServices}
       />

@@ -16,7 +16,7 @@ export const TagsField: React.FC = () => {
 
   return (
     <Controller
-      name="tags"
+      name="metadata.labels"
       control={control}
       render={({ field, fieldState: { error } }) => {
         const selectedOptions = (field.value ?? []).map((val) => ({ label: val }));
@@ -24,8 +24,8 @@ export const TagsField: React.FC = () => {
 
         return (
           <EuiFormRow
-            label={i18n.translate('xpack.alertingV2.ruleForm.tagsLabel', {
-              defaultMessage: 'Tags',
+            label={i18n.translate('xpack.alertingV2.ruleForm.labelsLabel', {
+              defaultMessage: 'Labels',
             })}
             isInvalid={!!error}
             error={error?.message}

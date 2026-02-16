@@ -15,7 +15,7 @@ const DESCRIPTION_ROW_ID = 'ruleV2FormDescriptionField';
 
 export const DescriptionField: React.FC = () => {
   const { control, watch } = useFormContext<FormValues>();
-  const descriptionValue = watch('description');
+  const descriptionValue = watch('metadata.description');
 
   // Show the input if there's already a description value
   const [isInputVisible, setIsInputVisible] = useState(() => Boolean(descriptionValue));
@@ -53,7 +53,7 @@ export const DescriptionField: React.FC = () => {
 
   return (
     <Controller
-      name="description"
+      name="metadata.description"
       control={control}
       render={({ field: { ref, ...field }, fieldState: { error } }) => (
         <EuiFormRow

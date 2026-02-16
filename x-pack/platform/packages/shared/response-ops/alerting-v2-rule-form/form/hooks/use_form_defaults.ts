@@ -12,8 +12,6 @@ import { getGroupByColumnsFromQuery } from './use_default_group_by';
 interface UseFormDefaultsProps {
   /** The ES|QL query to derive defaults from */
   query: string;
-  /** Optional default time field */
-  defaultTimeField?: string;
 }
 
 /**
@@ -22,27 +20,36 @@ interface UseFormDefaultsProps {
  * This hook extracts:
  * - groupingKey: columns from the STATS ... BY clause
  *
- * By computing all defaults upfront, we avoid useEffect-based synchronization
- * after the form is initialized.
+ * Note: timeField is initialized as empty and auto-selected by TimeFieldSelect
+ * based on the available date fields from the query.
  */
-export const useFormDefaults = ({ query, defaultTimeField }: UseFormDefaultsProps): FormValues => {
+export const useFormDefaults = ({ query }: UseFormDefaultsProps): FormValues => {
   return useMemo(() => {
     // Extract grouping columns from STATS ... BY clause
     const groupingKey = getGroupByColumnsFromQuery(query);
 
     return {
       kind: 'alert',
-      name: '',
-      description: '',
-      tags: [],
-      schedule: {
-        custom: '5m',
+      metadata: {
+        name: '',
+        enabled: true,
+        description: '',
       },
-      lookbackWindow: '5m',
-      timeField: defaultTimeField ?? '',
-      enabled: true,
-      query,
-      groupingKey,
+      timeField: '', // Auto-selected by TimeFieldSelect when fields load
+      schedule: {
+        every: '5m',
+        lookback: '1m',
+      },
+      evaluation: {
+        query: {
+          base: query,
+        },
+      },
+      grouping: groupingKey.length
+        ? {
+            fields: groupingKey,
+          }
+        : undefined,
     };
-  }, [query, defaultTimeField]);
+  }, [query]);
 };

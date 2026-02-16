@@ -37,11 +37,11 @@ interface Props {
 export const LookbackWindow: React.FC<Props> = React.forwardRef<HTMLInputElement, Props>(
   ({ value, onChange, errors }, ref) => {
     const intervalNumber = useMemo(() => {
-      return getDurationNumberInItsUnit(value ?? 1);
+      return getDurationNumberInItsUnit(value || '5m');
     }, [value]);
 
     const intervalUnit = useMemo(() => {
-      return getDurationUnitValue(value);
+      return getDurationUnitValue(value || '5m');
     }, [value]);
 
     const onIntervalNumberChange = useCallback(

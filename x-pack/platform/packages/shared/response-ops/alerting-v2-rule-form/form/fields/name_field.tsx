@@ -18,7 +18,7 @@ export const NameField: React.FC = () => {
 
   return (
     <Controller
-      name="name"
+      name="metadata.name"
       control={control}
       rules={{
         required: i18n.translate('xpack.alertingV2.ruleForm.nameRequiredError', {

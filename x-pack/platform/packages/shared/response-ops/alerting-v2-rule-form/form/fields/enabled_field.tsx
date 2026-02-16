@@ -16,7 +16,7 @@ export const EnabledField: React.FC = () => {
 
   return (
     <Controller
-      name="enabled"
+      name="metadata.enabled"
       control={control}
       render={({ field: { value, onChange }, fieldState: { error } }) => (
         <EuiFormRow

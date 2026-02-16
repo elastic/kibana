@@ -39,15 +39,17 @@ const createWrapper = (defaultValues: Partial<FormValues> = {}) => {
     const form = useForm<FormValues>({
       defaultValues: {
         kind: 'alert',
-        name: '',
-        description: '',
-        tags: [],
-        schedule: { custom: '5m' },
-        lookbackWindow: '5m',
-        timeField: '',
-        enabled: true,
-        query: 'FROM logs-* | STATS count() BY host.name',
-        groupingKey: [],
+        metadata: {
+          name: '',
+          enabled: true,
+        },
+        timeField: '@timestamp',
+        schedule: { every: '5m' },
+        evaluation: {
+          query: {
+            base: 'FROM logs-* | STATS count() BY host.name',
+          },
+        },
         ...defaultValues,
       },
     });
@@ -140,7 +142,7 @@ describe('GroupFieldSelect', () => {
       fetchStatus: 'idle',
     } as any);
 
-    const Wrapper = createWrapper({ groupingKey: ['host.name'] });
+    const Wrapper = createWrapper({ grouping: { fields: ['host.name'] } });
     const services = createMockServices();
 
     render(
@@ -154,7 +156,13 @@ describe('GroupFieldSelect', () => {
   });
 
   it('calls useQueryColumns with query from form', () => {
-    const Wrapper = createWrapper({ query: 'FROM metrics-* | STATS avg(value) BY region' });
+    const Wrapper = createWrapper({
+      evaluation: {
+        query: {
+          base: 'FROM metrics-* | STATS avg(value) BY region',
+        },
+      },
+    });
     const services = createMockServices();
 
     render(
