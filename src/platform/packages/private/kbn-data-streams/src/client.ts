@@ -122,6 +122,15 @@ export class DataStreamClient<
     });
   }
 
+  public async mget(args: { ids: string[], space?: string }) {
+    const { ids } = args;
+
+    return this.client.mget({
+      index: this.dataStreamDefinition.name,
+      ids,
+    });
+  }
+
   public async exists() {
     return this.client.indices.exists({
       index: this.dataStreamDefinition.name,
