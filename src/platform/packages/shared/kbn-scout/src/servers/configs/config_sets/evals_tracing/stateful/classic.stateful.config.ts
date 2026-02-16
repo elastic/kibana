@@ -14,7 +14,7 @@ import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
 const gcsCredentials = process.env.GCS_CREDENTIALS;
-let gcsCredentialsFileSetting: string | undefined;
+let gcsSecureFile: string | undefined;
 
 if (gcsCredentials) {
   const gcsCredentialsFilePath = join(
@@ -22,7 +22,7 @@ if (gcsCredentials) {
     `gcs-credentials-${Date.now()}-${process.pid}.json`
   );
   writeFileSync(gcsCredentialsFilePath, gcsCredentials);
-  gcsCredentialsFileSetting = `gcs.client.default.credentials_file=${gcsCredentialsFilePath}`;
+  gcsSecureFile = `gcs.client.default.credentials_file=${gcsCredentialsFilePath}`;
 }
 
 /**
@@ -36,10 +36,7 @@ export const servers: ScoutServerConfig = {
   ...defaultConfig,
   esTestCluster: {
     ...defaultConfig.esTestCluster,
-    serverArgs: [
-      ...defaultConfig.esTestCluster.serverArgs,
-      ...(gcsCredentialsFileSetting ? [gcsCredentialsFileSetting] : []),
-    ],
+    secureFiles: [...(gcsSecureFile ? [gcsSecureFile] : [])],
   },
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,

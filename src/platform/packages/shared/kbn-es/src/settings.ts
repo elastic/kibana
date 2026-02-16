@@ -14,25 +14,14 @@ const SECURE_SETTINGS_LIST = [
   /^xpack\.security\.authc\.realms\.oidc\.[a-zA-Z0-9_]+\.rp\.client_secret$/,
   /^xpack\.security\.authc\.realms\.jwt\.[a-zA-Z0-9_]+\.client_authentication\.shared_secret$/,
   /^xpack\.security\.http\.ssl\.keystore\.secure_password$/,
-  /^gcs\.client\.[a-zA-Z0-9_]+\.credentials_file$/,
   /^telemetry\.secret_token$/,
   /^telemetry\.api_key$/,
 ];
-
-/**
- * Secure settings whose values are file paths. These must be added to the
- * keystore with `elasticsearch-keystore add-file` instead of `add -x`.
- */
-const FILE_BASED_SECURE_SETTINGS_LIST = [/^gcs\.client\.[a-zA-Z0-9_]+\.credentials_file$/];
 
 function isSecureSetting(settingName: string) {
   return SECURE_SETTINGS_LIST.some((secureSettingNameRegex) =>
     secureSettingNameRegex.test(settingName)
   );
-}
-
-export function isFileBasedSecureSetting(settingName: string) {
-  return FILE_BASED_SECURE_SETTINGS_LIST.some((pattern) => pattern.test(settingName));
 }
 
 export enum SettingsFilter {

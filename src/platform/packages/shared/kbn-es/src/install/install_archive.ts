@@ -18,7 +18,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 import { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } from '../paths';
 import { Artifact } from '../artifact';
-import { isFileBasedSecureSetting, parseSettings, SettingsFilter } from '../settings';
+import { parseSettings, SettingsFilter } from '../settings';
 import { log as defaultLog, isFile, copyFileSync } from '../utils';
 import type { InstallArchiveOptions } from './types';
 
@@ -131,17 +131,10 @@ async function configureKeystore(
       chalk.bold(secureSettingValue)
     );
 
-    if (isFileBasedSecureSetting(secureSettingName)) {
-      await execa(ES_KEYSTORE_BIN, ['add-file', secureSettingName, secureSettingValue], {
-        cwd: installPath,
-        env,
-      });
-    } else {
-      await execa(ES_KEYSTORE_BIN, ['add', secureSettingName, '-x'], {
-        input: secureSettingValue,
-        cwd: installPath,
-        env,
-      });
-    }
+    await execa(ES_KEYSTORE_BIN, ['add', secureSettingName, '-x'], {
+      input: secureSettingValue,
+      cwd: installPath,
+      env,
+    });
   }
 }
