@@ -95,7 +95,11 @@ export const createHandler =
     // credentials needed for auth). Reject any host not in the allowlist to prevent SSRF.
     let host = hosts[0];
     if (requestHost) {
-      const match = hosts.find((h) => stripCredentialsFromUrl(h) === requestHost);
+      // Normalize the incoming host the same way we normalize configured hosts
+      // (e.g. adding trailing slash, dropping default ports) so that old values
+      // stored in the client's localStorage still match after URL normalisation.
+      const normalizedRequestHost = stripCredentialsFromUrl(requestHost);
+      const match = hosts.find((h) => stripCredentialsFromUrl(h) === normalizedRequestHost);
       if (!match) {
         return response.badRequest({
           body: 'Host is not configured in elasticsearch.hosts',
