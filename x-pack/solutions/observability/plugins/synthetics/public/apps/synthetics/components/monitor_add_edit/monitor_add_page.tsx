@@ -23,7 +23,8 @@ import { LocationsLoadingError } from './locations_loading_error';
 import { ADD_MONITOR_STEPS } from './steps/step_config';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
-import { EmptyLocations } from '../settings/private_locations/empty_locations';
+import { GETTING_STARTED_ROUTE } from '../../../../../common/constants';
+import { Redirect } from 'react-router';
 
 export const MonitorAddPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'add-monitor' });
@@ -56,7 +57,7 @@ export const MonitorAddPage = () => {
   }
 
   if (locations.length === 0) {
-    return <EmptyLocations inFlyout={false} redirectToSettings={true} />;
+    return <Redirect to={GETTING_STARTED_ROUTE} />;
   }
 
   return (

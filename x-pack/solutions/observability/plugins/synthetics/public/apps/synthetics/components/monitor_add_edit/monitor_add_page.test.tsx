@@ -8,6 +8,9 @@
 import React from 'react';
 import { render } from '../../utils/testing/rtl_helpers';
 import { MonitorAddPage } from './monitor_add_page';
+import * as useCloneMonitorModule from './hooks/use_clone_monitor';
+import { GETTING_STARTED_ROUTE } from '@kbn/synthetics-plugin/common/constants';
+import { act } from '@testing-library/react';
 
 describe('MonitorAddPage', () => {
   it('renders correctly', async () => {
@@ -58,21 +61,30 @@ describe('MonitorAddPage', () => {
     expect(getByLabelText(/Loading/)).toBeInTheDocument();
   });
 
-  it('renders empty locations state when no locations are available', async () => {
-    const { findByText } = render(<MonitorAddPage />, {
-      state: {
-        serviceLocations: {
-          locations: [],
-          locationsLoaded: true,
-          loading: false,
+  it('redirects to getting started page when no locations are available', async () => {    
+    const useCloneMonitorSpy = jest.spyOn(useCloneMonitorModule, 'useCloneMonitor').mockReturnValue({
+      data: undefined,
+      status: 'success' as any,
+      loading: false,
+      error: undefined,
+      refetch: jest.fn(),
+    });  
+    let history: ReturnType<typeof render>['history'];
+    
+    act(() => {
+      ({ history } = render(<MonitorAddPage />, {
+        state: {
+          serviceLocations: {
+            locations: [],
+            locationsLoaded: true,
+            loading: false,
+          },
         },
-      },
-    });
-
-    expect(await findByText('Create your first private location')).toBeInTheDocument();
-    expect(
-      await findByText(/In order to create a monitor, you will need to add a location first/)
-    ).toBeInTheDocument();
+      }));
+    })
+  
+    expect(history.location.pathname).toBe(GETTING_STARTED_ROUTE);  
+    useCloneMonitorSpy.mockRestore();  
   });
 
   it('renders an error', async () => {
