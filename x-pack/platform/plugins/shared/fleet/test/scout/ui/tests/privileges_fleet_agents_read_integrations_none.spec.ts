@@ -36,10 +36,7 @@ test.describe(
       await expect(fleetHome.getAddFleetServerHeader()).toHaveCount(0);
     });
 
-    test('is accessible and user only see agents tab', async ({
-      browserAuth,
-      pageObjects,
-    }) => {
+    test('is accessible and user only see agents tab', async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginWithCustomRole(getFleetAgentsReadIntegrationsNoneRole());
       const { fleetHome } = pageObjects;
 
