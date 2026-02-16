@@ -286,8 +286,8 @@ export function extractPaginationParams(
   }
 
   const lastResult = esqlResponse.values[esqlResponse.values.length - 1];
-  const timestampCursor = lastResult[timestampFieldIdx] as string;
-  const idCursor = lastResult[idFieldIdx] as string;
+  const timestampCursor = String(lastResult[timestampFieldIdx]);
+  const idCursor = String(lastResult[idFieldIdx]);
   return {
     timestampCursor,
     idCursor,

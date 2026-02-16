@@ -152,13 +152,6 @@ export class LogsExtractionClient {
     );
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
 
-    const { paginationTimestamp, paginationId } = engineDescriptor.logExtractionState;
-    if (paginationTimestamp || paginationId) {
-      this.logger.warn(
-        `Recovering from corrupt state, using paginationTimestamp ${paginationTimestamp} and paginationId ${paginationId} beggning of the window.`
-      );
-    }
-
     const { fromDateISO, toDateISO } =
       opts?.specificWindow ||
       this.getExtractionWindow(engineDescriptor.logExtractionState, delayMs);
@@ -176,7 +169,12 @@ export class LogsExtractionClient {
     const onAbort = () => this.logger.debug('Aborting execution mid logs extraction');
     opts?.abortController?.signal.addEventListener('abort', onAbort);
 
-    let recoveryId: string | undefined = paginationId;
+    let recoveryId: string | undefined = engineDescriptor.logExtractionState.paginationId;
+    if (recoveryId) {
+      this.logger.warn(
+        `Recovering from corrupt state, using paginationTimestamp ${fromDateISO} and paginationId ${recoveryId} beggning of the window.`
+      );
+    }
     do {
       const query = buildLogsExtractionEsqlQuery({
         indexPatterns,
