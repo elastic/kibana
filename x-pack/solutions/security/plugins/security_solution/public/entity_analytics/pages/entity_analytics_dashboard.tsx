@@ -28,6 +28,7 @@ import { PageLoader } from '../../common/components/page_loader';
 
 const EntityAnalyticsComponent = () => {
   const [skipEmptyPrompt, setSkipEmptyPrompt] = React.useState(false);
+
   const onSkip = React.useCallback(() => setSkipEmptyPrompt(true), [setSkipEmptyPrompt]);
   const {
     indicesExist: oldIndicesExist,
@@ -72,7 +73,6 @@ const EntityAnalyticsComponent = () => {
 
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
             <HeaderPage title={ENTITY_ANALYTICS} />
-
             {isSourcererLoading ? (
               <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsLoader" />
             ) : (
