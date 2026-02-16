@@ -3988,6 +3988,9 @@
           }
         }
       },
+      "metadata": {
+        "type": "flattened"
+      },
       "name": {
         "type": "text"
       },

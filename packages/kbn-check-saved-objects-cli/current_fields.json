@@ -1220,6 +1220,7 @@
     "indicator",
     "indicator.params",
     "indicator.type",
+    "metadata",
     "name",
     "tags",
     "version"
