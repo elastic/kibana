@@ -253,10 +253,15 @@ function generateContractMetasFromPath(
     const parameterTypes = generateParameterTypes([operation], openApiDocument);
     const contractName = generateContractName(typeBaseName);
     const schemaImports = [getRequestSchemaName(operationId), getResponseSchemaName(operationId)];
-    const paramsSchemaString = generateParamsSchemaString([operationId], {
-      // Adding fetcher to all kibana contracts at build time
-      fetcher: 'FetcherConfigSchema',
-    });
+    const paramsSchemaString = generateParamsSchemaString(
+      [operationId],
+      {
+        // Adding fetcher to all kibana contracts at build time
+        fetcher: 'FetcherConfigSchema',
+      },
+      // Spread routing/debug meta options into all kibana connector schemas
+      ['KibanaStepMetaSchema']
+    );
     const outputSchemaString = generateOutputSchemaString([operation], openApiDocument);
 
     contractMetas.push({
@@ -280,7 +285,9 @@ function generateContractMetasFromPath(
       paramsSchemaString,
       outputSchemaString,
       schemaImports,
-      additionalImports: ["import { FetcherConfigSchema } from '../../schema';"],
+      additionalImports: [
+        "import { FetcherConfigSchema, KibanaStepMetaSchema } from '../../schema';",
+      ],
     });
   }
   return contractMetas;
