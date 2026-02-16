@@ -12,6 +12,6 @@ The Observability Agent Builder plugin provides LLM-powered tools and insights f
 
 - **[AI Insights](./server/routes/ai_insights/AGENTS.md)** (`server/routes/ai_insights/AGENTS.md`) — Architecture of one-click AI Insights (prefetched context, hardcoded prompts), prompt design, UI integration, conversation handoff, and testing.
 
-- **[API Integration Tests](../../../test/api_integration_deployment_agnostic/apis/observability_agent_builder/AGENTS.md)** (`x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/observability_agent_builder/AGENTS.md`) — How to run API integration tests, test structure guidelines, and shared utilities.
+- **[API Integration Tests](../../test/api_integration_deployment_agnostic/apis/observability_agent_builder/AGENTS.md)** (`x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/observability_agent_builder/AGENTS.md`) — How to run API integration tests, test structure guidelines, and shared utilities.
 
 - **[Synthtrace Scenarios](../../../../../src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/AGENTS.md)** (`src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/AGENTS.md`) — How to generate synthetic test data for tools and AI Insights using Synthtrace scenarios.
