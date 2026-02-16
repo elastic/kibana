@@ -18,6 +18,8 @@
     "@kbn/utility-types",
     "@kbn/i18n",
     "@kbn/config-schema",
+    "@kbn/data-views-plugin",
+    "@kbn/discover-utils",
   ],
   "exclude": [
     "target/**/*",
