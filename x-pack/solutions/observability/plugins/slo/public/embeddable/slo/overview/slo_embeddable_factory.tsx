@@ -6,7 +6,6 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import type { TypeOf } from '@kbn/config-schema';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
@@ -38,7 +37,6 @@ import type {
   SloOverviewEmbeddableState, // TODO import from schema in common 
   SloOverviewState,
 } from './types';
-import type { SingleOverviewCustomSchema, GroupOverviewCustomSchema } from '../../../../common/embeddables/overview/schema';
 import { openSloConfiguration } from './slo_overview_open_configuration';
 
 const getOverviewPanelTitle = () =>

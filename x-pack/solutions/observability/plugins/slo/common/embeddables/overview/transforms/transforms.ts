@@ -9,7 +9,7 @@
 
 import type { OverviewEmbeddableState } from '../schema';
 
-interface LegacyStoredOverviewEmbeddableState {
+interface LegacyStoredSingleOverviewEmbeddableState {
   sloId?: string;
   sloInstanceId?: string;
   remoteName?: string;
@@ -20,7 +20,7 @@ interface LegacyStoredOverviewEmbeddableState {
 
 export const getTransforms = () => ({
   transformOut: (storedState: OverviewEmbeddableState) => {
-    const { sloId, sloInstanceId, remoteName, overviewMode, groupFilters, showAllGroupByInstances, ...state } = storedState as OverviewEmbeddableState & LegacyStoredOverviewEmbeddableState;
+    const { sloId, sloInstanceId, remoteName, overviewMode, groupFilters, showAllGroupByInstances, ...state } = storedState as OverviewEmbeddableState & LegacyStoredSingleOverviewEmbeddableState;
     const hasLegacyFields = sloId || groupFilters; 
     if (hasLegacyFields) {
       return {
