@@ -26,6 +26,7 @@ const mockConnectorsAndExtras = [
   },
   {
     ...mockConnectors[0],
+
     id: 'connector-wrong-action-type',
     name: 'Connector Wrong Action Type',
     isMissingSecrets: true,
