@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 import { K8S_HOST_NAME } from '../../fixtures/constants';
 
-test.describe('Node Details', { tag: ['@svlOblt'] }, () => {
+test.describe('Node Details', { tag: tags.serverless.observability.complete }, () => {
   test(
     'Serverless: Osquery tab should not render in serverless',
     {
-      tag: ['@svlOblt'],
+      tag: tags.serverless.observability.complete,
     },
     async ({ browserAuth, pageObjects: { nodeDetailsPage } }) => {
       await browserAuth.loginAsViewer();

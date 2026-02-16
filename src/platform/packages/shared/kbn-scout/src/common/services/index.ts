@@ -24,3 +24,4 @@ export {
   isElasticsearchRole,
 } from './custom_role';
 export type { ElasticsearchRoleDescriptor, KibanaRole } from './custom_role';
+export { getPrivilegedRoleName } from './roles';

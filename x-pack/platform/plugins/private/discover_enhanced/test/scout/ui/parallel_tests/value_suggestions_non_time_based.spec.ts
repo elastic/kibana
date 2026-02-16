@@ -6,11 +6,18 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { spaceTest, testData, assertionMessages } from '../fixtures';
 
 spaceTest.describe(
   'Discover app - value suggestions non-time based',
-  { tag: ['@ess', '@svlSearch', '@svlOblt'] },
+  {
+    tag: [
+      ...tags.stateful.classic,
+      ...tags.serverless.search,
+      ...tags.serverless.observability.complete,
+    ],
+  },
   // TODO: Update to use an ES archive with an index accessible to 'viewer'
   // for running this test against the Security serverless project.
   () => {
