@@ -7,14 +7,7 @@
 
 import { type DataTableRecord } from '@kbn/discover-utils';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import {
-  EuiLoadingSpinner,
-  EuiLink,
-  EuiFlexGroup,
-  EuiToolTip,
-  useEuiTheme,
-  EuiText,
-} from '@elastic/eui';
+import { EuiLoadingSpinner, EuiLink, EuiFlexGroup, EuiToolTip, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -36,7 +29,6 @@ export function DiscoverFlyoutStreamProcessingLink({
   locator,
   streamsRepositoryClient,
 }: DiscoverFlyoutStreamProcessingLinkProps) {
-  const { euiTheme } = useEuiTheme();
   const { value, loading, error } = useResolvedDefinitionName({
     streamsRepositoryClient,
     doc,
