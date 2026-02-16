@@ -7,11 +7,24 @@
 
 import { z } from '@kbn/zod';
 import { TemplateSchema } from '../../domain/template/v1';
-
 /**
- * Sort field for templates — any key of the Template schema
+ * Sort field for templates.
+ *
+ * Keep this list aligned with indexed scalar mapping fields in the template SO type.
  */
-export const TemplateSortFieldSchema = TemplateSchema.keyof();
+export const TemplateSortFieldSchema = z.enum([
+  'templateId',
+  'name',
+  'templateVersion',
+  'owner',
+  'deletedAt',
+  'author',
+  'usageCount',
+  'fieldCount',
+  'lastUsedAt',
+  'isDefault',
+  'isLatest',
+]);
 
 export type TemplateSortField = z.infer<typeof TemplateSortFieldSchema>;
 
