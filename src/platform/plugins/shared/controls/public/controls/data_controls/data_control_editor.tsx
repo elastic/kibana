@@ -199,7 +199,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
   isPinned,
 }: ControlEditorProps<State>) => {
   const controlActionRegistry = useControlActionRegistry();
-
+  console.log({ initialDefaultPanelTitle });
   const [editorState, setEditorState] = useState<Partial<State>>(initialState);
   const [defaultPanelTitle, setDefaultPanelTitle] = useState<string>(
     initialDefaultPanelTitle ?? initialState.fieldName ?? ''

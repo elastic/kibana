@@ -8,16 +8,16 @@
  */
 
 import type {
-  PublishesTitle,
   AppliesTimeslice,
   PublishingSubject,
   PublishesUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { HasCustomPrepend, TimeSliderControlState } from '@kbn/controls-schemas';
+import type { ControlLabelStateManager } from '../control_labels';
 
 export type TimeSliderControlApi = DefaultEmbeddableApi<TimeSliderControlState> &
-  Pick<PublishesTitle, 'defaultTitle$'> &
+  Pick<ControlLabelStateManager['api'], 'label$'> &
   AppliesTimeslice &
   PublishesUnsavedChanges &
   HasCustomPrepend & {

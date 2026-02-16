@@ -65,13 +65,13 @@ export const PresentationPanelHeader = <
       captionStyles: css`
         .dshLayout--editing &:hover {
           cursor: move;
-          background-color: ${transparentize(euiTheme.colors.warning, 0.2)};
+          background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.1)};
         }
       `,
       headerStyles: css`
-        height: ${euiTheme.size.l};
+        height: ${euiTheme.size.xl};
         overflow: hidden;
-        line-height: ${euiTheme.size.l};
+        line-height: ${euiTheme.size.xl};
         padding: 0px ${euiTheme.size.s};
 
         display: flex;

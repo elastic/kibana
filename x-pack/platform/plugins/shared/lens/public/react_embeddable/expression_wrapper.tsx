@@ -45,6 +45,7 @@ export interface ExpressionWrapperProps {
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;
   noPadding?: boolean;
+  paddingTop?: boolean;
   abortController?: AbortController;
 }
 
@@ -71,6 +72,7 @@ export function ExpressionWrapper({
   executionContext,
   lensInspector,
   noPadding,
+  paddingTop,
   abortController,
 }: ExpressionWrapperProps) {
   if (!expression) return null;
@@ -82,7 +84,8 @@ export function ExpressionWrapper({
       data-test-subj="lens-embeddable"
     >
       <ExpressionRendererComponent
-        padding={noPadding ? undefined : 's'}
+        padding={!noPadding ? 's' : undefined}
+        paddingTop={paddingTop}
         variables={variables}
         allowCache={true}
         expression={expression}

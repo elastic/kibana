@@ -63,7 +63,6 @@ export type OptionsListComponentApi = PublishesField &
     loadMoreSubject: Subject<void>;
     selectAll: (keys: string[]) => void;
     deselectAll: (keys: string[]) => void;
-    defaultTitle$?: PublishingSubject<string | undefined>;
     uuid: string;
     allowExpensiveQueries$: PublishingSubject<boolean>;
   };

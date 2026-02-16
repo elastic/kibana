@@ -15,9 +15,11 @@ export {
   apiCanDuplicatePanels,
   apiCanExpandPanels,
   apiCanPinPanels,
+  apiHasPinnedPanels,
   type CanDuplicatePanels,
   type CanExpandPanels,
   type CanPinPanels,
+  type HasPinnedPanels,
 } from './interfaces/panel_management';
 export {
   apiCanBeDuplicated,

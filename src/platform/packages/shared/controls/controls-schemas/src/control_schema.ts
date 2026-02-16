@@ -15,9 +15,6 @@ export const controlSchema = schema.object(
     title: schema.maybe(
       schema.string({ meta: { description: 'A human-readable title for the control' } })
     ),
-    description: schema.maybe(
-      schema.string({ meta: { description: 'A description for the control' } })
-    ),
   },
   { unknowns: 'allow' }
 );

@@ -28,8 +28,12 @@ import {
 } from '@kbn/controls-constants';
 import type { OptionsListControlState } from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { apiHasSections, initializeUnsavedChanges } from '@kbn/presentation-containers';
-import type { PublishingSubject } from '@kbn/presentation-publishing';
+import {
+  apiHasPinnedPanels,
+  apiHasSections,
+  initializeUnsavedChanges,
+} from '@kbn/presentation-containers';
+import { type PublishingSubject } from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
 import { isOptionsListESQLControlState, isValidSearch } from '../../../../common/options_list';
@@ -345,9 +349,13 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         allowExpensiveQueries$,
       };
 
+      const isPinned = apiHasPinnedPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
+
       return {
         api,
         Component: () => {
+          // const sectionId = useStateFromPublishingSubject(sectionId$);
+          // console.log({ sectionId });
           useEffect(() => {
             return () => {
               // on unmount, clean up all subscriptions
@@ -370,7 +378,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
                 displaySettings: state.displaySettings ?? {},
               }}
             >
-              <OptionsListControl />
+              <OptionsListControl isPinned={isPinned} />
             </OptionsListControlContext.Provider>
           );
         },

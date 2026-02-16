@@ -9,7 +9,6 @@
 
 import { isEmpty } from 'lodash';
 import React, { useMemo, useState } from 'react';
-import { BehaviorSubject } from 'rxjs';
 
 import type { UseEuiTheme } from '@elastic/eui';
 import {
@@ -28,6 +27,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { isCompressed } from '../../../../control_group/utils/is_compressed';
+import { ConditionalLabelWrapper } from '../../../control_labels';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
@@ -60,7 +60,10 @@ const optionListControlStyles = {
     css({
       fontWeight: `${euiTheme.font.weight.regular} !important` as 'normal',
       color: `${euiTheme.colors.textSubdued} !important`,
-      padding: `0 ${euiTheme.size.s}`,
+      padding: `0`,
+      '&.optionsList--pinned': {
+        padding: `0 ${euiTheme.size.s}`,
+      },
       '&:hover::before': {
         background: `${euiTheme.colors.backgroundBasePlain} !important`,
       },
@@ -99,8 +102,10 @@ const optionListControlStyles = {
 };
 
 export const OptionsListControl = ({
+  isPinned,
   disableMultiValueEmptySelection = false,
 }: {
+  isPinned: boolean;
   disableMultiValueEmptySelection?: boolean;
 }) => {
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
@@ -114,9 +119,9 @@ export const OptionsListControl = ({
     invalidSelections,
     field,
     loading,
-    panelTitle,
+    label,
+    fieldName,
     fieldFormatter,
-    defaultPanelTitle,
   ] = useBatchedPublishingSubjects(
     componentApi.exclude$,
     componentApi.existsSelected$,
@@ -124,9 +129,9 @@ export const OptionsListControl = ({
     componentApi.invalidSelections$,
     componentApi.field$,
     componentApi.dataLoading$,
-    componentApi.title$,
-    componentApi.fieldFormatter,
-    componentApi.defaultTitle$ ?? new BehaviorSubject(undefined)
+    componentApi.label$,
+    componentApi.fieldName$,
+    componentApi.fieldFormatter
   );
 
   const delimiter = useMemo(() => OptionsListStrings.control.getSeparator(field?.type), [field]);
@@ -222,6 +227,8 @@ export const OptionsListControl = ({
       badgeColor="success"
       isLoading={loading}
       iconType={'arrowDown'}
+      // iconSize={'s'}
+      className={isPinned ? `optionsList--pinned` : undefined}
       data-test-subj={`optionsList-control-${componentApi.uuid}`}
       css={styles.filterButton}
       onClick={() => setPopoverOpen(!isPopoverOpen)}
@@ -229,7 +236,7 @@ export const OptionsListControl = ({
       numActiveFilters={selectedOptionsCount}
       hasActiveFilters={Boolean(selectedOptionsCount)}
       textProps={{ css: styles.filterButtonText }}
-      aria-label={panelTitle ?? defaultPanelTitle}
+      aria-label={label ?? fieldName}
       aria-expanded={isPopoverOpen}
       aria-controls={popoverId}
       role="combobox"
@@ -241,34 +248,36 @@ export const OptionsListControl = ({
   );
 
   return (
-    <EuiFilterGroup
-      className={'kbnGridLayout--hideDragHandle'}
-      fullWidth
-      compressed={isCompressed(componentApi)}
-      css={optionListControlStyles.filterGroup}
-      data-control-id={componentApi.uuid}
-      data-shared-item
-    >
-      <EuiInputPopover
-        id={popoverId}
-        ownFocus
-        input={button}
-        repositionOnScroll
-        isOpen={isPopoverOpen}
-        panelPaddingSize="none"
-        panelMinWidth={MIN_POPOVER_WIDTH}
-        className="optionsList__inputButtonOverride"
-        css={styles.inputButtonOverride}
-        initialFocus={'[data-test-subj=optionsList-control-search-input]'}
-        closePopover={() => setPopoverOpen(false)}
-        panelClassName="optionsList__popoverOverride"
-        panelProps={{
-          title: panelTitle ?? defaultPanelTitle,
-          'aria-label': OptionsListStrings.popover.getAriaLabel(panelTitle ?? defaultPanelTitle!),
-        }}
+    <ConditionalLabelWrapper label={label ?? fieldName} isPinned={isPinned}>
+      <EuiFilterGroup
+        className={'kbnGridLayout--hideDragHandle'}
+        fullWidth
+        compressed={isCompressed(componentApi)}
+        css={optionListControlStyles.filterGroup}
+        data-control-id={componentApi.uuid}
+        data-shared-item
       >
-        <OptionsListPopover disableMultiValueEmptySelection={disableMultiValueEmptySelection} />
-      </EuiInputPopover>
-    </EuiFilterGroup>
+        <EuiInputPopover
+          title="test"
+          ownFocus
+          input={button}
+          repositionOnScroll
+          isOpen={isPopoverOpen}
+          panelPaddingSize="none"
+          panelMinWidth={MIN_POPOVER_WIDTH}
+          className="optionsList__inputButtonOverride"
+          css={styles.inputButtonOverride}
+          initialFocus={'[data-test-subj=optionsList-control-search-input]'}
+          closePopover={() => setPopoverOpen(false)}
+          panelClassName="optionsList__popoverOverride"
+          panelProps={{
+            title: label ?? fieldName,
+            'aria-label': OptionsListStrings.popover.getAriaLabel(label ?? fieldName!),
+          }}
+        >
+          <OptionsListPopover disableMultiValueEmptySelection={disableMultiValueEmptySelection} />
+        </EuiInputPopover>
+      </EuiFilterGroup>
+    </ConditionalLabelWrapper>
   );
 };

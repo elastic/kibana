@@ -110,6 +110,7 @@ export const ControlGroupRenderer = ({
       ...searchApi,
       ...propsApi,
       reload$,
+      panelIsPinned: () => true,
       getEditorConfig: getEditorConfig.current,
       disabledActionIds$,
       setDisabledActionIds: (ids: string[] | undefined) => {

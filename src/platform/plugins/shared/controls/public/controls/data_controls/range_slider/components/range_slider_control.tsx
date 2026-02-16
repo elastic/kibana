@@ -16,6 +16,7 @@ import type { RangeSliderValue } from '@kbn/controls-schemas';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
 import { RangeSliderStrings } from '../range_slider_strings';
 import { rangeSliderControlStyles } from './range_slider.styles';
+import { ConditionalLabelWrapper } from '../../../control_labels';
 
 export interface Props {
   compressed: boolean;
@@ -31,6 +32,8 @@ export interface Props {
   fieldFormatter?: (value: string) => string;
   onChange: (value: RangeSliderValue | undefined) => void;
   isEdit: boolean;
+  isPinned: boolean;
+  label?: string;
 }
 
 export const RangeSliderControl: FC<Props> = ({
@@ -47,6 +50,8 @@ export const RangeSliderControl: FC<Props> = ({
   fieldFormatter,
   onChange,
   isEdit,
+  isPinned,
+  label,
 }: Props) => {
   const rangeSliderRef = useRef<EuiDualRangeProps | null>(null);
 
@@ -190,80 +195,82 @@ export const RangeSliderControl: FC<Props> = ({
   }, [getCommonInputProps, displayedValue, max, fieldName, uuid]);
 
   return (
-    <span
-      data-shared-item
-      css={[styles.rangeSliderControl, isInvalid && styles.invalid, isEdit && styles.editMode]}
-      className="rangeSliderAnchor__button kbnGridLayout--hideDragHandle"
-      data-test-subj={`range-slider-control-${uuid}`}
-      data-control-id={uuid}
-    >
-      <EuiDualRange
-        ref={rangeSliderRef}
-        id={uuid}
-        fullWidth
-        showTicks
-        step={step}
-        ticks={ticks}
-        levels={levels}
-        min={displayedMin}
-        max={displayedMax}
-        isLoading={isLoading}
-        compressed={compressed}
-        inputPopoverProps={{
-          className: controlPanelClassName,
-          panelMinWidth: MIN_POPOVER_WIDTH,
-        }}
-        append={
-          isInvalid ? (
-            <div
-              className="rangeSlider__invalidToken"
-              data-test-subj={`range-slider-control-invalid-append-${uuid}`}
-            >
-              <EuiToolTip
-                position="top"
-                content={RangeSliderStrings.control.getInvalidSelectionWarningLabel()}
-                delay="long"
+    <ConditionalLabelWrapper label={label} isPinned={isPinned}>
+      <span
+        data-shared-item
+        css={[styles.rangeSliderControl, isInvalid && styles.invalid, isEdit && styles.editMode]}
+        className="rangeSliderAnchor__button kbnGridLayout--hideDragHandle"
+        data-test-subj={`range-slider-control-${uuid}`}
+        data-control-id={uuid}
+      >
+        <EuiDualRange
+          ref={rangeSliderRef}
+          id={uuid}
+          fullWidth
+          showTicks
+          step={step}
+          ticks={ticks}
+          levels={levels}
+          min={displayedMin}
+          max={displayedMax}
+          isLoading={isLoading}
+          compressed={compressed}
+          inputPopoverProps={{
+            className: controlPanelClassName,
+            panelMinWidth: MIN_POPOVER_WIDTH,
+          }}
+          append={
+            isInvalid ? (
+              <div
+                className="rangeSlider__invalidToken"
+                data-test-subj={`range-slider-control-invalid-append-${uuid}`}
               >
-                <EuiToken
-                  tabIndex={0}
-                  iconType="alert"
-                  size="s"
-                  color="euiColorVis9"
-                  shape="square"
-                  fill="dark"
-                  title={RangeSliderStrings.control.getInvalidSelectionWarningLabel()}
-                />
-              </EuiToolTip>
-            </div>
-          ) : undefined
-        }
-        onMouseUp={() => {
-          // when the pin is dropped (on mouse up), cancel any pending debounced changes and force the change
-          // in value to happen instantly (which, in turn, will re-calculate the min/max for the slider due to
-          // the `useEffect` above.
-          debouncedOnChange.cancel();
-          onChange(displayedValue);
-        }}
-        readOnly={disablePopover}
-        showInput={'inputWithPopover'}
-        data-test-subj="rangeSlider__slider"
-        minInputProps={minInputProps}
-        maxInputProps={maxInputProps}
-        value={[displayedValue[0] || displayedMin, displayedValue[1] || displayedMax]}
-        onChange={([minSelection, maxSelection]: [number | string, number | string], _, ev) => {
-          const originatingInputId = ev?.currentTarget.getAttribute('id');
-
-          if (originatingInputId?.includes('lowerBound')) {
-            // preserve original upper bound selection if only lower bound number field changed
-            maxSelection = displayedValue[1];
-          } else if (originatingInputId?.includes('upperBound')) {
-            // preserve original lower bound selection if only upper bound number field changed
-            minSelection = displayedValue[0];
+                <EuiToolTip
+                  position="top"
+                  content={RangeSliderStrings.control.getInvalidSelectionWarningLabel()}
+                  delay="long"
+                >
+                  <EuiToken
+                    tabIndex={0}
+                    iconType="alert"
+                    size="s"
+                    color="euiColorVis9"
+                    shape="square"
+                    fill="dark"
+                    title={RangeSliderStrings.control.getInvalidSelectionWarningLabel()}
+                  />
+                </EuiToolTip>
+              </div>
+            ) : undefined
           }
-          setDisplayedValue([String(minSelection), String(maxSelection)]);
-          debouncedOnChange([String(minSelection), String(maxSelection)]);
-        }}
-      />
-    </span>
+          onMouseUp={() => {
+            // when the pin is dropped (on mouse up), cancel any pending debounced changes and force the change
+            // in value to happen instantly (which, in turn, will re-calculate the min/max for the slider due to
+            // the `useEffect` above.
+            debouncedOnChange.cancel();
+            onChange(displayedValue);
+          }}
+          readOnly={disablePopover}
+          showInput={'inputWithPopover'}
+          data-test-subj="rangeSlider__slider"
+          minInputProps={minInputProps}
+          maxInputProps={maxInputProps}
+          value={[displayedValue[0] || displayedMin, displayedValue[1] || displayedMax]}
+          onChange={([minSelection, maxSelection]: [number | string, number | string], _, ev) => {
+            const originatingInputId = ev?.currentTarget.getAttribute('id');
+
+            if (originatingInputId?.includes('lowerBound')) {
+              // preserve original upper bound selection if only lower bound number field changed
+              maxSelection = displayedValue[1];
+            } else if (originatingInputId?.includes('upperBound')) {
+              // preserve original lower bound selection if only upper bound number field changed
+              minSelection = displayedValue[0];
+            }
+            setDisplayedValue([String(minSelection), String(maxSelection)]);
+            debouncedOnChange([String(minSelection), String(maxSelection)]);
+          }}
+        />
+      </span>
+    </ConditionalLabelWrapper>
   );
 };

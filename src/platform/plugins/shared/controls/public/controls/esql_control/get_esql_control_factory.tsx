@@ -14,13 +14,8 @@ import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { ESQLControlState } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import {
-  type PublishingSubject,
-  initializeStateManager,
-  initializeTitleManager,
-  titleComparators,
-} from '@kbn/presentation-publishing';
+import { apiCanPinPanels, initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { type PublishingSubject, initializeStateManager } from '@kbn/presentation-publishing';
 import type { OptionsListSelection } from '@kbn/controls-schemas';
 
 import { uiActionsService } from '../../services/kibana_services';
@@ -30,22 +25,28 @@ import type { OptionsListComponentApi } from '../data_controls/options_list_cont
 import { initializeESQLControlManager, selectionComparators } from './esql_control_manager';
 import type { ESQLControlApi, OptionsListESQLUnusedState } from './types';
 import { VariableControlsStrings } from './constants';
+import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
 
 export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQLControlApi> => {
   return {
     type: ESQL_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
-      const titlesManager = initializeTitleManager(state);
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
       const setDataLoading = (loading: boolean | undefined) => dataLoading$.next(loading);
 
       const selections = initializeESQLControlManager(uuid, parentApi, state, setDataLoading);
+      const labelManager = initializeLabelManager(
+        { title: initialState.title, variableName: initialState.variableName },
+        selections.internalApi,
+        'variableName'
+      );
 
       function serializeState() {
         return {
           ...selections.getLatestState(),
+          ...labelManager.getLatestState(),
         };
       }
 
@@ -57,17 +58,17 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         getComparators: () => {
           return {
             ...selectionComparators,
-            ...titleComparators,
+            ...defaultControlLabelComparators,
           };
         },
         onReset: (lastSaved) => {
           selections.reinitializeState(lastSaved);
-          titlesManager.reinitializeState(lastSaved);
+          labelManager.reinitializeState(lastSaved);
         },
       });
 
       const api = finalizeApi({
-        ...titlesManager.api,
+        ...labelManager.api,
         ...unsavedChangesApi,
         ...selections.api,
         dataLoading$,
@@ -82,20 +83,19 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
          */
         isDuplicable: false,
         isPinnable: true,
-        defaultTitle$: new BehaviorSubject<string | undefined>(state.title),
         isEditingEnabled: () => true,
         getTypeDisplayName: () => VariableControlsStrings.displayName,
         onEdit: async () => {
           const nextState = {
-            ...titlesManager.getLatestState(),
             ...selections.getLatestState(),
+            ...labelManager.getLatestState(),
           };
           const variablesInParent = apiPublishesESQLVariables(api.parentApi)
             ? api.parentApi.esqlVariables$.value
             : [];
           const onSaveControl = async (updatedState: ESQLControlState) => {
             selections.reinitializeState(updatedState);
-            titlesManager.reinitializeState(updatedState);
+            labelManager.reinitializeState(updatedState);
           };
           try {
             await uiActionsService.executeTriggerActions('ESQL_CONTROL_TRIGGER', {
@@ -140,6 +140,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
       const componentApi: OptionsListComponentApi = {
         ...api,
         ...selections.internalApi,
+        ...labelManager.api,
         isExpandable: false,
         isCustomizable: false,
         isDuplicable: false,
@@ -193,6 +194,8 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         dataViews$: new BehaviorSubject(undefined) as OptionsListComponentApi['dataViews$'],
       };
 
+      const isPinned = apiCanPinPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
+
       return {
         api,
         Component: () => (
@@ -216,6 +219,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
             <OptionsListControl
               // Don't allow empty selections until "ANY" value is supported: https://github.com/elastic/elasticsearch/issues/136735
               disableMultiValueEmptySelection={true}
+              isPinned={isPinned}
             />
           </OptionsListControlContext.Provider>
         ),
