@@ -16,6 +16,8 @@ import type {
   ProcessorType,
   RedactProcessor,
   ReplaceProcessor,
+  SplitProcessor,
+  SortProcessor,
   StreamlangConditionBlockWithUIAttributes,
   StreamlangDSL,
   StreamlangProcessorDefinition,
@@ -59,6 +61,8 @@ import type {
   RedactFormState,
   ReplaceFormState,
   SetFormState,
+  SplitFormState,
+  SortFormState,
   TrimFormState,
   UppercaseFormState,
 } from './types';
@@ -80,6 +84,8 @@ export const SPECIALISED_TYPES = [
   'lowercase',
   'trim',
   'join',
+  'split',
+  'sort',
   'concat',
 ];
 
@@ -273,6 +279,24 @@ const defaultJoinProcessorFormState = (): JoinFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultSplitProcessorFormState = (): SplitFormState => ({
+  action: 'split' as const,
+  from: '',
+  separator: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultSortProcessorFormState = (): SortFormState => ({
+  action: 'sort' as const,
+  from: '',
+  order: 'asc',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const defaultMathProcessorFormState = (): MathFormState => ({
   action: 'math' as const,
   expression: '',
@@ -316,6 +340,8 @@ const defaultProcessorFormStateByType: Record<
   trim: defaultTrimProcessorFormState,
   set: defaultSetProcessorFormState,
   join: defaultJoinProcessorFormState,
+  split: defaultSplitProcessorFormState,
+  sort: defaultSortProcessorFormState,
   concat: defaultConcatProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
@@ -364,6 +390,8 @@ export const getFormStateFromActionStep = (
     step.action === 'lowercase' ||
     step.action === 'trim' ||
     step.action === 'join' ||
+    step.action === 'split' ||
+    step.action === 'sort' ||
     step.action === 'concat'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
@@ -658,6 +686,39 @@ export const convertFormStateToProcessor = (
           description,
           where: 'where' in formState ? formState.where : undefined,
         } as JoinProcessor,
+      };
+    }
+
+    if (formState.action === 'split') {
+      const { from, separator, to, ignore_failure, ignore_missing, preserve_trailing } = formState;
+      return {
+        processorDefinition: {
+          action: 'split',
+          from,
+          separator,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          preserve_trailing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as SplitProcessor,
+      };
+    }
+
+    if (formState.action === 'sort') {
+      const { from, order, to, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'sort',
+          from,
+          order,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as SortProcessor,
       };
     }
 

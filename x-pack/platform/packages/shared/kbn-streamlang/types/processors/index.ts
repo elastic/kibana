@@ -512,6 +512,56 @@ export const joinProcessorSchema = processorBaseWithWhereSchema.extend({
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<JoinProcessor>;
 
+export interface SplitProcessor extends ProcessorBaseWithWhere {
+  action: 'split';
+  from: string;
+  separator: string;
+  to?: string;
+  ignore_missing?: boolean;
+  preserve_trailing?: boolean;
+}
+
+export const splitProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('split'),
+  from: StreamlangSourceField.describe('Source field to split into an array'),
+  separator: StreamlangSeparator.describe(
+    'Regex separator used to split the field value into an array'
+  ),
+  to: z
+    .optional(StreamlangTargetField)
+    .describe('Target field for the split array (defaults to source)'),
+  ignore_missing: z.optional(z.boolean()).describe('Skip processing when source field is missing'),
+  preserve_trailing: z
+    .optional(z.boolean())
+    .describe('Preserve empty trailing fields in the split result'),
+}) satisfies z.Schema<SplitProcessor>;
+
+/**
+ * Sort processor
+ */
+export type SortOrder = 'asc' | 'desc';
+export const sortOrders = ['asc', 'desc'] as const;
+
+export interface SortProcessor extends ProcessorBaseWithWhere {
+  action: 'sort';
+  from: string;
+  to?: string;
+  order?: SortOrder;
+  ignore_missing?: boolean;
+}
+
+export const sortProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('sort'),
+  from: StreamlangSourceField.describe('Array field to sort'),
+  to: z
+    .optional(StreamlangTargetField)
+    .describe('Target field for the sorted array (defaults to source)'),
+  order: z
+    .optional(z.enum(sortOrders))
+    .describe('Sort order - "asc" (ascending) or "desc" (descending). Defaults to "asc"'),
+  ignore_missing: z.optional(z.boolean()).describe('Skip processing when source field is missing'),
+}) satisfies z.Schema<SortProcessor>;
+
 /**
  * Concat processor
  */
@@ -575,6 +625,8 @@ export type StreamlangProcessorDefinition =
   | LowercaseProcessor
   | TrimProcessor
   | JoinProcessor
+  | SplitProcessor
+  | SortProcessor
   | ConcatProcessor
   | ManualIngestPipelineProcessor;
 
@@ -595,6 +647,8 @@ export const streamlangProcessorSchema = z.union([
   lowercaseProcessorSchema,
   trimProcessorSchema,
   joinProcessorSchema,
+  splitProcessorSchema,
+  sortProcessorSchema,
   convertProcessorSchema,
   concatProcessorSchema,
   manualIngestPipelineProcessorSchema,
@@ -615,6 +669,7 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     replaceProcessorSchema,
     redactProcessorSchema,
     mathProcessorSchema,
+    splitProcessorSchema,
   ])
 );
 

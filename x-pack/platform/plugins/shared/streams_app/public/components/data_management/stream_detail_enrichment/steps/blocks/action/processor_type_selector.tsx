@@ -519,6 +519,68 @@ const getAvailableProcessors: (
       );
     },
   },
+  split: {
+    type: 'split' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.splitInputDisplay',
+      {
+        defaultMessage: 'Split',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.splitHelpText"
+          defaultMessage="{splitLink} using a separator delimiter."
+          values={{
+            splitLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsSplitLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.split}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.splitLinkLabel', {
+                  defaultMessage: 'Splits a field into an array',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
+  sort: {
+    type: 'sort' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.sortInputDisplay',
+      {
+        defaultMessage: 'Sort',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.sortHelpText"
+          defaultMessage="{sortLink} ascending or descending."
+          values={{
+            sortLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsSortLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.sort}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.sortLinkLabel', {
+                  defaultMessage: 'Sorts the elements of an array',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
   ...configDrivenProcessors,
   ...(isWired
     ? {}
@@ -554,6 +616,8 @@ const PROCESSOR_GROUP_MAP: Record<
   convert: 'convert',
   date: 'convert',
   replace: 'convert',
+  split: 'convert',
+  sort: 'convert',
   redact: 'convert',
   append: 'set',
   set: 'set',

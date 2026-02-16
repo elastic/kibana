@@ -72,6 +72,18 @@ export const ProcessorFieldSelector = ({
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorRequiredError',
         { defaultMessage: 'A field value is required.' }
       ),
+      validate: (value: string) => {
+        if (value.includes('{{')) {
+          return i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorMustacheError',
+            {
+              defaultMessage:
+                "Mustache template syntax '{{' '}}' or '{{{' '}}}' is not allowed in field names",
+            }
+          );
+        }
+        return true;
+      },
     },
   });
 
