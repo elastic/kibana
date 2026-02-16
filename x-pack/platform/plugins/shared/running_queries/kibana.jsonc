@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/running-queries-plugin",
+  "owner": "@elastic/kibana-management",
+  "description": "This plugin provides a UI to view and manage running queries.",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "runningQueries",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "running_queries"],
+    "requiredPlugins": [
+      "management"
+    ]
+  }
+}

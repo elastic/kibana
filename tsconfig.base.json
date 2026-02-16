@@ -1868,6 +1868,8 @@
       "@kbn/rule-data-utils/*": ["src/platform/packages/shared/kbn-rule-data-utils/*"],
       "@kbn/rule-registry-plugin": ["x-pack/platform/plugins/shared/rule_registry"],
       "@kbn/rule-registry-plugin/*": ["x-pack/platform/plugins/shared/rule_registry/*"],
+      "@kbn/running-queries-plugin": ["x-pack/platform/plugins/shared/running_queries"],
+      "@kbn/running-queries-plugin/*": ["x-pack/platform/plugins/shared/running_queries/*"],
       "@kbn/runtime-fields-plugin": ["x-pack/platform/plugins/private/runtime_fields"],
       "@kbn/runtime-fields-plugin/*": ["x-pack/platform/plugins/private/runtime_fields/*"],
       "@kbn/safer-lodash-set": ["src/platform/packages/shared/kbn-safer-lodash-set"],
