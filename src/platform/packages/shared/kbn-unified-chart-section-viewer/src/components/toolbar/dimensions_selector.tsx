@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiToolTip,
   EuiButtonEmpty,
+  useEuiTheme,
 } from '@elastic/eui';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
@@ -49,6 +50,7 @@ export const DimensionsSelector = ({
   singleSelection = false,
   isLoading = false,
 }: DimensionsSelectorProps) => {
+  const { euiTheme } = useEuiTheme();
   const [localSelectedDimensions, setLocalSelectedDimensions] =
     useState<Dimension[]>(selectedDimensions);
 
@@ -132,7 +134,7 @@ export const DimensionsSelector = ({
                 width: 100%;
                 height: 100%;
                 pointer-events: auto;
-                z-index: 1;
+                z-index: ${euiTheme.levels.menu};
               `,
             }}
           >
@@ -151,6 +153,7 @@ export const DimensionsSelector = ({
     localSelectedDimensions,
     intersectingDimensions,
     singleSelection,
+    euiTheme.levels.menu,
   ]);
 
   const onChangeRef = useRef(onChange);
