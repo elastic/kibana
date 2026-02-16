@@ -15,7 +15,18 @@ import {
   ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
 } from '../../../../common/constants';
-import { WATCHLIST_I18N } from './constants';
+import {
+  WATCHLIST_CUSTOM_C_LEVEL_USERS_LABEL,
+  WATCHLIST_CUSTOM_HIGH_RISK_USERS_LABEL,
+  WATCHLIST_CUSTOM_WATCHLIST_3_LABEL,
+  WATCHLIST_GROUP_CUSTOM_LABEL,
+  WATCHLIST_GROUP_PREBUILT_LABEL,
+  WATCHLIST_ICON_GEAR_ARIA_LABEL,
+  WATCHLIST_ICON_PIN_ARIA_LABEL,
+  WATCHLIST_PREBUILT_DEPARTING_EMPLOYEES_LABEL,
+  WATCHLIST_PREBUILT_PRIVILEGED_USERS_LABEL,
+  WATCHLIST_PREBUILT_UNAUTHORIZED_LLM_ACCESS_LABEL,
+} from './translations';
 import type { WatchlistItem, WatchlistOption } from './types';
 
 interface WatchlistFilterProps {
@@ -25,28 +36,30 @@ interface WatchlistFilterProps {
 // Demo atm, replacing with real data with crud
 const WATCHLIST_OPTIONS: WatchlistOption[] = [
   {
-    prepend: <EuiIcon type="pin" aria-label={WATCHLIST_I18N.iconPin} style={{ marginRight: 8 }} />,
+    prepend: (
+      <EuiIcon type="pin" aria-label={WATCHLIST_ICON_PIN_ARIA_LABEL} style={{ marginRight: 8 }} />
+    ),
     id: 'group-prebuilt',
-    label: WATCHLIST_I18N.groupPrebuilt,
+    label: WATCHLIST_GROUP_PREBUILT_LABEL,
     isGroupLabelOption: true,
     groupicon: 'pin',
   },
-  { id: 'prebuilt-priv', label: WATCHLIST_I18N.prebuiltPrivilegedUsers },
-  { id: 'prebuilt-llm', label: WATCHLIST_I18N.prebuiltUnauthorizedLlmAccess },
-  { id: 'prebuilt-depart', label: WATCHLIST_I18N.prebuiltDepartingEmployees },
+  { id: 'prebuilt-priv', label: WATCHLIST_PREBUILT_PRIVILEGED_USERS_LABEL },
+  { id: 'prebuilt-llm', label: WATCHLIST_PREBUILT_UNAUTHORIZED_LLM_ACCESS_LABEL },
+  { id: 'prebuilt-depart', label: WATCHLIST_PREBUILT_DEPARTING_EMPLOYEES_LABEL },
 
   {
     prepend: (
-      <EuiIcon type="gear" aria-label={WATCHLIST_I18N.iconGear} style={{ marginRight: 8 }} />
+      <EuiIcon type="gear" aria-label={WATCHLIST_ICON_GEAR_ARIA_LABEL} style={{ marginRight: 8 }} />
     ),
     id: 'group-custom',
-    label: WATCHLIST_I18N.groupCustom,
+    label: WATCHLIST_GROUP_CUSTOM_LABEL,
     isGroupLabelOption: true,
     groupicon: 'gear',
   },
-  { id: 'custom-clevel', label: WATCHLIST_I18N.customCLevelUsers },
-  { id: 'custom-highrisk', label: WATCHLIST_I18N.customHighRiskUsers },
-  { id: 'custom-3', label: WATCHLIST_I18N.customWatchlist3 },
+  { id: 'custom-clevel', label: WATCHLIST_CUSTOM_C_LEVEL_USERS_LABEL },
+  { id: 'custom-highrisk', label: WATCHLIST_CUSTOM_HIGH_RISK_USERS_LABEL },
+  { id: 'custom-3', label: WATCHLIST_CUSTOM_WATCHLIST_3_LABEL },
 ];
 
 const WATCHLIST_ROUTE_MAP: Record<string, string> = {
