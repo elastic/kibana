@@ -45,10 +45,14 @@ export interface ChangeHistoryDocument {
     id: string; // Unique id of the target object in kibana.
     type: string; // Type of the target object in kibana.
     hash: string; // SHA256 hash of the object.snapshot to identify the payload.
+    sequence?: string; // Sequence identifier for ordering. (Optional)
     changes?: string[]; // List of field names that changed. (Optional)
     oldvalues?: Record<string, unknown>; // Previous values for changed fields. (Optional)
     snapshot: Record<string, unknown>; // Full snapshot after the change. (Optional)
   };
+
+  // Optional list of tags for the event.
+  tags?: string[];
 
   // Optional metadata about the event.
   // Information that does not form part of the diff or ECS schema.
@@ -61,18 +65,21 @@ export interface ChangeHistoryDocument {
 }
 
 export interface ObjectChange {
-  id: string;
-  type: string;
-  current?: Record<string, any>; // <-- Current version of the object. If available.
-  next: Record<string, any>; // <-- Version of the object after changes (ie the snapshot). Always required.
+  id?: string;
+  objectType: string;
+  objectId: string;
+  sequence?: string; // Sequence identifier for ordering changes. (Optional)
+  before?: Record<string, any>; // <-- Current version of the object. If available.
+  after: Record<string, any>; // <-- Version of the object after changes (ie the snapshot). Always required.
 }
 
 export interface LogChangeHistoryOptions {
   action: string;
   userId: string;
+  timestamp?: string;
   spaceId: string;
   correlationId?: string;
-  overrides?: Partial<Pick<ChangeHistoryDocument, 'event' | 'metadata'>>;
+  data?: Partial<Pick<ChangeHistoryDocument, 'event' | 'tags' | 'metadata'>>;
   excludeFields?: ChangeTrackingExcludeFilter;
   sensitiveFields?: ChangeTrackingSensitiveDataFilter;
   // Optional diff to be used instead of standard diff calculation

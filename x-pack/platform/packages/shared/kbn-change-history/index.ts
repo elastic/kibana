@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { monotonicFactory } from 'ulid';
 import type {
   QueryDslQueryContainer,
   SearchTotalHits,
@@ -26,6 +27,8 @@ import type {
 import { standardDiffDocCalculation } from './src/utils';
 
 export * from './src/types';
+
+const ulid = monotonicFactory();
 
 const MAX_RESULT_SIZE = 100;
 
@@ -55,7 +58,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
   private client?: ChangeHistoryDataStreamClient;
 
   // Data stream name is `public` to allow calling code to also access it directly.
-  public dataStreamName: string;
+  public readonly dataStreamName: string;
 
   constructor({
     module,
@@ -150,9 +153,14 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
    * Log a bulk change for one or more objects.
    * @param changes - The changes to objects that were affected.
    * @param opts - The options for the bulk change.
-   * @param opts.correlationId - The correlation ID for the bulk change.
-   * @param opts.overrides - Optional overrides for the change history document.
+   * @param opts.action - The action performed (`rule-create`, `rule-update`, `rule-delete`, etc.)
+   * @param opts.userId - The ID of the user who performed the change.
+   * @param opts.spaceId - The ID of the space that the change belongs to.
+   * @param opts.timestamp - Optional timestamp of the change.
+   * @param opts.correlationId - Optional correlation ID for the bulk change.
+   * @param opts.data - Optional data to merge into the change history document.
    * @param opts.excludeFields - Optional fields to exclude from the diff calculation.
+   * @param opts.sensitiveFields - Optional fields to mask instead of store in plain form.
    * @param opts.diffDocCalculation - Optional function to calculate the diff between the current and next state of the object.
    * @returns A promise that resolves when the bulk change is logged.
    * @throws An error if the data stream is not initialized, or if an error occurs while logging the change.
@@ -173,24 +181,29 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
     const operations = [] as Array<ClientBulkOperation | ChangeHistoryDocument>;
     for (const change of changes) {
       // Create document
-      const { id, type } = change;
-      const hash = crypto.createHash('sha256').update(JSON.stringify(change.next)).digest('hex');
-      const document = this.createDocument(opts.overrides);
-      document.user = { ...document.user, id: opts.userId };
+      const { id, objectType, objectId, sequence } = change;
+      const hash = crypto.createHash('sha256').update(JSON.stringify(change.after)).digest('hex');
+      const document = this.createDocument(id, opts.timestamp, opts.data);
+      document.user = { id: opts.userId };
       document.event = { ...document.event, module, dataset, action: opts.action };
       if (correlationId && !document.event.group) document.event.group = { id: correlationId };
-      document.object = { id, type, hash, snapshot: change.next };
-      document.kibana = { ...document.kibana, space_id: opts.spaceId, version: kibanaVersion };
+      document.object = { id: objectId, type: objectType, hash, sequence, snapshot: change.after };
+      document.kibana = { space_id: opts.spaceId, version: kibanaVersion };
       // Do we have "before" state?
       // Perform diff using diffDocCalculation(), defaulted to standard if not passed in.
-      if (change.current) {
+      if (change.before) {
         const diffCalc = opts.diffDocCalculation ?? standardDiffDocCalculation;
-        const { fieldChanges, oldvalues } = diffCalc({
-          a: change.current,
-          b: change.next,
-          excludeFields: opts.excludeFields,
-        });
-        document.object = { changes: fieldChanges, oldvalues, ...document.object };
+        try {
+          const { fieldChanges, oldvalues } = diffCalc({
+            a: change.before,
+            b: change.after,
+            excludeFields: opts.excludeFields,
+          });
+          document.object = { ...document.object, changes: fieldChanges, oldvalues };
+        } catch (err) {
+          // Uncalculated diff should not be fatal, just log and continue
+          this.logger.error(new Error('Unable to calculate change history diff', { cause: err }));
+        }
       }
       // Queue operations
       operations.push({ create: { _id: document.event.id } });
@@ -251,20 +264,21 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
     };
   }
 
-  private createDocument(overrides?: Partial<ChangeHistoryDocument>): ChangeHistoryDocument {
-    const { event, kibana, metadata } = overrides ?? {};
+  private createDocument(
+    eventId?: string,
+    timestamp?: string,
+    data?: Partial<ChangeHistoryDocument>
+  ): ChangeHistoryDocument {
+    const { event, metadata, tags } = data ?? {};
     return {
-      '@timestamp': new Date().toISOString(),
+      '@timestamp': new Date(timestamp || Date.now()).toISOString(),
       event: {
-        id: event?.id || crypto.randomBytes(15).toString('base64url'),
+        id: eventId || ulid(), // <-- ULIDs make event order deterministic (helps with integration tests)
         type: event?.type ?? 'change',
         outcome: event?.outcome ?? 'success',
         reason: event?.reason,
       },
-      kibana: {
-        space_id: kibana?.space_id,
-        version: kibana?.version,
-      },
+      tags,
       metadata,
     } as ChangeHistoryDocument;
   }

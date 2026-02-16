@@ -52,11 +52,14 @@ export const changeHistoryMappings = {
         id: mappings.keyword(),
         type: mappings.keyword(),
         hash: mappings.keyword(),
+        sequence: mappings.keyword(),
         changes: mappings.keyword(),
         oldvalues: mappings.object({ properties: {} }), // mappings.flattened(),
         snapshot: mappings.object({ properties: {} }), // mappings.flattened(),
       },
     }),
+
+    tags: mappings.keyword(),
 
     // mappings.flattened(),
     metadata: mappings.object({

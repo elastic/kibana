@@ -16,8 +16,8 @@ Solution-agnostic: use it from any plugin or module that needs audit-style histo
 
 **Log changes** with `log` / `logBulk`:
 
-- Pass a **change** (or array of changes) and an **options** object. Each change has `id`, `type`, `next` (post-change snapshot), and optional `current` (pre-change snapshot).
-- When `change.current` is provided, a diff is computed (using the optional custom `diffDocCalculation` or a default).
+- Pass a **change** (or array of changes) and an **options** object. Each change has `objectType`, `objectId`, and `after` (post-change snapshot); optional change `id`, `sequence`, and `before` (pre-change snapshot).
+- When `change.before` is provided, a diff is computed (using the optional custom `diffDocCalculation` or a default).
 
 **Query history** with `getHistory(objectType, objectId, opts?)`:
 
@@ -42,12 +42,12 @@ All persisted documents follow the same schema (see below).
   Creates/ensures the data stream and stores the internal client. Call once before `log` / `logBulk` / `getHistory`.
 
 - **`log(change, opts)`**
-  Writes one change document. `change` must have `id`, `type`, and `next` (post-change snapshot); `current` (pre-change snapshot) is optional and used to compute diff fields when provided. `opts` is `LogChangeHistoryOptions` (see below).
+  Writes one change document. `change` must have `objectType`, `objectId`, and `after` (post-change snapshot); optional change `id`, `sequence`, and `before` (pre-change snapshot; used to compute diff fields when provided). `opts` is `LogChangeHistoryOptions` (see below).
 
 - **`logBulk(changes, opts)`**
   Same as `log` for multiple changes in one bulk request. When `changes.length > 1`, documents are grouped with a shared event group id (or `opts.correlationId` if provided). `opts` is the same `LogChangeHistoryOptions` object.
 
-- **`LogChangeHistoryOptions`** — Options for logging a change. Required: `action`, `userId`, `spaceId`. Optional: `correlationId` (groups bulk events when set), `overrides` (partial `event` and `metadata` to merge into the document), `excludeFields` (nested key/value map to exclude fields from the diff), `sensitiveFields` (nested key/value map for fields to hash instead of store in plain form), `diffDocCalculation` (function `(opts: ChangeTrackingDiffOptions) => ChangeTrackingDiff`; when omitted, a default diff is used).
+- **`LogChangeHistoryOptions`** — Options for logging a change. Required: `action`, `userId`, `spaceId`. Optional: `timestamp` (ISO8601 string; defaults to now), `correlationId` (groups bulk events when set), change `data` (partial `event`, `tags`, and `metadata` to merge into the document), `excludeFields` (nested key/value map to exclude fields from the diff), `sensitiveFields` (nested key/value map for fields to mask instead of store in plain form), `diffDocCalculation` (function `(opts: ChangeTrackingDiffOptions) => ChangeTrackingDiff`; when omitted, a default diff is used).
 
 - **`getHistory(objectType, objectId, opts?)`**
   Returns a promise with `{ startDate?, total, items }`. Filters by `object.type` and `object.id`. Optional `opts` is `GetChangeHistoryOptions`: `additionalFilters` (array of ES query clauses), pagination options `sort`, `from`, `size` (default 100), `transportOpts`. Results are sorted by `@timestamp` then `event.id` descending by default.
@@ -82,9 +82,11 @@ The data stream uses `dynamic: false` and the following index mapping (defined b
 | `object.id`        | `keyword`          | Unique id of the target object in Kibana.                                                         |
 | `object.type`      | `keyword`          | Type of the target object in Kibana.                                                              |
 | `object.hash`      | `keyword`          | Hash of the `object.snapshot` to identify the payload.                                 |
+| `object.sequence`  | `keyword`          | Sequence identifier for ordering. (Optional)                                                     |
 | `object.changes`   | `keyword`          | List of field names that changed. (Optional)                                                      |
 | `object.oldvalues` | `object` (dynamic) | Previous values for changed fields. (Optional)                                                    |
 | `object.snapshot`  | `object` (dynamic) | Full snapshot after the change. (Optional)                                                        |
+| `tags`             | `keyword`          | Optional list of tags for the event.                                                              |
 | `metadata`         | `object` (dynamic) | Optional metadata about the event; information that does not form part of the diff or ECS schema. |
 | `kibana`           | `object`           | Kibana context.                                                                                   |
 | `kibana.space_id`  | `keyword`          | ID of the space that the event belongs to.                                                        |
@@ -98,48 +100,156 @@ See [tsconfig.json](tsconfig.json) for internal kibana references.
 
 ---
 
-## Usage example
+## Usage examples
+
+### Basic usage (no frills)
 
 ```ts
 import { ChangeHistoryClient } from '@kbn/change-history';
 import type { ObjectChange, LogChangeHistoryOptions } from '@kbn/change-history';
 
+// During plugin `setup()` phase
 const client = new ChangeHistoryClient({
-  module: 'my-module',
-  dataset: 'my-dataset',
+  module: 'security',
+  dataset: 'detections',
   logger,
   kibanaVersion: '9.4.0',
 });
+
+// During plugin `start()` phase
 await client.initialize(elasticsearchClient);
 
-// After an object create/update:
+// When user makes a change
 const change: ObjectChange = {
-  id: ruleId,
-  type: 'alerting-rule',
-  current: previousSnapshot, // optional; if set, diff is computed
-  next: newSnapshot,
+  objectType: 'alerting-rule',
+  objectId: ruleId,
+  after: ruleSnapshot, // <-- Version after changes, the raw object we use for reverting
 };
-const opts: LogChangeHistoryOptions = {
+await client.log(change, {
+    action: 'rule-create',
+    userId,
+    spaceId,
+  }
+);
+
+// When reading history for an object
+const { startDate, total, items } = await client.getHistory('alerting-rule', ruleId);
+console.log(
+  `Change tracking started on ${startDate}, we have ${total} items, latest change at: \n${JSON.stringify(items[0]?.['@timestamp'])}`
+);
+```
+
+### Object update with diff
+
+```ts
+// After an object update (diff is computed from before → after):
+const change: ObjectChange = {
+  objectType: 'alerting-rule',
+  objectId: ruleId,
+  before: previousSnapshot, // <-- optional; if set, diff is computed
+  after: ruleSnapshot,
+};
+await client.log(change, {
   action: 'rule-update',
   userId,
   spaceId,
-  excludeFields: { someEphemeralField: false },
-  diffDocCalculation: myDiffFn, // optional
-};
-await client.log(change, opts);
+});
 
-// To read history for an object
+// Read history for an object
 const { startDate, total, items } = await client.getHistory('alerting-rule', ruleId);
+const { object } = items.shift();
+console.log(
+  `We have just updated the following fields: \n${object.changes)}`
+);
+```
 
-// With options (filters, pagination):
+### Bulk changes with correlation ID
+
+Multiple changes in one request share a group id so they can be queried together. Pass a `correlationId` or let the client generate one when `changes.length > 1`:
+
+```ts
+const changes: ObjectChange[] = [
+  { objectType: 'alerting-rule', objectId: id1, before: before1, after: after1 },
+  { objectType: 'alerting-rule', objectId: id2, before: before2, after: after2 },
+];
+await client.logBulk(changes, {
+  action: 'rule-bulk-update',
+  userId,
+  spaceId,
+  correlationId: 'my-bulk-operation-123',
+});
+```
+
+### Adding tags, reason, and metadata
+
+Use `data` to set `event` fields (e.g. `reason`), `tags`, and `metadata` on the stored document:
+
+```ts
+await client.log(
+  {
+    objectType: 'alerting-rule',
+    objectId: ruleId,
+    before: previousSnapshot,
+    after: newSnapshot,
+  },
+  {
+    action: 'rule-update',
+    userId,
+    spaceId,
+    data: {
+      event: { reason: 'Threshold adjusted by user' },
+      tags: ['new-rules-ui', 'manual-edit'],
+      metadata: { tab: 'settings' },
+    },
+  }
+);
+```
+
+### Field exclusions and sensitive fields
+
+Dealing with domain-specific data that should be excluded or masked.
+
+```ts
+await client.log(change, {
+  action: 'rule-update',
+  userId,
+  spaceId,
+  // Fields that should not participate in the diff (e.g. volatile or system fields) and that can be excluded
+  excludeFields: {
+    updatedAt: true,
+    monitoringData: true,
+    'params.isUpdated': true,
+  },
+  // Fields containing sensitive data that should be masked
+  sensitiveFields: ['user.email', 'params.apiKey']
+});
+```
+
+
+### Logging a deletion
+
+Store the last known state as the snapshot and mark the event as a deletion:
+
+```ts
+await client.log(changes, {
+    action: 'rule-delete',
+    userId,
+    spaceId,
+    data: { event: { type: 'deletion', reason: 'User requested deletion' } },
+  }
+);
+```
+
+### Querying with filters and pagination
+
+```ts
 const { startDate, total, items } = await client.getHistory('alerting-rule', ruleId, {
-  additionalFilters: [{ range: { '@timestamp': { gte: '2024-01-01' } } }],
+  additionalFilters: [{ range: { '@timestamp': { lt: '2026-01-01' } } }],
   size: 50,
   from: 0,
 });
-
 console.log(
-  `Change tracking started on ${startDate}, there are currently ${total} versions available, the last item was modified on ${items[0]?.['@timestamp']}`
+  `Last update in 2025 was at ${items[0]?.['@timestamp']}`
 );
 ```
 
