@@ -169,6 +169,7 @@ export const GetFullAgentPolicyRequestSchema = {
     download: schema.maybe(schema.boolean()),
     standalone: schema.maybe(schema.boolean()),
     kubernetes: schema.maybe(schema.boolean()),
+    revision: schema.maybe(schema.number()),
   }),
 };
 
