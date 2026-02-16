@@ -37,7 +37,13 @@ export async function fetchTraceDocuments({
   endTime: number;
   size: number;
   fields: string[];
-}) {
+}): Promise<
+  {
+    items: Record<string, unknown>[];
+    error?: string;
+    isTruncated: boolean;
+  }[]
+> {
   const searches: MsearchRequestItem[] = traceIds.flatMap((traceId) => [
     { index },
     {

@@ -109,7 +109,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it('returns a single trace with APM events and logs', async () => {
+      it('returns a single trace with Observability documents(logs, transactions, spans, and errors)', async () => {
         const results = await agentBuilderApiClient.executeTool<GetTracesToolResult>({
           id: OBSERVABILITY_GET_TRACES_TOOL_ID,
           params: {
@@ -125,14 +125,29 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(trace.items.length).to.be.greaterThan(0);
       });
 
-      it('respects maxTraces and indicates truncation', async () => {
+      it('respects maxTraces', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetTracesToolResult>({
+          id: OBSERVABILITY_GET_TRACES_TOOL_ID,
+          params: {
+            start: START,
+            end: END,
+            kqlFilter: 'transaction.duration.us > 5',
+            maxTraces: 1,
+          },
+        });
+
+        const { traces } = results[0].data;
+        expect(traces).to.have.length(1);
+      });
+
+      it('respects maxDocsPerTrace and indicates truncation', async () => {
         const results = await agentBuilderApiClient.executeTool<GetTracesToolResult>({
           id: OBSERVABILITY_GET_TRACES_TOOL_ID,
           params: {
             start: START,
             end: END,
             kqlFilter: `trace.id: "${DEFAULT_TRACE_CONFIGS[0].traceId}"`,
-            maxTraces: 1,
+            maxDocsPerTrace: 1,
           },
         });
 
