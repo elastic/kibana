@@ -51,6 +51,16 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     newestValue({ source: `${prefix}.type`, destination: 'entity.type' }),
     newestValue({ source: `${prefix}.sub_type`, destination: 'entity.sub_type' }),
     newestValue({ source: `${prefix}.url`, destination: 'entity.url' }),
+    oldestValue({
+      source: `@timestamp`,
+      destination: 'entity.lifecycle.first_seen',
+      mapping: { type: 'date' },
+    }),
+    newestValue({
+      source: `@timestamp`,
+      destination: 'entity.lifecycle.last_activity',
+      mapping: { type: 'date' },
+    }),
 
     newestValue({
       source: `${prefix}.attributes.Privileged`,
@@ -75,18 +85,6 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       destination: 'entity.attributes.Mfa_enabled',
       mapping: { type: 'boolean' },
       allowAPIUpdate: true,
-    }),
-
-    /* Lifecycle fields should not allow update via the API */
-    newestValue({
-      source: `${prefix}.lifecycle.First_seen`,
-      destination: 'entity.lifecycle.First_seen',
-      mapping: { type: 'date' },
-    }),
-    newestValue({
-      source: `${prefix}.lifecycle.Last_activity`,
-      destination: 'entity.lifecycle.Last_activity',
-      mapping: { type: 'date' },
     }),
 
     newestValue({

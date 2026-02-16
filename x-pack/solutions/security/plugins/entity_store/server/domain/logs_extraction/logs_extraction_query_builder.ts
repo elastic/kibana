@@ -95,16 +95,16 @@ export const buildLogsExtractionEsqlQuery = ({
 function recentFieldStats(fields: EntityField[]) {
   return fields
     .map((field) => {
-      const { retention, destination: dest } = field;
+      const { retention, destination: dest, source } = field;
       const recentDest = recentData(dest);
       const castedSrc = castSrcType(field);
       switch (retention.operation) {
         case 'collect_values':
-          return `${recentDest} = MV_DEDUPE(TOP(${castedSrc}, ${retention.maxLength}))`;
+          return `${recentDest} = TOP(MV_DEDUPE(${castedSrc}), ${retention.maxLength}) WHERE MV_COUNT(${source}) > 0`;
         case 'prefer_newest_value':
-          return `${recentDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD})`;
+          return `${recentDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${source} IS NOT NULL`;
         case 'prefer_oldest_value':
-          return `${recentDest} = FIRST(${castedSrc}, ${TIMESTAMP_FIELD})`;
+          return `${recentDest} = FIRST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${source} IS NOT NULL`;
         default:
           throw new Error('unknown field operation');
       }
@@ -123,7 +123,16 @@ function mergedFieldStats(idFieldName: string, fields: EntityField[]) {
 
       switch (retention.operation) {
         case 'collect_values':
-          return `${dest} = MV_DEDUPE(COALESCE(MV_APPEND(${recentDest}, ${dest}), ${recentDest}))`;
+          /**
+           * If both recent and current values are null, return null.
+           * If current value is null, return recent value.
+           * Otherwise, return the union of recent and current values, sliced to the max length.
+           */
+          return `${dest} = CASE(${recentDest} IS NULL AND ${dest} IS NULL, NULL,
+                                  ${dest} IS NULL, ${recentDest},
+                                  MV_SLICE(MV_UNION(${recentDest}, ${dest}), 0, ${
+            retention.maxLength - 1
+          }))`;
         case 'prefer_newest_value':
           return `${dest} = COALESCE(${recentDest}, ${dest})`;
         case 'prefer_oldest_value':
