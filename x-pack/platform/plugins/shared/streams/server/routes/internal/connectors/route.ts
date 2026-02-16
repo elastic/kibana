@@ -6,13 +6,24 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { isSupportedConnectorType, type InferenceConnector } from '@kbn/inference-common';
+import { isSupportedConnector, type InferenceConnector } from '@kbn/inference-common';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 
-const INFERENCE_CONNECTOR_TYPE = '.inference';
+export const INFERENCE_CONNECTOR_TYPE = '.inference';
 
-async function inferenceEndpointExists(
+/**
+ * Minimal connector interface for filtering. Compatible with the connector
+ * type returned by the actions plugin.
+ */
+export interface ConnectorWithConfig {
+  id: string;
+  actionTypeId: string;
+  name: string;
+  config?: Record<string, unknown>;
+}
+
+export async function inferenceEndpointExists(
   esClient: ElasticsearchClient,
   inferenceId: string
 ): Promise<boolean> {
@@ -22,6 +33,42 @@ async function inferenceEndpointExists(
   } catch (error) {
     return false;
   }
+}
+
+/**
+ * Filters connectors to only include supported GenAI connectors.
+ * For .inference connectors, also validates that the inference endpoint exists.
+ *
+ * @param connectors - List of all connectors to filter
+ * @param checkInferenceEndpointExists - Function to check if an inference endpoint exists
+ * @returns List of supported connectors with validated inference endpoints
+ */
+export async function filterSupportedConnectors<T extends ConnectorWithConfig>(
+  connectors: T[],
+  checkInferenceEndpointExists: (inferenceId: string) => Promise<boolean>
+): Promise<T[]> {
+  // Filter to only supported GenAI connector types
+  // Uses isSupportedConnector which also validates .inference connectors have taskType: 'chat_completion'
+  const supportedConnectors = connectors.filter((connector) => isSupportedConnector(connector));
+
+  // Validate inference connectors have endpoints
+  const validatedConnectors = await Promise.all(
+    supportedConnectors.map(async (connector) => {
+      if (connector.actionTypeId === INFERENCE_CONNECTOR_TYPE) {
+        const inferenceId = (connector.config as InferenceConnector['config'])?.inferenceId;
+        if (inferenceId) {
+          const exists = await checkInferenceEndpointExists(inferenceId);
+          if (!exists) {
+            return null;
+          }
+        }
+      }
+      return connector;
+    })
+  );
+
+  // Type assertion is safe here - we're only filtering out nulls, the remaining values are T
+  return validatedConnectors.filter((connector) => connector !== null) as T[];
 }
 
 export const getConnectorsRoute = createServerRoute({
@@ -48,32 +95,8 @@ export const getConnectorsRoute = createServerRoute({
 
     const connectors = await actionsClient.getAll();
 
-    // Filter to only supported GenAI connector types
-    const supportedConnectors = connectors.filter((connector) =>
-      isSupportedConnectorType(connector.actionTypeId)
-    );
-
-    // Validate inference connectors have endpoints
-    const validatedConnectors = await Promise.all(
-      supportedConnectors.map(async (connector) => {
-        if (connector.actionTypeId === INFERENCE_CONNECTOR_TYPE) {
-          const inferenceId = (connector.config as InferenceConnector['config'])?.inferenceId;
-          if (inferenceId) {
-            const exists = await inferenceEndpointExists(
-              scopedClusterClient.asCurrentUser,
-              inferenceId
-            );
-            if (!exists) {
-              return null;
-            }
-          }
-        }
-        return connector;
-      })
-    );
-
-    const filteredConnectors = validatedConnectors.filter(
-      (connector): connector is NonNullable<typeof connector> => connector !== null
+    const filteredConnectors = await filterSupportedConnectors(connectors, (inferenceId) =>
+      inferenceEndpointExists(scopedClusterClient.asCurrentUser, inferenceId)
     );
 
     return {
