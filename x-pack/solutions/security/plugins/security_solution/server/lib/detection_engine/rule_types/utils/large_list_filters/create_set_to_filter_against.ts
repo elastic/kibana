@@ -36,8 +36,8 @@ export const createSetToFilterAgainst = async <T>({
     return acc;
   }, new Set<unknown>());
 
-  ruleExecutionLogger.trace(
-    `Distinct values from field: ${[...valuesFromSearchResultField].length}`
+  ruleExecutionLogger.debug(
+    `number of distinct values from ${field}: ${[...valuesFromSearchResultField].length}`
   );
 
   const matchedListItems = await listClient.searchListItemByValues({
@@ -47,7 +47,7 @@ export const createSetToFilterAgainst = async <T>({
   });
 
   ruleExecutionLogger.debug(
-    `Matched items from list: ${matchedListItems.length}\nList ID: "${listId}".`
+    `number of matched items from list with id ${listId}: ${matchedListItems.length}`
   );
 
   return new Set<unknown>(

@@ -102,7 +102,6 @@ enabled:
   - src/platform/test/functional/apps/kibana_overview/config.ts
   - src/platform/test/functional/apps/management/config.ts
   - src/platform/test/functional/apps/saved_objects_management/config.ts
-  - src/platform/test/functional/apps/sharing/config.ts
   - src/platform/test/functional/apps/status_page/config.ts
   - src/platform/test/functional/apps/visualize/group1/config.ts
   - src/platform/test/functional/apps/visualize/group2/config.ts
@@ -293,7 +292,6 @@ enabled:
   - x-pack/platform/test/functional_cloud/intercepts.config.ts
   - x-pack/platform/test/licensing_plugin/config.public.ts
   - x-pack/platform/test/licensing_plugin/config.ts
-  - x-pack/platform/test/product_intercepts_functional/config.ts
   - x-pack/platform/test/reporting_api_integration/reporting_and_security.config.ts
   - x-pack/platform/test/reporting_api_integration/reporting_without_security.config.ts
   - x-pack/platform/test/reporting_functional/reporting_and_security.config.ts
@@ -379,7 +377,6 @@ enabled:
   - x-pack/performance/journeys_e2e/cloud_security_dashboard.ts
   - x-pack/performance/journeys_e2e/apm_service_inventory.ts
   - x-pack/performance/journeys_e2e/infra_hosts_view.ts
-  - x-pack/platform/test/custom_branding/config.ts
   # configs migrated to the new Kibana architecture
   - x-pack/platform/test/api_integration/apis/aiops/config.ts
   - x-pack/platform/test/api_integration/apis/cases/config.ts
