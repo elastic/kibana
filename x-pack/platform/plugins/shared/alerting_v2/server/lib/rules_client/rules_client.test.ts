@@ -12,6 +12,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 import type { CreateRuleParams, UpdateRuleData } from './types';
 import type { UserService } from '../services/user_service/user_service';
+import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { RulesClient } from './rules_client';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
@@ -218,9 +219,7 @@ describe('RulesClient', () => {
         SavedObjectsErrorHelpers.createGenericNotFoundError(RULE_SAVED_OBJECT_TYPE, 'rule-id-1')
       );
 
-      await expect(
-        client.updateRule({ id: 'rule-id-1', data: {} as UpdateRuleData })
-      ).rejects.toMatchObject({
+      await expect(client.updateRule({ id: 'rule-id-1', data: {} })).rejects.toMatchObject({
         output: { statusCode: 404 },
       });
     });
@@ -274,10 +273,85 @@ describe('RulesClient', () => {
         SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, 'rule-id-4')
       );
 
-      await expect(
-        client.updateRule({ id: 'rule-id-4', data: {} as UpdateRuleData })
-      ).rejects.toMatchObject({
+      await expect(client.updateRule({ id: 'rule-id-4', data: {} })).rejects.toMatchObject({
         output: { statusCode: 409 },
+      });
+    });
+
+    it('throws 400 when setting stateTransition on a signal rule', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        kind: 'signal',
+      };
+
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'rule-id-signal',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-signal',
+          data: { state_transition: { pending_count: 3 } },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: 'stateTransition is only allowed for rules of kind "alert".',
+      });
+
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+    });
+
+    it('allows setting stateTransition on an alert rule', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        kind: 'alert',
+      };
+
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'rule-id-alert',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-alert',
+          data: {
+            state_transition: { pending_count: 3, recovering_count: 5 },
+          },
+        })
+      ).resolves.not.toThrow();
+    });
+
+    it('allows setting stateTransition to null on a signal rule (removing it)', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        kind: 'signal',
+      };
+
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'rule-id-signal-null',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+
+      await client.updateRule({
+        id: 'rule-id-signal-null',
+        data: { stateTransition: null } as unknown as UpdateRuleData,
       });
     });
   });
