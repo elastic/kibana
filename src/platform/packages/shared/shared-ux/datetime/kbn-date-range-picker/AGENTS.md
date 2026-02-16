@@ -29,10 +29,6 @@ yarn test:type_check --project src/platform/packages/shared/shared-ux/datetime/k
 yarn storybook shared_ux
 ```
 
-## Component Architecture
-
-TODO (input text is source of truth, state flow)
-
 ## Rules
 
 1. Avoid complexity in TypeScript types

@@ -12,7 +12,6 @@ import React, {
   useContext,
   useState,
   useRef,
-  useEffect,
   useMemo,
   useCallback,
   type PropsWithChildren,
@@ -21,7 +20,7 @@ import React, {
 
 import { useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 
-import type { TimeRangeBounds, TimeRange } from './types';
+import type { TimeRangeBounds, TimeRange, InitialFocus } from './types';
 import { DATE_RANGE_INPUT_DELIMITER } from './constants';
 import { textToTimeRange } from './parse';
 import {
@@ -47,13 +46,6 @@ export interface DateRangePickerContextValue {
    */
   applyRange: (range?: TimeRangeBounds) => void;
 }
-
-/**
- * Determines which element receives focus when ArrowDown is pressed from the input.
- * A string is treated as a CSS selector resolved against the panel; a ref points
- * to the element directly. When unset, defaults to the panel div itself.
- */
-export type InitialFocus = RefObject<HTMLElement | null> | string;
 
 /** Internal context value used by sub-components. */
 interface DateRangePickerInternalContextValue extends DateRangePickerContextValue {
@@ -109,7 +101,7 @@ export function DateRangePickerProvider({
   defaultValue,
   onChange,
   dateFormat,
-  isInvalid: isInvalidProp,
+  isInvalid = false,
   compressed = true,
   showTimeWindowButtons = false,
 }: PropsWithChildren<DateRangePickerProps>) {
@@ -140,10 +132,6 @@ export function DateRangePickerProvider({
     ? durationToDisplayShortText(duration.startDate, duration.endDate)
     : null;
 
-  // TODO separate a "live" validity prop that should be available in context
-  // from the `isInvalid` top-level prop that will be passed down to control
-  const isInvalid = isInvalidProp || timeRange.isInvalid;
-
   const timeWindowButtonsConfig: TimeWindowButtonsConfig | false = useMemo(
     () =>
       showTimeWindowButtons === false
@@ -153,17 +141,6 @@ export function DateRangePickerProvider({
         : showTimeWindowButtons,
     [showTimeWindowButtons]
   );
-
-  // Safety net: if text becomes empty outside of editing mode (e.g., via direct setText('')),
-  // restore the last valid text to prevent the input from staying empty.
-  // This complements `setIsEditingWithRestore` which handles the normal edit-cancel flow.
-  // TODO double-check this is actually needed
-  useEffect(() => {
-    if (!isEditing && text.trim() === '' && lastValidText.current) {
-      setText(lastValidText.current);
-      lastValidText.current = '';
-    }
-  }, [text, isEditing]);
 
   const setIsEditingWithRestore = useCallback(
     (editing: boolean) => {
@@ -192,16 +169,14 @@ export function DateRangePickerProvider({
         rangeToApply = timeRange;
       }
 
-      const changeProps: DateRangePickerOnChangeProps = {
+      onChange({
         start: rangeToApply.start,
         end: rangeToApply.end,
         startDate: rangeToApply.startDate,
         endDate: rangeToApply.endDate,
         value: rangeToApply.value,
         isInvalid: rangeToApply.isInvalid,
-      };
-
-      onChange(changeProps);
+      } satisfies DateRangePickerOnChangeProps);
       setIsEditing(false);
     },
     [onChange, timeRange]

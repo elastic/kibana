@@ -12,11 +12,9 @@ import { css } from '@emotion/react';
 
 import { EuiPopover } from '@elastic/eui';
 
+import { FOCUSABLE_SELECTOR } from './constants';
 import { useDateRangePickerContext } from './date_range_picker_context';
 import { DateRangePickerControl } from './date_range_picker_control';
-
-const FOCUSABLE_SELECTOR =
-  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /**
  * Dialog popover for the DateRangePicker.

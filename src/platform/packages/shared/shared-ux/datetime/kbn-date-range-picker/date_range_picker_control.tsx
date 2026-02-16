@@ -20,14 +20,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import { useDateRangePickerContext, type InitialFocus } from './date_range_picker_context';
+import { FOCUSABLE_SELECTOR } from './constants';
+import { resolveInitialFocus } from './utils';
+import { useDateRangePickerContext } from './date_range_picker_context';
 import { TimeWindowButtons } from './date_range_picker_time_window_buttons';
 import { useSelectTextPartsWithArrowKeys } from './hooks/use_select_text_parts_with_arrow_keys';
 import { useInputHintText } from './hooks/use_input_hint_text';
-
-// TODO move to constants.ts
-const FOCUSABLE_SELECTOR =
-  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /**
  * The control portion of the DateRangePicker: displays a button when idle
@@ -196,24 +194,4 @@ export function DateRangePickerControl() {
       {timeWindowButtonsConfig && <TimeWindowButtons config={timeWindowButtonsConfig} />}
     </div>
   );
-}
-
-/**
- * Resolve the `initialFocus` target within the panel.
- * A string is treated as a CSS selector; a ref as a direct element handle.
- * Falls back to the panel div itself when unset.
- *
- * TODO move to utils.ts
- */
-function resolveInitialFocus(
-  panelRef: React.RefObject<HTMLDivElement>,
-  initialFocus?: InitialFocus
-): HTMLElement | null {
-  if (typeof initialFocus === 'string') {
-    return panelRef.current?.querySelector<HTMLElement>(initialFocus) ?? null;
-  }
-  if (initialFocus && 'current' in initialFocus) {
-    return initialFocus.current;
-  }
-  return panelRef.current;
 }
