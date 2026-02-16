@@ -583,7 +583,15 @@ export type InternalStateStore = ReturnType<typeof createInternalStateStore>;
 
 export type InternalStateDispatch = InternalStateStore['dispatch'];
 
-type InternalStateThunkAction<TReturn = void> = ThunkAction<
+export type InternalStateDispatchable = Parameters<InternalStateDispatch>[0];
+
+export type InternalStateDispatchReturn<TAction> = TAction extends InternalStateThunkAction<
+  infer TThunkReturn
+>
+  ? TThunkReturn
+  : TAction;
+
+export type InternalStateThunkAction<TReturn = void> = ThunkAction<
   TReturn,
   InternalStateDispatch extends ThunkDispatch<infer TState, never, never> ? TState : never,
   InternalStateDispatch extends ThunkDispatch<never, infer TExtra, never> ? TExtra : never,

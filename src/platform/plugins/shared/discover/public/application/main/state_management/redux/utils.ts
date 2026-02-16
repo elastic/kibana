@@ -22,6 +22,7 @@ import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type {
   InternalStateDependencies,
   InternalStateDispatch,
+  InternalStateDispatchable,
   TabActionPayload,
 } from './internal_state';
 import type { DiscoverInternalState, TabState } from './types';
@@ -56,12 +57,15 @@ export type InjectedActionArgs<TPayload extends TabActionPayload> = MaybeActionA
   WithoutTabId<TPayload>
 >;
 
-export const createTabActionInjector =
-  (tabId: string) =>
-  <TPayload extends TabActionPayload, TReturn>(actionCreator: (params: TPayload) => TReturn) =>
-  (...[payload]: InjectedActionArgs<TPayload>) => {
-    return actionCreator({ ...payload, tabId } as TPayload);
+export const createTabActionInjector = (tabId: string) => {
+  return <TPayload extends TabActionPayload, TReturn extends InternalStateDispatchable>(
+    actionCreator: (params: TPayload) => TReturn
+  ) => {
+    return (...[payload]: InjectedActionArgs<TPayload>) => {
+      return actionCreator({ ...payload, tabId } as TPayload);
+    };
   };
+};
 
 export type TabActionInjector = ReturnType<typeof createTabActionInjector>;
 

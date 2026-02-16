@@ -15,7 +15,7 @@ import {
   createSelectorHook,
 } from 'react-redux';
 import type { PropsWithChildren } from 'react';
-import React, { useMemo, createContext } from 'react';
+import React, { useCallback, useMemo, createContext } from 'react';
 import defaultComparator from 'fast-deep-equal';
 import { useAdHocDataViews } from './runtime_state';
 import type { DiscoverAppState, DiscoverInternalState, TabState } from './types';
@@ -23,12 +23,12 @@ import {
   type TabActionPayload,
   type InternalStateDispatch,
   type InternalStateStore,
+  type InternalStateDispatchable,
+  type InternalStateDispatchReturn,
 } from './internal_state';
 import { selectTab } from './selectors';
 import { type InjectedActionArgs, type TabActionInjector, createTabActionInjector } from './utils';
 import type { ChartPortalNode } from '../../components/chart';
-
-type DispatchReturn<TReturn> = TReturn extends (...args: infer _Args) => infer R ? R : TReturn;
 
 const internalStateContext = createContext<ReactReduxContextValue>(
   // Recommended approach for versions of Redux prior to v9:
@@ -99,16 +99,16 @@ export const useCurrentTabDispatch = () => {
   const dispatch = useInternalStateDispatch();
   const { injectCurrentTab } = useCurrentTabContext();
 
-  return useMemo(() => {
-    return function dispatchCurrentTab<TPayload extends TabActionPayload, TReturn>(
-      actionCreator: (params: TPayload) => TReturn,
-      ...args: InjectedActionArgs<TPayload>
-    ): DispatchReturn<TReturn> {
-      const injected = injectCurrentTab(actionCreator);
-      const actionOrThunk = (injected as (...a: unknown[]) => unknown)(...args) as TReturn;
-      return dispatch(actionOrThunk as never) as DispatchReturn<TReturn>;
-    };
-  }, [dispatch, injectCurrentTab]);
+  return useCallback(
+    function dispatchCurrentTab<
+      TPayload extends TabActionPayload,
+      TReturn extends InternalStateDispatchable
+    >(actionCreator: (params: TPayload) => TReturn, ...args: InjectedActionArgs<TPayload>) {
+      const dispatchable = injectCurrentTab(actionCreator)(...args);
+      return dispatch(dispatchable) as InternalStateDispatchReturn<TReturn>;
+    },
+    [dispatch, injectCurrentTab]
+  );
 };
 
 export const useCurrentChartPortalNode = () => useCurrentTabContext().currentChartPortalNode;
