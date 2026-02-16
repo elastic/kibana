@@ -24,7 +24,7 @@ import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOForm } from '../../../types';
 import { SyncFieldSelector } from './sync_field_selector';
-import { useSloFormContext } from '../../slo_form_context';
+import { useIsHorizontalLayout } from '../../slo_form_context';
 
 const LABELS = {
   advancedSettings: i18n.translate('xpack.slo.sloEdit.settings.advancedSettingsLabel', {
@@ -88,7 +88,10 @@ function SyncDelayField({ fullWidth }: SyncDelayFieldProps) {
             min={1}
             max={359}
             step={1}
-            onChange={(event) => onChange(event.target.value)}
+            onChange={(event) => {
+              const val = event.target.value;
+              onChange(val === '' ? undefined : Number(val));
+            }}
           />
         )}
       />
@@ -129,7 +132,10 @@ function FrequencyField({ fullWidth }: FrequencyFieldProps) {
             min={1}
             max={59}
             step={1}
-            onChange={(event) => onChange(event.target.value)}
+            onChange={(event) => {
+              const val = event.target.value;
+              onChange(val === '' ? undefined : Number(val));
+            }}
           />
         )}
       />
@@ -244,8 +250,7 @@ function AdvancedSettingsVerticalLayout() {
 }
 
 export function AdvancedSettings() {
-  const { formLayout } = useSloFormContext();
-  return formLayout === 'horizontal' ? (
+  return useIsHorizontalLayout() ? (
     <AdvancedSettingsHorizontalLayout />
   ) : (
     <AdvancedSettingsVerticalLayout />

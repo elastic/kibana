@@ -10,11 +10,10 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOForm } from '../../types';
-import { useSloFormContext } from '../slo_form_context';
+import { useIsHorizontalLayout } from '../slo_form_context';
 
 export function TimesliceWindowField() {
-  const { formLayout } = useSloFormContext();
-  const isHorizontalLayout = formLayout === 'horizontal';
+  const isHorizontalLayout = useIsHorizontalLayout();
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
 
   return (

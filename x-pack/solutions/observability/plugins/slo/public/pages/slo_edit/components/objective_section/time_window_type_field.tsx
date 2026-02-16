@@ -10,7 +10,7 @@ import { EuiFormRow, EuiIconTip, EuiSelect } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
 import { TIMEWINDOW_TYPE_OPTIONS } from '../../constants';
 import type { CreateSLOForm } from '../../types';
-import { useSloFormContext } from '../slo_form_context';
+import { useIsHorizontalLayout } from '../slo_form_context';
 import { OBJECTIVE_LABELS } from './objective_section_labels';
 
 interface TimeWindowFieldProps {
@@ -18,8 +18,7 @@ interface TimeWindowFieldProps {
 }
 
 export function TimeWindowTypeField({ selectId }: TimeWindowFieldProps) {
-  const { formLayout } = useSloFormContext();
-  const isHorizontalLayout = formLayout === 'horizontal';
+  const isHorizontalLayout = useIsHorizontalLayout();
   const { control } = useFormContext<CreateSLOForm>();
 
   return (

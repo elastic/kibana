@@ -15,11 +15,11 @@ import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 import { useSectionFormValidation } from '../hooks/use_section_form_validation';
 import { useShowSections } from '../hooks/use_show_sections';
 import type { CreateSLOForm, FormSettings } from '../types';
-import { SloFormContextProvider } from './slo_form_context';
-import { SloEditFormDescriptionSection } from './description_section';
+import { DEFAULT_FORM_SETTINGS, SloFormContextProvider } from './slo_form_context';
+import { DescriptionSection } from './description_section';
 import { SloEditFormFooter, SloEditFormHorizontalFooter } from './slo_edit_form_footer';
-import { SloEditFormIndicatorSection } from './indicator_section';
-import { SloEditFormObjectiveSection } from './objective_section';
+import { IndicatorSection } from './indicator_section';
+import { ObjectiveSection } from './objective_section';
 
 export interface Props {
   initialValues?: CreateSLOForm;
@@ -27,12 +27,6 @@ export interface Props {
   onFlyoutClose?: () => void;
   formSettings?: FormSettings;
 }
-
-const DEFAULT_FORM_SETTINGS: FormSettings = {
-  isEditMode: false,
-  allowedIndicatorTypes: [],
-  formLayout: 'vertical',
-};
 
 const STEP_DEFINITION = 1;
 const STEP_OBJECTIVES = 2;
@@ -184,13 +178,9 @@ export function SloEditForm({
         <EuiStepsHorizontal steps={stepDefinitions} size="xs" />
       </div>
       <div data-test-subj="sloFormHorizontalStepPanel">
-        {activeStep === STEP_DEFINITION && <SloEditFormIndicatorSection />}
-        {activeStep === STEP_OBJECTIVES && canAccessObjectiveStep && (
-          <SloEditFormObjectiveSection />
-        )}
-        {activeStep === STEP_DESCRIPTION && canAccessDescriptionStep && (
-          <SloEditFormDescriptionSection />
-        )}
+        {activeStep === STEP_DEFINITION && <IndicatorSection />}
+        {activeStep === STEP_OBJECTIVES && canAccessObjectiveStep && <ObjectiveSection />}
+        {activeStep === STEP_DESCRIPTION && canAccessDescriptionStep && <DescriptionSection />}
       </div>
     </>
   ) : (
@@ -200,21 +190,21 @@ export function SloEditForm({
           title: i18n.translate('xpack.slo.sloEdit.definition.title', {
             defaultMessage: 'Define SLI',
           }),
-          children: <SloEditFormIndicatorSection />,
+          children: <IndicatorSection />,
           status: isIndicatorSectionValid ? 'complete' : 'incomplete',
         },
         {
           title: i18n.translate('xpack.slo.sloEdit.objectives.title', {
             defaultMessage: 'Set objectives',
           }),
-          children: showObjectiveSection ? <SloEditFormObjectiveSection /> : null,
+          children: showObjectiveSection ? <ObjectiveSection /> : null,
           status: showObjectiveSection && isObjectiveSectionValid ? 'complete' : 'incomplete',
         },
         {
           title: i18n.translate('xpack.slo.sloEdit.description.title', {
             defaultMessage: 'Describe SLO',
           }),
-          children: showDescriptionSection ? <SloEditFormDescriptionSection /> : null,
+          children: showDescriptionSection ? <DescriptionSection /> : null,
           status: showDescriptionSection && isDescriptionSectionValid ? 'complete' : 'incomplete',
         },
       ]}

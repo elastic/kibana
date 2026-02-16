@@ -99,58 +99,76 @@ function useSloFormSubmit({ slo, onFlyoutClose, isEditMode }: Props) {
   };
 }
 
-export function SloEditFormFooter({ slo, onFlyoutClose, isEditMode }: Props) {
+function useNavigateBack(onFlyoutClose?: () => void) {
   const {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
+
+  return onFlyoutClose ?? (() => navigateToUrl(basePath.prepend(paths.slos)));
+}
+
+function FooterPortalWrapper({
+  onFlyoutClose,
+  children,
+}: {
+  onFlyoutClose?: () => void;
+  children: React.ReactNode;
+}) {
   const isFlyout = Boolean(onFlyoutClose);
-  const { isLoading, handleSubmit } = useSloFormSubmit({ slo, onFlyoutClose, isEditMode });
-
-  const content = (
-    <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          color="primary"
-          data-test-subj="sloFormSubmitButton"
-          fill
-          isLoading={isLoading}
-          onClick={handleSubmit}
-        >
-          {isEditMode
-            ? i18n.translate('xpack.slo.sloEdit.editSloButton', {
-                defaultMessage: 'Update SLO',
-              })
-            : i18n.translate('xpack.slo.sloEdit.createSloButton', {
-                defaultMessage: 'Create SLO',
-              })}
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          color="primary"
-          data-test-subj="sloFormCancelButton"
-          disabled={isLoading}
-          onClick={
-            onFlyoutClose ? onFlyoutClose : () => navigateToUrl(basePath.prepend(paths.slos))
-          }
-        >
-          {i18n.translate('xpack.slo.sloEdit.cancelButton', {
-            defaultMessage: 'Cancel',
-          })}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EquivalentApiRequest slo={slo} disabled={isLoading} isEditMode={isEditMode} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <SLOInspect slo={slo} disabled={isLoading} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+  return isFlyout ? (
+    <InPortal node={sloEditFormFooterPortal}>{children}</InPortal>
+  ) : (
+    <>{children}</>
   );
+}
 
-  return isFlyout ? <InPortal node={sloEditFormFooterPortal}>{content}</InPortal> : content;
+export function SloEditFormFooter({ slo, onFlyoutClose, isEditMode }: Props) {
+  const { isLoading, handleSubmit } = useSloFormSubmit({ slo, onFlyoutClose, isEditMode });
+  const handleCancel = useNavigateBack(onFlyoutClose);
+
+  return (
+    <FooterPortalWrapper onFlyoutClose={onFlyoutClose}>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="primary"
+            data-test-subj="sloFormSubmitButton"
+            fill
+            isLoading={isLoading}
+            onClick={handleSubmit}
+          >
+            {isEditMode
+              ? i18n.translate('xpack.slo.sloEdit.editSloButton', {
+                  defaultMessage: 'Update SLO',
+                })
+              : i18n.translate('xpack.slo.sloEdit.createSloButton', {
+                  defaultMessage: 'Create SLO',
+                })}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            color="primary"
+            data-test-subj="sloFormCancelButton"
+            disabled={isLoading}
+            onClick={handleCancel}
+          >
+            {i18n.translate('xpack.slo.sloEdit.cancelButton', {
+              defaultMessage: 'Cancel',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EquivalentApiRequest slo={slo} disabled={isLoading} isEditMode={isEditMode} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <SLOInspect slo={slo} disabled={isLoading} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </FooterPortalWrapper>
+  );
 }
 
 export function SloEditFormHorizontalFooter({
@@ -163,82 +181,80 @@ export function SloEditFormHorizontalFooter({
   onNext,
   nextDisabled,
 }: HorizontalFooterProps) {
-  const {
-    application: { navigateToUrl },
-    http: { basePath },
-  } = useKibana().services;
-  const isFlyout = Boolean(onFlyoutClose);
   const { isLoading, handleSubmit } = useSloFormSubmit({ slo, onFlyoutClose, isEditMode });
+  const handleCancel = useNavigateBack(onFlyoutClose);
 
-  const content = (
-    <EuiFlexGroup justifyContent="spaceBetween">
-      <EuiFlexItem grow={false}>
-        {isFirstStep ? (
-          <EuiButtonEmpty
-            onClick={
-              onFlyoutClose ? onFlyoutClose : () => navigateToUrl(basePath.prepend(paths.slos))
-            }
-            disabled={isLoading}
-            data-test-subj="sloFormCancelButton"
-          >
-            {i18n.translate('xpack.slo.sloEdit.flyout.cancelButton', {
-              defaultMessage: 'Cancel',
-            })}
-          </EuiButtonEmpty>
-        ) : (
-          <EuiButtonEmpty onClick={onBack} disabled={isLoading} data-test-subj="sloFormBackButton">
-            {i18n.translate('xpack.slo.sloEdit.flyout.backButton', {
-              defaultMessage: 'Back',
-            })}
-          </EuiButtonEmpty>
-        )}
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s">
-          {isLastStep && (
-            <>
-              <EuiFlexItem grow={false}>
-                <EquivalentApiRequest slo={slo} disabled={isLoading} isEditMode={isEditMode} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <SLOInspect slo={slo} disabled={isLoading} />
-              </EuiFlexItem>
-            </>
+  return (
+    <FooterPortalWrapper onFlyoutClose={onFlyoutClose}>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          {isFirstStep ? (
+            <EuiButtonEmpty
+              onClick={handleCancel}
+              disabled={isLoading}
+              data-test-subj="sloFormCancelButton"
+            >
+              {i18n.translate('xpack.slo.sloEdit.flyout.cancelButton', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButtonEmpty>
+          ) : (
+            <EuiButtonEmpty
+              onClick={onBack}
+              disabled={isLoading}
+              data-test-subj="sloFormBackButton"
+            >
+              {i18n.translate('xpack.slo.sloEdit.flyout.backButton', {
+                defaultMessage: 'Back',
+              })}
+            </EuiButtonEmpty>
           )}
-          <EuiFlexItem grow={false}>
-            {isLastStep ? (
-              <EuiButton
-                fill
-                onClick={handleSubmit}
-                isLoading={isLoading}
-                data-test-subj="sloFormSubmitButton"
-              >
-                {isEditMode
-                  ? i18n.translate('xpack.slo.sloEdit.editSloButton', {
-                      defaultMessage: 'Update SLO',
-                    })
-                  : i18n.translate('xpack.slo.sloEdit.flyout.createButton', {
-                      defaultMessage: 'Create SLO',
-                    })}
-              </EuiButton>
-            ) : (
-              <EuiButton
-                fill
-                onClick={onNext}
-                disabled={nextDisabled}
-                data-test-subj="sloFormNextButton"
-              >
-                {i18n.translate('xpack.slo.sloEdit.flyout.nextButton', {
-                  defaultMessage: 'Next',
-                })}
-              </EuiButton>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+        </EuiFlexItem>
 
-  return isFlyout ? <InPortal node={sloEditFormFooterPortal}>{content}</InPortal> : content;
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s">
+            {isLastStep && (
+              <>
+                <EuiFlexItem grow={false}>
+                  <EquivalentApiRequest slo={slo} disabled={isLoading} isEditMode={isEditMode} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <SLOInspect slo={slo} disabled={isLoading} />
+                </EuiFlexItem>
+              </>
+            )}
+            <EuiFlexItem grow={false}>
+              {isLastStep ? (
+                <EuiButton
+                  fill
+                  onClick={handleSubmit}
+                  isLoading={isLoading}
+                  data-test-subj="sloFormSubmitButton"
+                >
+                  {isEditMode
+                    ? i18n.translate('xpack.slo.sloEdit.editSloButton', {
+                        defaultMessage: 'Update SLO',
+                      })
+                    : i18n.translate('xpack.slo.sloEdit.flyout.createButton', {
+                        defaultMessage: 'Create SLO',
+                      })}
+                </EuiButton>
+              ) : (
+                <EuiButton
+                  fill
+                  onClick={onNext}
+                  disabled={nextDisabled}
+                  data-test-subj="sloFormNextButton"
+                >
+                  {i18n.translate('xpack.slo.sloEdit.flyout.nextButton', {
+                    defaultMessage: 'Next',
+                  })}
+                </EuiButton>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </FooterPortalWrapper>
+  );
 }

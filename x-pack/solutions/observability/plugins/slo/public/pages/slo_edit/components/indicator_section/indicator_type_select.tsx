@@ -11,7 +11,7 @@ import type { EuiSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOForm } from '../../types';
-import { useSloFormContext } from '../slo_form_context';
+import { useIsHorizontalLayout } from '../slo_form_context';
 
 const indicatorLabel = i18n.translate('xpack.slo.sloEdit.definition.sliType', {
   defaultMessage: 'Choose the SLI type',
@@ -22,8 +22,7 @@ interface IndicatorTypeSelectProps {
 }
 
 export function IndicatorTypeSelect({ options }: IndicatorTypeSelectProps) {
-  const { formLayout } = useSloFormContext();
-  const isHorizontalLayout = formLayout === 'horizontal';
+  const isHorizontalLayout = useIsHorizontalLayout();
   const { control } = useFormContext<CreateSLOForm>();
 
   return (

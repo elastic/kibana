@@ -12,7 +12,7 @@ import { useFormContext } from 'react-hook-form';
 import type { CreateSLOForm } from '../../../types';
 import { TimestampFieldSelector } from '../../common/timestamp_field_selector';
 import { IndexSelection } from './index_selection';
-import { useSloFormContext } from '../../slo_form_context';
+import { useIsHorizontalLayout } from '../../slo_form_context';
 
 interface Props {
   dataView?: DataView;
@@ -20,8 +20,7 @@ interface Props {
 }
 
 export function IndexAndTimestampField({ dataView, isLoading }: Props) {
-  const { formLayout } = useSloFormContext();
-  const isHorizontalLayout = formLayout === 'horizontal';
+  const isHorizontalLayout = useIsHorizontalLayout();
   const { watch } = useFormContext<CreateSLOForm>();
   const index = watch('indicator.params.index');
 

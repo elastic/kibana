@@ -10,11 +10,10 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOForm } from '../../types';
-import { useSloFormContext } from '../slo_form_context';
+import { useIsHorizontalLayout } from '../slo_form_context';
 
 export function TimesliceTargetField() {
-  const { formLayout } = useSloFormContext();
-  const isHorizontalLayout = formLayout === 'horizontal';
+  const isHorizontalLayout = useIsHorizontalLayout();
   const { control, getFieldState, watch } = useFormContext<CreateSLOForm>();
   const indicator = watch('indicator.type');
 
@@ -59,7 +58,10 @@ export function TimesliceTargetField() {
               min={0}
               max={100}
               step={0.001}
-              onChange={(event) => onChange(event.target.value)}
+              onChange={(event) => {
+                const val = event.target.value;
+                onChange(val === '' ? undefined : Number(val));
+              }}
             />
           )}
         />

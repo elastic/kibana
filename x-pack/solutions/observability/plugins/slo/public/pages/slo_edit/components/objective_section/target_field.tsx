@@ -9,12 +9,11 @@ import React from 'react';
 import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOForm } from '../../types';
-import { useSloFormContext } from '../slo_form_context';
+import { useIsHorizontalLayout } from '../slo_form_context';
 import { OBJECTIVE_LABELS } from './objective_section_labels';
 
 export function TargetField() {
-  const { formLayout } = useSloFormContext();
-  const isHorizontalLayout = formLayout === 'horizontal';
+  const isHorizontalLayout = useIsHorizontalLayout();
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
 
   return (
@@ -43,7 +42,10 @@ export function TargetField() {
             min={0.001}
             max={99.999}
             step={0.001}
-            onChange={(event) => onChange(event.target.value)}
+            onChange={(event) => {
+              const val = event.target.value;
+              onChange(val === '' ? undefined : Number(val));
+            }}
           />
         )}
       />

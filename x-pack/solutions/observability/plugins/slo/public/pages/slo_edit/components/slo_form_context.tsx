@@ -9,7 +9,7 @@ import React, { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
 import type { FormSettings } from '../types';
 
-const DEFAULT_FORM_SETTINGS: Required<FormSettings> = {
+export const DEFAULT_FORM_SETTINGS: Required<FormSettings> = {
   isEditMode: false,
   allowedIndicatorTypes: [],
   formLayout: 'vertical',
@@ -33,4 +33,9 @@ export function SloFormContextProvider({
 
 export function useSloFormContext() {
   return useContext(SloFormContext);
+}
+
+export function useIsHorizontalLayout(): boolean {
+  const { formLayout } = useSloFormContext();
+  return formLayout === 'horizontal';
 }

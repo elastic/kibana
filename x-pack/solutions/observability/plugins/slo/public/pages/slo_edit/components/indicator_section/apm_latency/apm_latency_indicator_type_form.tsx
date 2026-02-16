@@ -29,7 +29,7 @@ import { DataPreviewChart } from '../../common/data_preview_chart';
 import { QueryBuilder } from '../../common/query_builder';
 import { formatAllFilters } from '../../../helpers/format_filters';
 import { getGroupByCardinalityFilters } from '../apm_common/get_group_by_cardinality_filters';
-import { useSloFormContext } from '../../slo_form_context';
+import { useIsHorizontalLayout } from '../../slo_form_context';
 
 const LABELS = {
   serviceName: i18n.translate('xpack.slo.sloEdit.apmLatency.serviceName', {
@@ -122,11 +122,11 @@ function useApmLatencyFormData() {
   return { control, getFieldState, dataView, isIndexFieldsLoading, allFilters };
 }
 
-interface ServiceFieldsProps {
+interface FieldGroupProps {
   fullWidth?: boolean;
 }
 
-function ServiceFields({ fullWidth }: ServiceFieldsProps) {
+function ServiceFields({ fullWidth }: FieldGroupProps) {
   return (
     <>
       <FieldSelector
@@ -150,11 +150,7 @@ function ServiceFields({ fullWidth }: ServiceFieldsProps) {
   );
 }
 
-interface TransactionFieldsProps {
-  fullWidth?: boolean;
-}
-
-function TransactionFields({ fullWidth }: TransactionFieldsProps) {
+function TransactionFields({ fullWidth }: FieldGroupProps) {
   return (
     <>
       <FieldSelector
@@ -177,11 +173,7 @@ function TransactionFields({ fullWidth }: TransactionFieldsProps) {
   );
 }
 
-interface ThresholdFieldProps {
-  fullWidth?: boolean;
-}
-
-function ThresholdField({ fullWidth }: ThresholdFieldProps) {
+function ThresholdField({ fullWidth }: FieldGroupProps) {
   const { control, getFieldState } =
     useFormContext<CreateSLOForm<APMTransactionDurationIndicator>>();
 
@@ -217,11 +209,7 @@ function ThresholdField({ fullWidth }: ThresholdFieldProps) {
   );
 }
 
-interface QueryFilterFieldProps {
-  dataView?: DataView;
-}
-
-function QueryFilterField({ dataView }: QueryFilterFieldProps) {
+function QueryFilterField({ dataView }: { dataView?: DataView }) {
   return (
     <QueryBuilder
       dataTestSubj="apmLatencyFilterInput"
@@ -234,65 +222,48 @@ function QueryFilterField({ dataView }: QueryFilterFieldProps) {
   );
 }
 
-function ApmLatencyHorizontalLayout() {
+export function ApmLatencyIndicatorTypeForm() {
+  const isHorizontalLayout = useIsHorizontalLayout();
   const { dataView, isIndexFieldsLoading, allFilters } = useApmLatencyFormData();
+  const direction = isHorizontalLayout ? 'column' : 'row';
+  const fullWidth = isHorizontalLayout || undefined;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <ServiceFields fullWidth />
+      <EuiFlexGroup direction={direction} gutterSize="m">
+        <ServiceFields fullWidth={fullWidth} />
       </EuiFlexGroup>
 
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <TransactionFields fullWidth />
+      <EuiFlexGroup direction={direction} gutterSize="m">
+        <TransactionFields fullWidth={fullWidth} />
       </EuiFlexGroup>
 
-      <ThresholdField fullWidth />
+      <ThresholdField fullWidth={fullWidth} />
 
-      <EuiSpacer size="xs" />
-      <EuiAccordion id="apmLatencyAdvancedSettings" buttonContent={LABELS.advancedSettings}>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup direction="column" gutterSize="m">
+      {isHorizontalLayout ? (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiAccordion id="apmLatencyAdvancedSettings" buttonContent={LABELS.advancedSettings}>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup direction="column" gutterSize="m">
+              <QueryFilterField dataView={dataView} />
+              <GroupByField
+                dataView={dataView}
+                isLoading={isIndexFieldsLoading}
+                filters={allFilters}
+              />
+            </EuiFlexGroup>
+          </EuiAccordion>
+          <EuiSpacer size="xs" />
+        </>
+      ) : (
+        <>
           <QueryFilterField dataView={dataView} />
           <GroupByField dataView={dataView} isLoading={isIndexFieldsLoading} filters={allFilters} />
-        </EuiFlexGroup>
-      </EuiAccordion>
-      <EuiSpacer size="xs" />
+        </>
+      )}
 
       <DataPreviewChart />
     </EuiFlexGroup>
-  );
-}
-
-function ApmLatencyVerticalLayout() {
-  const { dataView, isIndexFieldsLoading, allFilters } = useApmLatencyFormData();
-
-  return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexGroup direction="row" gutterSize="m">
-        <ServiceFields />
-      </EuiFlexGroup>
-
-      <EuiFlexGroup direction="row" gutterSize="m">
-        <TransactionFields />
-      </EuiFlexGroup>
-
-      <ThresholdField />
-
-      <QueryFilterField dataView={dataView} />
-
-      <GroupByField dataView={dataView} isLoading={isIndexFieldsLoading} filters={allFilters} />
-
-      <DataPreviewChart />
-    </EuiFlexGroup>
-  );
-}
-
-export function ApmLatencyIndicatorTypeForm() {
-  const { formLayout } = useSloFormContext();
-  return formLayout === 'horizontal' ? (
-    <ApmLatencyHorizontalLayout />
-  ) : (
-    <ApmLatencyVerticalLayout />
   );
 }

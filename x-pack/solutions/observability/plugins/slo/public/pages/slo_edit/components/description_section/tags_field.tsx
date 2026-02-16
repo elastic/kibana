@@ -12,12 +12,11 @@ import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOForm } from '../../types';
 import { useFetchSLOSuggestions } from '../../hooks/use_fetch_suggestions';
-import { useSloFormContext } from '../slo_form_context';
+import { useIsHorizontalLayout } from '../slo_form_context';
 import { OptionalText } from '../common/optional_text';
 
 export function TagsField() {
-  const { formLayout } = useSloFormContext();
-  const isHorizontalLayout = formLayout === 'horizontal';
+  const isHorizontalLayout = useIsHorizontalLayout();
   const { control } = useFormContext<CreateSLOForm>();
   const tagsId = useGeneratedHtmlId({ prefix: 'tags' });
   const { suggestions } = useFetchSLOSuggestions();

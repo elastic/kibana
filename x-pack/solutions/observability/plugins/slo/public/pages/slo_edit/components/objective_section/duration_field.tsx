@@ -11,7 +11,7 @@ import type { TimeWindowType } from '@kbn/slo-schema';
 import { Controller, useFormContext } from 'react-hook-form';
 import { CALENDARALIGNED_TIMEWINDOW_OPTIONS, ROLLING_TIMEWINDOW_OPTIONS } from '../../constants';
 import type { CreateSLOForm } from '../../types';
-import { useSloFormContext } from '../slo_form_context';
+import { useIsHorizontalLayout } from '../slo_form_context';
 import { OBJECTIVE_LABELS } from './objective_section_labels';
 
 interface DurationFieldProps {
@@ -20,8 +20,7 @@ interface DurationFieldProps {
 }
 
 export function DurationField({ selectId, timeWindowType }: DurationFieldProps) {
-  const { formLayout } = useSloFormContext();
-  const isHorizontalLayout = formLayout === 'horizontal';
+  const isHorizontalLayout = useIsHorizontalLayout();
   const { control } = useFormContext<CreateSLOForm>();
 
   return (

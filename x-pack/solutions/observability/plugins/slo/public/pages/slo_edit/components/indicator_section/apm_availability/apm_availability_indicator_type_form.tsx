@@ -22,7 +22,7 @@ import { DataPreviewChart } from '../../common/data_preview_chart';
 import { QueryBuilder } from '../../common/query_builder';
 import { formatAllFilters } from '../../../helpers/format_filters';
 import { getGroupByCardinalityFilters } from '../apm_common/get_group_by_cardinality_filters';
-import { useSloFormContext } from '../../slo_form_context';
+import { useIsHorizontalLayout } from '../../slo_form_context';
 
 const LABELS = {
   serviceName: i18n.translate('xpack.slo.sloEdit.apmAvailability.serviceName', {
@@ -108,11 +108,11 @@ function useApmAvailabilityFormData() {
   return { dataView, isIndexFieldsLoading, allFilters };
 }
 
-interface ServiceFieldsProps {
+interface FieldGroupProps {
   fullWidth?: boolean;
 }
 
-function ServiceFields({ fullWidth }: ServiceFieldsProps) {
+function ServiceFields({ fullWidth }: FieldGroupProps) {
   return (
     <>
       <FieldSelector
@@ -136,11 +136,7 @@ function ServiceFields({ fullWidth }: ServiceFieldsProps) {
   );
 }
 
-interface TransactionFieldsProps {
-  fullWidth?: boolean;
-}
-
-function TransactionFields({ fullWidth }: TransactionFieldsProps) {
+function TransactionFields({ fullWidth }: FieldGroupProps) {
   return (
     <>
       <FieldSelector
@@ -163,11 +159,7 @@ function TransactionFields({ fullWidth }: TransactionFieldsProps) {
   );
 }
 
-interface QueryFilterFieldProps {
-  dataView?: DataView;
-}
-
-function QueryFilterField({ dataView }: QueryFilterFieldProps) {
+function QueryFilterField({ dataView }: { dataView?: DataView }) {
   return (
     <QueryBuilder
       dataTestSubj="apmAvailabilityFilterInput"
@@ -180,65 +172,57 @@ function QueryFilterField({ dataView }: QueryFilterFieldProps) {
   );
 }
 
-function ApmAvailabilityHorizontalLayout() {
-  const { dataView, isIndexFieldsLoading, allFilters } = useApmAvailabilityFormData();
-
-  return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <ServiceFields fullWidth />
-      </EuiFlexGroup>
-
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <TransactionFields fullWidth />
-      </EuiFlexGroup>
-
-      <EuiSpacer size="xs" />
-      <EuiAccordion id="apmAvailabilityAdvancedSettings" buttonContent={LABELS.advancedSettings}>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup direction="column" gutterSize="m">
-          <QueryFilterField dataView={dataView} />
-          <GroupByField dataView={dataView} isLoading={isIndexFieldsLoading} filters={allFilters} />
-        </EuiFlexGroup>
-      </EuiAccordion>
-      <EuiSpacer size="xs" />
-
-      <DataPreviewChart />
-    </EuiFlexGroup>
-  );
-}
-
-function ApmAvailabilityVerticalLayout() {
-  const { dataView, isIndexFieldsLoading, allFilters } = useApmAvailabilityFormData();
-
-  return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexGroup direction="row" gutterSize="m">
-        <ServiceFields />
-      </EuiFlexGroup>
-
-      <EuiFlexGroup direction="row" gutterSize="m">
-        <TransactionFields />
-      </EuiFlexGroup>
-
-      <EuiFlexGroup direction="row" gutterSize="m">
-        <EuiFlexItem>
-          <QueryFilterField dataView={dataView} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <GroupByField dataView={dataView} isLoading={isIndexFieldsLoading} filters={allFilters} />
-
-      <DataPreviewChart />
-    </EuiFlexGroup>
-  );
-}
-
 export function ApmAvailabilityIndicatorTypeForm() {
-  const { formLayout } = useSloFormContext();
-  return formLayout === 'horizontal' ? (
-    <ApmAvailabilityHorizontalLayout />
-  ) : (
-    <ApmAvailabilityVerticalLayout />
+  const isHorizontalLayout = useIsHorizontalLayout();
+  const { dataView, isIndexFieldsLoading, allFilters } = useApmAvailabilityFormData();
+  const direction = isHorizontalLayout ? 'column' : 'row';
+  const fullWidth = isHorizontalLayout || undefined;
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction={direction} gutterSize="m">
+        <ServiceFields fullWidth={fullWidth} />
+      </EuiFlexGroup>
+
+      <EuiFlexGroup direction={direction} gutterSize="m">
+        <TransactionFields fullWidth={fullWidth} />
+      </EuiFlexGroup>
+
+      {isHorizontalLayout ? (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiAccordion
+            id="apmAvailabilityAdvancedSettings"
+            buttonContent={LABELS.advancedSettings}
+          >
+            <EuiSpacer size="m" />
+            <EuiFlexGroup direction="column" gutterSize="m">
+              <QueryFilterField dataView={dataView} />
+              <GroupByField
+                dataView={dataView}
+                isLoading={isIndexFieldsLoading}
+                filters={allFilters}
+              />
+            </EuiFlexGroup>
+          </EuiAccordion>
+          <EuiSpacer size="xs" />
+        </>
+      ) : (
+        <>
+          <EuiFlexGroup direction="row" gutterSize="m">
+            <EuiFlexItem>
+              <QueryFilterField dataView={dataView} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <GroupByField
+            dataView={dataView}
+            isLoading={isIndexFieldsLoading}
+            filters={allFilters}
+          />
+        </>
+      )}
+
+      <DataPreviewChart />
+    </EuiFlexGroup>
   );
 }
