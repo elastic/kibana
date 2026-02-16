@@ -112,7 +112,7 @@
             "tags": [],
             "label": "files",
             "description": [
-              "a Record containing one entry per file: the key entry should be the filename\nand the value either a Blob content, or a Record with a stringified content and type"
+              "a Record containing one entry per file: the key entry should be the filename"
             ],
             "signature": [
               "Record<string, ",

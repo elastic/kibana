@@ -644,7 +644,7 @@
         "label": "Severity",
         "description": [],
         "signature": [
-          "\"medium\" | \"high\" | \"low\" | \"critical\""
+          "\"medium\" | \"critical\" | \"high\" | \"low\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/severity/index.ts",
         "lineNumber": 10,
@@ -661,7 +661,7 @@
         "label": "SeverityMapping",
         "description": [],
         "signature": [
-          "{ field: string; operator: \"equals\"; value: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[]"
+          "{ field: string; operator: \"equals\"; value: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; }[]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/severity_mapping/index.ts",
         "lineNumber": 23,
@@ -678,7 +678,7 @@
         "label": "SeverityMappingItem",
         "description": [],
         "signature": [
-          "{ field: string; operator: \"equals\"; value: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }"
+          "{ field: string; operator: \"equals\"; value: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/severity_mapping/index.ts",
         "lineNumber": 13,
@@ -1013,7 +1013,7 @@
         ],
         "signature": [
           "Type",
-          "<{ field: string; operator: \"equals\"; value: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[], { field: string; operator: \"equals\"; value: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; }[] | undefined, unknown>"
+          "<{ field: string; operator: \"equals\"; value: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; }[], { field: string; operator: \"equals\"; value: string; severity: \"medium\" | \"critical\" | \"high\" | \"low\"; }[] | undefined, unknown>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types/src/default_severity_mapping_array/index.ts",
         "lineNumber": 16,

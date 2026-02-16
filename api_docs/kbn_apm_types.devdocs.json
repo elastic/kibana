@@ -491,6 +491,22 @@
           },
           {
             "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.Error.index",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
             "id": "def-common.Error.parent",
             "type": "Object",
             "tags": [],
@@ -500,7 +516,7 @@
               "{ id?: string | undefined; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
-            "lineNumber": 23,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -516,7 +532,7 @@
               "{ id?: string | undefined; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
-            "lineNumber": 24,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -532,7 +548,7 @@
               "{ id?: string | undefined; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
-            "lineNumber": 25,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -548,7 +564,7 @@
               "{ id?: string | undefined; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
-            "lineNumber": 26,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -564,7 +580,7 @@
               "{ name: string; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
-            "lineNumber": 27,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -580,7 +596,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -602,7 +618,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -624,7 +640,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
-            "lineNumber": 30,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1076,7 +1092,7 @@
         "label": "ErrorsByTraceId",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
-        "lineNumber": 33,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1099,7 +1115,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
-            "lineNumber": 34,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1115,7 +1131,7 @@
               "\"apm\" | \"unprocessedOtel\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/errors.ts",
-            "lineNumber": 35,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1486,6 +1502,217 @@
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/faas.ts",
             "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.FocusedTraceWaterfallProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FocusedTraceWaterfallProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/focused_trace_waterfall.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.FocusedTraceWaterfallProps.traceId",
+            "type": "string",
+            "tags": [],
+            "label": "traceId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/focused_trace_waterfall.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.FocusedTraceWaterfallProps.rangeFrom",
+            "type": "string",
+            "tags": [],
+            "label": "rangeFrom",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/focused_trace_waterfall.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.FocusedTraceWaterfallProps.rangeTo",
+            "type": "string",
+            "tags": [],
+            "label": "rangeTo",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/focused_trace_waterfall.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.FocusedTraceWaterfallProps.docId",
+            "type": "string",
+            "tags": [],
+            "label": "docId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/focused_trace_waterfall.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.FullTraceWaterfallProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FullTraceWaterfallProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
+        "lineNumber": 7,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.FullTraceWaterfallProps.traceId",
+            "type": "string",
+            "tags": [],
+            "label": "traceId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
+            "lineNumber": 8,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.FullTraceWaterfallProps.rangeFrom",
+            "type": "string",
+            "tags": [],
+            "label": "rangeFrom",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.FullTraceWaterfallProps.rangeTo",
+            "type": "string",
+            "tags": [],
+            "label": "rangeTo",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.FullTraceWaterfallProps.serviceName",
+            "type": "string",
+            "tags": [],
+            "label": "serviceName",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.FullTraceWaterfallProps.scrollElement",
+            "type": "Object",
+            "tags": [],
+            "label": "scrollElement",
+            "description": [],
+            "signature": [
+              "Element | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.FullTraceWaterfallProps.onNodeClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onNodeClick",
+            "description": [],
+            "signature": [
+              "((nodeSpanId: string) => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-types",
+                "id": "def-common.FullTraceWaterfallProps.onNodeClick.$1",
+                "type": "string",
+                "tags": [],
+                "label": "nodeSpanId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
+                "lineNumber": 13,
+                "columnNumber": 18,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.FullTraceWaterfallProps.onErrorClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onErrorClick",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/apm-types",
+                "scope": "common",
+                "docId": "kibKbnApmTypesPluginApi",
+                "section": "def-common.FullTraceWaterfallOnErrorClick",
+                "text": "FullTraceWaterfallOnErrorClick"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
+            "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3740,7 +3967,7 @@
           "\"application.launch.time\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 222,
+        "lineNumber": 238,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3765,6 +3992,23 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.ATTRIBUTE_OTEL_JVM_MEMORY_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "ATTRIBUTE_OTEL_JVM_MEMORY_TYPE",
+        "description": [],
+        "signature": [
+          "\"attributes.jvm.memory.type\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "lineNumber": 206,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.CHILD_ID",
         "type": "string",
         "tags": [],
@@ -3774,7 +4018,7 @@
           "\"child.id\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 232,
+        "lineNumber": 248,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3791,7 +4035,7 @@
           "\"client.geo.city_name\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 229,
+        "lineNumber": 245,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3808,7 +4052,7 @@
           "\"client.geo.country_iso_code\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 226,
+        "lineNumber": 242,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3825,7 +4069,7 @@
           "\"client.geo.country_name\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 228,
+        "lineNumber": 244,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3842,7 +4086,7 @@
           "\"client.geo.region_iso_code\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 227,
+        "lineNumber": 243,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3859,7 +4103,7 @@
           "\"client.geo.region_name\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 230,
+        "lineNumber": 246,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4114,7 +4358,7 @@
           "\"data_stream.type\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 216,
+        "lineNumber": 232,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4148,7 +4392,7 @@
           "\"device.model.identifier\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 220,
+        "lineNumber": 236,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4456,7 +4700,7 @@
           "\"event.name\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 223,
+        "lineNumber": 239,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4668,6 +4912,42 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.FullTraceWaterfallOnErrorClick",
+        "type": "Type",
+        "tags": [],
+        "label": "FullTraceWaterfallOnErrorClick",
+        "description": [],
+        "signature": [
+          "(params: { traceId: string; docId: string; errorCount: number; errorDocId?: string | undefined; docIndex?: string | undefined; }) => void"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.FullTraceWaterfallOnErrorClick.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{ traceId: string; docId: string; errorCount: number; errorDocId?: string | undefined; docIndex?: string | undefined; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
+            "lineNumber": 17,
+            "columnNumber": 47,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.HOST",
         "type": "string",
         "tags": [],
@@ -4830,7 +5110,7 @@
           "\"_index\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 215,
+        "lineNumber": 231,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5059,6 +5339,23 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.LABEL_OTEL_JVM_MEMORY_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "LABEL_OTEL_JVM_MEMORY_TYPE",
+        "description": [],
+        "signature": [
+          "\"labels.jvm_memory_type\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "lineNumber": 209,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.LABEL_TELEMETRY_AUTO_VERSION",
         "type": "string",
         "tags": [],
@@ -5136,7 +5433,7 @@
           "\"log.level\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 234,
+        "lineNumber": 250,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5356,6 +5653,23 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.METRIC_OTEL_JVM_CPU_PERCENT",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_OTEL_JVM_CPU_PERCENT",
+        "description": [],
+        "signature": [
+          "\"metrics.jvm.cpu.recent_utilization\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "lineNumber": 198,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.METRIC_OTEL_JVM_GC_DURATION",
         "type": "string",
         "tags": [],
@@ -5365,7 +5679,75 @@
           "\"process.runtime.jvm.gc.duration\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 193,
+        "lineNumber": 194,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.METRIC_OTEL_JVM_GC_DURATION_SECONDS",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_OTEL_JVM_GC_DURATION_SECONDS",
+        "description": [],
+        "signature": [
+          "\"metrics.jvm.gc.duration\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "lineNumber": 204,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.METRIC_OTEL_JVM_MEMORY_COMMITTED",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_OTEL_JVM_MEMORY_COMMITTED",
+        "description": [],
+        "signature": [
+          "\"metrics.jvm.memory.committed\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "lineNumber": 200,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.METRIC_OTEL_JVM_MEMORY_LIMIT",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_OTEL_JVM_MEMORY_LIMIT",
+        "description": [],
+        "signature": [
+          "\"metrics.jvm.memory.limit\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "lineNumber": 201,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.METRIC_OTEL_JVM_MEMORY_USED",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_OTEL_JVM_MEMORY_USED",
+        "description": [],
+        "signature": [
+          "\"metrics.jvm.memory.used\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "lineNumber": 199,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5382,7 +5764,7 @@
           "\"process.runtime.jvm.cpu.utilization\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 187,
+        "lineNumber": 188,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5399,7 +5781,7 @@
           "\"process.runtime.jvm.memory.committed\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 189,
+        "lineNumber": 190,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5416,7 +5798,7 @@
           "\"process.runtime.jvm.memory.limit\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 190,
+        "lineNumber": 191,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5433,7 +5815,7 @@
           "\"process.runtime.jvm.memory.usage\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 188,
+        "lineNumber": 189,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5450,7 +5832,24 @@
           "\"process.runtime.jvm.threads.count\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 191,
+        "lineNumber": 192,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.METRIC_OTEL_JVM_SYSTEM_CPU",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_OTEL_JVM_SYSTEM_CPU",
+        "description": [],
+        "signature": [
+          "\"metrics.jvm.system.cpu.utilization\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "lineNumber": 203,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5467,7 +5866,24 @@
           "\"process.runtime.jvm.system.cpu.utilization\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 192,
+        "lineNumber": 193,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.METRIC_OTEL_JVM_THREAD_COUNT",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_OTEL_JVM_THREAD_COUNT",
+        "description": [],
+        "signature": [
+          "\"metrics.jvm.thread.count\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "lineNumber": 202,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5645,7 +6061,7 @@
           "\"network.connection.type\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 219,
+        "lineNumber": 235,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5764,7 +6180,7 @@
           "\"links\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 209,
+        "lineNumber": 225,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5781,7 +6197,7 @@
           "\"links.span_id\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 210,
+        "lineNumber": 226,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5798,7 +6214,7 @@
           "\"links.trace_id\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 211,
+        "lineNumber": 227,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5832,7 +6248,7 @@
           "\"process.args\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 237,
+        "lineNumber": 253,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5849,7 +6265,7 @@
           "\"process.pid\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 238,
+        "lineNumber": 254,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5917,7 +6333,7 @@
           "\"server.address\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 205,
+        "lineNumber": 221,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5934,7 +6350,7 @@
           "\"server.port\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 206,
+        "lineNumber": 222,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6172,7 +6588,7 @@
           "\"session.id\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 221,
+        "lineNumber": 237,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6634,7 +7050,7 @@
           "\"telemetry.sdk.language\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 199,
+        "lineNumber": 215,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6651,7 +7067,7 @@
           "\"telemetry.sdk.name\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 198,
+        "lineNumber": 214,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6668,7 +7084,7 @@
           "\"telemetry.sdk.version\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 200,
+        "lineNumber": 216,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6685,7 +7101,7 @@
           "\"_tier\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 214,
+        "lineNumber": 230,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7008,7 +7424,7 @@
           "\"url.path\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 203,
+        "lineNumber": 219,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7025,7 +7441,7 @@
           "\"url.scheme\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 204,
+        "lineNumber": 220,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7101,16 +7517,16 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
-        "id": "def-common.VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP",
+        "id": "def-common.VALUE_OTEL_JVM_MEMORY_TYPE_HEAP",
         "type": "string",
         "tags": [],
-        "label": "VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP",
+        "label": "VALUE_OTEL_JVM_MEMORY_TYPE_HEAP",
         "description": [],
         "signature": [
           "\"heap\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 194,
+        "lineNumber": 210,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7118,16 +7534,16 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
-        "id": "def-common.VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP",
+        "id": "def-common.VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP",
         "type": "string",
         "tags": [],
-        "label": "VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP",
+        "label": "VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP",
         "description": [],
         "signature": [
           "\"non_heap\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "lineNumber": 195,
+        "lineNumber": 211,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

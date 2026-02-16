@@ -616,16 +616,16 @@
             "trackAdoption": false,
             "references": [
               {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/server/ui_settings.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/server/ui_settings.ts"
+              },
+              {
                 "plugin": "@kbn/management-settings-field-definition",
                 "path": "src/platform/packages/shared/kbn-management/settings/field_definition/get_definition.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/server/ui_settings.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/server/ui_settings.ts"
               }
             ]
           },
@@ -913,7 +913,7 @@
         "label": "UiSettingsSolutions",
         "description": [],
         "signature": [
-          "(\"security\" | \"workplaceai\" | \"oblt\" | \"es\" | \"classic\")[]"
+          "(\"security\" | \"es\" | \"workplaceai\" | \"oblt\" | \"classic\")[]"
         ],
         "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
         "lineNumber": 67,
