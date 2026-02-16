@@ -70,9 +70,10 @@ export function createTestServerlessInstances({
   enableCPS?: boolean;
   /**
    * Additional Elasticsearch arguments to pass when starting the cluster.
-   * These will be appended to the default esArgs when enableCPS is true.
+   * These are general-purpose ES configuration arguments that will be appended
+   * to any default arguments (including CPS args when enableCPS is true).
    *
-   * Example: `['xpack.ccs.projects={"origin": {...}}']`
+   * Example: `['script.allowed_types=inline']`
    *
    * @default []
    */

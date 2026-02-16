@@ -661,11 +661,12 @@ describe('CPS project_routing on serverless ES', () => {
   });
 
   /**
-   * Tests for project_routing with the Kibana service account.
-   * According to the CPS team, the Kibana service account can access the origin project
-   * without needing UIAM credentials. UIAM is only required for cross-project access.
+   * Tests for project_routing using the low-level transport.request() API.
+   * These tests verify that project_routing works correctly when passed directly
+   * in the request body via transport.request(), as an alternative to using the
+   * higher-level client methods (search, count, msearch, etc.).
    */
-  describe('project_routing with origin project access', () => {
+  describe('project_routing using transport.request()', () => {
     it('search works with project_routing to origin project', async () => {
       const response: any = await client.transport.request({
         method: 'POST',
