@@ -164,7 +164,7 @@ export const FixedIntervalField = ({
                     <EuiFieldNumber
                       compressed
                       fullWidth
-                      min={0}
+                      min={1}
                       value={currentValue}
                       isInvalid={isInvalid}
                       data-test-subj={`${dataTestSubj}FixedIntervalValue`}
