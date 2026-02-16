@@ -608,5 +608,36 @@ export default function ({ getService }: FtrProviderContext) {
         expect(apiResponse3.nextSearchAfter).to.eql(JSON.stringify(apiResponse3.items[1].sort));
       });
     });
+
+    describe('effective config', () => {
+      it('should return effective config', async () => {
+        const agentId = 'agent-with-effective-config';
+        await es.index({
+          id: agentId,
+          index: '.fleet-agents',
+          refresh: 'wait_for',
+          document: {
+            access_api_key_id: 'api-key-2',
+            active: true,
+            policy_id: 'policy1',
+            type: 'PERMANENT',
+            local_metadata: { host: { hostname: 'host2' } },
+            user_provided_metadata: {},
+            enrolled_at: '2022-06-21T12:14:25Z',
+            last_checkin: '2022-06-27T12:27:29Z',
+            agent: { id: agentId, version: '9.4.0' },
+            effective_config: {},
+          },
+        });
+
+        const { body: apiResponse } = await supertest
+          .get(`/api/fleet/agents/${agentId}/effective_config`)
+          .expect(200);
+
+        expect(apiResponse).to.eql({ effective_config: {} });
+
+        await es.delete({ index: AGENTS_INDEX, id: agentId, refresh: 'wait_for' });
+      });
+    });
   });
 }
