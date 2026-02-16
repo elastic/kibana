@@ -224,6 +224,7 @@ export default function ({ getService }: FtrProviderContext) {
               'agents_all',
               'agents_read',
               'all',
+              'generate_report',
               'minimal_all',
               'minimal_read',
               'read',

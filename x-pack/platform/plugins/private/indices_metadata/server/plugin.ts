@@ -26,6 +26,7 @@ import type { PluginConfig } from './config';
 import type { CdnConfig } from './lib/services/artifact.types';
 import { ArtifactService } from './lib/services/artifact';
 import { ConfigurationService } from './lib/services/configuration';
+import { TelemetryConfigProvider } from './lib/services/telemetry_config_provider';
 
 export class IndicesMetadataPlugin
   implements
@@ -41,6 +42,7 @@ export class IndicesMetadataPlugin
 
   private readonly indicesMetadataService: IndicesMetadataService;
   private readonly configurationService: ConfigurationService;
+  private readonly telemetryConfigProvider: TelemetryConfigProvider;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -51,6 +53,7 @@ export class IndicesMetadataPlugin
       this.logger,
       this.configurationService
     );
+    this.telemetryConfigProvider = new TelemetryConfigProvider();
   }
 
   public setup(core: CoreSetup, plugin: IndicesMetadataPluginSetupDeps) {
@@ -64,7 +67,7 @@ export class IndicesMetadataPlugin
   public start(core: CoreStart, plugin: IndicesMetadataPluginStartDeps) {
     this.logger.debug('Starting indices metadata plugin');
     const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
-
+    this.telemetryConfigProvider.start(plugin.telemetry.isOptedIn$);
     this.config$.subscribe(async (pluginConfig) => {
       this.logger.debug('PluginConfig changed', { pluginConfig } as LogMeta);
 
@@ -75,12 +78,17 @@ export class IndicesMetadataPlugin
         const info = await core.elasticsearch.client.asInternalUser.info();
         const artifactService = new ArtifactService(this.logger, info, cdnConfig);
 
-        this.configurationService.start(artifactService, DEFAULT_INDICES_METADATA_CONFIGURATION);
+        this.configurationService.start(
+          artifactService,
+          DEFAULT_INDICES_METADATA_CONFIGURATION,
+          this.telemetryConfigProvider
+        );
         this.indicesMetadataService.start(
           plugin.taskManager,
           core.analytics,
           core.elasticsearch.client.asInternalUser,
-          isServerless
+          isServerless,
+          this.telemetryConfigProvider
         );
       } else {
         this.logger.info('Indices metadata plugin is disabled, stopping services');

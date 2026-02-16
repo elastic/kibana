@@ -19,6 +19,10 @@ export interface TemplateFieldRendererProps {
   values?: Record<string, unknown>;
 }
 
+/**
+ * WARN: this component uses shared-form renderer for Case form compatiblity.
+ * Dont change this until we migrate everything to react hook form.
+ */
 export const TemplateFieldRenderer: FC<TemplateFieldRendererProps> = ({
   parsedTemplate,
   values = {},

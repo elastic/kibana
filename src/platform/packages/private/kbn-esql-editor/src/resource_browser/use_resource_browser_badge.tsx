@@ -12,8 +12,9 @@ import { useEuiTheme } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { useCallback, useRef } from 'react';
 import type { MutableRefObject } from 'react';
-import { getSupportedCommand, SUPPORTED_COMMANDS } from './utils';
-import { IndicesBrowserOpenMode } from './open_mode';
+import { getSupportedCommand } from './utils';
+import { IndicesBrowserOpenMode } from './types';
+import { SUPPORTED_COMMANDS } from './constants';
 
 interface UseSourcesBadgeParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
@@ -34,22 +35,20 @@ export const useSourcesBadge = ({
   const sourcesBadgeStyle = css`
     .${sourcesBadgeClassName} {
       cursor: pointer;
-      display: inline-block;
-      vertical-align: middle;
-      padding-block: 0px;
-      padding-inline: ${euiTheme.size.xxs};
+      display: inline-flex;
+      align-items: center;
+      padding: ${euiTheme.size.xs} ${euiTheme.size.s};
       max-inline-size: 100%;
       font-size: ${euiTheme.font.scale.s};
-      line-height: ${`calc(${euiTheme.size.m} * 1.5)`};
-      font-weight: ${euiTheme.font.weight.medium};
+      font-weight: ${euiTheme.font.weight.medium} !important;
+      line-height: 1;
       white-space: nowrap;
       text-decoration: none;
-      border-radius: ${euiTheme.border.radius.small};
+      border-radius: ${euiTheme.size.xl};
       text-align: start;
-      border-width: ${euiTheme.border.width.thin};
-      border-style: solid;
-      color: ${euiTheme.colors.plainLight} !important;
-      background-color: ${euiTheme.colors.primary};
+      color: ${euiTheme.colors.primary} !important;
+      background-color: ${euiTheme.colors.backgroundBasePrimary} !important;
+      box-sizing: border-box;
     }
   `;
 

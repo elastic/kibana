@@ -8,7 +8,6 @@ mapped_pages:
 * [Running {{es}} during development](/extend/running-elasticsearch.md)
 * [Considerations for basepath](/extend/development-basepath.md)
 * [Upgrading Node.js](/extend/upgrading-nodejs.md)
-* [Sharing saved objects](/extend/sharing-saved-objects.md)
 * [Legacy URL Aliases](/extend/legacy-url-aliases.md)
 
 
