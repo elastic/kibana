@@ -121,7 +121,6 @@ export const HelpPopover: React.FC<{
         }
       }
     };
-    console.log('boom');
     getDataViewForQuery();
 
     return () => {
