@@ -18,6 +18,9 @@ import type {
 } from '../types';
 
 const VALID_STATUSES: IntegrationStatusFilterType[] = ['deprecated'];
+const INTEGRATIONS_QUERYPARAM_Q = 'q';
+const INTEGRATIONS_QUERYPARAM_SORT = 'sort';
+const INTEGRATIONS_QUERYPARAM_STATUS = 'status';
 
 function isValidStatus(value: string): value is IntegrationStatusFilterType {
   return (VALID_STATUSES as string[]).includes(value);
@@ -37,7 +40,12 @@ export function useAddUrlFilters() {
       method.call(history, {
         search: toUrlParams(
           {
-            ...omit(urlParams, 'q', 'sort', 'status'),
+            ...omit(
+              urlParams,
+              INTEGRATIONS_QUERYPARAM_Q,
+              INTEGRATIONS_QUERYPARAM_SORT,
+              INTEGRATIONS_QUERYPARAM_STATUS
+            ),
             ...(newFilters.q ? { q: newFilters.q } : {}),
             ...(newFilters.sort ? { sort: newFilters.sort } : {}),
             ...(newFilters.status && newFilters.status.length > 0
@@ -58,25 +66,25 @@ export function useUrlFilters(): BrowseIntegrationsFilter {
   const { urlParams } = useUrlParams();
 
   return useMemo(() => {
-    let q: BrowseIntegrationsFilter['q'];
-    if (typeof urlParams.q === 'string') {
+    let q: BrowseIntegrationsFilter[typeof INTEGRATIONS_QUERYPARAM_Q];
+    if (typeof urlParams[INTEGRATIONS_QUERYPARAM_Q] === 'string') {
       q = urlParams.q;
     }
 
-    let sort: BrowseIntegrationsFilter['sort'];
+    let sort: BrowseIntegrationsFilter[typeof INTEGRATIONS_QUERYPARAM_SORT];
     if (typeof urlParams.sort === 'string' && isValidSortType(urlParams.sort)) {
       sort = urlParams.sort;
     }
 
-    let status: BrowseIntegrationsFilter['status'];
+    let status: BrowseIntegrationsFilter[typeof INTEGRATIONS_QUERYPARAM_STATUS];
     const rawStatus = urlParams.status;
     if (typeof rawStatus === 'string') {
-      // Single value: ?status=beta
+      // Single value: ?status=deprecated
       if (isValidStatus(rawStatus)) {
         status = [rawStatus];
       }
     } else if (Array.isArray(rawStatus)) {
-      // Multiple values: ?status=beta&status=deprecated
+      // currently there's only one status filter but we can have more in the future
       const validStatuses = rawStatus.filter(
         (s): s is IntegrationStatusFilterType => typeof s === 'string' && isValidStatus(s)
       );
