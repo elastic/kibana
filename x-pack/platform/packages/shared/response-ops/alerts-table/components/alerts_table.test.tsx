@@ -25,7 +25,6 @@ import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_uti
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { getMutedAlertsInstancesByRule } from '@kbn/response-ops-alerts-apis/apis/get_muted_alerts_instances_by_rule';
 import { applicationServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
-import { afterAll } from '@elastic/synthetics';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type {

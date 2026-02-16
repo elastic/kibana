@@ -42,6 +42,7 @@ export interface RunTaskOpts<TaskPayloadType = BasePayload> {
   taskInstanceFields: TaskInstanceFields;
   cancellationToken: CancellationToken;
   stream: Writable;
+  useInternalUser?: boolean;
 }
 
 // standard type for run task function of any ExportType implementation
