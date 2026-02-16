@@ -163,6 +163,13 @@ export interface UnlinkFeaturesAction {
   };
 }
 
+export interface UnlinkRelationshipsAction {
+  type: 'unlink_relationships';
+  request: {
+    name: string;
+  };
+}
+
 export interface UpdateIngestSettingsAction {
   type: 'update_ingest_settings';
   request: {
@@ -211,6 +218,7 @@ export type ElasticsearchAction =
   | UnlinkAssetsAction
   | UnlinkSystemsAction
   | UnlinkFeaturesAction
+  | UnlinkRelationshipsAction
   | UpdateFailureStoreAction
   | UpdateIngestSettingsAction
   | UpsertEsqlViewAction
@@ -237,6 +245,7 @@ export interface ActionsByType {
   unlink_assets: UnlinkAssetsAction[];
   unlink_systems: UnlinkSystemsAction[];
   unlink_features: UnlinkFeaturesAction[];
+  unlink_relationships: UnlinkRelationshipsAction[];
   update_failure_store: UpdateFailureStoreAction[];
   update_ingest_settings: UpdateIngestSettingsAction[];
   upsert_esql_view: UpsertEsqlViewAction[];
