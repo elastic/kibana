@@ -41,9 +41,12 @@ export const getRuleFireCountStepDefinition: PublicStepDefinition = {
   label: i18n.translate('xpack.securitySolution.workflows.steps.getRuleFireCount.label', {
     defaultMessage: 'Get Rule Fire Count',
   }),
-  description: i18n.translate('xpack.securitySolution.workflows.steps.getRuleFireCount.description', {
-    defaultMessage: 'Get the count of how many times a rule fired within a symmetric time window',
-  }),
+  description: i18n.translate(
+    'xpack.securitySolution.workflows.steps.getRuleFireCount.description',
+    {
+      defaultMessage: 'Get the count of how many times a rule fired within a specified time range',
+    }
+  ),
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/stats')
       .then(({ icon }) => ({ default: icon }))

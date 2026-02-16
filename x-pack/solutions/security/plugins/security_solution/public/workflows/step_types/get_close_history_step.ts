@@ -79,9 +79,13 @@ export const getCloseHistoryStepDefinition: PublicStepDefinition = {
   label: i18n.translate('xpack.securitySolution.workflows.steps.getCloseHistory.label', {
     defaultMessage: 'Get Close History',
   }),
-  description: i18n.translate('xpack.securitySolution.workflows.steps.getCloseHistory.description', {
-    defaultMessage: 'Get previous close reasons and false positive designations for similar alerts',
-  }),
+  description: i18n.translate(
+    'xpack.securitySolution.workflows.steps.getCloseHistory.description',
+    {
+      defaultMessage:
+        'Get previous close reasons and false positive designations for similar alerts',
+    }
+  ),
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/search').then(({ icon }) => ({ default: icon }))
   ),
