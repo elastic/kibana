@@ -58,6 +58,23 @@ describe('MonitorAddPage', () => {
     expect(getByLabelText(/Loading/)).toBeInTheDocument();
   });
 
+  it('renders empty locations state when no locations are available', async () => {
+    const { findByText } = render(<MonitorAddPage />, {
+      state: {
+        serviceLocations: {
+          locations: [],
+          locationsLoaded: true,
+          loading: false,
+        },
+      },
+    });
+
+    expect(await findByText('Create your first private location')).toBeInTheDocument();
+    expect(
+      await findByText(/In order to create a monitor, you will need to add a location first/)
+    ).toBeInTheDocument();
+  });
+
   it('renders an error', async () => {
     const { getByText } = render(<MonitorAddPage />, {
       state: {

@@ -23,6 +23,7 @@ import { LocationsLoadingError } from './locations_loading_error';
 import { ADD_MONITOR_STEPS } from './steps/step_config';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
+import { EmptyLocations } from '../settings/private_locations/empty_locations';
 
 export const MonitorAddPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'add-monitor' });
@@ -40,7 +41,11 @@ export const MonitorAddPage = () => {
   useEffect(() => {
     dispatch(getServiceLocations());
   }, [dispatch]);
-  const { locationsLoaded, error: locationsError } = useSelector(selectServiceLocationsState);
+  const {
+    locations,
+    locationsLoaded,
+    error: locationsError,
+  } = useSelector(selectServiceLocationsState);
 
   if (locationsError) {
     return <LocationsLoadingError />;
@@ -48,6 +53,10 @@ export const MonitorAddPage = () => {
 
   if (!locationsLoaded || cloneMonitorLoading) {
     return <LoadingState />;
+  }
+
+  if (locations.length === 0) {
+    return <EmptyLocations inFlyout={false} redirectToSettings={true} />;
   }
 
   return (
