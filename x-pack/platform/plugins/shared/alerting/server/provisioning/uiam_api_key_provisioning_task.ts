@@ -47,8 +47,8 @@ import type {
 } from './types';
 import type { AlertingPluginsStart } from '../plugin';
 
-const PROVISION_UIAM_API_KEYS_FLAG = 'alerting.rules.provisionUiamApiKeys';
-const API_KEY_PROVISIONING_TASK_TASK_SCHEDULE: IntervalSchedule = { interval: '1h' };
+export const PROVISION_UIAM_API_KEYS_FLAG = 'alerting.rules.provisionUiamApiKeys';
+const API_KEY_PROVISIONING_TASK_TASK_SCHEDULE: IntervalSchedule = { interval: '1m' };
 const RUN_AT_INTERVAL = 60000;
 const TASK_TIMEOUT = '5m';
 const GET_RULES_BATCH_SIZE = 500;
@@ -56,7 +56,7 @@ const GET_RULES_BATCH_SIZE = 500;
 export const API_KEY_PROVISIONING_TASK_ID = 'api_key_provisioning';
 export const API_KEY_PROVISIONING_TASK_TYPE = `alerting:${API_KEY_PROVISIONING_TASK_ID}`;
 
-const TAGS = ['serverless', 'alerting', 'uiam_api_key_provisioning'];
+export const TAGS = ['serverless', 'alerting', 'uiam-api-key-provisioning', 'background-task'];
 
 export class UiamApiKeyProvisioningTask {
   private readonly logger: Logger;
@@ -129,6 +129,10 @@ export class UiamApiKeyProvisioningTask {
             params: {},
           });
           this.isTaskScheduled = true;
+          this.logger.info(
+            `${PROVISION_UIAM_API_KEYS_FLAG} enabled - Task ${API_KEY_PROVISIONING_TASK_TYPE} scheduled`,
+            { tags: TAGS }
+          );
         } catch (e) {
           this.logger.error(
             `Error scheduling task ${API_KEY_PROVISIONING_TASK_TYPE}, received ${e.message}`,
@@ -139,6 +143,10 @@ export class UiamApiKeyProvisioningTask {
         try {
           await taskManager.removeIfExists(API_KEY_PROVISIONING_TASK_ID);
           this.isTaskScheduled = false;
+          this.logger.info(
+            `${PROVISION_UIAM_API_KEYS_FLAG} disabled - Task ${API_KEY_PROVISIONING_TASK_TYPE} removed`,
+            { tags: TAGS }
+          );
         } catch (e) {
           this.logger.error(
             `Error removing task ${API_KEY_PROVISIONING_TASK_TYPE}, received ${e.message}`,
@@ -272,6 +280,13 @@ export class UiamApiKeyProvisioningTask {
     apiKeysToConvert: Array<ApiKeyToConvert>,
     coreStart: CoreStart
   ): Promise<ConvertApiKeysResult> => {
+    if (apiKeysToConvert.length === 0) {
+      return {
+        apiKeysByRuleId: [],
+        provisioningStatusForFailedConversions: [],
+      };
+    }
+
     const keys = apiKeysToConvert.map(({ apiKey }) => ({
       key: apiKey,
       type: 'elasticsearch' as const,
