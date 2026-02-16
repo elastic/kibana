@@ -164,7 +164,7 @@ import {
 } from './lib/trial_companion/services/trial_companion_milestone_service';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
-
+import { registerWorkflowSteps } from './workflows/step_types';
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
 export class Plugin implements ISecuritySolutionPlugin {
@@ -700,7 +700,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.registerAgentBuilderAttachmentsAndTools(plugins.agentBuilder, core, this.logger);
 
-    this.registerWorkflowSteps(plugins.workflowsManagement);
+    this.registerWorkflowSteps(plugins.workflowsExtensions);
 
     if (plugins.workflowsManagement) {
       this.workflowsManagementSetup = plugins.workflowsManagement;
