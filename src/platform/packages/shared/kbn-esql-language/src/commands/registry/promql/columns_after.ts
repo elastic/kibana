@@ -10,11 +10,9 @@ import type { ESQLCommand, ESQLAstPromqlCommand } from '../../../types';
 import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';
 import type { IAdditionalFields } from '../registry';
 import { isBinaryExpression, isIdentifier } from '../../../ast/is';
+import { Walker } from '../../../ast/walker';
+import { findPipeOutsideQuotes } from '../../definitions/utils/shared';
 import { PromqlParamName } from './utils';
-import {
-  collectMetricsAndLabels,
-  findPromqlExpression,
-} from '../../../embedded_languages/promql/ast/traversal';
 
 export const columnsAfter = async (
   command: ESQLCommand,
@@ -23,7 +21,7 @@ export const columnsAfter = async (
   { fromPromql }: IAdditionalFields
 ): Promise<ESQLColumnData[]> => {
   const promqlCommand = command as ESQLAstPromqlCommand;
-  const pipeIndex = query.indexOf('|', promqlCommand.location.max);
+  const pipeIndex = findPipeOutsideQuotes(query, promqlCommand.location.min);
   const sourceColumns = fromPromql ? await fromPromql(promqlCommand) : [];
   const userDefinedColumn = getUserDefinedColumn(promqlCommand);
   const stepColumn = getStepColumn(promqlCommand);
@@ -91,14 +89,33 @@ function getPromqlOutputColumns(
   metrics: Set<string>;
   breakdownLabels: Set<string>;
 } {
-  const query = findPromqlExpression(command.query);
+  const metrics = new Set<string>();
+  const breakdownLabels = new Set<string>();
+  let expressionType: string | undefined;
 
-  if (!query?.expression) {
-    return { metrics: new Set(), breakdownLabels: new Set() };
-  }
+  Walker.walk(command, {
+    promql: {
+      visitPromqlQuery: (node) => {
+        expressionType ??= node.expression?.type;
+      },
+      visitPromqlSelector: (node) => {
+        if (node.metric?.name) {
+          metrics.add(node.metric.name);
+        }
+      },
+      visitPromqlFunction: (node) => {
+        if (node.grouping) {
+          for (const label of node.grouping.args) {
+            if (label.name) {
+              breakdownLabels.add(label.name);
+            }
+          }
+        }
+      },
+    },
+  });
 
-  const { metrics, breakdownLabels } = collectMetricsAndLabels(query.expression);
-  const includeMetrics = query.expression.type === 'selector' && !excludeMetrics;
+  const includeMetrics = expressionType === 'selector' && !excludeMetrics;
 
   if (!includeMetrics) {
     return { metrics: new Set(), breakdownLabels };
