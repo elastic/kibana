@@ -40,28 +40,28 @@ const gradients = {
   },
 } as const;
 
-// TEMP: design iteration shades for dark-mode secondary background.
+// TEMP: design iteration shades for dark-mode base background.
 // These will be replaced with tokens once EUI exposes AI button gradient tokens.
-const darkModeSecondaryBackgroundColors = {
+const darkModeBaseBackgroundColors = {
   startColor: '#61A2FF',
   endColor: '#C5A5FA',
 } as const;
 
-// TEMP: design iteration shades for dark-mode primary background.
-const darkModePrimaryBackgroundColors = {
+// TEMP: design iteration shades for dark-mode filled background.
+const darkModeFilledBackgroundColors = {
   startColor: '#0D2F5E',
   endColor: '#3E2C63',
 } as const;
 
-const darkModeSecondaryForegroundColor = '#07101F';
+const darkModeBaseForegroundColor = '#07101F';
 
-// TEMP: design iteration shades for light-mode primary background.
-const lightModePrimaryBackgroundColors = {
+// TEMP: design iteration shades for light-mode filled background.
+const lightModeFilledBackgroundColors = {
   startColor: '#0B64DD',
   endColor: '#8144CC',
 } as const;
 
-const lightModePrimaryForegroundColor = '#FFFFFF';
+const lightModeFilledForegroundColor = '#FFFFFF';
 
 const makeLinearGradient = ({
   angle,
@@ -83,7 +83,7 @@ export interface AiButtonGradientStyleOptions {
    * When provided, variant-specific gradient behavior can be applied.
    * This is optional to keep backwards compatibility with existing `fill` callers.
    */
-  readonly variant?: 'primary' | 'secondary' | 'empty';
+  readonly variant?: 'accent' | 'base' | 'empty';
 }
 
 export interface AiButtonGradientStyles {
@@ -137,8 +137,8 @@ const getForegroundColors = ({
   isDarkMode: boolean;
   variant?: AiButtonVariant;
 }): AiGradientColors => {
-  if (isDarkMode && (variant === 'primary' || variant === 'empty')) {
-    return darkModeSecondaryBackgroundColors;
+  if (isDarkMode && (variant === 'accent' || variant === 'empty')) {
+    return darkModeBaseBackgroundColors;
   }
 
   return isDarkMode ? gradients.foreground.darkMode : gradients.foreground.lightMode;
@@ -168,27 +168,27 @@ export const useAiButtonGradientStyles = ({
   const isDarkMode = useKibanaIsDarkMode();
 
   return useMemo(() => {
-    const resolvedVariant = (variant ?? (fill ? 'primary' : 'secondary')) as AiButtonVariant;
+    const resolvedVariant = (variant ?? (fill ? 'accent' : 'base')) as AiButtonVariant;
 
     let buttonBackground: string;
     if (resolvedVariant === 'empty') {
       buttonBackground = isDarkMode ? '#000' : '#FFFFFF';
-    } else if (resolvedVariant === 'primary') {
+    } else if (resolvedVariant === 'accent') {
       buttonBackground = makeButtonBackgroundGradient(
-        isDarkMode ? darkModePrimaryBackgroundColors : lightModePrimaryBackgroundColors
+        isDarkMode ? darkModeFilledBackgroundColors : lightModeFilledBackgroundColors
       );
     } else {
-      // secondary
+      // base
       buttonBackground = makeButtonBackgroundGradient(
-        isDarkMode ? darkModeSecondaryBackgroundColors : gradients.buttonBackground.lightMode
+        isDarkMode ? darkModeBaseBackgroundColors : gradients.buttonBackground.lightMode
       );
     }
 
     let buttonForegroundColor: string | undefined;
-    if (!isDarkMode && resolvedVariant === 'primary') {
-      buttonForegroundColor = lightModePrimaryForegroundColor;
-    } else if (isDarkMode && resolvedVariant === 'secondary') {
-      buttonForegroundColor = darkModeSecondaryForegroundColor;
+    if (!isDarkMode && resolvedVariant === 'accent') {
+      buttonForegroundColor = lightModeFilledForegroundColor;
+    } else if (isDarkMode && resolvedVariant === 'base') {
+      buttonForegroundColor = darkModeBaseForegroundColor;
     }
 
     const buttonCss = css`
@@ -208,11 +208,11 @@ export const useAiButtonGradientStyles = ({
     `;
 
     let labelCss: SerializedStyles;
-    if (isDarkMode && resolvedVariant === 'secondary') {
-      labelCss = solidTextCss(darkModeSecondaryForegroundColor);
-    } else if (!isDarkMode && resolvedVariant === 'primary') {
+    if (isDarkMode && resolvedVariant === 'base') {
+      labelCss = solidTextCss(darkModeBaseForegroundColor);
+    } else if (!isDarkMode && resolvedVariant === 'accent') {
       labelCss = css`
-        color: ${lightModePrimaryForegroundColor};
+        color: ${lightModeFilledForegroundColor};
       `;
     } else {
       labelCss = gradientTextCss(
@@ -251,7 +251,7 @@ export interface SvgAiGradientOptions {
   /**
    * When provided, variant-specific gradient behavior can be applied.
    */
-  readonly variant?: 'primary' | 'secondary' | 'empty';
+  readonly variant?: 'accent' | 'base' | 'empty';
 }
 
 export const useSvgAiGradient = ({
@@ -266,10 +266,10 @@ export const useSvgAiGradient = ({
   const iconGradientCss = useMemo(() => {
     // Backwards compatible default: filled buttons don't use gradient icons unless a variant is provided.
     if (variant == null && isFilled) return undefined;
-    // Dark mode secondary should be a solid foreground color.
-    if (variant === 'secondary' && isDarkMode) return undefined;
-    // Keep light mode primary icons as solid (existing behavior); apply gradient in dark mode.
-    if (variant === 'primary' && isFilled && !isDarkMode) return undefined;
+    // Dark mode base should be a solid foreground color.
+    if (variant === 'base' && isDarkMode) return undefined;
+    // Keep light mode filled icons as solid (existing behavior); apply gradient in dark mode.
+    if (variant === 'accent' && isFilled && !isDarkMode) return undefined;
     return css`
       & .euiIcon {
         fill: ${gradientUrl} !important;

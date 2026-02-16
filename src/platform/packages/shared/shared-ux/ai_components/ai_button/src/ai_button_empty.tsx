@@ -8,14 +8,15 @@
  */
 
 import React from 'react';
-import type { EuiButtonProps } from '@elastic/eui';
+import type { EuiButtonEmptyProps } from '@elastic/eui';
 
 import { AiButtonInternal } from './ai_button_internal';
 
-export const AiButtonBase = (
-  props: Omit<EuiButtonProps, 'fill' | 'iconType'> & {
-    iconType?: EuiButtonProps['iconType'] | 'aiLogo';
-  }
-) => {
-  return <AiButtonInternal {...props} variant="base" />;
+export type AiButtonEmptyProps = EuiButtonEmptyProps & {
+  children: React.ReactNode;
+  iconType?: EuiButtonEmptyProps['iconType'] | 'aiLogo';
+};
+
+export const AiButtonEmpty = (props: AiButtonEmptyProps) => {
+  return <AiButtonInternal {...props} variant="empty" />;
 };

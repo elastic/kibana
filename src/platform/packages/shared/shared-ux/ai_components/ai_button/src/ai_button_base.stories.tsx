@@ -9,14 +9,19 @@
 
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { AiButtonBase, type AiButtonBaseProps } from './ai_button_base';
+import type { EuiButtonSize } from '@elastic/eui';
+import { AiButtonBase } from './ai_button_base';
+import { AiButtonAccent } from './ai_button_accent';
+import { AiButtonEmpty } from './ai_button_empty';
+import { AiButtonIcon } from './ai_button_icon';
+import type { AiButtonVariant } from './ai_button_internal';
 
 interface StoryArgs {
   label: string;
-  variant: AiButtonBaseProps['variant'];
-  size: 'xs' | 's' | 'm';
+  size: EuiButtonSize;
   isDisabled: boolean;
   withIcon: boolean;
+  icon: 'aiLogo' | 'sparkles' | 'productAgent';
 }
 
 export default {
@@ -27,90 +32,126 @@ export default {
     label: { control: 'text' },
     isDisabled: { control: 'boolean' },
     withIcon: { control: 'boolean' },
+    icon: { control: 'select', options: ['aiLogo', 'sparkles', 'productAgent'] },
   },
 } as Meta<StoryArgs>;
 
 export const Default: StoryObj<StoryArgs> = {
   render: (args) => {
-    const { label, variant, size, isDisabled, withIcon } = args;
+    const { label, size, isDisabled, withIcon, icon } = args;
 
-    const iconProps = withIcon ? { iconType: 'sparkles' } : {};
+    const iconProps = withIcon ? { iconType: icon } : {};
 
     return (
-      <AiButtonBase
-        size={size as 's' | 'm'}
-        isDisabled={isDisabled}
-        variant={variant}
-        {...iconProps}
-      >
+      <AiButtonBase size={size} isDisabled={isDisabled} {...iconProps}>
         {label}
       </AiButtonBase>
     );
   },
   args: {
     label: 'AI Assistant',
-    variant: 'secondary',
     size: 's',
     isDisabled: false,
     withIcon: false,
+    icon: 'aiLogo',
   },
   argTypes: {
-    variant: { control: 'select', options: ['secondary', 'primary'] },
+    size: { control: 'select', options: ['s', 'm'] },
+  },
+};
+
+export const Accent: StoryObj<StoryArgs> = {
+  render: (args) => {
+    const { label, size, isDisabled, withIcon, icon } = args;
+
+    const iconProps = withIcon ? { iconType: icon } : {};
+
+    return (
+      <AiButtonAccent size={size} isDisabled={isDisabled} {...iconProps}>
+        {label}
+      </AiButtonAccent>
+    );
+  },
+  args: {
+    label: 'AI Assistant',
+    size: 's',
+    isDisabled: false,
+    withIcon: true,
+    icon: 'aiLogo',
+  },
+  argTypes: {
     size: { control: 'select', options: ['s', 'm'] },
   },
 };
 
 export const Empty: StoryObj<StoryArgs> = {
   render: (args) => {
-    const { label, size, isDisabled, withIcon } = args;
-    const iconProps = withIcon ? { iconType: 'sparkles' } : {};
+    const { label, size, isDisabled, withIcon, icon } = args;
+
+    const iconProps = withIcon ? { iconType: icon } : {};
 
     return (
-      <AiButtonBase
-        size={size as 'xs' | 's' | 'm'}
-        isDisabled={isDisabled}
-        variant="empty"
-        {...iconProps}
-      >
+      <AiButtonEmpty size={size} isDisabled={isDisabled} {...iconProps}>
         {label}
-      </AiButtonBase>
+      </AiButtonEmpty>
     );
   },
   args: {
     label: 'AI Assistant',
     size: 's',
     isDisabled: false,
-    withIcon: false,
+    withIcon: true,
+    icon: 'aiLogo',
   },
   argTypes: {
     size: { control: 'select', options: ['xs', 's', 'm'] },
   },
 };
 
-export const IconOnly: StoryObj<StoryArgs> = {
+interface IconOnlyStoryArgs {
+  label: string;
+  size: EuiButtonSize;
+  isDisabled: boolean;
+  icon: 'aiLogo' | 'sparkles' | 'productAgent';
+  variant: AiButtonVariant;
+  appName: string;
+}
+
+export const IconOnly: StoryObj<IconOnlyStoryArgs> = {
+  parameters: {
+    controls: {
+      exclude: ['withIcon'],
+    },
+  },
   render: (args) => {
-    const { label, variant, size, isDisabled } = args;
+    const { label, size, isDisabled, icon, variant, appName } = args;
 
     return (
-      <AiButtonBase
-        iconOnly
-        size={size as 'xs' | 's' | 'm'}
+      <AiButtonIcon
+        size={size}
         isDisabled={isDisabled}
         aria-label={label}
-        iconType="sparkles"
+        iconType={icon}
         variant={variant}
+        appName={appName}
+        onClick={() => undefined}
       />
     );
   },
   args: {
     label: 'AI Assistant',
-    variant: 'secondary',
     size: 's',
     isDisabled: false,
+    icon: 'aiLogo',
+    variant: 'base',
+    appName: 'AI Assistant',
   },
   argTypes: {
-    variant: { control: 'select', options: ['secondary', 'primary', 'empty'] },
+    label: { control: 'text' },
+    appName: { control: 'text' },
+    isDisabled: { control: 'boolean' },
+    icon: { control: 'select', options: ['aiLogo', 'sparkles', 'productAgent'] },
+    variant: { control: 'select', options: ['base', 'accent', 'empty'] },
     size: { control: 'select', options: ['xs', 's', 'm'] },
-    withIcon: { table: { disable: true } },
   },
 };

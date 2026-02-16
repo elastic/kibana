@@ -12,10 +12,10 @@ import type { EuiButtonProps } from '@elastic/eui';
 
 import { AiButtonInternal } from './ai_button_internal';
 
-export const AiButtonBase = (
+export const AiButtonAccent = (
   props: Omit<EuiButtonProps, 'fill' | 'iconType'> & {
     iconType?: EuiButtonProps['iconType'] | 'aiLogo';
   }
 ) => {
-  return <AiButtonInternal {...props} variant="base" />;
+  return <AiButtonInternal {...props} variant="accent" />;
 };

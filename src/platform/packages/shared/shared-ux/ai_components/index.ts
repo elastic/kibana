@@ -8,4 +8,7 @@
  */
 
 export { AiButtonBase } from './ai_button/src/ai_button_base';
-export type { AiButtonBaseProps } from './ai_button/src/ai_button_base';
+export { AiButtonAccent } from './ai_button/src/ai_button_accent';
+export { AiButtonEmpty } from './ai_button/src/ai_button_empty';
+export { AiButtonIcon } from './ai_button/src/ai_button_icon';
+export type { AiButtonVariant } from './ai_button/src/ai_button_internal';

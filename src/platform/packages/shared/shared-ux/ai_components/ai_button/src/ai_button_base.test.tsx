@@ -11,13 +11,12 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { css } from '@emotion/react';
 
-import { AiButtonBase } from './ai_button_base';
+import { AiButtonInternal } from './ai_button_internal';
 
+const mockUseAiButtonGradientStyles = jest.fn();
 const mockUseSvgAiGradient = jest.fn();
 jest.mock('./use_ai_gradient_styles', () => ({
-  useAiButtonGradientStyles: jest
-    .fn()
-    .mockReturnValue({ buttonCss: undefined, labelCss: undefined }),
+  useAiButtonGradientStyles: (opts: unknown) => mockUseAiButtonGradientStyles(opts),
   useSvgAiGradient: (opts: unknown) => mockUseSvgAiGradient(opts),
 }));
 
@@ -32,21 +31,51 @@ const defaultSvgGradient = {
 };
 
 beforeEach(() => {
-  mockUseSvgAiGradient.mockClear();
+  jest.clearAllMocks();
+  mockUseAiButtonGradientStyles.mockReturnValue({ buttonCss: undefined, labelCss: undefined });
   mockUseSvgAiGradient.mockReturnValue(defaultSvgGradient);
 });
 
-describe('<AiButtonBase />', () => {
-  it('classic variant renders label text', () => {
-    render(<AiButtonBase variant="secondary">AI Assistant</AiButtonBase>);
+describe('<AiButtonInternal />', () => {
+  it('base variant renders label text', () => {
+    render(<AiButtonInternal variant="base">AI Assistant</AiButtonInternal>);
 
     expect(screen.getByText('AI Assistant')).toBeInTheDocument();
+    expect(mockUseAiButtonGradientStyles).toHaveBeenCalledWith(
+      expect.objectContaining({ fill: false, variant: 'base' })
+    );
+    expect(mockUseSvgAiGradient).toHaveBeenCalledWith(
+      expect.objectContaining({ isFilled: false, variant: 'base' })
+    );
   });
 
-  it('iconOnly variant renders an element with aria-label', () => {
-    render(
-      <AiButtonBase
-        variant="primary"
+  it('accent variant renders EuiButton with fill', () => {
+    render(<AiButtonInternal variant="accent">AI Assistant</AiButtonInternal>);
+
+    expect(mockUseAiButtonGradientStyles).toHaveBeenCalledWith(
+      expect.objectContaining({ fill: true, variant: 'accent' })
+    );
+    expect(mockUseSvgAiGradient).toHaveBeenCalledWith(
+      expect.objectContaining({ isFilled: true, variant: 'accent' })
+    );
+  });
+
+  it('empty variant uses EuiButtonEmpty', () => {
+    const { container } = render(<AiButtonInternal variant="empty">AI Assistant</AiButtonInternal>);
+
+    expect(container.querySelector('.euiButtonEmpty')).toBeTruthy();
+    expect(mockUseAiButtonGradientStyles).toHaveBeenCalledWith(
+      expect.objectContaining({ fill: false, variant: 'empty' })
+    );
+    expect(mockUseSvgAiGradient).toHaveBeenCalledWith(
+      expect.objectContaining({ isFilled: false, variant: 'empty' })
+    );
+  });
+
+  it('iconOnly variant renders EuiButtonIcon', () => {
+    const { container } = render(
+      <AiButtonInternal
+        variant="base"
         iconOnly
         iconType="sparkles"
         aria-label="AI Icon"
@@ -54,31 +83,34 @@ describe('<AiButtonBase />', () => {
       />
     );
 
-    expect(screen.getByLabelText('AI Icon')).toBeInTheDocument();
+    expect(container.querySelector('button.euiButtonIcon')).toBeInTheDocument();
   });
 
-  it.each([
-    { iconGradientCss: css``, shouldRenderGradientDefs: true },
-    { iconGradientCss: undefined, shouldRenderGradientDefs: false },
-  ])(
-    'renders gradient defs only when iconGradientCss is set',
-    ({ iconGradientCss, shouldRenderGradientDefs }) => {
+  it.each([{ iconGradientCss: css``, iconGradientCssState: 'set' }])(
+    'renders gradient defs only when iconGradientCss is $iconGradientCssState',
+    ({ iconGradientCss }) => {
       mockUseSvgAiGradient.mockReturnValue({
         ...defaultSvgGradient,
         iconGradientCss,
       });
 
-      render(
-        <AiButtonBase variant="secondary" onClick={() => undefined}>
-          Gradient check
-        </AiButtonBase>
-      );
+      render(<AiButtonInternal variant="base">Gradient check</AiButtonInternal>);
 
-      if (shouldRenderGradientDefs) {
-        expect(screen.getByTestId('svg-ai-gradient-defs')).toBeInTheDocument();
-      } else {
-        expect(screen.queryByTestId('svg-ai-gradient-defs')).not.toBeInTheDocument();
-      }
+      expect(screen.getByTestId('svg-ai-gradient-defs')).toBeInTheDocument();
+    }
+  );
+
+  it.each([{ iconGradientCss: undefined, iconGradientCssState: 'unset' }])(
+    "doesn't render gradient defs when iconGradientCss is $iconGradientCssState",
+    ({ iconGradientCss }) => {
+      mockUseSvgAiGradient.mockReturnValue({
+        ...defaultSvgGradient,
+        iconGradientCss,
+      });
+
+      render(<AiButtonInternal variant="base">Gradient check</AiButtonInternal>);
+
+      expect(screen.queryByTestId('svg-ai-gradient-defs')).not.toBeInTheDocument();
     }
   );
 });
