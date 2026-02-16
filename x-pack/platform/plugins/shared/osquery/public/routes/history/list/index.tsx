@@ -32,10 +32,7 @@ const HistoryPageComponent = () => {
         <EuiFlexItem>
           <EuiText>
             <h1>
-              <FormattedMessage
-                id="xpack.osquery.history.pageTitle"
-                defaultMessage="History"
-              />
+              <FormattedMessage id="xpack.osquery.history.pageTitle" defaultMessage="History" />
             </h1>
           </EuiText>
         </EuiFlexItem>
