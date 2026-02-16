@@ -27,6 +27,7 @@ import { removeMultilines } from '../../common/utils/build_query/remove_multilin
 import { useAllLiveQueries } from './use_all_live_queries';
 import type { SearchHit } from '../../common/search_strategy';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import { usePacks } from '../packs/use_packs';
 
 const EMPTY_ARRAY: SearchHit[] = [];
@@ -56,6 +57,7 @@ ActionTableResultsButton.displayName = 'ActionTableResultsButton';
 
 const ActionsTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
+  const queryHistoryRework = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { push } = useHistory();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
@@ -69,7 +71,7 @@ const ActionsTableComponent = () => {
   } = useAllLiveQueries({
     activePage: pageIndex,
     limit: pageSize,
-    kuery: 'user_id: *',
+    ...(!queryHistoryRework && { kuery: 'user_id: *' }),
   });
 
   const onTableChange = useCallback(({ page = {} }: any) => {
