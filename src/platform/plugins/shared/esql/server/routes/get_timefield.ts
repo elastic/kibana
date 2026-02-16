@@ -7,11 +7,56 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { schema } from '@kbn/config-schema';
-import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
+import type { ElasticsearchClient, IRouter, PluginInitializerContext } from '@kbn/core/server';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
-import { Parser, isSubQuery } from '@kbn/esql-language';
+import { Parser } from '@kbn/esql-language';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
+import { EsqlService } from '../services/esql_service';
+
+const hasTimestampInFieldCapsResponse = (result: FieldCapsResponse) =>
+  Boolean(result.fields && result.fields['@timestamp']);
+
+const ES_TIMESTAMP_FIELD_NAME = '@timestamp';
+
+const toDebugString = (error: unknown): string =>
+  error instanceof Error ? error.stack ?? error.message : String(error);
+
+const getEsqlColumnsForSource = async ({
+  client,
+  sourceName,
+}: {
+  client: ElasticsearchClient;
+  sourceName: string;
+}): Promise<ESQLSearchResponse | undefined> => {
+  const candidateQueries = [`FROM ${sourceName} | LIMIT 0`, `FROM ${sourceName} | LIMIT 1`];
+
+  for (const query of candidateQueries) {
+    try {
+      return await client.transport.request<ESQLSearchResponse>({
+        method: 'POST',
+        path: '/_query',
+        body: { query },
+      });
+    } catch {
+      // ignore and try next candidate
+    }
+  }
+};
+
+const checkViewLikeSourceForTimestamp = async ({
+  client,
+  sourceName,
+}: {
+  client: ElasticsearchClient;
+  sourceName: string;
+}): Promise<boolean> => {
+  // ES|QL views are resolved by ES|QL itself, and their schema is the output schema
+  // of the view query (not field caps of a backing index).
+  const esqlResp = await getEsqlColumnsForSource({ client, sourceName });
+  return Boolean(esqlResp?.columns?.some((col) => col.name === ES_TIMESTAMP_FIELD_NAME));
+};
 
 /**
  * Registers the ESQL get timefield route.
@@ -67,32 +112,50 @@ export const registerGetTimeFieldRoute = (
         });
       }
       const sources = getIndexPatternFromESQLQuery(query);
-      const subqueryArgs = sourceCommand.args.filter(isSubQuery);
-      const hasSubqueries = subqueryArgs.length > 0;
+      const service = new EsqlService({ client: core.elasticsearch.client.asCurrentUser });
+      const { views } = await service.getViews().catch(() => ({ views: [] }));
+      const viewNames = new Set(views.map(({ name }) => name));
 
       try {
-        // in case of subqueries we need to check all indices separately
-        const indices = hasSubqueries ? sources.split(',') : [sources];
-        const fieldCapsPromises = indices.map((index) =>
-          client.fieldCaps({
-            index,
-            fields: '@timestamp',
-            include_unmapped: false,
+        const indices = sources
+          .split(',')
+          .map((index) => index.trim())
+          .filter(Boolean);
+
+        if (!indices.length) {
+          return response.ok({
+            body: { timeField: undefined },
+          });
+        }
+
+        const sourceChecks = await Promise.all(
+          indices.map(async (sourceName) => {
+            // If ES tells us it's a view, skip fieldCaps and inspect the ES|QL schema instead.
+            if (viewNames.has(sourceName)) {
+              return checkViewLikeSourceForTimestamp({ client, sourceName });
+            }
+
+            try {
+              const fieldCapsResp = await client.fieldCaps({
+                index: sourceName,
+                fields: '@timestamp',
+                include_unmapped: false,
+              });
+              return hasTimestampInFieldCapsResponse(fieldCapsResp);
+            } catch (fieldCapsError) {
+              // Some sources (like ES|QL views) are not real indices and can make fieldCaps fail.
+              // As a fallback, run a minimal ES|QL query and infer the schema from the response.
+              logger.get().debug(toDebugString(fieldCapsError));
+              return checkViewLikeSourceForTimestamp({ client, sourceName });
+            }
           })
         );
 
-        const fieldCapsResults: FieldCapsResponse[] = await Promise.all(fieldCapsPromises);
-
-        // Check if all responses have the @timestamp field
-        const allHaveTimestamp = fieldCapsResults.every(
-          (result) => result.fields && result.fields['@timestamp']
-        );
-
         return response.ok({
-          body: { timeField: allHaveTimestamp ? '@timestamp' : undefined },
+          body: { timeField: sourceChecks.every(Boolean) ? '@timestamp' : undefined },
         });
       } catch (error) {
-        logger.get().debug(error);
+        logger.get().debug(toDebugString(error));
         throw error;
       }
     }

@@ -13,6 +13,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -223,6 +224,50 @@ describe('Unified data table cell rendering', function () {
       row: rows[0],
       isCompressed: true,
     });
+  });
+
+  it('renders _source column in ES|QL mode even when dataView has no _source field', () => {
+    // Avoid object spread: it drops the DataView type shape.
+    // We only override getFieldByName for `_source` to simulate ES|QL views.
+    const originalGetFieldByName = dataViewMock.getFieldByName.bind(dataViewMock);
+    const dataViewWithoutSource: DataView = Object.create(dataViewMock) as DataView;
+    dataViewWithoutSource.getFieldByName = (name: string) =>
+      name === '_source' ? undefined : originalGetFieldByName(name);
+
+    const rows: EsHitRecord[] = [
+      {
+        _id: '1',
+        _index: 'test',
+        _score: 1,
+        _source: undefined,
+        fields: { bytes: 100, extension: 'gif' },
+      },
+    ];
+
+    const DataTableCellValue = getRenderCellValueFn({
+      dataView: dataViewWithoutSource,
+      rows: rows.map(build),
+      shouldShowFieldHandler: () => true,
+      closePopover: jest.fn(),
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+      isPlainRecord: true,
+      columnsMeta: undefined,
+    });
+
+    const component = shallow(
+      <DataTableCellValue
+        rowIndex={0}
+        colIndex={0}
+        columnId="_source"
+        isDetails={false}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+
+    expect(component.find(SourceDocument).exists()).toBeTruthy();
   });
 
   it('renders _source column correctly when isDetails is set to true', () => {
