@@ -19,6 +19,7 @@ import {
   useEuiTheme,
   EuiTextTruncate,
   EuiBadgeGroup,
+  EuiFormPrepend,
 } from '@elastic/eui';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { Connector as BaseConnector } from '@kbn/search-connectors';
@@ -227,14 +228,13 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
         isLoading={isLoading}
         data-test-subj="serverlessSearchEditConnectorTypeChoices"
         prepend={
-          <EuiIcon
-            type={
+          <EuiFormPrepend
+            iconLeft={
               connector.service_type
                 ? connectorTypes.find((conn) => conn.serviceType === connector.service_type)
                     ?.iconPath ?? ''
                 : 'plugs'
             }
-            size="l"
           />
         }
         singleSelection={{ asPlainText: true }}

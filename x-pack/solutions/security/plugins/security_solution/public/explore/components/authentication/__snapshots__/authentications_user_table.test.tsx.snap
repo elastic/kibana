@@ -354,7 +354,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
             class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
           >
             <span
-              class="eui-textTruncate euiButtonEmpty__text"
+              class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
             >
               Rows per page: 10
             </span>
@@ -414,7 +414,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                 >
                   1
                 </span>
@@ -434,7 +434,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                 >
                   2
                 </span>
@@ -454,7 +454,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                 >
                   3
                 </span>
@@ -474,7 +474,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                 >
                   4
                 </span>
@@ -494,7 +494,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                 >
                   5
                 </span>
