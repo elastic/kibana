@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { EuiAccordionProps } from '@elastic/eui';
 import {
   EuiAccordion,
@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { Action } from './section_actions';
 import { SectionActions } from './section_actions';
 
@@ -35,6 +36,7 @@ export interface ContentFrameworkSectionProps {
   isTechPreview?: boolean;
   hasBorder?: boolean;
   hasPadding?: boolean;
+  onPanelClick?: () => void;
 }
 
 export function ContentFrameworkSection({
@@ -49,6 +51,7 @@ export function ContentFrameworkSection({
   isTechPreview = false,
   hasBorder = true,
   hasPadding = true,
+  onPanelClick,
 }: ContentFrameworkSectionProps) {
   const [accordionState, setAccordionState] = useState<EuiAccordionProps['forceState']>(forceState);
 
@@ -60,6 +63,18 @@ export function ContentFrameworkSection({
     setAccordionState(isOpen ? 'open' : 'closed');
     onToggle?.(isOpen);
   };
+
+  const handlePanelKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (onPanelClick && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        onPanelClick();
+      }
+    },
+    [onPanelClick]
+  );
+
+  const isClickable = Boolean(onPanelClick);
 
   return (
     <>
@@ -112,7 +127,23 @@ export function ContentFrameworkSection({
       >
         <EuiSpacer size="s" />
         <EuiPanel hasBorder={hasBorder} hasShadow={false} paddingSize={hasPadding ? 's' : 'none'}>
-          {children}
+          {isClickable ? (
+            <div
+              tabIndex={0}
+              onClick={onPanelClick}
+              onKeyDown={handlePanelKeyDown}
+              css={css`
+                &,
+                & * {
+                  cursor: pointer !important;
+                }
+              `}
+            >
+              {children}
+            </div>
+          ) : (
+            children
+          )}
         </EuiPanel>
       </EuiAccordion>
       {accordionState === 'closed' ? <EuiHorizontalRule margin="xs" /> : <EuiSpacer size="m" />}

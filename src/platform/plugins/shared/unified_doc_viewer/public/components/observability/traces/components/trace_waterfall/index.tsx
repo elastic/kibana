@@ -10,7 +10,7 @@
 import { EuiDelayRender } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { TRACE_ID_FIELD } from '@kbn/discover-utils';
 import { where } from '@kbn/esql-composer';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
@@ -34,11 +34,12 @@ export const fullScreenButtonLabel = i18n.translate(
 );
 
 const sectionTip = i18n.translate('unifiedDocViewer.observability.traces.trace.description', {
-  defaultMessage: 'Timeline of all spans in the trace, including their duration and hierarchy.',
+  defaultMessage:
+    'A summary of key spans in the trace. Click the waterfall to view the full trace timeline.',
 });
 
 const sectionTitle = i18n.translate('unifiedDocViewer.observability.traces.trace.title', {
-  defaultMessage: 'Trace',
+  defaultMessage: 'Trace summary',
 });
 
 export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props) {
@@ -79,6 +80,10 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
     [openInDiscoverSectionAction]
   );
 
+  const handlePanelClick = useCallback(() => {
+    setShowFullScreenWaterfall(true);
+  }, []);
+
   if (!FocusedTraceWaterfall) return null;
 
   return (
@@ -100,6 +105,7 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
         title={sectionTitle}
         description={sectionTip}
         actions={actions}
+        onPanelClick={handlePanelClick}
       >
         {docId ? (
           <FocusedTraceWaterfall
