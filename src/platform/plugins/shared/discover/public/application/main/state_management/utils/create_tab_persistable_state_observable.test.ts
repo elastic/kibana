@@ -14,7 +14,12 @@ import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { getPersistedTabMock } from '../redux/__mocks__/internal_state.mocks';
 import { createTabPersistableStateObservable } from './create_tab_persistable_state_observable';
-import { internalStateActions, selectTab, type DiscoverInternalState, type TabState } from '../redux';
+import {
+  internalStateActions,
+  selectTab,
+  type DiscoverInternalState,
+  type TabState,
+} from '../redux';
 
 describe('createTabPersistableStateObservable', () => {
   const setup = async () => {
