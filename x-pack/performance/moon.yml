@@ -27,6 +27,9 @@ dependsOn:
   - '@kbn/synthtrace-client'
   - '@kbn/test-suites-src'
   - '@kbn/ftr-common-functional-services'
+  - '@kbn/streams-plugin'
+  - '@kbn/content-packs-schema'
+  - '@kbn/streams-schema'
 tags:
   - test-helper
   - package
