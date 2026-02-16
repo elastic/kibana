@@ -56,7 +56,7 @@ export const MonitorAddPage = () => {
     return <LoadingState />;
   }
 
-  if (locations.length === 0) {
+  if (locationsLoaded && locations.length === 0) {
     return <Redirect to={GETTING_STARTED_ROUTE} />;
   }
 
