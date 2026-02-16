@@ -4427,6 +4427,9 @@
       },
       "status": {
         "type": "keyword"
+      },
+      "message": {
+        "type": "text"
       }
     }
   },
