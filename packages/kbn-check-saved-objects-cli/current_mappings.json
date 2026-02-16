@@ -1374,6 +1374,22 @@
       }
     }
   },
+  "entity-maintainers-tasks": {
+    "dynamic": false,
+    "properties": {
+      "entity-maintainers-tasks": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "interval": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
+      }
+    }
+  },
   "epm-packages": {
     "dynamic": false,
     "properties": {
