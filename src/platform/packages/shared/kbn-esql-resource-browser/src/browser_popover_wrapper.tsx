@@ -80,6 +80,7 @@ export interface BrowserPopoverWrapperProps<TItem> {
   isLoading: boolean;
   searchValue: string;
   setSearchValue: (value: string) => void;
+  isMultiSelect?: boolean;
 }
 
 export function BrowserPopoverWrapper<TItem extends { name: string }>({
@@ -97,6 +98,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
   isLoading,
   searchValue,
   setSearchValue,
+  isMultiSelect = true,
 }: BrowserPopoverWrapperProps<TItem>) {
   const { euiTheme } = useEuiTheme();
   const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -181,11 +183,12 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
             truncation: 'middle',
           },
         }}
+        singleSelection={!isMultiSelect}
       >
         {(list, search) => (
           <div style={{ width: BROWSER_POPOVER_WIDTH, maxHeight: BROWSER_POPOVER_HEIGHT }}>
             <EuiPopoverTitle paddingSize="s">
-              <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                 <EuiFlexItem>{i18nKeys.title}</EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
