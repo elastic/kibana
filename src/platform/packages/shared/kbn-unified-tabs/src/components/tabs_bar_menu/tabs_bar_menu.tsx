@@ -382,7 +382,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
         hasArrow={false}
         buffer={0}
         panelProps={{
-          css: popoverCss,
+          css: { overflow: 'hidden' },
           ['data-test-subj']: 'unifiedTabs_tabsBarMenuPanel',
         }}
         button={
@@ -405,60 +405,76 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
           </EuiToolTip>
         }
       >
-        <EuiPopoverTitle paddingSize="s">
-          {i18n.translate('unifiedTabs.tabsBarMenu.openedItems', {
-            defaultMessage: 'Opened tabs',
-          })}
-        </EuiPopoverTitle>
-        <EuiContextMenu
-          initialPanelId={OPENED_TABS_ROOT_PANEL_ID}
-          panels={openedTabsPanels}
-          data-test-subj="unifiedTabs_tabsMenu_openedTabsContextMenu"
-        />
-        {recentlyClosedItems.length > 0 && (
-          <>
-            <EuiHorizontalRule margin="none" />
-            <EuiPopoverTitle paddingSize="s">
-              <EuiFlexGroup
-                responsive={false}
-                alignItems="center"
-                gutterSize="s"
-                justifyContent="spaceBetween"
-              >
-                <EuiFlexItem grow>
-                  {i18n.translate('unifiedTabs.tabsBarMenu.recentlyClosed', {
-                    defaultMessage: 'Recently closed',
-                  })}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="xs"
-                    flush="both"
-                    data-test-subj="unifiedTabs_tabsMenu_clearRecentlyClosed"
-                    aria-label={i18n.translate('unifiedTabs.tabsBarMenu.clearRecentlyClosed', {
-                      defaultMessage: 'Clear',
-                    })}
-                    onClick={onClearRecentlyClosed}
-                  >
-                    {i18n.translate('unifiedTabs.tabsBarMenu.clearRecentlyClosed', {
-                      defaultMessage: 'Clear',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPopoverTitle>
+        <div css={menuContainerCss}>
+          <EuiPopoverTitle paddingSize="s">
+            {i18n.translate('unifiedTabs.tabsBarMenu.openedItems', {
+              defaultMessage: 'Opened tabs',
+            })}
+          </EuiPopoverTitle>
+          <div css={sectionListCss}>
             <EuiContextMenu
-              initialPanelId={RECENTLY_CLOSED_ROOT_PANEL_ID}
-              panels={recentlyClosedPanels}
-              data-test-subj="unifiedTabs_tabsMenu_recentlyClosedContextMenu"
+              initialPanelId={OPENED_TABS_ROOT_PANEL_ID}
+              panels={openedTabsPanels}
+              data-test-subj="unifiedTabs_tabsMenu_openedTabsContextMenu"
             />
-          </>
-        )}
+          </div>
+          {recentlyClosedItems.length > 0 && (
+            <>
+              <EuiHorizontalRule margin="none" />
+              <EuiPopoverTitle paddingSize="s">
+                <EuiFlexGroup
+                  responsive={false}
+                  alignItems="center"
+                  gutterSize="s"
+                  justifyContent="spaceBetween"
+                >
+                  <EuiFlexItem grow>
+                    {i18n.translate('unifiedTabs.tabsBarMenu.recentlyClosed', {
+                      defaultMessage: 'Recently closed',
+                    })}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="xs"
+                      flush="both"
+                      data-test-subj="unifiedTabs_tabsMenu_clearRecentlyClosed"
+                      aria-label={i18n.translate('unifiedTabs.tabsBarMenu.clearRecentlyClosed', {
+                        defaultMessage: 'Clear',
+                      })}
+                      onClick={onClearRecentlyClosed}
+                    >
+                      {i18n.translate('unifiedTabs.tabsBarMenu.clearRecentlyClosed', {
+                        defaultMessage: 'Clear',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPopoverTitle>
+              <div css={sectionListCss}>
+                <EuiContextMenu
+                  initialPanelId={RECENTLY_CLOSED_ROOT_PANEL_ID}
+                  panels={recentlyClosedPanels}
+                  data-test-subj="unifiedTabs_tabsMenu_recentlyClosedContextMenu"
+                />
+              </div>
+            </>
+          )}
+        </div>
       </EuiPopover>
     );
   }
 );
 
-const popoverCss = css`
+const menuContainerCss = css`
   width: 240px;
+  max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+`;
+
+const sectionListCss = css`
+  overflow-y: auto;
+  min-height: 0;
+  max-height: 350px;
 `;
