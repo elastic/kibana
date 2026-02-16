@@ -6,17 +6,21 @@
  */
 
 import type { Feature, Streams, System } from '@kbn/streams-schema';
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import { dateRangeQuery, fromKueryExpression, getKqlFieldNamesFromExpression } from '@kbn/es-query';
+import { fromKueryExpression, getKqlFieldNamesFromExpression } from '@kbn/es-query';
 import { withSpan } from '@kbn/apm-utils';
 import { createGenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
 import { sumTokens } from '../helpers/sum_tokens';
 import { getComputedFeatureInstructions } from '../features/computed';
-import { getFeatureTypesFromToolArgs, resolveFeatureTypeFilters, toLlmFeature } from './tools/features_tool';
+import {
+  getFeatureTypesFromToolArgs,
+  resolveFeatureTypeFilters,
+  toLlmFeature,
+} from './tools/features_tool';
 import {
   createDefaultSignificantEventsToolUsage,
   type SignificantEventsToolUsage,
@@ -59,6 +63,7 @@ export const getUnmappedFields = (fieldNames: string[], mappedFields: Set<string
 export async function generateSignificantEvents({
   stream,
   system,
+  esClient,
   getFeatures,
   inferenceClient,
   signal,
@@ -67,6 +72,7 @@ export async function generateSignificantEvents({
 }: {
   stream: Streams.all.Definition;
   system?: System;
+  esClient: ElasticsearchClient;
   getFeatures(params?: { type?: string[] }): Promise<Feature[]>;
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
@@ -85,11 +91,6 @@ export async function generateSignificantEvents({
     .fieldCaps({
       index: stream.name,
       fields: '*',
-      index_filter: {
-        bool: {
-          filter: dateRangeQuery(start, end),
-        },
-      },
     })
     .catch((error) => {
       throw new Error(
@@ -154,22 +155,21 @@ export async function generateSignificantEvents({
           const queryValidationResults = queries.map((query) => {
             try {
               fromKueryExpression(query.kql);
-              
-                          const fieldNames = getKqlFieldNamesFromExpression(query.kql);
-            const unmappedFields = getUnmappedFields(fieldNames, mappedFields);
 
-            if (unmappedFields.length > 0) {
-              return {
-                query,
-                valid: false,
-                status: 'Failed to add',
-                error: `Query references unmapped fields: ${unmappedFields.join(
-                  ', '
-                )}. Use only fields that are tagged with (mapped) in the dataset_analysis.`,
-              };
-            }
+              const fieldNames = getKqlFieldNamesFromExpression(query.kql);
+              const unmappedFields = getUnmappedFields(fieldNames, mappedFields);
 
-              
+              if (unmappedFields.length > 0) {
+                return {
+                  query,
+                  valid: false,
+                  status: 'Failed to add',
+                  error: `Query references unmapped fields: ${unmappedFields.join(
+                    ', '
+                  )}. Use only fields that are tagged with (mapped) in the dataset_analysis.`,
+                };
+              }
+
               return {
                 query,
                 valid: true,

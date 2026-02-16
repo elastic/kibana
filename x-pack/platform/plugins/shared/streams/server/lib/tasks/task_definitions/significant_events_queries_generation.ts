@@ -53,13 +53,21 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 runContext.taskInstance
                   .params as TaskParams<SignificantEventsQueriesGenerationTaskParams>;
 
-              const { taskClient, streamsClient, inferenceClient, soClient, featureClient } =
-                await taskContext.getScopedClients({
-                  request: runContext.fakeRequest,
-                });
+              const {
+                taskClient,
+                streamsClient,
+                inferenceClient,
+                soClient,
+                featureClient,
+                scopedClusterClient,
+              } = await taskContext.getScopedClients({
+                request: runContext.fakeRequest,
+              });
 
               try {
                 const stream = await streamsClient.getStream(streamName);
+
+                const esClient = scopedClusterClient.asCurrentUser;
 
                 const promptsConfigService = new PromptsConfigService({
                   soClient,
@@ -89,6 +97,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                         },
                         {
                           inferenceClient,
+                          esClient,
                           featureClient,
                           logger: taskContext.logger.get('significant_events_generation'),
                           signal: runContext.abortController.signal,
