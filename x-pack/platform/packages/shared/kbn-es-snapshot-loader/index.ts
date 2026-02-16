@@ -8,3 +8,9 @@
 export { restoreSnapshot } from './src/restore';
 export { replaySnapshot } from './src/replay';
 export { type RestoreConfig, type ReplayConfig, type LoadResult } from './src/types';
+export {
+  createUrlRepository,
+  createGcsRepository,
+  type RepositoryStrategy,
+  type GcsRepositoryConfig,
+} from './src/repository';

@@ -7,8 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
+
+const gcsCredentials = process.env.GCS_CREDENTIALS;
+let gcsCredentialsFileSetting: string | undefined;
+
+if (gcsCredentials) {
+  const gcsCredentialsFilePath = join(
+    tmpdir(),
+    `gcs-credentials-${Date.now()}-${process.pid}.json`
+  );
+  writeFileSync(gcsCredentialsFilePath, gcsCredentials);
+  gcsCredentialsFileSetting = `gcs.client.default.credentials_file=${gcsCredentialsFilePath}`;
+}
 
 /**
  * Custom Scout stateful server configuration that enables OTLP trace exporting
@@ -19,6 +34,13 @@ import { defaultConfig } from '../../default/stateful/base.config';
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
+  esTestCluster: {
+    ...defaultConfig.esTestCluster,
+    serverArgs: [
+      ...defaultConfig.esTestCluster.serverArgs,
+      ...(gcsCredentialsFileSetting ? [gcsCredentialsFileSetting] : []),
+    ],
+  },
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
     env: {

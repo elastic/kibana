@@ -14,6 +14,7 @@ const SECURE_SETTINGS_LIST = [
   /^xpack\.security\.authc\.realms\.oidc\.[a-zA-Z0-9_]+\.rp\.client_secret$/,
   /^xpack\.security\.authc\.realms\.jwt\.[a-zA-Z0-9_]+\.client_authentication\.shared_secret$/,
   /^xpack\.security\.http\.ssl\.keystore\.secure_password$/,
+  /^gcs\.client\.[a-zA-Z0-9_]+\.credentials_file$/,
   /^telemetry\.secret_token$/,
   /^telemetry\.api_key$/,
 ];

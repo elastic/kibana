@@ -7,6 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { RepositoryStrategy } from './repository/types';
 
 export const DEFAULT_DATA_STREAM_PATTERNS = ['logs-*', 'metrics-*', 'traces-*'];
 
@@ -23,7 +24,11 @@ export interface SnapshotInfo {
 interface BaseConfig {
   esClient: Client;
   log: ToolingLog;
-  snapshotUrl: string;
+  repository?: RepositoryStrategy;
+  /**
+   * @deprecated Use `repository` instead.
+   */
+  snapshotUrl?: string;
   // If omitted, the loader will select the latest SUCCESS snapshot in the repository.
   snapshotName?: string;
 }
