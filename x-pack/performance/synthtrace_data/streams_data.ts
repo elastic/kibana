@@ -361,7 +361,9 @@ async function createLargeWiredHierarchyViaFork(
         if (isLockContentionError(error) && attempt < MAX_RETRIES) {
           const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt);
           log.warning(
-            `  Lock contention forking ${childName}, retry ${attempt + 1}/${MAX_RETRIES} after ${delay}ms`
+            `  Lock contention forking ${childName}, retry ${
+              attempt + 1
+            }/${MAX_RETRIES} after ${delay}ms`
           );
           await sleep(delay);
           continue;
