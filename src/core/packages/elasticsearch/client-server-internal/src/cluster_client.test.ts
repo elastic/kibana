@@ -25,9 +25,12 @@ import {
   ES_SECONDARY_AUTH_HEADER,
   AUTHORIZATION_HEADER,
   getDefaultHeaders,
+  ES_SECONDARY_CLIENT_AUTH_HEADER,
+  ES_CLIENT_AUTHENTICATION_HEADER,
 } from './headers';
 import { AgentManager } from './agent_manager';
 import { duration } from 'moment';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
 
 const createConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
@@ -747,6 +750,118 @@ describe('ClusterClient', () => {
         })
       );
     });
+
+    it('does not specify client authentication for non-UIAM credentials even if in UIAM mode', () => {
+      const config = createConfig({
+        requestHeadersWhitelist: ['authorization'],
+      });
+      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'Bearer yes' });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security: securityServiceMock.createInternalSetup(),
+        agentFactoryProvider,
+        kibanaVersion,
+      });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { [AUTHORIZATION_HEADER]: 'Bearer override' },
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            [AUTHORIZATION_HEADER]: 'Bearer yes',
+            'x-opaque-id': expect.any(String),
+          },
+        })
+      );
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          headers: { [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret' },
+        })
+      );
+    });
+
+    it('does not specify client authentication for UIAM credentials in real requests even if in UIAM mode', () => {
+      const config = createConfig({
+        requestHeadersWhitelist: ['authorization'],
+      });
+      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes' });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security: securityServiceMock.createInternalSetup(),
+        agentFactoryProvider,
+        kibanaVersion,
+      });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { [AUTHORIZATION_HEADER]: 'Bearer override' },
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes',
+            'x-opaque-id': expect.any(String),
+          },
+        })
+      );
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          headers: { [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret' },
+        })
+      );
+    });
+
+    it('specifies client authentication for UIAM credentials in fake requests if in UIAM mode ', () => {
+      const config = createConfig({ requestHeadersWhitelist: ['authorization'] });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security: securityServiceMock.createInternalSetup(),
+        agentFactoryProvider,
+        kibanaVersion,
+      });
+      const fakeRequest = httpServerMock.createFakeKibanaRequest({
+        headers: { [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes' },
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(fakeRequest);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+          },
+        })
+      );
+    });
   });
 
   describe('#asScoped().asSecondaryAuthUser', () => {
@@ -804,7 +919,7 @@ describe('ClusterClient', () => {
         requestHeadersWhitelist: ['foo'],
       });
       authHeaders.get.mockReturnValue({
-        [AUTHORIZATION_HEADER]: 'yes',
+        [AUTHORIZATION_HEADER]: 'Bearer yes',
       });
 
       const clusterClient = new ClusterClient({
@@ -829,12 +944,12 @@ describe('ClusterClient', () => {
       expect(internalClient.child).toHaveBeenCalledTimes(1);
       expect(internalClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
-          headers: { ...defaultHeaders, [ES_SECONDARY_AUTH_HEADER]: 'yes' },
+          headers: { ...defaultHeaders, [ES_SECONDARY_AUTH_HEADER]: 'Bearer yes' },
         })
       );
       expect(internalClient.child).toHaveBeenCalledWith(
         expect.not.objectContaining({
-          headers: { [AUTHORIZATION_HEADER]: 'yes' },
+          headers: { [AUTHORIZATION_HEADER]: 'Bearer yes' },
         })
       );
     });
@@ -878,7 +993,7 @@ describe('ClusterClient', () => {
         requestHeadersWhitelist: ['authorization'],
       });
       authHeaders.get.mockReturnValue({
-        [AUTHORIZATION_HEADER]: 'foo',
+        [AUTHORIZATION_HEADER]: 'Bearer foo',
       });
 
       const clusterClient = new ClusterClient({
@@ -900,7 +1015,7 @@ describe('ClusterClient', () => {
         expect.objectContaining({
           headers: {
             ...defaultHeaders,
-            [ES_SECONDARY_AUTH_HEADER]: 'foo',
+            [ES_SECONDARY_AUTH_HEADER]: 'Bearer foo',
             foo: 'bar',
             hello: 'dolly',
           },
@@ -911,7 +1026,7 @@ describe('ClusterClient', () => {
     it('does not add the x-opaque-id header based on the request id', () => {
       const config = createConfig();
       authHeaders.get.mockReturnValue({
-        [AUTHORIZATION_HEADER]: 'foo',
+        [AUTHORIZATION_HEADER]: 'Bearer foo',
       });
 
       const clusterClient = new ClusterClient({
@@ -949,7 +1064,7 @@ describe('ClusterClient', () => {
         requestHeadersWhitelist: ['authorization', 'foo'],
       });
       authHeaders.get.mockReturnValue({
-        [AUTHORIZATION_HEADER]: 'will_not_be_used',
+        [AUTHORIZATION_HEADER]: 'Bearer will_not_be_used',
       });
 
       const clusterClient = new ClusterClient({
@@ -962,7 +1077,7 @@ describe('ClusterClient', () => {
       });
       const request = {
         headers: {
-          [AUTHORIZATION_HEADER]: 'yes',
+          [AUTHORIZATION_HEADER]: 'Bearer yes',
           hello: 'dolly',
         },
       };
@@ -974,7 +1089,7 @@ describe('ClusterClient', () => {
       expect(internalClient.child).toHaveBeenCalledTimes(1);
       expect(internalClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
-          headers: expect.objectContaining({ [ES_SECONDARY_AUTH_HEADER]: 'yes' }),
+          headers: expect.objectContaining({ [ES_SECONDARY_AUTH_HEADER]: 'Bearer yes' }),
         })
       );
     });
@@ -984,7 +1099,7 @@ describe('ClusterClient', () => {
         requestHeadersWhitelist: ['authorization', 'foo'],
       });
       authHeaders.get.mockReturnValue({
-        [AUTHORIZATION_HEADER]: 'will_not_be_used',
+        [AUTHORIZATION_HEADER]: 'Bearer will_not_be_used',
       });
 
       const clusterClient = new ClusterClient({
@@ -998,7 +1113,7 @@ describe('ClusterClient', () => {
 
       const request = httpServerMock.createFakeKibanaRequest({
         headers: {
-          authorization: 'fake_request_auth',
+          authorization: 'Bearer fake_request_auth',
         },
       });
 
@@ -1045,6 +1160,79 @@ describe('ClusterClient', () => {
         client = scopedClusterClient.asSecondaryAuthUser;
       }).toThrowErrorMatchingInlineSnapshot(
         `"asSecondaryAuthUser called from a client scoped to a request without 'authorization' header."`
+      );
+    });
+
+    it('does not specify secondary client authentication for non-UIAM credentials even if in UIAM mode', () => {
+      const config = createConfig({ requestHeadersWhitelist: ['foo'] });
+      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'Bearer yes' });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security: securityServiceMock.createInternalSetup(),
+        agentFactoryProvider,
+        kibanaVersion,
+      });
+      const request = httpServerMock.createKibanaRequest({ headers: { foo: 'bar' } });
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asSecondaryAuthUser;
+
+      expect(internalClient.child).toHaveBeenCalledTimes(1);
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: { ...defaultHeaders, [ES_SECONDARY_AUTH_HEADER]: 'Bearer yes' },
+        })
+      );
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          headers: { [ES_SECONDARY_CLIENT_AUTH_HEADER]: 'some-shared-secret' },
+        })
+      );
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          headers: { [AUTHORIZATION_HEADER]: 'Bearer yes' },
+        })
+      );
+    });
+
+    it('specifies secondary client authentication for UIAM credentials if in UIAM mode', () => {
+      const config = createConfig({ requestHeadersWhitelist: ['foo'] });
+      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes' });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security: securityServiceMock.createInternalSetup(),
+        agentFactoryProvider,
+        kibanaVersion,
+      });
+      const request = httpServerMock.createKibanaRequest({ headers: { foo: 'bar' } });
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asSecondaryAuthUser;
+
+      expect(internalClient.child).toHaveBeenCalledTimes(1);
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            ...defaultHeaders,
+            [ES_SECONDARY_AUTH_HEADER]: 'Bearer essu_dev_yes',
+            [ES_SECONDARY_CLIENT_AUTH_HEADER]: 'some-shared-secret',
+          },
+        })
+      );
+      expect(internalClient.child).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          headers: { [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes' },
+        })
       );
     });
   });
