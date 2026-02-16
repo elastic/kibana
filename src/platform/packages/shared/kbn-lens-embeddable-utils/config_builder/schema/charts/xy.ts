@@ -440,7 +440,6 @@ const getListOfAvailableIcons = (description: string) =>
   schema.oneOf(
     [
       schema.oneOf([
-        schema.literal('empty'),
         schema.literal('asterisk'),
         schema.literal('alert'),
         schema.literal('bell'),

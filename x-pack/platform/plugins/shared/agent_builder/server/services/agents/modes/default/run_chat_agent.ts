@@ -105,6 +105,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const eventEmitter: AgentEventEmitterFn = (event) => {
     manualEvents$.next(event);
   };
+  toolManager.setEventEmitter(eventEmitter);
+
   // Pass action so regenerate uses the last round's original input instead of request input
   const processedConversation = await prepareConversation({
     nextInput,
@@ -139,7 +141,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       type: ToolManagerToolType.executable,
       tools: staticTools,
       logger,
-      eventEmitter,
     }),
     toolManager.addTools({
       type: ToolManagerToolType.browser,
@@ -150,7 +151,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         type: ToolManagerToolType.executable,
         tools: dynamicTools,
         logger,
-        eventEmitter,
       },
       {
         dynamic: true,
