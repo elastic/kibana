@@ -124,7 +124,7 @@ export const DimensionsSelector = ({
       };
 
       if (tooltipContent) {
-        option.prepend = (
+        option.append = (
           <EuiToolTip
             content={tooltipContent}
             position="top"
