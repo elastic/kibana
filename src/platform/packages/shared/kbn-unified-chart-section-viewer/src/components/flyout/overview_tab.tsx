@@ -77,17 +77,9 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
 
   // Helper function to create description list items
   const createDescriptionListItem = useCallback(
-    (
-      title: React.ReactNode,
-      value: React.ReactNode,
-      dataTestSubj?: string
-    ) => ({
+    (title: string, value: React.ReactNode, dataTestSubj?: string) => ({
       label: (
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="s"
-          data-test-subj={dataTestSubj}
-        >
+        <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj={dataTestSubj}>
           <EuiFlexItem
             grow={false}
             css={css`
