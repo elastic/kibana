@@ -21,8 +21,5 @@ export type { FeedbackState, FeedbackStateDeps } from './feedback_state';
 export { createVisibilityState } from './visibility_state';
 export type { VisibilityState, VisibilityStateDeps } from './visibility_state';
 
-export { createBodyClassesState } from './body_classes_state';
-export type { BodyClassesStateDeps } from './body_classes_state';
-
 export { createChromeState } from './chrome_state';
 export type { ChromeState, ChromeStateDeps } from './chrome_state';
