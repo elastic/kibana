@@ -10,6 +10,7 @@
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -17,6 +18,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { css } from '@emotion/react';
@@ -64,6 +66,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
 
   const [selectedItems, setSelectedItems] = useState<WorkflowListItemDto[]>([]);
   const [executeWorkflow, setExecuteWorkflow] = useState<WorkflowListItemDto | null>(null);
+  const [deleteWorkflowItem, setDeleteWorkflowItem] = useState<WorkflowListItemDto | null>(null);
+  const deleteModalTitleId = useGeneratedHtmlId();
 
   const canCreateWorkflow = application.capabilities.workflowsManagement.createWorkflow;
   const canExecuteWorkflow = application.capabilities.workflowsManagement.executeWorkflow;
@@ -113,16 +117,20 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
     [application, notifications, runWorkflow]
   );
 
-  const handleDeleteWorkflow = useCallback(
-    (item: WorkflowListItemDto) => {
-      const confirmed = window.confirm(`Are you sure you want to delete ${item.name}?`);
-      if (!confirmed) {
-        return;
-      }
-      deleteWorkflows.mutate({ ids: [item.id] });
-    },
-    [deleteWorkflows]
-  );
+  const handleDeleteWorkflow = useCallback((item: WorkflowListItemDto) => {
+    setDeleteWorkflowItem(item);
+  }, []);
+
+  const confirmDeleteWorkflow = useCallback(() => {
+    if (deleteWorkflowItem) {
+      deleteWorkflows.mutate({ ids: [deleteWorkflowItem.id] });
+    }
+    setDeleteWorkflowItem(null);
+  }, [deleteWorkflowItem, deleteWorkflows]);
+
+  const cancelDeleteWorkflow = useCallback(() => {
+    setDeleteWorkflowItem(null);
+  }, []);
 
   const handleCloneWorkflow = useCallback(
     (item: WorkflowListItemDto) => {
@@ -496,6 +504,34 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           onClose={() => setExecuteWorkflow(null)}
           onSubmit={(event) => handleRunWorkflow(executeWorkflow.id, event)}
         />
+      )}
+      {deleteWorkflowItem && (
+        <EuiConfirmModal
+          title={i18n.translate('workflows.workflowList.deleteModal.title', {
+            defaultMessage: 'Delete {name}?',
+            values: { name: deleteWorkflowItem.name },
+          })}
+          titleProps={{ id: deleteModalTitleId }}
+          aria-labelledby={deleteModalTitleId}
+          onCancel={cancelDeleteWorkflow}
+          onConfirm={confirmDeleteWorkflow}
+          cancelButtonText={i18n.translate('workflows.workflowList.deleteModal.cancel', {
+            defaultMessage: 'Cancel',
+          })}
+          confirmButtonText={i18n.translate('workflows.workflowList.deleteModal.confirm', {
+            defaultMessage: 'Delete',
+          })}
+          buttonColor="danger"
+          defaultFocusedButton="cancel"
+          data-test-subj="workflows-single-delete-modal"
+        >
+          <p>
+            {i18n.translate('workflows.workflowList.deleteModal.message', {
+              defaultMessage:
+                'You are about to delete this workflow. This action cannot be undone.',
+            })}
+          </p>
+        </EuiConfirmModal>
       )}
     </>
   );
