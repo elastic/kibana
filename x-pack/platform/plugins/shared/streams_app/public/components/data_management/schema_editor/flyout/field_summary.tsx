@@ -130,7 +130,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
             onClick={() => onGoToField(field.alias_for!)}
           >
             {i18n.translate('xpack.streams.fieldSummary.goToFieldButtonLabel', {
-              defaultMessage: 'Go to field',
+              defaultMessage: 'Go to source field',
             })}
           </EuiButtonEmpty>
         </EuiFlexItem>

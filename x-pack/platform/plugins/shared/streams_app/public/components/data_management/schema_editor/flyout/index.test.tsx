@@ -110,16 +110,16 @@ describe('SchemaEditorFlyout', () => {
       expect(screen.queryByText(/simulate/i)).not.toBeInTheDocument();
     });
 
-    it('renders "Go to field" button for alias fields when onGoToField is provided', () => {
+    it('renders "Go to source field" button for alias fields when onGoToField is provided', () => {
       const onGoToField = jest.fn();
       renderFlyout({ alias_for: 'original.field' }, { onGoToField });
 
       const goToFieldButton = screen.getByTestId('streamsAppFieldSummaryGoToFieldButton');
       expect(goToFieldButton).toBeInTheDocument();
-      expect(goToFieldButton).toHaveTextContent('Go to field');
+      expect(goToFieldButton).toHaveTextContent('Go to source field');
     });
 
-    it('calls onGoToField with the correct field name when "Go to field" button is clicked', async () => {
+    it('calls onGoToField with the correct field name when "Go to source field" button is clicked', async () => {
       const user = userEvent.setup();
       const onGoToField = jest.fn();
       renderFlyout({ alias_for: 'original.field' }, { onGoToField });
@@ -130,7 +130,7 @@ describe('SchemaEditorFlyout', () => {
       expect(onGoToField).toHaveBeenCalledWith('original.field');
     });
 
-    it('does not render "Go to field" button when onGoToField is not provided', () => {
+    it('does not render "Go to source field" button when onGoToField is not provided', () => {
       renderFlyout({ alias_for: 'original.field' }, { onGoToField: undefined });
 
       expect(screen.queryByTestId('streamsAppFieldSummaryGoToFieldButton')).not.toBeInTheDocument();
@@ -151,7 +151,7 @@ describe('SchemaEditorFlyout', () => {
       expect(screen.getByText('Advanced field mapping parameters')).toBeInTheDocument();
     });
 
-    it('does not render "Go to field" button for non-alias fields', () => {
+    it('does not render "Go to source field" button for non-alias fields', () => {
       const onGoToField = jest.fn();
       renderFlyout({ alias_for: undefined }, { onGoToField });
 

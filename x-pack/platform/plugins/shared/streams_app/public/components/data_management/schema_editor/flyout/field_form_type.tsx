@@ -72,9 +72,11 @@ export const FieldFormType = ({
           EMPTY_CONTENT
         )}
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EcsRecommendation isLoading={loading} recommendation={recommendation} />
-      </EuiFlexItem>
+      {!field.alias_for && (
+        <EuiFlexItem>
+          <EcsRecommendation isLoading={loading} recommendation={recommendation} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
