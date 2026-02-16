@@ -40,14 +40,6 @@ export const initTelemetry = (
   const telemetryConfig = apmConfigLoader.getTelemetryConfig();
   const monitoringCollectionConfig = apmConfigLoader.getMonitoringCollectionConfig();
 
-  // If tracing is enabled, we want to use the OpenTelemetry SDK for tracing.
-  // TODO: If APM config is still active, we need to migrate those config options to the OpenTelemetry SDK (like the exporter to the `elastic.apm.serverUrl`)
-  if (telemetryConfig.tracing.enabled) {
-    setPreferredClient('otel');
-  } else {
-    setPreferredClient('apm');
-  }
-
   // resource.attributes.*
   const resource = resources
     .detectResources({
