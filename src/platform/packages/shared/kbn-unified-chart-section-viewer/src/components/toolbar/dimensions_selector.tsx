@@ -274,8 +274,8 @@ export const DimensionsSelector = ({
       <EuiFlexGroup
         gutterSize="xs"
         css={css`
-          padding: 8px 0;
-          min-height: 24px;
+          padding: ${euiTheme.size.s} 0;
+          min-height: ${euiTheme.size.l};
         `}
         justifyContent="spaceBetween"
         alignItems="center"
