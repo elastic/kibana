@@ -13,6 +13,7 @@ import React from 'react';
 import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
 import { RoundResponseActions } from './round_response_actions';
+import { FakeAttachment } from './fake_attachment';
 
 export interface RoundResponseProps {
   response: AssistantResponse;
@@ -44,7 +45,10 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       {isLoading ? (
         <StreamingText content={message} steps={steps} />
       ) : (
-        <ChatMessageText content={message} steps={steps} />
+        <>
+          <ChatMessageText content={message} steps={steps} />
+          <FakeAttachment />
+        </>
       )}
     </EuiFlexItem>
     {!isLoading && !hasError && (
