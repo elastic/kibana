@@ -381,10 +381,49 @@ export const AGENT_MAPPINGS = {
       type: 'keyword',
     },
     identifying_attributes: {
-      type: 'object',
+      properties: {
+        service: {
+          properties: {
+            name: {
+              type: 'keyword',
+            },
+            version: {
+              type: 'keyword',
+            },
+            instance: {
+              properties: {
+                id: {
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
+      },
     },
     non_identifying_attributes: {
-      type: 'object',
+      properties: {
+        host: {
+          properties: {
+            arch: {
+              type: 'keyword',
+            },
+            name: {
+              type: 'keyword',
+            },
+          },
+        },
+        os: {
+          properties: {
+            type: {
+              type: 'keyword',
+            },
+            description: {
+              type: 'keyword',
+            },
+          },
+        },
+      },
     },
   },
 } as const;
