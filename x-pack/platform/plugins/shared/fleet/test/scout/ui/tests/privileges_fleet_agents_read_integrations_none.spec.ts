@@ -39,7 +39,6 @@ test.describe(
     test('is accessible and user only see agents tab', async ({
       browserAuth,
       pageObjects,
-      config,
     }) => {
       await browserAuth.loginWithCustomRole(getFleetAgentsReadIntegrationsNoneRole());
       const { fleetHome } = pageObjects;
