@@ -108,6 +108,26 @@ export const useRuntimeState = <T,>(stateSubject$: BehaviorSubject<T>) =>
 export const selectTabRuntimeState = (runtimeStateManager: RuntimeStateManager, tabId: string) =>
   runtimeStateManager.tabs.byId[tabId];
 
+/**
+ * Checks if a tab is initialized (has an active state container).
+ * A tab is considered initialized once its state container has been set up,
+ * which happens when the tab becomes active for the first time.
+ */
+export const isTabRuntimeStateInitialized = (
+  tabRuntimeState: ReactiveTabRuntimeState | undefined
+): boolean => Boolean(tabRuntimeState?.stateContainer$.getValue());
+
+/**
+ * Gets the data view only for initialized tabs.
+ * Returns undefined for non-initialized tabs to avoid returning stale data.
+ */
+export const selectTabDataViewWhenInitialized = (
+  tabRuntimeState: ReactiveTabRuntimeState | undefined
+): DataView | undefined =>
+  isTabRuntimeStateInitialized(tabRuntimeState)
+    ? tabRuntimeState?.currentDataView$.getValue()
+    : undefined;
+
 export const selectIsDataViewUsedInMultipleRuntimeTabStates = (
   runtimeStateManager: RuntimeStateManager,
   dataViewId: string
