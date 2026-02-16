@@ -17,12 +17,12 @@ export const NoDataFoundWarning = (props: { onRenderComplete?: () => void }) => 
       data-test-subj="aiopsNoDataFoundWarning"
       iconType="search"
       title={
-        <h2>
+        <h3>
           <FormattedMessage
             id="xpack.aiops.changePointDetection.noDataFoundTitle"
             defaultMessage="No data found"
           />
-        </h2>
+        </h3>
       }
       body={
         <p>
