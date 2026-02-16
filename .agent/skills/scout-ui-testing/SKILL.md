@@ -112,6 +112,11 @@ test('creates and verifies a dashboard', async ({ pageObjects, page }) => {
 - `start-server` has no Playwright config to inspect, so pass `--config-dir <name>` when your tests require a custom server config.
 - Debug: `SCOUT_LOG_LEVEL=debug`, or `npx playwright test --config <...> --project local --ui`
 
+## CI enablement
+
+- Scout tests run in CI only for modules listed under `plugins.enabled` / `packages.enabled` in `.buildkite/scout_ci_config.yml`.
+- `node scripts/scout.js generate` registers the module under `enabled` so the new configs run in CI.
+
 ## References
 
 Open only what you need:
