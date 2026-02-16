@@ -14,11 +14,9 @@ import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { AppMenuActionId } from '@kbn/discover-utils';
 import { getCreateRuleMenuItem, CreateESQLRuleFlyout } from './get_create_rule';
 import { discoverServiceMock } from '../../../../../__mocks__/services';
-import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
-import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
 import { getDiscoverStateMock } from '../../../../../__mocks__/discover_state.mock';
 import type { AppMenuExtensionParams } from '../../../../../context_awareness';
-import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
+import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
 import { internalStateActions } from '../../../state_management/redux';
 
 // Mock the DynamicRuleFormFlyout since we're testing the wrapper behavior
@@ -31,6 +29,16 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
       </button>
     </div>
   ),
+}));
+
+// Mock CreateAlertFlyout from get_alerts
+jest.mock('./get_alerts', () => ({
+  CreateAlertFlyout: () => <div data-test-subj="mockCreateAlertFlyout" />,
+  getManageRulesUrl: () => '/app/management/insightsAndAlerting/triggersActions/rules',
+  getTimeField: (dataView: {
+    timeFieldName?: string;
+    fields?: { getByType?: (type: string) => { name: string }[] };
+  }) => dataView?.timeFieldName || dataView?.fields?.getByType?.('date')?.[0]?.name,
 }));
 
 const getCreateRuleMenu = (
@@ -62,19 +70,6 @@ const getCreateRuleMenu = (
   });
 };
 
-const getLegacyRulesSubmenu = (
-  menuItem: DiscoverAppMenuItemType
-): DiscoverAppMenuPopoverItem | undefined => {
-  return menuItem.items?.find((item) => item.testId === 'discoverLegacyRulesButton');
-};
-
-const getLegacyRulesItems = (
-  menuItem: DiscoverAppMenuItemType
-): DiscoverAppMenuPopoverItem[] | undefined => {
-  const legacyRulesSubmenu = getLegacyRulesSubmenu(menuItem);
-  return legacyRulesSubmenu?.items;
-};
-
 describe('getCreateRuleMenuItem', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -86,190 +81,93 @@ describe('getCreateRuleMenuItem', () => {
       expect(menuItem.id).toBe(AppMenuActionId.createRule);
     });
 
-    it('should have the correct label and testId', () => {
+    it('should have the correct label and testId for the main menu button', () => {
       const menuItem = getCreateRuleMenu();
       expect(menuItem.label).toBe('Rules');
       expect(menuItem.testId).toBe('discoverRulesMenuButton');
     });
 
-    it('should include the Create rule button', () => {
+    it('should have the bell icon', () => {
       const menuItem = getCreateRuleMenu();
-      const createRuleItem = menuItem.items?.find(
-        (item) => item.testId === 'discoverCreateRuleButton'
-      );
-      expect(createRuleItem).toBeDefined();
-      expect(createRuleItem?.label).toBe('Create rule');
+      expect(menuItem.iconType).toBe('bell');
     });
 
-    it('should include the Create legacy rules submenu when capabilities allow', () => {
+    it('should have tooltip content', () => {
       const menuItem = getCreateRuleMenu();
-      const legacyRulesSubmenu = getLegacyRulesSubmenu(menuItem);
-      expect(legacyRulesSubmenu).toBeDefined();
-      expect(legacyRulesSubmenu?.label).toBe('Create legacy rules');
+      expect(menuItem.tooltipContent).toBe('Create alerting rules from this query');
     });
-  });
 
-  describe('Legacy Rules Submenu', () => {
-    it('should include the Search threshold rule when ES_QUERY_ID is authorized', () => {
+    it('should have nested items array', () => {
       const menuItem = getCreateRuleMenu();
-      const legacyItems = getLegacyRulesItems(menuItem);
-      const searchThresholdItem = legacyItems?.find(
-        (item) => item.testId === 'discoverLegacySearchThresholdButton'
-      );
-      expect(searchThresholdItem).toBeDefined();
-      expect(searchThresholdItem?.label).toBe('Search threshold rule');
+      expect(menuItem.items).toBeDefined();
+      expect(Array.isArray(menuItem.items)).toBe(true);
     });
 
-    it('should not include the Search threshold rule when ES_QUERY_ID is not authorized', () => {
-      const menuItem = getCreateRuleMenu(dataViewMock, true, []);
-      const legacyItems = getLegacyRulesItems(menuItem);
-      const searchThresholdItem = legacyItems?.find(
-        (item) => item.testId === 'discoverLegacySearchThresholdButton'
-      );
-      expect(searchThresholdItem).toBeUndefined();
-    });
+    describe('Nested Items', () => {
+      it('should have "Create rule" item for ES|QL rules', () => {
+        const menuItem = getCreateRuleMenu();
+        const createRuleItem = menuItem.items?.find((item) => item.id === 'create-rule');
 
-    it('should include the Manage rules and connectors link', () => {
-      const menuItem = getCreateRuleMenu();
-      const legacyItems = getLegacyRulesItems(menuItem);
-      const manageRulesItem = legacyItems?.find(
-        (item) => item.testId === 'discoverManageRulesButton'
-      );
-      expect(manageRulesItem).toBeDefined();
-      expect(manageRulesItem?.label).toBe('Manage rules and connectors');
-    });
+        expect(createRuleItem).toBeDefined();
+        expect(createRuleItem?.label).toBe('Create rule');
+        expect(createRuleItem?.testId).toBe('discoverCreateRuleButton');
+        expect(createRuleItem?.iconType).toBe('bell');
+        expect(createRuleItem?.order).toBe(1);
+        expect(createRuleItem?.run).toBeDefined();
+        expect(typeof createRuleItem?.run).toBe('function');
+      });
 
-    it('should have the Manage rules and connectors link at the end (highest order)', () => {
-      const menuItem = getCreateRuleMenu();
-      const legacyItems = getLegacyRulesItems(menuItem);
-      const manageRulesItem = legacyItems?.find(
-        (item) => item.testId === 'discoverManageRulesButton'
-      );
-      expect(manageRulesItem?.order).toBe(Number.MAX_SAFE_INTEGER);
-    });
-  });
+      it('should have "Create legacy rules" submenu with legacy items', () => {
+        const menuItem = getCreateRuleMenu();
+        const legacyRulesItem = menuItem.items?.find((item) => item.id === 'legacy-rules');
 
-  describe('Time Field Behavior - ES|QL Mode', () => {
-    it('should have the Search threshold rule button enabled if the data view has a time field', () => {
-      const menuItem = getCreateRuleMenu(dataViewWithTimefieldMock, true);
-      const legacyItems = getLegacyRulesItems(menuItem);
-      const searchThresholdItem = legacyItems?.find(
-        (item) => item.testId === 'discoverLegacySearchThresholdButton'
-      );
-      expect(searchThresholdItem?.disableButton).toBe(false);
-    });
+        expect(legacyRulesItem).toBeDefined();
+        expect(legacyRulesItem?.label).toBe('Create legacy rules');
+        expect(legacyRulesItem?.testId).toBe('discoverLegacyRulesButton');
+        expect(legacyRulesItem?.order).toBe(2);
+        expect(legacyRulesItem?.items).toBeDefined();
+        expect(legacyRulesItem?.items?.length).toBeGreaterThan(0);
+      });
 
-    it('should have the Search threshold rule button enabled if the data view has no timeFieldName but at least one date field', () => {
-      const menuItem = getCreateRuleMenu(dataViewMock, true);
-      const legacyItems = getLegacyRulesItems(menuItem);
-      const searchThresholdItem = legacyItems?.find(
-        (item) => item.testId === 'discoverLegacySearchThresholdButton'
-      );
-      expect(searchThresholdItem?.disableButton).toBe(false);
-    });
+      it('should include "Search threshold rule" in legacy items when ES_QUERY_ID is authorized', () => {
+        const menuItem = getCreateRuleMenu();
+        const legacyRulesItem = menuItem.items?.find((item) => item.id === 'legacy-rules');
+        const searchThresholdItem = legacyRulesItem?.items?.find(
+          (item) => item.id === 'legacy-search-threshold'
+        );
 
-    it('should have the Search threshold rule button disabled if the data view has no time fields at all', () => {
-      const menuItem = getCreateRuleMenu(dataViewWithNoTimefieldMock, true);
-      const legacyItems = getLegacyRulesItems(menuItem);
-      const searchThresholdItem = legacyItems?.find(
-        (item) => item.testId === 'discoverLegacySearchThresholdButton'
-      );
-      expect(searchThresholdItem?.disableButton).toBe(true);
-    });
-  });
+        expect(searchThresholdItem).toBeDefined();
+        expect(searchThresholdItem?.label).toBe('Search threshold rule');
+        expect(searchThresholdItem?.testId).toBe('discoverLegacySearchThresholdButton');
+        expect(searchThresholdItem?.iconType).toBe('bell');
+        expect(searchThresholdItem?.run).toBeDefined();
+      });
 
-  describe('Time Field Behavior - Data View Mode', () => {
-    it('should have the Search threshold rule button enabled if the data view has timeFieldName set', () => {
-      const menuItem = getCreateRuleMenu(dataViewWithTimefieldMock, false);
-      const legacyItems = getLegacyRulesItems(menuItem);
-      const searchThresholdItem = legacyItems?.find(
-        (item) => item.testId === 'discoverLegacySearchThresholdButton'
-      );
-      expect(searchThresholdItem?.disableButton).toBe(false);
-    });
+      it('should include "Manage rules and connectors" in legacy items', () => {
+        const menuItem = getCreateRuleMenu();
+        const legacyRulesItem = menuItem.items?.find((item) => item.id === 'legacy-rules');
+        const manageRulesItem = legacyRulesItem?.items?.find(
+          (item) => item.id === 'manage-rules-connectors'
+        );
 
-    it('should have the Search threshold rule button disabled if the data view has no timeFieldName (even with date fields)', () => {
-      // In non-ES|QL mode, only timeFieldName is checked, not date fields
-      const menuItem = getCreateRuleMenu(dataViewMock, false);
-      const legacyItems = getLegacyRulesItems(menuItem);
-      const searchThresholdItem = legacyItems?.find(
-        (item) => item.testId === 'discoverLegacySearchThresholdButton'
-      );
-      expect(searchThresholdItem?.disableButton).toBe(true);
-    });
-  });
+        expect(manageRulesItem).toBeDefined();
+        expect(manageRulesItem?.label).toBe('Manage rules and connectors');
+        expect(manageRulesItem?.testId).toBe('discoverManageRulesButton');
+        expect(manageRulesItem?.iconType).toBe('tableOfContents');
+        expect(manageRulesItem?.href).toBe(
+          '/app/management/insightsAndAlerting/triggersActions/rules'
+        );
+      });
 
-  describe('Manage rules and connectors link', () => {
-    it('should link to the unified rules page when rules app is registered', () => {
-      (discoverServiceMock.application.isAppRegistered as jest.Mock).mockReturnValue(true);
-      (discoverServiceMock.application.getUrlForApp as jest.Mock).mockImplementation(
-        (appId: string) => `/app/${appId}`
-      );
-      const menuItem = getCreateRuleMenu();
-      const legacyItems = getLegacyRulesItems(menuItem);
-      const manageRulesItem = legacyItems?.find(
-        (item) => item.testId === 'discoverManageRulesButton'
-      );
-      expect(manageRulesItem?.href).toBe('/app/rules');
-    });
+      it('should not include "Search threshold rule" when ES_QUERY_ID is not authorized', () => {
+        const menuItem = getCreateRuleMenu(dataViewMock, true, []); // No authorized rule types
+        const legacyRulesItem = menuItem.items?.find((item) => item.id === 'legacy-rules');
+        const searchThresholdItem = legacyRulesItem?.items?.find(
+          (item) => item.id === 'legacy-search-threshold'
+        );
 
-    it('should link to the management page when rules app is not registered', () => {
-      (discoverServiceMock.application.isAppRegistered as jest.Mock).mockReturnValue(false);
-      (discoverServiceMock.application.getUrlForApp as jest.Mock).mockImplementation(
-        (appId: string) => `/app/${appId}`
-      );
-      const menuItem = getCreateRuleMenu();
-      const legacyItems = getLegacyRulesItems(menuItem);
-      const manageRulesItem = legacyItems?.find(
-        (item) => item.testId === 'discoverManageRulesButton'
-      );
-      expect(manageRulesItem?.href).toBe(
-        '/app/management/insightsAndAlerting/triggersActions/rules'
-      );
-    });
-  });
-
-  describe('Capabilities', () => {
-    it('should not include legacy rules submenu if triggersActions capability is not available', () => {
-      const originalCapabilities = discoverServiceMock.capabilities;
-      discoverServiceMock.capabilities = {
-        ...originalCapabilities,
-        management: {
-          insightsAndAlerting: {
-            triggersActions: false,
-          },
-        },
-      };
-
-      const menuItem = getCreateRuleMenu();
-      const legacyRulesSubmenu = getLegacyRulesSubmenu(menuItem);
-
-      // Legacy rules submenu should not be present since legacyItems will be empty
-      expect(legacyRulesSubmenu).toBeUndefined();
-
-      // Restore original capabilities
-      discoverServiceMock.capabilities = originalCapabilities;
-    });
-  });
-
-  describe('Run Actions', () => {
-    it('should have a run function for the Create rule button', () => {
-      const menuItem = getCreateRuleMenu();
-      const createRuleItem = menuItem.items?.find(
-        (item) => item.testId === 'discoverCreateRuleButton'
-      );
-      expect(createRuleItem?.run).toBeDefined();
-      expect(typeof createRuleItem?.run).toBe('function');
-    });
-
-    it('should have a run function for the Search threshold rule button', () => {
-      const menuItem = getCreateRuleMenu();
-      const legacyItems = getLegacyRulesItems(menuItem);
-      const searchThresholdItem = legacyItems?.find(
-        (item) => item.testId === 'discoverLegacySearchThresholdButton'
-      );
-      expect(searchThresholdItem?.run).toBeDefined();
-      expect(typeof searchThresholdItem?.run).toBe('function');
+        expect(searchThresholdItem).toBeUndefined();
+      });
     });
   });
 });

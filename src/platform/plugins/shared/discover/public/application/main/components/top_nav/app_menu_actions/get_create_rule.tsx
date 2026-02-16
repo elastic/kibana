@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import type { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
+import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
 import { AppMenuActionId } from '@kbn/discover-utils';
 import { DynamicRuleFormFlyout } from '@kbn/alerting-v2-rule-form';
+import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
+import { CreateAlertFlyout, getManageRulesUrl, getTimeField } from './get_alerts';
 
 export function CreateESQLRuleFlyout({
   services,
@@ -38,8 +40,14 @@ export function CreateESQLRuleFlyout({
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
 
+  // Track the initial pathname to detect actual navigation (not just query param changes)
+  const initialPathnameRef = useRef(history.location.pathname);
+
+  // Create the app state observable once and memoize it
+  const appState$ = useMemo(() => stateContainer.createAppStateObservable(), [stateContainer]);
+
   useEffect(() => {
-    const querySubscription = stateContainer.createAppStateObservable().subscribe((appState) => {
+    const querySubscription = appState$.subscribe((appState) => {
       const esqlQuery = (appState.query as AggregateQuery)?.esql;
       if (esqlQuery !== undefined) {
         setQuery(esqlQuery || '');
@@ -52,10 +60,9 @@ export function CreateESQLRuleFlyout({
     });
 
     // Listen for route changes to close the flyout
-    // Only close on actual pathname changes, not query parameter updates (e.g., when user edits query)
-    const initialPathname = history.location.pathname;
+    // Only close on actual navigation (pathname change), not query param changes
     const unlisten = history.listen((location) => {
-      if (location.pathname !== initialPathname) {
+      if (location.pathname !== initialPathnameRef.current) {
         onCloseRef.current();
       }
     });
@@ -65,7 +72,7 @@ export function CreateESQLRuleFlyout({
       queryErrorSubscription.unsubscribe();
       unlisten();
     };
-  }, [stateContainer, history, queryError]);
+  }, [appState$, stateContainer.dataState.data$.main$, history, queryError]);
 
   return (
     <DynamicRuleFormFlyout
@@ -91,17 +98,61 @@ export const getCreateRuleMenuItem = ({
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
 }): DiscoverAppMenuItemType => {
-  return {
-    id: AppMenuActionId.createRule,
-    order: 3,
-    label: i18n.translate('discover.localMenu.ruleTitle', {
-      defaultMessage: 'Create Rule',
+  const { dataView, isEsqlMode } = discoverParams;
+  const timeField = getTimeField(dataView);
+  const hasTimeFieldName = !isEsqlMode ? Boolean(dataView?.timeFieldName) : Boolean(timeField);
+
+  const legacyItems: DiscoverAppMenuPopoverItem[] = [];
+
+  if (services.capabilities.management?.insightsAndAlerting?.triggersActions) {
+    if (discoverParams.authorizedRuleTypeIds.includes(ES_QUERY_ID)) {
+      legacyItems.push({
+        id: 'legacy-search-threshold',
+        order: 1,
+        label: i18n.translate('discover.localMenu.legacySearchThresholdTitle', {
+          defaultMessage: 'Search threshold rule',
+        }),
+        iconType: 'bell',
+        testId: 'discoverLegacySearchThresholdButton',
+        disableButton: !hasTimeFieldName,
+        tooltipContent: hasTimeFieldName
+          ? undefined
+          : i18n.translate('discover.localMenu.legacyMissedTimeFieldToolTip', {
+              defaultMessage: 'Data view does not have a time field.',
+            }),
+        run: ({ context: { onFinishAction } }) => {
+          return (
+            <CreateAlertFlyout
+              onFinishAction={onFinishAction}
+              discoverParams={discoverParams}
+              services={services}
+              stateContainer={stateContainer}
+            />
+          );
+        },
+      });
+    }
+
+    legacyItems.push({
+      id: 'manage-rules-connectors',
+      order: Number.MAX_SAFE_INTEGER,
+      label: i18n.translate('discover.localMenu.manageRulesAndConnectors', {
+        defaultMessage: 'Manage rules and connectors',
+      }),
+      iconType: 'tableOfContents',
+      testId: 'discoverManageRulesButton',
+      href: getManageRulesUrl(services),
+    });
+  }
+
+  const createRuleItem: DiscoverAppMenuPopoverItem = {
+    id: 'create-rule',
+    order: 1,
+    label: i18n.translate('discover.localMenu.createRuleTitle', {
+      defaultMessage: 'Create rule',
     }),
     iconType: 'bell',
-    testId: 'discoverESQLRuleButton',
-    tooltipContent: i18n.translate('discover.localMenu.ruleDescription', {
-      defaultMessage: 'Create an ES|QL alerting rule',
-    }),
+    testId: 'discoverCreateRuleButton',
     run: ({ context: { onFinishAction } }) => {
       return (
         <CreateESQLRuleFlyout
@@ -112,5 +163,36 @@ export const getCreateRuleMenuItem = ({
         />
       );
     },
+  };
+
+  const legacyRulesItem: DiscoverAppMenuPopoverItem = {
+    id: 'legacy-rules',
+    order: 2,
+    label: i18n.translate('discover.localMenu.legacyRulesTitle', {
+      defaultMessage: 'Create legacy rules',
+    }),
+    testId: 'discoverLegacyRulesButton',
+    items: legacyItems,
+  };
+
+  const items: DiscoverAppMenuPopoverItem[] = [createRuleItem];
+
+  if (legacyItems.length > 0) {
+    items.push(legacyRulesItem);
+  }
+
+  return {
+    id: AppMenuActionId.createRule,
+    order: 3,
+    label: i18n.translate('discover.localMenu.ruleTitle', {
+      defaultMessage: 'Rules',
+    }),
+    iconType: 'bell',
+    testId: 'discoverRulesMenuButton',
+    tooltipContent: i18n.translate('discover.localMenu.ruleDescription', {
+      defaultMessage: 'Create alerting rules from this query',
+    }),
+    items,
+    popoverTestId: 'discoverRulesPopover',
   };
 };

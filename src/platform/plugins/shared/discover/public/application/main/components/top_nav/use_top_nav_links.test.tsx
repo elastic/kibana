@@ -13,12 +13,28 @@ import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { AppMenuActionId } from '@kbn/discover-utils';
 import { BehaviorSubject } from 'rxjs';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { useTopNavLinks } from './use_top_nav_links';
 import type { DiscoverServices } from '../../../../build_services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import { internalStateActions } from '../../state_management/redux';
+
+// Mock useGetRuleTypesPermissions to return authorized rule types
+jest.mock('@kbn/alerts-ui-shared', () => ({
+  ...jest.requireActual('@kbn/alerts-ui-shared'),
+  useGetRuleTypesPermissions: jest.fn(() => ({
+    authorizedRuleTypes: [
+      {
+        id: '.es-query', // ES_QUERY_ID value
+        authorizedConsumers: {
+          discover: { all: true, read: true },
+        },
+      },
+    ],
+  })),
+}));
 
 const createTestServices = (overrides: Partial<DiscoverServices> = {}) => {
   const baseMock = createDiscoverServicesMock();
@@ -337,6 +353,8 @@ describe('useTopNavLinks', () => {
             },
           },
         },
+        // Required for legacy alerts menu to show
+        triggersActionsUi: triggersActionsUiMock.createStart(),
       });
 
       const v2State = getDiscoverStateMock({ isTimeBased: true });
