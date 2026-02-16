@@ -16,6 +16,7 @@ import {
   SIGNIFICANT_EVENT_TYPE_RESOURCE_HEALTH,
   SIGNIFICANT_EVENT_TYPE_SECURITY,
 } from './types';
+import { SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES } from './tools/features_tool';
 
 export { significantEventsSystemPrompt as significantEventsPrompt };
 
@@ -41,10 +42,19 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
       },
       tools: {
         get_stream_features: {
-          description: 'Fetches all extracted stream features for this stream.',
+          description:
+            'Fetches extracted stream features for this stream. Optionally filter by feature types.',
           schema: {
             type: 'object',
-            properties: {},
+            properties: {
+              feature_types: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                  enum: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES,
+                },
+              },
+            },
           },
         },
         add_queries: {

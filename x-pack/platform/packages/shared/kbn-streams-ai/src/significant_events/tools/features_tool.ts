@@ -5,8 +5,31 @@
  * 2.0.
  */
 
-import type { Feature } from '@kbn/streams-schema';
+import {
+  DATASET_ANALYSIS_FEATURE_TYPE,
+  ERROR_LOGS_FEATURE_TYPE,
+  LOG_PATTERNS_FEATURE_TYPE,
+  LOG_SAMPLES_FEATURE_TYPE,
+  type Feature,
+} from '@kbn/streams-schema';
 import { pick } from 'lodash';
+
+export const SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES = [
+  'infrastructure',
+  'technology',
+  'dependency',
+  DATASET_ANALYSIS_FEATURE_TYPE,
+  LOG_SAMPLES_FEATURE_TYPE,
+  LOG_PATTERNS_FEATURE_TYPE,
+  ERROR_LOGS_FEATURE_TYPE,
+] as const;
+
+export type SignificantEventsFeatureToolType =
+  (typeof SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES)[number];
+
+export interface GetStreamFeaturesInput {
+  feature_types?: unknown;
+}
 
 export type LlmFeature = Pick<
   Feature,
@@ -20,6 +43,31 @@ export type LlmFeature = Pick<
   | 'evidence'
   | 'tags'
 >;
+
+export function resolveFeatureTypeFilters(
+  featureTypes?: SignificantEventsFeatureToolType[]
+): string[] | undefined {
+  if (!featureTypes || featureTypes.length === 0) {
+    return undefined;
+  }
+
+  return [...new Set(featureTypes)];
+}
+
+export function getFeatureTypesFromToolArgs(
+  toolArguments: unknown
+): SignificantEventsFeatureToolType[] | undefined {
+  const args = (toolArguments ?? {}) as GetStreamFeaturesInput;
+  if (!Array.isArray(args.feature_types)) {
+    return undefined;
+  }
+
+  const validTypes = args.feature_types.filter((value): value is SignificantEventsFeatureToolType =>
+    SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES.includes(value as SignificantEventsFeatureToolType)
+  );
+
+  return validTypes.length > 0 ? validTypes : undefined;
+}
 
 export function toLlmFeature(feature: Feature): LlmFeature {
   return pick(feature, [
