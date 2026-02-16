@@ -45,17 +45,7 @@ export function TransactionDistribution({
   const { traceId, transactionId } = urlParams;
 
   const {
-    query: {
-      rangeFrom,
-      rangeTo,
-      showCriticalPath,
-      environment,
-      kuery,
-      transactionName,
-      transactionType,
-      sampleRangeFrom,
-      sampleRangeTo,
-    },
+    query: { rangeFrom, rangeTo, showCriticalPath, environment },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view'
@@ -182,18 +172,6 @@ export function TransactionDistribution({
     [history]
   );
 
-  const queryParams = useMemo(
-    () => ({
-      kuery,
-      transactionName,
-      transactionType,
-      sampleRangeFrom,
-      sampleRangeTo,
-      traceId,
-    }),
-    [kuery, transactionName, transactionType, sampleRangeFrom, sampleRangeTo, traceId]
-  );
-
   return (
     <ResettingHeightRetainer reset={!traceId}>
       <div data-test-subj="apmTransactionDistributionTabContent">
@@ -228,7 +206,7 @@ export function TransactionDistribution({
           onLogsTableConfigChange={onLogsTableConfigChange}
           rangeFrom={rangeFrom}
           rangeTo={rangeTo}
-          queryParams={queryParams}
+          traceId={traceId}
         />
       </div>
     </ResettingHeightRetainer>

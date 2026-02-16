@@ -8,6 +8,7 @@
 import type { ApmIndexSettingsResponse } from '@kbn/apm-sources-access-plugin/server/routes/settings';
 import { esql } from '@kbn/esql-language';
 import {
+  AT_TIMESTAMP,
   ERROR_GROUP_ID,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -45,6 +46,7 @@ export interface ESQLQueryParams {
   spanId?: string;
   traceId?: string;
   errorGroupId?: string;
+  sortDirection?: 'ASC' | 'DESC';
 }
 
 export const getESQLQuery = ({
@@ -79,6 +81,7 @@ export const getESQLQuery = ({
     spanId,
     traceId,
     errorGroupId,
+    sortDirection,
   } = params;
 
   let query = esql.from(dedupedIndices);
@@ -130,6 +133,10 @@ export const getESQLQuery = ({
 
   if (kuery) {
     query = query.pipe`WHERE KQL(${kuery})`;
+  }
+
+  if (sortDirection) {
+    query = query.sort([AT_TIMESTAMP, sortDirection]);
   }
 
   return query.print();
