@@ -200,7 +200,7 @@ export function makeEmbeddableServices(
       getTrigger: jest.fn().mockImplementation(() => ({ exec: jest.fn() })),
     },
     embeddableEnhanced: {
-      initializeEmbeddableDynamicActions: jest.fn(mockDynamicActionsManager),
+      initializeEmbeddableDynamicActions: jest.fn().mockResolvedValue(mockDynamicActionsManager),
     },
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   };
@@ -215,8 +215,9 @@ export function mockDynamicActionsManager() {
     } as unknown as EmbeddableDynamicActionsManager['api'],
     anyStateChange$: of(undefined),
     comparators: {
+      drilldown: jest.fn(),
       enhancements: jest.fn(),
-    },
+    } as unknown as EmbeddableDynamicActionsManager['comparators'],
     getLatestState: jest.fn(),
     serializeState: jest.fn(),
     reinitializeState: jest.fn(),

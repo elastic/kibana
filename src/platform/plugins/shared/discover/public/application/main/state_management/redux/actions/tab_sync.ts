@@ -24,6 +24,7 @@ import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../commo
 import { getCurrentUrlState } from '../../utils/cleanup_url_state';
 import { buildStateSubscribe } from '../../utils/build_state_subscribe';
 import { createUrlSyncObservables } from '../../utils/create_url_sync_observables';
+import { createTabAttributesObservable } from '../../utils/create_tab_attributes_observable';
 import { createSearchSessionRestorationDataProvider } from '../../utils/create_search_session_restoration_data_provider';
 import {
   createDataViewDataSource,
@@ -214,7 +215,6 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       services.timefilter.getTimeUpdate$(),
       services.timefilter.getRefreshIntervalUpdate$()
     ).subscribe(() => {
-      savedSearchContainer.updateTimeRange();
       syncLocallyPersistedTabState();
     });
 
@@ -239,6 +239,12 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     const savedSearchChangesSubscription = savedSearchContainer
       .getCurrent$()
       .subscribe(syncLocallyPersistedTabState);
+
+    const tabAttributesSubscription = createTabAttributesObservable({
+      tabId,
+      internalState$: getInternalState$(),
+      getState,
+    }).subscribe(syncLocallyPersistedTabState);
 
     // start subscribing to dataStateContainer, triggering data fetching
     const unsubscribeData = stateContainer.dataState.subscribe();
@@ -279,6 +285,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
 
     const unsubscribeFn = () => {
       savedSearchChangesSubscription.unsubscribe();
+      tabAttributesSubscription.unsubscribe();
       unsubscribeData();
       appStateSubscription.unsubscribe();
       unsubscribeUrlState();

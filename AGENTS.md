@@ -18,24 +18,32 @@
 - Unsure: read more code; if still stuck, ask w/ short options.
 - Conflicts: call out; pick safer path.
 - Unrecognized changes: assume other agent; keep going; focus your changes. If it causes issues, stop + ask user.
+- If a user correction contradicts this doc or any skills you followed, or missing guidance caused avoidable work, submit DevEx feedback: `echo "..." | scripts/devex_feedback.sh` (include the gap and suggested fix).
 
 ## Testing
 
 ### Jest unit
 `yarn test:jest [--config=<pathToConfigFile>] [TestPathPattern]`
+- Config is auto-discovered from the test file path (walks up to nearest `jest.config.js`). Simplest usage:
+  `yarn test:jest src/core/packages/http/server-internal/src/http_server.test.ts`
+- Only one `--config` per run. To test multiple packages, run separate commands.
 
 ### Jest integration
 `yarn test:jest_integration [--config=<pathToConfigFile>] [TestPathPattern]`
+- Auto-discovers `jest.integration.config.js` (not `jest.config.js`). Same single-config constraint as above.
 
 ### Type check
 `yarn test:type_check [--project path/to/tsconfig.json]`
+- Without `--project` it checks **all** projects (very slow). Always scope to a single project:
+  `yarn test:type_check --project src/core/packages/http/server-internal/tsconfig.json`
+- Only one `--project` per run. To check multiple packages, run separate commands.
 
 ### Function Test Runner (FTR)
 `yarn test:ftr [--config <file1> [--config <file2> ...]]`
 - For new tests, prefer using Scout
 
 ### Scout (UI/API with Playwright)
-`node scripts/scout.js run-tests --stateful --config <scoutConfigPath>` (or `--testFiles <specPath1,specPath2>`)
+`node scripts/scout run-tests --arch stateful --domain classic --config <scoutConfigPath>` (or `--testFiles <specPath1,specPath2>`)
 
 ## Code Style Guidelines
 Follow existing patterns in the target area first; below are common defaults.

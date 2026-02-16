@@ -19,6 +19,12 @@ import type { ConnectorsResponse } from '../../../connectors/model/types';
 export interface WorkflowDetailState {
   /** The yaml string used by the workflow yaml editor */
   yamlString: string;
+  /**
+   * Whether the YAML editor's internal value is synced with the Redux store.
+   * When false, there are pending debounced changes that haven't been dispatched yet.
+   * The save button should be disabled when this is false to prevent saving stale data.
+   */
+  isYamlSynced: boolean;
   /** The persisted workflow detail data */
   workflow?: WorkflowDetailDto;
   /** The computed data derived from the workflow yaml string, it is updated by the workflowComputationMiddleware */
@@ -41,6 +47,14 @@ export interface WorkflowDetailState {
   schema: WorkflowZodSchemaType;
   /** Loading states for async operations */
   loading: LoadingStates;
+  /** Connector flyout state */
+  connectorFlyout: {
+    isOpen: boolean;
+    connectorType?: string;
+    connectorIdToEdit?: string;
+    /** Position in Monaco editor where the flyout was opened from (for inserting connector ID) */
+    insertPosition?: LineColumnPosition;
+  };
 }
 
 export type ActiveTab = 'workflow' | 'executions';
@@ -51,4 +65,12 @@ export interface ComputedData {
   workflowLookup?: WorkflowLookup;
   workflowGraph?: WorkflowGraph; // This will be handled specially for serialization
   workflowDefinition?: WorkflowYaml | null;
+}
+
+/**
+ * Position in a text document (1-based line and column, matching Monaco editor).
+ */
+export interface LineColumnPosition {
+  lineNumber: number;
+  column: number;
 }

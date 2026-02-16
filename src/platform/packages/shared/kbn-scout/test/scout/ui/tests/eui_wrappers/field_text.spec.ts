@@ -7,24 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test, expect } from '../../../../../src/playwright';
+import { test, expect, tags } from '../../../../../src/playwright';
 import { EuiFieldTextWrapper } from '../../../../../src/playwright/eui_components';
 import { navigateToEuiTestPage } from '../../../fixtures/eui_helpers';
 
 // Failing: See https://github.com/elastic/kibana/issues/244036
-test.describe.skip('EUI testing wrapper: EuiFieldText', { tag: ['@svlSecurity', '@ess'] }, () => {
-  test(`fieldText`, async ({ page, log }) => {
-    const selector = {
-      locator: 'xpath=(//div[contains(@class, "euiFormControlLayout")])[1]',
-    };
+test.describe.skip(
+  'EUI testing wrapper: EuiFieldText',
+  { tag: [...tags.serverless.security.complete, ...tags.stateful.classic] },
+  () => {
+    test(`fieldText`, async ({ page, log }) => {
+      const selector = {
+        locator: 'xpath=(//div[contains(@class, "euiFormControlLayout")])[1]',
+      };
 
-    await navigateToEuiTestPage(page, 'docs/components/forms/text/#text-field', log);
+      await navigateToEuiTestPage(page, 'docs/components/forms/text/#text-field', log);
 
-    await test.step('should input text', async () => {
-      const fieldText = new EuiFieldTextWrapper(page, selector);
-      const testValue = 'Test input value';
-      await fieldText.fill(testValue);
-      expect(await fieldText.getValue()).toBe(testValue);
+      await test.step('should input text', async () => {
+        const fieldText = new EuiFieldTextWrapper(page, selector);
+        const testValue = 'Test input value';
+        await fieldText.fill(testValue);
+        expect(await fieldText.getValue()).toBe(testValue);
+      });
     });
-  });
-});
+  }
+);

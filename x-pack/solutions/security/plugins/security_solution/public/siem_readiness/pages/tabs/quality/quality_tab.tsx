@@ -20,7 +20,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { useSiemReadinessApi } from '@kbn/siem-readiness';
-import type { IndexInfo, DataQualityResultDocument } from '@kbn/siem-readiness';
+import type { IndexInfo, DataQualityResultDocument, MainCategories } from '@kbn/siem-readiness';
 import {
   CategoryAccordionTable,
   type CategoryData,
@@ -29,11 +29,11 @@ import {
 import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
 import { useBasePath } from '../../../../common/lib/kibana';
 import { QualityWarningPrompt } from './quality_warning_prompt';
-import {
-  buildQualityCaseDescription,
-  getQualityCaseTitle,
-  getQualityCaseTags,
-} from './quality_add_case_details';
+import { buildQualityCaseDescription, getQualityCaseTitle } from './quality_add_case_details';
+import { ViewCasesButton } from '../../components/view_cases_button';
+import type { SiemReadinessTabActiveCategoriesProps } from '../../components/configuration_panel';
+
+const DATA_QUALITY_CASE_TAGS = ['siem-readiness', 'data-quality', 'ecs-compatibility'];
 
 // Extended IndexInfo with computed fields
 interface IndexInfoWithStatus extends IndexInfo, Record<string, unknown> {
@@ -42,7 +42,9 @@ interface IndexInfoWithStatus extends IndexInfo, Record<string, unknown> {
   checkedAt: number | undefined;
 }
 
-export const QualityTab: React.FC = () => {
+export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
+  activeCategories,
+}) => {
   const basePath = useBasePath();
   const { openNewCaseFlyout } = useSiemReadinessCases();
   const { getReadinessCategories, getIndexQualityResultsLatest } = useSiemReadinessApi();
@@ -56,26 +58,31 @@ export const QualityTab: React.FC = () => {
     return new Map(getIndexQualityData.map((result) => [result.indexName, result]));
   }, [getIndexQualityData]);
 
-  // Prepare categories data with computed status field
+  // Prepare categories data with computed status field, filtered by active categories
   const categories: Array<CategoryData<IndexInfoWithStatus>> = useMemo(() => {
     if (!getReadinessCategoriesData?.mainCategoriesMap) return [];
 
-    return getReadinessCategoriesData.mainCategoriesMap.map((category) => ({
+    const activeOnly = getReadinessCategoriesData.mainCategoriesMap.filter((category) =>
+      activeCategories.includes(category.category as MainCategories)
+    );
+
+    const withStatus = activeOnly.map((category) => ({
       category: category.category,
       items: category.indices.map((index) => {
         const result = indexDataQualityMap.get(index.indexName);
         const incompatibleCount = result?.incompatibleFieldCount ?? 0;
-        const isIncompatible = incompatibleCount > 0;
 
         return {
           ...index,
-          status: isIncompatible ? ('incompatible' as const) : ('healthy' as const),
+          status: incompatibleCount > 0 ? ('incompatible' as const) : ('healthy' as const),
           incompatibleFieldCount: incompatibleCount,
           checkedAt: result?.checkedAt,
         };
       }),
     }));
-  }, [getReadinessCategoriesData?.mainCategoriesMap, indexDataQualityMap]);
+
+    return withStatus.filter((category) => category.items.length > 0);
+  }, [getReadinessCategoriesData?.mainCategoriesMap, indexDataQualityMap, activeCategories]);
 
   // Calculate total incompatible indices
   const totalIncompatibleIndices = useMemo(() => {
@@ -98,7 +105,7 @@ export const QualityTab: React.FC = () => {
     openNewCaseFlyout({
       title: getQualityCaseTitle(),
       description: caseDescription,
-      tags: getQualityCaseTags(),
+      tags: DATA_QUALITY_CASE_TAGS,
     });
   }, [openNewCaseFlyout, caseDescription]);
 
@@ -363,19 +370,24 @@ export const QualityTab: React.FC = () => {
           </EuiText>
         </EuiFlexItem>
         {hasIncompatibleIndices && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconSide="right"
-              size="s"
-              iconType="plusInCircle"
-              onClick={handleCreateCase}
-              data-test-subj="createNewCaseButton"
-            >
-              {i18n.translate('xpack.securitySolution.siemReadiness.quality.createCase', {
-                defaultMessage: 'Create new case',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          <>
+            <EuiFlexItem grow={false}>
+              <ViewCasesButton caseTagsArray={DATA_QUALITY_CASE_TAGS} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconSide="right"
+                size="s"
+                iconType="plusInCircle"
+                onClick={handleCreateCase}
+                data-test-subj="createNewCaseButton"
+              >
+                {i18n.translate('xpack.securitySolution.siemReadiness.quality.createCase', {
+                  defaultMessage: 'Create new case',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </>
         )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />

@@ -29,6 +29,7 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import { type RuntimeStateManager, selectTabRuntimeInternalState } from './runtime_state';
@@ -242,6 +243,14 @@ export const internalStateSlice = createSlice({
         tab.appState = action.payload.appState;
       }),
 
+    /**
+     * Set the tab attributes state
+     */
+    setAttributes: (state, action: TabAction<Pick<TabState, 'attributes'>>) =>
+      withTab(state, action.payload, (tab) => {
+        tab.attributes = action.payload.attributes;
+      }),
+
     setOverriddenVisContextAfterInvalidation: (
       state,
       action: TabAction<Pick<TabState, 'overriddenVisContextAfterInvalidation'>>
@@ -249,16 +258,6 @@ export const internalStateSlice = createSlice({
       withTab(state, action.payload, (tab) => {
         tab.overriddenVisContextAfterInvalidation =
           action.payload.overriddenVisContextAfterInvalidation;
-      }),
-
-    setControlGroupState: (
-      state,
-      action: TabAction<{
-        controlGroupState: TabState['controlGroupState'];
-      }>
-    ) =>
-      withTab(state, action.payload, (tab) => {
-        tab.controlGroupState = action.payload.controlGroupState;
       }),
 
     setCascadedDocumentsState: (
@@ -448,6 +447,14 @@ export const syncLocallyPersistedTabState = createAction<TabActionPayload>(
 
 export const discardFlyoutsOnTabChange = createAction('internalState/discardFlyoutsOnTabChange');
 
+export const transitionedFromEsqlToDataView = createAction<TabActionPayload>(
+  'internalState/transitionedFromEsqlToDataView'
+);
+
+export const transitionedFromDataViewToEsql = createAction<TabActionPayload>(
+  'internalState/transitionedFromDataViewToEsql'
+);
+
 type InternalStateListenerEffect<
   TActionCreator extends PayloadActionCreator<TPayload>,
   TPayload = TActionCreator extends PayloadActionCreator<infer T> ? T : never
@@ -494,6 +501,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
         withTab(listenerApi.getState(), action.payload, (tab) => {
           tabsStorageManager.updateTabStateLocally(action.payload.tabId, {
             internalState: selectTabRuntimeInternalState(runtimeStateManager, tab.id),
+            attributes: tab.attributes,
             appState: tab.appState,
             globalState: tab.globalState,
           });
@@ -508,6 +516,28 @@ const createMiddleware = (options: InternalStateDependencies) => {
     actionCreator: discardFlyoutsOnTabChange,
     effect: () => {
       dismissFlyouts([DiscoverFlyouts.lensEdit, DiscoverFlyouts.metricInsights]);
+    },
+  });
+
+  // This pair of listeners updates the default query mode based on the last used query type (ES|QL vs Data View), we use
+  // this so new discover sessions use that query mode as a default.
+  //
+  // NOTE: In the short term we will add a feature flag to default to ES|QL when there is no existing preference saved.
+  // Right now we use classic - this means that users will have to switch to ES|QL manually the first time if they already
+  // had classic stored as their last used mode.
+  startListening({
+    actionCreator: transitionedFromDataViewToEsql,
+    effect: (action, listenerApi) => {
+      const { services } = listenerApi.extra;
+      services.storage.set(DISCOVER_QUERY_MODE_KEY, 'esql');
+    },
+  });
+
+  startListening({
+    actionCreator: transitionedFromEsqlToDataView,
+    effect: (action, listenerApi) => {
+      const { services } = listenerApi.extra;
+      services.storage.set(DISCOVER_QUERY_MODE_KEY, 'classic');
     },
   });
 

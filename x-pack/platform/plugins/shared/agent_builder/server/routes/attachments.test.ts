@@ -45,6 +45,9 @@ describe('Attachment Routes', () => {
     customError: jest.MockedFunction<(params?: any) => any>;
     forbidden: jest.MockedFunction<(params?: any) => any>;
   };
+  let mockCoreSetup: {
+    getStartServices: jest.MockedFunction<() => Promise<any[]>>;
+  };
   let routeHandlers: Record<string, { config: any; handler: Function }>;
 
   const createMockAttachment = (
@@ -176,10 +179,21 @@ describe('Attachment Routes', () => {
       forbidden: jest.fn((params) => ({ type: 'forbidden', ...params })),
     };
 
+    mockCoreSetup = {
+      getStartServices: jest.fn().mockResolvedValue([
+        {
+          savedObjects: {
+            getScopedClient: jest.fn().mockReturnValue({}),
+          },
+        },
+      ]),
+    };
+
     // Register routes
     registerAttachmentRoutes({
       router: mockRouter,
       getInternalServices: mockGetInternalServices,
+      coreSetup: mockCoreSetup,
       logger: mockLogger,
     } as unknown as RouteDependencies);
   });
@@ -196,6 +210,11 @@ describe('Attachment Routes', () => {
       license: {
         status: 'active',
         hasAtLeast: jest.fn().mockReturnValue(true),
+      },
+    }),
+    agentBuilder: Promise.resolve({
+      spaces: {
+        getSpaceId: jest.fn().mockReturnValue('default'),
       },
     }),
   });

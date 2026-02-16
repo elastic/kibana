@@ -7,9 +7,7 @@ export JOB=${BUILDKITE_PARALLEL_JOB:-0}
 
 # a jest failure will result in the script returning an exit code of 10
 exitCode=0
-results=()
 configs=""
-failedConfigs=""
 
 # Parallel execution tuning (can be overridden via env)
 #   JEST_MAX_PARALLEL: number of concurrent Jest config processes
@@ -29,18 +27,6 @@ else
 fi
 
 export TEST_TYPE
-
-
-# Added section for tracking and retrying failed configs
-FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${TEST_TYPE}${JOB}"
-
-if [[ ! "$configs" && "${BUILDKITE_RETRY_COUNT:-0}" == "1" ]]; then
-  configs=$(buildkite-agent meta-data get "$FAILED_CONFIGS_KEY" --default '')
-  if [[ "$configs" ]]; then
-    echo "--- Retrying only failed configs"
-    echo "$configs"
-  fi
-fi
 
 if [ "$configs" == "" ]; then
   echo "--- downloading jest test run order"
@@ -89,8 +75,6 @@ set -e
 if [ $code -ne 0 ]; then
   exitCode=10
 fi
-
-echo "--- Jest configs complete (combined)"
 
 # Scout reporter
 source .buildkite/scripts/steps/test/scout_upload_report_events.sh

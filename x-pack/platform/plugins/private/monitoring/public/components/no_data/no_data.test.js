@@ -13,6 +13,7 @@ jest.mock('../../legacy_shims', () => ({
   Legacy: {
     shims: {
       hasEnterpriseLicense: false,
+      useCloudConnectStatus: () => ({ isCloudConnectAutoopsEnabled: false, isLoading: false }),
     },
   },
 }));

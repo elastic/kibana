@@ -29,6 +29,8 @@ export const selectHasChanges = createSelector(
   (detail) => detail.yamlString !== detail.workflow?.yaml
 );
 
+export const selectIsYamlSynced = createSelector(selectDetail, (detail) => detail.isYamlSynced);
+
 export const selectYamlDocument = createSelector(
   selectYamlComputed,
   (computed) => computed?.yamlDocument
@@ -153,4 +155,25 @@ export const selectEditorWorkflowDefinition = createSelector(
 export const selectEditorYamlLineCounter = createSelector(
   selectEditorComputed,
   (computed) => computed?.yamlLineCounter
+);
+
+export const selectConnectorFlyout = createSelector(
+  selectDetail,
+  (detail) => detail.connectorFlyout
+);
+export const selectIsConnectorFlyoutOpen = createSelector(
+  selectConnectorFlyout,
+  (flyout) => flyout.isOpen
+);
+export const selectConnectorFlyoutType = createSelector(
+  selectConnectorFlyout,
+  (flyout) => flyout.connectorType
+);
+export const selectConnectorFlyoutConnectorToEdit = createSelector(
+  selectConnectorFlyout,
+  (flyout) => flyout.connectorIdToEdit
+);
+export const selectConnectorFlyoutInsertPosition = createSelector(
+  selectConnectorFlyout,
+  (flyout) => flyout.insertPosition
 );

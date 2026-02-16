@@ -10,7 +10,6 @@
 import { escape } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-common';
 import { asPrettyString, getHighlightHtml, shortenDottedString } from '../utils';
 import { FieldFormat } from '../field_format';
 import type { TextContextTypeConvert, HtmlContextTypeConvert } from '../types';
@@ -109,12 +108,11 @@ export class StringFormat extends FieldFormat {
   }
 
   textConvert: TextContextTypeConvert = (val, options) => {
-    if (val === '') {
-      return EMPTY_LABEL;
+    const missing = this.checkForMissingValueText(val);
+    if (missing) {
+      return missing;
     }
-    if (val == null || val === MISSING_TOKEN) {
-      return NULL_LABEL;
-    }
+
     switch (this.param('transform')) {
       case 'lower':
         return String(val).toLowerCase();
@@ -134,12 +132,11 @@ export class StringFormat extends FieldFormat {
   };
 
   htmlConvert: HtmlContextTypeConvert = (val, { hit, field } = {}) => {
-    if (val === '') {
-      return `<span class="ffString__emptyValue">${EMPTY_LABEL}</span>`;
+    const missing = this.checkForMissingValueHtml(val);
+    if (missing) {
+      return missing;
     }
-    if (val == null || val === MISSING_TOKEN) {
-      return `<span class="ffString__emptyValue">${NULL_LABEL}</span>`;
-    }
+
     return hit?.highlight?.[field?.name!]
       ? getHighlightHtml(escape(val), hit.highlight[field!.name])
       : escape(this.textConvert(val));

@@ -1,0 +1,75 @@
+# INLINESTATS-BY
+
+The INLINE STATS command groups rows based on a common value specified after BY and calculates one or more aggregated values over the grouped rows. The output table retains all columns from the input table, with new columns added or existing columns overridden if their names overlap. Aggregated values can be filtered using WHERE for each calculation, and if BY is omitted, aggregations are applied to the entire dataset. The new columns appear in the order defined in the INLINE STATS command.
+
+## Syntax
+
+`INLINE STATS [column1 =] expression1 [WHERE boolean_expression1][,
+      ...,
+      [columnN =] expressionN [WHERE boolean_expressionN]]
+      [BY [grouping_name1 =] grouping_expression1[,
+          ...,
+          [grouping_nameN = ] grouping_expressionN]]`
+
+### Parameters
+
+#### columnX
+
+The name for the aggregated value returned. If omitted, the name defaults to the corresponding expression. If multiple columns share the same name, only the rightmost column with that name is kept.
+
+#### expressionX
+
+An expression that computes an aggregated value.
+
+#### grouping_expressionX
+
+An expression that outputs the values to group by. If its name matches an existing or computed column, that column will be overridden.
+
+#### boolean_expressionX
+
+The condition that determines which rows are included when evaluating expressionX.
+
+## Examples
+
+Calculates the maximum salary for each language group and adds it as a new column.
+
+```esql
+FROM employees
+| KEEP emp_no, languages, salary
+| INLINE STATS max_salary = MAX(salary) BY languages
+```
+
+Calculates the maximum salary across all employees and adds it as a new column to every row.
+
+```esql
+FROM employees
+| KEEP emp_no, languages, salary
+| INLINE STATS max_salary = MAX(salary)
+```
+
+Calculates the average salary and the count of employees, grouped by both language and tenure.
+
+```esql
+FROM employees
+| WHERE still_hired
+| KEEP emp_no, languages, salary, hire_date
+| EVAL tenure = DATE_DIFF("year", hire_date, "2025-09-18T00:00:00")
+| DROP hire_date
+| INLINE STATS avg_salary = AVG(salary), count = count(*) BY languages, tenure
+```
+
+Calculates rounded average salaries for employees in different salary ranges, using conditional WHERE clauses for each aggregation.
+
+```esql
+FROM employees
+| KEEP emp_no, salary
+| INLINE STATS avg_lt_50 = ROUND(AVG(salary)) WHERE salary < 50000,
+               avg_lt_60 = ROUND(AVG(salary)) WHERE salary >=50000 AND salary < 60000,
+               avg_gt_60 = ROUND(AVG(salary)) WHERE salary >= 60000
+```
+
+## Limitations
+
+- The CATEGORIZE grouping function is not currently supported.
+- You cannot use LIMIT (explicit or implicit) before INLINE STATS, as this can lead to unexpected results.
+- You cannot use FORK before INLINE STATS, because FORK adds an implicit LIMIT to each branch, which can lead to unexpected results.
