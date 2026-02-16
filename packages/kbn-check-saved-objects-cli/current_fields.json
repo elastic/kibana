@@ -96,7 +96,9 @@
     "name",
     "updatedAt",
     "updatedBy",
-    "workflow_id"
+    "destinations",
+    "destinations.type",
+    "destinations.id"
   ],
   "alerting_rule": [
     "createdAt",

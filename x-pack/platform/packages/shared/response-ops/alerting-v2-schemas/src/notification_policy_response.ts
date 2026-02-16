@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { NotificationPolicyDestination } from './notification_policy_data_schema';
+
 export interface NotificationPolicyResponse {
   id: string;
   version?: string;
   name: string;
   description: string;
-  workflow_id: string;
+  destinations: NotificationPolicyDestination[];
   matcher?: string;
   group_by?: string[];
   throttle?: { interval: string };

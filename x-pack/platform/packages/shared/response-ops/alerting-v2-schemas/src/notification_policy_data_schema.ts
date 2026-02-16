@@ -8,10 +8,23 @@
 import { z } from '@kbn/zod';
 import { durationSchema } from './common';
 
+const workflowNotificationPolicyDestinationSchema = z.object({
+  type: z.literal('workflow'),
+  id: z.string(),
+});
+
+export const notificationPolicyDestinationSchema = z.discriminatedUnion('type', [
+  workflowNotificationPolicyDestinationSchema,
+]);
+
+export type NotificationPolicyDestination = z.infer<typeof notificationPolicyDestinationSchema>;
+
 export const createNotificationPolicyDataSchema = z.object({
   name: z.string(),
   description: z.string(),
-  workflow_id: z.string(),
+  destinations: z
+    .array(notificationPolicyDestinationSchema)
+    .min(1, 'At least one destination must be provided'),
   matcher: z.string().optional(),
   group_by: z.array(z.string()).optional(),
   throttle: z.object({ interval: durationSchema }).optional(),
@@ -22,7 +35,10 @@ export type CreateNotificationPolicyData = z.infer<typeof createNotificationPoli
 export const updateNotificationPolicyDataSchema = z.object({
   name: z.string().optional(),
   description: z.string().optional(),
-  workflow_id: z.string().optional(),
+  destinations: z
+    .array(notificationPolicyDestinationSchema)
+    .min(1, 'At least one destination must be provided')
+    .optional(),
   matcher: z.string().optional(),
   group_by: z.array(z.string()).optional(),
   throttle: z.object({ interval: durationSchema }).optional(),

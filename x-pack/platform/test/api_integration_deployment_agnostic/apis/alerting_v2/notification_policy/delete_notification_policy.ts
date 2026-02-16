@@ -38,7 +38,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .send({
           name: 'test-policy-for-delete',
           description: 'test-policy-for-delete description',
-          workflow_id: 'test-workflow-for-delete',
+          destinations: [{ type: 'workflow', id: 'test-workflow-for-delete' }],
         });
 
       const createdPolicyId = createResponse.body.id;

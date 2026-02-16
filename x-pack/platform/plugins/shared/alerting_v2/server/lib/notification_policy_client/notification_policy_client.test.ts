@@ -76,7 +76,7 @@ describe('NotificationPolicyClient', () => {
         data: {
           name: 'my-policy',
           description: 'my-policy description',
-          workflow_id: 'my-workflow',
+          destinations: [{ type: 'workflow', id: 'my-workflow' }],
         },
         options: { id: 'policy-id-1' },
       });
@@ -86,7 +86,7 @@ describe('NotificationPolicyClient', () => {
         expect.objectContaining({
           name: 'my-policy',
           description: 'my-policy description',
-          workflow_id: 'my-workflow',
+          destinations: [{ type: 'workflow', id: 'my-workflow' }],
           createdBy: 'elastic_profile_uid',
           updatedBy: 'elastic_profile_uid',
           createdAt: '2025-01-01T00:00:00.000Z',
@@ -101,7 +101,7 @@ describe('NotificationPolicyClient', () => {
           version: 'WzEsMV0=',
           name: 'my-policy',
           description: 'my-policy description',
-          workflow_id: 'my-workflow',
+          destinations: [{ type: 'workflow', id: 'my-workflow' }],
           createdBy: 'elastic_profile_uid',
           updatedBy: 'elastic_profile_uid',
           createdAt: '2025-01-01T00:00:00.000Z',
@@ -125,7 +125,7 @@ describe('NotificationPolicyClient', () => {
         data: {
           name: 'my-policy',
           description: 'my-policy description',
-          workflow_id: 'my-workflow',
+          destinations: [{ type: 'workflow', id: 'my-workflow' }],
         },
       });
 
@@ -134,7 +134,7 @@ describe('NotificationPolicyClient', () => {
         expect.objectContaining({
           name: 'my-policy',
           description: 'my-policy description',
-          workflow_id: 'my-workflow',
+          destinations: [{ type: 'workflow', id: 'my-workflow' }],
         }),
         expect.objectContaining({
           overwrite: false,
@@ -145,7 +145,7 @@ describe('NotificationPolicyClient', () => {
       expect(res.id).toEqual(expect.any(String));
       expect(res.name).toBe('my-policy');
       expect(res.description).toBe('my-policy description');
-      expect(res.workflow_id).toBe('my-workflow');
+      expect(res.destinations).toEqual([{ type: 'workflow', id: 'my-workflow' }]);
     });
 
     it('throws 409 conflict when id already exists', async () => {
@@ -161,7 +161,7 @@ describe('NotificationPolicyClient', () => {
           data: {
             name: 'my-policy',
             description: 'my-policy description',
-            workflow_id: 'my-workflow',
+            destinations: [{ type: 'workflow', id: 'my-workflow' }],
           },
           options: { id: 'policy-id-conflict' },
         })
@@ -176,7 +176,7 @@ describe('NotificationPolicyClient', () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'test-policy',
         description: 'test-policy description',
-        workflow_id: 'test-workflow',
+        destinations: [{ type: 'workflow', id: 'test-workflow' }],
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -225,7 +225,7 @@ describe('NotificationPolicyClient', () => {
       const firstAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'policy-two',
         description: 'policy-two description',
-        workflow_id: 'workflow-two',
+        destinations: [{ type: 'workflow', id: 'workflow-two' }],
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -234,7 +234,7 @@ describe('NotificationPolicyClient', () => {
       const secondAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'policy-one',
         description: 'policy-one description',
-        workflow_id: 'workflow-one',
+        destinations: [{ type: 'workflow', id: 'workflow-one' }],
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -287,7 +287,7 @@ describe('NotificationPolicyClient', () => {
       const firstAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'policy-found-one',
         description: 'policy-found-one description',
-        workflow_id: 'workflow-found-one',
+        destinations: [{ type: 'workflow', id: 'workflow-found-one' }],
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -296,7 +296,7 @@ describe('NotificationPolicyClient', () => {
       const thirdAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'policy-found-three',
         description: 'policy-found-three description',
-        workflow_id: 'workflow-found-three',
+        destinations: [{ type: 'workflow', id: 'workflow-found-three' }],
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -366,7 +366,7 @@ describe('NotificationPolicyClient', () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
-        workflow_id: 'original-workflow',
+        destinations: [{ type: 'workflow', id: 'original-workflow' }],
         createdBy: 'creator_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
@@ -388,7 +388,10 @@ describe('NotificationPolicyClient', () => {
       });
 
       const res = await client.updateNotificationPolicy({
-        data: { name: 'updated-policy', workflow_id: 'updated-workflow' },
+        data: {
+          name: 'updated-policy',
+          destinations: [{ type: 'workflow', id: 'updated-workflow' }],
+        },
         options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
       });
 
@@ -398,7 +401,7 @@ describe('NotificationPolicyClient', () => {
         expect.objectContaining({
           name: 'updated-policy',
           description: 'original-policy description',
-          workflow_id: 'updated-workflow',
+          destinations: [{ type: 'workflow', id: 'updated-workflow' }],
           updatedBy: 'elastic_profile_uid',
           updatedAt: '2025-01-01T00:00:00.000Z',
           // Preserves original createdBy and createdAt
@@ -414,7 +417,7 @@ describe('NotificationPolicyClient', () => {
           version: 'WzIsMV0=',
           name: 'updated-policy',
           description: 'original-policy description',
-          workflow_id: 'updated-workflow',
+          destinations: [{ type: 'workflow', id: 'updated-workflow' }],
           updatedAt: '2025-01-01T00:00:00.000Z',
         })
       );
@@ -430,7 +433,7 @@ describe('NotificationPolicyClient', () => {
 
       await expect(
         client.updateNotificationPolicy({
-          data: { workflow_id: 'some-workflow' },
+          data: { destinations: [{ type: 'workflow', id: 'some-workflow' }] },
           options: { id: 'policy-id-update-404', version: 'WzEsMV0=' },
         })
       ).rejects.toMatchObject({
@@ -442,7 +445,7 @@ describe('NotificationPolicyClient', () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
-        workflow_id: 'original-workflow',
+        destinations: [{ type: 'workflow', id: 'original-workflow' }],
         createdBy: 'creator_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
@@ -465,7 +468,7 @@ describe('NotificationPolicyClient', () => {
 
       await expect(
         client.updateNotificationPolicy({
-          data: { workflow_id: 'new-workflow' },
+          data: { destinations: [{ type: 'workflow', id: 'new-workflow' }] },
           options: { id: 'policy-id-conflict', version: 'WzEsMV0=' },
         })
       ).rejects.toMatchObject({
@@ -479,7 +482,7 @@ describe('NotificationPolicyClient', () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'policy-to-delete',
         description: 'policy-to-delete description',
-        workflow_id: 'workflow-to-delete',
+        destinations: [{ type: 'workflow', id: 'workflow-to-delete' }],
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
