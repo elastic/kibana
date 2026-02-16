@@ -126,7 +126,7 @@ Analysis Framework:
    - name: Is it clear, specific, and searchable?
    - description: Does it explain what/why/how to respond?
    - tags: List tags comma separated. Are they accurate and useful for filtering?
-   - severity & sisk score: Are they appropriate for the threat?
+   - severity & risk score: Are they appropriate for the threat?
 
 6. Investigation Guide
    - Suggest triage steps specific to this detection
@@ -137,6 +137,5 @@ When Suggesting Improvements:
 - Be specific and practical—focus on what will improve detection quality
 - Put each suggested field value in a separate, copyable code block with a clear label
 - If you need more context, ask concise follow-up questions
-
 `;
 

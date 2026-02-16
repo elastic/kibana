@@ -52,31 +52,41 @@ export type AddRuleAttachmentToChatButtonProps = (
   mode?: 'creation' | 'exploration';
 };
 
-const isFormProps = (
-  props: AddRuleAttachmentToChatButtonProps
-): props is AddRuleAttachmentFromFormProps & {
-  pathway?: AgentBuilderAddToChatTelemetry['pathway'];
-} => {
-  return 'defineStepData' in props;
-};
-
 export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButtonProps> = (props) => {
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const pathway = props.pathway ?? 'rule_creation';
   const mode = props.mode ?? 'creation';
 
+  const {
+    defineStepData,
+    aboutStepData,
+    scheduleStepData,
+    actionsStepData,
+    actionTypeRegistry,
+    rule,
+  } = props;
+
   // Format rule for AI assistant attachment from either form state or an existing rule response.
+  const isFormBased =
+    defineStepData != null &&
+    aboutStepData != null &&
+    scheduleStepData != null &&
+    actionsStepData != null &&
+    actionTypeRegistry != null;
+
   const ruleAttachment = useMemo(() => {
-    const formattedRule = isFormProps(props) ? formatRule<RuleCreateProps>(
-      props.defineStepData,
-      props.aboutStepData,
-      props.scheduleStepData,
-      props.actionsStepData,
-      props.actionTypeRegistry
-    ) : props.rule;
+    const formattedRule = isFormBased
+      ? formatRule<RuleCreateProps>(
+          defineStepData,
+          aboutStepData,
+          scheduleStepData,
+          actionsStepData,
+          actionTypeRegistry
+        )
+      : rule;
     const attachmentLabel = formattedRule?.name;
 
-    const attachmentData = `<rule>${JSON.stringify(formattedRule ?? props.rule)}</rule>`;
+    const attachmentData = `<rule>${JSON.stringify(formattedRule)}</rule>`;
     const attachmentPrompt =
       mode === 'exploration' ? RULE_EXPLORATION_ATTACHMENT_PROMPT : RULE_ATTACHMENT_PROMPT;
 
@@ -88,7 +98,7 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
       },
       attachmentPrompt,
     };
-  }, [mode, props]);
+  }, [isFormBased, mode, defineStepData, aboutStepData, scheduleStepData, actionsStepData, actionTypeRegistry, rule]);
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(ruleAttachment);
 

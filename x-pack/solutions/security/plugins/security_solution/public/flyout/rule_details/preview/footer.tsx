@@ -13,6 +13,7 @@ import { RULE_PREVIEW_FOOTER_TEST_ID, RULE_PREVIEW_OPEN_RULE_FLYOUT_TEST_ID } fr
 import { useRuleDetailsLink } from '../../document_details/shared/hooks/use_rule_details_link';
 import { FlyoutFooter } from '../../shared/components/flyout_footer';
 import { AddRuleAttachmentToChatButton } from '../../../detection_engine/rule_creation_ui/components/add_rule_attachment_to_chat_button';
+import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_agent_builder_availability';
 
 interface PreviewFooterProps {
   ruleId: string;
@@ -24,6 +25,11 @@ interface PreviewFooterProps {
  */
 export const PreviewFooter = memo(({ ruleId, rule }: PreviewFooterProps) => {
   const href = useRuleDetailsLink({ ruleId });
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+
+  if (!href && !isAgentChatExperienceEnabled) {
+    return null;
+  }
 
   return (
     <FlyoutFooter data-test-subj={RULE_PREVIEW_FOOTER_TEST_ID}>
