@@ -84,7 +84,7 @@ export interface TableAction<T> {
 
 export interface TableActionGroup<T> {
   id: string;
-  groupLabel: string;
+  groupLabel?: string;
   actions: Array<TableAction<T>>;
 }
 
@@ -118,18 +118,20 @@ function ActionsCell<T extends object>({
     let subPanelId = 1;
 
     for (const [groupIndex, group] of actions.entries()) {
-      // Add group header
-      mainPanelItems.push({
-        name: group.groupLabel,
-        disabled: true,
-        css: {
-          fontWeight: 700,
-          color: euiTheme.colors.text,
-          borderBottom: euiTheme.border.thin,
-          marginTop: groupIndex > 0 ? euiTheme.size.m : 0,
-        },
-        'data-test-subj': `apmManagedTableActionsMenuGroup-${group.id}`,
-      });
+      // Add group header if it exists
+      if (group.groupLabel) {
+        mainPanelItems.push({
+          name: group.groupLabel,
+          disabled: true,
+          css: {
+            fontWeight: 700,
+            color: euiTheme.colors.text,
+            borderBottom: euiTheme.border.thin,
+            marginTop: groupIndex > 0 ? euiTheme.size.m : 0,
+          },
+          'data-test-subj': `apmManagedTableActionsMenuGroup-${group.id}`,
+        });
+      }
 
       // Add action items
       for (const action of group.actions) {

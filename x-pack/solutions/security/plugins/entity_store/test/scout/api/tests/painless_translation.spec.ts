@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
-
 import { expect } from '@kbn/scout-security/api';
 import { apiTest } from '@kbn/scout-security';
 import {
@@ -91,7 +89,7 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
         expect(hits.length).toBeGreaterThan(0);
 
         for (const hit of hits) {
-          const expectedEuid = getEuidFromObject(entityType, hit._source);
+          const expectedEuid = getEuidFromObject(entityType, hit);
           const actualEuid = (hit.fields?.entity_id as string[] | undefined)?.[0];
 
           expect(actualEuid).toBe(expectedEuid);
