@@ -31,6 +31,12 @@ describe(
       login();
       visit(ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL);
       cy.url({ timeout: 10000 }).should('include', ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL);
+      // Diagnostic: surface if we are seeing an upsell or privileges page instead.
+      cy.get('body').then(($body) => {
+        if ($body.find('[data-test-subj="noPrivilegesPage"]').length) {
+          cy.log('Rendered noPrivilegesPage');
+        }
+      });
     });
 
     afterEach(() => {});
