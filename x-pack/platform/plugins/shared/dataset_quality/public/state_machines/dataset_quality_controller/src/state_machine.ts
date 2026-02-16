@@ -31,6 +31,7 @@ import {
   fetchDatasetStatsFailedNotifier,
   fetchDatasetTypesPrivilegesFailedNotifier,
   fetchDegradedStatsFailedNotifier,
+  fetchFailedStatsFailedNotifier,
   fetchIntegrationsFailedNotifier,
   fetchTotalDocsFailedNotifier,
   updateFailureStoreFailedNotifier,
@@ -379,9 +380,11 @@ const createPureDatasetQualityControllerStateMachine = (
                   ],
                   NOTIFY_TOTAL_DOCS_STATS_FAILED: [
                     {
+                      target: '.unauthorized',
                       guard: 'checkIfActionForbidden',
                     },
                     {
+                      target: '.loaded',
                       actions: ['notifyFetchTotalDocsFailed'],
                     },
                   ],
@@ -658,6 +661,12 @@ export const createDatasetQualityControllerStateMachine = ({
         }
       },
 
+      notifyFetchFailedStatsFailed: ({ event }) => {
+        if ('error' in event) {
+          fetchFailedStatsFailedNotifier(toasts, event.error as Error);
+        }
+      },
+
       notifyFetchTotalDocsFailed: ({ event }) => {
         if ('error' in event) {
           fetchTotalDocsFailedNotifier(toasts, event.error as Error, {});
@@ -747,7 +756,7 @@ const createLoadDataStreamDocsStatsActor = ({ dataStreamStatsClient }: ActorDeps
 
         sendBack({ type: 'SAVE_TOTAL_DOCS_STATS', data: totalDocsStats, dataStreamType: type });
       } catch (e) {
-        sendBack({ type: 'NOTIFY_TOTAL_DOCS_STATS_FAILED', data: e as Error });
+        sendBack({ type: 'NOTIFY_TOTAL_DOCS_STATS_FAILED', error: e as Error });
       }
     };
     fetchDocs();

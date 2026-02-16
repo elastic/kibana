@@ -12,7 +12,6 @@ import { distinctUntilChanged, from, map } from 'rxjs';
 import { createActor } from 'xstate';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { createDatasetQualityDetailsControllerStateMachine } from '../../state_machines/dataset_quality_details_controller/state_machine';
-import type { DataStreamsStatsServiceStart } from '../../services/data_streams_stats';
 import type { DataStreamDetailsServiceStart } from '../../services/data_stream_details';
 import type { DatasetQualityStartDeps } from '../../types';
 import { getContextFromPublicState, getPublicStateFromContext } from './public_state';
@@ -24,7 +23,6 @@ import type {
 interface Dependencies {
   core: CoreStart;
   plugins: DatasetQualityStartDeps;
-  dataStreamStatsService: DataStreamsStatsServiceStart;
   dataStreamDetailsService: DataStreamDetailsServiceStart;
 }
 
