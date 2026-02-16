@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function isTemplateExpression(expression: string): boolean {
-  return expression.startsWith('{{') && expression.endsWith('}}');
+export function isTemplateExpression(expression: string | unknown): expression is `{{${string}}}` {
+  return typeof expression === 'string' && expression.startsWith('{{') && expression.endsWith('}}');
 }
