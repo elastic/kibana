@@ -337,6 +337,51 @@ export class UnifiedTabsPageObject extends FtrService {
     return titles;
   }
 
+  public async getRecentlyClosedRootTitles() {
+    await this.openTabsBarMenu();
+    const rootItems = await this.find.allByCssSelector(
+      '[data-test-subj^="unifiedTabs_tabsMenu_recentlyClosedGroup_"], [data-test-subj^="unifiedTabs_tabsMenu_recentlyClosedTab_"]'
+    );
+    const titles = [];
+    for (const item of rootItems) {
+      const fullText = await item.getVisibleText();
+      const title = fullText.split('\n')[0];
+      titles.push(title);
+    }
+    await this.closeTabsBarMenu();
+    return titles;
+  }
+
+  public async getRecentlyClosedGroupTabTitles(groupIndex: number) {
+    await this.openTabsBarMenu();
+    const groupItems = await this.find.allByCssSelector(
+      '[data-test-subj^="unifiedTabs_tabsMenu_recentlyClosedGroup_"]'
+    );
+
+    if (groupIndex < 0 || groupIndex >= groupItems.length) {
+      throw new Error(`Recently closed group index ${groupIndex} is out of bounds`);
+    }
+
+    await groupItems[groupIndex].click();
+    await this.retry.waitFor('the restore all button to appear', async () => {
+      return await this.testSubjects.exists('unifiedTabs_tabsMenu_restoreAllTabs');
+    });
+
+    const groupTabItems = await this.find.allByCssSelector(
+      '[data-test-subj^="unifiedTabs_tabsMenu_recentlyClosedGroupTab_"]'
+    );
+
+    const titles = [];
+    for (const item of groupTabItems) {
+      const fullText = await item.getVisibleText();
+      const title = fullText.split('\n')[0];
+      titles.push(title);
+    }
+
+    await this.closeTabsBarMenu();
+    return titles;
+  }
+
   public async restoreRecentlyClosedTab(index: number) {
     const currentNumberOfTabs = await this.getNumberOfTabs();
     await this.openTabsBarMenu();
@@ -350,6 +395,64 @@ export class UnifiedTabsPageObject extends FtrService {
     await this.retry.waitFor('the tab to be restored', async () => {
       const newNumberOfTabs = await this.getNumberOfTabs();
       return newNumberOfTabs === currentNumberOfTabs + 1;
+    });
+  }
+
+  public async restoreRecentlyClosedTabFromGroup(groupIndex: number, tabIndex: number) {
+    const currentNumberOfTabs = await this.getNumberOfTabs();
+    await this.openTabsBarMenu();
+
+    const groupItems = await this.find.allByCssSelector(
+      '[data-test-subj^="unifiedTabs_tabsMenu_recentlyClosedGroup_"]'
+    );
+    if (groupIndex < 0 || groupIndex >= groupItems.length) {
+      throw new Error(`Recently closed group index ${groupIndex} is out of bounds`);
+    }
+
+    await groupItems[groupIndex].click();
+    await this.retry.waitFor('group items to be visible', async () => {
+      return await this.testSubjects.exists('unifiedTabs_tabsMenu_restoreAllTabs');
+    });
+
+    const groupTabItems = await this.find.allByCssSelector(
+      '[data-test-subj^="unifiedTabs_tabsMenu_recentlyClosedGroupTab_"]'
+    );
+    if (tabIndex < 0 || tabIndex >= groupTabItems.length) {
+      throw new Error(`Recently closed group tab index ${tabIndex} is out of bounds`);
+    }
+
+    await groupTabItems[tabIndex].click();
+    await this.retry.waitFor('the tab to be restored', async () => {
+      const newNumberOfTabs = await this.getNumberOfTabs();
+      return newNumberOfTabs === currentNumberOfTabs + 1;
+    });
+  }
+
+  public async restoreAllRecentlyClosedTabsFromGroup(groupIndex: number) {
+    const currentNumberOfTabs = await this.getNumberOfTabs();
+    await this.openTabsBarMenu();
+
+    const groupItems = await this.find.allByCssSelector(
+      '[data-test-subj^="unifiedTabs_tabsMenu_recentlyClosedGroup_"]'
+    );
+    if (groupIndex < 0 || groupIndex >= groupItems.length) {
+      throw new Error(`Recently closed group index ${groupIndex} is out of bounds`);
+    }
+
+    await groupItems[groupIndex].click();
+    await this.retry.waitFor('group items to be visible', async () => {
+      return await this.testSubjects.exists('unifiedTabs_tabsMenu_restoreAllTabs');
+    });
+
+    const groupTabItems = await this.find.allByCssSelector(
+      '[data-test-subj^="unifiedTabs_tabsMenu_recentlyClosedGroupTab_"]'
+    );
+    const groupSize = groupTabItems.length;
+
+    await this.testSubjects.click('unifiedTabs_tabsMenu_restoreAllTabs');
+    await this.retry.waitFor('the group tabs to be restored', async () => {
+      const newNumberOfTabs = await this.getNumberOfTabs();
+      return newNumberOfTabs === currentNumberOfTabs + groupSize;
     });
   }
 

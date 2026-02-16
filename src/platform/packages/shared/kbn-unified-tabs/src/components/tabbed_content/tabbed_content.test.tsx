@@ -24,12 +24,16 @@ describe('TabbedContent', () => {
   const TabsWrapper = ({
     initialItems,
     initialSelectedItemId,
+    recentlyClosedItems = [],
+    createItem,
     onChanged,
     onEBTEvent,
     disableRenderContent = false,
   }: {
     initialItems: TabbedContentProps['items'];
     initialSelectedItemId?: TabbedContentProps['selectedItemId'];
+    recentlyClosedItems?: TabbedContentProps['recentlyClosedItems'];
+    createItem?: TabbedContentProps['createItem'];
     onChanged: TabbedContentProps['onChanged'];
     onEBTEvent: TabbedContentProps['onEBTEvent'];
     disableRenderContent?: boolean;
@@ -45,8 +49,8 @@ describe('TabbedContent', () => {
       <TabbedContent
         items={managedItems}
         selectedItemId={managedSelectedItemId}
-        recentlyClosedItems={[]}
-        createItem={() => NEW_TAB}
+        recentlyClosedItems={recentlyClosedItems}
+        createItem={createItem ?? (() => NEW_TAB)}
         getPreviewData={getPreviewDataMock}
         services={servicesMock}
         onChanged={(updatedState) => {
@@ -67,7 +71,53 @@ describe('TabbedContent', () => {
     );
   };
 
+  it('can restore all tabs from a recently closed tab set', async () => {
+    const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+    const initialItems = [{ id: 'tab1', label: 'Tab 1' }];
+    const onChanged = jest.fn();
+    const onEBTEvent = jest.fn();
+
+    let counter = 0;
+    const createItem = () => {
+      counter += 1;
+      return { id: `new-${counter}`, label: `New ${counter}` };
+    };
+
+    const closedAt = Date.now() - 60_000;
+    const recentlyClosedItems = [
+      { id: 'closed1', label: 'Closed Tab 1', closedAt },
+      { id: 'closed2', label: 'Closed Tab 2', closedAt },
+    ];
+
+    render(
+      <TabsWrapper
+        initialItems={initialItems}
+        initialSelectedItemId={initialItems[0].id}
+        recentlyClosedItems={recentlyClosedItems}
+        createItem={createItem}
+        onChanged={onChanged}
+        onEBTEvent={onEBTEvent}
+      />
+    );
+
+    await user.click(screen.getByTestId('unifiedTabs_tabsBarMenuButton'));
+    await user.click(screen.getByText('2 tabs'));
+    await user.click(screen.getByTestId('unifiedTabs_tabsMenu_restoreAllTabs'));
+
+    await waitFor(() => {
+      expect(onChanged).toHaveBeenCalledWith({
+        items: [
+          initialItems[0],
+          { id: 'new-1', label: 'Closed Tab 1', restoredFromId: 'closed1' },
+          { id: 'new-2', label: 'Closed Tab 2', restoredFromId: 'closed2' },
+        ],
+        selectedItem: { id: 'new-1', label: 'Closed Tab 1', restoredFromId: 'closed1' },
+      });
+    });
+  });
+
   it('can create a new tab and sends tabCreated EBT event', async () => {
+    const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
     const initialItems = [
       { id: 'tab1', label: 'Tab 1' },
       { id: 'tab2', label: 'Tab 2' },
@@ -83,7 +133,8 @@ describe('TabbedContent', () => {
         onEBTEvent={onEBTEvent}
       />
     );
-    screen.getByTestId('unifiedTabs_tabsBar_newTabBtn').click();
+
+    await user.click(screen.getByTestId('unifiedTabs_tabsBar_newTabBtn'));
     expect(onChanged).toHaveBeenCalledWith({
       items: [...initialItems, NEW_TAB],
       selectedItem: NEW_TAB,
@@ -103,6 +154,7 @@ describe('TabbedContent', () => {
   });
 
   it('can close a tab and sends tabClosed EBT event', async () => {
+    const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
     const initialItems = [
       { id: 'tab1', label: 'Tab 1' },
       { id: 'tab2', label: 'Tab 2' },
@@ -127,7 +179,7 @@ describe('TabbedContent', () => {
       screen.getByTestId(`unifiedTabs_selectTabBtn_${firstTab.id}`).getAttribute('aria-selected')
     ).toBe('true');
 
-    screen.getByTestId(`unifiedTabs_closeTabBtn_${firstTab.id}`).click();
+    await user.click(screen.getByTestId(`unifiedTabs_closeTabBtn_${firstTab.id}`));
     expect(onChanged).toHaveBeenCalledWith({
       items: [secondTab],
       selectedItem: secondTab,
@@ -148,6 +200,7 @@ describe('TabbedContent', () => {
   });
 
   it('can duplicate a tab and sends tabDuplicated event', async () => {
+    const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
     const initialItems = [
       { id: 'tab1', label: 'Tab 1' },
       { id: 'tab2', label: 'Tab 2' },
@@ -171,13 +224,13 @@ describe('TabbedContent', () => {
       screen.getByTestId(`unifiedTabs_selectTabBtn_${firstTab.id}`).getAttribute('aria-selected')
     ).toBe('true');
 
-    screen.getByTestId(`unifiedTabs_tabMenuBtn_${firstTab.id}`).click();
+    await user.click(screen.getByTestId(`unifiedTabs_tabMenuBtn_${firstTab.id}`));
 
     await waitFor(() => {
       expect(screen.getByTestId('unifiedTabs_tabMenuItem_duplicate')).toBeInTheDocument();
     });
 
-    screen.getByTestId('unifiedTabs_tabMenuItem_duplicate').click();
+    await user.click(screen.getByTestId('unifiedTabs_tabMenuItem_duplicate'));
     const duplicatedTab = {
       ...NEW_TAB,
       label: `${firstTab.label} (copy)`,

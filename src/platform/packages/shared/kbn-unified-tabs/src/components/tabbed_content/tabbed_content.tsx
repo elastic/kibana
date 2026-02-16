@@ -188,7 +188,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   );
 
   const onSelectRecentlyClosed = useCallback(
-    async (item: TabItem) => {
+    async (item: RecentlyClosedTabItem) => {
       const newItem = createItem();
       const restoredItem = { ...omit(item, 'closedAt'), id: newItem.id, restoredFromId: item.id };
       tabsBarApi.current?.moveFocusToNextSelectedItem(restoredItem);
@@ -206,6 +206,42 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       });
     },
     [changeState, createItem, onEBTEvent]
+  );
+
+  const onRestoreRecentlyClosedGroup = useCallback(
+    async (itemsToRestore: RecentlyClosedTabItem[]) => {
+      if (itemsToRestore.length === 0) {
+        return;
+      }
+
+      changeState((prevState) => {
+        const remainingCapacity = maxItemsCount
+          ? Math.max(0, maxItemsCount - prevState.items.length)
+          : itemsToRestore.length;
+
+        const restoredItems = itemsToRestore.slice(0, remainingCapacity).map((item) => {
+          const newItem = createItem();
+          return { ...omit(item, 'closedAt'), id: newItem.id, restoredFromId: item.id };
+        });
+
+        const nextSelectedItem = restoredItems[0] ?? prevState.selectedItem;
+        if (nextSelectedItem) {
+          tabsBarApi.current?.moveFocusToNextSelectedItem(nextSelectedItem);
+        }
+
+        onEBTEvent({
+          [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabSelectRecentlyClosed,
+          [TabsEventDataKeys.TAB_ID]: itemsToRestore[0].id,
+          [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
+        });
+
+        return {
+          items: [...prevState.items, ...restoredItems],
+          selectedItem: nextSelectedItem ?? null,
+        };
+      });
+    },
+    [changeState, createItem, maxItemsCount, onEBTEvent]
   );
 
   const onClose = useCallback(
@@ -393,6 +429,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           onLabelEdited={onLabelEdited}
           onSelect={onSelect}
           onSelectRecentlyClosed={onSelectRecentlyClosed}
+          onRestoreRecentlyClosedGroup={onRestoreRecentlyClosedGroup}
           onClearRecentlyClosed={onClearRecentlyClosed}
           onReorder={onReorder}
           onClose={onClose}

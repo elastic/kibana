@@ -14,6 +14,7 @@ import moment from 'moment';
 import type { EuiSelectableOption, EuiSelectableOptionsListProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
+  EuiContextMenu,
   EuiPopover,
   useGeneratedHtmlId,
   EuiSelectable,
@@ -24,8 +25,11 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiText,
-  useEuiTheme,
   EuiTextTruncate,
+} from '@elastic/eui';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import type { RecentlyClosedTabItem, TabPreviewData } from '../../types';
 import type { TabItem } from '../../types';
@@ -33,8 +37,7 @@ import { TabPreview } from '../tab_preview';
 
 interface OptionData {
   // lowercase names because EUI applies these to the DOM and React warns against non-lowercase attributes
-  tabitem: RecentlyClosedTabItem | TabItem;
-  formattedtime?: string;
+  tabitem: TabItem;
 }
 
 const getOpenedTabsList = (
@@ -50,23 +53,7 @@ const getOpenedTabsList = (
   }));
 };
 
-const getRecentlyClosedTabsList = (
-  tabItems: RecentlyClosedTabItem[]
-): Array<EuiSelectableOption<OptionData>> => {
-  return tabItems.map((tab) => {
-    const momentClosedAt = moment(tab.closedAt);
-    const formattedTime = momentClosedAt?.isValid() ? momentClosedAt.fromNow() : '';
-
-    return {
-      label: tab.label,
-      key: tab.id,
-      'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedTab_${tab.id}`,
-      tabitem: tab,
-      formattedtime: formattedTime,
-      title: undefined, // disable default title tooltip
-    };
-  });
-};
+const RECENTLY_CLOSED_ROOT_PANEL_ID = 'recentlyClosedRoot';
 
 export interface TabsBarMenuProps {
   items: TabItem[];
@@ -75,6 +62,7 @@ export interface TabsBarMenuProps {
   getPreviewData?: (item: TabItem) => TabPreviewData;
   onSelect: (item: TabItem) => Promise<void>;
   onSelectRecentlyClosed: (item: RecentlyClosedTabItem) => Promise<void>;
+  onRestoreRecentlyClosedGroup: (items: RecentlyClosedTabItem[]) => Promise<void>;
   onClearRecentlyClosed: () => void;
 }
 
@@ -86,22 +74,12 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
     getPreviewData,
     onSelect,
     onSelectRecentlyClosed,
+    onRestoreRecentlyClosedGroup,
     onClearRecentlyClosed,
   }) => {
-    const { euiTheme } = useEuiTheme();
-
     const openedTabsList: EuiSelectableOption<OptionData>[] = useMemo(
       () => getOpenedTabsList(items, selectedItem),
       [items, selectedItem]
-    );
-
-    const [menuOpenCount, setMenuOpenCount] = useState(0);
-
-    const recentlyClosedTabsList = useMemo(
-      () => getRecentlyClosedTabsList(recentlyClosedItems),
-      // disabling eslint rule because we want the formattedTimes to update whenever the popover opens
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [recentlyClosedItems, menuOpenCount]
     );
 
     const [isPopoverOpen, setPopover] = useState(false);
@@ -129,11 +107,6 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
           <>
             {/* title set to undefined to disable default tooltip */}
             <EuiTextTruncate truncation="middle" text={option.label} title={undefined} />
-            {option.formattedtime && (
-              <EuiText size="xs" color="subdued" className="eui-displayBlock">
-                {option.formattedtime}
-              </EuiText>
-            )}
           </>
         );
 
@@ -161,6 +134,160 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
       [previewTabId, getPreviewData]
     );
 
+    const getRecentlyClosedItemName = useCallback(
+      (
+        item: TabItem,
+        formattedTime?: string,
+        options?: { includeTimeLine?: boolean }
+      ): React.ReactNode => {
+        const includeTimeLine = options?.includeTimeLine ?? Boolean(formattedTime);
+        const itemContents = (
+          <>
+            <EuiTextTruncate truncation="middle" text={item.label} title={undefined} />
+            {includeTimeLine && formattedTime ? (
+              <EuiText size="xs" color="subdued" className="eui-displayBlock">
+                {formattedTime}
+              </EuiText>
+            ) : null}
+          </>
+        );
+
+        if (!getPreviewData) {
+          return itemContents;
+        }
+
+        const previewData = getPreviewData(item);
+
+        return (
+          <TabPreview
+            showPreview={previewTabId === item.id}
+            setShowPreview={() => setPreviewTabId((prev) => (prev === item.id ? null : item.id))}
+            tabItem={{ id: item.id, label: item.label }}
+            previewData={previewData}
+            previewDelay={0}
+            position="left"
+          >
+            <div>{itemContents}</div>
+          </TabPreview>
+        );
+      },
+      [getPreviewData, previewTabId]
+    );
+
+    const recentlyClosedPanels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
+      if (recentlyClosedItems.length === 0) {
+        return [];
+      }
+
+      // Group by closedAt (batch close), while preserving the incoming item order per group.
+      const groups = new Map<number, RecentlyClosedTabItem[]>();
+      for (const item of recentlyClosedItems) {
+        const existing = groups.get(item.closedAt);
+        if (existing) {
+          existing.push(item);
+        } else {
+          groups.set(item.closedAt, [item]);
+        }
+      }
+
+      const closedAtValues = Array.from(groups.keys()).sort((a, b) => b - a);
+      const panels: EuiContextMenuPanelDescriptor[] = [];
+      const rootItems: EuiContextMenuPanelItemDescriptor[] = [];
+
+      for (const closedAt of closedAtValues) {
+        const groupItems = groups.get(closedAt) ?? [];
+        if (groupItems.length === 0) {
+          continue;
+        }
+
+        const momentClosedAt = moment(closedAt);
+        // Recompute relative times whenever the popover is (re)opened.
+        const now = isPopoverOpen ? moment() : moment();
+        const formattedTime = momentClosedAt?.isValid() ? momentClosedAt.from(now) : '';
+
+        if (groupItems.length === 1) {
+          const tab = groupItems[0];
+          rootItems.push({
+            name: getRecentlyClosedItemName(tab, formattedTime),
+            onClick: () => {
+              onSelectRecentlyClosed(tab);
+              closePopover();
+            },
+            // Preserve existing test id for single items.
+            'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedTab_${tab.id}`,
+          });
+          continue;
+        }
+
+        const groupPanelId = `recentlyClosedGroup_${closedAt}`;
+        rootItems.push({
+          name: (
+            <>
+              <EuiTextTruncate
+                truncation="middle"
+                text={i18n.translate('unifiedTabs.tabsBarMenu.recentlyClosedGroupLabel', {
+                  defaultMessage: '{count} tabs',
+                  values: { count: groupItems.length },
+                })}
+                title={undefined}
+              />
+              {formattedTime ? (
+                <EuiText size="xs" color="subdued" className="eui-displayBlock">
+                  {formattedTime}
+                </EuiText>
+              ) : null}
+            </>
+          ),
+          panel: groupPanelId,
+          'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedGroup_${closedAt}`,
+        });
+
+        const groupPanelItems: EuiContextMenuPanelItemDescriptor[] = [
+          {
+            name: i18n.translate('unifiedTabs.tabsBarMenu.restoreAllTabs', {
+              defaultMessage: 'Restore all tabs',
+            }),
+            onClick: () => {
+              onRestoreRecentlyClosedGroup(groupItems);
+              closePopover();
+            },
+            'data-test-subj': 'unifiedTabs_tabsMenu_restoreAllTabs',
+          },
+          ...groupItems.map<EuiContextMenuPanelItemDescriptor>((tab) => ({
+            name: getRecentlyClosedItemName(tab, undefined, { includeTimeLine: false }),
+            onClick: () => {
+              onSelectRecentlyClosed(tab);
+              closePopover();
+            },
+            'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedGroupTab_${tab.id}`,
+          })),
+        ];
+
+        panels.push({
+          id: groupPanelId,
+          title: i18n.translate('unifiedTabs.tabsBarMenu.recentlyClosedGroupTitle', {
+            defaultMessage: '{count} tabs',
+            values: { count: groupItems.length },
+          }),
+          items: groupPanelItems,
+        });
+      }
+
+      panels.unshift({
+        id: RECENTLY_CLOSED_ROOT_PANEL_ID,
+        items: rootItems,
+      });
+
+      return panels;
+    }, [
+      recentlyClosedItems,
+      getRecentlyClosedItemName,
+      isPopoverOpen,
+      onSelectRecentlyClosed,
+      onRestoreRecentlyClosedGroup,
+      closePopover,
+    ]);
+
     return (
       <EuiPopover
         data-test-subj="unifiedTabs_tabsBarMenu"
@@ -183,13 +310,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
               data-test-subj="unifiedTabs_tabsBarMenuButton"
               iconType="arrowDown"
               onClick={() => {
-                setPopover((prev) => {
-                  const willOpen = !prev;
-                  if (willOpen) {
-                    setMenuOpenCount((count) => count + 1);
-                  }
-                  return willOpen;
-                });
+                setPopover((prev) => !prev);
               }}
             />
           </EuiToolTip>
@@ -226,64 +347,40 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
         {recentlyClosedItems.length > 0 && (
           <>
             <EuiHorizontalRule margin="none" />
-            <EuiSelectable
-              aria-label={i18n.translate('unifiedTabs.tabsBarMenu.recentlyClosedTabsList', {
-                defaultMessage: 'Recently closed tabs list',
-              })}
-              options={recentlyClosedTabsList}
-              singleSelection={true}
-              listProps={{
-                ...selectableListProps,
-                rowHeight: parseInt(euiTheme.size.xxxl, 10),
-              }}
-              renderOption={renderOption}
-              onChange={(newOptions) => {
-                const clickedTabId = newOptions.find((option) => option.checked)?.key;
-                const tabToNavigate = recentlyClosedItems.find((tab) => tab.id === clickedTabId);
-                if (tabToNavigate) {
-                  onSelectRecentlyClosed(tabToNavigate);
-                  closePopover();
-                }
-              }}
-            >
-              {(tabs) => (
-                <>
-                  <EuiPopoverTitle paddingSize="s">
-                    <EuiFlexGroup
-                      responsive={false}
-                      alignItems="center"
-                      gutterSize="s"
-                      justifyContent="spaceBetween"
-                    >
-                      <EuiFlexItem grow>
-                        {i18n.translate('unifiedTabs.tabsBarMenu.recentlyClosed', {
-                          defaultMessage: 'Recently closed',
-                        })}
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty
-                          size="xs"
-                          flush="both"
-                          data-test-subj="unifiedTabs_tabsMenu_clearRecentlyClosed"
-                          aria-label={i18n.translate(
-                            'unifiedTabs.tabsBarMenu.clearRecentlyClosed',
-                            {
-                              defaultMessage: 'Clear',
-                            }
-                          )}
-                          onClick={onClearRecentlyClosed}
-                        >
-                          {i18n.translate('unifiedTabs.tabsBarMenu.clearRecentlyClosed', {
-                            defaultMessage: 'Clear',
-                          })}
-                        </EuiButtonEmpty>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiPopoverTitle>
-                  {tabs}
-                </>
-              )}
-            </EuiSelectable>
+            <EuiPopoverTitle paddingSize="s">
+              <EuiFlexGroup
+                responsive={false}
+                alignItems="center"
+                gutterSize="s"
+                justifyContent="spaceBetween"
+              >
+                <EuiFlexItem grow>
+                  {i18n.translate('unifiedTabs.tabsBarMenu.recentlyClosed', {
+                    defaultMessage: 'Recently closed',
+                  })}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="xs"
+                    flush="both"
+                    data-test-subj="unifiedTabs_tabsMenu_clearRecentlyClosed"
+                    aria-label={i18n.translate('unifiedTabs.tabsBarMenu.clearRecentlyClosed', {
+                      defaultMessage: 'Clear',
+                    })}
+                    onClick={onClearRecentlyClosed}
+                  >
+                    {i18n.translate('unifiedTabs.tabsBarMenu.clearRecentlyClosed', {
+                      defaultMessage: 'Clear',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPopoverTitle>
+            <EuiContextMenu
+              initialPanelId={RECENTLY_CLOSED_ROOT_PANEL_ID}
+              panels={recentlyClosedPanels}
+              data-test-subj="unifiedTabs_tabsMenu_recentlyClosedContextMenu"
+            />
           </>
         )}
       </EuiPopover>
