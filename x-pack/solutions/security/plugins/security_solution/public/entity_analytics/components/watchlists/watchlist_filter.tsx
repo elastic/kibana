@@ -19,6 +19,8 @@ import {
   WATCHLIST_CUSTOM_C_LEVEL_USERS_LABEL,
   WATCHLIST_CUSTOM_HIGH_RISK_USERS_LABEL,
   WATCHLIST_CUSTOM_WATCHLIST_3_LABEL,
+  WATCHLIST_FILTER_LABEL,
+  WATCHLIST_FILTER_PLACEHOLDER,
   WATCHLIST_GROUP_CUSTOM_LABEL,
   WATCHLIST_GROUP_PREBUILT_LABEL,
   WATCHLIST_ICON_GEAR_ARIA_LABEL,
@@ -33,7 +35,7 @@ interface WatchlistFilterProps {
   onChangeSelectedId?: (id: string) => void;
 }
 
-// Demo atm, replacing with real data with crud
+// TODO: demo purposes, replace with management API data https://github.com/elastic/security-team/issues/15463?issue=elastic%7Csecurity-team%7C15981
 const WATCHLIST_OPTIONS: WatchlistOption[] = [
   {
     prepend: (
@@ -42,7 +44,6 @@ const WATCHLIST_OPTIONS: WatchlistOption[] = [
     id: 'group-prebuilt',
     label: WATCHLIST_GROUP_PREBUILT_LABEL,
     isGroupLabelOption: true,
-    groupicon: 'pin',
   },
   { id: 'prebuilt-priv', label: WATCHLIST_PREBUILT_PRIVILEGED_USERS_LABEL },
   { id: 'prebuilt-llm', label: WATCHLIST_PREBUILT_UNAUTHORIZED_LLM_ACCESS_LABEL },
@@ -55,7 +56,6 @@ const WATCHLIST_OPTIONS: WatchlistOption[] = [
     id: 'group-custom',
     label: WATCHLIST_GROUP_CUSTOM_LABEL,
     isGroupLabelOption: true,
-    groupicon: 'gear',
   },
   { id: 'custom-clevel', label: WATCHLIST_CUSTOM_C_LEVEL_USERS_LABEL },
   { id: 'custom-highrisk', label: WATCHLIST_CUSTOM_HIGH_RISK_USERS_LABEL },
@@ -71,7 +71,7 @@ const ROUTE_TO_WATCHLIST_MAP: Record<string, string> = Object.fromEntries(
 ) as Record<string, string>;
 
 export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) => {
-  // hook this up to real data
+  // TODO: replace data with watchlist management API https://github.com/elastic/security-team/issues/15463?issue=elastic%7Csecurity-team%7C15981
   const options = WATCHLIST_OPTIONS;
 
   const { pathname } = useLocation();
@@ -95,7 +95,7 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
 
   const navigateToWatchlist = useCallback(
     (watchlistId?: string) => {
-      const isCleared = !watchlistId || watchlistId === 'none' || watchlistId === 'clear-selection';
+      const isCleared = !watchlistId;
       const mappedPath = watchlistId ? WATCHLIST_ROUTE_MAP[watchlistId] : undefined;
       const nextPath = !isCleared && mappedPath ? mappedPath : ENTITY_ANALYTICS_THREAT_HUNTING_PATH;
 
@@ -116,7 +116,7 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
         onChangeSelectedId?.(newlySelected.id);
         navigateToWatchlist(newlySelected.id);
       } else {
-        navigateToWatchlist('none');
+        navigateToWatchlist(undefined);
       }
     },
     [onChangeSelectedId, navigateToWatchlist]
@@ -127,9 +127,9 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
       <EuiFlexItem>
         <EuiComboBox
           data-test-subj="watchlistFilterComboBox"
-          aria-label="Watchlist"
-          prepend="Watchlist"
-          placeholder="Select watchlist"
+          aria-label={WATCHLIST_FILTER_LABEL}
+          prepend={WATCHLIST_FILTER_LABEL}
+          placeholder={WATCHLIST_FILTER_PLACEHOLDER}
           singleSelection={{ asPlainText: true }}
           options={options}
           selectedOptions={selected ? [selected] : []}
