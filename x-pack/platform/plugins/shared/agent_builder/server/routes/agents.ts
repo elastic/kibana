@@ -195,7 +195,8 @@ export function registerAgentRoutes({
                           description:
                             'Optional list of workflow ids. When set, these workflows run before every agent execution, in order.',
                         },
-                      })
+                      }),
+                      { maxSize: 100 }
                     )
                   ),
                 },
@@ -314,7 +315,8 @@ export function registerAgentRoutes({
                             description:
                               'Updated list of workflow ids. When set, these workflows run every agent execution, in order.',
                           },
-                        })
+                        }),
+                        { maxSize: 100 }
                       )
                     ),
                   },
