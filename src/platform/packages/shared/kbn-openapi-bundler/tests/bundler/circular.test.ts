@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import type { OpenAPIV3 } from 'openapi-types';
 import { bundleSpecs } from './bundle_specs';
 import { createOASDocument } from '../create_oas_document';
@@ -49,18 +49,19 @@ describe('OpenAPI Bundler - circular specs', () => {
       })
     );
 
-    expect(dump(bundledSpec.paths['/api/some_api']!.get!.responses['200'])).toMatchInlineSnapshot(`
-"content:
-  application/json:
-    schema: &ref_0
-      type: object
-      properties:
-        fieldA:
-          type: integer
-        fieldB: *ref_0
-description: Successful response
-"
-`);
+    expect(stringify(bundledSpec.paths['/api/some_api']!.get!.responses['200']))
+      .toMatchInlineSnapshot(`
+      "content:
+        application/json:
+          schema: &a1
+            type: object
+            properties:
+              fieldA:
+                type: integer
+              fieldB: *a1
+      description: Successful response
+      "
+    `);
   });
 
   it('bundles specs with recursive references', async () => {
