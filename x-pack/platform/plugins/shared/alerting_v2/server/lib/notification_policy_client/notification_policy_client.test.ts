@@ -6,7 +6,6 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import {

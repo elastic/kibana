@@ -6,15 +6,15 @@
  */
 
 import { PluginStart } from '@kbn/core-di';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { ISavedObjectsClientFactory } from '@kbn/core-di-server';
 import { SavedObjectsClientFactory } from '@kbn/core-di-server';
-import { inject, injectable } from 'inversify';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core/types';
-import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { inject, injectable } from 'inversify';
 import type { NotificationPolicySavedObjectAttributes } from '../../../saved_objects';
+import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
 
