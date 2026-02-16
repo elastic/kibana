@@ -9,6 +9,7 @@ plugins:
     - dashboard
     - discover_enhanced
     - entity_store
+    - exploratoryView
     - fleet
     - gen_ai_settings
     - global_search
@@ -18,7 +19,6 @@ plugins:
     - maps
     - observability
     - observability_onboarding
-    - exploratoryView
     - painless_lab
     - profiling
     - search_getting_started
