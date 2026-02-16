@@ -12,7 +12,7 @@ import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/ty
 import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
 import { EuiSpacer, EuiText, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
-import { FormatFieldValueReact } from '@kbn/field-formats-plugin/public';
+import { FormatFieldValueReact } from '@kbn/discover-utils';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { css } from '@emotion/react';
 import useWindowSize from 'react-use/lib/useWindowSize';
