@@ -55,8 +55,7 @@ export interface ExecutorServices {
 }
 
 export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServices => {
-  const { context, abortController, fakeRequest, logger, ruleData, ruleTaskTimeout, uiamApiKey } =
-    opts;
+  const { context, abortController, fakeRequest, logger, ruleData, ruleTaskTimeout } = opts;
 
   const wrappedClientOptions = {
     rule: ruleData,
