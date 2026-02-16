@@ -136,8 +136,6 @@ export class CoreUsageDataService
           .stats({
             index,
             metric: ['docs', 'store'],
-            ignore_unavailable: true,
-            allow_no_indices: true,
           })
           .then((body) => {
             const stats = body._all;

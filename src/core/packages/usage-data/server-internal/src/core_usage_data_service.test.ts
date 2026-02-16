@@ -438,7 +438,9 @@ describe('CoreUsageDataService', () => {
       it('returns zeroed index stats when indices stats are unavailable', async () => {
         const http = httpServiceMock.createInternalSetupContract();
         const metrics = metricsServiceMock.createInternalSetupContract();
-        const savedObjectsStartPromise = Promise.resolve(savedObjectsServiceMock.createStartContract());
+        const savedObjectsStartPromise = Promise.resolve(
+          savedObjectsServiceMock.createStartContract()
+        );
         const changedDeprecatedConfigPath$ = new BehaviorSubject({
           set: ['new.path'],
           unset: ['deprecated.path'],
@@ -505,7 +507,9 @@ describe('CoreUsageDataService', () => {
       it('throws when fetching index stats fails', async () => {
         const http = httpServiceMock.createInternalSetupContract();
         const metrics = metricsServiceMock.createInternalSetupContract();
-        const savedObjectsStartPromise = Promise.resolve(savedObjectsServiceMock.createStartContract());
+        const savedObjectsStartPromise = Promise.resolve(
+          savedObjectsServiceMock.createStartContract()
+        );
         const changedDeprecatedConfigPath$ = new BehaviorSubject({
           set: ['new.path'],
           unset: ['deprecated.path'],
