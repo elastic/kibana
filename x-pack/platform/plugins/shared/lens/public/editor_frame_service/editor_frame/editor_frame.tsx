@@ -271,6 +271,10 @@ const componentStyles = {
       flex: 1,
       minHeight: 0, // Required for overflow to work in flex container
       overflowY: 'auto',
+      // Use clip for x-axis to allow drag-drop extra targets (e.g., "Alt/Option to duplicate" tooltip)
+      // to be visible outside the container bounds. Unlike 'hidden' or 'auto', 'clip' doesn't create
+      // a scroll container on the x-axis, allowing absolutely positioned children to overflow.
+      overflowX: 'clip',
       backgroundColor: euiTheme.colors.emptyShade,
     }),
   visualizationToolbar: ({ euiTheme }: UseEuiTheme) =>
