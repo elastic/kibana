@@ -13,7 +13,6 @@ interface MetricsPagination {
   readonly prevButton: Locator;
   readonly nextButton: Locator;
   getPageButton(pageIndex: number): Locator;
-  getTotalPages(): Promise<number>;
 }
 
 function createPagination(parentContainer: Locator): MetricsPagination {
@@ -24,15 +23,6 @@ function createPagination(parentContainer: Locator): MetricsPagination {
     nextButton: container.locator('[data-test-subj="pagination-button-next"]'),
     getPageButton: (pageIndex: number) =>
       container.locator(`[data-test-subj="pagination-button-${pageIndex}"]`),
-    getTotalPages: async () => {
-      const allButtons = container.locator('[data-test-subj^="pagination-button-"]');
-      const navButtons = container.locator(
-        '[data-test-subj="pagination-button-previous"], [data-test-subj="pagination-button-next"]'
-      );
-      const totalButtons = await allButtons.count();
-      const navCount = await navButtons.count();
-      return totalButtons - navCount;
-    },
   };
 }
 
