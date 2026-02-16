@@ -106,7 +106,10 @@ export class OpenInDiscoverDrilldown
   };
 
   public readonly isConfigurable = (context: ActionFactoryContext) =>
-    this.deps.hasDiscoverAccess() && apiIsOfType(context.embeddable, DOC_TYPE);
+    this.deps.hasDiscoverAccess() &&
+    apiIsOfType(context.embeddable, DOC_TYPE) &&
+    // Hide from the "Create drilldown" flyout for ES|QL (text-based) Lens panels.
+    context.embeddable.isTextBasedLanguage() !== true;
 
   public readonly getHref = async (config: Config, context: ActionContext) => {
     const { getHref } = await getDiscoverHelpersAsync();

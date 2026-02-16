@@ -70,4 +70,28 @@ describe('open in discover drilldown', () => {
     await drilldown.execute({ openInNewTab: true }, { embeddable: getLensApiMock(), filters });
     expect(getHref).toHaveBeenCalledWith(expect.objectContaining({ filters }));
   });
+
+  it('is not configurable for ES|QL (text-based) Lens panels', async () => {
+    const embeddable = getLensApiMock();
+    (embeddable.isTextBasedLanguage as jest.Mock).mockReturnValue(true);
+
+    const isConfigurable = drilldown.isConfigurable({
+      embeddable,
+      triggers: [],
+    } as unknown as ActionFactoryContext);
+
+    expect(isConfigurable).toBe(false);
+  });
+
+  it('is configurable for DSL (non text-based) Lens panels', async () => {
+    const embeddable = getLensApiMock();
+    (embeddable.isTextBasedLanguage as jest.Mock).mockReturnValue(false);
+
+    const isConfigurable = drilldown.isConfigurable({
+      embeddable,
+      triggers: [],
+    } as unknown as ActionFactoryContext);
+
+    expect(isConfigurable).toBe(true);
+  });
 });
