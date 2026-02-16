@@ -25,7 +25,7 @@ inputs:
 steps:
   - name: search-messages
     type: microsoft-teams.searchMessages
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= microsoft-teams-stack-connector-id %>
     with:
       query: "${{ inputs.query }}"
       from: ${{ inputs.from }}

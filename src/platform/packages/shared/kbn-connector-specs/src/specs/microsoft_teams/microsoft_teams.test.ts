@@ -66,11 +66,16 @@ describe('MicrosoftTeams', () => {
   });
 
   describe('auth', () => {
-    it('should use oauth_client_credentials', () => {
+    it('should support bearer and oauth_client_credentials', () => {
       const { auth } = MicrosoftTeams;
       expect(auth).toBeDefined();
-      expect(auth?.types).toHaveLength(1);
+      expect(auth?.types).toHaveLength(2);
       expect(auth?.types[0]).toEqual(
+        expect.objectContaining({
+          type: 'bearer',
+        })
+      );
+      expect(auth?.types[1]).toEqual(
         expect.objectContaining({
           type: 'oauth_client_credentials',
         })
@@ -145,6 +150,27 @@ describe('MicrosoftTeams', () => {
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://graph.microsoft.com/v1.0/me/joinedTeams',
+        {
+          params: {
+            $select: 'id,displayName,description,isArchived,tenantId',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should use /users/{userId} path when userId is provided', async () => {
+      const mockResponse = {
+        data: { value: [{ id: 'team-1', displayName: 'Engineering' }] },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = (await MicrosoftTeams.actions.listJoinedTeams.handler(mockContext, {
+        userId: 'user-abc-123',
+      })) as GraphCollectionResponse;
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/users/user-abc-123/joinedTeams',
         {
           params: {
             $select: 'id,displayName,description,isArchived,tenantId',
@@ -359,6 +385,29 @@ describe('MicrosoftTeams', () => {
           $top: 5,
         },
       });
+    });
+
+    it('should use /users/{userId} path when userId is provided', async () => {
+      const mockResponse = {
+        data: {
+          value: [{ id: 'chat-1', topic: 'Test', chatType: 'group' }],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = (await MicrosoftTeams.actions.listChats.handler(mockContext, {
+        userId: 'user-abc-123',
+      })) as GraphCollectionResponse;
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/users/user-abc-123/chats',
+        {
+          params: {
+            $select: 'id,topic,createdDateTime,lastUpdatedDateTime,chatType,webUrl',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
     });
 
     it('should not include $top when not provided', async () => {
@@ -666,7 +715,7 @@ describe('MicrosoftTeams', () => {
   });
 
   describe('test handler', () => {
-    it('should return success when API is accessible', async () => {
+    it('should use /me/joinedTeams for delegated auth (bearer)', async () => {
       const mockResponse = {
         data: {
           value: [
@@ -690,6 +739,36 @@ describe('MicrosoftTeams', () => {
       expect(result).toEqual({
         ok: true,
         message: 'Successfully connected to Microsoft Teams: found 3 teams',
+      });
+    });
+
+    it('should use /teams for app-only auth (oauth_client_credentials)', async () => {
+      const appOnlyContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_client_credentials' },
+      } as unknown as ActionContext;
+
+      const mockResponse = {
+        data: {
+          value: [
+            { id: 'team-1', displayName: 'Engineering' },
+            { id: 'team-2', displayName: 'Marketing' },
+          ],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      if (!MicrosoftTeams.test) {
+        throw new Error('Test handler not defined');
+      }
+      const result = (await MicrosoftTeams.test.handler(appOnlyContext)) as TestResult;
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/teams', {
+        params: { $select: 'id,displayName' },
+      });
+      expect(result).toEqual({
+        ok: true,
+        message: 'Successfully connected to Microsoft Teams: found 2 teams',
       });
     });
 

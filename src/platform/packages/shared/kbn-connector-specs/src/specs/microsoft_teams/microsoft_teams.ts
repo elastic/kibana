@@ -12,6 +12,13 @@ import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 
 /**
+ * Returns the base path for user-scoped Microsoft Graph API endpoints.
+ * When a userId is provided, returns `/users/{userId}` (for app-only auth).
+ * Otherwise, returns `/me` (for delegated auth with a signed-in user).
+ */
+const userPath = (userId?: string): string => (userId ? `/users/${userId}` : '/me');
+
+/**
  * Common output schema for Microsoft Graph API responses that return a collection.
  */
 const GraphCollectionOutputSchema = z.object({
@@ -33,6 +40,19 @@ export const MicrosoftTeams: ConnectorSpec = {
   auth: {
     types: [
       {
+        type: 'bearer',
+        defaults: {},
+        overrides: {
+          meta: {
+            token: {
+              label: 'Microsoft API token',
+              placeholder: 'abcde...',
+              description: 'Your Microsoft Bearer Token',
+            },
+          },
+        },
+      },
+      {
         type: 'oauth_client_credentials',
         defaults: {
           scope: 'https://graph.microsoft.com/.default',
@@ -51,15 +71,27 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/user-list-joinedteams
     listJoinedTeams: {
       isTool: true,
-      input: z.object({}).optional(),
+      input: z
+        .object({
+          userId: z
+            .string()
+            .optional()
+            .describe('User ID (required for app-only auth via client credentials)'),
+        })
+        .optional(),
       output: GraphCollectionOutputSchema,
-      handler: async (ctx) => {
+      handler: async (ctx, input) => {
+        const typedInput = input as { userId?: string } | undefined;
+        const base = userPath(typedInput?.userId);
         ctx.log.debug('Microsoft Teams listing joined teams');
-        const response = await ctx.client.get('https://graph.microsoft.com/v1.0/me/joinedTeams', {
-          params: {
-            $select: 'id,displayName,description,isArchived,tenantId',
-          },
-        });
+        const response = await ctx.client.get(
+          `https://graph.microsoft.com/v1.0${base}/joinedTeams`,
+          {
+            params: {
+              $select: 'id,displayName,description,isArchived,tenantId',
+            },
+          }
+        );
         return response.data;
       },
     },
@@ -120,13 +152,18 @@ export const MicrosoftTeams: ConnectorSpec = {
     listChats: {
       isTool: true,
       input: z.object({
+        userId: z
+          .string()
+          .optional()
+          .describe('User ID (required for app-only auth via client credentials)'),
         top: z.number().optional().describe('Number of chats to return (max 50)'),
       }),
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
-        const typedInput = input as { top?: number };
+        const typedInput = input as { userId?: string; top?: number };
+        const base = userPath(typedInput.userId);
         ctx.log.debug('Microsoft Teams listing chats');
-        const response = await ctx.client.get('https://graph.microsoft.com/v1.0/me/chats', {
+        const response = await ctx.client.get(`https://graph.microsoft.com/v1.0${base}/chats`, {
           params: {
             $select: 'id,topic,createdDateTime,lastUpdatedDateTime,chatType,webUrl',
             ...(typedInput.top !== undefined && { $top: typedInput.top }),
@@ -213,7 +250,12 @@ export const MicrosoftTeams: ConnectorSpec = {
       ctx.log.debug('Microsoft Teams test handler');
 
       try {
-        const response = await ctx.client.get('https://graph.microsoft.com/v1.0/me/joinedTeams', {
+        const isAppOnly = ctx.secrets?.authType === 'oauth_client_credentials';
+        const url = isAppOnly
+          ? 'https://graph.microsoft.com/v1.0/teams'
+          : 'https://graph.microsoft.com/v1.0/me/joinedTeams';
+
+        const response = await ctx.client.get(url, {
           params: { $select: 'id,displayName' },
         });
         const numOfTeams = response.data.value.length;

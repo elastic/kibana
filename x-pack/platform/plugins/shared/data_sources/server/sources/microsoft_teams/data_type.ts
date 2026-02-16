@@ -17,10 +17,12 @@ export const microsoftTeamsDataSource: DataSource = {
 
   iconType: '.microsoft-teams',
 
-  stackConnector: {
-    type: '.microsoft-teams',
-    config: {},
-  },
+  stackConnectors: [
+    {
+      type: '.microsoft-teams',
+      config: {},
+    },
+  ],
 
   workflows: {
     directory: __dirname + '/workflows',

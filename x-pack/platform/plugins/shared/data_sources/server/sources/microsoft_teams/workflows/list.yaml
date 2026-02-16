@@ -18,6 +18,10 @@ inputs:
   - name: team_id
     type: string
     required: false
+  - name: user_id
+    type: string
+    required: false
+    description: "User ID (required for app-only auth via client credentials)"
   - name: channel_id
     type: string
     required: false
@@ -32,18 +36,19 @@ steps:
   - name: list-joined-teams
     type: microsoft-teams.listJoinedTeams
     if: "${{ inputs.list_action == 'listJoinedTeams' }}"
-    connector-id: <%= stackConnectorId %>
-    with: {}
+    connector-id: <%= microsoft-teams-stack-connector-id %>
+    with:
+      userId: "${{ inputs.user_id }}"
   - name: list-channels
     type: microsoft-teams.listChannels
     if: "${{ inputs.list_action == 'listChannels' and inputs.team_id }}"
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= microsoft-teams-stack-connector-id %>
     with:
       teamId: "${{ inputs.team_id }}"
   - name: list-channel-messages
     type: microsoft-teams.listChannelMessages
     if: "${{ inputs.list_action == 'listChannelMessages' and inputs.team_id and inputs.channel_id }}"
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= microsoft-teams-stack-connector-id %>
     with:
       teamId: "${{ inputs.team_id }}"
       channelId: "${{ inputs.channel_id }}"
@@ -51,13 +56,13 @@ steps:
   - name: list-chats
     type: microsoft-teams.listChats
     if: "${{ inputs.list_action == 'listChats' }}"
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= microsoft-teams-stack-connector-id %>
     with:
       top: ${{ inputs.top }}
   - name: list-chat-messages
     type: microsoft-teams.listChatMessages
     if: "${{ inputs.list_action == 'listChatMessages' and inputs.chat_id }}"
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= microsoft-teams-stack-connector-id %>
     with:
       chatId: "${{ inputs.chat_id }}"
       top: ${{ inputs.top }}
