@@ -24,21 +24,17 @@ export const ruleSavedObjectAttributesSchema = schema.object({
     owner: schema.maybe(schema.string()),
     labels: schema.maybe(schema.arrayOf(schema.string())),
   }),
-
   time_field: schema.string(),
-
   schedule: schema.object({
     every: schema.string(),
     lookback: schema.maybe(schema.string()),
   }),
-
   evaluation: schema.object({
     query: schema.object({
       base: schema.string(),
       condition: schema.string(),
     }),
   }),
-
   recovery_policy: schema.maybe(
     schema.object({
       type: schema.oneOf([schema.literal('query'), schema.literal('no_breach')]),
@@ -50,26 +46,25 @@ export const ruleSavedObjectAttributesSchema = schema.object({
       ),
     })
   ),
-
   state_transition: schema.maybe(
-    schema.object({
-      pending_operator: schema.maybe(schema.oneOf([schema.literal('AND'), schema.literal('OR')])),
-      pending_count: schema.maybe(schema.number()),
-      pending_timeframe: schema.maybe(schema.string()),
-      recovering_operator: schema.maybe(
-        schema.oneOf([schema.literal('AND'), schema.literal('OR')])
-      ),
-      recovering_count: schema.maybe(schema.number()),
-      recovering_timeframe: schema.maybe(schema.string()),
-    })
+    schema.nullable(
+      schema.object({
+        pending_operator: schema.maybe(schema.oneOf([schema.literal('AND'), schema.literal('OR')])),
+        pending_count: schema.maybe(schema.number()),
+        pending_timeframe: schema.maybe(schema.string()),
+        recovering_operator: schema.maybe(
+          schema.oneOf([schema.literal('AND'), schema.literal('OR')])
+        ),
+        recovering_count: schema.maybe(schema.number()),
+        recovering_timeframe: schema.maybe(schema.string()),
+      })
+    )
   ),
-
   grouping: schema.maybe(
     schema.object({
       fields: schema.arrayOf(schema.string()),
     })
   ),
-
   no_data: schema.maybe(
     schema.object({
       behavior: schema.maybe(
@@ -90,7 +85,6 @@ export const ruleSavedObjectAttributesSchema = schema.object({
       })
     )
   ),
-
   // Server-managed fields
   enabled: schema.boolean(),
   createdBy: schema.nullable(schema.string()),

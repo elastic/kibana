@@ -85,6 +85,7 @@ describe('useGetTemplates', () => {
         search: '',
         tags: [],
         author: [],
+        isDeleted: false,
       },
     });
   });
@@ -124,6 +125,7 @@ describe('useGetTemplates', () => {
         sortOrder: 'desc',
         tags: [],
         author: [],
+        isDeleted: false,
       },
     });
   });
@@ -159,6 +161,7 @@ describe('useGetTemplates', () => {
         search: 'partial search',
         tags: [],
         author: [],
+        isDeleted: false,
       },
     });
   });

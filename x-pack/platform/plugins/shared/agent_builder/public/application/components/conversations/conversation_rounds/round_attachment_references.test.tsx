@@ -19,8 +19,8 @@ import {
 import { RoundAttachmentReferences } from './round_attachment_references';
 
 jest.mock('./round_attachment_reference_pill', () => ({
-  AttachmentReferencePill: ({ attachment, version, operation }: any) => (
-    <span data-test-subj="attachment-pill">{`${attachment.id}:${version}:${operation}`}</span>
+  AttachmentReferencePill: ({ attachment, operation }: any) => (
+    <span data-test-subj="attachment-pill">{`${attachment.id}:${operation}`}</span>
   ),
 }));
 
@@ -63,7 +63,7 @@ describe('RoundAttachmentReferences', () => {
     );
 
     expect(screen.getAllByTestId('attachment-pill')).toHaveLength(1);
-    expect(screen.getByText('conv-1:1:created')).toBeInTheDocument();
+    expect(screen.getByText('conv-1:created')).toBeInTheDocument();
   });
 
   it('falls back to optimistic attachments when conversationAttachments are missing', () => {
@@ -76,8 +76,8 @@ describe('RoundAttachmentReferences', () => {
 
     const pills = screen.getAllByTestId('attachment-pill');
     expect(pills).toHaveLength(2);
-    expect(screen.getByText('fallback-1:1:created')).toBeInTheDocument();
-    expect(screen.getByText('fallback-2:1:created')).toBeInTheDocument();
+    expect(screen.getByText('fallback-1:created')).toBeInTheDocument();
+    expect(screen.getByText('fallback-2:created')).toBeInTheDocument();
   });
 
   it('filters by actor when actorFilter is provided', () => {
@@ -110,7 +110,7 @@ describe('RoundAttachmentReferences', () => {
 
     const pills = screen.getAllByTestId('attachment-pill');
     expect(pills).toHaveLength(1);
-    expect(screen.getByText('att-user:1:created')).toBeInTheDocument();
+    expect(screen.getByText('att-user:created')).toBeInTheDocument();
   });
 
   it('skips hidden attachments from conversationAttachments', () => {
@@ -142,7 +142,7 @@ describe('RoundAttachmentReferences', () => {
 
     const pills = screen.getAllByTestId('attachment-pill');
     expect(pills).toHaveLength(1);
-    expect(screen.getByText('visible:1:created')).toBeInTheDocument();
+    expect(screen.getByText('visible:created')).toBeInTheDocument();
   });
 
   it('infers operation from version when operation is missing', () => {
@@ -183,7 +183,7 @@ describe('RoundAttachmentReferences', () => {
       />
     );
 
-    expect(screen.getByText('att-v2:2:updated')).toBeInTheDocument();
+    expect(screen.getByText('att-v2:updated')).toBeInTheDocument();
   });
 
   it('returns null when refs do not match available attachments', () => {

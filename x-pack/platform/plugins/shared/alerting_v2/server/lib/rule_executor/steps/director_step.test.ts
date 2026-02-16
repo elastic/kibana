@@ -18,6 +18,8 @@ describe('DirectorStep', () => {
       { name: 'group_hash', type: 'keyword' },
       { name: 'last_episode_id', type: 'keyword' },
       { name: 'last_episode_status', type: 'keyword' },
+      { name: 'last_episode_status_count', type: 'long' },
+      { name: 'last_episode_timestamp', type: 'date' },
     ],
     values: [],
   });

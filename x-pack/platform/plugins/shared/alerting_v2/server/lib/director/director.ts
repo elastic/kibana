@@ -13,17 +13,19 @@ import type { QueryServiceContract } from '../services/query_service/query_servi
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import { getLatestAlertEventStateQuery, type LatestAlertEventState } from './queries';
 import type { AlertEpisodeStatus } from '../../resources/alert_events';
-import { alertEpisodeStatus, type AlertEvent } from '../../resources/alert_events';
+import { alertEpisodeStatus, alertEventType, type AlertEvent } from '../../resources/alert_events';
+import type { RuleResponse } from '../rules_client/types';
 import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
 import { TransitionStrategyFactory } from './strategies/strategy_resolver';
-import type { ITransitionStrategy } from './strategies/types';
+import type { ITransitionStrategy, StateTransitionResult } from './strategies/types';
 
 interface RunDirectorParams {
-  ruleId: string;
+  rule: RuleResponse;
   alertEvents: AlertEvent[];
 }
 
 interface CalculateNextStateParams {
+  rule: RuleResponse;
   currentAlertEvent: AlertEvent;
   previousAlertEvent?: LatestAlertEventState;
   strategy: ITransitionStrategy;
@@ -43,17 +45,18 @@ export class DirectorService {
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  async run({ ruleId, alertEvents }: RunDirectorParams): Promise<AlertEvent[]> {
+  async run({ rule, alertEvents }: RunDirectorParams): Promise<AlertEvent[]> {
     if (alertEvents.length === 0) {
       return [];
     }
 
-    const strategy = this.strategyFactory.getStrategy();
+    const strategy = this.strategyFactory.getStrategy(rule);
     const groupHashes = Array.from(new Set(alertEvents.map((event) => event.group_hash)));
-    const alertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(ruleId, groupHashes);
+    const alertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(rule.id, groupHashes);
 
     const alertsWithNextEpisode = alertEvents.map((currentAlertEvent) =>
       this.getAlertEventWithNextEpisode({
+        rule,
         currentAlertEvent,
         previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
         strategy,
@@ -82,35 +85,39 @@ export class DirectorService {
   }
 
   private getAlertEventWithNextEpisode({
+    rule,
     currentAlertEvent,
     previousAlertEvent,
     strategy,
   }: CalculateNextStateParams): AlertEvent {
     const currentStatus = previousAlertEvent?.last_episode_status;
 
-    const nextStatus = strategy.getNextState({
-      currentAlertEpisodeStatus: currentStatus,
-      alertEventStatus: currentAlertEvent.status,
+    const result: StateTransitionResult = strategy.getNextState({
+      rule,
+      alertEvent: currentAlertEvent,
+      previousEpisode: previousAlertEvent,
     });
 
     const episodeId = this.resolveEpisodeId({
       previousAlertEvent,
-      nextStatus,
+      nextStatus: result.status,
     });
 
-    if (currentStatus !== nextStatus) {
+    if (currentStatus !== result.status) {
       this.logger.debug({
         message: `State Transition [${currentAlertEvent.group_hash}]: ${
           currentStatus ?? 'unknown'
-        } -> ${nextStatus} (Episode: ${episodeId})`,
+        } -> ${result.status} (Episode: ${episodeId})`,
       });
     }
 
     return {
       ...currentAlertEvent,
+      type: alertEventType.alert,
       episode: {
         id: episodeId,
-        status: nextStatus,
+        status: result.status,
+        ...(result.statusCount != null ? { status_count: result.statusCount } : {}),
       },
     };
   }
