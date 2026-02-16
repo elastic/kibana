@@ -19,7 +19,7 @@ export interface WatchlistItem {
   label: string;
   isGroupLabelOption?: false;
   checked?: 'on' | 'off';
-  groupicon?: never;
+  groupIcon?: never;
   prepend?: React.ReactNode;
 }
 
