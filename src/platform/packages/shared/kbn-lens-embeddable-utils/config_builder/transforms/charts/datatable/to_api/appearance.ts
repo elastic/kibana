@@ -74,27 +74,27 @@ function parseDensityToAPI(
 }
 
 /**
- * Parses transposed metric sorting information from a column ID
- * Transposed column IDs have format: value1---value2---...---metricColumnId
+ * Parses pivoted metric sorting information from a column ID
+ * Pivoted metrics are stored using transposed column IDs with format: value1---value2---...---metricColumnId
  */
-function parseTransposedMetricSorting(
+function parsePivotedSorting(
   columnId: string,
   columnIdMapping: ColumnIdMapping
 ): { values: string[]; index: number } | undefined {
-  const transposeInfo = parseTransposeId(columnId);
+  const info = parseTransposeId(columnId);
 
-  if (!transposeInfo) {
+  if (!info) {
     return undefined;
   }
 
-  const mapped = columnIdMapping.get(transposeInfo.id);
+  const mapped = columnIdMapping.get(info.id);
 
   if (!mapped || mapped.type !== 'metric') {
     return undefined;
   }
 
   return {
-    values: transposeInfo.values,
+    values: info.values,
     index: mapped.index,
   };
 }
@@ -114,13 +114,12 @@ function parseSortingToAPI(
   // Old SOs can have a missing direction, so we default to asc
   const DEFAULT_DIRECTION = 'asc' as const;
 
-  // Check if this is transposed metric sorting
-  const transposedSorting = parseTransposedMetricSorting(columnId, columnIdMapping);
-  if (transposedSorting) {
+  const pivotedSorting = parsePivotedSorting(columnId, columnIdMapping);
+  if (pivotedSorting) {
     return {
-      column_type: 'transposed_metric',
-      index: transposedSorting.index,
-      values: transposedSorting.values,
+      column_type: 'pivoted_metric',
+      index: pivotedSorting.index,
+      values: pivotedSorting.values,
       direction: direction ?? DEFAULT_DIRECTION,
     };
   }

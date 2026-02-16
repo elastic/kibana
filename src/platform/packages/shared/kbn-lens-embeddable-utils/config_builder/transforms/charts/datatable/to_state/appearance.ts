@@ -20,7 +20,7 @@ function getSortingColumnId(sortBy: NonNullable<DatatableState['sort_by']>): str
       return getAccessorName(METRIC_ACCESSOR_PREFIX, sortBy.index);
     case 'row':
       return getAccessorName(ROW_ACCESSOR_PREFIX, sortBy.index);
-    case 'transposed_metric': {
+    case 'pivoted_metric': {
       const metricColumnId = getAccessorName(METRIC_ACCESSOR_PREFIX, sortBy.index);
       return getTransposeId(sortBy.values.join(TRANSPOSE_SEPARATOR), metricColumnId);
     }
