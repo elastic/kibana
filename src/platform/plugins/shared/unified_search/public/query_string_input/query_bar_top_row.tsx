@@ -902,7 +902,12 @@ export const QueryBarTopRow = React.memo(
       }
 
       return (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            margin-left: auto;
+          `}
+        >
           <ESQLMenu onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged} />
         </EuiFlexItem>
       );
@@ -1046,7 +1051,6 @@ export const QueryBarTopRow = React.memo(
                     {props.esqlVariablesConfig?.controlsWrapper}
                   </EuiFlexItem>
                 )}
-                {shouldShowDatePickerAsBadge() && props.filterBar}
                 {renderEsqlMenuPopover()}
               </EuiFlexGroup>
               {!shouldShowDatePickerAsBadge() && props.filterBar}
