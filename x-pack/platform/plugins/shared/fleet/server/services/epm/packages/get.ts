@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import pMap from 'p-map';
 import minimatch from 'minimatch';
 import type {
@@ -427,7 +427,7 @@ export async function getInstalledPackageManifests(
 
   const parsedManifests = result.saved_objects.reduce<Map<string, PackageSpecManifest>>(
     (acc, asset) => {
-      acc.set(asset.attributes.asset_path, load(asset.attributes.data_utf8));
+      acc.set(asset.attributes.asset_path, parse(asset.attributes.data_utf8));
       return acc;
     },
     new Map()

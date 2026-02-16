@@ -6,7 +6,6 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { dump } from 'js-yaml';
 
 import { schema } from '@kbn/config-schema';
 
@@ -676,7 +675,7 @@ describe('schema validation', () => {
   });
 
   it('download full agent policy should return valid response', async () => {
-    const expectedResponse = fullAgentPolicyToYaml(fullAgentPolicy, dump);
+    const expectedResponse = fullAgentPolicyToYaml(fullAgentPolicy);
     (agentPolicyService.getFullAgentPolicy as jest.Mock).mockResolvedValue(fullAgentPolicy);
     await downloadFullAgentPolicy(
       context,

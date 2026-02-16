@@ -8,7 +8,7 @@
 import React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import { isEqual, omit, pick } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -350,7 +350,7 @@ export function useOnSubmit({
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
           packageInfo,
-          load,
+          parse,
           spaceSettings
         );
         setValidationResults(newValidationResult);

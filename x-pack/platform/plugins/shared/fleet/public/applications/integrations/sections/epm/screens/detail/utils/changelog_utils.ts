@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 
 import semverGte from 'semver/functions/gte';
 import semverLte from 'semver/functions/lte';
@@ -44,7 +44,7 @@ export const parseYamlChangelog = (
   latestVersion: string,
   currentVersion?: string
 ) => {
-  const parsedChangelog: Changelog = changelogText ? load(changelogText) : [];
+  const parsedChangelog: Changelog = changelogText ? parse(changelogText) : [];
 
   if (!currentVersion) return parsedChangelog.filter((e) => semverLte(e.version, latestVersion));
 

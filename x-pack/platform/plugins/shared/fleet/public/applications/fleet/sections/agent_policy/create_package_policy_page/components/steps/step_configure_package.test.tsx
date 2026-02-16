@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
@@ -33,7 +33,7 @@ describe('StepConfigurePackage', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
   const render = (isAgentlessSelected = false) => {
-    const validationResults = validatePackagePolicy(packagePolicy, packageInfo, load);
+    const validationResults = validatePackagePolicy(packagePolicy, packageInfo, parse);
 
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy

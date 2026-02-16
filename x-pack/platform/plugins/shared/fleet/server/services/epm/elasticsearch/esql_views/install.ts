@@ -6,7 +6,7 @@
  */
 
 import pMap from 'p-map';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
@@ -53,7 +53,7 @@ export async function installEsqlViews({
 
   const esqlViews = esqlViewPaths.map((path) => {
     const assetData = getAssetFromAssetsMap(esqlViewAssetsMap, path).toString('utf-8');
-    const data = path.endsWith('.yml') ? load(assetData) : JSON.parse(assetData);
+    const data = path.endsWith('.yml') ? parse(assetData) : JSON.parse(assetData);
 
     return { name: data.name, query: data.query };
   });

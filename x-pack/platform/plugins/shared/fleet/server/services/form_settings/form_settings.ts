@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import { type Props, schema } from '@kbn/config-schema';
 import { stringifyZodError } from '@kbn/zod-helpers';
 
@@ -79,7 +79,7 @@ export function _getSettingsValuesForAgentPolicy(
 
 function convertValue(val: any, type?: string) {
   if (type === 'yaml') {
-    const valJs = load(val);
+    const valJs = parse(val);
     if (valJs.agent?.internal) {
       return valJs.agent.internal;
     } else {

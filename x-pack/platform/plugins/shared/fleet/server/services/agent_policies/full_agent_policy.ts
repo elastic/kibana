@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import deepMerge from 'deepmerge';
 import { set } from '@kbn/safer-lodash-set';
 
@@ -525,7 +525,7 @@ export function transformOutputToFullPolicyOutput(
     preset,
   } = output;
 
-  const configJs = config_yaml ? load(config_yaml) : {};
+  const configJs = config_yaml ? parse(config_yaml) : {};
 
   // build logic to read config_yaml and transform it with the new shipper data
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
@@ -677,7 +677,7 @@ export function transformOutputToFullPolicyOutput(
   }
 
   if (outputTypeSupportPresets(output.type)) {
-    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', load);
+    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', parse);
   }
 
   return newOutput;

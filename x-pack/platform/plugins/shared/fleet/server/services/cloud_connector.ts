@@ -37,6 +37,7 @@ import {
   CloudConnectorInvalidVarsError,
   CloudConnectorDeleteError,
   rethrowIfInstanceOrWrap,
+  getErrorMessage,
 } from '../errors';
 
 import { appContextService } from './app_context';
@@ -250,11 +251,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         packagePolicyCount: 0,
       };
     } catch (error) {
-      logger.error(
-        `Failed to create cloud connector: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
+      logger.error(`Failed to create cloud connector: ${getErrorMessage(error)}`);
       rethrowIfInstanceOrWrap(
         error,
         CloudConnectorCreateError,
@@ -428,11 +425,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         packagePolicyCount,
       };
     } catch (error) {
-      logger.error(
-        `Failed to update cloud connector: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
+      logger.error(`Failed to update cloud connector: ${getErrorMessage(error)}`);
       rethrowIfInstanceOrWrap(error, CloudConnectorCreateError, 'Failed to update cloud connector');
     }
   }
