@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
-import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
   apiIsPresentationContainer,
   type PresentationContainer,
@@ -19,6 +17,11 @@ import {
 } from '@kbn/presentation-publishing';
 import { apiHasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
 import type { UiActionsEnhancedDrilldownTemplate as DrilldownTemplate } from '@kbn/ui-actions-enhanced-plugin/public';
+import {
+  APPLY_FILTER_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+  SELECT_RANGE_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 /**
  * We know that VALUE_CLICK_TRIGGER and SELECT_RANGE_TRIGGER are also triggering APPLY_FILTER_TRIGGER.

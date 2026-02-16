@@ -6,12 +6,13 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import { streamsApiTest as apiTest } from '../fixtures';
 import { PUBLIC_API_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
   'Stream data routing - fork stream API (CRUD)',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     // Stream names must be exactly one level deep when forking from 'logs'
     // Format: logs.<name> where name uses hyphens, not dots
