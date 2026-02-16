@@ -100,7 +100,7 @@ export const assertPromptTextareaContains = (expectedPrompt: string) => {
 };
 
 export const assertEsqlQueryBarContains = (expectedQuery: string) => {
-  cy.contains(ESQL_QUERY_BAR, expectedQuery, { timeout: 60000 }).should('be.visible');
+  cy.get(ESQL_QUERY_BAR).contains(expectedQuery);
 };
 
 export const assertCancelledCalloutVisible = () => {
