@@ -7,7 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { encodePath } from './encode_path';
-export { toURL } from './to_url';
-export { sanitizeHostname } from './sanitize_hostname';
-export { stripCredentialsFromUrl } from './strip_credentials_from_url';
+/**
+ * Strips username and password credentials from a URL string.
+ * Returns the original string if it cannot be parsed as a URL.
+ */
+export function stripCredentialsFromUrl(urlString: string): string {
+  try {
+    const url = new URL(urlString);
+    url.username = '';
+    url.password = '';
+    return url.toString();
+  } catch {
+    return urlString;
+  }
+}
