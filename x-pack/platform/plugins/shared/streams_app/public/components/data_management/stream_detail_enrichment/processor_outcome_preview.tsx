@@ -49,6 +49,7 @@ import { selectDraftProcessor } from './state_management/interactive_mode_machin
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
   getAllFieldsInOrder,
+  getOriginalSampleDocument,
   getSourceField,
   getTableColumns,
   previewDocsFilterOptions,
@@ -503,8 +504,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const docViewerContext = useMemo(
     () => ({
-      originalSample:
-        originalSamples && currentDoc ? originalSamples[currentDoc.index].document : undefined,
+      originalSample: getOriginalSampleDocument(originalSamples, currentDoc?.index),
     }),
     [currentDoc, originalSamples]
   );
