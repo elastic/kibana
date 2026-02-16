@@ -100,7 +100,7 @@ function recentFieldStats(fields: EntityField[]) {
       const castedSrc = castSrcType(field);
       switch (retention.operation) {
         case 'collect_values':
-          return `${recentDest} = TOP(MV_DEDUPE(${castedSrc}), ${retention.maxLength}) WHERE MV_COUNT(${source}) > 0`;
+          return `${recentDest} = TOP(MV_DEDUPE(${castedSrc}), ${retention.maxLength}) WHERE ${source} IS NOT NULL`;
         case 'prefer_newest_value':
           return `${recentDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${source} IS NOT NULL`;
         case 'prefer_oldest_value':
