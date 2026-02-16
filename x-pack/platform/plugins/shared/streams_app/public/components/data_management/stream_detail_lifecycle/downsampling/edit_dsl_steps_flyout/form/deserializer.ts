@@ -6,7 +6,7 @@
  */
 
 import type { IngestStreamLifecycleDSL } from '@kbn/streams-schema';
-import type { DslStepMetaFields, DslStepsFlyoutFormInternal, TimeUnit } from './types';
+import type { DslStepMetaFields, DslStepsFlyoutFormInternal, PreservedTimeUnit } from './types';
 import { MAX_DOWNSAMPLE_STEPS } from './constants';
 import { parseInterval, toMilliseconds } from './utils';
 
@@ -18,11 +18,11 @@ export const createDslStepsFlyoutDeserializer = () => {
       .map((step) => {
         const parsedAfter = parseInterval(step?.after);
         const afterValue = parsedAfter?.value ?? '';
-        const afterUnit = (parsedAfter?.unit ?? 'd') as TimeUnit;
+        const afterUnit = (parsedAfter?.unit ?? 'd') as PreservedTimeUnit;
 
         const parsedInterval = parseInterval(step?.fixed_interval);
         const fixedIntervalValue = parsedInterval?.value ?? '1';
-        const fixedIntervalUnit = (parsedInterval?.unit ?? 'd') as TimeUnit;
+        const fixedIntervalUnit = (parsedInterval?.unit ?? 'd') as PreservedTimeUnit;
 
         return {
           afterValue,

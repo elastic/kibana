@@ -67,6 +67,44 @@ export const Default: Story = {
   },
 };
 
+export const PreserveMsUnits: Story = {
+  render: () => {
+    const StoryComponent = () => {
+      const initialSteps: IngestStreamLifecycleDSL = {
+        dsl: {
+          data_retention: '30d',
+          downsample: [{ after: '1500ms', fixed_interval: '300000ms' }],
+        },
+      };
+
+      const [selectedStepIndex, setSelectedStepIndex] = useState<number | undefined>(0);
+
+      return (
+        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
+          <EuiFlexItem grow={false}>
+            <EditDslStepsFlyout
+              initialSteps={initialSteps}
+              selectedStepIndex={selectedStepIndex}
+              setSelectedStepIndex={setSelectedStepIndex}
+              onClose={() => {
+                action('onClose')();
+              }}
+              onChange={(next: IngestStreamLifecycleDSL) => {
+                action('onChange')(next);
+              }}
+              onSave={(next: IngestStreamLifecycleDSL) => {
+                action('onSave')(next);
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    };
+
+    return <StoryComponent />;
+  },
+};
+
 export const StepSyncing: Story = {
   render: () => {
     const StoryComponent = () => {

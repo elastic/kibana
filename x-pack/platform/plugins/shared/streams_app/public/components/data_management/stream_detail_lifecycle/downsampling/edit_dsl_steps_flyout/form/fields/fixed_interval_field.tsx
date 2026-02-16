@@ -16,7 +16,8 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import type { TimeUnit } from '../types';
+import { getTimeUnitLabel } from '../../../../helpers/format_size_units';
+import type { PreservedTimeUnit, TimeUnit } from '../types';
 import { formatMillisecondsInUnit, getStepIndexFromArrayItemPath, toMilliseconds } from '../utils';
 import { MAX_DOWNSAMPLE_STEPS } from '../constants';
 import {
@@ -114,7 +115,7 @@ export const FixedIntervalField = ({
           {(unitField) => {
             const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(valueField);
             const currentValue = String(valueField.value ?? '');
-            const currentUnit = String(unitField.value ?? 'd') as TimeUnit;
+            const currentUnit = String(unitField.value ?? 'd') as PreservedTimeUnit;
 
             const getFixedIntervalMsAt = (index: number): number | undefined => {
               const value = String(
@@ -122,7 +123,7 @@ export const FixedIntervalField = ({
               ).trim();
               const unit = String(
                 form.getFields()[`_meta.downsampleSteps[${index}].fixedIntervalUnit`]?.value ?? 'd'
-              ) as TimeUnit;
+              ) as PreservedTimeUnit;
               if (value === '') return;
               const ms = toMilliseconds(value, unit);
               return Number.isFinite(ms) && ms > 0 ? ms : undefined;
@@ -178,10 +179,27 @@ export const FixedIntervalField = ({
                         'xpack.streams.editDslStepsFlyout.fixedIntervalUnitAriaLabel',
                         { defaultMessage: 'Fixed interval unit' }
                       )}
-                      options={timeUnitOptions.map((o) => ({ value: o.value, text: o.text }))}
+                      options={(() => {
+                        let unitOptions: Array<{ value: PreservedTimeUnit; text: string }> =
+                          timeUnitOptions.map((o) => ({ value: o.value, text: o.text }));
+                        const canShowNonDefaultUnit =
+                          currentUnit === 'ms' ||
+                          currentUnit === 'micros' ||
+                          currentUnit === 'nanos';
+                        if (
+                          canShowNonDefaultUnit &&
+                          !unitOptions.some((o) => o.value === currentUnit)
+                        ) {
+                          unitOptions = [
+                            ...unitOptions,
+                            { value: currentUnit, text: getTimeUnitLabel(currentUnit) },
+                          ];
+                        }
+                        return unitOptions;
+                      })()}
                       value={currentUnit}
                       data-test-subj={`${dataTestSubj}FixedIntervalUnit`}
-                      onChange={(e) => unitField.setValue(e.target.value as TimeUnit)}
+                      onChange={(e) => unitField.setValue(e.target.value as PreservedTimeUnit)}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

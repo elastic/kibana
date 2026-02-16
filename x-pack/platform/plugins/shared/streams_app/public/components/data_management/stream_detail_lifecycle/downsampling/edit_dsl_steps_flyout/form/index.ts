@@ -7,6 +7,7 @@
 
 export type {
   TimeUnit,
+  PreservedTimeUnit,
   DslStepMetaFields,
   DslStepsFlyoutFormInternal,
   DslStepsFlyoutFormOutput,

@@ -5,45 +5,38 @@
  * 2.0.
  */
 
-import type { TimeUnit } from './types';
+import type { PreservedTimeUnit } from './types';
+import { splitSizeAndUnits, toMillis } from '../../../helpers/format_size_units';
 
-const TIME_UNIT_TO_MILLISECONDS: Record<TimeUnit, number> = {
-  s: 1000,
-  m: 60_000,
-  h: 3_600_000,
-  d: 86_400_000,
-};
-
-export const toMilliseconds = (value: string, unit: TimeUnit): number => {
+export const toMilliseconds = (value: string, unit: PreservedTimeUnit): number => {
   if (value.trim() === '') return -1;
-  const num = Number(value);
-  if (!Number.isFinite(num)) return Number.NaN;
-  return num * TIME_UNIT_TO_MILLISECONDS[unit];
+  const resolvedValue = value.trim();
+  const ms = toMillis(`${resolvedValue}${unit}`);
+  return ms === undefined ? Number.NaN : ms;
 };
 
 export const parseInterval = (
   duration: string | undefined
-): { value: string; unit: TimeUnit } | undefined => {
+): { value: string; unit: PreservedTimeUnit } | undefined => {
   if (!duration) return;
 
-  // Data stream lifecycle `after` values can be represented in milliseconds (e.g. "0ms").
-  // The DSL steps flyout only supports d/h/m/s UI units, so normalize whole-second ms values to seconds.
-  const msMatch = /^(\d+)ms$/.exec(duration);
-  if (msMatch) {
-    const ms = Number(msMatch[1]);
-    if (!Number.isFinite(ms) || ms < 0) return;
-    if (ms % 1000 !== 0) return;
-    return { value: String(ms / 1000), unit: 's' };
-  }
-
-  // Match only integer durations for supported UI units.
-  const result = /^(\d+)([dhms])$/.exec(duration);
-  if (!result) return;
-  return { value: result[1], unit: result[2] as TimeUnit };
+  const { size, unit } = splitSizeAndUnits(duration);
+  if (!size || !unit) return;
+  if (toMillis(`1${unit}`) === undefined) return;
+  return { value: size, unit: unit as PreservedTimeUnit };
 };
 
-export const formatMillisecondsInUnit = (ms: number, unit: TimeUnit, precision = 2): string => {
-  const valueInUnit = ms / TIME_UNIT_TO_MILLISECONDS[unit];
+export const formatMillisecondsInUnit = (
+  ms: number,
+  unit: PreservedTimeUnit,
+  precision = 2
+): string => {
+  const multiplier = toMillis(`1${unit}`);
+  if (multiplier === undefined || multiplier === 0) {
+    return `${ms}ms`;
+  }
+
+  const valueInUnit = ms / multiplier;
   const formatted =
     Number.isFinite(valueInUnit) && Number.isInteger(valueInUnit)
       ? String(valueInUnit)

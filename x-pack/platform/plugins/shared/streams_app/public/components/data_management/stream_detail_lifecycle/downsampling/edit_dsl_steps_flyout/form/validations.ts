@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
-import type { TimeUnit } from './types';
+import type { PreservedTimeUnit } from './types';
 import { toMilliseconds } from './utils';
 
 const { emptyField, isInteger } = fieldValidators;
@@ -67,7 +67,7 @@ export const afterGreaterThanPreviousStep: AnyValidationFunc = (...args) => {
     const value = String((formData as any)[`_meta.downsampleSteps[${index}].afterValue`] ?? '');
     const unit = String(
       (formData as any)[`_meta.downsampleSteps[${index}].afterUnit`] ?? 'd'
-    ) as TimeUnit;
+    ) as PreservedTimeUnit;
     const computed = toMilliseconds(value, unit);
     const ms =
       (formData as any)[`_meta.downsampleSteps[${index}].afterToMilliSeconds`] ??
@@ -139,7 +139,7 @@ export const fixedIntervalMustBeAtLeastFiveMinutes: AnyValidationFunc = (...args
 
   const unit = String(
     (formData as any)[`_meta.downsampleSteps[${stepIndex}].fixedIntervalUnit`] ?? 'd'
-  ) as TimeUnit;
+  ) as PreservedTimeUnit;
   const milliseconds = toMilliseconds(String(value), unit);
   if (!Number.isFinite(milliseconds) || milliseconds <= 0) return;
 
@@ -165,7 +165,7 @@ export const fixedIntervalMultipleOfPreviousStep: AnyValidationFunc = (...args) 
     );
     const unit = String(
       (formData as any)[`_meta.downsampleSteps[${index}].fixedIntervalUnit`] ?? 'd'
-    ) as TimeUnit;
+    ) as PreservedTimeUnit;
 
     if (!value || !unit) return null;
     const milliseconds = toMilliseconds(value, unit);

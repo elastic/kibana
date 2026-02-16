@@ -7,12 +7,12 @@
 
 import { cloneDeep } from 'lodash';
 import type { IngestStreamLifecycleDSL } from '@kbn/streams-schema';
-import type { DslStepsFlyoutFormInternal } from './types';
+import type { DslStepsFlyoutFormInternal, PreservedTimeUnit } from './types';
 import { MAX_DOWNSAMPLE_STEPS } from './constants';
 
 const formatDuration = (
   value: string | undefined,
-  unit: string | undefined
+  unit: PreservedTimeUnit | undefined
 ): string | undefined => {
   if (!value || value.trim() === '') return;
   if (!unit) return;
@@ -24,7 +24,7 @@ const formatDuration = (
 
 const formatInterval = (
   value: string | undefined,
-  unit: string | undefined
+  unit: PreservedTimeUnit | undefined
 ): string | undefined => {
   if (!value || value.trim() === '') return;
   if (!unit) return;

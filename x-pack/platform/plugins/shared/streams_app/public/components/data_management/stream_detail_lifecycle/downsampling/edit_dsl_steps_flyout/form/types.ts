@@ -6,19 +6,22 @@
  */
 
 import type { IngestStreamLifecycleDSL } from '@kbn/streams-schema';
+import type { StreamsTimeUnit } from '../../../helpers/format_size_units';
 
-export type TimeUnit = 'd' | 'h' | 'm' | 's';
+export type TimeUnit = Extract<StreamsTimeUnit, 'd' | 'h' | 'm' | 's'>;
+
+export type PreservedTimeUnit = StreamsTimeUnit;
 
 export interface DslStepMetaFields {
   afterValue: string;
-  afterUnit: TimeUnit;
+  afterUnit: PreservedTimeUnit;
   /**
    * Derived field used for cross-step `after` ordering validation.
    * -1 means "unset / invalid / not computed".
    */
   afterToMilliSeconds: number;
   fixedIntervalValue: string;
-  fixedIntervalUnit: TimeUnit;
+  fixedIntervalUnit: PreservedTimeUnit;
 }
 
 /**

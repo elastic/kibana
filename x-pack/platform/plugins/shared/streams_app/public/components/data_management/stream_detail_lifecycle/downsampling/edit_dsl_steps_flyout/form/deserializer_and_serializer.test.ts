@@ -94,6 +94,25 @@ describe('streams DSL steps flyout deserializer and serializer', () => {
     });
   });
 
+  it('round-trips preserved units like ms for after and fixed_interval', () => {
+    const input: IngestStreamLifecycleDSL = {
+      dsl: {
+        data_retention: '30d',
+        downsample: [{ after: '1500ms', fixed_interval: '300000ms' }],
+      },
+    } as any;
+
+    const internal = deserializer(input);
+    expect(internal._meta.downsampleSteps[0].afterValue).toBe('1500');
+    expect(internal._meta.downsampleSteps[0].afterUnit).toBe('ms');
+    expect(internal._meta.downsampleSteps[0].afterToMilliSeconds).toBe(1500);
+    expect(internal._meta.downsampleSteps[0].fixedIntervalValue).toBe('300000');
+    expect(internal._meta.downsampleSteps[0].fixedIntervalUnit).toBe('ms');
+
+    const out = createDslStepsFlyoutSerializer(cloneDeep(input))(internal);
+    expect(out).toEqual(input);
+  });
+
   it('defaults missing/invalid durations during deserialization', () => {
     const internal = deserializer({
       dsl: {

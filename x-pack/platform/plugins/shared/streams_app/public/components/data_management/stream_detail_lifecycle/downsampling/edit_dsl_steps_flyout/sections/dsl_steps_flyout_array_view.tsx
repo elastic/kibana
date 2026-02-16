@@ -22,7 +22,7 @@ import type { FormArrayField } from '@kbn/es-ui-shared-plugin/static/forms/hook_
 import {
   MAX_DOWNSAMPLE_STEPS,
   type DslStepMetaFields,
-  type TimeUnit,
+  type PreservedTimeUnit,
   toMilliseconds,
 } from '../form';
 import { TIME_UNIT_OPTIONS } from '../constants';
@@ -63,7 +63,7 @@ export const DslStepsFlyoutArrayView = ({
       const afterValue = String(fields[`_meta.downsampleSteps[${index}].afterValue`]?.value ?? '');
       const afterUnit = String(
         fields[`_meta.downsampleSteps[${index}].afterUnit`]?.value ?? 'd'
-      ) as TimeUnit;
+      ) as PreservedTimeUnit;
       const afterToMilliSeconds = Number(
         fields[`_meta.downsampleSteps[${index}].afterToMilliSeconds`]?.value ?? -1
       );
@@ -72,7 +72,7 @@ export const DslStepsFlyoutArrayView = ({
       );
       const fixedIntervalUnit = String(
         fields[`_meta.downsampleSteps[${index}].fixedIntervalUnit`]?.value ?? 'd'
-      ) as TimeUnit;
+      ) as PreservedTimeUnit;
 
       return {
         afterValue,

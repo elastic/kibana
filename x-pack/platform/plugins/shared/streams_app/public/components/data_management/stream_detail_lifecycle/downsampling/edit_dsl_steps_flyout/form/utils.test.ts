@@ -19,25 +19,21 @@ describe('streams DSL steps flyout utils', () => {
       expect(parseInterval('5h')).toEqual({ value: '5', unit: 'h' });
       expect(parseInterval('10m')).toEqual({ value: '10', unit: 'm' });
       expect(parseInterval('1s')).toEqual({ value: '1', unit: 's' });
+      expect(parseInterval('0ms')).toEqual({ value: '0', unit: 'ms' });
+      expect(parseInterval('1500ms')).toEqual({ value: '1500', unit: 'ms' });
+      expect(parseInterval('500micros')).toEqual({ value: '500', unit: 'micros' });
+      expect(parseInterval('500000nanos')).toEqual({ value: '500000', unit: 'nanos' });
     });
 
     it('returns undefined for invalid inputs', () => {
       expect(parseInterval(undefined)).toBeUndefined();
       expect(parseInterval('')).toBeUndefined();
-      expect(parseInterval('1ms')).toBeUndefined();
       expect(parseInterval('h')).toBeUndefined();
       expect(parseInterval('1')).toBeUndefined();
       expect(parseInterval('1w')).toBeUndefined();
       expect(parseInterval(' 1d')).toBeUndefined();
       expect(parseInterval('1d ')).toBeUndefined();
       expect(parseInterval('1.5h')).toBeUndefined();
-    });
-
-    it('normalizes whole-second millisecond durations to seconds', () => {
-      expect(parseInterval('0ms')).toEqual({ value: '0', unit: 's' });
-      expect(parseInterval('1000ms')).toEqual({ value: '1', unit: 's' });
-      expect(parseInterval('5000ms')).toEqual({ value: '5', unit: 's' });
-      expect(parseInterval('1500ms')).toBeUndefined();
     });
   });
 
@@ -47,6 +43,9 @@ describe('streams DSL steps flyout utils', () => {
       expect(toMilliseconds('2', 'm')).toBe(2 * 60_000);
       expect(toMilliseconds('3', 'h')).toBe(3 * 3_600_000);
       expect(toMilliseconds('4', 'd')).toBe(4 * 86_400_000);
+      expect(toMilliseconds('1', 'ms')).toBe(1);
+      expect(toMilliseconds('1000', 'micros')).toBe(1);
+      expect(toMilliseconds('1000000', 'nanos')).toBe(1);
     });
 
     it('returns -1 for empty/blank strings', () => {
