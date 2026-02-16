@@ -9,5 +9,13 @@ import { globalSetupHook } from '@kbn/scout';
 
 globalSetupHook('Setup environment for streams tests', async ({ apiServices, log }) => {
   log.debug('[setup] Enabling streams...');
-  await apiServices.streams.enable();
+  try {
+    await apiServices.streams.enable();
+  } catch (error) {
+    // Ignore 409 Conflict errors (streams already enabled)
+    if (error?.response?.status !== 409) {
+      throw error;
+    }
+    log.debug('[setup] Streams already enabled, continuing...');
+  }
 });

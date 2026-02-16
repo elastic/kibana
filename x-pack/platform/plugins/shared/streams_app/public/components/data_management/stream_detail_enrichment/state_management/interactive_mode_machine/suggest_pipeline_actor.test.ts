@@ -60,6 +60,12 @@ const createParentRef = (): InteractiveModeParentRef => {
 };
 
 describe('interactive mode pipeline suggestion polling', () => {
+  let notifySuggestionFailureMock: jest.Mock;
+
+  beforeEach(() => {
+    notifySuggestionFailureMock = jest.fn();
+  });
+
   afterEach(() => {
     jest.clearAllTimers();
     jest.useRealTimers();
@@ -182,6 +188,141 @@ describe('interactive mode pipeline suggestion polling', () => {
     await jest.advanceTimersByTimeAsync(60_000);
     await settleActor();
     expect(getPipelineSuggestionStatusMock).toHaveBeenCalledTimes(1);
+
+    actor.stop();
+  });
+
+  it('shows error toast when task fails with TaskStatus.Failed', async () => {
+    jest.useFakeTimers();
+
+    const getPipelineSuggestionStatusMock = jest.fn(
+      async (): Promise<PipelineSuggestionTaskStatusResult> => ({
+        status: TaskStatus.Failed,
+        error: 'LLM connection failed',
+      })
+    );
+
+    const testMachine = interactiveModeMachine.provide({
+      actors: {
+        loadExistingSuggestion: fromPromise<
+          LoadExistingSuggestionResult,
+          LoadExistingSuggestionInputMinimal
+        >(async () => ({ type: 'none' as const })),
+        schedulePipelineSuggestionTask: fromPromise<
+          void,
+          SchedulePipelineSuggestionTaskInputMinimal
+        >(async () => {}),
+        getPipelineSuggestionStatus: fromPromise<
+          PipelineSuggestionTaskStatusResult,
+          GetPipelineSuggestionStatusInputMinimal
+        >(async () => getPipelineSuggestionStatusMock()),
+      },
+      actions: {
+        notifySuggestionFailure: notifySuggestionFailureMock,
+      },
+    });
+
+    const input = {
+      dsl: { steps: [] } as unknown as StreamlangDSL,
+      newStepIds: [],
+      parentRef: createParentRef(),
+      privileges: { manage: true, simulate: true },
+      simulationMode: 'complete' as const,
+      streamName: 'logs-generic-default',
+      grokCollection: {} as GrokCollection,
+    };
+
+    const actor = createActor(testMachine, { input });
+    actor.start();
+
+    await waitForMatch(actor, 'pipelineSuggestion.idle');
+    actor.send({ type: 'suggestion.generate', connectorId: 'connector-1' });
+
+    // Wait for the task to be checked and fail
+    await waitForMatch(actor, 'pipelineSuggestion.idle');
+
+    expect(notifySuggestionFailureMock).toHaveBeenCalledTimes(1);
+    expect(notifySuggestionFailureMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: expect.anything(),
+        event: expect.objectContaining({
+          output: expect.objectContaining({
+            status: TaskStatus.Failed,
+            error: 'LLM connection failed',
+          }),
+        }),
+      }),
+      expect.objectContaining({
+        event: expect.objectContaining({
+          error: expect.any(Error),
+        }),
+      })
+    );
+
+    actor.stop();
+  });
+
+  it('shows error toast when polling API call fails', async () => {
+    jest.useFakeTimers();
+
+    const pollingError = new Error('Network error');
+    const getPipelineSuggestionStatusMock = jest.fn(async () => {
+      throw pollingError;
+    });
+
+    const testMachine = interactiveModeMachine.provide({
+      actors: {
+        loadExistingSuggestion: fromPromise<
+          LoadExistingSuggestionResult,
+          LoadExistingSuggestionInputMinimal
+        >(async () => ({ type: 'none' as const })),
+        schedulePipelineSuggestionTask: fromPromise<
+          void,
+          SchedulePipelineSuggestionTaskInputMinimal
+        >(async () => {}),
+        getPipelineSuggestionStatus: fromPromise<
+          PipelineSuggestionTaskStatusResult,
+          GetPipelineSuggestionStatusInputMinimal
+        >(async () => getPipelineSuggestionStatusMock()),
+      },
+      actions: {
+        notifySuggestionFailure: notifySuggestionFailureMock,
+      },
+    });
+
+    const input = {
+      dsl: { steps: [] } as unknown as StreamlangDSL,
+      newStepIds: [],
+      parentRef: createParentRef(),
+      privileges: { manage: true, simulate: true },
+      simulationMode: 'complete' as const,
+      streamName: 'logs-generic-default',
+      grokCollection: {} as GrokCollection,
+    };
+
+    const actor = createActor(testMachine, { input });
+    actor.start();
+
+    await waitForMatch(actor, 'pipelineSuggestion.idle');
+    actor.send({ type: 'suggestion.generate', connectorId: 'connector-1' });
+
+    // Wait for the polling to fail and transition back to idle
+    await waitForMatch(actor, 'pipelineSuggestion.idle');
+
+    expect(notifySuggestionFailureMock).toHaveBeenCalledTimes(1);
+    expect(notifySuggestionFailureMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: expect.anything(),
+        event: expect.objectContaining({
+          error: pollingError,
+        }),
+      }),
+      expect.objectContaining({
+        event: expect.objectContaining({
+          error: pollingError,
+        }),
+      })
+    );
 
     actor.stop();
   });

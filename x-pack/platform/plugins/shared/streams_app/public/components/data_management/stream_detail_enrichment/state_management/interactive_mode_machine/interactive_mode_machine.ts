@@ -573,7 +573,21 @@ export const interactiveModeMachine = setup({
               {
                 guard: ({ event }) => event.output.status === TaskStatus.Failed,
                 target: 'idle',
-                actions: [{ type: 'clearSuggestionPollingDeadline' }],
+                actions: [
+                  { type: 'clearSuggestionPollingDeadline' },
+                  {
+                    type: 'notifySuggestionFailure',
+                    params: ({ event }) => ({
+                      event: {
+                        error: new Error(
+                          event.output.status === TaskStatus.Failed
+                            ? event.output.error
+                            : 'Pipeline suggestion task failed'
+                        ),
+                      },
+                    }),
+                  },
+                ],
               },
               {
                 guard: ({ event }) =>
@@ -589,7 +603,13 @@ export const interactiveModeMachine = setup({
             ],
             onError: {
               target: 'idle',
-              actions: [{ type: 'clearSuggestionPollingDeadline' }],
+              actions: [
+                { type: 'clearSuggestionPollingDeadline' },
+                {
+                  type: 'notifySuggestionFailure',
+                  params: ({ event }: { event: { error: unknown } }) => ({ event }),
+                },
+              ],
             },
           },
         },

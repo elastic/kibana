@@ -295,6 +295,7 @@ export const StepsEditor = React.memo(() => {
           onCancel={() => {
             cancelSuggestion();
           }}
+          showBackgroundMessage={true}
         />
       );
     }
