@@ -13,7 +13,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import moment from 'moment';
 import { executeEsqlQuery } from '../infra/elasticsearch/esql';
 import { ingestEntities } from '../infra/elasticsearch/ingest';
-import { HASHED_ID } from './logs_extraction/logs_extraction_query_builder';
+import { HASHED_ID_FIELD } from './logs_extraction/logs_extraction_query_builder';
 import { LogExtractionState, type EngineDescriptorClient } from './definitions/saved_objects';
 import { ENGINE_STATUS } from './constants';
 import type { EntityType } from '../../common/domain/definitions/entity_schema';
@@ -80,7 +80,7 @@ describe('LogsExtractionClient', () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID, type: 'keyword' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
           { name: 'user.name', type: 'keyword' },
           { name: 'host.name', type: 'keyword' },
         ],
@@ -129,7 +129,7 @@ describe('LogsExtractionClient', () => {
       expect(mockIngestEntities).toHaveBeenCalledWith({
         esClient: mockEsClient,
         esqlResponse: mockEsqlResponse,
-        esIdField: HASHED_ID,
+        esIdField: HASHED_ID_FIELD,
         targetIndex: expect.stringContaining('.entities.v2.latest.security_default'),
         logger: expect.any(Object),
       });
@@ -146,7 +146,7 @@ describe('LogsExtractionClient', () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID, type: 'keyword' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
           { name: 'user.name', type: 'keyword' },
         ],
         values: [],
@@ -187,7 +187,7 @@ describe('LogsExtractionClient', () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID, type: 'keyword' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
         ],
         values: [],
       };
@@ -230,7 +230,7 @@ describe('LogsExtractionClient', () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID, type: 'keyword' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
         ],
         values: [],
       };
@@ -325,7 +325,7 @@ describe('LogsExtractionClient', () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID, type: 'keyword' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
         ],
         values: [],
       };
@@ -365,7 +365,7 @@ describe('LogsExtractionClient', () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID, type: 'keyword' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
         ],
         values: [
           ['2024-01-02T10:00:00.000Z', 'hash1'],
@@ -404,7 +404,7 @@ describe('LogsExtractionClient', () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID, type: 'keyword' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
           { name: 'user.name', type: 'keyword' },
         ],
         values: [
@@ -439,7 +439,7 @@ describe('LogsExtractionClient', () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID, type: 'keyword' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
         ],
         values: [],
       };
@@ -493,7 +493,7 @@ describe('LogsExtractionClient', () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID, type: 'keyword' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
         ],
         values: [['2024-01-02T10:00:00.000Z', 'hash1']],
       };
@@ -525,7 +525,7 @@ describe('LogsExtractionClient', () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID, type: 'keyword' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
         ],
         values: [],
       };
@@ -552,7 +552,7 @@ describe('LogsExtractionClient', () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID, type: 'keyword' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
         ],
         values: [[lastTimestamp, 'hash1']],
       };

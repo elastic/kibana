@@ -87,6 +87,12 @@ export const literalString = 'HI';
 //   missing comments (2):
 //     line 32 - a
 //     line 45 - foo
+//   param doc mismatches (3):
+//     line 19 - notAnArrowFn
+//     line 24 - aPropertyMisdirection
+//     line 29 - aPropertyInlineFn
+//   missing complex type info (1):
+//     line 32 - a
 //   no references (14):
 //     line 18 - aPretendNamespaceObj
 //     line 19 - notAnArrowFn

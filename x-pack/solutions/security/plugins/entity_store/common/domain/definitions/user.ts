@@ -7,7 +7,7 @@
 
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
 import type { EntityDefinitionWithoutId } from './entity_schema';
-import { collectValues as collect, oldestValue } from './field_retention_operations';
+import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';
 
 export const userEntityDefinition: EntityDefinitionWithoutId = {
   type: 'user',
@@ -28,7 +28,9 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
   entityTypeFallback: 'Identity',
   indexPatterns: [],
   fields: [
+    newestValue({ destination: 'entity.name', source: 'user.name' }),
     oldestValue({ source: 'user.entity.id' }),
+
     collect({ source: 'user.domain' }),
     collect({ source: 'user.email' }),
     collect({ source: 'user.name' }),

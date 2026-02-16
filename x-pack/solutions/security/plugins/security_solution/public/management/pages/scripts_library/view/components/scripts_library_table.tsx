@@ -20,10 +20,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { ActionsContextMenu } from '../../../../components/actions_context_menu';
 import type { SupportedHostOsType } from '../../../../../../common/endpoint/constants';
+import type { ScriptTagKey } from '../../../../../../common/endpoint/service/scripts_library/constants';
 import { SCRIPT_TAGS } from '../../../../../../common/endpoint/service/scripts_library/constants';
 import { PopoverItems } from '../../../../../common/components/popover_items';
-import { useAppUrl } from '../../../../../common/lib/kibana';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { useFormatBytes } from '../../../../../common/components/formatted_bytes';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../../common/constants';
@@ -36,10 +37,13 @@ import type {
   SortableScriptLibraryFields,
   SortDirection,
 } from '../../../../../../common/endpoint/types';
-import { scriptsLibraryLabels as tableLabels } from '../../translations';
+import { SCRIPT_LIBRARY_LABELS as tableLabels } from '../../translations';
 import { ScriptNameNavLink } from './script_name_nav_link';
-import { getScriptsDetailPath } from '../../../../common/url_routing';
 import { ScriptTablePlatformBadges } from './platform_badges';
+import {
+  useScriptActionItems,
+  type UseScriptActionItemsProps,
+} from '../hooks/use_script_action_items';
 
 const SCRIPTS_TABLE_COLUMN_WIDTHS = Object.freeze({
   name: '25%',
@@ -51,20 +55,32 @@ const SCRIPTS_TABLE_COLUMN_WIDTHS = Object.freeze({
   actions: '65px',
 });
 
+const ScriptRowActions = memo<{
+  item: EndpointScript;
+  onClickAction: UseScriptActionItemsProps['onClickAction'];
+  'data-test-subj'?: string;
+}>(({ item, onClickAction, 'data-test-subj': dataTestSubj }) => {
+  const items = useScriptActionItems({
+    script: item,
+    onClickAction,
+  });
+  return <ActionsContextMenu items={items} data-test-subj={dataTestSubj} />;
+});
+
+ScriptRowActions.displayName = 'ScriptRowActions';
+
 interface GetScriptsLibraryTableColumnsProps {
-  formatBytes: (bytes: number) => string;
-  getAppUrl: ReturnType<typeof useAppUrl>['getAppUrl'];
-  getTestId: (suffix?: string | undefined) => string | undefined;
   queryParams: ScriptsLibraryTableProps['queryParams'];
-  searchParams: ScriptsLibraryTableProps['searchParams'];
+  formatBytes: (bytes: number) => string;
+  getTestId: (suffix?: string | undefined) => string | undefined;
+  onClickAction: ScriptsLibraryTableProps['onClickAction'];
 }
 
 const getScriptsLibraryTableColumns = ({
   formatBytes,
-  getAppUrl,
-  getTestId,
   queryParams,
-  searchParams,
+  getTestId,
+  onClickAction,
 }: GetScriptsLibraryTableColumnsProps) => {
   const columns = [
     {
@@ -74,17 +90,14 @@ const getScriptsLibraryTableColumns = ({
       width: SCRIPTS_TABLE_COLUMN_WIDTHS.name,
       truncateText: true,
       render: (name: string, item: EndpointScript) => {
-        const toRoutePath = getScriptsDetailPath({
-          query: { ...queryParams, selectedScriptId: item.id, show: 'details' },
-          search: searchParams,
-        });
-        const toRouteUrl = getAppUrl({ path: toRoutePath });
         return (
           <EuiToolTip content={name} anchorClassName="eui-textTruncate">
             <ScriptNameNavLink
               name={name}
-              href={toRouteUrl}
-              data-test-subj={`${getTestId(`column-name-${item.id}`)}`}
+              queryParams={queryParams}
+              scriptId={item.id}
+              onClick={() => onClickAction({ show: 'details', script: item })}
+              data-test-subj={`${getTestId('column-name')}-${item.id}`}
             />
           </EuiToolTip>
         );
@@ -110,9 +123,9 @@ const getScriptsLibraryTableColumns = ({
           <EuiBadge
             color="hollow"
             key={`${sortedTag}-${i}`}
-            data-test-subj={getTestId(`tags-${sortedTag}`)}
+            data-test-subj={getTestId(`types-${sortedTag}`)}
           >
-            {SCRIPT_TAGS[sortedTag as keyof typeof SCRIPT_TAGS] || sortedTag}
+            {SCRIPT_TAGS[sortedTag as ScriptTagKey] || sortedTag}
           </EuiBadge>
         );
         return (
@@ -122,7 +135,7 @@ const getScriptsLibraryTableColumns = ({
             popoverButtonIcon="tag"
             popoverButtonTitle={tags.length.toString()}
             renderItem={renderItem}
-            dataTestPrefix={getTestId('tags')}
+            dataTestPrefix={getTestId('types')}
           />
         );
       },
@@ -165,6 +178,7 @@ const getScriptsLibraryTableColumns = ({
       render: (updatedAt: string) => {
         return (
           <FormattedDate
+            data-test-subj={getTestId('column-updated-at')}
             fieldName={tableLabels.table.columns.updatedAt}
             value={updatedAt}
             className="eui-textTruncate"
@@ -176,8 +190,9 @@ const getScriptsLibraryTableColumns = ({
       field: 'fileSize',
       name: tableLabels.table.columns.size,
       width: SCRIPTS_TABLE_COLUMN_WIDTHS.size,
+      sortable: true,
       render: (fileSize: number) => (
-        <EuiText size="s" data-test-subj={getTestId('file-size')}>
+        <EuiText size="s" data-test-subj={getTestId('column-file-size')}>
           {formatBytes(fileSize).toLowerCase()}
         </EuiText>
       ),
@@ -186,7 +201,17 @@ const getScriptsLibraryTableColumns = ({
       field: '',
       name: tableLabels.table.columns.actions,
       width: SCRIPTS_TABLE_COLUMN_WIDTHS.actions,
-      actions: [],
+      actions: [
+        {
+          render: (item: EndpointScript) => (
+            <ScriptRowActions
+              item={item}
+              onClickAction={onClickAction}
+              data-test-subj={getTestId(`row-actions-${item.id}`)}
+            />
+          ),
+        },
+      ],
     },
   ];
 
@@ -202,8 +227,8 @@ export interface ScriptsLibraryTableProps {
   isLoading?: boolean;
   items: ScriptItems;
   onChange: OnChangeTable;
+  onClickAction: UseScriptActionItemsProps['onClickAction'];
   queryParams: ListScriptsRequestQuery;
-  searchParams: string;
   sort: {
     field?: SortableScriptLibraryFields;
     direction?: SortDirection;
@@ -217,13 +242,12 @@ export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
     isLoading,
     items,
     onChange,
+    onClickAction,
     queryParams,
-    searchParams,
     sort,
     totalItemCount,
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const { getAppUrl } = useAppUrl();
     const formatBytes = useFormatBytes();
     const { pagination: paginationFromUrlParams } = useUrlPagination();
     const sorting = useMemo(
@@ -283,12 +307,11 @@ export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
       () =>
         getScriptsLibraryTableColumns({
           formatBytes,
-          getTestId,
-          getAppUrl,
           queryParams,
-          searchParams,
+          getTestId,
+          onClickAction,
         }),
-      [formatBytes, getTestId, getAppUrl, queryParams, searchParams]
+      [formatBytes, queryParams, getTestId, onClickAction]
     );
 
     const setTableRowProps = useCallback((scriptData: ScriptItems[number]) => {
