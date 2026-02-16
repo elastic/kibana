@@ -13,7 +13,6 @@ import { TabInitializationStatus, type TabState } from './types';
 export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
   initializationState: { initializationStatus: TabInitializationStatus.NotStarted },
   globalState: {},
-  previousGlobalState: {},
   appState: {},
   previousAppState: {},
   forceFetchOnSelect: false,

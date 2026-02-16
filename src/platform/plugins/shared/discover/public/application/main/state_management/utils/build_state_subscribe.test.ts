@@ -14,7 +14,7 @@ import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_sta
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { createDataViewDataSource, DataSourceType } from '../../../../../common/data_sources';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import { internalStateActions } from '../redux';
+import { internalStateActions, type TabState } from '../redux';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 
 describe('buildStateSubscribe', () => {
@@ -38,16 +38,6 @@ describe('buildStateSubscribe', () => {
     });
     stateContainer = result.stateContainer;
 
-    // TODO: verify and improve
-    // Sync previousGlobalState with globalState to establish a clean baseline for tests
-    // During initialization, globalState gets populated by the timefilter but previousGlobalState remains empty
-    toolkit.internalState.dispatch(
-      internalStateActions.resetGlobalState({
-        tabId: toolkit.getCurrentTab().id,
-        globalState: toolkit.getCurrentTab().globalState,
-      })
-    );
-
     stateContainer.dataState.refetch$.next = jest.fn();
     stateContainer.dataState.reset = jest.fn();
     jest.spyOn(internalStateActions, 'assignNextDataView');
@@ -70,13 +60,11 @@ describe('buildStateSubscribe', () => {
 
   const getNextState = ({
     appState: appStateOverrides = {},
-    globalState: globalStateOverrides = {},
   }: {
-    appState?: Record<string, unknown>;
-    globalState?: Record<string, unknown>;
+    appState?: Partial<TabState['appState']>;
   } = {}) => ({
-    appState: { ...toolkit.getCurrentTab().appState, ...appStateOverrides },
-    globalState: { ...toolkit.getCurrentTab().globalState, ...globalStateOverrides },
+    ...toolkit.getCurrentTab().appState,
+    ...appStateOverrides,
   });
 
   it('should set the data view if the index has changed, and refetch should be triggered', async () => {
@@ -140,7 +128,7 @@ describe('buildStateSubscribe', () => {
     expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
   });
 
-  it('should call refetch$ if filters have changed', async () => {
+  it('should not call refetch$ if filters have changed', async () => {
     await getSubscribeFn()(
       getNextState({
         appState: {
@@ -154,7 +142,7 @@ describe('buildStateSubscribe', () => {
       })
     );
 
-    expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
+    expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
   });
 
   it('should not execute setState function if initialFetchStatus is UNINITIALIZED', async () => {
@@ -188,40 +176,5 @@ describe('buildStateSubscribe', () => {
 
     await getSubscribeFn()(getNextState({ appState: { dataSource: newDataSource } }));
     expect(stateContainer.dataState.reset).toBeCalledTimes(1);
-  });
-
-  describe('global state changes', () => {
-    it('should call refetch$ when timeRange changes', async () => {
-      await getSubscribeFn()(
-        getNextState({ globalState: { timeRange: { from: 'now-30m', to: 'now' } } })
-      );
-
-      expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
-    });
-
-    it('should call refetch$ when refreshInterval changes', async () => {
-      await getSubscribeFn()(
-        getNextState({ globalState: { refreshInterval: { pause: false, value: 5000 } } })
-      );
-
-      expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
-    });
-
-    it('should call refetch$ when global filters change', async () => {
-      await getSubscribeFn()(
-        getNextState({
-          globalState: {
-            filters: [
-              {
-                meta: { index: 'test-index', disabled: false, negate: false, alias: null },
-                query: { match: { field: 'value' } },
-              },
-            ],
-          },
-        })
-      );
-
-      expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
-    });
   });
 });

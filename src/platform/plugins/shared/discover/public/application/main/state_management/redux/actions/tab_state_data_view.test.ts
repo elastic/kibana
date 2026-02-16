@@ -219,6 +219,9 @@ describe('tab_state_data_view actions', () => {
 
     test('onDataViewCreated - ad-hoc data view', async () => {
       const { internalState, tabId, runtimeStateManager, services } = await setup();
+      expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.getValue()).toBe(
+        dataViewMockWithTimeField
+      );
       jest
         .spyOn(services.dataViews, 'get')
         .mockImplementationOnce((id) =>
@@ -230,9 +233,10 @@ describe('tab_state_data_view actions', () => {
           nextDataView: dataViewAdHoc,
         })
       );
-      expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.getValue()).toBe(
-        dataViewAdHoc
-      );
+      // Verify the ad-hoc data view was added to the runtime state
+      const adHocDataViews = runtimeStateManager.adHocDataViews$.getValue();
+      expect(adHocDataViews.map((dv) => dv.id)).toContain(dataViewAdHoc.id);
+      // Verify the app state was updated with the new data source
       expect(selectTab(internalState.getState(), tabId).appState.dataSource).toEqual(
         createDataViewDataSource({ dataViewId: dataViewAdHoc.id! })
       );

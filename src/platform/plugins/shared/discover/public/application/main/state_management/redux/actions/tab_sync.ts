@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, startWith } from 'rxjs';
+import { combineLatest, merge, startWith } from 'rxjs';
 import {
   connectToQueryState,
   noSearchSessionStorageCapabilityMessage,
@@ -25,7 +25,6 @@ import { getCurrentUrlState } from '../../utils/cleanup_url_state';
 import { buildStateSubscribe } from '../../utils/build_state_subscribe';
 import { createUrlSyncObservables } from '../../utils/create_url_sync_observables';
 import { createTabStateObservable } from '../../utils/create_tab_state_observable';
-import { createTabAppAndGlobalStatesObservable } from '../../utils/create_tab_app_and_global_states_observable';
 import { createSearchSessionRestorationDataProvider } from '../../utils/create_search_session_restoration_data_provider';
 import {
   createDataViewDataSource,
@@ -207,12 +206,8 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     // initialize syncing with _g and _a part of the URL
     const unsubscribeUrlState = initializeAndSyncUrlState();
 
-    // subscribing to state changes of app state and global state, triggering data fetching
-    const appAndGlobalStatesSubscription = createTabAppAndGlobalStatesObservable({
-      tabId,
-      internalState$: getInternalState$(),
-      getState,
-    }).subscribe(
+    // subscribing to state changes of appStateContainer, triggering data fetching
+    const appStateSubscription = appStateContainer.state$.subscribe(
       buildStateSubscribe({
         dataState: stateContainer.dataState,
         internalState: stateContainer.internalState,
@@ -229,6 +224,16 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     }).subscribe(() => {
       dispatch(
         internalStateActions.syncLocallyPersistedTabState({
+          tabId,
+        })
+      );
+    });
+
+    // triggers data fetching when filters change
+    const filterUnsubscribe = merge(services.filterManager.getFetches$()).subscribe(() => {
+      addLog('[tab_sync] filter changes triggers data fetching');
+      dispatch(
+        internalStateActions.fetchData({
           tabId,
         })
       );
@@ -257,10 +262,11 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
 
     const unsubscribeFn = () => {
       unsubscribeData();
-      appAndGlobalStatesSubscription.unsubscribe();
+      appStateSubscription.unsubscribe();
       tabStateSubscription.unsubscribe();
       unsubscribeUrlState();
       unsubscribeUrlTracking();
+      filterUnsubscribe.unsubscribe();
     };
 
     tabRuntimeState.unsubscribeFn$.next(unsubscribeFn);

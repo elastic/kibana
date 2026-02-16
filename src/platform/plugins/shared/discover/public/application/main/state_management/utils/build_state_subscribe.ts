@@ -17,7 +17,8 @@ import {
 } from '../redux';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
-import { isEqualState, isEqualFilters } from './state_comparators';
+import type { DiscoverAppState } from '../redux';
+import { isEqualState } from './state_comparators';
 import { addLog } from '../../../../utils/add_log';
 import { FetchStatus } from '../../../types';
 import { loadAndResolveDataView } from './resolve_data_view';
@@ -29,7 +30,7 @@ import {
 import { sendLoadingMsg } from '../../hooks/use_saved_search_messages';
 
 /**
- * Builds a subscribe function for the app and global state, that is executed when the state changes in URL
+ * Builds a subscribe function for the app state, that is executed when the app state changes in URL
  * or programmatically. It's main purpose is to detect which changes should trigger a refetch of the data.
  * @param stateContainer
  */
@@ -47,80 +48,48 @@ export const buildStateSubscribe =
     services: DiscoverServices;
     getCurrentTab: () => TabState;
   }) =>
-  async (nextState: Pick<TabState, 'appState' | 'globalState'>) => {
-    const triggerFetch = () => {
-      // Set documents loading to true immediately on state changes since there's a delay
-      // on the fetch and we don't want to see state changes reflected in the data grid
-      // until the fetch is complete (it also helps to minimize data grid re-renders)
-      sendLoadingMsg(dataState.data$.documents$, dataState.data$.documents$.getValue());
+  async (nextState: DiscoverAppState) => {
+    const prevState = getCurrentTab().previousAppState;
+    const isEsqlMode = isDataSourceType(nextState.dataSource, DataSourceType.Esql);
+    const queryChanged = !isEqual(nextState.query, prevState.query);
 
-      dataState.fetch();
-    };
-
-    const prevGlobalState = getCurrentTab().previousGlobalState;
-    const nextGlobalState = nextState.globalState;
-
-    if (!isEqualState(nextGlobalState, prevGlobalState)) {
-      const logData = {
-        globalStateChanged: logEntry(true, prevGlobalState, nextGlobalState),
-      };
-
-      addLog(
-        '[buildStateSubscribe] global state changes triggers data fetching',
-        JSON.stringify(logData, null, 2)
-      );
-
-      triggerFetch();
+    if (isEsqlMode && prevState.viewMode !== nextState.viewMode && !queryChanged) {
+      addLog('[appstate] subscribe $fetch ignored for es|ql', { prevState, nextState });
       return;
     }
 
-    const prevAppState = getCurrentTab().previousAppState;
-    const nextAppState = nextState.appState;
-    const isEsqlMode = isDataSourceType(nextAppState.dataSource, DataSourceType.Esql);
-    const queryChanged = !isEqual(nextAppState.query, prevAppState.query);
-
-    if (isEsqlMode && prevAppState.viewMode !== nextAppState.viewMode && !queryChanged) {
-      addLog('[appstate] subscribe $fetch ignored for es|ql', { prevAppState, nextAppState });
-      return;
-    }
-
-    if (isEsqlMode && isEqualState(prevAppState, nextAppState, ['dataSource']) && !queryChanged) {
+    if (isEsqlMode && isEqualState(prevState, nextState, ['dataSource']) && !queryChanged) {
       // When there's a switch from data view to es|ql, this just leads to a cleanup of index
       // And there's no subsequent action in this function required
-      addLog('[appstate] subscribe update ignored for es|ql', { prevAppState, nextAppState });
+      addLog('[appstate] subscribe update ignored for es|ql', { prevState, nextState });
       return;
     }
 
-    if (isEqualState(prevAppState, nextAppState) && !queryChanged) {
-      addLog('[appstate] subscribe update ignored due to no changes', {
-        prevAppState,
-        nextAppState,
-      });
+    if (isEqualState(prevState, nextState) && !queryChanged) {
+      addLog('[appstate] subscribe update ignored due to no changes', { prevState, nextState });
       return;
     }
 
-    addLog('[appstate] subscribe triggered', nextAppState);
+    addLog('[appstate] subscribe triggered', nextState);
 
     if (isEsqlMode) {
-      const isEsqlModePrev = isDataSourceType(prevAppState.dataSource, DataSourceType.Esql);
+      const isEsqlModePrev = isDataSourceType(prevState.dataSource, DataSourceType.Esql);
       if (!isEsqlModePrev) {
         dataState.reset();
       }
     }
 
-    const { sampleSize, sort, dataSource } = prevAppState;
+    const { sampleSize, sort, dataSource } = prevState;
     // Cast to boolean to avoid false positives when comparing
     // undefined and false, which would trigger a refetch
-    const sampleSizeChanged = nextAppState.sampleSize !== sampleSize;
-    const docTableSortChanged = !isEqual(nextAppState.sort, sort) && !isEsqlMode;
-    const dataSourceChanged = !isEqual(nextAppState.dataSource, dataSource) && !isEsqlMode;
-    const appFiltersChanged =
-      !isEqualFilters(nextAppState.filters, prevAppState.filters) && !isEsqlMode;
+    const sampleSizeChanged = nextState.sampleSize !== sampleSize;
+    const docTableSortChanged = !isEqual(nextState.sort, sort) && !isEsqlMode;
+    const dataSourceChanged = !isEqual(nextState.dataSource, dataSource) && !isEsqlMode;
 
     // NOTE: this is also called when navigating from discover app to context app
-    if (nextAppState.dataSource && dataSourceChanged) {
-      const dataViewId = isDataSourceType(nextAppState.dataSource, DataSourceType.DataView)
-        ? nextAppState.dataSource.dataViewId
+    if (nextState.dataSource && dataSourceChanged) {
+      const dataViewId = isDataSourceType(nextState.dataSource, DataSourceType.DataView)
+        ? nextState.dataSource.dataViewId
         : undefined;
 
       const { dataView: nextDataView, fallback } = await loadAndResolveDataView({
@@ -166,18 +135,11 @@ export const buildStateSubscribe =
       return;
     }
 
-    if (
-      sampleSizeChanged ||
-      docTableSortChanged ||
-      dataSourceChanged ||
-      queryChanged ||
-      appFiltersChanged
-    ) {
+    if (sampleSizeChanged || docTableSortChanged || dataSourceChanged || queryChanged) {
       const logData = {
-        docTableSortChanged: logEntry(docTableSortChanged, sort, nextAppState.sort),
-        dataSourceChanged: logEntry(dataSourceChanged, dataSource, nextAppState.dataSource),
-        queryChanged: logEntry(queryChanged, prevAppState.query, nextAppState.query),
-        appFiltersChanged: logEntry(appFiltersChanged, prevAppState.filters, nextAppState.filters),
+        docTableSortChanged: logEntry(docTableSortChanged, sort, nextState.sort),
+        dataSourceChanged: logEntry(dataSourceChanged, dataSource, nextState.dataSource),
+        queryChanged: logEntry(queryChanged, prevState.query, nextState.query),
       };
 
       if (dataState.disableNextFetchOnStateChange$.getValue()) {
@@ -192,11 +154,16 @@ export const buildStateSubscribe =
       }
 
       addLog(
-        '[buildStateSubscribe] app state changes triggers data fetching',
+        '[buildStateSubscribe] state changes triggers data fetching',
         JSON.stringify(logData, null, 2)
       );
 
-      triggerFetch();
+      // Set documents loading to true immediately on state changes since there's a delay
+      // on the fetch and we don't want to see state changes reflected in the data grid
+      // until the fetch is complete (it also helps to minimize data grid re-renders)
+      sendLoadingMsg(dataState.data$.documents$, dataState.data$.documents$.getValue());
+
+      dataState.fetch();
     }
   };
 

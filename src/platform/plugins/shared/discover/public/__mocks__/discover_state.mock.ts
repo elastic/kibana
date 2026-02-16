@@ -443,7 +443,6 @@ export function getDiscoverStateMock({
   );
 
   const currentTabId = internalState.getState().tabs.unsafeCurrentId;
-  const currentTab = selectTab(internalState.getState(), currentTabId);
 
   internalState.dispatch(
     internalStateActions.resetAppState({
@@ -454,13 +453,6 @@ export function getDiscoverStateMock({
         dataView: finalSavedSearch?.searchSource.getField('index'),
         services,
       }),
-    })
-  );
-
-  internalState.dispatch(
-    internalStateActions.resetGlobalState({
-      tabId: currentTabId,
-      globalState: currentTab.globalState,
     })
   );
 

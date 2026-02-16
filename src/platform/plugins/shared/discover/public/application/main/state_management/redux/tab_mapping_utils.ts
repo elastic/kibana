@@ -69,7 +69,6 @@ export const fromSavedObjectTabToTabState = ({
     appState,
     previousAppState: existingTab?.appState ?? appState,
     globalState,
-    previousGlobalState: existingTab?.globalState ?? globalState,
     attributes: {
       ...DEFAULT_TAB_STATE.attributes,
       timeRestore: tab.timeRestore ?? false,

@@ -137,16 +137,6 @@ describe('tab mapping utils', () => {
               "column1",
             ],
           },
-          "previousGlobalState": Object {
-            "refreshInterval": Object {
-              "pause": true,
-              "value": 500,
-            },
-            "timeRange": Object {
-              "from": "now-7d",
-              "to": "now",
-            },
-          },
           "resetDefaultProfileState": Object {
             "breakdownField": false,
             "columns": false,
@@ -233,16 +223,6 @@ describe('tab mapping utils', () => {
             "columns": Array [
               "column1",
             ],
-          },
-          "previousGlobalState": Object {
-            "refreshInterval": Object {
-              "pause": true,
-              "value": 500,
-            },
-            "timeRange": Object {
-              "from": "now-7d",
-              "to": "now",
-            },
           },
           "resetDefaultProfileState": Object {
             "breakdownField": false,
