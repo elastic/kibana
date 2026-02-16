@@ -68,6 +68,16 @@ export const registerSiemRuleMigrationsCreateQRadarRulesRoute = (
               });
             }
 
+            const isEligibleForTranslation = qradarRules.some(
+              (rule) => rule.rule_type !== 'building_block'
+            );
+
+            if (!isEligibleForTranslation) {
+              return res.badRequest({
+                body: { message: 'No valid rules could be extracted from the XML' },
+              });
+            }
+
             const rulesCount = qradarRules.length;
 
             const VendorProcessor = getVendorProcessor('qradar');
