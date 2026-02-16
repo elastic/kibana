@@ -17,9 +17,11 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import {
+  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
   AI_CHAT_EXPERIENCE_TYPE,
 } from '@kbn/management-settings-ids';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 
 // Mock the context hook
 jest.mock('../contexts/enabled_features_context');
@@ -65,6 +67,10 @@ describe('GenAiSettingsApp', () => {
     'genAiSettings:defaultAIConnectorOnly': {
       value: false,
       type: 'boolean',
+    },
+    'genAiSettings:prePromptWorkflowIds': {
+      value: [],
+      type: 'json',
     },
     [AI_CHAT_EXPERIENCE_TYPE]: {
       value: AIChatExperience.Classic,
@@ -201,6 +207,56 @@ describe('GenAiSettingsApp', () => {
       renderComponent();
       expect(screen.queryByTestId('aiFeatureVisibilitySection')).not.toBeInTheDocument();
       expect(screen.queryByTestId('goToSpacesButton')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('pre-execution workflow section gating', () => {
+    it('renders pre-execution workflow section when required advanced settings are enabled', async () => {
+      jest.spyOn(coreStart.settings.client, 'get').mockImplementation((key, fallback) => {
+        if (
+          key === WORKFLOWS_UI_SETTING_ID ||
+          key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+        ) {
+          return true;
+        }
+        return fallback;
+      });
+
+      renderComponent();
+
+      expect(await screen.findByTestId('genAiSettingsPrePromptWorkflowPicker')).toBeInTheDocument();
+    });
+
+    it('does not render pre-execution workflow section when workflows UI advanced setting is disabled', () => {
+      jest.spyOn(coreStart.settings.client, 'get').mockImplementation((key, fallback) => {
+        if (key === WORKFLOWS_UI_SETTING_ID) {
+          return false;
+        }
+        return fallback;
+      });
+      jest
+        .spyOn(coreStart.featureFlags, 'getBooleanValue')
+        .mockImplementation((_flagName, _fallbackValue) => true);
+
+      renderComponent();
+
+      expect(screen.queryByTestId('genAiSettingsPrePromptWorkflowPicker')).not.toBeInTheDocument();
+    });
+
+    it('does not render pre-execution workflow section when experimental features setting is disabled', () => {
+      jest.spyOn(coreStart.settings.client, 'get').mockImplementation((key, fallback) => {
+        if (key === WORKFLOWS_UI_SETTING_ID) {
+          return true;
+        }
+        if (key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID) {
+          return false;
+        }
+        return fallback;
+      });
+
+      renderComponent();
+
+      expect(screen.queryByTestId('genAiSettingsPrePromptWorkflowPicker')).not.toBeInTheDocument();
     });
   });
 

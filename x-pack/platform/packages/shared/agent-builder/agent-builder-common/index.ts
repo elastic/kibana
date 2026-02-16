@@ -168,5 +168,4 @@ export {
   isPromptRequestEvent,
 } from './chat';
 export * from './telemetry';
-export { AGENT_WORKFLOWS_FEATURE_FLAG } from './feature_flags';
 export { getLatestVersion, type VersionedAttachment } from './attachments';

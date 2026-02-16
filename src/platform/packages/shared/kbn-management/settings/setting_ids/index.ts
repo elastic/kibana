@@ -138,6 +138,7 @@ export const OBSERVABILITY_REGISTER_OBSERVABILITY_AGENT_ID =
 export const GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR = 'genAiSettings:defaultAIConnector';
 export const GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY =
   'genAiSettings:defaultAIConnectorOnly';
+export const GEN_AI_SETTINGS_PRE_PROMPT_WORKFLOW_IDS = 'genAiSettings:prePromptWorkflowIds';
 export const AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE = 'aiAssistant:preferredAIAssistantType';
 export const AI_CHAT_EXPERIENCE_TYPE = 'aiAssistant:preferredChatExperience';
 export const AI_ANONYMIZATION_SETTINGS = 'ai:anonymizationSettings';
