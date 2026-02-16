@@ -303,6 +303,8 @@ describe(`feature_privilege_builder`, () => {
 
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
+            "alerting:alert-type/my-consumer/rule/getGapAutoFillScheduler",
+            "alerting:alert-type/my-consumer/rule/findGapAutoFillSchedulerLogs",
             "alerting:alert-type/my-consumer/rule/createGapAutoFillScheduler",
             "alerting:alert-type/my-consumer/rule/updateGapAutoFillScheduler",
             "alerting:alert-type/my-consumer/rule/deleteGapAutoFillScheduler",
