@@ -178,6 +178,7 @@ export interface IlmPolicyHotPhase extends IlmPolicyPhase {
 export interface IlmPolicyDeletePhase {
   name: 'delete';
   min_age: string;
+  delete_searchable_snapshot?: boolean;
 }
 
 export interface IlmPolicyPhases {

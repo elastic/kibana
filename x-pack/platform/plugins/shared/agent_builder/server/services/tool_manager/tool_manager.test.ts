@@ -29,6 +29,9 @@ jest.mock('@kbn/agent-builder-genai-utils/langchain', () => ({
       invoke: jest.fn(),
     } as unknown as StructuredTool;
   }),
+}));
+
+jest.mock('@kbn/agent-builder-genai-utils/langchain/tools', () => ({
   reverseMap: jest.fn((map) => {
     const reversed = new Map();
     map.forEach((value: string, key: string) => {
@@ -174,6 +177,71 @@ describe('ToolManager', () => {
 
       const mappings = toolManager.getToolIdMapping();
       expect(mappings.size).toBeGreaterThan(0);
+    });
+
+    it('removes a dynamic tool when the same tool is later added as static', async () => {
+      const tool = createMockExecutableTool('tool-1');
+
+      await toolManager.addTools(
+        {
+          type: ToolManagerToolType.executable,
+          tools: tool,
+          logger: mockLogger,
+        },
+        { dynamic: true }
+      );
+
+      expect(toolManager.list().map((t) => t.name)).toEqual(['langchain_tool-1']);
+      expect(toolManager.getDynamicToolIds()).toEqual(['tool-1']);
+
+      // Re-adding as static should remove from dynamic cache and keep only the static tool.
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: tool,
+        logger: mockLogger,
+      });
+
+      expect(toolManager.list().map((t) => t.name)).toEqual(['langchain_tool-1']);
+      expect(toolManager.getDynamicToolIds()).toEqual([]);
+
+      // Adding a new dynamic tool should keep tool-1 static and only track tool-2 as dynamic.
+      const tool2 = createMockExecutableTool('tool-2');
+      await toolManager.addTools(
+        {
+          type: ToolManagerToolType.executable,
+          tools: tool2,
+          logger: mockLogger,
+        },
+        { dynamic: true }
+      );
+
+      expect(toolManager.list().map((t) => t.name)).toEqual([
+        'langchain_tool-1',
+        'langchain_tool-2',
+      ]);
+      expect(toolManager.getDynamicToolIds()).toEqual(['tool-2']);
+    });
+
+    it('does not add a dynamic tool when a static tool with the same name exists', async () => {
+      const tool = createMockExecutableTool('tool-1');
+
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: tool,
+        logger: mockLogger,
+      });
+
+      await toolManager.addTools(
+        {
+          type: ToolManagerToolType.executable,
+          tools: tool,
+          logger: mockLogger,
+        },
+        { dynamic: true }
+      );
+
+      expect(toolManager.list().map((t) => t.name)).toEqual(['langchain_tool-1']);
+      expect(toolManager.getDynamicToolIds()).toEqual([]);
     });
   });
 
