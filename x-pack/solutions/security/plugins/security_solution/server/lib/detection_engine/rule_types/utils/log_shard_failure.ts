@@ -20,7 +20,7 @@ export const logShardFailures = (
     isSequenceQuery,
     JSON.stringify(shardFailures)
   );
-  ruleExecutionLogger.error(`Shard failure\nError: ${shardFailureMessage}.`);
+  ruleExecutionLogger.error(shardFailureMessage);
   if (isSequenceQuery) {
     result.errors.push(shardFailureMessage);
   } else {
