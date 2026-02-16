@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type CliSupportedServerModes =
-  | 'stateful'
-  | 'serverless=es'
-  | 'serverless=oblt'
-  | 'serverless=oblt-logs-essentials'
-  | 'serverless=security'
-  | 'serverless=security-essentials'
-  | 'serverless=security-ease';
+import type { ScoutServerConfig } from '../../../../../types';
+import { defaultConfig } from './base.config';
+
+export const servers: ScoutServerConfig = defaultConfig;
