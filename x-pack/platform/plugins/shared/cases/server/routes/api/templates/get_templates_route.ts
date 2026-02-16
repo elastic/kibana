@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { castArray } from 'lodash';
+import type { TemplatesFindRequest } from '../../../../common/types/api';
 import { INTERNAL_TEMPLATES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -15,7 +17,7 @@ import { parseTemplate } from './parse_template';
  * GET /internal/cases/templates
  * List all templates (excluding soft-deleted ones by default)
  */
-export const getTemplatesRoute = createCasesRoute({
+export const getTemplatesRoute = createCasesRoute<{}, TemplatesFindRequest, {}>({
   method: 'get',
   path: INTERNAL_TEMPLATES_URL,
   security: DEFAULT_CASES_ROUTE_SECURITY,
@@ -28,11 +30,24 @@ export const getTemplatesRoute = createCasesRoute({
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
 
-      const templates = await casesClient.templates.getAllTemplates();
-      const parsedTemplates = templates.map((template) => parseTemplate(template.attributes));
+      const { page, perPage, sortField, sortOrder, search, tags, author, isDeleted } =
+        request.query;
+      const { templates, ...pagination } = await casesClient.templates.getAllTemplates({
+        page: Number(page),
+        perPage: Number(perPage),
+        sortField,
+        sortOrder,
+        search,
+        tags: tags ? castArray(tags).filter(Boolean) : [],
+        author: author ? castArray(author).filter(Boolean) : [],
+        isDeleted: String(isDeleted) === 'true',
+      });
 
       return response.ok({
-        body: parsedTemplates,
+        body: {
+          ...pagination,
+          templates: templates.map((template) => parseTemplate(template)),
+        },
       });
     } catch (error) {
       throw createCaseError({
