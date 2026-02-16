@@ -33,7 +33,7 @@ export interface EsQueryAlertMetaData extends RuleTypeMetaData {
   adHocDataViewList: DataView[];
 }
 
-export const RuleFormFlyoutWithType = RuleFormFlyout<EsQueryAlertMetaData>;
+const RuleFormFlyoutWithType = RuleFormFlyout<EsQueryAlertMetaData>;
 
 export const CreateAlertFlyout: React.FC<{
   discoverParams: AppMenuDiscoverParams;

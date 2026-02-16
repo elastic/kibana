@@ -19,7 +19,13 @@ const TestWrapper: React.FC<{
   children: React.ReactNode;
 }> = ({ errors = {}, isSubmitted = false, children }) => {
   const methods = useForm<FormValues>({
-    defaultValues: { name: '', query: '' },
+    defaultValues: {
+      kind: 'alert',
+      metadata: { name: '', enabled: false },
+      timeField: '',
+      schedule: { every: '', lookback: '' },
+      evaluation: { query: { base: '' } },
+    },
   });
 
   // Override formState with test values by spreading

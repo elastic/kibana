@@ -39,7 +39,7 @@ export const RuleFields: React.FC<RuleFieldsProps> = ({ services, query }) => {
     <>
       <RuleDetailsFieldGroup />
       <EuiSpacer size="m" />
-      <RuleExecutionFieldGroup services={services} query={query} />
+      <RuleExecutionFieldGroup services={services} />
     </>
   );
 };
