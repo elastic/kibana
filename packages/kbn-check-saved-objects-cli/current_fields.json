@@ -1359,5 +1359,11 @@
     "title",
     "version"
   ],
+  "watchlist-config": [
+    "description",
+    "managed",
+    "name",
+    "riskModifier"
+  ],
   "workplace_search_telemetry": []
 }
