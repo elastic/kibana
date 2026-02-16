@@ -17,11 +17,10 @@ import {
   LOG_LEVEL_REGEX,
   OTEL_MESSAGE_FIELD,
 } from '@kbn/discover-utils';
-import { MESSAGE_FIELD } from '@kbn/discover-utils';
+import { MESSAGE_FIELD, escapeAndPreserveHighlightTags } from '@kbn/discover-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { makeHighContrastColor, useEuiTheme } from '@elastic/eui';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
-import { escape } from 'lodash';
 import { formatJsonDocumentForContent } from './utils';
 
 interface ContentProps extends DataGridCellValueElementProps {
@@ -49,7 +48,7 @@ const LogMessage = ({
           className={className}
           data-test-subj="discoverDataTableMessageValue"
           // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: value }}
+          dangerouslySetInnerHTML={{ __html: escapeAndPreserveHighlightTags(value) }}
         />
       </div>
     );
@@ -60,7 +59,7 @@ const LogMessage = ({
       className={className}
       data-test-subj="discoverDataTableMessageValue"
       // eslint-disable-next-line react/no-danger
-      dangerouslySetInnerHTML={{ __html: value }}
+      dangerouslySetInnerHTML={{ __html: escapeAndPreserveHighlightTags(value) }}
     />
   );
 };
@@ -105,7 +104,7 @@ export const Content = ({
   const isDarkTheme = useKibanaIsDarkMode();
 
   const highlightedValue = useMemo(
-    () => (value ? getHighlightedMessage(escape(value), row, euiTheme, isDarkTheme) : value),
+    () => (value ? getHighlightedMessage(value, row, euiTheme, isDarkTheme) : value),
     [value, row, euiTheme, isDarkTheme]
   );
 

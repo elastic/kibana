@@ -28,6 +28,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { escapeAndPreserveHighlightTags } from '@kbn/discover-utils';
 import {
   actionFilterForText,
   actionFilterOutText,
@@ -38,7 +39,10 @@ import {
   filterOutText,
   openCellActionPopoverAriaText,
 } from './translations';
-import { truncateAndPreserveHighlightTags, extractTextAndMarkTags } from './utils';
+import {
+  truncateAndPreserveHighlightTags,
+  extractTextAndMarkTags,
+} from './utils';
 
 interface CellActionsPopoverProps {
   onFilter?: DocViewFilterFn;
@@ -108,11 +112,18 @@ export function CellActionsPopover({
             `}
           >
             <strong>{name}</strong>{' '}
-            {typeof renderValue === 'function'
-              ? renderValue(value)
-              : rawValue != null && typeof rawValue !== 'object'
-              ? (rawValue as React.ReactNode)
-              : value}
+            <span
+              // eslint-disable-next-line react/no-danger
+              dangerouslySetInnerHTML={{
+                __html: escapeAndPreserveHighlightTags(
+                  typeof renderValue === 'function'
+                    ? renderValue(value)
+                    : rawValue != null && typeof rawValue !== 'object'
+                    ? (rawValue as React.ReactNode)
+                    : value
+                ),
+              }}
+            />
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -225,7 +236,7 @@ export function FieldBadgeWithActions({
           <span
             // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{
-              __html: displayValue,
+              __html: escapeAndPreserveHighlightTags(displayValue),
             }}
           />
         </EuiBadge>
