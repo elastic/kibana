@@ -67,6 +67,26 @@ const breadcrumbGetters: {
       text: liveQueryId,
     },
   ],
+  history: () => [
+    BASE_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.osquery.breadcrumbs.historyPageTitle', {
+        defaultMessage: 'History',
+      }),
+    },
+  ],
+  history_details: ({ liveQueryId }) => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.history(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.historyPageTitle', {
+        defaultMessage: 'History',
+      }),
+    },
+    {
+      text: liveQueryId,
+    },
+  ],
   saved_queries: () => [
     BASE_BREADCRUMB,
     {
