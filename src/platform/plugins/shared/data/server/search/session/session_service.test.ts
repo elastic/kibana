@@ -963,6 +963,7 @@ describe('SearchSessionService', () => {
 
           // Then
           expect(statuses).toEqual({
+            sessions: {},
             statuses: {},
           });
         });
@@ -1032,6 +1033,23 @@ describe('SearchSessionService', () => {
 
         // Then
         expect(res).toEqual({
+          sessions: {
+            session1: {
+              name: 'my_name',
+              restoreState: undefined,
+              locatorId: 'my_locator_id',
+            },
+            session2: {
+              name: 'my_name',
+              restoreState: undefined,
+              locatorId: 'my_locator_id',
+            },
+            session3: {
+              name: 'my_name',
+              restoreState: undefined,
+              locatorId: 'my_locator_id',
+            },
+          },
           statuses: {
             session1: { status: SearchSessionStatus.COMPLETE, errors: [] },
             session2: {
