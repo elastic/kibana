@@ -61,23 +61,35 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
           <div>
             <EuiTitle size="xs">
               <h3>
-                <FormattedMessage
-                  id="xpack.fleet.editOutputFlyout.SSLOptionsToggleLabel"
-                  defaultMessage="Authentication"
-                />
+                {type === 'download_source' ? (
+                  <FormattedMessage
+                    id="xpack.fleet.editDownloadSourceFlyout.sslSectionTitle"
+                    defaultMessage="TLS / Secure connection"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.fleet.editOutputFlyout.SSLOptionsToggleLabel"
+                    defaultMessage="Authentication"
+                  />
+                )}
               </h3>
             </EuiTitle>
             <EuiText size="s">
               <p>
                 <EuiTextColor color="subdued">
-                  {showmTLSText ? (
+                  {type === 'download_source' ? (
+                    <FormattedMessage
+                      id="xpack.fleet.editDownloadSourceFlyout.sslSectionDescription"
+                      defaultMessage="Configure TLS settings to securely connect to the download source"
+                    />
+                  ) : showmTLSText ? (
                     <FormattedMessage
                       id="xpack.fleet.settings.editOutputFlyout.SSLOptionsDescription"
                       defaultMessage="Add these settings only when setting up an mTLS connection"
                     />
                   ) : (
                     <FormattedMessage
-                      id="xpack.fleet.editOutputFlyout.SSLOptionsToggleLabel"
+                      id="xpack.fleet.editOutputFlyout.sslSectionDescription"
                       defaultMessage="Set up a TLS secure connection"
                     />
                   )}
