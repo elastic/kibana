@@ -7,24 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// When this CJS file is loaded via the ESM loader (imported from .mjs), the
-// `require()` provided is the ESM translator's synthetic require, which does
-// NOT go through `require.extensions`.  That means the esbuild CJS hook
-// registered by ts_require_hook.js never fires, and Node fails to load .ts
-// files that contain ESM syntax.  Using `createRequire` gives us a real CJS
-// `require` that honours `require.extensions`, so esbuild can transform .ts
-// files to CJS on the fly.
-const { createRequire: _createRequire } = require('node:module');
-const _require = _createRequire(__filename);
+import { createRequire } from 'node:module';
 
-module.exports = {
+// createRequire gives us a real CJS require that honours require.extensions,
+// so the esbuild CJS hook registered by ts_require_hook.js can transform .ts
+// files on the fly.
+const _require = createRequire(import.meta.url);
+
+export default {
   ['@kbn/repo-packages'](): any {
     // we need to load this package before we install node modules so we can't use @kbn/* imports here
     // eslint-disable-next-line import/no-dynamic-require
     return _require('../../../../../' + 'src/platform/packages/private/kbn-repo-packages');
   },
 
-  // NOTE: babel-register removed - these packages must be pre-built ESM
   ['@kbn/ci-stats-reporter'](): any {
     return _require('@kbn/ci-stats-reporter');
   },

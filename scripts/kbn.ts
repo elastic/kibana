@@ -9,6 +9,10 @@
 
 // Load CJS TypeScript hooks first (patches Module._resolveFilename for .ts extensions)
 require('../src/setup_node_env/ts_require_hook');
+// Register ESM resolve hooks so .mjs files can import .ts sources via .js specifiers
+const { register } = require('node:module');
+const { pathToFileURL } = require('node:url');
+register(pathToFileURL(require.resolve('../src/setup_node_env/ts_resolve_hooks.mjs')));
 // When running kbn.ts, bootstrap is not done yet, package links are not established
 // So we use direct relative paths to the setup_node_env files
 /* eslint-disable @kbn/imports/uniform_imports */
