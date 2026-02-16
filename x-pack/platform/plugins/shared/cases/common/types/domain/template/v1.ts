@@ -55,7 +55,7 @@ export const TemplateSchema = z.object({
   /**
    * Template author
    */
-  author: z.string(),
+  author: z.string().optional(),
 
   /**
    * Number of times this template has been used
@@ -130,7 +130,6 @@ export const CreateTemplateInputSchema = TemplateSchema.omit({
   templateVersion: true,
   deletedAt: true,
   name: true,
-  author: true,
 });
 
 export type CreateTemplateInput = z.infer<typeof CreateTemplateInputSchema>;
@@ -143,7 +142,6 @@ export const UpdateTemplateInputSchema = TemplateSchema.omit({
   templateVersion: true,
   deletedAt: true,
   name: true,
-  author: true,
 });
 
 export type UpdateTemplateInput = z.infer<typeof UpdateTemplateInputSchema>;

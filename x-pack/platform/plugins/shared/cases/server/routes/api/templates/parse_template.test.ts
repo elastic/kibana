@@ -30,6 +30,7 @@ const createTemplate = (overrides?: Partial<Template>): Template => ({
   templateVersion: 1,
   deletedAt: null,
   author: 'test-user',
+  isLatest: true,
   ...overrides,
 });
 

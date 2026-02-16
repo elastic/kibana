@@ -438,8 +438,23 @@ describe('TemplatesService', () => {
 
         const searchCall = unsecuredSavedObjectsClient.search.mock.calls[0][0];
         const query = searchCall?.query as { bool: { filter?: unknown[] } };
-        // No filters when isDeleted is true and no tags/author
-        expect(query.bool.filter).toEqual([]);
+        // Only the isLatest filter remains (deletedAt is omitted when isDeleted is true)
+        expect(query.bool.filter).toHaveLength(1);
+        expect(query.bool.filter).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              bool: expect.objectContaining({
+                should: expect.arrayContaining([
+                  expect.objectContaining({
+                    match: expect.objectContaining({
+                      [`${CASE_TEMPLATE_SAVED_OBJECT}.isLatest`]: true,
+                    }),
+                  }),
+                ]),
+              }),
+            }),
+          ])
+        );
       });
     });
 
