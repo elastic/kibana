@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import type { EntityMaintainerStatus, EntityMaintainerTaskMethod, RegisterEntityMaintainerConfig } from './types';
-import { TasksConfig } from "../config";
-import { EntityStoreTaskType } from "../constants";
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { Logger } from '@kbn/logging';
-import { EntityStoreCoreSetup } from '../../types';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type {
+  EntityMaintainerStatus,
+  EntityMaintainerTaskMethod,
+  RegisterEntityMaintainerConfig,
+} from './types';
+import { TasksConfig } from '../config';
+import { EntityStoreTaskType } from '../constants';
+import type { EntityStoreCoreSetup } from '../../types';
 import {
   EntityMaintainersTasksClient,
   EntityMaintainersTasksTypeName,
 } from '../../domain/definitions/saved_objects';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 
 function getTaskType(id: string): string {
   return `${TasksConfig[EntityStoreTaskType.Values.entityMaintainer].type}:${id}`;
@@ -77,60 +81,55 @@ export function registerEntityMaintainerTask({
     const { run, interval, initialState, description, id, setup } = config;
     const type = getTaskType(id);
 
-    core.getStartServices()
-      .then(([start]) => {
-        const internalRepo = start.savedObjects.createInternalRepository([
-          EntityMaintainersTasksTypeName,
-        ]);
-        const maintainerTasksClient = new EntityMaintainersTasksClient(internalRepo, logger);
-        maintainerTasksClient.addOrUpdate({ id, interval }).catch((err) => {
-          logger.error(`Failed to register entity maintainer task in saved object: ${err?.message}`);
-        });
-
-        taskManager.registerTaskDefinitions({
-          [type]: {
-            title: title,
-            description,
-            createTaskRunner: ({ taskInstance, abortController, fakeRequest }) => ({
-              run: async () => {
-                const currentStatus = taskInstance.state;
-
-                if (!fakeRequest) {
-                  logger.error(`No fake request found, skipping run`);
-
-                  return {
-                    state: currentStatus,
-                  };
-                }
-
-                const maintainerStatus: EntityMaintainerStatus = {
-                  metadata: {
-                    runs: currentStatus?.metadata?.runs || 0,
-                    lastSuccessTimestamp: currentStatus?.metadata?.lastSuccessTimestamp || null,
-                    lastErrorTimestamp: currentStatus?.metadata?.lastErrorTimestamp || null,
-                    namespace: currentStatus?.namespace || currentStatus?.metadata?.namespace,
-                  },
-                  state: currentStatus?.metadata?.runs
-                    ? currentStatus.state
-                    : initialState,
-                };
-
-                return await runEntityMaintainerTask({
-                  currentStatus: maintainerStatus,
-                  fakeRequest,
-                  logger: logger.get(taskInstance.id),
-                  setup,
-                  run,
-                  abortController,
-                  esClient: start.elasticsearch.client.asScoped(fakeRequest).asCurrentUser
-                });
-              }
-            }),
-          },
-        });
-
+    core.getStartServices().then(([start]) => {
+      const internalRepo = start.savedObjects.createInternalRepository([
+        EntityMaintainersTasksTypeName,
+      ]);
+      const maintainerTasksClient = new EntityMaintainersTasksClient(internalRepo, logger);
+      maintainerTasksClient.addOrUpdate({ id, interval }).catch((err) => {
+        logger.error(`Failed to register entity maintainer task in saved object: ${err?.message}`);
       });
 
+      taskManager.registerTaskDefinitions({
+        [type]: {
+          title,
+          description,
+          createTaskRunner: ({ taskInstance, abortController, fakeRequest }) => ({
+            run: async () => {
+              const currentStatus = taskInstance.state;
+
+              if (!fakeRequest) {
+                logger.error(`No fake request found, skipping run`);
+
+                return {
+                  state: currentStatus,
+                };
+              }
+
+              const maintainerStatus: EntityMaintainerStatus = {
+                metadata: {
+                  runs: currentStatus?.metadata?.runs || 0,
+                  lastSuccessTimestamp: currentStatus?.metadata?.lastSuccessTimestamp || null,
+                  lastErrorTimestamp: currentStatus?.metadata?.lastErrorTimestamp || null,
+                  namespace: currentStatus?.namespace || currentStatus?.metadata?.namespace,
+                },
+                state: currentStatus?.metadata?.runs ? currentStatus.state : initialState,
+              };
+
+              return await runEntityMaintainerTask({
+                currentStatus: maintainerStatus,
+                fakeRequest,
+                logger: logger.get(taskInstance.id),
+                setup,
+                run,
+                abortController,
+                esClient: start.elasticsearch.client.asScoped(fakeRequest).asCurrentUser,
+              });
+            },
+          }),
+        },
+      });
+    });
   } catch (err) {
     logger.error(`Error registering entity maintainer task: ${err?.message}`);
     throw err;
@@ -144,7 +143,7 @@ async function runEntityMaintainerTask({
   setup,
   run,
   abortController,
-  esClient
+  esClient,
 }: {
   currentStatus: EntityMaintainerStatus;
   fakeRequest: KibanaRequest;
@@ -163,7 +162,7 @@ async function runEntityMaintainerTask({
         abortController,
         logger,
         fakeRequest,
-        esClient
+        esClient,
       });
     }
     logger.debug(`Executing run`);
@@ -172,7 +171,7 @@ async function runEntityMaintainerTask({
       abortController,
       logger,
       fakeRequest,
-      esClient
+      esClient,
     });
     currentStatus.metadata.lastSuccessTimestamp = new Date().toISOString();
   } catch (err) {

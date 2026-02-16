@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
 export interface EntityMaintainerStatusMetadata {
@@ -14,7 +14,6 @@ export interface EntityMaintainerStatusMetadata {
   lastSuccessTimestamp: string | null;
   lastErrorTimestamp: string | null;
 }
-
 
 type JsonPrimitive = string | number | boolean | null;
 type JsonValue = JsonPrimitive | EntityMaintainerState | JsonValue[];
@@ -35,7 +34,9 @@ interface EntityMaintainerTaskMethodContext {
   esClient: ElasticsearchClient;
 }
 
-export type EntityMaintainerTaskMethod = (context: EntityMaintainerTaskMethodContext) => Promise<EntityMaintainerState>;
+export type EntityMaintainerTaskMethod = (
+  context: EntityMaintainerTaskMethodContext
+) => Promise<EntityMaintainerState>;
 
 export interface RegisterEntityMaintainerConfig {
   id: string;

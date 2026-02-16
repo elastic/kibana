@@ -84,6 +84,6 @@ export async function createRequestHandlerContext({
       entityMaintainersTasksClient,
     }),
     featureFlags: new FeatureFlags(core.uiSettings.client),
-    logsExtractionClient
+    logsExtractionClient,
   };
 }

@@ -7,10 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
-import {
-  scheduleEntityMaintainerTasks,
-  registerEntityMaintainerTask,
-} from './index';
+import { scheduleEntityMaintainerTasks, registerEntityMaintainerTask } from '.';
 import type { RegisterEntityMaintainerConfig } from './types';
 
 const mockGetAll = jest.fn();
@@ -231,16 +228,20 @@ describe('entity_maintainer task', () => {
       expect(mockRegisterTaskDefinitions).toHaveBeenCalledTimes(2);
       const defs1 = mockRegisterTaskDefinitions.mock.calls[0][0];
       const defs2 = mockRegisterTaskDefinitions.mock.calls[1][0];
-      const runnerA = defs1['entity_store:v2:entity_maintainer_task:maintainer-a'].createTaskRunner({
-        taskInstance: { id: 'maintainer-a:default', state: {} },
-        abortController: new AbortController(),
-        fakeRequest: { headers: {} } as KibanaRequest,
-      });
-      const runnerB = defs2['entity_store:v2:entity_maintainer_task:maintainer-b'].createTaskRunner({
-        taskInstance: { id: 'maintainer-b:default', state: {} },
-        abortController: new AbortController(),
-        fakeRequest: { headers: {} } as KibanaRequest,
-      });
+      const runnerA = defs1['entity_store:v2:entity_maintainer_task:maintainer-a'].createTaskRunner(
+        {
+          taskInstance: { id: 'maintainer-a:default', state: {} },
+          abortController: new AbortController(),
+          fakeRequest: { headers: {} } as KibanaRequest,
+        }
+      );
+      const runnerB = defs2['entity_store:v2:entity_maintainer_task:maintainer-b'].createTaskRunner(
+        {
+          taskInstance: { id: 'maintainer-b:default', state: {} },
+          abortController: new AbortController(),
+          fakeRequest: { headers: {} } as KibanaRequest,
+        }
+      );
 
       await runnerA.run();
       await runnerB.run();
@@ -281,7 +282,11 @@ describe('entity_maintainer task', () => {
         taskInstance: {
           id: 'test-maintainer:default',
           state: {
-            metadata: { runs: 1, lastSuccessTimestamp: new Date().toISOString(), lastErrorTimestamp: null },
+            metadata: {
+              runs: 1,
+              lastSuccessTimestamp: new Date().toISOString(),
+              lastErrorTimestamp: null,
+            },
             state: { synced: true },
           },
         },
@@ -296,12 +301,10 @@ describe('entity_maintainer task', () => {
     it('should change state across lifecycle as run or setup change it', async () => {
       const { logger, taskManagerSetup, core } = createMockDeps();
       const setup = jest.fn().mockResolvedValue({ setupState: 1 });
-      const run = jest
-        .fn()
-        .mockImplementation(({ status }) => {
-          const prev = status.state.runState ?? status.state.setupState ?? 0;
-          return Promise.resolve({ ...status.state, runState: prev + 1 });
-        });
+      const run = jest.fn().mockImplementation(({ status }) => {
+        const prev = status.state.runState ?? status.state.setupState ?? 0;
+        return Promise.resolve({ ...status.state, runState: prev + 1 });
+      });
       const config = createMockConfig({ setup, run, initialState: { initial: 0 } });
 
       registerEntityMaintainerTask({

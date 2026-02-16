@@ -74,7 +74,11 @@ export class AssetManager {
     this.entityMaintainersTasksClient = deps.entityMaintainersTasksClient;
   }
 
-  public async init(request: KibanaRequest, entityTypes: EntityType[], logExtractionParams?: LogExtractionBodyParams) {
+  public async init(
+    request: KibanaRequest,
+    entityTypes: EntityType[],
+    logExtractionParams?: LogExtractionBodyParams
+  ) {
     try {
       await Promise.all(
         entityTypes.map((type) => this.initEntity(request, type, logExtractionParams))
@@ -108,7 +112,6 @@ export class AssetManager {
         namespace: this.namespace,
         request,
       });
-
     } catch (error) {
       this.logger.get(type).error(`Error starting extract entity task for type ${type}:`, error);
       throw error;

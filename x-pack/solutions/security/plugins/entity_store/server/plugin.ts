@@ -24,16 +24,17 @@ import {
   EntityMaintainersTasksType,
 } from './domain/definitions/saved_objects';
 import { registerEntityMaintainerTask } from './tasks/entity_maintainer';
-import { RegisterEntityMaintainerConfig } from './tasks/entity_maintainer/types';
+import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainer/types';
 
 export class EntityStorePlugin
   implements
-  Plugin<
-    EntityStoreSetupContract,
-    EntityStoreStartContract,
-    EntityStoreSetupPlugins,
-    EntityStoreStartPlugins
-  > {
+    Plugin<
+      EntityStoreSetupContract,
+      EntityStoreStartContract,
+      EntityStoreSetupPlugins,
+      EntityStoreStartPlugins
+    >
+{
   private readonly logger: Logger;
   private readonly isServerless: boolean;
 
@@ -42,7 +43,10 @@ export class EntityStorePlugin
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
-  public setup(core: EntityStoreCoreSetup, plugins: EntityStoreSetupPlugins): EntityStoreSetupContract {
+  public setup(
+    core: EntityStoreCoreSetup,
+    plugins: EntityStoreSetupPlugins
+  ): EntityStoreSetupContract {
     plugins.taskManager.registerCanEncryptedSavedObjects(plugins.encryptedSavedObjects.canEncrypt);
 
     const router = core.http.createRouter<EntityStoreRequestHandlerContext>();
@@ -70,12 +74,13 @@ export class EntityStorePlugin
     core.savedObjects.registerType(EntityMaintainersTasksType);
 
     return {
-      registerEntityMaintainer: (config: RegisterEntityMaintainerConfig) => registerEntityMaintainerTask({
-        taskManager: plugins.taskManager,
-        logger: this.logger,
-        config,
-        core
-      }),
+      registerEntityMaintainer: (config: RegisterEntityMaintainerConfig) =>
+        registerEntityMaintainerTask({
+          taskManager: plugins.taskManager,
+          logger: this.logger,
+          config,
+          core,
+        }),
     };
   }
 

@@ -9,10 +9,7 @@ import type { ISavedObjectsRepository } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
 import type { EntityMaintainerTaskEntry } from './constants';
 import { EntityMaintainerTaskEntry as EntityMaintainerTaskEntrySchema } from './constants';
-import {
-  EntityMaintainersTasksTypeName,
-  EntityMaintainersTasksId,
-} from './types';
+import { EntityMaintainersTasksTypeName, EntityMaintainersTasksId } from './types';
 
 const ENTITY_MAINTAINERS_TASKS_ATTR = 'entity-maintainers-tasks' as const;
 
@@ -24,10 +21,9 @@ export class EntityMaintainersTasksClient {
 
   async getAll(): Promise<EntityMaintainerTaskEntry[]> {
     try {
-      const doc = await this.repository.get<Record<typeof ENTITY_MAINTAINERS_TASKS_ATTR, unknown[]>>(
-        EntityMaintainersTasksTypeName,
-        EntityMaintainersTasksId
-      );
+      const doc = await this.repository.get<
+        Record<typeof ENTITY_MAINTAINERS_TASKS_ATTR, unknown[]>
+      >(EntityMaintainersTasksTypeName, EntityMaintainersTasksId);
       const raw = doc.attributes[ENTITY_MAINTAINERS_TASKS_ATTR] ?? [];
       return raw.map((entry) => EntityMaintainerTaskEntrySchema.parse(entry));
     } catch (err) {
