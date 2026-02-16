@@ -8,16 +8,19 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
+import { useAttachmentPanel } from '../../../../context/attachment_panel/attachment_panel_context';
 
 const styles = css`
   width: 100%;
-  border: 1px solid red;
+  border: 3px solid red;
   border-radius: 4px;
   padding: 32px;
   margin: 16px 0;
 `;
 
-export const FakeAttachment: React.FC = () => {
+export const FakeAttachment = ({ attachmentId }: { attachmentId: string }) => {
+  const { openPanel } = useAttachmentPanel();
+
   return (
     <>
       <EuiFlexGroup direction="row" justifyContent="spaceBetween" css={styles}>
@@ -31,7 +34,7 @@ export const FakeAttachment: React.FC = () => {
             <EuiButton color="text" size="s">
               Secondary
             </EuiButton>
-            <EuiButton color="primary" size="s">
+            <EuiButton color="primary" size="s" onClick={() => openPanel(attachmentId)}>
               Preview
             </EuiButton>
           </EuiFlexGroup>
@@ -41,7 +44,7 @@ export const FakeAttachment: React.FC = () => {
         css={css`
           width: 100%;
           height: 400px;
-          border: 1px solid red;
+          border: 3px solid red;
           border-radius: 4px;
           display: flex;
           justify-content: center;
@@ -49,7 +52,7 @@ export const FakeAttachment: React.FC = () => {
         `}
       >
         <EuiText>
-          <h3>Inline Attachment (2)</h3>
+          <h3>Inline Attachment (2) - {attachmentId}</h3>
         </EuiText>
       </EuiFlexGroup>
     </>

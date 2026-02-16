@@ -9,7 +9,9 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AssistantResponse, ConversationRoundStep } from '@kbn/agent-builder-common';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+
 import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
 import { RoundResponseActions } from './round_response_actions';
@@ -29,32 +31,36 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   steps,
   isLoading,
   isLastRound,
-}) => (
-  <EuiFlexGroup
-    direction="column"
-    gutterSize="m"
-    aria-label={i18n.translate('xpack.agentBuilder.round.assistantResponse', {
-      defaultMessage: 'Assistant response',
-    })}
-    data-test-subj="agentBuilderRoundResponse"
-    css={css`
-      position: relative;
-    `}
-  >
-    <EuiFlexItem>
-      {isLoading ? (
-        <StreamingText content={message} steps={steps} />
-      ) : (
-        <>
-          <ChatMessageText content={message} steps={steps} />
-          <FakeAttachment />
-        </>
-      )}
-    </EuiFlexItem>
-    {!isLoading && !hasError && (
-      <EuiFlexItem grow={false}>
-        <RoundResponseActions content={message} isVisible isLastRound={isLastRound} />
+}) => {
+  const fakeId = useMemo(() => uuidv4(), []);
+
+  return (
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="m"
+      aria-label={i18n.translate('xpack.agentBuilder.round.assistantResponse', {
+        defaultMessage: 'Assistant response',
+      })}
+      data-test-subj="agentBuilderRoundResponse"
+      css={css`
+        position: relative;
+      `}
+    >
+      <EuiFlexItem>
+        {isLoading ? (
+          <StreamingText content={message} steps={steps} />
+        ) : (
+          <>
+            <ChatMessageText content={message} steps={steps} />
+            <FakeAttachment attachmentId={fakeId} />
+          </>
+        )}
       </EuiFlexItem>
-    )}
-  </EuiFlexGroup>
-);
+      {!isLoading && !hasError && (
+        <EuiFlexItem grow={false}>
+          <RoundResponseActions content={message} isVisible isLastRound={isLastRound} />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+};
