@@ -19,13 +19,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import React, { useMemo, useState, useCallback, useEffect } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import useWindowSize from 'react-use/lib/useWindowSize';
 import type { MetricField, Dimension } from '../../types';
 import { getUnitLabel } from '../../common/utils';
 import { TabTitleAndDescription } from './tab_title_and_description';
-import { calculateFlyoutContentHeight } from './get_height';
+import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from './get_height';
 
 interface OverviewTabProps {
   metric: MetricField;
@@ -39,7 +40,6 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGINATION_SIZE);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const [containerHeight, setContainerHeight] = useState(0);
 
   const unitLabel = useMemo(() => getUnitLabel({ unit: metric.unit }), [metric.unit]);
 
@@ -152,21 +152,11 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
     [metric.index, metric.type, metric.instrument, unitLabel, createDescriptionListItem]
   );
 
-  useEffect(() => {
-    if (!containerRef) {
-      return;
-    }
+  useWindowSize(); // trigger re-render on window resize to recalculate the container height
 
-    const calculateHeight = () => {
-      const height = calculateFlyoutContentHeight(containerRef);
-      setContainerHeight(height);
-    };
-
-    calculateHeight();
-
-    window.addEventListener('resize', calculateHeight);
-    return () => window.removeEventListener('resize', calculateHeight);
-  }, [containerRef]);
+  const containerHeight = containerRef
+    ? calculateFlyoutContentHeight(containerRef, DEFAULT_MARGIN_BOTTOM)
+    : 0;
 
   // Create list items from dimensions
   const dimensionListItems = paginatedDimensions.map((dimension: Dimension) => {
