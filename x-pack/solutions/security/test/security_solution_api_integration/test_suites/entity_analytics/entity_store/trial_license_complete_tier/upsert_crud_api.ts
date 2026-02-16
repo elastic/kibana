@@ -57,7 +57,11 @@ export default function (providerContext: FtrProviderContext) {
 
       beforeEach(async () => {
         // This test only validates user entity behavior, so enable only the user engine
-        await enableEntityStore(providerContext, { entityTypes: ['user'] });
+        // Pass COMMON_DATASTREAM_NAME so the transform reads from our test data
+        await enableEntityStore(providerContext, {
+          entityTypes: ['user'],
+          extraIndexPatterns: [COMMON_DATASTREAM_NAME],
+        });
         log.info('beforeEach complete');
       });
 
