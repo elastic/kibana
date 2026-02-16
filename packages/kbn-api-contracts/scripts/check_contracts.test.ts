@@ -53,7 +53,8 @@ jest.mock('../src/report/format_failure', () => ({
 
 import { execSync } from 'child_process';
 import { rmSync } from 'fs';
-import { runBumpDiff, BumpServiceError } from '../src/diff/run_bump_diff';
+import { runBumpDiff } from '../src/diff/run_bump_diff';
+import { BumpServiceError } from '../src/diff/errors';
 import { parseBumpDiff } from '../src/diff/parse_bump_diff';
 import { checkTerraformImpact } from '../src/terraform/check_terraform_impact';
 import { loadAllowlist } from '../src/allowlist/load_allowlist';

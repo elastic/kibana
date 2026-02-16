@@ -9,7 +9,8 @@
 
 import { existsSync } from 'node:fs';
 import { execFileSync } from 'child_process';
-import { runBumpDiff, BumpServiceError } from './run_bump_diff';
+import { runBumpDiff } from './run_bump_diff';
+import { BumpServiceError } from './errors';
 
 jest.mock('@kbn/repo-info', () => ({
   REPO_ROOT: '/mock/repo/root',
@@ -121,7 +122,7 @@ describe('runBumpDiff', () => {
     ]);
   });
 
-  it('throws on exit code 1 with invalid stdout', () => {
+  it('throws BumpServiceError on exit code 1 with invalid stdout', () => {
     const error = Object.assign(new Error('Process exited with code 1'), {
       stdout: 'not json',
       status: 1,
@@ -130,7 +131,10 @@ describe('runBumpDiff', () => {
       throw error;
     });
 
-    expect(() => runBumpDiff('/tmp/base.yaml', '/tmp/current.yaml')).toThrow();
+    expect(() => runBumpDiff('/tmp/base.yaml', '/tmp/current.yaml')).toThrow(BumpServiceError);
+    expect(() => runBumpDiff('/tmp/base.yaml', '/tmp/current.yaml')).toThrow(
+      /no parseable JSON output/
+    );
   });
 
   it('throws on non-1 exit codes', () => {
@@ -147,7 +151,7 @@ describe('runBumpDiff', () => {
     );
   });
 
-  it('throws on empty stdout with exit code 1', () => {
+  it('throws BumpServiceError on empty stdout with exit code 1', () => {
     const error = Object.assign(new Error('Process exited with code 1'), {
       stdout: '',
       status: 1,
@@ -156,7 +160,10 @@ describe('runBumpDiff', () => {
       throw error;
     });
 
-    expect(() => runBumpDiff('/tmp/base.yaml', '/tmp/current.yaml')).toThrow();
+    expect(() => runBumpDiff('/tmp/base.yaml', '/tmp/current.yaml')).toThrow(BumpServiceError);
+    expect(() => runBumpDiff('/tmp/base.yaml', '/tmp/current.yaml')).toThrow(
+      /no parseable JSON output/
+    );
   });
 
   it('throws BumpServiceError when bump.sh service is unavailable (stderr)', () => {

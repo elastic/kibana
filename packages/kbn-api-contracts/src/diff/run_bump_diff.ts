@@ -11,32 +11,11 @@ import { existsSync } from 'node:fs';
 import { execFileSync } from 'child_process';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { BumpDiffEntry } from './parse_bump_diff';
+import { toBumpDiffError } from './errors';
 
 const OAS_DOCS_DIR = path.resolve(REPO_ROOT, './oas_docs');
 const DIFF_TIMEOUT = 240_000;
-
-const BUMP_SERVICE_ERROR_PATTERNS = [
-  'unable to compute your documentation diff',
-  'please try again later',
-  'please contact support at https://bump.sh',
-];
-
-export class BumpServiceError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'BumpServiceError';
-  }
-}
-
-const isBumpServiceError = (error: unknown): boolean => {
-  if (!error || typeof error !== 'object') return false;
-  const stderr = ('stderr' in error ? (error as { stderr: string | Buffer }).stderr : '')
-    ?.toString()
-    .toLowerCase();
-  const message = ('message' in error ? (error as Error).message : '').toLowerCase();
-  const combined = `${stderr} ${message}`;
-  return BUMP_SERVICE_ERROR_PATTERNS.some((pattern) => combined.includes(pattern));
-};
+const MAX_BUFFER = 50 * 1024 * 1024;
 
 const validateFilePath = (filePath: string, label: string): void => {
   if (!path.isAbsolute(filePath)) {
@@ -58,7 +37,7 @@ export const runBumpDiff = (basePath: string, currentPath: string): BumpDiffEntr
       {
         cwd: OAS_DOCS_DIR,
         encoding: 'utf-8',
-        maxBuffer: 50 * 1024 * 1024,
+        maxBuffer: MAX_BUFFER,
         stdio: ['pipe', 'pipe', 'pipe'],
         timeout: DIFF_TIMEOUT,
       }
@@ -82,12 +61,6 @@ export const runBumpDiff = (basePath: string, currentPath: string): BumpDiffEntr
       }
     }
 
-    if (isBumpServiceError(error)) {
-      throw new BumpServiceError(
-        `bump.sh service unavailable — the API diff could not be computed. This is a transient error from the bump.sh external service, not a problem with your PR. Re-running the CI job should resolve this.`
-      );
-    }
-
-    throw error;
+    return toBumpDiffError(error);
   }
 };
