@@ -81,6 +81,11 @@ export const TemplateSchema = z.object({
    * Whether this is the default template
    */
   isDefault: z.boolean().optional(),
+
+  /**
+   * Whether this is the latest version for a templateId
+   */
+  isLatest: z.boolean().optional(),
 });
 
 export type Template = z.infer<typeof TemplateSchema>;
