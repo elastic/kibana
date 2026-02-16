@@ -41,7 +41,7 @@ const getPanelDrilldownCounts = (
   return { panelsWithDrilldowns, drilldownCount };
 };
 
-spaceTest.describe('Lens migration smoke (7.12.1)', { tag: tags.ESS_ONLY }, () => {
+spaceTest.describe('Lens migration smoke (7.12.1)', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace, kbnClient }) => {
     await scoutSpace.savedObjects.cleanStandardList();
     const imported = await scoutSpace.savedObjects.load(EXPORT_PATH);

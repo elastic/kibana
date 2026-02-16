@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { servers as defaultConfig } from '../../../default/serverless/oblt.serverless.config';
+import { servers as defaultConfig } from '../../default/serverless/security_complete.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
 
 /**
@@ -18,7 +18,7 @@ import type { ScoutServerConfig } from '../../../../../types';
  * dashboard/test/scout_oas_schema/
  *
  * Usage:
- *   node scripts/scout.js start-server --serverless=oblt --config-dir oas_schema
+ *   node scripts/scout.js start-server --arch serverless --domain security_complete --serverConfigSet oas_schema
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
