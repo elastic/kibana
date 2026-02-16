@@ -93,12 +93,12 @@
     "createdAt",
     "createdBy",
     "description",
+    "destinations",
+    "destinations.id",
+    "destinations.type",
     "name",
     "updatedAt",
-    "updatedBy",
-    "destinations",
-    "destinations.type",
-    "destinations.id"
+    "updatedBy"
   ],
   "alerting_rule": [
     "createdAt",
