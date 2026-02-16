@@ -748,9 +748,7 @@ export class AlertsService implements IAlertsService {
     };
 
     // Build the painless script to set snooze fields
-    const scriptParts: string[] = [
-      `ctx._source['${ALERT_MUTED}'] = true;`,
-    ];
+    const scriptParts: string[] = [`ctx._source['${ALERT_MUTED}'] = true;`];
     const params: Record<string, unknown> = {};
 
     if (expiresAt) {
@@ -862,5 +860,4 @@ export class AlertsService implements IAlertsService {
       throw error;
     }
   }
-
 }

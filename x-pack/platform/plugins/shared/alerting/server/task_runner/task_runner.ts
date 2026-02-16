@@ -459,9 +459,7 @@ export class TaskRunner<
                   logger: this.logger,
                 });
               } catch (e) {
-                this.logger.warn(
-                  `Failed to auto-unmute alert '${alertInstanceId}': ${e.message}`
-                );
+                this.logger.warn(`Failed to auto-unmute alert '${alertInstanceId}': ${e.message}`);
               }
             }
           }

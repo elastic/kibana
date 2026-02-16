@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { compact, get } from 'lodash';
 import type { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
 import type { RuleAction, RuleTypeParams } from '@kbn/alerting-types';
-import { get } from 'lodash';
+import { RuleNotifyWhen } from '@kbn/alerting-types';
 import {
   ALERT_MUTED,
   ALERT_SNOOZE_EXPIRES_AT,
@@ -16,8 +17,6 @@ import {
 } from '@kbn/rule-data-utils';
 import { evaluateSnoozeConditions } from '../../../lib/snooze';
 import type { AlertSnoozeConfig } from '../../../lib/snooze';
-import { RuleNotifyWhen } from '@kbn/alerting-types';
-import { compact } from 'lodash';
 import type { RuleTypeState, RuleAlertData } from '../../../../common';
 import { parseDuration } from '../../../../common';
 import type { GetSummarizedAlertsParams } from '../../../alerts_client/types';

@@ -19,11 +19,7 @@ import { updateMeta } from '../../../../rules_client/lib';
 
 export async function muteInstance(
   context: RulesClientContext,
-  {
-    params,
-    query,
-    body,
-  }: { params: MuteAlertParams; query: MuteAlertQuery; body?: MuteAlertBody }
+  { params, query, body }: { params: MuteAlertParams; query: MuteAlertQuery; body?: MuteAlertBody }
 ): Promise<void> {
   const ruleId = params.alertId;
   try {
