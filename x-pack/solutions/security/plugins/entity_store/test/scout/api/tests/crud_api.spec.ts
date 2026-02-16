@@ -8,12 +8,13 @@
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import type { Client } from '@elastic/elasticsearch';
-import type { HostEntity } from '../../../../common/domain/definitions/entity.gen';
+import type { Entity, HostEntity } from '../../../../common/domain/definitions/entity.gen';
 import {
   COMMON_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_INDEX,
+  UPDATES_DATASTREAM,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 
@@ -125,7 +126,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       responseType: 'json',
       body: {
         entity: {
-          id: entityObj.host.entity.id,
+          id: entityObj.host?.entity?.id,
           name: 'this-is-upsert',
         },
         host: {
@@ -148,10 +149,49 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(received.entity).toBeUndefined();
     expect(received.host).toMatchObject({
       entity: {
-        id: entityObj.host.entity.id,
+        id: entityObj.host?.entity?.id,
       },
       name: 'this-is-upsert',
     });
+  });
+
+  apiTest('Should perform a bulk upsert', async ({ apiClient, esClient }) => {
+    const bulkBody = {
+      entities: [
+        {
+          type: 'generic',
+          document: {
+            entity: {
+              id: 'required-id-1-bulk',
+            },
+          },
+        },
+        {
+          type: 'generic',
+          document: {
+            entity: {
+              id: 'required-id-2-bulk',
+            },
+          },
+        },
+      ],
+    };
+
+    const bulkUpsert = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPSERT_BULK, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: bulkBody,
+    });
+    // expect(bulkUpsert.body).toBe('ok');
+    expect(bulkUpsert.statusCode).toBe(200);
+
+    const resp = await esClient.search({
+      index: UPDATES_DATASTREAM,
+      query: {
+        match_all: {},
+      },
+    });
+    expect(resp.hits.hits).toHaveLength(2);
   });
 });
 
@@ -160,7 +200,7 @@ async function countEntitiesByID(esClient: Client, index: string, id: string): P
     index,
     query: {
       bool: {
-        should: [{ term: { 'entity.id': id } }, { term: { 'host.entity.id': id } }],
+        should: [{ wildcard: { 'entity.id': id } }, { wildcard: { 'host.entity.id': id } }],
         minimum_should_match: 1,
       },
     },

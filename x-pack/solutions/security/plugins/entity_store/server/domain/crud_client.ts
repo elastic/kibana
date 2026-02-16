@@ -125,6 +125,7 @@ export class CRUDClient {
       operations.push({ create: {} }, preparedDoc);
     }
 
+    this.logger.info(`Upserting ${operations.length / 2} entities`);
     await this.esClient.bulk({
       index: getUpdatesEntitiesDataStreamName(this.namespace),
       operations,
