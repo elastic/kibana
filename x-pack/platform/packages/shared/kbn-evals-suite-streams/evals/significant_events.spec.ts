@@ -19,12 +19,13 @@ import type { EvaluatorParams } from '@kbn/evals/src/types';
 import type { EvaluationCriterion } from '@kbn/evals/src/evaluators/criteria';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import kbnDatemath from '@kbn/datemath';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+
 import { evaluate } from '../src/evaluate';
 import type { SignificantEventsEvaluationExample } from './significant_events_datasets';
 import { SIGNIFICANT_EVENTS_DATASETS } from './significant_events_datasets';
 import {
   checkKqlSyntax,
+  checkExecutionHit,
   checkCategoryCompliance,
   checkSeverityCompliance,
   checkEvidenceGrounding,
@@ -96,28 +97,15 @@ const validateQuery = async ({
   const syntaxResult = checkKqlSyntax(kql);
 
   // 2. Execution Verification (only when syntax is valid)
-  let isExecutionHit = false;
-  let executionCheck: CheckResult;
-  if (syntaxResult.passed) {
-    const dsl = toElasticsearchQuery(fromKueryExpression(kql));
-    const searchResult = await esClient.search({ index: testIndex, query: dsl });
-    const total = searchResult.hits.total;
-    const hits = typeof total === 'number' ? total : total?.value ?? 0;
-    isExecutionHit = hits > 0;
-    executionCheck = {
-      check: 'execution_hit',
-      passed: isExecutionHit,
-      expected: '> 0 hits',
-      actual: `${hits} hits`,
-    };
-  } else {
-    executionCheck = {
-      check: 'execution_hit',
-      passed: false,
-      expected: '> 0 hits',
-      actual: 'skipped (invalid KQL syntax)',
-    };
-  }
+  const executionCheck: CheckResult = syntaxResult.passed
+    ? await checkExecutionHit(kql, testIndex, esClient)
+    : {
+        check: 'execution_hit',
+        passed: false,
+        expected: '> 0 hits',
+        actual: 'skipped (invalid KQL syntax)',
+      };
+  const isExecutionHit = executionCheck.passed;
 
   // 3. Category Compliance
   const categoryResult = checkCategoryCompliance(category, ALLOWED_CATEGORIES);

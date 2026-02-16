@@ -384,18 +384,53 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
         input: buildInput({
           stream_name: 'synthtrace.http_5xx_errors',
           stream_description: 'A stream with a high number of HTTP 5xx errors.',
-          sample_logs: Array(50).fill(
-            '192.168.1.1 - - [15/Jan/2024:10:30:00 +0000] "GET /api/user HTTP/1.1" 503 1234 "-" "Mozilla/5.0"'
-          ),
+          sample_logs: [
+            ...Array(20).fill(
+              '192.168.1.1 - - [15/Jan/2024:10:30:00 +0000] "GET /api/user HTTP/1.1" 503 1234 "-" "Mozilla/5.0"'
+            ),
+            ...Array(15).fill(
+              '10.0.0.5 - - [15/Jan/2024:10:31:12 +0000] "POST /api/checkout HTTP/1.1" 500 892 "-" "Mozilla/5.0"'
+            ),
+            ...Array(10).fill(
+              '172.16.0.3 - - [15/Jan/2024:10:32:45 +0000] "GET /api/products HTTP/1.1" 502 456 "-" "Mozilla/5.0"'
+            ),
+            ...Array(5).fill(
+              '192.168.1.10 - - [15/Jan/2024:10:33:20 +0000] "PUT /api/settings HTTP/1.1" 504 0 "-" "Mozilla/5.0"'
+            ),
+          ],
           additionalFeatures: [
             logPatterns({
               patterns: [
                 {
                   pattern: '* - - [*] "* HTTP/1.1" 503 * "-" "*"',
                   regex: '.+ - - \\[.+\\] ".+ HTTP/1\\.1" 503 \\d+ "-" ".+"',
-                  count: 50,
+                  count: 20,
                   sample:
                     '192.168.1.1 - - [15/Jan/2024:10:30:00 +0000] "GET /api/user HTTP/1.1" 503 1234 "-" "Mozilla/5.0"',
+                  field: 'message',
+                },
+                {
+                  pattern: '* - - [*] "* HTTP/1.1" 500 * "-" "*"',
+                  regex: '.+ - - \\[.+\\] ".+ HTTP/1\\.1" 500 \\d+ "-" ".+"',
+                  count: 15,
+                  sample:
+                    '10.0.0.5 - - [15/Jan/2024:10:31:12 +0000] "POST /api/checkout HTTP/1.1" 500 892 "-" "Mozilla/5.0"',
+                  field: 'message',
+                },
+                {
+                  pattern: '* - - [*] "* HTTP/1.1" 502 * "-" "*"',
+                  regex: '.+ - - \\[.+\\] ".+ HTTP/1\\.1" 502 \\d+ "-" ".+"',
+                  count: 10,
+                  sample:
+                    '172.16.0.3 - - [15/Jan/2024:10:32:45 +0000] "GET /api/products HTTP/1.1" 502 456 "-" "Mozilla/5.0"',
+                  field: 'message',
+                },
+                {
+                  pattern: '* - - [*] "* HTTP/1.1" 504 * "-" "*"',
+                  regex: '.+ - - \\[.+\\] ".+ HTTP/1\\.1" 504 \\d+ "-" ".+"',
+                  count: 5,
+                  sample:
+                    '192.168.1.10 - - [15/Jan/2024:10:33:20 +0000] "PUT /api/settings HTTP/1.1" 504 0 "-" "Mozilla/5.0"',
                   field: 'message',
                 },
               ],
@@ -409,7 +444,11 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
                 'HTTP web server handling client requests and producing access logs in combined log format.',
               properties: { format: 'combined_log' },
               confidence: 90,
-              evidence: ['"GET /api/user HTTP/1.1" 503 1234'],
+              evidence: [
+                '"GET /api/user HTTP/1.1" 503 1234',
+                '"POST /api/checkout HTTP/1.1" 500 892',
+                '"GET /api/products HTTP/1.1" 502 456',
+              ],
               tags: ['web', 'http'],
               meta: {},
             },
@@ -418,14 +457,12 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
         output: {
           expected_query: {
             categories: ['error'],
-            kql_substrings: [
-              'http.response.status_code >= 500 and http.response.status_code < 600',
-            ],
+            kql_substrings: [['500', '502', '503', '504']],
           },
           criteria: [
             {
               id: 'http_5xx_detection',
-              text: 'At least one query captures HTTP 5xx server errors, using status code filtering rather than string matching on "503"',
+              text: 'At least one query captures HTTP 5xx server errors from the access log patterns. The query should target one or more of the status codes (500, 502, 503, 504) visible in the raw log messages.',
               score: 1.5,
             },
             {
@@ -435,7 +472,7 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
             },
             {
               id: 'unavailability_severity',
-              text: 'Severity should reflect that repeated 503 errors indicate service unavailability (>= 60)',
+              text: 'Severity should reflect that repeated 5xx errors indicate server-side failures and potential service unavailability (>= 60)',
               score: 0.5,
             },
           ],
@@ -443,7 +480,7 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
         metadata: {
           difficulty: 'medium',
           notes:
-            'Scenario D (HTTP Errors): Inject logs with 5xx status codes to test range queries.',
+            'Scenario D (HTTP Errors): Inject raw access logs with a mix of 5xx status codes (500, 502, 503, 504). Since data is ingested as raw text (message field only), queries should use string matching on the status code patterns.',
         },
       },
       {

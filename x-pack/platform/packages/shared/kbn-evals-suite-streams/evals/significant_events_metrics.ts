@@ -6,6 +6,7 @@
  */
 
 import { fromKueryExpression } from '@kbn/es-query';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 /** Severity score must be within this inclusive range */
 export const SEVERITY_SCORE_MIN = 0;
@@ -90,14 +91,50 @@ export interface SignificantEventsQualityMetrics {
   overallQuality: number;
 }
 
+const getErrorMessage = (e: unknown): string => (e instanceof Error ? e.message : String(e));
+
 /** Validates that a KQL string is syntactically correct */
 export const checkKqlSyntax = (kql: string): CheckResult => {
   try {
     fromKueryExpression(kql);
     return { check: 'kql_syntax', passed: true, actual: kql };
   } catch (e) {
-    const errorMessage = e instanceof Error ? e.message : String(e);
-    return { check: 'kql_syntax', passed: false, expected: 'valid KQL', actual: errorMessage };
+    return {
+      check: 'kql_syntax',
+      passed: false,
+      expected: 'valid KQL',
+      actual: getErrorMessage(e),
+    };
+  }
+};
+
+/** Executes a KQL query against ES and checks whether it produces any hits */
+export const checkExecutionHit = async (
+  kql: string,
+  testIndex: string,
+  esClient: ElasticsearchClient
+): Promise<CheckResult> => {
+  try {
+    const { values } = await esClient.esql.query({
+      query: `FROM ${testIndex} | WHERE KQL("${kql
+        .replace(/\\/g, '\\\\')
+        .replace(/"/g, '\\"')}") | STATS hits = COUNT(*)`,
+      drop_null_columns: true,
+    });
+    const hits = Number(values[0]?.[0] ?? 0);
+    return {
+      check: 'execution_hit',
+      passed: hits > 0,
+      expected: '> 0 hits',
+      actual: `${hits} hits`,
+    };
+  } catch (e) {
+    return {
+      check: 'execution_hit',
+      passed: false,
+      expected: '> 0 hits',
+      actual: `execution error: ${getErrorMessage(e)}`,
+    };
   }
 };
 
