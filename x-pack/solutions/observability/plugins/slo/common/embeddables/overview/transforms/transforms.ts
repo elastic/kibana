@@ -10,40 +10,47 @@ import type {
   LegacyGroupOverviewEmbeddableState,
 } from '../schema';
 import type { OverviewEmbeddableState } from '../../../../server/lib/embeddables/schema';
+import type { SingleOverviewCustomState, GroupOverviewCustomState } from '../schema';
+
+type StoredStateWithLegacy = Partial<SingleOverviewCustomState> &
+  Partial<GroupOverviewCustomState> &
+  Partial<LegacySingleOverviewEmbeddableState> &
+  Partial<LegacyGroupOverviewEmbeddableState>;
 
 export const getTransforms = () => ({
   transformOut: (storedState: OverviewEmbeddableState) => {
-    const {
-      sloId,
-      sloInstanceId,
-      remoteName,
-      overviewMode,
-      groupFilters,
-      showAllGroupByInstances,
-    } = storedState as OverviewEmbeddableState &
-      LegacySingleOverviewEmbeddableState &
-      LegacyGroupOverviewEmbeddableState;
-    const isSingleOverview = storedState.overview_mode ?? overviewMode === 'single';
-    const hasLegacyFields = sloId || groupFilters;
-    if (hasLegacyFields) {
-      if (isSingleOverview) {
-        return {
-          ...(storedState as OverviewEmbeddableState),
-          slo_id: sloId,
-          slo_instance_id: sloInstanceId,
-          remote_name: remoteName,
-          overview_mode: overviewMode,
-          show_all_group_by_instances: showAllGroupByInstances,
-        };
-      } else {
-        return {
-          ...(storedState as OverviewEmbeddableState),
-          overview_mode: overviewMode,
-          group_filters: groupFilters,
-        };
-      }
-    }
+    const state = storedState as StoredStateWithLegacy;
 
-    return storedState;
+    // Determine the overviewMode - check both new (snake_case) and legacy (camelCase) formats
+    const overviewMode = state.overview_mode ?? state.overviewMode;
+
+    if (overviewMode === 'single' || (!overviewMode && 'sloId' in state)) {
+      // Single overview mode - prioritize new format, fallback to legacy
+      return {
+        slo_id: state.slo_id ?? state.sloId,
+        slo_instance_id: state.slo_instance_id ?? state.sloInstanceId,
+        remote_name: state.remote_name ?? state.remoteName,
+        overview_mode: 'single',
+        show_all_group_by_instances:
+          state.show_all_group_by_instances ?? state.showAllGroupByInstances,
+      };
+    } else {
+      // Group overview mode - prioritize new format, fallback to legacy
+      const legacyGroupFilters = state.groupFilters;
+
+      return {
+        overview_mode: 'groups',
+        group_filters: state.group_filters
+          ? state.group_filters
+          : legacyGroupFilters
+          ? {
+              group_by: legacyGroupFilters.groupBy,
+              groups: legacyGroupFilters.groups,
+              filters: legacyGroupFilters.filters,
+              kql_query: legacyGroupFilters.kqlQuery,
+            }
+          : undefined,
+      };
+    }
   },
 });

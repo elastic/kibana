@@ -51,8 +51,7 @@ export const legacyGroupOverviewEmbeddableCustomSchema = schema.object({
     ]),
     groups: schema.maybe(schema.arrayOf(schema.string())),
     filters: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-
-    kql_query: schema.maybe(schema.string()),
+    kqlQuery: schema.maybe(schema.string()),
   }),
 });
 
@@ -64,7 +63,6 @@ export type LegacyGroupOverviewEmbeddableState = TypeOf<
 >;
 
 export type SingleOverviewCustomState = TypeOf<typeof SingleOverviewCustomSchema>;
-// export type GroupOverviewCustomState = TypeOf<typeof GroupOverviewCustomSchema>;
 
 export type GroupOverviewCustomState = Omit<
   TypeOf<typeof GroupOverviewCustomSchema>,
