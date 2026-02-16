@@ -46,7 +46,7 @@ export interface RuleResponse {
     recovering_operator?: 'AND' | 'OR';
     recovering_count?: number;
     recovering_timeframe?: string;
-  };
+  } | null;
   grouping?: {
     fields: string[];
   };

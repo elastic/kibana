@@ -16,8 +16,10 @@ export function parseDurationToMs(value: string): number {
   if (!match) {
     throw new Error(`Invalid duration "${value}"`);
   }
+
   const amount = Number(match[1]);
   const unit = match[2];
+
   switch (unit) {
     case 'ms':
       return amount;
