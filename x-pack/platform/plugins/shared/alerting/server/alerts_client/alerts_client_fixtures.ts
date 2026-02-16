@@ -144,6 +144,7 @@ export const getExpectedQueryByExecutionUuid = ({
             must_not: [
               { exists: { field: 'kibana.alert.maintenance_window_ids' } },
               { term: { 'kibana.alert.status': 'delayed' } },
+              { term: { 'kibana.alert.muted': true } },
             ],
           },
         },
@@ -265,7 +266,12 @@ export const getExpectedQueryByTimeRange = ({
     },
     { term: { 'kibana.alert.rule.uuid': ruleId } },
     {
-      bool: { must_not: { term: { 'kibana.alert.status': 'delayed' } } },
+      bool: {
+        must_not: [
+          { term: { 'kibana.alert.status': 'delayed' } },
+          { term: { 'kibana.alert.muted': true } },
+        ],
+      },
     }
   );
   if (excludedAlertInstanceIds?.length) {

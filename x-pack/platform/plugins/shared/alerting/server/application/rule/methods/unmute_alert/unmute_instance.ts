@@ -91,7 +91,16 @@ async function unmuteInstanceWithOCC(
     });
 
     if (indices && indices.length > 0) {
+      // Clear muted flag on alert document
       await context.alertsService?.unmuteAlertInstance({
+        ruleId,
+        alertInstanceId,
+        indices,
+        logger: context.logger,
+      });
+
+      // Clear snooze configuration fields from the alert document
+      await context.alertsService?.clearSnoozeAlertInstance({
         ruleId,
         alertInstanceId,
         indices,

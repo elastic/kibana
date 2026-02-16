@@ -990,7 +990,7 @@ describe('Task Runner', () => {
     );
     expect(logger.debug).nthCalledWith(
       3,
-      `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': rule is muted`,
+      `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': alert is muted`,
       { tags: ['1', 'test'] }
     );
     expect(logger.debug).nthCalledWith(
@@ -1113,7 +1113,7 @@ describe('Task Runner', () => {
     expect(logger.debug).toHaveBeenCalledTimes(7);
     expect(logger.debug).nthCalledWith(
       3,
-      `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': rule is muted`,
+      `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': alert is muted`,
       { tags: ['1', 'test'] }
     );
   });

@@ -28,6 +28,7 @@ const createAlertsClientMock = () => {
       updatePersistedAlerts: jest.fn(),
       getAlertsToUpdateWithMaintenanceWindows: jest.fn(),
       getAlertsToUpdateWithLastScheduledActions: jest.fn(),
+      getTrackedAlertByInstanceId: jest.fn(),
     };
   });
 };

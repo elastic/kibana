@@ -6,6 +6,7 @@
  */
 
 import { isEmpty, isEqual, omit } from 'lodash';
+import type { SnoozeCondition } from '@kbn/alerting-types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { Observable } from 'rxjs';
 import { filter, firstValueFrom } from 'rxjs';
@@ -18,6 +19,10 @@ import {
   ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  ALERT_SNOOZE_EXPIRES_AT,
+  ALERT_SNOOZE_CONDITIONS,
+  ALERT_SNOOZE_CONDITION_OPERATOR,
+  ALERT_SNOOZE_SNAPSHOT,
 } from '@kbn/rule-data-utils';
 import {
   DEFAULT_ALERTS_ILM_POLICY_NAME,
@@ -701,4 +706,161 @@ export class AlertsService implements IAlertsService {
       logger,
     });
   }
+
+  /**
+   * Writes snooze configuration fields to the alert ES document.
+   * This stores conditions, expiry, and snapshot data directly on
+   * the alert-as-data document so the task runner can evaluate them.
+   */
+  public async snoozeAlertInstance({
+    ruleId,
+    alertInstanceId,
+    indices,
+    logger,
+    expiresAt,
+    conditions,
+    conditionOperator,
+  }: {
+    ruleId: string;
+    alertInstanceId: string;
+    indices: string[];
+    logger: Logger;
+    expiresAt?: string;
+    conditions?: SnoozeCondition[];
+    conditionOperator?: 'any' | 'all';
+  }) {
+    if (!indices || indices.length === 0) {
+      throw new Error(
+        `Unable to snooze alert instance for rule '${ruleId}' - no alert indices available`
+      );
+    }
+
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    const query: QueryDslQueryContainer = {
+      bool: {
+        must: [
+          { term: { [ALERT_RULE_UUID]: ruleId } },
+          { term: { [ALERT_INSTANCE_ID]: alertInstanceId } },
+          { term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } },
+        ],
+      },
+    };
+
+    // Build the painless script to set snooze fields
+    const scriptParts: string[] = [
+      `ctx._source['${ALERT_MUTED}'] = true;`,
+    ];
+    const params: Record<string, unknown> = {};
+
+    if (expiresAt) {
+      scriptParts.push(`ctx._source['${ALERT_SNOOZE_EXPIRES_AT}'] = params.expiresAt;`);
+      params.expiresAt = expiresAt;
+    }
+
+    if (conditions && conditions.length > 0) {
+      scriptParts.push(`ctx._source['${ALERT_SNOOZE_CONDITIONS}'] = params.conditions;`);
+      params.conditions = conditions;
+    }
+
+    if (conditionOperator) {
+      scriptParts.push(
+        `ctx._source['${ALERT_SNOOZE_CONDITION_OPERATOR}'] = params.conditionOperator;`
+      );
+      params.conditionOperator = conditionOperator;
+    }
+
+    // Build a snapshot map from condition snapshotValue fields for audit/debugging
+    if (conditions && conditions.length > 0) {
+      const snapshot: Record<string, string> = {};
+      for (const c of conditions) {
+        if (c.snapshotValue != null) {
+          snapshot[c.field] = c.snapshotValue;
+        }
+      }
+      if (Object.keys(snapshot).length > 0) {
+        scriptParts.push(`ctx._source['${ALERT_SNOOZE_SNAPSHOT}'] = params.snapshot;`);
+        params.snapshot = snapshot;
+      }
+    }
+
+    try {
+      await esClient.updateByQuery({
+        index: indices,
+        conflicts: 'proceed',
+        wait_for_completion: false,
+        refresh: true,
+        ignore_unavailable: true,
+        query,
+        script: {
+          source: scriptParts.join('\n'),
+          lang: 'painless',
+          params,
+        },
+      });
+    } catch (error) {
+      logger.error(
+        `Error snoozing alert instance '${alertInstanceId}' for rule '${ruleId}' - ${error.message}`
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Clears snooze configuration fields from the alert ES document.
+   */
+  public async clearSnoozeAlertInstance({
+    ruleId,
+    alertInstanceId,
+    indices,
+    logger,
+  }: {
+    ruleId: string;
+    alertInstanceId: string;
+    indices: string[];
+    logger: Logger;
+  }) {
+    if (!indices || indices.length === 0) {
+      throw new Error(
+        `Unable to clear snooze for alert instance for rule '${ruleId}' - no alert indices available`
+      );
+    }
+
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    const query: QueryDslQueryContainer = {
+      bool: {
+        must: [
+          { term: { [ALERT_RULE_UUID]: ruleId } },
+          { term: { [ALERT_INSTANCE_ID]: alertInstanceId } },
+        ],
+      },
+    };
+
+    try {
+      await esClient.updateByQuery({
+        index: indices,
+        conflicts: 'proceed',
+        wait_for_completion: false,
+        refresh: true,
+        ignore_unavailable: true,
+        query,
+        script: {
+          source: [
+            `ctx._source.remove('${ALERT_SNOOZE_EXPIRES_AT}');`,
+            `ctx._source.remove('${ALERT_SNOOZE_CONDITIONS}');`,
+            `ctx._source.remove('${ALERT_SNOOZE_CONDITION_OPERATOR}');`,
+            `ctx._source.remove('${ALERT_SNOOZE_SNAPSHOT}');`,
+          ].join('\n'),
+          lang: 'painless',
+        },
+      });
+    } catch (error) {
+      logger.error(
+        `Error clearing snooze for alert instance '${alertInstanceId}' for rule '${ruleId}' - ${error.message}`
+      );
+      throw error;
+    }
+  }
+
 }

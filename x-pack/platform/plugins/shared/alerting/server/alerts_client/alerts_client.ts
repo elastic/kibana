@@ -389,6 +389,10 @@ export class AlertsClient<
     this.legacyAlertsClient.determineDelayedAlerts(opts);
   }
 
+  public getTrackedAlertByInstanceId(id: string): Record<string, unknown> | undefined {
+    return this.trackedAlerts.getById(id) as Record<string, unknown> | undefined;
+  }
+
   public logAlerts(opts: LogAlertsOpts) {
     this.legacyAlertsClient.logAlerts(opts);
   }

@@ -3174,6 +3174,165 @@ describe('Alerts Service', () => {
           ).rejects.toThrowErrorMatchingInlineSnapshot(`"ES connection failed"`);
         });
       });
+
+      describe('snoozeAlertInstance', () => {
+        it('calls updateByQuery with snooze fields', async () => {
+          clusterClient.updateByQuery.mockResolvedValue({ updated: 1 });
+
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await alertsService.snoozeAlertInstance({
+            ruleId: 'rule-1',
+            alertInstanceId: 'alert-1',
+            indices: ['.alerts-default'],
+            logger,
+            expiresAt: '2025-12-31T00:00:00Z',
+            conditions: [
+              {
+                type: 'severity_equals',
+                field: 'kibana.alert.severity',
+                value: 'low',
+              },
+            ],
+            conditionOperator: 'any',
+          });
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith(
+            expect.objectContaining({
+              index: ['.alerts-default'],
+              script: expect.objectContaining({
+                lang: 'painless',
+                params: expect.objectContaining({
+                  expiresAt: '2025-12-31T00:00:00Z',
+                  conditionOperator: 'any',
+                }),
+              }),
+            })
+          );
+        });
+
+        it('writes ALERT_SNOOZE_SNAPSHOT when conditions have snapshotValue', async () => {
+          clusterClient.updateByQuery.mockResolvedValue({ updated: 1 });
+
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await alertsService.snoozeAlertInstance({
+            ruleId: 'rule-1',
+            alertInstanceId: 'alert-1',
+            indices: ['.alerts-default'],
+            logger,
+            conditions: [
+              {
+                type: 'field_change',
+                field: 'kibana.alert.severity',
+                snapshotValue: 'critical',
+              },
+            ],
+            conditionOperator: 'any',
+          });
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith(
+            expect.objectContaining({
+              script: expect.objectContaining({
+                params: expect.objectContaining({
+                  snapshot: { 'kibana.alert.severity': 'critical' },
+                }),
+              }),
+            })
+          );
+        });
+
+        it('throws when no indices are provided', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.snoozeAlertInstance({
+              ruleId: 'rule-1',
+              alertInstanceId: 'alert-1',
+              indices: [],
+              logger,
+            })
+          ).rejects.toThrow('Unable to snooze alert instance');
+        });
+      });
+
+      describe('clearSnoozeAlertInstance', () => {
+        it('calls updateByQuery to remove snooze fields', async () => {
+          clusterClient.updateByQuery.mockResolvedValue({ updated: 1 });
+
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await alertsService.clearSnoozeAlertInstance({
+            ruleId: 'rule-1',
+            alertInstanceId: 'alert-1',
+            indices: ['.alerts-default'],
+            logger,
+          });
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith(
+            expect.objectContaining({
+              index: ['.alerts-default'],
+              script: expect.objectContaining({
+                lang: 'painless',
+              }),
+            })
+          );
+        });
+
+        it('throws when no indices are provided', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.clearSnoozeAlertInstance({
+              ruleId: 'rule-1',
+              alertInstanceId: 'alert-1',
+              indices: [],
+              logger,
+            })
+          ).rejects.toThrow('Unable to clear snooze');
+        });
+      });
+
     });
   }
 });

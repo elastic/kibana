@@ -16,6 +16,10 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_MUTED,
+  ALERT_SNOOZE_EXPIRES_AT,
+  ALERT_SNOOZE_CONDITIONS,
+  ALERT_SNOOZE_CONDITION_OPERATOR,
+  ALERT_SNOOZE_SNAPSHOT,
   ALERT_STATUS,
   EVENT_ACTION,
   TAGS,
@@ -126,6 +130,11 @@ export const buildRecoveredAlert = <
     [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
     // Preserve muted state from existing alert
     ...(alertMuted !== undefined ? { [ALERT_MUTED]: alertMuted } : {}),
+    // Clear snooze configuration fields on recovery
+    [ALERT_SNOOZE_EXPIRES_AT]: undefined,
+    [ALERT_SNOOZE_CONDITIONS]: undefined,
+    [ALERT_SNOOZE_CONDITION_OPERATOR]: undefined,
+    [ALERT_SNOOZE_SNAPSHOT]: undefined,
     // Set status to 'recovered'
     [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
     // Set latest duration as recovered alerts should have updated duration

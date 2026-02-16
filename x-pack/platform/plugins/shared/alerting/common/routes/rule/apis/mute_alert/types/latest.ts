@@ -4,5 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export type { MuteAlertRequestParams } from './v1';
+export type { MuteAlertRequestParams, MuteAlertRequestQuery, MuteAlertRequestBody } from './v1';

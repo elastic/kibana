@@ -843,7 +843,7 @@ describe('Action Scheduler', () => {
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(0);
     expect(defaultSchedulerContext.logger.debug).nthCalledWith(
       1,
-      `skipping scheduling of actions for '1' in rule ${defaultSchedulerContext.ruleLabel}: rule is muted`
+      `skipping scheduling of actions for '1' in rule ${defaultSchedulerContext.ruleLabel}: alert is muted`
     );
   });
 
@@ -956,7 +956,7 @@ describe('Action Scheduler', () => {
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(0);
     expect(defaultSchedulerContext.logger.debug).nthCalledWith(
       1,
-      `skipping scheduling of actions for '1' in rule ${defaultSchedulerContext.ruleLabel}: rule is muted`
+      `skipping scheduling of actions for '1' in rule ${defaultSchedulerContext.ruleLabel}: alert is muted`
     );
   });
 

@@ -21,12 +21,14 @@ describe('mute alert instance', () => {
   const alertsServiceMock = {
     isExistingAlert: jest.fn(),
     muteAlertInstance: jest.fn(),
+    snoozeAlertInstance: jest.fn(),
   };
 
   beforeEach(() => {
     getAlertIndicesAliasMock.mockReturnValue(['alert-index-1']);
     alertsServiceMock.isExistingAlert.mockResolvedValue(true);
     alertsServiceMock.muteAlertInstance.mockResolvedValue(undefined);
+    alertsServiceMock.snoozeAlertInstance.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -217,4 +219,137 @@ describe('mute alert instance', () => {
       })
     ).rejects.toThrow('Alert instance with id "instance1" does not exist for rule with id "1"');
   });
+
+  it('calls snoozeAlertInstance when body contains conditions', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'test-rule-type',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: { bar: true },
+        executionStatus: {
+          status: 'unknown',
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        },
+        actions: [{ group: 'default', actionRef: 'action_0', params: { foo: true } }],
+        consumer: 'bar',
+        mutedInstanceIds: [],
+        notifyWhen: 'onActiveAlert',
+      },
+      references: [{ name: 'action_0', type: 'action', id: '1' }],
+      version: 'v1',
+    });
+
+    await muteInstance(context, {
+      params: { alertId: '1', alertInstanceId: 'instance1' },
+      query: { validateAlertsExistence: false },
+      body: {
+        expiresAt: new Date(Date.now() + 3600000).toISOString(),
+        conditions: [
+          {
+            type: 'severity_equals',
+            field: 'kibana.alert.severity',
+            value: 'low',
+          },
+        ],
+        conditionOperator: 'any',
+      },
+    });
+
+    expect(alertsServiceMock.snoozeAlertInstance).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ruleId: '1',
+        alertInstanceId: 'instance1',
+        expiresAt: expect.any(String),
+        conditions: [
+          expect.objectContaining({
+            type: 'severity_equals',
+            field: 'kibana.alert.severity',
+            value: 'low',
+          }),
+        ],
+        conditionOperator: 'any',
+      })
+    );
+    expect(alertsServiceMock.muteAlertInstance).not.toHaveBeenCalled();
+
+    // Conditional snooze should NOT update the rule SO's mutedInstanceIds
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+  });
+
+  it('calls muteAlertInstance when body is absent (simple mute)', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'test-rule-type',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: { bar: true },
+        executionStatus: {
+          status: 'unknown',
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        },
+        actions: [{ group: 'default', actionRef: 'action_0', params: { foo: true } }],
+        consumer: 'bar',
+        mutedInstanceIds: [],
+        notifyWhen: 'onActiveAlert',
+      },
+      references: [{ name: 'action_0', type: 'action', id: '1' }],
+      version: 'v1',
+    });
+
+    await muteInstance(context, {
+      params: { alertId: '1', alertInstanceId: 'instance1' },
+      query: { validateAlertsExistence: false },
+    });
+
+    expect(alertsServiceMock.muteAlertInstance).toHaveBeenCalled();
+    expect(alertsServiceMock.snoozeAlertInstance).not.toHaveBeenCalled();
+  });
+
+  it('uses SNOOZE_ALERT audit action when body contains conditions', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'test-rule-type',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: { bar: true },
+        executionStatus: {
+          status: 'unknown',
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        },
+        actions: [],
+        consumer: 'bar',
+        mutedInstanceIds: [],
+        notifyWhen: 'onActiveAlert',
+      },
+      references: [],
+      version: 'v1',
+    });
+
+    await muteInstance(context, {
+      params: { alertId: '1', alertInstanceId: 'instance1' },
+      query: { validateAlertsExistence: false },
+      body: {
+        conditions: [
+          {
+            type: 'field_change',
+            field: 'kibana.alert.severity',
+            snapshotValue: 'critical',
+          },
+        ],
+      },
+    });
+
+    expect(auditLoggerMock.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({
+          action: 'rule_alert_snooze',
+        }),
+      })
+    );
+  });
+
 });
