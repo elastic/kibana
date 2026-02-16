@@ -953,6 +953,7 @@ x-pack/platform/packages/shared/ai-infra/inference-langchain @elastic/appex-ai-i
 x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/alerting-rule-utils @elastic/actionable-obs-team
+x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/file-upload @elastic/ml-ui
 x-pack/platform/packages/shared/file-upload-common @elastic/ml-ui
 x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
@@ -1989,6 +1990,8 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/common/ftr_provider_context.ts @elastic/appex-qa
 /x-pack/platform/plugins/shared/maps/test/scout @elastic/appex-qa # temporarily
 /x-pack/platform/plugins/private/discover_enhanced/test/scout/ @elastic/appex-qa # temporarily
+/x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/fixtures/page_objects/metrics_experience.ts @elastic/appex-qa @elastic/obs-exploration-team
+/x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/metrics_experience/ @elastic/appex-qa @elastic/obs-exploration-team
 /x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts @elastic/kibana-data-discovery # test tracks bundle size limits
 /x-pack/platform/plugins/private/painless_lab/test/scout @elastic/appex-qa # temporarily
 /x-pack/platform/test/functional/fixtures/kbn_archives/packaging.json @elastic/appex-qa # No usages found
@@ -3210,7 +3213,8 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/intercepts @elastic/appex-sharedux
 /x-pack/platform/test/accessibility/apps/group3/tags.ts @elastic/appex-sharedux
 /x-pack/platform/test/accessibility/apps/group3/snapshot_and_restore.ts @elastic/appex-sharedux
-/x-pack/platform/test/serverless/functional/test_suites/spaces/spaces_selection.ts @elastic/appex-sharedux
+/x-pack/platform/plugins/shared/spaces/test/scout/ui/fixtures/ @elastic/appex-sharedux
+/x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_serverless.spec.ts @elastic/appex-sharedux
 /x-pack/platform/test/serverless/functional/test_suites/spaces/index.ts @elastic/appex-sharedux
 packages/react @elastic/appex-sharedux
 src/platform/testfunctional/page_objects/solution_navigation.ts @elastic/appex-sharedux
