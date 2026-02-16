@@ -92,8 +92,8 @@ export class WorkflowExecuteStepImpl implements NodeImplementation {
     stepExecutionRuntime.setInput({ 'workflow-id': workflowId, inputs });
     await stepExecutionRuntime.flushEventLogs();
 
-    // Determine if we should await based on step type
-    const shouldAwait = node.type === 'workflow.execute';
+    // Select executor based on step type
+    const executor = node.type === 'workflow.execute' ? this.syncExecutor : this.asyncExecutor;
 
     try {
       const rawDepth = stepExecutionRuntime.workflowExecution.context?.parentDepth;
@@ -128,38 +128,22 @@ export class WorkflowExecuteStepImpl implements NodeImplementation {
         return;
       }
 
-      if (shouldAwait) {
-        const result = await this.syncExecutor.execute(
-          targetWorkflow,
-          inputs,
-          this.init.spaceId,
-          this.init.request,
-          currentDepth
-        );
+      const result = await executor.execute(
+        targetWorkflow,
+        inputs,
+        this.init.spaceId,
+        this.init.request,
+        currentDepth
+      );
 
-        if (result.status === 'completed') {
-          stepExecutionRuntime.finishStep(result.output);
-          workflowExecutionRuntime.navigateToNextNode();
-        } else if (result.status === 'failed') {
-          stepExecutionRuntime.failStep(result.error as Error);
-          workflowExecutionRuntime.navigateToNextNode();
-        }
-        // result.status === 'waiting': delay entered, no navigation
-      } else {
-        const result = await this.asyncExecutor.execute(
-          targetWorkflow,
-          inputs,
-          this.init.spaceId,
-          this.init.request
-        );
-        if (result.status === 'completed') {
-          stepExecutionRuntime.finishStep(result.output);
-          workflowExecutionRuntime.navigateToNextNode();
-        } else if (result.status === 'failed') {
-          stepExecutionRuntime.failStep(result.error as Error);
-          workflowExecutionRuntime.navigateToNextNode();
-        }
+      if (result.status === 'completed') {
+        stepExecutionRuntime.finishStep(result.output);
+        workflowExecutionRuntime.navigateToNextNode();
+      } else if (result.status === 'failed') {
+        stepExecutionRuntime.failStep(result.error as Error);
+        workflowExecutionRuntime.navigateToNextNode();
       }
+      // result.status === 'waiting': delay entered, no navigation
     } catch (error) {
       stepExecutionRuntime.failStep(error as Error);
       workflowExecutionRuntime.navigateToNextNode();
@@ -174,16 +158,23 @@ export class WorkflowExecuteStepImpl implements NodeImplementation {
 
   private async ensureWorkflowIsExecutable(workflow: EsWorkflow): Promise<void> {
     const { node, stepExecutionRuntime } = this.init;
+    const currentWorkflowId = stepExecutionRuntime.workflowExecution.workflowId;
+    // Prevent a workflow from triggering itself (direct self-referencing)
+    if (workflow.id === currentWorkflowId) {
+      throw new Error(
+        `Workflow "${workflow.id}" cannot call itself (self-referencing detected at step "${node.stepId}")`
+      );
+    }
     // Note: spaceId validation is already done by the repository when fetching the workflow
     // since getWorkflow filter by spaceId
     if (!workflow.enabled) {
       throw new Error(
-        `Workflow "${workflow.id}" is disabled (referenced by step "${node.stepId}" in workflow "${stepExecutionRuntime.workflowExecution.workflowId}")`
+        `Workflow "${workflow.id}" is disabled (referenced by step "${node.stepId}" in workflow "${currentWorkflowId}")`
       );
     }
     if (!workflow.valid) {
       throw new Error(
-        `Workflow "${workflow.id}" is not valid (referenced by step "${node.stepId}" in workflow "${stepExecutionRuntime.workflowExecution.workflowId}")`
+        `Workflow "${workflow.id}" is not valid (referenced by step "${node.stepId}" in workflow "${currentWorkflowId}")`
       );
     }
   }

@@ -28,7 +28,8 @@ export class WorkflowExecuteAsyncStrategy {
     workflow: EsWorkflow,
     inputs: Record<string, unknown>,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    parentDepth: number
   ): Promise<StrategyResult> {
     try {
       // Execute workflow without waiting
@@ -43,6 +44,7 @@ export class WorkflowExecuteAsyncStrategy {
           parentWorkflowId: workflowExecution.workflowId,
           parentWorkflowExecutionId: workflowExecution.id,
           parentStepId: this.stepExecutionRuntime.node.stepId,
+          parentDepth,
         },
         request
       );
