@@ -16,7 +16,7 @@ import type {
 } from './profile_service';
 import { AsyncProfileService, ProfileService } from './profile_service';
 import type { CellRenderersExtensionParams, Profile } from './types';
-import { EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT } from './toolkit';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from './toolkit';
 
 interface TestParams {
   myParam: string;
@@ -92,11 +92,11 @@ describe('ProfileService', () => {
     service.registerProvider(provider2);
     const params = {
       context: { profileId: 'test-profile-1', myContext: 'test' },
-      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+      toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
     };
     const params2 = {
       context: { profileId: 'test-profile-2', myContext: 'test' },
-      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+      toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
     };
     const profile = service.getProfile(params);
     const profile2 = service.getProfile(params2);
@@ -116,7 +116,7 @@ describe('ProfileService', () => {
     expect(
       service.getProfile({
         context: { profileId: 'test-profile-2', myContext: 'test' },
-        toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       })
     ).toEqual({});
   });

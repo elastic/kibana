@@ -12,7 +12,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { OpenInNewTabParams, UpdateESQLQueryFn } from './types';
 
-export interface DiscoverContextAwarenessToolkitActions {
+export interface ContextAwarenessToolkitActions {
   openInNewTab?: (params: OpenInNewTabParams) => void;
   updateESQLQuery?: UpdateESQLQueryFn;
   addFilter?: DocViewFilterFn;
@@ -20,10 +20,10 @@ export interface DiscoverContextAwarenessToolkitActions {
   setExpandedDoc?: (record?: DataTableRecord, options?: { initialTabId?: string }) => void;
 }
 
-export interface DiscoverContextAwarenessToolkit {
-  readonly actions: DiscoverContextAwarenessToolkitActions;
+export interface ContextAwarenessToolkit {
+  readonly actions: ContextAwarenessToolkitActions;
 }
 
-export const EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT: DiscoverContextAwarenessToolkit = {
+export const EMPTY_CONTEXT_AWARENESS_TOOLKIT: ContextAwarenessToolkit = {
   actions: {},
 };

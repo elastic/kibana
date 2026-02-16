@@ -20,7 +20,7 @@ import type {
 } from '../profiles/data_source_profile';
 import type { RootProfileService } from '../profiles/root_profile';
 import type { AppliedProfile } from '../composable_profile';
-import type { DiscoverContextAwarenessToolkit } from '../toolkit';
+import type { ContextAwarenessToolkit } from '../toolkit';
 import type {
   DocumentContext,
   DocumentProfileProviderParams,
@@ -72,7 +72,7 @@ export class ScopedProfilesManager {
     private readonly dataSourceProfileService: DataSourceProfileService,
     private readonly documentProfileService: DocumentProfileService,
     private readonly scopedEbtManager: ScopedDiscoverEBTManager,
-    private readonly toolkit: DiscoverContextAwarenessToolkit
+    private readonly toolkit: ContextAwarenessToolkit
   ) {
     this.dataSourceContext$ = new BehaviorSubject(dataSourceProfileService.defaultContext);
   }

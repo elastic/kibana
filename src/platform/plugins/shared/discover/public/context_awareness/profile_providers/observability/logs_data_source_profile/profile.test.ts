@@ -20,7 +20,7 @@ import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_
 import type { ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 import { RESOLUTION_MATCH } from './__mocks__';
-import { EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
 
 const mockServices = createProfileProviderSharedServicesMock();
 
@@ -160,7 +160,7 @@ describe('logsDataSourceProfileProvider', () => {
       const getRowIndicatorProvider =
         logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
           context: RESOLUTION_MATCH.context,
-          toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         });
       const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithLogLevel,
@@ -176,7 +176,7 @@ describe('logsDataSourceProfileProvider', () => {
       const getRowIndicatorProvider =
         logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
           context: RESOLUTION_MATCH.context,
-          toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         });
       const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithLogLevel,
@@ -190,7 +190,7 @@ describe('logsDataSourceProfileProvider', () => {
       const getRowIndicatorProvider =
         logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
           context: RESOLUTION_MATCH.context,
-          toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         });
       const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithoutLogLevel,
@@ -251,7 +251,7 @@ describe('logsDataSourceProfileProvider', () => {
       const getRowAdditionalLeadingControls =
         logsDataSourceProfileProvider.profile.getRowAdditionalLeadingControls?.(() => undefined, {
           context: RESOLUTION_MATCH.context,
-          toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         });
       const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
         dataView: dataViewWithLogLevel,
@@ -266,7 +266,7 @@ describe('logsDataSourceProfileProvider', () => {
       const getColumnsConfiguration =
         logsDataSourceProfileProvider.profile.getColumnsConfiguration?.(() => ({}), {
           context: RESOLUTION_MATCH.context,
-          toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         });
 
       const columnConfiguration = getColumnsConfiguration?.();

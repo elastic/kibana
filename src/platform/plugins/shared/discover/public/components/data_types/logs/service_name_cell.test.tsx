@@ -14,7 +14,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
 import { getServiceNameCell } from './service_name_cell';
-import type { DiscoverContextAwarenessToolkit } from '../../../context_awareness';
+import type { ContextAwarenessToolkit } from '../../../context_awareness';
 
 const core = {
   application: {
@@ -38,7 +38,7 @@ jest.mock('../../../hooks/use_discover_services', () => {
 });
 
 const renderCell = (serviceNameField: string, record: DataTableRecord) => {
-  const toolkit: DiscoverContextAwarenessToolkit = {
+  const toolkit: ContextAwarenessToolkit = {
     actions: {
       addFilter: jest.fn(),
     },

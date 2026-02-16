@@ -40,7 +40,7 @@ import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_ap
 import type { SearchEmbeddableState } from '../../common/embeddable/types';
 import type { SearchEmbeddableApi } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
-import { BaseAppWrapper, type DiscoverContextAwarenessToolkit } from '../context_awareness';
+import { BaseAppWrapper, type ContextAwarenessToolkit } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
 
@@ -245,7 +245,7 @@ export const getSearchEmbeddableFactory = ({
         });
       };
 
-      const toolkit: DiscoverContextAwarenessToolkit = {
+      const toolkit: ContextAwarenessToolkit = {
         actions: {
           addFilter,
         },

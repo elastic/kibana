@@ -21,7 +21,7 @@ import {
 } from '@kbn/discover-utils';
 import { FieldBadgeWithActions } from '@kbn/discover-contextual-components/src/data_types/logs/components/cell_actions_popover';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import type { DiscoverContextAwarenessToolkit } from '../../../context_awareness';
+import type { ContextAwarenessToolkit } from '../../../context_awareness';
 import { AGENT_NAME_FIELD } from '../../../../common/data_types/logs/constants';
 
 const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_icon'));
@@ -32,7 +32,7 @@ const agentIconStyle = ({ euiTheme }: UseEuiTheme) => css`
 `;
 
 export const getServiceNameCell =
-  (serviceNameField: string, toolkit: DiscoverContextAwarenessToolkit) =>
+  (serviceNameField: string, toolkit: ContextAwarenessToolkit) =>
   (props: DataGridCellValueElementProps) => {
     const { core, share } = useDiscoverServices();
     const serviceNameValue = getFieldValue(props.row, serviceNameField);

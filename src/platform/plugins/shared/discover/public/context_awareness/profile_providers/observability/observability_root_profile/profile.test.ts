@@ -10,7 +10,7 @@
 import { SolutionType } from '../../../profiles';
 import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { createObservabilityRootProfileProvider } from './profile';
-import { EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 
@@ -63,7 +63,7 @@ describe('observabilityRootProfileProvider', () => {
       expect(result.context.allLogsIndexPattern).toEqual('logs-*');
       const defaultDataViews = observabilityRootProfileProvider.profile.getDefaultAdHocDataViews?.(
         () => [],
-        { context: result.context, toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT }
+        { context: result.context, toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT }
       )();
       expect(defaultDataViews).toEqual([
         {
@@ -88,7 +88,7 @@ describe('observabilityRootProfileProvider', () => {
       expect(result.context.allLogsIndexPattern).toEqual(undefined);
       const defaultDataViews = observabilityRootProfileProvider.profile.getDefaultAdHocDataViews?.(
         () => [],
-        { context: result.context, toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT }
+        { context: result.context, toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT }
       )();
       expect(defaultDataViews).toEqual([]);
     });
@@ -106,7 +106,7 @@ describe('observabilityRootProfileProvider', () => {
             solutionType: SolutionType.Observability,
             allLogsIndexPattern: mockServices.logsContextService.getAllLogsIndexPattern(),
           },
-          toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         }
       );
 
@@ -136,7 +136,7 @@ describe('observabilityRootProfileProvider', () => {
             solutionType: SolutionType.Observability,
             allLogsIndexPattern: mockServices.logsContextService.getAllLogsIndexPattern(),
           },
-          toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         }
       );
 
@@ -174,7 +174,7 @@ describe('observabilityRootProfileProvider', () => {
             solutionType: SolutionType.Observability,
             allLogsIndexPattern: mockServices.logsContextService.getAllLogsIndexPattern(),
           },
-          toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         }
       );
 
@@ -212,7 +212,7 @@ describe('observabilityRootProfileProvider', () => {
             solutionType: SolutionType.Observability,
             allLogsIndexPattern: mockServices.logsContextService.getAllLogsIndexPattern(),
           },
-          toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         }
       );
 

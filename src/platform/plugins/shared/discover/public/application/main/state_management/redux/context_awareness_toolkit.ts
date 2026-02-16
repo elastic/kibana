@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DiscoverContextAwarenessToolkit } from '../../../../context_awareness/toolkit';
+import type { ContextAwarenessToolkit } from '../../../../context_awareness/toolkit';
 import type { InternalStateStore } from './internal_state';
 import { internalStateActions } from '.';
 
@@ -17,7 +17,7 @@ export const createContextAwarenessToolkit = ({
 }: {
   internalState: InternalStateStore;
   tabId: string;
-}): DiscoverContextAwarenessToolkit => {
+}): ContextAwarenessToolkit => {
   return {
     actions: {
       openInNewTab: (params) => {

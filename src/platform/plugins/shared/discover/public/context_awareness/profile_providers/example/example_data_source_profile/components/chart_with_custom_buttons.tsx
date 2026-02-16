@@ -21,7 +21,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import type { DiscoverContextAwarenessToolkitActions } from '../../../../toolkit';
+import type { ContextAwarenessToolkitActions } from '../../../../toolkit';
 import {
   useCurrentTabAction,
   useInternalStateDispatch,
@@ -29,7 +29,7 @@ import {
 import { internalStateActions } from '../../../../../application/main/state_management/redux';
 
 interface ChartWithCustomButtonsProps extends ChartSectionProps {
-  actions: Pick<DiscoverContextAwarenessToolkitActions, 'openInNewTab' | 'updateESQLQuery'>;
+  actions: Pick<ContextAwarenessToolkitActions, 'openInNewTab' | 'updateESQLQuery'>;
 }
 
 export const ChartWithCustomButtons = ({ actions, ...props }: ChartWithCustomButtonsProps) => {

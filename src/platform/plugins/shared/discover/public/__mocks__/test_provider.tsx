@@ -22,10 +22,7 @@ import {
   type DiscoverCustomizationService,
 } from '../customizations';
 import { DiscoverMainProvider } from '../application/main/state_management/discover_state_provider';
-import {
-  EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
-  type ScopedProfilesManager,
-} from '../context_awareness';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT, type ScopedProfilesManager } from '../context_awareness';
 import type { DiscoverServices } from '../build_services';
 import { createDiscoverServicesMock } from './services';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
@@ -118,7 +115,7 @@ export const DiscoverTestProvider = ({
       originalScopedProfilesManager ??
       services.profilesManager.createScopedProfilesManager({
         scopedEbtManager,
-        toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       }),
     [originalScopedProfilesManager, scopedEbtManager, services.profilesManager]
   );

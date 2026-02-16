@@ -16,7 +16,7 @@ import { useCurrentTabContext } from './hooks';
 import type { DiscoverStateContainer } from '../discover_state';
 import type { ConnectedCustomizationService } from '../../../../customizations';
 import type {
-  DiscoverContextAwarenessToolkit,
+  ContextAwarenessToolkit,
   ProfilesManager,
   ScopedProfilesManager,
 } from '../../../../context_awareness';
@@ -82,7 +82,7 @@ export const createTabRuntimeState = ({
 }: {
   profilesManager: ProfilesManager;
   ebtManager: DiscoverEBTManager;
-  toolkit: DiscoverContextAwarenessToolkit;
+  toolkit: ContextAwarenessToolkit;
   initialValues?: {
     unifiedHistogramLayoutPropsMap?: InitialUnifiedHistogramLayoutPropsMap;
   };

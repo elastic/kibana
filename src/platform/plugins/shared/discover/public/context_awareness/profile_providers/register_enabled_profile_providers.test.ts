@@ -14,7 +14,7 @@ import {
   createContextAwarenessMocks,
   createProfileProviderSharedServicesMock,
 } from '../__mocks__';
-import { EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT } from '../toolkit';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../toolkit';
 import { createExampleRootProfileProvider } from './example/example_root_profile';
 import { registerEnabledProfileProviders } from './register_enabled_profile_providers';
 import type { CellRenderersExtensionParams } from '../types';
@@ -40,14 +40,14 @@ describe('registerEnabledProfileProviders', () => {
     const context = await rootProfileServiceMock.resolve({ solutionNavId: null });
     const profile = rootProfileServiceMock.getProfile({
       context,
-      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+      toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
     });
     const baseImpl = () => ({});
     profile.getCellRenderers?.(baseImpl)({} as unknown as CellRenderersExtensionParams);
     expect(rootProfileProviderMock.profile.getCellRenderers).toHaveBeenCalledTimes(1);
     expect(rootProfileProviderMock.profile.getCellRenderers).toHaveBeenCalledWith(baseImpl, {
       context,
-      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+      toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
     });
   });
 
@@ -66,7 +66,7 @@ describe('registerEnabledProfileProviders', () => {
     const context = await rootProfileServiceMock.resolve({ solutionNavId: null });
     const profile = rootProfileServiceMock.getProfile({
       context,
-      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+      toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
     });
     const baseImpl = () => ({});
     profile.getCellRenderers?.(baseImpl)({} as unknown as CellRenderersExtensionParams);
@@ -89,14 +89,14 @@ describe('registerEnabledProfileProviders', () => {
     const context = await rootProfileServiceMock.resolve({ solutionNavId: null });
     const profile = rootProfileServiceMock.getProfile({
       context,
-      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+      toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
     });
     const baseImpl = () => ({});
     profile.getCellRenderers?.(baseImpl)({} as unknown as CellRenderersExtensionParams);
     expect(exampleRootProfileProvider.profile.getCellRenderers).toHaveBeenCalledTimes(1);
     expect(exampleRootProfileProvider.profile.getCellRenderers).toHaveBeenCalledWith(baseImpl, {
       context,
-      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+      toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
     });
     expect(rootProfileProviderMock.profile.getCellRenderers).not.toHaveBeenCalled();
   });
@@ -136,14 +136,14 @@ describe('registerEnabledProfileProviders', () => {
 
     const profile = dataSourceProfileServiceMock.getProfile({
       context: dataSourceContext,
-      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+      toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
     });
     const baseImpl = () => ({});
     profile.getCellRenderers?.(baseImpl)({} as unknown as CellRenderersExtensionParams);
     expect(dataSourceProfileProviderMock.profile.getCellRenderers).toHaveBeenCalledTimes(1);
     expect(dataSourceProfileProviderMock.profile.getCellRenderers).toHaveBeenCalledWith(baseImpl, {
       context: dataSourceContext,
-      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+      toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
     });
   });
 
@@ -182,7 +182,7 @@ describe('registerEnabledProfileProviders', () => {
 
     const profile = dataSourceProfileServiceMock.getProfile({
       context: dataSourceContext,
-      toolkit: EMPTY_DISCOVER_CONTEXT_AWARENESS_TOOLKIT,
+      toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
     });
     const baseImpl = () => ({});
     profile.getCellRenderers?.(baseImpl)({} as unknown as CellRenderersExtensionParams);
