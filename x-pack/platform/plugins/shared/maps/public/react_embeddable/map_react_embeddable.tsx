@@ -210,6 +210,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
             crossPanelActions.cleanup();
             reduxSync.cleanup();
             unsubscribeFromFetch();
+            projectRoutingManager.cleanup();
             maybeStopDynamicActions?.stopDynamicActions();
           };
         }, []);

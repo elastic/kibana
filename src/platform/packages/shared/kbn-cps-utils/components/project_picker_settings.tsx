@@ -54,9 +54,7 @@ export const ProjectPickerSettings = ({ onResetToDefaults }: ProjectPickerSettin
         <EuiButtonIcon
           display="empty"
           iconType="ellipsis"
-          aria-label={i18n.translate('cpsUtils.projectPicker.settingsButtonLabel', {
-            defaultMessage: 'Manage cross-project search',
-          })}
+          aria-label={strings.getManageCrossProjectSearchLabel()}
           onClick={() => setIsOpen(!isOpen)}
           size="s"
           color="text"
