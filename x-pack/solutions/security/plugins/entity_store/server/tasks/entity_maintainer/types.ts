@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
+import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
 export interface EntityMaintainerStatusMetadata {
+  namespace: string;
   runs: number;
   lastSuccessTimestamp: string | null;
   lastErrorTimestamp: string | null;
@@ -31,6 +32,7 @@ interface EntityMaintainerTaskMethodContext {
   abortController: AbortController;
   logger: Logger;
   fakeRequest: KibanaRequest;
+  esClient: ElasticsearchClient;
 }
 
 export type EntityMaintainerTaskMethod = (context: EntityMaintainerTaskMethodContext) => Promise<EntityMaintainerState>;
