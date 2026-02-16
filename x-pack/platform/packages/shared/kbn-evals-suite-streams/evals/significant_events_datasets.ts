@@ -6,6 +6,7 @@
  */
 
 import type { Feature } from '@kbn/streams-schema';
+import type { EvaluationCriterion } from '@kbn/evals/src/evaluators/criteria';
 import { GROK_PATTERN_DATASETS } from './pattern_extraction_datasets';
 import type { KqlSubstringExpectation } from './significant_events_metrics';
 
@@ -19,6 +20,9 @@ export interface SignificantEventsGroundTruth {
     categories: string[];
     // KQL substring expectations -- each entry must be satisfied by at least one query
     kql_substrings?: KqlSubstringExpectation[];
+    // Per-example LLM evaluation criteria that complement the base criteria.
+    // Supports both plain strings (weight 1) and structured { id, text, score } objects.
+    criteria?: EvaluationCriterion[];
   };
 }
 
@@ -230,6 +234,23 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
           expected_query: {
             categories: ['security'],
             kql_substrings: ['Failed password'],
+            criteria: [
+              {
+                id: 'ssh_detection',
+                text: 'At least one query specifically targets SSH authentication failures (e.g., "Failed password" pattern)',
+                score: 1.5,
+              },
+              {
+                id: 'security_category',
+                text: 'The query for failed passwords should be categorized as "security" with severity >= 70, reflecting the brute-force attack risk',
+                score: 1,
+              },
+              {
+                id: 'no_irrelevant_categories',
+                text: 'Should not generate "operational" or "configuration" queries for this security-focused dataset',
+                score: 0.5,
+              },
+            ],
           },
         },
         metadata: {
@@ -286,6 +307,18 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
           expected_query: {
             categories: ['operational'],
             kql_substrings: [['Started', 'Stopping']],
+            criteria: [
+              {
+                id: 'lifecycle_detection',
+                text: 'Queries should capture service lifecycle events (start/stop) from systemd',
+                score: 1.5,
+              },
+              {
+                id: 'operational_category',
+                text: 'These should be categorized as "operational" with low-to-medium severity (0-50), since service start/stop is routine',
+                score: 1,
+              },
+            ],
           },
         },
         metadata: {
@@ -335,6 +368,23 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
           expected_query: {
             categories: ['error'],
             kql_substrings: ['error', 'java.lang.NullPointerException'],
+            criteria: [
+              {
+                id: 'npe_detection',
+                text: 'At least one query targets the specific Java NullPointerException observed in the stack trace',
+                score: 1.5,
+              },
+              {
+                id: 'error_severity',
+                text: 'Should be categorized as "error" with high severity (>= 60), reflecting an application crash',
+                score: 1,
+              },
+              {
+                id: 'java_specific',
+                text: 'Query should reference Java-specific exception patterns rather than generic error terms',
+                score: 0.5,
+              },
+            ],
           },
         },
         metadata: {
@@ -383,6 +433,23 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
             categories: ['error'],
             kql_substrings: [
               'http.response.status_code >= 500 and http.response.status_code < 600',
+            ],
+            criteria: [
+              {
+                id: 'http_5xx_detection',
+                text: 'At least one query captures HTTP 5xx server errors, using status code filtering rather than string matching on "503"',
+                score: 1.5,
+              },
+              {
+                id: 'error_category',
+                text: 'Should be categorized as "error" since 5xx codes indicate server-side failures',
+                score: 1,
+              },
+              {
+                id: 'unavailability_severity',
+                text: 'Severity should reflect that repeated 503 errors indicate service unavailability (>= 60)',
+                score: 0.5,
+              },
             ],
           },
         },
@@ -434,6 +501,23 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
           expected_query: {
             categories: ['error'],
             kql_substrings: ['error', 'IndexError'],
+            criteria: [
+              {
+                id: 'python_error_detection',
+                text: 'At least one query targets the Python IndexError or Traceback pattern',
+                score: 1.5,
+              },
+              {
+                id: 'error_severity',
+                text: 'Should be categorized as "error" with medium-to-high severity',
+                score: 1,
+              },
+              {
+                id: 'python_specific',
+                text: 'Query should reference Python-specific exception patterns (e.g., IndexError, Traceback) rather than just generic error terms',
+                score: 0.5,
+              },
+            ],
           },
         },
         metadata: {
@@ -480,6 +564,23 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
           expected_query: {
             categories: ['error'],
             kql_substrings: ['error', 'image', 'not found'],
+            criteria: [
+              {
+                id: 'docker_error_detection',
+                text: 'At least one query targets Docker image pull failures or image-not-found errors',
+                score: 1.5,
+              },
+              {
+                id: 'error_category',
+                text: 'Should be categorized as "error" since a missing image prevents container startup',
+                score: 1,
+              },
+              {
+                id: 'docker_specific',
+                text: 'Query should reference Docker-specific terms (e.g., "pull access denied", "image", "daemon") not just generic errors',
+                score: 0.5,
+              },
+            ],
           },
         },
         metadata: {
@@ -528,6 +629,23 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
           expected_query: {
             categories: ['error'],
             kql_substrings: ['error', 'CrashLoopBackOff'],
+            criteria: [
+              {
+                id: 'crashloop_detection',
+                text: 'At least one query targets the Kubernetes CrashLoopBackOff state',
+                score: 1.5,
+              },
+              {
+                id: 'error_high_severity',
+                text: 'Should be categorized as "error" with high severity (>= 70), since CrashLoopBackOff indicates a pod is repeatedly crashing',
+                score: 1,
+              },
+              {
+                id: 'k8s_specific',
+                text: 'Query should reference Kubernetes-specific terms (e.g., CrashLoopBackOff, Terminated, Exit Code) rather than generic error patterns',
+                score: 0.5,
+              },
+            ],
           },
         },
         metadata: {
@@ -573,6 +691,23 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
           expected_query: {
             categories: ['error'],
             kql_substrings: ['error', 'connect', 'database'],
+            criteria: [
+              {
+                id: 'db_connection_detection',
+                text: 'At least one query targets PostgreSQL connection failures (e.g., "Connection refused" or "could not connect")',
+                score: 1.5,
+              },
+              {
+                id: 'error_high_severity',
+                text: 'Should be categorized as "error" with high severity, since database connectivity loss typically causes service outages',
+                score: 1,
+              },
+              {
+                id: 'db_specific',
+                text: 'Query should reference database-specific connection error patterns, not just the generic word "error"',
+                score: 0.5,
+              },
+            ],
           },
         },
         metadata: {
@@ -626,6 +761,23 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
           expected_query: {
             categories: ['resource_health'],
             kql_substrings: [['warn', 'critical'], 'full'],
+            criteria: [
+              {
+                id: 'disk_space_detection',
+                text: 'At least one query targets disk space warnings or critical alerts (e.g., "full", "WARN", "CRITICAL")',
+                score: 1.5,
+              },
+              {
+                id: 'resource_health_category',
+                text: 'Should be categorized as "resource_health" since this represents infrastructure capacity issues',
+                score: 1,
+              },
+              {
+                id: 'severity_escalation',
+                text: 'Severity should reflect escalation: CRITICAL disk full (>= 70) is more severe than WARN (40-60)',
+                score: 0.5,
+              },
+            ],
           },
         },
         metadata: {
@@ -681,6 +833,23 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
           expected_query: {
             categories: ['error'],
             kql_substrings: ['4??', '5??'],
+            criteria: [
+              {
+                id: 'nginx_error_detection',
+                text: 'At least one query targets HTTP 4xx client errors and/or 5xx server errors in Nginx access logs',
+                score: 1.5,
+              },
+              {
+                id: 'status_code_filtering',
+                text: 'Queries should use HTTP status code filtering appropriate for web server monitoring',
+                score: 1,
+              },
+              {
+                id: 'error_category',
+                text: 'Should be categorized as "error" since 4xx/5xx status codes represent failed requests',
+                score: 0.5,
+              },
+            ],
           },
         },
         metadata: {
@@ -720,6 +889,23 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
           expected_query: {
             categories: ['operational'],
             kql_substrings: [['error', 'fail*']],
+            criteria: [
+              {
+                id: 'syslog_event_detection',
+                text: 'Queries should target operational events typical of Linux syslog (e.g., errors, service failures, authentication events)',
+                score: 1.5,
+              },
+              {
+                id: 'operational_category',
+                text: 'Should be categorized as "operational" given the general system-level nature of syslog messages',
+                score: 1,
+              },
+              {
+                id: 'no_hallucinated_tech',
+                text: 'Should not generate highly specialized queries for technologies not present in the log data',
+                score: 0.5,
+              },
+            ],
           },
         },
         metadata: {

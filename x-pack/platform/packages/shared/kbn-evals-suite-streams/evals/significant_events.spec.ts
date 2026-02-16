@@ -16,6 +16,7 @@ import { generateSignificantEvents } from '@kbn/streams-ai';
 import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/prompt';
 import { tags } from '@kbn/scout';
 import type { EvaluatorParams } from '@kbn/evals/src/types';
+import type { EvaluationCriterion } from '@kbn/evals/src/evaluators/criteria';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import kbnDatemath from '@kbn/datemath';
 import { evaluate } from '../src/evaluate';
@@ -39,6 +40,34 @@ const ALLOWED_CATEGORIES = [
   SIGNIFICANT_EVENT_TYPE_ERROR,
   SIGNIFICANT_EVENT_TYPE_SECURITY,
 ] as const;
+
+const BASE_LLM_CRITERIA: EvaluationCriterion[] = [
+  {
+    id: 'semantic_relevance',
+    text: 'Each generated KQL query must be semantically relevant to the stream description and the patterns visible in the sample logs. Queries should target events that a user monitoring this specific system would care about. Queries that are generic or unrelated to the observed log patterns should FAIL.',
+    score: 2,
+  },
+  {
+    id: 'category_appropriateness',
+    text: 'The category assigned to each query (operational, error, security, resource_health, configuration) must semantically match the nature of the event the query captures. For example, a query matching "Failed password" logs should be "security" not "operational". A query matching HTTP 5xx errors should be "error" not "resource_health".',
+    score: 1,
+  },
+  {
+    id: 'severity_proportionality',
+    text: 'Severity scores should be proportional to the real-world impact of the detected event. Security incidents and crashes should score higher (60-100) than routine operational events (0-40). Scores should follow the documented scale: 80-100 critical, 60-79 high, 40-59 medium, 0-39 low.',
+    score: 1,
+  },
+  {
+    id: 'title_descriptiveness',
+    text: 'Each query title must clearly describe what the query monitors in a way a user can understand without reading the KQL. Titles like "SSH Brute Force Attempts" or "Java NullPointerException" are good. Titles like "Query 1" or "Error Query" are bad.',
+    score: 0.5,
+  },
+  {
+    id: 'query_specificity',
+    text: 'Queries should be specific enough to be actionable. Overly broad queries (e.g., message:* or error:*) that would match too many unrelated documents should FAIL. Queries should target specific event patterns identified in the logs or inferred from features.',
+    score: 1.5,
+  },
+];
 
 type SignificantEventsQuery = Awaited<
   ReturnType<typeof generateSignificantEvents>
@@ -249,7 +278,8 @@ evaluate.describe(
                     evaluate: async ({ input, output, expected, metadata }) => {
                       return evaluators
                         .criteria([
-                          'Assert the KQL queries are generated following the user intent',
+                          ...BASE_LLM_CRITERIA,
+                          ...(expected.expected_query.criteria ?? []),
                         ])
                         .evaluate({
                           input,
@@ -307,11 +337,14 @@ evaluate.describe(
           },
           [
             {
-              name: 'evaluator',
+              name: 'llm_evaluator',
               kind: 'LLM',
               evaluate: async ({ input, output, expected, metadata }) => {
                 return evaluators
-                  .criteria(['Assert the KQL queries are generated following the user intent'])
+                  .criteria([
+                    'Given an empty datastream with no log data, the output should either contain zero queries or only general-purpose monitoring queries',
+                    'The system must not hallucinate specific event patterns, error types, or technology-specific queries without supporting evidence from log data',
+                  ])
                   .evaluate({
                     input,
                     expected,
