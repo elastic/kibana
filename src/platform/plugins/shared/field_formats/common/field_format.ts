@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createElement } from 'react';
 import type { ReactNode } from 'react';
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
 import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-common';
@@ -235,8 +234,8 @@ export abstract class FieldFormat {
     };
   }
 
-  static from(convertFn: TextContextTypeConvert): FieldFormatInstanceType {
-    return createCustomFieldFormat(convertFn);
+  static from(convertFn: FieldFormatConvertFunction): FieldFormatInstanceType {
+    return createCustomFieldFormat(convertFn as TextContextTypeConvert);
   }
 
   setupContentType(): FieldFormatConvert {
@@ -269,12 +268,4 @@ export abstract class FieldFormat {
     }
   }
 
-  protected checkForMissingValueReact(val: unknown): ReactNode | void {
-    if (val === '') {
-      return createElement('span', { className: 'ffString__emptyValue' }, EMPTY_LABEL);
-    }
-    if (val == null || val === MISSING_TOKEN) {
-      return createElement('span', { className: 'ffString__emptyValue' }, NULL_LABEL);
-    }
-  }
 }

@@ -22,6 +22,7 @@ import type {
   FieldFormatParams,
 } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
+import { checkForMissingValueReact } from '../content_types';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
 const allowedUrlSchemes = ['http://', 'https://', 'mailto:'];
@@ -220,7 +221,7 @@ export class UrlFormat extends FieldFormat {
   };
 
   reactConvert: ReactContextTypeConvert = (rawValue: unknown, options = {}): ReactNode => {
-    const missing = this.checkForMissingValueReact(rawValue);
+    const missing = checkForMissingValueReact(rawValue);
     if (missing) {
       return missing;
     }

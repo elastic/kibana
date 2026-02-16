@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isValidElement } from 'react';
 import { EMPTY_LABEL, NULL_LABEL } from '@kbn/field-formats-common';
 import { HTML_CONTEXT_TYPE } from '../content_types';
 import { StringFormat } from './string';
@@ -139,5 +140,69 @@ describe('String Format', () => {
         })
       )
     ).toBe('<mark class="ffSearch__highlight">&lt;img /&gt;</mark>');
+  });
+
+  describe('react content type', () => {
+    test('convert returns plain text for simple values', () => {
+      const string = new StringFormat({ transform: 'lower' }, jest.fn());
+      const result = string.convert('Kibana', 'react');
+      // Plain text values are returned as strings (no wrapping element)
+      expect(result).toBe('kibana');
+    });
+
+    test('convert returns plain text for upper case transform', () => {
+      const string = new StringFormat({ transform: 'upper' }, jest.fn());
+      expect(string.convert('Kibana', 'react')).toBe('KIBANA');
+    });
+
+    test('convert returns ReactNode with <mark> for highlighted values', () => {
+      const string = new StringFormat({}, jest.fn());
+      const result = string.convert('test value', 'react', {
+        field: { name: 'foo' },
+        hit: {
+          highlight: {
+            foo: ['@kibana-highlighted-field@test value@/kibana-highlighted-field@'],
+          },
+        },
+      });
+      // Should return a React element (not a plain string) when highlights are present
+      expect(isValidElement(result)).toBe(true);
+    });
+
+    test('convert returns missing value ReactNode for empty string', () => {
+      const string = new StringFormat();
+      const result = string.convert('', 'react');
+      // Missing values are rendered as React elements with the empty label
+      expect(isValidElement(result)).toBe(true);
+    });
+
+    test('convert returns missing value ReactNode for null', () => {
+      const string = new StringFormat();
+      const result = string.convert(null, 'react');
+      expect(isValidElement(result)).toBe(true);
+    });
+
+    test('convert returns missing value ReactNode for undefined', () => {
+      const string = new StringFormat();
+      const result = string.convert(undefined, 'react');
+      expect(isValidElement(result)).toBe(true);
+    });
+
+    test('highlighted react output does not contain raw HTML strings', () => {
+      const string = new StringFormat({}, jest.fn());
+      const result = string.convert('<script>alert("xss")</script>', 'react', {
+        field: { name: 'foo' },
+        hit: {
+          highlight: {
+            foo: [
+              '@kibana-highlighted-field@<script>alert("xss")</script>@/kibana-highlighted-field@',
+            ],
+          },
+        },
+      });
+      // The result should be a React element, never a raw HTML string
+      expect(isValidElement(result)).toBe(true);
+      expect(typeof result).not.toBe('string');
+    });
   });
 });

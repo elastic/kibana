@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { createElement } from 'react';
+import type { ReactNode } from 'react';
 import { isFunction } from 'lodash';
+import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-common';
 import type {
   IFieldFormat,
   ReactContextTypeConvert,
@@ -16,6 +18,20 @@ import type {
 } from '../types';
 
 export const REACT_CONTEXT_TYPE: FieldFormatsContentType = 'react';
+
+/**
+ * React equivalent of checkForMissingValueHtml — returns a ReactNode
+ * with the appropriate empty/missing label wrapped in a span.
+ * Exported so individual formatters can use it in their reactConvert methods.
+ */
+export const checkForMissingValueReact = (val: unknown): ReactNode | void => {
+  if (val === '') {
+    return createElement('span', { className: 'ffString__emptyValue' }, EMPTY_LABEL);
+  }
+  if (val == null || val === MISSING_TOKEN) {
+    return createElement('span', { className: 'ffString__emptyValue' }, NULL_LABEL);
+  }
+};
 
 const HTML_TAG_RE = /<[^>]+>/;
 

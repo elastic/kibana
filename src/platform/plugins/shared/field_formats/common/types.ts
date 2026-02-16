@@ -73,7 +73,7 @@ export type FieldFormatConvertFunction =
 export interface FieldFormatConvert {
   text: TextContextTypeConvert;
   html: HtmlContextTypeConvert;
-  react: ReactContextTypeConvert;
+  react?: ReactContextTypeConvert;
 }
 
 /** @public **/

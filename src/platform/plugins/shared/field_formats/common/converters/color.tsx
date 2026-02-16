@@ -15,6 +15,7 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
 import type { HtmlContextTypeConvert, TextContextTypeConvert, ReactContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
+import { checkForMissingValueReact } from '../content_types';
 import { asPrettyString } from '../utils';
 import { DEFAULT_CONVERTER_COLOR } from '../constants/color_default';
 
@@ -99,7 +100,7 @@ export class ColorFormat extends FieldFormat {
   };
 
   reactConvert: ReactContextTypeConvert = (val: string | number, options) => {
-    const missing = this.checkForMissingValueReact(val);
+    const missing = checkForMissingValueReact(val);
     if (missing) {
       return missing;
     }

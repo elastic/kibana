@@ -36,6 +36,11 @@ export function getHighlightReact(
       .split(highlightTags.post)
       .join('');
 
+    // Skip empty/no-op highlights to avoid splitting on an empty string
+    if (!untagged) {
+      continue;
+    }
+
     // Build the replacement segments from the highlight
     const segments = parseHighlightSegments(highlight);
 

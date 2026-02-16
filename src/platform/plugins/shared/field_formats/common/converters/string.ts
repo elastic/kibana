@@ -14,6 +14,7 @@ import { asPrettyString, getHighlightHtml, getHighlightReact, shortenDottedStrin
 import { FieldFormat } from '../field_format';
 import type { TextContextTypeConvert, HtmlContextTypeConvert, ReactContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
+import { checkForMissingValueReact } from '../content_types';
 
 const TRANSFORM_OPTIONS = [
   {
@@ -143,7 +144,7 @@ export class StringFormat extends FieldFormat {
   };
 
   reactConvert: ReactContextTypeConvert = (val, options = {}) => {
-    const missing = this.checkForMissingValueReact(val);
+    const missing = checkForMissingValueReact(val);
     if (missing) {
       return missing;
     }

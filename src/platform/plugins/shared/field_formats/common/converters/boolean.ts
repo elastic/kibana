@@ -13,6 +13,7 @@ import { FieldFormat } from '../field_format';
 import type { HtmlContextTypeConvert, TextContextTypeConvert, ReactContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString } from '../utils';
+import { checkForMissingValueReact } from '../content_types';
 
 /** @public */
 export class BoolFormat extends FieldFormat {
@@ -53,7 +54,7 @@ export class BoolFormat extends FieldFormat {
   };
 
   reactConvert: ReactContextTypeConvert = (value, options) => {
-    const missing = this.checkForMissingValueReact(value);
+    const missing = checkForMissingValueReact(value);
     if (missing) {
       return missing;
     }
