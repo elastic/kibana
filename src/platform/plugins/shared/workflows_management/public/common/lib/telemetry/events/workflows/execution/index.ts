@@ -100,15 +100,9 @@ const workflowTestRunInitiatedSchema: RootSchema<ReportWorkflowTestRunInitiatedA
   triggerTab: {
     type: 'keyword',
     _meta: {
-      description: 'The trigger tab selected in the Test Workflow modal: manual, alert, or index',
+      description:
+        'The trigger tab selected in the Test Workflow modal: manual, alert, index, or historical',
       optional: true,
-    },
-  },
-  isReplay: {
-    type: 'boolean',
-    _meta: {
-      description: 'True when the run was initiated from From historical (replay) mode',
-      optional: false,
     },
   },
 };

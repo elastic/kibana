@@ -20,28 +20,27 @@ export const TRIGGER_TABS_LABELS: Record<WorkflowTriggerTab, string> = {
   manual: i18n.translate('plugins.workflowsManagement.workflowsExecution.manualTriggerLabel', {
     defaultMessage: 'Manual',
   }),
+  historical: i18n.translate(
+    'plugins.workflowsManagement.workflowsExecution.historicalTriggerLabel',
+    { defaultMessage: 'Historical' }
+  ),
 };
 
-export const TRIGGER_TABS_DESCRIPTIONS: Record<string, string> = {
+export const TRIGGER_TABS_DESCRIPTIONS: Record<WorkflowTriggerTab, string> = {
   manual: i18n.translate(
     'plugins.workflowsManagement.workflowsExecution.manualTriggerDescription',
     {
-      defaultMessage:
-        'Provide custom JSON data manually for testing. Ideal for simulating specific scenarios or debugging edge cases.',
+      defaultMessage: 'Provide custom JSON data manually.',
     }
   ),
   index: i18n.translate('plugins.workflowsManagement.workflowsExecution.indexTriggerDescription', {
-    defaultMessage:
-      'Choose a document directly from an index to use as the test input. This is helpful for verifying workflows against real indexed data.',
+    defaultMessage: 'Choose a document from Elasticsearch.',
   }),
   alert: i18n.translate('plugins.workflowsManagement.workflowsExecution.alertTriggerDescription', {
-    defaultMessage:
-      'Choose an existing alert directly from an index to use as the test input. This is helpful for verifying workflows against real alerts data.',
+    defaultMessage: 'Choose an existing alert directly.',
   }),
-  scheduled: i18n.translate(
-    'plugins.workflowsManagement.workflowsExecution.scheduledTriggerDescription',
-    {
-      defaultMessage: 'Select a schedule to trigger workflow',
-    }
+  historical: i18n.translate(
+    'plugins.workflowsManagement.workflowsExecution.historicalTriggerDescription',
+    { defaultMessage: 'Reuse data from previous runs.' }
   ),
 };

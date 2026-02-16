@@ -10,14 +10,14 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { WorkflowsBaseTelemetry } from '../../../../../common/service/telemetry';
+import type { WorkflowTriggerTab } from '../../../../../features/run_workflow/ui/types';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
 import { selectWorkflow, selectYamlString } from '../selectors';
 
 export interface TestWorkflowParams {
   inputs: Record<string, unknown>;
-  triggerTab?: 'manual' | 'alert' | 'index';
-  isReplay?: boolean;
+  triggerTab?: WorkflowTriggerTab;
 }
 
 export interface TestWorkflowResponse {
@@ -30,10 +30,7 @@ export const testWorkflowThunk = createAsyncThunk<
   { state: RootState; extra: { services: WorkflowsServices } }
 >(
   'detail/testWorkflowThunk',
-  async (
-    { inputs, triggerTab, isReplay = false },
-    { getState, rejectWithValue, extra: { services } }
-  ) => {
+  async ({ inputs, triggerTab }, { getState, rejectWithValue, extra: { services } }) => {
     const { http, notifications } = services;
     const workflowsManagement = services.workflowsManagement;
     const telemetry = workflowsManagement?.telemetry
@@ -71,8 +68,7 @@ export const testWorkflowThunk = createAsyncThunk<
         error: undefined,
         editorType: 'yaml',
         origin: 'workflow_detail',
-        triggerTab: isReplay ? undefined : triggerTab,
-        isReplay,
+        triggerTab,
       });
 
       // Show success notification
@@ -101,8 +97,7 @@ export const testWorkflowThunk = createAsyncThunk<
         error: errorObj,
         origin: 'workflow_detail',
         editorType: 'yaml',
-        triggerTab: isReplay ? undefined : triggerTab,
-        isReplay,
+        triggerTab,
       });
 
       notifications.toasts.addError(new Error(errorMessage), {

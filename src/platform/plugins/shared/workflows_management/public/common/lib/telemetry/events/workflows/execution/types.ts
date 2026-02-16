@@ -55,14 +55,9 @@ export interface ReportWorkflowTestRunInitiatedActionParams extends BaseResultAc
    */
   editorType?: WorkflowEditorType;
   /**
-   * The trigger tab selected in the Test Workflow modal: 'manual', 'alert', or 'index'.
-   * Undefined when isReplay is true.
+   * The trigger tab selected in the Test Workflow modal
    */
   triggerTab?: WorkflowTriggerTab;
-  /**
-   * True when the run was initiated from "From historical" (replay) mode.
-   */
-  isReplay: boolean;
 }
 
 /**

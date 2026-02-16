@@ -329,10 +329,8 @@ export class WorkflowsBaseTelemetry {
     editorType?: WorkflowEditorType;
     origin?: WorkflowTelemetryOrigin;
     triggerTab?: WorkflowTriggerTab;
-    isReplay: boolean;
   }) => {
-    const { workflowId, hasInputs, inputCount, error, editorType, origin, triggerTab, isReplay } =
-      params;
+    const { workflowId, hasInputs, inputCount, error, editorType, origin, triggerTab } = params;
     this.telemetryService.reportEvent(WorkflowExecutionEventTypes.WorkflowTestRunInitiated, {
       eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowTestRunInitiated],
       ...(workflowId && { workflowId }),
@@ -341,7 +339,6 @@ export class WorkflowsBaseTelemetry {
       ...(editorType && { editorType }),
       ...(origin && { origin }),
       ...(triggerTab && { triggerTab }),
-      isReplay,
       ...this.getBaseResultParams(error),
     });
   };

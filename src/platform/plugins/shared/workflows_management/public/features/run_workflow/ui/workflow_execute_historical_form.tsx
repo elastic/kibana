@@ -8,8 +8,16 @@
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiCallOut, EuiComboBox, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import {
+  EuiCallOut,
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,26 +27,29 @@ import { useWorkflowExecutions } from '../../../entities/workflows/model/use_wor
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
-export interface WorkflowExecuteReplayProps {
+/**
+ * Sentinel error value used to signal "not ready" to the parent (no execution
+ * selected, or execution still loading). The parent disables submit whenever
+ * `errors` is non-null, so this keeps the Run button disabled without
+ * displaying a visible error message.
+ */
+const NOT_READY_SENTINEL = '__historical_not_ready__';
+
+export interface WorkflowExecuteHistoricalFormProps {
   workflowId: string | undefined;
-  selectedExecutionId: string | null;
-  onSelectionChange: (executionId: string | null) => void;
-  editorValue: string;
-  onEditorChange: (value: string) => void;
-  editorErrors: string | null;
-  onEditorErrorsChange: (errors: string | null) => void;
+  /** Pre-select this execution when the form mounts (e.g. from Replay button). */
+  initialExecutionId?: string;
+  value: string;
+  setValue: (value: string) => void;
+  errors: string | null;
+  setErrors: (errors: string | null) => void;
 }
 
-export const WorkflowExecuteReplay = React.memo<WorkflowExecuteReplayProps>(
-  ({
-    workflowId,
-    selectedExecutionId,
-    onSelectionChange,
-    editorValue,
-    onEditorChange,
-    editorErrors,
-    onEditorErrorsChange,
-  }) => {
+export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistoricalFormProps>(
+  ({ workflowId, initialExecutionId, value, setValue, errors, setErrors }) => {
+    const [selectedExecutionId, setSelectedExecutionId] = useState<string | null>(
+      initialExecutionId ?? null
+    );
     const getFormattedDateTime = useGetFormattedDateTime();
 
     const { data: executionsList } = useWorkflowExecutions({
@@ -79,23 +90,46 @@ export const WorkflowExecuteReplay = React.memo<WorkflowExecuteReplayProps>(
       };
     }, [selectedExecution?.context]);
 
+    // Signal "not ready" to the parent when no execution is selected or still loading
+    useEffect(() => {
+      if (!selectedExecutionId || isLoadingExecution) {
+        setErrors(NOT_READY_SENTINEL);
+      }
+    }, [selectedExecutionId, isLoadingExecution, setErrors]);
+
+    // Populate the editor when execution data arrives
     useEffect(() => {
       if (selectedExecution) {
-        onEditorChange(JSON.stringify(replayInputsFromContext, null, 2));
-        onEditorErrorsChange(null);
+        setValue(JSON.stringify(replayInputsFromContext, null, 2));
+        setErrors(null);
       }
-    }, [selectedExecution, replayInputsFromContext, onEditorChange, onEditorErrorsChange]);
+    }, [selectedExecution, replayInputsFromContext, setValue, setErrors]);
 
-    const handleReplayOptionChange = useCallback(
-      (selected: EuiComboBoxOptionOption<string>[]) => {
-        const id = selected.length > 0 && selected[0].key ? String(selected[0].key) : null;
-        onSelectionChange(id);
+    const handleExecutionChange = useCallback((selected: EuiComboBoxOptionOption<string>[]) => {
+      const id = selected.length > 0 && selected[0].key ? String(selected[0].key) : null;
+      setSelectedExecutionId(id);
+    }, []);
+
+    const handleChange = useCallback(
+      (newValue: string) => {
+        setValue(newValue);
+        try {
+          JSON.parse(newValue);
+          setErrors(null);
+        } catch {
+          setErrors(
+            i18n.translate('workflows.workflowExecuteModal.invalidJson', {
+              defaultMessage: 'Invalid JSON',
+            })
+          );
+        }
       },
-      [onSelectionChange]
+      [setValue, setErrors]
     );
 
     return (
-      <>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiSpacer size="s" />
         <EuiFlexItem grow={false}>
           <EuiFormRow
             label={i18n.translate('workflows.workflowExecuteModal.replaySelectLabel', {
@@ -111,7 +145,7 @@ export const WorkflowExecuteReplay = React.memo<WorkflowExecuteReplayProps>(
                   ? executionOptions.filter((o) => o.key === selectedExecutionId)
                   : []
               }
-              onChange={handleReplayOptionChange}
+              onChange={handleExecutionChange}
               isClearable
               fullWidth
               isLoading={!executionsList && !!workflowId}
@@ -134,7 +168,7 @@ export const WorkflowExecuteReplay = React.memo<WorkflowExecuteReplayProps>(
                 })}
               </EuiText>
             </EuiFlexItem>
-            {editorErrors && (
+            {errors && errors !== NOT_READY_SENTINEL && (
               <EuiFlexItem grow={false}>
                 <EuiCallOut
                   announceOnMount
@@ -144,7 +178,7 @@ export const WorkflowExecuteReplay = React.memo<WorkflowExecuteReplayProps>(
                     defaultMessage: 'Invalid JSON',
                   })}
                 >
-                  <p>{editorErrors}</p>
+                  <p>{errors}</p>
                 </EuiCallOut>
               </EuiFlexItem>
             )}
@@ -155,18 +189,18 @@ export const WorkflowExecuteReplay = React.memo<WorkflowExecuteReplayProps>(
                 })}
                 fullWidth
               >
-                <CodeEditor
+                {/* <CodeEditor
                   languageId="json"
-                  value={editorValue}
+                  value={value}
                   fitToContent={{ minLines: 5, maxLines: 20 }}
                   width="100%"
-                  onChange={(value) => {
-                    onEditorChange(value);
+                  onChange={(newValue) => {
+                    setValue(newValue);
                     try {
-                      JSON.parse(value);
-                      onEditorErrorsChange(null);
+                      JSON.parse(newValue);
+                      setErrors(null);
                     } catch {
-                      onEditorErrorsChange(
+                      setErrors(
                         i18n.translate('workflows.workflowExecuteModal.invalidJson', {
                           defaultMessage: 'Invalid JSON',
                         })
@@ -184,6 +218,42 @@ export const WorkflowExecuteReplay = React.memo<WorkflowExecuteReplayProps>(
                     theme: WORKFLOWS_MONACO_EDITOR_THEME,
                     formatOnType: true,
                   }}
+                /> */}
+
+                <CodeEditor
+                  languageId="json"
+                  value={value}
+                  fitToContent={{
+                    minLines: 5,
+                    maxLines: 10,
+                  }}
+                  width="100%"
+                  onChange={handleChange}
+                  dataTestSubj={'workflow-manual-json-editor'}
+                  options={{
+                    language: 'json',
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    wordWrap: 'on',
+                    automaticLayout: true,
+                    lineNumbers: 'on',
+                    glyphMargin: true,
+                    tabSize: 2,
+                    lineNumbersMinChars: 2,
+                    insertSpaces: true,
+                    fontSize: 14,
+                    renderWhitespace: 'all',
+                    wordWrapColumn: 80,
+                    wrappingIndent: 'indent',
+                    theme: WORKFLOWS_MONACO_EDITOR_THEME,
+                    formatOnType: true,
+                    quickSuggestions: false,
+                    suggestOnTriggerCharacters: false,
+                    wordBasedSuggestions: false,
+                    parameterHints: {
+                      enabled: false,
+                    },
+                  }}
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -199,11 +269,11 @@ export const WorkflowExecuteReplay = React.memo<WorkflowExecuteReplayProps>(
             </EuiText>
           </EuiFlexItem>
         )}
-      </>
+      </EuiFlexGroup>
     );
   }
 );
-WorkflowExecuteReplay.displayName = 'WorkflowExecuteReplay';
+WorkflowExecuteHistoricalForm.displayName = 'WorkflowExecuteHistoricalForm';
 
 function getTriggerTypeLabel(context?: Record<string, unknown>): string {
   if (!context) return '';

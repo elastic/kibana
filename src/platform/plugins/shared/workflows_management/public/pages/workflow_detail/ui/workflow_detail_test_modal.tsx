@@ -22,6 +22,7 @@ import {
   setReplayExecutionId,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { testWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/test_workflow_thunk';
+import type { WorkflowTriggerTab } from '../../../features/run_workflow/ui/types';
 import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
 import { useAsyncThunk } from '../../../hooks/use_async_thunk';
 import { useCapabilities } from '../../../hooks/use_capabilities';
@@ -44,12 +45,8 @@ export const WorkflowDetailTestModal = () => {
   const testWorkflow = useAsyncThunk(testWorkflowThunk);
 
   const handleRunWorkflow = useCallback(
-    async (
-      inputs: Record<string, unknown>,
-      triggerTab: 'manual' | 'alert' | 'index' | undefined,
-      isReplay: boolean
-    ) => {
-      const executionId = await testWorkflow({ inputs, triggerTab, isReplay });
+    async (inputs: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => {
+      const executionId = await testWorkflow({ inputs, triggerTab });
 
       if (executionId) {
         setSelectedExecution(executionId.workflowExecutionId);
@@ -98,7 +95,6 @@ export const WorkflowDetailTestModal = () => {
       onClose={closeModal}
       onSubmit={handleRunWorkflow}
       initialExecutionId={replayExecutionId ?? undefined}
-      initialInputMode={replayExecutionId ? 'replay' : 'new_run'}
     />
   );
 };
