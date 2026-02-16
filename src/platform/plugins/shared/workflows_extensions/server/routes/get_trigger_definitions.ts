@@ -7,13 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import stringify from 'json-stable-stringify';
 import { createHash } from 'node:crypto';
 import type { IRouter } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
 import type { TriggerRegistry } from '../trigger_registry';
 
 const ROUTE_PATH = '/internal/workflows_extensions/trigger_definitions';
+
+/**
+ * Deterministic JSON stringification (sorted keys) for hashing.
+ * Uses only built-ins so we don't add a dependency.
+ */
+function stableStringify(value: unknown): string {
+  if (value === null || typeof value !== 'object') {
+    return JSON.stringify(value);
+  }
+  if (Array.isArray(value)) {
+    return `[${value.map((v) => stableStringify(v)).join(',')}]`;
+  }
+  const obj = value as Record<string, unknown>;
+  const keys = Object.keys(obj).sort();
+  const pairs = keys.map((k) => `${JSON.stringify(k)}:${stableStringify(obj[k])}`);
+  return `{${pairs.join(',')}}`;
+}
 
 /**
  * Converts a trigger's Zod eventSchema to JSON Schema for hashing.
@@ -32,7 +48,7 @@ function eventSchemaToJsonSchema(eventSchema: z.ZodType): Record<string, unknown
  * (e.g. after a plugin update). Compare stored hash with the one in the next response to invalidate caches or re-validate.
  */
 function hashJsonSchema(schema: Record<string, unknown>): string {
-  return createHash('sha256').update(stringify(schema), 'utf8').digest('hex');
+  return createHash('sha256').update(stableStringify(schema), 'utf8').digest('hex');
 }
 
 /**

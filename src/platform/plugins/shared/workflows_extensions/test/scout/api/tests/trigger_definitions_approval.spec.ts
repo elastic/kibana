@@ -8,7 +8,8 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
-import { apiTest, expect } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import { APPROVED_TRIGGER_DEFINITIONS } from '../fixtures/approved_trigger_definitions';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
@@ -34,7 +35,9 @@ apiTest.describe(
         });
 
         expect(response.statusCode).toBe(200);
-        expect(response.body).toHaveProperty('triggers');
+        expect(
+          response.body && typeof response.body === 'object' && 'triggers' in response.body
+        ).toBe(true);
         expect(Array.isArray(response.body.triggers)).toBe(true);
 
         for (const trigger of response.body.triggers) {
