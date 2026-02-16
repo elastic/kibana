@@ -69,7 +69,7 @@ export async function checkFileCasing(log, paths, getExpectedCasing, options = {
 
   const pathsToValidate = uniq(
     paths
-      .map((path) => new File(path))
+      .map((path) => (path instanceof File ? path : new File(path)))
       .map((file) => normalizePath(file.getRelativePath()))
       .flatMap((path) => getSegmentPaths(path))
       .filter((path) => generateExceptions || !exceptions.includes(path))
