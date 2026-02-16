@@ -291,11 +291,7 @@ async function runConfigs(
         const args = [
           'scripts/jest',
           '--config',
-<<<<<<< HEAD
-          relConfig,
-=======
           relative(REPO_ROOT, cleanConfig),
->>>>>>> upstream/main
           '--runInBand',
           '--coverage=false',
           '--passWithNoTests',
@@ -424,7 +420,11 @@ function parseFailedTests(output: string): FailedTest[] {
 function writeFailureSummary(failedResults: JestConfigResult[], log: ToolingLog) {
   const cwd = process.cwd();
 
-  log.write(`--- ❌ Failed Tests Summary (${failedResults.length} config${failedResults.length > 1 ? 's' : ''} failed)\n`);
+  log.write(
+    `--- ❌ Failed Tests Summary (${failedResults.length} config${
+      failedResults.length > 1 ? 's' : ''
+    } failed)\n`
+  );
 
   for (const r of failedResults) {
     const relativePath = relative(cwd, r.config);
