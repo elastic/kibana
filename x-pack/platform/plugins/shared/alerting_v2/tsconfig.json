@@ -55,7 +55,8 @@
     "@kbn/core-user-profile-server-mocks",
     "@kbn/core-user-profile-server",
     "@kbn/es-mappings",
-    "@kbn/workflows-management-plugin"
+    "@kbn/workflows-management-plugin",
+    "@kbn/std"
   ],
   "exclude": ["target/**/*"]
 }

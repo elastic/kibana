@@ -9,8 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { createQueryService } from '../services/query_service/query_service.mock';
-import { BasicTransitionStrategy } from './strategies/basic_strategy';
-import { TransitionStrategyFactory } from './strategies/strategy_resolver';
+import { createTransitionStrategyFactory } from './strategies/strategy_resolver.mock';
 import { DirectorService } from './director';
 
 export function createDirectorService(): {
@@ -20,8 +19,7 @@ export function createDirectorService(): {
   const { queryService, mockEsClient } = createQueryService();
   const { loggerService } = createLoggerService();
 
-  const basicStrategy = new BasicTransitionStrategy();
-  const strategyFactory = new TransitionStrategyFactory(basicStrategy);
+  const strategyFactory = createTransitionStrategyFactory();
   const directorService = new DirectorService(strategyFactory, queryService, loggerService);
 
   return {

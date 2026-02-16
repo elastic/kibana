@@ -17,16 +17,16 @@ import type {
 } from '../../routes/schemas/alert_action_schema';
 import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
 import type { QueryServiceContract } from '../services/query_service/query_service';
-import { QueryServiceScopedToken } from '../services/query_service/tokens';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
+import { QueryServiceInternalToken } from '../services/query_service/tokens';
 
 @injectable()
 export class AlertActionsClient {
   constructor(
-    @inject(QueryServiceScopedToken) private readonly queryService: QueryServiceContract,
+    @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
     @inject(StorageServiceScopedToken) private readonly storageService: StorageServiceContract,
     @inject(UserService) private readonly userService: UserServiceContract
   ) {}

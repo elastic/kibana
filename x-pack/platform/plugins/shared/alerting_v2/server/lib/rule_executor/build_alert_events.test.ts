@@ -6,7 +6,6 @@
  */
 
 import type { EsqlEsqlResult } from '@elastic/elasticsearch/lib/api/types';
-import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import { buildAlertEventsFromEsqlResponse } from './build_alert_events';
 
 describe('buildAlertEventsFromEsqlResponse', () => {
@@ -20,22 +19,6 @@ describe('buildAlertEventsFromEsqlResponse', () => {
   });
 
   it('transforms ES|QL response rows into alert documents', () => {
-    const ruleAttributes: RuleSavedObjectAttributes = {
-      name: 'My ES|QL Rule',
-      kind: 'alert',
-      tags: ['esql', 'test'],
-      schedule: { custom: '1m' },
-      enabled: true,
-      query: 'FROM idx | STATS count = COUNT(*) BY host.name',
-      timeField: '@timestamp',
-      lookbackWindow: '5m',
-      groupingKey: ['host.name', 'region'],
-      createdBy: 'u',
-      createdAt: '2025-01-01T00:00:00.000Z',
-      updatedBy: 'u',
-      updatedAt: '2025-01-01T00:00:00.000Z',
-    };
-
     const esqlResponse: EsqlEsqlResult = {
       columns: [
         { name: 'host.name', type: 'keyword' },
@@ -52,7 +35,7 @@ describe('buildAlertEventsFromEsqlResponse', () => {
       ruleId: 'rule-123',
       ruleVersion: 1,
       spaceId: 'default',
-      ruleAttributes,
+      ruleAttributes: { grouping: { fields: ['host.name', 'region'] } },
       esqlResponse,
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
     });

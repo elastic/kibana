@@ -5,22 +5,15 @@
  * 2.0.
  */
 
-import type { CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
+import type { CreateRuleData, UpdateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
+
+/** Re-exported from the shared schemas package. */
+export type { CreateRuleData, UpdateRuleData, RuleResponse };
 
 export interface CreateRuleParams {
   data: CreateRuleData;
   options?: { id?: string };
 }
-
-export interface RuleResponse extends CreateRuleData {
-  id: string;
-  createdBy: string | null;
-  createdAt: string;
-  updatedBy: string | null;
-  updatedAt: string;
-}
-
-export type { CreateRuleData, UpdateRuleData };
 
 export interface FindRulesParams {
   page?: number;
