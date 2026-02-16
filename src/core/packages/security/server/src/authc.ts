@@ -9,7 +9,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import type { APIKeysType } from './authentication/api_keys';
+import type { APIKeysType } from './authentication';
 
 /**
  * Core's authentication service
