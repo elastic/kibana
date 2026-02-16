@@ -12,7 +12,11 @@ import { css } from '@emotion/react';
 import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { formatHitReact, FormatFieldValueReact, type FormattedHitReact } from '@kbn/discover-utils';
+import {
+  formatHitReact,
+  FormatFieldValueReact,
+  type FormattedHitReact,
+} from '@kbn/field-formats-plugin/public';
 import {
   EuiDescriptionList,
   EuiDescriptionListDescription,

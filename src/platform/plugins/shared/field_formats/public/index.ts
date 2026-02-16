@@ -11,7 +11,16 @@ import { FieldFormatsPlugin } from './plugin';
 export { DateFormat, DateNanosFormat } from './lib/converters';
 
 // React rendering components
-export { FormattedValue, type FormattedValueProps } from './components';
+export {
+  FormattedValue,
+  type FormattedValueProps,
+  FormatFieldValueReact,
+  getFieldFormatter,
+  type FormatFieldValueReactProps,
+  formatHitReact,
+  type FormattedHitReact,
+  type FormattedHitReactPair,
+} from './components';
 
 export function plugin() {
   return new FieldFormatsPlugin();

@@ -19,7 +19,7 @@ import type {
   DataTableRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import { FormatFieldValueReact } from '@kbn/discover-utils';
+import { FormatFieldValueReact } from '@kbn/field-formats-plugin/public';
 import { UnifiedDataTableContext } from '../table_context';
 import type { CustomCellRenderer } from '../types';
 import { SourceDocument } from '../components/source_document';

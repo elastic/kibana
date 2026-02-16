@@ -280,6 +280,8 @@ export class UrlFormat extends FieldFormat {
 
     switch (this.param('type')) {
       case 'audio':
+        // Audio URLs are user-specified and we cannot provide captions for arbitrary external content
+        // eslint-disable-next-line jsx-a11y/media-has-caption
         return <audio controls preload="none" src={url} />;
 
       case 'img': {

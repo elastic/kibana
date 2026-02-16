@@ -9,13 +9,10 @@
 
 import React, { type FC, memo } from 'react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import {
-  FormattedValue,
-  type FieldFormatsStartCommon,
-  type FormattedValueProps,
-} from '@kbn/field-formats-plugin/common';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import type { EsHitRecord } from '../types';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
+import { FormattedValue, type FormattedValueProps } from '../../common/components';
+import type { FieldFormatsStartCommon } from '../../common/types';
 
 export interface FormatFieldValueReactProps {
   /**
@@ -65,7 +62,7 @@ export interface FormatFieldValueReactProps {
  * ## Usage
  *
  * ```tsx
- * import { FormatFieldValueReact } from '@kbn/discover-utils';
+ * import { FormatFieldValueReact } from '@kbn/field-formats-plugin/public';
  *
  * <FormatFieldValueReact
  *   value={row.flattened[columnId]}

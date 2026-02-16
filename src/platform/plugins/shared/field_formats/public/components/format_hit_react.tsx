@@ -9,10 +9,14 @@
 
 import React, { type ReactNode, Fragment, memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord, ShouldShowFieldInTableHandler, EsHitRecord } from '../types';
-import { FormatFieldValueReact } from './format_value_react';
+import type {
+  DataTableRecord,
+  ShouldShowFieldInTableHandler,
+  EsHitRecord,
+} from '@kbn/discover-utils/types';
+import type { FieldFormatsStart } from '../plugin';
+import { FormatFieldValueReact } from './format_field_value_react';
 
 /**
  * A pair representing a formatted field for React rendering
@@ -157,7 +161,7 @@ export function formatHitReact(
   // off additional fields and instead show a summary how many more field exists.
   if (totalLength > maxEntries) {
     renderedPairs.push([
-      i18n.translate('discover.formatHit.moreFields', {
+      i18n.translate('fieldFormats.formatHit.moreFields', {
         defaultMessage: 'and {count} more {count, plural, one {field} other {fields}}',
         values: { count: totalLength - maxEntries },
       }),

@@ -9,3 +9,15 @@
 
 // Re-export from common for backward compatibility
 export { FormattedValue, type FormattedValueProps } from '../../common/components';
+
+// React formatting components for use by plugins
+export {
+  FormatFieldValueReact,
+  getFieldFormatter,
+  type FormatFieldValueReactProps,
+} from './format_field_value_react';
+export {
+  formatHitReact,
+  type FormattedHitReact,
+  type FormattedHitReactPair,
+} from './format_hit_react';
