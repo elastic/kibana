@@ -356,7 +356,7 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
   /**
    * The interval between health check requests Kibana sends to the Elasticsearch during failure.
    */
-  public readonly healthCheckFailureInterval: Duration;
+  public readonly healthCheckFailureInterval: Duration | undefined;
   /**
    * The number of times to retry the health check request
    */
