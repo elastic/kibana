@@ -77,8 +77,6 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/share-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/ui-actions-browser",
-    "@kbn/embeddable-plugin",
     "@kbn/presentation-publishing",
     "@kbn/esql-utils",
     "@kbn/esql-language",

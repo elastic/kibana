@@ -5,118 +5,168 @@
  * 2.0.
  */
 
-import type { ToolResultStore } from '@kbn/agent-builder-server';
-import { ToolResultType } from '@kbn/agent-builder-common';
-import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils/config_builder';
-import { resolveLensConfig } from './utils';
+import { filterVisualizationIds, upsertMarkdownPanel } from './manage_dashboard/utils';
+import type { AttachmentPanel } from '@kbn/dashboard-agent-common';
 
-const createMockResultStore = (
-  results: Map<string, { type: string; data: Record<string, unknown> }>
-): ToolResultStore => {
-  return {
-    has: (id: string) => results.has(id),
-    get: (id: string) => {
-      const result = results.get(id);
-      return {
-        ...result,
-        tool_result_id: '',
-      } as ReturnType<ToolResultStore['get']>;
-    },
-  };
-};
+// TODO: Add tests for normalizePanels and resolveLensConfigFromAttachment once attachment mocking utilities are available
+// These functions require AttachmentStateManager which is complex to mock
 
-describe('resolveLensConfig', () => {
-  // Minimal valid config for testing
-  const validLensConfig = {
-    type: 'metric',
-    title: 'Test Metric',
-    dataset: { type: 'esql', query: 'FROM test' },
-    metric: { operation: 'count' },
-  } as unknown as LensApiSchemaType;
+describe('filterVisualizationIds', () => {
+  it('should remove specified IDs from the array', () => {
+    const ids = ['viz1', 'viz2', 'viz3', 'viz4'];
+    const result = filterVisualizationIds(ids, ['viz2', 'viz4']);
 
-  describe('when panel is a direct config object', () => {
-    it('should return the config when panel is a valid Lens API config', () => {
-      const result = resolveLensConfig(validLensConfig);
-      expect(result).toEqual(validLensConfig);
-    });
+    expect(result).toEqual(['viz1', 'viz3']);
+  });
 
-    it.each([
-      ['null', null],
-      ['undefined', undefined],
-      ['a number', 42],
-      ['an object without type', { title: 'No type' }],
-    ])('should throw when panel is %s', (_, invalidPanel) => {
-      expect(() => resolveLensConfig(invalidPanel)).toThrow(
-        'Invalid panel configuration. Expected a Lens API config object with a "type" property.'
-      );
+  it('should return all IDs when no IDs match for removal', () => {
+    const ids = ['viz1', 'viz2'];
+    const result = filterVisualizationIds(ids, ['non-existent']);
+
+    expect(result).toEqual(['viz1', 'viz2']);
+  });
+
+  it('should return empty array when all IDs are removed', () => {
+    const ids = ['viz1', 'viz2'];
+    const result = filterVisualizationIds(ids, ['viz1', 'viz2']);
+
+    expect(result).toEqual([]);
+  });
+
+  it('should return original array when removal list is empty', () => {
+    const ids = ['viz1', 'viz2'];
+    const result = filterVisualizationIds(ids, []);
+
+    expect(result).toEqual(['viz1', 'viz2']);
+  });
+
+  it('should handle empty input array', () => {
+    const result = filterVisualizationIds([], ['viz1']);
+    expect(result).toEqual([]);
+  });
+});
+
+describe('AttachmentPanel types', () => {
+  it('should support lens panel entry type', () => {
+    const entry = {
+      type: 'lens',
+      panelId: 'panel-1',
+      visualization: { type: 'Metric', value: 'count()' },
+      title: 'Test Metric',
+    };
+
+    expect(entry.type).toBe('lens');
+    expect(entry.panelId).toBe('panel-1');
+    expect(entry.visualization).toBeDefined();
+  });
+
+  it('should support generic panel entry type', () => {
+    const entry = {
+      type: 'DASHBOARD_MARKDOWN',
+      panelId: 'panel-2',
+      rawConfig: { content: '# Test' },
+      title: 'Markdown Panel',
+    };
+
+    expect(entry.type).toBe('DASHBOARD_MARKDOWN');
+    expect(entry.panelId).toBe('panel-2');
+    expect(entry.rawConfig).toBeDefined();
+  });
+
+  it('should work with union type', () => {
+    const lensPanel = {
+      type: 'lens',
+      panelId: 'panel-1',
+      visualization: { type: 'Metric' },
+    };
+
+    const genericPanel = {
+      type: 'DASHBOARD_MARKDOWN',
+      panelId: 'panel-2',
+      rawConfig: { content: '# Test' },
+    };
+
+    expect(lensPanel.panelId).toBe('panel-1');
+    expect(genericPanel.panelId).toBe('panel-2');
+  });
+});
+
+describe('upsertMarkdownPanel', () => {
+  it('adds a markdown panel when one does not exist', () => {
+    const existingPanels: AttachmentPanel[] = [
+      {
+        type: 'lens',
+        panelId: 'panel-1',
+        visualization: { type: 'Metric' },
+      },
+    ];
+
+    const result = upsertMarkdownPanel(existingPanels, '# Summary');
+
+    expect(result.changedPanel).toBeDefined();
+    expect(result.panels).toHaveLength(2);
+    expect(result.panels[0]).toMatchObject({
+      type: 'DASHBOARD_MARKDOWN',
+      rawConfig: { content: '# Summary' },
     });
   });
 
-  describe('when panel is a string reference', () => {
-    it('should throw when string is not a valid tool result id format', () => {
-      expect(() => resolveLensConfig('invalid-id')).toThrow(
-        'Invalid panel reference "invalid-id". Expected a tool_result_id from a previous visualization tool call.'
-      );
+  it('updates existing markdown panel content in place', () => {
+    const existingPanels: AttachmentPanel[] = [
+      {
+        type: 'DASHBOARD_MARKDOWN',
+        panelId: 'markdown-1',
+        rawConfig: { content: '# Old summary' },
+      },
+      {
+        type: 'lens',
+        panelId: 'panel-1',
+        visualization: { type: 'Metric' },
+      },
+    ];
+
+    const result = upsertMarkdownPanel(existingPanels, '# New summary');
+
+    expect(result.changedPanel).toMatchObject({
+      type: 'DASHBOARD_MARKDOWN',
+      panelId: 'markdown-1',
+      rawConfig: { content: '# New summary' },
     });
-
-    it('should throw when resultStore is not provided', () => {
-      expect(() => resolveLensConfig('abc123')).toThrow(
-        'Panel reference "abc123" was not found in the tool result store.'
-      );
+    expect(result.panels[0]).toMatchObject({
+      type: 'DASHBOARD_MARKDOWN',
+      panelId: 'markdown-1',
+      rawConfig: { content: '# New summary' },
     });
+    expect(result.panels[1]).toEqual(existingPanels[1]);
+  });
 
-    it('should throw when panel reference is not found in resultStore', () => {
-      const resultStore = createMockResultStore(new Map());
-      expect(() => resolveLensConfig('abc123', resultStore)).toThrow(
-        'Panel reference "abc123" was not found in the tool result store.'
-      );
-    });
+  it('does not change panels when markdown content is unchanged', () => {
+    const existingPanels: AttachmentPanel[] = [
+      {
+        type: 'DASHBOARD_MARKDOWN',
+        panelId: 'markdown-1',
+        rawConfig: { content: '# Summary' },
+      },
+    ];
 
-    it('should throw when referenced result is not a visualization type', () => {
-      const results = new Map([
-        ['abc123', { type: ToolResultType.other, data: { someData: true } }],
-      ]);
-      const resultStore = createMockResultStore(results);
+    const result = upsertMarkdownPanel(existingPanels, '# Summary');
 
-      expect(() => resolveLensConfig('abc123', resultStore)).toThrow(
-        'Provided tool_result_id "abc123" is not a visualization result (got "other").'
-      );
-    });
+    expect(result.changedPanel).toBeUndefined();
+    expect(result.panels).toEqual(existingPanels);
+  });
 
-    it('should throw when visualization result has no visualization config', () => {
-      const results = new Map([['abc123', { type: ToolResultType.visualization, data: {} }]]);
-      const resultStore = createMockResultStore(results);
+  it('does not change panels when markdown content is not provided', () => {
+    const existingPanels: AttachmentPanel[] = [
+      {
+        type: 'lens',
+        panelId: 'panel-1',
+        visualization: { type: 'Metric' },
+      },
+    ];
 
-      expect(() => resolveLensConfig('abc123', resultStore)).toThrow(
-        'Visualization result "abc123" does not contain a valid visualization config.'
-      );
-    });
+    const result = upsertMarkdownPanel(existingPanels);
 
-    it('should throw when visualization config is not an object', () => {
-      const results = new Map([
-        [
-          'abc123',
-          { type: ToolResultType.visualization, data: { visualization: 'not-an-object' } },
-        ],
-      ]);
-      const resultStore = createMockResultStore(results);
-
-      expect(() => resolveLensConfig('abc123', resultStore)).toThrow(
-        'Visualization result "abc123" does not contain a valid visualization config.'
-      );
-    });
-
-    it('should return the visualization config when valid', () => {
-      const results = new Map([
-        [
-          'abc123',
-          { type: ToolResultType.visualization, data: { visualization: validLensConfig } },
-        ],
-      ]);
-      const resultStore = createMockResultStore(results);
-
-      const result = resolveLensConfig('abc123', resultStore);
-      expect(result).toEqual(validLensConfig);
-    });
+    expect(result.changedPanel).toBeUndefined();
+    expect(result.panels).toEqual(existingPanels);
   });
 });

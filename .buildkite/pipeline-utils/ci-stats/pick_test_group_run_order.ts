@@ -357,7 +357,8 @@ export async function pickTestGroupRunOrder() {
             label: 'Jest Integration Tests',
             command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
             parallelism: integration.count,
-            timeout_in_minutes: 120,
+            // TODO: Reduce once we have identified the cause of random long-running tests
+            timeout_in_minutes: 75,
             key: 'jest-integration',
             agents: expandAgentQueue('n2-4-spot', 105),
             depends_on: JEST_CONFIGS_DEPS,
