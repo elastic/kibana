@@ -20,4 +20,3 @@ export const PREINSTALLED_WORKFLOWS: PreinstalledWorkflow[] = [
     filePath: './preinstalled_workflows/alert_validation_workflow.yml',
   },
 ];
-

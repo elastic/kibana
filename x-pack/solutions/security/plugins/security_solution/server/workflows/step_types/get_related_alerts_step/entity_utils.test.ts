@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { buildIgnoreMap, extractEntityValues, fieldToEntityLabel, getValuesAtPath } from './entity_utils';
+import {
+  buildIgnoreMap,
+  extractEntityValues,
+  fieldToEntityLabel,
+  getValuesAtPath,
+} from './entity_utils';
 
 describe('entity_utils', () => {
   describe('fieldToEntityLabel', () => {
@@ -44,8 +49,10 @@ describe('entity_utils', () => {
       const ignoreMap = buildIgnoreMap([{ field: 'user.name', values: ['root'] }]);
 
       expect(Array.from(extractEntityValues(source, 'user.name', ignoreMap))).toEqual([]);
-      expect(Array.from(extractEntityValues(source, 'host.name', ignoreMap)).sort()).toEqual(['host-1', 'host-2']);
+      expect(Array.from(extractEntityValues(source, 'host.name', ignoreMap)).sort()).toEqual([
+        'host-1',
+        'host-2',
+      ]);
     });
   });
 });
-

@@ -39,9 +39,7 @@ describe('buildAlertTimelineString', () => {
       kibana: { alert: { severity: ['low'], rule: { name: ['rule-1'] } } },
     });
 
-    expect(text).toBe(
-      'process event by alice on host-1 created low alert rule-1.'
-    );
+    expect(text).toBe('process event by alice on host-1 created low alert rule-1.');
   });
 });
 
@@ -60,9 +58,7 @@ describe('buildProcessTimelineString', () => {
         parent: { name: ['bash'], pid: [122759] },
         ppid: [122759],
         hash: {
-          sha256: [
-            '59474588a312b6b6e73e5a42a59bf71e62b55416b6c9d5e4a6e1c630c2a9ecd4',
-          ],
+          sha256: ['59474588a312b6b6e73e5a42a59bf71e62b55416b6c9d5e4a6e1c630c2a9ecd4'],
         },
       },
     });
@@ -94,4 +90,3 @@ describe('buildCombinedTimelineString', () => {
     );
   });
 });
-

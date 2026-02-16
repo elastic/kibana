@@ -21,4 +21,3 @@ describe('query_utils', () => {
 
   // NOTE: ignore_entities are applied during entity extraction/scoring, not as ES query must_not filters.
 });
-

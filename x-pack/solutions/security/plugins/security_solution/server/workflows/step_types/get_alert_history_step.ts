@@ -11,7 +11,11 @@ import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
 
 const inputSchema = z.object({
   ruleId: z.string().describe('The rule ID to get alert history for'),
-  time_range: z.string().optional().default('7d').describe('Time range to query (e.g., "7d", "24h", "30d"). Default: "7d"'),
+  time_range: z
+    .string()
+    .optional()
+    .default('7d')
+    .describe('Time range to query (e.g., "7d", "24h", "30d"). Default: "7d"'),
 });
 
 const outputSchema = z.object({
@@ -81,9 +85,10 @@ export const getAlertHistoryStepDefinition = createServerStepDefinition({
         },
       });
 
-      const totalCount = typeof searchResponse.hits.total === 'number' 
-        ? searchResponse.hits.total 
-        : searchResponse.hits.total?.value ?? 0;
+      const totalCount =
+        typeof searchResponse.hits.total === 'number'
+          ? searchResponse.hits.total
+          : searchResponse.hits.total?.value ?? 0;
 
       const buckets = (searchResponse.aggregations?.alerts_over_time as any)?.buckets ?? [];
       const history = buckets.map((bucket: any) => ({
@@ -96,8 +101,10 @@ export const getAlertHistoryStepDefinition = createServerStepDefinition({
           rule_id: ruleId,
           time_range: timeRange,
           total_alerts: totalCount,
-          history: history,
-          message: `Rule ${ruleId} fired ${totalCount} time${totalCount !== 1 ? 's' : ''} in the last ${timeRange}.`,
+          history,
+          message: `Rule ${ruleId} fired ${totalCount} time${
+            totalCount !== 1 ? 's' : ''
+          } in the last ${timeRange}.`,
         },
       };
     } catch (error) {
@@ -108,4 +115,3 @@ export const getAlertHistoryStepDefinition = createServerStepDefinition({
     }
   },
 });
-

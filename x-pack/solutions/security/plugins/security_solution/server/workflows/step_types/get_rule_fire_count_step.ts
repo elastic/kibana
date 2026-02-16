@@ -17,7 +17,13 @@ const inputSchema = z.object({
     .describe(
       'ISO timestamp used as the end of the lookback window. If omitted, the current time (now) is used.'
     ),
-  time_range: z.string().optional().default('1h').describe('Lookback window subtracted from the timestamp (e.g., "1h", "24h", "7d"). Fire count is calculated from [timestamp - time_range] to [timestamp]. Default: "1h"'),
+  time_range: z
+    .string()
+    .optional()
+    .default('1h')
+    .describe(
+      'Lookback window subtracted from the timestamp (e.g., "1h", "24h", "7d"). Fire count is calculated from [timestamp - time_range] to [timestamp]. Default: "1h"'
+    ),
 });
 
 const outputSchema = z.object({
@@ -76,7 +82,9 @@ export const getRuleFireCountStepDefinition = createServerStepDefinition({
           rule_id: ruleId,
           count: totalCount,
           time_range: timeRange,
-          message: `Rule ${ruleId} fired ${totalCount} time${totalCount !== 1 ? 's' : ''} in the last ${timeRange}.`,
+          message: `Rule ${ruleId} fired ${totalCount} time${
+            totalCount !== 1 ? 's' : ''
+          } in the last ${timeRange}.`,
         },
       };
     } catch (error) {
@@ -87,4 +95,3 @@ export const getRuleFireCountStepDefinition = createServerStepDefinition({
     }
   },
 });
-

@@ -7,11 +7,11 @@
 
 import { buildRelatedAlertsGraph } from './graph_builder';
 
-type Doc = {
+interface Doc {
   _id: string;
   _index: string;
   _source: Record<string, unknown>;
-};
+}
 
 const iso = (ms: number) => new Date(ms).toISOString();
 
@@ -161,9 +161,7 @@ describe('buildRelatedAlertsGraph', () => {
 
     expect(result.nodes.map((n) => n.id).sort()).toEqual(['B', 'C']);
     expect(result.edges).toEqual(
-      expect.arrayContaining([
-        { from: 'B', to: 'C', score: 1, label_scores: { host: 1 } },
-      ])
+      expect.arrayContaining([{ from: 'B', to: 'C', score: 1, label_scores: { host: 1 } }])
     );
     expect(result.stats?.depth_reached).toBeGreaterThanOrEqual(1);
   });
@@ -486,4 +484,3 @@ describe('buildRelatedAlertsGraph', () => {
     );
   });
 });
-

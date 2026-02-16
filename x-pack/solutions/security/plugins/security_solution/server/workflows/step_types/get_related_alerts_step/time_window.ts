@@ -35,4 +35,3 @@ export const parseTimeWindowToMs = (timeWindow: string): number => {
       return 60 * 60 * 1000;
   }
 };
-

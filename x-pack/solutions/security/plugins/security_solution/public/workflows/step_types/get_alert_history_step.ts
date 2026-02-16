@@ -11,7 +11,11 @@ import { i18n } from '@kbn/i18n';
 
 const inputSchema = z.object({
   ruleId: z.string().describe('The rule ID to get alert history for'),
-  time_range: z.string().optional().default('7d').describe('Time range to query (e.g., "7d", "24h", "30d"). Default: "7d"'),
+  time_range: z
+    .string()
+    .optional()
+    .default('7d')
+    .describe('Time range to query (e.g., "7d", "24h", "30d"). Default: "7d"'),
 });
 
 const outputSchema = z.object({
@@ -39,9 +43,13 @@ export const getAlertHistoryStepDefinition: PublicStepDefinition = {
   }),
   // Icon will default to 'kibana' if not provided
   documentation: {
-    details: i18n.translate('securitySolution.workflows.steps.getAlertHistory.documentation.details', {
-      defaultMessage: 'Returns a date histogram of alerts for the specified rule within the given time range.',
-    }),
+    details: i18n.translate(
+      'securitySolution.workflows.steps.getAlertHistory.documentation.details',
+      {
+        defaultMessage:
+          'Returns a date histogram of alerts for the specified rule within the given time range.',
+      }
+    ),
     examples: [
       `## Get alert history for a rule
 \`\`\`yaml
@@ -54,4 +62,3 @@ export const getAlertHistoryStepDefinition: PublicStepDefinition = {
     ],
   },
 };
-

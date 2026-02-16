@@ -67,7 +67,8 @@ const toStringArray = (value: unknown): string[] | undefined => {
   return asString.length ? [asString] : undefined;
 };
 
-const getValues = (source: Source, field: string): string[] | undefined => toStringArray(get(field, source));
+const getValues = (source: Source, field: string): string[] | undefined =>
+  toStringArray(get(field, source));
 
 const joinValues = (values: string[] | undefined): string | undefined =>
   values != null && values.length ? values.join(', ') : undefined;
@@ -198,7 +199,8 @@ export const buildProcessTimelineString = (source: Source): string => {
   const eventAction = getSingleValue(source, 'event.action');
   const actionText = getProcessActionText(eventAction);
 
-  const processName = getSingleValue(source, 'process.name') ?? getSingleValue(source, 'process.executable');
+  const processName =
+    getSingleValue(source, 'process.name') ?? getSingleValue(source, 'process.executable');
   const processPid = getNumberValue(source, 'process.pid');
   const args = getArgs(source);
   const processTitle = getSingleValue(source, 'process.title');
@@ -351,4 +353,3 @@ export const getAlertTimelineStringStepDefinition = createServerStepDefinition({
     }
   },
 });
-

@@ -11,12 +11,14 @@ import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { i18n } from '@kbn/i18n';
 
 const DEFAULT_ENTITY_FIELDS = ['host.name', 'user.name', 'service.name'] as const;
-type EntityFieldConfig = {
+interface EntityFieldConfig {
   field: string;
   score?: number;
   aliases?: Array<{ field: string; score?: number }>;
-};
-const DEFAULT_ENTITY_FIELD_CONFIG: EntityFieldConfig[] = DEFAULT_ENTITY_FIELDS.map((field) => ({ field }));
+}
+const DEFAULT_ENTITY_FIELD_CONFIG: EntityFieldConfig[] = DEFAULT_ENTITY_FIELDS.map((field) => ({
+  field,
+}));
 
 const inputSchema = z.object({
   alertId: z.string().describe('The alert ID to find related alerts for'),
@@ -45,7 +47,9 @@ const inputSchema = z.object({
     .string()
     .optional()
     .default('1h')
-    .describe('Initial time window around the seed alert timestamp (e.g., "1h", "24h"). Default: "1h"'),
+    .describe(
+      'Initial time window around the seed alert timestamp (e.g., "1h", "24h"). Default: "1h"'
+    ),
   expand_window: z
     .string()
     .optional()
@@ -81,7 +85,9 @@ const inputSchema = z.object({
     .min(1)
     .optional()
     .default(500)
-    .describe('Maximum number of terms per `terms` query clause (chunked if exceeded). Default: 500'),
+    .describe(
+      'Maximum number of terms per `terms` query clause (chunked if exceeded). Default: 500'
+    ),
   max_entities_per_field: z
     .number()
     .int()
@@ -150,18 +156,26 @@ export const getRelatedAlertsStepDefinition: PublicStepDefinition = {
     defaultMessage: 'Get Related Alerts',
   }),
   description: i18n.translate('securitySolution.workflows.steps.getRelatedAlerts.description', {
-    defaultMessage: 'Build a graph of alerts related by shared entities (or score threshold) within an expanding time window',
+    defaultMessage:
+      'Build a graph of alerts related by shared entities (or score threshold) within an expanding time window',
   }),
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/link').then(({ icon }) => ({ default: icon })).catch(() =>
-      import('@elastic/eui/es/components/icon/assets/search').then(({ icon }) => ({ default: icon }))
-    )
+    import('@elastic/eui/es/components/icon/assets/link')
+      .then(({ icon }) => ({ default: icon }))
+      .catch(() =>
+        import('@elastic/eui/es/components/icon/assets/search').then(({ icon }) => ({
+          default: icon,
+        }))
+      )
   ),
   documentation: {
-    details: i18n.translate('securitySolution.workflows.steps.getRelatedAlerts.documentation.details', {
-      defaultMessage:
-        'Recursively discovers alerts related by shared entities (e.g. host, user, service) within a configurable, expanding time window and returns a nodes/edges graph. Relatedness is controlled by a score threshold (min_entity_score + per-field score overrides; sums per-label scores).',
-    }),
+    details: i18n.translate(
+      'securitySolution.workflows.steps.getRelatedAlerts.documentation.details',
+      {
+        defaultMessage:
+          'Recursively discovers alerts related by shared entities (e.g. host, user, service) within a configurable, expanding time window and returns a nodes/edges graph. Relatedness is controlled by a score threshold (min_entity_score + per-field score overrides; sums per-label scores).',
+      }
+    ),
     examples: [
       `## Get related alerts graph
 \`\`\`yaml
@@ -198,4 +212,3 @@ export const getRelatedAlertsStepDefinition: PublicStepDefinition = {
     ],
   },
 };
-

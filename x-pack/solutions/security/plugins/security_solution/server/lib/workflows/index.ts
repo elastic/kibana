@@ -10,4 +10,3 @@ export {
   PreinstalledWorkflowsBootstrap,
   type BootstrapResult,
 } from './bootstrap_preinstalled_workflows';
-

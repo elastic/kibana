@@ -6,5 +6,3 @@
  */
 
 export { registerWorkflowSteps } from './register_workflow_steps';
-
-

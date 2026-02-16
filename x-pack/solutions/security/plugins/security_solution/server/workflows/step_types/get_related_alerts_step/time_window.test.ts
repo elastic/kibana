@@ -21,4 +21,3 @@ describe('parseTimeWindowToMs', () => {
     expect(parseTimeWindowToMs('')).toBe(60 * 60 * 1000);
   });
 });
-

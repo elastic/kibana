@@ -137,7 +137,9 @@ export const getGlobalPrevalenceStepDefinition = createServerStepDefinition({
         prevalenceMessage = `Medium prevalence: Rule is triggering across ${uniqueHosts} unique hosts.`;
       } else {
         prevalenceLevel = 'low';
-        prevalenceMessage = `Low prevalence: Rule is triggering across ${uniqueHosts} unique host${uniqueHosts !== 1 ? 's' : ''}.`;
+        prevalenceMessage = `Low prevalence: Rule is triggering across ${uniqueHosts} unique host${
+          uniqueHosts !== 1 ? 's' : ''
+        }.`;
       }
 
       return {
@@ -155,9 +157,10 @@ export const getGlobalPrevalenceStepDefinition = createServerStepDefinition({
     } catch (error) {
       context.logger.error('Failed to get global prevalence', error);
       return {
-        error: new Error(error instanceof Error ? error.message : 'Failed to get global prevalence'),
+        error: new Error(
+          error instanceof Error ? error.message : 'Failed to get global prevalence'
+        ),
       };
     }
   },
 });
-
