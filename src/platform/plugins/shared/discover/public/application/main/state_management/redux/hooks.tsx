@@ -29,8 +29,9 @@ import { type TabActionInjector, createTabActionInjector } from './utils';
 import type { ChartPortalNode } from '../../components/chart';
 
 type WithoutTabId<TPayload extends TabActionPayload> = Omit<TPayload, 'tabId'>;
-type DispatchCurrentTabArgs<TPayload extends TabActionPayload> =
-  keyof WithoutTabId<TPayload> extends never ? [] : [payload: WithoutTabId<TPayload>];
+type DispatchCurrentTabArgs<TPayload extends TabActionPayload> = {} extends WithoutTabId<TPayload>
+  ? [payload?: WithoutTabId<TPayload>]
+  : [payload: WithoutTabId<TPayload>];
 
 type DispatchReturn<TReturn> = TReturn extends (...args: infer _Args) => infer R ? R : TReturn;
 

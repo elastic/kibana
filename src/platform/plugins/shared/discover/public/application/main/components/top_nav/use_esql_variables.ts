@@ -97,7 +97,7 @@ export const useESQLVariables = ({
       if (!isEqual(newVariables, currentEsqlVariables)) {
         // Update the ESQL variables in the internal state
         dispatchCurrentTab(internalStateActions.setEsqlVariables, { esqlVariables: newVariables });
-        dispatchCurrentTab(internalStateActions.fetchData, {});
+        dispatchCurrentTab(internalStateActions.fetchData);
       }
     });
 
