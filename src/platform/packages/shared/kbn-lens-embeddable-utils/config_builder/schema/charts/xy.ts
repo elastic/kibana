@@ -410,7 +410,15 @@ const xyDataLayerSchemaESQL = schema.object(
     ...layerSettingsSchema,
     ...datasetEsqlTableSchema,
     ...xyDataLayerSharedSchema,
-    breakdown_by: schema.maybe(esqlColumnSchema),
+    breakdown_by: schema.maybe(
+      esqlColumnSchema.extends(
+        {
+          color: schema.maybe(colorMappingSchema),
+          collapse_by: schema.maybe(collapseBySchema),
+        },
+        { meta: { description: 'ES|QL column for breakdown' } }
+      )
+    ),
     y: schema.arrayOf(
       esqlColumnSchema.extends(
         {
@@ -432,7 +440,6 @@ const getListOfAvailableIcons = (description: string) =>
   schema.oneOf(
     [
       schema.oneOf([
-        schema.literal('empty'),
         schema.literal('asterisk'),
         schema.literal('alert'),
         schema.literal('bell'),

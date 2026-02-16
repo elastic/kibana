@@ -6,12 +6,13 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import { streamsApiTest as apiTest } from '../fixtures';
 import { COMMON_API_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
   'Stream data processing - simulate processing API',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     // Grok processor tests
     apiTest(

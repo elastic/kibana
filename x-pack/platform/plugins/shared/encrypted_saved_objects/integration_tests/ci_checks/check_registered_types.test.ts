@@ -75,7 +75,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "fleet-fleet-server-host": "3b8d0809aaf8a133596307bc29328207c7ceee1dc72233da75141ec47ad8d327",
         "fleet-message-signing-keys": "5cdcf6bf85247267f8876bda4226e871dbfefe01f050e898db7cbc267d57a275",
         "fleet-uninstall-tokens": "6e7d75921dcce46e566f175eab1b0e3825fe565f20cdb3c984e7037934d61e23",
-        "ingest-download-sources": "23eb3cf789fe13b4899215c6f919705b8a44b89f8feba7181e1f5db3c7699d40",
+        "ingest-download-sources": "b3740796eab0a91736e43bd22f7489cbf6f2ad0241ae370d1c8195b6a8d8ad52",
         "ingest-outputs": "d66716d5333484a25c57f7917bead5ac2576ec57a4b9eb61701b573f35ab62ad",
         "oauth_state": "90050be54da9ef0e0059b14eb634af1165374618055289365f8cfebba24ddcdb",
         "privmon-api-key": "7d7b76b3bc5287a784518731ba66d4f761052177fc04b1a85e5605846ab9de42",
