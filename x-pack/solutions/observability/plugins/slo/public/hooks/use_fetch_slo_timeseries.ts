@@ -52,23 +52,20 @@ export function useFetchSloTimeseries({
     }),
     queryFn: async ({ signal }) => {
       try {
-        return await sloClient.fetch(
-          'GET /api/observability/slos/{id}/timeseries 2023-10-31',
-          {
-            params: {
-              path: { id: sloId },
-              query: {
-                from: from.toISOString(),
-                to: to.toISOString(),
-                ...(instanceId && instanceId !== ALL_VALUE && { instanceId }),
-                ...(remoteName && { remoteName }),
-                ...(bucketInterval && { bucketInterval }),
-                ...(includeRaw && { includeRaw: 'true' as const }),
-              },
+        return await sloClient.fetch('GET /api/observability/slos/{id}/timeseries 2023-10-31', {
+          params: {
+            path: { id: sloId },
+            query: {
+              from: from.toISOString(),
+              to: to.toISOString(),
+              ...(instanceId && instanceId !== ALL_VALUE && { instanceId }),
+              ...(remoteName && { remoteName }),
+              ...(bucketInterval && { bucketInterval }),
+              ...(includeRaw && { includeRaw: 'true' as const }),
             },
-            signal,
-          }
-        );
+          },
+          signal,
+        });
       } catch (error) {
         // ignore error
       }

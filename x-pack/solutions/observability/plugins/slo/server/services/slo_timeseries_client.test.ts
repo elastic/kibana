@@ -240,9 +240,7 @@ describe('SloTimeseriesClient', () => {
           body: expect.objectContaining({
             query: expect.objectContaining({
               bool: expect.objectContaining({
-                filter: expect.arrayContaining([
-                  { term: { 'slo.instanceId': 'my-service' } },
-                ]),
+                filter: expect.arrayContaining([{ term: { 'slo.instanceId': 'my-service' } }]),
               }),
             }),
           }),
