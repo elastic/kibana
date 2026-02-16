@@ -53,6 +53,7 @@ const journeyTargetGroups: JourneyTargetGroups = {
     'streams_processing_step',
     'streams_retention',
     'streams_field_mapping',
+    'streams_wired_hierarchy',
   ],
 };
 

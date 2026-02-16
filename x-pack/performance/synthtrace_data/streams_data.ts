@@ -8,6 +8,9 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { KibanaServer } from '@kbn/ftr-common-functional-services';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { generateArchive } from '@kbn/streams-plugin/server/lib/content';
+import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
+import { emptyAssets } from '@kbn/streams-schema';
 
 const PUBLIC_API_HEADERS = {
   'kbn-xsrf': 'streams-perf-test',
@@ -317,4 +320,255 @@ export async function setupListingPageData(
 export async function setupWiredStreams(kibanaServer: KibanaServer, log: ToolingLog) {
   await enableStreams(kibanaServer, log);
   await createWiredStreamHierarchy(kibanaServer, log);
+}
+
+// ---------------------------------------------------------------------------
+// Phase 5: Large wired stream hierarchy
+// ---------------------------------------------------------------------------
+
+type WiredHierarchyStrategy = 'fork' | 'import';
+
+/** Default child count for the large wired hierarchy */
+const DEFAULT_WIRED_HIERARCHY_COUNT = 100;
+
+/**
+ * Phase 5A — Create a large wired hierarchy by serially forking children from `logs`.
+ * Each fork acquires the global lock, so this is O(N) in lock acquisitions.
+ * Practical for up to ~100 children; for 1000+ use the 'import' strategy.
+ */
+async function createLargeWiredHierarchyViaFork(
+  kibanaServer: KibanaServer,
+  log: ToolingLog,
+  count: number
+) {
+  log.info(`Creating ${count} wired child streams via serial fork...`);
+
+  for (let i = 1; i <= count; i++) {
+    const childName = `logs.perf_child_${String(i).padStart(4, '0')}`;
+    const conditionValue = `perf-service-${i}`;
+
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        await forkStream(
+          kibanaServer,
+          'logs',
+          childName,
+          'resource.attributes.service.name',
+          conditionValue
+        );
+        break;
+      } catch (error) {
+        if (isLockContentionError(error) && attempt < MAX_RETRIES) {
+          const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt);
+          log.warning(
+            `  Lock contention forking ${childName}, retry ${attempt + 1}/${MAX_RETRIES} after ${delay}ms`
+          );
+          await sleep(delay);
+          continue;
+        }
+        throw error;
+      }
+    }
+
+    if (i % 10 === 0 || i === count) {
+      log.info(`  Forked ${i}/${count} wired child streams`);
+    }
+  }
+
+  log.info(`Finished creating ${count} wired child streams via fork`);
+}
+
+/**
+ * Build the content pack entries for a wired hierarchy with N children under ROOT_STREAM_ID.
+ * Stream names in a content pack are relative to the import target (e.g. importing into 'logs'
+ * means a child named 'perf_child_0001' becomes 'logs.perf_child_0001').
+ */
+function buildWiredHierarchyContentPackEntries(count: number) {
+  const childRouting = [];
+  const childEntries = [];
+
+  for (let i = 1; i <= count; i++) {
+    const relativeChildName = `perf_child_${String(i).padStart(4, '0')}`;
+
+    childRouting.push({
+      destination: relativeChildName,
+      where: { field: 'resource.attributes.service.name', eq: `perf-service-${i}` },
+      status: 'enabled' as const,
+    });
+
+    childEntries.push({
+      type: 'stream' as const,
+      name: relativeChildName,
+      request: {
+        stream: {
+          description: '',
+          ingest: {
+            processing: { steps: [] as never[] },
+            settings: {},
+            wired: { fields: {}, routing: [] as never[] },
+            lifecycle: { inherit: {} },
+            failure_store: { inherit: {} },
+          },
+        },
+        ...emptyAssets,
+        queries: [] as never[],
+      },
+    });
+  }
+
+  const rootEntry = {
+    type: 'stream' as const,
+    name: ROOT_STREAM_ID,
+    request: {
+      stream: {
+        description: '',
+        ingest: {
+          processing: { steps: [] as never[] },
+          settings: {},
+          wired: { fields: {}, routing: childRouting },
+          lifecycle: { inherit: {} },
+          failure_store: { inherit: {} },
+        },
+      },
+      ...emptyAssets,
+      queries: [] as never[],
+    },
+  };
+
+  return [rootEntry, ...childEntries];
+}
+
+/**
+ * Upload a content pack zip to the Kibana Streams content import API.
+ * Constructs raw multipart/form-data since KbnClient.request() does not
+ * natively support file uploads.
+ */
+async function uploadContentPack(
+  kibanaServer: KibanaServer,
+  streamName: string,
+  archiveBuffer: Buffer,
+  include: object
+) {
+  const boundary = `----FormBoundary${Date.now()}`;
+  const includeJson = JSON.stringify(include);
+
+  const parts: Buffer[] = [
+    Buffer.from(
+      `--${boundary}\r\n` +
+        `Content-Disposition: form-data; name="include"\r\n\r\n` +
+        `${includeJson}\r\n`
+    ),
+    Buffer.from(
+      `--${boundary}\r\n` +
+        `Content-Disposition: form-data; name="content"; filename="content.zip"\r\n` +
+        `Content-Type: application/zip\r\n\r\n`
+    ),
+    archiveBuffer,
+    Buffer.from(`\r\n--${boundary}--\r\n`),
+  ];
+
+  const body = Buffer.concat(parts);
+
+  await kibanaServer.request({
+    path: `/api/streams/${streamName}/content/import`,
+    method: 'POST',
+    headers: {
+      ...PUBLIC_API_HEADERS,
+      'Content-Type': `multipart/form-data; boundary=${boundary}`,
+    },
+    body: body as unknown as Record<string, unknown>,
+  });
+}
+
+/**
+ * Phase 5B — Create a large wired hierarchy via the content import bulk path.
+ * Builds a content pack zip with all children, then imports it in a single
+ * bulkUpsert call (one global lock acquisition regardless of child count).
+ * Scales to 1000+ children.
+ */
+async function createLargeWiredHierarchyViaImport(
+  kibanaServer: KibanaServer,
+  log: ToolingLog,
+  count: number
+) {
+  log.info(`Creating ${count} wired child streams via content import (bulk path)...`);
+
+  // Enable the content packs feature flag
+  await kibanaServer.uiSettings.update({
+    'observability:streamsEnableContentPacks': true,
+  });
+  log.info('  Enabled content packs feature flag');
+
+  // Build content pack entries
+  const entries = buildWiredHierarchyContentPackEntries(count);
+  log.info(`  Built ${entries.length} content pack entries (1 root + ${count} children)`);
+
+  // Generate zip archive using the same utility the Streams plugin uses
+  const archiveBuffer = await generateArchive(
+    { name: 'perf-wired-hierarchy', description: 'Performance test hierarchy', version: '1.0.0' },
+    entries
+  );
+  log.info(`  Generated archive (${Math.round(archiveBuffer.length / 1024)} KB)`);
+
+  // Upload via content import API — this calls streamsClient.bulkUpsert() internally,
+  // batching all upserts into a single State.attemptChanges() call
+  await uploadContentPack(kibanaServer, 'logs', archiveBuffer, { objects: { all: {} } });
+  log.info(`Finished creating ${count} wired child streams via content import`);
+}
+
+/**
+ * Create a large wired stream hierarchy under 'logs'.
+ *
+ * @param strategy - 'fork' for serial fork (Phase 5A, safe for ~100 children)
+ *                   'import' for content pack bulk import (Phase 5B, scales to 1000+)
+ * @param count - Number of child streams to create under 'logs'
+ */
+export async function createLargeWiredHierarchy(
+  kibanaServer: KibanaServer,
+  es: Client,
+  log: ToolingLog,
+  options: { count?: number; strategy?: WiredHierarchyStrategy } = {}
+) {
+  const { count = DEFAULT_WIRED_HIERARCHY_COUNT, strategy = 'import' } = options;
+
+  // Raise max shards per node to accommodate all wired streams + system indices
+  const maxShardsPerNode = count * 4;
+  await es.cluster.putSettings({
+    persistent: { 'cluster.max_shards_per_node': String(maxShardsPerNode) },
+  });
+  log.info(`Raised cluster.max_shards_per_node to ${maxShardsPerNode}`);
+
+  if (strategy === 'fork') {
+    await createLargeWiredHierarchyViaFork(kibanaServer, log, count);
+  } else {
+    await createLargeWiredHierarchyViaImport(kibanaServer, log, count);
+  }
+}
+
+/**
+ * Full setup for the large wired hierarchy journey.
+ * In performance runs, guards heavy creation to run only during the ingest
+ * phase (WARMUP), since beforeSteps runs in both WARMUP and TEST phases.
+ * In regular FTR/CI runs (no performance phase), setup runs normally.
+ */
+export async function setupLargeWiredHierarchy(
+  kibanaServer: KibanaServer,
+  es: Client,
+  log: ToolingLog,
+  options: { count?: number; strategy?: WiredHierarchyStrategy } = {}
+) {
+  const isPerformanceRun = Boolean(process.env.TEST_PERFORMANCE_PHASE);
+  const shouldIngest = process.env.TEST_INGEST_ES_DATA === 'true';
+
+  // beforeSteps runs in both WARMUP and TEST phases during performance runs.
+  // Only skip in the TEST phase there; run setup normally in non-performance CI/FTR runs.
+  if (isPerformanceRun && !shouldIngest) {
+    log.info(
+      'Skipping large wired hierarchy setup during performance TEST phase (TEST_INGEST_ES_DATA != true)'
+    );
+    return;
+  }
+
+  await enableStreams(kibanaServer, log);
+  await createLargeWiredHierarchy(kibanaServer, es, log, options);
 }
