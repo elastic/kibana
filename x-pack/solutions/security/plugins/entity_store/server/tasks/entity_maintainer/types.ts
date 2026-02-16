@@ -8,8 +8,6 @@
 import { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
-export interface EntityMaintainerWriter { }
-
 export interface EntityMaintainerStatusMetadata {
   runs: number;
   lastSuccessTimestamp: string | null;
@@ -19,7 +17,7 @@ export interface EntityMaintainerStatusMetadata {
 
 type JsonPrimitive = string | number | boolean | null;
 type JsonValue = JsonPrimitive | EntityMaintainerState | JsonValue[];
-interface EntityMaintainerState {
+export interface EntityMaintainerState {
   [key: string]: JsonValue;
 }
 

@@ -6,7 +6,7 @@
  */
 
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import type { EntityMaintainerStatus, RegisterEntityMaintainerConfig } from './types';
+import type { EntityMaintainerStatus, EntityMaintainerTaskMethod, RegisterEntityMaintainerConfig } from './types';
 import { TasksConfig } from "../config";
 import { EntityStoreTaskType } from "../constants";
 import type { Logger } from '@kbn/logging';
@@ -42,7 +42,6 @@ export async function scheduleEntityMaintainerTasks({
   try {
     logger.debug(`Scheduling entity maintainer tasks`);
     const tasks = await entityMaintainersTasksClient.getAll();
-    logger.debug(`Tasks: ${JSON.stringify(tasks)}`);
     for (const { id, interval } of tasks) {
       await taskManager.ensureScheduled(
         {
@@ -56,7 +55,7 @@ export async function scheduleEntityMaintainerTasks({
       );
     }
   } catch (err) {
-    logger.error(`Failed to schedule entity maintainer tasks: ${(err as Error).message}`);
+    logger.error(`Failed to schedule entity maintainer tasks: ${err?.message}`);
     throw err;
   }
 }
@@ -85,7 +84,7 @@ export function registerEntityMaintainerTask({
         ]);
         const maintainerTasksClient = new EntityMaintainersTasksClient(internalRepo, logger);
         maintainerTasksClient.addOrUpdate({ id, interval }).catch((err: Error) => {
-          logger.error(`Failed to register entity maintainer task in saved object: ${err.message}`);
+          logger.error(`Failed to register entity maintainer task in saved object: ${err?.message}`);
         });
       });
 
@@ -96,48 +95,86 @@ export function registerEntityMaintainerTask({
         createTaskRunner: ({ taskInstance, abortController, fakeRequest }) => ({
           run: async () => {
             const currentStatus = taskInstance.state;
-
-            if (!fakeRequest) {
-              logger.error(`Entity maintainer task [${id}]: no fake request found, skipping run`);
-              return {
-                state: currentStatus,
-              };
-            }
-
             const maintainerStatus: EntityMaintainerStatus = {
               metadata: {
                 runs: currentStatus?.metadata?.runs || 0,
                 lastSuccessTimestamp: currentStatus?.metadata?.lastSuccessTimestamp || null,
                 lastErrorTimestamp: currentStatus?.metadata?.lastErrorTimestamp || null,
               },
-              state: currentStatus?.metadata?.runs ? currentStatus.state : initialState,
+              state: currentStatus?.metadata?.runs
+                ? currentStatus.state
+                : initialState,
             };
 
-            try {
-              const isFirstRun = maintainerStatus.metadata.runs === 0;
-              if (isFirstRun && setup) {
-                logger.debug(`Entity maintainer task [${id}]: first run, executing setup`);
-                maintainerStatus.state = await setup({ status: maintainerStatus, abortController, logger, fakeRequest });
-              }
-              logger.debug(`Entity maintainer task [${id}]: executing run`);
-              maintainerStatus.state = await run({ status: maintainerStatus, abortController, logger, fakeRequest });
-              maintainerStatus.metadata.lastSuccessTimestamp = new Date().toISOString();
-            } catch (error) {
-              maintainerStatus.metadata.lastErrorTimestamp = new Date().toISOString();
-              logger.debug(`Entity maintainer task [${id}]: run failed - ${error.message}`);
-            } finally {
-              maintainerStatus.metadata.runs++;
-            }
-
-            return {
-              state: maintainerStatus,
-            };
-          },
+            return await runEntityMaintainerTask({
+              currentStatus: maintainerStatus,
+              fakeRequest,
+              logger: logger.get(taskInstance.id),
+              setup,
+              run,
+              abortController,
+            });
+          }
         }),
       },
     });
-  } catch (e) {
-    logger.error(`Error registering entity maintainer task: ${e.message}`);
-    throw e;
+  } catch (err) {
+    logger.error(`Error registering entity maintainer task: ${err?.message}`);
+    throw err;
   }
+}
+
+async function runEntityMaintainerTask({
+  currentStatus,
+  fakeRequest,
+  logger,
+  setup,
+  run,
+  abortController,
+}: {
+  currentStatus: EntityMaintainerStatus;
+  fakeRequest: KibanaRequest | undefined;
+  logger: Logger;
+  setup?: EntityMaintainerTaskMethod;
+  run: EntityMaintainerTaskMethod;
+  abortController: AbortController;
+}): Promise<{ state: EntityMaintainerStatus }> {
+  
+  if (!fakeRequest) {
+    logger.error(`No fake request found, skipping run`);
+
+    return {
+      state: currentStatus,
+    };
+  }
+
+  try {
+    const isFirstRun = currentStatus.metadata.runs === 0;
+    if (isFirstRun && setup) {
+      logger.debug(`First run, executing setup`);
+      currentStatus.state = await setup({
+        status: {...currentStatus},
+        abortController,
+        logger,
+        fakeRequest,
+      });
+    }
+    logger.debug(`Executing run`);
+    currentStatus.state = await run({
+      status: {...currentStatus},
+      abortController,
+      logger,
+      fakeRequest,
+    });
+    currentStatus.metadata.lastSuccessTimestamp = new Date().toISOString();
+  } catch (err) {
+    currentStatus.metadata.lastErrorTimestamp = new Date().toISOString();
+    logger.debug(`Run failed - ${err?.message}`);
+  } finally {
+    currentStatus.metadata.runs++;
+  }
+
+  return {
+    state: currentStatus,
+  };
 }

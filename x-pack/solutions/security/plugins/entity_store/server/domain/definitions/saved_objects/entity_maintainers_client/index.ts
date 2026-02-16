@@ -12,19 +12,19 @@ import { EntityMaintainerTaskEntry as EntityMaintainerTaskEntrySchema } from './
 import {
   EntityMaintainersTasksTypeName,
   EntityMaintainersTasksId,
-} from './entity_maintainers_tasks_type';
+} from './types';
 
 const ENTITY_MAINTAINERS_TASKS_ATTR = 'entity-maintainers-tasks' as const;
 
 export class EntityMaintainersTasksClient {
   constructor(
-    private readonly repo: ISavedObjectsRepository,
+    private readonly repository: ISavedObjectsRepository,
     private readonly logger: Logger
   ) {}
 
   async getAll(): Promise<EntityMaintainerTaskEntry[]> {
     try {
-      const doc = await this.repo.get<Record<typeof ENTITY_MAINTAINERS_TASKS_ATTR, unknown[]>>(
+      const doc = await this.repository.get<Record<typeof ENTITY_MAINTAINERS_TASKS_ATTR, unknown[]>>(
         EntityMaintainersTasksTypeName,
         EntityMaintainersTasksId
       );
@@ -42,19 +42,19 @@ export class EntityMaintainersTasksClient {
   async addOrUpdate(entry: EntityMaintainerTaskEntry): Promise<void> {
     const taskEntry = EntityMaintainerTaskEntrySchema.parse(entry);
     try {
-      const existing = await this.repo.get<
+      const existing = await this.repository.get<
         Record<typeof ENTITY_MAINTAINERS_TASKS_ATTR, EntityMaintainerTaskEntry[]>
       >(EntityMaintainersTasksTypeName, EntityMaintainersTasksId);
       const tasks = existing.attributes[ENTITY_MAINTAINERS_TASKS_ATTR] ?? [];
       this.logger.debug(`Tasks registered: ${JSON.stringify(tasks)}`);
       const filtered = tasks.filter((t) => t.id !== taskEntry.id);
-      await this.repo.update(EntityMaintainersTasksTypeName, EntityMaintainersTasksId, {
+      await this.repository.update(EntityMaintainersTasksTypeName, EntityMaintainersTasksId, {
         [ENTITY_MAINTAINERS_TASKS_ATTR]: [...filtered, taskEntry],
       });
     } catch (err) {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
         this.logger.debug(`Creating entity maintainers tasks document with first entry`);
-        await this.repo.create(
+        await this.repository.create(
           EntityMaintainersTasksTypeName,
           { [ENTITY_MAINTAINERS_TASKS_ATTR]: [taskEntry] },
           { id: EntityMaintainersTasksId }

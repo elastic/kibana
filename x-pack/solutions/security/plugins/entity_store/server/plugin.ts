@@ -23,8 +23,8 @@ import {
   EngineDescriptorType,
   EntityMaintainersTasksType,
 } from './domain/definitions/saved_objects';
-import { registerEntityMaintainerTask } from './tasks/entity_maintainer_task';
-import { RegisterEntityMaintainerConfig } from './tasks/entity_maintainer_task/types';
+import { registerEntityMaintainerTask } from './tasks/entity_maintainer';
+import { RegisterEntityMaintainerConfig } from './tasks/entity_maintainer/types';
 
 export class EntityStorePlugin
   implements
