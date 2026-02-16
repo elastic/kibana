@@ -6,13 +6,14 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { DropDocumentProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql, transpileIngestPipeline } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Cross-compatibility - Drop Document Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest(
       'should drop documents matching where condition in both ingest pipeline and ES|QL',

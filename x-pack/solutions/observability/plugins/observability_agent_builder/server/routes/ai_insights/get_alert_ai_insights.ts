@@ -19,6 +19,7 @@ import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
 import { getToolHandler as getLogGroups } from '../../tools/get_log_groups/handler';
+import { getToolHandler as getRuntimeMetrics } from '../../tools/get_runtime_metrics/handler';
 import { getEntityLinkingInstructions } from '../../agent/register_observability_agent';
 
 /**
@@ -89,6 +90,7 @@ const START_TIME_OFFSETS = {
   downstream: 24 * 60, // 24 hours
   logs: 15,
   changePoints: 6 * 60, // 6 hours
+  runtimeMetrics: 15,
 } as const;
 
 async function fetchAlertContext({
@@ -170,6 +172,30 @@ async function fetchAlertContext({
     }
   }
 
+  async function fetchRuntimeMetrics() {
+    try {
+      const start = getStart(START_TIME_OFFSETS.runtimeMetrics);
+      const end = alertStart;
+      const result = await getRuntimeMetrics({
+        core,
+        plugins,
+        request,
+        logger,
+        serviceName,
+        serviceEnvironment,
+        start,
+        end,
+      });
+
+      return result.nodes.length > 0
+        ? { key: 'runtimeMetrics' as const, start, end, data: result.nodes }
+        : null;
+    } catch (err) {
+      logger.debug(`AI insight: runtimeMetrics failed: ${err}`);
+      return null;
+    }
+  }
+
   const allFetchers = [
     ...fetchConfigs.map(async (config) => {
       try {
@@ -188,6 +214,7 @@ async function fetchAlertContext({
       }
     }),
     fetchLogGroups(),
+    fetchRuntimeMetrics(),
   ];
 
   const results = await Promise.all(allFetchers);
@@ -235,12 +262,12 @@ function generateAlertSummary({
     - Only give a non-inconclusive Assessment when supported by on-topic signals; otherwise say "Inconclusive" and don't speculate.
     - Keep it concise (~100–150 words total).
 
-    Signal priority (use what exists, skip what doesn't):
-    1) Downstream dependencies: dependency metrics that may indicate issues
-    2) Change points: sudden shifts in throughput/latency/failure rate
-    3) Log categories: error messages and exception patterns
-    4) Errors: exception patterns with downstream context
-    5) Service summary: instance counts, versions, anomalies, and metadata
+    Available signals (use what's relevant and available):
+    - Runtime metrics: CPU, memory, GC duration, thread count — indicates internal resource pressure
+    - Downstream dependencies: latency/errors in called services — indicates external issues
+    - Change points: sudden shifts in throughput/latency/failure rate — shows when problems started
+    - Log categories: error messages and exception patterns
+    - Service summary: instance counts, versions, anomalies, and metadata
 
     ${getEntityLinkingInstructions({ urlPrefix })}
   `);

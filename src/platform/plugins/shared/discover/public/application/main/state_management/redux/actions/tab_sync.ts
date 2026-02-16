@@ -215,7 +215,6 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       services.timefilter.getTimeUpdate$(),
       services.timefilter.getRefreshIntervalUpdate$()
     ).subscribe(() => {
-      savedSearchContainer.updateTimeRange();
       syncLocallyPersistedTabState();
     });
 
