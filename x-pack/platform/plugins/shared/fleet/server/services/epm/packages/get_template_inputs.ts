@@ -232,7 +232,7 @@ export async function getTemplateInputs(
   } else if (format === 'yml') {
     const data = { inputs: filteredInputs, ...(otelcolConfig ? otelcolConfig : {}) };
     const doc = new Document(data, { sortMapEntries: _sortYamlKeys, strict: false });
-    const yaml = doc.toString();
+    const yaml = doc.toString({ singleQuote: true });
     return addCommentsToYaml(yaml, buildIndexedPackage(packageInfo), inputIdsDestinationMap);
   }
 
@@ -352,7 +352,7 @@ function addCommentsToYaml(
     });
   }
 
-  return doc.toString();
+  return doc.toString({ singleQuote: true });
 }
 
 function commentVariablesInYaml(rootNode: yamlDoc.Node, vars: RegistryVarsEntry[] = []) {
