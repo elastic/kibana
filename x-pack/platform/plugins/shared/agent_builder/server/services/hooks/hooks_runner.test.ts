@@ -10,6 +10,7 @@ import {
   isHooksExecutionError,
   ToolResultType,
 } from '@kbn/agent-builder-common';
+import { createWorkflowExecutionError } from '@kbn/agent-builder-common/base/errors';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createHooksRunner } from './hooks_runner';
 import type { CreateHooksRunnerDeps } from './hooks_runner';
@@ -150,6 +151,25 @@ describe('createHooksRunner', () => {
         hookLifecycle: HookLifecycle.beforeAgent,
       }),
     });
+  });
+
+  it('rethrows workflow execution errors without wrapping them', async () => {
+    const workflowError = createWorkflowExecutionError('workflow failed', {
+      workflow: 'my-workflow',
+    });
+    const run = createRunner({
+      getHooksForLifecycle: (): HookRegistration<HookLifecycle>[] => [
+        {
+          id: 'workflow-hook',
+          mode: HookExecutionMode.blocking,
+          handler: async () => {
+            throw workflowError;
+          },
+        } as HookRegistration<HookLifecycle>,
+      ],
+    }).run;
+
+    await expect(run(HookLifecycle.beforeAgent, baseContext)).rejects.toBe(workflowError);
   });
 
   it('throws request aborted when abortSignal is aborted before a hook runs', async () => {
