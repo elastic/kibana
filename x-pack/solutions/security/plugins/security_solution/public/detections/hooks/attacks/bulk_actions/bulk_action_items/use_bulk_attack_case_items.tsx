@@ -12,10 +12,7 @@ import { useAddToExistingCase } from '../../../../../attack_discovery/pages/resu
 import { useAddToNewCase } from '../../../../../attack_discovery/pages/results/take_action/use_add_to_case';
 import { APP_ID } from '../../../../../../common';
 import { useKibana } from '../../../../../common/lib/kibana';
-import {
-  ADD_TO_EXISTING_CASE,
-  ADD_TO_NEW_CASE,
-} from '../../../../../common/components/visualization_actions/translations';
+import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
 import {
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT,
