@@ -3332,7 +3332,6 @@ describe('Alerts Service', () => {
           ).rejects.toThrow('Unable to clear snooze');
         });
       });
-
     });
   }
 });

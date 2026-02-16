@@ -11,7 +11,12 @@ import { ExecutionResponseType } from '@kbn/actions-plugin/server/create_execute
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { chunk } from 'lodash';
 import type { ThrottledActions } from '../../types';
-import type { ActionSchedulerOptions, ActionsToSchedule, AlertToAutoUnmute, IActionScheduler } from './types';
+import type {
+  ActionSchedulerOptions,
+  ActionsToSchedule,
+  AlertToAutoUnmute,
+  IActionScheduler,
+} from './types';
 import type { Alert } from '../../alert';
 import type {
   AlertInstanceContext,

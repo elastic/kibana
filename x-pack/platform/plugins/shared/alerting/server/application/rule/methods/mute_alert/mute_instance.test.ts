@@ -351,5 +351,4 @@ describe('mute alert instance', () => {
       })
     );
   });
-
 });

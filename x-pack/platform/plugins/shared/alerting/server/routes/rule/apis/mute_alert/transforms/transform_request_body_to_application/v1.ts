@@ -6,7 +6,7 @@
  */
 
 import type { SnoozeCondition } from '@kbn/alerting-types';
-import type { MuteAlertRequestBodyV1 } from '@kbn/alerting-plugin/common/routes/rule/apis/mute_alert';
+import type { MuteAlertRequestBodyV1 } from '../../../../../../../common/routes/rule/apis/mute_alert';
 
 export const transformRequestBodyToApplication = (
   body?: MuteAlertRequestBodyV1
