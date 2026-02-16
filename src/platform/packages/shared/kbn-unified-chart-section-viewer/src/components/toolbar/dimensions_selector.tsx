@@ -283,27 +283,27 @@ export const DimensionsSelector = ({
           alignItems="center"
           responsive={false}
         >
-        <EuiFlexItem>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="metricsExperience.dimensionsSelector.selectedDimensionsCount"
-              defaultMessage="{count, plural, one {# dimension selected} other {# dimensions selected}}"
-              values={{ count }}
-            />
-          </EuiText>
-        </EuiFlexItem>
-        {count > 0 && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="xs" flush="right" onClick={handleClearAll}>
+          <EuiFlexItem>
+            <EuiText size="xs" color="subdued">
               <FormattedMessage
-                id="metricsExperience.dimensionsSelector.clearSelection"
-                defaultMessage="Clear selection"
+                id="metricsExperience.dimensionsSelector.selectedDimensionsCount"
+                defaultMessage="{count, plural, one {# dimension selected} other {# dimensions selected}}"
+                values={{ count }}
               />
-            </EuiButtonEmpty>
+            </EuiText>
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
+          {count > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty size="xs" flush="right" onClick={handleClearAll}>
+                <FormattedMessage
+                  id="metricsExperience.dimensionsSelector.clearSelection"
+                  defaultMessage="Clear selection"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
       </>
     );
   }, [localSelectedDimensions.length, handleClearAll, euiTheme.size.l]);

@@ -380,11 +380,11 @@ describe('color_assignment', () => {
       );
 
       expect(assignments.palette1.totalSeriesCount).toEqual(3);
-      
+
       const expectedSeriesName1 = `A${MULTI_FIELD_KEY_SEPARATOR}X`;
       const expectedSeriesName2 = `A${MULTI_FIELD_KEY_SEPARATOR}Y`;
       const expectedSeriesName3 = `B${MULTI_FIELD_KEY_SEPARATOR}X`;
-      
+
       expect(assignments.palette1.getRank(multiSplitLayer.layerId, expectedSeriesName1)).toEqual(0);
       expect(assignments.palette1.getRank(multiSplitLayer.layerId, expectedSeriesName2)).toEqual(1);
       expect(assignments.palette1.getRank(multiSplitLayer.layerId, expectedSeriesName3)).toEqual(2);
