@@ -89,9 +89,9 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
     indexPatternString: SUMMARY_DESTINATION_INDEX_NAME,
   });
   const [selectedGroupBy, setSelectedGroupBy] =
-    useState<GroupBy>(selectedFilters.groupBy) ?? 'status';
+    useState<GroupBy>(selectedFilters.group_by) ?? 'status';
   const [filters, setFilters] = useState(selectedFilters.filters) ?? [];
-  const [kqlQuery, setkqlQuery] = useState(selectedFilters.kqlQuery);
+  const [kqlQuery, setkqlQuery] = useState(selectedFilters.kql_query);
   const [selectedGroupByLabel, setSelectedGroupByLabel] = useState('Status');
   const [groupOptions, setGroupOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedGroupOptions, setSelectedGroupOptions] = useState<
@@ -175,7 +175,7 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
           value={selectedGroupBy}
           onChange={(e) => {
             setSelectedGroupBy(e.target.value as GroupBy);
-            onSelected('groupBy', e.target.value);
+            onSelected('group_by', e.target.value);
             setSelectedGroupOptions([]);
             onSelected('groups', []);
           }}
