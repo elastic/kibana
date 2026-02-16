@@ -5,27 +5,10 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
 import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 
-const LazyIconBriefcase = lazy(() =>
-  import('@kbn/observability-nav-icons').then(({ iconBriefcase }) => ({ default: iconBriefcase }))
-);
-const LazyIconMl = lazy(() =>
-  import('@kbn/observability-nav-icons').then(({ iconProductMl }) => ({ default: iconProductMl }))
-);
-const LazyIconProductStreamsWired = lazy(() =>
-  import('@kbn/observability-nav-icons').then(({ iconProductStreamsWired }) => ({
-    default: iconProductStreamsWired,
-  }))
-);
-const LazyIconProductCloudInfra = lazy(() =>
-  import('@kbn/observability-nav-icons').then(({ iconProductCloudInfra }) => ({
-    default: iconProductCloudInfra,
-  }))
-);
 export function filterForFeatureAvailability(
   node: NodeDefinition,
   featureFlag: boolean = false
@@ -65,12 +48,14 @@ export const createNavigationTree = ({
           defaultMessage: 'Discover',
         }),
         link: 'discover',
+        icon: 'productDiscover',
       },
       {
         title: i18n.translate('xpack.serverlessObservability.nav.dashboards', {
           defaultMessage: 'Dashboards',
         }),
         link: 'dashboards',
+        icon: 'productDashboard',
         getIsActive: ({ pathNameSerialized, prepend }) => {
           return pathNameSerialized.startsWith(prepend('/app/dashboards'));
         },
@@ -85,7 +70,7 @@ export const createNavigationTree = ({
       ...filterForFeatureAvailability(
         {
           link: 'observability-overview:cases' as const,
-          icon: LazyIconBriefcase,
+          icon: 'briefcase',
           children: [
             {
               link: 'observability-overview:cases_configure' as const,
@@ -107,7 +92,7 @@ export const createNavigationTree = ({
       ...filterForFeatureAvailability(
         {
           link: 'streams' as const,
-          icon: LazyIconProductStreamsWired,
+          icon: 'productStreamsWired',
         },
         streamsAvailable
       ),
@@ -176,7 +161,7 @@ export const createNavigationTree = ({
           defaultMessage: 'Infrastructure',
         }),
         renderAs: 'panelOpener',
-        icon: LazyIconProductCloudInfra,
+        icon: 'productCloudInfra',
         children: [
           {
             children: [
@@ -205,7 +190,7 @@ export const createNavigationTree = ({
       ...filterForFeatureAvailability(
         {
           link: 'agent_builder',
-          icon: 'productRobot',
+          icon: 'productAgent',
         },
         !showAiAssistant
       ),
@@ -216,7 +201,7 @@ export const createNavigationTree = ({
           title: i18n.translate('xpack.serverlessObservability.nav.machineLearning', {
             defaultMessage: 'Machine Learning',
           }),
-          icon: LazyIconMl,
+          icon: 'productML',
           children: [
             {
               id: 'category-ml_overview',

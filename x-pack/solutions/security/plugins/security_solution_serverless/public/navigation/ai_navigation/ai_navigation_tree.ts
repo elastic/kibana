@@ -76,11 +76,12 @@ export const createAiNavigationTree = (
       children: [
         {
           link: 'discover' as AppDeepLinkId,
+          icon: 'productDiscover',
         },
         ...(chatExperience === AIChatExperience.Agent
           ? [
               {
-                icon: 'productRobot',
+                icon: 'productAgent',
                 link: 'agent_builder' as AppDeepLinkId,
               },
             ]

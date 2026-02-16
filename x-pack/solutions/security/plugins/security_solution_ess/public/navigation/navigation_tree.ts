@@ -12,11 +12,7 @@ import {
   SecurityPageName,
 } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
-import {
-  defaultNavigationTree,
-  LazyIconFindings,
-  LazyIconIntelligence,
-} from '@kbn/security-solution-navigation/navigation_tree';
+import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { type Services } from '../common/services';
 import { SOLUTION_NAME } from './translations';
@@ -35,7 +31,7 @@ export const createNavigationTree = (
     },
     {
       link: 'discover',
-      icon: 'discoverApp',
+      icon: 'productDiscover',
     },
     defaultNavigationTree.dashboards(),
     defaultNavigationTree.rules(),
@@ -52,7 +48,7 @@ export const createNavigationTree = (
     ...(chatExperience === AIChatExperience.Agent
       ? [
           {
-            icon: 'productRobot',
+            icon: 'productAgent',
             link: 'agent_builder' as AppDeepLinkId,
           },
         ]
@@ -64,8 +60,7 @@ export const createNavigationTree = (
     },
     {
       id: SecurityPageName.cloudSecurityPostureFindings,
-      // TODO change this to the `bullseye` EUI icon when available
-      icon: LazyIconFindings,
+      icon: 'bullseye',
       link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
     },
     defaultNavigationTree.cases(),
@@ -74,8 +69,7 @@ export const createNavigationTree = (
     defaultNavigationTree.investigations(),
     {
       id: SecurityPageName.threatIntelligence,
-      // TODO change this to the `compute` EUI icon when available
-      icon: LazyIconIntelligence,
+      icon: 'processor',
       link: securityLink(SecurityPageName.threatIntelligence),
     },
     {

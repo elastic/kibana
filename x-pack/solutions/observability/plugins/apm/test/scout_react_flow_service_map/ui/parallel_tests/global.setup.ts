@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { globalSetupHook } from '@kbn/scout-oblt';
+import { globalSetupHook, tags } from '@kbn/scout-oblt';
 import { opbeans } from '../fixtures/synthtrace/opbeans';
 import { testData } from '../fixtures';
 
 globalSetupHook(
   'Ingest data to Elasticsearch for React Flow Service Map tests',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   async ({ apmSynthtraceEsClient, apiServices, log, config }) => {
     const startTime = Date.now();
 

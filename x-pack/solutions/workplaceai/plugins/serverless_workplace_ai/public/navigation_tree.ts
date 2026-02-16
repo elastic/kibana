@@ -19,7 +19,7 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
         breadcrumbStatus: 'hidden',
       },
       {
-        icon: 'productRobot',
+        icon: 'productAgent',
         link: 'agent_builder',
       },
       {
@@ -33,12 +33,14 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
       },
       {
         link: 'dashboards',
+        icon: 'productDashboard',
         getIsActive: ({ pathNameSerialized, prepend }) => {
           return pathNameSerialized.startsWith(prepend('/app/dashboards'));
         },
       },
       {
         link: 'discover',
+        icon: 'productDiscover',
       },
     ],
     footer: [

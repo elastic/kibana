@@ -73,15 +73,17 @@ export const getNavigationTreeDefinition = ({
             },
             {
               link: 'discover',
+              icon: 'productDiscover',
             },
             {
               getIsActive: ({ pathNameSerialized, prepend, location }) =>
                 pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
                 isEditingFromDashboard(location, pathNameSerialized, prepend),
               link: 'dashboards',
+              icon: 'productDashboard',
             },
             {
-              icon: 'productRobot',
+              icon: 'productAgent',
               link: 'agent_builder',
             },
             {
@@ -143,7 +145,7 @@ export const getNavigationTreeDefinition = ({
                   ),
                 },
               ],
-              icon: 'machineLearningApp',
+              icon: 'productML',
               id: 'machine_learning',
               renderAs: 'panelOpener',
               title: i18n.translate('xpack.enterpriseSearch.searchNav.machineLearning', {

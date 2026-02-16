@@ -66,15 +66,17 @@ export function createNavigationTree({
       },
       {
         link: 'discover',
+        icon: 'productDiscover',
       },
       {
         link: 'dashboards',
+        icon: 'productDashboard',
         getIsActive: ({ pathNameSerialized, prepend, location }) =>
           pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
           isEditingFromDashboard(location, pathNameSerialized, prepend),
       },
       {
-        icon: 'productRobot',
+        icon: 'productAgent',
         link: 'agent_builder',
       },
       {
@@ -127,7 +129,7 @@ export function createNavigationTree({
             ],
           },
         ],
-        icon: 'machineLearningApp',
+        icon: 'productML',
         id: 'machine_learning',
         renderAs: 'panelOpener',
         title: MACHINE_LEARNING_TITLE,

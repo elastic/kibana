@@ -14,7 +14,7 @@ export function StartConversationButton(props: React.ComponentProps<typeof EuiBu
     <EuiButton
       data-test-subj="aiAgentStartConversationButton"
       fill
-      iconType="productRobot"
+      iconType="productAgent"
       size="s"
       {...props}
     >

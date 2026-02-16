@@ -55,6 +55,12 @@ export interface IndexDataVisualizerESQLProps {
   getAdditionalLinks?: GetAdditionalLinks;
 }
 const DEFAULT_ESQL_QUERY = { esql: '' };
+
+const maxInlineSizeStyles = css`
+  max-inline-size: 100%;
+  min-inline-size: 0;
+`;
+
 export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVisualizerProps) => {
   const { services } = useDataVisualizerKibana();
   const { data, http } = services;
@@ -227,30 +233,32 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     >
       <EuiPageTemplate.Section>
         <EuiPageTemplate.Header data-test-subj="dataVisualizerPageHeader" css={dvPageHeader}>
-          <EuiFlexGroup
-            data-test-subj="dataViewTitleHeader"
-            direction="row"
-            alignItems="center"
-            css={{ padding: 0, marginRight: 0 }}
-          >
-            {unsupportedReasonForQuery ? (
-              <EuiFlexItem grow={true}>
-                <EuiCallOut
-                  announceOnMount
-                  size="s"
-                  iconType="warning"
-                  color="warning"
-                  title={unsupportedReasonForQuery}
-                />
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
-
-          {isWithinLargeBreakpoint ? <EuiSpacer size="m" /> : null}
+          {unsupportedReasonForQuery ? (
+            <>
+              <EuiFlexGroup
+                data-test-subj="dataViewTitleHeader"
+                direction="row"
+                alignItems="center"
+                css={{ padding: 0, marginRight: 0 }}
+              >
+                <EuiFlexItem grow={true}>
+                  <EuiCallOut
+                    announceOnMount
+                    size="s"
+                    iconType="warning"
+                    color="warning"
+                    title={unsupportedReasonForQuery}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              {isWithinLargeBreakpoint ? <EuiSpacer size="m" /> : null}
+            </>
+          ) : null}
           <EuiFlexGroup
             alignItems="center"
             justifyContent="flexEnd"
             gutterSize="s"
+            css={maxInlineSizeStyles}
             data-test-subj="dataVisualizerTimeRangeSelectorSection"
           >
             {hasValidTimeField && currentDataView ? (
@@ -265,7 +273,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
                 />
               </EuiFlexItem>
             ) : null}
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} css={maxInlineSizeStyles}>
               <DatePickerWrapper
                 isAutoRefreshOnly={!hasValidTimeField}
                 showRefresh={!hasValidTimeField}
