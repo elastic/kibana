@@ -89,7 +89,6 @@ function useApmAvailabilityFormData() {
     'indicator.params.transactionName',
     'indicator.params.filter',
   ]);
-
   const indicatorParamsFilters = getGroupByCardinalityFilters({
     serviceName,
     environment,
@@ -214,11 +213,7 @@ export function ApmAvailabilityIndicatorTypeForm() {
               <QueryFilterField dataView={dataView} />
             </EuiFlexItem>
           </EuiFlexGroup>
-          <GroupByField
-            dataView={dataView}
-            isLoading={isIndexFieldsLoading}
-            filters={allFilters}
-          />
+          <GroupByField dataView={dataView} isLoading={isIndexFieldsLoading} filters={allFilters} />
         </>
       )}
 

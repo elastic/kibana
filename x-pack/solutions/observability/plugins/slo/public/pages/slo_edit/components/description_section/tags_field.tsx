@@ -32,7 +32,6 @@ export function TagsField() {
       <Controller
         name="tags"
         control={control}
-        defaultValue={[]}
         rules={{ required: false }}
         render={({ field: { ref, ...field }, fieldState }) => (
           <EuiComboBox

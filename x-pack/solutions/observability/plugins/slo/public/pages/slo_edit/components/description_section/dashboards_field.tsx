@@ -36,7 +36,6 @@ export function DashboardsField() {
       <Controller
         name="artifacts.dashboards"
         control={control}
-        defaultValue={undefined}
         render={({ field }) => (
           <DashboardsSelector
             uiActions={uiActions}

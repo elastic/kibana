@@ -28,7 +28,6 @@ export function DescriptionField() {
     >
       <Controller
         name="description"
-        defaultValue=""
         control={control}
         rules={{ required: false }}
         render={({ field: { ref, ...field } }) => (

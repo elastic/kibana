@@ -88,7 +88,6 @@ function useApmLatencyFormData() {
   const { control, watch, getFieldState } =
     useFormContext<CreateSLOForm<APMTransactionDurationIndicator>>();
   const { data: apmIndex } = useFetchApmIndex();
-  const dataViewId = watch(DATA_VIEW_FIELD);
 
   const [
     serviceName = '',
@@ -103,7 +102,6 @@ function useApmLatencyFormData() {
     'indicator.params.transactionName',
     'indicator.params.filter',
   ]);
-
   const indicatorParamsFilters = getGroupByCardinalityFilters({
     serviceName,
     environment,
@@ -113,6 +111,8 @@ function useApmLatencyFormData() {
   const allFilters = formatAllFilters(globalFilters, indicatorParamsFilters);
 
   useApmDefaultValues();
+
+  const dataViewId = watch(DATA_VIEW_FIELD);
 
   const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
     indexPatternString: apmIndex,
