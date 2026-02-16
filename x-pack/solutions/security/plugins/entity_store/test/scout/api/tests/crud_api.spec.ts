@@ -227,6 +227,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(del.statusCode).toBe(200);
 
     expect(
+      // @typescript-eslint/no-floating-promises
       esClient.get({
         index: LATEST_INDEX,
         id: entityId,
