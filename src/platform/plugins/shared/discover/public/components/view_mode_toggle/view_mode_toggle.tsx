@@ -11,7 +11,6 @@ import type { ComponentProps } from 'react';
 import React, { useMemo, useEffect, useState, type ReactElement, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -20,7 +19,6 @@ import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 import { HitsCounter, HitsCounterMode } from '../hits_counter';
-import { useAppStateSelector } from '../../application/main/state_management/redux';
 
 export const DocumentViewModeToggle = ({
   viewMode,

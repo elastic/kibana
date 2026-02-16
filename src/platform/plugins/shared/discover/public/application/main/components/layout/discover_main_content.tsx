@@ -147,7 +147,6 @@ export const DiscoverMainContent = ({
 
   const viewModeToggle = useMemo(() => renderViewModeToggle(), [renderViewModeToggle]);
 
-  const showChart = useAppStateSelector((state) => !state.hideChart);
   const showDataTable = useAppStateSelector((state) => !state.hideDataTable);
 
   return (
@@ -168,7 +167,7 @@ export const DiscoverMainContent = ({
           }
           data-test-subj="dscMainContent"
         >
-          {showChart && isChartAvailable && showDataTable && <EuiHorizontalRule margin="none" />}
+          {isChartAvailable && showDataTable && <EuiHorizontalRule margin="none" />}
           {viewMode === VIEW_MODE.DOCUMENT_LEVEL && showDataTable ? (
             <DiscoverDocuments
               viewModeToggle={viewModeToggle}

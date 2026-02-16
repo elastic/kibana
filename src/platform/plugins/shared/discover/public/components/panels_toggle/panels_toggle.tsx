@@ -78,10 +78,9 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   const isInsideDiscoverContent = !isInsideHistogram;
   const isInTabsContext = renderedFor === 'tabs' || renderedFor === 'root';
 
-  // Chart toggle: show in histogram when chart visible, OR in tabs only when chart is hidden
-  // (avoids duplicate when both chart toolbar and hits area would show it)
-  const showChartToggle =
-    isInsideHistogram || (isInsideDiscoverContent && isChartHidden);
+  // Chart toggle: only in histogram toolbar (chart section).
+  // When chart is collapsed, the toggle stays in the collapsed chart bar — not in tabs.
+  const showChartToggle = isInsideHistogram;
 
   // Table toggle: only in tabs context when in document view and chart is available,
   // since collapsing the table requires a chart to expand into
