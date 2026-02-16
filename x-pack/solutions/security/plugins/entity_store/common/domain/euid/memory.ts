@@ -7,13 +7,33 @@
 
 import type { EntityType, EuidAttribute } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { getFieldValue, isEuidField } from './commons';
+import { getDocument, getFieldValue, isEuidField } from './commons';
 
+/**
+ * Constructs an entity id from the provided entity type and document.
+ *
+ * It supports both flattened and nested document shapes.
+ * If a document contains `_source` property, it will be unwrapped before processing.
+ *
+ * Example usage:
+ * ```ts
+ * import { getEuidFromObject } from './memory';
+ *
+ * const euid = getEuidFromObject('host', { host: { name: 'server1', domain: 'example.com' } });
+ * // euid may look like:
+ * // 'host:server1.example.com'
+ * ```
+ *
+ * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
+ * @param doc - The document to derive entity id from. May be a flattened or nested shape.
+ * @returns An entity id string, or undefined if the document does not contain enough identifying information.
+ */
 export function getEuidFromObject(entityType: EntityType, doc: any) {
   if (!doc) {
     return undefined;
   }
 
+  doc = getDocument(doc);
   const { identityField } = getEntityDefinitionWithoutId(entityType);
   const composedId = getComposedFieldValues(doc, identityField.euidFields);
   if (composedId.length === 0) {
