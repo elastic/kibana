@@ -340,6 +340,8 @@
           "id": {
             "type": "keyword"
           }
+        }
+      }
     }
   },
   "alerting_rule": {
