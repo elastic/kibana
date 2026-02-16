@@ -35,13 +35,8 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
   /**
    * Middleware list
    */
-  bind(RuleExecutionMiddlewaresToken)
-    .toDynamicValue(({ get }) => [
-      // First middleware is outermost wrapper
-      get(CancellationBoundaryMiddleware),
-      get(ErrorHandlingMiddleware),
-    ])
-    .inSingletonScope();
+  bind(RuleExecutionMiddlewaresToken).to(CancellationBoundaryMiddleware).inSingletonScope();
+  bind(RuleExecutionMiddlewaresToken).to(ErrorHandlingMiddleware).inSingletonScope();
 
   /**
    * Rule execution steps via multi-injection.

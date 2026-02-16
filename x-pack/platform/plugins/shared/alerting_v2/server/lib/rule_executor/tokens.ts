@@ -23,4 +23,4 @@ export const RuleExecutionStepsToken = Symbol.for(
  */
 export const RuleExecutionMiddlewaresToken = Symbol.for(
   'alerting_v2.RuleExecutionMiddlewares'
-) as ServiceIdentifier<RuleExecutionMiddleware[]>;
+) as ServiceIdentifier<RuleExecutionMiddleware>;
