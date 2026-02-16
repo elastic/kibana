@@ -14,16 +14,14 @@ import { fireEvent, render as rtlRender, waitFor } from '@testing-library/react'
 import { EuiThemeProvider } from '@elastic/eui';
 import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
 
-let httpPostMock: jest.Mock;
-let httpFetchMock: jest.Mock;
+const mockHttpPost = jest.fn();
+const mockHttpFetch = jest.fn();
 jest.mock('../../../../services/kibana_services', () => {
-  httpPostMock = jest.fn();
-  httpFetchMock = jest.fn();
   return {
     coreServices: {
       http: {
-        post: (...args: unknown[]) => httpPostMock(...args),
-        fetch: (...args: unknown[]) => httpFetchMock(...args),
+        post: (...args: unknown[]) => mockHttpPost(...args),
+        fetch: (...args: unknown[]) => mockHttpFetch(...args),
       },
     },
   };
@@ -123,34 +121,19 @@ describe('Options list popover', () => {
     expect(contextMock.componentApi.requestSize$.getValue()).toBe(MAX_OPTIONS_LIST_REQUEST_SIZE);
   });
 
-  test('renders user avatar + display name for assignee ids field', async () => {
+  test('renders available options for assignee ids field', async () => {
     const contextMock = getOptionsListContextMock();
     contextMock.componentApi.fieldName$.next('kibana.alert.workflow_assignee_ids');
     contextMock.componentApi.setAvailableOptions([{ value: 'uid-1', docCount: 1 }]);
 
-    httpPostMock.mockImplementation(async (path: string) => {
-      if (path === '/internal/security/user_profile/_bulk_get') {
-        return [
-          {
-            uid: 'uid-1',
-            enabled: true,
-            user: { username: 'user1', full_name: 'User One' },
-            data: { avatar: {} },
-          },
-        ];
-      }
-      return [];
-    });
-
     const suggestionsComponent = mountComponent(contextMock);
 
     await waitFor(() => {
-      expect(httpPostMock).toHaveBeenCalled();
-      expect(suggestionsComponent.getByText('User One')).toBeInTheDocument();
+      expect(suggestionsComponent.getByText('uid-1')).toBeInTheDocument();
     });
   });
 
-  test('assignee popover renders a search input and filters options as you type', async () => {
+  test('assignee field does not render a local search input in this component', async () => {
     const contextMock = getOptionsListContextMock();
     contextMock.componentApi.fieldName$.next('kibana.alert.workflow_assignee_ids');
     contextMock.componentApi.setAvailableOptions([
@@ -158,81 +141,29 @@ describe('Options list popover', () => {
       { value: 'uid-2', docCount: 1 },
     ]);
 
-    httpPostMock.mockImplementation(async (path: string) => {
-      if (path === '/internal/security/user_profile/_bulk_get') {
-        return [
-          {
-            uid: 'uid-1',
-            enabled: true,
-            user: { username: 'user1', full_name: 'User One' },
-            data: { avatar: {} },
-          },
-          {
-            uid: 'uid-2',
-            enabled: true,
-            user: { username: 'user2', full_name: 'User Two' },
-            data: { avatar: {} },
-          },
-        ];
-      }
-      return [];
-    });
-    httpFetchMock.mockRejectedValueOnce(new Error('suggest unavailable'));
-
     const suggestionsComponent = mountComponent(contextMock);
 
     await waitFor(() => {
-      expect(suggestionsComponent.getByText('User One')).toBeInTheDocument();
-      expect(suggestionsComponent.getByText('User Two')).toBeInTheDocument();
+      expect(suggestionsComponent.getByText('uid-1')).toBeInTheDocument();
+      expect(suggestionsComponent.getByText('uid-2')).toBeInTheDocument();
     });
-
-    const input = suggestionsComponent.getByTestId('optionsList-assignee-search-input');
-    fireEvent.change(input, { target: { value: 'Two' } });
-
-    await waitFor(() => {
-      expect(suggestionsComponent.queryByText('User One')).not.toBeInTheDocument();
-      expect(suggestionsComponent.getByText('User Two')).toBeInTheDocument();
-    });
+    expect(
+      suggestionsComponent.queryByTestId('optionsList-assignee-search-input')
+    ).not.toBeInTheDocument();
   });
 
-  test('assignee search uses user profile suggest to render results', async () => {
+  test('assignee search does not call user profile suggest in this component', async () => {
     const contextMock = getOptionsListContextMock();
     contextMock.componentApi.fieldName$.next('kibana.alert.workflow_assignee_ids');
     contextMock.componentApi.setSearchString('user');
 
-    httpFetchMock.mockImplementation(async (path: string) => {
-      if (path === '/internal/detection_engine/users/_find') {
-        return [
-          {
-            uid: 'uid-9',
-            enabled: true,
-            user: { username: 'user9', full_name: 'User Nine' },
-            data: { avatar: {} },
-          },
-        ];
-      }
-      return [];
-    });
-    httpPostMock.mockImplementation(async (path: string) => {
-      if (path === '/internal/security/user_profile/_bulk_get') {
-        return [
-          {
-            uid: 'uid-9',
-            enabled: true,
-            user: { username: 'user9', full_name: 'User Nine' },
-            data: { avatar: {} },
-          },
-        ];
-      }
-      return [];
-    });
-
     const suggestionsComponent = mountComponent(contextMock);
 
     await waitFor(() => {
-      expect(httpFetchMock).toHaveBeenCalledWith('/internal/detection_engine/users/_find', expect.anything());
-      expect(suggestionsComponent.getByText('User Nine')).toBeInTheDocument();
+      expect(suggestionsComponent.getByText('No options found')).toBeInTheDocument();
     });
+    expect(mockHttpFetch).not.toHaveBeenCalled();
+    expect(mockHttpPost).not.toHaveBeenCalled();
   });
 
   test('assignee search falls back to default suggestions when user search fails', async () => {
@@ -241,8 +172,8 @@ describe('Options list popover', () => {
     contextMock.componentApi.setAvailableOptions([{ value: 'uid-1', docCount: 1 }]);
     contextMock.componentApi.setSearchString('user');
 
-    httpFetchMock.mockRejectedValueOnce(new Error('forbidden'));
-    httpPostMock.mockImplementation(async (path: string) => {
+    mockHttpFetch.mockRejectedValueOnce(new Error('forbidden'));
+    mockHttpPost.mockImplementation(async (path: string) => {
       if (path === '/internal/security/user_profile/_bulk_get') return [];
       return [];
     });
@@ -254,24 +185,23 @@ describe('Options list popover', () => {
     });
   });
 
-  test('assignee ids field shows a \"No assignees\" option and toggles does-not-exist state', async () => {
+  test('hideExists removes exists option and still allows selecting available values', async () => {
     const contextMock = getOptionsListContextMock();
     contextMock.componentApi.fieldName$.next('kibana.alert.workflow_assignee_ids');
+    contextMock.componentApi.setAvailableOptions([{ value: 'uid-1', docCount: 1 }]);
     // emulate FilterGroup hiding the built-in exists option
     const suggestionsComponent = mountComponent({
       ...contextMock,
       displaySettings: { hideExists: true } as any,
     });
 
-    const option = await suggestionsComponent.findByTestId(
-      'optionsList-control-selection-no-assignees'
-    );
+    const option = await suggestionsComponent.findByTestId('optionsList-control-selection-uid-1');
     fireEvent.click(option);
 
-    expect(contextMock.componentApi.makeSelection).toHaveBeenCalledWith(
-      '__options_list_no_assignees__',
-      false
-    );
+    expect(
+      suggestionsComponent.queryByTestId('optionsList-control-selection-exists')
+    ).not.toBeInTheDocument();
+    expect(contextMock.componentApi.makeSelection).toHaveBeenCalledWith('uid-1', false);
   });
 
   test('does not fetch user profiles for non-assignee fields', async () => {
@@ -286,8 +216,8 @@ describe('Options list popover', () => {
       expect(optionComponents.length).toBeGreaterThan(0);
     });
 
-    expect(httpPostMock).not.toHaveBeenCalled();
-    expect(httpFetchMock).not.toHaveBeenCalled();
+    expect(mockHttpPost).not.toHaveBeenCalled();
+    expect(mockHttpFetch).not.toHaveBeenCalled();
     // Default behavior: raw value is displayed.
     expect(suggestionsComponent.getByText('uid-1')).toBeInTheDocument();
   });
