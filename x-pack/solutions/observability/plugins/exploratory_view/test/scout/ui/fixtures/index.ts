@@ -6,11 +6,10 @@
  */
 
 import type {
-  PageObjects,
-  ScoutTestFixtures,
-  ScoutWorkerFixtures,
-  ScoutParallelTestFixtures,
-  ScoutParallelWorkerFixtures,
+  ObltTestFixtures,
+  ObltWorkerFixtures,
+  ObltParallelTestFixtures,
+  ObltParallelWorkerFixtures,
 } from '@kbn/scout-oblt';
 import {
   test as baseTest,
@@ -19,26 +18,26 @@ import {
 } from '@kbn/scout-oblt';
 import { ExploratoryViewPage } from './page_objects';
 
-export interface ExtScoutTestFixtures extends ScoutTestFixtures {
-  pageObjects: PageObjects & {
+export interface ExploratoryViewTestFixtures {
+  pageObjects: ObltTestFixtures['pageObjects'] & {
     exploratoryView: ExploratoryViewPage;
   };
 }
 
-export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
+export const test = baseTest.extend<ExploratoryViewTestFixtures>({
   pageObjects: async (
     {
       pageObjects,
       page,
       kbnUrl,
     }: {
-      pageObjects: ExtScoutTestFixtures['pageObjects'];
-      page: ExtScoutTestFixtures['page'];
-      kbnUrl: ExtScoutTestFixtures['kbnUrl'];
+      pageObjects: ObltTestFixtures['pageObjects'];
+      page: ObltTestFixtures['page'];
+      kbnUrl: ObltWorkerFixtures['kbnUrl'];
     },
-    use: (pageObjects: ExtScoutTestFixtures['pageObjects']) => Promise<void>
+    use: (pageObjects: ExploratoryViewTestFixtures['pageObjects']) => Promise<void>
   ) => {
-    const extendedPageObjects = {
+    const extendedPageObjects: ExploratoryViewTestFixtures['pageObjects'] = {
       ...pageObjects,
       exploratoryView: createLazyPageObject(ExploratoryViewPage, page, kbnUrl),
     };
@@ -47,15 +46,15 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
   },
 });
 
-export interface ExtParallelRunTestFixtures extends ScoutParallelTestFixtures {
-  pageObjects: PageObjects & {
+export interface ExploratoryViewParallelTestFixtures {
+  pageObjects: ObltParallelTestFixtures['pageObjects'] & {
     exploratoryView: ExploratoryViewPage;
   };
 }
 
 export const spaceTest = spaceBaseTest.extend<
-  ExtParallelRunTestFixtures,
-  ScoutParallelWorkerFixtures
+  ExploratoryViewParallelTestFixtures,
+  ObltParallelWorkerFixtures
 >({
   pageObjects: async (
     {
@@ -63,13 +62,13 @@ export const spaceTest = spaceBaseTest.extend<
       page,
       kbnUrl,
     }: {
-      pageObjects: ExtParallelRunTestFixtures['pageObjects'];
-      page: ExtParallelRunTestFixtures['page'];
-      kbnUrl: ExtParallelRunTestFixtures['kbnUrl'];
+      pageObjects: ObltParallelTestFixtures['pageObjects'];
+      page: ObltParallelTestFixtures['page'];
+      kbnUrl: ObltParallelWorkerFixtures['kbnUrl'];
     },
-    use: (pageObjects: ExtParallelRunTestFixtures['pageObjects']) => Promise<void>
+    use: (pageObjects: ExploratoryViewParallelTestFixtures['pageObjects']) => Promise<void>
   ) => {
-    const extendedPageObjects = {
+    const extendedPageObjects: ExploratoryViewParallelTestFixtures['pageObjects'] = {
       ...pageObjects,
       exploratoryView: createLazyPageObject(ExploratoryViewPage, page, kbnUrl),
     };
