@@ -212,8 +212,10 @@ export function EditorFrame(props: EditorFrameProps) {
                 {/* Scrollable config panel content area - takes remaining height */}
                 <div
                   className="eui-scrollBar"
+                  data-test-subj="lnsConfigPanelScrollContainer"
                   css={css`
                     flex: 1;
+                    min-height: 0; /* Required for overflow to work in flex container */
                     overflow-y: auto;
                     background-color: ${euiTheme.colors.emptyShade};
                   `}

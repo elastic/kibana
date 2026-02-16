@@ -155,6 +155,7 @@ export function FrameLayout(props: FrameLayoutProps) {
                   min-width: 358px;
                   max-width: 440px;
                   max-height: 100%;
+                  overflow: hidden; /* Required to constrain flex children for scrolling */
                   ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
                     max-width: 100%;
                   }
