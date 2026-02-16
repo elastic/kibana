@@ -47,7 +47,7 @@ export const MwsCalloutContent = ({ activeMWs }: { activeMWs: MaintenanceWindow[
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.synthetics.maintenanceWindowCallout.nextSyncNote"
-              defaultMessage="Maintenance window changes are applied to private location monitors within {syncInterval} {syncInterval, plural, one {minute} other {minutes}}."
+              defaultMessage="It may take up to {syncInterval} {syncInterval, plural, one {minute} other {minutes}} for maintenance window changes to be applied to private location monitors."
               values={{ syncInterval }}
             />
           </EuiText>

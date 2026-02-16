@@ -17,13 +17,13 @@ export const MwsPendingSyncCallout = ({ syncInterval }: { syncInterval: number }
         title={i18n.translate('xpack.synthetics.maintenanceWindowCallout.pendingSync.title', {
           defaultMessage: 'Maintenance window changes pending',
         })}
-        color="primary"
+        color="warning"
         iconType="info"
         data-test-subj="maintenanceWindowPendingSyncCallout"
       >
         <FormattedMessage
           id="xpack.synthetics.maintenanceWindowCallout.pendingSync.description"
-          defaultMessage="One or more maintenance windows assigned to this monitor have been recently modified or deleted. Changes will be applied to private location monitors within {syncInterval} {syncInterval, plural, one {minute} other {minutes}}."
+          defaultMessage="One or more maintenance windows have been recently modified or deleted. It may take up to {syncInterval} {syncInterval, plural, one {minute} other {minutes}} for changes to be applied to private location monitors."
           values={{ syncInterval }}
         />
       </EuiCallOut>

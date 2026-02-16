@@ -29,6 +29,15 @@ export const useHasPendingMwChanges = (monitorMWIds: string[]) => {
   const { data: allMWsData } = useSelector(selectMaintenanceWindowsState);
   const { lastRefresh } = useSyntheticsRefreshContext();
 
+  const hasMonitorMWs = monitorMWIds.length > 0;
+
+  const activeMWs: MaintenanceWindow[] =
+    hasMonitorMWs && activeMWsData?.length
+      ? activeMWsData.filter((mw) => monitorMWIds.includes(mw.id))
+      : [];
+
+  const needsPendingCheck = hasMonitorMWs && activeMWs.length === 0;
+
   const activeIdsKey = useMemo(
     () =>
       activeMWsData
@@ -39,20 +48,15 @@ export const useHasPendingMwChanges = (monitorMWIds: string[]) => {
   );
 
   useEffect(() => {
-    dispatch(getMaintenanceWindowsAction.get());
-  }, [dispatch, lastRefresh, activeIdsKey]);
+    if (needsPendingCheck) {
+      dispatch(getMaintenanceWindowsAction.get());
+    }
+  }, [dispatch, lastRefresh, activeIdsKey, needsPendingCheck]);
 
   const syncInterval = useSyncInterval();
 
-  const hasMonitorMWs = monitorMWIds.length > 0;
-
-  const activeMWs: MaintenanceWindow[] =
-    hasMonitorMWs && activeMWsData?.length
-      ? activeMWsData.filter((mw) => monitorMWIds.includes(mw.id))
-      : [];
-
   const hasPendingChanges = (() => {
-    if (!hasMonitorMWs || allMWsData == null) return false;
+    if (!needsPendingCheck || allMWsData == null) return false;
 
     const allMWsById = new Map(allMWsData.data.map((mw) => [mw.id, mw]));
     const syncWindowMs = syncInterval * 60 * 1000;
@@ -62,15 +66,12 @@ export const useHasPendingMwChanges = (monitorMWIds: string[]) => {
       const mw = allMWsById.get(id);
       if (!mw) return true;
 
-      const isActive = activeMWs.some((a) => a.id === id);
-      if (!isActive) {
-        const updatedAtStr = (mw as unknown as Record<string, unknown>).updated_at as
-          | string
-          | undefined;
-        if (updatedAtStr) {
-          const updatedAt = new Date(updatedAtStr).getTime();
-          return now - updatedAt < syncWindowMs;
-        }
+      const updatedAtStr = (mw as unknown as Record<string, unknown>).updated_at as
+        | string
+        | undefined;
+      if (updatedAtStr) {
+        const updatedAt = new Date(updatedAtStr).getTime();
+        return now - updatedAt < syncWindowMs;
       }
 
       return false;
