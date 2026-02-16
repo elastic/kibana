@@ -668,6 +668,7 @@ export interface CustomAssetFailedAttempt extends FailedAttempt {
 }
 
 export enum INSTALL_STATES {
+  RESOLVE_DEPENDENCIES = 'resolve_dependencies',
   CREATE_RESTART_INSTALLATION = 'create_restart_installation',
   INSTALL_PRECHECK = 'install_precheck',
   INSTALL_ESQL_VIEWS = 'install_esql_views',
@@ -728,6 +729,10 @@ export interface Installation {
   previous_version?: string | null;
   rolled_back?: boolean;
   is_rollback_ttl_expired?: boolean;
+  dependencies?: Array<{
+    name: string;
+    version: string;
+  }> | null;
 }
 
 export interface PackageUsageStats {
