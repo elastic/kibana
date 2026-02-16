@@ -189,8 +189,9 @@ export function TransactionDistribution({
       transactionType,
       sampleRangeFrom,
       sampleRangeTo,
+      traceId,
     }),
-    [kuery, transactionName, transactionType, sampleRangeFrom, sampleRangeTo]
+    [kuery, transactionName, transactionType, sampleRangeFrom, sampleRangeTo, traceId]
   );
 
   return (

@@ -15,6 +15,7 @@ import {
   SPAN_DURATION,
   SPAN_ID,
   SPAN_NAME,
+  TRACE_ID,
   TRANSACTION_DURATION,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
@@ -42,6 +43,7 @@ export interface ESQLQueryParams {
   dependencyName?: string;
   spanName?: string;
   spanId?: string;
+  traceId?: string;
   errorGroupId?: string;
 }
 
@@ -75,6 +77,7 @@ export const getESQLQuery = ({
     dependencyName,
     spanName,
     spanId,
+    traceId,
     errorGroupId,
   } = params;
 
@@ -88,18 +91,6 @@ export const getESQLQuery = ({
     query = query.where`${esql.col(SERVICE_NAME)} == ${serviceName}`;
   }
 
-  if (spanId) {
-    query = query.where`${esql.col(SPAN_ID)} == ${spanId}`;
-  }
-
-  if (
-    environment &&
-    environment !== ENVIRONMENT_ALL_VALUE &&
-    environment !== ENVIRONMENT_NOT_DEFINED_VALUE
-  ) {
-    query = query.where`${esql.col(SERVICE_ENVIRONMENT)} == ${environment}`;
-  }
-
   if (transactionName) {
     query = query.where`${esql.col(TRANSACTION_NAME)} == ${transactionName}`;
   } else if (spanName) {
@@ -110,8 +101,24 @@ export const getESQLQuery = ({
     query = query.where`${esql.col(TRANSACTION_TYPE)} == ${transactionType}`;
   }
 
+  if (
+    environment &&
+    environment !== ENVIRONMENT_ALL_VALUE &&
+    environment !== ENVIRONMENT_NOT_DEFINED_VALUE
+  ) {
+    query = query.where`${esql.col(SERVICE_ENVIRONMENT)} == ${environment}`;
+  }
+
   if (dependencyName) {
     query = query.where`${esql.col(SPAN_DESTINATION_SERVICE_RESOURCE)} == ${dependencyName}`;
+  }
+
+  if (spanId) {
+    query = query.where`${esql.col(SPAN_ID)} == ${spanId}`;
+  }
+
+  if (traceId) {
+    query = query.where`${esql.col(TRACE_ID)} == ${traceId}`;
   }
 
   if (sampleRangeFrom && sampleRangeTo) {

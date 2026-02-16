@@ -107,7 +107,7 @@ export function TraceExplorerWaterfall() {
     [history]
   );
 
-  const queryParams = useMemo(() => ({ kuery }), [kuery]);
+  const queryParams = useMemo(() => ({ kuery, traceId }), [kuery, traceId]);
 
   const isWaterfallLoading =
     waterfallFetchResult.status === FETCH_STATUS.LOADING &&

@@ -160,8 +160,9 @@ export function DependencyOperationDetailView() {
       dependencyName,
       sampleRangeFrom,
       sampleRangeTo,
+      traceId: selectedSample?.traceId,
     }),
-    [kuery, spanName, dependencyName, sampleRangeFrom, sampleRangeTo]
+    [kuery, spanName, dependencyName, sampleRangeFrom, sampleRangeTo, selectedSample?.traceId]
   );
 
   return (
