@@ -9,7 +9,7 @@ plugins:
     - dashboard
     - discover_enhanced
     - entity_store
-    - exploratoryView
+    - exploratory_view
     - fleet
     - gen_ai_settings
     - global_search
