@@ -34,11 +34,19 @@ export const muteAlertQuerySchema = schema.maybe(
 );
 
 const snoozeConditionSchema = schema.object({
-  type: schema.oneOf([
-    schema.literal('severity_change'),
-    schema.literal('severity_equals'),
-    schema.literal('field_change'),
-  ]),
+  type: schema.oneOf(
+    [
+      schema.literal('severity_change'),
+      schema.literal('severity_equals'),
+      schema.literal('field_change'),
+    ],
+    {
+      meta: {
+        description:
+          "The kind of condition: 'severity_change' unmutes when the value differs from the snapshot, 'severity_equals' unmutes when the value matches a target, 'field_change' unmutes when any monitored field changes.",
+      },
+    }
+  ),
   field: schema.string({
     meta: { description: 'The alert document field to monitor (e.g. kibana.alert.severity).' },
   }),
