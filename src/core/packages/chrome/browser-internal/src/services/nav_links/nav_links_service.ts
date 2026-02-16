@@ -49,8 +49,6 @@ export class NavLinksService {
         navLinks$.next(navlinks);
       });
 
-    const forceAppSwitcherNavigation$ = new BehaviorSubject(false);
-
     return {
       getNavLinks$: () => {
         return navLinks$.pipe(map(sortNavLinks), takeUntil(this.stop$));
@@ -67,14 +65,6 @@ export class NavLinksService {
 
       has(id: string) {
         return navLinks$.value.has(id);
-      },
-
-      enableForcedAppSwitcherNavigation() {
-        forceAppSwitcherNavigation$.next(true);
-      },
-
-      getForceAppSwitcherNavigation$() {
-        return forceAppSwitcherNavigation$.asObservable();
       },
     };
   }

@@ -27,6 +27,7 @@ import type { OutputsForAgentPolicy } from '../../../../../../../../server/types
 
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useAgentVersion } from '../../../../../hooks';
+import { hasVersionSuffix } from '../../../../../../../../common/services/version_specific_policies_utils';
 import { isAgentUpgradeable } from '../../../../../services';
 import { AgentPolicySummaryLine } from '../../../../../components';
 import { AgentHealth } from '../../../components';
@@ -180,7 +181,12 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 defaultMessage: 'Agent policy',
               }),
               description: agentPolicy ? (
-                <AgentPolicySummaryLine policy={agentPolicy} agent={agent} />
+                <AgentPolicySummaryLine
+                  policy={agentPolicy}
+                  agent={agent}
+                  showPolicyId
+                  isVersionSpecific={hasVersionSuffix(agent.policy_id ?? '')}
+                />
               ) : (
                 <EuiSkeletonText lines={1} />
               ),
