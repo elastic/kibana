@@ -75,7 +75,6 @@ describe('getInitialAppState', () => {
           },
         },
       }),
-      timeRestore: false,
       services,
     });
     const appState = getInitialAppState({
@@ -122,7 +121,6 @@ describe('getInitialAppState', () => {
           },
         },
       }),
-      timeRestore: false,
       services,
     });
     const appState = getInitialAppState({
@@ -237,7 +235,6 @@ describe('getInitialAppState', () => {
   const getPersistedTab = ({ services }: { services: DiscoverServices }) =>
     fromTabStateToSavedObjectTab({
       tab: getTabStateMock({ id: 'mock-tab' }),
-      timeRestore: false,
       services,
     });
 

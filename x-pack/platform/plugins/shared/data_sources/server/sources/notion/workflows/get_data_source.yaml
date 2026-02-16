@@ -11,6 +11,6 @@ inputs:
 steps:
   - name: get-data-source
     type: notion.getDataSource
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= notion-stack-connector-id %>
     with:
       dataSourceId: "${{inputs.data_source_id}}"

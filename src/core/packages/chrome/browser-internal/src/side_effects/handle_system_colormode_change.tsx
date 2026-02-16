@@ -19,6 +19,7 @@ import { take, type Observable } from 'rxjs';
 import { browsersSupportsSystemTheme } from '@kbn/core-theme-browser-internal';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { Logger } from '@kbn/logging';
 
 const doSyncWithSystem = (
   userSettings: { darkMode?: string } = { darkMode: 'space_default' },
@@ -73,12 +74,13 @@ const doHandle = async ({
   return true;
 };
 
-export async function handleSystemColorModeChange({
+export function handleSystemColorModeChange({
   getNotifications,
   uiSettings,
   coreStart,
   stop$,
   http,
+  logger,
 }: {
   getNotifications: () => Promise<NotificationsStart>;
   http: InternalHttpStart;
@@ -89,62 +91,78 @@ export async function handleSystemColorModeChange({
     userProfile: UserProfileService;
   };
   stop$: Observable<void>;
-}) {
-  if (!(await doHandle({ http, uiSettings, coreStart }))) {
-    return;
-  }
+  logger: Logger;
+}): void {
+  void doHandle({ http, uiSettings, coreStart })
+    .then((shouldHandle) => {
+      if (!shouldHandle) {
+        return;
+      }
 
-  let currentDarkModeValue: boolean | undefined;
-  const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
+      let currentDarkModeValue: boolean | undefined;
+      const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
 
-  const onDarkModeChange = async ({ matches: isDarkMode }: { matches: boolean }) => {
-    if (currentDarkModeValue === undefined) {
-      // The current value can only be set on page reload as that's the moment when
-      // we actually apply set the dark/light color mode of the page.
-      currentDarkModeValue = isDarkMode;
-    } else if (currentDarkModeValue !== isDarkMode) {
-      (await getNotifications()).toasts.addInfo(
-        {
-          title: i18n.translate('core.ui.chrome.appearanceChange.successNotificationTitle', {
-            defaultMessage: 'System color mode updated',
-          }),
-          text: mountReactNode(
-            <>
-              <p>
-                {i18n.translate('core.ui.chrome.appearanceChange.successNotificationText', {
-                  defaultMessage: 'Reload the page to see the changes',
-                })}
-              </p>
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    size="s"
-                    onClick={() => window.location.reload()}
-                    data-test-subj="windowReloadButton"
-                    autoFocus
-                  >
-                    {i18n.translate(
-                      'core.ui.chrome.appearanceChange.requiresPageReloadButtonLabel',
-                      {
-                        defaultMessage: 'Reload page',
-                      }
-                    )}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          ),
-        },
-        { toastLifeTimeMs: Infinity } // leave it on until discard or page reload
-      );
-    }
-  };
+      const onDarkModeChange = ({ matches: isDarkMode }: { matches: boolean }) => {
+        if (currentDarkModeValue === undefined) {
+          // The current value can only be set on page reload as that's the moment when
+          // we actually apply set the dark/light color mode of the page.
+          currentDarkModeValue = isDarkMode;
+        } else if (currentDarkModeValue !== isDarkMode) {
+          void getNotifications()
+            .then((notifications) => {
+              notifications.toasts.addInfo(
+                {
+                  title: i18n.translate(
+                    'core.ui.chrome.appearanceChange.successNotificationTitle',
+                    {
+                      defaultMessage: 'System color mode updated',
+                    }
+                  ),
+                  text: mountReactNode(
+                    <>
+                      <p>
+                        {i18n.translate('core.ui.chrome.appearanceChange.successNotificationText', {
+                          defaultMessage: 'Reload the page to see the changes',
+                        })}
+                      </p>
+                      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                        <EuiFlexItem grow={false}>
+                          <EuiButton
+                            size="s"
+                            onClick={() => window.location.reload()}
+                            data-test-subj="windowReloadButton"
+                            autoFocus
+                          >
+                            {i18n.translate(
+                              'core.ui.chrome.appearanceChange.requiresPageReloadButtonLabel',
+                              {
+                                defaultMessage: 'Reload page',
+                              }
+                            )}
+                          </EuiButton>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </>
+                  ),
+                },
+                { toastLifeTimeMs: Infinity } // leave it on until discard or page reload
+              );
+            })
+            .catch((error) => {
+              logger.error(error);
+            });
+        }
+      };
 
-  onDarkModeChange(matchMedia);
+      onDarkModeChange(matchMedia);
 
-  matchMedia.addEventListener('change', onDarkModeChange);
+      matchMedia.addEventListener('change', onDarkModeChange);
 
-  stop$.pipe(take(1)).subscribe(() => {
-    matchMedia.removeEventListener('change', onDarkModeChange);
-  });
+      stop$.pipe(take(1)).subscribe(() => {
+        matchMedia.removeEventListener('change', onDarkModeChange);
+      });
+    })
+    .catch((error) => {
+      logger.error(error);
+    });
 }
