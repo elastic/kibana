@@ -93,7 +93,7 @@ jest.mock('../../common/constants', () => {
   const actual = jest.requireActual('../../common/constants');
   return {
     ...actual,
-    MAX_DIMENSIONS_SELECTIONS: 10, // Override for tests to allow multiple selections
+    MAX_DIMENSIONS_SELECTIONS: 5, // Override for tests to allow multiple selections
   };
 });
 
