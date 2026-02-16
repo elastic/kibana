@@ -13,6 +13,7 @@ import { formatDate } from './utils/helpers';
 import { customInstructionsBlock } from './utils/custom_instructions';
 import { formatResearcherActionHistory, formatAnswerActionHistory } from './utils/actions';
 import { renderVisualizationPrompt } from './utils/visualizations';
+import { renderAttachmentPrompt } from './utils/attachment_rendering';
 import { attachmentTypeInstructions } from './utils/attachments';
 import type { PromptFactoryParams, AnswerAgentPromptRuntimeParams } from './types';
 
@@ -79,7 +80,9 @@ ${attachmentTypeInstructions(attachmentTypes)}
 
 ## CUSTOM RENDERING
 
-${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
+${visEnabled ? renderVisualizationPrompt() : ''}
+
+${renderAttachmentPrompt()}
 
 ## ADDITIONAL INFO
 - Current date: ${formatDate(conversationTimestamp)}
@@ -149,7 +152,9 @@ ${attachmentTypeInstructions(attachmentTypes)}
 
 ## CUSTOM RENDERING
 
-${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
+${visEnabled ? renderVisualizationPrompt() : ''}
+
+${renderAttachmentPrompt()}
 
 ## ADDITIONAL INFO
 - Current date: ${formatDate(conversationTimestamp)}
