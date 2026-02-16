@@ -99,6 +99,16 @@ jest.mock('../../../../hooks/use_stream_detail', () => ({
   }),
 }));
 
+// Mock useStreamsAppFetch for available tags
+jest.mock('../../../../hooks/use_streams_app_fetch', () => ({
+  useStreamsAppFetch: () => ({
+    value: { streams: [], canReadFailureStore: true },
+    loading: false,
+    error: undefined,
+    refresh: jest.fn(),
+  }),
+}));
+
 // Mock hooks used by StreamTitlePanel and StreamTagsPanel
 jest.mock('../../../../hooks/use_update_streams', () => ({
   useUpdateStreams: () => jest.fn().mockResolvedValue({}),

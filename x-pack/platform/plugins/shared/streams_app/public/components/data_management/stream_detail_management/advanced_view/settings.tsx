@@ -31,6 +31,7 @@ import { getFormattedError } from '../../../../util/errors';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 import { useUpdateStreams } from '../../../../hooks/use_update_streams';
+import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { Row, RowMetadata } from './row';
 import { parseDuration } from '../../stream_detail_lifecycle/helpers/helpers';
 import { StreamMetadataForm } from './stream_metadata_form';
@@ -94,6 +95,31 @@ export function Settings({
   const abortController = useAbortController();
   const updateStream = useUpdateStreams(definition.stream.name);
   const canManage = definition.privileges.manage === true;
+
+  // Fetch all streams to extract available tags for typeahead
+  const streamsListFetch = useStreamsAppFetch(
+    async ({ signal }) =>
+      streamsRepositoryClient.fetch('GET /internal/streams', {
+        signal,
+      }),
+    [streamsRepositoryClient]
+  );
+
+  // Extract unique tags from all streams for typeahead suggestions
+  const availableTags = useMemo(() => {
+    if (!streamsListFetch.value?.streams) {
+      return [];
+    }
+    const tagsSet = new Set<string>();
+    for (const stream of streamsListFetch.value.streams) {
+      if (Streams.ingest.all.Definition.is(stream.stream) && stream.stream.tags) {
+        for (const tag of stream.stream.tags) {
+          tagsSet.add(tag);
+        }
+      }
+    }
+    return Array.from(tagsSet).sort();
+  }, [streamsListFetch.value?.streams]);
 
   // Index settings state
   const originalSettings = useMemo(
@@ -360,6 +386,7 @@ export function Settings({
       <StreamMetadataForm
         tags={metadata.tags}
         onTagsChange={(tags) => setMetadata((prev) => ({ ...prev, tags }))}
+        availableTags={availableTags}
         description={metadata.description}
         onDescriptionChange={(value) => setMetadata((prev) => ({ ...prev, description: value }))}
         showDescription={showDescription}

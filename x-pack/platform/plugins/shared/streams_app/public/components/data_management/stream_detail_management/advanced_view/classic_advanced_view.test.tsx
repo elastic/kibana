@@ -105,23 +105,37 @@ jest.mock('../../../../hooks/use_update_streams', () => ({
   useUpdateStreams: () => jest.fn().mockResolvedValue({}),
 }));
 
+// Mock useStreamsAppFetch - returns different values depending on the callback
 jest.mock('../../../../hooks/use_streams_app_fetch', () => ({
-  useStreamsAppFetch: () => ({
-    value: {
-      indexTemplate: {
-        name: 'logs-test-template',
-        index_template: {
-          index_patterns: ['logs-test-*'],
-          _meta: {},
+  useStreamsAppFetch: (callback: Function) => {
+    // Check if this is for streams list (returns {streams}) or unmanaged assets
+    const callbackStr = callback.toString();
+    if (callbackStr.includes('GET /internal/streams')) {
+      return {
+        value: { streams: [], canReadFailureStore: true },
+        loading: false,
+        error: undefined,
+        refresh: jest.fn(),
+      };
+    }
+    // For unmanaged elasticsearch assets
+    return {
+      value: {
+        indexTemplate: {
+          name: 'logs-test-template',
+          index_template: {
+            index_patterns: ['logs-test-*'],
+            _meta: {},
+          },
         },
+        ingestPipeline: { name: 'logs-test-pipeline', _meta: {} },
+        dataStream: { name: 'logs-test-default', indices: [], status: 'green' },
+        componentTemplates: [],
       },
-      ingestPipeline: { name: 'logs-test-pipeline', _meta: {} },
-      dataStream: { name: 'logs-test-default', indices: [], status: 'green' },
-      componentTemplates: [],
-    },
-    loading: false,
-    error: null,
-  }),
+      loading: false,
+      error: null,
+    };
+  },
 }));
 
 jest.mock('../../../../hooks/use_kibana', () => ({

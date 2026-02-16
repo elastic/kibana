@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeader,
@@ -177,18 +176,6 @@ export function Wrapper({
                       verbose={true}
                       showTooltip={true}
                     />
-                    {Streams.ingest.all.GetResponse.is(definition) &&
-                      definition.stream.tags &&
-                      definition.stream.tags.length > 0 &&
-                      definition.stream.tags.map((tag) => (
-                        <EuiBadge
-                          key={tag}
-                          color="hollow"
-                          data-test-subj={`streamHeaderTag-${tag}`}
-                        >
-                          {tag}
-                        </EuiBadge>
-                      ))}
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>

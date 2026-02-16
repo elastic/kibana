@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DescriptionGenerationTaskResult } from '@kbn/streams-plugin/server/routes/internal/streams/description_generation/route';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { AIFeatures } from '../../../../hooks/use_ai_features';
 import { DescriptionGenerationControl } from '../../../stream_detail_systems/stream_description/description_generation_control';
 import { Row, RowMetadata } from './row';
@@ -62,6 +62,7 @@ const STREAM_DESCRIPTION_PLACEHOLDER = i18n.translate(
 export interface StreamMetadataFormProps {
   tags: string[];
   onTagsChange: (tags: string[]) => void;
+  availableTags?: string[];
   description?: string;
   onDescriptionChange?: (value: string) => void;
   showDescription?: boolean;
@@ -81,6 +82,7 @@ export interface StreamMetadataFormProps {
 export const StreamMetadataForm: React.FC<StreamMetadataFormProps> = ({
   tags,
   onTagsChange,
+  availableTags = [],
   description,
   onDescriptionChange,
   showDescription = false,
@@ -112,6 +114,12 @@ export const StreamMetadataForm: React.FC<StreamMetadataFormProps> = ({
     [tags, onTagsChange]
   );
 
+  // Compute available tag options (excluding already selected tags)
+  const tagOptions = useMemo(() => {
+    const selectedTagSet = new Set(tags);
+    return availableTags.filter((tag) => !selectedTagSet.has(tag)).map((tag) => ({ label: tag }));
+  }, [availableTags, tags]);
+
   const areButtonsDisabled =
     disabled ||
     isTaskLoading ||
@@ -127,7 +135,7 @@ export const StreamMetadataForm: React.FC<StreamMetadataFormProps> = ({
             <EuiComboBox
               data-test-subj="streamMetadataFormTagsInput"
               fullWidth
-              noSuggestions
+              options={tagOptions}
               placeholder={STREAM_TAGS_PLACEHOLDER}
               selectedOptions={tags.map((tag) => ({ label: tag }))}
               onCreateOption={handleTagCreate}
