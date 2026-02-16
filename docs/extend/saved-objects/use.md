@@ -1,5 +1,5 @@
 ---
-navigation_title: Use
+navigation_title: CRUD operations
 ---
 
 # Using Saved Objects services [saved-objects-use]
