@@ -165,6 +165,12 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
         version: {
           type: 'keyword',
         },
+        action_id: {
+          type: 'keyword',
+        },
+        start_date: {
+          type: 'date',
+        },
         ecs_mapping: {
           dynamic: false,
           properties: {},

@@ -42,6 +42,8 @@ export const convertPackQueriesToSO = (queries) =>
           'snapshot',
           'removed',
           'timeout',
+          'action_id',
+          'start_date',
         ]),
         ...(ecsMapping ? { ecs_mapping: ecsMapping } : {}),
       });
@@ -56,6 +58,8 @@ export const convertPackQueriesToSO = (queries) =>
       timeout?: number;
       snapshot?: boolean;
       removed?: boolean;
+      action_id?: string;
+      start_date?: string;
       ecs_mapping?: Record<string, unknown>;
     }>
   );
@@ -90,7 +94,11 @@ export const convertSOQueriesToPackConfig = (
 ) =>
   reduce(
     queries,
-    (acc, { id: queryId, ecs_mapping, query, platform, removed, snapshot, ...rest }, key) => {
+    (
+      acc,
+      { id: queryId, ecs_mapping, query, platform, removed, snapshot, action_id, start_date, ...rest },
+      key
+    ) => {
       const resultType = snapshot === false ? { removed, snapshot } : {};
       const index = queryId ? queryId : key;
       acc[index] = {
@@ -103,6 +111,8 @@ export const convertSOQueriesToPackConfig = (
           : {}),
         ...(platform === DEFAULT_PLATFORM || platform === undefined ? {} : { platform }),
         ...resultType,
+        ...(action_id ? { action_id } : {}),
+        ...(start_date ? { start_date } : {}),
       };
 
       return acc;

@@ -11,7 +11,7 @@ import type { ISearchRequestParams } from '@kbn/search-types';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 
 import { getQueryFilter } from '../../../../../utils/build_query';
-import { ACTIONS_INDEX } from '../../../../../../common/constants';
+import { ACTIONS_INDEX, OSQUERY_SCHEDULED_INPUT_TYPE } from '../../../../../../common/constants';
 
 import type { ActionsRequestOptions } from '../../../../../../common/search_strategy/osquery/actions';
 
@@ -62,10 +62,8 @@ export const buildActionsQuery = ({
             },
           },
           {
-            term: {
-              input_type: {
-                value: 'osquery',
-              },
+            terms: {
+              input_type: ['osquery', OSQUERY_SCHEDULED_INPUT_TYPE],
             },
           },
         ] as estypes.QueryDslQueryContainer[],

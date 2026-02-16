@@ -8,6 +8,7 @@
 import { isArray, isEmpty, pickBy, map, isNumber } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
   EuiCodeBlock,
@@ -21,7 +22,7 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { QUERY_TIMEOUT } from '../../common/constants';
+import { QUERY_TIMEOUT, OSQUERY_SCHEDULED_INPUT_TYPE } from '../../common/constants';
 import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
 import { useAllLiveQueries } from './use_all_live_queries';
 import type { SearchHit } from '../../common/search_strategy';
@@ -79,6 +80,8 @@ const ActionsTableComponent = () => {
   }, []);
 
   const renderQueryColumn = useCallback((_: any, item: any) => {
+    const isScheduled = item._source.input_type === OSQUERY_SCHEDULED_INPUT_TYPE;
+
     if (item._source.pack_name) {
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
@@ -86,6 +89,15 @@ const ActionsTableComponent = () => {
             <EuiIcon type="package" />
           </EuiFlexItem>
           <EuiFlexItem>{item._source.pack_name}</EuiFlexItem>
+          {isScheduled && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">
+                {i18n.translate('xpack.osquery.liveQueryActions.table.scheduledBadge', {
+                  defaultMessage: 'Scheduled',
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       );
     }
@@ -101,10 +113,13 @@ const ActionsTableComponent = () => {
     );
   }, []);
 
-  const renderAgentsColumn = useCallback(
-    (_: any, item: any) => <>{item.fields.agents?.length ?? 0}</>,
-    []
-  );
+  const renderAgentsColumn = useCallback((_: any, item: any) => {
+    if (!item.fields.agents) {
+      return <>{'\u2014'}</>;
+    }
+
+    return <>{item.fields.agents.length}</>;
+  }, []);
 
   const renderCreatedByColumn = useCallback(
     (userId: any) => (isArray(userId) ? userId[0] : '-'),
@@ -186,6 +201,11 @@ const ActionsTableComponent = () => {
 
   const isPlayButtonAvailable = useCallback(
     (item: any) => {
+      // Hide re-run button for scheduled actions
+      if (item._source?.input_type === OSQUERY_SCHEDULED_INPUT_TYPE) {
+        return false;
+      }
+
       if (item.fields.pack_id?.length) {
         return (
           existingPackIds.includes(item.fields.pack_id[0]) &&

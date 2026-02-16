@@ -16,7 +16,7 @@ import type {
   GetLiveQueryDetailsRequestQuerySchema,
 } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-import { API_VERSIONS } from '../../../common/constants';
+import { API_VERSIONS, OSQUERY_SCHEDULED_INPUT_TYPE } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import { getActionResponses } from './utils';
 
@@ -82,6 +82,66 @@ export const getLiveQueryDetailsRoute = (
           );
 
           const queries = actionDetails?._source?.queries;
+          const inputType = actionDetails?._source?.input_type;
+          const isScheduled = inputType === OSQUERY_SCHEDULED_INPUT_TYPE;
+
+          if (isScheduled) {
+            // Scheduled actions: minimal view — no per-agent status, no expiration, no pending calculation
+            const responseData = await lastValueFrom(
+              zip(
+                ...map(queries, (query) =>
+                  getActionResponses(search, query.action_id, 0)
+                )
+              )
+            );
+
+            const agentByActionIdStatusMap = mapKeys(responseData, 'action_id');
+
+            return response.ok({
+              body: {
+                data: {
+                  ...pick(
+                    actionDetails._source,
+                    'action_id',
+                    '@timestamp',
+                    'pack_id',
+                    'pack_name',
+                    'input_type'
+                  ),
+                  queries: reduce<
+                    {
+                      action_id: string;
+                      id: string;
+                      query: string;
+                      agents: string[];
+                      ecs_mapping?: unknown;
+                      version?: string;
+                      platform?: string;
+                      saved_query_id?: string;
+                    },
+                    Array<Record<string, unknown>>
+                  >(
+                    actionDetails._source?.queries,
+                    (acc, query) => {
+                      const agentStatus = agentByActionIdStatusMap[query.action_id];
+
+                      acc.push({
+                        ...query,
+                        ...agentStatus,
+                        status: 'scheduled',
+                      });
+
+                      return acc;
+                    },
+                    [] as Array<Record<string, unknown>>
+                  ),
+                  status: 'scheduled',
+                },
+              },
+            });
+          }
+
+          // Live query actions: standard flow
           const expirationDate = actionDetails?.fields?.expiration[0];
 
           const expired = !expirationDate ? true : new Date(expirationDate) < new Date();
@@ -110,7 +170,8 @@ export const getLiveQueryDetailsRoute = (
                   'user_id',
                   'pack_id',
                   'pack_name',
-                  'prebuilt_pack'
+                  'prebuilt_pack',
+                  'input_type'
                 ),
                 queries: reduce<
                   {

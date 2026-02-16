@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useLayoutEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
+import { OSQUERY_SCHEDULED_INPUT_TYPE } from '../../../../common/constants';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
@@ -26,6 +27,7 @@ const LiveQueryDetailsPageComponent = () => {
   const liveQueryListProps = useRouterNavigate('live_queries');
   const [isLive, setIsLive] = useState(false);
   const { data } = useLiveQueryDetails({ actionId, isLive });
+  const isScheduled = data?.input_type === OSQUERY_SCHEDULED_INPUT_TYPE;
 
   const LeftColumn = useMemo(
     () => (
@@ -39,23 +41,48 @@ const LiveQueryDetailsPageComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText>
-            <h1>
-              <FormattedMessage
-                id="xpack.osquery.liveQueryDetails.pageTitle"
-                defaultMessage="Live query details"
-              />
-            </h1>
-          </EuiText>
+          <EuiFlexGroup alignItems="center" gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <h1>
+                  {isScheduled ? (
+                    <FormattedMessage
+                      id="xpack.osquery.liveQueryDetails.scheduledPageTitle"
+                      defaultMessage="Scheduled query details"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.osquery.liveQueryDetails.pageTitle"
+                      defaultMessage="Live query details"
+                    />
+                  )}
+                </h1>
+              </EuiText>
+            </EuiFlexItem>
+            {isScheduled && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">
+                  <FormattedMessage
+                    id="xpack.osquery.liveQueryDetails.scheduledBadge"
+                    defaultMessage="Scheduled"
+                  />
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [liveQueryListProps]
+    [liveQueryListProps, isScheduled]
   );
 
   useLayoutEffect(() => {
-    setIsLive(() => !(data?.status === 'completed'));
-  }, [data?.status]);
+    if (isScheduled) {
+      setIsLive(false);
+    } else {
+      setIsLive(() => !(data?.status === 'completed'));
+    }
+  }, [data?.status, isScheduled]);
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
@@ -64,9 +91,10 @@ const LiveQueryDetailsPageComponent = () => {
           actionId={actionId}
           data={data?.queries}
           startDate={data?.['@timestamp']}
-          expirationDate={data?.expiration}
-          agentIds={data?.agents}
+          expirationDate={isScheduled ? undefined : data?.expiration}
+          agentIds={isScheduled ? undefined : data?.agents}
           showResultsHeader
+          isScheduled={isScheduled}
         />
       </EuiFlexItem>
     </WithHeaderLayout>

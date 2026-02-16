@@ -20,6 +20,8 @@ export interface PackResponseData {
   saved_object_id: string;
   name: string;
   description: string | undefined;
+  schedule_id?: string;
+  start_date?: string;
   queries: PackQuery[];
   version?: number;
   enabled: boolean | undefined;
@@ -35,6 +37,8 @@ export interface ReadPackResponseData {
   saved_object_id: string;
   name: string;
   description: string | undefined;
+  schedule_id?: string;
+  start_date?: string;
   queries: Record<string, PackQuery>;
   version?: number;
   enabled: boolean | undefined;

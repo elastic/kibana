@@ -69,6 +69,8 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           coreMigrationVersion: rest.coreMigrationVersion,
           name: attributes.name,
           description: attributes.description,
+          schedule_id: id,
+          start_date: attributes.created_at,
           version: attributes.version,
           enabled: attributes.enabled,
           created_at: attributes.created_at,

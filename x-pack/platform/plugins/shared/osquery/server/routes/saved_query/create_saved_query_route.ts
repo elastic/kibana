@@ -119,6 +119,8 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
             timeout: attributes.timeout,
             platform: attributes.platform,
             query: attributes.query,
+            schedule_id: savedQuerySO.id,
+            start_date: attributes.created_at,
             updated_at: attributes.updated_at,
             updated_by: attributes.updated_by,
             saved_object_id: savedQuerySO.id,

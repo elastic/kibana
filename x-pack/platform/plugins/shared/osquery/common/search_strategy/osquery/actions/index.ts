@@ -21,13 +21,14 @@ export interface ActionsStrategyResponse extends IEsSearchResponse {
 
 export interface ActionDetails {
   action_id: string;
-  expiration: string;
+  expiration?: string;
   '@timestamp': string;
-  agent_all: boolean;
-  agent_ids: string[];
-  agent_platforoms: string[];
-  agent_policy_ids: string[];
-  agents: string[];
+  agent_all?: boolean;
+  agent_ids?: string[];
+  agent_platforoms?: string[];
+  agent_policy_ids?: string[];
+  agents?: string[];
+  input_type?: string;
   user_id?: string;
   pack_id?: string;
   pack_name?: string;

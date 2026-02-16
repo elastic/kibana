@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment-timezone';
 import { set } from '@kbn/safer-lodash-set';
 import { has, unset, some, mapKeys } from 'lodash';
@@ -16,6 +17,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import type { CreatePackRequestBodySchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -35,6 +37,7 @@ import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
 import { createPackRequestBodySchema } from '../../../common/api';
 import { getUserInfo } from '../../lib/get_user_info';
+import { createScheduledActionDocument } from '../../handlers/action/create_scheduled_action_document';
 
 type PackSavedObjectLimited = Omit<PackSavedObject, 'saved_object_id' | 'references'>;
 
@@ -81,7 +84,23 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         });
         const username = currentUser?.username ?? undefined;
 
-        const { name, description, queries, enabled, policy_ids, shards = {} } = request.body;
+        const { name, description, queries: rawQueries, enabled, policy_ids, shards = {} } = request.body;
+
+        // Generate per-query action_ids
+        const now = moment().toISOString();
+        const queries = rawQueries
+          ? Object.fromEntries(
+              Object.entries(rawQueries).map(([key, value]) => [
+                key,
+                {
+                  ...value,
+                  action_id: uuidv4(),
+                  start_date: now,
+                },
+              ])
+            )
+          : rawQueries;
+
         const conflictingEntries = await spaceScopedClient.find({
           type: packSavedObjectType,
           filter: `${packSavedObjectType}.attributes.name: "${name}"`,
@@ -172,6 +191,34 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           );
         }
 
+        // Create scheduled action document if pack is enabled and has policy_ids
+        if (enabled && policiesList.length && queries) {
+          const spaceId = osqueryContext?.service?.getActiveSpace
+            ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
+            : DEFAULT_SPACE_ID;
+
+          const scheduledQueries = convertPackQueriesToSO(queries).map((q: { id: string; action_id?: string; query: string; interval?: number; version?: string; platform?: string; timeout?: number }) => ({
+            action_id: q.action_id ?? '',
+            id: q.id,
+            query: q.query,
+            interval: q.interval,
+            version: q.version,
+            platform: q.platform,
+            timeout: q.timeout,
+          }));
+
+          const internalEsClient = coreContext.elasticsearch.client.asInternalUser;
+          await createScheduledActionDocument({
+            esClient: internalEsClient,
+            actionId: packSO.id,
+            packId: packSO.id,
+            packName: name,
+            queries: scheduledQueries,
+            spaceId,
+            logger: osqueryContext.logFactory.get('scheduled-action'),
+          });
+        }
+
         set(packSO, 'attributes.queries', queries);
 
         const { attributes } = packSO;
@@ -179,6 +226,8 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const data: PackResponseData = {
           name: attributes.name,
           description: attributes.description,
+          schedule_id: packSO.id,
+          start_date: attributes.created_at,
           queries: attributes.queries,
           version: attributes.version,
           enabled: attributes.enabled,

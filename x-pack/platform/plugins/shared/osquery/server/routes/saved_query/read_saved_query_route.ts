@@ -114,6 +114,8 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
           timeout,
           platform,
           query,
+          schedule_id: savedQuery.id,
+          start_date: createdAt,
           updated_at: updatedAt,
           updated_by: updatedBy,
           prebuilt,

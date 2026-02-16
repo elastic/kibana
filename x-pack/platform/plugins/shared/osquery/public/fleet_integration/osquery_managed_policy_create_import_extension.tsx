@@ -258,57 +258,61 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
   );
 
   useEffect(() => {
+    if (!editMode || !policy?.policy_ids?.length) {
+      return;
+    }
+
     const policyIdsWithNoAgent: string[] = [];
-    if (editMode && !agentlessPolicyIds?.length) {
-      const fetchAgentsCount = async () => {
-        try {
-          if (policy?.policy_ids?.length) {
-            await Promise.all(
-              policy.policy_ids.map(async (id: string) => {
-                const response = await http.fetch<{ results: { total: number } }>(
-                  agentRouteService.getStatusPath(),
-                  {
-                    query: {
-                      policyId: id,
-                    },
-                  }
-                );
-                if (response.results.total === 0) {
-                  policyIdsWithNoAgent.push(id);
-                }
-              })
+
+    const fetchAgentsCount = async () => {
+      try {
+        await Promise.all(
+          policy.policy_ids.map(async (id: string) => {
+            const response = await http.fetch<{ results: { total: number } }>(
+              agentRouteService.getStatusPath(),
+              {
+                query: {
+                  policyId: id,
+                },
+              }
             );
-            setAgentlessPolicyIds(policyIdsWithNoAgent);
+            if (response.results.total === 0) {
+              policyIdsWithNoAgent.push(id);
+            }
+          })
+        );
+        if (policyIdsWithNoAgent.length) {
+          setAgentlessPolicyIds(policyIdsWithNoAgent);
+        }
+        // eslint-disable-next-line no-empty
+      } catch (e) {}
+    };
+
+    const fetchAgentPolicyDetails = async () => {
+      if (policyIdsWithNoAgent?.length) {
+        const policiesWithoutAgent: AgentPolicy[] = [];
+        try {
+          await Promise.all(
+            policyIdsWithNoAgent.map(async (id) => {
+              const response = await http.fetch<{ item: AgentPolicy }>(
+                agentPolicyRouteService.getInfoPath(id)
+              );
+              if (response.item) {
+                policiesWithoutAgent.push(response.item);
+              }
+            })
+          );
+          if (policiesWithoutAgent.length) {
+            setAgentPolicies(policiesWithoutAgent);
           }
           // eslint-disable-next-line no-empty
         } catch (e) {}
-      };
+      }
+    };
 
-      const fetchAgentPolicyDetails = async () => {
-        if (policyIdsWithNoAgent?.length) {
-          const policiesWithoutAgent: AgentPolicy[] = [];
-          try {
-            await Promise.all(
-              policyIdsWithNoAgent.map(async (id) => {
-                const response = await http.fetch<{ item: AgentPolicy }>(
-                  agentPolicyRouteService.getInfoPath(id)
-                );
-                if (response.item) {
-                  policiesWithoutAgent.push(response.item);
-                }
-              })
-            );
-            if (policiesWithoutAgent.length) {
-              setAgentPolicies(policiesWithoutAgent);
-            }
-            // eslint-disable-next-line no-empty
-          } catch (e) {}
-        }
-      };
-
-      fetchAgentsCount().then(() => fetchAgentPolicyDetails());
-    }
-  }, [editMode, http, agentlessPolicyIds?.length, agentlessPolicyIds, policy?.policy_ids]);
+    fetchAgentsCount().then(() => fetchAgentPolicyDetails());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     /*

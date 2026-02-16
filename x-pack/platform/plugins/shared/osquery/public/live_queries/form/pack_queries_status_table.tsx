@@ -142,6 +142,7 @@ interface PackQueriesStatusTableProps {
   expirationDate?: string;
   showResultsHeader?: boolean;
   addToTimeline?: AddToTimelineHandler;
+  isScheduled?: boolean;
 }
 
 const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = ({
@@ -153,6 +154,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   expirationDate,
   showResultsHeader,
   addToTimeline,
+  isScheduled,
 }) => {
   const [queryDetailsFlyoutOpen, setQueryDetailsFlyoutOpen] = useState<{
     id: string;
@@ -359,14 +361,19 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         width: '80px',
         render: renderDocsColumn,
       },
-      {
-        field: '',
-        name: i18n.translate('xpack.osquery.pack.queriesTable.agentsResultsColumnTitle', {
-          defaultMessage: 'Agents',
-        }),
-        width: '160px',
-        render: renderAgentsColumn,
-      },
+      // Hide Agents column for scheduled actions
+      ...(!isScheduled
+        ? [
+            {
+              field: '',
+              name: i18n.translate('xpack.osquery.pack.queriesTable.agentsResultsColumnTitle', {
+                defaultMessage: 'Agents',
+              }),
+              width: '160px',
+              render: renderAgentsColumn,
+            },
+          ]
+        : []),
       {
         field: '',
         name: i18n.translate('xpack.osquery.pack.queriesTable.viewResultsColumnTitle', {
@@ -389,6 +396,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       },
     ],
     [
+      isScheduled,
       renderIDColumn,
       renderQueryColumn,
       renderDocsColumn,

@@ -14,6 +14,7 @@ import { buildRouteValidation } from '../../utils/build_validation/route_validat
 import { API_VERSIONS } from '../../../common/constants';
 import { isSavedQueryPrebuilt } from './utils';
 import { PLUGIN_ID } from '../../../common';
+import type { SavedQuerySavedObject } from '../../common/types';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
@@ -112,7 +113,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           return response.conflict({ body: `Saved query with id "${id}" already exists.` });
         }
 
-        const updatedSavedQuerySO = await spaceScopedClient.update(
+        await spaceScopedClient.update(
           savedQuerySavedObjectType,
           request.params.id,
           {
@@ -134,17 +135,23 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           }
         );
 
-        if (ecs_mapping || updatedSavedQuerySO.attributes.ecs_mapping) {
+        const savedQuerySO = await spaceScopedClient.get<SavedQuerySavedObject>(
+          savedQuerySavedObjectType,
+          request.params.id
+        );
+
+        if (savedQuerySO.attributes.ecs_mapping) {
           // @ts-expect-error update types
-          updatedSavedQuerySO.attributes.ecs_mapping =
+          savedQuerySO.attributes.ecs_mapping =
             ecs_mapping ||
-            (updatedSavedQuerySO.attributes.ecs_mapping &&
-              // @ts-expect-error update types
-              convertECSMappingToObject(updatedSavedQuerySO.attributes.ecs_mapping)) ||
+            convertECSMappingToObject(savedQuerySO.attributes.ecs_mapping) ||
             {};
+        } else if (ecs_mapping) {
+          // @ts-expect-error update types
+          savedQuerySO.attributes.ecs_mapping = ecs_mapping;
         }
 
-        const { attributes } = updatedSavedQuerySO;
+        const { attributes } = savedQuerySO;
 
         const data: Partial<UpdateSavedQueryResponse> = {
           description: attributes.description,
@@ -157,9 +164,11 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           timeout: attributes.timeout,
           platform: attributes.platform,
           query: attributes.query,
+          schedule_id: savedQuerySO.id,
+          start_date: attributes.created_at,
           updated_at: attributes.updated_at,
           updated_by: attributes.updated_by,
-          saved_object_id: updatedSavedQuerySO.id,
+          saved_object_id: savedQuerySO.id,
         };
 
         return response.ok({

@@ -15,6 +15,8 @@ export interface SavedQueryResponse {
   snapshot?: boolean;
   removed?: boolean;
   platform?: string;
+  schedule_id?: string;
+  start_date?: string;
   ecs_mapping?: Array<{ key: string; value: Record<string, object> }>;
   created_at: string;
   created_by: string | undefined;
@@ -34,6 +36,8 @@ export interface UpdateSavedQueryResponse {
   snapshot?: boolean;
   removed?: boolean;
   platform?: string;
+  schedule_id?: string;
+  start_date?: string;
   ecs_mapping?: Array<{ key: string; value: object }>;
   created_at: string;
   created_by: string | undefined;
