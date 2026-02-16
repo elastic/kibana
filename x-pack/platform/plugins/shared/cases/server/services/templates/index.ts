@@ -51,36 +51,20 @@ export class TemplatesService {
       isDeleted,
     } = params;
 
-    const allLatest = await this.fetchLatestTemplates({ isDeleted, search, tags, author });
-
-    // Sort (must be done in memory — aggregation buckets can't be sorted by arbitrary fields)
-    const sorted = [...allLatest].sort((a, b) => {
-      const aVal = a.attributes[sortField];
-      const bVal = b.attributes[sortField];
-
-      if (aVal == null && bVal == null) return 0;
-      if (aVal == null) return 1;
-      if (bVal == null) return -1;
-
-      let comparison = 0;
-      if (typeof aVal === 'string' && typeof bVal === 'string') {
-        comparison = aVal.localeCompare(bVal);
-      } else if (typeof aVal === 'number' && typeof bVal === 'number') {
-        comparison = aVal - bVal;
-      } else if (typeof aVal === 'boolean' && typeof bVal === 'boolean') {
-        comparison = Number(aVal) - Number(bVal);
-      }
-
-      return sortOrder === 'asc' ? comparison : -comparison;
+    const { templates, total } = await this.searchTemplates({
+      page,
+      perPage,
+      sortField,
+      sortOrder,
+      isDeleted,
+      search,
+      tags,
+      author,
+      isLatest: true,
     });
 
-    // Paginate
-    const total = sorted.length;
-    const start = (page - 1) * perPage;
-    const paginated = sorted.slice(start, start + perPage);
-
     return {
-      templates: paginated.map((so) => so.attributes),
+      templates: templates.map((so) => so.attributes),
       page,
       perPage,
       total,
@@ -91,40 +75,52 @@ export class TemplatesService {
     templateId: string,
     version?: string
   ): Promise<SavedObject<Template> | undefined> {
-    const allLatest = await this.fetchLatestTemplates({ templateId, version });
-    return allLatest[0];
+    const { templates } = await this.searchTemplates({
+      page: 1,
+      perPage: 1,
+      sortField: 'templateVersion',
+      sortOrder: 'desc',
+      templateId,
+      version,
+      ...(version === undefined ? { isLatest: true } : {}),
+    });
+
+    return templates[0];
   }
 
   /**
-   * Fetches the latest version of each template from ES using aggregations.
-   * Filtering (search, tags, author) is pushed into the ES query so fewer
-   * documents enter the aggregation buckets.
+   * Fetches templates from ES using regular search.
    */
-  private async fetchLatestTemplates({
+  private async searchTemplates({
+    page,
+    perPage,
+    sortField,
+    sortOrder,
     isDeleted = false,
     templateId,
     version,
+    isLatest,
     search,
     tags,
     author,
   }: {
+    page: number;
+    perPage: number;
+    sortField: TemplatesFindRequest['sortField'];
+    sortOrder: TemplatesFindRequest['sortOrder'];
     isDeleted?: boolean;
     templateId?: string;
     version?: string;
+    isLatest?: boolean;
     search?: string;
     tags?: string[];
     author?: string[];
-  } = {}): Promise<Array<SavedObject<Template>>> {
+  }): Promise<{ templates: Array<SavedObject<Template>>; total: number }> {
     interface SearchResult {
-      aggregations: {
-        by_template: {
-          buckets: Array<{
-            latest_template: {
-              hits: {
-                hits: SavedObjectsRawDoc[];
-              };
-            };
-          }>;
+      hits: {
+        hits: SavedObjectsRawDoc[];
+        total: {
+          value: number;
         };
       };
     }
@@ -138,6 +134,9 @@ export class TemplatesService {
         : []),
       ...(version
         ? [toElasticsearchQuery(fromKueryExpression(`${SO}.templateVersion: "${version}"`))]
+        : []),
+      ...(isLatest !== undefined
+        ? [toElasticsearchQuery(fromKueryExpression(`${SO}.isLatest: ${isLatest}`))]
         : []),
       ...(tags && tags.length > 0
         ? [
@@ -178,45 +177,46 @@ export class TemplatesService {
         ]
       : [];
 
+    const from = (page - 1) * perPage;
+
+    const sort = [
+      {
+        [`${CASE_TEMPLATE_SAVED_OBJECT}.${sortField}`]: {
+          order: sortOrder,
+          missing: '_last',
+        },
+      },
+      ...(sortField === 'templateId'
+        ? []
+        : [
+            {
+              [`${CASE_TEMPLATE_SAVED_OBJECT}.templateId`]: {
+                order: 'asc' as const,
+              },
+            },
+          ]),
+    ];
+
     const findResult = (await this.dependencies.unsecuredSavedObjectsClient.search({
       namespaces: ['*'],
       type: CASE_TEMPLATE_SAVED_OBJECT,
+      from,
+      size: perPage,
+      sort,
       query: {
         bool: {
           filter: filters,
           ...(must.length > 0 ? { must } : {}),
         },
       },
-      aggs: {
-        by_template: {
-          terms: {
-            field: `${CASE_TEMPLATE_SAVED_OBJECT}.templateId`,
-            size: 10000,
-          },
-          aggs: {
-            latest_template: {
-              top_hits: {
-                size: 1,
-                sort: [
-                  {
-                    [`${CASE_TEMPLATE_SAVED_OBJECT}.templateVersion`]: {
-                      order: 'desc',
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        },
-      },
     })) as SearchResult;
 
-    return findResult.aggregations.by_template.buckets.flatMap(
-      (bucket) =>
-        bucket.latest_template.hits?.hits?.map((hit) =>
-          this.dependencies.savedObjectsSerializer.rawToSavedObject<Template>(hit)
-        ) ?? []
-    );
+    return {
+      templates: findResult.hits.hits.map((hit) =>
+        this.dependencies.savedObjectsSerializer.rawToSavedObject<Template>(hit)
+      ),
+      total: findResult.hits.total.value,
+    };
   }
 
   private async updateMappings(definition: string) {
@@ -249,6 +249,7 @@ export class TemplatesService {
       CASE_TEMPLATE_SAVED_OBJECT,
       {
         templateVersion: 1,
+        isLatest: true,
         deletedAt: null,
         definition: input.definition,
         name: parsedDefinition.name,
@@ -284,6 +285,7 @@ export class TemplatesService {
       CASE_TEMPLATE_SAVED_OBJECT,
       {
         templateVersion: currentTemplate.attributes.templateVersion + 1,
+        isLatest: true,
         definition: input.definition,
         name: parsedDefinition.name,
         owner: input.owner,
@@ -298,6 +300,19 @@ export class TemplatesService {
       {
         refresh: true,
       }
+    );
+
+    await this.dependencies.unsecuredSavedObjectsClient.bulkUpdate(
+      [
+        {
+          id: currentTemplate.id,
+          type: CASE_TEMPLATE_SAVED_OBJECT,
+          attributes: {
+            isLatest: false,
+          },
+        },
+      ],
+      { refresh: true }
     );
 
     await this.updateMappings(input.definition);
