@@ -34,7 +34,7 @@ steps:
     steps:
       - name: download_file
         type: google_drive.downloadFile
-        connector-id: <%= stackConnectorId %>
+        connector-id: <%= google_drive-stack-connector-id %>
         with:
           fileId: "${{foreach.item}}"
       - name: extract_content

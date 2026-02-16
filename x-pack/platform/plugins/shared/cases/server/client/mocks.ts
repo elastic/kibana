@@ -35,6 +35,7 @@ import type { CasesSubClient } from './cases/client';
 import type { ConfigureSubClient, InternalConfigureSubClient } from './configure/client';
 import type { CasesClientFactory } from './factory';
 import type { MetricsSubClient } from './metrics/client';
+import type { TemplatesSubClient } from './templates/client';
 import type { UserActionsSubClient } from './user_actions/client';
 
 import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
@@ -53,6 +54,7 @@ import {
   createLicensingServiceMock,
   createUserActionServiceMock,
   createNotificationServiceMock,
+  createTemplatesServiceMock,
 } from '../services/mocks';
 import { ConfigSchema } from '../config';
 
@@ -135,6 +137,18 @@ const createConfigureSubClientMock = (): ConfigureSubClientMock => {
   });
 };
 
+type TemplatesSubClientMock = jest.Mocked<TemplatesSubClient>;
+
+const createTemplatesSubClientMock = (): TemplatesSubClientMock => {
+  return lazyObject({
+    getAllTemplates: jest.fn(),
+    getTemplate: jest.fn(),
+    createTemplate: jest.fn(),
+    updateTemplate: jest.fn(),
+    deleteTemplate: jest.fn(),
+  });
+};
+
 type InternalConfigureSubClientMock = jest.Mocked<InternalConfigureSubClient>;
 
 const createInternalConfigureSubClientMock = (): InternalConfigureSubClientMock => {
@@ -149,6 +163,7 @@ export interface CasesClientMock extends CasesClient {
   cases: CasesSubClientMock;
   attachments: AttachmentsSubClientMock;
   userActions: UserActionsSubClientMock;
+  templates: TemplatesSubClientMock;
 }
 
 export const createCasesClientMock = (): CasesClientMock => {
@@ -158,6 +173,7 @@ export const createCasesClientMock = (): CasesClientMock => {
     userActions: createUserActionsSubClientMock(),
     configure: createConfigureSubClientMock(),
     metrics: createMetricsSubClientMock(),
+    templates: createTemplatesSubClientMock(),
   });
   return client as unknown as CasesClientMock;
 };
@@ -208,6 +224,7 @@ export const createCasesClientMockArgs = () => {
       userActionService: createUserActionServiceMock(),
       licensingService: createLicensingServiceMock(),
       notificationService: createNotificationServiceMock(),
+      templatesService: createTemplatesServiceMock(),
     },
     authorization: createAuthorizationMock(),
     logger: loggingSystemMock.createLogger(),

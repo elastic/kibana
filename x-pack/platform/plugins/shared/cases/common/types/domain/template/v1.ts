@@ -89,6 +89,7 @@ export type Template = z.infer<typeof TemplateSchema>;
  * Parsed template definition
  */
 export const ParsedTemplateDefinitionSchema = z.object({
+  name: z.string().min(1).max(100),
   fields: z.array(FieldSchema).refine(
     (fields) => {
       const fieldNames = new Set(fields.map((field) => field.name));
@@ -121,6 +122,7 @@ export const CreateTemplateInputSchema = TemplateSchema.omit({
   templateId: true,
   templateVersion: true,
   deletedAt: true,
+  name: true,
 });
 
 export type CreateTemplateInput = z.infer<typeof CreateTemplateInputSchema>;
@@ -132,6 +134,7 @@ export const UpdateTemplateInputSchema = TemplateSchema.omit({
   templateId: true,
   templateVersion: true,
   deletedAt: true,
+  name: true,
 });
 
 export type UpdateTemplateInput = z.infer<typeof UpdateTemplateInputSchema>;

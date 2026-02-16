@@ -13,7 +13,7 @@ import { KBN_ARCHIVES } from '../fixtures/constants';
 /**
  * IMPORTANT: These tests only work in 'classic' navigation mode. Once https://github.com/elastic/kibana/pull/251436 is merged, we might need to revisit this and make them work in 'solution' navigation as well.
  */
-test.describe('GlobalSearch providers', { tag: tags.ESS_ONLY }, () => {
+test.describe('GlobalSearch providers', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.savedObjects.cleanStandardList();
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
