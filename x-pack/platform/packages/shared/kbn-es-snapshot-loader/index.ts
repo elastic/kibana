@@ -11,6 +11,7 @@ export { type RestoreConfig, type ReplayConfig, type LoadResult } from './src/ty
 export {
   createUrlRepository,
   createGcsRepository,
+  type RepositoryType,
   type RepositoryStrategy,
   type GcsRepositoryConfig,
 } from './src/repository';

@@ -8,8 +8,10 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
+export type RepositoryType = 'url' | 'gcs';
+
 export interface RepositoryStrategy {
-  type: string;
+  type: RepositoryType;
   validate(): void;
   register(params: { esClient: Client; log: ToolingLog; repoName: string }): Promise<void>;
 }

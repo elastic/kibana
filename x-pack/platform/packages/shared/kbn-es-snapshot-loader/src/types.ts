@@ -9,8 +9,6 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { RepositoryStrategy } from './repository/types';
 
-export const DEFAULT_DATA_STREAM_PATTERNS = ['logs-*', 'metrics-*', 'traces-*'];
-
 // Snapshot metadata
 export interface SnapshotInfo {
   snapshot: string;

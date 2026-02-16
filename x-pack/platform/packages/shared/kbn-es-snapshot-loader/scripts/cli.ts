@@ -88,9 +88,13 @@ function resolveRepositoryFromFlags(flags: CommonFlags): RepositoryStrategy {
     throw new Error('Cannot use both --snapshot-url and --gcs-* flags');
   }
 
+  if (repoType === 'gcs' && !gcsBucket) {
+    throw new Error('--gcs-bucket is required when using --repo-type gcs');
+  }
+
   if (gcsBucket || repoType === 'gcs') {
     return createGcsRepository({
-      bucket: gcsBucket ?? '',
+      bucket: gcsBucket!,
       basePath: gcsBasePath,
       client: gcsClient,
     });
