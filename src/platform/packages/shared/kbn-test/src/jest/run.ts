@@ -31,7 +31,11 @@ import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
 import type { Config } from '@jest/types';
 
 import jestFlags from './jest_flags.json';
-import { isInBuildkite, isConfigCompleted, markConfigCompleted } from './buildkite_checkpoint';
+import {
+  isInBuildkite,
+  isConfigCompleted,
+  markConfigCompletedSync,
+} from './buildkite_checkpoint';
 import { parseShardAnnotation } from './shard_config';
 
 const JEST_CACHE_DIR = 'data/jest-cache';
@@ -170,16 +174,24 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
       testFiles: testFiles.map((testFile) => relative(currentWorkingDirectory, testFile)),
     });
 
-    // Buildkite checkpoint: mark this config as completed so retries can skip it.
-    // Jest sets process.exitCode before resolving; 0 or undefined means all tests passed.
-    if (
-      isInBuildkite() &&
-      resolvedConfigPath &&
-      (process.exitCode === 0 || process.exitCode === undefined)
-    ) {
+    // Buildkite checkpoint: register exit handler AFTER run() resolves.
+    //
+    // Jest sets process.exitCode inside a process.on('exit') handler that was registered
+    // during run(). By registering our handler here (after run() resolved), it fires
+    // AFTER Jest's handler in the listener queue, so process.exitCode is already correct.
+    //
+    // We check process.exitCode directly (not the code argument) because the argument
+    // reflects the value at emit time, before any handler has run.
+    //
+    // Uses synchronous markConfigCompletedSync because async is not supported in 'exit' handlers.
+    if (isInBuildkite() && resolvedConfigPath) {
       const relConfig = relative(REPO_ROOT, resolvedConfigPath);
-      log.info(`[jest-checkpoint] Marking ${relConfig} as completed`);
-      await markConfigCompleted(relConfig);
+      process.on('exit', () => {
+        if (process.exitCode === 0) {
+          log.info(`[jest-checkpoint] Marking ${relConfig} as completed`);
+          markConfigCompletedSync(relConfig);
+        }
+      });
     }
   });
 }
