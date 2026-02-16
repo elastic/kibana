@@ -16,7 +16,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const aiops = getService('aiops');
   const browser = getService('browser');
-  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const { common, discover, header, timePicker, unifiedFieldList } = getPageObjects([
     'common',
@@ -29,12 +28,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
-
-  async function retrySwitchTab(tabIndex: number, seconds: number) {
-    await retry.tryForTime(seconds * 1000, async () => {
-      await browser.switchTab(tabIndex);
-    });
-  }
 
   describe('log pattern analysis ES|QL in discover', function () {
     before(async () => {
@@ -58,16 +51,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await discover.clickNewSearchButton();
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
-    });
-
-    let tabsCount = 1;
-
-    afterEach(async () => {
-      if (tabsCount > 1) {
-        await browser.closeCurrentWindow();
-        await retrySwitchTab(0, 10);
-        tabsCount--;
-      }
     });
 
     it('should render categorize fields correctly', async () => {
@@ -110,8 +93,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // ensure it opens a new tab and the discover doc count is greater than 0
       // We cannot look for an exact count as the count may vary based on sampling (when that is added)
       await dataGrid.clickCellExpandPopoverAction('patterns-action-view-docs-in-discover');
-      await retrySwitchTab(1, 10);
-      tabsCount++;
+
+      await discover.waitUntilTabIsLoaded();
 
       await aiops.logPatternAnalysisPage.assertDiscoverDocCountExists();
       // ensure the discover doc count is greater than 0

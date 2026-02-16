@@ -96,14 +96,6 @@ field
     : (qualifiedName ASSIGN)? booleanExpression
     ;
 
-rerankFields
-    : rerankField (COMMA rerankField)*
-    ;
-
-rerankField
-    : qualifiedName (ASSIGN booleanExpression)?
-    ;
-
 fromCommand
     : FROM indexPatternAndMetadataFields
     ;
@@ -126,8 +118,7 @@ subquery
     ;
 
 indexPattern
-    : clusterString COLON unquotedIndexString
-    | unquotedIndexString CAST_OP selectorString
+    : (clusterString COLON)? unquotedIndexString (CAST_OP selectorString)?
     | indexString
     ;
 
@@ -331,7 +322,7 @@ forkSubQueryProcessingCommand
     ;
 
 rerankCommand
-    : RERANK (targetField=qualifiedName ASSIGN)? queryText=constant ON rerankFields commandNamedParameters
+    : RERANK (targetField=qualifiedName ASSIGN)? queryText=constant ON rerankFields=fields commandNamedParameters
     ;
 
 completionCommand
@@ -379,14 +370,10 @@ setField
     ;
 
 mmrCommand
-    : DEV_MMR queryVector=mmrOptionalQueryVector diversifyField=qualifiedName MMR_LIMIT limitValue=integerValue commandNamedParameters
+    :  DEV_MMR (queryVector=mmrQueryVectorParams)? ON diversifyField=qualifiedName MMR_LIMIT limitValue=integerValue commandNamedParameters
     ;
 
 mmrQueryVectorParams
     : parameter                           # mmrQueryVectorParameter
     | primaryExpression                   # mmrQueryVectorExpression
-    ;
-
-mmrOptionalQueryVector
-    : (mmrQueryVectorParams ON)?
     ;

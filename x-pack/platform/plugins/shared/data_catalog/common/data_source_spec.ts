@@ -60,7 +60,23 @@ export interface CustomOAuthConfiguration {
 export interface StackConnectorConfig {
   type: string;
   config: Record<string, unknown>;
-  importedTools?: string[];
+  importedTools?: ImportedTool[];
+}
+
+export interface ImportedTool {
+  name: string;
+  description?: string;
+}
+
+/**
+ * Workflow configuration for a data source.
+ * Workflows are loaded from YAML files in the specified directory.
+ */
+export interface WorkflowsConfig {
+  /** Absolute path to directory containing workflow YAML files (use join(__dirname, 'workflows')) */
+  directory: string;
+  /** Template variables to inject into workflow YAMLs (replaces <%= key %> patterns) */
+  templateInputs?: Record<string, string>;
 }
 
 /**
@@ -86,16 +102,17 @@ export interface DataSource {
   iconType: string;
 
   /**
-   * Generates workflows for interacting with the third-party data source.
+   * How to load up workflows definitions for this data source type.
    * Workflows are the only model for "taking action" against the third party.
-   */
-  generateWorkflows(stackConnectorId?: string): WorkflowInfo[];
+   * */
+  workflows: WorkflowsConfig;
 
   /**
    * Stack connector configuration.
    * Stack connectors are the only model for executing workflow actions against the third party.
+   * More than one stack connector can be associated with a data source type.
    */
-  stackConnector: StackConnectorConfig;
+  stackConnectors: StackConnectorConfig[];
 
   /** OAuth configuration for authentication */
   oauthConfiguration?: EARSOAuthConfiguration | CustomOAuthConfiguration;

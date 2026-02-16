@@ -2,10 +2,19 @@
 plugins:
   enabled:
     - apm
+    - banners
+    - cloud_security_posture
     - console
+    - dashboard
+    - dashboard
     - discover_enhanced
+    - entity_store
+    - fleet
+    - gen_ai_settings
+    - global_search
     - index_management
     - infra
+    - lens
     - maps
     - observability
     - observability_onboarding
@@ -13,15 +22,20 @@ plugins:
     - profiling
     - search_getting_started
     - search_homepage
+    - security
     - security_solution
     - slo
     - spaces
     - streams
     - streams_app
-    - workflows_extensions
     - transform
-    - fleet
-    - entity_store
+    - workflows_extensions
+    - global_search
+    - banners
+    - workflows_management
+    - intercepts
+    - custom_branding
+    - share
   disabled:
 
 packages:
@@ -30,3 +44,7 @@ packages:
   disabled:
     - kbn-scout # Internal scout tests are run in advance to validate Scout integrity (see .buildkite/scripts/steps/test/scout_test_run_builder.sh)
     - kbn-scout-release-testing # Release tests will run separately as part of the release process
+
+# Define test configs to be excluded from automatic discovery & execution in CI environment (process.env.CI=true)
+excluded_configs:
+  - x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel.playwright.config.ts

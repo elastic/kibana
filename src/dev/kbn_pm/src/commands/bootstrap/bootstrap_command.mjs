@@ -8,7 +8,8 @@
  */
 
 import { run } from '../../lib/spawn.mjs';
-import External from '../../lib/external_packages.ts';
+import { moonRun } from '../../lib/moon.mjs';
+import External from '../../lib/external_packages.js';
 
 import {
   areNodeModulesPresent,
@@ -65,7 +66,6 @@ export const command = {
     const quiet = args.getBooleanValue('quiet') ?? false;
     const vscodeConfig =
       !IS_CI && (args.getBooleanValue('vscode') ?? !process.env.KBN_BOOTSTRAP_NO_VSCODE);
-    const allowRoot = args.getBooleanValue('allow-root') ?? false;
     const forceInstall = args.getBooleanValue('force-install');
     const shouldInstall =
       forceInstall || !(await areNodeModulesPresent()) || !(await checkYarnIntegrity(log));
@@ -111,13 +111,29 @@ export const command = {
       }
     });
 
-    await time('run install scripts', async () => {
-      await runInstallScripts(log, { quiet });
-    });
-
-    await time('build @kbn packages', async () => {
-      await buildKbnPackages(log, { quiet });
-    });
+    await Promise.all([
+      time('extract relevant versions for packages', async () => {
+        log.info('extract relevant versions for packages');
+        await moonRun(':extract-version-dependencies', {
+          pipe: !quiet,
+          quiet,
+          noCache: forceInstall,
+        });
+        log.success('relevant versions extracted for packages');
+      }),
+      time('pre-build webpack bundles for packages', async () => {
+        log.info('pre-build webpack bundles for packages');
+        await moonRun(':build-webpack', {
+          pipe: !quiet,
+          quiet,
+          noCache: forceInstall,
+        });
+        log.success('shared webpack bundles built');
+      }),
+      time('run install scripts', async () => {
+        await runInstallScripts(log, { quiet });
+      }),
+    ]);
 
     await time('sort package json', async () => {
       await sortPackageJson(log);

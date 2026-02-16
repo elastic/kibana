@@ -138,7 +138,7 @@ If you want local traces available for trace-based evaluators, run EDOT locally 
 
 ```bash
 node scripts/edot_collector.js
-node scripts/scout.js start-server --stateful --config-dir evals_tracing
+node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet evals_tracing
 node scripts/evals run --suite <suite-id> --evaluation-connector-id <connector-id>
 ```
 
@@ -181,13 +181,13 @@ export default createPlaywrightEvalsConfig({ testDir: __dirname });
 Start scout:
 
 ```bash
-node scripts/scout.js start-server --stateful
+node scripts/scout.js start-server --arch stateful --domain classic
 ```
 
 If you want OTLP trace export enabled for evals, use the custom Scout config:
 
 ```bash
-node scripts/scout.js start-server --stateful --config-dir evals_tracing
+node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet evals_tracing
 ```
 
 Now run the tests exactly like a normal Scout/Playwright suite in another terminal:
@@ -472,6 +472,15 @@ Then control which evaluators run using the `SELECTED_EVALUATORS` environment va
 SELECTED_EVALUATORS="Factuality,Relevance" node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 ```
 
+**RAG Evaluator Patterns:** For RAG metrics, use pattern names (`Precision@K`, `Recall@K`, `F1@K`) to select evaluators. The actual K values are controlled by `RAG_EVAL_K`:
+
+```bash
+# This will run Precision@5, Precision@10, Precision@20 (and same for Recall, F1) based on RAG_EVAL_K
+SELECTED_EVALUATORS="Precision@K,Recall@K,F1@K,Factuality" RAG_EVAL_K=5,10,20 node scripts/playwright test ...
+```
+
+**Note:** K-specific names like `Precision@10` are not allowed in `SELECTED_EVALUATORS`. Always use the `@K` pattern and control K values via `RAG_EVAL_K`.
+
 If not specified, all evaluators will run by default.
 
 ### Repeated evaluations
@@ -525,7 +534,7 @@ To do this, you need to create (or override) a configuration file at `.scout/ser
 
 Then you can run the evaluations as normal. The Playwright tests will use the provided configuration details to target your Kibana instance.
 
-> **Note:** Running the Scout server with `node scripts/scout.js start-server --stateful` will override any manual configuration in `.scout/servers/local.json` so you may need to update this file every time you want to switch between the two.
+> **Note:** Running the Scout server with `node scripts/scout.js start-server --arch stateful --domain classic` will override any manual configuration in `.scout/servers/local.json` so you may need to update this file every time you want to switch between the two.
 
 ## Executor selection (Phoenix vs in-Kibana)
 

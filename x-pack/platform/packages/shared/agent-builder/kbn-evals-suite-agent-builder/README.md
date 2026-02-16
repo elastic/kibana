@@ -55,7 +55,7 @@ export KIBANA_TESTING_AI_CONNECTORS='{"my-connector":{"name":"My Test Connector"
 Start Scout server:
 
 ```bash
-node scripts/scout.js start-server --stateful
+node scripts/scout.js start-server --arch stateful --domain classic
 ```
 
 ### Start EDOT Collector
@@ -126,8 +126,11 @@ EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --co
 # Run only selected evaluators
 SELECTED_EVALUATORS="Factuality,Relevance,Groundedness" node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
-# Override RAG evaluator K value (takes priority over config)
-RAG_EVAL_K=5 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+# Run RAG evaluators with multiple K values using patterns (Precision@K matches Precision@5, Precision@10, etc.)
+SELECTED_EVALUATORS="Precision@K,Recall@K,F1@K,Factuality" RAG_EVAL_K=5,10,20 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+
+# Override RAG evaluator K value (supports comma-separated values for multi-K evaluation)
+RAG_EVAL_K=5,10,20 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
 # Retrieve traces from another (monitoring) cluster
 TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts

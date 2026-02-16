@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
+import type { ESQLCallbacks, ESQLFieldWithMetadata, IndexAutocompleteItem } from '@kbn/esql-types';
 import {
   BasicPrettyPrinter,
   esqlCommandRegistry,
@@ -21,12 +21,13 @@ import {
   type ESQLColumnData,
   type ESQLPolicy,
 } from '../commands/registry/types';
-import type { ESQLAstJoinCommand } from '../types';
+import type { ESQLAstJoinCommand, ESQLAstPromqlCommand } from '../types';
 import type { IAdditionalFields } from '../commands/registry/registry';
 import { enrichFieldsWithECSInfo } from './enrich_fields_with_ecs';
 import { columnIsPresent } from '../commands/definitions/utils/columns';
 import { getUnmappedFieldType } from '../commands/definitions/utils/settings';
 import { getLookupJoinSource } from '../commands/definitions/utils/sources';
+import { getIndexFromPromQLParams } from '../commands/definitions/utils/promql';
 
 async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
   if (!resourceRetriever?.getFieldsMetadata) {
@@ -80,6 +81,32 @@ function createGetEnrichFields(
 function createGetFromFields(fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>) {
   return (command: ESQLAstCommand): Promise<ESQLFieldWithMetadata[]> => {
     return fetchFields(BasicPrettyPrinter.command(command));
+  };
+}
+
+function createGetPromqlFields(
+  fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  getTimeseriesIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>
+) {
+  return async (command: ESQLAstCommand): Promise<ESQLFieldWithMetadata[]> => {
+    if (command.name !== 'promql') {
+      return [];
+    }
+
+    const indexName = getIndexFromPromQLParams(command as ESQLAstPromqlCommand);
+
+    if (!indexName) {
+      const indices = (await getTimeseriesIndices?.())?.indices ?? [];
+      const indexNames = indices.map(({ name }) => name);
+
+      if (indexNames.length > 0) {
+        return fetchFields(synth.cmd`FROM ${indexNames.join(',')}`.toString());
+      }
+
+      return [];
+    }
+
+    return fetchFields(synth.cmd`FROM ${indexName}`.toString());
   };
 }
 // Get the fields from the FROM clause, enrich them with ECS metadata
@@ -148,6 +175,7 @@ export async function getCurrentQueryAvailableColumns(
   previousPipeFields: ESQLColumnData[],
   fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>,
   getPolicies: () => Promise<Map<string, ESQLPolicy>>,
+  getTimeseriesIndices: () => Promise<{ indices: IndexAutocompleteItem[] }>,
   originalQueryText: string,
   unmappedFieldsStrategy?: UnmappedFieldsStrategy
 ) {
@@ -160,11 +188,13 @@ export async function getCurrentQueryAvailableColumns(
   const getJoinFields = createGetJoinFields(fetchFields);
   const getEnrichFields = createGetEnrichFields(fetchFields, getPolicies);
   const getFromFields = createGetFromFields(fetchFields);
+  const getPromqlFields = createGetPromqlFields(fetchFields, getTimeseriesIndices);
 
   const additionalFields: IAdditionalFields = {
     fromJoin: getJoinFields,
     fromEnrich: getEnrichFields,
     fromFrom: getFromFields,
+    fromPromql: getPromqlFields,
   };
 
   const previousCommands = commands.slice(0, -1);

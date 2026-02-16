@@ -7,4 +7,4 @@
 
 // NOTE: babel-register removed - load_esql_docs must be pre-built or converted to JS
 
-require('./load_esql_docs');
+require('./generate_esql_docs');

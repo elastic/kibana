@@ -100,6 +100,9 @@ export interface DashboardCreationOptions {
   /** Settings for unified search integration. */
   unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
 
+  /** Whether to render the control group above the dashboard viewport. */
+  useControlsIntegration?: boolean;
+
   /**
    * Validates a loaded saved object and determines whether it is valid.
    *
@@ -174,6 +177,7 @@ export type DashboardApi = CanExpandPanels &
     highlightPanel: (panelRef: HTMLDivElement) => void;
     highlightPanelId$: PublishingSubject<string | undefined>;
     isEmbeddedExternally: boolean;
+    isEditableByUser: boolean;
     isManaged: boolean;
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
     runInteractiveSave: () => Promise<SaveDashboardReturn | undefined>;

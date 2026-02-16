@@ -128,6 +128,7 @@ export class CasePlugin
       logger: this.logger,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       lensEmbeddableFactory: this.lensEmbeddableFactory,
+      config: this.caseConfig,
     });
 
     core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'cases'>(
@@ -145,6 +146,7 @@ export class CasePlugin
           usageCollection: plugins.usageCollection,
           logger: this.logger,
           kibanaVersion: this.kibanaVersion,
+          templatesConfig: this.caseConfig.templates,
         });
       }
 
@@ -165,7 +167,7 @@ export class CasePlugin
       router,
       routes: [
         ...getExternalRoutes({ isServerless: this.isServerless, docLinks: core.docLinks }),
-        ...getInternalRoutes(this.userProfileService),
+        ...getInternalRoutes(this.userProfileService, this.caseConfig),
       ],
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
@@ -277,6 +279,7 @@ export class CasePlugin
       // usageCounter will be set to a defined value in the setup() function
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       usageCounter: this.usageCounter!,
+      config: this.caseConfig,
     });
 
     return {
@@ -306,6 +309,7 @@ export class CasePlugin
           return this.clientFactory.create({
             request,
             scopedClusterClient: coreContext.elasticsearch.client.asCurrentUser,
+            internalClusterClient: coreContext.elasticsearch.client.asInternalUser,
             savedObjectsService: savedObjects,
           });
         },
@@ -321,6 +325,7 @@ export class CasePlugin
       return this.clientFactory.create({
         request,
         scopedClusterClient: client.asScoped(request).asCurrentUser,
+        internalClusterClient: client.asInternalUser,
         savedObjectsService: core.savedObjects,
       });
     };

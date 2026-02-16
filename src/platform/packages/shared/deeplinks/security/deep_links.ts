@@ -13,6 +13,7 @@ export enum SecurityPageName {
   attacks = 'attacks',
   aiValue = 'ai_value',
   assetInventory = 'asset_inventory',
+  aiRuleCreation = 'ai_rule_creation',
   attackDiscovery = 'attack_discovery',
   blocklist = 'blocklist',
 
@@ -107,4 +108,10 @@ export enum SecurityPageName {
   configurationsIntegrations = 'configurations-integrations',
   configurationsAiSettings = 'configurations-ai_settings',
   configurationsBasicRules = 'configurations-basic_rules',
+
+  /**
+   * Detection Engine Health UI Pages
+   */
+  spaceRulesHealth = 'space-rules-health',
+  ruleHealth = 'rule-health',
 }

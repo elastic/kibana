@@ -17,15 +17,41 @@ export class DiscoverApp {
 
   async goto() {
     await this.page.gotoApp('discover');
+    await this.waitForDataViewSwitch();
+  }
+
+  private async getVisibleDataViewSwitch() {
+    const discoverSwitch = this.page.testSubj.locator('discover-dataView-switch-link');
+    const fallbackSwitch = this.page.testSubj.locator('dataView-switch-link');
+
+    // There should be exactly one visible data view switch.
+    // If both are visible (bug), fail explicitly instead of picking one
+    await expect(discoverSwitch.or(fallbackSwitch)).toBeVisible();
+
+    const discoverVisible = await discoverSwitch.isVisible();
+    const fallbackVisible = await fallbackSwitch.isVisible();
+
+    if (discoverVisible === fallbackVisible) {
+      throw new Error(
+        `Expected exactly one data view switch link to be visible, but discover=${discoverVisible} fallback=${fallbackVisible}`
+      );
+    }
+
+    return discoverVisible ? discoverSwitch : fallbackSwitch;
+  }
+
+  private async waitForDataViewSwitch() {
+    await this.getVisibleDataViewSwitch();
   }
 
   async selectDataView(name: string) {
-    const currentValue = await this.page.testSubj.innerText('*dataView-switch-link');
+    const dataViewSwitch = await this.getVisibleDataViewSwitch();
+    const currentValue = await dataViewSwitch.innerText();
     if (currentValue === name) {
       return;
     }
-    await this.page.testSubj.click('*dataView-switch-link');
-    await this.page.testSubj.waitForSelector('indexPattern-switcher');
+    await dataViewSwitch.click();
+    await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeVisible();
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
     const matchingDataViewLocator = this.page.testSubj
       .locator('indexPattern-switcher')
@@ -35,12 +61,14 @@ export class DiscoverApp {
     } else {
       await this.page.testSubj.locator('explore-matching-indices-button').click();
     }
-    await this.page.testSubj.waitForSelector('indexPattern-switcher', { state: 'hidden' });
+    await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeHidden();
     await this.waitUntilFieldListHasCountOfFields();
   }
 
   getSelectedDataView(): Locator {
-    return this.page.testSubj.locator('discover-dataView-switch-link');
+    return this.page.testSubj
+      .locator('discover-dataView-switch-link')
+      .or(this.page.testSubj.locator('dataView-switch-link'));
   }
 
   async clickNewSearch() {
@@ -55,7 +83,6 @@ export class DiscoverApp {
     await this.page.testSubj.fill('savedObjectTitle', name);
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
-    await this.page.waitForLoadingIndicatorHidden();
   }
 
   async waitUntilFieldListHasCountOfFields() {
@@ -223,17 +250,6 @@ export class DiscoverApp {
       .locator('[data-test-subj^="dataGridHeaderCell-"]')
       .allInnerTexts();
     return headers.join(',');
-  }
-
-  async getSharedItemTitleAndDescription(): Promise<{ title: string; description: string }> {
-    const cssSelector = '[data-shared-item][data-title][data-description]';
-    const element = this.page.locator(cssSelector);
-    await element.waitFor({ state: 'visible' });
-
-    const title = (await element.getAttribute('data-title')) || '';
-    const description = (await element.getAttribute('data-description')) || '';
-
-    return { title, description };
   }
 
   async showChart() {

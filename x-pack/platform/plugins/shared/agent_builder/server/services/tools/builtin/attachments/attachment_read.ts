@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
@@ -38,7 +37,9 @@ export const createAttachmentReadTool = ({
   schema: attachmentReadSchema,
   tags: ['attachment'],
   handler: async ({ attachment_id: attachmentId, version }) => {
-    const attachment = attachmentManager.get(attachmentId);
+    const attachment = attachmentManager.get(attachmentId, {
+      version,
+    });
 
     if (!attachment) {
       return {
@@ -51,27 +52,13 @@ export const createAttachmentReadTool = ({
       };
     }
 
-    const versionData = version
-      ? attachmentManager.readVersion(attachmentId, version, ATTACHMENT_REF_ACTOR.agent)
-      : attachmentManager.readLatest(attachmentId, ATTACHMENT_REF_ACTOR.agent);
+    const { data: versionData, type } = attachment;
 
-    if (!versionData) {
-      return {
-        results: [
-          createErrorResult({
-            message: `Version ${version} not found for attachment '${attachmentId}'`,
-            metadata: { attachment_id: attachmentId, version },
-          }),
-        ],
-      };
-    }
-
-    let data = versionData.data;
+    let formattedData: unknown = versionData.data;
     if (attachmentsService && formatContext) {
       const definition = attachmentsService.getTypeDefinition(attachment.type);
       const typeReadonly = definition?.isReadonly ?? true;
-      const isReadonly = typeReadonly || attachment.readonly === true;
-      if (definition && isReadonly) {
+      if (definition && typeReadonly) {
         try {
           const formatted = await definition.format(
             {
@@ -83,13 +70,13 @@ export const createAttachmentReadTool = ({
           );
           if (formatted.getRepresentation) {
             const representation = await formatted.getRepresentation();
-            data =
+            formattedData =
               representation.type === 'text'
                 ? representation.value
                 : JSON.stringify(representation);
           }
         } catch {
-          data = versionData.data;
+          formattedData = versionData.data;
         }
       }
     }
@@ -101,9 +88,9 @@ export const createAttachmentReadTool = ({
           type: ToolResultType.other,
           data: {
             attachment_id: attachmentId,
-            type: attachment.type,
-            version: versionData.version,
-            data,
+            type,
+            version: attachment.version,
+            data: formattedData,
           },
         },
       ],

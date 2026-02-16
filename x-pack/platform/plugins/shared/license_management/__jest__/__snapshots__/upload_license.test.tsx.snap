@@ -54,7 +54,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                 aria-hidden="true"
                 class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
                 color="text"
-                data-euiicon-type="importAction"
+                data-euiicon-type="upload"
               />
               <span
                 class="euiFilePicker__promptText"
@@ -198,7 +198,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                 aria-hidden="true"
                 class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
                 color="text"
-                data-euiicon-type="importAction"
+                data-euiicon-type="upload"
               />
               <span
                 class="euiFilePicker__promptText"
@@ -342,7 +342,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                 aria-hidden="true"
                 class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
                 color="text"
-                data-euiicon-type="importAction"
+                data-euiicon-type="upload"
               />
               <span
                 class="euiFilePicker__promptText"
@@ -486,7 +486,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                 aria-hidden="true"
                 class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
                 color="text"
-                data-euiicon-type="importAction"
+                data-euiicon-type="upload"
               />
               <span
                 class="euiFilePicker__promptText"
@@ -630,7 +630,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                 aria-hidden="true"
                 class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
                 color="text"
-                data-euiicon-type="importAction"
+                data-euiicon-type="upload"
               />
               <span
                 class="euiFilePicker__promptText"

@@ -27,7 +27,7 @@ export const getWithResponseActionsRole: () => Omit<Role, 'name'> = () => {
             'actions_log_management_all',
             'actions_log_management_read',
           ],
-          securitySolutionRulesV1: ['all'],
+          securitySolutionRulesV2: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },

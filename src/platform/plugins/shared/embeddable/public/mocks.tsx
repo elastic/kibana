@@ -49,8 +49,6 @@ const createSetupContract = (): Setup => {
     registerAddFromLibraryType: jest.fn().mockImplementation(registerAddFromLibraryType),
     registerReactEmbeddableFactory: jest.fn().mockImplementation(registerReactEmbeddableFactory),
     registerLegacyURLTransform: jest.fn(),
-    transformEnhancementsIn: jest.fn(),
-    transformEnhancementsOut: jest.fn(),
   };
   return setupContract;
 };

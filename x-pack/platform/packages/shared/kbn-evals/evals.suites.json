@@ -8,13 +8,6 @@
       "ciLabels": ["evals:agent-builder"]
     },
     {
-      "id": "agent-builder/reporting",
-      "name": "Agent Builder (Reporting)",
-      "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/reporting.playwright.config.ts",
-      "tags": ["platform", "agent-builder"],
-      "ciLabels": ["evals:agent-builder-reporting"]
-    },
-    {
       "id": "streams",
       "name": "Streams",
       "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-streams/playwright.config.ts",

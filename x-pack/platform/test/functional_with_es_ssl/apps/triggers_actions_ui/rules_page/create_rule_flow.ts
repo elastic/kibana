@@ -27,7 +27,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     before(async () => {
-      await pageObjects.common.navigateToApp('rules');
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
@@ -81,7 +81,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       // Navigate back to rules page to verify the rule appears
-      await pageObjects.common.navigateToApp('rules');
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       // Search for the created rule
@@ -102,7 +102,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('return path is set correctly after rule creation', async () => {
       // Start on the rules page
-      await pageObjects.common.navigateToApp('rules');
+      await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       // Create a new rule
@@ -161,8 +161,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         await pageObjects.header.waitUntilLoadingHasFinished();
         const url = await browser.getCurrentUrl();
-        if (!url.includes(`/app/rules/${ruleId}`)) {
-          throw new Error(`Expected URL to contain '/app/rules/${ruleId}' but got: ${url}`);
+        if (!url.includes(`/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`)) {
+          throw new Error(
+            `Expected URL to contain '/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}' but got: ${url}`
+          );
         }
       });
 
@@ -173,7 +175,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       // Verify the URL contains the rule details path
       const url = await browser.getCurrentUrl();
-      expect(url).to.contain(`/app/rules/${ruleId}`);
+      expect(url).to.contain(`/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`);
     });
   });
 };

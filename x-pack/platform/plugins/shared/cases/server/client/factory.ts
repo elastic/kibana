@@ -36,7 +36,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { FilesStart } from '@kbn/files-plugin/server';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
-import { KIBANA_SYSTEM_USERNAME, SAVED_OBJECT_TYPES } from '../../common/constants';
+import { KIBANA_SYSTEM_USERNAME } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import {
   CaseConfigureService,
@@ -45,6 +45,7 @@ import {
   ConnectorMappingsService,
   AttachmentService,
   AlertService,
+  TemplatesService,
 } from '../services';
 
 import { AuthorizationAuditLogger } from '../authorization';
@@ -55,6 +56,8 @@ import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_fram
 import type { CasesServices } from './types';
 import { LicensingService } from '../services/licensing';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
+import type { ConfigType } from '../config';
+import { getSavedObjectsTypes } from '../../common';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;
@@ -72,6 +75,7 @@ interface CasesClientFactoryArgs {
   publicBaseUrl?: IBasePath['publicBaseUrl'];
   filesPluginStart: FilesStart;
   usageCounter?: IUsageCounter;
+  config: ConfigType;
 }
 
 /**
@@ -108,11 +112,13 @@ export class CasesClientFactory {
   public async create({
     request,
     scopedClusterClient,
+    internalClusterClient,
     savedObjectsService,
   }: {
     request: KibanaRequest;
     savedObjectsService: SavedObjectsServiceStart;
     scopedClusterClient: ElasticsearchClient;
+    internalClusterClient: ElasticsearchClient;
   }): Promise<CasesClient> {
     this.validateInitialization();
 
@@ -128,7 +134,7 @@ export class CasesClientFactory {
     });
 
     const unsecuredSavedObjectsClient = savedObjectsService.getScopedClient(request, {
-      includedHiddenTypes: SAVED_OBJECT_TYPES,
+      includedHiddenTypes: getSavedObjectsTypes(this.options.config),
       // this tells the security plugin to not perform SO authorization and audit logging since we are handling
       // that manually using our Authorization class and audit logger.
       excludedExtensions: [SECURITY_EXTENSION_ID],
@@ -141,6 +147,7 @@ export class CasesClientFactory {
       unsecuredSavedObjectsClient,
       savedObjectsSerializer,
       esClient: scopedClusterClient,
+      internalClusterClient,
       request,
       auditLogger,
       alertsClient,
@@ -180,6 +187,7 @@ export class CasesClientFactory {
     unsecuredSavedObjectsClient,
     savedObjectsSerializer,
     esClient,
+    internalClusterClient,
     request,
     auditLogger,
     alertsClient,
@@ -187,6 +195,7 @@ export class CasesClientFactory {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     savedObjectsSerializer: ISavedObjectsSerializer;
     esClient: ElasticsearchClient;
+    internalClusterClient: ElasticsearchClient;
     request: KibanaRequest;
     auditLogger: AuditLogger;
     alertsClient: PublicMethodsOf<AlertsClient>;
@@ -197,6 +206,13 @@ export class CasesClientFactory {
       log: this.logger,
       persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
       unsecuredSavedObjectsClient,
+    });
+
+    const templatesService = new TemplatesService({
+      unsecuredSavedObjectsClient,
+      savedObjectsSerializer,
+      esClient,
+      internalClusterClient,
     });
 
     const caseService = new CasesService({
@@ -225,6 +241,7 @@ export class CasesClientFactory {
     });
 
     return {
+      templatesService,
       alertsService: new AlertService(esClient, this.logger, alertsClient),
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),

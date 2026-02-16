@@ -1,0 +1,67 @@
+# https://buildkite.com/elastic/kibana-uiam-verify-and-promote/
+
+### Parameters for this job:
+# UIAM_IMAGE: the full image path for the docker image to test
+# FORCE_PROMOTE: if set to true, promotion will happen on non-main branches
+
+agents:
+  image: family/kibana-ubuntu-2404
+  imageProject: elastic-images-prod
+  provider: gcp
+  machineType: n2-standard-2
+
+steps:
+  - label: 'Annotate runtime parameters'
+    command: .buildkite/scripts/steps/uiam/annotate_runtime_parameters.sh
+
+  - label: 'Pre-Build'
+    command: .buildkite/scripts/lifecycle/pre_build.sh
+    key: pre-build
+    timeout_in_minutes: 10
+
+  - label: 'Build Kibana Distribution'
+    command: .buildkite/scripts/steps/build_kibana.sh
+    agents:
+      machineType: n2-standard-8
+      diskSizeGb: 100
+    key: build
+    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+    depends_on: pre-build
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/test/scout_uiam_tests.sh
+    label: 'Scout UIAM Tests'
+    agents:
+      machineType: n2-standard-4
+      diskSizeGb: 105
+    key: scout-uiam-tests
+    timeout_in_minutes: 30
+    depends_on:
+      - build
+    env:
+      UIAM_DOCKER_IMAGE: $UIAM_IMAGE
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - wait: ~
+
+  - label: ':arrow_up::key::arrow_up: Promote UIAM docker image'
+    command: .buildkite/scripts/steps/uiam/promote_uiam_image.sh $UIAM_IMAGE
+    key: promote-uiam-image
+    if: "build.branch == 'main' || build.env('FORCE_PROMOTE') == 'true'"
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+  - wait: ~
+
+  - label: 'Post-Build'
+    command: .buildkite/scripts/lifecycle/post_build.sh
+    timeout_in_minutes: 10
