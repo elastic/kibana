@@ -40,8 +40,6 @@ export const AttachmentWithActions: React.FC<AttachmentWithActionsProps> = ({
     return null;
   }
 
-  console.log({ attachment });
-
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
 
   if (!uiDefinition) {
@@ -56,8 +54,6 @@ export const AttachmentWithActions: React.FC<AttachmentWithActionsProps> = ({
       //   attachmentsService.updateOrigin(conversationId, attachment.id, originId);
     },
   });
-
-  console.log({ uiDefinition });
 
   return (
     <>
