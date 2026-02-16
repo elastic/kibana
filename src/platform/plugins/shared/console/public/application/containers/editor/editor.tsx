@@ -85,11 +85,10 @@ interface Props {
   loading: boolean;
   inputEditorValue: string;
   setInputEditorValue: (value: string) => void;
-  enableSuggestWidgetRepositioning: boolean;
 }
 
 export const Editor = memo(
-  ({ loading, inputEditorValue, setInputEditorValue, enableSuggestWidgetRepositioning }: Props) => {
+  ({ loading, inputEditorValue, setInputEditorValue }: Props) => {
     const {
       services: { storage, objectStorageClient },
     } = useServicesContext();
@@ -207,7 +206,6 @@ export const Editor = memo(
                         value={inputEditorValue}
                         setValue={setInputEditorValue}
                         customParsedRequestsProvider={customParsedRequestsProvider}
-                        enableSuggestWidgetRepositioning={enableSuggestWidgetRepositioning}
                       />
                     )}
                   </EuiSplitPanel.Inner>
