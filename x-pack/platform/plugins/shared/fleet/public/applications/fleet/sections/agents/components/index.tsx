@@ -15,3 +15,4 @@ export * from './agent_policy_created_callout';
 export { MetricNonAvailable } from './metric_non_available';
 export { HierarchicalActionsMenu } from './hierarchical_actions_menu';
 export type { MenuItem, HierarchicalActionsMenuProps } from './hierarchical_actions_menu';
+export { AgentPolicyYamlFlyout } from './agent_policy_yaml_flyout';

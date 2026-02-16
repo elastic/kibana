@@ -37,6 +37,7 @@ export interface SingleAgentMenuCallbacks {
   onReassignClick: () => void;
   onUpgradeClick: () => void;
   onViewAgentJsonClick: () => void;
+  onViewAgentPolicyClick: () => void;
   onMigrateAgentClick: () => void;
   onRequestDiagnosticsClick: () => void;
   onChangeAgentPrivilegeLevelClick: () => void;
@@ -222,6 +223,22 @@ export function useSingleAgentMenuItems({
             callbacks.onViewAgentJsonClick();
           },
           'data-test-subj': 'viewAgentDetailsJsonBtn',
+        },
+        // View agent policy - available when agent has a policy
+        {
+          id: 'view-agent-policy',
+          name: (
+            <FormattedMessage
+              id="xpack.fleet.agentList.viewAgentPolicyText"
+              defaultMessage="View agent policy"
+            />
+          ),
+          icon: 'inspect',
+          disabled: !agent.policy_id,
+          onClick: () => {
+            callbacks.onViewAgentPolicyClick();
+          },
+          'data-test-subj': 'viewAgentPolicyBtn',
         },
       ],
     };

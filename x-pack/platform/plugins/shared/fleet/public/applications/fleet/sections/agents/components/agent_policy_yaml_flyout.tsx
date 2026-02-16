@@ -1,0 +1,153 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { memo } from 'react';
+import styled from '@emotion/styled';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { dump } from 'js-yaml';
+import {
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiCallOut,
+  EuiIconTip,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+
+import { MAX_FLYOUT_WIDTH } from '../../../constants';
+import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useStartServices } from '../../../hooks';
+import { Loading } from '../../../components';
+import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
+import { API_VERSIONS } from '../../../../../../common/constants';
+import { splitVersionSuffixFromPolicyId } from '../../../../../../common/services/version_specific_policies_utils';
+
+const FlyoutBody = styled(EuiFlyoutBody)`
+  .euiFlyoutBody__overflowContent {
+    padding: 0;
+  }
+`;
+
+export const AgentPolicyYamlFlyout = memo<{
+  policyId: string;
+  revision?: number | null;
+  onClose: () => void;
+}>(({ policyId, revision, onClose }) => {
+  const flyoutTitleId = useGeneratedHtmlId();
+  const { version: agentVersion } = splitVersionSuffixFromPolicyId(policyId);
+
+  const core = useStartServices();
+  const {
+    isLoading: isLoadingYaml,
+    data: yamlData,
+    error,
+  } = useGetOneAgentPolicyFull(policyId, revision ? { revision } : undefined);
+  const { data: agentPolicyData } = useGetOneAgentPolicy(policyId);
+
+  const body = isLoadingYaml ? (
+    <Loading />
+  ) : error ? (
+    <EuiCallOut
+      announceOnMount
+      title={
+        <FormattedMessage
+          id="xpack.fleet.agentPolicyYamlFlyout.errorTitle"
+          defaultMessage="Error loading agent policy"
+        />
+      }
+      color="danger"
+      iconType="warning"
+    >
+      {error.message}
+    </EuiCallOut>
+  ) : (
+    <EuiCodeBlock language="yaml" isCopyable fontSize="m" whiteSpace="pre">
+      {fullAgentPolicyToYaml(yamlData!.item, dump)}
+    </EuiCodeBlock>
+  );
+
+  const revisionQueryParam = revision ? `&revision=${revision}` : '';
+  const downloadLink =
+    core.http.basePath.prepend(agentPolicyRouteService.getInfoFullDownloadPath(policyId)) +
+    `?apiVersion=${API_VERSIONS.public.v1}${revisionQueryParam}`;
+
+  return (
+    <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH} aria-labelledby={flyoutTitleId}>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id={flyoutTitleId}>
+            {agentPolicyData?.item ? (
+              <>
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicyYamlFlyout.titleWithName"
+                  defaultMessage="''{name}'' agent policy{revisionLabel}{versionLabel}"
+                  values={{
+                    name: agentPolicyData.item.name,
+                    revisionLabel: revision ? ` (rev. ${revision})` : '',
+                    versionLabel: agentVersion ? ` - v${agentVersion}` : '',
+                  }}
+                />
+                {agentVersion && (
+                  <>
+                    {' '}
+                    <EuiIconTip
+                      type="branch"
+                      size="m"
+                      color="subdued"
+                      content={
+                        <FormattedMessage
+                          id="xpack.fleet.agentPolicyYamlFlyout.versionSpecificPolicyTooltip"
+                          defaultMessage="This agent uses a version-specific policy because it doesn't meet the agent version requirements of some integrations."
+                        />
+                      }
+                    />
+                  </>
+                )}
+              </>
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.agentPolicyYamlFlyout.titleWithoutName"
+                defaultMessage="Agent policy"
+              />
+            )}
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <FlyoutBody>{body}</FlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={onClose} flush="left">
+              <FormattedMessage
+                id="xpack.fleet.agentPolicyYamlFlyout.closeButtonLabel"
+                defaultMessage="Close"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              href={downloadLink}
+              iconType="download"
+              isDisabled={Boolean(isLoadingYaml && !yamlData)}
+            >
+              <FormattedMessage
+                id="xpack.fleet.agentPolicyYamlFlyout.downloadButtonLabel"
+                defaultMessage="Download policy"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+  );
+});
