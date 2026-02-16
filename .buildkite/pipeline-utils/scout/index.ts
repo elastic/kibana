@@ -8,3 +8,5 @@
  */
 
 export * from './pick_scout_test_group_run_order';
+export * from './get_scout_burn_in_configs';
+export * from './pick_scout_burn_in_run_order';
