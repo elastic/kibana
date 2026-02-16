@@ -14,16 +14,19 @@ import type { StreamsAppKibanaContext } from '../../../../hooks/use_kibana';
 
 jest.mock('../../../../hooks/use_kibana');
 jest.mock('../../../../hooks/use_stream_detail');
+jest.mock('../../../../hooks/use_streams_app_fetch');
 jest.mock('@kbn/unsaved-changes-prompt', () => ({
   useUnsavedChangesPrompt: jest.fn(),
 }));
 
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';
+import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseStreamDetail = useStreamDetail as jest.MockedFunction<typeof useStreamDetail>;
+const mockUseStreamsAppFetch = useStreamsAppFetch as jest.MockedFunction<typeof useStreamsAppFetch>;
 const mockUseUnsavedChangesPrompt = useUnsavedChangesPrompt as jest.MockedFunction<
   typeof useUnsavedChangesPrompt
 >;
@@ -124,6 +127,14 @@ describe('Settings', () => {
     });
 
     mockUseUnsavedChangesPrompt.mockImplementation(() => {});
+
+    // Mock useStreamsAppFetch to return empty streams list for available tags
+    mockUseStreamsAppFetch.mockReturnValue({
+      value: { streams: [], canReadFailureStore: true },
+      loading: false,
+      error: undefined,
+      refresh: jest.fn(),
+    } as any);
   });
 
   describe('Unsaved changes prompt', () => {
@@ -221,6 +232,39 @@ describe('Settings', () => {
       await waitFor(() => {
         expect(screen.queryByTestId('streamsAppSettingsBottomBar')).not.toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Stream metadata form', () => {
+    it('renders tags field', () => {
+      renderWithI18n(
+        <Settings definition={defaultDefinition} refreshDefinition={mockRefreshDefinition} />
+      );
+
+      // Tags field should be present
+      expect(screen.getByTestId('streamMetadataFormTagsInput')).toBeInTheDocument();
+    });
+
+    it('does not render description field by default', () => {
+      renderWithI18n(
+        <Settings definition={defaultDefinition} refreshDefinition={mockRefreshDefinition} />
+      );
+
+      // Description field should not be present by default
+      expect(screen.queryByTestId('streamMetadataFormDescriptionInput')).not.toBeInTheDocument();
+    });
+
+    it('renders description field when showDescription is true', () => {
+      renderWithI18n(
+        <Settings
+          definition={defaultDefinition}
+          refreshDefinition={mockRefreshDefinition}
+          showDescription={true}
+        />
+      );
+
+      // Description field should be present
+      expect(screen.getByTestId('streamMetadataFormDescriptionInput')).toBeInTheDocument();
     });
   });
 });

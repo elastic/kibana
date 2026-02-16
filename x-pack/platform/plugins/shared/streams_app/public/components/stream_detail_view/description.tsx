@@ -5,12 +5,20 @@
  * 2.0.
  */
 
-import { EuiInlineEditText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiMarkdownEditor,
+  EuiMarkdownFormat,
+  EuiTab,
+  EuiTabs,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { convertGetResponseIntoUpsertRequest, type Streams } from '@kbn/streams-schema';
-import type { ChangeEvent } from 'react';
 import React, { useEffect, useState } from 'react';
-import { css } from '@emotion/react';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
 import { useUpdateStreams } from '../../hooks/use_update_streams';
 
@@ -19,6 +27,26 @@ const EMPTY_DESCRIPTION_LABEL = i18n.translate(
   { defaultMessage: 'Add a description' }
 );
 
+const NO_DESCRIPTION_LABEL = i18n.translate('xpack.streams.streamDescription.noDescriptionLabel', {
+  defaultMessage: 'No description',
+});
+
+const PREVIEW_TAB_LABEL = i18n.translate('xpack.streams.streamDescription.previewTabLabel', {
+  defaultMessage: 'Preview',
+});
+
+const EDITOR_TAB_LABEL = i18n.translate('xpack.streams.streamDescription.editorTabLabel', {
+  defaultMessage: 'Editor',
+});
+
+const SAVE_LABEL = i18n.translate('xpack.streams.streamDescription.saveButtonLabel', {
+  defaultMessage: 'Save',
+});
+
+const CANCEL_LABEL = i18n.translate('xpack.streams.streamDescription.cancelButtonLabel', {
+  defaultMessage: 'Cancel',
+});
+
 interface Props {
   definition: Streams.ingest.all.GetResponse;
 }
@@ -26,68 +54,107 @@ interface Props {
 export function StreamDescription({ definition }: Props) {
   const { refresh } = useStreamDetail();
   const updateStream = useUpdateStreams(definition.stream.name);
-  const [description, setDescription] = useState(definition.stream.description);
+  const canManage = definition.privileges.manage === true;
+
+  const savedDescription = definition.stream.description ?? '';
+
+  const [selectedTab, setSelectedTab] = useState<'preview' | 'editor'>('preview');
+  const [description, setDescription] = useState(savedDescription);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    setDescription(definition.stream.description);
-  }, [definition.stream.description]);
+    setDescription(savedDescription);
+  }, [savedDescription]);
 
-  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setDescription(e.target.value);
-  };
+  const sanitizedDescription = description.trim();
+  const sanitizedSavedDescription = savedDescription.trim();
+  const hasChanges = sanitizedDescription !== sanitizedSavedDescription;
 
   return (
-    <div>
-      <EuiInlineEditText
-        data-test-subj="streamDescriptionEdit"
-        css={css`
-          .euiButtonEmpty {
-            block-size: auto;
-            white-space: normal;
-            overflow: visible;
-            vertical-align: baseline;
-            text-align: start;
-          }
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="streamDescription">
+      <EuiFlexItem grow={false}>
+        <EuiTabs size="s">
+          <EuiTab
+            onClick={() => setSelectedTab('preview')}
+            isSelected={selectedTab === 'preview'}
+            data-test-subj="streamDescriptionTabPreview"
+          >
+            {PREVIEW_TAB_LABEL}
+          </EuiTab>
+          <EuiTab
+            onClick={() => setSelectedTab('editor')}
+            isSelected={selectedTab === 'editor'}
+            data-test-subj="streamDescriptionTabEditor"
+          >
+            {EDITOR_TAB_LABEL}
+          </EuiTab>
+        </EuiTabs>
+      </EuiFlexItem>
 
-          .eui-textTruncate {
-            overflow: visible !important;
-            text-overflow: clip !important;
-            white-space: normal !important;
-          }
-        `}
-        editModeProps={{
-          inputProps: {},
-          formRowProps: {},
-          saveButtonProps: {
-            color: 'primary',
-          },
-          cancelButtonProps: {
-            display: 'empty',
-          },
-        }}
-        isReadOnly={definition.privileges.manage !== true}
-        placeholder={EMPTY_DESCRIPTION_LABEL}
-        value={description}
-        onChange={onChange}
-        onCancel={(previousValue) => {
-          setDescription(previousValue);
-        }}
-        inputAriaLabel={i18n.translate('xpack.streams.streamDescription.inputAriaLabel', {
-          defaultMessage: 'Edit Stream description',
-        })}
-        size="xs"
-        onSave={async (value) => {
-          const sanitized = value.trim();
-          setDescription(sanitized);
+      <EuiFlexItem grow={false}>
+        {selectedTab === 'preview' ? (
+          sanitizedDescription.length > 0 ? (
+            <EuiMarkdownFormat textSize="s">{description}</EuiMarkdownFormat>
+          ) : (
+            <EuiText size="s" color="subdued">
+              <p>{canManage ? EMPTY_DESCRIPTION_LABEL : NO_DESCRIPTION_LABEL}</p>
+            </EuiText>
+          )
+        ) : (
+          <EuiMarkdownEditor
+            data-test-subj="streamDescriptionMarkdownEditor"
+            value={description}
+            onChange={setDescription}
+            aria-labelledby="stream-description-editor"
+            placeholder={EMPTY_DESCRIPTION_LABEL}
+            readOnly={!canManage}
+          />
+        )}
+      </EuiFlexItem>
 
-          const request = convertGetResponseIntoUpsertRequest(definition);
-          request.stream.description = sanitized;
+      {canManage && (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                isDisabled={!hasChanges || isSaving}
+                onClick={() => {
+                  setDescription(savedDescription);
+                  setSelectedTab('preview');
+                }}
+                data-test-subj="streamDescriptionCancelButton"
+              >
+                {CANCEL_LABEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                fill
+                isLoading={isSaving}
+                isDisabled={!hasChanges || isSaving}
+                onClick={async () => {
+                  const request = convertGetResponseIntoUpsertRequest(definition);
+                  request.stream.description = sanitizedDescription;
 
-          await updateStream(request);
-
-          refresh();
-        }}
-      />
-    </div>
+                  setIsSaving(true);
+                  try {
+                    await updateStream(request);
+                    refresh();
+                    setSelectedTab('preview');
+                  } finally {
+                    setIsSaving(false);
+                  }
+                }}
+                data-test-subj="streamDescriptionSaveButton"
+              >
+                {SAVE_LABEL}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 }

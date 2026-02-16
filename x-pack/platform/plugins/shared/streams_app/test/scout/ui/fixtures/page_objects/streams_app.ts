@@ -1142,4 +1142,103 @@ export class StreamsApp {
   async fillConcatLiteralInput(value: string) {
     await this.concatLiteralInput.fill(value);
   }
+
+  // Stream name utility methods (header)
+  async expectStreamName(name: string) {
+    await expect(this.page.getByTestId('streamName')).toHaveText(name);
+  }
+
+  // Stream tags utility methods (header)
+  async expectStreamTag(tag: string) {
+    await expect(this.page.getByTestId(`streamTag-${tag}`)).toBeVisible();
+  }
+
+  async expectStreamTagsEmpty() {
+    await expect(this.page.getByTestId('streamTagsEmpty')).toBeVisible();
+  }
+
+  async openStreamTagsPopover() {
+    await this.page.getByTestId('streamTagsAddButton').click();
+    await expect(this.page.getByTestId('streamTagsComboBox')).toBeVisible();
+  }
+
+  async addStreamTagInHeader(tag: string) {
+    await this.openStreamTagsPopover();
+    const comboBox = this.page.getByTestId('streamTagsComboBox');
+    await comboBox.locator('input').fill(tag);
+    await this.page.keyboard.press('Enter');
+    // Close the popover by clicking elsewhere
+    await this.page.keyboard.press('Escape');
+  }
+
+  async removeStreamTagInHeader(tag: string) {
+    // Click the remove button on the tag badge
+    await this.page.getByTestId(`streamTag-${tag}`).locator('button').click();
+  }
+
+  // Stream metadata form utility methods (unified form in advanced settings)
+  // Tags are always editable - no edit button needed
+  async addStreamMetadataTag(tag: string) {
+    const comboBox = this.page.getByTestId('streamMetadataFormTagsInput');
+    await comboBox.locator('input').fill(tag);
+    await this.page.keyboard.press('Enter');
+  }
+
+  async expectStreamMetadataTag(tag: string) {
+    // Tags appear as pills in the combo box
+    const comboBox = this.page.getByTestId('streamMetadataFormTagsInput');
+    await expect(comboBox.getByText(tag)).toBeVisible();
+  }
+
+  async expectStreamMetadataTagsEmpty() {
+    // Check that no tags are present (the combo box has no selected options)
+    const comboBox = this.page.getByTestId('streamMetadataFormTagsInput');
+    // The combo box should not have any pills
+    await expect(comboBox.locator('.euiComboBoxPill')).toHaveCount(0);
+  }
+
+  // Save changes via bottom bar (for all metadata + index settings)
+  async saveStreamSettings() {
+    await this.page.getByTestId('streamsAppSettingsSaveButton').click();
+  }
+
+  async cancelStreamSettingsChanges() {
+    await this.page.getByTestId('streamsAppSettingsCancelButton').click();
+  }
+
+  async expectStreamSettingsBottomBarVisible() {
+    await expect(this.page.getByTestId('streamsAppSettingsBottomBar')).toBeVisible();
+  }
+
+  async expectStreamSettingsBottomBarHidden() {
+    await expect(this.page.getByTestId('streamsAppSettingsBottomBar')).toBeHidden();
+  }
+
+  // Legacy methods (kept for backwards compatibility with any other tests)
+  // Stream tags utility methods (advanced settings panel)
+  async clickStreamTagsPanelEdit() {
+    await this.page.getByTestId('streamTagsPanelEditButton').click();
+  }
+
+  async addStreamTagInPanel(tag: string) {
+    const comboBox = this.page.getByTestId('streamTagsPanelComboBox');
+    await comboBox.locator('input').fill(tag);
+    await this.page.keyboard.press('Enter');
+  }
+
+  async saveStreamTagsPanel() {
+    await this.page.getByTestId('streamTagsPanelSaveButton').click();
+  }
+
+  async cancelStreamTagsPanel() {
+    await this.page.getByTestId('streamTagsPanelCancelButton').click();
+  }
+
+  async expectStreamTagsPanelBadge(tag: string) {
+    await expect(this.page.getByTestId(`streamTagsPanelBadge-${tag}`)).toBeVisible();
+  }
+
+  async expectStreamTagsPanelEmpty() {
+    await expect(this.page.getByTestId('streamTagsPanelEmpty')).toBeVisible();
+  }
 }
