@@ -45,7 +45,7 @@ export const LogRateAnalysisForEmbeddable: FC<LogRateAnalysisForEmbeddableProps>
   const timeRangeParsed = useMemo(() => {
     if (timeRange) {
       const bounds = calculateBounds(timeRange);
-      if (bounds?.min && bounds?.max) {
+      if (bounds.min && bounds.max) {
         return { min: bounds.min, max: bounds.max };
       }
     }
