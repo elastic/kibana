@@ -81,21 +81,6 @@ describe('CPS project_routing on serverless ES', () => {
     serverlessKibana = await startKibana();
     client = serverlessKibana.coreStart.elasticsearch.client.asInternalUser;
 
-    // Wait for ES/UIAM to fully initialize and establish project state
-    // The CPS team mentioned there's a brief window where ES returns errors after startup.
-    // We need to wait long enough for:
-    // 1. UIAM service to fully start and connect to CosmosDB
-    // 2. ES to sync project state from UIAM
-    // 3. Origin project state to be established
-    await new Promise((resolve) => setTimeout(resolve, 60000)); // Increased to 60 seconds
-
-    // Make an initial ping to establish connection
-    try {
-      await client.ping();
-    } catch (e) {
-      // Ignore ping errors
-    }
-
     await client.indices.create({
       index: TEST_INDEX,
       settings: { hidden: true },
