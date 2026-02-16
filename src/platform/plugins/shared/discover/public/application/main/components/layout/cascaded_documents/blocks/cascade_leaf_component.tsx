@@ -26,7 +26,7 @@ import { getCustomCascadeGridBodyStyle } from './cascade_leaf_component.styles';
 import type { ESQLDataGroupNode } from './types';
 import type { DataCascadeLeafUiState } from '../../../../state_management/redux/types';
 
-interface ESQLDataCascadeLeafCellProps
+export interface ESQLDataCascadeLeafCellProps
   extends Pick<
       UnifiedDataTableProps,
       | 'dataGridDensityState'
@@ -148,13 +148,18 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   useEffect(() => {
     let unregister: (() => void) | null = null;
 
-    if (virtualizer.scrollElement?.isSameNode(scrollElementGetter())) {
+    if (virtualizer.scrollElement?.isSameNode(getScrollElement())) {
       // Only register when using the parent's scroll element (not in fullscreen mode)
       unregister = preventSizeChangePropagation();
     }
 
     return () => unregister?.();
-  }, [preventSizeChangePropagation, scrollElementGetter, virtualizer.scrollElement]);
+  }, [
+    getScrollElement,
+    preventSizeChangePropagation,
+    scrollElementGetter,
+    virtualizer.scrollElement,
+  ]);
 
   const items = virtualizer.getVirtualItems();
 
