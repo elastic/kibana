@@ -110,7 +110,7 @@ export const getCloseHistoryStepDefinition = createServerStepDefinition({
         });
 
         if (alertResponse.hits.hits.length > 0) {
-          const alertSource = alertResponse.hits.hits[0]._source
+          const alertSource = alertResponse.hits.hits[0]._source;
           hostName = alertSource?.['host.name'] as string | undefined;
           userName = alertSource?.['user.name'] as string | undefined;
           serviceName = alertSource?.['service.name'] as string | undefined;

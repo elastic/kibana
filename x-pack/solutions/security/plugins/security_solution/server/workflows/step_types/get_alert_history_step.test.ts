@@ -106,9 +106,7 @@ describe('getAlertHistory step', () => {
       const context = createMockContext(input, searchMock);
       const result = await getAlertHistoryStepDefinition.handler(context as never);
 
-      expect(result.output!.history[0].timestamp).toBe(
-        new Date(1704067200000).toISOString()
-      );
+      expect(result.output!.history[0].timestamp).toBe(new Date(1704067200000).toISOString());
     });
 
     it('singular message when total is 1', async () => {

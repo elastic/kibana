@@ -88,7 +88,9 @@ export const getRuleMetadataStepDefinition = createServerStepDefinition({
         };
       }
 
-      const alertSource = searchResponse.hits.hits[0]._source as Record<string, unknown> | undefined;
+      const alertSource = searchResponse.hits.hits[0]._source as
+        | Record<string, unknown>
+        | undefined;
       const src = (key: string) => alertSource?.[key];
 
       // Threat is returned as an array; take first item for tactic/technique
@@ -98,7 +100,9 @@ export const getRuleMetadataStepDefinition = createServerStepDefinition({
           ? (threatArr[0] as Record<string, unknown>)
           : undefined;
       const tacticObj = firstThreat?.tactic as { id?: string; name?: string } | undefined;
-      const techniqueArr = firstThreat?.technique as Array<{ id?: string; name?: string }> | undefined;
+      const techniqueArr = firstThreat?.technique as
+        | Array<{ id?: string; name?: string }>
+        | undefined;
       const firstTechnique = Array.isArray(techniqueArr) ? techniqueArr[0] : undefined;
 
       const ruleMetadata = {

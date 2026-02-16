@@ -85,9 +85,7 @@ describe('getGlobalPrevalence step', () => {
     });
 
     it('returns medium prevalence when unique hosts >= 5 and < 20', async () => {
-      const searchMock = jest
-        .fn()
-        .mockResolvedValue(createAggResponse(50, 10, 8, []));
+      const searchMock = jest.fn().mockResolvedValue(createAggResponse(50, 10, 8, []));
 
       const input = getGlobalPrevalenceInputSchema.parse({ ruleId: 'rule-1' });
       const context = createMockContext(input, searchMock);
@@ -98,9 +96,7 @@ describe('getGlobalPrevalence step', () => {
     });
 
     it('returns high prevalence when unique hosts >= 20 and < 50', async () => {
-      const searchMock = jest
-        .fn()
-        .mockResolvedValue(createAggResponse(200, 30, 25, []));
+      const searchMock = jest.fn().mockResolvedValue(createAggResponse(200, 30, 25, []));
 
       const input = getGlobalPrevalenceInputSchema.parse({ ruleId: 'rule-1' });
       const context = createMockContext(input, searchMock);
@@ -111,9 +107,7 @@ describe('getGlobalPrevalence step', () => {
     });
 
     it('returns very_high prevalence when unique hosts >= 50', async () => {
-      const searchMock = jest
-        .fn()
-        .mockResolvedValue(createAggResponse(500, 75, 60, []));
+      const searchMock = jest.fn().mockResolvedValue(createAggResponse(500, 75, 60, []));
 
       const input = getGlobalPrevalenceInputSchema.parse({ ruleId: 'rule-1' });
       const context = createMockContext(input, searchMock);
@@ -124,9 +118,7 @@ describe('getGlobalPrevalence step', () => {
     });
 
     it('uses custom timestamp for the time range anchor', async () => {
-      const searchMock = jest
-        .fn()
-        .mockResolvedValue(createAggResponse(0, 0, 0, []));
+      const searchMock = jest.fn().mockResolvedValue(createAggResponse(0, 0, 0, []));
 
       const input = getGlobalPrevalenceInputSchema.parse({
         ruleId: 'rule-1',

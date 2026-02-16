@@ -277,9 +277,7 @@ describe('getRelatedAlerts step', () => {
       await getRelatedAlertsStepDefinition.handler(context as never);
 
       const params = mockBuildGraph.mock.calls[0][0];
-      expect(params.ignoreEntities).toEqual([
-        { field: 'user.name', values: ['root', 'SYSTEM'] },
-      ]);
+      expect(params.ignoreEntities).toEqual([{ field: 'user.name', values: ['root', 'SYSTEM'] }]);
       expect(params.minEntityScore).toBe(5);
     });
 

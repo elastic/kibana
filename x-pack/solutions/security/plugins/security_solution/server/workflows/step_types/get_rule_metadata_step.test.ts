@@ -56,9 +56,7 @@ describe('getRuleMetadata step', () => {
                 'kibana.alert.rule.category': 'Credential Access',
                 'kibana.alert.rule.type': 'query',
                 'kibana.alert.severity': 'high',
-                'kibana.alert.rule.references': [
-                  'https://attack.mitre.org/techniques/T1110/',
-                ],
+                'kibana.alert.rule.references': ['https://attack.mitre.org/techniques/T1110/'],
                 'kibana.alert.rule.threat': [
                   {
                     framework: 'MITRE ATT&CK',
@@ -85,9 +83,7 @@ describe('getRuleMetadata step', () => {
       expect(metadata.threat_framework).toBe('MITRE ATT&CK');
       expect(metadata.threat_tactic).toEqual({ id: 'TA0006', name: 'Credential Access' });
       expect(metadata.threat_technique).toEqual({ id: 'T1110', name: 'Brute Force' });
-      expect(metadata.references).toEqual([
-        'https://attack.mitre.org/techniques/T1110/',
-      ]);
+      expect(metadata.references).toEqual(['https://attack.mitre.org/techniques/T1110/']);
       expect(result.output!.note).toContain('Exceptions are not included');
     });
 
