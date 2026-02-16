@@ -21,10 +21,7 @@ export interface StepTransform {
  * Applies the given transform to a value. If transform is null or undefined,
  * returns the value unchanged. Applies all the transforms contained, which includes pick.
  */
-export function applyTransform(
-  transform: StepTransform | null | undefined,
-  value: unknown
-): unknown {
+export function applyTransform(transform: StepTransform | undefined, value: unknown): unknown {
   let ret = value;
   if (isPlainObject(transform)) {
     if (transform.pick !== null) {
@@ -38,132 +35,157 @@ export function applyTransform(
  * Applies the include (field projection) to a value using raw `pick` input
  * (object or array of dot-paths and/or nested list nodes). For arrays, applies
  * the same projection to each element. For objects, keeps only keys present in
- * the pick spec; if the spec value is a nested object, recurses into that branch.
+ * the pick; only paths that exist in the source are copied.
  */
 function applyPick(value: unknown, pick: unknown): unknown {
-  try {
-    return applyPickRecursive(value, pick, 1);
-  } catch (error: ApplyIncludeDepthError) {
-    return error;
-  }
+  const paths = normalizePick(pick);
+  return applyPickRecursive(value, paths, 1);
 }
 
 const MAX_APPLY_INCLUDE_DEPTH = 15;
 
-/** Thrown when recursion exceeds MAX_APPLY_INCLUDE_DEPTH; allows handler try/catch to surface the error. */
-class ApplyIncludeDepthError extends Error {
-  constructor() {
-    super(`Maximum recursion depth ${MAX_APPLY_INCLUDE_DEPTH} has been exceeded`);
-    this.name = 'ApplyIncludeDepthError';
-  }
-}
-
 /**
- * Recurses and throws ApplyIncludeDepthError when depth is exceeded so the error propagates to the caller.
+ * Applies the path list to value. Throws when recursion depth exceeds MAX_APPLY_INCLUDE_DEPTH.
  */
-function applyPickRecursive(value: unknown, pick: unknown, recurseDepth: number): unknown {
+function applyPickRecursive(value: unknown, paths: string[], recurseDepth: number): unknown {
   if (recurseDepth > MAX_APPLY_INCLUDE_DEPTH) {
-    throw new ApplyIncludeDepthError();
+    throw new Error(`Maximum recursion depth ${MAX_APPLY_INCLUDE_DEPTH} has been exceeded`);
   }
-  const spec = normalizeFieldsSpec(pick);
-  if (!isPlainObject(spec)) {
+  if (paths.length === 0) {
     return value;
   }
   if (Array.isArray(value)) {
-    return value.map((item) => applyPickRecursive(item, spec, recurseDepth + 1));
+    return value.map((item) => applyPickRecursive(item, paths, recurseDepth + 1));
   }
-  if (isPlainObject(value)) {
-    const result: FieldsSpec = {};
-    for (const key of Object.keys(spec)) {
-      if (key in value) {
-        const childSpec = spec[key];
-        const childValue = value[key];
-        if (isNonEmptyPlainObject(childSpec)) {
-          result[key] = applyPickRecursive(childValue, childSpec, recurseDepth + 1);
-        } else {
-          result[key] = childValue;
-        }
-      }
+  if (!isPlainObject(value)) {
+    return value;
+  }
+  const result: FieldsSpec = {};
+  for (const path of paths) {
+    const valueAtPath = getAtPath(value, path);
+    if (valueAtPath !== undefined) {
+      setAtPath(result, path, valueAtPath);
     }
-    return result;
   }
-  return value;
+  return result;
 }
 
-function isPlainObject(value: unknown): value is Record<string, unknown> {
+function isPlainObject(value: unknown): value is FieldsSpec {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 /** Plain object with at least one key (nested spec or list-format node). */
-function isNonEmptyPlainObject(value: unknown): value is Record<string, unknown> {
+function isNonEmptyPlainObject(value: unknown): value is FieldsSpec {
   return isPlainObject(value) && Object.keys(value).length > 0;
 }
 
 /**
- * Converts raw `pick` input (object or array format) into a single FieldsSpec.
- * Array format can mix dot-path strings and nested list nodes.
+ * Normalizes raw `pick` input to an array of dot-path strings.
+ * Object spec (e.g. { a: { b: {} } }) and array format (strings + list-format nodes) are supported.
  */
-function normalizeFieldsSpec(raw: unknown): FieldsSpec {
+function normalizePick(raw: unknown): string[] {
   if (isPlainObject(raw)) {
-    return raw as FieldsSpec;
+    return specToPaths(raw as FieldsSpec, '');
   }
-  if (!Array.isArray(raw)) {
-    return {};
+  if (Array.isArray(raw)) {
+    return flattenPickToPaths(raw, '');
   }
-  const elementToSpec = (element: unknown): FieldsSpec => {
-    if (typeof element === 'string') return pathToSpec(element);
-    if (isNonEmptyPlainObject(element)) return listFormatToSpec([element]);
-    return {};
-  };
-  return raw.reduce<FieldsSpec>(
-    (spec, element) => deepMergeSpecs(spec, elementToSpec(element)),
-    {}
-  );
+  return [];
 }
 
-/** Dot-path string → nested spec, e.g. 'a.b' → { a: { b: {} } }. */
-function pathToSpec(path: string): FieldsSpec {
-  const keys = path
+/** Walks a spec object and returns dot-path strings for each leaf key. */
+function specToPaths(spec: FieldsSpec, prefix: string): string[] {
+  const paths: string[] = [];
+  for (const key of Object.keys(spec)) {
+    const segment = prefix ? `${prefix}.${key}` : key;
+    const child = spec[key];
+    if (isNonEmptyPlainObject(child)) {
+      paths.push(...specToPaths(child as FieldsSpec, segment));
+    } else {
+      paths.push(segment);
+    }
+  }
+  return paths;
+}
+
+/** Just a utility to change a dotted path into an array */
+const pathParts = (path: string): string[] =>
+  path
     .split('.')
     .map((k) => k.trim())
     .filter(Boolean);
-  if (keys.length === 0) return {};
-  return keys.reduceRight<FieldsSpec>((child, key) => ({ [key]: child }), {});
-}
 
-/** List format: strings and/or { key: string[] | nested nodes }. */
-function listFormatToSpec(nodes: unknown[]): FieldsSpec {
-  let spec: FieldsSpec = {};
-  for (const node of nodes) {
-    if (typeof node === 'string') {
-      spec = deepMergeSpecs(spec, pathToSpec(node));
-    } else if (isNonEmptyPlainObject(node)) {
-      for (const key of Object.keys(node)) {
-        const child = node[key];
-        spec[key] = Array.isArray(child) ? listFormatToSpec(child) : {};
-      }
+/**
+ * Iterative walk to get an object by its dot notation. Must be aware of arrays in the middle.
+ */
+function getAtPath(obj: FieldsSpec, path: string): unknown {
+  const keys = pathParts(path);
+  let current: unknown = obj;
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    if (current == null || typeof current !== 'object') return undefined;
+    if (Array.isArray(current)) {
+      const remainder = keys.slice(i).join('.');
+      return (current as unknown[]).map((item) =>
+        isPlainObject(item) ? getAtPath(item, remainder) : undefined
+      );
     }
+    if (!(key in (current as FieldsSpec))) return undefined;
+    current = (current as FieldsSpec)[key];
   }
-  return spec;
+  return current;
 }
 
 /**
- * Recursive merge of A and B as a union of fields at the same level
+ * Iterative walk to set an object by its dot notation. Must be aware of arrays in the middle.
  */
-function deepMergeSpecs(a: FieldsSpec, b: FieldsSpec): FieldsSpec {
-  const result: FieldsSpec = { ...a };
-  for (const key of Object.keys(b)) {
-    const bVal = b[key];
-    if (!(key in result)) {
-      result[key] = bVal;
+function setAtPath(obj: FieldsSpec, path: string, value: unknown): void {
+  const keys = pathParts(path);
+  if (keys.length > 0) {
+    const key = keys[0];
+    const remainder = keys.slice(1).join('.');
+    if (Array.isArray(value)) {
+      if (!(key in obj) || !Array.isArray(obj[key])) {
+        obj[key] = (value as unknown[]).map(() => ({}));
+      }
+      const arr = obj[key] as FieldsSpec[];
+      (value as unknown[]).forEach((v, i) => {
+        if (arr[i] == null) arr[i] = {};
+        setAtPath(arr[i] as FieldsSpec, remainder, v);
+      });
     } else {
-      const aVal = result[key];
-      if (isPlainObject(aVal) && isPlainObject(bVal)) {
-        result[key] = deepMergeSpecs(aVal as FieldsSpec, bVal as FieldsSpec);
+      if (remainder) {
+        if (!(key in obj) || !isPlainObject(obj[key])) {
+          obj[key] = {};
+        }
+        setAtPath(obj[key] as FieldsSpec, remainder, value);
       } else {
-        result[key] = bVal;
+        obj[key] = value;
       }
     }
   }
-  return result as FieldsSpec;
+}
+
+/**
+ * Flattens array pick format to dot-path strings. List-format nodes are
+ * objects whose values are arrays of paths or nested list-format nodes.
+ */
+function flattenPickToPaths(elements: unknown[], prefix: string): string[] {
+  const paths: string[] = [];
+  for (const element of elements) {
+    if (typeof element === 'string') {
+      paths.push(prefix ? `${prefix}.${element}` : element);
+    } else if (isPlainObject(element)) {
+      for (const key of Object.keys(element)) {
+        const child = element[key];
+        const segment = prefix ? `${prefix}.${key}` : key;
+        if (Array.isArray(child)) {
+          paths.push(...flattenPickToPaths(child, segment));
+        } else {
+          paths.push(segment);
+        }
+      }
+    }
+  }
+  return paths;
 }
