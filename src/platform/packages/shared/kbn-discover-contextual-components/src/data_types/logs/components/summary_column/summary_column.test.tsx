@@ -17,8 +17,11 @@ import type {
   SummaryColumnProps,
 } from './summary_column';
 import SummaryColumn, { SummaryCellPopover } from './summary_column';
-import { DataGridDensity, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
-import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import {
+  DataGridDensity,
+  ROWS_HEIGHT_OPTIONS,
+  type DataTableColumnsMeta,
+} from '@kbn/unified-data-table';
 import * as constants from '@kbn/discover-utils/src/data_types/logs/constants';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
@@ -348,9 +351,7 @@ describe('SummaryColumn with columnsMeta', () => {
     );
 
     // Should pass the data view field (with type 'number') to formatFieldValue
-    const bytesFieldCall = formatFieldValueSpy.mock.calls.find(
-      (call) => call[4]?.name === 'bytes'
-    );
+    const bytesFieldCall = formatFieldValueSpy.mock.calls.find((call) => call[4]?.name === 'bytes');
     expect(bytesFieldCall).toBeDefined();
     expect(bytesFieldCall![4]).toMatchObject({
       name: 'bytes',
@@ -422,9 +423,7 @@ describe('SummaryColumn with columnsMeta', () => {
     );
 
     // Should pass a field with the columnsMeta type (string/keyword) to formatFieldValue
-    const bytesFieldCall = formatFieldValueSpy.mock.calls.find(
-      (call) => call[4]?.name === 'bytes'
-    );
+    const bytesFieldCall = formatFieldValueSpy.mock.calls.find((call) => call[4]?.name === 'bytes');
     expect(bytesFieldCall).toBeDefined();
     expect(bytesFieldCall![4]).toMatchObject({
       name: 'bytes',

@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  DataGridDensity,
-  type DataGridCellValueElementProps,
-  type DataTableColumnsMeta,
-} from '@kbn/unified-data-table';
+import { DataGridDensity, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import React, { useMemo } from 'react';
 import { EuiButtonIcon, EuiCodeBlock, EuiFlexGroup, EuiText, EuiTitle } from '@elastic/eui';
 import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
@@ -45,7 +41,6 @@ export interface SummaryColumnFactoryDeps {
   density: DataGridDensity | undefined;
   rowHeight: number | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
-  columnsMeta: DataTableColumnsMeta | undefined;
   onFilter?: DocViewFilterFn;
   core: CoreStart;
   share?: SharePluginStart;

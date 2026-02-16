@@ -26,7 +26,7 @@ const SummaryColumn = (props: Omit<AllSummaryColumnProps, 'core' | 'share'>) => 
 };
 
 export const getTracesSummaryColumn = (params: SummaryColumnGetterDeps) => {
-  const { actions, dataView, density, rowHeight, columnsMeta } = params;
+  const { actions, dataView, density, rowHeight } = params;
   const shouldShowFieldHandler = createGetShouldShowFieldHandler(dataView);
 
   return (props: Omit<SummaryColumnProps, 'core' | 'share'>) => (
@@ -37,7 +37,6 @@ export const getTracesSummaryColumn = (params: SummaryColumnGetterDeps) => {
       onFilter={actions.addFilter}
       rowHeight={rowHeight}
       shouldShowFieldHandler={shouldShowFieldHandler}
-      columnsMeta={columnsMeta}
     />
   );
 };

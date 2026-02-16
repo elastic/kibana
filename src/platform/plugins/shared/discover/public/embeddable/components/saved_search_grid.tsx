@@ -122,7 +122,6 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         rowHeightState: gridProps.rowHeightState,
         configRowHeight: props.configRowHeight,
       }),
-      columnsMeta: gridProps.columnsMeta,
     });
   }, [
     getCellRenderersAccessor,
@@ -132,7 +131,6 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     props.configRowHeight,
     gridProps.dataGridDensityState,
     gridProps.rowHeightState,
-    gridProps.columnsMeta,
   ]);
 
   return (

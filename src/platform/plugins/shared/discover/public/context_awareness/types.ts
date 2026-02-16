@@ -318,10 +318,6 @@ export interface CellRenderersExtensionParams {
    * The current row height mode applied to the data grid component
    */
   rowHeight: number | undefined;
-  /**
-   * Fields info for ES|QL results
-   */
-  columnsMeta: UnifiedDataTableProps['columnsMeta'];
 }
 
 /**

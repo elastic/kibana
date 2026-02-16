@@ -107,6 +107,7 @@ export const getRenderCellValueFn = ({
             fieldFormats={fieldFormats}
             closePopover={closePopover}
             isCompressed={isCompressed}
+            columnsMeta={columnsMeta}
           />
         </span>
       );

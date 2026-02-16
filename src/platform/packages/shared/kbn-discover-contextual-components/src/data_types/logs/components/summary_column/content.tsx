@@ -8,11 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  SourceDocument,
-  type DataGridCellValueElementProps,
-  type DataTableColumnsMeta,
-} from '@kbn/unified-data-table';
+import { SourceDocument, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { ShouldShowFieldInTableHandler, DataTableRecord } from '@kbn/discover-utils';
 import {
   getMessageFieldWithFallbacks,
@@ -32,7 +28,6 @@ interface ContentProps extends DataGridCellValueElementProps {
   isCompressed: boolean;
   isSingleLine?: boolean;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
-  columnsMeta: DataTableColumnsMeta | undefined;
 }
 
 const LogMessage = ({
