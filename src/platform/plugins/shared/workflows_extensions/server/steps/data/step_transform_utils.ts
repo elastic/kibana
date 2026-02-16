@@ -20,34 +20,28 @@ export interface StepTransform {
 /**
  * Applies the given transform to a value. If transform is null or undefined,
  * returns the value unchanged. Applies all the transforms contained, which includes pick.
+ * If clone is true, clones the value first and applies the transform to the clone so the original is not mutated.
  */
-export function applyTransform(transform: StepTransform | undefined, value: unknown): unknown {
-  let ret = value;
+export function applyTransform(
+  transform: StepTransform | undefined,
+  value: unknown,
+  clone: boolean = false
+): unknown {
+  const target = clone ? structuredClone(value) : value;
   if (isPlainObject(transform)) {
     if (transform.pick !== null) {
-      ret = applyPick(ret, transform.pick);
+      applyPickInPlace(target, normalizePick(transform.pick), 1);
     }
   }
-  return ret;
-}
-
-/**
- * Applies the include (field projection) to a value using raw `pick` input
- * (object or array of dot-paths and/or nested list nodes). For arrays, applies
- * the same projection to each element. For objects, keeps only keys present in
- * the pick; only paths that exist in the source are copied.
- */
-function applyPick(value: unknown, pick: unknown): unknown {
-  const paths = normalizePick(pick);
-  return applyPickRecursive(value, paths, 1);
+  return target;
 }
 
 const MAX_APPLY_INCLUDE_DEPTH = 15;
 
 /**
- * Applies the path list to value. Throws when recursion depth exceeds MAX_APPLY_INCLUDE_DEPTH.
+ * Mutates value in place by deleting keys not in the path list. Throws when depth exceeds MAX_APPLY_INCLUDE_DEPTH.
  */
-function applyPickRecursive(value: unknown, paths: string[], recurseDepth: number): unknown {
+function applyPickInPlace(value: unknown, paths: string[], recurseDepth: number): unknown {
   if (recurseDepth > MAX_APPLY_INCLUDE_DEPTH) {
     throw new Error(`Maximum recursion depth ${MAX_APPLY_INCLUDE_DEPTH} has been exceeded`);
   }
@@ -55,19 +49,30 @@ function applyPickRecursive(value: unknown, paths: string[], recurseDepth: numbe
     return value;
   }
   if (Array.isArray(value)) {
-    return value.map((item) => applyPickRecursive(item, paths, recurseDepth + 1));
+    value.forEach((item) => applyPickInPlace(item, paths, recurseDepth + 1));
+    return value;
   }
   if (!isPlainObject(value)) {
     return value;
   }
-  const result: FieldsSpec = {};
-  for (const path of paths) {
-    const valueAtPath = getAtPath(value, path);
-    if (valueAtPath !== undefined) {
-      setAtPath(result, path, valueAtPath);
+  const allowedKeys = new Set(paths.map((p) => pathParts(p)[0]).filter(Boolean));
+  for (const key of Object.keys(value)) {
+    if (!allowedKeys.has(key)) {
+      delete value[key];
     }
   }
-  return result;
+  for (const key of allowedKeys) {
+    if (key in value) {
+      const nestedPaths = paths
+        .filter((p) => pathParts(p)[0] === key)
+        .map((p) => pathParts(p).slice(1).join('.'))
+        .filter(Boolean);
+      if (nestedPaths.length > 0) {
+        applyPickInPlace(value[key], nestedPaths, recurseDepth + 1);
+      }
+    }
+  }
+  return value;
 }
 
 function isPlainObject(value: unknown): value is FieldsSpec {
@@ -114,57 +119,6 @@ const pathParts = (path: string): string[] =>
     .split('.')
     .map((k) => k.trim())
     .filter(Boolean);
-
-/**
- * Iterative walk to get an object by its dot notation. Must be aware of arrays in the middle.
- */
-function getAtPath(obj: FieldsSpec, path: string): unknown {
-  const keys = pathParts(path);
-  let current: unknown = obj;
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    if (current == null || typeof current !== 'object') return undefined;
-    if (Array.isArray(current)) {
-      const remainder = keys.slice(i).join('.');
-      return (current as unknown[]).map((item) =>
-        isPlainObject(item) ? getAtPath(item, remainder) : undefined
-      );
-    }
-    if (!(key in (current as FieldsSpec))) return undefined;
-    current = (current as FieldsSpec)[key];
-  }
-  return current;
-}
-
-/**
- * Iterative walk to set an object by its dot notation. Must be aware of arrays in the middle.
- */
-function setAtPath(obj: FieldsSpec, path: string, value: unknown): void {
-  const keys = pathParts(path);
-  if (keys.length > 0) {
-    const key = keys[0];
-    const remainder = keys.slice(1).join('.');
-    if (Array.isArray(value)) {
-      if (!(key in obj) || !Array.isArray(obj[key])) {
-        obj[key] = (value as unknown[]).map(() => ({}));
-      }
-      const arr = obj[key] as FieldsSpec[];
-      (value as unknown[]).forEach((v, i) => {
-        if (arr[i] == null) arr[i] = {};
-        setAtPath(arr[i] as FieldsSpec, remainder, v);
-      });
-    } else {
-      if (remainder) {
-        if (!(key in obj) || !isPlainObject(obj[key])) {
-          obj[key] = {};
-        }
-        setAtPath(obj[key] as FieldsSpec, remainder, value);
-      } else {
-        obj[key] = value;
-      }
-    }
-  }
-}
 
 /**
  * Flattens array pick format to dot-path strings. List-format nodes are
