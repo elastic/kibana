@@ -456,17 +456,13 @@ describe('run_all.ts', () => {
           emptyConfigs: [],
         });
 
-        // Mock multiple process instances for retry logic
-        let processCount = 0;
         mockSpawn.mockImplementation(() => {
           const mockProcess = new EventEmitter() as any;
           mockProcess.stdout = new EventEmitter();
           mockProcess.stderr = new EventEmitter();
 
-          // Always fail both initial and retry attempts
           process.nextTick(() => {
             mockProcess.emit('exit', 1);
-            processCount++;
           });
 
           return mockProcess;
@@ -479,8 +475,8 @@ describe('run_all.ts', () => {
           expect((err as Error).message).toContain('process.exit called with code 10');
         }
 
-        // Should have spawned processes for both initial run and retry
-        expect(mockSpawn).toHaveBeenCalledTimes(2); // 1 initial + 1 retry
+        // No retry — only 1 spawn for the failing config
+        expect(mockSpawn).toHaveBeenCalledTimes(1);
 
         expect(mockReporter).toHaveBeenCalledWith(
           expect.any(Number),
@@ -709,69 +705,7 @@ describe('run_all.ts', () => {
       });
     });
 
-    describe('parallel execution and retry logic', () => {
-      it('should handle retry mechanism for failed configs', async () => {
-        mockGetJestConfigs.mockResolvedValue({
-          configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
-          emptyConfigs: [],
-        });
-
-        let callCount = 0;
-        mockSpawn.mockImplementation(() => {
-          const mockProcess = new EventEmitter() as any;
-          mockProcess.stdout = new EventEmitter();
-          mockProcess.stderr = new EventEmitter();
-
-          process.nextTick(() => {
-            // Fail first time, succeed on retry
-            mockProcess.emit('exit', callCount === 0 ? 1 : 0);
-            callCount++;
-          });
-
-          return mockProcess;
-        });
-
-        const runPromise = runJestAll().catch(() => {
-          // Expected due to process.exit mock
-        });
-
-        await runPromise;
-
-        expect(mockLog.info).toHaveBeenCalledWith(
-          '--- Detected failing configs, starting retry pass (maxParallel=1)'
-        );
-        expect(mockLog.info).toHaveBeenCalledWith('Configs fixed after retry:');
-      });
-
-      it('should handle configs that still fail after retry', async () => {
-        mockGetJestConfigs.mockResolvedValue({
-          configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
-          emptyConfigs: [],
-        });
-
-        // Always fail
-        mockSpawn.mockImplementation(() => {
-          const mockProcess = new EventEmitter() as any;
-          mockProcess.stdout = new EventEmitter();
-          mockProcess.stderr = new EventEmitter();
-
-          process.nextTick(() => {
-            mockProcess.emit('exit', 1);
-          });
-
-          return mockProcess;
-        });
-
-        try {
-          await runJestAll();
-        } catch (err) {
-          expect((err as Error).message).toContain('process.exit called with code 10');
-        }
-
-        expect(mockLog.info).toHaveBeenCalledWith('Configs still failing after retry:');
-        expect(mockLog.info).toHaveBeenCalledWith('  - /path/to/config1.js');
-      });
-    });
+    describe('parallel execution', () => {});
 
     describe('Buildkite checkpoint resume', () => {
       beforeEach(() => {

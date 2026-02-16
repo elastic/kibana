@@ -136,48 +136,10 @@ export async function runJestAll() {
     process.exit(1);
   }
 
-  // First pass
-  const firstPass = configs.length ? await runConfigs(configs, maxParallel, log) : [];
+  const results = configs.length ? await runConfigs(configs, maxParallel, log) : [];
 
-  let failing = firstPass.filter((r) => r.code !== 0).map((r) => r.config);
-
-  let retryResults: JestConfigResult[] = [];
-
-  if (failing.length > 0) {
-    log.info('--- Detected failing configs, starting retry pass (maxParallel=1)');
-    retryResults = await runConfigs(failing, 1, log);
-
-    const fixed = retryResults.filter((r) => r.code === 0).map((r) => r.config);
-
-    const stillFailing = retryResults.filter((r) => r.code !== 0).map((r) => r.config);
-
-    if (fixed.length) {
-      log.info('Configs fixed after retry:');
-
-      for (const f of fixed) {
-        log.info(`  - ${f}`);
-      }
-    }
-
-    if (stillFailing.length) {
-      log.info('Configs still failing after retry:');
-      for (const f of stillFailing) {
-        log.info(`  - ${f}`);
-      }
-    }
-
-    failing = stillFailing; // update failing list to post-retry
-  }
-
-  const results = retryResults.length
-    ? // merge: prefer retry result for retried configs
-      firstPass.map((r) => {
-        const retried = retryResults.find((rr) => rr.config === r.config);
-        return retried ? retried : r;
-      })
-    : firstPass;
-
-  const globalExit = failing.length > 0 ? 10 : 0; // maintain previous non-zero code
+  const hasFailures = results.some((r) => r.code !== 0);
+  const globalExit = hasFailures ? 10 : 0;
 
   const totalMs = Date.now() - startAll;
 
@@ -321,8 +283,10 @@ async function runConfigs(
           const code = c == null ? 1 : c;
           const durationMs = Date.now() - start;
 
-          // Parse failed tests from output if the run failed
-          const failedTests = code !== 0 ? parseFailedTests(buffer) : [];
+          // Parse failed tests from output if the run failed.
+          // Strip ANSI color codes first so regexes match on CI where Jest colorizes output.
+          const cleanBuffer = buffer.replace(/\x1b\[[0-9;]*m/g, '');
+          const failedTests = code !== 0 ? parseFailedTests(cleanBuffer) : [];
 
           results.push({ config, code, durationMs, slowTestsFile, failedTests });
 
