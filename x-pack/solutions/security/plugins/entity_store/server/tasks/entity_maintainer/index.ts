@@ -75,13 +75,14 @@ export function registerEntityMaintainerTask({
   config: RegisterEntityMaintainerConfig;
   core: EntityStoreCoreSetup;
 }): void {
-  try {
-    logger.debug(`Registering entity maintainer task: ${config.id}`);
-    const { title } = TasksConfig[EntityStoreTaskType.Values.entityMaintainer];
-    const { run, interval, initialState, description, id, setup } = config;
-    const type = getTaskType(id);
+  logger.debug(`Registering entity maintainer task: ${config.id}`);
+  const { title } = TasksConfig[EntityStoreTaskType.Values.entityMaintainer];
+  const { run, interval, initialState, description, id, setup } = config;
+  const type = getTaskType(id);
 
-    core.getStartServices().then(([start]) => {
+  void core
+    .getStartServices()
+    .then(([start]) => {
       const internalRepo = start.savedObjects.createInternalRepository([
         EntityMaintainersTasksTypeName,
       ]);
@@ -129,11 +130,10 @@ export function registerEntityMaintainerTask({
           }),
         },
       });
+    })
+    .catch((err) => {
+      logger.error(`Failed to register entity maintainer task: ${err?.message}`);
     });
-  } catch (err) {
-    logger.error(`Error registering entity maintainer task: ${err?.message}`);
-    throw err;
-  }
 }
 
 async function runEntityMaintainerTask({
