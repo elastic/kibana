@@ -42,10 +42,7 @@ interface StreamNameFormRowProps {
 const MIN_NAME_LENGTH = 1;
 const PREFIX_MAX_VISIBLE_CHARACTERS = 25;
 
-export const getHelpText = (
-  isStreamNameEmpty: boolean,
-  readOnly: boolean
-): string | undefined => {
+export const getHelpText = (isStreamNameEmpty: boolean, readOnly: boolean): string | undefined => {
   if (isStreamNameEmpty && !readOnly) {
     return i18n.translate('xpack.streams.streamDetailRouting.minimumNameHelpText', {
       defaultMessage: `Stream name is required.`,
