@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { popularizeField } from '@kbn/unified-data-table';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLatest from 'react-use/lib/useLatest';
 import { ContextApp } from './context_app';
@@ -67,6 +69,21 @@ export function ContextAppRoute() {
   const rootProfileState = useRootProfile();
   const [scopedEbtManager] = useState(() => ebtManager.createScopedEBTManager());
 
+  const [expandedDoc, setExpandedDocState] = useState<DataTableRecord | undefined>();
+  const [initialDocViewerTabId, setInitialDocViewerTabId] = useState<string | undefined>(undefined);
+  const docViewerRef = useRef<DocViewerApi>(null);
+
+  const setExpandedDoc = useCallback(
+    (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
+      setExpandedDocState(doc);
+      setInitialDocViewerTabId(options?.initialTabId);
+      if (options?.initialTabId) {
+        docViewerRef.current?.setSelectedTabId(options.initialTabId);
+      }
+    },
+    []
+  );
+
   const addFilter = useLatest<DocViewFilterFn>((mapping, values, operation) => {
     if (!dataView || !mapping) {
       return;
@@ -95,6 +112,7 @@ export function ContextAppRoute() {
       toolkit: {
         actions: {
           addFilter: stableAddFilter,
+          setExpandedDoc,
         },
       },
     })
@@ -137,6 +155,10 @@ export function ContextAppRoute() {
           dataView={dataView}
           referrer={locationState?.referrer}
           addFilter={stableAddFilter}
+          expandedDoc={expandedDoc}
+          initialDocViewerTabId={initialDocViewerTabId}
+          docViewerRef={docViewerRef}
+          setExpandedDoc={setExpandedDoc}
         />
       </rootProfileState.AppWrapper>
     </ScopedServicesProvider>

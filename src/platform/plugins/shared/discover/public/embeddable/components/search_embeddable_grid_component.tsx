@@ -24,6 +24,8 @@ import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warni
 import type { DataGridDensity } from '@kbn/unified-data-table';
 import { DataLoadingState, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import {
@@ -50,6 +52,10 @@ interface SavedSearchEmbeddableComponentProps {
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
   enableDocumentViewer: boolean;
+  docViewerRef: React.RefObject<DocViewerApi>;
+  expandedDoc: DataTableRecord | undefined;
+  initialDocViewerTabId: string | undefined;
+  setExpandedDoc?: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
   stateManager: SearchEmbeddableStateManager;
 }
 
@@ -60,6 +66,10 @@ export function SearchEmbeddableGridComponent({
   dataView,
   onAddFilter,
   enableDocumentViewer,
+  docViewerRef,
+  expandedDoc,
+  initialDocViewerTabId,
+  setExpandedDoc,
   stateManager,
 }: SavedSearchEmbeddableComponentProps) {
   const discoverServices = useDiscoverServices();
@@ -261,6 +271,10 @@ export function SearchEmbeddableGridComponent({
       showTimeCol={!discoverServices.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)}
       dataGridDensityState={savedSearch.density}
       enableDocumentViewer={enableDocumentViewer}
+      expandedDoc={expandedDoc}
+      initialDocViewerTabId={initialDocViewerTabId}
+      docViewerRef={docViewerRef}
+      setExpandedDoc={setExpandedDoc}
     />
   );
 }

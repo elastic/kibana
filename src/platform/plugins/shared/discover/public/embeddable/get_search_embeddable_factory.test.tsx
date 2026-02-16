@@ -132,9 +132,15 @@ describe('saved search embeddable', () => {
 
       // wait for data fetching
       expect(api.dataLoading$.getValue()).toBe(true);
+
+      await waitFor(() => {
+        expect(search).toHaveBeenCalled();
+      });
       resolveSearch();
-      await waitOneTick();
-      expect(api.dataLoading$.getValue()).toBe(false);
+
+      await waitFor(() => {
+        expect(api.dataLoading$.getValue()).toBe(false);
+      });
 
       await waitFor(() => {
         expect(discoverComponent.queryByTestId('embeddedSavedSearchDocTable')).toBeInTheDocument();
@@ -165,9 +171,12 @@ describe('saved search embeddable', () => {
 
       const discoverComponent = render(<Component />);
 
+      await waitFor(() => {
+        expect(api.dataLoading$.getValue()).toBe(false);
+      });
+
       // Field statistics mode should not trigger document fetching
       expect(search).not.toHaveBeenCalled();
-      expect(api.dataLoading$.getValue()).toBe(false);
 
       expect(discoverComponent.queryByTestId('dscFieldStatsEmbeddedContent')).toBeInTheDocument();
     });
@@ -180,7 +189,7 @@ describe('saved search embeddable', () => {
         searchMock: search,
         partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL },
       });
-      const { api } = await factory.buildEmbeddable({
+      const { api, Component } = await factory.buildEmbeddable({
         initialState: { savedObjectId: 'id' }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
@@ -188,11 +197,19 @@ describe('saved search embeddable', () => {
       });
       await waitOneTick(); // wait for build to complete
 
+      render(<Component />);
+
       // wait for data fetching
       expect(api.dataLoading$.getValue()).toBe(true);
+
+      await waitFor(() => {
+        expect(search).toHaveBeenCalled();
+      });
       resolveSearch();
-      await waitOneTick();
-      expect(api.dataLoading$.getValue()).toBe(false);
+
+      await waitFor(() => {
+        expect(api.dataLoading$.getValue()).toBe(false);
+      });
 
       expect(search).toHaveBeenCalledTimes(1);
       api.setTitle('custom title');
@@ -269,13 +286,16 @@ describe('saved search embeddable', () => {
         .spyOn(discoverServiceMock.profilesManager, 'createScopedProfilesManager')
         .mockReturnValueOnce(scopedProfilesManager);
       runtimeState = getInitialRuntimeState();
-      const { api } = await factory.buildEmbeddable({
+      const { api, Component } = await factory.buildEmbeddable({
         initialState: { savedObjectId: 'id' }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
       });
       await waitOneTick(); // wait for build to complete
+
+      render(<Component />);
+      await waitOneTick();
 
       expect(resolveDataSourceProfileSpy).toHaveBeenCalledWith({
         dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
@@ -309,9 +329,15 @@ describe('saved search embeddable', () => {
 
       // wait for data fetching
       expect(api.dataLoading$.getValue()).toBe(true);
+
+      await waitFor(() => {
+        expect(search).toHaveBeenCalled();
+      });
       resolveSearch();
-      await waitOneTick();
-      expect(api.dataLoading$.getValue()).toBe(false);
+
+      await waitFor(() => {
+        expect(api.dataLoading$.getValue()).toBe(false);
+      });
 
       await waitFor(() => {
         const discoverGridComponent = discoverComponent.queryByTestId('discoverDocTable');

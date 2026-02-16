@@ -19,6 +19,7 @@ import { uiSettingsMock } from '../../__mocks__/ui_settings';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 
 const mockNavigationPlugin = {
   ui: { TopNavMenu: mockTopNavMenu, AggregateQueryTopNavMenu: mockTopNavMenu },
@@ -30,10 +31,16 @@ services.uiSettings = uiSettingsMock;
 
 describe('ContextApp test', () => {
   const addFilterMock = jest.fn();
+  const setExpandedDocMock = jest.fn();
+  const docViewerRef = React.createRef<DocViewerApi>();
   const defaultProps: ContextAppProps = {
     dataView: dataViewMock,
     anchorId: 'mocked_anchor_id',
     addFilter: addFilterMock,
+    expandedDoc: undefined,
+    initialDocViewerTabId: undefined,
+    docViewerRef,
+    setExpandedDoc: setExpandedDocMock,
   };
 
   const topNavProps = {

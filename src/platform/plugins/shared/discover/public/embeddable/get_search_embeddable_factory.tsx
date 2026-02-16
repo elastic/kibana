@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, firstValueFrom, merge } from 'rxjs';
 
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -27,8 +27,11 @@ import {
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
+import useObservable from 'react-use/lib/useObservable';
 
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { APPLY_FILTER_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DiscoverServices } from '../build_services';
@@ -245,9 +248,26 @@ export const getSearchEmbeddableFactory = ({
         });
       };
 
+      const enableDocumentViewer =
+        runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !== undefined
+          ? runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer
+          : true;
+
+      const expandedDoc$ = new BehaviorSubject<DataTableRecord | undefined>(undefined);
+      const initialDocViewerTabId$ = new BehaviorSubject<string | undefined>(undefined);
+
+      const setExpandedDoc = (
+        doc: DataTableRecord | undefined,
+        options?: { initialTabId?: string }
+      ) => {
+        expandedDoc$.next(doc);
+        initialDocViewerTabId$.next(options?.initialTabId);
+      };
+
       const toolkit: ContextAwarenessToolkit = {
         actions: {
           addFilter,
+          setExpandedDoc: enableDocumentViewer ? setExpandedDoc : undefined,
         },
       };
 
@@ -285,6 +305,19 @@ export const getSearchEmbeddableFactory = ({
             api.savedSearch$,
             api.dataViews$
           );
+
+          const expandedDoc = useObservable(expandedDoc$, expandedDoc$.getValue());
+          const initialDocViewerTabId = useObservable(
+            initialDocViewerTabId$,
+            initialDocViewerTabId$.getValue()
+          );
+          const docViewerRef = useRef<DocViewerApi>(null);
+
+          useEffect(() => {
+            if (initialDocViewerTabId) {
+              docViewerRef.current?.setSelectedTabId(initialDocViewerTabId);
+            }
+          }, [initialDocViewerTabId]);
 
           useEffect(() => {
             return () => {
@@ -352,12 +385,13 @@ export const getSearchEmbeddableFactory = ({
                               ? undefined
                               : addFilter
                           }
-                          enableDocumentViewer={
-                            runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !==
-                            undefined
-                              ? runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer
-                              : true
+                          enableDocumentViewer={enableDocumentViewer}
+                          expandedDoc={enableDocumentViewer ? expandedDoc : undefined}
+                          initialDocViewerTabId={
+                            enableDocumentViewer ? initialDocViewerTabId : undefined
                           }
+                          docViewerRef={docViewerRef}
+                          setExpandedDoc={enableDocumentViewer ? setExpandedDoc : undefined}
                           stateManager={searchEmbeddable.stateManager}
                         />
                       </CellActionsProvider>

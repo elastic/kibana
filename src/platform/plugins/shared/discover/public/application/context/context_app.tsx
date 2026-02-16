@@ -29,6 +29,8 @@ import { useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
 import type { AppState, GlobalState } from './services/context_state';
@@ -48,9 +50,22 @@ export interface ContextAppProps {
   anchorId: string;
   referrer?: string;
   addFilter: DocViewFilterFn;
+  expandedDoc: DataTableRecord | undefined;
+  initialDocViewerTabId: string | undefined;
+  docViewerRef: React.RefObject<DocViewerApi>;
+  setExpandedDoc: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
 }
 
-export const ContextApp = ({ dataView, anchorId, referrer, addFilter }: ContextAppProps) => {
+export const ContextApp = ({
+  dataView,
+  anchorId,
+  referrer,
+  addFilter,
+  expandedDoc,
+  initialDocViewerTabId,
+  docViewerRef,
+  setExpandedDoc,
+}: ContextAppProps) => {
   const styles = useMemoCss(componentStyles);
 
   const services = useDiscoverServices();
@@ -265,6 +280,10 @@ export const ContextApp = ({ dataView, anchorId, referrer, addFilter }: ContextA
                 successorCount={appState.successorCount}
                 setAppState={stateContainer.setAppState}
                 addFilter={addFilter as DocViewFilterFn}
+                expandedDoc={expandedDoc}
+                initialDocViewerTabId={initialDocViewerTabId}
+                docViewerRef={docViewerRef}
+                setExpandedDoc={setExpandedDoc}
                 rows={rows}
                 predecessors={fetchedState.predecessors}
                 successors={fetchedState.successors}
