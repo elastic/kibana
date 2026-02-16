@@ -10,7 +10,7 @@ import { getFormattedFields } from './get_formatted_fields';
 import { formatFieldValue } from './format_value';
 import type { DataTableRecord } from '../types';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 
 jest.mock('./format_value', () => ({
   formatFieldValue: jest.fn(),
@@ -23,7 +23,7 @@ describe('getFormattedFields', () => {
     },
   } as unknown as DataView;
 
-  const mockFieldFormats = {} as FieldFormatsStart;
+  const mockFieldFormats = {} as FieldFormatsStartCommon;
 
   const mockDoc: DataTableRecord = {
     id: '1',

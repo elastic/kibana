@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { dataViewMock } from '../__mocks__';
 import { formatFieldValue } from './format_value';
@@ -17,7 +17,7 @@ const services = {
     getDefaultInstance: jest.fn<FieldFormat, [string]>(
       () => ({ convert: (value: unknown) => value } as FieldFormat)
     ),
-  } as unknown as FieldFormatsStart,
+  } as unknown as FieldFormatsStartCommon,
 };
 
 const hit = {

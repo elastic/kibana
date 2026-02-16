@@ -17,3 +17,4 @@ export type {
 } from './src/types';
 
 export type { FormattedHitReact, FormattedHitReactPair } from './src/utils/format_hit_react';
+export type { FormatFieldValueReactProps } from './src/utils/format_field_value_react';

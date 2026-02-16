@@ -11,7 +11,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CoreStart, IUiSettingsClient, NotificationsStart } from '@kbn/core/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { FileUploadManager } from '@kbn/file-upload';
@@ -40,7 +40,7 @@ export interface EditLookupIndexFlyoutDeps {
   coreStart: CoreStart;
   data: DataPublicPluginStart;
   uiActions: UiActionsStart;
-  fieldFormats: FieldFormatsStart;
+  fieldFormats: FieldFormatsStartCommon;
   share: SharePluginStart;
   fileUpload: FileUploadPluginStart;
 }
@@ -59,7 +59,7 @@ export interface KibanaContextExtra {
   uiActions: UiActionsStart;
   overlays: CoreStart['overlays'];
   rendering: CoreStart['rendering'];
-  fieldFormats: FieldFormatsStart;
+  fieldFormats: FieldFormatsStartCommon;
   dataViewFieldEditor: DataViewFieldEditorStart;
   /** Custom service for indexing documents */
   indexUpdateService: IndexUpdateService;

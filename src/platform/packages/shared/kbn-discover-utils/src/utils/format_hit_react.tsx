@@ -9,13 +9,9 @@
 
 import React, { type ReactNode, Fragment, memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type {
-  DataTableRecord,
-  ShouldShowFieldInTableHandler,
-  EsHitRecord,
-} from '@kbn/discover-utils/types';
-import type { FieldFormatsStart } from '../plugin';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
+import type { DataTableRecord, ShouldShowFieldInTableHandler, EsHitRecord } from '../types';
 import { FormatFieldValueReact } from './format_field_value_react';
 
 /**
@@ -52,7 +48,7 @@ interface FormatHitReactFieldValueProps {
   hit: DataTableRecord;
   fieldName: string;
   dataView: DataView;
-  fieldFormats: FieldFormatsStart;
+  fieldFormats: FieldFormatsStartCommon;
 }
 
 /**
@@ -90,7 +86,7 @@ export function formatHitReact(
   dataView: DataView,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   maxEntries: number,
-  fieldFormats: FieldFormatsStart
+  fieldFormats: FieldFormatsStartCommon
 ): FormattedHitReact {
   const cached = formattedHitReactCache.get(hit.raw);
 
@@ -161,7 +157,7 @@ export function formatHitReact(
   // off additional fields and instead show a summary how many more field exists.
   if (totalLength > maxEntries) {
     renderedPairs.push([
-      i18n.translate('fieldFormats.formatHit.moreFields', {
+      i18n.translate('discoverUtils.formatHit.moreFields', {
         defaultMessage: 'and {count} more {count, plural, one {field} other {fields}}',
         values: { count: totalLength - maxEntries },
       }),

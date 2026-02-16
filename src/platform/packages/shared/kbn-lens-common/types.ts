@@ -65,7 +65,7 @@ import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-p
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { NavigationPublicPluginStart, TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
@@ -150,7 +150,7 @@ export interface LensAppServices extends StartServices {
   chrome: ChromeStart;
   storage: IStorageWrapper;
   dataViews: DataViewsPublicPluginStart;
-  fieldFormats: FieldFormatsStart;
+  fieldFormats: FieldFormatsStartCommon;
   data: DataPublicPluginStart;
   eventAnnotationService: EventAnnotationServiceType;
   inspector: LensInspector;

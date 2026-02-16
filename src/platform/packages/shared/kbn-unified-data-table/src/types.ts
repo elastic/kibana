@@ -15,7 +15,7 @@ import type {
 } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 export type { DataTableColumnsMeta } from '@kbn/discover-utils/types';
 export type { DataGridDensity } from './constants';
 
@@ -45,7 +45,7 @@ export type ValueToStringConverter = (
 export type DataGridCellValueElementProps = EuiDataGridCellValueElementProps & {
   row: DataTableRecord;
   dataView: DataView;
-  fieldFormats: FieldFormatsStart;
+  fieldFormats: FieldFormatsStartCommon;
   closePopover: () => void;
   isCompressed?: boolean;
 };

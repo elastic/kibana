@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC, memo } from 'react';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import React, { type FC, type ReactNode, memo, useMemo } from 'react';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
-import { FormattedValue, type FormattedValueProps } from '../../common/components';
-import type { FieldFormatsStartCommon } from '../../common/types';
+import type {
+  FieldFormatsStartCommon,
+  IFieldFormat,
+  HtmlContextTypeOptions,
+  ReactContextTypeOptions,
+} from '@kbn/field-formats-plugin/common';
+import type { EsHitRecord } from '../types';
 
 export interface FormatFieldValueReactProps {
   /**
@@ -52,6 +56,68 @@ export interface FormatFieldValueReactProps {
 }
 
 /**
+ * Internal component that renders formatter HTML output via dangerouslySetInnerHTML.
+ * This is used as a fallback when the formatter doesn't support React rendering.
+ */
+const LegacyHtmlAdapter: FC<{
+  html: string;
+  className?: string;
+  'data-test-subj'?: string;
+}> = memo(({ html, className, 'data-test-subj': dataTestSubj }) => {
+  return (
+    <span
+      className={className}
+      data-test-subj={dataTestSubj}
+      // The HTML from field formatters is sanitized and safe for rendering.
+      // eslint-disable-next-line react/no-danger
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+});
+
+LegacyHtmlAdapter.displayName = 'LegacyHtmlAdapter';
+
+/**
+ * Internal component that renders a formatted value using the appropriate rendering path.
+ * Tries React rendering first, falls back to HTML rendering if not supported.
+ */
+const FormattedValueInternal: FC<{
+  fieldFormat: IFieldFormat;
+  value: unknown;
+  options: HtmlContextTypeOptions & ReactContextTypeOptions;
+  className?: string;
+  'data-test-subj'?: string;
+}> = memo(({ fieldFormat, value, options, className, 'data-test-subj': dataTestSubj }) => {
+  const formattedContent = useMemo<ReactNode>(() => {
+    // Try React rendering first (preferred path)
+    const reactResult = fieldFormat.convertToReact(value, { ...options, className });
+    if (reactResult !== undefined) {
+      return reactResult;
+    }
+
+    // Fall back to HTML rendering via legacy adapter
+    const htmlResult = fieldFormat.convert(value, 'html', options);
+    return (
+      <LegacyHtmlAdapter html={htmlResult} className={className} data-test-subj={dataTestSubj} />
+    );
+  }, [fieldFormat, value, options, className, dataTestSubj]);
+
+  // If React rendering was used directly, wrap in span for consistent structure
+  if (fieldFormat.hasReactSupport()) {
+    return (
+      <span className={className} data-test-subj={dataTestSubj}>
+        {formattedContent}
+      </span>
+    );
+  }
+
+  // Legacy adapter already renders the span
+  return <>{formattedContent}</>;
+});
+
+FormattedValueInternal.displayName = 'FormattedValueInternal';
+
+/**
  * Renders a formatted field value using React components.
  *
  * This component is the React equivalent of the `formatFieldValue` function.
@@ -62,7 +128,7 @@ export interface FormatFieldValueReactProps {
  * ## Usage
  *
  * ```tsx
- * import { FormatFieldValueReact } from '@kbn/field-formats-plugin/public';
+ * import { FormatFieldValueReact } from '@kbn/discover-utils';
  *
  * <FormatFieldValueReact
  *   value={row.flattened[columnId]}
@@ -99,13 +165,13 @@ export interface FormatFieldValueReactProps {
 export const FormatFieldValueReact: FC<FormatFieldValueReactProps> = memo(
   ({ value, hit, fieldFormats, dataView, field, className, 'data-test-subj': dataTestSubj }) => {
     const fieldFormat = getFieldFormatter(fieldFormats, dataView, field);
-    const options: FormattedValueProps['options'] = {
+    const options: HtmlContextTypeOptions & ReactContextTypeOptions = {
       hit,
       field,
     };
 
     return (
-      <FormattedValue
+      <FormattedValueInternal
         fieldFormat={fieldFormat}
         value={value}
         options={options}

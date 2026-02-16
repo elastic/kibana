@@ -15,7 +15,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { MAX_LOADED_GRID_ROWS } from '../constants';
 import type { DataGridPaginationMode } from '../..';
 
@@ -28,7 +28,7 @@ export interface UnifiedDataTableFooterProps {
   totalHits?: number;
   onFetchMoreRecords?: () => void;
   data: DataPublicPluginStart;
-  fieldFormats: FieldFormatsStart;
+  fieldFormats: FieldFormatsStartCommon;
   paginationMode: DataGridPaginationMode;
   hasScrolledToBottom: boolean;
 }

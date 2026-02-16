@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord, LogDocumentOverview } from '../..';
 import { fieldConstants, formatFieldValue } from '../..';
@@ -15,7 +15,7 @@ import { getFieldValueWithFallback } from './get_field_value_with_fallback';
 
 export function getLogDocumentOverview(
   doc: DataTableRecord,
-  { dataView, fieldFormats }: { dataView: DataView; fieldFormats: FieldFormatsStart }
+  { dataView, fieldFormats }: { dataView: DataView; fieldFormats: FieldFormatsStartCommon }
 ): LogDocumentOverview {
   const formatField = <T extends keyof LogDocumentOverview>(field: T) => {
     // Use fallback to check both ECS and OTel field names

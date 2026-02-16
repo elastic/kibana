@@ -9,14 +9,10 @@
 
 import React, { Fragment, type ReactNode } from 'react';
 import { css } from '@emotion/react';
-import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/src/types';
+import type { DataTableRecord, ShouldShowFieldInTableHandler, FormattedHitReact } from '@kbn/discover-utils/types';
+import { formatHitReact, FormatFieldValueReact } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import {
-  formatHitReact,
-  FormatFieldValueReact,
-  type FormattedHitReact,
-} from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -50,7 +46,7 @@ export function SourceDocument({
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   maxEntries: number;
   isPlainRecord?: boolean;
-  fieldFormats: FieldFormatsStart;
+  fieldFormats: FieldFormatsStartCommon;
   dataTestSubj?: string;
   className?: string;
   isCompressed?: boolean;
@@ -102,7 +98,7 @@ function getTopLevelObjectPairsReact(
   columnId: string,
   dataView: DataView,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
-  fieldFormats: FieldFormatsStart
+  fieldFormats: FieldFormatsStartCommon
 ): FormattedHitReact {
   const innerColumns = getInnerColumns(row.raw.fields as Record<string, unknown[]>, columnId);
   // Put the most important fields first

@@ -10,7 +10,7 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import { convertValueToString as commonConvertValueToString } from '@kbn/discover-utils';
 
@@ -34,7 +34,7 @@ export const convertValueToString = ({
   rows: DataTableRecord[];
   columnId: string;
   dataView: DataView;
-  fieldFormats: FieldFormatsStart;
+  fieldFormats: FieldFormatsStartCommon;
   columnsMeta: DataTableColumnsMeta | undefined;
   options?: {
     compatibleWithCSV?: boolean; // values as one-liner + escaping formulas + adding wrapping quotes

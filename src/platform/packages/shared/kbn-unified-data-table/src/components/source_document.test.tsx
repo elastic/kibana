@@ -8,7 +8,7 @@
  */
 
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import SourceDocument from './source_document';
@@ -53,7 +53,7 @@ describe('Unified data table source document cell rendering', function () {
         row={rows[0]}
         dataView={dataViewMock}
         columnId="_source"
-        fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
+        fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStartCommon}
         shouldShowFieldHandler={() => false}
         maxEntries={100}
         isPlainRecord={true}
@@ -85,7 +85,7 @@ describe('Unified data table source document cell rendering', function () {
         row={row}
         dataView={dataViewMock}
         columnId="foo"
-        fieldFormats={mockFieldFormats as unknown as FieldFormatsStart}
+        fieldFormats={mockFieldFormats as unknown as FieldFormatsStartCommon}
         shouldShowFieldHandler={() => true}
         maxEntries={100}
         isPlainRecord={true}

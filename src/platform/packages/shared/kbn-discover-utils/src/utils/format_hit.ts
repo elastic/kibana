@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   DataTableRecord,
@@ -47,7 +47,7 @@ export function formatHit(
   dataView: DataView,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   maxEntries: number,
-  fieldFormats: FieldFormatsStart
+  fieldFormats: FieldFormatsStartCommon
 ): FormattedHit {
   const cached = formattedHitCache.get(hit.raw);
 

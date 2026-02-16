@@ -19,7 +19,7 @@ import type {
 import { EuiDataGrid, useGeneratedHtmlId } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { memoize } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { DATA_GRID_STYLE_DEFAULT } from '../../constants';
@@ -44,7 +44,7 @@ export interface CompareDocumentsProps {
   schemaDetectors: EuiDataGridSchemaDetector[];
   forceShowAllFields: boolean;
   showFullScreenButton?: boolean;
-  fieldFormats: FieldFormatsStart;
+  fieldFormats: FieldFormatsStartCommon;
   getDocById: (id: string) => DataTableRecord | undefined;
   replaceSelectedDocs: (docIds: string[]) => void;
   setIsCompareActive: (isCompareActive: boolean) => void;

@@ -35,7 +35,7 @@ import { formatFieldValue } from '@kbn/discover-utils/src';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { testPatternAgainstAllowedList } from '@kbn/data-view-utils';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { FieldBadgeWithActionsProps } from '../cell_actions_popover';
 import { FieldBadgeWithActions } from '../cell_actions_popover';
 import { TransactionNameIcon } from './icons/transaction_name_icon';
@@ -146,7 +146,7 @@ interface ResourceFieldsProps {
   dataView: DataView;
   core: CoreStart;
   share?: SharePluginStart;
-  fieldFormats: FieldFormatsStart;
+  fieldFormats: FieldFormatsStartCommon;
 }
 
 export const createResourceFields = ({

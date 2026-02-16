@@ -17,7 +17,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { SourceDocument } from '../components/source_document';
 
 jest.mock('@kbn/code-editor', () => {
@@ -116,7 +116,7 @@ describe('Unified data table cell rendering', function () {
       rows: rowsSource.map(build),
       shouldShowFieldHandler: () => false,
       closePopover: jest.fn(),
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStartCommon,
       maxEntries: 100,
       columnsMeta: undefined,
     });
@@ -142,7 +142,7 @@ describe('Unified data table cell rendering', function () {
       rows: rowsSource.map(build),
       shouldShowFieldHandler: () => false,
       closePopover: jest.fn(),
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStartCommon,
       maxEntries: 100,
       columnsMeta: undefined,
     });
@@ -169,7 +169,7 @@ describe('Unified data table cell rendering', function () {
       rows: rowsFields.map(build),
       shouldShowFieldHandler: () => false,
       closePopover: closePopoverMockFn,
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStartCommon,
       maxEntries: 100,
       columnsMeta: undefined,
     });
@@ -199,7 +199,7 @@ describe('Unified data table cell rendering', function () {
       rows,
       shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStartCommon,
       maxEntries: 100,
       columnsMeta: undefined,
     });
@@ -236,7 +236,7 @@ describe('Unified data table cell rendering', function () {
       rows: rowsSource.map(build),
       shouldShowFieldHandler: () => false,
       closePopover: jest.fn(),
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStartCommon,
       maxEntries: 100,
       columnsMeta: undefined,
     });
@@ -303,7 +303,7 @@ describe('Unified data table cell rendering', function () {
       rows,
       shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStartCommon,
       maxEntries: 100,
       isPlainRecord: true,
       columnsMeta: undefined,
@@ -344,7 +344,7 @@ describe('Unified data table cell rendering', function () {
       rows,
       shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStartCommon,
       maxEntries: 100,
       columnsMeta: undefined,
     });
@@ -383,7 +383,7 @@ describe('Unified data table cell rendering', function () {
       rows,
       shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStartCommon,
       // this is the number of rendered items
       maxEntries: 1,
       columnsMeta: undefined,
@@ -421,7 +421,7 @@ describe('Unified data table cell rendering', function () {
       rows: rowsFields.map(build),
       shouldShowFieldHandler: (fieldName: string) => false,
       closePopover: jest.fn(),
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStartCommon,
       maxEntries: 100,
       columnsMeta: undefined,
     });
@@ -498,7 +498,7 @@ describe('Unified data table cell rendering', function () {
       rows,
       shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStartCommon,
       maxEntries: 100,
       columnsMeta: undefined,
     });
@@ -539,7 +539,7 @@ describe('Unified data table cell rendering', function () {
       rows,
       shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStartCommon,
       maxEntries: 100,
       columnsMeta: undefined,
     });
@@ -577,7 +577,7 @@ describe('Unified data table cell rendering', function () {
       rows: rowsFieldsWithTopLevelObject.map(build),
       shouldShowFieldHandler: () => false,
       closePopover: closePopoverMockFn,
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStartCommon,
       maxEntries: 100,
       columnsMeta: undefined,
     });
@@ -652,7 +652,7 @@ describe('Unified data table cell rendering', function () {
       rows: rowsFieldsWithTopLevelObject.map(build),
       shouldShowFieldHandler: () => false,
       closePopover: closePopoverMockFn,
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStartCommon,
       maxEntries: 100,
       columnsMeta: undefined,
     });
@@ -681,7 +681,7 @@ describe('Unified data table cell rendering', function () {
       rows: rowsFieldsWithTopLevelObject.map(build),
       shouldShowFieldHandler: () => false,
       closePopover: jest.fn(),
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStartCommon,
       maxEntries: 100,
       columnsMeta: undefined,
     });
@@ -1017,7 +1017,7 @@ describe('Unified data table cell rendering', function () {
       rows: rowsSource.map(build),
       shouldShowFieldHandler: () => false,
       closePopover: jest.fn(),
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStartCommon,
       maxEntries: 100,
       columnsMeta: undefined,
     });
@@ -1043,7 +1043,7 @@ describe('Unified data table cell rendering', function () {
       rows: rowsSource.map(build),
       shouldShowFieldHandler: () => false,
       closePopover: jest.fn(),
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStartCommon,
       maxEntries: 100,
       columnsMeta: undefined,
     });
@@ -1082,7 +1082,7 @@ describe('Unified data table cell rendering', function () {
       rows: rowsFieldsUnmapped.map(build),
       shouldShowFieldHandler: (fieldName: string) => ['unmapped'].includes(fieldName),
       closePopover: jest.fn(),
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStartCommon,
       maxEntries: 100,
       columnsMeta: undefined,
     });
@@ -1761,7 +1761,7 @@ describe('Unified data table cell rendering', function () {
       rows: rows.map(build),
       shouldShowFieldHandler: () => true,
       closePopover: jest.fn(),
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStartCommon,
       maxEntries: 100,
       columnsMeta: {
         // custom ES|QL var

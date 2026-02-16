@@ -16,7 +16,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import DateMath from '@kbn/datemath';
 import {
@@ -75,7 +75,7 @@ export interface FieldStatsServices {
   uiSettings: IUiSettingsClient;
   dataViews: DataViewsContract;
   data: DataPublicPluginStart;
-  fieldFormats: FieldFormatsStart;
+  fieldFormats: FieldFormatsStartCommon;
   charts: ChartsPluginSetup;
 }
 

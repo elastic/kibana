@@ -12,7 +12,7 @@
  *
  * This package provides utilities for field formatting. New code should NOT use
  * dangerouslySetInnerHTML for field formatter output. Instead, use
- * FormatFieldValueReact or FormattedValue from @kbn/field-formats-plugin/public.
+ * FormatFieldValueReact or FormattedValue from @kbn/field-formats-plugin/common.
  *
  * See @kbn/field-formats-plugin README for migration guidance.
  */

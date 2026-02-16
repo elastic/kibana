@@ -12,7 +12,7 @@ import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { IUiSettingsClient, Capabilities } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type {
   LensPublicStart,
   TypedLensByValueInput,
@@ -56,7 +56,7 @@ export interface UnifiedHistogramServices {
   data: DataPublicPluginStart;
   uiActions: UiActionsStart;
   uiSettings: IUiSettingsClient;
-  fieldFormats: FieldFormatsStart;
+  fieldFormats: FieldFormatsStartCommon;
   lens: LensPublicStart;
   storage: Storage;
   expressions: ExpressionsStart;

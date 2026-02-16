@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type {
@@ -33,7 +33,7 @@ import type { EsHitRecord } from '../types';
 export function formatFieldValue(
   value: unknown,
   hit: EsHitRecord,
-  fieldFormats: FieldFormatsStart,
+  fieldFormats: FieldFormatsStartCommon,
   dataView?: DataView,
   field?: DataViewField,
   contentType?: FieldFormatsContentType,

@@ -8,7 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import {
   AGENT_NAME,
   AT_TIMESTAMP,
@@ -78,7 +78,7 @@ const fields: Array<keyof TraceDocumentOverview> = [
 
 export function getTraceDocumentOverview(
   doc: DataTableRecord,
-  { dataView, fieldFormats }: { dataView: DataView; fieldFormats: FieldFormatsStart }
+  { dataView, fieldFormats }: { dataView: DataView; fieldFormats: FieldFormatsStartCommon }
 ): TraceDocumentOverview {
   return getFormattedFields<TraceDocumentOverview>(doc, fields, { dataView, fieldFormats });
 }

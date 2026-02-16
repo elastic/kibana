@@ -9,7 +9,7 @@
 
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { DataTableRecord } from '../../types';
 import { formatFieldValue } from './format_value';
 
@@ -32,7 +32,7 @@ export const convertValueToString = ({
   dataViewField?: DataViewField;
   flattenedValue: unknown;
   dataTableRecord: DataTableRecord;
-  fieldFormats: FieldFormatsStart;
+  fieldFormats: FieldFormatsStartCommon;
   options?: {
     compatibleWithCSV?: boolean; // values as one-liner + escaping formulas + adding wrapping quotes
     compatibleWithMarkdown?: boolean; // values as one-liner

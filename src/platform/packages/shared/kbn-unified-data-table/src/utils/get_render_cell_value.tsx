@@ -9,17 +9,17 @@
 
 import React, { useEffect, useContext, memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import type {
   DataTableColumnsMeta,
   DataTableRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import { FormatFieldValueReact } from '@kbn/field-formats-plugin/public';
+import { FormatFieldValueReact } from '@kbn/discover-utils';
 import { UnifiedDataTableContext } from '../table_context';
 import type { CustomCellRenderer } from '../types';
 import { SourceDocument } from '../components/source_document';
@@ -46,7 +46,7 @@ export const getRenderCellValueFn = ({
   rows: DataTableRecord[] | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   closePopover: () => void;
-  fieldFormats: FieldFormatsStart;
+  fieldFormats: FieldFormatsStartCommon;
   maxEntries: number;
   externalCustomRenderers?: CustomCellRenderer;
   isPlainRecord?: boolean;
@@ -187,7 +187,7 @@ function renderPopoverContent({
   columnId: string;
   dataView: DataView;
   useTopLevelObjectColumns: boolean;
-  fieldFormats: FieldFormatsStart;
+  fieldFormats: FieldFormatsStartCommon;
   closePopover: () => void;
 }) {
   const closeButton = (

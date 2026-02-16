@@ -58,7 +58,7 @@ import {
   prepareDataViewForEditing,
 } from '@kbn/discover-utils';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
@@ -317,7 +317,7 @@ interface InternalUnifiedDataTableProps {
    */
   services: {
     theme: ThemeServiceStart;
-    fieldFormats: FieldFormatsStart;
+    fieldFormats: FieldFormatsStartCommon;
     uiSettings: IUiSettingsClient;
     dataViewFieldEditor?: DataViewFieldEditorStart;
     toastNotifications: ToastsStart;

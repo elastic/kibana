@@ -10,17 +10,11 @@
 import { FieldFormatsPlugin } from './plugin';
 export { DateFormat, DateNanosFormat } from './lib/converters';
 
-// React rendering components
-export {
-  FormattedValue,
-  type FormattedValueProps,
-  FormatFieldValueReact,
-  getFieldFormatter,
-  type FormatFieldValueReactProps,
-  formatHitReact,
-  type FormattedHitReact,
-  type FormattedHitReactPair,
-} from './components';
+// React rendering components - re-export FormattedValue from common for backward compatibility
+export { FormattedValue, type FormattedValueProps } from '../common';
+
+// For FormatFieldValueReact, formatHitReact, and related types, import from @kbn/discover-utils
+// These are now in kbn-discover-utils to avoid circular dependencies
 
 export function plugin() {
   return new FieldFormatsPlugin();

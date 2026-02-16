@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useContext, useMemo, useState } from 'react';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import {
@@ -165,7 +165,7 @@ export function DataTableDocumentToolbarBtn({
   selectedDocsState: UseSelectedDocsState;
   enableComparisonMode: boolean | undefined;
   setIsCompareActive: (value: boolean) => void;
-  fieldFormats: FieldFormatsStart;
+  fieldFormats: FieldFormatsStartCommon;
   pageIndex: number | undefined;
   pageSize: number | undefined;
   toastNotifications: ToastsStart;

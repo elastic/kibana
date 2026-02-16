@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '../types';
 import { formatFieldValue } from './format_value';
@@ -15,7 +15,7 @@ import { formatFieldValue } from './format_value';
 export function getFormattedFields<T>(
   doc: DataTableRecord,
   fields: Array<keyof T>,
-  { dataView, fieldFormats }: { dataView: DataView; fieldFormats: FieldFormatsStart }
+  { dataView, fieldFormats }: { dataView: DataView; fieldFormats: FieldFormatsStartCommon }
 ): T {
   const formatField = <K extends keyof T>(field: K) => {
     const fieldStr = field as string;
