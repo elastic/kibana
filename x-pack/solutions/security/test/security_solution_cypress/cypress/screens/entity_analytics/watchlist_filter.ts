@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { StreamDetailOverview } from './stream_detail_overview';
+import { getDataTestSubjectSelector } from '../../helpers/common';
+
+export const WATCHLIST_FILTER_COMBO_BOX = getDataTestSubjectSelector('watchlistFilterComboBox');
