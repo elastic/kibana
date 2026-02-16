@@ -35,6 +35,7 @@ plugins:
     - workflows_management
     - intercepts
     - custom_branding
+    - share
   disabled:
 
 packages:
