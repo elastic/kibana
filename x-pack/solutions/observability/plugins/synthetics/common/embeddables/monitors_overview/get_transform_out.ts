@@ -7,16 +7,19 @@
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
 import { transformTitlesOut } from '@kbn/presentation-publishing';
-import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { flow } from 'lodash';
-import type { OverviewStatsEmbeddableState } from './types';
+import type { OverviewMonitorsEmbeddableState } from './types';
 import type { LegacyMonitorFilters } from '../../types';
 
-export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['transformOut']) {
-  function transformOut(storedState: OverviewStatsEmbeddableState, references?: Reference[]) {
+export function getTransformOut() {
+  function transformOut(
+    storedState: OverviewMonitorsEmbeddableState,
+    _panelReferences?: Reference[],
+    _containerReferences?: Reference[]
+  ): OverviewMonitorsEmbeddableState {
     const transformsFlow = flow(
-      transformTitlesOut<OverviewStatsEmbeddableState>,
-      (state: OverviewStatsEmbeddableState) => {
+      transformTitlesOut<OverviewMonitorsEmbeddableState>,
+      (state: OverviewMonitorsEmbeddableState) => {
         // Handle legacy stored shape: convert camelCase to snake_case (REST API shape)
         if (state.filters) {
           const filters = state.filters as unknown as LegacyMonitorFilters;
@@ -24,7 +27,7 @@ export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['tra
 
           if (hasLegacyKeys) {
             // Convert legacy camelCase to REST API snake_case
-            const convertedState: OverviewStatsEmbeddableState = {
+            return {
               ...state,
               filters: {
                 projects: filters.projects,
@@ -34,11 +37,10 @@ export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['tra
                 monitor_types: filters.monitorTypes || filters.monitor_types || [],
               },
             };
-            return transformDrilldownsOut(convertedState, references);
           }
         }
         // Already in REST API shape (snake_case)
-        return transformDrilldownsOut(state, references);
+        return state;
       }
     );
     return transformsFlow(storedState);

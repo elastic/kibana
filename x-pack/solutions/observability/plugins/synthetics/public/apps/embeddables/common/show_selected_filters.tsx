@@ -35,7 +35,7 @@ export const ShowSelectedFilters = ({ filters }: { filters: MonitorFilters }) =>
 };
 
 const labels: Record<string, string> = {
-  monitorIds: i18n.translate('xpack.synthetics.showSelectedFilters.monitorIdLabel', {
+  monitor_ids: i18n.translate('xpack.synthetics.showSelectedFilters.monitorIdLabel', {
     defaultMessage: 'Monitor',
   }),
   tags: i18n.translate('xpack.synthetics.showSelectedFilters.tagsLabel', {
@@ -44,7 +44,7 @@ const labels: Record<string, string> = {
   locations: i18n.translate('xpack.synthetics.showSelectedFilters.locationsLabel', {
     defaultMessage: 'Location',
   }),
-  monitorTypes: i18n.translate('xpack.synthetics.showSelectedFilters.monitorTypeLabel', {
+  monitor_types: i18n.translate('xpack.synthetics.showSelectedFilters.monitorTypeLabel', {
     defaultMessage: 'Type',
   }),
   projects: i18n.translate('xpack.synthetics.showSelectedFilters.presetLabel', {

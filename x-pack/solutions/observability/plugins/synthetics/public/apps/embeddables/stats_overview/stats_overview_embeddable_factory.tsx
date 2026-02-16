@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import React, { useEffect } from 'react';
 import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type {
   PublishesWritableTitle,
   PublishesTitle,
@@ -43,8 +44,8 @@ const DEFAULT_FILTERS: MonitorFilters = {
   projects: [],
   tags: [],
   locations: [],
-  monitorIds: [],
-  monitorTypes: [],
+  monitor_ids: [],
+  monitor_types: [],
 };
 
 export type StatsOverviewApi = DefaultEmbeddableApi<OverviewStatsEmbeddableState> &
@@ -62,10 +63,15 @@ export const getStatsOverviewEmbeddableFactory = (
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
+      // Client code uses REST API shape (snake_case) directly
+      // transformOut handles conversion from legacy camelCase if needed
       const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const reload$ = new Subject<boolean>();
-      const filters$ = new BehaviorSubject(initialState.filters);
+      const filters$ = new BehaviorSubject({
+        ...DEFAULT_FILTERS,
+        ...(initialState?.filters || {}),
+      });
 
       const { embeddableEnhanced } = pluginStart;
       const dynamicActionsManager = await embeddableEnhanced?.initializeEmbeddableDynamicActions(
@@ -75,7 +81,7 @@ export const getStatsOverviewEmbeddableFactory = (
       );
       const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
-      function serializeState() {
+      function serializeState(): OverviewStatsEmbeddableState {
         return {
           ...titleManager.getLatestState(),
           filters: filters$.getValue(),
@@ -111,7 +117,7 @@ export const getStatsOverviewEmbeddableFactory = (
         ...titleManager.api,
         ...(dynamicActionsManager?.api ?? {}),
         ...unsavedChangesApi,
-        supportedTriggers: () => [],
+        supportedTriggers: () => [CONTEXT_MENU_TRIGGER],
         defaultTitle$,
         getTypeDisplayName: () =>
           i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.typeDisplayName', {

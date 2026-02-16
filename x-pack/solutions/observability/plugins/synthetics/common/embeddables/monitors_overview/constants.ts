@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const ALL_VALUE = '*';
+export const SYNTHETICS_MONITORS_EMBEDDABLE = 'SYNTHETICS_MONITORS_EMBEDDABLE';

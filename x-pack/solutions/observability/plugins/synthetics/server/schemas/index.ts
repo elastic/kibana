@@ -1,0 +1,26 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export {
+  monitorOptionSchema,
+  monitorFiltersSchema,
+  legacyMonitorFiltersSchema,
+  type MonitorOption,
+  type MonitorFilters,
+  type LegacyMonitorFilters,
+} from './common_schemas';
+
+export {
+  syntheticsStatsOverviewEmbeddableSchema,
+  statsOverviewCustomStateSchema,
+  type SyntheticsStatsOverviewEmbeddableState,
+} from './synthetics_stats_overview_embeddable_schema';
+
+export {
+  syntheticsMonitorsEmbeddableSchema,
+  type SyntheticsMonitorsEmbeddableState,
+} from './synthetics_monitors_embeddable_schema';
