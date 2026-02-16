@@ -8,7 +8,6 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { SloAggregationClient } from './slo_aggregation_client';
-import { sevenDays } from './fixtures/duration';
 
 const DEFAULT_SETTINGS = {
   useAllRemoteClusters: false,
@@ -99,9 +98,7 @@ describe('SloAggregationClient', () => {
       expect.objectContaining({
         query: expect.objectContaining({
           bool: expect.objectContaining({
-            filter: expect.arrayContaining([
-              { term: { 'slo.metadata.env': 'production' } },
-            ]),
+            filter: expect.arrayContaining([{ term: { 'slo.metadata.env': 'production' } }]),
           }),
         }),
       })
@@ -130,9 +127,7 @@ describe('SloAggregationClient', () => {
       expect.objectContaining({
         query: expect.objectContaining({
           bool: expect.objectContaining({
-            filter: expect.arrayContaining([
-              { terms: { status: ['VIOLATED', 'DEGRADING'] } },
-            ]),
+            filter: expect.arrayContaining([{ terms: { status: ['VIOLATED', 'DEGRADING'] } }]),
           }),
         }),
       })

@@ -121,9 +121,7 @@ function toSort(params: FindSLOParams): Sort {
   };
 }
 
-function parseMetadataFilter(
-  metadata?: string
-): Array<{ term: Record<string, string> }> {
+function parseMetadataFilter(metadata?: string): Array<{ term: Record<string, string> }> {
   if (!metadata) return [];
   return metadata
     .split(',')
