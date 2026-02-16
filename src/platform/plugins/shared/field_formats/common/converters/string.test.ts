@@ -15,8 +15,8 @@ import { StringFormat } from './string';
  * Removes a wrapping span, that is created by the field formatter infrastructure
  * and we're not caring about in these tests.
  */
-function stripSpan(input: string): string {
-  return input.replace(/^\<span\>(.*)\<\/span\>$/, '$1');
+function stripSpan(input: string | import('react').ReactNode): string {
+  return (input as string).replace(/^\<span\>(.*)\<\/span\>$/, '$1');
 }
 
 describe('String Format', () => {

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldFormatsContentType, IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 
 export const formatValue = (
   value: number | string,
   fieldFormatter: IFieldFormat,
-  format: FieldFormatsContentType = 'text'
+  format: 'html' | 'text' = 'text'
 ) => {
   if (typeof value === 'number' && isNaN(value)) {
     return '-';

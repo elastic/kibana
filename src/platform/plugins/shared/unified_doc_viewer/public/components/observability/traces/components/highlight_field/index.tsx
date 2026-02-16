@@ -14,7 +14,7 @@ import type { FieldConfigValue } from '../../../../content_framework';
 
 interface Props {
   value?: FieldConfigValue;
-  formattedValue?: string;
+  formattedValue?: React.ReactNode;
   children?: (props: { content: React.ReactNode }) => React.ReactNode | React.ReactNode;
   textSize?: EuiTextProps['size'];
 
@@ -23,7 +23,7 @@ interface Props {
 
 export function HighlightField({ value, formattedValue, children, textSize = 'xs', as }: Props) {
   const formattedContent = formattedValue ? (
-    <FormattedValue value={formattedValue} textSize={textSize} as={as} />
+    <HighlightFieldFormattedValue value={formattedValue} textSize={textSize} as={as} />
   ) : null;
   const valueContent = value ? <EuiText size={textSize}>{value}</EuiText> : null;
   const content = formattedContent ?? valueContent;
@@ -35,30 +35,22 @@ export function HighlightField({ value, formattedValue, children, textSize = 'xs
   return <>{content}</>;
 }
 
-const FormattedValue = ({
+const HighlightFieldFormattedValue = ({
   value,
   textSize,
   as,
 }: {
-  value: string;
+  value: React.ReactNode;
   textSize: EuiTextProps['size'];
   as?: keyof JSX.IntrinsicElements;
 }) => {
   if (as) {
     const As = as;
-    return (
-      <As
-        // Value returned from formatFieldValue is always sanitized
-        dangerouslySetInnerHTML={{ __html: value }}
-      />
-    );
+    return <As>{value}</As>;
   }
   return (
-    <EuiText
-      className="eui-textTruncate"
-      size={textSize}
-      // Value returned from formatFieldValue is always sanitized
-      dangerouslySetInnerHTML={{ __html: value }}
-    />
+    <EuiText className="eui-textTruncate" size={textSize}>
+      {value}
+    </EuiText>
   );
 };

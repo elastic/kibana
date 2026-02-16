@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -14,9 +15,10 @@ import type {
   DataTableRecord,
   ShouldShowFieldInTableHandler,
   FormattedHit,
+  FormattedHitReact,
   EsHitRecord,
 } from '../types';
-import { formatFieldValue } from './format_value';
+import { formatFieldValue, formatFieldValueReact } from './format_value';
 
 // We use a special type here allowing formattedValue to be undefined because
 // we want to avoid formatting values which will not be shown to users since
@@ -24,6 +26,12 @@ import { formatFieldValue } from './format_value';
 type PartialHitPair = [
   fieldDisplayName: string,
   formattedValue: string | undefined,
+  fieldName: string | null
+];
+
+type PartialHitReactPair = [
+  fieldDisplayName: string,
+  formattedValue: ReactNode | undefined,
   fieldName: string | null
 ];
 
@@ -127,6 +135,90 @@ export function formatHit(
   const formattedHit = renderedPairs as FormattedHit;
 
   formattedHitCache.set(hit.raw, { formattedHit, maxEntries });
+
+  return formattedHit;
+}
+
+const formattedHitReactCache = new WeakMap<
+  EsHitRecord,
+  { formattedHit: FormattedHitReact; maxEntries: number }
+>();
+
+/**
+ * Returns a formatted document in form of key/value pairs where each value is a ReactNode.
+ * Safe for direct rendering in JSX — no dangerouslySetInnerHTML needed.
+ */
+export function formatHitReact(
+  hit: DataTableRecord,
+  dataView: DataView,
+  shouldShowFieldHandler: ShouldShowFieldInTableHandler,
+  maxEntries: number,
+  fieldFormats: FieldFormatsStart
+): FormattedHitReact {
+  const cached = formattedHitReactCache.get(hit.raw);
+
+  if (cached && cached.maxEntries === maxEntries) {
+    return cached.formattedHit;
+  }
+
+  const highlights = hit.raw.highlight ?? {};
+  const flattened = hit.flattened;
+  const renderedPairs: PartialHitReactPair[] = [];
+  const otherPairs: PartialHitReactPair[] = [];
+
+  for (const key of Object.keys(flattened)) {
+    const field = dataView.fields.getByName(key);
+    const displayKey = field?.displayName;
+    const pairs = highlights[key] ? renderedPairs : otherPairs;
+
+    if (displayKey) {
+      const multiParent = field.getSubtypeMulti?.()?.multi.parent;
+      const isHighlighted = Boolean(highlights[key]);
+      const isParentHighlighted = Boolean(multiParent && highlights[multiParent]);
+
+      if ((isHighlighted && !isParentHighlighted) || shouldShowFieldHandler(key)) {
+        pairs.push([displayKey, undefined, key]);
+      }
+    } else {
+      pairs.push([key, undefined, key]);
+    }
+  }
+
+  const totalLength = renderedPairs.length + otherPairs.length;
+
+  if (renderedPairs.length > maxEntries) {
+    renderedPairs.length = maxEntries;
+  } else if (renderedPairs.length < maxEntries && otherPairs.length) {
+    for (let i = 0; i < otherPairs.length && renderedPairs.length < maxEntries; i++) {
+      renderedPairs.push(otherPairs[i]);
+    }
+  }
+
+  for (const pair of renderedPairs) {
+    const key = pair[2]!;
+    pair[1] = formatFieldValueReact(
+      flattened[key],
+      hit.raw,
+      fieldFormats,
+      dataView,
+      dataView.getFieldByName(key)
+    );
+  }
+
+  if (totalLength > maxEntries) {
+    renderedPairs.push([
+      i18n.translate('discover.formatHit.moreFields', {
+        defaultMessage: 'and {count} more {count, plural, one {field} other {fields}}',
+        values: { count: totalLength - maxEntries },
+      }),
+      '',
+      null,
+    ]);
+  }
+
+  const formattedHit = renderedPairs as FormattedHitReact;
+
+  formattedHitReactCache.set(hit.raw, { formattedHit, maxEntries });
 
   return formattedHit;
 }

@@ -150,7 +150,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
       static id = 'terms';
       static hidden = true;
 
-      convert = (val: string, type: FieldFormatsContentType) => {
+      convert = (val: string, type?: FieldFormatsContentType): string => {
         const params = this._params;
         const format = this.getCachedFormat(
           params as SerializedFieldFormat<{}, SerializableRecord>
@@ -163,15 +163,17 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
           return `${params.missingBucketLabel}`;
         }
 
-        return format.convert(val, type);
+        return format.convert(val, type ?? 'text') as string;
       };
-      getConverterFor = (type: FieldFormatsContentType) => (val: string) => this.convert(val, type);
+      getConverterFor = (type?: FieldFormatsContentType) =>
+        (val: string) =>
+          this.convert(val, type);
     },
     class AggsMultiTermsFieldFormat extends FieldFormatWithCache {
       static id = 'multi_terms';
       static hidden = true;
 
-      convert = (val: unknown, type: FieldFormatsContentType) => {
+      convert = (val: unknown, type?: FieldFormatsContentType): string => {
         const params = this._params;
         const formats = (params.paramsPerField as SerializedFieldFormat[]).map((fieldParams) => {
           return this.getCachedFormat(fieldParams);
@@ -185,11 +187,13 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
 
         return (
           (val as MultiFieldKey)?.keys
-            ?.map((valPart, i) => formats[i].convert(valPart, type))
+            ?.map((valPart, i) => formats[i].convert(valPart, type ?? 'text') as string)
             .join(joinTemplate) ?? ''
         );
       };
-      getConverterFor = (type: FieldFormatsContentType) => (val: string) => this.convert(val, type);
+      getConverterFor = (type?: FieldFormatsContentType) =>
+        (val: string) =>
+          this.convert(val, type);
     },
   ];
 }

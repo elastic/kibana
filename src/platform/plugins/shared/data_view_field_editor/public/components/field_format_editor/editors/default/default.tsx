@@ -16,7 +16,7 @@ import type { FormatEditorProps } from '../types';
 import { formatId } from './constants';
 
 export const convertSampleInput = (
-  converter: (input: SampleInput) => string,
+  converter: (input: SampleInput) => React.ReactNode,
   inputs: SampleInput[]
 ) => {
   let error;

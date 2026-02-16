@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
 import type { IgnoredReason } from '@kbn/discover-utils';
 import {
   convertValueToString,
   formatFieldValue,
+  formatFieldValueReact,
   getIgnoredReason,
   isNestedFieldParent,
 } from '@kbn/discover-utils';
@@ -34,9 +36,11 @@ export class FieldRow {
 
   #isFormattedAsHtml: boolean;
   #isFormattedAsText: boolean;
+  #isFormattedAsReact: boolean;
 
   #formattedAsHtml: string | undefined;
   #formattedAsText: string | undefined;
+  #formattedAsReact: ReactNode | undefined;
 
   #fieldType: string | undefined;
 
@@ -64,6 +68,7 @@ export class FieldRow {
     this.#fieldFormats = fieldFormats;
     this.#isFormattedAsHtml = false;
     this.#isFormattedAsText = false;
+    this.#isFormattedAsReact = false;
 
     this.name = name;
     this.displayNameOverride = displayNameOverride;
@@ -92,6 +97,22 @@ export class FieldRow {
     }
 
     return this.#formattedAsHtml;
+  }
+
+  // format as ReactNode in a lazy way — safe for direct JSX rendering
+  public get formattedAsReact(): ReactNode | undefined {
+    if (!this.#isFormattedAsReact) {
+      this.#formattedAsReact = formatFieldValueReact(
+        this.flattenedValue,
+        this.#hit.raw,
+        this.#fieldFormats,
+        this.#dataView,
+        this.dataViewField
+      );
+      this.#isFormattedAsReact = true;
+    }
+
+    return this.#formattedAsReact;
   }
 
   // format as text in a lazy way

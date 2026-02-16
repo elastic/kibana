@@ -13,7 +13,7 @@ import ReactDOM from 'react-dom/server';
 import { findLast, cloneDeep, escape } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
+import type { HtmlContextTypeConvert, TextContextTypeConvert, ReactContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString } from '../utils';
 import { DEFAULT_CONVERTER_COLOR } from '../constants/color_default';
@@ -95,6 +95,32 @@ export class ColorFormat extends FieldFormat {
         }}
         dangerouslySetInnerHTML={{ __html: displayVal }} // eslint-disable-line react/no-danger
       />
+    );
+  };
+
+  reactConvert: ReactContextTypeConvert = (val: string | number, options) => {
+    const missing = this.checkForMissingValueReact(val);
+    if (missing) {
+      return missing;
+    }
+
+    const color = this.findColorRuleForVal(val) as typeof DEFAULT_CONVERTER_COLOR;
+
+    const displayVal = asPrettyString(val, options);
+    if (!color) return displayVal;
+
+    return (
+      <span
+        style={{
+          color: color.text,
+          backgroundColor: color.background,
+          display: 'inline-block',
+          padding: '0 8px',
+          borderRadius: '3px',
+        }}
+      >
+        {displayVal}
+      </span>
     );
   };
 }

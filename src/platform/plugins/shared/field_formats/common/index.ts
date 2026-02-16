@@ -45,7 +45,7 @@ export {
   DURATION_OUTPUT_FORMATS,
 } from './constants/duration_formats';
 export { FIELD_FORMAT_IDS } from './types';
-export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
+export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE, REACT_CONTEXT_TYPE } from './content_types';
 
 export type {
   FieldFormatsGetConfigFn,
@@ -65,4 +65,6 @@ export type {
   HtmlContextTypeOptions,
   TextContextTypeConvert,
   TextContextTypeOptions,
+  ReactContextTypeConvert,
+  ReactContextTypeOptions,
 } from './types';

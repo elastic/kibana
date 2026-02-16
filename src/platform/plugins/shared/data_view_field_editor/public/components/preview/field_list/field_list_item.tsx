@@ -63,7 +63,8 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
 
   const showPinIcon = isPinHovered || isPinFocused || isPinned;
 
-  const doesContainImage = formattedValue?.includes('<img');
+  const doesContainImage =
+    typeof formattedValue === 'string' && formattedValue.includes('<img');
 
   const renderName = () => {
     if (isFromScript && !Boolean(key)) {
@@ -136,11 +137,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
 
     if (formattedValue !== undefined) {
       return withTooltip(
-        <span
-          css={styles.keyAndValueWrapper}
-          // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
-          dangerouslySetInnerHTML={{ __html: formattedValue! }} // eslint-disable-line react/no-danger
-        />
+        <span css={styles.keyAndValueWrapper}>{formattedValue}</span>
       );
     }
 

@@ -104,7 +104,7 @@ export interface Params {
 export interface FieldPreview {
   key: string;
   value: unknown;
-  formattedValue?: string;
+  formattedValue?: import('react').ReactNode;
   type?: string;
 }
 

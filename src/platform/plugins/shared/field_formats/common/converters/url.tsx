@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
+import type { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { escape, memoize } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { getHighlightHtml } from '../utils';
+import { getHighlightHtml, getHighlightReact } from '../utils';
 import { FieldFormat } from '../field_format';
 import type {
   TextContextTypeConvert,
   HtmlContextTypeConvert,
+  ReactContextTypeConvert,
   FieldFormatMetaParams,
   FieldFormatParams,
 } from '../types';
@@ -213,6 +216,80 @@ export class UrlFormat extends FieldFormat {
         const linkTarget = this.param('openLinkInCurrentTab') ? '_self' : '_blank';
 
         return `<a href="${prefix}${url}" target="${linkTarget}" rel="noopener noreferrer">${linkLabel}</a>`;
+    }
+  };
+
+  reactConvert: ReactContextTypeConvert = (rawValue: unknown, options = {}): ReactNode => {
+    const missing = this.checkForMissingValueReact(rawValue);
+    if (missing) {
+      return missing;
+    }
+
+    const value = String(rawValue);
+    const { field, hit } = options;
+    const { parsedUrl } = this._params;
+    const { basePath, pathname, origin } = parsedUrl || {};
+
+    const url = this.formatUrl(value);
+    const label = this.formatLabel(value, url);
+
+    switch (this.param('type')) {
+      case 'audio':
+        return <audio controls preload="none" src={url} />;
+
+      case 'img': {
+        const imageLabel =
+          label === url ? `A dynamically-specified image located at ${url}` : label;
+
+        const parsedWidth = parseInt(this.param('width'), 10);
+        const parsedHeight = parseInt(this.param('height'), 10);
+        const isValidWidth = !isNaN(parsedWidth);
+        const isValidHeight = !isNaN(parsedHeight);
+        const maxWidth = isValidWidth ? `${parsedWidth}px` : 'none';
+        const maxHeight = isValidHeight ? `${parsedHeight}px` : 'none';
+
+        return (
+          <img
+            src={url}
+            alt={imageLabel}
+            style={{ width: 'auto', height: 'auto', maxWidth, maxHeight }}
+          />
+        );
+      }
+      default: {
+        const allowed = allowedUrlSchemes.some((scheme) => url.indexOf(scheme) === 0);
+        if (!allowed && !parsedUrl) {
+          return url;
+        }
+
+        let prefix = '';
+        if (!allowed) {
+          if (url[0] === '#') {
+            prefix = `${origin}${pathname}`;
+          } else if (url.indexOf(basePath || '/') === 0) {
+            prefix = `${origin}`;
+          } else {
+            const prefixEnd = url[0] === '/' ? '' : '/';
+            prefix = `${origin}${basePath || ''}/app${prefixEnd}`;
+          }
+        }
+
+        let linkLabel: ReactNode;
+
+        if (hit?.highlight?.[field?.name!]) {
+          linkLabel = getHighlightReact(label, hit.highlight[field!.name]);
+        } else {
+          linkLabel = label;
+        }
+
+        const linkTarget = this.param('openLinkInCurrentTab') ? '_self' : '_blank';
+
+        return (
+          <a href={`${prefix}${url}`} target={linkTarget} rel="noopener noreferrer">  👹
+            {linkLabel}
+          </a>
+        );
+      }
     }
   };
 }

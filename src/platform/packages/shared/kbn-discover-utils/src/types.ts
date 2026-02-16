@@ -72,6 +72,17 @@ type FormattedHitPair = readonly [
  */
 export type FormattedHit = FormattedHitPair[];
 
+type FormattedHitReactPair = readonly [
+  fieldDisplayName: string,
+  formattedValue: import('react').ReactNode,
+  fieldName: string | null
+];
+
+/**
+ * Pairs array for each field in the hit, with ReactNode values for safe rendering
+ */
+export type FormattedHitReact = FormattedHitReactPair[];
+
 export interface LogDocumentOverview
   extends LogResourceFields,
     LogStackTraceFields,

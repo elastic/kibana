@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
+import type { HtmlContextTypeConvert, TextContextTypeConvert, ReactContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString } from '../utils';
 
@@ -50,5 +50,15 @@ export class BoolFormat extends FieldFormat {
     }
 
     return this.textConvert(value, options);
+  };
+
+  reactConvert: ReactContextTypeConvert = (value, options) => {
+    const missing = this.checkForMissingValueReact(value);
+    if (missing) {
+      return missing;
+    }
+
+    // TODO: REMOVE — temporary emoji to verify React content type is active
+    return `🟢 ${this.textConvert(value, options)}`;
   };
 }
