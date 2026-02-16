@@ -17,11 +17,24 @@ const inputSchema = z.object({
     .describe(
       'ISO timestamp used as the end of the lookback window. If omitted, the current time (now) is used.'
     ),
-  time_range: z.string().optional().default('30d').describe('Lookback window subtracted from the timestamp (e.g., "30d", "90d", "7d"). Close history is calculated from [timestamp - time_range] to [timestamp]. Default: "30d"'),
-  match_alert_entities: z.object({
-    alertId: z.string().describe('The alert ID (required when match_alert_entities is provided)'),
-    alertIndex: z.string().describe('The alert index (required when match_alert_entities is provided)'),
-  }).optional().describe('The alert entities to match. When provided, only returns closed alerts on the same host/user/entity. When omitted, returns all closed alerts for the same rule.'),
+  time_range: z
+    .string()
+    .optional()
+    .default('30d')
+    .describe(
+      'Lookback window subtracted from the timestamp (e.g., "30d", "90d", "7d"). Close history is calculated from [timestamp - time_range] to [timestamp]. Default: "30d"'
+    ),
+  match_alert_entities: z
+    .object({
+      alertId: z.string().describe('The alert ID (required when match_alert_entities is provided)'),
+      alertIndex: z
+        .string()
+        .describe('The alert index (required when match_alert_entities is provided)'),
+    })
+    .optional()
+    .describe(
+      'The alert entities to match. When provided, only returns closed alerts on the same host/user/entity. When omitted, returns all closed alerts for the same rule.'
+    ),
 });
 
 const outputSchema = z.object({
@@ -167,13 +180,15 @@ export const getCloseHistoryStepDefinition = createServerStepDefinition({
       }
 
       // Exclude the current alert if alertId is provided
-      const mustNotFilters = alertId ? [
-        {
-          term: {
-            _id: alertId,
-          },
-        },
-      ] : [];
+      const mustNotFilters = alertId
+        ? [
+            {
+              term: {
+                _id: alertId,
+              },
+            },
+          ]
+        : [];
 
       // Search for closed alerts
       const closedAlertsResponse = await esClient.search({
@@ -227,19 +242,24 @@ export const getCloseHistoryStepDefinition = createServerStepDefinition({
         closeReasonsSummary[reason] = (closeReasonsSummary[reason] || 0) + 1;
 
         // Check if marked as false positive via reason or tags
-        if (reason === 'false_positive' || alert.workflow_tags.some((tag: string) => 
-          falsePositiveTags.some(fpTag => tag.toLowerCase().includes(fpTag.toLowerCase()))
-        )) {
+        if (
+          reason === 'false_positive' ||
+          alert.workflow_tags.some((tag: string) =>
+            falsePositiveTags.some((fpTag) => tag.toLowerCase().includes(fpTag.toLowerCase()))
+          )
+        ) {
           falsePositiveCount++;
         }
       });
 
       const matchType = matchEntities ? 'same rule + entities' : 'same rule';
-      const entityInfo = matchEntities ? {
-        host_name: hostName,
-        user_name: userName,
-        service_name: serviceName,
-      } : undefined;
+      const entityInfo = matchEntities
+        ? {
+            host_name: hostName,
+            user_name: userName,
+            service_name: serviceName,
+          }
+        : undefined;
 
       return {
         output: {
@@ -253,7 +273,11 @@ export const getCloseHistoryStepDefinition = createServerStepDefinition({
           false_positive_count: falsePositiveCount,
           close_reasons_summary: closeReasonsSummary,
           closed_alerts: closedAlerts,
-          message: `Found ${closedAlerts.length} closed alert${closedAlerts.length !== 1 ? 's' : ''} for ${matchType} in the last ${timeRange}. ${falsePositiveCount > 0 ? `${falsePositiveCount} were marked as false positive.` : ''}`,
+          message: `Found ${closedAlerts.length} closed alert${
+            closedAlerts.length !== 1 ? 's' : ''
+          } for ${matchType} in the last ${timeRange}. ${
+            falsePositiveCount > 0 ? `${falsePositiveCount} were marked as false positive.` : ''
+          }`,
         },
       };
     } catch (error) {
@@ -264,4 +288,3 @@ export const getCloseHistoryStepDefinition = createServerStepDefinition({
     }
   },
 });
-

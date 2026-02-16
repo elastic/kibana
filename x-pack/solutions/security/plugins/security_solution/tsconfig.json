@@ -275,6 +275,8 @@
     "@kbn/kql",
     "@kbn/babel-register",
     "@kbn/core-security-common",
-    "@kbn/entity-store"
+    "@kbn/entity-store",
+    "@kbn/workflows-extensions",
+    "@kbn/workflows-management-plugin"
   ]
 }

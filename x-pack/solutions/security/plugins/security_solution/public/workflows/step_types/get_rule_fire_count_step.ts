@@ -18,7 +18,13 @@ const inputSchema = z.object({
     .describe(
       'ISO timestamp used as the end of the lookback window. If omitted, the current time (now) is used.'
     ),
-  time_range: z.string().optional().default('1h').describe('Lookback window subtracted from the timestamp (e.g., "1h", "24h", "7d"). Fire count is calculated from [timestamp - time_range] to [timestamp]. Default: "1h"'),
+  time_range: z
+    .string()
+    .optional()
+    .default('1h')
+    .describe(
+      'Lookback window subtracted from the timestamp (e.g., "1h", "24h", "7d"). Fire count is calculated from [timestamp - time_range] to [timestamp]. Default: "1h"'
+    ),
 });
 
 const outputSchema = z.object({
@@ -39,14 +45,22 @@ export const getRuleFireCountStepDefinition: PublicStepDefinition = {
     defaultMessage: 'Get the count of how many times a rule fired within a specified time range',
   }),
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/stats').then(({ icon }) => ({ default: icon })).catch(() =>
-      import('@elastic/eui/es/components/icon/assets/search').then(({ icon }) => ({ default: icon }))
-    )
+    import('@elastic/eui/es/components/icon/assets/stats')
+      .then(({ icon }) => ({ default: icon }))
+      .catch(() =>
+        import('@elastic/eui/es/components/icon/assets/search').then(({ icon }) => ({
+          default: icon,
+        }))
+      )
   ),
   documentation: {
-    details: i18n.translate('xpack.securitySolution.workflows.steps.getRuleFireCount.documentation.details', {
-      defaultMessage: 'Returns the total number of times a rule fired within the lookback window [timestamp - time_range, timestamp] (or [now - time_range, now] if timestamp is omitted).',
-    }),
+    details: i18n.translate(
+      'xpack.securitySolution.workflows.steps.getRuleFireCount.documentation.details',
+      {
+        defaultMessage:
+          'Returns the total number of times a rule fired within the lookback window [timestamp - time_range, timestamp] (or [now - time_range, now] if timestamp is omitted).',
+      }
+    ),
     examples: [
       `## Get rule fire count (last 24h from now)
 \`\`\`yaml
@@ -68,4 +82,3 @@ export const getRuleFireCountStepDefinition: PublicStepDefinition = {
     ],
   },
 };
-

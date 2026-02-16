@@ -39,4 +39,3 @@ describe('getRelatedAlerts step input schema', () => {
     expect(badInfinity.success).toBe(false);
   });
 });
-

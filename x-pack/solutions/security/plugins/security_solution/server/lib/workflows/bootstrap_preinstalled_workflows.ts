@@ -57,11 +57,17 @@ export class PreinstalledWorkflowsBootstrap {
    */
   public async bootstrap(): Promise<BootstrapResult> {
     this.logger.info(
-      `[PreinstalledWorkflows] Bootstrap method started - workflowsDir: ${this.workflowsDir}, workflowCount: ${PREINSTALLED_WORKFLOWS.length}, spaceId: ${this.spaceId}, hasManagement: ${!!this.workflowsManagement?.management}`
+      `[PreinstalledWorkflows] Bootstrap method started - workflowsDir: ${
+        this.workflowsDir
+      }, workflowCount: ${PREINSTALLED_WORKFLOWS.length}, spaceId: ${
+        this.spaceId
+      }, hasManagement: ${!!this.workflowsManagement?.management}`
     );
-    
+
     if (!this.workflowsManagement?.management) {
-      this.logger.warn('[PreinstalledWorkflows] Workflows management plugin not available, skipping workflow installation');
+      this.logger.warn(
+        '[PreinstalledWorkflows] Workflows management plugin not available, skipping workflow installation'
+      );
       return { installed: 0, updated: 0, skipped: 0, errors: 0 };
     }
 
@@ -72,7 +78,9 @@ export class PreinstalledWorkflowsBootstrap {
       errors: 0,
     };
 
-    this.logger.info(`Starting bootstrap of ${PREINSTALLED_WORKFLOWS.length} pre-installed workflow(s)`);
+    this.logger.info(
+      `Starting bootstrap of ${PREINSTALLED_WORKFLOWS.length} pre-installed workflow(s)`
+    );
 
     for (const workflow of PREINSTALLED_WORKFLOWS) {
       try {
@@ -103,15 +111,22 @@ export class PreinstalledWorkflowsBootstrap {
    */
   private async processWorkflow(workflow: PreinstalledWorkflow): Promise<BootstrapAction> {
     this.logger.debug(`Processing workflow ${workflow.id} from ${workflow.filePath}`);
-    
-    const existing = await this.workflowsManagement.management!.getWorkflow(workflow.id, this.spaceId);
-    
+
+    const existing = await this.workflowsManagement.management!.getWorkflow(
+      workflow.id,
+      this.spaceId
+    );
+
     if (existing) {
-      this.logger.debug(`Workflow ${workflow.id} already exists. ${existing.deletedAt ? 'It is soft deleted' : ''}`.trim());
+      this.logger.debug(
+        `Workflow ${workflow.id} already exists. ${
+          existing.deletedAt ? 'It is soft deleted' : ''
+        }`.trim()
+      );
     } else {
       this.logger.debug(`Workflow ${workflow.id} does not exist, will install`);
     }
-    
+
     const fileYaml = this.loadWorkflowYaml(workflow.filePath);
     this.logger.debug(`Loaded YAML for ${workflow.id}, length: ${fileYaml.length} characters`);
 
@@ -133,7 +148,9 @@ export class PreinstalledWorkflowsBootstrap {
    * Install a new workflow
    */
   private async installWorkflow(workflow: PreinstalledWorkflow, yaml: string): Promise<void> {
-    this.logger.debug(`Loading workflow YAML for ${workflow.id}, length: ${yaml.length} characters`);
+    this.logger.debug(
+      `Loading workflow YAML for ${workflow.id}, length: ${yaml.length} characters`
+    );
 
     const createdWorkflow = await this.workflowsManagement.management!.createWorkflow(
       {
@@ -182,13 +199,15 @@ export class PreinstalledWorkflowsBootstrap {
     }
 
     // Normalize path: remove leading ./ if present, then join
-    const normalizedPath = relativeFilePath.startsWith('./') 
-      ? relativeFilePath.slice(2) 
+    const normalizedPath = relativeFilePath.startsWith('./')
+      ? relativeFilePath.slice(2)
       : relativeFilePath;
     const filePath = resolve(join(this.workflowsDir, normalizedPath));
-    
-    this.logger.debug(`Loading workflow YAML from: ${filePath} (resolved from ${relativeFilePath})`);
-    
+
+    this.logger.debug(
+      `Loading workflow YAML from: ${filePath} (resolved from ${relativeFilePath})`
+    );
+
     try {
       const yaml = readFileSync(filePath, 'utf-8');
       this.yamlCache.set(relativeFilePath, yaml);
@@ -230,12 +249,14 @@ export async function bootstrapPreinstalledWorkflows(
 ): Promise<void> {
   logger.info('[PreinstalledWorkflows] Bootstrap function called');
   logger.debug(
-    `[PreinstalledWorkflows] Creating bootstrap instance - hasWorkflowsManagement: ${!!workflowsManagement}, hasManagement: ${!!workflowsManagement?.management}, spaceId: ${spaceId}, workflowCount: ${PREINSTALLED_WORKFLOWS.length}`
+    `[PreinstalledWorkflows] Creating bootstrap instance - hasWorkflowsManagement: ${!!workflowsManagement}, hasManagement: ${!!workflowsManagement?.management}, spaceId: ${spaceId}, workflowCount: ${
+      PREINSTALLED_WORKFLOWS.length
+    }`
   );
-  
+
   const bootstrap = new PreinstalledWorkflowsBootstrap(workflowsManagement, spaceId, logger);
   const result = await bootstrap.bootstrap();
-  
+
   logger.info(
     `[PreinstalledWorkflows] Bootstrap completed - installed: ${result.installed}, updated: ${result.updated}, skipped: ${result.skipped}, errors: ${result.errors}`
   );

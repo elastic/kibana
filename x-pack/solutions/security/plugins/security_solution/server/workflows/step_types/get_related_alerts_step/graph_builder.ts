@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import { addEntitiesWithLimit, buildIgnoreMap, extractEntityValues, fieldToEntityLabel } from './entity_utils';
+import {
+  addEntitiesWithLimit,
+  buildIgnoreMap,
+  extractEntityValues,
+  fieldToEntityLabel,
+} from './entity_utils';
 import { buildEntityShouldClauses } from './query_utils';
 import type { AlertMeta, RelatedAlertsGraphOutput } from './types';
 
-type EsSearchClient = {
+interface EsSearchClient {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   search: (request: any) => Promise<any>;
-};
+}
 
 type EdgeAccumulator = Map<
   string,
@@ -93,7 +98,9 @@ const computeParentLinks = (params: {
     for (const alias of aliases) {
       if (!alias?.field || alias.field === field) continue;
       const aliasScore =
-        (typeof alias.score === 'number' && Number.isFinite(alias.score) ? alias.score : undefined) ??
+        (typeof alias.score === 'number' && Number.isFinite(alias.score)
+          ? alias.score
+          : undefined) ??
         scoring.entityFieldScores.get(alias.field) ??
         scoring.defaultScorePerField;
       matchFields.push({ field: alias.field, score: aliasScore });
@@ -186,7 +193,10 @@ const indexEntitiesForAlert = (params: {
 const addTraversalEdges = (params: {
   edgesByKey: EdgeAccumulator;
   childId: string;
-  parentLinks: Map<string, { labels: Set<string>; labelScores: Map<string, number>; score: number }>;
+  parentLinks: Map<
+    string,
+    { labels: Set<string>; labelScores: Map<string, number>; score: number }
+  >;
 }) => {
   const { edgesByKey, childId, parentLinks } = params;
 
@@ -242,7 +252,6 @@ const searchWindow = async (params: {
   let searchAfter: unknown[] | undefined;
   let page = 0;
   while (!stop()) {
-
     const response = await esClient.search({
       index,
       // Hidden indices (like `.internal.*`) don't expand on wildcards unless explicitly enabled.
@@ -294,7 +303,7 @@ const searchWindow = async (params: {
   }
 };
 
-export type BuildRelatedAlertsGraphParams = {
+export interface BuildRelatedAlertsGraphParams {
   esClient: EsSearchClient;
   seed: { alertId: string; alertIndex: string };
   searchIndex: string;
@@ -325,7 +334,7 @@ export type BuildRelatedAlertsGraphParams = {
    */
   minEntityScore: number;
   includeSeed: boolean;
-};
+}
 
 export const buildRelatedAlertsGraph = async (
   params: BuildRelatedAlertsGraphParams
@@ -365,7 +374,9 @@ export const buildRelatedAlertsGraph = async (
       ? minEntityScore
       : 2;
   const safeEntityFieldScores = new Map<string, number>(
-    Object.entries(entityFieldScores ?? {}).filter(([, v]) => typeof v === 'number' && Number.isFinite(v))
+    Object.entries(entityFieldScores ?? {}).filter(
+      ([, v]) => typeof v === 'number' && Number.isFinite(v)
+    )
   );
 
   const safeEntityFieldAliases = (() => {
@@ -375,7 +386,10 @@ export const buildRelatedAlertsGraph = async (
       if (typeof from !== 'string' || from.length === 0) continue;
       if (!Array.isArray(aliases) || aliases.length === 0) continue;
       const cleaned = aliases
-        .filter((a): a is { field: string; score?: number } => typeof a?.field === 'string' && a.field.length > 0)
+        .filter(
+          (a): a is { field: string; score?: number } =>
+            typeof a?.field === 'string' && a.field.length > 0
+        )
         .filter((a) => a.field !== from);
       if (!cleaned.length) continue;
       map.set(from, cleaned);
@@ -403,7 +417,9 @@ export const buildRelatedAlertsGraph = async (
     defaultScorePerField: 1,
   };
 
-  const expandEntitiesByAliases = (entitiesByField: Map<string, Set<string>>): Map<string, Set<string>> => {
+  const expandEntitiesByAliases = (
+    entitiesByField: Map<string, Set<string>>
+  ): Map<string, Set<string>> => {
     const out = new Map<string, Set<string>>();
 
     for (const [field, values] of entitiesByField.entries()) {
@@ -425,7 +441,12 @@ export const buildRelatedAlertsGraph = async (
   };
 
   const sourceFields = Array.from(
-    new Set<string>(['@timestamp', 'kibana.alert.rule.name', 'kibana.alert.severity', ...entityFields])
+    new Set<string>([
+      '@timestamp',
+      'kibana.alert.rule.name',
+      'kibana.alert.severity',
+      ...entityFields,
+    ])
   );
 
   // Fetch seed alert.
@@ -466,7 +487,12 @@ export const buildRelatedAlertsGraph = async (
   for (const field of entityFields) {
     const values = extractEntityValues(seedSource, field, ignoreMap);
     seedEntities.set(field, values);
-    addEntitiesWithLimit({ known: knownEntitiesByField, field, values, maxEntitiesPerField: safeMaxEntitiesPerField });
+    addEntitiesWithLimit({
+      known: knownEntitiesByField,
+      field,
+      values,
+      maxEntitiesPerField: safeMaxEntitiesPerField,
+    });
   }
 
   alertMetaById.set(seed.alertId, {
@@ -487,7 +513,9 @@ export const buildRelatedAlertsGraph = async (
     return {
       nodes,
       edges: [],
-      alerts_sorted: includeSeed ? [{ alert_id: seed.alertId, alert_index: seedHit._index, timestamp: seedTimestamp }] : [],
+      alerts_sorted: includeSeed
+        ? [{ alert_id: seed.alertId, alert_index: seedHit._index, timestamp: seedTimestamp }]
+        : [],
       stats: {
         depth_reached: 0,
         nodes: nodes.length,
@@ -674,7 +702,9 @@ export const buildRelatedAlertsGraph = async (
 
   const allMetas = Array.from(alertMetaById.values());
   const seedId = seed.alertId;
-  const nodesFiltered = includeSeed ? nodesInternal : new Set(Array.from(nodesInternal).filter((id) => id !== seedId));
+  const nodesFiltered = includeSeed
+    ? nodesInternal
+    : new Set(Array.from(nodesInternal).filter((id) => id !== seedId));
 
   const alertsSorted = allMetas
     .filter((m) => nodesFiltered.has(m.alert_id))
@@ -706,4 +736,3 @@ export const buildRelatedAlertsGraph = async (
     },
   };
 };
-

@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { registerWorkflowSteps } from './register_workflow_steps';
+import { getDataTestSubjectSelector } from '../../helpers/common';
+
+export const WATCHLIST_FILTER_COMBO_BOX = getDataTestSubjectSelector('watchlistFilterComboBox');

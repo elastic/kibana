@@ -47,4 +47,3 @@ export const toonEncodeStepDefinition = createServerStepDefinition({
     }
   },
 });
-

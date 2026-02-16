@@ -30,4 +30,3 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(getRuleMetadataStepDefinition);
   workflowsExtensions.registerStepDefinition(toonEncodeStepDefinition);
 };
-

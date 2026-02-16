@@ -54,7 +54,7 @@ export const InputSchema = z.object({
     )
     .optional()
     .describe('Optional attachments to provide to the agent.'),
-    
+
   /**
    * Optional existing conversation id to continue a previous conversation.
    */

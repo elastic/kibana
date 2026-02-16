@@ -54,15 +54,22 @@ export const getGlobalPrevalenceStepDefinition: PublicStepDefinition = {
     defaultMessage: 'Check if a rule is triggering across many hosts to determine prevalence level',
   }),
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/globe').then(({ icon }) => ({ default: icon })).catch(() =>
-      import('@elastic/eui/es/components/icon/assets/search').then(({ icon }) => ({ default: icon }))
-    )
+    import('@elastic/eui/es/components/icon/assets/globe')
+      .then(({ icon }) => ({ default: icon }))
+      .catch(() =>
+        import('@elastic/eui/es/components/icon/assets/search').then(({ icon }) => ({
+          default: icon,
+        }))
+      )
   ),
   documentation: {
-    details: i18n.translate('xpack.securitySolution.workflows.steps.getGlobalPrevalence.documentation.details', {
-      defaultMessage:
-        'Returns the count of unique hosts and users affected by a rule, along with a prevalence level (low, medium, high, very_high) and top affected hosts. Prevalence is calculated over a lookback window of [timestamp - time_range, timestamp] (or [now - time_range, now] if timestamp is omitted).',
-    }),
+    details: i18n.translate(
+      'xpack.securitySolution.workflows.steps.getGlobalPrevalence.documentation.details',
+      {
+        defaultMessage:
+          'Returns the count of unique hosts and users affected by a rule, along with a prevalence level (low, medium, high, very_high) and top affected hosts. Prevalence is calculated over a lookback window of [timestamp - time_range, timestamp] (or [now - time_range, now] if timestamp is omitted).',
+      }
+    ),
     examples: [
       `## Get global prevalence (last 24h from now)
 \`\`\`yaml
@@ -84,4 +91,3 @@ export const getGlobalPrevalenceStepDefinition: PublicStepDefinition = {
     ],
   },
 };
-

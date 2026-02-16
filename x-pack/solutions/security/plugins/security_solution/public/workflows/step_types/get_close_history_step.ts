@@ -18,11 +18,24 @@ const inputSchema = z.object({
     .describe(
       'ISO timestamp used as the end of the lookback window. If omitted, the current time (now) is used.'
     ),
-  time_range: z.string().optional().default('30d').describe('Lookback window subtracted from the timestamp (e.g., "30d", "90d", "7d"). Close history is calculated from [timestamp - time_range] to [timestamp]. Default: "30d"'),
-  match_alert_entities: z.object({
-    alertId: z.string().describe('The alert ID (required when match_alert_entities is provided)'),
-    alertIndex: z.string().describe('The alert index (required when match_alert_entities is provided)'),
-  }).optional().describe('The alert entities to match. When provided, only returns closed alerts on the same host/user/entity. When omitted, returns all closed alerts for the same rule.'),
+  time_range: z
+    .string()
+    .optional()
+    .default('30d')
+    .describe(
+      'Lookback window subtracted from the timestamp (e.g., "30d", "90d", "7d"). Close history is calculated from [timestamp - time_range] to [timestamp]. Default: "30d"'
+    ),
+  match_alert_entities: z
+    .object({
+      alertId: z.string().describe('The alert ID (required when match_alert_entities is provided)'),
+      alertIndex: z
+        .string()
+        .describe('The alert index (required when match_alert_entities is provided)'),
+    })
+    .optional()
+    .describe(
+      'The alert entities to match. When provided, only returns closed alerts on the same host/user/entity. When omitted, returns all closed alerts for the same rule.'
+    ),
 });
 
 const outputSchema = z.object({
@@ -73,9 +86,13 @@ export const getCloseHistoryStepDefinition: PublicStepDefinition = {
     import('@elastic/eui/es/components/icon/assets/search').then(({ icon }) => ({ default: icon }))
   ),
   documentation: {
-    details: i18n.translate('xpack.securitySolution.workflows.steps.getCloseHistory.documentation.details', {
-      defaultMessage: 'Returns historical close information for alerts matching the same rule (and optionally the same entities) to help understand how similar alerts were handled.',
-    }),
+    details: i18n.translate(
+      'xpack.securitySolution.workflows.steps.getCloseHistory.documentation.details',
+      {
+        defaultMessage:
+          'Returns historical close information for alerts matching the same rule (and optionally the same entities) to help understand how similar alerts were handled.',
+      }
+    ),
     examples: [
       `## Get close history for same rule (last 30d from now)
 \`\`\`yaml
@@ -108,4 +125,3 @@ export const getCloseHistoryStepDefinition: PublicStepDefinition = {
     ],
   },
 };
-

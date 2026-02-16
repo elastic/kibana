@@ -61,6 +61,8 @@ import {
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   SERVER_APP_ID,
   CASE_ATTACHMENT_INDICATOR_TYPE_ID,
+  PREINSTALLED_WORKFLOWS_FEATURE_FLAG,
+  PREINSTALLED_WORKFLOWS_FEATURE_FLAG_DEFAULT,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
@@ -125,10 +127,6 @@ import {
 } from '../common/endpoint/constants';
 
 import { bootstrapPreinstalledWorkflows } from './lib/workflows';
-import {
-  PREINSTALLED_WORKFLOWS_FEATURE_FLAG,
-  PREINSTALLED_WORKFLOWS_FEATURE_FLAG_DEFAULT,
-} from '../common/constants';
 
 import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
@@ -1002,29 +1000,45 @@ export class Plugin implements ISecuritySolutionPlugin {
     }
 
     if (this.workflowsManagementSetup) {
-      this.logger.info('[PreinstalledWorkflows] WorkflowsManagement plugin available, checking feature flag for pre-installed workflows');
+      this.logger.info(
+        '[PreinstalledWorkflows] WorkflowsManagement plugin available, checking feature flag for pre-installed workflows'
+      );
       core.featureFlags
-        .getBooleanValue(PREINSTALLED_WORKFLOWS_FEATURE_FLAG, PREINSTALLED_WORKFLOWS_FEATURE_FLAG_DEFAULT)
+        .getBooleanValue(
+          PREINSTALLED_WORKFLOWS_FEATURE_FLAG,
+          PREINSTALLED_WORKFLOWS_FEATURE_FLAG_DEFAULT
+        )
         .then((isEnabled) => {
-          this.logger.info(`[PreinstalledWorkflows] Pre-installed workflows feature flag: ${isEnabled}`);
+          this.logger.info(
+            `[PreinstalledWorkflows] Pre-installed workflows feature flag: ${isEnabled}`
+          );
           if (isEnabled) {
-            this.logger.info('[PreinstalledWorkflows] Starting bootstrap of pre-installed workflows');
+            this.logger.info(
+              '[PreinstalledWorkflows] Starting bootstrap of pre-installed workflows'
+            );
             return bootstrapPreinstalledWorkflows(
               this.workflowsManagementSetup!,
               'default',
               this.logger
             );
           } else {
-            this.logger.info('[PreinstalledWorkflows] Pre-installed workflows feature flag is disabled, skipping bootstrap');
+            this.logger.info(
+              '[PreinstalledWorkflows] Pre-installed workflows feature flag is disabled, skipping bootstrap'
+            );
           }
         })
         .catch((error) => {
-          this.logger.error(`[PreinstalledWorkflows] Error bootstrapping pre-installed workflows: ${error.message}`, {
-            error: error.stack,
-          });
+          this.logger.error(
+            `[PreinstalledWorkflows] Error bootstrapping pre-installed workflows: ${error.message}`,
+            {
+              error: error.stack,
+            }
+          );
         });
     } else {
-      this.logger.info('[PreinstalledWorkflows] WorkflowsManagement plugin not available, skipping pre-installed workflows bootstrap');
+      this.logger.info(
+        '[PreinstalledWorkflows] WorkflowsManagement plugin not available, skipping pre-installed workflows bootstrap'
+      );
     }
 
     return {};

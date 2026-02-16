@@ -12,12 +12,14 @@ import { buildRelatedAlertsGraph } from './get_related_alerts_step/graph_builder
 import { parseTimeWindowToMs } from './get_related_alerts_step/time_window';
 
 const DEFAULT_ENTITY_FIELDS = ['host.name', 'user.name', 'service.name'] as const;
-type EntityFieldConfig = {
+interface EntityFieldConfig {
   field: string;
   score?: number;
   aliases?: Array<{ field: string; score?: number }>;
-};
-const DEFAULT_ENTITY_FIELD_CONFIG: EntityFieldConfig[] = DEFAULT_ENTITY_FIELDS.map((field) => ({ field }));
+}
+const DEFAULT_ENTITY_FIELD_CONFIG: EntityFieldConfig[] = DEFAULT_ENTITY_FIELDS.map((field) => ({
+  field,
+}));
 
 export const getRelatedAlertsInputSchema = z.object({
   alertId: z.string().describe('The alert ID to find related alerts for'),
@@ -46,7 +48,9 @@ export const getRelatedAlertsInputSchema = z.object({
     .string()
     .optional()
     .default('1h')
-    .describe('Initial time window around the seed alert timestamp (e.g., "1h", "24h"). Default: "1h"'),
+    .describe(
+      'Initial time window around the seed alert timestamp (e.g., "1h", "24h"). Default: "1h"'
+    ),
   expand_window: z
     .string()
     .optional()
@@ -54,24 +58,24 @@ export const getRelatedAlertsInputSchema = z.object({
     .describe(
       'Time window padding applied to the growing min/max timestamps as related alerts are found. Default: "1h"'
     ),
-  max_depth: z
-    .coerce.number()
+  max_depth: z.coerce
+    .number()
     .finite()
     .int()
     .min(0)
     .optional()
     .default(3)
     .describe('Maximum recursion depth (number of expansion rounds). Default: 3'),
-  max_alerts: z
-    .coerce.number()
+  max_alerts: z.coerce
+    .number()
     .finite()
     .int()
     .min(1)
     .optional()
     .default(300)
     .describe('Hard cap on number of discovered alerts (including seed if included). Default: 300'),
-  page_size: z
-    .coerce.number()
+  page_size: z.coerce
+    .number()
     .finite()
     .int()
     .min(1)
@@ -79,16 +83,18 @@ export const getRelatedAlertsInputSchema = z.object({
     .optional()
     .default(200)
     .describe('Elasticsearch page size per query. Default: 200'),
-  max_terms_per_query: z
-    .coerce.number()
+  max_terms_per_query: z.coerce
+    .number()
     .finite()
     .int()
     .min(1)
     .optional()
     .default(500)
-    .describe('Maximum number of terms per `terms` query clause (chunked if exceeded). Default: 500'),
-  max_entities_per_field: z
-    .coerce.number()
+    .describe(
+      'Maximum number of terms per `terms` query clause (chunked if exceeded). Default: 500'
+    ),
+  max_entities_per_field: z.coerce
+    .number()
     .finite()
     .int()
     .min(1)
@@ -102,8 +108,8 @@ export const getRelatedAlertsInputSchema = z.object({
     .describe(
       'Entity values to ignore for correlation/scoring (e.g. field=user.name values=[root,SYSTEM]). Ignored values do not contribute to edge scores and are not used for graph expansion.'
     ),
-  min_entity_score: z
-    .coerce.number()
+  min_entity_score: z.coerce
+    .number()
     .finite()
     .min(1)
     .optional()
@@ -182,14 +188,16 @@ export const getRelatedAlertsStepDefinition = createServerStepDefinition({
         : `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
       const esClient = context.contextManager.getScopedEsClient();
 
-      const entityFieldConfigs = (entity_fields?.length ? entity_fields : DEFAULT_ENTITY_FIELD_CONFIG).filter(
-        (f) => typeof f?.field === 'string' && f.field.length > 0
-      );
+      const entityFieldConfigs = (
+        entity_fields?.length ? entity_fields : DEFAULT_ENTITY_FIELD_CONFIG
+      ).filter((f) => typeof f?.field === 'string' && f.field.length > 0);
       const entityFields = Array.from(
         new Set(
           entityFieldConfigs.flatMap((c) => [
             c.field,
-            ...((Array.isArray(c.aliases) ? c.aliases : []).map((a) => a.field).filter((f) => typeof f === 'string')),
+            ...(Array.isArray(c.aliases) ? c.aliases : [])
+              .map((a) => a.field)
+              .filter((f) => typeof f === 'string'),
           ])
         )
       ).filter((f) => f.length > 0);
@@ -203,7 +211,10 @@ export const getRelatedAlertsStepDefinition = createServerStepDefinition({
       for (const c of entityFieldConfigs) {
         const aliases = Array.isArray(c.aliases) ? c.aliases : [];
         const cleaned = aliases
-          .filter((a): a is { field: string; score?: number } => typeof a?.field === 'string' && a.field.length > 0)
+          .filter(
+            (a): a is { field: string; score?: number } =>
+              typeof a?.field === 'string' && a.field.length > 0
+          )
           .filter((a) => a.field !== c.field);
         if (cleaned.length) {
           entityFieldAliases[c.field] = cleaned.map((a) => ({
@@ -241,4 +252,3 @@ export const getRelatedAlertsStepDefinition = createServerStepDefinition({
     }
   },
 });
-

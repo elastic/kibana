@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-export type AlertMeta = {
+export interface AlertMeta {
   alert_id: string;
   alert_index: string;
   timestamp?: string;
   rule_name?: string;
   severity?: string;
   ts_ms?: number;
-};
+}
 
-export type RelatedAlertsGraphOutput = {
+export interface RelatedAlertsGraphOutput {
   nodes: Array<{ id: string }>;
   edges: Array<{
     from: string;
@@ -43,5 +43,4 @@ export type RelatedAlertsGraphOutput = {
     queries: number;
     time_range: { gte: string; lte: string };
   };
-};
-
+}

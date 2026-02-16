@@ -28,4 +28,3 @@ export const buildEntityShouldClauses = (params: {
 
   return shouldClauses;
 };
-
