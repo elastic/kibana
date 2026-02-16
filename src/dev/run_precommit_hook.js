@@ -22,8 +22,7 @@ import { getFilesForCommit, checkFileCasing } from './precommit_hook';
 import { checkSemverRanges } from './no_pkg_semver_ranges';
 import { load as yamlLoad } from 'js-yaml';
 import { readFile } from 'fs/promises';
-import { KEBAB_CASE_PATTERNS } from './precommit_hook/casing_check_config';
-import minimatch from 'minimatch';
+import { getExpectedCasing } from './precommit_hook/casing_check_config';
 
 const EXCEPTIONS_JSON_PATH = join(REPO_ROOT, 'src/dev/precommit_hook/exceptions.json');
 
@@ -89,24 +88,6 @@ class FileCasingCheck extends PrecommitCheck {
     const exceptions = Object.values(rawExceptions).flatMap((teamObject) =>
       Object.keys(teamObject)
     );
-
-    /**
-     * Contains the logic that decides what is the expected casing for each Kibana resource (folders, files)
-     * @param relativePath string the relative path to the resource
-     * @returns expected casing (kebab-case | snake_case) for the given resource
-     */
-    const getExpectedCasing = function (relativePath) {
-      if (packageRootDirs.has(relativePath)) {
-        // it is a Kibana module of type package (not a plugin)
-        return 'kebab-case';
-      } else if (KEBAB_CASE_PATTERNS.some((pattern) => minimatch(relativePath, pattern))) {
-        // the resource matches one of the KEBAB_CASE_PATTERNS from the config
-        return 'kebab-case';
-      } else {
-        // everything else is snake_case by default
-        return 'snake_case';
-      }
-    };
 
     await checkFileCasing(log, files, getExpectedCasing, {
       packageRootDirs,

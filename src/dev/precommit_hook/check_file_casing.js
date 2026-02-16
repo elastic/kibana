@@ -63,7 +63,7 @@ function getSegmentPaths(relativePath) {
 }
 
 export async function checkFileCasing(log, paths, getExpectedCasing, options = {}) {
-  const { exceptions = [], generateExceptions = false } = options;
+  const { exceptions = [], generateExceptions = false, packageRootDirs } = options;
 
   const violations = [];
 
@@ -77,7 +77,7 @@ export async function checkFileCasing(log, paths, getExpectedCasing, options = {
 
   pathsToValidate.forEach((path) => {
     const resourceName = basename(path);
-    const expectedCasing = getExpectedCasing(path);
+    const expectedCasing = getExpectedCasing(path, packageRootDirs);
 
     switch (expectedCasing) {
       case 'kebab-case':
