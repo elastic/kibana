@@ -121,6 +121,7 @@ const MaybeWrapper = ({
   return (
     <EuiFlyout
       data-test-subj="lnsEditOnFlyFlyout"
+      className="lnsApp"
       type="push"
       ownFocus
       paddingSize="m"
@@ -134,7 +135,11 @@ const MaybeWrapper = ({
       size="s"
       hideCloseButton
       css={css`
-        clip-path: none; // need to override the eui-flyout clip-path for dnd outside of the flyout
+        // need to override the eui-flyout clip-path for dnd outside of the flyout
+        clip-path: none !important;
+        // Allow drag-drop extra targets to overflow horizontally
+        overflow-y: clip !important;
+        overflow-x: visible !important;
       `}
     >
       {children}

@@ -481,12 +481,21 @@ export function LensEditConfigurationFlyout({
           <EuiFlexGroup
             css={css`
               block-size: 100%;
+              /* Allow drag-drop extra targets to overflow horizontally through all containers */
+              overflow-y: clip !important;
+              overflow-x: visible !important;
               /* Reset min-block-size to allow flex items to shrink below content size */
               .euiFlexItem,
               .euiAccordion,
               .euiAccordion__triggerWrapper,
               .euiAccordion__childWrapper {
                 min-block-size: 0;
+              }
+              /* All intermediate containers must allow horizontal overflow */
+              .euiFlexItem,
+              .euiAccordion {
+                overflow-y: clip !important;
+                overflow-x: visible !important;
               }
               /* Make accordions flex containers to enable content scrolling */
               .euiAccordion {
@@ -507,10 +516,22 @@ export function LensEditConfigurationFlyout({
               .euiAccordion__childWrapper {
                 ${euiScrollBarStyles(euiTheme)}
                 overflow-y: auto !important;
+                overflow-x: hidden !important;
                 pointer-events: none;
 
+                /* Extend the scroll container to the left to accommodate drag-drop extra targets
+                   (e.g., "Alt/Option to duplicate" tooltip) that are positioned to the left of drop zones. */
                 padding-left: ${euiTheme.euiTheme.components.forms.maxWidth};
                 margin-left: -${euiTheme.euiTheme.components.forms.maxWidth};
+                /* Background gradient: transparent in the extended left area (for drag-drop tooltips),
+                   solid color for the visible content area */
+                background: linear-gradient(
+                  to right,
+                  transparent 0,
+                  transparent ${euiTheme.euiTheme.components.forms.maxWidth},
+                  ${euiTheme.euiTheme.colors.emptyShade}
+                    ${euiTheme.euiTheme.components.forms.maxWidth}
+                );
                 > * {
                   pointer-events: auto;
                 }
@@ -543,6 +564,9 @@ export function LensEditConfigurationFlyout({
             <EuiFlexItem
               grow={isLayerAccordionOpen ? 1 : false}
               css={css`
+                /* Allow horizontal overflow for drag-drop extra targets */
+                overflow-y: clip !important;
+                overflow-x: visible !important;
                 .euiAccordion__childWrapper {
                   flex: ${isLayerAccordionOpen ? 1 : 'none'};
                 }
