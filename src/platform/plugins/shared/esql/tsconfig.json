@@ -40,6 +40,7 @@
     "@kbn/discover-utils",
     "@kbn/kql",
     "@kbn/inspector-plugin",
+    "@kbn/es-types",
   ],
   "exclude": [
     "target/**/*",
