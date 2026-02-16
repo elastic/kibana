@@ -13,7 +13,7 @@ import type { DataCascadeImplRef } from '../lib/core/api';
 import { DataCascadeProvider, type GroupNode, type LeafNode } from '../store_provider';
 
 export type { GroupNode, LeafNode, DataCascadeImplProps as DataCascadeProps, DataCascadeImplRef };
-
+export type { DataCascadeUISnapshot } from '../lib/core/api';
 export { DataCascadeRow, DataCascadeRowCell } from './data_cascade_impl';
 
 export type {

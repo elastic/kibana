@@ -20,7 +20,7 @@ import type {
   VIEW_MODE,
 } from '@kbn/saved-search-plugin/common';
 import type { DataGridDensity, UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
-import type { ExpandedState, RowSelectionState } from '@tanstack/react-table';
+import type { DataCascadeUISnapshot } from '@kbn/shared-ux-document-data-cascade';
 import type {
   UnifiedFieldListRestorableState,
   UnifiedFieldListSidebarContainerProps,
@@ -34,6 +34,7 @@ import type { SerializedError } from '@reduxjs/toolkit';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
+import type { ESQLDataGroupNode } from '../../components/layout/cascaded_documents/blocks/types';
 
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;
@@ -134,9 +135,9 @@ export interface DataCascadeLeafUiState {
 }
 
 export interface DataCascadeUiState {
-  expanded?: ExpandedState;
-  rowSelection?: RowSelectionState;
-  scrollOffset?: number;
+  expanded?: DataCascadeUISnapshot<ESQLDataGroupNode, DataTableRecord>['expanded'];
+  rowSelection?: DataCascadeUISnapshot<ESQLDataGroupNode, DataTableRecord>['rowSelection'];
+  scrollOffset?: DataCascadeUISnapshot<ESQLDataGroupNode, DataTableRecord>['scrollOffset'];
   leafUiState?: Record<string, DataCascadeLeafUiState>;
 }
 

@@ -16,6 +16,7 @@ export type {
   DataCascadeRowProps,
   DataCascadeRowCellProps,
   CascadeRowCellNestedVirtualizationAnchorProps,
+  DataCascadeUISnapshot,
 } from './src/components';
 export * from './src/lib';
 export { NumberBadge } from './src/components/helpers';

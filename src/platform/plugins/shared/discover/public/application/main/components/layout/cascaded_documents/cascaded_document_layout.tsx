@@ -72,9 +72,9 @@ const ESQLDataCascade = React.memo(
       cascadeGroupingChangeHandler,
     } = useCascadedDocumentsContext();
 
-    const cascadeStateSnapshotHandler = useCallback(
-      (ref: DataCascadeImplRef<ESQLDataGroupNode, DataTableRecord>) => {
-        const snapshotStore = ref?.getUISnapshotStore();
+    const cascadeInstanceRefHandler = useCallback(
+      (cascadeInstanceRef: DataCascadeImplRef<ESQLDataGroupNode, DataTableRecord>) => {
+        const snapshotStore = cascadeInstanceRef?.getUISnapshotStore();
 
         if (snapshotStore && !cascadeStateChangesSubscription.current) {
           cascadeStateChangesSubscription.current = snapshotStore.subscribe(
@@ -174,11 +174,12 @@ const ESQLDataCascade = React.memo(
       <DataCascade<ESQLDataGroupNode>
         size="s"
         overscan={25}
-        ref={cascadeStateSnapshotHandler}
+        ref={cascadeInstanceRefHandler}
         data={cascadeGroupData}
         cascadeGroups={availableCascadeGroups}
         initialGroupColumn={selectedCascadeGroups}
         initialScrollOffset={dataCascadeUiState?.scrollOffset}
+        initialExpandedRowIds={Object.keys(dataCascadeUiState?.expanded ?? {})}
         customTableHeader={customTableHeading}
       >
         <DataCascadeRow<ESQLDataGroupNode, DataTableRecord>

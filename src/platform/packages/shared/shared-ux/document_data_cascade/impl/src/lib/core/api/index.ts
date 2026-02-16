@@ -25,8 +25,10 @@ import {
  * Snapshot of data cascade ui state for use with useSyncExternalStore.
  * Includes virtualizer-derived state and specific table state.
  */
-export interface DataCascadeUISnapshot<G extends GroupNode, L extends LeafNode>
-  extends Pick<IStoreState<G, L>['table'], 'expanded' | 'rowSelection'> {
+export interface DataCascadeUISnapshot<
+  G extends GroupNode = GroupNode,
+  L extends LeafNode = LeafNode
+> extends Pick<IStoreState<G, L>['table'], 'expanded' | 'rowSelection'> {
   scrollOffset: number;
   range: { startIndex: number; endIndex: number } | null;
   isScrolling: boolean;
