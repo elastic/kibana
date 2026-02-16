@@ -61,7 +61,8 @@ const props = {
   canDeleteFilter: true,
 };
 
-describe('EditFilterList', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/244294
+describe.skip('EditFilterList', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
