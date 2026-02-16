@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import { readUtf8File } from './fs_utils';
@@ -30,7 +30,7 @@ export interface RulesetFile {
 
 export const readRulesetFile = (rulesetPath: string): RulesetFile => {
   const raw = readUtf8File(rulesetPath);
-  const parsed: unknown = yaml.load(raw);
+  const parsed: unknown = parse(raw);
   if (!isRecord(parsed) || !Array.isArray(parsed.rules)) {
     throw new Error(`Invalid ruleset file: ${rulesetPath}`);
   }
