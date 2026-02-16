@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { generateNoticeFromSource } from './generate_notice_from_source';
+export {
+  generateNoticeFromSource,
+  checkFilesForNoticeComments,
+} from './generate_notice_from_source';
 // @ts-ignore not typed yet
 export { generateBuildNoticeText } from './generate_build_notice_text';

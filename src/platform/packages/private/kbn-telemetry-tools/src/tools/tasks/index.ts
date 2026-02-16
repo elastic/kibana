@@ -13,7 +13,7 @@ export type { TaskContext } from './task_context';
 export { createTaskContext } from './task_context';
 
 export { parseConfigsTask } from './parse_configs_task';
-export { extractCollectorsTask } from './extract_collectors_task';
+export { extractCollectorsTask, type ExtractCollectorsOptions } from './extract_collectors_task';
 export { generateSchemasTask } from './generate_schemas_task';
 export { writeToFileTask } from './write_to_file_task';
 export { checkMatchingSchemasTask } from './check_matching_schemas_task';
