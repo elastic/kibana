@@ -346,8 +346,8 @@ describe('run_all.ts', () => {
 
       await runPromise;
 
-      // Verify that output was captured and logged
-      expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining('Test output from stdout'));
+      // Verify that output was captured and written (via log.write in Buildkite section)
+      expect(mockLog.write).toHaveBeenCalledWith(expect.stringContaining('Test output from stdout'));
     });
 
     describe('logging and reporting', () => {
@@ -372,7 +372,7 @@ describe('run_all.ts', () => {
         );
       });
 
-      it('should log output for each config with timing', async () => {
+      it('should log output for each config with Buildkite section headers', async () => {
         const mockProcess = new EventEmitter() as any;
         mockProcess.stdout = new EventEmitter();
         mockProcess.stderr = new EventEmitter();
@@ -390,8 +390,9 @@ describe('run_all.ts', () => {
 
         await runPromise;
 
-        expect(mockLog.info).toHaveBeenCalledWith(
-          expect.stringMatching(/Output for .*config.*\.js \(exit 0 - success, \d+s\)/)
+        // Passing configs get collapsed Buildkite sections (---)
+        expect(mockLog.write).toHaveBeenCalledWith(
+          expect.stringMatching(/--- ✅ .*config.*\.js \(\d+s\)\n/)
         );
       });
 
@@ -411,7 +412,7 @@ describe('run_all.ts', () => {
 
         await runPromise;
 
-        expect(mockLog.write).toHaveBeenCalledWith('--- Combined Jest run summary');
+        expect(mockLog.write).toHaveBeenCalledWith('+++ Combined Jest run summary\n');
         expect(mockLog.info).toHaveBeenCalledWith(
           expect.stringMatching(/Total duration \(wall to wall\): \d+s/)
         );
@@ -557,9 +558,9 @@ describe('run_all.ts', () => {
 
         await runPromise;
 
-        // Should log duration in seconds
-        expect(mockLog.info).toHaveBeenCalledWith(
-          expect.stringMatching(/exit 0 - success, \d+s\)/)
+        // Should log duration in Buildkite section header
+        expect(mockLog.write).toHaveBeenCalledWith(
+          expect.stringMatching(/--- ✅ .*\.js \(\d+s\)\n/)
         );
       });
     });
@@ -822,12 +823,12 @@ describe('run_all.ts', () => {
 
         // config1 should be skipped
         expect(mockLog.info).toHaveBeenCalledWith(
-          'Skipping /path/to/config1.js (already completed on previous attempt)'
+          expect.stringContaining('[jest-checkpoint]   SKIP config1.js')
         );
 
         // Should log the resume summary
         expect(mockLog.info).toHaveBeenCalledWith(
-          expect.stringContaining('Resumed from checkpoint: skipped 1 already-completed configs')
+          expect.stringContaining('[jest-checkpoint] Resumed: skipped 1 already-completed')
         );
 
         // Only one process should be spawned (for config2)
@@ -984,10 +985,10 @@ describe('run_all.ts', () => {
 
         // Both configs should be reported as skipped
         expect(mockLog.info).toHaveBeenCalledWith(
-          'Skipping /path/to/config1.js (already completed on previous attempt)'
+          expect.stringContaining('[jest-checkpoint]   SKIP config1.js')
         );
         expect(mockLog.info).toHaveBeenCalledWith(
-          'Skipping /path/to/config2.js (already completed on previous attempt)'
+          expect.stringContaining('[jest-checkpoint]   SKIP config2.js')
         );
       });
 
