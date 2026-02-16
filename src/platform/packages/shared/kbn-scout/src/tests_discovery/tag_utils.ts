@@ -8,16 +8,18 @@
  */
 
 import type { ScoutTargetArch, ScoutTargetDomain } from '@kbn/scout-info';
-import { ScoutTestTarget } from '@kbn/scout-info';
+import { ScoutTestTarget, testTargets } from '@kbn/scout-info';
 import { tags } from '../playwright/tags';
 
 // Gets test tags for a given target type
 export const getTestTagsForTarget = (target: string): string[] => {
   switch (target) {
+    case 'local':
+      return testTargets.local.map((t) => t.playwrightTag);
     case 'mki':
-      return tags.serverless.all;
+      return testTargets.cloud.filter((t) => t.arch === 'serverless').map((t) => t.playwrightTag);
     case 'ech':
-      return tags.stateful.all;
+      return testTargets.cloud.filter((t) => t.arch === 'stateful').map((t) => t.playwrightTag);
     case 'all':
     default:
       return tags.deploymentAgnostic;
