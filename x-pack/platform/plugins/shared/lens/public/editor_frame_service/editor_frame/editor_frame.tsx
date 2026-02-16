@@ -168,9 +168,20 @@ export function EditorFrame(props: EditorFrameProps) {
         configPanel={
           areDatasourcesLoaded && (
             <ErrorBoundary onError={onError}>
-              <>
+              {/* Flex container to enable proper scroll behavior for the config panel.
+                  The toolbar and layer tabs remain fixed at the top while the
+                  ConfigPanelWrapper content area scrolls independently. */}
+              <div
+                css={css`
+                  display: flex;
+                  flex-direction: column;
+                  height: 100%;
+                `}
+              >
+                {/* Toolbar area - fixed height, doesn't shrink */}
                 <div
                   css={css`
+                    flex-shrink: 0;
                     background-color: ${euiTheme.colors.backgroundBaseHighlighted};
                     border-bottom: ${euiTheme.border.thin};
                   `}
@@ -192,13 +203,18 @@ export function EditorFrame(props: EditorFrameProps) {
                   </EuiFlexGroup>
                   <EuiSpacer size="s" />
                 </div>
+                {/* Layer tabs - fixed height via its own styling */}
                 <LayerTabsWrapper
                   coreStart={props.core}
                   framePublicAPI={framePublicAPI}
                   uiActions={props.plugins.uiActions}
                 />
+                {/* Scrollable config panel content area - takes remaining height */}
                 <div
+                  className="eui-scrollBar"
                   css={css`
+                    flex: 1;
+                    overflow-y: auto;
                     background-color: ${euiTheme.colors.emptyShade};
                   `}
                 >
@@ -212,7 +228,7 @@ export function EditorFrame(props: EditorFrameProps) {
                     getUserMessages={props.getUserMessages}
                   />
                 </div>
-              </>
+              </div>
             </ErrorBoundary>
           )
         }
