@@ -136,6 +136,12 @@ export class CoreUsageDataService
           .stats({
             index,
             metric: ['docs', 'store'],
+            filter_path: [
+              '_all.primaries.docs.count',
+              '_all.primaries.docs.deleted',
+              '_all.total.store.size_in_bytes',
+              '_all.primaries.store.size_in_bytes',
+            ],
           })
           .then((body) => {
             const stats = body._all;
