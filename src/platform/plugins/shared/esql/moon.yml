@@ -49,6 +49,7 @@ dependsOn:
   - '@kbn/discover-utils'
   - '@kbn/kql'
   - '@kbn/inspector-plugin'
+  - '@kbn/es-types'
 tags:
   - plugin
   - prod
