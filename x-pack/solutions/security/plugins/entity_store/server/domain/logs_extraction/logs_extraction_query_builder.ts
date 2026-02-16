@@ -123,16 +123,9 @@ function mergedFieldStats(idFieldName: string, fields: EntityField[]) {
 
       switch (retention.operation) {
         case 'collect_values':
-          /**
-           * If both recent and current values are null, return null.
-           * If current value is null, return recent value.
-           * Otherwise, return the union of recent and current values, sliced to the max length.
-           */
-          return `${dest} = CASE(${recentDest} IS NULL AND ${dest} IS NULL, NULL,
-                                  ${dest} IS NULL, ${recentDest},
-                                  MV_SLICE(MV_UNION(${recentDest}, ${dest}), 0, ${
+          return `${dest} = MV_SLICE(MV_UNION(${recentDest}, ${dest}), 0, ${
             retention.maxLength - 1
-          }))`;
+          })`;
         case 'prefer_newest_value':
           return `${dest} = COALESCE(${recentDest}, ${dest})`;
         case 'prefer_oldest_value':

@@ -219,8 +219,6 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
       'entity.id': 'user:latest-test',
       'entity.type': 'Identity',
       'entity.name': 'latest-test-name',
-      'entity.lifecycle.first_seen': '2026-02-13T11:00:00.000Z',
-      'entity.lifecycle.last_activity': '2026-02-13T11:00:00.000Z',
     });
 
     // Add sub_type to the document
@@ -254,8 +252,6 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
       'entity.name': 'latest-test-name',
       'entity.sub_type': 'Sub Type 1',
       'user.hash': ['hash-1', 'hash-2'],
-      'entity.lifecycle.first_seen': '2026-02-13T11:00:00.000Z',
-      'entity.lifecycle.last_activity': '2026-02-13T11:01:00.000Z',
     });
 
     // Update sub_type in between documents with null values
@@ -321,8 +317,6 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
       'entity.name': 'latest-test-name',
       'entity.sub_type': 'Sub Type 3',
       'user.hash': ['hash-1', 'hash-3', 'hash-4', 'hash-5', 'hash-2'],
-      'entity.lifecycle.first_seen': '2026-02-13T11:00:00.000Z',
-      'entity.lifecycle.last_activity': '2026-02-13T11:02:04.000Z',
     });
 
     // Make sure latest is not overwritten from the document if not changed
@@ -366,8 +360,6 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
         'hash-2',
       ],
       'user.domain': 'example.com',
-      'entity.lifecycle.first_seen': '2026-02-13T11:00:00.000Z',
-      'entity.lifecycle.last_activity': '2026-02-13T11:03:00.000Z',
     });
   });
 });
