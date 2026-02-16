@@ -168,6 +168,25 @@ export const checkSeverityCompliance = (score: number): CheckResult => {
   };
 };
 
+/** Pattern that matches a leading KQL-style field prefix, e.g. `message: ` */
+const FIELD_PREFIX_PATTERN = /^\w+:\s*/;
+
+/**
+ * Normalise an evidence string so it can be matched against raw log lines.
+ *
+ * Strips:
+ *  - leading field-name prefixes like `message: `
+ *  - surrounding double-quotes added by the LLM
+ */
+export const normaliseEvidence = (ev: string): string => {
+  let normalised = ev.trim();
+  normalised = normalised.replace(FIELD_PREFIX_PATTERN, '');
+  if (normalised.startsWith('"') && normalised.endsWith('"')) {
+    normalised = normalised.slice(1, -1);
+  }
+  return normalised;
+};
+
 export const checkEvidenceGrounding = (
   evidence: string[] | undefined,
   sampleLogs: string[]
@@ -180,10 +199,10 @@ export const checkEvidenceGrounding = (
     };
   }
 
-  const logsWithMessage = sampleLogs.map((log) => `message: "${log}"`);
-
+  const allLogs = sampleLogs.join('\n');
   const missing = evidence.filter((ev) => {
-    return !logsWithMessage.includes(ev);
+    const normalised = normaliseEvidence(ev);
+    return !allLogs.includes(normalised);
   });
 
   if (missing.length === 0) {
