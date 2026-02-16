@@ -28,7 +28,7 @@ import type {
 import { getEuidFromObject } from '../../common/domain/euid';
 import { getUpdatesEntitiesDataStreamName } from './assets/updates_data_stream';
 
-interface EntityManagerDependencies {
+interface CRUDClientDependencies {
   logger: Logger;
   esClient: ElasticsearchClient;
   namespace: string;
@@ -44,7 +44,7 @@ export class CRUDClient {
   private readonly esClient: ElasticsearchClient;
   private readonly namespace: string;
 
-  constructor(deps: EntityManagerDependencies) {
+  constructor(deps: CRUDClientDependencies) {
     this.logger = deps.logger;
     this.esClient = deps.esClient;
     this.namespace = deps.namespace;
