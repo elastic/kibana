@@ -15,10 +15,8 @@ type StepStreamOutput =
 
 type StepStreamHandler = (state: RulePipelineState) => StepStreamOutput;
 
-type FlatMapStepHandler = (state: RulePipelineState) => AsyncIterable<StepStreamResult>;
-type OneToOneStepHandler = (
-  state: RulePipelineState
-) => Promise<StepStreamResult> | StepStreamResult;
+type ExpandStepHandler = (state: RulePipelineState) => AsyncIterable<StepStreamResult>;
+type MapStepHandler = (state: RulePipelineState) => Promise<StepStreamResult> | StepStreamResult;
 
 const isAsyncIterable = (value: unknown): value is AsyncIterable<StepStreamResult> =>
   typeof (value as AsyncIterable<StepStreamResult>)?.[Symbol.asyncIterator] === 'function';
@@ -63,10 +61,10 @@ export const pipeStream = (input: PipelineStateStream, handler: StepStreamHandle
     }
   })();
 
-export const mapOneToOneStep = (input: PipelineStateStream, handler: OneToOneStepHandler) =>
+export const mapStep = (input: PipelineStateStream, handler: MapStepHandler) =>
   pipeStream(input, handler);
 
-export const flatMapStep = (input: PipelineStateStream, handler: FlatMapStepHandler) =>
+export const expandStep = (input: PipelineStateStream, handler: ExpandStepHandler) =>
   pipeStream(input, handler);
 
 interface MissingStateResult {

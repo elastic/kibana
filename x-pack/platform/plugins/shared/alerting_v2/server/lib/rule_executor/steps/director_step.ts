@@ -12,7 +12,7 @@ import {
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
 import { DirectorService } from '../../director/director';
-import { flatMapStep, requireState } from '../stream_utils';
+import { expandStep, requireState } from '../stream_utils';
 
 @injectable()
 export class DirectorStep implements RuleExecutionStep {
@@ -26,7 +26,7 @@ export class DirectorStep implements RuleExecutionStep {
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     const step = this;
 
-    return flatMapStep(streamState, async function* (state) {
+    return expandStep(streamState, async function* (state) {
       const { input } = state;
 
       step.logger.debug({

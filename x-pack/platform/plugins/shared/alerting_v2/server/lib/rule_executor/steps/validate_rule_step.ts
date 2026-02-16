@@ -7,7 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
-import { mapOneToOneStep, requireState } from '../stream_utils';
+import { mapStep, requireState } from '../stream_utils';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -20,7 +20,7 @@ export class ValidateRuleStep implements RuleExecutionStep {
   constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {}
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
-    return mapOneToOneStep(streamState, (state) => {
+    return mapStep(streamState, (state) => {
       const { input } = state;
 
       this.logger.debug({

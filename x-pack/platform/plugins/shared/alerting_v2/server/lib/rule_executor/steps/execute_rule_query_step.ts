@@ -14,7 +14,7 @@ import {
 } from '../../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceScopedToken } from '../../services/query_service/tokens';
-import { flatMapStep, requireState } from '../stream_utils';
+import { expandStep, requireState } from '../stream_utils';
 
 /**
  * Returns the query to execute for this rule.
@@ -42,7 +42,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     const step = this;
 
-    return flatMapStep(streamState, async function* (state) {
+    return expandStep(streamState, async function* (state) {
       const { input } = state;
 
       step.logger.debug({

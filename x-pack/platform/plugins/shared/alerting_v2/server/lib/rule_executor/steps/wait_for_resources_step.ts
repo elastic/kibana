@@ -7,7 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
-import { mapOneToOneStep } from '../stream_utils';
+import { mapStep } from '../stream_utils';
 import {
   ResourceManager,
   type ResourceManagerContract,
@@ -27,7 +27,7 @@ export class WaitForResourcesStep implements RuleExecutionStep {
   ) {}
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
-    return mapOneToOneStep(streamState, async (state) => {
+    return mapStep(streamState, async (state) => {
       const { input } = state;
 
       this.logger.debug({

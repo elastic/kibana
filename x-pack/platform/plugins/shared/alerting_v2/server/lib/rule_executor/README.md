@@ -131,7 +131,7 @@ Create a new file in `steps/` directory (e.g., `my_new_step.ts`):
 ```typescript
 import { inject, injectable } from 'inversify';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
-import { mapOneToOneStep, requireState } from '../stream_utils';
+import { mapStep, requireState } from '../stream_utils';
 import type { RuleResponse } from '../../rules_client';
 import {
   LoggerServiceToken,
@@ -147,7 +147,7 @@ export class MyNewStep implements RuleExecutionStep {
   ) {}
 
   public executeStream(input: PipelineStateStream): PipelineStateStream {
-    return mapOneToOneStep(input, async (state) => {
+    return mapStep(input, async (state) => {
       const requiredState = requireState(state, ['rule']);
 
       if (!requiredState.ok) {

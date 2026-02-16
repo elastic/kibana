@@ -14,7 +14,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
-import { mapOneToOneStep, requireState } from '../stream_utils';
+import { mapStep, requireState } from '../stream_utils';
 
 @injectable()
 export class StoreAlertEventsStep implements RuleExecutionStep {
@@ -26,7 +26,7 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
   ) {}
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
-    return mapOneToOneStep(streamState, async (state) => {
+    return mapStep(streamState, async (state) => {
       const { input } = state;
 
       this.logger.debug({

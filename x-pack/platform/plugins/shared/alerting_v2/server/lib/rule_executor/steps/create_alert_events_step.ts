@@ -12,7 +12,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
-import { flatMapStep, requireState } from '../stream_utils';
+import { expandStep, requireState } from '../stream_utils';
 
 @injectable()
 export class CreateAlertEventsStep implements RuleExecutionStep {
@@ -24,7 +24,7 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
     const step = this;
     let buildBatch: AlertEventsBatchBuilder | undefined;
 
-    return flatMapStep(streamState, async function* (state) {
+    return expandStep(streamState, async function* (state) {
       const { input } = state;
 
       step.logger.debug({
