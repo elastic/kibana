@@ -19,6 +19,7 @@ import { ConversationServiceImpl } from './conversation';
 import { type AttachmentService, createAttachmentService } from './attachments';
 import { HooksService } from './hooks';
 import { type SkillService, createSkillService } from './skills';
+import { createSmlService, type SmlServiceInstance } from './sml';
 import { AuditLogService } from '../audit';
 import { createAgentExecutionService, createTaskHandler } from './execution';
 import { createMeteringService, type MeteringService } from './metering';
@@ -30,12 +31,24 @@ interface ServiceInstances {
   hooks: HooksService;
   skills: SkillService;
   metering: MeteringService;
+  sml: SmlServiceInstance;
 }
 
 export class ServiceManager {
   private services?: ServiceInstances;
   public internalSetup?: InternalSetupServices;
   public internalStart?: InternalStartServices;
+
+  /**
+   * Provides access to the SML service instance for task registration
+   * and crawler scheduling.
+   */
+  getSmlServiceInstance(): SmlServiceInstance {
+    if (!this.services?.sml) {
+      throw new Error('SML service not available — call setupServices first');
+    }
+    return this.services.sml;
+  }
 
   setupServices({
     logger,
@@ -50,6 +63,7 @@ export class ServiceManager {
       hooks: new HooksService(),
       skills: createSkillService(),
       metering: createMeteringService({ cloud, usageApi, logger: logger.get('metering') }),
+      sml: createSmlService(),
     };
 
     this.internalSetup = {
@@ -59,6 +73,7 @@ export class ServiceManager {
       hooks: this.services.hooks.setup({ logger: logger.get('hooks') }),
       skills: this.services.skills.setup(),
       metering: this.services.metering,
+      sml: this.services.sml.setup({ logger: logger.get('sml') }),
     };
 
     return this.internalSetup;
@@ -75,6 +90,7 @@ export class ServiceManager {
     featureFlags,
     actions,
     taskManager,
+    securityPlugin,
     trackingService,
     analyticsService,
   }: ServicesStartDeps): InternalStartServices {
@@ -92,6 +108,10 @@ export class ServiceManager {
     };
 
     const attachments = this.services.attachments.start();
+    const sml = this.services.sml.start({
+      logger: logger.get('sml'),
+      securityAuthz: securityPlugin?.authz,
+    });
 
     const tools = this.services.tools.start({
       getRunner,
@@ -198,6 +218,7 @@ export class ServiceManager {
       featureFlags,
       uiSettings,
       savedObjects,
+      sml,
     };
 
     return this.internalStart;

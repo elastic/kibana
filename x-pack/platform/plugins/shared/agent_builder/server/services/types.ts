@@ -17,6 +17,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { HooksServiceSetup, HooksServiceStart } from '@kbn/agent-builder-server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
@@ -26,6 +27,7 @@ import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { ConversationService } from './conversation';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
 import type { SkillServiceSetup, SkillServiceStart } from './skills';
+import type { SmlService, SmlServiceSetup } from './sml';
 import type { TrackingService } from '../telemetry/tracking_service';
 import type { AnalyticsService } from '../telemetry';
 import type { AuditLogService } from '../audit';
@@ -39,6 +41,7 @@ export interface InternalSetupServices {
   hooks: HooksServiceSetup;
   skills: SkillServiceSetup;
   metering: MeteringService;
+  sml: SmlServiceSetup;
 }
 
 export interface InternalStartServices {
@@ -56,6 +59,7 @@ export interface InternalStartServices {
   savedObjects: SavedObjectsServiceStart;
   execution: AgentExecutionService;
   taskHandler: TaskHandler;
+  sml: SmlService;
 }
 
 export interface ServiceSetupDeps {
@@ -80,6 +84,7 @@ export interface ServicesStartDeps {
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
   taskManager: TaskManagerStartContract;
+  securityPlugin?: SecurityPluginStart;
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
 }
