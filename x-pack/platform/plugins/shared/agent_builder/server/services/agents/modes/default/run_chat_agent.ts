@@ -146,7 +146,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     toolManager.addTools({
       type: ToolManagerToolType.browser,
       tools: browserApiTools ?? [],
-    })
+    }),
   ]);
 
   // Then add dynamic tools
@@ -159,7 +159,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     {
       dynamic: true,
     }
-  )
+  );
 
   const cycleLimit = 10;
   const graphRecursionLimit = getRecursionLimit(cycleLimit);

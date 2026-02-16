@@ -215,7 +215,10 @@ describe('ToolManager', () => {
         { dynamic: true }
       );
 
-      expect(toolManager.list().map((t) => t.name)).toEqual(['langchain_tool-1', 'langchain_tool-2']);
+      expect(toolManager.list().map((t) => t.name)).toEqual([
+        'langchain_tool-1',
+        'langchain_tool-2',
+      ]);
       expect(toolManager.getDynamicToolIds()).toEqual(['tool-2']);
     });
 
