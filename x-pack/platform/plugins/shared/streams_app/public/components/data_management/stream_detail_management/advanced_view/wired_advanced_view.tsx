@@ -56,7 +56,7 @@ export function WiredAdvancedView({
       <IndexConfiguration
         definition={definition}
         refreshDefinition={refreshDefinition}
-        showDescription={significantEvents?.enabled}
+        showDescription={significantEvents?.enabled && significantEvents?.available}
         aiFeatures={aiFeatures}
       >
         <EuiCallOut
@@ -72,7 +72,7 @@ export function WiredAdvancedView({
         />
         <EuiSpacer size="l" />
       </IndexConfiguration>
-      {significantEvents?.enabled && (
+      {significantEvents?.enabled && significantEvents?.available && (
         <>
           <EuiSpacer />
           <StreamDiscoveryConfiguration definition={definition.stream} aiFeatures={aiFeatures} />

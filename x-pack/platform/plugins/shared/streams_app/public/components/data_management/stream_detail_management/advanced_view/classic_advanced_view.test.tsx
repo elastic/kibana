@@ -218,10 +218,10 @@ describe('ClassicAdvancedView', () => {
   });
 
   describe('Significant Events Feature (Description Field & Stream Discovery)', () => {
-    it('should render description field when significantEvents feature is enabled', () => {
+    it('should render description field when significantEvents feature is enabled and available', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
-          significantEvents: { enabled: true },
+          significantEvents: { enabled: true, available: true },
         },
       } as any);
 
@@ -236,10 +236,10 @@ describe('ClassicAdvancedView', () => {
       expect(screen.getByText('Description')).toBeInTheDocument();
     });
 
-    it('should render Stream discovery panel when significantEvents feature is enabled', () => {
+    it('should render Stream discovery panel when significantEvents feature is enabled and available', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
-          significantEvents: { enabled: true },
+          significantEvents: { enabled: true, available: true },
         },
       } as any);
 
@@ -257,7 +257,7 @@ describe('ClassicAdvancedView', () => {
     it('should NOT render description field or Stream discovery when significantEvents is disabled', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
-          significantEvents: { enabled: false },
+          significantEvents: { enabled: false, available: true },
         },
       } as any);
 
@@ -272,10 +272,47 @@ describe('ClassicAdvancedView', () => {
       expect(screen.queryByText('Stream discovery')).not.toBeInTheDocument();
     });
 
+    it('should NOT render description field or Stream discovery when significantEvents is enabled but not available (basic license)', () => {
+      mockUseStreamsPrivileges.mockReturnValue({
+        features: {
+          significantEvents: { enabled: true, available: false },
+        },
+      } as any);
+
+      renderWithProviders(
+        <ClassicAdvancedView
+          definition={createMockDefinition()}
+          refreshDefinition={mockRefreshDefinition}
+        />
+      );
+
+      // These components require enterprise license and should NOT render with basic license
+      expect(screen.queryByText('Description')).not.toBeInTheDocument();
+      expect(screen.queryByText('Stream discovery')).not.toBeInTheDocument();
+    });
+
     it('should NOT render description field or Stream discovery when significantEvents is undefined', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
           significantEvents: undefined,
+        },
+      } as any);
+
+      renderWithProviders(
+        <ClassicAdvancedView
+          definition={createMockDefinition()}
+          refreshDefinition={mockRefreshDefinition}
+        />
+      );
+
+      expect(screen.queryByText('Description')).not.toBeInTheDocument();
+      expect(screen.queryByText('Stream discovery')).not.toBeInTheDocument();
+    });
+
+    it('should NOT render description field or Stream discovery when significantEvents available is undefined', () => {
+      mockUseStreamsPrivileges.mockReturnValue({
+        features: {
+          significantEvents: { enabled: true, available: undefined },
         },
       } as any);
 
@@ -432,23 +469,6 @@ describe('ClassicAdvancedView', () => {
   });
 
   describe('Stream Metadata Form', () => {
-    it('should always render title field', () => {
-      mockUseStreamsPrivileges.mockReturnValue({
-        features: {
-          significantEvents: { enabled: false },
-        },
-      } as any);
-
-      renderWithProviders(
-        <ClassicAdvancedView
-          definition={createMockDefinition()}
-          refreshDefinition={mockRefreshDefinition}
-        />
-      );
-
-      expect(screen.getByText('Title')).toBeInTheDocument();
-    });
-
     it('should always render tags field', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
@@ -468,10 +488,10 @@ describe('ClassicAdvancedView', () => {
   });
 
   describe('All Features Enabled', () => {
-    it('should render all panels when significantEvents is enabled', () => {
+    it('should render all panels when significantEvents is enabled and available', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
-          significantEvents: { enabled: true },
+          significantEvents: { enabled: true, available: true },
         },
       } as any);
 
@@ -482,8 +502,7 @@ describe('ClassicAdvancedView', () => {
         />
       );
 
-      // Stream title and tags (now part of unified form with labels "Title" and "Tags")
-      expect(screen.getByText('Title')).toBeInTheDocument();
+      // Stream tags (part of unified form with label "Tags")
       expect(screen.getByText('Tags')).toBeInTheDocument();
       // Stream description (now part of unified form with label "Description")
       expect(screen.getByText('Description')).toBeInTheDocument();

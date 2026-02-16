@@ -31,10 +31,10 @@ export function ClassicAdvancedView({
       <UnmanagedElasticsearchAssets
         definition={definition}
         refreshDefinition={refreshDefinition}
-        showDescription={significantEvents?.enabled}
+        showDescription={significantEvents?.enabled && significantEvents?.available}
         aiFeatures={aiFeatures}
       />
-      {significantEvents?.enabled && (
+      {significantEvents?.enabled && significantEvents?.available && (
         <>
           <EuiSpacer />
           <StreamDiscoveryConfiguration definition={definition.stream} aiFeatures={aiFeatures} />
