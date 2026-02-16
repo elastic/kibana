@@ -23,19 +23,14 @@ const genericEntity: Entity = {
   },
 };
 
-apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
+apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
-  let crudHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ apiClient, kbnClient, samlAuth }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
       ...COMMON_HEADERS,
-    };
-    crudHeaders = {
-      ...defaultHeaders,
-      'elastic-api-version': API_VERSIONS.public.v1,
     };
 
     // enable feature flag
@@ -63,7 +58,7 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
 
   apiTest('Should create an entity', async ({ apiClient, esClient }) => {
     const create = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPSERT('generic'), {
-      headers: crudHeaders,
+      headers: defaultHeaders,
       responseType: 'json',
       body: genericEntity,
     });

@@ -25,7 +25,7 @@ export const ENTITY_STORE_ROUTES = {
   FORCE_LOG_EXTRACTION: (entityType: string) =>
     `internal/security/entity-store/${entityType}/force-log-extraction`,
   CRUD_UPSERT: (entityType: string) =>
-    `api/entity-store/entities/${entityType}`,
+    `internal/security/entity-store/entities/${entityType}`,
 } as const;
 
 export const ENTITY_STORE_TAGS = [...tags.stateful.classic, ...tags.serverless.security.complete];
