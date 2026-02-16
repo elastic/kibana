@@ -47,7 +47,6 @@ export class WorkflowExecuteStepImpl implements NodeImplementation {
     const {
       node: _node,
       stepExecutionRuntime,
-      workflowExecutionRuntime,
       workflowsExecutionEngine,
       workflowExecutionRepository,
       stepExecutionRepository,
@@ -64,7 +63,6 @@ export class WorkflowExecuteStepImpl implements NodeImplementation {
       workflowsExecutionEngine,
       workflowExecutionRepository,
       stepExecutionRuntime,
-      workflowExecutionRuntime,
       workflowLogger
     );
   }
@@ -148,12 +146,19 @@ export class WorkflowExecuteStepImpl implements NodeImplementation {
         }
         // result.status === 'waiting': delay entered, no navigation
       } else {
-        await this.asyncExecutor.execute(
+        const result = await this.asyncExecutor.execute(
           targetWorkflow,
           inputs,
           this.init.spaceId,
           this.init.request
         );
+        if (result.status === 'completed') {
+          stepExecutionRuntime.finishStep(result.output);
+          workflowExecutionRuntime.navigateToNextNode();
+        } else if (result.status === 'failed') {
+          stepExecutionRuntime.failStep(result.error as Error);
+          workflowExecutionRuntime.navigateToNextNode();
+        }
       }
     } catch (error) {
       stepExecutionRuntime.failStep(error as Error);

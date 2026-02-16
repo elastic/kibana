@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WorkflowExecuteStepImpl } from './workflow_execute_step_impl';
-export { WorkflowExecuteAsyncStrategy } from './strategies/workflow_execute_async_strategy';
-export { WorkflowExecuteSyncStrategy } from './strategies/workflow_execute_sync_strategy';
-export type { StrategyResult } from './types';
+export interface StrategyResult {
+  status: 'completed' | 'failed' | 'waiting';
+  output?: Record<string, unknown>;
+  error?: Error;
+}

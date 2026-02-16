@@ -8,19 +8,19 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { EsWorkflow } from '@kbn/workflows';
 import type { WorkflowExecutionRepository } from '../../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
-import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
+import type { StrategyResult } from '../types';
+import { toExecutionModel } from '../utils';
 
 export class WorkflowExecuteAsyncStrategy {
   constructor(
     private workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart,
     private workflowExecutionRepository: WorkflowExecutionRepository,
     private stepExecutionRuntime: StepExecutionRuntime,
-    private workflowExecutionRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {}
 
@@ -29,14 +29,13 @@ export class WorkflowExecuteAsyncStrategy {
     inputs: Record<string, unknown>,
     spaceId: string,
     request: KibanaRequest
-  ): Promise<void> {
-    this.stepExecutionRuntime.startStep();
-
+  ): Promise<StrategyResult> {
     try {
       // Execute workflow without waiting
       const workflowExecution = this.stepExecutionRuntime.workflowExecution;
+      const isTestRun = !!workflowExecution.isTestRun;
       const { workflowExecutionId } = await this.workflowsExecutionEngine.executeWorkflow(
-        this.toExecutionModel(workflow),
+        toExecutionModel(workflow, isTestRun),
         {
           spaceId,
           inputs,
@@ -56,7 +55,7 @@ export class WorkflowExecuteAsyncStrategy {
         spaceId
       );
 
-      // Finish step immediately with execution ID and timing information
+      // Return step output for the impl to persist
       const stepOutput: Record<string, unknown> = {
         workflowId: workflow.id,
         executionId: workflowExecutionId,
@@ -68,24 +67,9 @@ export class WorkflowExecuteAsyncStrategy {
         stepOutput.startedAt = execution.startedAt;
       }
 
-      this.stepExecutionRuntime.finishStep(stepOutput);
+      return { status: 'completed', output: stepOutput };
     } catch (error) {
-      this.stepExecutionRuntime.failStep(error as Error);
+      return { status: 'failed', error: error as Error };
     }
-
-    this.workflowExecutionRuntime.navigateToNextNode();
-  }
-
-  private toExecutionModel(workflow: EsWorkflow): WorkflowExecutionEngineModel {
-    return {
-      id: workflow.id,
-      name: workflow.name,
-      enabled: workflow.enabled,
-      definition: workflow.definition,
-      yaml: workflow.yaml,
-      // Note: spaceId is not part of EsWorkflow type, but we have it from the context
-      // The execution engine will use the spaceId from the execution context
-      isTestRun: false,
-    };
   }
 }
