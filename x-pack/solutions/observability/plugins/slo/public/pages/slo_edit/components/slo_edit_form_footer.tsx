@@ -9,7 +9,7 @@ import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 import type { GetSLOResponse } from '@kbn/slo-schema';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { InPortal } from 'react-reverse-portal';
 import { useCreateRule } from '../../../hooks/use_create_burn_rate_rule';
@@ -33,13 +33,20 @@ export interface Props {
   isEditMode: boolean;
 }
 
-export function SloEditFormFooter({ slo, onFlyoutClose, isEditMode }: Props) {
+interface HorizontalFooterProps extends Props {
+  isFirstStep: boolean;
+  isLastStep: boolean;
+  onBack: () => void;
+  onNext: () => void;
+  nextDisabled: boolean;
+}
+
+function useSloFormSubmit({ slo, onFlyoutClose, isEditMode }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
 
-  const isFlyout = Boolean(onFlyoutClose);
   const { getValues, trigger } = useFormContext<CreateSLOForm>();
 
   const { mutateAsync: createSlo, isLoading: isCreateSloLoading } = useCreateSlo();
@@ -47,7 +54,7 @@ export function SloEditFormFooter({ slo, onFlyoutClose, isEditMode }: Props) {
   const { mutate: createBurnRateRule, isLoading: isCreateBurnRateRuleLoading } =
     useCreateRule<BurnRateRuleParams>();
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     const isValid = await trigger();
     if (!isValid) {
       return;
@@ -59,19 +66,46 @@ export function SloEditFormFooter({ slo, onFlyoutClose, isEditMode }: Props) {
       const processedValues = transformValuesToUpdateSLOInput(values);
       await updateSlo({ sloId: slo.id, slo: processedValues });
       navigateToUrl(basePath.prepend(paths.slos));
-    } else {
-      const processedValues = transformCreateSLOFormToCreateSLOInput(values);
-      const resp = await createSlo({ slo: processedValues });
-      createBurnRateRule({
-        rule: createBurnRateRuleRequestBody({ ...processedValues, id: resp.id }),
-      });
-      if (onFlyoutClose) {
-        onFlyoutClose();
-      } else {
-        navigateToUrl(basePath.prepend(paths.slos));
-      }
+      return;
     }
+
+    const processedValues = transformCreateSLOFormToCreateSLOInput(values);
+    const resp = await createSlo({ slo: processedValues });
+    createBurnRateRule({
+      rule: createBurnRateRuleRequestBody({ ...processedValues, id: resp.id }),
+    });
+
+    if (onFlyoutClose) {
+      onFlyoutClose();
+    } else {
+      navigateToUrl(basePath.prepend(paths.slos));
+    }
+  }, [
+    basePath,
+    createBurnRateRule,
+    createSlo,
+    getValues,
+    isEditMode,
+    navigateToUrl,
+    onFlyoutClose,
+    slo,
+    trigger,
+    updateSlo,
+  ]);
+
+  return {
+    isLoading: isCreateSloLoading || isUpdateSloLoading || isCreateBurnRateRuleLoading,
+    handleSubmit,
   };
+}
+
+export function SloEditFormFooter({ slo, onFlyoutClose, isEditMode }: Props) {
+  const {
+    application: { navigateToUrl },
+    http: { basePath },
+  } = useKibana().services;
+  const isFlyout = Boolean(onFlyoutClose);
+  const { isLoading, handleSubmit } = useSloFormSubmit({ slo, onFlyoutClose, isEditMode });
 
   const content = (
     <EuiFlexGroup gutterSize="s">
@@ -80,7 +114,7 @@ export function SloEditFormFooter({ slo, onFlyoutClose, isEditMode }: Props) {
           color="primary"
           data-test-subj="sloFormSubmitButton"
           fill
-          isLoading={isCreateSloLoading || isUpdateSloLoading || isCreateBurnRateRuleLoading}
+          isLoading={isLoading}
           onClick={handleSubmit}
         >
           {isEditMode
@@ -96,7 +130,7 @@ export function SloEditFormFooter({ slo, onFlyoutClose, isEditMode }: Props) {
         <EuiButtonEmpty
           color="primary"
           data-test-subj="sloFormCancelButton"
-          disabled={isCreateSloLoading || isUpdateSloLoading || isCreateBurnRateRuleLoading}
+          disabled={isLoading}
           onClick={
             onFlyoutClose ? onFlyoutClose : () => navigateToUrl(basePath.prepend(paths.slos))
           }
@@ -110,20 +144,103 @@ export function SloEditFormFooter({ slo, onFlyoutClose, isEditMode }: Props) {
       {!isFlyout && (
         <>
           <EuiFlexItem grow={false}>
-            <EquivalentApiRequest
-              slo={slo}
-              disabled={isCreateSloLoading || isUpdateSloLoading || isCreateBurnRateRuleLoading}
-              isEditMode={isEditMode}
-            />
+            <EquivalentApiRequest slo={slo} disabled={isLoading} isEditMode={isEditMode} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <SLOInspect
-              slo={slo}
-              disabled={isCreateSloLoading || isUpdateSloLoading || isCreateBurnRateRuleLoading}
-            />
+            <SLOInspect slo={slo} disabled={isLoading} />
           </EuiFlexItem>
         </>
       )}
+    </EuiFlexGroup>
+  );
+
+  return isFlyout ? <InPortal node={sloEditFormFooterPortal}>{content}</InPortal> : content;
+}
+
+export function SloEditFormHorizontalFooter({
+  slo,
+  onFlyoutClose,
+  isEditMode,
+  isFirstStep,
+  isLastStep,
+  onBack,
+  onNext,
+  nextDisabled,
+}: HorizontalFooterProps) {
+  const {
+    application: { navigateToUrl },
+    http: { basePath },
+  } = useKibana().services;
+  const isFlyout = Boolean(onFlyoutClose);
+  const { isLoading, handleSubmit } = useSloFormSubmit({ slo, onFlyoutClose, isEditMode });
+
+  const content = (
+    <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexItem grow={false}>
+        {isFirstStep ? (
+          <EuiButtonEmpty
+            onClick={
+              onFlyoutClose ? onFlyoutClose : () => navigateToUrl(basePath.prepend(paths.slos))
+            }
+            disabled={isLoading}
+            data-test-subj="sloFormCancelButton"
+          >
+            {i18n.translate('xpack.slo.sloEdit.flyout.cancelButton', {
+              defaultMessage: 'Cancel',
+            })}
+          </EuiButtonEmpty>
+        ) : (
+          <EuiButtonEmpty onClick={onBack} disabled={isLoading} data-test-subj="sloFormBackButton">
+            {i18n.translate('xpack.slo.sloEdit.flyout.backButton', {
+              defaultMessage: 'Back',
+            })}
+          </EuiButtonEmpty>
+        )}
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s">
+          {isLastStep && (
+            <>
+              <EuiFlexItem grow={false}>
+                <EquivalentApiRequest slo={slo} disabled={isLoading} isEditMode={isEditMode} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <SLOInspect slo={slo} disabled={isLoading} />
+              </EuiFlexItem>
+            </>
+          )}
+          <EuiFlexItem grow={false}>
+            {isLastStep ? (
+              <EuiButton
+                fill
+                onClick={handleSubmit}
+                isLoading={isLoading}
+                data-test-subj="sloFormSubmitButton"
+              >
+                {isEditMode
+                  ? i18n.translate('xpack.slo.sloEdit.editSloButton', {
+                      defaultMessage: 'Update SLO',
+                    })
+                  : i18n.translate('xpack.slo.sloEdit.flyout.createButton', {
+                      defaultMessage: 'Create SLO',
+                    })}
+              </EuiButton>
+            ) : (
+              <EuiButton
+                fill
+                onClick={onNext}
+                disabled={nextDisabled}
+                data-test-subj="sloFormNextButton"
+              >
+                {i18n.translate('xpack.slo.sloEdit.flyout.nextButton', {
+                  defaultMessage: 'Next',
+                })}
+              </EuiButton>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 

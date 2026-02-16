@@ -13,6 +13,7 @@ const DEFAULT_FORM_SETTINGS: Required<FormSettings> = {
   isEditMode: false,
   isFlyout: false,
   allowedIndicatorTypes: [],
+  formLayout: 'vertical',
 };
 
 const SloFormContext = createContext<Required<FormSettings>>(DEFAULT_FORM_SETTINGS);
