@@ -23,16 +23,13 @@ const mockConnectorsAndExtras = [
     id: 'connector-missing-secrets',
     name: 'Connector Missing Secrets',
     isMissingSecrets: true,
-    authMode: 'shared',
   },
   {
     ...mockConnectors[0],
-
     id: 'connector-wrong-action-type',
     name: 'Connector Wrong Action Type',
     isMissingSecrets: true,
     actionTypeId: '.d3',
-    authMode: 'shared',
   },
   {
     ...mockConnectors[0],
@@ -40,7 +37,6 @@ const mockConnectorsAndExtras = [
     name: 'Text Embedding Connector',
     isMissingSecrets: false,
     actionTypeId: '.inference',
-    authMode: 'shared',
     config: {
       taskType: 'text_embedding',
     },
@@ -55,7 +51,6 @@ const connectorsApiResponse = mockConnectorsAndExtras.map((c) => ({
   referenced_by_count: 0,
   is_missing_secrets: c.isMissingSecrets,
   is_system_action: false,
-  auth_mode: c.authMode,
 }));
 
 const loadConnectorsResult = mockConnectors.map((c) => ({

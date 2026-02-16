@@ -38,6 +38,6 @@ const transformConnector: RewriteRequestCase<
   isMissingSecrets,
   isSystemAction,
   isConnectorTypeDeprecated,
-  authMode,
+  ...(authMode !== undefined ? { authMode } : {}),
   ...res,
 });
