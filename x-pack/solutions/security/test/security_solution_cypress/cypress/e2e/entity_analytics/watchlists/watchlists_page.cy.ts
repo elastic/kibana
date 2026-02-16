@@ -29,6 +29,8 @@ describe(
 
     beforeEach(() => {
       login();
+      visit(ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL);
+      cy.url({ timeout: 10000 }).should('include', ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL);
     });
 
     afterEach(() => {});
@@ -36,7 +38,6 @@ describe(
     after(() => {});
 
     it('renders page as expected', () => {
-      visit(ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL);
       cy.get(WATCHLISTS_MANAGEMENT_PAGE_TITLE, { timeout: 60000 }).should('exist');
     });
   }
