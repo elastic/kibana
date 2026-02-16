@@ -135,6 +135,7 @@ export class CRUDClient {
 
   public async deleteEntity(id: string) {
     try {
+      this.logger.info(`Deleting Entity ID ${id}g`);
       await this.esClient.delete({
         index: getLatestEntitiesIndexName(this.namespace),
         id,
