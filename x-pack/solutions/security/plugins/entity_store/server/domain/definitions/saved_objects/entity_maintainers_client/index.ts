@@ -34,7 +34,7 @@ export class EntityMaintainersTasksClient {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
         return [];
       }
-      this.logger.error(`Failed to get entity maintainer tasks: ${err.message}`);
+      this.logger.error(`Failed to get entity maintainer tasks: ${err?.message}`);
       throw err;
     }
   }
@@ -62,7 +62,7 @@ export class EntityMaintainersTasksClient {
         return;
       }
       this.logger.error(
-        `Failed to register entity maintainer task in saved object: ${err.message}`
+        `Failed to register entity maintainer task in saved object: ${err?.message}`
       );
       throw err;
     }
