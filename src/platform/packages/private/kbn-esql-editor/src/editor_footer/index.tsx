@@ -53,6 +53,10 @@ interface EditorFooterProps {
   queryStats?: QueryStats;
 }
 
+const openDocumentationLabel = i18n.translate('esqlEditor.query.documentationAriaLabel', {
+  defaultMessage: 'Open documentation',
+});
+
 export const EditorFooter = memo(function EditorFooter({
   styles,
   onUpdateAndSubmitQuery,
@@ -144,9 +148,7 @@ export const EditorFooter = memo(function EditorFooter({
                 <>
                   <EuiToolTip
                     position="top"
-                    content={i18n.translate('esqlEditor.query.documentationAriaLabel', {
-                      defaultMessage: 'Open documentation',
-                    })}
+                    content={openDocumentationLabel}
                     disableScreenReaderOutput
                   >
                     <EuiButtonIcon
@@ -155,9 +157,7 @@ export const EditorFooter = memo(function EditorFooter({
                       data-test-subj="ESQLEditor-documentation"
                       size="xs"
                       onClick={() => toggleLanguageComponent()}
-                      aria-label={i18n.translate('esqlEditor.query.documentationAriaLabel', {
-                        defaultMessage: 'Open documentation',
-                      })}
+                      aria-label={openDocumentationLabel}
                     />
                   </EuiToolTip>
                   <LanguageDocumentationFlyout
