@@ -27,6 +27,19 @@ export const collectValues = ({
   allowAPIUpdate,
 });
 
+export const newestList = ({
+  destination,
+  mapping = { type: 'keyword' },
+  source,
+  allowAPIUpdate = false,
+}: Operation): EntityField => ({
+  destination: destination ?? source,
+  source,
+  retention: { operation: 'prefer_newest_list' },
+  mapping,
+  allowAPIUpdate,
+});
+
 export const newestValue = ({
   destination,
   mapping = { type: 'keyword' },
