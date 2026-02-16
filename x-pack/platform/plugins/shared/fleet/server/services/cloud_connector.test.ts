@@ -1984,10 +1984,10 @@ describe('CloudConnectorService', () => {
         );
       });
 
-      it('should throw error for gcp cloud provider', () => {
+      it('should throw error for unknown cloud provider', () => {
         const invalidRequest: CreateCloudConnectorRequest = {
           name: 'test-connector',
-          cloudProvider: 'gcp' as any,
+          cloudProvider: 'unknown' as any,
           vars: {
             role_arn: {
               value: 'arn:aws:iam::123456789012:role/TestRole',
@@ -2004,7 +2004,7 @@ describe('CloudConnectorService', () => {
         };
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
-          'Unsupported cloud provider: gcp'
+          'Unsupported cloud provider: unknown'
         );
       });
     });
@@ -2325,6 +2325,361 @@ describe('CloudConnectorService', () => {
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidAzureRequest)).toThrow(
           'azure_credentials_cloud_connector_id must be a valid string'
+        );
+      });
+    });
+  });
+
+  describe('CloudConnectorService - GCP support', () => {
+    describe('create', () => {
+      it('should create GCP cloud connector with valid vars', async () => {
+        const gcpRequest: CreateCloudConnectorRequest = {
+          name: 'gcp-test-connector',
+          cloudProvider: 'gcp',
+          vars: {
+            service_account: {
+              value: 'test-service-account@project.iam.gserviceaccount.com',
+              type: 'text',
+            },
+            audience: {
+              value:
+                '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+              type: 'text',
+            },
+            gcp_credentials_cloud_connector_id: {
+              value: 'gcp-connector-id',
+              type: 'text',
+            },
+          },
+        };
+
+        const mockSavedObject = {
+          id: 'cloud-connector-123',
+          attributes: {
+            name: 'gcp-test-connector',
+            namespace: '*',
+            cloudProvider: 'gcp',
+            vars: gcpRequest.vars,
+            packagePolicyCount: 0,
+            created_at: '2023-01-01T00:00:00.000Z',
+            updated_at: '2023-01-01T00:00:00.000Z',
+          },
+        } as SavedObject<CloudConnector>;
+
+        // Mock the find call for duplicate name checking
+        mockSoClient.find.mockResolvedValue({
+          saved_objects: [],
+          total: 0,
+          page: 1,
+          per_page: 10000,
+        });
+
+        mockSoClient.create.mockResolvedValue(mockSavedObject);
+
+        const result = await service.create(mockSoClient, gcpRequest);
+
+        expect(mockSoClient.create).toHaveBeenCalledTimes(1);
+        const [[type, createCall]] = mockSoClient.create.mock.calls;
+        expect(type).toBe(CLOUD_CONNECTOR_SAVED_OBJECT_TYPE);
+        expect(createCall).toMatchObject({
+          name: 'gcp-test-connector',
+          cloudProvider: 'gcp',
+          namespace: '*',
+          vars: gcpRequest.vars,
+        });
+        expect((createCall as any).created_at).toBeDefined();
+        expect((createCall as any).updated_at).toBeDefined();
+
+        expect(result).toEqual({
+          id: 'cloud-connector-123',
+          name: 'gcp-test-connector',
+          namespace: '*',
+          cloudProvider: 'gcp',
+          vars: gcpRequest.vars,
+          packagePolicyCount: 0,
+          created_at: '2023-01-01T00:00:00.000Z',
+          updated_at: '2023-01-01T00:00:00.000Z',
+        });
+      });
+
+      it('should throw error for GCP connector with missing service_account', async () => {
+        const invalidRequest: CreateCloudConnectorRequest = {
+          name: 'gcp-test-connector',
+          cloudProvider: 'gcp',
+          vars: {
+            audience: {
+              value:
+                '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+              type: 'text',
+            },
+            gcp_credentials_cloud_connector_id: {
+              value: 'gcp-connector-id',
+              type: 'text',
+            },
+          } as any,
+        };
+
+        await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
+          'service_account must be a valid string'
+        );
+      });
+
+      it('should throw error for GCP connector with missing audience', async () => {
+        const invalidRequest: CreateCloudConnectorRequest = {
+          name: 'gcp-test-connector',
+          cloudProvider: 'gcp',
+          vars: {
+            service_account: {
+              value: 'test-service-account@project.iam.gserviceaccount.com',
+              type: 'text',
+            },
+            gcp_credentials_cloud_connector_id: {
+              value: 'gcp-connector-id',
+              type: 'text',
+            },
+          } as any,
+        };
+
+        await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
+          'audience must be a valid string'
+        );
+      });
+
+      it('should throw error for GCP connector with missing gcp_credentials_cloud_connector_id', async () => {
+        const invalidRequest: CreateCloudConnectorRequest = {
+          name: 'gcp-test-connector',
+          cloudProvider: 'gcp',
+          vars: {
+            service_account: {
+              value: 'test-service-account@project.iam.gserviceaccount.com',
+              type: 'text',
+            },
+            audience: {
+              value:
+                '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+              type: 'text',
+            },
+          } as any,
+        };
+
+        await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
+          'gcp_credentials_cloud_connector_id must be a valid string'
+        );
+      });
+    });
+
+    describe('update', () => {
+      it('should update GCP cloud connector vars', async () => {
+        const existingConnector = {
+          id: 'cloud-connector-123',
+          attributes: {
+            name: 'existing-gcp-connector',
+            namespace: '*',
+            cloudProvider: 'gcp',
+            vars: {
+              service_account: {
+                value: 'old-service-account@project.iam.gserviceaccount.com',
+                type: 'text',
+              },
+              audience: {
+                value:
+                  '//iam.googleapis.com/projects/111111111/locations/global/workloadIdentityPools/old-pool/providers/old-provider',
+                type: 'text',
+              },
+              gcp_credentials_cloud_connector_id: {
+                value: 'old-gcp-connector-id',
+                type: 'text',
+              },
+            },
+            packagePolicyCount: 1,
+            created_at: '2023-01-01T00:00:00.000Z',
+            updated_at: '2023-01-01T00:00:00.000Z',
+          },
+        } as SavedObject<CloudConnector>;
+
+        const updateRequest = {
+          vars: {
+            service_account: {
+              value: 'new-service-account@project.iam.gserviceaccount.com',
+              type: 'text',
+            },
+            audience: {
+              value:
+                '//iam.googleapis.com/projects/222222222/locations/global/workloadIdentityPools/new-pool/providers/new-provider',
+              type: 'text',
+            },
+            gcp_credentials_cloud_connector_id: {
+              value: 'new-gcp-connector-id',
+              type: 'text',
+            },
+          },
+        } as Partial<UpdateCloudConnectorRequest>;
+
+        const updatedConnector = {
+          ...existingConnector,
+          attributes: {
+            ...existingConnector.attributes,
+            vars: updateRequest.vars,
+            updated_at: '2023-01-02T00:00:00.000Z',
+          },
+        };
+
+        mockSoClient.get.mockResolvedValue(existingConnector);
+        mockSoClient.update.mockResolvedValue(updatedConnector);
+
+        const result = await service.update(mockSoClient, 'cloud-connector-123', updateRequest);
+
+        expect(mockSoClient.update).toHaveBeenCalledWith(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          'cloud-connector-123',
+          expect.objectContaining({
+            vars: updateRequest.vars,
+            updated_at: expect.any(String),
+          })
+        );
+
+        expect(result.vars).toEqual(updateRequest.vars);
+      });
+
+      it('should validate GCP vars on update', async () => {
+        const existingConnector = {
+          id: 'cloud-connector-123',
+          attributes: {
+            name: 'existing-gcp-connector',
+            namespace: '*',
+            cloudProvider: 'gcp',
+            vars: {
+              service_account: {
+                value: 'old-service-account@project.iam.gserviceaccount.com',
+                type: 'text',
+              },
+              audience: {
+                value:
+                  '//iam.googleapis.com/projects/111111111/locations/global/workloadIdentityPools/old-pool/providers/old-provider',
+                type: 'text',
+              },
+              gcp_credentials_cloud_connector_id: {
+                value: 'old-gcp-connector-id',
+                type: 'text',
+              },
+            },
+            packagePolicyCount: 1,
+            created_at: '2023-01-01T00:00:00.000Z',
+            updated_at: '2023-01-01T00:00:00.000Z',
+          },
+        } as SavedObject<CloudConnector>;
+
+        const invalidUpdateRequest = {
+          vars: {
+            service_account: { value: '', type: 'text' }, // Empty service account
+            audience: {
+              value:
+                '//iam.googleapis.com/projects/222222222/locations/global/workloadIdentityPools/new-pool/providers/new-provider',
+              type: 'text',
+            },
+            gcp_credentials_cloud_connector_id: {
+              value: 'new-gcp-connector-id',
+              type: 'text',
+            },
+          } as any,
+        };
+
+        mockSoClient.get.mockResolvedValue(existingConnector);
+
+        await expect(
+          service.update(mockSoClient, 'cloud-connector-123', invalidUpdateRequest)
+        ).rejects.toThrow('service_account must be a valid string');
+      });
+    });
+
+    describe('validateCloudConnectorDetails', () => {
+      it('should validate GCP connector requires all three fields', () => {
+        const validGcpRequest: CreateCloudConnectorRequest = {
+          name: 'gcp-test-connector',
+          cloudProvider: 'gcp',
+          vars: {
+            service_account: {
+              value: 'test-service-account@project.iam.gserviceaccount.com',
+              type: 'text',
+            },
+            audience: {
+              value:
+                '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+              type: 'text',
+            },
+            gcp_credentials_cloud_connector_id: {
+              value: 'gcp-connector-id',
+              type: 'text',
+            },
+          },
+        };
+
+        expect(() => (service as any).validateCloudConnectorDetails(validGcpRequest)).not.toThrow();
+      });
+
+      it('should validate GCP fields are text values', () => {
+        const invalidGcpRequest: CreateCloudConnectorRequest = {
+          name: 'gcp-test-connector',
+          cloudProvider: 'gcp',
+          vars: {
+            service_account: { value: '', type: 'text' }, // Empty service account
+            audience: {
+              value:
+                '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+              type: 'text',
+            },
+            gcp_credentials_cloud_connector_id: {
+              value: 'gcp-connector-id',
+              type: 'text',
+            },
+          } as any,
+        };
+
+        expect(() => (service as any).validateCloudConnectorDetails(invalidGcpRequest)).toThrow(
+          'service_account must be a valid string'
+        );
+      });
+
+      it('should validate GCP connector with missing audience', () => {
+        const invalidGcpRequest: CreateCloudConnectorRequest = {
+          name: 'gcp-test-connector',
+          cloudProvider: 'gcp',
+          vars: {
+            service_account: {
+              value: 'test-service-account@project.iam.gserviceaccount.com',
+              type: 'text',
+            },
+            gcp_credentials_cloud_connector_id: {
+              value: 'gcp-connector-id',
+              type: 'text',
+            },
+          } as any,
+        };
+
+        expect(() => (service as any).validateCloudConnectorDetails(invalidGcpRequest)).toThrow(
+          'audience must be a valid string'
+        );
+      });
+
+      it('should validate GCP connector with missing gcp_credentials_cloud_connector_id', () => {
+        const invalidGcpRequest: CreateCloudConnectorRequest = {
+          name: 'gcp-test-connector',
+          cloudProvider: 'gcp',
+          vars: {
+            service_account: {
+              value: 'test-service-account@project.iam.gserviceaccount.com',
+              type: 'text',
+            },
+            audience: {
+              value:
+                '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+              type: 'text',
+            },
+          } as any,
+        };
+
+        expect(() => (service as any).validateCloudConnectorDetails(invalidGcpRequest)).toThrow(
+          'gcp_credentials_cloud_connector_id must be a valid string'
         );
       });
     });

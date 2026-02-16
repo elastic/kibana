@@ -22,6 +22,16 @@ export const TENANT_ID_VAR_NAME = 'tenant_id';
 export const CLIENT_ID_VAR_NAME = 'client_id';
 export const AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID = 'azure_credentials_cloud_connector_id';
 
+// GCP Cloud Connector constants
+export const GCP_SERVICE_ACCOUNT_VAR_NAME = 'gcp.credentials.service_account_email';
+export const GCP_AUDIENCE_VAR_NAME = 'gcp.credentials.audience';
+export const GCP_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME =
+  'gcp.credentials.gcp_credentials_cloud_connector_id';
+
+export const SERVICE_ACCOUNT_VAR_NAME = 'service_account';
+export const AUDIENCE_VAR_NAME = 'audience';
+export const GCP_CREDENTIALS_CLOUD_CONNECTOR_ID = 'gcp_credentials_cloud_connector_id';
+
 // Account type variable names for different cloud providers
 export const AWS_ACCOUNT_TYPE_VAR_NAME = 'aws.account_type';
 export const AZURE_ACCOUNT_TYPE_VAR_NAME = 'azure.account_type';
@@ -43,4 +53,10 @@ export const SUPPORTED_CLOUD_CONNECTOR_VARS = [
   TENANT_ID_VAR_NAME,
   CLIENT_ID_VAR_NAME,
   AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID,
+  GCP_SERVICE_ACCOUNT_VAR_NAME,
+  GCP_AUDIENCE_VAR_NAME,
+  GCP_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME,
+  SERVICE_ACCOUNT_VAR_NAME,
+  AUDIENCE_VAR_NAME,
+  GCP_CREDENTIALS_CLOUD_CONNECTOR_ID,
 ];

@@ -37,7 +37,16 @@ export interface AzureCloudConnectorVars {
   azure_credentials_cloud_connector_id: CloudConnectorVar;
 }
 
-export type CloudConnectorVars = AwsCloudConnectorVars | AzureCloudConnectorVars;
+export interface GcpCloudConnectorVars {
+  service_account: CloudConnectorVar;
+  audience: CloudConnectorVar;
+  gcp_credentials_cloud_connector_id: CloudConnectorVar;
+}
+
+export type CloudConnectorVars =
+  | AwsCloudConnectorVars
+  | AzureCloudConnectorVars
+  | GcpCloudConnectorVars;
 
 export interface CloudConnector {
   id: string;

@@ -16,17 +16,24 @@ import {
 } from '../../../../common';
 import type { PackagePolicyConfigRecordEntry, AccountType, CloudProvider } from '../../../types';
 import type { UpdatePolicy } from '../types';
-import type { CloudConnectorCredentials, AwsCloudConnectorCredentials } from '../types';
+import type {
+  CloudConnectorCredentials,
+  AwsCloudConnectorCredentials,
+  GcpCloudConnectorCredentials,
+} from '../types';
 import {
   isAzureCloudConnectorVars,
+  isGcpCloudConnectorVars,
   updateInputVarsWithCredentials,
   isCloudConnectorNameValid,
 } from '../utils';
 import {
   AWS_CLOUD_CONNECTOR_FIELD_NAMES,
   AZURE_CLOUD_CONNECTOR_FIELD_NAMES,
+  GCP_CLOUD_CONNECTOR_FIELD_NAMES,
   AWS_ACCOUNT_TYPE_INPUT_VAR_NAME,
   AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME,
+  GCP_ACCOUNT_TYPE_INPUT_VAR_NAME,
   SINGLE_ACCOUNT,
   ORGANIZATION_ACCOUNT,
 } from '../constants';
@@ -86,6 +93,8 @@ export const getAccountTypeFromInputs = (
     accountTypeVarName = AWS_ACCOUNT_TYPE_INPUT_VAR_NAME;
   } else if (cloudProvider === 'azure') {
     accountTypeVarName = AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME;
+  } else if (cloudProvider === 'gcp') {
+    accountTypeVarName = GCP_ACCOUNT_TYPE_INPUT_VAR_NAME;
   } else {
     return undefined;
   }
@@ -116,6 +125,24 @@ const createInitialCredentials = (vars: PackagePolicyConfigRecord): CloudConnect
         extractVarValue(vars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID]),
       azure_credentials_cloud_connector_id: azureCredentialsId,
     };
+  }
+
+  if (isGcpCloudConnectorVars(vars, 'gcp')) {
+    const gcpCredentialsId =
+      extractVarValue(vars.gcp_credentials_cloud_connector_id) ||
+      extractVarValue(vars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_CREDENTIALS_CLOUD_CONNECTOR_ID]);
+
+    return {
+      serviceAccount:
+        extractVarValue(vars.service_account) ||
+        extractVarValue(vars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.SERVICE_ACCOUNT]) ||
+        extractVarValue(vars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_SERVICE_ACCOUNT]),
+      audience:
+        extractVarValue(vars.audience) ||
+        extractVarValue(vars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.AUDIENCE]) ||
+        extractVarValue(vars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_AUDIENCE]),
+      gcp_credentials_cloud_connector_id: gcpCredentialsId,
+    } as GcpCloudConnectorCredentials;
   }
 
   // Default to AWS credentials (role_arn is a text var, external_id could be secret or text)

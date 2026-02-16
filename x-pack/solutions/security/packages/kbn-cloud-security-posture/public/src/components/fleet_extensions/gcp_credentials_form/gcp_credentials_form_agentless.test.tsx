@@ -14,6 +14,7 @@ import type {
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
 import { ORGANIZATION_ACCOUNT } from '@kbn/fleet-plugin/common';
+import { SetupTechnology } from '@kbn/fleet-plugin/common/types';
 
 import { GcpCredentialsFormAgentless } from './gcp_credentials_form_agentless';
 
@@ -24,6 +25,7 @@ jest.mock('../utils');
 jest.mock('../utils', () => ({
   getTemplateUrlFromPackageInfo: jest.fn(),
   updatePolicyWithInputs: jest.fn(),
+  getCloudCredentialVarsConfig: jest.fn().mockReturnValue({}),
   gcpField: {
     fields: {
       'gcp.project_id': { label: 'Project ID', type: 'text' },
@@ -200,6 +202,7 @@ describe('GcpCredentialsFormAgentless', () => {
     packageInfo: mockPackageInfo,
     disabled: false,
     hasInvalidRequiredVars: false,
+    setupTechnology: SetupTechnology.AGENTLESS,
   };
 
   const defaultCloudSetup = getDefaultGcpAgentlessCloudSetup();

@@ -14,6 +14,7 @@ import type {
   CloudConnectorSecretReference,
   AwsCloudConnectorVars,
   AzureCloudConnectorVars,
+  GcpCloudConnectorVars,
 } from '../../common/types/models/cloud_connector';
 import type { CloudConnectorSOAttributes } from '../types/so_attributes';
 import type {
@@ -29,6 +30,9 @@ import {
   TENANT_ID_VAR_NAME,
   CLIENT_ID_VAR_NAME,
   AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID,
+  SERVICE_ACCOUNT_VAR_NAME,
+  AUDIENCE_VAR_NAME,
+  GCP_CREDENTIALS_CLOUD_CONNECTOR_ID,
 } from '../../common/constants/cloud_connector';
 
 import {
@@ -577,6 +581,34 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         );
         throw new CloudConnectorInvalidVarsError(
           `${AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID} must be a valid string`
+        );
+      }
+    } else if (cloudConnector.cloudProvider === 'gcp') {
+      // Type assertion is safe here because we perform runtime validation below
+      const gcpVars = vars as GcpCloudConnectorVars;
+      // Validate that all required GCP fields have valid values
+      const serviceAccount = gcpVars.service_account?.value;
+      const audience = gcpVars.audience?.value;
+      const gcpCredentials = gcpVars.gcp_credentials_cloud_connector_id?.value;
+
+      if (!serviceAccount) {
+        logger.error(`Package policy must contain valid ${SERVICE_ACCOUNT_VAR_NAME} value`);
+        throw new CloudConnectorInvalidVarsError(
+          `${SERVICE_ACCOUNT_VAR_NAME} must be a valid string`
+        );
+      }
+
+      if (!audience) {
+        logger.error(`Package policy must contain valid ${AUDIENCE_VAR_NAME} value`);
+        throw new CloudConnectorInvalidVarsError(`${AUDIENCE_VAR_NAME} must be a valid string`);
+      }
+
+      if (!gcpCredentials) {
+        logger.error(
+          `Package policy must contain valid ${GCP_CREDENTIALS_CLOUD_CONNECTOR_ID} value`
+        );
+        throw new CloudConnectorInvalidVarsError(
+          `${GCP_CREDENTIALS_CLOUD_CONNECTOR_ID} must be a valid string`
         );
       }
     } else {

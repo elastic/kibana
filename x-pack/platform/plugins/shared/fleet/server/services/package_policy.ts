@@ -89,6 +89,7 @@ import type {
 import type {
   AzureCloudConnectorVars,
   CloudConnectorVar,
+  GcpCloudConnectorVars,
 } from '../../common/types/models/cloud_connector';
 import {
   FleetError,
@@ -142,6 +143,12 @@ import {
   TENANT_ID_VAR_NAME,
   CLIENT_ID_VAR_NAME,
   AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID,
+  GCP_SERVICE_ACCOUNT_VAR_NAME,
+  GCP_AUDIENCE_VAR_NAME,
+  GCP_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME,
+  SERVICE_ACCOUNT_VAR_NAME,
+  AUDIENCE_VAR_NAME,
+  GCP_CREDENTIALS_CLOUD_CONNECTOR_ID,
 } from '../../common/constants/cloud_connector';
 
 import { createSoFindIterable } from './utils/create_so_find_iterable';
@@ -363,6 +370,41 @@ const extractPackagePolicyVars = (
     } else {
       logger.error(
         `Missing required Azure vars: tenant_id=${!!tenantId}, client_id=${!!clientId}, azure_credentials=[REDACTED]`
+      );
+    }
+  }
+
+  if (packagePolicy.supports_cloud_connector && cloudProvider === 'gcp') {
+    const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+
+    if (!vars) {
+      logger.error('Package policy must contain vars');
+      throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
+    }
+
+    const serviceAccount = vars[SERVICE_ACCOUNT_VAR_NAME] || vars[GCP_SERVICE_ACCOUNT_VAR_NAME];
+    const audience = vars[AUDIENCE_VAR_NAME] || vars[GCP_AUDIENCE_VAR_NAME];
+    const gcpCredentials =
+      vars[GCP_CREDENTIALS_CLOUD_CONNECTOR_ID] || vars[GCP_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME];
+
+    if (serviceAccount && audience && gcpCredentials) {
+      // Type assertions are needed because PackagePolicyConfigRecordEntry in packagePolicy.inputs.streams[0].vars has loose types (type?: string, value?: any)
+      // while CloudConnectorVar in CloudConnectorVars expects specific literal types (type?: 'text').
+      // Runtime validation occurs in cloudConnectorService.validateCloudConnectorDetails()
+      const gcpCloudConnectorVars: GcpCloudConnectorVars = {
+        service_account: serviceAccount as CloudConnectorVar,
+        audience: audience as CloudConnectorVar,
+        gcp_credentials_cloud_connector_id: gcpCredentials as CloudConnectorVar,
+      };
+
+      logger.debug(
+        `Extracted GCP cloud connector vars: service_account=${!!serviceAccount}, audience=${!!audience}, gcp_credentials=[REDACTED]`
+      );
+
+      return gcpCloudConnectorVars;
+    } else {
+      logger.error(
+        `Missing required GCP vars: service_account=${!!serviceAccount}, audience=${!!audience}, gcp_credentials=[REDACTED]`
       );
     }
   }

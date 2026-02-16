@@ -61,6 +61,7 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   templateName = 'azure-cloud-connector-template',
   credentials,
   setCredentials,
+  accountType,
 }) => {
   const armTemplateUrl =
     cloud && templateName
