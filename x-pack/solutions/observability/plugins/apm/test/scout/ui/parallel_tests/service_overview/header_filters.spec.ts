@@ -19,7 +19,7 @@ test.describe('Service overview - header filters', { tag: ['@ess', '@svlOblt'] }
   }) => {
     await test.step('Navigate to service overview', async () => {
       await serviceDetailsPage.goToPage({
-        serviceName: 'opbeans-java',
+        serviceName: 'opbeans-node',
       });
     });
 
