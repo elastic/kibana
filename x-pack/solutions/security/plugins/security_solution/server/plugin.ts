@@ -1000,6 +1000,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     }
 
     if (this.workflowsManagementSetup) {
+      const workflowsManagementSetup = this.workflowsManagementSetup;
       this.logger.info(
         '[PreinstalledWorkflows] WorkflowsManagement plugin available, checking feature flag for pre-installed workflows'
       );
@@ -1016,11 +1017,7 @@ export class Plugin implements ISecuritySolutionPlugin {
             this.logger.info(
               '[PreinstalledWorkflows] Starting bootstrap of pre-installed workflows'
             );
-            return bootstrapPreinstalledWorkflows(
-              this.workflowsManagementSetup!,
-              'default',
-              this.logger
-            );
+            return bootstrapPreinstalledWorkflows(workflowsManagementSetup, 'default', this.logger);
           } else {
             this.logger.info(
               '[PreinstalledWorkflows] Pre-installed workflows feature flag is disabled, skipping bootstrap'

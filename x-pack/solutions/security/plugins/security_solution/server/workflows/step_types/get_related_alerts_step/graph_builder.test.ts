@@ -6,62 +6,117 @@
  */
 
 import { buildRelatedAlertsGraph } from './graph_builder';
+import type { DetectionAlert800 } from '../../../../common/api/detection_engine/model/alerts';
 
+/** Test doc: _source is a partial alert shape; we assert to DetectionAlert800 for type compatibility */
 interface Doc {
   _id: string;
   _index: string;
-  _source: Record<string, unknown>;
+  _source: DetectionAlert800;
 }
+
+/** Cast partial _source to DetectionAlert800 for test fixtures */
+const src = (s: Record<string, unknown>): DetectionAlert800 => s as DetectionAlert800;
 
 const iso = (ms: number) => new Date(ms).toISOString();
 
-const get = (obj: any, path: string) => {
-  const parts = path.split('.');
-  let cur = obj;
-  for (const p of parts) {
-    if (cur == null) return undefined;
-    cur = cur[p];
-  }
-  return cur;
-};
+interface TermsClause {
+  terms: Record<string, string[]>;
+}
+type FilterClause = Record<string, unknown>;
+
+interface SearchRequest {
+  index: string;
+  size?: number;
+  query?: { bool?: { filter?: FilterClause[]; must_not?: FilterClause[] } };
+  search_after?: [string, string];
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
 
 const makeEsClient = (params: { seedIndex: string; seedId: string; docs: Doc[] }) => {
   const { seedIndex, seedId, docs } = params;
 
   return {
-    search: jest.fn(async (req: any) => {
+    search: jest.fn(async (req: Record<string, unknown>) => {
+      const typedReq = req as unknown as SearchRequest;
       // Seed fetch
-      if (req.index === seedIndex) {
+      if (typedReq.index === seedIndex) {
         const hit = docs.find((d) => d._index === seedIndex && d._id === seedId);
         return { hits: { hits: hit ? [hit] : [] } };
       }
 
       // Search queries
-      const filters = req.query?.bool?.filter ?? [];
-      const range = filters.find((f: any) => f.range?.['@timestamp'])?.range?.['@timestamp'];
+      const filters = typedReq.query?.bool?.filter ?? [];
+
+      let range: { gte: string; lte: string } | undefined;
+      for (const f of filters) {
+        if (isRecord(f)) {
+          const rangeObj = f.range;
+          if (isRecord(rangeObj)) {
+            const timestampRange = rangeObj['@timestamp'];
+            if (
+              isRecord(timestampRange) &&
+              typeof timestampRange.gte === 'string' &&
+              typeof timestampRange.lte === 'string'
+            ) {
+              range = timestampRange as { gte: string; lte: string };
+              break;
+            }
+          }
+        }
+      }
+      if (!range) {
+        throw new Error('Expected @timestamp range filter in query');
+      }
       const gte = Date.parse(range.gte);
       const lte = Date.parse(range.lte);
 
-      const should = filters.find((f: any) => f.bool?.should)?.bool?.should ?? [];
-      const mustNot = req.query?.bool?.must_not ?? [];
+      let should: TermsClause[] = [];
+      for (const f of filters) {
+        if (isRecord(f)) {
+          const boolObj = f.bool;
+          if (isRecord(boolObj)) {
+            const shouldArray = boolObj.should;
+            if (Array.isArray(shouldArray)) {
+              should = shouldArray as TermsClause[];
+              break;
+            }
+          }
+        }
+      }
+      const mustNot = typedReq.query?.bool?.must_not ?? [];
 
-      const after = req.search_after as [string, string] | undefined;
+      const after = typedReq.search_after as [string, string] | undefined;
 
       let hits = docs
-        .filter((d) => d._index === req.index)
+        .filter((d) => d._index === typedReq.index)
         .filter((d) => {
-          const ts = get(d._source, '@timestamp');
+          const ts = d._source['@timestamp'];
           const ms = typeof ts === 'string' ? Date.parse(ts) : NaN;
           return Number.isFinite(ms) && ms >= gte && ms <= lte;
         })
         .filter((d) => {
           // OR of terms clauses
           if (!should.length) return false;
-          return should.some((clause: any) => {
-            const terms = clause.terms;
-            const field = Object.keys(terms)[0];
-            const values: string[] = terms[field];
-            const v = get(d._source, field);
+          return should.some((clause) => {
+            if (!isRecord(clause)) return false;
+            const termsObj = clause.terms;
+            if (!isRecord(termsObj)) return false;
+            const field = Object.keys(termsObj)[0];
+            if (!field) return false;
+            const values = termsObj[field];
+            if (!Array.isArray(values)) return false;
+            const fieldParts = field.split('.');
+            let v: unknown = d._source;
+            for (const part of fieldParts) {
+              if (!isRecord(v)) {
+                v = undefined;
+                break;
+              }
+              v = v[part];
+            }
             if (typeof v === 'string') return values.includes(v);
             if (Array.isArray(v)) return v.some((x) => typeof x === 'string' && values.includes(x));
             return false;
@@ -69,34 +124,47 @@ const makeEsClient = (params: { seedIndex: string; seedId: string; docs: Doc[] }
         })
         .filter((d) => {
           // must_not terms
-          return !mustNot.some((clause: any) => {
-            const terms = clause.terms;
+          return !mustNot.some((clause) => {
+            if (!isRecord(clause) || !isRecord(clause.terms)) return false;
+            const terms = clause.terms as Record<string, string[]>;
             const field = Object.keys(terms)[0];
-            const values: string[] = terms[field];
-            const v = get(d._source, field);
+            if (!field) return false;
+            const values = terms[field] ?? [];
+            const fieldParts = field.split('.');
+            let v: unknown = d._source;
+            for (const part of fieldParts) {
+              if (!isRecord(v)) {
+                v = undefined;
+                break;
+              }
+              v = v[part];
+            }
             if (typeof v === 'string') return values.includes(v);
             if (Array.isArray(v)) return v.some((x) => typeof x === 'string' && values.includes(x));
             return false;
           });
         })
         .sort((a, b) => {
-          const ta = Date.parse(get(a._source, '@timestamp') as string);
-          const tb = Date.parse(get(b._source, '@timestamp') as string);
+          const tsa = a._source['@timestamp'];
+          const tsb = b._source['@timestamp'];
+          const ta = typeof tsa === 'string' ? Date.parse(tsa) : 0;
+          const tb = typeof tsb === 'string' ? Date.parse(tsb) : 0;
           return ta === tb ? a._id.localeCompare(b._id) : ta - tb;
         });
 
       if (after) {
         const [afterTs, afterId] = after;
         hits = hits.filter((d) => {
-          const ts = get(d._source, '@timestamp') as string;
+          const ts = d._source['@timestamp'];
+          if (typeof ts !== 'string') return false;
           return ts > afterTs || (ts === afterTs && d._id > afterId);
         });
       }
 
-      const size = req.size ?? 10;
+      const size = typedReq.size ?? 10;
       const page = hits.slice(0, size).map((h) => ({
         ...h,
-        sort: [get(h._source, '@timestamp'), h._id],
+        sort: [h._source['@timestamp'], h._id],
       }));
 
       return { hits: { hits: page } };
@@ -114,28 +182,28 @@ describe('buildRelatedAlertsGraph', () => {
       {
         _id: 'A',
         _index: seedIndex,
-        _source: {
+        _source: src({
           '@timestamp': iso(t0),
           host: { name: 'host-1' },
-        },
+        }),
       },
       {
         _id: 'B',
         _index: searchIndex,
-        _source: {
+        _source: src({
           '@timestamp': iso(t0 + 50 * 60 * 1000), // within seed window
           host: { name: 'host-1' },
-          'kibana.alert.rule.name': 'rule-b',
-        },
+          kibana: { alert: { rule: { name: 'rule-b' } } },
+        }),
       },
       {
         _id: 'C',
         _index: searchIndex,
-        _source: {
+        _source: src({
           '@timestamp': iso(t0 + 80 * 60 * 1000), // outside seed window, inside expanded window
           host: { name: 'host-1' },
-          'kibana.alert.rule.name': 'rule-c',
-        },
+          kibana: { alert: { rule: { name: 'rule-c' } } },
+        }),
       },
     ];
 
@@ -175,52 +243,52 @@ describe('buildRelatedAlertsGraph', () => {
       {
         _id: 'A',
         _index: seedIndex,
-        _source: {
+        _source: src({
           '@timestamp': iso(t0),
           host: { name: 'host-1' },
           user: { name: 'u1', id: 'uid-1' },
           process: { entity_id: 'p1' },
           source: { ip: '1.1.1.1' },
           destination: { ip: '2.2.2.2' },
-        },
+        }),
       },
       // host only => score 2 (below threshold 4)
       {
         _id: 'B',
         _index: searchIndex,
-        _source: {
+        _source: src({
           '@timestamp': iso(t0 + 5 * 60 * 1000),
           host: { name: 'host-1' },
-        },
+        }),
       },
       // host + user => 2 + 2 = 4 (meets threshold)
       {
         _id: 'C',
         _index: searchIndex,
-        _source: {
+        _source: src({
           '@timestamp': iso(t0 + 10 * 60 * 1000),
           host: { name: 'host-1' },
           user: { name: 'u1' },
-        },
+        }),
       },
       // process.entity_id only => 5 (meets threshold)
       {
         _id: 'D',
         _index: searchIndex,
-        _source: {
+        _source: src({
           '@timestamp': iso(t0 + 15 * 60 * 1000),
           process: { entity_id: 'p1' },
-        },
+        }),
       },
       // source + destination => 1 + 1 = 2 (below threshold)
       {
         _id: 'E',
         _index: searchIndex,
-        _source: {
+        _source: src({
           '@timestamp': iso(t0 + 20 * 60 * 1000),
           source: { ip: '1.1.1.1' },
           destination: { ip: '2.2.2.2' },
-        },
+        }),
       },
     ];
 
@@ -268,18 +336,18 @@ describe('buildRelatedAlertsGraph', () => {
       {
         _id: 'A',
         _index: seedIndex,
-        _source: {
+        _source: src({
           '@timestamp': iso(t0),
           host: { name: 'host-1' },
-        },
+        }),
       },
       {
         _id: 'B',
         _index: searchIndex,
-        _source: {
+        _source: src({
           '@timestamp': iso(t0 + 10 * 60 * 1000),
           host: { name: 'host-1' },
-        },
+        }),
       },
     ];
 
@@ -296,8 +364,8 @@ describe('buildRelatedAlertsGraph', () => {
       maxAlerts: 10,
       pageSize: 100,
       // simulate bad upstream values (this previously produced `terms: []`)
-      maxTermsPerQuery: Number('nope') as any,
-      maxEntitiesPerField: Number('nope') as any,
+      maxTermsPerQuery: Number('nope'),
+      maxEntitiesPerField: Number('nope'),
       ignoreEntities: [],
       entityFieldScores: { 'host.name': 1 },
       minEntityScore: 1,
@@ -309,12 +377,26 @@ describe('buildRelatedAlertsGraph', () => {
 
     // Verify the query the ES client received had non-empty `terms` arrays.
     const calls = (esClient.search as jest.Mock).mock.calls;
-    const searchCall = calls.find(([req]) => req.index === searchIndex);
+    const searchCall = calls.find(([req]) => (req as SearchRequest).index === searchIndex);
     expect(searchCall).toBeTruthy();
-    const req = searchCall![0];
-    const should = req.query?.bool?.filter?.find((f: any) => f.bool?.should)?.bool?.should ?? [];
+    const typedReq = searchCall?.[0] as SearchRequest | undefined;
+
+    let should: TermsClause[] = [];
+    for (const f of typedReq?.query?.bool?.filter ?? []) {
+      if (isRecord(f)) {
+        const boolObj = f.bool;
+        if (isRecord(boolObj)) {
+          const shouldArray = boolObj.should;
+          if (Array.isArray(shouldArray)) {
+            should = shouldArray as TermsClause[];
+            break;
+          }
+        }
+      }
+    }
+
     expect(should.length).toBeGreaterThan(0);
-    const firstTerms = should[0]?.terms?.['host.name'] as unknown;
+    const firstTerms = should[0]?.terms?.['host.name'];
     expect(firstTerms).toEqual(['host-1']);
   });
 
@@ -327,22 +409,22 @@ describe('buildRelatedAlertsGraph', () => {
       {
         _id: 'A',
         _index: seedIndex,
-        _source: {
+        _source: src({
           '@timestamp': iso(t0),
           process: { entity_id: 'p1' },
           user: { name: 'u1' },
-        },
+        }),
       },
       // This alert contains an ignored value (user.name=root) but also matches strongly via process.entity_id.
       // It should still be eligible to link.
       {
         _id: 'B',
         _index: searchIndex,
-        _source: {
+        _source: src({
           '@timestamp': iso(t0 + 5 * 60 * 1000),
           process: { entity_id: 'p1' },
           user: { name: 'root' },
-        },
+        }),
       },
     ];
 
@@ -381,19 +463,19 @@ describe('buildRelatedAlertsGraph', () => {
       {
         _id: 'A',
         _index: seedIndex,
-        _source: {
+        _source: src({
           '@timestamp': iso(t0),
           source: { ip: '10.0.0.10' },
-        },
+        }),
       },
       // Does NOT share source.ip, but does share the seed source.ip as destination.ip.
       {
         _id: 'B',
         _index: searchIndex,
-        _source: {
+        _source: src({
           '@timestamp': iso(t0 + 5 * 60 * 1000),
           destination: { ip: '10.0.0.10' },
-        },
+        }),
       },
     ];
 
@@ -435,26 +517,26 @@ describe('buildRelatedAlertsGraph', () => {
       {
         _id: 'A',
         _index: seedIndex,
-        _source: {
+        _source: src({
           '@timestamp': iso(t0),
           user: { name: 'patyk' },
-        },
+        }),
       },
       {
         _id: 'B',
         _index: searchIndex,
-        _source: {
+        _source: src({
           '@timestamp': iso(t0 + 5 * 60 * 1000),
           user: { name: 'patyk' },
-        },
+        }),
       },
       {
         _id: 'C',
         _index: searchIndex,
-        _source: {
+        _source: src({
           '@timestamp': iso(t0 + 10 * 60 * 1000),
           user: { name: 'root' },
-        },
+        }),
       },
     ];
 

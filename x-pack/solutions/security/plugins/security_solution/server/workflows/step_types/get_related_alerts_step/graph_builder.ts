@@ -13,10 +13,21 @@ import {
 } from './entity_utils';
 import { buildEntityShouldClauses } from './query_utils';
 import type { AlertMeta, RelatedAlertsGraphOutput } from './types';
+import type { DetectionAlert800 } from '../../../../common/api/detection_engine/model/alerts';
+
+interface EsHit {
+  _id?: string;
+  _index: string;
+  _source?: DetectionAlert800;
+  sort?: unknown;
+}
+
+interface EsSearchResponse {
+  hits: { hits: EsHit[] };
+}
 
 interface EsSearchClient {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  search: (request: any) => Promise<any>;
+  search: (request: Record<string, unknown>) => Promise<EsSearchResponse>;
 }
 
 type EdgeAccumulator = Map<
@@ -96,35 +107,37 @@ const computeParentLinks = (params: {
 
     const matchFields: Array<{ field: string; score: number }> = [{ field, score: fieldScore }];
     for (const alias of aliases) {
-      if (!alias?.field || alias.field === field) continue;
-      const aliasScore =
-        (typeof alias.score === 'number' && Number.isFinite(alias.score)
-          ? alias.score
-          : undefined) ??
-        scoring.entityFieldScores.get(alias.field) ??
-        scoring.defaultScorePerField;
-      matchFields.push({ field: alias.field, score: aliasScore });
+      if (alias?.field && alias.field !== field) {
+        const aliasScore =
+          (typeof alias.score === 'number' && Number.isFinite(alias.score)
+            ? alias.score
+            : undefined) ??
+          scoring.entityFieldScores.get(alias.field) ??
+          scoring.defaultScorePerField;
+        matchFields.push({ field: alias.field, score: aliasScore });
+      }
     }
 
     for (const v of values) {
       for (const matchField of matchFields) {
         const key = `${matchField.field}\u0000${v}`;
         const neighbors = entityToAlertIds.get(key);
-        if (!neighbors) continue;
-
-        for (const neighborId of neighbors) {
-          if (!parentCandidates.has(neighborId)) continue;
-          const entry =
-            parents.get(neighborId) ??
-            ({
-              labels: new Set<string>(),
-              labelScores: new Map<string, number>(),
-              score: 0,
-            } as { labels: Set<string>; labelScores: Map<string, number>; score: number });
-          entry.labels.add(label);
-          const prev = entry.labelScores.get(label) ?? 0;
-          entry.labelScores.set(label, Math.max(prev, matchField.score));
-          parents.set(neighborId, entry);
+        if (neighbors) {
+          for (const neighborId of neighbors) {
+            if (parentCandidates.has(neighborId)) {
+              const entry =
+                parents.get(neighborId) ??
+                ({
+                  labels: new Set<string>(),
+                  labelScores: new Map<string, number>(),
+                  score: 0,
+                } as { labels: Set<string>; labelScores: Map<string, number>; score: number });
+              entry.labels.add(label);
+              const prev = entry.labelScores.get(label) ?? 0;
+              entry.labelScores.set(label, Math.max(prev, matchField.score));
+              parents.set(neighborId, entry);
+            }
+          }
         }
       }
     }
@@ -154,20 +167,21 @@ const mergeEntities = (params: {
   const frontier = new Map<string, Set<string>>();
 
   for (const [field, values] of added.entries()) {
-    if (!values.size) continue;
+    if (values.size) {
+      const existing = known.get(field) ?? new Set<string>();
+      const newValues = new Set<string>();
 
-    const existing = known.get(field) ?? new Set<string>();
-    const newValues = new Set<string>();
+      for (const v of values) {
+        if (existing.size >= maxEntitiesPerField) break;
+        if (!existing.has(v)) {
+          existing.add(v);
+          newValues.add(v);
+        }
+      }
 
-    for (const v of values) {
-      if (existing.size >= maxEntitiesPerField) break;
-      if (existing.has(v)) continue;
-      existing.add(v);
-      newValues.add(v);
+      known.set(field, existing);
+      if (newValues.size) frontier.set(field, newValues);
     }
-
-    known.set(field, existing);
-    if (newValues.size) frontier.set(field, newValues);
   }
 
   return frontier;
@@ -232,7 +246,7 @@ const searchWindow = async (params: {
   shouldClauses: Array<Record<string, unknown>>;
   sourceFields: string[];
   pageSize: number;
-  onHit: (hit: any) => void;
+  onHit: (hit: EsHit) => void;
   stop: () => boolean;
   queriesRef: { queries: number };
 }) => {
@@ -288,7 +302,7 @@ const searchWindow = async (params: {
     });
     queriesRef.queries++;
 
-    const hits: any[] = response.hits.hits;
+    const hits = response.hits.hits;
     page++;
     if (!hits.length) break;
 
@@ -383,16 +397,17 @@ export const buildRelatedAlertsGraph = async (
     const map = new Map<string, Array<{ field: string; score?: number }>>();
 
     for (const [from, aliases] of Object.entries(entityFieldAliases ?? {})) {
-      if (typeof from !== 'string' || from.length === 0) continue;
-      if (!Array.isArray(aliases) || aliases.length === 0) continue;
-      const cleaned = aliases
-        .filter(
-          (a): a is { field: string; score?: number } =>
-            typeof a?.field === 'string' && a.field.length > 0
-        )
-        .filter((a) => a.field !== from);
-      if (!cleaned.length) continue;
-      map.set(from, cleaned);
+      if (from.length > 0 && Array.isArray(aliases) && aliases.length > 0) {
+        const cleaned = aliases
+          .filter(
+            (a): a is { field: string; score?: number } =>
+              typeof a?.field === 'string' && a.field.length > 0
+          )
+          .filter((a) => a.field !== from);
+        if (cleaned.length) {
+          map.set(from, cleaned);
+        }
+      }
     }
 
     // Symmetrize for expansion/linking so either side can drive matching.
@@ -423,17 +438,17 @@ export const buildRelatedAlertsGraph = async (
     const out = new Map<string, Set<string>>();
 
     for (const [field, values] of entitiesByField.entries()) {
-      if (!values.size) continue;
+      if (values.size) {
+        const own = out.get(field) ?? new Set<string>();
+        for (const v of values) own.add(v);
+        out.set(field, own);
 
-      const own = out.get(field) ?? new Set<string>();
-      for (const v of values) own.add(v);
-      out.set(field, own);
-
-      const aliases = safeEntityFieldAliases.get(field) ?? [];
-      for (const alias of aliases) {
-        const aliasSet = out.get(alias.field) ?? new Set<string>();
-        for (const v of values) aliasSet.add(v);
-        out.set(alias.field, aliasSet);
+        const aliases = safeEntityFieldAliases.get(field) ?? [];
+        for (const alias of aliases) {
+          const aliasSet = out.get(alias.field) ?? new Set<string>();
+          for (const v of values) aliasSet.add(v);
+          out.set(alias.field, aliasSet);
+        }
       }
     }
 
@@ -463,9 +478,8 @@ export const buildRelatedAlertsGraph = async (
     throw new Error(`Alert with ID ${seed.alertId} not found`);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const seedSource = seedHit._source as any;
-  const seedTimestamp = seedSource?.['@timestamp'];
+  const seedSource = seedHit._source;
+  const seedTimestamp = (seedSource as Record<string, unknown> | undefined)?.['@timestamp'];
   const seedTsMs = typeof seedTimestamp === 'string' ? Date.parse(seedTimestamp) : NaN;
   if (!Number.isFinite(seedTsMs)) {
     throw new Error(`Seed alert ${seed.alertId} does not have a valid @timestamp`);
@@ -498,9 +512,13 @@ export const buildRelatedAlertsGraph = async (
   alertMetaById.set(seed.alertId, {
     alert_id: seed.alertId,
     alert_index: seedHit._index,
-    timestamp: seedTimestamp,
-    rule_name: seedSource?.['kibana.alert.rule.name'],
-    severity: seedSource?.['kibana.alert.severity'],
+    timestamp: typeof seedTimestamp === 'string' ? seedTimestamp : undefined,
+    rule_name: (seedSource as Record<string, unknown> | undefined)?.['kibana.alert.rule.name'] as
+      | string
+      | undefined,
+    severity: (seedSource as Record<string, unknown> | undefined)?.['kibana.alert.severity'] as
+      | string
+      | undefined,
     ts_ms: seedTsMs,
   });
 
@@ -514,7 +532,13 @@ export const buildRelatedAlertsGraph = async (
       nodes,
       edges: [],
       alerts_sorted: includeSeed
-        ? [{ alert_id: seed.alertId, alert_index: seedHit._index, timestamp: seedTimestamp }]
+        ? [
+            {
+              alert_id: seed.alertId,
+              alert_index: seedHit._index,
+              timestamp: typeof seedTimestamp === 'string' ? seedTimestamp : undefined,
+            },
+          ]
         : [],
       stats: {
         depth_reached: 0,
@@ -570,7 +594,7 @@ export const buildRelatedAlertsGraph = async (
     let ignoredAlreadySeen = 0;
     let ignoredNoParentLink = 0;
 
-    const processHit = (params2: { hit: any; parentCandidates: Set<string> }) => {
+    const processHit = (params2: { hit: EsHit; parentCandidates: Set<string> }) => {
       const { hit, parentCandidates } = params2;
       const id: string | undefined = hit?._id;
       if (!id) return;
@@ -579,9 +603,8 @@ export const buildRelatedAlertsGraph = async (
         return;
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const source = hit._source as any;
-      const ts = source?.['@timestamp'];
+      const source = hit._source;
+      const ts = (source as Record<string, unknown> | undefined)?.['@timestamp'];
       const tsMs = typeof ts === 'string' ? Date.parse(ts) : NaN;
 
       // Extract entities for this alert (needed to decide if it truly links to a parent).
@@ -617,9 +640,13 @@ export const buildRelatedAlertsGraph = async (
       alertMetaById.set(id, {
         alert_id: id,
         alert_index: hit._index,
-        timestamp: ts,
-        rule_name: source?.['kibana.alert.rule.name'],
-        severity: source?.['kibana.alert.severity'],
+        timestamp: typeof ts === 'string' ? ts : undefined,
+        rule_name: (source as Record<string, unknown> | undefined)?.['kibana.alert.rule.name'] as
+          | string
+          | undefined,
+        severity: (source as Record<string, unknown> | undefined)?.['kibana.alert.severity'] as
+          | string
+          | undefined,
         ts_ms: Number.isFinite(tsMs) ? tsMs : undefined,
       });
 

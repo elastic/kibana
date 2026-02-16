@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
+import type { DetectionAlert800 } from '../../../common/api/detection_engine/model/alerts';
 
 const inputSchema = z.object({
   ruleId: z.string().describe('The rule ID to get metadata for'),
@@ -42,6 +43,8 @@ const outputSchema = z.object({
   note: z.string().optional(),
 });
 
+export const getRuleMetadataInputSchema = inputSchema;
+
 export const getRuleMetadataStepDefinition = createServerStepDefinition({
   id: 'security.getRuleMetadata',
   inputSchema,
@@ -53,7 +56,7 @@ export const getRuleMetadataStepDefinition = createServerStepDefinition({
       const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
       const esClient = context.contextManager.getScopedEsClient();
 
-      const searchResponse = await esClient.search({
+      const searchResponse = await esClient.search<DetectionAlert800>({
         index: alertsIndex,
         size: 1,
         _source: [
@@ -85,29 +88,39 @@ export const getRuleMetadataStepDefinition = createServerStepDefinition({
         };
       }
 
-      const alertSource = searchResponse.hits.hits[0]._source as any;
+      const alertSource = searchResponse.hits.hits[0]._source as Record<string, unknown> | undefined;
+      const src = (key: string) => alertSource?.[key];
+
+      // Threat is returned as an array; take first item for tactic/technique
+      const threatArr = src('kibana.alert.rule.threat');
+      const firstThreat =
+        Array.isArray(threatArr) && threatArr.length > 0
+          ? (threatArr[0] as Record<string, unknown>)
+          : undefined;
+      const tacticObj = firstThreat?.tactic as { id?: string; name?: string } | undefined;
+      const techniqueArr = firstThreat?.technique as Array<{ id?: string; name?: string }> | undefined;
+      const firstTechnique = Array.isArray(techniqueArr) ? techniqueArr[0] : undefined;
+
       const ruleMetadata = {
         rule_id: ruleId,
-        rule_name: alertSource?.['kibana.alert.rule.name'],
-        rule_uuid: alertSource?.['kibana.alert.rule.uuid'],
-        rule_description: alertSource?.['kibana.alert.rule.description'],
-        rule_category: alertSource?.['kibana.alert.rule.category'],
-        rule_type: alertSource?.['kibana.alert.rule.type'],
-        severity: alertSource?.['kibana.alert.severity'],
-        references: alertSource?.['kibana.alert.rule.references'],
-        threat_framework: alertSource?.['kibana.alert.rule.threat.framework'],
-        threat_tactic: alertSource?.['kibana.alert.rule.threat.tactic.name']
-          ? {
-              id: alertSource?.['kibana.alert.rule.threat.tactic.id'],
-              name: alertSource?.['kibana.alert.rule.threat.tactic.name'],
-            }
-          : undefined,
-        threat_technique: alertSource?.['kibana.alert.rule.threat.technique.name']
-          ? {
-              id: alertSource?.['kibana.alert.rule.threat.technique.id'],
-              name: alertSource?.['kibana.alert.rule.threat.technique.name'],
-            }
-          : undefined,
+        rule_name: src('kibana.alert.rule.name') as string | undefined,
+        rule_uuid: src('kibana.alert.rule.uuid') as string | undefined,
+        rule_description: src('kibana.alert.rule.description') as string | undefined,
+        rule_category: src('kibana.alert.rule.category') as string | undefined,
+        rule_type: src('kibana.alert.rule.type') as string | undefined,
+        severity: src('kibana.alert.severity') as string | undefined,
+        references: src('kibana.alert.rule.references') as string[] | undefined,
+        threat_framework:
+          (firstThreat?.framework as string | undefined) ??
+          (src('kibana.alert.rule.threat.framework') as string | undefined),
+        threat_tactic:
+          tacticObj && typeof tacticObj.name === 'string'
+            ? { id: tacticObj.id, name: tacticObj.name }
+            : undefined,
+        threat_technique:
+          firstTechnique && typeof firstTechnique.name === 'string'
+            ? { id: firstTechnique.id, name: firstTechnique.name }
+            : undefined,
       };
 
       return {

@@ -13,7 +13,6 @@ import { getGlobalPrevalenceStepDefinition } from './get_global_prevalence_step'
 import { getRelatedAlertsStepDefinition } from './get_related_alerts_step';
 import { getRuleFireCountStepDefinition } from './get_rule_fire_count_step';
 import { getRuleMetadataStepDefinition } from './get_rule_metadata_step';
-import { toonEncodeStepDefinition } from './toon_encode_step';
 
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin
@@ -28,5 +27,4 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(getRelatedAlertsStepDefinition);
   workflowsExtensions.registerStepDefinition(getRuleFireCountStepDefinition);
   workflowsExtensions.registerStepDefinition(getRuleMetadataStepDefinition);
-  workflowsExtensions.registerStepDefinition(toonEncodeStepDefinition);
 };

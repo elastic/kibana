@@ -181,15 +181,14 @@ steps:
               timestamp: '{{foreach.item["@timestamp"]}}'
               time_range: "24h"
 
-          # Rule fire count: how many times the rule fired in a recent window.
-          # Anchored to the alert timestamp so the count covers the window
-          # leading up to the alert, not the current moment.
+          # Rule fire count: how many times the rule fired in a symmetric
+          # window around the alert timestamp (past and future from that time).
           - name: get_rule_fire_count
             type: security.getRuleFireCount
             with:
               ruleId: "{{event.rule.id}}"
               timestamp: '{{foreach.item["@timestamp"]}}'
-              time_range: "1h"
+              time_window: "1h"
 
           # Rule metadata: name, description, severity, MITRE ATT&CK mapping.
           - name: get_rule_metadata

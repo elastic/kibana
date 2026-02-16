@@ -13,6 +13,19 @@ import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { PREINSTALLED_WORKFLOWS, type PreinstalledWorkflow } from './workflow_registry';
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'string') return error;
+  return isRecord(error) && typeof error.message === 'string' ? error.message : String(error);
+};
+
+const getErrorStatusCode = (error: unknown): number | undefined => {
+  return isRecord(error) && typeof error.statusCode === 'number' ? error.statusCode : undefined;
+};
+
 function createSystemRequest(): KibanaRequest {
   const rawRequest = {
     headers: {
@@ -64,7 +77,8 @@ export class PreinstalledWorkflowsBootstrap {
       }, hasManagement: ${!!this.workflowsManagement?.management}`
     );
 
-    if (!this.workflowsManagement?.management) {
+    const management = this.workflowsManagement.management;
+    if (!management) {
       this.logger.warn(
         '[PreinstalledWorkflows] Workflows management plugin not available, skipping workflow installation'
       );
@@ -84,16 +98,16 @@ export class PreinstalledWorkflowsBootstrap {
 
     for (const workflow of PREINSTALLED_WORKFLOWS) {
       try {
-        const result = await this.processWorkflow(workflow);
+        const result = await this.processWorkflow(management, workflow);
         stats[result]++;
-      } catch (error: any) {
-        if (error.statusCode === 409 || error.message?.includes('already exists')) {
+      } catch (error: unknown) {
+        const message = getErrorMessage(error);
+        const statusCode = getErrorStatusCode(error);
+        if (statusCode === 409 || message.includes('already exists')) {
           this.logger.debug(`Workflow ${workflow.id} already exists (conflict), skipping`);
           stats.skipped++;
         } else {
-          this.logger.error(`Failed to process workflow ${workflow.id}: ${error.message}`, {
-            error: error.stack,
-          });
+          this.logger.error(`Failed to process workflow ${workflow.id}: ${message}`);
           stats.errors++;
         }
       }
@@ -109,20 +123,16 @@ export class PreinstalledWorkflowsBootstrap {
   /**
    * Process a single workflow - install if new, update if changed
    */
-  private async processWorkflow(workflow: PreinstalledWorkflow): Promise<BootstrapAction> {
+  private async processWorkflow(
+    management: NonNullable<WorkflowsServerPluginSetup['management']>,
+    workflow: PreinstalledWorkflow
+  ): Promise<BootstrapAction> {
     this.logger.debug(`Processing workflow ${workflow.id} from ${workflow.filePath}`);
 
-    const existing = await this.workflowsManagement.management!.getWorkflow(
-      workflow.id,
-      this.spaceId
-    );
+    const existing = await management.getWorkflow(workflow.id, this.spaceId);
 
     if (existing) {
-      this.logger.debug(
-        `Workflow ${workflow.id} already exists. ${
-          existing.deletedAt ? 'It is soft deleted' : ''
-        }`.trim()
-      );
+      this.logger.debug(`Workflow ${workflow.id} already exists`);
     } else {
       this.logger.debug(`Workflow ${workflow.id} does not exist, will install`);
     }
@@ -131,12 +141,12 @@ export class PreinstalledWorkflowsBootstrap {
     this.logger.debug(`Loaded YAML for ${workflow.id}, length: ${fileYaml.length} characters`);
 
     if (!existing) {
-      await this.installWorkflow(workflow, fileYaml);
+      await this.installWorkflow(management, workflow, fileYaml);
       return 'installed';
     }
 
-    if (this.shouldUpdate(existing.yaml || '', fileYaml) || existing.deletedAt === null) {
-      await this.updateWorkflow(workflow.id, fileYaml);
+    if (this.shouldUpdate(existing.yaml || '', fileYaml)) {
+      await this.updateWorkflow(management, workflow.id, fileYaml);
       return 'updated';
     }
 
@@ -147,12 +157,16 @@ export class PreinstalledWorkflowsBootstrap {
   /**
    * Install a new workflow
    */
-  private async installWorkflow(workflow: PreinstalledWorkflow, yaml: string): Promise<void> {
+  private async installWorkflow(
+    management: NonNullable<WorkflowsServerPluginSetup['management']>,
+    workflow: PreinstalledWorkflow,
+    yaml: string
+  ): Promise<void> {
     this.logger.debug(
       `Loading workflow YAML for ${workflow.id}, length: ${yaml.length} characters`
     );
 
-    const createdWorkflow = await this.workflowsManagement.management!.createWorkflow(
+    const createdWorkflow = await management.createWorkflow(
       {
         id: workflow.id,
         yaml,
@@ -169,15 +183,14 @@ export class PreinstalledWorkflowsBootstrap {
   /**
    * Update an existing workflow with new YAML
    */
-  private async updateWorkflow(workflowId: string, yaml: string): Promise<void> {
+  private async updateWorkflow(
+    management: NonNullable<WorkflowsServerPluginSetup['management']>,
+    workflowId: string,
+    yaml: string
+  ): Promise<void> {
     this.logger.info(`Workflow ${workflowId} exists but YAML has changed, updating...`);
 
-    await this.workflowsManagement.management!.updateWorkflow(
-      workflowId,
-      { yaml },
-      this.spaceId,
-      this.systemRequest
-    );
+    await management.updateWorkflow(workflowId, { yaml }, this.spaceId, this.systemRequest);
 
     this.logger.info(`Successfully updated pre-installed workflow: ${workflowId}`);
   }
@@ -195,7 +208,8 @@ export class PreinstalledWorkflowsBootstrap {
    */
   private loadWorkflowYaml(relativeFilePath: string): string {
     if (this.yamlCache.has(relativeFilePath)) {
-      return this.yamlCache.get(relativeFilePath)!;
+      const cached = this.yamlCache.get(relativeFilePath);
+      if (cached !== undefined) return cached;
     }
 
     // Normalize path: remove leading ./ if present, then join
@@ -212,14 +226,11 @@ export class PreinstalledWorkflowsBootstrap {
       const yaml = readFileSync(filePath, 'utf-8');
       this.yamlCache.set(relativeFilePath, yaml);
       return yaml;
-    } catch (error: any) {
-      const errorMessage = `Failed to read workflow file ${relativeFilePath} at ${filePath}: ${error.message}`;
-      this.logger.error(errorMessage, {
-        workflowsDir: this.workflowsDir,
-        relativeFilePath,
-        resolvedPath: filePath,
-        error: error.stack,
-      });
+    } catch (error: unknown) {
+      const errorMessage = `Failed to read workflow file ${relativeFilePath} at ${filePath}: ${getErrorMessage(
+        error
+      )}`;
+      this.logger.error(errorMessage);
       throw new Error(errorMessage);
     }
   }

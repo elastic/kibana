@@ -203,8 +203,9 @@ export const getRelatedAlertsStepDefinition = createServerStepDefinition({
       ).filter((f) => f.length > 0);
       const entityFieldScores: Record<string, number> = {};
       for (const c of entityFieldConfigs) {
-        if (typeof c.score !== 'number' || !Number.isFinite(c.score)) continue;
-        entityFieldScores[c.field] = Math.max(entityFieldScores[c.field] ?? -Infinity, c.score);
+        if (typeof c.score === 'number' && Number.isFinite(c.score)) {
+          entityFieldScores[c.field] = Math.max(entityFieldScores[c.field] ?? -Infinity, c.score);
+        }
       }
 
       const entityFieldAliases: Record<string, Array<{ field: string; score?: number }>> = {};

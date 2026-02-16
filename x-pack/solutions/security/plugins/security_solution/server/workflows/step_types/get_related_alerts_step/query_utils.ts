@@ -14,15 +14,15 @@ export const buildEntityShouldClauses = (params: {
 
   for (const [field, valuesSet] of entitiesByField.entries()) {
     const values = Array.from(valuesSet);
-    if (values.length === 0) continue;
-
-    for (let i = 0; i < values.length; i += maxTermsPerQuery) {
-      const chunk = values.slice(i, i + maxTermsPerQuery);
-      shouldClauses.push({
-        terms: {
-          [field]: chunk,
-        },
-      });
+    if (values.length > 0) {
+      for (let i = 0; i < values.length; i += maxTermsPerQuery) {
+        const chunk = values.slice(i, i + maxTermsPerQuery);
+        shouldClauses.push({
+          terms: {
+            [field]: chunk,
+          },
+        });
+      }
     }
   }
 

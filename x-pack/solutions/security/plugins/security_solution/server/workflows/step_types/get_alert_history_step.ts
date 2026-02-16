@@ -7,7 +7,13 @@
 
 import { z } from '@kbn/zod/v4';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import type { estypes } from '@elastic/elasticsearch';
 import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
+
+interface AlertHistoryAggregations {
+  alerts_over_time: estypes.AggregationsDateHistogramAggregate;
+  total_alerts: estypes.AggregationsValueCountAggregate;
+}
 
 const inputSchema = z.object({
   ruleId: z.string().describe('The rule ID to get alert history for'),
@@ -31,6 +37,8 @@ const outputSchema = z.object({
   message: z.string(),
 });
 
+export const getAlertHistoryInputSchema = inputSchema;
+
 export const getAlertHistoryStepDefinition = createServerStepDefinition({
   id: 'security.getAlertHistory',
   inputSchema,
@@ -43,7 +51,7 @@ export const getAlertHistoryStepDefinition = createServerStepDefinition({
       const timeRange = time_range ?? '7d';
       const esClient = context.contextManager.getScopedEsClient();
 
-      const searchResponse = await esClient.search({
+      const searchResponse = await esClient.search<unknown, AlertHistoryAggregations>({
         index: alertsIndex,
         size: 0,
         query: {
@@ -90,11 +98,19 @@ export const getAlertHistoryStepDefinition = createServerStepDefinition({
           ? searchResponse.hits.total
           : searchResponse.hits.total?.value ?? 0;
 
-      const buckets = (searchResponse.aggregations?.alerts_over_time as any)?.buckets ?? [];
-      const history = buckets.map((bucket: any) => ({
-        timestamp: bucket.key_as_string ?? new Date(bucket.key).toISOString(),
-        count: bucket.doc_count,
-      }));
+      const aggregations = searchResponse.aggregations;
+      const rawBuckets = aggregations?.alerts_over_time?.buckets ?? [];
+      const buckets = Array.isArray(rawBuckets) ? rawBuckets : Object.values(rawBuckets);
+
+      const history = buckets.map((bucket) => {
+        const keyMs = typeof bucket.key === 'number' ? bucket.key : Number(bucket.key);
+        const timestamp =
+          bucket.key_as_string ?? (Number.isFinite(keyMs) ? new Date(keyMs).toISOString() : '');
+        return {
+          timestamp,
+          count: bucket.doc_count ?? 0,
+        };
+      });
 
       return {
         output: {

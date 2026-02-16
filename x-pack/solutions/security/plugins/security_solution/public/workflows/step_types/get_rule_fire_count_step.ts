@@ -16,21 +16,21 @@ const inputSchema = z.object({
     .string()
     .optional()
     .describe(
-      'ISO timestamp used as the end of the lookback window. If omitted, the current time (now) is used.'
+      'ISO timestamp used as the center of the time window. If omitted, the current time (now) is used.'
     ),
-  time_range: z
+  time_window: z
     .string()
     .optional()
     .default('1h')
     .describe(
-      'Lookback window subtracted from the timestamp (e.g., "1h", "24h", "7d"). Fire count is calculated from [timestamp - time_range] to [timestamp]. Default: "1h"'
+      'Symmetric window applied before and after the timestamp (e.g., "1h", "24h", "7d"). Fire count is calculated from [timestamp - time_window] to [timestamp + time_window]. E.g. "1h" means look back 1h and forward 1h. Default: "1h"'
     ),
 });
 
 const outputSchema = z.object({
   rule_id: z.string(),
   count: z.number(),
-  time_range: z.string(),
+  time_window: z.string(),
   message: z.string(),
 });
 
@@ -42,7 +42,7 @@ export const getRuleFireCountStepDefinition: PublicStepDefinition = {
     defaultMessage: 'Get Rule Fire Count',
   }),
   description: i18n.translate('xpack.securitySolution.workflows.steps.getRuleFireCount.description', {
-    defaultMessage: 'Get the count of how many times a rule fired within a specified time range',
+    defaultMessage: 'Get the count of how many times a rule fired within a symmetric time window',
   }),
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/stats')
@@ -58,26 +58,26 @@ export const getRuleFireCountStepDefinition: PublicStepDefinition = {
       'xpack.securitySolution.workflows.steps.getRuleFireCount.documentation.details',
       {
         defaultMessage:
-          'Returns the total number of times a rule fired within the lookback window [timestamp - time_range, timestamp] (or [now - time_range, now] if timestamp is omitted).',
+          'Returns the total number of times a rule fired within a symmetric window [timestamp - time_window, timestamp + time_window] (or [now - time_window, now + time_window] if timestamp is omitted). E.g. "1h" means 1h before and 1h after the anchor.',
       }
     ),
     examples: [
-      `## Get rule fire count (last 24h from now)
+      `## Get rule fire count (±24h from now)
 \`\`\`yaml
 - name: get_fire_count
   type: security.getRuleFireCount
   with:
     ruleId: "{{ event.alerts[0].kibana.alert.rule.rule_id }}"
-    time_range: "24h"
+    time_window: "24h"
 \`\`\``,
-      `## Get rule fire count looking back 1h from an alert timestamp
+      `## Get rule fire count ±1h around an alert timestamp
 \`\`\`yaml
 - name: get_fire_count_at_alert_time
   type: security.getRuleFireCount
   with:
     ruleId: "{{ event.rule.id }}"
     timestamp: "{{ event.@timestamp }}"
-    time_range: "1h"
+    time_window: "1h"
 \`\`\``,
     ],
   },

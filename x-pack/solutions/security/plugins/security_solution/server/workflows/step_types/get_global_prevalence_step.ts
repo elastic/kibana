@@ -9,6 +9,22 @@ import { z } from '@kbn/zod/v4';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
 
+interface NumericValueAggregation {
+  value?: number;
+}
+
+interface HostsBreakdownBucket {
+  key: string;
+  alert_count?: NumericValueAggregation;
+}
+
+interface GlobalPrevalenceAggregations {
+  unique_hosts?: NumericValueAggregation;
+  unique_users?: NumericValueAggregation;
+  total_alerts?: NumericValueAggregation;
+  hosts_breakdown?: { buckets: HostsBreakdownBucket[] | Record<string, HostsBreakdownBucket> };
+}
+
 const inputSchema = z.object({
   ruleId: z.string().describe('The rule ID to check global prevalence for'),
   timestamp: z
@@ -42,6 +58,8 @@ const outputSchema = z.object({
   message: z.string(),
 });
 
+export const getGlobalPrevalenceInputSchema = inputSchema;
+
 export const getGlobalPrevalenceStepDefinition = createServerStepDefinition({
   id: 'security.getGlobalPrevalence',
   inputSchema,
@@ -59,7 +77,7 @@ export const getGlobalPrevalenceStepDefinition = createServerStepDefinition({
       const rangeGte = anchor ? `${anchor}||-${timeRange}` : `now-${timeRange}`;
       const rangeLte = anchor ?? 'now';
 
-      const searchResponse = await esClient.search({
+      const searchResponse = await esClient.search<unknown, GlobalPrevalenceAggregations>({
         index: alertsIndex,
         size: 0,
         query: {
@@ -113,15 +131,22 @@ export const getGlobalPrevalenceStepDefinition = createServerStepDefinition({
         },
       });
 
-      const totalAlerts = (searchResponse.aggregations?.total_alerts as any)?.value ?? 0;
-      const uniqueHosts = (searchResponse.aggregations?.unique_hosts as any)?.value ?? 0;
-      const uniqueUsers = (searchResponse.aggregations?.unique_users as any)?.value ?? 0;
-      const hostsBreakdown = (searchResponse.aggregations?.hosts_breakdown as any)?.buckets ?? [];
+      const aggregations = searchResponse.aggregations;
+      const totalAlerts = aggregations?.total_alerts?.value ?? 0;
+      const uniqueHosts = aggregations?.unique_hosts?.value ?? 0;
+      const uniqueUsers = aggregations?.unique_users?.value ?? 0;
 
-      const topHosts = hostsBreakdown.map((bucket: any) => ({
-        host_name: bucket.key,
-        alert_count: bucket.alert_count.value,
-      }));
+      const rawHostsBuckets = aggregations?.hosts_breakdown?.buckets ?? [];
+      const hostsBreakdown = Array.isArray(rawHostsBuckets)
+        ? rawHostsBuckets
+        : Object.values(rawHostsBuckets);
+
+      const topHosts = hostsBreakdown
+        .map((bucket) => ({
+          host_name: bucket.key,
+          alert_count: bucket.alert_count?.value ?? 0,
+        }))
+        .filter((h) => typeof h.host_name === 'string' && h.host_name.length > 0);
 
       // Determine prevalence level
       let prevalenceLevel: 'low' | 'medium' | 'high' | 'very_high' = 'low';

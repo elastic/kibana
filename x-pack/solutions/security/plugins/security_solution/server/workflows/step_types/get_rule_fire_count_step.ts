@@ -15,23 +15,25 @@ const inputSchema = z.object({
     .string()
     .optional()
     .describe(
-      'ISO timestamp used as the end of the lookback window. If omitted, the current time (now) is used.'
+      'ISO timestamp used as the center of the time window. If omitted, the current time (now) is used.'
     ),
-  time_range: z
+  time_window: z
     .string()
     .optional()
     .default('1h')
     .describe(
-      'Lookback window subtracted from the timestamp (e.g., "1h", "24h", "7d"). Fire count is calculated from [timestamp - time_range] to [timestamp]. Default: "1h"'
+      'Symmetric window applied before and after the timestamp (e.g., "1h", "24h", "7d"). Fire count is calculated from [timestamp - time_window] to [timestamp + time_window]. E.g. "1h" means look back 1h and forward 1h. Default: "1h"'
     ),
 });
 
 const outputSchema = z.object({
   rule_id: z.string(),
   count: z.number(),
-  time_range: z.string(),
+  time_window: z.string(),
   message: z.string(),
 });
+
+export const getRuleFireCountInputSchema = inputSchema;
 
 export const getRuleFireCountStepDefinition = createServerStepDefinition({
   id: 'security.getRuleFireCount',
@@ -39,16 +41,16 @@ export const getRuleFireCountStepDefinition = createServerStepDefinition({
   outputSchema,
   handler: async (context) => {
     try {
-      const { ruleId, timestamp, time_range } = context.input;
+      const { ruleId, timestamp, time_window } = context.input;
       const spaceId = context.contextManager.getContext().workflow.spaceId;
       const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
-      const timeRange = time_range ?? '1h';
+      const timeWindow = time_window ?? '1h';
       const esClient = context.contextManager.getScopedEsClient();
 
-      // Lookback window ending at timestamp (or now if omitted)
+      // Symmetric window: [anchor - time_window, anchor + time_window]
       const anchor = timestamp?.trim() || undefined;
-      const rangeGte = anchor ? `${anchor}||-${timeRange}` : `now-${timeRange}`;
-      const rangeLte = anchor ?? 'now';
+      const rangeGte = anchor ? `${anchor}||-${timeWindow}` : `now-${timeWindow}`;
+      const rangeLte = anchor ? `${anchor}||+${timeWindow}` : `now+${timeWindow}`;
 
       const searchResponse = await esClient.search({
         index: alertsIndex,
@@ -81,10 +83,10 @@ export const getRuleFireCountStepDefinition = createServerStepDefinition({
         output: {
           rule_id: ruleId,
           count: totalCount,
-          time_range: timeRange,
+          time_window: timeWindow,
           message: `Rule ${ruleId} fired ${totalCount} time${
             totalCount !== 1 ? 's' : ''
-          } in the last ${timeRange}.`,
+          } in the ±${timeWindow} window.`,
         },
       };
     } catch (error) {

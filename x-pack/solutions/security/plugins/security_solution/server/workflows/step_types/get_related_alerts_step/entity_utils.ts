@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { DetectionAlert800 } from '../../../../common/api/detection_engine/model/alerts';
+
 export type IgnoreEntitiesConfig = Array<{ field: string; values: string[] }>;
 
 export const fieldToEntityLabel = (field: string): string => {
@@ -15,10 +17,10 @@ export const fieldToEntityLabel = (field: string): string => {
 export const buildIgnoreMap = (ignoreEntities: IgnoreEntitiesConfig): Map<string, Set<string>> => {
   const ignoreMap = new Map<string, Set<string>>();
   for (const entry of ignoreEntities) {
-    if (!ignoreMap.has(entry.field)) {
+    const existing = ignoreMap.get(entry.field);
+    if (!existing) {
       ignoreMap.set(entry.field, new Set(entry.values));
     } else {
-      const existing = ignoreMap.get(entry.field)!;
       for (const v of entry.values) existing.add(v);
     }
   }
@@ -37,14 +39,12 @@ export const getValuesAtPath = (obj: unknown, path: readonly string[]): unknown[
   if (typeof obj !== 'object') return [];
 
   const [head, ...tail] = path;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const next = (obj as any)?.[head];
+  const next = (obj as Record<string, unknown>)[head];
   return getValuesAtPath(next, tail);
 };
 
 export const extractEntityValues = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  source: any,
+  source: DetectionAlert800 | undefined,
   field: string,
   ignoreMap: Map<string, Set<string>>
 ): Set<string> => {
@@ -56,8 +56,9 @@ export const extractEntityValues = (
   const ignore = ignoreMap.get(field);
   const out = new Set<string>();
   for (const v of values) {
-    if (ignore?.has(v)) continue;
-    out.add(v);
+    if (!ignore?.has(v)) {
+      out.add(v);
+    }
   }
   return out;
 };

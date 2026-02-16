@@ -7,7 +7,9 @@
 
 import { z } from '@kbn/zod/v4';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import type { estypes } from '@elastic/elasticsearch';
 import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
+import type { DetectionAlert800 } from '../../../common/api/detection_engine/model/alerts';
 
 const inputSchema = z.object({
   ruleId: z.string().describe('The rule ID'),
@@ -71,6 +73,8 @@ const outputSchema = z.object({
   message: z.string(),
 });
 
+export const getCloseHistoryInputSchema = inputSchema;
+
 export const getCloseHistoryStepDefinition = createServerStepDefinition({
   id: 'security.getCloseHistory',
   inputSchema,
@@ -94,7 +98,7 @@ export const getCloseHistoryStepDefinition = createServerStepDefinition({
       let serviceName: string | undefined;
 
       if (matchEntities && alertId && alertIndex) {
-        const alertResponse = await esClient.search({
+        const alertResponse = await esClient.search<DetectionAlert800>({
           index: alertIndex,
           size: 1,
           _source: ['host', 'user', 'service'],
@@ -106,10 +110,10 @@ export const getCloseHistoryStepDefinition = createServerStepDefinition({
         });
 
         if (alertResponse.hits.hits.length > 0) {
-          const alertSource = alertResponse.hits.hits[0]._source as any;
-          hostName = alertSource?.host?.name;
-          userName = alertSource?.user?.name;
-          serviceName = alertSource?.service?.name;
+          const alertSource = alertResponse.hits.hits[0]._source
+          hostName = alertSource?.['host.name'] as string | undefined;
+          userName = alertSource?.['user.name'] as string | undefined;
+          serviceName = alertSource?.['service.name'] as string | undefined;
         }
       }
 
@@ -119,7 +123,7 @@ export const getCloseHistoryStepDefinition = createServerStepDefinition({
       const rangeLte = anchor ?? 'now';
 
       // Build query filters
-      const mustFilters: any[] = [
+      const mustFilters: estypes.QueryDslQueryContainer[] = [
         {
           term: {
             'kibana.alert.rule.uuid': ruleId,
@@ -142,7 +146,7 @@ export const getCloseHistoryStepDefinition = createServerStepDefinition({
 
       // Add entity filters if match_entities is true
       if (matchEntities) {
-        const entityFilters = [];
+        const entityFilters: estypes.QueryDslQueryContainer[] = [];
         if (hostName) {
           entityFilters.push({ term: { 'host.name': hostName } });
         }
@@ -191,7 +195,7 @@ export const getCloseHistoryStepDefinition = createServerStepDefinition({
         : [];
 
       // Search for closed alerts
-      const closedAlertsResponse = await esClient.search({
+      const closedAlertsResponse = await esClient.search<DetectionAlert800>({
         index: alertsIndex,
         size: 100,
         _source: [
@@ -216,19 +220,24 @@ export const getCloseHistoryStepDefinition = createServerStepDefinition({
       });
 
       const closedAlerts = closedAlertsResponse.hits.hits.map((hit) => {
-        const source = hit._source as any;
+        const source = hit._source as Record<string, unknown> | undefined;
+        const src = (key: string) => source?.[key];
+        const workflowTags = src('kibana.alert.workflow_tags');
+        const tagsArray = Array.isArray(workflowTags)
+          ? (workflowTags.filter((v): v is string => typeof v === 'string') as string[])
+          : [];
         return {
           alert_id: hit._id ?? '',
           alert_index: hit._index ?? '',
-          timestamp: source?.['@timestamp'],
-          rule_name: source?.['kibana.alert.rule.name'],
-          severity: source?.['kibana.alert.severity'],
-          close_reason: source?.['kibana.alert.workflow_reason'] || 'unknown',
-          workflow_tags: source?.['kibana.alert.workflow_tags'] || [],
-          status_updated_at: source?.['kibana.alert.workflow_status_updated_at'],
-          host_name: source?.host?.name,
-          user_name: source?.user?.name,
-          service_name: source?.service?.name,
+          timestamp: src('@timestamp') as string | undefined,
+          rule_name: src('kibana.alert.rule.name') as string | undefined,
+          severity: src('kibana.alert.severity') as string | undefined,
+          close_reason: (src('kibana.alert.workflow_reason') as string | undefined) ?? 'unknown',
+          workflow_tags: tagsArray,
+          status_updated_at: src('kibana.alert.workflow_status_updated_at') as string | undefined,
+          host_name: src('host.name') as string | undefined,
+          user_name: src('user.name') as string | undefined,
+          service_name: src('service.name') as string | undefined,
         };
       });
 
@@ -244,7 +253,7 @@ export const getCloseHistoryStepDefinition = createServerStepDefinition({
         // Check if marked as false positive via reason or tags
         if (
           reason === 'false_positive' ||
-          alert.workflow_tags.some((tag: string) =>
+          alert.workflow_tags.some((tag) =>
             falsePositiveTags.some((fpTag) => tag.toLowerCase().includes(fpTag.toLowerCase()))
           )
         ) {
