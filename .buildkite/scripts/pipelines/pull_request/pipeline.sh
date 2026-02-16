@@ -7,5 +7,15 @@ set -euo pipefail
 (buildkite-agent pipeline upload .buildkite/pipelines/pull_request/store_moon_cache.yml > /dev/null \
  && echo "Uploaded cache-warmup step" >&2) || echo "Failed to upload cache-warmup step" >&2
 
-
+set +e
 ts-node .buildkite/scripts/pipelines/pull_request/pipeline.ts
+pipeline_status=$?
+
+if [[ $pipeline_status -ne 0 ]]; then
+  echo "⚠️ Pipeline generation failed - emitting bogus pipeline to ensure build fails" >&2
+  echo "boom"
+  exit 1
+fi
+
+echo "Pipeline generation successful" >&2
+exit 0
