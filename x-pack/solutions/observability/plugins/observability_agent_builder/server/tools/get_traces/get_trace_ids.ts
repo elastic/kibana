@@ -29,10 +29,8 @@ export async function getTraceIds({
 }): Promise<string[]> {
   const search = getTypedSearch(esClient.asCurrentUser);
 
-  // `traceIdBucketSize` controls the number of unique `trace.id` values returned (terms `size`).
-  const traceIdBucketSize = Math.min(maxTraces, 20);
   // `samplerShardSize` controls how many documents are considered per shard for the nested terms agg.
-  const samplerShardSize = Math.max(200, traceIdBucketSize * 10);
+  const samplerShardSize = Math.max(200, maxTraces * 10);
   const searchRequest = {
     size: 0,
     track_total_hits: false,
@@ -56,7 +54,7 @@ export async function getTraceIds({
           trace_ids: {
             terms: {
               field: TRACE_ID,
-              size: traceIdBucketSize,
+              size: maxTraces,
               execution_hint: 'map' as const,
               // remove bias towards large traces by sorting on trace.id
               // which will be random-esque
