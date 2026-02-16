@@ -123,6 +123,7 @@ describe('CPS project_routing on serverless ES', () => {
 
   afterAll(async () => {
     await client?.indices.delete({ index: TEST_INDEX }).catch(() => {});
+    await client?.close();
     await serverlessKibana?.stop();
     await serverlessES?.stop();
   });
