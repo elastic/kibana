@@ -104,6 +104,13 @@ const workflowTestRunInitiatedSchema: RootSchema<ReportWorkflowTestRunInitiatedA
       optional: true,
     },
   },
+  isReplay: {
+    type: 'boolean',
+    _meta: {
+      description: 'True when the run was initiated from From historical (replay) mode',
+      optional: false,
+    },
+  },
 };
 
 const workflowStepTestRunInitiatedSchema: RootSchema<ReportWorkflowStepTestRunInitiatedActionParams> =

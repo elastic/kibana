@@ -17,6 +17,7 @@ import { selectWorkflow, selectYamlString } from '../selectors';
 export interface TestWorkflowParams {
   inputs: Record<string, unknown>;
   triggerTab?: 'manual' | 'alert' | 'index';
+  isReplay?: boolean;
 }
 
 export interface TestWorkflowResponse {
@@ -29,7 +30,10 @@ export const testWorkflowThunk = createAsyncThunk<
   { state: RootState; extra: { services: WorkflowsServices } }
 >(
   'detail/testWorkflowThunk',
-  async ({ inputs, triggerTab }, { getState, rejectWithValue, extra: { services } }) => {
+  async (
+    { inputs, triggerTab, isReplay = false },
+    { getState, rejectWithValue, extra: { services } }
+  ) => {
     const { http, notifications } = services;
     const workflowsManagement = services.workflowsManagement;
     const telemetry = workflowsManagement?.telemetry
@@ -67,7 +71,8 @@ export const testWorkflowThunk = createAsyncThunk<
         error: undefined,
         editorType: 'yaml',
         origin: 'workflow_detail',
-        triggerTab,
+        triggerTab: isReplay ? undefined : triggerTab,
+        isReplay,
       });
 
       // Show success notification
@@ -96,7 +101,8 @@ export const testWorkflowThunk = createAsyncThunk<
         error: errorObj,
         origin: 'workflow_detail',
         editorType: 'yaml',
-        triggerTab,
+        triggerTab: isReplay ? undefined : triggerTab,
+        isReplay,
       });
 
       notifications.toasts.addError(new Error(errorMessage), {

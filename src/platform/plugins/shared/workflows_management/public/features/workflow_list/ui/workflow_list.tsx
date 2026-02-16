@@ -485,7 +485,9 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           definition={executeWorkflow.definition}
           workflowId={executeWorkflow.id}
           onClose={() => setExecuteWorkflow(null)}
-          onSubmit={(event) => handleRunWorkflow(executeWorkflow.id, event)}
+          onSubmit={(data, triggerTab, _isReplay) =>
+            handleRunWorkflow(executeWorkflow.id, data, triggerTab)
+          }
         />
       )}
     </>

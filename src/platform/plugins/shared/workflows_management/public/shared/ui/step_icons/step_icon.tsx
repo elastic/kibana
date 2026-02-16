@@ -14,7 +14,7 @@ import React, { Suspense } from 'react';
 import type { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { ExecutionStatus } from '@kbn/workflows';
-import { getStepIconType } from './get_step_icon_type';
+import { getStepIconType, getTriggerTypeIconType } from './get_step_icon_type';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getExecutionStatusColors, getExecutionStatusIcon } from '../status_badge';
 
@@ -43,25 +43,31 @@ export const StepIcon = React.memo(
       return <EuiBeacon size={14} color="warning" />;
     }
 
-    const actionTypeIcon = getActionTypeIcon(stepType, actionTypeRegistry);
-    if (actionTypeIcon) {
-      return (
-        <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-          <EuiIcon type={actionTypeIcon} size="m" />
-        </Suspense>
-      );
+    let iconType: IconType;
+    if (stepType.startsWith('trigger_')) {
+      iconType = getTriggerTypeIconType(stepType);
+    } else {
+      const actionTypeIcon = getActionTypeIcon(stepType, actionTypeRegistry);
+      if (actionTypeIcon) {
+        return (
+          <Suspense fallback={<EuiLoadingSpinner size="s" />}>
+            <EuiIcon type={actionTypeIcon} size="m" aria-hidden={true} />
+          </Suspense>
+        );
+      }
+
+      const stepDefinition = workflowsExtensions.getStepDefinition(stepType);
+      if (stepDefinition?.icon) {
+        return (
+          <Suspense fallback={<EuiLoadingSpinner size="s" />}>
+            <EuiIcon type={stepDefinition.icon} size="m" aria-hidden={true} />
+          </Suspense>
+        );
+      }
+
+      iconType = getStepIconType(stepType);
     }
 
-    const stepDefinition = workflowsExtensions.getStepDefinition(stepType);
-    if (stepDefinition?.icon) {
-      return (
-        <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-          <EuiIcon type={stepDefinition.icon} size="m" />
-        </Suspense>
-      );
-    }
-
-    const iconType = getStepIconType(stepType);
     if (iconType.startsWith('token')) {
       return (
         <EuiToken
@@ -100,6 +106,7 @@ export const StepIcon = React.memo(
         }
         onClick={onClick}
         {...rest}
+        aria-hidden={true}
       />
     );
   }

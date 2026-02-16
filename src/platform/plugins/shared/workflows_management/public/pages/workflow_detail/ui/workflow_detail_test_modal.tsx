@@ -13,10 +13,14 @@ import { i18n } from '@kbn/i18n';
 import {
   selectEditorYaml,
   selectIsTestModalOpen,
+  selectReplayExecutionId,
   selectWorkflowDefinition,
   selectWorkflowId,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
-import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
+import {
+  setIsTestModalOpen,
+  setReplayExecutionId,
+} from '../../../entities/workflows/store/workflow_detail/slice';
 import { testWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/test_workflow_thunk';
 import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
 import { useAsyncThunk } from '../../../hooks/use_async_thunk';
@@ -32,6 +36,7 @@ export const WorkflowDetailTestModal = () => {
   const { setSelectedExecution } = useWorkflowUrlState();
 
   const isTestModalOpen = useSelector(selectIsTestModalOpen);
+  const replayExecutionId = useSelector(selectReplayExecutionId);
   const definition = useSelector(selectWorkflowDefinition);
   const workflowId = useSelector(selectWorkflowId);
   const yamlString = useSelector(selectEditorYaml);
@@ -39,8 +44,12 @@ export const WorkflowDetailTestModal = () => {
   const testWorkflow = useAsyncThunk(testWorkflowThunk);
 
   const handleRunWorkflow = useCallback(
-    async (inputs: Record<string, unknown>, triggerTab?: 'manual' | 'alert' | 'index') => {
-      const executionId = await testWorkflow({ inputs, triggerTab });
+    async (
+      inputs: Record<string, unknown>,
+      triggerTab: 'manual' | 'alert' | 'index' | undefined,
+      isReplay: boolean
+    ) => {
+      const executionId = await testWorkflow({ inputs, triggerTab, isReplay });
 
       if (executionId) {
         setSelectedExecution(executionId.workflowExecutionId);
@@ -51,6 +60,7 @@ export const WorkflowDetailTestModal = () => {
 
   const closeModal = useCallback(() => {
     dispatch(setIsTestModalOpen(false));
+    dispatch(setReplayExecutionId(null));
   }, [dispatch]);
 
   useEffect(() => {
@@ -87,6 +97,8 @@ export const WorkflowDetailTestModal = () => {
       yamlString={yamlString}
       onClose={closeModal}
       onSubmit={handleRunWorkflow}
+      initialExecutionId={replayExecutionId ?? undefined}
+      initialInputMode={replayExecutionId ? 'replay' : 'new_run'}
     />
   );
 };

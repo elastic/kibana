@@ -8,6 +8,7 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
+import type { WorkflowTriggerTab } from '../../features/run_workflow/ui/types';
 import type { YamlValidationResult } from '../../features/validate_workflow_yaml/model/types';
 import {
   workflowEventNames,
@@ -16,7 +17,6 @@ import {
   WorkflowUIEventTypes,
   WorkflowValidationEventTypes,
 } from '../lib/telemetry/events/workflows';
-import type { WorkflowTriggerTab } from '../lib/telemetry/events/workflows/execution/types';
 import type {
   WorkflowEditorType,
   WorkflowTelemetryOrigin,
@@ -329,8 +329,10 @@ export class WorkflowsBaseTelemetry {
     editorType?: WorkflowEditorType;
     origin?: WorkflowTelemetryOrigin;
     triggerTab?: WorkflowTriggerTab;
+    isReplay: boolean;
   }) => {
-    const { workflowId, hasInputs, inputCount, error, editorType, origin, triggerTab } = params;
+    const { workflowId, hasInputs, inputCount, error, editorType, origin, triggerTab, isReplay } =
+      params;
     this.telemetryService.reportEvent(WorkflowExecutionEventTypes.WorkflowTestRunInitiated, {
       eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowTestRunInitiated],
       ...(workflowId && { workflowId }),
@@ -339,6 +341,7 @@ export class WorkflowsBaseTelemetry {
       ...(editorType && { editorType }),
       ...(origin && { origin }),
       ...(triggerTab && { triggerTab }),
+      isReplay,
       ...this.getBaseResultParams(error),
     });
   };

@@ -66,6 +66,11 @@ export const selectIsTestModalOpen = createSelector(
   (detail) => detail.isTestModalOpen
 );
 
+export const selectReplayExecutionId = createSelector(
+  selectDetail,
+  (detail) => detail.replayExecutionId
+);
+
 export const selectIsSavingYaml = createSelector(
   selectDetail,
   (detail) => detail.loading.isSavingYaml

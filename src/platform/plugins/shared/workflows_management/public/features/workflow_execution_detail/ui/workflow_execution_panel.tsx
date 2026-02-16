@@ -10,6 +10,7 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -17,15 +18,21 @@ import {
   EuiLink,
   EuiPanel,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { isCancelableStatus, isTerminalStatus } from '@kbn/workflows';
 import { CancelExecutionButton } from './cancel_execution_button';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
+import {
+  setIsTestModalOpen,
+  setReplayExecutionId,
+} from '../../../entities/workflows/store/workflow_detail/slice';
 
 const i18nTexts = {
   backToExecutions: i18n.translate('workflows.workflowStepExecutionList.backToExecution', {
@@ -33,6 +40,9 @@ const i18nTexts = {
   }),
   done: i18n.translate('workflows.workflowStepExecutionList.done', {
     defaultMessage: 'Done',
+  }),
+  replay: i18n.translate('workflows.workflowStepExecutionList.replay', {
+    defaultMessage: 'Run again',
   }),
 };
 
@@ -55,6 +65,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
     selectedId: selectedStepExecutionId,
     onClose,
   }) => {
+    const dispatch = useDispatch();
     const styles = useMemoCss(componentStyles);
     const showCancelButton = useMemo<boolean>(
       () => Boolean(execution && isCancelableStatus(execution.status)),
@@ -64,6 +75,13 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
       () => Boolean(!showBackButton && execution && isTerminalStatus(execution.status)),
       [showBackButton, execution]
     );
+
+    const replayExecution = useCallback(() => {
+      if (execution?.id) {
+        dispatch(setReplayExecutionId(execution.id));
+        dispatch(setIsTestModalOpen(true));
+      }
+    }, [execution?.id, dispatch]);
 
     return (
       <EuiFlexGroup
@@ -78,7 +96,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
               <EuiPanel paddingSize="m" hasShadow={false} css={styles.linkCss}>
                 <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="sortLeft" />
+                    <EuiIcon type="sortLeft" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xxs">
@@ -117,15 +135,32 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
               ) : (
                 <>
                   {showDoneButton && (
-                    <EuiButton
-                      onClick={onClose}
-                      iconType="check"
-                      size="s"
-                      fullWidth
-                      aria-label={i18nTexts.done}
-                    >
-                      {i18nTexts.done}
-                    </EuiButton>
+                    <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+                      <EuiFlexItem grow={false}>
+                        <EuiToolTip content={i18nTexts.replay} disableScreenReaderOutput>
+                          <EuiButtonIcon
+                            onClick={replayExecution}
+                            iconType="refresh"
+                            size="s"
+                            color="success"
+                            aria-label={i18nTexts.replay}
+                            display="base"
+                            data-test-subj="replayExecutionButton"
+                          />
+                        </EuiToolTip>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiButton
+                          onClick={onClose}
+                          iconType="check"
+                          size="s"
+                          fullWidth
+                          aria-label={i18nTexts.done}
+                        >
+                          {i18nTexts.done}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   )}
                 </>
               )}

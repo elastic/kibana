@@ -9,8 +9,10 @@
 
 import {
   EuiButton,
+  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -22,23 +24,23 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
-import { capitalize } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { parseDocument } from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
+import { ENABLED_TRIGGER_TABS } from './constants';
+import { TRIGGER_TABS_DESCRIPTIONS, TRIGGER_TABS_LABELS } from './translations';
+import type { WorkflowTriggerTab } from './types';
 import { useExecutionInput } from './use_execution_input/use_execution_input';
 import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
-import { MANUAL_TRIGGERS_DESCRIPTIONS } from '../../../../common/translations';
-import type { WorkflowTriggerTab } from '../../../common/lib/telemetry/events/workflows/execution/types';
+import { WorkflowExecuteReplay } from './workflow_execute_replay';
+import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 
-type TriggerType = 'manual' | 'index' | 'alert';
-
-function getDefaultTrigger(definition: WorkflowYaml | null): TriggerType {
+function getDefaultTrigger(definition: WorkflowYaml | null): WorkflowTriggerTab {
   if (!definition) {
     return 'alert';
   }
@@ -55,20 +57,48 @@ function getDefaultTrigger(definition: WorkflowYaml | null): TriggerType {
   return 'alert';
 }
 
-interface WorkflowExecuteModalProps {
+export type InputMode = 'new_run' | 'replay';
+
+export interface WorkflowExecuteModalProps {
   definition: WorkflowYaml | null;
   workflowId?: string;
   isTestRun: boolean;
   onClose: () => void;
-  onSubmit: (data: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => void;
+  onSubmit: (
+    data: Record<string, unknown>,
+    triggerTab: WorkflowTriggerTab | undefined,
+    isReplay: boolean
+  ) => void;
   yamlString?: string;
+  /** When set, open in replay mode with this execution pre-selected */
+  initialExecutionId?: string;
+  /** Initial input mode; defaults to new_run if no initialExecutionId */
+  initialInputMode?: InputMode;
 }
 export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
-  ({ definition, workflowId, onClose, onSubmit, isTestRun, yamlString }) => {
+  ({
+    definition,
+    workflowId,
+    onClose,
+    onSubmit,
+    isTestRun,
+    yamlString,
+    initialExecutionId,
+    initialInputMode,
+  }) => {
     const modalTitleId = useGeneratedHtmlId();
-    const enabledTriggers = ['alert', 'index', 'manual'];
+    const inputModeButtonId = useGeneratedHtmlId();
     const defaultTrigger = useMemo(() => getDefaultTrigger(definition), [definition]);
-    const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>(defaultTrigger);
+    const [selectedTrigger, setSelectedTrigger] = useState<WorkflowTriggerTab>(defaultTrigger);
+
+    const defaultInputMode: InputMode =
+      initialInputMode ?? (initialExecutionId ? 'replay' : 'new_run');
+    const [inputMode, setInputMode] = useState<InputMode>(defaultInputMode);
+    const [selectedReplayExecutionId, setSelectedReplayExecutionId] = useState<string | null>(
+      initialExecutionId ?? null
+    );
+    const [replayEditorValue, setReplayEditorValue] = useState<string>('{}');
+    const [replayEditorErrors, setReplayEditorErrors] = useState<string | null>(null);
 
     const { executionInput, setExecutionInput } = useExecutionInput({
       workflowName: definition?.name || '',
@@ -79,18 +109,45 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
 
     const { euiTheme } = useEuiTheme();
 
+    const { isLoading: isLoadingReplayExecution } = useWorkflowExecution({
+      executionId: inputMode === 'replay' ? selectedReplayExecutionId : null,
+      enabled: inputMode === 'replay' && selectedReplayExecutionId !== null,
+    });
+
     const handleSubmit = useCallback(() => {
-      onSubmit(JSON.parse(executionInput), selectedTrigger);
+      if (inputMode === 'replay') {
+        try {
+          const parsed = JSON.parse(replayEditorValue) as Record<string, unknown>;
+          onSubmit(parsed, undefined, true);
+          onClose();
+        } catch (e) {
+          setReplayEditorErrors(
+            e instanceof Error
+              ? e.message
+              : i18n.translate('workflows.workflowExecuteModal.invalidJson', {
+                  defaultMessage: 'Invalid JSON',
+                })
+          );
+        }
+        return;
+      }
+      onSubmit(JSON.parse(executionInput), selectedTrigger, false);
       onClose();
-    }, [onSubmit, onClose, executionInput, selectedTrigger]);
+    }, [inputMode, onSubmit, onClose, executionInput, selectedTrigger, replayEditorValue]);
 
     const handleChangeTrigger = useCallback(
-      (trigger: TriggerType): void => {
+      (trigger: WorkflowTriggerTab): void => {
         setExecutionInput('');
         setSelectedTrigger(trigger);
       },
       [setExecutionInput, setSelectedTrigger]
     );
+
+    const isReplaySubmitDisabled =
+      inputMode === 'replay' &&
+      (selectedReplayExecutionId === null ||
+        isLoadingReplayExecution ||
+        Boolean(replayEditorErrors));
 
     // Extract inputs from yamlString if definition.inputs is undefined
     const inputs = useMemo(() => {
@@ -128,7 +185,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
 
     useEffect(() => {
       if (shouldAutoRun) {
-        onSubmit({}, 'manual'); // Auto-run defaults to manual trigger
+        onSubmit({}, 'manual', false);
         onClose();
         return;
       }
@@ -201,92 +258,150 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
-            <EuiFlexGroup direction="row" gutterSize="l">
-              {enabledTriggers.map((trigger) => (
-                <EuiFlexItem key={trigger}>
-                  <EuiButton
-                    color={selectedTrigger === trigger ? 'primary' : 'text'}
-                    onClick={() => handleChangeTrigger(trigger as TriggerType)}
-                    iconSide="right"
-                    contentProps={{
-                      style: {
-                        justifyContent: 'flex-start',
-                        flexDirection: 'column',
-                        alignItems: 'flex-start',
-                        padding: selectedTrigger === trigger ? '10px' : '9px',
-                        textAlign: 'left',
+            <EuiFlexGroup direction="column" gutterSize="m">
+              <EuiFlexItem grow={false}>
+                <EuiFormRow
+                  label={i18n.translate('workflows.workflowExecuteModal.inputModeLabel', {
+                    defaultMessage: 'Input',
+                  })}
+                >
+                  <EuiButtonGroup
+                    id={inputModeButtonId}
+                    legend={i18n.translate('workflows.workflowExecuteModal.inputModeLegend', {
+                      defaultMessage: 'Choose input mode',
+                    })}
+                    options={[
+                      {
+                        id: 'new_run',
+                        label: i18n.translate('workflows.workflowExecuteModal.inputModeNewRun', {
+                          defaultMessage: 'New input',
+                        }),
                       },
-                    }}
-                    css={css`
-                      width: 100%;
-                      height: fit-content;
-                      min-height: 100%;
-                      svg,
-                      img {
-                        margin-left: auto;
-                      }
-                    `}
-                  >
-                    <EuiRadio
-                      name={capitalize(trigger)}
-                      label={capitalize(trigger)}
-                      id={trigger}
-                      checked={selectedTrigger === trigger}
-                      onChange={() => {}}
-                    />
-                    <EuiText
-                      size="s"
-                      css={css`
-                        text-wrap: auto;
-                        margin-left: ${euiTheme.size.l};
-                      `}
-                    >
-                      {MANUAL_TRIGGERS_DESCRIPTIONS[trigger]}
-                    </EuiText>
-                  </EuiButton>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
+                      {
+                        id: 'replay',
+                        label: i18n.translate(
+                          'workflows.workflowExecuteModal.inputModeFromHistorical',
+                          {
+                            defaultMessage: 'From historical',
+                          }
+                        ),
+                      },
+                    ]}
+                    idSelected={inputMode}
+                    onChange={(id) => setInputMode(id as InputMode)}
+                    color="primary"
+                    data-test-subj="workflowExecuteModalInputModeButtonGroup"
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
 
-            {selectedTrigger === 'alert' && (
-              <WorkflowExecuteEventForm
-                value={executionInput}
-                setValue={setExecutionInput}
-                errors={executionInputErrors}
-                setErrors={setExecutionInputErrors}
-              />
-            )}
-            {selectedTrigger === 'manual' && (
-              <WorkflowExecuteManualForm
-                definition={
-                  definition
-                    ? {
-                        ...definition,
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        inputs: inputs as any,
+              {inputMode === 'new_run' && (
+                <>
+                  <EuiFlexItem>
+                    <EuiFlexGroup direction="row" gutterSize="l">
+                      {ENABLED_TRIGGER_TABS.map((trigger) => (
+                        <EuiFlexItem key={trigger}>
+                          <EuiButton
+                            color={selectedTrigger === trigger ? 'primary' : 'text'}
+                            onClick={() => handleChangeTrigger(trigger)}
+                            iconSide="right"
+                            contentProps={{
+                              style: {
+                                justifyContent: 'flex-start',
+                                flexDirection: 'column',
+                                alignItems: 'flex-start',
+                                padding: selectedTrigger === trigger ? '10px' : '9px',
+                                textAlign: 'left',
+                              },
+                            }}
+                            css={css`
+                              width: 100%;
+                              height: fit-content;
+                              min-height: 100%;
+                              svg,
+                              img {
+                                margin-left: auto;
+                              }
+                            `}
+                          >
+                            <EuiRadio
+                              name={TRIGGER_TABS_LABELS[trigger]}
+                              label={TRIGGER_TABS_LABELS[trigger]}
+                              id={trigger}
+                              checked={selectedTrigger === trigger}
+                              onChange={() => {}}
+                            />
+                            <EuiText
+                              size="s"
+                              css={css`
+                                text-wrap: auto;
+                                margin-left: ${euiTheme.size.l};
+                              `}
+                            >
+                              {TRIGGER_TABS_DESCRIPTIONS[trigger]}
+                            </EuiText>
+                          </EuiButton>
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+
+                  {selectedTrigger === 'alert' && (
+                    <WorkflowExecuteEventForm
+                      value={executionInput}
+                      setValue={setExecutionInput}
+                      errors={executionInputErrors}
+                      setErrors={setExecutionInputErrors}
+                    />
+                  )}
+                  {selectedTrigger === 'manual' && (
+                    <WorkflowExecuteManualForm
+                      definition={
+                        definition
+                          ? {
+                              ...definition,
+                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                              inputs: inputs as any,
+                            }
+                          : null
                       }
-                    : null
-                }
-                value={executionInput}
-                errors={executionInputErrors}
-                setErrors={setExecutionInputErrors}
-                setValue={setExecutionInput}
-              />
-            )}
-            {selectedTrigger === 'index' && (
-              <WorkflowExecuteIndexForm
-                value={executionInput}
-                setValue={setExecutionInput}
-                errors={executionInputErrors}
-                setErrors={setExecutionInputErrors}
-              />
-            )}
+                      value={executionInput}
+                      errors={executionInputErrors}
+                      setErrors={setExecutionInputErrors}
+                      setValue={setExecutionInput}
+                    />
+                  )}
+                  {selectedTrigger === 'index' && (
+                    <WorkflowExecuteIndexForm
+                      value={executionInput}
+                      setValue={setExecutionInput}
+                      errors={executionInputErrors}
+                      setErrors={setExecutionInputErrors}
+                    />
+                  )}
+                </>
+              )}
+
+              {inputMode === 'replay' && (
+                <WorkflowExecuteReplay
+                  workflowId={workflowId}
+                  selectedExecutionId={selectedReplayExecutionId}
+                  onSelectionChange={setSelectedReplayExecutionId}
+                  editorValue={replayEditorValue}
+                  onEditorChange={setReplayEditorValue}
+                  editorErrors={replayEditorErrors}
+                  onEditorErrorsChange={setReplayEditorErrors}
+                />
+              )}
+            </EuiFlexGroup>
           </EuiModalBody>
           <EuiModalFooter>
             <EuiButton
               onClick={handleSubmit}
               iconType="play"
-              disabled={Boolean(executionInputErrors)}
+              disabled={
+                inputMode === 'replay' ? isReplaySubmitDisabled : Boolean(executionInputErrors)
+              }
               color="success"
               data-test-subj="executeWorkflowButton"
             >
