@@ -48,6 +48,10 @@ export const request = async <T = unknown>({
   timeout?: number;
   sslOverrides?: SSLSettings;
   connectorUsageCollector?: ConnectorUsageCollector;
+  /**
+   *  keep-alive is only supported for https connections or proxied http connections
+   *  It will be ignored for non-proxied http connections, this issue is tracked in https://github.com/elastic/kibana/issues/252991
+   **/
   keepAlive?: boolean;
 } & AxiosRequestConfig): Promise<AxiosResponse> => {
   if (!isEmpty(axios?.defaults?.baseURL ?? '')) {
