@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TabsBarMenu } from './tabs_bar_menu';
 import type { TabItem } from '../../types';
@@ -92,7 +92,7 @@ describe('TabsBarMenu', () => {
     const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
     await user.click(menuButton);
 
-    const secondTabOption = (await screen.findAllByRole('option'))[1];
+    const secondTabOption = await screen.findByTestId('unifiedTabs_tabsMenu_openedTab_tab2');
     await user.click(secondTabOption);
 
     expect(mockOnSelectOpenedTab).toHaveBeenCalledWith(mockTabs[1]);
@@ -205,8 +205,8 @@ describe('TabsBarMenu', () => {
     const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
     await user.click(menuButton);
 
-    const selectedTabOption = (await screen.findAllByText(mockTabs[0].label))[0];
-    expect(selectedTabOption.closest('[aria-selected="true"]')).toBeInTheDocument();
+    const selectedTabOption = await screen.findByTestId('unifiedTabs_tabsMenu_openedTab_tab1');
+    expect(selectedTabOption).toHaveAttribute('aria-label', 'Tab 1, selected tab');
   });
 
   it('displays relative time for recently closed items', async () => {
@@ -255,8 +255,7 @@ describe('TabsBarMenu', () => {
     const groupTabItem = await screen.findByTestId(
       `unifiedTabs_tabsMenu_recentlyClosedGroupTab_${mockRecentlyClosedGroup[0].id}`
     );
-    const groupTabText = within(groupTabItem).getByTestId('fullText');
-    await user.hover(groupTabText);
+    await user.hover(groupTabItem);
 
     // Wait for the preview to appear
     const title = await screen.findByTestId(

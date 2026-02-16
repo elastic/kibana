@@ -11,13 +11,12 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import moment from 'moment';
-import type { EuiSelectableOption, EuiSelectableOptionsListProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiContextMenu,
+  EuiContextMenuItem,
   EuiPopover,
   useGeneratedHtmlId,
-  EuiSelectable,
   EuiPopoverTitle,
   EuiHorizontalRule,
   EuiToolTip,
@@ -35,24 +34,7 @@ import type { RecentlyClosedTabItem, TabPreviewData } from '../../types';
 import type { TabItem } from '../../types';
 import { TabPreview } from '../tab_preview';
 
-interface OptionData {
-  // lowercase names because EUI applies these to the DOM and React warns against non-lowercase attributes
-  tabitem: TabItem;
-}
-
-const getOpenedTabsList = (
-  tabItems: TabItem[],
-  selectedTab: TabItem | null
-): EuiSelectableOption<OptionData>[] => {
-  return tabItems.map((tab) => ({
-    label: tab.label,
-    checked: selectedTab && tab.id === selectedTab.id ? 'on' : undefined,
-    key: tab.id,
-    tabitem: tab,
-    title: undefined, // disable default title tooltip
-  }));
-};
-
+const OPENED_TABS_ROOT_PANEL_ID = 'openedTabsRoot';
 const RECENTLY_CLOSED_ROOT_PANEL_ID = 'recentlyClosedRoot';
 
 export interface TabsBarMenuProps {
@@ -77,11 +59,6 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
     onRestoreRecentlyClosedGroup,
     onClearRecentlyClosed,
   }) => {
-    const openedTabsList: EuiSelectableOption<OptionData>[] = useMemo(
-      () => getOpenedTabsList(items, selectedItem),
-      [items, selectedItem]
-    );
-
     const [isPopoverOpen, setPopover] = useState(false);
     const [previewTabId, setPreviewTabId] = useState<string | null>(null);
     const contextMenuPopoverId = useGeneratedHtmlId();
@@ -94,54 +71,92 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
       setPopover(false);
     }, [setPopover]);
 
-    const selectableListProps = {
-      onFocusBadge: false,
-      truncationProps: {
-        truncation: 'middle',
-      },
-    } as Partial<EuiSelectableOptionsListProps>;
+    const getOpenedTabItemContents = useCallback((item: TabItem): React.ReactNode => {
+      return <EuiTextTruncate truncation="middle" text={item.label} title={undefined} />;
+    }, []);
 
-    const renderOption = useCallback(
-      (option: EuiSelectableOption<OptionData>) => {
-        const itemContents = (
-          <>
-            {/* title set to undefined to disable default tooltip */}
-            <EuiTextTruncate truncation="middle" text={option.label} title={undefined} />
-          </>
-        );
+    const openedTabsPanels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
+      const openedTabItems: EuiContextMenuPanelItemDescriptor[] = items.map((tab) => {
+        const isSelected = selectedItem?.id === tab.id;
+        const icon = isSelected ? 'check' : 'empty';
+        const name = getOpenedTabItemContents(tab);
+        const ariaLabel = isSelected
+          ? i18n.translate('unifiedTabs.tabsBarMenu.openedTabSelectedAriaLabel', {
+              defaultMessage: '{tabLabel}, selected tab',
+              values: { tabLabel: tab.label },
+            })
+          : tab.label;
 
-        if (!getPreviewData) {
-          return itemContents;
+        const onClick = () => {
+          onSelect(tab);
+          closePopover();
+        };
+
+        if (getPreviewData) {
+          return {
+            key: tab.id,
+            renderItem: () => {
+              return (
+                <TabPreview
+                  showPreview={previewTabId === tab.id}
+                  setShowPreview={() =>
+                    setPreviewTabId((prev) => (prev === tab.id ? null : tab.id))
+                  }
+                  tabItem={{ id: tab.id, label: tab.label }}
+                  previewData={getPreviewData(tab)}
+                  previewDelay={0}
+                  position="left"
+                >
+                  <EuiContextMenuItem
+                    icon={icon}
+                    size="s"
+                    onClick={onClick}
+                    data-test-subj={`unifiedTabs_tabsMenu_openedTab_${tab.id}`}
+                    aria-label={ariaLabel}
+                  >
+                    {name}
+                  </EuiContextMenuItem>
+                </TabPreview>
+              );
+            },
+          };
         }
 
-        const previewData = getPreviewData(option.tabitem);
+        return {
+          name,
+          icon,
+          onClick,
+          'data-test-subj': `unifiedTabs_tabsMenu_openedTab_${tab.id}`,
+          'aria-label': ariaLabel,
+          size: 's',
+        };
+      });
 
-        return (
-          <TabPreview
-            showPreview={previewTabId === option.key}
-            setShowPreview={() =>
-              setPreviewTabId((prev) => (prev === option.key ? null : (option.key as string)))
-            }
-            tabItem={{ id: option.key as string, label: option.label }}
-            previewData={previewData}
-            previewDelay={0}
-            position="left"
-          >
-            <div>{itemContents}</div>
-          </TabPreview>
-        );
-      },
-      [previewTabId, getPreviewData]
-    );
+      return [
+        {
+          id: OPENED_TABS_ROOT_PANEL_ID,
+          items: openedTabItems,
+          size: 's',
+        },
+      ];
+    }, [
+      items,
+      selectedItem,
+      getOpenedTabItemContents,
+      onSelect,
+      closePopover,
+      getPreviewData,
+      previewTabId,
+    ]);
 
-    const getRecentlyClosedItemName = useCallback(
+    const getRecentlyClosedItemContents = useCallback(
       (
         item: TabItem,
         formattedTime?: string,
         options?: { includeTimeLine?: boolean }
       ): React.ReactNode => {
         const includeTimeLine = options?.includeTimeLine ?? Boolean(formattedTime);
-        const itemContents = (
+        return (
           <>
             <EuiTextTruncate truncation="middle" text={item.label} title={undefined} />
             {includeTimeLine && formattedTime ? (
@@ -151,27 +166,8 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
             ) : null}
           </>
         );
-
-        if (!getPreviewData) {
-          return itemContents;
-        }
-
-        const previewData = getPreviewData(item);
-
-        return (
-          <TabPreview
-            showPreview={previewTabId === item.id}
-            setShowPreview={() => setPreviewTabId((prev) => (prev === item.id ? null : item.id))}
-            tabItem={{ id: item.id, label: item.label }}
-            previewData={previewData}
-            previewDelay={0}
-            position="left"
-          >
-            <div>{itemContents}</div>
-          </TabPreview>
-        );
       },
-      [getPreviewData, previewTabId]
+      []
     );
 
     const recentlyClosedPanels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
@@ -207,15 +203,46 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
 
         if (groupItems.length === 1) {
           const tab = groupItems[0];
-          rootItems.push({
-            name: getRecentlyClosedItemName(tab, formattedTime),
-            onClick: () => {
-              onSelectRecentlyClosed(tab);
-              closePopover();
-            },
-            // Preserve existing test id for single items.
-            'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedTab_${tab.id}`,
-          });
+          const onClick = () => {
+            onSelectRecentlyClosed(tab);
+            closePopover();
+          };
+
+          const name = getRecentlyClosedItemContents(tab, formattedTime);
+
+          if (getPreviewData) {
+            rootItems.push({
+              key: tab.id,
+              renderItem: () => (
+                <TabPreview
+                  showPreview={previewTabId === tab.id}
+                  setShowPreview={() =>
+                    setPreviewTabId((prev) => (prev === tab.id ? null : tab.id))
+                  }
+                  tabItem={{ id: tab.id, label: tab.label }}
+                  previewData={getPreviewData(tab)}
+                  previewDelay={0}
+                  position="left"
+                >
+                  <EuiContextMenuItem
+                    size="s"
+                    onClick={onClick}
+                    data-test-subj={`unifiedTabs_tabsMenu_recentlyClosedTab_${tab.id}`}
+                  >
+                    {name}
+                  </EuiContextMenuItem>
+                </TabPreview>
+              ),
+            });
+          } else {
+            rootItems.push({
+              name,
+              onClick,
+              size: 's',
+              // Preserve existing test id for single items.
+              'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedTab_${tab.id}`,
+            });
+          }
           continue;
         }
 
@@ -244,23 +271,68 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
 
         const groupPanelItems: EuiContextMenuPanelItemDescriptor[] = [
           {
-            name: i18n.translate('unifiedTabs.tabsBarMenu.restoreAllTabs', {
-              defaultMessage: 'Restore all tabs',
-            }),
-            onClick: () => {
-              onRestoreRecentlyClosedGroup(groupItems);
-              closePopover();
-            },
-            'data-test-subj': 'unifiedTabs_tabsMenu_restoreAllTabs',
+            key: 'restoreAllTabs',
+            renderItem: () => (
+              <EuiContextMenuItem
+                size="s"
+                onClick={() => {
+                  onRestoreRecentlyClosedGroup(groupItems);
+                  closePopover();
+                }}
+                data-test-subj="unifiedTabs_tabsMenu_restoreAllTabs"
+              >
+                {i18n.translate('unifiedTabs.tabsBarMenu.restoreAllTabs', {
+                  defaultMessage: 'Restore all tabs',
+                })}
+              </EuiContextMenuItem>
+            ),
           },
-          ...groupItems.map<EuiContextMenuPanelItemDescriptor>((tab) => ({
-            name: getRecentlyClosedItemName(tab, undefined, { includeTimeLine: false }),
-            onClick: () => {
+          {
+            key: 'restoreAllTabsSeparator',
+            isSeparator: true,
+            margin: 'none',
+          },
+          ...groupItems.map<EuiContextMenuPanelItemDescriptor>((tab) => {
+            const onClick = () => {
               onSelectRecentlyClosed(tab);
               closePopover();
-            },
-            'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedGroupTab_${tab.id}`,
-          })),
+            };
+
+            const name = getRecentlyClosedItemContents(tab, undefined, { includeTimeLine: false });
+
+            if (getPreviewData) {
+              return {
+                key: tab.id,
+                renderItem: () => (
+                  <TabPreview
+                    showPreview={previewTabId === tab.id}
+                    setShowPreview={() =>
+                      setPreviewTabId((prev) => (prev === tab.id ? null : tab.id))
+                    }
+                    tabItem={{ id: tab.id, label: tab.label }}
+                    previewData={getPreviewData(tab)}
+                    previewDelay={0}
+                    position="left"
+                  >
+                    <EuiContextMenuItem
+                      size="s"
+                      onClick={onClick}
+                      data-test-subj={`unifiedTabs_tabsMenu_recentlyClosedGroupTab_${tab.id}`}
+                    >
+                      {name}
+                    </EuiContextMenuItem>
+                  </TabPreview>
+                ),
+              };
+            }
+
+            return {
+              name,
+              onClick,
+              size: 's',
+              'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedGroupTab_${tab.id}`,
+            };
+          }),
         ];
 
         panels.push({
@@ -270,22 +342,27 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
             values: { count: groupItems.length },
           }),
           items: groupPanelItems,
+          size: 's',
         });
       }
 
       panels.unshift({
         id: RECENTLY_CLOSED_ROOT_PANEL_ID,
         items: rootItems,
+        size: 's',
       });
 
       return panels;
     }, [
       recentlyClosedItems,
-      getRecentlyClosedItemName,
+      getRecentlyClosedItemContents,
       isPopoverOpen,
       onSelectRecentlyClosed,
       onRestoreRecentlyClosedGroup,
       closePopover,
+      getPreviewData,
+      previewTabId,
+      setPreviewTabId,
     ]);
 
     return (
@@ -316,34 +393,16 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
           </EuiToolTip>
         }
       >
-        <EuiSelectable
-          aria-label={i18n.translate('unifiedTabs.tabsBarMenu.openedTabsList', {
-            defaultMessage: 'Opened tabs list',
+        <EuiPopoverTitle paddingSize="s">
+          {i18n.translate('unifiedTabs.tabsBarMenu.openedItems', {
+            defaultMessage: 'Opened tabs',
           })}
-          options={openedTabsList}
-          onChange={(newOptions) => {
-            const clickedTabId = newOptions.find((option) => option.checked)?.key;
-            const tabToNavigate = items.find((tab) => tab.id === clickedTabId);
-            if (tabToNavigate) {
-              onSelect(tabToNavigate);
-              closePopover();
-            }
-          }}
-          renderOption={renderOption}
-          singleSelection="always"
-          listProps={selectableListProps}
-        >
-          {(tabs) => (
-            <>
-              <EuiPopoverTitle paddingSize="s">
-                {i18n.translate('unifiedTabs.tabsBarMenu.openedItems', {
-                  defaultMessage: 'Opened tabs',
-                })}
-              </EuiPopoverTitle>
-              {tabs}
-            </>
-          )}
-        </EuiSelectable>
+        </EuiPopoverTitle>
+        <EuiContextMenu
+          initialPanelId={OPENED_TABS_ROOT_PANEL_ID}
+          panels={openedTabsPanels}
+          data-test-subj="unifiedTabs_tabsMenu_openedTabsContextMenu"
+        />
         {recentlyClosedItems.length > 0 && (
           <>
             <EuiHorizontalRule margin="none" />
