@@ -30,6 +30,7 @@ import {
   checkSeverityCompliance,
   checkEvidenceGrounding,
   checkTitleQuality,
+  CHECK_IDS,
   calculateSignificantEventsQuality,
   buildMetricsReasoning,
   type CheckResult,
@@ -100,12 +101,11 @@ const validateQuery = async ({
   const executionCheck: CheckResult = syntaxResult.passed
     ? await checkExecutionHit(kql, testIndex, esClient)
     : {
-        check: 'execution_hit',
+        check: CHECK_IDS.executionHit,
         passed: false,
         expected: '> 0 hits',
         actual: 'skipped (invalid KQL syntax)',
       };
-  const isExecutionHit = executionCheck.passed;
 
   // 3. Category Compliance
   const categoryResult = checkCategoryCompliance(category, ALLOWED_CATEGORIES);
@@ -124,12 +124,6 @@ const validateQuery = async ({
     title,
     category,
     severityScore,
-    isSyntaxValid: syntaxResult.passed,
-    isExecutionHit,
-    isCategoryCompliant: categoryResult.passed,
-    isSeverityCompliant: severityResult.passed,
-    hasValidEvidence: evidenceResult.passed,
-    hasMeaningfulTitle: titleResult.passed,
     checks: [
       syntaxResult,
       executionCheck,

@@ -39,9 +39,20 @@ if (Math.abs(WEIGHT_SUM - 1) > 1e-9) {
   throw new Error(`Composite score weights must sum to 1.0, got ${WEIGHT_SUM}`);
 }
 
+export const CHECK_IDS = Object.freeze({
+  kqlSyntax: 'kql_syntax',
+  executionHit: 'execution_hit',
+  categoryCompliance: 'category_compliance',
+  severityCompliance: 'severity_compliance',
+  evidenceGrounding: 'evidence_grounding',
+  titleQuality: 'title_quality',
+});
+
+export type CheckId = (typeof CHECK_IDS)[keyof typeof CHECK_IDS];
+
 /** Result of a single atomic check on one query */
 export interface CheckResult {
-  check: string;
+  check: CheckId;
   passed: boolean;
   expected?: string;
   actual: string;
@@ -53,12 +64,6 @@ export interface QueryValidationDetail {
   title: string;
   category: string;
   severityScore: number;
-  isSyntaxValid: boolean;
-  isExecutionHit: boolean;
-  isCategoryCompliant: boolean;
-  isSeverityCompliant: boolean;
-  hasValidEvidence: boolean;
-  hasMeaningfulTitle: boolean;
   checks: CheckResult[];
 }
 
@@ -97,10 +102,10 @@ const getErrorMessage = (e: unknown): string => (e instanceof Error ? e.message 
 export const checkKqlSyntax = (kql: string): CheckResult => {
   try {
     fromKueryExpression(kql);
-    return { check: 'kql_syntax', passed: true, actual: kql };
+    return { check: CHECK_IDS.kqlSyntax, passed: true, actual: kql };
   } catch (e) {
     return {
-      check: 'kql_syntax',
+      check: CHECK_IDS.kqlSyntax,
       passed: false,
       expected: 'valid KQL',
       actual: getErrorMessage(e),
@@ -123,14 +128,14 @@ export const checkExecutionHit = async (
     });
     const hits = Number(values[0]?.[0] ?? 0);
     return {
-      check: 'execution_hit',
+      check: CHECK_IDS.executionHit,
       passed: hits > 0,
       expected: '> 0 hits',
       actual: `${hits} hits`,
     };
   } catch (e) {
     return {
-      check: 'execution_hit',
+      check: CHECK_IDS.executionHit,
       passed: false,
       expected: '> 0 hits',
       actual: `execution error: ${getErrorMessage(e)}`,
@@ -145,7 +150,7 @@ export const checkCategoryCompliance = (
 ): CheckResult => {
   const passed = allowedCategories.includes(category);
   return {
-    check: 'category_compliance',
+    check: CHECK_IDS.categoryCompliance,
     passed,
     expected: `one of [${allowedCategories.join(', ')}]`,
     actual: category,
@@ -156,7 +161,7 @@ export const checkCategoryCompliance = (
 export const checkSeverityCompliance = (score: number): CheckResult => {
   const passed = score >= SEVERITY_SCORE_MIN && score <= SEVERITY_SCORE_MAX;
   return {
-    check: 'severity_compliance',
+    check: CHECK_IDS.severityCompliance,
     passed,
     expected: `${SEVERITY_SCORE_MIN}-${SEVERITY_SCORE_MAX}`,
     actual: String(score),
@@ -168,7 +173,11 @@ export const checkEvidenceGrounding = (
   sampleLogs: string[]
 ): CheckResult => {
   if (!evidence || evidence.length === 0) {
-    return { check: 'evidence_grounding', passed: true, actual: 'no evidence provided (ok)' };
+    return {
+      check: CHECK_IDS.evidenceGrounding,
+      passed: true,
+      actual: 'no evidence provided (ok)',
+    };
   }
 
   const logsWithMessage = sampleLogs.map((log) => `message: "${log}"`);
@@ -178,11 +187,15 @@ export const checkEvidenceGrounding = (
   });
 
   if (missing.length === 0) {
-    return { check: 'evidence_grounding', passed: true, actual: `${evidence.length} items found` };
+    return {
+      check: CHECK_IDS.evidenceGrounding,
+      passed: true,
+      actual: `${evidence.length} items found`,
+    };
   }
 
   return {
-    check: 'evidence_grounding',
+    check: CHECK_IDS.evidenceGrounding,
     passed: false,
     expected: 'all evidence in sample logs',
     actual: `missing: ${missing.join('; ')}`,
@@ -193,7 +206,7 @@ export const checkEvidenceGrounding = (
 export const checkTitleQuality = (title: string): CheckResult => {
   if (!title || title.trim().length === 0) {
     return {
-      check: 'title_quality',
+      check: CHECK_IDS.titleQuality,
       passed: false,
       expected: `non-empty, >= ${MIN_TITLE_WORD_COUNT} words`,
       actual: 'empty title',
@@ -203,14 +216,14 @@ export const checkTitleQuality = (title: string): CheckResult => {
   const wordCount = title.trim().split(/\s+/).length;
   if (wordCount < MIN_TITLE_WORD_COUNT) {
     return {
-      check: 'title_quality',
+      check: CHECK_IDS.titleQuality,
       passed: false,
       expected: `>= ${MIN_TITLE_WORD_COUNT} words`,
       actual: `${wordCount} words: "${title}"`,
     };
   }
 
-  return { check: 'title_quality', passed: true, actual: title };
+  return { check: CHECK_IDS.titleQuality, passed: true, actual: title };
 };
 
 /**
@@ -314,15 +327,15 @@ export const calculateSignificantEventsQuality = (
     };
   }
 
-  const rate = (predicate: (q: QueryValidationDetail) => boolean): number =>
-    queryDetails.filter(predicate).length / count;
+  const rateByCheck = (check: CheckId): number =>
+    queryDetails.filter((q) => q.checks.some((c) => c.check === check && c.passed)).length / count;
 
-  const syntaxValidityRate = rate((q) => q.isSyntaxValid);
-  const executionHitRate = rate((q) => q.isExecutionHit);
-  const categoryComplianceRate = rate((q) => q.isCategoryCompliant);
-  const severityComplianceRate = rate((q) => q.isSeverityCompliant);
-  const evidenceGroundingRate = rate((q) => q.hasValidEvidence);
-  const titleQualityRate = rate((q) => q.hasMeaningfulTitle);
+  const syntaxValidityRate = rateByCheck(CHECK_IDS.kqlSyntax);
+  const executionHitRate = rateByCheck(CHECK_IDS.executionHit);
+  const categoryComplianceRate = rateByCheck(CHECK_IDS.categoryCompliance);
+  const severityComplianceRate = rateByCheck(CHECK_IDS.severityCompliance);
+  const evidenceGroundingRate = rateByCheck(CHECK_IDS.evidenceGrounding);
+  const titleQualityRate = rateByCheck(CHECK_IDS.titleQuality);
 
   const categoryRecall = calculateCategoryRecall(queryDetails, groundTruth.categories);
   const kqlSubstringRecall = calculateKqlSubstringRecall(queryDetails, groundTruth.kql_substrings);
