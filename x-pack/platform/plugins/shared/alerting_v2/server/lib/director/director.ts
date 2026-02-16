@@ -7,24 +7,26 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import { inject, injectable } from 'inversify';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import { LoggerServiceToken } from '../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import { getLatestAlertEventStateQuery, type LatestAlertEventState } from './queries';
 import type { AlertEpisodeStatus } from '../../resources/alert_events';
-import { alertEpisodeStatus, type AlertEvent } from '../../resources/alert_events';
+import { alertEpisodeStatus, alertEventType, type AlertEvent } from '../../resources/alert_events';
 import { TransitionStrategyFactory } from './strategies/strategy_resolver';
-import type { ITransitionStrategy } from './strategies/types';
+import type { ITransitionStrategy, StateTransitionResult } from './strategies/types';
 import type { ExecutionContext } from '../execution_context';
 
 interface RunDirectorParams {
-  ruleId: string;
+  rule: RuleResponse;
   alertEvents: AsyncIterable<AlertEvent[]>;
   executionContext: ExecutionContext;
 }
 
 interface CalculateNextStateParams {
+  rule: RuleResponse;
   currentAlertEvent: AlertEvent;
   previousAlertEvent?: LatestAlertEventState;
   strategy: ITransitionStrategy;
@@ -45,16 +47,16 @@ export class DirectorService {
   ) {}
 
   async *run({
-    ruleId,
+    rule,
     alertEvents,
     executionContext,
   }: RunDirectorParams): AsyncIterable<AlertEvent[]> {
-    const strategy = this.strategyFactory.getStrategy();
+    const strategy = this.strategyFactory.getStrategy(rule);
 
     for await (const batch of alertEvents) {
       executionContext.throwIfAborted();
 
-      const processedBatch = await this.processBatch(ruleId, batch, strategy, executionContext);
+      const processedBatch = await this.processBatch(rule, batch, strategy, executionContext);
 
       if (processedBatch.length > 0) {
         yield processedBatch;
@@ -63,7 +65,7 @@ export class DirectorService {
   }
 
   private async processBatch(
-    ruleId: string,
+    rule: RuleResponse,
     alertEvents: AlertEvent[],
     strategy: ITransitionStrategy,
     executionContext: ExecutionContext
@@ -71,10 +73,11 @@ export class DirectorService {
     const scope = executionContext.createScope();
     const groupHashes = [...new Set(alertEvents.map((e) => e.group_hash))];
     const alertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(
-      ruleId,
+      rule,
       groupHashes,
       executionContext
     );
+
     scope.add(() => alertStateByGroupHash.clear());
 
     try {
@@ -82,6 +85,7 @@ export class DirectorService {
 
       return alertEvents.map((currentAlertEvent) =>
         this.getAlertEventWithNextEpisode({
+          rule,
           currentAlertEvent,
           previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
           strategy,
@@ -93,11 +97,11 @@ export class DirectorService {
   }
 
   private async fetchLatestAlertStateByGroupHash(
-    ruleId: string,
+    rule: RuleResponse,
     groupHashes: string[],
     context: ExecutionContext
   ): Promise<Map<string, LatestAlertEventState>> {
-    const request = getLatestAlertEventStateQuery({ ruleId, groupHashes }).toRequest();
+    const request = getLatestAlertEventStateQuery({ ruleId: rule.id, groupHashes }).toRequest();
     const rowBatchStream = this.queryService.executeQueryStream<LatestAlertEventState>({
       query: request.query,
       // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
@@ -121,35 +125,39 @@ export class DirectorService {
   }
 
   private getAlertEventWithNextEpisode({
+    rule,
     currentAlertEvent,
     previousAlertEvent,
     strategy,
   }: CalculateNextStateParams): AlertEvent {
     const currentStatus = previousAlertEvent?.last_episode_status;
 
-    const nextStatus = strategy.getNextState({
-      currentAlertEpisodeStatus: currentStatus,
-      alertEventStatus: currentAlertEvent.status,
+    const result: StateTransitionResult = strategy.getNextState({
+      rule,
+      alertEvent: currentAlertEvent,
+      previousEpisode: previousAlertEvent,
     });
 
     const episodeId = this.resolveEpisodeId({
       previousAlertEvent,
-      nextStatus,
+      nextStatus: result.status,
     });
 
-    if (currentStatus !== nextStatus) {
+    if (currentStatus !== result.status) {
       this.logger.debug({
         message: `State Transition [${currentAlertEvent.group_hash}]: ${
           currentStatus ?? 'unknown'
-        } -> ${nextStatus} (Episode: ${episodeId})`,
+        } -> ${result.status} (Episode: ${episodeId})`,
       });
     }
 
     return {
       ...currentAlertEvent,
+      type: alertEventType.alert,
       episode: {
         id: episodeId,
-        status: nextStatus,
+        status: result.status,
+        ...(result.statusCount != null ? { status_count: result.statusCount } : {}),
       },
     };
   }

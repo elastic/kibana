@@ -65,7 +65,7 @@ export class DirectorStep implements RuleExecutionStep {
       }
 
       const alertsWithEpisodesStream = step.director.run({
-        ruleId: input.ruleId,
+        rule,
         executionContext: input.executionContext,
         alertEvents: (async function* () {
           yield [...alertEventsBatch];
