@@ -19,6 +19,7 @@ import * as i18n from '../translations';
 import { useDeleteDataStream } from '../../../../../common';
 import { InputTypesBadges } from './input_types_badges';
 import { Status } from './status';
+import { useUIState } from '../../../contexts';
 
 interface DataStreamsTableProps {
   integrationId: string;
@@ -28,6 +29,7 @@ interface DataStreamsTableProps {
 export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps) => {
   const { euiTheme } = useEuiTheme();
   const { deleteDataStreamMutation } = useDeleteDataStream();
+  const { openEditPipelineFlyout } = useUIState();
   const [dataStreamDeleteTarget, setDataStreamDeleteTarget] = useState<DataStreamResponse | null>(
     null
   );
@@ -91,13 +93,13 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
         name: '',
         actions: [
           {
-            name: 'Expand',
-            description: 'Expand for details about this data stream',
+            name: i18n.TABLE_ACTIONS.expand,
+            description: i18n.TABLE_ACTIONS.expandDescription,
             icon: 'expand',
             type: 'icon',
             'data-test-subj': 'expandDataStreamButton',
-            onClick: () => {
-              // TODO: Implement expand action
+            onClick: (item: DataStreamResponse) => {
+              openEditPipelineFlyout(item);
             },
             enabled: (item: DataStreamResponse) =>
               item.status === 'completed' && item.dataStreamId !== deletingDataStreamId,
@@ -107,7 +109,7 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
       },
       {
         field: 'title',
-        name: 'Title',
+        name: i18n.TABLE_COLUMN_HEADERS.title,
         sortable: true,
         render: (title: DataStreamResponse['title']) => (
           <EuiToolTip
@@ -122,7 +124,7 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
       },
       {
         field: 'inputTypes',
-        name: 'Data Collection Methods',
+        name: i18n.TABLE_COLUMN_HEADERS.dataCollectionMethods,
         sortable: true,
         render: (inputTypes: DataStreamResponse['inputTypes']) => (
           <InputTypesBadges inputTypes={inputTypes} />
@@ -133,7 +135,7 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
       },
       {
         field: 'status',
-        name: 'Status',
+        name: i18n.TABLE_COLUMN_HEADERS.status,
         sortable: true,
         render: (status: DataStreamResponse['status'], item: DataStreamResponse) => (
           <Status status={status} isDeleting={item.dataStreamId === deletingDataStreamId} />
@@ -141,11 +143,11 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
         width: '120px',
       },
       {
-        name: 'Actions',
+        name: i18n.TABLE_COLUMN_HEADERS.actions,
         actions: [
           {
-            name: 'Refresh',
-            description: 'Refresh this data stream',
+            name: i18n.TABLE_ACTIONS.refresh,
+            description: i18n.TABLE_ACTIONS.refreshDescription,
             icon: 'refresh',
             type: 'icon',
             'data-test-subj': 'refreshDataStreamButton',
@@ -158,8 +160,8 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
               item.dataStreamId !== deletingDataStreamId,
           },
           {
-            name: 'Delete',
-            description: 'Delete this data stream',
+            name: i18n.TABLE_ACTIONS.delete,
+            description: i18n.TABLE_ACTIONS.deleteDescription,
             icon: 'trash',
             type: 'icon',
             color: 'danger',
@@ -173,7 +175,7 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
         width: '80px',
       },
     ];
-  }, [deletingDataStreamId, euiTheme]);
+  }, [deletingDataStreamId, euiTheme, openEditPipelineFlyout]);
 
   return (
     <>
@@ -188,12 +190,12 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
       {dataStreamDeleteTarget && (
         <EuiConfirmModal
           aria-labelledby={deleteModalTitleId}
-          title={`Are you sure you want to delete "${dataStreamDeleteTarget.title}"?`}
+          title={i18n.DELETE_MODAL.title(dataStreamDeleteTarget.title)}
           titleProps={{ id: deleteModalTitleId }}
           onCancel={handleDeleteCancel}
           onConfirm={handleDeleteConfirm}
-          cancelButtonText="Cancel"
-          confirmButtonText="Delete"
+          cancelButtonText={i18n.DELETE_MODAL.cancelButton}
+          confirmButtonText={i18n.DELETE_MODAL.confirmButton}
           defaultFocusedButton="confirm"
           buttonColor="danger"
         />

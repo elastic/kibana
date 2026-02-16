@@ -8,7 +8,7 @@
  */
 
 import { EsqlQuery } from '../../composer/query';
-import { printAst } from '../../shared/debug';
+import { printAst } from '../../debug';
 import type { ESQLAstPromqlCommand } from '../../types';
 
 /**

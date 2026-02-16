@@ -13,9 +13,11 @@ import {
 } from '@kbn/dashboard-plugin/public';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
-import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/public';
+import {
+  APPLY_FILTER_TRIGGER,
+  IMAGE_CLICK_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { AbstractDashboardDrilldownParams } from '../abstract_dashboard_drilldown';
 import { AbstractDashboardDrilldown } from '../abstract_dashboard_drilldown';
 import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './constants';

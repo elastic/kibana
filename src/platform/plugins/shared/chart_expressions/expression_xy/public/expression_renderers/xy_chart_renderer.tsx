@@ -39,7 +39,7 @@ import {
 
 import type { ThemeServiceSetup } from '@kbn/core/public';
 import type { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
-import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
+import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { getDataLayers } from '../helpers';
 import { LayerTypes, SeriesTypes } from '../../common/constants';
 import type { CommonXYDataLayerConfig, XYChartProps } from '../../common';
