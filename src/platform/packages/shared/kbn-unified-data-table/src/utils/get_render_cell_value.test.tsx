@@ -11,14 +11,17 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render } from '@testing-library/react';
 import { getRenderCellValueFn } from './get_render_cell_value';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { buildDataViewMock, dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { SourceDocument } from '../components/source_document';
+import { fieldList } from '@kbn/data-views-plugin/common';
+import * as formatValueModule from '@kbn/discover-utils/src/utils/format_value';
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');
@@ -974,6 +977,261 @@ describe('Unified data table cell rendering', function () {
       searchable: true,
       aggregatable: false,
       isNull: false,
+    });
+  });
+
+  describe('columnsMeta handling for _source column', () => {
+    let formatFieldValueSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      formatFieldValueSpy = jest
+        .spyOn(formatValueModule, 'formatFieldValue')
+        .mockReturnValue('formatted');
+    });
+
+    afterEach(() => {
+      formatFieldValueSpy.mockRestore();
+    });
+
+    it('passes data view field to formatFieldValue when columnsMeta is undefined', () => {
+      const testDataView = buildDataViewMock({
+        name: 'test-data-view',
+        fields: fieldList([
+          {
+            name: '_index',
+            type: 'string',
+            scripted: false,
+            searchable: true,
+            aggregatable: false,
+          },
+          {
+            name: '_source',
+            type: '_source',
+            scripted: false,
+            searchable: false,
+            aggregatable: false,
+          },
+          {
+            name: 'bytes',
+            type: 'number',
+            esTypes: ['long'],
+            scripted: false,
+            searchable: true,
+            aggregatable: true,
+          },
+        ]),
+      });
+
+      const rows = [
+        buildDataTableRecord(
+          {
+            _id: '1',
+            _index: 'test',
+            _score: 1,
+            _source: { bytes: 100 },
+          },
+          testDataView
+        ),
+      ];
+
+      const DataTableCellValue = getRenderCellValueFn({
+        dataView: testDataView,
+        rows,
+        shouldShowFieldHandler: () => true,
+        closePopover: jest.fn(),
+        fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+        maxEntries: 100,
+        columnsMeta: undefined,
+      });
+
+      render(
+        <DataTableCellValue
+          rowIndex={0}
+          colIndex={0}
+          columnId="_source"
+          isDetails={false}
+          isExpanded={false}
+          isExpandable={true}
+          setCellProps={jest.fn()}
+        />
+      );
+
+      // Should pass the data view field (with type 'number') to formatFieldValue
+      const bytesFieldCall = formatFieldValueSpy.mock.calls.find(
+        (call) => call[4]?.name === 'bytes'
+      );
+      expect(bytesFieldCall).toBeDefined();
+      expect(bytesFieldCall![4]).toMatchObject({
+        name: 'bytes',
+        type: 'number',
+      });
+    });
+
+    it('passes field with columnsMeta type to formatFieldValue when types differ', () => {
+      const testDataView = buildDataViewMock({
+        name: 'test-data-view',
+        fields: fieldList([
+          {
+            name: '_index',
+            type: 'string',
+            scripted: false,
+            searchable: true,
+            aggregatable: false,
+          },
+          {
+            name: '_source',
+            type: '_source',
+            scripted: false,
+            searchable: false,
+            aggregatable: false,
+          },
+          {
+            name: 'bytes',
+            type: 'number',
+            esTypes: ['long'],
+            scripted: false,
+            searchable: true,
+            aggregatable: true,
+          },
+        ]),
+      });
+
+      const rows = [
+        buildDataTableRecord(
+          {
+            _id: '1',
+            _index: 'test',
+            _score: 1,
+            _source: { bytes: '100' },
+          },
+          testDataView
+        ),
+      ];
+
+      // columnsMeta overrides bytes from number to string/keyword
+      const columnsMeta = {
+        bytes: {
+          type: 'string' as const,
+          esType: 'keyword',
+        },
+      };
+
+      const DataTableCellValue = getRenderCellValueFn({
+        dataView: testDataView,
+        rows,
+        shouldShowFieldHandler: () => true,
+        closePopover: jest.fn(),
+        fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+        maxEntries: 100,
+        columnsMeta,
+      });
+
+      render(
+        <DataTableCellValue
+          rowIndex={0}
+          colIndex={0}
+          columnId="_source"
+          isDetails={false}
+          isExpanded={false}
+          isExpandable={true}
+          setCellProps={jest.fn()}
+        />
+      );
+
+      // Should pass a field with the columnsMeta type (string/keyword) to formatFieldValue
+      const bytesFieldCall = formatFieldValueSpy.mock.calls.find(
+        (call) => call[4]?.name === 'bytes'
+      );
+      expect(bytesFieldCall).toBeDefined();
+      expect(bytesFieldCall![4]).toMatchObject({
+        name: 'bytes',
+        type: 'string',
+        esTypes: ['keyword'],
+      });
+    });
+
+    it('passes field with columnsMeta type to formatFieldValue when rendering object columns', () => {
+      const testDataView = buildDataViewMock({
+        name: 'test-data-view',
+        fields: fieldList([
+          {
+            name: '_index',
+            type: 'string',
+            scripted: false,
+            searchable: true,
+            aggregatable: false,
+          },
+          {
+            name: '_source',
+            type: '_source',
+            scripted: false,
+            searchable: false,
+            aggregatable: false,
+          },
+          {
+            name: 'object.value',
+            type: 'number',
+            esTypes: ['long'],
+            scripted: false,
+            searchable: true,
+            aggregatable: true,
+          },
+        ]),
+      });
+
+      const rows = [
+        buildDataTableRecord(
+          {
+            _id: '1',
+            _index: 'test',
+            _score: 1,
+            _source: undefined,
+            fields: { 'object.value': [100] },
+          },
+          testDataView
+        ),
+      ];
+
+      // columnsMeta overrides object.value from number to string/keyword
+      const columnsMeta = {
+        'object.value': {
+          type: 'string' as const,
+          esType: 'keyword',
+        },
+      };
+
+      const DataTableCellValue = getRenderCellValueFn({
+        dataView: testDataView,
+        rows,
+        shouldShowFieldHandler: () => true,
+        closePopover: jest.fn(),
+        fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+        maxEntries: 100,
+        columnsMeta,
+      });
+
+      render(
+        <DataTableCellValue
+          rowIndex={0}
+          colIndex={0}
+          columnId="object"
+          isDetails={false}
+          isExpanded={false}
+          isExpandable={true}
+          setCellProps={jest.fn()}
+        />
+      );
+
+      // Should pass a field with the columnsMeta type (string/keyword) to formatFieldValue
+      const objectValueFieldCall = formatFieldValueSpy.mock.calls.find(
+        (call) => call[4]?.name === 'object.value'
+      );
+      expect(objectValueFieldCall).toBeDefined();
+      expect(objectValueFieldCall![4]).toMatchObject({
+        name: 'object.value',
+        type: 'string',
+        esTypes: ['keyword'],
+      });
     });
   });
 });

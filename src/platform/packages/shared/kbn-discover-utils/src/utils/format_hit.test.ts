@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dataViewMock } from '../__mocks__';
+import { buildDataViewMock, dataViewMock } from '../__mocks__';
 import { formatHit } from './format_hit';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import type { DataTableRecord, EsHitRecord } from '../types';
+import type { DataTableColumnsMeta, DataTableRecord, EsHitRecord } from '../types';
 import { buildDataTableRecord } from './build_data_record';
+import { fieldList } from '@kbn/data-views-plugin/common';
+import * as formatValueModule from './format_value';
 
 describe('formatHit', () => {
   let row: DataTableRecord;
@@ -155,5 +157,165 @@ describe('formatHit', () => {
       ['_index', 'formatted:logs', '_index'],
       ['_score', undefined, '_score'],
     ]);
+  });
+
+  describe('with columnsMeta', () => {
+    let formatFieldValueSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      formatFieldValueSpy = jest
+        .spyOn(formatValueModule, 'formatFieldValue')
+        .mockReturnValue('formatted');
+    });
+
+    afterEach(() => {
+      formatFieldValueSpy.mockRestore();
+    });
+
+    it('should pass data view field to formatFieldValue when columnsMeta is undefined', () => {
+      const testDataView = buildDataViewMock({
+        name: 'test-data-view',
+        fields: fieldList([
+          {
+            name: '_index',
+            type: 'string',
+            scripted: false,
+            searchable: true,
+            aggregatable: false,
+          },
+          {
+            name: 'bytes',
+            type: 'number',
+            esTypes: ['long'],
+            scripted: false,
+            searchable: true,
+            aggregatable: true,
+          },
+        ]),
+      });
+
+      const testHit = buildDataTableRecord(
+        {
+          _id: '1',
+          _index: 'logs',
+          fields: {
+            bytes: [100],
+          },
+        },
+        testDataView
+      );
+
+      formatHit(testHit, testDataView, () => true, 220, fieldFormatsMock, undefined);
+
+      // Should pass the data view field (with type 'number') to formatFieldValue
+      const bytesFieldCall = formatFieldValueSpy.mock.calls.find(
+        (call) => call[4]?.name === 'bytes'
+      );
+      expect(bytesFieldCall).toBeDefined();
+      expect(bytesFieldCall![4]).toMatchObject({
+        name: 'bytes',
+        type: 'number',
+      });
+    });
+
+    it('should pass field with columnsMeta type to formatFieldValue when types differ', () => {
+      const testDataView = buildDataViewMock({
+        name: 'test-data-view',
+        fields: fieldList([
+          {
+            name: '_index',
+            type: 'string',
+            scripted: false,
+            searchable: true,
+            aggregatable: false,
+          },
+          {
+            name: 'bytes',
+            type: 'number',
+            esTypes: ['long'],
+            scripted: false,
+            searchable: true,
+            aggregatable: true,
+          },
+        ]),
+      });
+
+      const testHit = buildDataTableRecord(
+        {
+          _id: '1',
+          _index: 'logs',
+          fields: {
+            bytes: ['100'],
+          },
+        },
+        testDataView
+      );
+
+      const columnsMeta: DataTableColumnsMeta = {
+        bytes: {
+          type: 'string',
+          esType: 'keyword',
+        },
+      };
+
+      formatHit(testHit, testDataView, () => true, 220, fieldFormatsMock, columnsMeta);
+
+      // Should pass a field with the columnsMeta type (string/keyword) to formatFieldValue
+      const bytesFieldCall = formatFieldValueSpy.mock.calls.find(
+        (call) => call[4]?.name === 'bytes'
+      );
+      expect(bytesFieldCall).toBeDefined();
+      expect(bytesFieldCall![4]).toMatchObject({
+        name: 'bytes',
+        type: 'string',
+        esTypes: ['keyword'],
+      });
+    });
+
+    it('should pass field created from columnsMeta to formatFieldValue for fields not in data view', () => {
+      const testDataView = buildDataViewMock({
+        name: 'test-data-view',
+        fields: fieldList([
+          {
+            name: '_index',
+            type: 'string',
+            scripted: false,
+            searchable: true,
+            aggregatable: false,
+          },
+        ]),
+      });
+
+      const testHit = buildDataTableRecord(
+        {
+          _id: '1',
+          _index: 'logs',
+          fields: {
+            custom_esql_field: [42],
+          },
+        },
+        testDataView
+      );
+
+      const columnsMeta: DataTableColumnsMeta = {
+        custom_esql_field: {
+          type: 'number',
+          esType: 'long',
+        },
+      };
+
+      formatHit(testHit, testDataView, () => true, 220, fieldFormatsMock, columnsMeta);
+
+      // Should pass a field created from columnsMeta to formatFieldValue
+      const customFieldCall = formatFieldValueSpy.mock.calls.find(
+        (call) => call[4]?.name === 'custom_esql_field'
+      );
+      expect(customFieldCall).toBeDefined();
+      expect(customFieldCall![4]).toMatchObject({
+        name: 'custom_esql_field',
+        type: 'number',
+        esTypes: ['long'],
+      });
+    });
   });
 });
