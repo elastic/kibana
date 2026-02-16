@@ -22,7 +22,7 @@ jest.mock('./lib/with_license_check', () => ({
   withLicenseCheck: (handler: unknown) => handler,
 }));
 
-describe('POST /api/workflows/{id}/clone', () => {
+describe('POST /api/workflows/workflow/{id}/clone', () => {
   let workflowsApi: WorkflowsManagementApi;
   let mockRouter: any;
   let mockSpaces: any;
@@ -92,7 +92,7 @@ describe('POST /api/workflows/{id}/clone', () => {
       const mockRequest = {
         params: { id: 'workflow-123' },
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123/clone' },
+        url: { pathname: '/api/workflows/workflow/workflow-123/clone' },
       };
       const mockResponse = createMockResponse();
 
@@ -114,7 +114,7 @@ describe('POST /api/workflows/{id}/clone', () => {
       const mockRequest = {
         params: { id: 'non-existent-workflow' },
         headers: {},
-        url: { pathname: '/api/workflows/non-existent-workflow/clone' },
+        url: { pathname: '/api/workflows/workflow/non-existent-workflow/clone' },
       };
       const mockResponse = createMockResponse();
 
@@ -132,7 +132,7 @@ describe('POST /api/workflows/{id}/clone', () => {
       const mockRequest = {
         params: { id: 'workflow-123' },
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123/clone' },
+        url: { pathname: '/api/workflows/workflow/workflow-123/clone' },
       };
       const mockResponse = createMockResponse();
 
@@ -173,7 +173,7 @@ describe('POST /api/workflows/{id}/clone', () => {
       const mockRequest = {
         params: { id: 'workflow-123' },
         headers: {},
-        url: { pathname: '/s/custom-space/api/workflows/workflow-123/clone' },
+        url: { pathname: '/s/custom-space/api/workflows/workflow/workflow-123/clone' },
       };
       const mockResponse = createMockResponse();
 
@@ -205,7 +205,7 @@ describe('POST /api/workflows/{id}/clone', () => {
       const mockRequest = {
         params: { id: 'workflow-123' },
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123/clone' },
+        url: { pathname: '/api/workflows/workflow/workflow-123/clone' },
       };
       const mockResponse = createMockResponse();
 

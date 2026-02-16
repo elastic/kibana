@@ -22,7 +22,7 @@ jest.mock('./lib/with_license_check', () => ({
   withLicenseCheck: (handler: unknown) => handler,
 }));
 
-describe('POST /api/workflows-executions/{executionId}/cancel', () => {
+describe('POST /api/workflows/executions/{executionId}/cancel', () => {
   let workflowsApi: WorkflowsManagementApi;
   let mockRouter: any;
   let mockSpaces: any;
@@ -55,7 +55,7 @@ describe('POST /api/workflows-executions/{executionId}/cancel', () => {
       const mockRequest = {
         params: { executionId: 'execution-123' },
         headers: {},
-        url: { pathname: '/api/workflows-executions/execution-123/cancel' },
+        url: { pathname: '/api/workflows/executions/execution-123/cancel' },
       };
       const mockResponse = createMockResponse();
 
@@ -73,7 +73,7 @@ describe('POST /api/workflows-executions/{executionId}/cancel', () => {
       const mockRequest = {
         params: { executionId: 'execution-123' },
         headers: {},
-        url: { pathname: '/api/workflows-executions/execution-123/cancel' },
+        url: { pathname: '/api/workflows/executions/execution-123/cancel' },
       };
       const mockResponse = createMockResponse();
 
@@ -95,7 +95,7 @@ describe('POST /api/workflows-executions/{executionId}/cancel', () => {
       const mockRequest = {
         params: { executionId: 'execution-456' },
         headers: {},
-        url: { pathname: '/s/custom-space/api/workflows-executions/execution-456/cancel' },
+        url: { pathname: '/s/custom-space/api/workflows/executions/execution-456/cancel' },
       };
       const mockResponse = createMockResponse();
 
@@ -116,7 +116,7 @@ describe('POST /api/workflows-executions/{executionId}/cancel', () => {
       const mockRequest = {
         params: { executionId: 'execution-123' },
         headers: {},
-        url: { pathname: '/api/workflows-executions/execution-123/cancel' },
+        url: { pathname: '/api/workflows/executions/execution-123/cancel' },
       };
       const mockResponse = createMockResponse();
 
@@ -138,7 +138,7 @@ describe('POST /api/workflows-executions/{executionId}/cancel', () => {
       const mockRequest = {
         params: { executionId: 'execution-123' },
         headers: {},
-        url: { pathname: '/api/workflows-executions/execution-123/cancel' },
+        url: { pathname: '/api/workflows/executions/execution-123/cancel' },
       };
       const mockResponse = createMockResponse();
 

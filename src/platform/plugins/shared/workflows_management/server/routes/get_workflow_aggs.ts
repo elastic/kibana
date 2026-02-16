@@ -36,6 +36,10 @@ export function registerGetWorkflowAggsRoute({ router, api, logger, spaces }: Ro
       withLicenseCheck(async (context, request, response) => {
         try {
           const { fields } = request.query;
+          if (fields.length > 25) {
+            // Manually validate the fields array size since maxItems in openapi schema is not translated properly to zod
+            throw new Error('Maximum number of fields is 25');
+          }
           const spaceId = spaces.getSpaceId(request);
           const aggs = await api.getWorkflowAggs(fields, spaceId);
 

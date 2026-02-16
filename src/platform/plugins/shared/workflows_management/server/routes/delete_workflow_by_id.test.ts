@@ -22,7 +22,7 @@ jest.mock('./lib/with_license_check', () => ({
   withLicenseCheck: (handler: unknown) => handler,
 }));
 
-describe('DELETE /api/workflows/{id}', () => {
+describe('DELETE /api/workflows/workflow/{id}', () => {
   let workflowsApi: WorkflowsManagementApi;
   let mockRouter: any;
   let mockSpaces: any;
@@ -55,7 +55,7 @@ describe('DELETE /api/workflows/{id}', () => {
       const mockRequest = {
         params: { id: 'workflow-123' },
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123' },
+        url: { pathname: '/api/workflows/workflow/workflow-123' },
       };
       const mockResponse = createMockResponse();
 
@@ -77,7 +77,7 @@ describe('DELETE /api/workflows/{id}', () => {
       const mockRequest = {
         params: { id: 'workflow-123' },
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123' },
+        url: { pathname: '/api/workflows/workflow/workflow-123' },
       };
       const mockResponse = createMockResponse();
 
@@ -99,7 +99,7 @@ describe('DELETE /api/workflows/{id}', () => {
       const mockRequest = {
         params: { id: 'workflow-123' },
         headers: {},
-        url: { pathname: '/s/custom-space/api/workflows/workflow-123' },
+        url: { pathname: '/s/custom-space/api/workflows/workflow/workflow-123' },
       };
       const mockResponse = createMockResponse();
 
@@ -123,7 +123,7 @@ describe('DELETE /api/workflows/{id}', () => {
       const mockRequest = {
         params: { id: 'workflow-123' },
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123' },
+        url: { pathname: '/api/workflows/workflow/workflow-123' },
       };
       const mockResponse = createMockResponse();
 
@@ -144,7 +144,7 @@ describe('DELETE /api/workflows/{id}', () => {
       const mockRequest = {
         params: { id: 'non-existent-workflow' },
         headers: {},
-        url: { pathname: '/api/workflows/non-existent-workflow' },
+        url: { pathname: '/api/workflows/workflow/non-existent-workflow' },
       };
       const mockResponse = createMockResponse();
 
@@ -166,7 +166,7 @@ describe('DELETE /api/workflows/{id}', () => {
       const mockRequest = {
         params: { id: 'workflow-123' },
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123' },
+        url: { pathname: '/api/workflows/workflow/workflow-123' },
       };
       const mockResponse = createMockResponse();
 

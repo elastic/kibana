@@ -28,11 +28,11 @@ export interface BulkCreateResult {
 }
 
 export interface WorkflowsApiService {
-  /** POST /api/workflows — create a single workflow from YAML. */
+  /** POST /api/workflows/workflow — create a single workflow from YAML. */
   create: (spaceId: string, yaml: string) => Promise<WorkflowDetailDto>;
-  /** POST /api/workflows/_bulk_create — create multiple workflows at once. */
+  /** POST /api/workflows — create multiple workflows at once (bulk). */
   bulkCreate: (spaceId: string, yamls: string[]) => Promise<BulkCreateResult>;
-  /** PUT /api/workflows/{id} — partially update a workflow (e.g. toggle enabled). */
+  /** PUT /api/workflows/workflow/{id} — partially update a workflow (e.g. toggle enabled). */
   update: (
     spaceId: string,
     id: string,
@@ -49,7 +49,7 @@ export const getWorkflowsApiService = (kbnClient: KbnClient): WorkflowsApiServic
     create: async (spaceId: string, yaml: string): Promise<WorkflowDetailDto> => {
       const response = await kbnClient.request<WorkflowDetailDto>({
         method: 'POST',
-        path: `/s/${spaceId}/api/workflows`,
+        path: `/s/${spaceId}/api/workflows/workflow`,
         body: { yaml },
       });
       return response.data;
@@ -62,7 +62,7 @@ export const getWorkflowsApiService = (kbnClient: KbnClient): WorkflowsApiServic
     ): Promise<WorkflowDetailDto> => {
       const response = await kbnClient.request<WorkflowDetailDto>({
         method: 'PUT',
-        path: `/s/${spaceId}/api/workflows/${id}`,
+        path: `/s/${spaceId}/api/workflows/workflow/${id}`,
         body,
       });
       return response.data;
@@ -71,7 +71,7 @@ export const getWorkflowsApiService = (kbnClient: KbnClient): WorkflowsApiServic
     bulkCreate: async (spaceId: string, yamls: string[]): Promise<BulkCreateResult> => {
       const response = await kbnClient.request<BulkCreateResult>({
         method: 'POST',
-        path: `/s/${spaceId}/api/workflows/_bulk_create`,
+        path: `/s/${spaceId}/api/workflows`,
         body: { workflows: yamls.map((yaml) => ({ yaml })) },
       });
       return response.data;

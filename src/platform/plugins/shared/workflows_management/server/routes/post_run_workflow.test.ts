@@ -23,7 +23,7 @@ jest.mock('./lib/with_license_check', () => ({
   withLicenseCheck: (handler: unknown) => handler,
 }));
 
-describe('POST /api/workflows/{id}/run', () => {
+describe('POST /api/workflows/workflow/{id}/run', () => {
   let workflowsApi: WorkflowsManagementApi;
   let mockRouter: any;
   let mockSpaces: any;
@@ -73,7 +73,7 @@ describe('POST /api/workflows/{id}/run', () => {
         params: { id: 'workflow-123' },
         body: { inputs: { param1: 'value1', param2: 'value2' } },
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123/run' },
+        url: { pathname: '/api/workflows/workflow/workflow-123/run' },
       };
       const mockResponse = createMockResponse();
 
@@ -104,7 +104,7 @@ describe('POST /api/workflows/{id}/run', () => {
         params: { id: 'non-existent-workflow' },
         body: { inputs: {} },
         headers: {},
-        url: { pathname: '/api/workflows/non-existent-workflow/run' },
+        url: { pathname: '/api/workflows/workflow/non-existent-workflow/run' },
       };
       const mockResponse = createMockResponse();
 
@@ -130,7 +130,7 @@ describe('POST /api/workflows/{id}/run', () => {
         params: { id: 'workflow-123' },
         body: { inputs: {} },
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123/run' },
+        url: { pathname: '/api/workflows/workflow/workflow-123/run' },
       };
       const mockResponse = createMockResponse();
 

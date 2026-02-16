@@ -22,7 +22,7 @@ jest.mock('./lib/with_license_check', () => ({
   withLicenseCheck: (handler: unknown) => handler,
 }));
 
-describe('PUT /api/workflows/{id}', () => {
+describe('PUT /api/workflows/workflow/{id}', () => {
   let workflowsApi: WorkflowsManagementApi;
   let mockRouter: any;
   let mockSpaces: any;
@@ -71,7 +71,7 @@ describe('PUT /api/workflows/{id}', () => {
           yaml: 'name: Updated Workflow\ndescription: Updated description\nenabled: true\ntags: [updated, workflow]',
         },
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123' },
+        url: { pathname: '/api/workflows/workflow/workflow-123' },
       };
       const mockResponse = createMockResponse();
 
@@ -94,7 +94,7 @@ describe('PUT /api/workflows/{id}', () => {
         params: { id: 'non-existent-workflow' },
         body: { name: 'Updated Workflow', enabled: true },
         headers: {},
-        url: { pathname: '/api/workflows/non-existent-workflow' },
+        url: { pathname: '/api/workflows/workflow/non-existent-workflow' },
       };
       const mockResponse = createMockResponse();
 
@@ -118,7 +118,7 @@ describe('PUT /api/workflows/{id}', () => {
         params: { id: 'workflow-123' },
         body: { name: 'Updated Workflow', enabled: true },
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123' },
+        url: { pathname: '/api/workflows/workflow/workflow-123' },
       };
       const mockResponse = createMockResponse();
 

@@ -22,7 +22,7 @@ jest.mock('./lib/with_license_check', () => ({
   withLicenseCheck: (handler: unknown) => handler,
 }));
 
-describe('POST /api/workflows', () => {
+describe('POST /api/workflows/workflow', () => {
   let workflowsApi: WorkflowsManagementApi;
   let mockRouter: any;
   let mockSpaces: any;
@@ -76,7 +76,7 @@ describe('POST /api/workflows', () => {
           yaml: 'name: New Test Workflow\ndescription: A newly created test workflow\ntriggers: []\nsteps:\n  - id: step1\n    name: First Step\n    type: action\n    action: test-action',
         },
         headers: {},
-        url: { pathname: '/api/workflows' },
+        url: { pathname: '/api/workflows/workflow' },
       };
       const mockResponse = createMockResponse();
 
@@ -98,7 +98,7 @@ describe('POST /api/workflows', () => {
       const mockRequest = {
         body: { yaml: 'name: Test Workflow' },
         headers: {},
-        url: { pathname: '/api/workflows' },
+        url: { pathname: '/api/workflows/workflow' },
       };
       const mockResponse = createMockResponse();
 
@@ -134,7 +134,7 @@ describe('POST /api/workflows', () => {
       const mockRequest = {
         body: { yaml: 'name: Space-specific Workflow' },
         headers: {},
-        url: { pathname: '/s/custom-space/api/workflows' },
+        url: { pathname: '/s/custom-space/api/workflows/workflow' },
       };
       const mockResponse = createMockResponse();
 
@@ -158,7 +158,7 @@ describe('POST /api/workflows', () => {
       const mockRequest = {
         body: { yaml: 'name: Test Workflow' },
         headers: {},
-        url: { pathname: '/api/workflows' },
+        url: { pathname: '/api/workflows/workflow' },
       };
       const mockResponse = createMockResponse();
 

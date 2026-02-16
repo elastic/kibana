@@ -36,7 +36,6 @@ paths:
             type: array
             items:
               type: string
-            maxItems: 25
       responses:
         200:
           description: Aggregations returned successfully
@@ -46,7 +45,7 @@ paths:
                 type: object
                 additionalProperties: true
 
-  /api/workflows/{id}:
+  /api/workflows/workflow/{id}:
     get:
       summary: Get workflow by ID
       operationId: GetWorkflowById
@@ -171,10 +170,10 @@ paths:
                   total:
                     type: number
     post:
-      summary: Create workflow
-      operationId: PostCreateWorkflow
+      summary: Bulk create workflows
+      operationId: PostBulkCreateWorkflows
       x-codegen-enabled: true
-      description: Creates a new workflow
+      description: Creates multiple workflows
       tags:
         - Workflows
       requestBody:
@@ -183,17 +182,37 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - workflows
               properties:
-                yaml:
-                  type: string
+                workflows:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      yaml:
+                        type: string
       responses:
         200:
-          description: Workflow created successfully
+          description: Bulk create result
           content:
             application/json:
               schema:
                 type: object
-                additionalProperties: true
+                properties:
+                  created:
+                    type: array
+                    items:
+                      type: object
+                  failed:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        index:
+                          type: number
+                        error:
+                          type: string
     delete:
       summary: Bulk delete workflows
       operationId: DeleteWorkflowsBulk
@@ -308,6 +327,32 @@ paths:
                   totalConnectors:
                     type: number
 
+  /api/workflows/workflow:
+    post:
+      summary: Create workflow
+      operationId: PostCreateWorkflow
+      x-codegen-enabled: true
+      description: Creates a new workflow
+      tags:
+        - Workflows
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                yaml:
+                  type: string
+      responses:
+        200:
+          description: Workflow created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
   /api/workflows/workflow-json-schema:
     get:
       summary: Get workflow JSON schema
@@ -333,53 +378,7 @@ paths:
         500:
           description: Error generating schema
 
-  /api/workflows/_bulk_create:
-    post:
-      summary: Bulk create workflows
-      operationId: PostBulkCreateWorkflows
-      x-codegen-enabled: true
-      description: Creates multiple workflows
-      tags:
-        - Workflows
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - workflows
-              properties:
-                workflows:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      yaml:
-                        type: string
-      responses:
-        200:
-          description: Bulk create result
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  created:
-                    type: array
-                    items:
-                      type: object
-                  failed:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        index:
-                          type: number
-                        error:
-                          type: string
-
-  /api/workflows/{id}/run:
+  /api/workflows/workflow/{id}/run:
     post:
       summary: Run workflow
       operationId: PostRunWorkflow
@@ -422,7 +421,7 @@ paths:
         400:
           description: Workflow not valid or disabled
 
-  /api/workflows/{id}/clone:
+  /api/workflows/workflow/{id}/clone:
     post:
       summary: Clone workflow
       operationId: PostCloneWorkflow
@@ -447,7 +446,7 @@ paths:
         404:
           description: Workflow not found
 
-  /api/workflows/test:
+  /api/workflows/workflow/test:
     post:
       summary: Test workflow
       operationId: PostTestWorkflow
@@ -482,7 +481,7 @@ paths:
                   workflowExecutionId:
                     type: string
 
-  /api/workflows/testStep:
+  /api/workflows/workflow/step/test:
     post:
       summary: Test workflow step
       operationId: PostTestStep

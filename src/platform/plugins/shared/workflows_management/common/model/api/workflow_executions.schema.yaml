@@ -3,7 +3,7 @@ info:
   title: Workflow Executions API
   version: '1'
 paths:
-  /api/workflows/{workflowId}/executions:
+  /api/workflows/workflow/{workflowId}/executions:
     get:
       summary: List workflow executions
       operationId: GetWorkflowExecutions
@@ -65,7 +65,7 @@ paths:
                   size:
                     type: number
 
-  /api/workflows-executions/{executionId}:
+  /api/workflows/executions/{executionId}:
     get:
       summary: Get workflow execution by ID
       operationId: GetWorkflowExecutionById
@@ -90,7 +90,7 @@ paths:
         404:
           description: Execution not found
 
-  /api/workflows-executions/{executionId}/cancel:
+  /api/workflows/executions/{executionId}/cancel:
     post:
       summary: Cancel workflow execution
       operationId: PostCancelWorkflowExecution
@@ -110,7 +110,7 @@ paths:
         404:
           description: Execution not found
 
-  /api/workflows-executions/{executionId}/logs:
+  /api/workflows/executions/{executionId}/logs:
     get:
       summary: Get workflow execution logs
       operationId: GetWorkflowExecutionLogs
@@ -188,7 +188,7 @@ paths:
                   page:
                     type: number
 
-  /api/workflows-executions/{executionId}/steps/{stepId}:
+  /api/workflows/executions/{executionId}/steps/{stepId}:
     get:
       summary: Get step execution
       operationId: GetStepExecution

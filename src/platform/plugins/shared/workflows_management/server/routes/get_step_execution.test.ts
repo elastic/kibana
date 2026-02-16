@@ -22,7 +22,7 @@ jest.mock('./lib/with_license_check', () => ({
   withLicenseCheck: (handler: unknown) => handler,
 }));
 
-describe('GET /api/workflows-executions/{executionId}/steps/{stepId}', () => {
+describe('GET /api/workflows/executions/{executionId}/steps/{stepId}', () => {
   let workflowsApi: WorkflowsManagementApi;
   let mockRouter: any;
   let mockSpaces: any;
@@ -74,7 +74,7 @@ describe('GET /api/workflows-executions/{executionId}/steps/{stepId}', () => {
       const mockRequest = {
         params: { executionId: 'execution-123', stepId: 'step-execution-123' },
         headers: {},
-        url: { pathname: '/api/workflows-executions/execution-123/steps/step-execution-123' },
+        url: { pathname: '/api/workflows/executions/execution-123/steps/step-execution-123' },
       };
       const mockResponse = createMockResponse();
 
@@ -94,7 +94,7 @@ describe('GET /api/workflows-executions/{executionId}/steps/{stepId}', () => {
       const mockRequest = {
         params: { executionId: 'execution-123', stepId: 'non-existent-step' },
         headers: {},
-        url: { pathname: '/api/workflows-executions/execution-123/steps/non-existent-step' },
+        url: { pathname: '/api/workflows/executions/execution-123/steps/non-existent-step' },
       };
       const mockResponse = createMockResponse();
 
@@ -115,7 +115,7 @@ describe('GET /api/workflows-executions/{executionId}/steps/{stepId}', () => {
       const mockRequest = {
         params: { executionId: 'execution-123', stepId: 'step-execution-123' },
         headers: {},
-        url: { pathname: '/api/workflows-executions/execution-123/steps/step-execution-123' },
+        url: { pathname: '/api/workflows/executions/execution-123/steps/step-execution-123' },
       };
       const mockResponse = createMockResponse();
 
@@ -155,7 +155,7 @@ describe('GET /api/workflows-executions/{executionId}/steps/{stepId}', () => {
         headers: {},
         url: {
           pathname:
-            '/s/custom-space/api/workflows-executions/execution-456/steps/step-execution-456',
+            '/s/custom-space/api/workflows/executions/execution-456/steps/step-execution-456',
         },
       };
       const mockResponse = createMockResponse();
@@ -179,7 +179,7 @@ describe('GET /api/workflows-executions/{executionId}/steps/{stepId}', () => {
       const mockRequest = {
         params: { executionId: 'execution-123', stepId: 'step-execution-123' },
         headers: {},
-        url: { pathname: '/api/workflows-executions/execution-123/steps/step-execution-123' },
+        url: { pathname: '/api/workflows/executions/execution-123/steps/step-execution-123' },
       };
       const mockResponse = createMockResponse();
 
@@ -201,7 +201,7 @@ describe('GET /api/workflows-executions/{executionId}/steps/{stepId}', () => {
       const mockRequest = {
         params: { executionId: 'execution-123', stepId: 'step-execution-123' },
         headers: {},
-        url: { pathname: '/api/workflows-executions/execution-123/steps/step-execution-123' },
+        url: { pathname: '/api/workflows/executions/execution-123/steps/step-execution-123' },
       };
       const mockResponse = createMockResponse();
 

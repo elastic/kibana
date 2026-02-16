@@ -52,7 +52,7 @@ export const GetConnectorsResponse = z.object({
 });
 export type GetWorkflowAggsRequestQuery = z.infer<typeof GetWorkflowAggsRequestQuery>;
 export const GetWorkflowAggsRequestQuery = z.object({
-  fields: ArrayFromString(z.string()).max(25),
+  fields: ArrayFromString(z.string()),
 });
 export type GetWorkflowAggsRequestQueryInput = z.input<typeof GetWorkflowAggsRequestQuery>;
 

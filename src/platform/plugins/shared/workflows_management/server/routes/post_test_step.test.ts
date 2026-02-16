@@ -22,7 +22,7 @@ jest.mock('./lib/with_license_check', () => ({
   withLicenseCheck: (handler: unknown) => handler,
 }));
 
-describe('POST /api/workflows/testStep', () => {
+describe('POST /api/workflows/workflow/step/test', () => {
   let workflowsApi: WorkflowsManagementApi;
   let mockRouter: any;
   let mockSpaces: any;
@@ -62,7 +62,7 @@ describe('POST /api/workflows/testStep', () => {
           contextOverride: { param1: 'value1', param2: 'value2' },
         },
         headers: {},
-        url: { pathname: '/api/workflows/testStep' },
+        url: { pathname: '/api/workflows/workflow/step/test' },
       };
       const mockResponse = createMockResponse();
 
@@ -92,7 +92,7 @@ describe('POST /api/workflows/testStep', () => {
           contextOverride: {},
         },
         headers: {},
-        url: { pathname: '/api/workflows/testStep' },
+        url: { pathname: '/api/workflows/workflow/step/test' },
       };
       const mockResponse = createMockResponse();
 

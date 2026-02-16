@@ -33,8 +33,8 @@ export const WORKFLOWS_API_BASE_PATH = '/api/workflows';
 export const WORKFLOWS_API_PATHS = {
   /** GET - List/search workflows (with query params). Also used for GET /api/workflows (RESTful). */
   LIST: `${WORKFLOWS_API_BASE_PATH}`,
-  /** POST - Create a single workflow */
-  CREATE: `${WORKFLOWS_API_BASE_PATH}`,
+  /** POST - Create a single workflow (POST /api/workflows/workflow) */
+  CREATE: `${WORKFLOWS_API_BASE_PATH}/workflow`,
   /** DELETE - Bulk delete workflows (body: { ids }) */
   BULK_DELETE: `${WORKFLOWS_API_BASE_PATH}`,
   /** POST - Search workflows (legacy; prefer GET LIST with query params) */
@@ -48,24 +48,24 @@ export const WORKFLOWS_API_PATHS = {
   /** GET - Workflow JSON schema */
   JSON_SCHEMA: `${WORKFLOWS_API_BASE_PATH}/workflow-json-schema`,
   /** POST - Test workflow */
-  TEST: `${WORKFLOWS_API_BASE_PATH}/test`,
+  TEST: `${WORKFLOWS_API_BASE_PATH}/workflow/test`,
   /** POST - Test single step */
-  TEST_STEP: `${WORKFLOWS_API_BASE_PATH}/testStep`,
-  /** POST - Bulk create workflows */
-  BULK_CREATE: `${WORKFLOWS_API_BASE_PATH}/_bulk_create`,
+  TEST_STEP: `${WORKFLOWS_API_BASE_PATH}/workflow/step/test`,
+  /** POST - Bulk create workflows (POST /api/workflows) */
+  BULK_CREATE: `${WORKFLOWS_API_BASE_PATH}`,
   /** GET/PUT/DELETE - Single workflow by id (use with .replace('{id}', id)) */
-  BY_ID: `${WORKFLOWS_API_BASE_PATH}/{id}`,
+  BY_ID: `${WORKFLOWS_API_BASE_PATH}/workflow/{id}`,
   /** POST - Run workflow */
-  RUN: `${WORKFLOWS_API_BASE_PATH}/{id}/run`,
+  RUN: `${WORKFLOWS_API_BASE_PATH}/workflow/{id}/run`,
   /** POST - Clone workflow */
-  CLONE: `${WORKFLOWS_API_BASE_PATH}/{id}/clone`,
+  CLONE: `${WORKFLOWS_API_BASE_PATH}/workflow/{id}/clone`,
 } as const;
 
 /**
  * Base path for workflow execution resources (flat; no workflowId in path).
  * Use this for get/cancel/logs/step by executionId only.
  */
-export const WORKFLOWS_EXECUTIONS_API_BASE_PATH = '/api/workflows-executions';
+export const WORKFLOWS_EXECUTIONS_API_BASE_PATH = '/api/workflows/executions';
 
 /**
  * Path templates for single-execution operations (flat; executionId only).
@@ -84,11 +84,11 @@ export const WORKFLOWS_EXECUTIONS_API_PATHS = {
 
 /**
  * Path templates for workflow execution list (nested under a workflow).
- * List remains workflow-scoped: GET /api/workflows/{workflowId}/executions
+ * List remains workflow-scoped: GET /api/workflows/workflow/{workflowId}/executions
  */
 export const WORKFLOW_EXECUTIONS_API_PATHS = {
   /** GET - List executions for a workflow */
-  LIST: `${WORKFLOWS_API_BASE_PATH}/{workflowId}/executions`,
+  LIST: `${WORKFLOWS_API_BASE_PATH}/workflow/{workflowId}/executions`,
 } as const;
 
 /**

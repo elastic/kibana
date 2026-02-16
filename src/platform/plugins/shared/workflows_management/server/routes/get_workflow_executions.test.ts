@@ -22,7 +22,7 @@ jest.mock('./lib/with_license_check', () => ({
   withLicenseCheck: (handler: unknown) => handler,
 }));
 
-describe('GET /api/workflows/{workflowId}/executions', () => {
+describe('GET /api/workflows/workflow/{workflowId}/executions', () => {
   let workflowsApi: WorkflowsManagementApi;
   let mockRouter: any;
   let mockSpaces: any;
@@ -108,7 +108,7 @@ describe('GET /api/workflows/{workflowId}/executions', () => {
           size: 10,
         },
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123/executions' },
+        url: { pathname: '/api/workflows/workflow/workflow-123/executions' },
       };
       const mockResponse = createMockResponse();
 
@@ -135,7 +135,7 @@ describe('GET /api/workflows/{workflowId}/executions', () => {
         params: { workflowId: 'workflow-123' },
         query: {},
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123/executions' },
+        url: { pathname: '/api/workflows/workflow/workflow-123/executions' },
       };
       const mockResponse = createMockResponse();
 
@@ -177,7 +177,7 @@ describe('GET /api/workflows/{workflowId}/executions', () => {
         params: { workflowId: 'workflow-123' },
         query: { statuses: ['completed'] },
         headers: {},
-        url: { pathname: '/s/custom-space/api/workflows/workflow-123/executions' },
+        url: { pathname: '/s/custom-space/api/workflows/workflow/workflow-123/executions' },
       };
       const mockResponse = createMockResponse();
 
@@ -210,7 +210,7 @@ describe('GET /api/workflows/{workflowId}/executions', () => {
         params: { workflowId: 'workflow-123' },
         query: { page: 2, size: 5 },
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123/executions' },
+        url: { pathname: '/api/workflows/workflow/workflow-123/executions' },
       };
       const mockResponse = createMockResponse();
 
@@ -236,7 +236,7 @@ describe('GET /api/workflows/{workflowId}/executions', () => {
         params: { workflowId: 'workflow-123' },
         query: {},
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123/executions' },
+        url: { pathname: '/api/workflows/workflow/workflow-123/executions' },
       };
       const mockResponse = createMockResponse();
 
