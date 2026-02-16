@@ -21,7 +21,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { ReportingServerPluginSetup } from '@kbn/reporting-server';
+import type { ReportingSetup } from '@kbn/reporting-plugin/server';
 import { getCanvasFeature } from './feature';
 import { initRoutes } from './routes';
 import { registerCanvasUsageCollector } from './collectors';
@@ -39,7 +39,7 @@ interface PluginsSetup {
   features: FeaturesPluginSetup;
   home: HomeServerPluginSetup;
   data: DataPluginSetup;
-  reporting?: ReportingServerPluginSetup;
+  reporting?: ReportingSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
