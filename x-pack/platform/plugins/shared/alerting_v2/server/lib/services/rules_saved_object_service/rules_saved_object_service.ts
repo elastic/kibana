@@ -12,11 +12,11 @@ import { SavedObjectsClientFactory } from '@kbn/core-di-server';
 import { inject, injectable } from 'inversify';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
+import type { SavedObjectError } from '@kbn/core/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RuleSavedObjectAttributes } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
-import type { SavedObjectError } from '@kbn/core/types';
 
 export type RulesSavedObjectsBulkGetResultItem =
   | {
