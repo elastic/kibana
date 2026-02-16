@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/management-plugin'
   - '@kbn/i18n-react'
+  - '@kbn/es-ui-shared-plugin'
 tags:
   - plugin
   - prod
@@ -30,6 +31,7 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
+    - common/**/*
     - public/**/*
     - server/**/*
     - '!target/**/*'
