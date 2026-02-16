@@ -168,17 +168,20 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
  * For example: 0.5 stays 0.5, "25%" becomes 0.25.
  */
 function parseZoomFactor(value: number | string): number {
-  if (typeof value === 'string' && value.includes('%')) {
-    const parsed = parseFloat(value.replace('%', '').trim());
-    if (isNaN(parsed)) {
-      throw new TypeError('Invalid percentage string for zoomFactor');
-    }
-    return parsed / 100;
-  }
-  const result = typeof value === 'number' ? value : parseFloat(String(value));
-  if (isNaN(result)) {
+  const isPercentage = typeof value === 'string' && value.trim().endsWith('%');
+  const parsed =
+    typeof value === 'number'
+      ? value
+      : parseFloat(isPercentage ? value.replace('%', '').trim() : value);
+
+  if (isNaN(parsed)) {
     throw new TypeError('Please provide a valid number or percentage string e.g. "25%"');
   }
+  const result = isPercentage ? parsed / 100 : parsed;
+  if (result < 0 || result > 1) {
+    throw new TypeError('Please provide a `zoomFactor` value between 0 and 1');
+  }
+
   return result;
 }
 

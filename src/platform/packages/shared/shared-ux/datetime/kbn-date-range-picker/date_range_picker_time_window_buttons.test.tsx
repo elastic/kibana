@@ -238,4 +238,21 @@ describe('TimeWindowButtons', () => {
       expect(onChange).not.toHaveBeenCalled();
     });
   });
+
+  describe('zoomFactor', () => {
+    it('throws for out-of-range values', () => {
+      function renderPickerWithZoomFactor(zoomFactor: number | string) {
+        renderPicker({
+          defaultValue: '-5m',
+          showTimeWindowButtons: { zoomFactor },
+        });
+      }
+
+      expect(() => renderPickerWithZoomFactor(-0.5)).toThrow();
+
+      expect(() => renderPickerWithZoomFactor(1.1)).toThrow();
+
+      expect(() => renderPickerWithZoomFactor('200%')).toThrow();
+    });
+  });
 });
