@@ -11,9 +11,10 @@ import { execSync } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { findPackageForPath, getPackages } from '@kbn/repo-packages';
-import { doAnyChangesMatch } from '#pipeline-utils/github';
+import { doAnyChangesMatch } from '../github';
+import { getKibanaDir } from '../utils';
+
+const REPO_ROOT = getKibanaDir();
 
 /**
  * Configuration for affected package detection
@@ -60,12 +61,11 @@ export function filterConfigsByAffectedPackages(
   const filtered: string[] = [];
 
   for (const configPath of configs) {
-    const absolutePath = path.join(REPO_ROOT, configPath);
-    const pkg = findPackageForPath(REPO_ROOT, absolutePath);
+    const pkgId = findPackageForPath(configPath);
 
-    if (pkg && affectedPackages.has(pkg.name)) {
+    if (pkgId && affectedPackages.has(pkgId)) {
       filtered.push(configPath);
-    } else if (!pkg) {
+    } else if (!pkgId) {
       // Config is not in a package (e.g., root-level test) - include it to be safe
       filtered.push(configPath);
     }
@@ -103,7 +103,7 @@ export async function getAffectedPackagesForFiltering(
   log('--- Detecting Affected Packages for Jest Filtering');
 
   // Check if we should run all tests due to critical changes
-  const runAll = await shouldRunAllTests(mergeBase);
+  const runAll = await shouldRunAllTests();
   if (runAll) {
     log('Critical infrastructure files changed - running all tests (no affected filtering)');
     return null;
@@ -142,25 +142,55 @@ function getConfigFromEnv(): AffectedPackagesConfig {
   };
 }
 
+let cachedPackageLookup: Map<string, string> | null = null;
+/**
+ * Get all @kbn packages from package.json
+ * Returns a map of package directory -> package name
+ */
+function getPackageLookup(): Map<string, string> {
+  if (cachedPackageLookup != null) {
+    return cachedPackageLookup;
+  }
+
+  const packageJsonPath = path.join(REPO_ROOT, 'package.json');
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+  const allDependencies = {
+    ...packageJson.dependencies,
+    ...packageJson.devDependencies,
+  };
+
+  const packageLookup = new Map<string, string>();
+  for (const [packageName, packageLink] of Object.entries<string>(allDependencies)) {
+    if (packageName.startsWith('@kbn/')) {
+      const packageDir = packageLink.replace(/^link:/, '');
+      packageLookup.set(packageDir, packageName);
+    }
+  }
+
+  cachedPackageLookup = packageLookup;
+
+  return packageLookup;
+}
+
 /**
  * Build a dependency graph that maps each package to its downstream dependents
  */
 function buildDownstreamDependencyGraph(): Map<string, Set<string>> {
-  const packages = getPackages(REPO_ROOT);
   const downstreamMap = new Map<string, Set<string>>();
+  const packageLookup = getPackageLookup();
 
   // Initialize empty sets for all packages
-  for (const pkg of packages) {
-    downstreamMap.set(pkg.name, new Set<string>());
+  for (const packageName of packageLookup.values()) {
+    downstreamMap.set(packageName, new Set<string>());
   }
 
   // For each package, add it to the downstream set of all its dependencies
-  for (const pkg of packages) {
-    const dependencies = getDependenciesForPackage(pkg);
+  for (const [packageDir, packageName] of packageLookup.entries()) {
+    const dependencies = getDependenciesForPackage(packageDir);
     for (const depId of dependencies) {
       const downstreams = downstreamMap.get(depId);
       if (downstreams) {
-        downstreams.add(pkg.name);
+        downstreams.add(packageName);
       }
     }
   }
@@ -171,9 +201,9 @@ function buildDownstreamDependencyGraph(): Map<string, Set<string>> {
 /**
  * Get dependencies for a package from its moon.yml or tsconfig.json
  */
-function getDependenciesForPackage(pkg: any): string[] {
+function getDependenciesForPackage(packageDir: string): string[] {
   // Try to read dependencies from moon.yml first
-  const moonYmlPath = path.join(REPO_ROOT, pkg.normalizedRepoRelativeDir, 'moon.yml');
+  const moonYmlPath = path.join(REPO_ROOT, packageDir, 'moon.yml');
   try {
     const moonYmlContent = fs.readFileSync(moonYmlPath, 'utf8');
     const moonConfig = yaml.load(moonYmlContent) as any;
@@ -181,7 +211,18 @@ function getDependenciesForPackage(pkg: any): string[] {
       return moonConfig.dependsOn;
     }
   } catch (error) {
-    // ignore
+    // moon.yml doesn't exist or can't be read, try tsconfig
+  }
+
+  // Fallback to tsconfig.json kbn_references
+  const tsconfigPath = path.join(REPO_ROOT, packageDir, 'tsconfig.json');
+  try {
+    const tsconfig = JSON.parse(fs.readFileSync(tsconfigPath, 'utf8'));
+    if (tsconfig?.kbn_references && Array.isArray(tsconfig.kbn_references)) {
+      return tsconfig.kbn_references;
+    }
+  } catch (error) {
+    // tsconfig doesn't exist or can't be read
   }
 
   return [];
@@ -235,10 +276,9 @@ function getAffectedPackagesGit(mergeBase: string, includeDownstream: boolean): 
   // Map files to packages
   const directlyAffectedPackages = new Set<string>();
   for (const file of changedFiles) {
-    const absolutePath = path.join(REPO_ROOT, file);
-    const pkg = findPackageForPath(REPO_ROOT, absolutePath);
-    if (pkg) {
-      directlyAffectedPackages.add(pkg.name);
+    const pkgId = findPackageForPath(file);
+    if (pkgId) {
+      directlyAffectedPackages.add(pkgId);
     }
   }
 
@@ -287,7 +327,7 @@ function getAffectedPackagesMoon(mergeBase: string, includeDownstream: boolean):
 /**
  * Check if changes require running all tests (e.g., infrastructure changes)
  */
-async function shouldRunAllTests(mergeBase: string): Promise<boolean> {
+async function shouldRunAllTests(): Promise<boolean> {
   const criticalPaths = [
     '.buildkite/',
     'scripts/jest.js',
@@ -302,4 +342,20 @@ async function shouldRunAllTests(mergeBase: string): Promise<boolean> {
   ];
 
   return doAnyChangesMatch(criticalPaths.map((p) => new RegExp(p)));
+}
+
+function findPackageForPath(filePath: string): string | undefined {
+  const packageLookup = getPackageLookup();
+
+  // find the longest prefix of the path that is a key in the packageLookup
+  let longestPrefix = '';
+  for (const packageDir of packageLookup.keys()) {
+    if (filePath.startsWith(packageDir)) {
+      if (packageDir.length > longestPrefix.length) {
+        longestPrefix = packageDir;
+      }
+    }
+  }
+
+  return packageLookup.get(longestPrefix);
 }
