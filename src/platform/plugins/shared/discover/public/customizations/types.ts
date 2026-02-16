@@ -26,7 +26,7 @@ export interface ExtendedDiscoverStateContainer extends DiscoverStateContainer {
   /**
    * Creates an observable of the current tab's main state (query, filters, time range, refresh interval, persistable attributes)
    */
-  createTabStateObservable: () => Observable<
+  createTabPersistableStateObservable: () => Observable<
     Pick<TabState, 'appState' | 'globalState' | 'attributes'>
   >;
 

@@ -12,7 +12,7 @@ import { distinctUntilChanged, map, type Observable, skip } from 'rxjs';
 import { type DiscoverInternalState, selectTab, type TabState } from '../redux';
 import { isEqualState } from './state_comparators';
 
-export const createTabStateObservable = ({
+export const createTabPersistableStateObservable = ({
   tabId,
   internalState$,
   getState,

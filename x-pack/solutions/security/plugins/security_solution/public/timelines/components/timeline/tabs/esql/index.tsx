@@ -234,7 +234,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         next: setDiscoverInternalState,
       });
 
-      const tabStateSub = stateContainer.createTabStateObservable().subscribe({
+      const tabStateSub = stateContainer.createTabPersistableStateObservable().subscribe({
         next: () => {
           setTabStateVersion((prev) => prev + 1);
         },

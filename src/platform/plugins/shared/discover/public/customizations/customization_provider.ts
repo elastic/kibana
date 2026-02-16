@@ -21,7 +21,7 @@ import type {
 import { createCustomizationService } from './customization_service';
 import { getInitialAppState } from '../application/main/state_management/utils/get_initial_app_state';
 import { createTabAppStateObservable } from '../application/main/state_management/utils/create_tab_app_state_observable';
-import { createTabStateObservable } from '../application/main/state_management/utils/create_tab_state_observable';
+import { createTabPersistableStateObservable } from '../application/main/state_management/utils/create_tab_persistable_state_observable';
 import type { DiscoverServices } from '../build_services';
 import {
   fromSavedSearchToSavedObjectTab,
@@ -65,8 +65,8 @@ export const getExtendedDiscoverStateContainer = (
         internalState$: from(stateContainer.internalState),
         getState: stateContainer.internalState.getState,
       }),
-    createTabStateObservable: () =>
-      createTabStateObservable({
+    createTabPersistableStateObservable: () =>
+      createTabPersistableStateObservable({
         tabId,
         internalState$: from(stateContainer.internalState),
         getState: stateContainer.internalState.getState,

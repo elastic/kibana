@@ -17,7 +17,7 @@ import type { TabState } from '../types';
 import { getTabRuntimeStateMock } from '../__mocks__/runtime_state.mocks';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 import * as tabSyncApi from './tab_sync';
-import * as createTabStateObservableModule from '../../utils/create_tab_state_observable';
+import * as createTabPersistableStateObservableModule from '../../utils/create_tab_persistable_state_observable';
 
 const { initializeAndSync, stopSyncing } = tabSyncApi;
 
@@ -108,19 +108,19 @@ describe('tab_sync actions', () => {
   });
 
   describe('state observables subscriptions', () => {
-    it('should subscribe to createTabStateObservable for syncing locally persisted tab state', async () => {
+    it('should subscribe to createTabPersistableStateObservable for syncing locally persisted tab state', async () => {
       const mockTabState$ = new Subject<
         Pick<TabState, 'appState' | 'globalState' | 'attributes'>
       >();
-      const createTabStateObservableSpy = jest
-        .spyOn(createTabStateObservableModule, 'createTabStateObservable')
+      const createTabPersistableStateObservableSpy = jest
+        .spyOn(createTabPersistableStateObservableModule, 'createTabPersistableStateObservable')
         .mockReturnValue(mockTabState$);
 
       const { tabId, initializeSingleTab } = await setup();
 
       await initializeSingleTab({ tabId });
 
-      expect(createTabStateObservableSpy).toHaveBeenCalledWith(
+      expect(createTabPersistableStateObservableSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           tabId,
           internalState$: expect.any(Object),
@@ -137,7 +137,7 @@ describe('tab_sync actions', () => {
         Pick<TabState, 'appState' | 'globalState' | 'attributes'>
       >();
       jest
-        .spyOn(createTabStateObservableModule, 'createTabStateObservable')
+        .spyOn(createTabPersistableStateObservableModule, 'createTabPersistableStateObservable')
         .mockReturnValue(mockTabState$);
 
       // Spy on the action creator before initialization
@@ -168,7 +168,7 @@ describe('tab_sync actions', () => {
         Pick<TabState, 'appState' | 'globalState' | 'attributes'>
       >();
       jest
-        .spyOn(createTabStateObservableModule, 'createTabStateObservable')
+        .spyOn(createTabPersistableStateObservableModule, 'createTabPersistableStateObservable')
         .mockReturnValue(mockTabState$);
 
       const { tabId, initializeSingleTab, runtimeStateManager } = await setup();
