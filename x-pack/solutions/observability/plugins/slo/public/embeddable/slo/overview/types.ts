@@ -15,6 +15,16 @@ import type {
   PublishesWritableTitle,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
+// import type {
+//   OverviewEmbeddableState,
+//   SingleOverviewEmbeddableState,
+//   GroupOverviewEmbeddableState,
+// } from '../../../../server/lib/embeddables/schema';
+
+import type {
+  SingleOverviewCustomState,
+  GroupOverviewCustomState,
+} from '../../../../common/embeddables/overview/schema';
 
 export type OverviewMode = 'single' | 'groups';
 export type GroupBy = 'slo.tags' | 'status' | 'slo.indicator.type';
@@ -29,20 +39,8 @@ export interface SloConfigurationProps {
   overview_mode?: OverviewMode;
 }
 
-// TODO import from common schema
-export type SingleSloCustomInput = SloConfigurationProps & {
-  slo_id: string | undefined;
-  slo_instance_id: string | undefined;
-  remote_name?: string;
-  show_all_group_by_instances?: boolean;
-};
-
-// TODO import from commn schema
-export type GroupSloCustomInput = SloConfigurationProps & {
-  group_filters: GroupFilters | undefined;
-};
-
-export type SloOverviewState = Partial<GroupSloCustomInput> & Partial<SingleSloCustomInput>;
+export type SloOverviewState = Partial<SingleOverviewCustomState> &
+  Partial<GroupOverviewCustomState>;
 
 export type SloOverviewEmbeddableState = SerializedTitles &
   Partial<DynamicActionsSerializedState> &
@@ -57,8 +55,8 @@ export type SloOverviewApi = DefaultEmbeddableApi<SloOverviewEmbeddableState> &
   HasSupportedTriggers;
 
 export interface HasSloGroupOverviewConfig {
-  getSloGroupOverviewConfig: () => GroupSloCustomInput;
-  updateSloGroupOverviewConfig: (next: GroupSloCustomInput) => void;
+  getSloGroupOverviewConfig: () => GroupOverviewCustomState;
+  updateSloGroupOverviewConfig: (next: GroupOverviewCustomState) => void;
 }
 
 export const apiHasSloGroupOverviewConfig = (

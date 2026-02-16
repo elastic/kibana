@@ -7,26 +7,17 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
+import type { Filter } from '@kbn/es-query';
 
-const ConfigurationSchema = schema.object({
-  overview_mode: schema.maybe(schema.oneOf([schema.literal('single'), schema.literal('groups')])),
-});
-
-const SingleOverviewSchema = schema.object({
+export const SingleOverviewCustomSchema = schema.object({
   slo_id: schema.string(),
   slo_instance_id: schema.maybe(schema.string()),
   remote_name: schema.maybe(schema.string()),
   show_all_group_by_instances: schema.maybe(schema.boolean()),
+  overview_mode: schema.literal('single'),
 });
 
-export const SingleOverviewEmbeddableSchema = schema.allOf(
-  [SingleOverviewSchema, ConfigurationSchema, serializedTitlesSchema],
-  { meta: { description: 'SLO Single Overview embeddable schema' } }
-);
-export const SingleOverviewCustomSchema = schema.allOf([SingleOverviewSchema, ConfigurationSchema]);
-
-const GroupOverviewSchema = schema.object({
+export const GroupOverviewCustomSchema = schema.object({
   group_filters: schema.maybe(
     schema.object({
       group_by: schema.oneOf([
@@ -39,22 +30,8 @@ const GroupOverviewSchema = schema.object({
       kql_query: schema.maybe(schema.string()),
     })
   ),
+  overview_mode: schema.literal('groups'),
 });
-
-export const GroupOverviewEmbeddableSchema = schema.allOf(
-  [GroupOverviewSchema, ConfigurationSchema, serializedTitlesSchema],
-  { meta: { description: 'SLO Group Overview embeddable schema' } }
-);
-export const GroupOverviewCustomSchema = schema.allOf([GroupOverviewSchema, ConfigurationSchema], {
-  meta: { description: 'SLO Group Overview embeddable schema' },
-});
-
-export const overviewEmbeddableSchema = schema.oneOf(
-  [SingleOverviewEmbeddableSchema, GroupOverviewEmbeddableSchema],
-  { meta: { description: 'SLO Overview embeddable schema' } }
-);
-
-export type OverviewEmbeddableState = TypeOf<typeof overviewEmbeddableSchema>;
 
 export const legacySingleOverviewEmbeddableCustomSchema = schema.object({
   sloId: schema.string(),
@@ -74,6 +51,7 @@ export const legacyGroupOverviewEmbeddableCustomSchema = schema.object({
     ]),
     groups: schema.maybe(schema.arrayOf(schema.string())),
     filters: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+
     kql_query: schema.maybe(schema.string()),
   }),
 });
@@ -84,3 +62,18 @@ export type LegacySingleOverviewEmbeddableState = TypeOf<
 export type LegacyGroupOverviewEmbeddableState = TypeOf<
   typeof legacyGroupOverviewEmbeddableCustomSchema
 >;
+
+export type SingleOverviewCustomState = TypeOf<typeof SingleOverviewCustomSchema>;
+// export type GroupOverviewCustomState = TypeOf<typeof GroupOverviewCustomSchema>;
+
+export type GroupOverviewCustomState = Omit<
+  TypeOf<typeof GroupOverviewCustomSchema>,
+  'group_filters'
+> & {
+  group_filters?: {
+    group_by: 'slo.tags' | 'status' | 'slo.indicator.type';
+    groups?: string[];
+    filters?: Filter[];
+    kql_query?: string;
+  };
+};

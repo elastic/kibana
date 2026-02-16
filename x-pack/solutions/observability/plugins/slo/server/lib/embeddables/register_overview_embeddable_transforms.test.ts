@@ -7,7 +7,7 @@
 
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../../../common/embeddables/overview/constants';
-import { overviewEmbeddableSchema } from '../../../common/embeddables/overview/schema';
+import { overviewEmbeddableSchema } from './schema';
 import { getTransforms } from '../../../common/embeddables/overview/transforms/transforms';
 import { registerOverviewEmbeddableTransforms } from './register_overview_embeddable_transforms';
 

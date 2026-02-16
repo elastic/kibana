@@ -32,11 +32,11 @@ import { GroupSloView } from './group_view/group_view';
 import { SloOverview } from './slo_overview';
 import { SloCardChartList } from './slo_overview_grid';
 import type {
-  GroupSloCustomInput,
   SloOverviewApi,
   SloOverviewEmbeddableState, // TODO import from schema in common
   SloOverviewState,
 } from './types';
+import type { GroupOverviewCustomState } from '../../../../common/embeddables/overview/schema'; // TODO import from common schema
 import { openSloConfiguration } from './slo_overview_open_configuration';
 
 const getOverviewPanelTitle = () =>
@@ -136,7 +136,7 @@ export const getOverviewEmbeddableFactory = ({
             sloClient,
             api.getSloGroupOverviewConfig()
           );
-          api.updateSloGroupOverviewConfig(result as GroupSloCustomInput);
+          api.updateSloGroupOverviewConfig(result as GroupOverviewCustomState);
         } catch (e) {
           return Promise.reject();
         }
@@ -146,10 +146,10 @@ export const getOverviewEmbeddableFactory = ({
         const { group_filters, overview_mode } = sloStateManager.getLatestState();
         return {
           group_filters,
-          overview_mode,
-        };
+          overview_mode: overview_mode ?? 'groups',
+        } as GroupOverviewCustomState;
       },
-      updateSloGroupOverviewConfig: (update: GroupSloCustomInput) => {
+      updateSloGroupOverviewConfig: (update: GroupOverviewCustomState) => {
         sloStateManager.api.setGroupFilters(update.group_filters);
       },
     });

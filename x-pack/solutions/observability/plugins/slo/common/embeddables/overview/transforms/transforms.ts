@@ -6,10 +6,10 @@
  */
 
 import type {
-  OverviewEmbeddableState,
   LegacySingleOverviewEmbeddableState,
   LegacyGroupOverviewEmbeddableState,
 } from '../schema';
+import type { OverviewEmbeddableState } from '../../../../server/lib/embeddables/schema';
 
 export const getTransforms = () => ({
   transformOut: (storedState: OverviewEmbeddableState) => {
