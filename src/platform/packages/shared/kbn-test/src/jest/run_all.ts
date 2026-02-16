@@ -186,7 +186,7 @@ export async function runJestAll() {
     testFiles: results.map((r) => relative(process.cwd(), r.config)),
   });
 
-  log.write('--- Combined Jest run summary');
+  log.write('+++ Combined Jest run summary\n');
 
   await writeSummary(results, log, totalMs);
 
@@ -332,10 +332,13 @@ async function runConfigs(
           const sec = Math.round(durationMs / 1000);
 
           const relConfigPath = relative(REPO_ROOT, config);
+          // Buildkite collapsible sections:
+          //   --- (collapsed) for passing configs — full output preserved but hidden
+          //   +++ (expanded) for failing configs — immediately visible
           if (code === 0) {
-            log.write(`+++ ✅ ${relConfigPath} (${sec}s)\n`);
+            log.write(`--- ✅ ${relConfigPath} (${sec}s)\n`);
           } else {
-            log.write(`--- ❌ ${relConfigPath} (${sec}s) - FAILED\n`);
+            log.write(`+++ ❌ ${relConfigPath} (${sec}s) - FAILED\n`);
           }
           log.write(buffer + '\n');
 
@@ -420,11 +423,7 @@ function parseFailedTests(output: string): FailedTest[] {
 function writeFailureSummary(failedResults: JestConfigResult[], log: ToolingLog) {
   const cwd = process.cwd();
 
-  log.write(
-    `--- ❌ Failed Tests Summary (${failedResults.length} config${
-      failedResults.length > 1 ? 's' : ''
-    } failed)\n`
-  );
+  log.write(`+++ ❌ Failed Tests Summary (${failedResults.length} config${failedResults.length > 1 ? 's' : ''} failed)\n`);
 
   for (const r of failedResults) {
     const relativePath = relative(cwd, r.config);
