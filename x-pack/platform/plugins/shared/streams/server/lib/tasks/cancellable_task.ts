@@ -9,7 +9,7 @@ import type { RunContext } from '@kbn/task-manager-plugin/server';
 import type { RunFunction } from '@kbn/task-manager-plugin/server/task';
 import { TaskStatus } from '@kbn/streams-schema';
 import type { LogMeta } from '@kbn/logging';
-import { getErrorMessage } from '../streams/errors/get_error_message';
+import { getErrorMessage } from '../streams/errors/parse_error';
 import type { TaskContext } from './task_definitions';
 import type { TaskParams } from './types';
 

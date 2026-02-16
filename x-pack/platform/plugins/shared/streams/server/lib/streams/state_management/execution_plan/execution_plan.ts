@@ -27,7 +27,7 @@ import {
   deleteIngestPipeline,
   upsertIngestPipeline,
 } from '../../ingest_pipelines/manage_ingest_pipelines';
-import { getErrorMessage } from '../../errors/get_error_message';
+import { getErrorMessage } from '../../errors/parse_error';
 import { upsertEsqlView, deleteEsqlView } from '../../esql_views/manage_esql_views';
 import { FailedToExecuteElasticsearchActionsError } from '../errors/failed_to_execute_elasticsearch_actions_error';
 import { FailedToPlanElasticsearchActionsError } from '../errors/failed_to_plan_elasticsearch_actions_error';

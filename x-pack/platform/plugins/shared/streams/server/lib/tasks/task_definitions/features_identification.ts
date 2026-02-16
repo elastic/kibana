@@ -14,7 +14,7 @@ import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LogMeta } from '@kbn/logging';
-import { getErrorMessage } from '../../streams/errors/get_error_message';
+import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';

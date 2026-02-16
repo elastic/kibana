@@ -11,7 +11,7 @@ import type { Streams } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
-import { getErrorMessage } from '../../../lib/streams/errors/get_error_message';
+import { getErrorMessage } from '../../../lib/streams/errors/parse_error';
 import type { UpsertStreamResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
 import { upsertDataStream } from '../../../lib/streams/data_streams/manage_data_streams';

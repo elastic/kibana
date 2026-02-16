@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import { getErrorMessage } from '../errors/get_error_message';
+import { getErrorMessage } from '../errors/parse_error';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DeleteComponentOptions {

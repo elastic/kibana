@@ -9,7 +9,7 @@ import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
 import type { IdentifySystemsResult } from '@kbn/streams-ai';
-import { getErrorMessage } from '../../streams/errors/get_error_message';
+import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';

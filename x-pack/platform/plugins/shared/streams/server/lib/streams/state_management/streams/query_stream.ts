@@ -8,7 +8,7 @@
 import { cloneDeep, isEqual } from 'lodash';
 import { validateQuery } from '@kbn/esql-language';
 import { Streams, getEsqlViewName, getParentId, isChildOf } from '@kbn/streams-schema';
-import { getErrorMessage } from '../../errors/get_error_message';
+import { getErrorMessage } from '../../errors/parse_error';
 import { StatusError } from '../../errors/status_error';
 import { getEsqlView } from '../../esql_views/manage_esql_views';
 import type { ElasticsearchAction } from '../execution_plan/types';

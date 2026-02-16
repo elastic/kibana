@@ -25,7 +25,7 @@ import {
   isEnabledLifecycleFailureStore,
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
-import { getErrorMessage } from '../errors/get_error_message';
+import { getErrorMessage, parseError } from '../errors/parse_error';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {
@@ -68,13 +68,9 @@ export async function upsertDataStream({ esClient, name, logger }: DataStreamMan
     await retryTransientEsErrors(() => esClient.indices.createDataStream({ name }), { logger });
     logger.debug(() => `Installed data stream: ${name}`);
   } catch (error) {
-    const isAlreadyExists =
-      error instanceof Object &&
-      'meta' in error &&
-      (error as { meta?: { body?: { error?: { type?: string } } } })?.meta?.body?.error?.type ===
-        'resource_already_exists_exception';
-    if (!isAlreadyExists) {
-      logger.error(`Error creating data stream: ${getErrorMessage(error)}`);
+    const { type, message } = parseError(error);
+    if (type !== 'resource_already_exists_exception') {
+      logger.error(`Error creating data stream: ${message}`);
       throw error;
     }
   }

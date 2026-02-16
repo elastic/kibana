@@ -7,7 +7,7 @@
 
 import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { getErrorMessage } from '../errors/get_error_message';
+import { getErrorMessage } from '../errors/parse_error';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface TemplateManagementOptions {

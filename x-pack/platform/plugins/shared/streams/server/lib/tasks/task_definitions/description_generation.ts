@@ -11,7 +11,7 @@ import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
 import { generateStreamDescription } from '@kbn/streams-ai';
 import type { GenerateDescriptionResult } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import { getErrorMessage } from '../../streams/errors/get_error_message';
+import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';

@@ -22,7 +22,7 @@ import { streamFromDefinition } from './stream_active_record/stream_from_definit
 import type { StateDependencies, StreamChange } from './types';
 import { ConcurrentAccessError } from './errors/concurrent_access_error';
 import { InsufficientPermissionsError } from '../errors/insufficient_permissions_error';
-import { getErrorMessage } from '../errors/get_error_message';
+import { getErrorMessage } from '../errors/parse_error';
 import { StatusError } from '../errors/status_error';
 
 interface Changes {

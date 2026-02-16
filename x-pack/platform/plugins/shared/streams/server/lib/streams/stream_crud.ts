@@ -15,7 +15,6 @@ import type {
   IngestPipeline,
   UnitMillis,
 } from '@elastic/elasticsearch/lib/api/types';
-import { errors as esErrors } from '@elastic/elasticsearch';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type {
   EffectiveFailureStore,
@@ -27,8 +26,10 @@ import type {
   IngestStreamSettings,
 } from '@kbn/streams-schema';
 import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
+
 import { FAILURE_STORE_SELECTOR } from '../../../common/constants';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
+import { parseError } from './errors/parse_error';
 
 interface BaseParams {
   scopedClusterClient: IScopedClusterClient;
@@ -169,7 +170,8 @@ async function fetchComponentTemplate(
       }
     );
   } catch (e) {
-    if (e instanceof esErrors.ResponseError && e.meta?.statusCode === 404) {
+    const { statusCode } = parseError(e);
+    if (statusCode === 404) {
       return { name, component_template: undefined };
     }
     throw e;
@@ -287,7 +289,8 @@ export async function getDataStream({
     const response = await scopedClusterClient.asCurrentUser.indices.getDataStream({ name });
     dataStream = response.data_streams[0];
   } catch (e) {
-    if (e instanceof esErrors.ResponseError && e.meta?.statusCode === 404) {
+    const { statusCode } = parseError(e);
+    if (statusCode === 404) {
       // fall through and throw not found
     } else {
       throw e;
@@ -319,7 +322,8 @@ export async function getClusterDefaultFailureStoreRetentionValue({
       defaultRetention = persistentDSRetention ?? defaultsDSRetention;
     }
   } catch (e) {
-    if (e instanceof esErrors.ResponseError && e.meta?.statusCode === 403) {
+    const { statusCode } = parseError(e);
+    if (statusCode === 403) {
       // if user doesn't have permissions to read cluster settings, we just return undefined
     } else {
       throw e;
@@ -404,7 +408,8 @@ export async function getFailureStoreSize({
       total_size_in_bytes: docsStats?.total_size_in_bytes || 0,
     };
   } catch (e) {
-    if (e instanceof esErrors.ResponseError && e.meta?.statusCode === 404) {
+    const { statusCode } = parseError(e);
+    if (statusCode === 404) {
       return undefined;
     } else {
       throw e;
@@ -432,7 +437,8 @@ export async function getFailureStoreMeteringSize({
       total_size_in_bytes: response._total?.size_in_bytes || 0,
     };
   } catch (e) {
-    if (e instanceof esErrors.ResponseError && e.meta?.statusCode === 404) {
+    const { statusCode } = parseError(e);
+    if (statusCode === 404) {
       return undefined;
     } else {
       throw e;
@@ -461,7 +467,8 @@ export async function getFailureStoreCreationDate({
     }
     return age || undefined;
   } catch (e) {
-    if (e instanceof esErrors.ResponseError && e.meta?.statusCode === 404) {
+    const { statusCode } = parseError(e);
+    if (statusCode === 404) {
       return undefined;
     } else {
       throw e;

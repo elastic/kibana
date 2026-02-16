@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod';
 
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
-import { getErrorMessage } from '../../../lib/streams/errors/get_error_message';
+import { getErrorMessage } from '../../../lib/streams/errors/parse_error';
 import { createServerRoute } from '../../create_server_route';
 import { findConflictingTemplates } from '../../../lib/streams/helpers/validate_template_conflicts';
 

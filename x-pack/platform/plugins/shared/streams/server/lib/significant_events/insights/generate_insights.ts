@@ -13,7 +13,7 @@ import type { InsightsResult } from '@kbn/streams-schema';
 import type { LogMeta } from '@kbn/logging';
 import type { QueryClient } from '../../streams/assets/query/query_client';
 import type { StreamsClient } from '../../streams/client';
-import { getErrorMessage } from '../../streams/errors/get_error_message';
+import { getErrorMessage } from '../../streams/errors/parse_error';
 import { SummarizeQueriesPrompt } from './prompts/summarize_queries/prompt';
 import { SummarizeStreamsPrompt } from './prompts/summarize_streams/prompt';
 import { extractInsightsFromResponse, collectQueryData, type QueryData } from './utils';
