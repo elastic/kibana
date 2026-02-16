@@ -53,7 +53,8 @@
     "@kbn/core-user-profile-common",
     "@kbn/core-user-profile-server-mocks",
     "@kbn/core-user-profile-server",
-    "@kbn/es-mappings"
+    "@kbn/es-mappings",
+    "@kbn/std"
   ],
   "exclude": ["target/**/*"]
 }

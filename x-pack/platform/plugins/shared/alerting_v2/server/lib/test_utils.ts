@@ -23,6 +23,7 @@ import type { QueryPayload } from './rule_executor/get_query_payload';
 import type { AlertEvent } from '../resources/alert_events';
 import type { RuleExecutionPipelineInput } from './rule_executor/execution_pipeline';
 import { createExecutionContext } from './execution_context';
+import type { RuleSavedObjectAttributes } from '../saved_objects';
 
 /**
  * Creates a mock Elasticsearch client.
@@ -51,15 +52,45 @@ export function createMockLogger(): jest.Mocked<Logger> {
 export function createRuleResponse(overrides: Partial<RuleResponse> = {}): RuleResponse {
   return {
     id: 'rule-1',
-    name: 'test-rule',
     kind: 'alert',
-    tags: [],
-    schedule: { custom: '1m' },
+    metadata: { name: 'test-rule' },
+    time_field: '@timestamp',
+    schedule: { every: '1m', lookback: '5m' },
+    evaluation: {
+      query: {
+        base: 'FROM logs-* | LIMIT 10',
+        condition: 'WHERE true',
+      },
+    },
+    grouping: { fields: [] },
     enabled: true,
-    query: 'FROM logs-* | LIMIT 10',
-    timeField: '@timestamp',
-    lookbackWindow: '5m',
-    groupingKey: [],
+    createdBy: 'elastic_profile_uid',
+    createdAt: '2025-01-01T00:00:00.000Z',
+    updatedBy: 'elastic_profile_uid',
+    updatedAt: '2025-01-01T00:00:00.000Z',
+    ...overrides,
+  };
+}
+
+/**
+ * Creates standard RuleSavedObjectAttributes for testing.
+ */
+export function createRuleSoAttributes(
+  overrides: Partial<RuleSavedObjectAttributes> = {}
+): RuleSavedObjectAttributes {
+  return {
+    kind: 'alert',
+    metadata: { name: 'test-rule' },
+    time_field: '@timestamp',
+    schedule: { every: '1m', lookback: '5m' },
+    evaluation: {
+      query: {
+        base: 'FROM logs-* | LIMIT 10',
+        condition: 'WHERE true',
+      },
+    },
+    grouping: { fields: [] },
+    enabled: true,
     createdBy: 'elastic_profile_uid',
     createdAt: '2025-01-01T00:00:00.000Z',
     updatedBy: 'elastic_profile_uid',

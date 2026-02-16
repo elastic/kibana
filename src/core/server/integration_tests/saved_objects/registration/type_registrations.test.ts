@@ -184,6 +184,7 @@ const previouslyRegisteredTypes = [
   'workplace_search_telemetry',
   'gap_auto_fill_scheduler',
   'trial-companion-nba-milestone',
+  'alerting_notification_policy',
 ].sort();
 
 describe('SO type registrations', () => {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import { createAlertEventsBatchBuilder } from './build_alert_events';
 
 describe('createAlertEventsBatchBuilder', () => {
@@ -19,22 +18,6 @@ describe('createAlertEventsBatchBuilder', () => {
   });
 
   it('transforms ES|QL rows into alert documents', () => {
-    const ruleAttributes: RuleSavedObjectAttributes = {
-      name: 'My ES|QL Rule',
-      kind: 'alert',
-      tags: ['esql', 'test'],
-      schedule: { custom: '1m' },
-      enabled: true,
-      query: 'FROM idx | STATS count = COUNT(*) BY host.name',
-      timeField: '@timestamp',
-      lookbackWindow: '5m',
-      groupingKey: ['host.name', 'region'],
-      createdBy: 'u',
-      createdAt: '2025-01-01T00:00:00.000Z',
-      updatedBy: 'u',
-      updatedAt: '2025-01-01T00:00:00.000Z',
-    };
-
     const rows = [
       { 'host.name': 'host-a', region: 'us-east', count: 10 },
       { 'host.name': 'host-b', region: 'eu-west', count: 5 },
@@ -44,7 +27,7 @@ describe('createAlertEventsBatchBuilder', () => {
       ruleId: 'rule-123',
       ruleVersion: 1,
       spaceId: 'default',
-      ruleAttributes,
+      ruleAttributes: { grouping: { fields: ['host.name', 'region'] } },
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
     });
 

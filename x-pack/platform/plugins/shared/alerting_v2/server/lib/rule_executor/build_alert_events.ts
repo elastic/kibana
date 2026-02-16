@@ -6,9 +6,9 @@
  */
 
 import { createHash } from 'crypto';
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 
-import type { RuleSavedObjectAttributes } from '../../saved_objects';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { AlertEvent } from '../../resources/alert_events';
 
 function sha256(value: string) {
@@ -38,7 +38,7 @@ export interface BuildAlertEventsBaseOpts {
   ruleId: string;
   ruleVersion: number;
   spaceId: string;
-  ruleAttributes: RuleSavedObjectAttributes;
+  ruleAttributes: Pick<RuleResponse, 'grouping'>;
   /**
    * Stable identifier for this task run (used for deterministic ids to avoid duplicates on retry).
    */
@@ -73,9 +73,9 @@ export function createAlertEventsBatchBuilder({
     for (const rowDoc of batch) {
       const groupHash = buildGroupHash({
         rowDoc,
-        groupKeyFields: ruleAttributes.groupingKey ?? [],
+        groupKeyFields: ruleAttributes.grouping?.fields ?? [],
         get fallbackSeed(): string {
-          return `${executionUuid}|row:${index}|${stringify(rowDoc)}`;
+          return `${executionUuid}|row:${index}|${stableStringify(rowDoc)}`;
         },
       });
 

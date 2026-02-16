@@ -54,6 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
       const types = (await getRegisteredTypes())
         .filter((t: string) => !TEST_TYPES.includes(t) && !actionTypeIdsFromSpecs.has(t))
         .sort();
+
       expect(types).to.eql([
         'Fleet-Metrics-Task',
         'Fleet-Usage-Logger',
@@ -107,6 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:connector_usage_reporting',
         'actions_telemetry',
         'ad_hoc_run-backfill',
+        'agent-builder:run-agent',
         'alert-deletion',
         'alerting:.es-query',
         'alerting:.geo-containment',
@@ -135,7 +137,6 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:monitoring_ccr_read_exceptions',
         'alerting:monitoring_shard_size',
         'alerting:observability.rules.custom_threshold',
-        'alerting:security.attack_discovery.data_generator',
         'alerting:siem.eqlRule',
         'alerting:siem.esqlRule',
         'alerting:siem.indicatorRule',

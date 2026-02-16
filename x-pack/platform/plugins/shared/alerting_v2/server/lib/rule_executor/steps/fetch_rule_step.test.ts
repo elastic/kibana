@@ -7,13 +7,13 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { FetchRuleStep } from './fetch_rule_step';
-import type { RuleSavedObjectAttributes } from '../../../saved_objects';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import {
   collectStreamResults,
   createPipelineStream,
   createRuleExecutionInput,
   createRulePipelineState,
+  createRuleSoAttributes,
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createRulesClient } from '../../rules_client/rules_client.mock';
@@ -25,25 +25,6 @@ describe('FetchRuleStep', () => {
   let step: FetchRuleStep;
   let mockSavedObjectsClient: ReturnType<typeof createRulesClient>['mockSavedObjectsClient'];
 
-  const createRuleAttributes = (
-    overrides: Partial<RuleSavedObjectAttributes> = {}
-  ): RuleSavedObjectAttributes => ({
-    name: 'test-rule',
-    kind: 'alert',
-    tags: [],
-    schedule: { custom: '1m' },
-    enabled: true,
-    query: 'FROM logs-* | LIMIT 1',
-    timeField: '@timestamp',
-    lookbackWindow: '1m',
-    groupingKey: [],
-    createdBy: 'elastic_profile_uid',
-    createdAt: '2025-01-01T00:00:00.000Z',
-    updatedBy: 'elastic_profile_uid',
-    updatedAt: '2025-01-01T00:00:00.000Z',
-    ...overrides,
-  });
-
   beforeEach(() => {
     const { loggerService } = createLoggerService();
     const { rulesClient, mockSavedObjectsClient: soClient } = createRulesClient();
@@ -52,7 +33,7 @@ describe('FetchRuleStep', () => {
   });
 
   it('returns rule when rule exists', async () => {
-    const ruleAttributes = createRuleAttributes();
+    const ruleAttributes = createRuleSoAttributes();
     mockSavedObjectsClient.get.mockResolvedValue({
       id: 'rule-1',
       type: RULE_SAVED_OBJECT_TYPE,
@@ -66,7 +47,7 @@ describe('FetchRuleStep', () => {
     expect(result.type).toBe('continue');
     expect(result.state.rule).toBeDefined();
     expect(result.state.rule?.id).toBe('rule-1');
-    expect(result.state.rule?.name).toBe('test-rule');
+    expect(result.state.rule?.metadata.name).toBe('test-rule');
   });
 
   it('halts with rule_deleted when rule is not found', async () => {
@@ -95,7 +76,7 @@ describe('FetchRuleStep', () => {
   });
 
   it('calls the ruleClient with correct params', async () => {
-    const ruleAttributes = createRuleAttributes();
+    const ruleAttributes = createRuleSoAttributes();
     mockSavedObjectsClient.get.mockResolvedValue({
       id: 'custom-rule',
       type: RULE_SAVED_OBJECT_TYPE,

@@ -23,7 +23,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { RuleListItem } from '../services/rules_api';
+import type { RuleApiResponse } from '../services/rules_api';
 import { RulesApi } from '../services/rules_api';
 
 const getErrorMessage = (error: unknown) => {
@@ -37,7 +37,7 @@ export const RulesListPage = () => {
   const history = useHistory();
   const rulesApi = useService(RulesApi);
   const isMounted = useMountedState();
-  const [rules, setRules] = useState<RuleListItem[]>([]);
+  const [rules, setRules] = useState<RuleApiResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,18 +65,25 @@ export const RulesListPage = () => {
     loadRules();
   }, [rulesApi, isMounted]);
 
-  const columns: Array<EuiBasicTableColumn<RuleListItem>> = useMemo(
+  const columns: Array<EuiBasicTableColumn<RuleApiResponse>> = useMemo(
     () => [
       {
-        field: 'name',
+        field: 'metadata',
         name: (
           <FormattedMessage id="xpack.alertingV2.rulesList.column.name" defaultMessage="Name" />
         ),
+        render: (metadata: RuleApiResponse['metadata']) => metadata?.name ?? '-',
       },
       {
         field: 'id',
         name: (
           <FormattedMessage id="xpack.alertingV2.rulesList.column.id" defaultMessage="Rule ID" />
+        ),
+      },
+      {
+        field: 'kind',
+        name: (
+          <FormattedMessage id="xpack.alertingV2.rulesList.column.kind" defaultMessage="Kind" />
         ),
       },
       {
@@ -87,7 +94,7 @@ export const RulesListPage = () => {
             defaultMessage="Enabled"
           />
         ),
-        render: (enabled?: boolean) =>
+        render: (enabled: boolean) =>
           enabled ? (
             <FormattedMessage id="xpack.alertingV2.rulesList.enabledYes" defaultMessage="Yes" />
           ) : (
@@ -102,20 +109,19 @@ export const RulesListPage = () => {
             defaultMessage="Schedule"
           />
         ),
-        render: (schedule?: RuleListItem['schedule']) =>
-          schedule?.custom ? (
-            schedule.custom
-          ) : (
+        render: (schedule: RuleApiResponse['schedule']) =>
+          schedule?.every ?? (
             <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />
           ),
       },
       {
-        field: 'query',
+        field: 'evaluation',
         name: (
           <FormattedMessage id="xpack.alertingV2.rulesList.column.query" defaultMessage="Query" />
         ),
-        render: (query?: string) =>
-          query ? (
+        render: (evaluation: RuleApiResponse['evaluation']) => {
+          const query = evaluation?.query?.base;
+          return query ? (
             <EuiCodeBlock
               language="esql"
               paddingSize="s"
@@ -127,25 +133,28 @@ export const RulesListPage = () => {
             </EuiCodeBlock>
           ) : (
             <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />
-          ),
+          );
+        },
       },
       {
-        field: 'tags',
+        field: 'metadata',
         name: (
-          <FormattedMessage id="xpack.alertingV2.rulesList.column.tags" defaultMessage="Tags" />
+          <FormattedMessage id="xpack.alertingV2.rulesList.column.labels" defaultMessage="Labels" />
         ),
-        render: (tags?: string[]) =>
-          tags && tags.length ? (
+        render: (metadata: RuleApiResponse['metadata']) => {
+          const labels = metadata?.labels;
+          return labels && labels.length ? (
             <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-              {tags.map((tag) => (
-                <EuiFlexItem key={tag} grow={false}>
-                  <EuiBadge color="hollow">{tag}</EuiBadge>
+              {labels.map((label) => (
+                <EuiFlexItem key={label} grow={false}>
+                  <EuiBadge color="hollow">{label}</EuiBadge>
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
           ) : (
             <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />
-          ),
+          );
+        },
       },
       {
         name: (

@@ -1,17 +1,24 @@
 {
-  "lastModified": "2026-01-30T09:08:11.822Z",
-  "sha1": "aa0eb69636bdf19082590c8edb678d26f246ca70",
+  "lastModified": "2026-02-09T13:21:52.717Z",
+  "sha1": "50c958125bdc4f27abe403c3a5f590cb23721ad4",
   "tests": [
     {
       "id": "9ed5a2598c1c91a-911908fadbaff38",
       "title": "_import API with multiple spaces should import and export saved objects across different spaces",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/spaces_only/import_in_multiple_spaces.spec.ts",
-        "line": 73,
+        "line": 74,
         "column": 10
       }
     },
@@ -20,11 +27,18 @@
       "title": "_import API with multiple spaces should import a dashboard object in space_1 and import the same object into space_2 but with a new destination ID",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/spaces_only/import_in_multiple_spaces.spec.ts",
-        "line": 152,
+        "line": 153,
         "column": 10
       }
     },
@@ -33,11 +47,18 @@
       "title": "_import API within the Default space should return 409 when trying to create dashboard that already exists when overwrite=false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/spaces_only/import_in_single_space.spec.ts",
-        "line": 68,
+        "line": 69,
         "column": 12
       }
     },
@@ -46,11 +67,18 @@
       "title": "_import API within the Default space should return 200 and override existing dashboard when importing a dashboard that already exists when overwrite=true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/spaces_only/import_in_single_space.spec.ts",
-        "line": 124,
+        "line": 125,
         "column": 12
       }
     },
@@ -59,11 +87,18 @@
       "title": "_import API within the Default space should return 200 and create a copy of the imported saved object (with a new ID) when createNewCopies=true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/spaces_only/import_in_single_space.spec.ts",
-        "line": 189,
+        "line": 190,
         "column": 12
       }
     },
@@ -72,11 +107,18 @@
       "title": "_import API within the Default space should return 400 when creating hidden type object",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/spaces_only/import_in_single_space.spec.ts",
-        "line": 234,
+        "line": 235,
         "column": 12
       }
     },
@@ -85,11 +127,18 @@
       "title": "_import API within the Space 1 space should return 409 when trying to create dashboard that already exists when overwrite=false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/spaces_only/import_in_single_space.spec.ts",
-        "line": 68,
+        "line": 69,
         "column": 12
       }
     },
@@ -98,11 +147,18 @@
       "title": "_import API within the Space 1 space should return 200 and override existing dashboard when importing a dashboard that already exists when overwrite=true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/spaces_only/import_in_single_space.spec.ts",
-        "line": 124,
+        "line": 125,
         "column": 12
       }
     },
@@ -111,11 +167,18 @@
       "title": "_import API within the Space 1 space should return 200 and create a copy of the imported saved object (with a new ID) when createNewCopies=true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/spaces_only/import_in_single_space.spec.ts",
-        "line": 189,
+        "line": 190,
         "column": 12
       }
     },
@@ -124,11 +187,18 @@
       "title": "_import API within the Space 1 space should return 400 when creating hidden type object",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/spaces_only/import_in_single_space.spec.ts",
-        "line": 234,
+        "line": 235,
         "column": 12
       }
     }
