@@ -10,7 +10,8 @@
 /**
  * Generates the OTel Collector configuration for Kubernetes deployment.
  * Collects container logs, Kubernetes metrics, and host metrics from Kubernetes nodes.
- * OTLP traces and metrics are accepted but only exported to debug (not Elasticsearch).
+ * OTLP traces are exported to Elasticsearch and used to generate span metrics.
+ * OTLP metrics are accepted but only exported to debug (not Elasticsearch).
  * Uses k8sattributes processor for proper pod/container metadata enrichment.
  */
 export function getFullOtelCollectorConfig({
@@ -18,12 +19,14 @@ export function getFullOtelCollectorConfig({
   username,
   password,
   logsIndex = 'logs',
+  tracesIndex = 'traces-apm.otel',
   namespace = 'otel-demo',
 }: {
   elasticsearchEndpoint: string;
   username: string;
   password: string;
   logsIndex?: string;
+  tracesIndex?: string;
   namespace?: string;
 }): string {
   const configYaml = `
@@ -329,6 +332,7 @@ exporters:
     user: USERNAME_PLACEHOLDER
     password: PASSWORD_PLACEHOLDER
     logs_index: LOGS_INDEX_PLACEHOLDER
+    traces_index: TRACES_INDEX_PLACEHOLDER
     mapping:
       mode: otel
     tls:
@@ -341,6 +345,21 @@ exporters:
       enabled: true
       initial_interval: 100ms
       max_interval: 30s
+
+connectors:
+  # Generates metrics from trace spans (latency, call counts, error rates)
+  spanmetrics:
+    histogram:
+      explicit:
+        buckets: [5ms, 10ms, 25ms, 50ms, 100ms, 250ms, 500ms, 1s, 2.5s, 5s, 10s]
+    dimensions:
+      - name: service.namespace
+      - name: deployment.environment
+      - name: k8s.namespace.name
+      - name: k8s.deployment.name
+    exemplars:
+      enabled: true
+    metrics_flush_interval: 15s
 
 extensions:
   health_check:
@@ -364,14 +383,15 @@ service:
       receivers: [k8s_events]
       processors: [resourcedetection, resource, batch]
       exporters: [elasticsearch, debug]
-    # Accept traces but only export to debug (not Elasticsearch)
+    # Export traces to Elasticsearch and generate span metrics
     traces:
       receivers: [otlp]
       processors: [k8sattributes, resourcedetection, resource, batch]
-      exporters: [debug]
-    # Accept metrics but only export to debug (not Elasticsearch)
+      exporters: [elasticsearch, spanmetrics, debug]
+    # Accept metrics from OTLP and span metrics connector, export to debug
+    # (Elasticsearch metrics export not yet enabled)
     metrics:
-      receivers: [otlp]
+      receivers: [otlp, spanmetrics]
       processors: [k8sattributes, resourcedetection, resource, batch]
       exporters: [debug]
     # Collect Kubernetes metrics (cluster, kubelet, host)
@@ -385,5 +405,6 @@ service:
     .replace(/ELASTICSEARCH_ENDPOINT_PLACEHOLDER/g, elasticsearchEndpoint)
     .replace(/USERNAME_PLACEHOLDER/g, username)
     .replace(/PASSWORD_PLACEHOLDER/g, password)
-    .replace(/LOGS_INDEX_PLACEHOLDER/g, logsIndex);
+    .replace(/LOGS_INDEX_PLACEHOLDER/g, logsIndex)
+    .replace(/TRACES_INDEX_PLACEHOLDER/g, tracesIndex);
 }
