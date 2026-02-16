@@ -47,6 +47,8 @@ const optionalSettingsSchema = t.partial({
 
 const tagsSchema = t.array(t.string);
 
+const metadataSchema = t.record(t.string, t.string);
+
 // id cannot contain special characters and spaces
 const sloIdSchema = new t.Type<string, string, unknown>(
   'sloIdSchema',
@@ -98,6 +100,7 @@ const requiredSloFields = t.type({
 const optionalSloFields = t.partial({
   createdBy: t.string,
   updatedBy: t.string,
+  metadata: metadataSchema,
 });
 
 const baseSloSchema = t.intersection([requiredSloFields, optionalSloFields]);
@@ -115,6 +118,7 @@ export {
   budgetingMethodSchema,
   dashboardsWithIdSchema,
   groupBySchema,
+  metadataSchema,
   objectiveSchema,
   occurrencesBudgetingMethodSchema,
   optionalSettingsSchema,

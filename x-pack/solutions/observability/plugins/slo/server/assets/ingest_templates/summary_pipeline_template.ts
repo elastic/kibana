@@ -88,6 +88,13 @@ export const getSummaryPipelineTemplate = (
       },
       {
         set: {
+          description: 'Set metadata field',
+          field: 'slo.metadata',
+          value: slo.metadata ?? {},
+        },
+      },
+      {
+        set: {
           description: 'Set indicator.type field',
           field: 'slo.indicator.type',
           value: slo.indicator.type,

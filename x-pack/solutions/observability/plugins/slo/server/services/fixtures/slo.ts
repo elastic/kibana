@@ -164,6 +164,7 @@ const defaultSLO: Omit<SLODefinition, 'id' | 'revision' | 'createdAt' | 'updated
     preventInitialBackfill: false,
   },
   tags: ['critical', 'k8s'],
+  metadata: {},
   enabled: true,
   groupBy: ALL_VALUE,
 };

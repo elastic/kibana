@@ -115,6 +115,9 @@ export const SLI_MAPPINGS_TEMPLATE: ClusterPutComponentTemplateRequest = {
             groupings: {
               type: 'flattened',
             },
+            metadata: {
+              type: 'flattened',
+            },
           },
         },
       },

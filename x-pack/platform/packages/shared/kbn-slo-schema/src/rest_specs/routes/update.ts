@@ -9,6 +9,7 @@ import { indicatorSchema, timeWindowSchema } from '../../schema';
 import { allOrAnyStringOrArray } from '../../schema/common';
 import {
   budgetingMethodSchema,
+  metadataSchema,
   objectiveSchema,
   optionalSettingsSchema,
   sloDefinitionSchema,
@@ -29,6 +30,7 @@ const updateSLOParamsSchema = t.type({
     objective: objectiveSchema,
     settings: optionalSettingsSchema,
     tags: tagsSchema,
+    metadata: metadataSchema,
     groupBy: allOrAnyStringOrArray,
     artifacts: t.partial({
       dashboards: t.array(t.type({ id: t.string })),

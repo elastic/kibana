@@ -150,6 +150,9 @@ export const SUMMARY_MAPPINGS_TEMPLATE: ClusterPutComponentTemplateRequest = {
             updatedBy: {
               type: 'keyword',
             },
+            metadata: {
+              type: 'flattened',
+            },
           },
         },
         sliValue: {

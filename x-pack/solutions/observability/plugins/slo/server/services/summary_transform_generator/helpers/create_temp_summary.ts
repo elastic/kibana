@@ -51,6 +51,7 @@ export interface EsSummaryDocument {
     updatedAt?: string; // >= 8.14
     createdBy?: string; // >= 8.18
     updatedBy?: string; // >= 8.18
+    metadata?: Record<string, string>; // >= 9.1
   };
   goodEvents: number;
   totalEvents: number;
@@ -138,6 +139,8 @@ export function createTempSummaryDocument(
       // Added in 8.18
       createdBy: slo.createdBy ?? '',
       updatedBy: slo.updatedBy ?? '',
+      // Added in 9.1
+      metadata: slo.metadata ?? {},
     },
     goodEvents: 0,
     totalEvents: 0,

@@ -49,6 +49,17 @@ export const slo: SavedObjectsType = {
         },
       ],
     },
+    2: {
+      changes: [
+        { type: 'mappings_addition', addedMappings: { metadata: { type: 'flattened' } } },
+        {
+          type: 'data_backfill',
+          backfillFn: (doc) => {
+            return { attributes: { metadata: doc.attributes.metadata ?? {} } };
+          },
+        },
+      ],
+    },
   },
   mappings: {
     dynamic: false,
@@ -65,6 +76,7 @@ export const slo: SavedObjectsType = {
       budgetingMethod: { type: 'keyword' },
       enabled: { type: 'boolean' },
       tags: { type: 'keyword' },
+      metadata: { type: 'flattened' },
       version: { type: 'long' },
     },
   },
