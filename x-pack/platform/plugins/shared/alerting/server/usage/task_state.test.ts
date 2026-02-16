@@ -910,4 +910,164 @@ describe('telemetry task state', () => {
       expect(result).not.toHaveProperty('foo');
     });
   });
+
+  describe('v6', () => {
+    const v6 = stateSchemaByVersion[6];
+    it('should work on empty object when running the up migration', () => {
+      const result = v6.up({});
+      expect(result).toHaveProperty('count_backfill_executions', 0);
+      expect(result).toHaveProperty('count_backfills_by_execution_status_per_day', {});
+      expect(result).toHaveProperty('count_gaps', 0);
+      expect(result).toHaveProperty('total_unfilled_gap_duration_ms', 0);
+      expect(result).toHaveProperty('total_filled_gap_duration_ms', 0);
+    });
+
+    it('should drop unknown properties when running the up migration', () => {
+      const state = { foo: true };
+      const result = v6.up(state);
+      expect(result).not.toHaveProperty('foo');
+    });
+  });
+
+  describe('v7', () => {
+    const v7 = stateSchemaByVersion[7];
+    it('should work on empty object when running the up migration', () => {
+      const result = v7.up({});
+      expect(result).toHaveProperty('count_rules_with_api_key_created_by_user', 0);
+    });
+
+    it(`shouldn't overwrite properties when running the up migration`, () => {
+      const state = {
+        avg_es_search_duration_by_type_per_day: { '.index-threshold': 1 },
+        avg_es_search_duration_per_day: 2,
+        avg_execution_time_by_type_per_day: { '.index-threshold': 3 },
+        avg_execution_time_per_day: 4,
+        avg_total_search_duration_by_type_per_day: { '.index-threshold': 5 },
+        avg_total_search_duration_per_day: 6,
+        connectors_per_alert: {
+          avg: 7,
+          max: 8,
+          min: 9,
+        },
+        count_active_by_type: { '.index-threshold': 10 },
+        count_active_total: 11,
+        count_alerts_by_rule_type: {},
+        count_alerts_total: 0,
+        count_by_type: { '.index-threshold': 12 },
+        count_connector_types_by_consumers: { '.index-threshold': 13 },
+        count_disabled_total: 14,
+        count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day: {
+          '.index-threshold': 15,
+        },
+        count_failed_and_unrecognized_rule_tasks_by_status_per_day: { '.index-threshold': 16 },
+        count_failed_and_unrecognized_rule_tasks_per_day: 17,
+        count_ignored_fields_by_rule_type: {},
+        count_mw_total: 0,
+        count_mw_with_filter_alert_toggle_on: 0,
+        count_mw_with_repeat_toggle_on: 0,
+        count_rules_by_execution_status: {
+          error: 18,
+          success: 19,
+          warning: 20,
+        },
+        count_rules_by_execution_status_per_day: { '.index-threshold': 21 },
+        count_rules_by_notify_when: {
+          on_action_group_change: 22,
+          on_active_alert: 23,
+          on_throttle_interval: 24,
+        },
+        count_rules_executions_by_type_per_day: { '.index-threshold': 25 },
+        count_rules_executions_failured_by_reason_by_type_per_day: { '.index-threshold': 26 },
+        count_rules_executions_failured_by_reason_per_day: { '.index-threshold': 27 },
+        count_rules_executions_failured_per_day: 28,
+        count_rules_executions_per_day: 29,
+        count_rules_executions_timeouts_by_type_per_day: { '.index-threshold': 30 },
+        count_rules_executions_timeouts_per_day: 31,
+        count_rules_muted: 32,
+        count_rules_muted_by_type: {},
+        count_rules_namespaces: 33,
+        count_rules_snoozed: 34,
+        count_rules_snoozed_by_type: {},
+        count_rules_with_muted_alerts: 35,
+        count_rules_with_tags: 36,
+        count_rules_with_linked_dashboards: 10,
+        count_rules_with_investigation_guide: 10,
+        count_rules_with_api_key_created_by_user: 5,
+        count_backfill_executions: 20,
+        count_backfills_by_execution_status_per_day: {},
+        count_gaps: 10,
+        total_unfilled_gap_duration_ms: 100,
+        total_filled_gap_duration_ms: 200,
+        count_total: 37,
+        error_messages: ['foo'],
+        has_errors: true,
+        percentile_num_alerts_by_type_per_day: { '.index-threshold': 38 },
+        percentile_num_alerts_per_day: { '.index-threshold': 39 },
+        percentile_num_generated_actions_by_type_per_day: { '.index-threshold': 40 },
+        percentile_num_generated_actions_per_day: { '.index-threshold': 41 },
+        runs: 42,
+        schedule_time: {
+          avg: '43s',
+          max: '44s',
+          min: '45s',
+        },
+        schedule_time_number_s: {
+          avg: 46,
+          max: 47,
+          min: 48,
+        },
+        throttle_time: {
+          avg: '49s',
+          max: '50s',
+          min: '51s',
+        },
+        throttle_time_number_s: {
+          avg: 52,
+          max: 53,
+          min: 54,
+        },
+      };
+      const result = v7.up(cloneDeep(state));
+      expect(result).toEqual(state);
+    });
+
+    it('should drop unknown properties when running the up migration', () => {
+      const state = { foo: true };
+      const result = v7.up(state);
+      expect(result).not.toHaveProperty('foo');
+    });
+  });
+
+  describe('v8', () => {
+    const v8 = stateSchemaByVersion[8];
+    it('should work on empty object when running the up migration', () => {
+      const result = v8.up({});
+      expect(result).toHaveProperty('count_rules_with_elasticagent_tag', 0);
+      expect(result).toHaveProperty('count_rules_with_elasticagent_tag_by_type', {});
+    });
+    it(`shouldn't overwrite properties when running the up migration`, () => {
+      const state = {
+        count_rules_with_elasticagent_tag: 5,
+        count_rules_with_elasticagent_tag_by_type: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 3,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          metrics__alert__threshold: 2,
+        },
+      };
+      const result = v8.up(cloneDeep(state));
+      expect(result.count_rules_with_elasticagent_tag).toEqual(5);
+      expect(result.count_rules_with_elasticagent_tag_by_type).toEqual({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        logs__alert__document__count: 3,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        metrics__alert__threshold: 2,
+      });
+    });
+    it('should drop unknown properties when running the up migration', () => {
+      const state = { foo: true };
+      const result = v8.up(state);
+      expect(result).not.toHaveProperty('foo');
+    });
+  });
 });
