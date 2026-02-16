@@ -24,8 +24,11 @@ export const ENTITY_STORE_ROUTES = {
   UNINSTALL: 'internal/security/entity-store/uninstall',
   FORCE_LOG_EXTRACTION: (entityType: string) =>
     `internal/security/entity-store/${entityType}/force-log-extraction`,
+  CRUD_UPSERT: (entityType: string) =>
+    `api/entity-store/entities/${entityType}`,
 } as const;
 
 export const ENTITY_STORE_TAGS = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
+export const LATEST_INDEX = '.entities.v2.latest.security_default';
 export const UPDATES_INDEX = '.entities.v2.updates.security_default';

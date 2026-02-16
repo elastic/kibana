@@ -14,7 +14,7 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth }) => {
-    const credentials = await samlAuth.asInteractiveUser('admin');
+    const credentials = await samlAuth.asInteract.iveUser('admin');
     const cookieHeader = credentials.cookieHeader;
     defaultHeaders = {
       ...cookieHeader,
