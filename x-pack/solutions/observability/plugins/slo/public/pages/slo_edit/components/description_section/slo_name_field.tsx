@@ -13,13 +13,14 @@ import type { CreateSLOForm } from '../../types';
 import { useSloFormContext } from '../slo_form_context';
 
 export function SloNameField() {
-  const { isFlyout } = useSloFormContext();
+  const { formLayout } = useSloFormContext();
+  const isHorizontalLayout = formLayout === 'horizontal';
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
   const sloNameId = useGeneratedHtmlId({ prefix: 'sloName' });
 
   return (
     <EuiFormRow
-      fullWidth={isFlyout}
+      fullWidth={isHorizontalLayout}
       isInvalid={getFieldState('name').invalid}
       label={i18n.translate('xpack.slo.sloEdit.description.sloName', {
         defaultMessage: 'SLO Name',
@@ -32,7 +33,7 @@ export function SloNameField() {
         render={({ field: { ref, ...field }, fieldState }) => (
           <EuiFieldText
             {...field}
-            fullWidth={isFlyout}
+            fullWidth={isHorizontalLayout}
             isInvalid={fieldState.invalid}
             id={sloNameId}
             data-test-subj="sloFormNameInput"

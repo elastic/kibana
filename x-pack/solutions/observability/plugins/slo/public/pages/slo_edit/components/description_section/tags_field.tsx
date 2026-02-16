@@ -16,14 +16,15 @@ import { useSloFormContext } from '../slo_form_context';
 import { OptionalText } from '../common/optional_text';
 
 export function TagsField() {
-  const { isFlyout } = useSloFormContext();
+  const { formLayout } = useSloFormContext();
+  const isHorizontalLayout = formLayout === 'horizontal';
   const { control } = useFormContext<CreateSLOForm>();
   const tagsId = useGeneratedHtmlId({ prefix: 'tags' });
   const { suggestions } = useFetchSLOSuggestions();
 
   return (
     <EuiFormRow
-      fullWidth={isFlyout}
+      fullWidth={isHorizontalLayout}
       label={i18n.translate('xpack.slo.sloEdit.tags.label', {
         defaultMessage: 'Tags',
       })}
@@ -38,7 +39,7 @@ export function TagsField() {
           <EuiComboBox
             {...field}
             id={tagsId}
-            fullWidth={isFlyout}
+            fullWidth={isHorizontalLayout}
             aria-label={i18n.translate('xpack.slo.sloEdit.tags.placeholder', {
               defaultMessage: 'Add tags',
             })}

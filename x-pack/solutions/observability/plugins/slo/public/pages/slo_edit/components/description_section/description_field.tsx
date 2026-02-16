@@ -14,13 +14,14 @@ import { useSloFormContext } from '../slo_form_context';
 import { OptionalText } from '../common/optional_text';
 
 export function DescriptionField() {
-  const { isFlyout } = useSloFormContext();
+  const { formLayout } = useSloFormContext();
+  const isHorizontalLayout = formLayout === 'horizontal';
   const { control } = useFormContext<CreateSLOForm>();
   const descriptionId = useGeneratedHtmlId({ prefix: 'sloDescription' });
 
   return (
     <EuiFormRow
-      fullWidth={isFlyout}
+      fullWidth={isHorizontalLayout}
       label={i18n.translate('xpack.slo.sloEdit.description.sloDescription', {
         defaultMessage: 'Description',
       })}
@@ -34,7 +35,7 @@ export function DescriptionField() {
         render={({ field: { ref, ...field } }) => (
           <EuiTextArea
             {...field}
-            fullWidth={isFlyout}
+            fullWidth={isHorizontalLayout}
             id={descriptionId}
             data-test-subj="sloFormDescriptionTextArea"
             placeholder={i18n.translate('xpack.slo.sloEdit.description.sloDescriptionPlaceholder', {

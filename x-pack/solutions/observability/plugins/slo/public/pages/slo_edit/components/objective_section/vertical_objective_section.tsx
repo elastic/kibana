@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { AdvancedSettings } from '../indicator_section/advanced_settings/advanced_settings';
-import { DataPreviewChart } from '../common/data_preview_chart';
+import { MAX_WIDTH } from '../../constants';
 import { BudgetingMethodField } from './budgeting_method_field';
 import { DurationField } from './duration_field';
 import { SloEditFormObjectiveSectionTimeslices } from './objective_section_timeslices';
@@ -21,7 +21,7 @@ import { TargetField } from './target_field';
 import { TimeWindowTypeField } from './time_window_type_field';
 import { useObjectiveSectionFormData } from './use_objective_section_form_data';
 
-export function FlyoutObjectiveSection() {
+export function VerticalObjectiveSection() {
   const {
     isServerless,
     budgetingSelect,
@@ -34,44 +34,41 @@ export function FlyoutObjectiveSection() {
 
   return (
     <EuiPanel
-      hasBorder
+      hasBorder={false}
       hasShadow={false}
-      paddingSize="m"
+      paddingSize="none"
+      style={{ maxWidth: MAX_WIDTH }}
       data-test-subj="sloEditFormObjectiveSection"
     >
       <EuiFlexGroup direction="column" gutterSize="m">
         {isServerless && <ServerlessWarningCallout />}
 
-        <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexGrid columns={3} gutterSize="m">
           <EuiFlexItem grow={false}>
             <TimeWindowTypeField selectId={timeWindowTypeSelect} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <DurationField selectId={timeWindowSelect} timeWindowType={timeWindowType} />
           </EuiFlexItem>
-        </EuiFlexGroup>
+        </EuiFlexGrid>
 
         {indicator === 'sli.metric.timeslice' && <TimesliceMetricCallout />}
         {indicator === 'sli.synthetics.availability' && <SyntheticsAvailabilityCallout />}
 
-        <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexGrid columns={3} gutterSize="m">
           <EuiFlexItem grow={false}>
             <BudgetingMethodField selectId={budgetingSelect} indicator={indicator} />
           </EuiFlexItem>
           {budgetingMethod === 'timeslices' && <SloEditFormObjectiveSectionTimeslices />}
-        </EuiFlexGroup>
+        </EuiFlexGrid>
 
-        <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexGrid columns={3} gutterSize="m">
           <EuiFlexItem grow={false}>
             <TargetField />
           </EuiFlexItem>
-        </EuiFlexGroup>
+        </EuiFlexGrid>
 
-        <EuiSpacer size="xs" />
         <AdvancedSettings />
-        <EuiSpacer size="xs" />
-
-        <DataPreviewChart />
       </EuiFlexGroup>
     </EuiPanel>
   );

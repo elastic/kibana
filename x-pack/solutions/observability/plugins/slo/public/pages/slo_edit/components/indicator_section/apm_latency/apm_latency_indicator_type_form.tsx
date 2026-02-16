@@ -234,7 +234,7 @@ function QueryFilterField({ dataView }: QueryFilterFieldProps) {
   );
 }
 
-function ApmLatencyFlyout() {
+function ApmLatencyHorizontalLayout() {
   const { dataView, isIndexFieldsLoading, allFilters } = useApmLatencyFormData();
 
   return (
@@ -264,7 +264,7 @@ function ApmLatencyFlyout() {
   );
 }
 
-function ApmLatencyFullPage() {
+function ApmLatencyVerticalLayout() {
   const { dataView, isIndexFieldsLoading, allFilters } = useApmLatencyFormData();
 
   return (
@@ -289,6 +289,10 @@ function ApmLatencyFullPage() {
 }
 
 export function ApmLatencyIndicatorTypeForm() {
-  const { isFlyout } = useSloFormContext();
-  return isFlyout ? <ApmLatencyFlyout /> : <ApmLatencyFullPage />;
+  const { formLayout } = useSloFormContext();
+  return formLayout === 'horizontal' ? (
+    <ApmLatencyHorizontalLayout />
+  ) : (
+    <ApmLatencyVerticalLayout />
+  );
 }

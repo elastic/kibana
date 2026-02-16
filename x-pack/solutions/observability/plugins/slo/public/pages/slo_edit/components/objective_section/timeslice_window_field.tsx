@@ -13,13 +13,14 @@ import type { CreateSLOForm } from '../../types';
 import { useSloFormContext } from '../slo_form_context';
 
 export function TimesliceWindowField() {
-  const { isFlyout } = useSloFormContext();
+  const { formLayout } = useSloFormContext();
+  const isHorizontalLayout = formLayout === 'horizontal';
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
 
   return (
     <EuiFlexItem grow={false}>
       <EuiFormRow
-        fullWidth={isFlyout}
+        fullWidth={isHorizontalLayout}
         isInvalid={getFieldState('objective.timesliceWindow').invalid}
         label={
           <span>
@@ -43,7 +44,7 @@ export function TimesliceWindowField() {
           render={({ field: { ref, onChange, ...field }, fieldState }) => (
             <EuiFieldNumber
               {...field}
-              fullWidth={isFlyout}
+              fullWidth={isHorizontalLayout}
               isInvalid={fieldState.invalid}
               required
               data-test-subj="sloFormObjectiveTimesliceWindowInput"

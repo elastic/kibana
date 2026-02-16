@@ -20,14 +20,15 @@ const DASHBOARDS_COMBOBOX_PLACEHOLDER = i18n.translate('xpack.slo.sloEdit.dashbo
 });
 
 export function DashboardsField() {
-  const { isFlyout } = useSloFormContext();
+  const { formLayout } = useSloFormContext();
+  const isHorizontalLayout = formLayout === 'horizontal';
   const { control } = useFormContext<CreateSLOForm>();
   const { services } = useKibana();
   const { uiActions } = services;
 
   return (
     <EuiFormRow
-      fullWidth={isFlyout}
+      fullWidth={isHorizontalLayout}
       label={i18n.translate('xpack.slo.sloEdit.dashboards.label', {
         defaultMessage: 'Linked dashboards',
       })}

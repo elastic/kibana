@@ -13,12 +13,13 @@ import { useSloFormContext } from '../slo_form_context';
 import { OBJECTIVE_LABELS } from './objective_section_labels';
 
 export function TargetField() {
-  const { isFlyout } = useSloFormContext();
+  const { formLayout } = useSloFormContext();
+  const isHorizontalLayout = formLayout === 'horizontal';
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
 
   return (
     <EuiFormRow
-      fullWidth={isFlyout}
+      fullWidth={isHorizontalLayout}
       isInvalid={getFieldState('objective.target').invalid}
       label={
         <span>
@@ -34,7 +35,7 @@ export function TargetField() {
         render={({ field: { ref, onChange, ...field }, fieldState }) => (
           <EuiFieldNumber
             {...field}
-            fullWidth={isFlyout}
+            fullWidth={isHorizontalLayout}
             required
             isInvalid={fieldState.invalid}
             data-test-subj="sloFormObjectiveTargetInput"

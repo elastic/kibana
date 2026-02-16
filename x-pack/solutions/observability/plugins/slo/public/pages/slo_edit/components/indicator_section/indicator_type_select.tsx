@@ -22,11 +22,12 @@ interface IndicatorTypeSelectProps {
 }
 
 export function IndicatorTypeSelect({ options }: IndicatorTypeSelectProps) {
-  const { isFlyout } = useSloFormContext();
+  const { formLayout } = useSloFormContext();
+  const isHorizontalLayout = formLayout === 'horizontal';
   const { control } = useFormContext<CreateSLOForm>();
 
   return (
-    <EuiFormRow label={indicatorLabel} fullWidth={isFlyout}>
+    <EuiFormRow label={indicatorLabel} fullWidth={isHorizontalLayout}>
       <Controller
         name="indicator.type"
         control={control}
@@ -35,7 +36,7 @@ export function IndicatorTypeSelect({ options }: IndicatorTypeSelectProps) {
           <EuiSelect
             {...field}
             required
-            fullWidth={isFlyout}
+            fullWidth={isHorizontalLayout}
             data-test-subj="sloFormIndicatorTypeSelect"
             options={options}
             aria-label={indicatorLabel}

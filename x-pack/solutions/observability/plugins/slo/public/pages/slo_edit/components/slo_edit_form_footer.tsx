@@ -141,16 +141,12 @@ export function SloEditFormFooter({ slo, onFlyoutClose, isEditMode }: Props) {
         </EuiButtonEmpty>
       </EuiFlexItem>
 
-      {!isFlyout && (
-        <>
-          <EuiFlexItem grow={false}>
-            <EquivalentApiRequest slo={slo} disabled={isLoading} isEditMode={isEditMode} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <SLOInspect slo={slo} disabled={isLoading} />
-          </EuiFlexItem>
-        </>
-      )}
+      <EuiFlexItem grow={false}>
+        <EquivalentApiRequest slo={slo} disabled={isLoading} isEditMode={isEditMode} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <SLOInspect slo={slo} disabled={isLoading} />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 

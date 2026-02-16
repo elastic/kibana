@@ -173,7 +173,7 @@ function PreventBackfillField({ checkboxId, fullWidth }: PreventBackfillFieldPro
   );
 }
 
-function AdvancedSettingsFlyout() {
+function AdvancedSettingsHorizontalLayout() {
   const preventBackfillCheckbox = useGeneratedHtmlId({ prefix: 'preventBackfill' });
   const advancedSettingsAccordion = useGeneratedHtmlId({ prefix: 'advancedSettingsAccordion' });
 
@@ -202,14 +202,14 @@ function AdvancedSettingsFlyout() {
   );
 }
 
-function AdvancedSettingsFullPage() {
+function AdvancedSettingsVerticalLayout() {
   const preventBackfillCheckbox = useGeneratedHtmlId({ prefix: 'preventBackfill' });
   const advancedSettingsAccordion = useGeneratedHtmlId({ prefix: 'advancedSettingsAccordion' });
 
   const accordionButtonContent = (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiIcon type="controlsVertical" size="m" />
+        <EuiIcon type="controlsVertical" size="m" aria-label={LABELS.advancedSettings} />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle size="xxs">
@@ -244,6 +244,10 @@ function AdvancedSettingsFullPage() {
 }
 
 export function AdvancedSettings() {
-  const { isFlyout } = useSloFormContext();
-  return isFlyout ? <AdvancedSettingsFlyout /> : <AdvancedSettingsFullPage />;
+  const { formLayout } = useSloFormContext();
+  return formLayout === 'horizontal' ? (
+    <AdvancedSettingsHorizontalLayout />
+  ) : (
+    <AdvancedSettingsVerticalLayout />
+  );
 }

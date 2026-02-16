@@ -7,10 +7,14 @@
 
 import React from 'react';
 import { useSloFormContext } from '../slo_form_context';
-import { ClassicIndicatorSection } from './classic_indicator_section';
-import { FlyoutIndicatorSection } from './flyout_indicator_section';
+import { VerticalIndicatorSection } from './vertical_indicator_section';
+import { HorizontalIndicatorSection } from './horizontal_indicator_section';
 
 export function SloEditFormIndicatorSection() {
-  const { isFlyout } = useSloFormContext();
-  return isFlyout ? <FlyoutIndicatorSection /> : <ClassicIndicatorSection />;
+  const { formLayout } = useSloFormContext();
+  return formLayout === 'horizontal' ? (
+    <HorizontalIndicatorSection />
+  ) : (
+    <VerticalIndicatorSection />
+  );
 }

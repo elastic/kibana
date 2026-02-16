@@ -26,7 +26,7 @@ export default function CreateSLOFormFlyout({
 }: {
   onClose: () => void;
   initialValues: RecursivePartial<CreateSLOInput>;
-  formSettings?: Omit<FormSettings, 'isFlyout'>;
+  formSettings?: FormSettings;
 }) {
   const formInitialValues = transformPartialSLODataToFormState(initialValues);
   const flyoutTitle = i18n.translate('xpack.slo.add.flyoutTitle', {

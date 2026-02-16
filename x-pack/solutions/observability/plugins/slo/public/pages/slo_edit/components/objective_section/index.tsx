@@ -7,10 +7,14 @@
 
 import React from 'react';
 import { useSloFormContext } from '../slo_form_context';
-import { ClassicObjectiveSection } from './classic_objective_section';
-import { FlyoutObjectiveSection } from './flyout_objective_section';
+import { VerticalObjectiveSection } from './vertical_objective_section';
+import { HorizontalObjectiveSection } from './horizontal_objective_section';
 
 export function SloEditFormObjectiveSection() {
-  const { isFlyout } = useSloFormContext();
-  return isFlyout ? <FlyoutObjectiveSection /> : <ClassicObjectiveSection />;
+  const { formLayout } = useSloFormContext();
+  return formLayout === 'horizontal' ? (
+    <HorizontalObjectiveSection />
+  ) : (
+    <VerticalObjectiveSection />
+  );
 }

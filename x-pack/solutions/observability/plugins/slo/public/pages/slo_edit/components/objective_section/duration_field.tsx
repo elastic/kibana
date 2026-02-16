@@ -20,12 +20,13 @@ interface DurationFieldProps {
 }
 
 export function DurationField({ selectId, timeWindowType }: DurationFieldProps) {
-  const { isFlyout } = useSloFormContext();
+  const { formLayout } = useSloFormContext();
+  const isHorizontalLayout = formLayout === 'horizontal';
   const { control } = useFormContext<CreateSLOForm>();
 
   return (
     <EuiFormRow
-      fullWidth={isFlyout}
+      fullWidth={isHorizontalLayout}
       label={
         <span>
           {OBJECTIVE_LABELS.duration}{' '}
@@ -40,7 +41,7 @@ export function DurationField({ selectId, timeWindowType }: DurationFieldProps) 
         render={({ field: { ref, ...field } }) => (
           <EuiSelect
             {...field}
-            fullWidth={isFlyout}
+            fullWidth={isHorizontalLayout}
             required
             id={selectId}
             data-test-subj="sloFormTimeWindowDurationSelect"

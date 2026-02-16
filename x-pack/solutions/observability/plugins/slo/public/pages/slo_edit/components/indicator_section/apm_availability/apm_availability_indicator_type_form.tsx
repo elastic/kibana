@@ -180,7 +180,7 @@ function QueryFilterField({ dataView }: QueryFilterFieldProps) {
   );
 }
 
-function ApmAvailabilityFlyout() {
+function ApmAvailabilityHorizontalLayout() {
   const { dataView, isIndexFieldsLoading, allFilters } = useApmAvailabilityFormData();
 
   return (
@@ -208,7 +208,7 @@ function ApmAvailabilityFlyout() {
   );
 }
 
-function ApmAvailabilityFullPage() {
+function ApmAvailabilityVerticalLayout() {
   const { dataView, isIndexFieldsLoading, allFilters } = useApmAvailabilityFormData();
 
   return (
@@ -235,6 +235,10 @@ function ApmAvailabilityFullPage() {
 }
 
 export function ApmAvailabilityIndicatorTypeForm() {
-  const { isFlyout } = useSloFormContext();
-  return isFlyout ? <ApmAvailabilityFlyout /> : <ApmAvailabilityFullPage />;
+  const { formLayout } = useSloFormContext();
+  return formLayout === 'horizontal' ? (
+    <ApmAvailabilityHorizontalLayout />
+  ) : (
+    <ApmAvailabilityVerticalLayout />
+  );
 }

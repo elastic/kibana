@@ -7,10 +7,14 @@
 
 import React from 'react';
 import { useSloFormContext } from '../slo_form_context';
-import { ClassicDescriptionSection } from './classic_description_section';
-import { FlyoutDescriptionSection } from './flyout_description_section';
+import { VerticalDescriptionSection } from './vertical_description_section';
+import { HorizontalDescriptionSection } from './horizontal_description_section';
 
 export function SloEditFormDescriptionSection() {
-  const { isFlyout } = useSloFormContext();
-  return isFlyout ? <FlyoutDescriptionSection /> : <ClassicDescriptionSection />;
+  const { formLayout } = useSloFormContext();
+  return formLayout === 'horizontal' ? (
+    <HorizontalDescriptionSection />
+  ) : (
+    <VerticalDescriptionSection />
+  );
 }

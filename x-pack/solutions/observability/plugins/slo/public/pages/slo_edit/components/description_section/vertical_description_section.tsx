@@ -6,19 +6,20 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { DataPreviewChart } from '../common/data_preview_chart';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { MAX_WIDTH } from '../../constants';
 import { DashboardsField } from './dashboards_field';
 import { DescriptionField } from './description_field';
 import { SloNameField } from './slo_name_field';
 import { TagsField } from './tags_field';
 
-export function FlyoutDescriptionSection() {
+export function VerticalDescriptionSection() {
   return (
     <EuiPanel
-      hasBorder
+      hasBorder={false}
       hasShadow={false}
-      paddingSize="m"
+      paddingSize="none"
+      style={{ maxWidth: MAX_WIDTH }}
       data-test-subj="sloEditFormDescriptionSection"
     >
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -34,8 +35,6 @@ export function FlyoutDescriptionSection() {
         <EuiFlexItem grow={false}>
           <DashboardsField />
         </EuiFlexItem>
-        <EuiSpacer size="m" />
-        <DataPreviewChart />
       </EuiFlexGroup>
     </EuiPanel>
   );

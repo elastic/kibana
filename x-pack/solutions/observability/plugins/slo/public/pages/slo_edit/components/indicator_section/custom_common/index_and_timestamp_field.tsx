@@ -20,7 +20,8 @@ interface Props {
 }
 
 export function IndexAndTimestampField({ dataView, isLoading }: Props) {
-  const { isFlyout } = useSloFormContext();
+  const { formLayout } = useSloFormContext();
+  const isHorizontalLayout = formLayout === 'horizontal';
   const { watch } = useFormContext<CreateSLOForm>();
   const index = watch('indicator.params.index');
 
@@ -28,15 +29,15 @@ export function IndexAndTimestampField({ dataView, isLoading }: Props) {
 
   return (
     <EuiFlexGroup
-      direction={isFlyout ? 'column' : 'row'}
+      direction={isHorizontalLayout ? 'column' : 'row'}
       gutterSize="m"
-      css={isFlyout ? undefined : { paddingRight: 34 }}
+      css={isHorizontalLayout ? undefined : { paddingRight: 34 }}
     >
       {/* minWidth is used to prevent the flex items from growing too wide */}
-      <EuiFlexItem grow={isFlyout ? true : 5} css={{ minWidth: 0 }}>
+      <EuiFlexItem grow={isHorizontalLayout ? true : 5} css={{ minWidth: 0 }}>
         <IndexSelection selectedDataView={dataView} />
       </EuiFlexItem>
-      <EuiFlexItem grow={isFlyout ? true : 2} css={{ minWidth: 0 }}>
+      <EuiFlexItem grow={isHorizontalLayout ? true : 2} css={{ minWidth: 0 }}>
         <TimestampFieldSelector
           fields={timestampFields}
           isLoading={!!index && isLoading}

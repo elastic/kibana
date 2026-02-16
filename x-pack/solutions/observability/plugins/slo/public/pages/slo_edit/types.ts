@@ -43,7 +43,6 @@ export type FormLayout = 'vertical' | 'horizontal';
 
 export interface FormSettings {
   isEditMode?: boolean;
-  isFlyout?: boolean;
   allowedIndicatorTypes?: IndicatorTypeSchema[];
   formLayout?: FormLayout;
 }

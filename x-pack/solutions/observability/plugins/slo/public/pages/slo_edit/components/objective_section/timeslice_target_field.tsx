@@ -13,14 +13,15 @@ import type { CreateSLOForm } from '../../types';
 import { useSloFormContext } from '../slo_form_context';
 
 export function TimesliceTargetField() {
-  const { isFlyout } = useSloFormContext();
+  const { formLayout } = useSloFormContext();
+  const isHorizontalLayout = formLayout === 'horizontal';
   const { control, getFieldState, watch } = useFormContext<CreateSLOForm>();
   const indicator = watch('indicator.type');
 
   return (
     <EuiFlexItem grow={false}>
       <EuiFormRow
-        fullWidth={isFlyout}
+        fullWidth={isHorizontalLayout}
         isInvalid={getFieldState('objective.timesliceTarget').invalid}
         label={
           <span>
@@ -49,7 +50,7 @@ export function TimesliceTargetField() {
           render={({ field: { ref, onChange, ...field }, fieldState }) => (
             <EuiFieldNumber
               {...field}
-              fullWidth={isFlyout}
+              fullWidth={isHorizontalLayout}
               required
               disabled={indicator === 'sli.metric.timeslice'}
               isInvalid={fieldState.invalid}

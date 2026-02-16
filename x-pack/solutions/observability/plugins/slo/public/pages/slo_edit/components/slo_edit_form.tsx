@@ -45,7 +45,6 @@ export function SloEditForm({
   formSettings = DEFAULT_FORM_SETTINGS,
 }: Props) {
   const { isEditMode = false, formLayout = 'vertical' } = formSettings;
-  const isFlyout = Boolean(onFlyoutClose);
   const isHorizontalLayout = formLayout === 'horizontal';
   assertValidProps({ isEditMode, slo, onFlyoutClose });
 
@@ -224,7 +223,7 @@ export function SloEditForm({
 
   return (
     <FormProvider {...form}>
-      <SloFormContextProvider value={{ ...formSettings, isFlyout }}>
+      <SloFormContextProvider value={formSettings}>
         <EuiFlexGroup
           direction="column"
           gutterSize={isHorizontalLayout ? 'none' : 'm'}

@@ -21,30 +21,30 @@ export default {
 };
 
 interface StoryArgs {
-  isFlyout?: boolean;
+  formLayout?: 'vertical' | 'horizontal';
 }
 
-const Template: StoryFn<StoryArgs> = ({ isFlyout = false }) => {
+const Template: StoryFn<StoryArgs> = ({ formLayout = 'vertical' }) => {
   const methods = useForm({ defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES });
   return (
     <FormProvider {...methods}>
-      <SloFormContextProvider value={{ isFlyout }}>
+      <SloFormContextProvider value={{ formLayout }}>
         <Component />
       </SloFormContextProvider>
     </FormProvider>
   );
 };
 
-export const FullPage = {
+export const Vertical = {
   render: Template,
   args: {
-    isFlyout: false,
+    formLayout: 'vertical',
   },
 };
 
-export const Flyout = {
+export const Horizontal = {
   render: Template,
   args: {
-    isFlyout: true,
+    formLayout: 'horizontal',
   },
 };

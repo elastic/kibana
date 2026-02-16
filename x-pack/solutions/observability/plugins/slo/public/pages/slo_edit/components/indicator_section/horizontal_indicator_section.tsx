@@ -21,7 +21,7 @@ import { useSloFormContext } from '../slo_form_context';
 import { IndicatorTypeSelect } from './indicator_type_select';
 import { useIndicatorSectionState } from './use_indicator_section_state';
 
-export function FlyoutIndicatorSection() {
+export function HorizontalIndicatorSection() {
   const { isEditMode } = useSloFormContext();
   useUnregisterFields({ isEditMode });
 

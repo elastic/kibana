@@ -19,12 +19,13 @@ interface BudgetingMethodFieldProps {
 }
 
 export function BudgetingMethodField({ selectId, indicator }: BudgetingMethodFieldProps) {
-  const { isFlyout } = useSloFormContext();
+  const { formLayout } = useSloFormContext();
+  const isHorizontalLayout = formLayout === 'horizontal';
   const { control } = useFormContext<CreateSLOForm>();
 
   return (
     <EuiFormRow
-      fullWidth={isFlyout}
+      fullWidth={isHorizontalLayout}
       label={
         <span>
           {OBJECTIVE_LABELS.budgetingMethod}{' '}
@@ -39,7 +40,7 @@ export function BudgetingMethodField({ selectId, indicator }: BudgetingMethodFie
         render={({ field: { ref, ...field } }) => (
           <EuiSelect
             {...field}
-            fullWidth={isFlyout}
+            fullWidth={isHorizontalLayout}
             disabled={
               indicator === 'sli.metric.timeslice' || indicator === 'sli.synthetics.availability'
             }

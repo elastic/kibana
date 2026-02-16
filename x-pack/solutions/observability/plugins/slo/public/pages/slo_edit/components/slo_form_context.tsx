@@ -11,7 +11,6 @@ import type { FormSettings } from '../types';
 
 const DEFAULT_FORM_SETTINGS: Required<FormSettings> = {
   isEditMode: false,
-  isFlyout: false,
   allowedIndicatorTypes: [],
   formLayout: 'vertical',
 };
