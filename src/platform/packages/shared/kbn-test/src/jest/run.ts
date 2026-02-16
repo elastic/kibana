@@ -31,11 +31,7 @@ import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
 import type { Config } from '@jest/types';
 
 import jestFlags from './jest_flags.json';
-import {
-  isInBuildkite,
-  isConfigCompleted,
-  markConfigCompletedSync,
-} from './buildkite_checkpoint';
+import { isInBuildkite, isConfigCompleted, markConfigCompletedSync } from './buildkite_checkpoint';
 import { parseShardAnnotation } from './shard_config';
 
 const JEST_CACHE_DIR = 'data/jest-cache';
