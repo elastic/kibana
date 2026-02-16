@@ -16,7 +16,7 @@ const ConfigurationSchema = schema.object({
 });
 
 const SingleOverviewSchema =  schema.object({
-  slo_id: schema.maybe(schema.string()),
+  slo_id: schema.string(),
   slo_instance_id: schema.maybe(schema.string()),
   remote_name: schema.maybe(schema.string()),
   show_all_group_by_instances: schema.maybe(schema.boolean()),
@@ -45,26 +45,33 @@ export const overviewEmbeddableSchema  = schema.oneOf([SingleOverviewEmbeddableS
 
 export type OverviewEmbeddableState = TypeOf<typeof overviewEmbeddableSchema>;
 
-export const legacyOverviewEmbeddableCustomSchema = schema.object(
+export const legacySingleOverviewEmbeddableCustomSchema = schema.object(
   {
-    sloId: schema.maybe(schema.string()), // slo_id is optional, it's required when overview_mode is 'single'
+    sloId: schema.string(),
     sloInstanceId: schema.maybe(schema.string()),
     remoteName: schema.maybe(schema.string()),
-    overviewMode: schema.maybe(schema.oneOf([schema.literal('single'), schema.literal('groups')])),
-    // showAllGroupByInstances: schema.maybe(schema.boolean()),
-    // groupFilters: schema.maybe(
-    //   schema.object({
-    //     groupBy: schema.oneOf([
-    //       schema.literal('slo.tags'),
-    //       schema.literal('status'),
-    //       schema.literal('slo.indicator.type'),
-    //     ]),
-    //     groups: schema.maybe(schema.arrayOf(schema.string())),
-    //     filters: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-    //     kql_query: schema.maybe(schema.string()),
-    //   })
-    // ),
+    overviewMode: schema.literal('single'),
+    showAllGroupByInstances: schema.maybe(schema.boolean()),
   }
 );
 
-export type LegacyOverviewEmbeddableState = TypeOf<typeof legacyOverviewEmbeddableCustomSchema>;
+export const legacyGroupOverviewEmbeddableCustomSchema = schema.object(
+  {
+    overviewMode: schema.literal('groups'),
+    groupFilters:
+      schema.object({
+        groupBy: schema.oneOf([
+          schema.literal('slo.tags'),
+          schema.literal('status'),
+          schema.literal('slo.indicator.type'),
+        ]),
+        groups: schema.maybe(schema.arrayOf(schema.string())),
+        filters: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+        kql_query: schema.maybe(schema.string()),
+      })
+
+  }
+);
+
+export type LegacySingleOverviewEmbeddableState = TypeOf<typeof legacySingleOverviewEmbeddableCustomSchema>;
+export type LegacyGroupOverviewEmbeddableState = TypeOf<typeof legacyGroupOverviewEmbeddableCustomSchema>;
