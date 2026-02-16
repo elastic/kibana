@@ -339,16 +339,15 @@ export const useTopNavLinks = ({
 
     return getAppMenu(discoverParams).appMenuRegistry(newAppMenuRegistry);
   }, [
-    getAppMenuAccessor,
-    discoverParams,
     appMenuItems,
-    services,
-    isEsqlMode,
     dataView,
-    dispatch,
+    discoverParams,
     dispatchCurrentTab,
-    state,
+    getAppMenuAccessor,
     hasUnsavedChanges,
+    isEsqlMode,
+    services,
+    state,
   ]);
 
   return useMemo((): AppMenuConfig => {
