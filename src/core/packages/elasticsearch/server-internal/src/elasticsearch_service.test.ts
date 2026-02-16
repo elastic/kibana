@@ -558,6 +558,7 @@ describe('CPS onRequest handler', () => {
     describe('onRequest handler behavior', () => {
       type OnRequestHandler = (ctx: { scoped: boolean }, params: any, options?: any) => void;
       let onRequestHandler: OnRequestHandler;
+      const LOCAL_PROJECT_ROUTING = '_alias:_origin';
 
       const setCpsEnabled = (enabled: boolean) => {
         // Access private property for testing
@@ -571,7 +572,7 @@ describe('CPS onRequest handler', () => {
       });
 
       it('injects project_routing for unscoped requests', () => {
-        const options: any = { querystring: {} };
+        const options: any = {};
         const params = {
           method: 'GET',
           path: '/_search',
@@ -582,24 +583,24 @@ describe('CPS onRequest handler', () => {
 
         onRequestHandler({ scoped: false }, params, options);
 
-        expect(options.querystring.project_routing).toBe('_alias:_origin');
+        expect((params as any).body?.project_routing).toBe(LOCAL_PROJECT_ROUTING);
       });
 
       it('does not inject project_routing when CPS is disabled', () => {
-        const options: any = { querystring: {} };
+        const options: any = {};
         const params = {
           method: 'GET',
           path: '/_search',
           meta: { acceptedParams: ['project_routing'] },
         };
 
-        onRequestHandler({ scoped: true }, params, options);
+        onRequestHandler({ scoped: true }, params as any, options);
 
-        expect(options.querystring.project_routing).toBeUndefined();
+        expect((params as any).body?.project_routing).toBeUndefined();
       });
 
       it('does not inject project_routing when API does not support it', () => {
-        const options: any = { querystring: {} };
+        const options: any = {};
         const params = {
           method: 'GET',
           path: '/_cat/indices',
@@ -610,26 +611,27 @@ describe('CPS onRequest handler', () => {
 
         onRequestHandler({ scoped: true }, params, options);
 
-        expect(options.querystring.project_routing).toBeUndefined();
+        expect((params as any).body?.project_routing).toBeUndefined();
       });
 
       it('does not inject project_routing when it is already set', () => {
-        const options: any = { querystring: { project_routing: 'custom-value' } };
+        const options: any = {};
         const params = {
           method: 'GET',
           path: '/_search',
           meta: { acceptedParams: ['project_routing'] },
+          body: { project_routing: 'custom-value' },
         };
 
         setCpsEnabled(true);
 
         onRequestHandler({ scoped: true }, params, options);
 
-        expect(options.querystring.project_routing).toBe('custom-value');
+        expect((params as any).body?.project_routing).toBe('custom-value');
       });
 
       it('does not inject project_routing for PIT requests', () => {
-        const options: any = { querystring: {} };
+        const options: any = {};
         const params = {
           method: 'POST',
           path: '/_search',
@@ -641,40 +643,41 @@ describe('CPS onRequest handler', () => {
 
         onRequestHandler({ scoped: true }, params, options);
 
-        expect(options.querystring.project_routing).toBeUndefined();
+        expect((params as any).body?.project_routing).toBeUndefined();
       });
 
       it('injects project_routing when all conditions are met', () => {
-        const options: any = { querystring: {} };
+        const options: any = {};
         const params = {
           method: 'GET',
           path: '/_search',
           meta: { acceptedParams: ['project_routing'] },
+          body: { project_routing: LOCAL_PROJECT_ROUTING },
         };
 
         setCpsEnabled(true);
 
         onRequestHandler({ scoped: true }, params, options);
 
-        expect(options.querystring.project_routing).toBe('_alias:_origin');
+        expect(params.body.project_routing).toBe(LOCAL_PROJECT_ROUTING);
       });
 
-      it('preserves existing querystring parameters when injecting project_routing', () => {
-        const options: any = { querystring: { pretty: true, format: 'json' } };
+      it('preserves existing param body when injecting project_routing', () => {
+        const options: any = {};
         const params = {
           method: 'GET',
           path: '/_search',
           meta: { acceptedParams: ['project_routing'] },
+          body: { field1: 'value1', project_routing: LOCAL_PROJECT_ROUTING },
         };
 
         setCpsEnabled(true);
 
         onRequestHandler({ scoped: true }, params, options);
 
-        expect(options.querystring).toEqual({
-          pretty: true,
-          format: 'json',
-          project_routing: '_alias:_origin',
+        expect(params.body).toEqual({
+          field1: 'value1',
+          project_routing: LOCAL_PROJECT_ROUTING,
         });
       });
     });
