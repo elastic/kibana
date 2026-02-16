@@ -47,20 +47,20 @@ const sortingSchema = schema.oneOf(
       },
       { meta: { description: 'Sort by a metric or row column' } }
     ),
-    // Sorting for split_metrics_by (transposed) columns
+    // Sorting for pivoted metric columns (created by split_metrics_by)
     schema.object(
       {
-        column_type: schema.literal('transposed_metric'),
+        column_type: schema.literal('pivoted_metric'),
         index: schema.number({
           min: 0,
-          meta: { description: 'Index of the metric column to sort by (0-based)' },
+          meta: { description: '0-based index into the "metrics" array for the metric to sort; use "values" to identify the pivoted column' },
         }),
         values: schema.arrayOf(schema.string(), {
           minSize: 1,
           maxSize: 20,
           meta: {
             description:
-              'Array of transposed column values, one for each split_metrics_by column in order',
+              'Array of pivot values, one for each split_metrics_by column in order',
           },
         }),
         direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
@@ -70,7 +70,7 @@ const sortingSchema = schema.oneOf(
       {
         meta: {
           description:
-            'Sort by a transposed metric column (created when metrics are pivoted by split_metrics_by)',
+            'Sort by a pivoted metric column (created when metrics are pivoted by split_metrics_by)',
         },
       }
     ),
@@ -300,7 +300,7 @@ interface SortByValidationInput {
   rows?: Array<{}>;
   split_metrics_by?: Array<{}>;
   sort_by?: {
-    column_type: 'metric' | 'row' | 'transposed_metric';
+    column_type: 'metric' | 'row' | 'pivoted_metric';
     index?: number;
     values?: string[];
   };
@@ -334,9 +334,9 @@ function validateSortBy({
     }
   }
 
-  if (column_type === 'transposed_metric') {
+  if (column_type === 'pivoted_metric') {
     if (!split_metrics_by || split_metrics_by.length === 0) {
-      return `Cannot sort by 'transposed_metric' when no split_metrics_by columns are defined.`;
+      return `Cannot sort by 'pivoted_metric' when no split_metrics_by columns are defined.`;
     }
 
     if (index == null || index >= metrics.length) {
