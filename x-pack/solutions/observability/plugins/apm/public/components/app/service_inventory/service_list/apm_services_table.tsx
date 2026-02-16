@@ -14,6 +14,7 @@ import {
   EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { apmEnableServiceInventoryTableSearchBar } from '@kbn/observability-plugin/common';
@@ -41,7 +42,7 @@ import type { Breakpoints } from '../../../../hooks/use_breakpoints';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { isFailure, isPending } from '../../../../hooks/use_fetcher';
+import { isFailure, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../utils/style';
 import type { ApmRoutes } from '../../../routing/apm_route_config';
@@ -61,6 +62,7 @@ import { ManagedTable } from '../../../shared/managed_table';
 import { ColumnHeaderWithTooltip } from './column_header_with_tooltip';
 import { HealthBadge } from './health_badge';
 import { SloStatusBadge } from '../../../shared/slo_status_badge';
+import { getESQLQuery, type IndexType } from '../../../shared/links/discover_links/get_esql_query';
 import { useServiceActions } from './service_actions';
 import {
   APM_SLO_INDICATOR_TYPES,
@@ -376,14 +378,21 @@ export function ApmServicesTable({
   onChangeItemIndices,
 }: Props) {
   const breakpoints = useBreakpoints();
-  const { core } = useApmPluginContext();
-  const { slo } = useKibana<ApmPluginStartDeps>().services;
+  const { core, share } = useApmPluginContext();
+  const discoverLocator = share.url.locators.get(DISCOVER_APP_LOCATOR);
+  const { slo, apmSourcesAccess } = useKibana<ApmPluginStartDeps>().services;
   const { link } = useApmRouter();
   const showTransactionTypeColumn = items.some(
     ({ transactionType }) => transactionType && !isDefaultTransactionType(transactionType)
   );
   const { query } = useApmParams('/services');
   const { kuery, environment } = query;
+
+  const { data: indexSettingsData = { apmIndexSettings: [] } } = useFetcher(
+    (_callApmApi, signal) => apmSourcesAccess.getApmIndexSettings({ signal }),
+    [apmSourcesAccess]
+  );
+
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
   });
@@ -520,9 +529,40 @@ export function ApmServicesTable({
     };
   }, [isTableSearchBarEnabled, maxCountExceeded, onChangeSearchQuery]);
 
-  const { actions: serviceActions, showActionsColumn } = useServiceActions({
+  const getDiscoverHref = useCallback(
+    (item: ServiceListItem, indexType: IndexType) => {
+      const esqlQuery = getESQLQuery({
+        indexType,
+        params: {
+          kuery,
+          serviceName: item.serviceName,
+          transactionType: indexType === 'traces' ? item.transactionType : undefined,
+          environment,
+        },
+        indexSettings: indexSettingsData.apmIndexSettings,
+      });
+
+      if (!esqlQuery) return undefined;
+
+      return discoverLocator?.getRedirectUrl({
+        timeRange: { from: query.rangeFrom, to: query.rangeTo },
+        query: { esql: esqlQuery },
+      });
+    },
+    [
+      kuery,
+      environment,
+      indexSettingsData.apmIndexSettings,
+      query.rangeFrom,
+      query.rangeTo,
+      discoverLocator,
+    ]
+  );
+
+  const serviceActions = useServiceActions({
     openAlertFlyout,
     openSloFlyout,
+    getDiscoverHref,
   });
 
   return (
@@ -581,10 +621,8 @@ export function ApmServicesTable({
           onChangeRenderedItems={onChangeRenderedItems}
           onChangeItemIndices={onChangeItemIndices}
           tableSearchBar={tableSearchBar}
-          {...(showActionsColumn && {
-            actions: serviceActions,
-            isActionsDisabled: (item: ServiceListItem) => item.serviceName === OTHER_SERVICE_NAME,
-          })}
+          actions={serviceActions}
+          isActionsDisabled={(item: ServiceListItem) => item.serviceName === OTHER_SERVICE_NAME}
         />
       </EuiFlexItem>
       <AlertingFlyout
