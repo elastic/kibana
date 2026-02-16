@@ -15,7 +15,7 @@ import {
   rawMaintenanceWindowSchemaV2,
   rawMaintenanceWindowSchemaV3,
 } from './schema';
-import { transformRRuleToCustomSchedule } from '../lib/transforms/rrule_to_custom/latest';
+import { transformRRuleToCustomSchedule } from '../../common/transforms/rrule_to_custom/latest';
 
 type MaintenanceWindowV1 = TypeOf<typeof rawMaintenanceWindowSchemaV1>;
 type MaintenanceWindowV2 = TypeOf<typeof rawMaintenanceWindowSchemaV2>;

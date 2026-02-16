@@ -10,8 +10,10 @@ import moment from 'moment-timezone';
 import { RRule } from '@kbn/rrule';
 import type { DateRange } from '../../../common';
 import type { MaintenanceWindow, Schedule } from '../types';
-import { transformCustomScheduleToRRule } from '../../lib/transforms/custom_to_rrule/latest';
-import { getDurationInMilliseconds } from '../../lib/transforms/custom_to_rrule/util';
+import {
+  transformCustomScheduleToRRule,
+  getDurationInMilliseconds,
+} from '../../../common/transforms';
 
 export interface GenerateMaintenanceWindowEventsParams {
   schedule: Schedule;

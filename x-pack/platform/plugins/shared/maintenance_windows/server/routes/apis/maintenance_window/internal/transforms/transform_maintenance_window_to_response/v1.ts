@@ -7,8 +7,10 @@
 
 import type { MaintenanceWindowResponseV1 } from '../../../../../schemas/maintenance_window/internal/response';
 import type { MaintenanceWindow } from '../../../../../../application/types';
-import { getDurationInMilliseconds } from '../../../../../../lib/transforms/custom_to_rrule/util';
-import { transformCustomScheduleToRRule } from '../../../../../../lib/transforms/custom_to_rrule/v1';
+import {
+  getDurationInMilliseconds,
+  transformCustomScheduleToRRule,
+} from '../../../../../../../common/transforms';
 
 export const transformInternalMaintenanceWindowToExternal = (
   maintenanceWindow: MaintenanceWindow

@@ -6,7 +6,7 @@
  */
 import moment from 'moment';
 import type { Schedule } from '../types';
-import { getDurationInMilliseconds } from '../../lib/transforms/custom_to_rrule/util';
+import { getDurationInMilliseconds } from '../../../common/transforms';
 
 // Returns a date in ISO format one year in the future if the rule is recurring or until the end of the MW if it is not recurring.
 export const getMaintenanceWindowExpirationDate = ({
