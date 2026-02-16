@@ -9,7 +9,7 @@ import yaml from 'js-yaml';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type { SavedObject, SavedObjectsFindResponse, SavedObjectsRawDoc } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import type {
   SavedObjectsRawDocSource,
   SavedObjectsSearchResponse,
@@ -49,43 +49,29 @@ describe('TemplatesService', () => {
   });
 
   describe('getAllTemplates', () => {
-    it('returns templates parsed from search aggregations', async () => {
+    it('returns templates parsed from search hits', async () => {
       const service = createService();
-      const rawDocs: SavedObjectsRawDoc[] = [
-        { _id: 'template-1' } as SavedObjectsRawDoc,
-        { _id: 'template-2' } as SavedObjectsRawDoc,
+      const templateAttrs1 = { name: 'Template A' } as Template;
+      const templateAttrs2 = { name: 'Template B' } as Template;
+      const rawDocs = [
+        { _id: 'template-1', _index: '.kibana_cases' },
+        { _id: 'template-2', _index: '.kibana_cases' },
       ];
       const savedObjects = [
-        { id: 'template-1' } as SavedObject<Template>,
-        { id: 'template-2' } as SavedObject<Template>,
+        { id: 'template-1', attributes: templateAttrs1 } as SavedObject<Template>,
+        { id: 'template-2', attributes: templateAttrs2 } as SavedObject<Template>,
       ];
 
-      const searchResponse: SavedObjectsSearchResponse<SavedObjectsRawDocSource, unknown> = {
+      const searchResponse = {
         took: 1,
         timed_out: false,
         _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-        hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
-        aggregations: {
-          by_template: {
-            buckets: [
-              {
-                latest_template: {
-                  hits: {
-                    hits: [rawDocs[0]],
-                  },
-                },
-              },
-              {
-                latest_template: {
-                  hits: {
-                    hits: [rawDocs[1]],
-                  },
-                },
-              },
-            ],
-          },
+        hits: {
+          total: { value: 2, relation: 'eq' },
+          max_score: null,
+          hits: [rawDocs[0], rawDocs[1]],
         },
-      };
+      } as unknown as SavedObjectsSearchResponse<SavedObjectsRawDocSource, unknown>;
 
       unsecuredSavedObjectsClient.search.mockResolvedValue(searchResponse);
 
@@ -93,29 +79,81 @@ describe('TemplatesService', () => {
         .mockReturnValueOnce(savedObjects[0])
         .mockReturnValueOnce(savedObjects[1]);
 
-      const result = await service.getAllTemplates();
+      const result = await service.getAllTemplates({
+        page: 1,
+        perPage: 10,
+        isDeleted: false,
+        tags: [],
+        author: [],
+        sortField: 'templateId',
+        sortOrder: 'asc',
+        search: '',
+      });
 
       expect(unsecuredSavedObjectsClient.search).toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          from: 0,
+          size: 10,
+          sort: [
+            {
+              [`${CASE_TEMPLATE_SAVED_OBJECT}.templateId`]: {
+                order: 'asc',
+                missing: '_last',
+              },
+            },
+          ],
+        })
+      );
       expect(savedObjectsSerializer.rawToSavedObject).toHaveBeenCalledTimes(2);
-      expect(result).toEqual(savedObjects);
+      expect(result).toEqual({
+        templates: [templateAttrs1, templateAttrs2],
+        page: 1,
+        perPage: 10,
+        total: 2,
+      });
     });
   });
 
   describe('getTemplate', () => {
-    it('returns the first template from getAllTemplates', async () => {
+    it('returns the first saved object from ES search hits', async () => {
       const service = createService();
-      const template = { id: 'template-1' } as SavedObject<Template>;
-      jest.spyOn(service, 'getAllTemplates').mockResolvedValue([template]);
+      const template = {
+        id: 'template-1',
+        attributes: { templateId: 'template-1', name: 'Template One' } as Template,
+      } as SavedObject<Template>;
+
+      const searchResponse = {
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          max_score: null,
+          hits: [{ _id: 'template-1', _index: '.kibana_cases' }],
+        },
+      } as unknown as SavedObjectsSearchResponse<SavedObjectsRawDocSource, unknown>;
+
+      unsecuredSavedObjectsClient.search.mockResolvedValue(searchResponse);
+      savedObjectsSerializer.rawToSavedObject.mockReturnValueOnce(template);
 
       const result = await service.getTemplate('template-1');
 
-      expect(service.getAllTemplates).toHaveBeenCalledWith('template-1', undefined);
+      expect(unsecuredSavedObjectsClient.search).toHaveBeenCalled();
       expect(result).toEqual(template);
     });
 
     it('returns undefined when no templates are found', async () => {
       const service = createService();
-      jest.spyOn(service, 'getAllTemplates').mockResolvedValue([]);
+
+      const searchResponse = {
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+      } as unknown as SavedObjectsSearchResponse<SavedObjectsRawDocSource, unknown>;
+
+      unsecuredSavedObjectsClient.search.mockResolvedValue(searchResponse);
 
       const result = await service.getTemplate('missing-template');
 
@@ -143,6 +181,7 @@ describe('TemplatesService', () => {
         name: 'New Template',
         owner: 'securitySolution',
         definition,
+        isLatest: true,
       }),
       expect.any(Object)
     );
@@ -164,6 +203,38 @@ describe('TemplatesService', () => {
       },
     });
     expect(esClient.indices.putMapping).not.toHaveBeenCalled();
+  });
+
+  it('persists description, tags, author, fieldCount and fieldNames on create', async () => {
+    const definition = buildDefinition('Template With Metadata');
+    const service = createService();
+
+    unsecuredSavedObjectsClient.create.mockResolvedValue({
+      id: 'template-id',
+      attributes: {} as Template,
+    } as SavedObject<Template>);
+
+    await service.createTemplate({
+      owner: 'securitySolution',
+      definition,
+      description: 'A detailed description',
+      tags: ['security', 'network'],
+      author: 'alice',
+    });
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      CASE_TEMPLATE_SAVED_OBJECT,
+      expect.objectContaining({
+        name: 'Template With Metadata',
+        description: 'A detailed description',
+        tags: ['security', 'network'],
+        author: 'alice',
+        fieldCount: 1,
+        fieldNames: ['field_one'],
+        isLatest: true,
+      }),
+      expect.any(Object)
+    );
   });
 
   it('uses the internal client to update mappings on update', async () => {
@@ -198,8 +269,21 @@ describe('TemplatesService', () => {
         name: 'Updated Template',
         owner: 'observability',
         definition,
+        isLatest: true,
       }),
       expect.any(Object)
+    );
+    expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+      [
+        {
+          id: 'template-so-id',
+          type: CASE_TEMPLATE_SAVED_OBJECT,
+          attributes: {
+            isLatest: false,
+          },
+        },
+      ],
+      { refresh: true }
     );
 
     expect(internalClusterClient.indices.putMapping).toHaveBeenCalledWith({
@@ -219,6 +303,50 @@ describe('TemplatesService', () => {
       },
     });
     expect(esClient.indices.putMapping).not.toHaveBeenCalled();
+  });
+
+  it('persists description, tags, author, fieldCount and fieldNames on update', async () => {
+    const definition = buildDefinition('Updated With Metadata');
+    const service = createService();
+
+    jest.spyOn(service, 'getTemplate').mockResolvedValue({
+      id: 'template-so-id',
+      attributes: {
+        templateId: 'template-id',
+        name: 'Previous Template',
+        owner: 'securitySolution',
+        definition: buildDefinition('Previous Template'),
+        templateVersion: 1,
+        deletedAt: null,
+      },
+    } as SavedObject<Template>);
+
+    unsecuredSavedObjectsClient.create.mockResolvedValue({
+      id: 'template-new-so-id',
+      attributes: {} as Template,
+    } as SavedObject<Template>);
+
+    await service.updateTemplate('template-id', {
+      owner: 'observability',
+      definition,
+      description: 'Updated description',
+      tags: ['updated', 'tag'],
+      author: 'bob',
+    });
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      CASE_TEMPLATE_SAVED_OBJECT,
+      expect.objectContaining({
+        name: 'Updated With Metadata',
+        description: 'Updated description',
+        tags: ['updated', 'tag'],
+        author: 'bob',
+        fieldCount: 1,
+        fieldNames: ['field_one'],
+        isLatest: true,
+      }),
+      expect.any(Object)
+    );
   });
 
   describe('updateTemplate', () => {

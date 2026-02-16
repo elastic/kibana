@@ -29,13 +29,7 @@ import type {
   GetAgentsRequestQueryInput,
 } from '@kbn/osquery-plugin/common/api/fleet_wrapper/fleet_wrapper.gen';
 import type {
-  OsqueryCreateLiveQueryRequestBodyInput,
-  OsqueryFindLiveQueriesRequestQueryInput,
-  OsqueryGetLiveQueryDetailsRequestParamsInput,
-  OsqueryGetLiveQueryResultsRequestQueryInput,
-  OsqueryGetLiveQueryResultsRequestParamsInput,
-} from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
-import type {
+  OsqueryCopyPacksRequestParamsInput,
   OsqueryCreatePacksRequestBodyInput,
   OsqueryDeletePacksRequestParamsInput,
   OsqueryFindPacksRequestQueryInput,
@@ -44,6 +38,7 @@ import type {
   OsqueryUpdatePacksRequestBodyInput,
 } from '@kbn/osquery-plugin/common/api/packs/packs.gen';
 import type {
+  OsqueryCopySavedQueryRequestParamsInput,
   OsqueryCreateSavedQueryRequestBodyInput,
   OsqueryDeleteSavedQueryRequestParamsInput,
   OsqueryFindSavedQueriesRequestQueryInput,
@@ -51,6 +46,13 @@ import type {
   OsqueryUpdateSavedQueryRequestParamsInput,
   OsqueryUpdateSavedQueryRequestBodyInput,
 } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
+import type {
+  OsqueryCreateLiveQueryRequestBodyInput,
+  OsqueryFindLiveQueriesRequestQueryInput,
+  OsqueryGetLiveQueryDetailsRequestParamsInput,
+  OsqueryGetLiveQueryResultsRequestQueryInput,
+  OsqueryGetLiveQueryResultsRequestParamsInput,
+} from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
 import type {
   ReadAssetsStatusRequestQueryInput,
   UpdateAssetsStatusRequestQueryInput,
@@ -105,6 +107,36 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
+  },
+  /**
+   * Create a copy of a query pack with a unique name by appending a `_copy` suffix. If the name already exists, a numeric suffix is added (e.g., `_copy_2`). The copied pack is always created with `enabled` set to `false`.
+   */
+  osqueryCopyPacks(props: OsqueryCopyPacksProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams('/api/osquery/packs/{id}/copy', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * Create a copy of a saved query with a unique name by appending a `_copy` suffix. If the name already exists, a numeric suffix is added (e.g., `_copy_2`).
+   */
+  osqueryCopySavedQuery(props: OsqueryCopySavedQueryProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams('/api/osquery/saved_queries/{id}/copy', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
    * Create and run a live query.
@@ -353,6 +385,12 @@ export interface GetAgentPolicyProps {
 }
 export interface GetAgentsProps {
   query: GetAgentsRequestQueryInput;
+}
+export interface OsqueryCopyPacksProps {
+  params: OsqueryCopyPacksRequestParamsInput;
+}
+export interface OsqueryCopySavedQueryProps {
+  params: OsqueryCopySavedQueryRequestParamsInput;
 }
 export interface OsqueryCreateLiveQueryProps {
   body: OsqueryCreateLiveQueryRequestBodyInput;
