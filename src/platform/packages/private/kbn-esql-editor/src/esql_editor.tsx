@@ -701,6 +701,7 @@ const ESQLEditorInternal = function ESQLEditor({
     isHistoryOpen,
     isCurrentQueryStarred,
     onUpdateAndSubmitQuery,
+    onVisorClosed: () => editorRef.current?.focus(),
     starredQueriesService,
     trimmedQuery,
     hasUserDismissedVisorAutoOpen: Boolean(hasUserDismissedVisorAutoOpen),

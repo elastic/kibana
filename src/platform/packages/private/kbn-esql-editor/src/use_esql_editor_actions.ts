@@ -17,6 +17,7 @@ interface UseEsqlEditorActionsParams {
   isHistoryOpen: boolean;
   isCurrentQueryStarred: boolean;
   onUpdateAndSubmitQuery: (newQuery: string, source: QuerySource) => void;
+  onVisorClosed?: () => void;
   starredQueriesService: EsqlStarredQueriesService | null;
   trimmedQuery: string;
   hasUserDismissedVisorAutoOpen: boolean;
@@ -33,6 +34,7 @@ export function useEsqlEditorActions({
   isHistoryOpen,
   isCurrentQueryStarred,
   onUpdateAndSubmitQuery,
+  onVisorClosed,
   starredQueriesService,
   trimmedQuery,
   hasUserDismissedVisorAutoOpen,
@@ -51,11 +53,16 @@ export function useEsqlEditorActions({
   onToggleVisor: () => void;
 } {
   const onToggleVisor = useCallback(() => {
+    const isClosingVisor = isVisorOpenRef.current;
     setHasUserDismissedVisorAutoOpen(!hasUserDismissedVisorAutoOpen);
     setIsVisorOpen(!isVisorOpenRef.current);
+    if (isClosingVisor) {
+      onVisorClosed?.();
+    }
   }, [
     hasUserDismissedVisorAutoOpen,
     isVisorOpenRef,
+    onVisorClosed,
     setHasUserDismissedVisorAutoOpen,
     setIsVisorOpen,
   ]);
