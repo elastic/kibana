@@ -8,6 +8,7 @@
 import { performance } from 'perf_hooks';
 import type { estypes } from '@elastic/elasticsearch';
 import { cloneDeep } from 'lodash';
+import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 
 import {
   computeIsESQLQueryAggregating,
@@ -36,6 +37,7 @@ import { getDataTierFilter } from '../utils/get_data_tier_filter';
 import { checkErrorDetails } from '../utils/check_error_details';
 import { logClusterShardFailuresEsql } from '../utils/log_cluster_shard_failures_esql';
 import type { ExcludedDocument, EsqlState } from './types';
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 
 import {
   addToSearchAfterReturn,
@@ -53,6 +55,10 @@ import {
 } from '../utils/get_is_alert_suppression_active';
 import { bulkCreate } from '../factories';
 import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
+import type {
+  DetectionAlertLatest,
+  WrappedAlert,
+} from '../../../../../common/api/detection_engine/model/alerts';
 
 const MAX_EXCLUDED_DOCUMENTS = 100 * 1000;
 
@@ -63,6 +69,8 @@ export const esqlExecutor = async ({
   licensing,
   scheduleNotificationResponseActionsService,
   ruleExecutionTimeout,
+  filters,
+  mergeRuleTypeFields,
 }: {
   sharedParams: SecuritySharedParams<EsqlRuleParams>;
   services: SecurityRuleServices;
@@ -70,6 +78,12 @@ export const esqlExecutor = async ({
   licensing: LicensingPluginSetup;
   scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
   ruleExecutionTimeout?: string;
+  filters?: ESBoolQuery | undefined;
+  mergeRuleTypeFields?: (
+    alerts: Array<
+      WrappedAlert<DetectionAlertLatest | (DetectionAlertLatest & SuppressionFieldsLatest)>
+    >
+  ) => Array<WrappedAlert<DetectionAlertLatest | (DetectionAlertLatest & SuppressionFieldsLatest)>>;
 }) => {
   const {
     completeRule,
@@ -130,7 +144,7 @@ export const esqlExecutor = async ({
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
           size,
-          filters: dataTiersFilters,
+          filters: filters ? [filters, ...dataTiersFilters] : dataTiersFilters,
           primaryTimestamp,
           secondaryTimestamp,
           exceptionFilter,
@@ -214,13 +228,18 @@ export const esqlExecutor = async ({
           isAlertSuppressionActive &&
           alertSuppressionTypeGuard(completeRule.ruleParams.alertSuppression)
         ) {
-          const wrapSuppressedHits = (events: Array<estypes.SearchHit<SignalSource>>) =>
-            wrapSuppressedEsqlAlerts({
+          const wrapSuppressedHits = (events: Array<estypes.SearchHit<SignalSource>>) => {
+            let wrapped = wrapSuppressedEsqlAlerts({
               sharedParams,
               events,
               isRuleAggregating,
               expandedFields,
             });
+            if (mergeRuleTypeFields) {
+              wrapped = mergeRuleTypeFields(wrapped);
+            }
+            return wrapped;
+          };
 
           const bulkCreateResult = await bulkCreateSuppressedAlertsInMemory({
             sharedParams,
@@ -253,12 +272,16 @@ export const esqlExecutor = async ({
             break;
           }
         } else {
-          const wrappedAlerts = wrapEsqlAlerts({
+          let wrappedAlerts = wrapEsqlAlerts({
             sharedParams,
             events: syntheticHits,
             isRuleAggregating,
             expandedFields,
           });
+
+          if (mergeRuleTypeFields) {
+            wrappedAlerts = mergeRuleTypeFields(wrappedAlerts);
+          }
 
           const bulkCreateResult = await bulkCreate({
             wrappedAlerts,

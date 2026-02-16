@@ -133,12 +133,12 @@ export const generateAlertId = (alert: DetectionAlertLatest) => {
  * alert's ancestors array.
  * @param doc The parent event
  */
-export const buildParent = (doc: SimpleHit): AncestorLatest => {
+export const buildParent = (doc: SimpleHit, fallbackIndex?: string): AncestorLatest => {
   const isSignal: boolean = isWrappedSignalHit(doc) || isWrappedDetectionAlert(doc);
   const parent: AncestorLatest = {
     id: doc._id,
     type: isSignal ? 'signal' : 'event',
-    index: doc._index,
+    index: doc._index || fallbackIndex || '',
     depth: isSignal ? (getField(doc, ALERT_DEPTH) as number | undefined) ?? 1 : 0,
     rule: isSignal ? (getField(doc, ALERT_RULE_UUID) as string) : undefined,
   };
@@ -150,8 +150,8 @@ export const buildParent = (doc: SimpleHit): AncestorLatest => {
  * creating an array of N+1 ancestors.
  * @param doc The parent event for which to extend the ancestry.
  */
-export const buildAncestors = (doc: SimpleHit): AncestorLatest[] => {
-  const newAncestor = buildParent(doc);
+export const buildAncestors = (doc: SimpleHit, fallbackIndex?: string): AncestorLatest[] => {
+  const newAncestor = buildParent(doc, fallbackIndex);
   const ancestorsField = getField(doc, ALERT_ANCESTORS);
   const existingAncestors: AncestorLatest[] = Array.isArray(ancestorsField) ? ancestorsField : [];
   return [...existingAncestors, newAncestor];
@@ -182,10 +182,14 @@ export const buildAlertFields = ({
   overrides,
   intendedTimestamp,
 }: BuildAlertFieldsProps): DetectionAlertLatest => {
-  const parents = docs.map(buildParent);
+  const fallbackIndex =
+    'index' in completeRule.ruleParams ? completeRule.ruleParams.index?.join(', ') : undefined;
+
+  const parents = docs.map((doc) => buildParent(doc, fallbackIndex));
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
+
   const ancestors = docs.reduce(
-    (acc: AncestorLatest[], doc) => acc.concat(buildAncestors(doc)),
+    (acc: AncestorLatest[], doc) => acc.concat(buildAncestors(doc, fallbackIndex)),
     []
   );
 
