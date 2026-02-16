@@ -42,7 +42,8 @@
     "@kbn/ebt-tools",
     "@kbn/shared-ux-utility",
     "@kbn/search-types",
-    "@kbn/esql-resource-browser"
+    "@kbn/esql-resource-browser",
+    "@kbn/projects-solutions-groups"
   ],
   "exclude": [
     "target/**/*",
