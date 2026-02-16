@@ -587,7 +587,11 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
         output: {
           expected_query: {
             categories: ['error'],
-            kql_substrings: ['error', 'image', 'not found'],
+            kql_substrings: [
+              ['error', 'Error'],
+              'image',
+              ['not found', 'Unable to find', 'pull access denied'],
+            ],
           },
           criteria: [
             {
@@ -856,7 +860,10 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
         output: {
           expected_query: {
             categories: ['error'],
-            kql_substrings: ['4??', '5??'],
+            kql_substrings: [
+              ['4??', '4*', '400', '403', '404'],
+              ['5??', '5*', '500', '502', '503'],
+            ],
           },
           criteria: [
             {
@@ -912,7 +919,7 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
         output: {
           expected_query: {
             categories: ['operational'],
-            kql_substrings: [['error', 'fail*']],
+            kql_substrings: [['error', 'fail', 'Out of memory', 'Kill process']],
           },
           criteria: [
             {

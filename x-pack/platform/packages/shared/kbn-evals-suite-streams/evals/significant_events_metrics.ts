@@ -174,9 +174,11 @@ const FIELD_PREFIX_PATTERN = /^\w+:\s*/;
 /**
  * Normalise an evidence string so it can be matched against raw log lines.
  *
- * Strips:
+ * Strips / normalises:
  *  - leading field-name prefixes like `message: `
  *  - surrounding double-quotes added by the LLM
+ *  - escaped double-quotes (`\"` -> `"`)
+ *  - runs of whitespace collapsed to a single space
  */
 export const normaliseEvidence = (ev: string): string => {
   let normalised = ev.trim();
@@ -184,8 +186,14 @@ export const normaliseEvidence = (ev: string): string => {
   if (normalised.startsWith('"') && normalised.endsWith('"')) {
     normalised = normalised.slice(1, -1);
   }
+  normalised = normalised.replace(/\\"/g, '"');
+  normalised = normalised.replace(/\\n/g, '\n');
+  normalised = normalised.replace(/\s+/g, ' ');
   return normalised;
 };
+
+/** Collapse whitespace in a string for fuzzy substring matching */
+const collapseWhitespace = (s: string): string => s.replace(/\s+/g, ' ');
 
 export const checkEvidenceGrounding = (
   evidence: string[] | undefined,
@@ -199,7 +207,7 @@ export const checkEvidenceGrounding = (
     };
   }
 
-  const allLogs = sampleLogs.join('\n');
+  const allLogs = collapseWhitespace(sampleLogs.join('\n'));
   const missing = evidence.filter((ev) => {
     const normalised = normaliseEvidence(ev);
     return !allLogs.includes(normalised);
