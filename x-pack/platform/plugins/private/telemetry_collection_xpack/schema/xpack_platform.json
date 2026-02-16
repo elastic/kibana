@@ -2169,6 +2169,12 @@
         "count_rules_with_investigation_guide": {
           "type": "long"
         },
+        "count_rules_with_api_key_created_by_user": {
+          "type": "long",
+          "_meta": {
+            "description": "The total number of rules with API keys that are manually provided by the user, not created by the alerting framework."
+          }
+        },
         "count_mw_total": {
           "type": "long"
         },
