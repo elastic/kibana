@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { BehaviorSubject, firstValueFrom, merge } from 'rxjs';
 
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -219,31 +219,35 @@ export const getSearchEmbeddableFactory = ({
         },
       });
 
+      const addFilter: DocViewFilterFn = async (mapping, values, operation) => {
+        const dataView = api.dataViews$.getValue()?.[0];
+        if (!dataView || !mapping) {
+          return;
+        }
+
+        const fieldName = typeof mapping === 'string' ? mapping : mapping.name;
+
+        let newFilters = generateFilters(
+          discoverServices.filterManager,
+          fieldName,
+          values,
+          operation,
+          dataView
+        );
+        newFilters = newFilters.map((filter) => ({
+          ...filter,
+          $state: { store: FilterStateStore.APP_STATE },
+        }));
+
+        await startServices.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+          embeddable: api,
+          filters: newFilters,
+        });
+      };
+
       const toolkit: DiscoverContextAwarenessToolkit = {
         actions: {
-          addFilter: async (field, value, operator) => {
-            const dataView = api.dataViews$.getValue()?.[0];
-            if (!dataView || !field || isEsqlMode(api.savedSearch$.getValue())) {
-              return;
-            }
-
-            let newFilters = generateFilters(
-              discoverServices.filterManager,
-              field,
-              value,
-              operator,
-              dataView
-            );
-            newFilters = newFilters.map((filter) => ({
-              ...filter,
-              $state: { store: FilterStateStore.APP_STATE },
-            }));
-
-            await startServices.executeTriggerActions(APPLY_FILTER_TRIGGER, {
-              embeddable: api,
-              filters: newFilters,
-            });
-          },
+          addFilter,
         },
       };
 
@@ -311,30 +315,6 @@ export const getSearchEmbeddableFactory = ({
             return dataViews![0];
           }, [dataViews]);
 
-          const onAddFilter = useCallback<DocViewFilterFn>(
-            async (field, value, operator) => {
-              if (!dataView || !field) return;
-
-              let newFilters = generateFilters(
-                discoverServices.filterManager,
-                field,
-                value,
-                operator,
-                dataView
-              );
-              newFilters = newFilters.map((filter) => ({
-                ...filter,
-                $state: { store: FilterStateStore.APP_STATE },
-              }));
-
-              await startServices.executeTriggerActions(APPLY_FILTER_TRIGGER, {
-                embeddable: api,
-                filters: newFilters,
-              });
-            },
-            [dataView]
-          );
-
           const renderAsFieldStatsTable = useMemo(
             () => isFieldStatsMode(savedSearch, dataView, discoverServices.uiSettings),
             [savedSearch, dataView]
@@ -355,7 +335,7 @@ export const getSearchEmbeddableFactory = ({
                           fetchContext$,
                         }}
                         dataView={dataView!}
-                        onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
+                        onAddFilter={isEsqlMode(savedSearch) ? undefined : addFilter}
                         stateManager={searchEmbeddable.stateManager}
                       />
                     ) : (
@@ -370,7 +350,7 @@ export const getSearchEmbeddableFactory = ({
                           onAddFilter={
                             runtimeState.nonPersistedDisplayOptions?.enableFilters === false
                               ? undefined
-                              : onAddFilter
+                              : addFilter
                           }
                           enableDocumentViewer={
                             runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !==
