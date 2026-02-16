@@ -15,6 +15,7 @@ import { getDateLiterals } from '../../definitions/utils/literals';
 import {
   getPromqlFunctionSuggestions,
   getPromqlFunctionSuggestionsForReturnTypes,
+  getPromqlLabelMatcherSuggestions,
   getMetricTypesForSignature,
 } from '../../definitions/utils/promql';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
@@ -44,6 +45,15 @@ import {
 } from './utils';
 import { findPipeOutsideQuotes } from '../../definitions/utils/shared';
 import { SuggestionCategory } from '../../../language/autocomplete/utils';
+
+let commaWithAutoSuggest: ISuggestionItem | undefined;
+const getCommaWithAutoSuggest = (): ISuggestionItem => {
+  if (!commaWithAutoSuggest) {
+    commaWithAutoSuggest = withAutoSuggest({ ...commaCompleteItem, text: ', ' });
+  }
+
+  return commaWithAutoSuggest;
+};
 
 export async function autocomplete(
   query: string,
@@ -108,22 +118,17 @@ export async function autocomplete(
 
     case 'inside_grouping':
       return position.isCompleteLabel
-        ? [commaCompleteItem]
+        ? [getCommaWithAutoSuggest()]
         : buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain');
 
-    // TODO: Re-enable label matcher suggestions when label signatures are implemented
-    // case 'after_label_brace':
-    //   return position.isCompleteLabel
-    //     ? [commaCompleteItem]
-    //     : buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain');
-    // case 'after_label_name':
-    //   return getPromqlLabelMatcherSuggestions();
-    // case 'after_label_operator':
-    //   return [valuePlaceholderConstant];
     case 'after_label_brace':
+      return position.isCompleteLabel
+        ? [getCommaWithAutoSuggest()]
+        : buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain');
     case 'after_label_name':
+      return getPromqlLabelMatcherSuggestions();
     case 'after_label_operator':
-      return [];
+      return [valuePlaceholderConstant];
 
     case 'after_metric': {
       return position.signatureTypes?.includes('range_vector') && !position.selector?.duration
@@ -141,12 +146,12 @@ export async function autocomplete(
       return position.canAddGrouping ? [promqlByCompleteItem] : [];
 
     case 'after_complete_arg':
-      return position.canSuggestCommaInFunctionArgs ? [commaCompleteItem] : [];
+      return position.canSuggestCommaInFunctionArgs ? [getCommaWithAutoSuggest()] : [];
 
     case 'after_open_paren':
     case 'inside_function_args': {
       if (position.canSuggestCommaInFunctionArgs) {
-        return [commaCompleteItem];
+        return [getCommaWithAutoSuggest()];
       }
       const signatureTypes = position.signatureTypes ?? [];
       const types = getMetricTypesForSignature(signatureTypes);

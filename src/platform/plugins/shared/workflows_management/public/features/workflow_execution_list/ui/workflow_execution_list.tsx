@@ -183,6 +183,7 @@ export const WorkflowExecutionList = ({
       gutterSize="s"
       justifyContent="flexStart"
       css={styles.container}
+      data-test-subj="workflowExecutionList"
     >
       <header>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>

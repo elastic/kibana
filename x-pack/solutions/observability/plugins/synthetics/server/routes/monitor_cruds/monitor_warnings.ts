@@ -14,7 +14,10 @@ interface MonitorWarning {
   message: string;
 }
 
-const buildBrowserTimeoutWarning = (monitorId: string, publicLocationIds: string[]): MonitorWarning => ({
+const buildBrowserTimeoutWarning = (
+  monitorId: string,
+  publicLocationIds: string[]
+): MonitorWarning => ({
   monitorId,
   message: i18n.translate(
     'xpack.synthetics.server.monitors.browserTimeoutNoPrivateLocationsWarning',
@@ -37,7 +40,9 @@ export const getBrowserTimeoutWarningForMonitor = (
   if (!monitor[ConfigKey.TIMEOUT]) {
     return null;
   }
-  const publicLocationIds = monitor.locations?.filter((location) => location.isServiceManaged).map((location) => location.id);
+  const publicLocationIds = monitor.locations
+    ?.filter((location) => location.isServiceManaged)
+    .map((location) => location.id);
   if (publicLocationIds.length === 0) {
     return null;
   }
@@ -47,15 +52,15 @@ export const getBrowserTimeoutWarningForMonitor = (
 export const getBrowserTimeoutWarningsForProjectMonitors = (
   monitors: ProjectMonitor[]
 ): MonitorWarning[] => {
-  return monitors
-    .reduce<MonitorWarning[]>((acc, monitor) => {
+  return monitors.reduce<MonitorWarning[]>((acc, monitor) => {
+    if (
+      monitor.type === MonitorTypeEnum.BROWSER &&
+      Boolean(monitor.timeout) &&
+      (monitor.locations ?? []).length > 0
+    ) {
+      acc.push(buildBrowserTimeoutWarning(monitor.id, monitor.locations as string[]));
+    }
 
-      if (monitor.type === MonitorTypeEnum.BROWSER &&
-        Boolean(monitor.timeout) &&
-        (monitor.locations ?? []).length > 0) {
-        acc.push(buildBrowserTimeoutWarning(monitor.id, monitor.locations as string[]))
-      }
-
-      return acc;
-    }, [])
+    return acc;
+  }, []);
 };
