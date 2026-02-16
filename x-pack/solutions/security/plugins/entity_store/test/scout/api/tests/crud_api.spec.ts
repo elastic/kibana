@@ -7,18 +7,21 @@
 
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS, LATEST_INDEX } from '../fixtures/constants';
+import type { Entity } from '../../../../common/domain/definitions/entity.gen';
+import {
+  COMMON_HEADERS,
+  ENTITY_STORE_ROUTES,
+  ENTITY_STORE_TAGS,
+  LATEST_INDEX,
+} from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
-import { Entity } from '@kbn/entity-store/common/domain/definitions/entity.gen';
-import {API_VERSIONS} from '@kbn/entity-store/server/routes/constants';
+import { API_VERSIONS } from '../../../../server/routes/constants';
 
 const genericEntity: Entity = {
-    entity: {
-        id: 'required-id',
-        // type: 'generic'
-    }
-}
-
+  entity: {
+    id: 'required-id',
+  },
+};
 
 apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
@@ -31,8 +34,8 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
       ...COMMON_HEADERS,
     };
     crudHeaders = {
-        ...defaultHeaders,
-        'elastic-api-version': API_VERSIONS.public.v1,
+      ...defaultHeaders,
+      'elastic-api-version': API_VERSIONS.public.v1,
     };
 
     // enable feature flag
@@ -58,31 +61,23 @@ apiTest.describe('Entity Store API tests', { tag: ENTITY_STORE_TAGS }, () => {
     expect(response.statusCode).toBe(200);
   });
 
-  apiTest(
-    'KUBA Should create an entity',
-    async ({ apiClient }) => {
+  apiTest('Should create an entity', async ({ apiClient, esClient }) => {
+    const create = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPSERT('generic'), {
+      headers: crudHeaders,
+      responseType: 'json',
+      body: genericEntity,
+    });
+    expect(create.statusCode).toBe(200);
+    expect(create.body).toStrictEqual({ ok: true });
 
-      const create = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPSERT('generic'), {
-        headers: crudHeaders,
-        responseType: 'json',
-        body: genericEntity,
-      });
-      expect(create.body).toStrictEqual({ ok: true });
-      expect(create.statusCode).toBe(200);
-
-      const search = await apiClient.post(LATEST_INDEX + '/_search', {
-        headers: crudHeaders,
-        responseType: 'json',
-        body: {
-            query: {
-                term: {
-                    'entity.id': genericEntity.entity.id,
-                }
-            }
+    const entities = await esClient.search({
+      index: LATEST_INDEX,
+      query: {
+        term: {
+          'entity.id': genericEntity.entity.id,
         },
-      })
-      expect(search.statusCode).toBe(200);
-      expect(search.body).toBe({});
-    }
-  );
+      },
+    });
+    expect(entities.hits.hits).toHaveLength(1);
+  });
 });
