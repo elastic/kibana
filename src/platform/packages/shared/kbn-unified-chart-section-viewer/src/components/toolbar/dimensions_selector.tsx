@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiToolTip,
   EuiButtonEmpty,
+  EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
@@ -271,16 +272,17 @@ export const DimensionsSelector = ({
   const popoverContentBelowSearch = useMemo(() => {
     const count = localSelectedDimensions.length;
     return (
-      <EuiFlexGroup
-        gutterSize="xs"
-        css={css`
-          padding: ${euiTheme.size.s} 0;
-          min-height: ${euiTheme.size.l};
-        `}
-        justifyContent="spaceBetween"
-        alignItems="center"
-        responsive={false}
-      >
+      <>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup
+          gutterSize="xs"
+          css={css`
+            min-height: ${euiTheme.size.l};
+          `}
+          justifyContent="spaceBetween"
+          alignItems="center"
+          responsive={false}
+        >
         <EuiFlexItem>
           <EuiText size="xs" color="subdued">
             <FormattedMessage
@@ -301,8 +303,10 @@ export const DimensionsSelector = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      </>
     );
-  }, [localSelectedDimensions.length, handleClearAll]);
+  }, [localSelectedDimensions.length, handleClearAll, euiTheme.size.l]);
 
   return (
     <ToolbarSelector
