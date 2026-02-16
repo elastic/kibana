@@ -34,10 +34,7 @@ const RunningQueriesApp: React.FC = () => {
 };
 
 export const renderApp = (coreStart: CoreStart, params: ManagementAppMountParams) => {
-  ReactDOM.render(
-    coreStart.rendering.addContext(<RunningQueriesApp />),
-    params.element
-  );
+  ReactDOM.render(coreStart.rendering.addContext(<RunningQueriesApp />), params.element);
 
   return () => {
     ReactDOM.unmountComponentAtNode(params.element);
