@@ -155,7 +155,7 @@ export const AttachmentReferencePill: React.FC<AttachmentReferencePillProps> = (
             <strong>{displayName}</strong>
           </EuiText>
           <EuiText size="xs" color="subdued">
-            {`v${version} · ${operationLabel}`}
+            {operationLabel}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
