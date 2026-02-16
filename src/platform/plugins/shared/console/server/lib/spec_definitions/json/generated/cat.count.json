@@ -35,8 +35,8 @@
       "s": []
     },
     "methods": [
-      "GET",
-      "POST"
+      "POST",
+      "GET"
     ],
     "patterns": [
       "_cat/count",
