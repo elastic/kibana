@@ -23,6 +23,8 @@ export const OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID =
   'observability.get_anomaly_detection_jobs';
 
 const DEFAULT_JOBS_LIMIT = 10;
+const DEFAULT_ANOMALY_RECORDS_LIMIT = 10;
+const DEFAULT_MIN_ANOMALY_SCORE = 50;
 const DEFAULT_TIME_RANGE = {
   start: 'now-24h',
   end: 'now',
@@ -38,19 +40,52 @@ export interface GetAnomalyDetectionJobsToolResult {
 }
 
 const getAnomalyDetectionJobsSchema = z.object({
+  group: z
+    .string()
+    .optional()
+    .describe('Filter jobs by ML job group name (e.g., "apm", "network").'),
   jobIds: z
     .array(z.string().min(1))
     .min(1)
     .max(20)
     .optional()
     .describe('Specific ML job IDs to query. Omit to include all jobs in this space.'),
-  limit: z
+  jobsLimit: z
     .number()
     .int()
     .min(1)
     .max(25)
     .default(DEFAULT_JOBS_LIMIT)
     .describe('Maximum number of jobs to return.'),
+  anomalyRecordsLimit: z
+    .number()
+    .int()
+    .min(0)
+    .max(100)
+    .default(DEFAULT_ANOMALY_RECORDS_LIMIT)
+    .describe(
+      'Maximum anomaly records to return per job. Set to 0 to skip anomaly records entirely.'
+    ),
+  minAnomalyScore: z
+    .number()
+    .min(0)
+    .max(100)
+    .default(DEFAULT_MIN_ANOMALY_SCORE)
+    .describe(
+      'Minimum anomaly score threshold (0-100). Higher scores indicate more severe anomalies. Default is 50 to filter noise.'
+    ),
+  includeExplanation: z
+    .boolean()
+    .default(false)
+    .describe(
+      'Include detailed anomaly score explanations. Disabled by default to reduce response size.'
+    ),
+  influencers: z
+    .array(z.record(z.string(), z.string()))
+    .optional()
+    .describe(
+      'Filter anomalies by influencers. Each object has one key (field name) and value. Example: [{ "service.name": "frontend" }, { "host.name": "server-1" }]. Returns anomalies matching ANY of the specified influencers.'
+    ),
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
 });
 
@@ -86,7 +121,17 @@ When to use:
     ): Promise<{
       results: (GetAnomalyDetectionJobsToolResult | Omit<ErrorResult, 'tool_result_id'>)[];
     }> => {
-      const { jobIds, limit: jobsLimit, start: rangeStart, end: rangeEnd } = toolParams;
+      const {
+        group,
+        jobIds,
+        jobsLimit,
+        anomalyRecordsLimit,
+        minAnomalyScore,
+        includeExplanation,
+        influencers,
+        start: rangeStart,
+        end: rangeEnd,
+      } = toolParams;
       const scopedEsClient = esClient.asCurrentUser;
       const mlClient = scopedEsClient.ml;
 
@@ -97,8 +142,13 @@ When to use:
           mlClient,
           request,
           logger,
+          group,
           jobIds,
           jobsLimit,
+          anomalyRecordsLimit,
+          minAnomalyScore,
+          includeExplanation,
+          influencers,
           rangeStart,
           rangeEnd,
         });
