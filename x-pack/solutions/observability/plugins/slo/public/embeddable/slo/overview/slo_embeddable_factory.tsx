@@ -34,7 +34,7 @@ import { SloCardChartList } from './slo_overview_grid';
 import type {
   GroupSloCustomInput,
   SloOverviewApi,
-  SloOverviewEmbeddableState, // TODO import from schema in common 
+  SloOverviewEmbeddableState, // TODO import from schema in common
   SloOverviewState,
 } from './types';
 import { openSloConfiguration } from './slo_overview_open_configuration';
@@ -178,7 +178,6 @@ export const getOverviewEmbeddableFactory = ({
           sloStateManager.api.groupFilters$,
           sloStateManager.api.remoteName$
         );
-        
 
         useEffect(() => {
           return () => {

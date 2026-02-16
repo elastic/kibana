@@ -34,9 +34,18 @@ describe('registerOverviewEmbeddableTransforms', () => {
   it('should register the correct schema', () => {
     registerOverviewEmbeddableTransforms(embeddableSetupMock);
 
+    expect(embeddableSetupMock.registerTransforms).toHaveBeenCalledWith(
+      SLO_OVERVIEW_EMBEDDABLE_ID,
+      expect.objectContaining({
+        getSchema: expect.any(Function),
+        getTransforms: expect.any(Function),
+      })
+    );
+
+    // Extract the registered configuration object
     const callArgs = embeddableSetupMock.registerTransforms.mock.calls[0];
-    const { getSchema } = callArgs[1];
-    const schema = getSchema();
+    const config = callArgs[1] as any;
+    const schema = config.getSchema(['VALUE_CLICK_TRIGGER']);
 
     expect(schema).toBe(overviewEmbeddableSchema);
   });
@@ -46,16 +55,18 @@ describe('registerOverviewEmbeddableTransforms', () => {
 
     const callArgs = embeddableSetupMock.registerTransforms.mock.calls[0];
     const { getTransforms: getTransformsFromSetup } = callArgs[1];
-    const transforms = getTransformsFromSetup();
+    const transforms = getTransformsFromSetup!({} as any);
 
     // Check that transforms have the expected structure
     expect(transforms).toHaveProperty('transformOut');
     expect(typeof transforms.transformOut).toBe('function');
-    
+
     // Verify it's the same function by checking behavior
     const expectedTransforms = getTransforms();
     const testState = { slo_id: 'test' };
-    expect(transforms.transformOut(testState)).toEqual(expectedTransforms.transformOut(testState));
+    expect((transforms as any).transformOut(testState)).toEqual(
+      (expectedTransforms as any).transformOut(testState)
+    );
   });
 
   describe('schema validation', () => {
@@ -186,7 +197,9 @@ describe('registerOverviewEmbeddableTransforms', () => {
         overview_mode: 'groups' as const,
       };
 
-      expect(() => overviewEmbeddableSchema.validate(stateWithOnlyRequiredGroupFields)).not.toThrow();
+      expect(() =>
+        overviewEmbeddableSchema.validate(stateWithOnlyRequiredGroupFields)
+      ).not.toThrow();
     });
   });
 
@@ -196,7 +209,7 @@ describe('registerOverviewEmbeddableTransforms', () => {
 
       const callArgs = embeddableSetupMock.registerTransforms.mock.calls[0];
       const { getTransforms: getTransformsFromSetup } = callArgs[1];
-      const transforms = getTransformsFromSetup();
+      const transforms = getTransformsFromSetup!({} as any);
 
       expect(transforms).toHaveProperty('transformOut');
       expect(typeof transforms.transformOut).toBe('function');
@@ -207,7 +220,7 @@ describe('registerOverviewEmbeddableTransforms', () => {
 
       const callArgs = embeddableSetupMock.registerTransforms.mock.calls[0];
       const { getTransforms: getTransformsFromSetup } = callArgs[1];
-      const transforms = getTransformsFromSetup();
+      const transforms = getTransformsFromSetup!({} as any);
 
       const legacyState = {
         sloId: 'legacy-slo-id',
@@ -218,7 +231,7 @@ describe('registerOverviewEmbeddableTransforms', () => {
         title: 'Test Title',
       };
 
-      const transformed = transforms.transformOut(legacyState as any);
+      const transformed = (transforms as any).transformOut(legacyState as any);
 
       expect(transformed).toMatchObject({
         slo_id: 'legacy-slo-id',
@@ -235,7 +248,7 @@ describe('registerOverviewEmbeddableTransforms', () => {
 
       const callArgs = embeddableSetupMock.registerTransforms.mock.calls[0];
       const { getTransforms: getTransformsFromSetup } = callArgs[1];
-      const transforms = getTransformsFromSetup();
+      const transforms = getTransformsFromSetup!({} as any);
 
       const newState = {
         slo_id: 'new-slo-id',
@@ -244,7 +257,7 @@ describe('registerOverviewEmbeddableTransforms', () => {
         title: 'Test Title',
       };
 
-      const transformed = transforms.transformOut(newState);
+      const transformed = (transforms as any).transformOut(newState as any);
 
       expect(transformed).toEqual(newState);
     });
