@@ -348,9 +348,7 @@ describe('SummaryColumn with columnsMeta', () => {
     );
 
     // Should pass the data view field (with type 'number') to formatFieldValue
-    const bytesFieldCall = formatFieldValueSpy.mock.calls.find(
-      (call) => call[4]?.name === 'bytes'
-    );
+    const bytesFieldCall = formatFieldValueSpy.mock.calls.find((call) => call[4]?.name === 'bytes');
     expect(bytesFieldCall).toBeDefined();
     expect(bytesFieldCall![4]).toMatchObject({
       name: 'bytes',
@@ -422,9 +420,7 @@ describe('SummaryColumn with columnsMeta', () => {
     );
 
     // Should pass a field with the columnsMeta type (string/keyword) to formatFieldValue
-    const bytesFieldCall = formatFieldValueSpy.mock.calls.find(
-      (call) => call[4]?.name === 'bytes'
-    );
+    const bytesFieldCall = formatFieldValueSpy.mock.calls.find((call) => call[4]?.name === 'bytes');
     expect(bytesFieldCall).toBeDefined();
     expect(bytesFieldCall![4]).toMatchObject({
       name: 'bytes',
