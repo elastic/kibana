@@ -6,8 +6,9 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingLogo, EuiSpacer, EuiTitle } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 import { isMobileAgentName } from '../../../../../common/agent_name';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -20,8 +21,10 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { replace } from '../../../shared/links/url_helpers';
 import { SearchBar } from '../../../shared/search_bar/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
+import { SloOverviewFlyout } from '../../../shared/slo_overview_flyout';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
+import { ServiceHeaderBadges } from './service_header_badges';
 import type { Tab } from './use_tabs';
 import { useTabs } from './use_tabs';
 
@@ -59,6 +62,24 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
 
   const isPendingServiceAgent = !agentName && isPending(serviceAgentStatus);
 
+  const [sloOverviewFlyout, setSloOverviewFlyout] = useState<{
+    serviceName: string;
+    agentName?: string;
+  } | null>(null);
+
+  const openSloOverviewFlyout = useCallback(() => {
+    setSloOverviewFlyout({ serviceName, agentName });
+  }, [serviceName, agentName]);
+
+  const closeSloOverviewFlyout = useCallback(() => {
+    setSloOverviewFlyout(null);
+  }, []);
+
+  const alertsTabHref = router.link('/services/{serviceName}/alerts' as const, {
+    path: { serviceName },
+    query,
+  });
+
   useBreadcrumb(
     () => ({
       title,
@@ -81,29 +102,40 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
       pageHeader={{
         tabs,
         pageTitle: (
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <EuiFlexGroup alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="l">
-                    <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <ServiceIcons
-                    serviceName={serviceName}
-                    environment={environment}
-                    start={start}
-                    end={end}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
+          <>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiFlexGroup alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="l">
+                      <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <ServiceIcons
+                      serviceName={serviceName}
+                      environment={environment}
+                      start={start}
+                      end={end}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <AnalyzeDataButton />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <AnalyzeDataButton />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <ServiceHeaderBadges
+              serviceName={serviceName}
+              environment={environment}
+              start={start}
+              end={end}
+              onSloClick={openSloOverviewFlyout}
+              alertsTabHref={alertsTabHref}
+            />
+          </>
         ),
       }}
     >
@@ -121,6 +153,13 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
             {children}
           </ServiceAnomalyTimeseriesContextProvider>
         </>
+      )}
+      {sloOverviewFlyout && (
+        <SloOverviewFlyout
+          serviceName={sloOverviewFlyout.serviceName}
+          agentName={sloOverviewFlyout.agentName as AgentName | undefined}
+          onClose={closeSloOverviewFlyout}
+        />
       )}
     </ApmMainTemplate>
   );
