@@ -31,9 +31,5 @@ export function calculateFlyoutContentHeight(
     return 0;
   }
 
-  // Find the flyout footer to account for its height
-  const flyoutFooter = containerRef.closest('.euiFlyout')?.querySelector('.euiFlyoutFooter');
-  const footerHeight = flyoutFooter ? flyoutFooter.getBoundingClientRect().height : 0;
-
-  return getTabContentAvailableHeight(containerRef, marginBottom + footerHeight);
+  return getTabContentAvailableHeight(containerRef, marginBottom);
 }
