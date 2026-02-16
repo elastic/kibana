@@ -30,7 +30,7 @@ import {
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
   DEBOUNCE_TIME,
 } from '../../common/constants';
-import { getOptionDisabledState, sortDimensionOptions } from './dimensions_selector_helpers';
+import { getOptionDisabledState } from './dimensions_selector_helpers';
 
 interface DimensionsSelectorProps {
   fields: Array<{ dimensions: Dimension[] }>;
@@ -147,7 +147,7 @@ export const DimensionsSelector = ({
       return option;
     });
 
-    return sortDimensionOptions(mappedOptions, localSelectedDimensions);
+    return mappedOptions;
   }, [
     dimensions,
     selectedNamesSet,
