@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, type ComponentProps, type ForwardedRef } from 'react';
+import React, { forwardRef, useMemo, useRef, type ComponentProps, type ForwardedRef } from 'react';
 import { DataCascadeImpl, type DataCascadeImplProps } from './data_cascade_impl';
 import type { DataCascadeImplRef } from '../lib/core/api';
 import { DataCascadeProvider, type GroupNode, type LeafNode } from '../store_provider';
 
 export type { GroupNode, LeafNode, DataCascadeImplProps as DataCascadeProps, DataCascadeImplRef };
-
+export type { DataCascadeUISnapshot } from '../lib/core/api';
 export { DataCascadeRow, DataCascadeRowCell } from './data_cascade_impl';
 
 export type {
@@ -24,7 +24,7 @@ export type {
 
 type DataCascadeProviderProps = ComponentProps<typeof DataCascadeProvider>;
 
-type DataCascadeComponent = <G extends GroupNode = GroupNode, L extends LeafNode = LeafNode>(
+export type DataCascadeComponent = <G extends GroupNode = GroupNode, L extends LeafNode = LeafNode>(
   props: Omit<DataCascadeImplProps<G, L>, 'cascadeRef'> &
     DataCascadeProviderProps & { ref?: React.Ref<DataCascadeImplRef<G, L>> }
 ) => React.ReactElement;
@@ -42,22 +42,37 @@ export const DataCascade = forwardRef(function DataCascadeWithProvider<
     initialGroupColumn,
     customTableHeader,
     tableTitleSlot,
-    initialExpandedRowIds,
+    initialTableState,
+    initialScrollOffset,
     ...restProps
   }: Omit<DataCascadeImplProps<G, L>, 'cascadeRef'> & DataCascadeProviderProps,
   ref: ForwardedRef<DataCascadeImplRef<G, L>>
 ) {
-  const cascadeImplProps: DataCascadeImplProps<G, L> = customTableHeader
-    ? { ...restProps, customTableHeader, cascadeRef: ref }
-    : { ...restProps, tableTitleSlot: tableTitleSlot!, cascadeRef: ref };
+  // create a stable reference for the component initializer props
+  const initialTableStateRef = useRef(initialTableState);
+  const initialScrollOffsetRef = useRef(initialScrollOffset);
 
-  return (
-    <DataCascadeProvider<G, L>
-      cascadeGroups={cascadeGroups}
-      initialGroupColumn={initialGroupColumn}
-      initialExpandedRowIds={initialExpandedRowIds}
-    >
-      <DataCascadeImpl<G, L> {...cascadeImplProps} />
-    </DataCascadeProvider>
+  const cascadeImplProps = useMemo<DataCascadeImplProps<G, L>>(
+    () =>
+      customTableHeader
+        ? { ...restProps, customTableHeader, cascadeRef: ref }
+        : { ...restProps, tableTitleSlot: tableTitleSlot!, cascadeRef: ref },
+    [customTableHeader, restProps, tableTitleSlot, ref]
+  );
+
+  return React.useMemo(
+    () => (
+      <DataCascadeProvider<G, L>
+        cascadeGroups={cascadeGroups}
+        initialGroupColumn={initialGroupColumn}
+        initialTableState={initialTableStateRef.current}
+      >
+        <DataCascadeImpl<G, L>
+          {...cascadeImplProps}
+          initialScrollOffset={initialScrollOffsetRef.current}
+        />
+      </DataCascadeProvider>
+    ),
+    [cascadeGroups, cascadeImplProps, initialGroupColumn]
   );
 }) as DataCascadeComponent;
