@@ -84,7 +84,8 @@ const mockOptionalProviderFormFields: ConfigEntryView[] = [
   },
 ];
 
-describe('MoreOptionsFields', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/253334
+describe.skip('MoreOptionsFields', () => {
   async function expectHeaderInputsToExistAndBeEditable(index: number, addContent: boolean = true) {
     // Input fields for key/value should be present but empty
     const keyInput = screen.getByTestId(`headers-key-${index}`);
