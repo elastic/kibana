@@ -32,19 +32,20 @@ export interface ContentListStateProviderProps {
  * Resolve the initial page size from pagination config.
  *
  * Precedence:
- * 1. Explicit `pagination.initialPageSize` (if provided).
- * 2. Persisted page size for the given `queryKeyScope`.
+ * 1. Persisted page size for the given `queryKeyScope` (user preference).
+ * 2. Explicit `pagination.initialPageSize` (if provided).
  * 3. {@link DEFAULT_PAGE_SIZE}.
  */
 const resolveInitialPageSize = (
   queryKeyScope: string,
   pagination?: PaginationConfig | boolean
 ): number => {
-  if (isPaginationConfig(pagination) && typeof pagination.initialPageSize === 'number') {
-    return pagination.initialPageSize;
-  }
+  const configuredDefault =
+    isPaginationConfig(pagination) && typeof pagination.initialPageSize === 'number'
+      ? pagination.initialPageSize
+      : DEFAULT_PAGE_SIZE;
 
-  return getPersistedPageSize(queryKeyScope, DEFAULT_PAGE_SIZE);
+  return getPersistedPageSize(queryKeyScope, configuredDefault);
 };
 
 /**

@@ -75,6 +75,25 @@ describe('useContentListPagination', () => {
       expect(result.current.pageSize).toBe(50);
     });
 
+    it('prefers persisted page size over config initialPageSize', () => {
+      localStorage.setItem('contentList:pageSize:test-list-listing', '10');
+
+      const { result } = renderHook(() => useContentListPagination(), {
+        wrapper: createWrapper({ initialPageSize: 50 }),
+      });
+
+      expect(result.current.pageSize).toBe(10);
+    });
+
+    it('falls back to config initialPageSize when no persisted value exists', () => {
+      // No persisted value in localStorage.
+      const { result } = renderHook(() => useContentListPagination(), {
+        wrapper: createWrapper({ initialPageSize: 50 }),
+      });
+
+      expect(result.current.pageSize).toBe(50);
+    });
+
     it('returns custom page size options from config', () => {
       const customOptions = [25, 50, 100];
       const { result } = renderHook(() => useContentListPagination(), {
