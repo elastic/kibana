@@ -64,7 +64,7 @@ export const selectTabSavedSearch = async (
       tabRuntimeState,
       services,
     }),
-    discoverSession: undefined,
+    discoverSession: state.persistedDiscoverSession,
     services,
   });
 };

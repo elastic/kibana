@@ -99,7 +99,7 @@ export const getExtendedDiscoverStateContainer = (
 
       return fromSavedObjectTabToSavedSearch({
         tab,
-        discoverSession: undefined,
+        discoverSession: stateContainer.internalState.getState().persistedDiscoverSession,
         services,
       });
     },
