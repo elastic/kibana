@@ -108,4 +108,10 @@ export enum SecurityPageName {
   configurationsIntegrations = 'configurations-integrations',
   configurationsAiSettings = 'configurations-ai_settings',
   configurationsBasicRules = 'configurations-basic_rules',
+
+  /**
+   * Detection Engine Health UI Pages
+   */
+  spaceRulesHealth = 'space-rules-health',
+  ruleHealth = 'rule-health',
 }

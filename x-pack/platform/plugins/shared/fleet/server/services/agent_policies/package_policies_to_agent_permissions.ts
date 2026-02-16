@@ -122,7 +122,8 @@ export function storedPackagePoliciesToAgentPermissions(
 
     const dataStreams = getNormalizedDataStreams(pkg);
     if (!isDynamicInput && (!dataStreams || dataStreams.length === 0)) {
-      return [packagePolicy.id, maybeAddAdditionalPackagePoliciesPermissions(packagePolicy)];
+      // Return empty object (not undefined) if no additional permissions
+      return [packagePolicy.id, maybeAddAdditionalPackagePoliciesPermissions(packagePolicy) ?? {}];
     }
 
     let dataStreamsForPermissions: DataStreamMeta[];
