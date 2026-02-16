@@ -44,13 +44,17 @@ export function orderIlmPhases(phases: IlmPolicyPhases) {
 export const getILMRatios = (
   value:
     | {
-        phases: IlmPolicyPhases;
-      }
+      phases: IlmPolicyPhases;
+    }
     | undefined
 ) => {
   if (!value) return undefined;
 
   const orderedPhases = orderIlmPhases(value.phases).reverse();
+
+  if (orderedPhases.length === 0) return undefined;
+
+
   const totalDuration = parseDurationInSeconds(first(orderedPhases)!.min_age);
 
   return orderedPhases.map((phase, index, phases) => {
