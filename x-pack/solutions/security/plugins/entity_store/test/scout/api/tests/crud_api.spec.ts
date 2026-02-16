@@ -182,7 +182,6 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       responseType: 'json',
       body: bulkBody,
     });
-    // expect(bulkUpsert.body).toBe('ok');
     expect(bulkUpsert.statusCode).toBe(200);
 
     const resp = await esClient.search({
@@ -194,6 +193,51 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       },
     });
     expect(resp.hits.hits).toHaveLength(2);
+  });
+
+  apiTest('Should delete an entity', async ({ apiClient, esClient }) => {
+    const entityObj: Entity = {
+      entity: {
+        id: 'required-id-delete',
+      },
+    };
+    const create = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPSERT('generic'), {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: entityObj,
+    });
+    expect(create.statusCode).toBe(200);
+    const resp = await esClient.search({
+      index: LATEST_INDEX,
+      query: {
+        match: {
+          'entity.id': entityObj.entity.id,
+        },
+      },
+    });
+    expect(resp.hits.hits).toHaveLength(1);
+    expect(resp.hits.hits[0]._id).toBeDefined();
+    const entityId = resp.hits.hits[0]._id as string;
+
+    const del = await apiClient.delete(ENTITY_STORE_ROUTES.CRUD_DELETE(entityId), {
+      headers: defaultHeaders,
+      responseType: 'json',
+    });
+    expect(del.body).toStrictEqual({ deleted: true });
+    expect(del.statusCode).toBe(200);
+
+    expect(
+      esClient.get({
+        index: LATEST_INDEX,
+        id: entityId,
+      })
+    ).rejects.toThrow(`"found":false`);
+
+    const apiNotFound = await apiClient.delete(ENTITY_STORE_ROUTES.CRUD_DELETE(entityId), {
+      headers: defaultHeaders,
+      responseType: 'json',
+    });
+    expect(apiNotFound.body.statusCode).toBe(404);
   });
 });
 
