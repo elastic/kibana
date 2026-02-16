@@ -22,20 +22,6 @@ import { systemIndicesSuperuser } from '@kbn/test';
 const TEST_INDEX = '.kibana_cps-routing-integration-test';
 const LOCAL_PROJECT_ROUTING = '_alias:_origin';
 
-// Pre-configured project for serverless ES tests
-// This matches the structure expected by the xpack.ccs.projects configuration
-const LOCAL_PROJECT_CONFIG = {
-  origin: {
-    abcde1234567890: {
-      _alias: 'local_project',
-      _id: 'abcde1234567890',
-      _organization: 'org1234567890',
-      _type: 'observability',
-      env: 'local',
-    },
-  },
-};
-
 // Test documents - defined at module scope so we can derive counts from them
 const TEST_DOCUMENTS = [
   { title: 'First document', category: 'alpha', timestamp: '2024-01-01', count: 10 },
@@ -152,18 +138,33 @@ describe('CPS project_routing on serverless ES', () => {
     });
 
     it('msearch works without project_routing', async () => {
-      const response = await client.msearch({
-        searches: [
-          { index: TEST_INDEX },
-          { query: { match_all: {} } },
-          { index: TEST_INDEX },
-          { query: { term: { category: 'alpha' } } },
-        ],
-      });
+      // msearch uses newline-delimited JSON (NDJSON) format
+      const ndjson =
+        JSON.stringify({ index: TEST_INDEX }) +
+        '\n' +
+        JSON.stringify({ query: { match_all: {} } }) +
+        '\n' +
+        JSON.stringify({ index: TEST_INDEX }) +
+        '\n' +
+        JSON.stringify({ query: { term: { category: 'alpha' } } }) +
+        '\n';
+
+      const response: any = await client.transport.request(
+        {
+          method: 'POST',
+          path: '/_msearch',
+          body: ndjson,
+        },
+        {
+          headers: {
+            'content-type': 'application/x-ndjson',
+          },
+        }
+      );
 
       expect(response.responses.length).toBe(2);
-      expect((response.responses[0] as any).hits.hits.length).toBe(TOTAL_DOCS_COUNT);
-      expect((response.responses[1] as any).hits.hits.length).toBe(ALPHA_CATEGORY_DOCS_COUNT);
+      expect(response.responses[0].hits.hits.length).toBe(TOTAL_DOCS_COUNT);
+      expect(response.responses[1].hits.hits.length).toBe(ALPHA_CATEGORY_DOCS_COUNT);
     });
 
     it('count works without project_routing', async () => {
@@ -534,7 +535,7 @@ describe('CPS project_routing on serverless ES', () => {
 
     it('works with wildcard index pattern', async () => {
       const response = await client.search({
-        index: 'cps-routing-*',
+        index: '.kibana_cps-routing-*',
         query: { match_all: {} },
         body: {
           // @ts-expect-error - project_routing is a valid body parameter
@@ -563,22 +564,36 @@ describe('CPS project_routing on serverless ES', () => {
 
   describe('msearch API with project_routing', () => {
     it('accepts project_routing parameter without error', async () => {
-      const response = await client.msearch({
-        searches: [
-          { index: TEST_INDEX },
-          { query: { match_all: {} } },
-          { index: TEST_INDEX },
-          { query: { term: { category: 'alpha' } } },
-        ],
-        body: {
-          // @ts-expect-error - project_routing is a valid body parameter
-          project_routing: LOCAL_PROJECT_ROUTING,
+      // msearch uses newline-delimited JSON (NDJSON) format
+      const ndjson =
+        JSON.stringify({ index: TEST_INDEX }) +
+        '\n' +
+        JSON.stringify({ query: { match_all: {} } }) +
+        '\n' +
+        JSON.stringify({ index: TEST_INDEX }) +
+        '\n' +
+        JSON.stringify({ query: { term: { category: 'alpha' } } }) +
+        '\n';
+
+      const response: any = await client.transport.request(
+        {
+          method: 'POST',
+          path: '/_msearch',
+          body: ndjson,
+          querystring: {
+            project_routing: LOCAL_PROJECT_ROUTING,
+          },
         },
-      });
+        {
+          headers: {
+            'content-type': 'application/x-ndjson',
+          },
+        }
+      );
 
       const expectedMsearchQueries = 2; // Two searches in the msearch request above
       expect(response.responses.length).toBe(expectedMsearchQueries);
-      expect((response.responses[0] as any).hits.hits.length).toBe(TOTAL_DOCS_COUNT);
+      expect(response.responses[0].hits.hits.length).toBe(TOTAL_DOCS_COUNT);
       expect((response.responses[1] as any).hits.hits.length).toBe(ALPHA_CATEGORY_DOCS_COUNT);
     });
   });
@@ -804,21 +819,28 @@ describe('CPS project_routing on serverless ES', () => {
       const ndjson =
         JSON.stringify({ index: TEST_INDEX }) +
         '\n' +
-        JSON.stringify({ project_routing: LOCAL_PROJECT_ROUTING, query: { match_all: {} } }) +
+        JSON.stringify({ query: { match_all: {} } }) +
         '\n' +
         JSON.stringify({ index: TEST_INDEX }) +
         '\n' +
-        JSON.stringify({
-          project_routing: LOCAL_PROJECT_ROUTING,
-          query: { term: { category: 'beta' } },
-        }) +
+        JSON.stringify({ query: { term: { category: 'beta' } } }) +
         '\n';
 
-      const response: any = await client.transport.request({
-        method: 'POST',
-        path: '/_msearch',
-        body: ndjson,
-      });
+      const response: any = await client.transport.request(
+        {
+          method: 'POST',
+          path: '/_msearch',
+          body: ndjson,
+          querystring: {
+            project_routing: LOCAL_PROJECT_ROUTING,
+          },
+        },
+        {
+          headers: {
+            'content-type': 'application/x-ndjson',
+          },
+        }
+      );
 
       expect(response.responses.length).toBe(2);
       expect(response.responses[0].hits.hits.length).toBe(TOTAL_DOCS_COUNT);
