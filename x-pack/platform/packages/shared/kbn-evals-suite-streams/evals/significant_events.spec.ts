@@ -31,6 +31,7 @@ import {
   checkTitleQuality,
   calculateSignificantEventsQuality,
   buildMetricsReasoning,
+  type CheckResult,
   type QueryValidationDetail,
 } from './significant_events_metrics';
 
@@ -96,12 +97,26 @@ const validateQuery = async ({
 
   // 2. Execution Verification (only when syntax is valid)
   let isExecutionHit = false;
+  let executionCheck: CheckResult;
   if (syntaxResult.passed) {
     const dsl = toElasticsearchQuery(fromKueryExpression(kql));
     const searchResult = await esClient.search({ index: testIndex, query: dsl });
     const total = searchResult.hits.total;
     const hits = typeof total === 'number' ? total : total?.value ?? 0;
     isExecutionHit = hits > 0;
+    executionCheck = {
+      check: 'execution_hit',
+      passed: isExecutionHit,
+      expected: '> 0 hits',
+      actual: `${hits} hits`,
+    };
+  } else {
+    executionCheck = {
+      check: 'execution_hit',
+      passed: false,
+      expected: '> 0 hits',
+      actual: 'skipped (invalid KQL syntax)',
+    };
   }
 
   // 3. Category Compliance
@@ -127,6 +142,14 @@ const validateQuery = async ({
     isSeverityCompliant: severityResult.passed,
     hasValidEvidence: evidenceResult.passed,
     hasMeaningfulTitle: titleResult.passed,
+    checks: [
+      syntaxResult,
+      executionCheck,
+      categoryResult,
+      severityResult,
+      evidenceResult,
+      titleResult,
+    ],
   };
 };
 
@@ -155,20 +178,23 @@ const codeBasedEvaluator = {
     const queries = Array.isArray(output) ? output : [output];
 
     if (queries.length === 0 || !queries[0] || !queries[0].kql) {
+      const emptyMetrics = calculateSignificantEventsQuality([], expected.expected_query);
       return {
         score: 0,
         reasoning: 'No queries generated',
-        details: {},
+        details: emptyMetrics,
       };
     }
 
     const validationDetails: QueryValidationDetail[] = [];
+    const testIndex = metadata.test_index;
+    if (!testIndex) throw new Error('test_index is required in metadata');
     for (const query of queries) {
       validationDetails.push(
         await validateQuery({
           query,
           sampleLogs: input.sample_logs,
-          testIndex: metadata.test_index ?? '',
+          testIndex,
           esClient,
         })
       );
@@ -215,87 +241,85 @@ evaluate.describe(
               // Create the data stream before we start writing to it
               await esClient.indices.createDataStream({ name: testIndex });
 
-              let bulkBody;
-              if (example.input.ingest_mode === 'single_doc') {
-                const message = example.input.sample_logs.join('\n');
-                bulkBody = [
-                  { create: { _index: testIndex } },
-                  {
-                    '@timestamp': new Date().toISOString(),
-                    'event.original': message,
-                    message,
-                  },
-                ];
-              } else {
-                bulkBody = example.input.sample_logs.flatMap((doc) => [
-                  { create: { _index: testIndex } },
-                  { '@timestamp': new Date().toISOString(), 'event.original': doc, message: doc },
-                ]);
-              }
-              await esClient.bulk({ refresh: true, body: bulkBody });
+              try {
+                let bulkBody;
+                if (example.input.ingest_mode === 'single_doc') {
+                  const message = example.input.sample_logs.join('\n');
+                  bulkBody = [
+                    { create: { _index: testIndex } },
+                    {
+                      '@timestamp': new Date().toISOString(),
+                      'event.original': message,
+                      message,
+                    },
+                  ];
+                } else {
+                  bulkBody = example.input.sample_logs.flatMap((doc) => [
+                    { create: { _index: testIndex } },
+                    { '@timestamp': new Date().toISOString(), 'event.original': doc, message: doc },
+                  ]);
+                }
+                await esClient.bulk({ refresh: true, body: bulkBody });
 
-              await executorClient.runExperiment(
-                {
-                  dataset: {
-                    name: `sig_events: ${example.input.stream_name}`,
-                    description: example.input.stream_description,
-                    examples: [
-                      {
-                        input: example.input,
-                        output: example.output,
-                        metadata: {
-                          ...example.metadata,
-                          test_index: testIndex,
+                await executorClient.runExperiment(
+                  {
+                    dataset: {
+                      name: `sig_events: ${example.input.stream_name}`,
+                      description: example.input.stream_description,
+                      examples: [
+                        {
+                          input: example.input,
+                          output: example.output,
+                          metadata: {
+                            ...example.metadata,
+                            test_index: testIndex,
+                          },
                         },
-                      },
-                    ],
-                  },
-                  task: async () => {
-                    const { stream } = await apiServices.streams.getStreamDefinition(testIndex);
-                    const { queries } = await generateSignificantEvents({
-                      stream,
-                      esClient,
-                      start: kbnDatemath.parse('now-24h')!.valueOf(),
-                      end: kbnDatemath.parse('now')!.valueOf(),
-                      inferenceClient,
-                      logger,
-                      signal: new AbortController().signal,
-                      systemPrompt: significantEventsPrompt,
-                      getFeatures: async () => example.input.features,
-                    });
+                      ],
+                    },
+                    task: async () => {
+                      const { stream } = await apiServices.streams.getStreamDefinition(testIndex);
+                      const { queries } = await generateSignificantEvents({
+                        stream,
+                        esClient,
+                        start: kbnDatemath.parse('now-24h')!.valueOf(),
+                        end: kbnDatemath.parse('now')!.valueOf(),
+                        inferenceClient,
+                        logger,
+                        signal: new AbortController().signal,
+                        systemPrompt: significantEventsPrompt,
+                        getFeatures: async () => example.input.features,
+                      });
 
-                    // The task should return the array of generated queries
-                    return queries;
-                  },
-                },
-
-                [
-                  {
-                    ...codeBasedEvaluator,
-                    evaluate: (args) => codeBasedEvaluator.evaluate({ ...args, esClient }),
-                  },
-                  {
-                    name: 'llm_evaluator',
-                    kind: 'LLM',
-                    evaluate: async ({ input, output, expected, metadata }) => {
-                      return evaluators
-                        .criteria([
-                          ...BASE_LLM_CRITERIA,
-                          ...(expected.expected_query.criteria ?? []),
-                        ])
-                        .evaluate({
-                          input,
-                          expected,
-                          output,
-                          metadata,
-                        });
+                      // The task should return the array of generated queries
+                      return queries;
                     },
                   },
-                ]
-              );
 
-              // Cleanup the test data stream
-              await esClient.indices.deleteDataStream({ name: testIndex });
+                  [
+                    {
+                      ...codeBasedEvaluator,
+                      evaluate: (args) => codeBasedEvaluator.evaluate({ ...args, esClient }),
+                    },
+                    {
+                      name: 'llm_evaluator',
+                      kind: 'LLM',
+                      evaluate: async ({ input, output, expected, metadata }) => {
+                        return evaluators
+                          .criteria([...BASE_LLM_CRITERIA, ...expected.criteria])
+                          .evaluate({
+                            input,
+                            expected,
+                            output,
+                            metadata,
+                          });
+                      },
+                    },
+                  ]
+                );
+              } finally {
+                await esClient.indices.deleteDataStream({ name: testIndex }).catch(() => {});
+              }
             }
           );
         });
@@ -307,56 +331,61 @@ evaluate.describe(
       async ({ executorClient, evaluators, esClient, inferenceClient, logger, apiServices }) => {
         const testIndex = `logs-sig-events-test-${Date.now()}`;
         await esClient.indices.createDataStream({ name: testIndex });
-        await executorClient.runExperiment(
-          {
-            dataset: {
-              name: 'sig_events: empty datastream',
-              description: 'Significant events query generation with empty stream data',
-              examples: [
-                {
-                  input: {},
-                  output: {},
-                  metadata: {},
-                },
-              ],
-            },
-            task: async () => {
-              const { stream } = await apiServices.streams.getStreamDefinition(testIndex);
-              const { queries } = await generateSignificantEvents({
-                stream,
-                esClient,
-                start: kbnDatemath.parse('now-24h')!.valueOf(),
-                end: kbnDatemath.parse('now')!.valueOf(),
-                inferenceClient,
-                logger,
-                signal: new AbortController().signal,
-                systemPrompt: significantEventsPrompt,
-                getFeatures: async () => [],
-              });
 
-              return queries;
-            },
-          },
-          [
+        try {
+          await executorClient.runExperiment(
             {
-              name: 'llm_evaluator',
-              kind: 'LLM',
-              evaluate: async ({ input, output, expected, metadata }) => {
-                return evaluators
-                  .criteria([
-                    'Given an empty datastream with no log data, the output should either contain zero queries or only general-purpose monitoring queries',
-                    'The system must not hallucinate specific event patterns, error types, or technology-specific queries without supporting evidence from log data',
-                  ])
-                  .evaluate({
-                    input,
-                    expected,
-                    output,
-                    metadata,
-                  });
+              dataset: {
+                name: 'sig_events: empty datastream',
+                description: 'Significant events query generation with empty stream data',
+                examples: [
+                  {
+                    input: {},
+                    output: {},
+                    metadata: {},
+                  },
+                ],
+              },
+              task: async () => {
+                const { stream } = await apiServices.streams.getStreamDefinition(testIndex);
+                const { queries } = await generateSignificantEvents({
+                  stream,
+                  esClient,
+                  start: kbnDatemath.parse('now-24h')!.valueOf(),
+                  end: kbnDatemath.parse('now')!.valueOf(),
+                  inferenceClient,
+                  logger,
+                  signal: new AbortController().signal,
+                  systemPrompt: significantEventsPrompt,
+                  getFeatures: async () => [],
+                });
+
+                return queries;
               },
             },
-          ]
-        );
+            [
+              {
+                name: 'llm_evaluator',
+                kind: 'LLM',
+                evaluate: async ({ input, output, expected, metadata }) => {
+                  return evaluators
+                    .criteria([
+                      'Given an empty datastream with no log data, the output should either contain zero queries or only general-purpose monitoring queries',
+                      'The system must not hallucinate specific event patterns, error types, or technology-specific queries without supporting evidence from log data',
+                    ])
+                    .evaluate({
+                      input,
+                      expected,
+                      output,
+                      metadata,
+                    });
+                },
+              },
+            ]
+          );
+        } finally {
+          await esClient.indices.deleteDataStream({ name: testIndex }).catch(() => {});
+        }
       }
     );
   }

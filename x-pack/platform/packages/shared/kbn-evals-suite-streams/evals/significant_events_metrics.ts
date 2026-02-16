@@ -6,7 +6,6 @@
  */
 
 import { fromKueryExpression } from '@kbn/es-query';
-import type { SignificantEventType } from '@kbn/streams-ai/src/significant_events/types';
 
 /** Severity score must be within this inclusive range */
 export const SEVERITY_SCORE_MIN = 0;
@@ -20,9 +19,24 @@ export const WEIGHT_KQL_SYNTAX = 0.2;
 export const WEIGHT_EXECUTION_HITS = 0.15;
 export const WEIGHT_CATEGORY_RECALL = 0.2;
 export const WEIGHT_KQL_SUBSTRING_RECALL = 0.15;
-export const WEIGHT_SCHEMA_COMPLIANCE = 0.1;
+export const WEIGHT_CATEGORY_COMPLIANCE = 0.05;
+export const WEIGHT_SEVERITY_COMPLIANCE = 0.05;
 export const WEIGHT_EVIDENCE_GROUNDING = 0.1;
 export const WEIGHT_TITLE_QUALITY = 0.1;
+
+const WEIGHT_SUM =
+  WEIGHT_KQL_SYNTAX +
+  WEIGHT_EXECUTION_HITS +
+  WEIGHT_CATEGORY_RECALL +
+  WEIGHT_KQL_SUBSTRING_RECALL +
+  WEIGHT_CATEGORY_COMPLIANCE +
+  WEIGHT_SEVERITY_COMPLIANCE +
+  WEIGHT_EVIDENCE_GROUNDING +
+  WEIGHT_TITLE_QUALITY;
+
+if (Math.abs(WEIGHT_SUM - 1) > 1e-9) {
+  throw new Error(`Composite score weights must sum to 1.0, got ${WEIGHT_SUM}`);
+}
 
 /** Result of a single atomic check on one query */
 export interface CheckResult {
@@ -44,6 +58,7 @@ export interface QueryValidationDetail {
   isSeverityCompliant: boolean;
   hasValidEvidence: boolean;
   hasMeaningfulTitle: boolean;
+  checks: CheckResult[];
 }
 
 /**
@@ -89,9 +104,9 @@ export const checkKqlSyntax = (kql: string): CheckResult => {
 /** Validates that a category is one of the allowed canonical types */
 export const checkCategoryCompliance = (
   category: string,
-  allowedCategories: readonly SignificantEventType[]
+  allowedCategories: readonly string[]
 ): CheckResult => {
-  const passed = allowedCategories.includes(category as SignificantEventType);
+  const passed = allowedCategories.includes(category);
   return {
     check: 'category_compliance',
     passed,
@@ -111,7 +126,6 @@ export const checkSeverityCompliance = (score: number): CheckResult => {
   };
 };
 
-/** Validates that all evidence strings can be found in the sample logs */
 /** Pattern that matches a leading KQL-style field prefix, e.g. `message: ` */
 const FIELD_PREFIX_PATTERN = /^\w+:\s*/;
 
@@ -139,10 +153,10 @@ export const checkEvidenceGrounding = (
     return { check: 'evidence_grounding', passed: true, actual: 'no evidence provided (ok)' };
   }
 
-  const allLogs = sampleLogs.join('\n');
+  const allLogsLower = sampleLogs.join('\n').toLowerCase();
   const missing = evidence.filter((ev) => {
-    const normalised = normaliseEvidence(ev);
-    return !allLogs.includes(normalised);
+    const normalised = normaliseEvidence(ev).toLowerCase();
+    return !allLogsLower.includes(normalised);
   });
 
   if (missing.length === 0) {
@@ -295,14 +309,13 @@ export const calculateSignificantEventsQuality = (
   const categoryRecall = calculateCategoryRecall(queryDetails, groundTruth.categories);
   const kqlSubstringRecall = calculateKqlSubstringRecall(queryDetails, groundTruth.kql_substrings);
 
-  const schemaComplianceRate = (categoryComplianceRate + severityComplianceRate) / 2;
-
   const overallQuality =
     syntaxValidityRate * WEIGHT_KQL_SYNTAX +
     executionHitRate * WEIGHT_EXECUTION_HITS +
     categoryRecall * WEIGHT_CATEGORY_RECALL +
     kqlSubstringRecall * WEIGHT_KQL_SUBSTRING_RECALL +
-    schemaComplianceRate * WEIGHT_SCHEMA_COMPLIANCE +
+    categoryComplianceRate * WEIGHT_CATEGORY_COMPLIANCE +
+    severityComplianceRate * WEIGHT_SEVERITY_COMPLIANCE +
     evidenceGroundingRate * WEIGHT_EVIDENCE_GROUNDING +
     titleQualityRate * WEIGHT_TITLE_QUALITY;
 
