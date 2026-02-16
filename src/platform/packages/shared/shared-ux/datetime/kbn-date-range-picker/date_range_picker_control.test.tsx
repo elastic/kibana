@@ -37,7 +37,7 @@ describe('DateRangePickerControl', () => {
       expect(screen.queryByTestId('dateRangePickerControlButton')).not.toBeInTheDocument();
     });
 
-    it('submits on Enter and returns to display mode', () => {
+    it('submits on Enter and returns to idle mode', () => {
       const onChange = jest.fn();
       renderWithEuiTheme(<DateRangePicker {...defaultProps} onChange={onChange} />);
 
@@ -50,7 +50,7 @@ describe('DateRangePickerControl', () => {
       expect(screen.queryByTestId('dateRangePickerInput')).not.toBeInTheDocument();
     });
 
-    it('cancels on Escape and returns to display mode', () => {
+    it('cancels on Escape and returns to idle mode', () => {
       const onChange = jest.fn();
       renderWithEuiTheme(<DateRangePicker {...defaultProps} onChange={onChange} />);
 
@@ -75,7 +75,7 @@ describe('DateRangePickerControl', () => {
       expect(button).toHaveTextContent('Last 20 minutes');
     });
 
-    it('closes on outside click and returns to display mode', () => {
+    it('closes on outside click and returns to idle mode', () => {
       const onChange = jest.fn();
       renderWithEuiTheme(<DateRangePicker {...defaultProps} onChange={onChange} />);
 

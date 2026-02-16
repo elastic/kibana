@@ -44,8 +44,8 @@ export function DateRangePickerControl() {
     compressed,
     maxWidth,
     displayText,
-    fullFormattedText,
-    displayDuration,
+    displayFullFormattedText,
+    displayShortDuration,
     inputRef,
     buttonRef,
     panelRef,
@@ -173,7 +173,9 @@ export function DateRangePickerControl() {
           />
         ) : (
           <EuiToolTip
-            content={fullFormattedText !== displayText ? fullFormattedText : undefined}
+            content={
+              displayFullFormattedText !== displayText ? displayFullFormattedText : undefined
+            }
             display="block"
             css={tooltipStyles}
             offset={euiTheme.base * 0.75}
@@ -186,7 +188,7 @@ export function DateRangePickerControl() {
               isInvalid={isInvalid}
               compressed={compressed}
             >
-              {displayDuration && <EuiBadge>{displayDuration}</EuiBadge>}
+              {displayShortDuration && <EuiBadge>{displayShortDuration}</EuiBadge>}
             </EuiFormControlButton>
           </EuiToolTip>
         )}

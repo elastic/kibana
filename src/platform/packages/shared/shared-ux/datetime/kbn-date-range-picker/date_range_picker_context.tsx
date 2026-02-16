@@ -56,22 +56,32 @@ export interface DateRangePickerContextValue {
 export type InitialFocus = RefObject<HTMLElement | null> | string;
 
 /** Internal context value used by sub-components. */
-// TODO add comments for each explaning why they're needed
 interface DateRangePickerInternalContextValue extends DateRangePickerContextValue {
+  /** Whether the picker is in editing mode (input focused, panel open) or idle. */
   isEditing: boolean;
+  /** Toggle editing mode; restores previous text when exiting without applying. */
   setIsEditing: (value: boolean) => void;
+  /** Whether to use EUI compressed form styling. */
   compressed: boolean;
+  /** Maximum width for the picker control, derived from EUI theme. */
   maxWidth: string;
+  /** Human-readable display text for the current time range (shown when idle). */
   displayText: string;
-  fullFormattedText: string;
-  displayDuration: string | null;
+  /** Full formatted text including absolute dates, used for tooltips. */
+  displayFullFormattedText: string;
+  /** Short duration label (e.g., "15m"), or `null` if duration cannot be computed. */
+  displayShortDuration: string | null;
+  /** Ref to the text input element for focus management. */
   inputRef: RefObject<HTMLInputElement>;
+  /** Ref to the trigger button for focus restoration. */
   buttonRef: RefObject<HTMLButtonElement>;
+  /** Ref to the popover panel for click-outside detection. */
   panelRef: RefObject<HTMLDivElement>;
   /** Generated HTML id for the dialog panel, used for ARIA `aria-controls`. */
   panelId: string;
   /** Optional initial focus target for the dialog panel. */
   initialFocus?: InitialFocus;
+  /** Parsed time range derived from the current text input. */
   timeRange: TimeRange;
   /** Resolved time window buttons config, or `false` when disabled. */
   timeWindowButtonsConfig: TimeWindowButtonsConfig | false;
@@ -118,7 +128,7 @@ export function DateRangePickerProvider({
     () => timeRangeToDisplayText(timeRange, { dateFormat }),
     [dateFormat, timeRange]
   );
-  const fullFormattedText = useMemo(
+  const displayFullFormattedText = useMemo(
     () => timeRangeToFullFormattedText(timeRange, { dateFormat }),
     [timeRange, dateFormat]
   );
@@ -126,7 +136,7 @@ export function DateRangePickerProvider({
     timeRange.startDate && timeRange.endDate
       ? { startDate: timeRange.startDate, endDate: timeRange.endDate }
       : null;
-  const displayDuration = duration
+  const displayShortDuration = duration
     ? durationToDisplayShortText(duration.startDate, duration.endDate)
     : null;
 
@@ -144,12 +154,30 @@ export function DateRangePickerProvider({
     [showTimeWindowButtons]
   );
 
+  // Safety net: if text becomes empty outside of editing mode (e.g., via direct setText('')),
+  // restore the last valid text to prevent the input from staying empty.
+  // This complements `setIsEditingWithRestore` which handles the normal edit-cancel flow.
+  // TODO double-check this is actually needed
   useEffect(() => {
     if (!isEditing && text.trim() === '' && lastValidText.current) {
       setText(lastValidText.current);
       lastValidText.current = '';
     }
   }, [text, isEditing]);
+
+  const setIsEditingWithRestore = useCallback(
+    (editing: boolean) => {
+      if (editing && text) {
+        lastValidText.current = text;
+      }
+      if (!editing && lastValidText.current) {
+        setText(lastValidText.current);
+        lastValidText.current = '';
+      }
+      setIsEditing(editing);
+    },
+    [text]
+  );
 
   /** Apply a range: parse it, call `onChange`, and exit editing mode. */
   const applyRange = useCallback(
@@ -179,20 +207,6 @@ export function DateRangePickerProvider({
     [onChange, timeRange]
   );
 
-  const setIsEditingWithRestore = useCallback(
-    (editing: boolean) => {
-      if (editing && text) {
-        lastValidText.current = text;
-      }
-      if (!editing && lastValidText.current) {
-        setText(lastValidText.current);
-        lastValidText.current = '';
-      }
-      setIsEditing(editing);
-    },
-    [text]
-  );
-
   const contextValue = useMemo<DateRangePickerInternalContextValue>(
     () => ({
       text,
@@ -204,8 +218,8 @@ export function DateRangePickerProvider({
       compressed,
       maxWidth,
       displayText,
-      fullFormattedText,
-      displayDuration,
+      displayFullFormattedText,
+      displayShortDuration,
       inputRef,
       buttonRef,
       panelRef,
@@ -222,8 +236,8 @@ export function DateRangePickerProvider({
       compressed,
       maxWidth,
       displayText,
-      fullFormattedText,
-      displayDuration,
+      displayFullFormattedText,
+      displayShortDuration,
       panelId,
       timeRange,
       timeWindowButtonsConfig,
