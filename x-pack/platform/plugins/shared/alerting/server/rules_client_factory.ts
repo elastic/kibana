@@ -15,11 +15,11 @@ import type {
 } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { IEventLogClientService, IEventLogger } from '@kbn/event-log-plugin/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import type { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
