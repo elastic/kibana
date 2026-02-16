@@ -63,8 +63,17 @@ export class TemplatesService {
       isLatest: true,
     });
 
+    const searchLower = search?.toLowerCase() ?? '';
+
     return {
-      templates: templates.map((so) => so.attributes),
+      templates: templates.map((so) => ({
+        ...so.attributes,
+        fieldSearchMatches:
+          searchLower !== '' &&
+          (so.attributes.fieldNames ?? []).some((fieldName) =>
+            fieldName.toLowerCase().includes(searchLower)
+          ),
+      })),
       page,
       perPage,
       total,
@@ -242,7 +251,7 @@ export class TemplatesService {
     });
   }
 
-  async createTemplate(input: CreateTemplateInput): Promise<SavedObject<Template>> {
+  async createTemplate(input: CreateTemplateInput, author: string): Promise<SavedObject<Template>> {
     const parsedDefinition = parseYaml(input.definition) as ParsedTemplate['definition'];
 
     const templateSavedObject = await this.dependencies.unsecuredSavedObjectsClient.create(
@@ -257,7 +266,7 @@ export class TemplatesService {
         templateId: v4(),
         description: input.description,
         tags: input.tags,
-        author: input.author,
+        author,
         fieldCount: parsedDefinition.fields.length,
         fieldNames: parsedDefinition.fields.map((f) => f.name),
       } as Template,
@@ -293,7 +302,7 @@ export class TemplatesService {
         deletedAt: null,
         description: input.description,
         tags: input.tags,
-        author: input.author,
+        author: currentTemplate.attributes.author,
         fieldCount: parsedDefinition.fields.length,
         fieldNames: parsedDefinition.fields.map((f) => f.name),
       },
@@ -318,6 +327,38 @@ export class TemplatesService {
     await this.updateMappings(input.definition);
 
     return templateSavedObject;
+  }
+
+  /**
+   * Returns all unique tags from the latest version of each non-deleted template.
+   */
+  async getTags(): Promise<string[]> {
+    const { templates } = await this.searchTemplates({
+      page: 1,
+      perPage: 10000,
+      sortField: 'name',
+      sortOrder: 'asc',
+      isLatest: true,
+    });
+    const tags = templates.flatMap((so) => so.attributes.tags ?? []).filter(Boolean);
+    return [...new Set(tags)].sort();
+  }
+
+  /**
+   * Returns all unique authors from the latest version of each non-deleted template.
+   */
+  async getAuthors(): Promise<string[]> {
+    const { templates } = await this.searchTemplates({
+      page: 1,
+      perPage: 10000,
+      sortField: 'name',
+      sortOrder: 'asc',
+      isLatest: true,
+    });
+    const authors = templates
+      .map((so) => so.attributes.author)
+      .filter((a): a is string => Boolean(a));
+    return [...new Set(authors)].sort();
   }
 
   async deleteTemplate(templateId: string): Promise<void> {

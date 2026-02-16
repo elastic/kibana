@@ -54,8 +54,12 @@ export type TemplatesFindRequest = z.infer<typeof TemplatesFindRequestSchema>;
 /**
  * Response schema for finding/listing templates
  */
+const TemplateWithSearchMetaSchema = TemplateSchema.extend({
+  fieldSearchMatches: z.boolean(),
+});
+
 export const TemplatesFindResponseSchema = z.object({
-  templates: z.array(TemplateSchema),
+  templates: z.array(TemplateWithSearchMetaSchema),
   page: z.number(),
   perPage: z.number(),
   total: z.number(),
