@@ -347,7 +347,9 @@ describe('run_all.ts', () => {
       await runPromise;
 
       // Verify that output was captured and written (via log.write in Buildkite section)
-      expect(mockLog.write).toHaveBeenCalledWith(expect.stringContaining('Test output from stdout'));
+      expect(mockLog.write).toHaveBeenCalledWith(
+        expect.stringContaining('Test output from stdout')
+      );
     });
 
     describe('logging and reporting', () => {
