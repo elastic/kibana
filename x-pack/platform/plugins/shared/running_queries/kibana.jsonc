@@ -12,6 +12,9 @@
     "configPath": ["xpack", "running_queries"],
     "requiredPlugins": [
       "management"
+    ],
+    "requiredBundles": [
+      "esUiShared"
     ]
   }
 }

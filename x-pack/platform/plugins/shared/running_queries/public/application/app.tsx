@@ -11,15 +11,21 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPageTemplate,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from './hooks/use_breadcrumbs';
+import { useRunningQueriesAppContext } from './app_context';
+import { RunningQueriesTable } from './components/running_queries_table';
 
 export const RunningQueriesApp: React.FC = () => {
   useBreadcrumbs();
+
+  const { apiService, notifications } = useRunningQueriesAppContext();
+  const { data, isLoading, error, resendRequest } = apiService.useLoadRunningQueries();
 
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [secondsAgo, setSecondsAgo] = useState(0);
@@ -28,13 +34,25 @@ export const RunningQueriesApp: React.FC = () => {
 
   const handleRefresh = useCallback(() => {
     setIsRefreshing(true);
-    // TODO: trigger data refresh
-    setTimeout(() => {
-      setIsRefreshing(false);
-      setSecondsAgo(Math.floor((Date.now() - lastRefreshTime.current) / 1000));
-      lastRefreshTime.current = Date.now();
-    }, 500);
-  }, []);
+    resendRequest();
+    setIsRefreshing(false);
+    setSecondsAgo(Math.floor((Date.now() - lastRefreshTime.current) / 1000));
+    lastRefreshTime.current = Date.now();
+  }, [resendRequest]);
+
+  const handleCancelQuery = useCallback(
+    (taskId: string) => {
+      notifications.toasts.addSuccess(
+        i18n.translate('xpack.runningQueries.cancelQueryToast', {
+          defaultMessage: 'Cancel requested for query {taskId}',
+          values: { taskId },
+        })
+      );
+    },
+    [notifications]
+  );
+
+  const queries = data?.queries ?? [];
 
   return (
     <EuiPageTemplate restrictWidth={false}>
@@ -79,13 +97,19 @@ export const RunningQueriesApp: React.FC = () => {
         ]}
       />
       <EuiPageTemplate.Section>
-        <EuiText>
-          <p>
-            {i18n.translate('xpack.runningQueries.description', {
-              defaultMessage: 'View and manage currently running queries.',
-            })}
-          </p>
-        </EuiText>
+        {isLoading && !data ? (
+          <EuiLoadingSpinner size="l" />
+        ) : error ? (
+          <EuiText color="danger">
+            <p>
+              {i18n.translate('xpack.runningQueries.loadError', {
+                defaultMessage: 'Failed to load running queries.',
+              })}
+            </p>
+          </EuiText>
+        ) : (
+          <RunningQueriesTable queries={queries} onCancelQuery={handleCancelQuery} />
+        )}
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );

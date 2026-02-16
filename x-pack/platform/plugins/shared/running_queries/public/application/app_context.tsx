@@ -6,11 +6,14 @@
  */
 
 import React, { useContext, type PropsWithChildren } from 'react';
-import type { ChromeStart, NotificationsStart } from '@kbn/core/public';
+import type { ChromeStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
+import type { RunningQueriesApiService } from '../lib/api';
 
 export interface RunningQueriesAppContextValue {
   chrome: ChromeStart;
+  http: HttpSetup;
   notifications: NotificationsStart;
+  apiService: RunningQueriesApiService;
 }
 
 const RunningQueriesAppContext = React.createContext<RunningQueriesAppContextValue | undefined>(

@@ -8,8 +8,8 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { RunningQueriesPlugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) => {
-  return new RunningQueriesPlugin(initializerContext);
+export const plugin = (_initializerContext: PluginInitializerContext) => {
+  return new RunningQueriesPlugin();
 };
 
 export type { RunningQueriesPluginSetup, RunningQueriesPluginStart } from './types';

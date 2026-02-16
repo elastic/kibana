@@ -13,6 +13,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { RunningQueriesServerSetup, RunningQueriesServerStart } from './types';
+import { registerRoutes } from './routes';
 
 export class RunningQueriesPlugin
   implements Plugin<RunningQueriesServerSetup, RunningQueriesServerStart>
@@ -25,6 +26,10 @@ export class RunningQueriesPlugin
 
   public setup(core: CoreSetup): RunningQueriesServerSetup {
     this.logger.debug('runningQueries: Setup');
+
+    const router = core.http.createRouter();
+    registerRoutes({ router, logger: this.logger });
+
     return {};
   }
 

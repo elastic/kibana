@@ -11,13 +11,18 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { RunningQueriesAppContextProvider } from './app_context';
 import { RunningQueriesApp } from './app';
+import { RunningQueriesApiService } from '../lib/api';
 
 export const renderApp = (coreStart: CoreStart, params: ManagementAppMountParams) => {
+  const apiService = new RunningQueriesApiService(coreStart.http);
+
   ReactDOM.render(
     coreStart.rendering.addContext(
       <RunningQueriesAppContextProvider
         chrome={coreStart.chrome}
+        http={coreStart.http}
         notifications={coreStart.notifications}
+        apiService={apiService}
       >
         <RunningQueriesApp />
       </RunningQueriesAppContextProvider>
