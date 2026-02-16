@@ -362,7 +362,9 @@ export const GetOneAgentRequestSchema = {
 
 export const GetAgentEffectiveConfigRequestSchema = {
   params: schema.object({
-    agentId: schema.string(),
+    agentId: schema.string({
+      meta: { description: 'The agent ID to get effective config of' },
+    }),
   }),
 };
 

@@ -185,6 +185,38 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
             },
           },
         },
+        options: {
+          oasOperationObject: () => ({
+            responses: {
+              200: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      successResponse: {
+                        value: {
+                          effective_config: {},
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              400: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      badRequestResponse: {
+                        value: {
+                          message: 'Bad Request',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        },
       },
       getAgentEffectiveConfigHandler
     );
