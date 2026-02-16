@@ -15,21 +15,19 @@ import { APM_SLO_INDICATOR_TYPES } from '../../../../../common/slo_indicator_typ
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import type { TableActions } from '../../../shared/managed_table';
+import type { IndexType } from '../../../shared/links/discover_links/get_esql_query';
 
 interface UseServiceActionsParams {
   openAlertFlyout: (ruleType: ApmRuleType, serviceName: string) => void;
   openSloFlyout: (indicatorType: ApmIndicatorType, serviceName: string) => void;
-}
-
-interface UseServiceActionsReturn {
-  actions: TableActions<ServiceListItem>;
-  showActionsColumn: boolean;
+  getDiscoverHref: (item: ServiceListItem, indexType: IndexType) => string | undefined;
 }
 
 export function useServiceActions({
   openAlertFlyout,
   openSloFlyout,
-}: UseServiceActionsParams): UseServiceActionsReturn {
+  getDiscoverHref,
+}: UseServiceActionsParams): TableActions<ServiceListItem> {
   const { core, plugins, share } = useApmPluginContext();
   const { capabilities } = core.application;
   const sloListLocator = share.url.locators.get<SloListLocatorParams>(sloListLocatorID);
@@ -37,10 +35,29 @@ export function useServiceActions({
   const { canSaveAlerts } = getAlertingCapabilities(plugins, capabilities);
   const canSaveApmAlerts = !!(capabilities.apm.save && canSaveAlerts);
   const canWriteSlos = !!capabilities.slo?.write;
-  const showActionsColumn = canSaveApmAlerts || canWriteSlos;
 
   const actions = useMemo(() => {
     const actionsList: TableActions<ServiceListItem> = [];
+
+    actionsList.push({
+      id: 'discover',
+      actions: [
+        {
+          id: 'servicesTable-openTracesInDiscover',
+          name: i18n.translate('xpack.apm.servicesTable.actions.openTracesInDiscover', {
+            defaultMessage: 'Open traces in Discover',
+          }),
+          href: (item) => getDiscoverHref(item, 'traces'),
+        },
+        {
+          id: 'servicesTable-openLogsInDiscover',
+          name: i18n.translate('xpack.apm.servicesTable.actions.openLogsInDiscover', {
+            defaultMessage: 'Open logs in Discover',
+          }),
+          href: (item) => getDiscoverHref(item, 'error'),
+        },
+      ],
+    });
 
     if (canSaveApmAlerts) {
       actionsList.push({
@@ -173,7 +190,14 @@ export function useServiceActions({
     }
 
     return actionsList;
-  }, [openAlertFlyout, openSloFlyout, canSaveApmAlerts, canWriteSlos, sloListLocator]);
+  }, [
+    openAlertFlyout,
+    openSloFlyout,
+    canSaveApmAlerts,
+    canWriteSlos,
+    sloListLocator,
+    getDiscoverHref,
+  ]);
 
-  return { actions, showActionsColumn };
+  return actions;
 }
