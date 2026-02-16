@@ -68,7 +68,6 @@ export function updateSavedSearch({
       savedSearch.grid = appState.grid;
     }
     savedSearch.hideChart = appState.hideChart;
-    savedSearch.hideDataTable = appState.hideDataTable;
     savedSearch.rowHeight = appState.rowHeight;
     savedSearch.headerRowHeight = appState.headerRowHeight;
     savedSearch.rowsPerPage = appState.rowsPerPage;

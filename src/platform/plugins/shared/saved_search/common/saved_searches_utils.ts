@@ -35,7 +35,6 @@ export const fromSavedSearchAttributes = <
     tags,
     grid: attributes.grid,
     hideChart: attributes.hideChart,
-    hideDataTable: attributes.hideDataTable ?? false,
     viewMode: attributes.viewMode,
     hideAggregatedPreview: attributes.hideAggregatedPreview,
     rowHeight: attributes.rowHeight,

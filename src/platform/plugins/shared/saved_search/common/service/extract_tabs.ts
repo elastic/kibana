@@ -15,7 +15,6 @@ import { omit } from 'lodash';
 import type {
   SCHEMA_SEARCH_MODEL_VERSION_5,
   SCHEMA_SEARCH_MODEL_VERSION_6,
-  SCHEMA_SEARCH_MODEL_VERSION_10,
 } from '../../server/saved_objects/schema';
 
 export const extractTabsBackfillFn: SavedObjectModelDataBackfillFn<
@@ -24,22 +23,6 @@ export const extractTabsBackfillFn: SavedObjectModelDataBackfillFn<
 > = (prevDoc) => {
   const attributes = extractTabs(prevDoc.attributes);
   return { attributes };
-};
-
-export const hideDataTableBackfillFn: SavedObjectModelDataBackfillFn<
-  TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_10>,
-  TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_10> & {
-    tabs: Array<{ id: string; label: string; attributes: Record<string, unknown> }>;
-  }
-> = (prevDoc) => {
-  const tabs = prevDoc.attributes.tabs?.map((tab) => ({
-    ...tab,
-    attributes: {
-      ...tab.attributes,
-      ...(tab.attributes.hideDataTable === undefined && { hideDataTable: false }),
-    },
-  }));
-  return { attributes: { ...prevDoc.attributes, tabs } };
 };
 
 // Don't change this, it's used to generate deterministic UUIDs for
