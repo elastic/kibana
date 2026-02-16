@@ -153,7 +153,7 @@ export function ChatActionsMenu({
                     openAgentBuilderConfirmationModal();
                   }}
                 >
-                  <EuiIcon type="productRobot" size="m" />
+                  <EuiIcon type="productAgent" size="m" />
                   {i18n.translate('xpack.aiAssistant.chatHeader.actions.agentBuilderOptInButton', {
                     defaultMessage: 'Try AI Agent',
                   })}

@@ -67,7 +67,7 @@ const AgentSelectPopoverButton: React.FC<{
   const hasActiveConversation = useHasActiveConversation();
   const iconType = selectedAgent
     ? () => <AgentAvatar agent={selectedAgent} size="s" />
-    : 'productRobot';
+    : 'productAgent';
   return (
     <InputPopoverButton
       open={isPopoverOpen}

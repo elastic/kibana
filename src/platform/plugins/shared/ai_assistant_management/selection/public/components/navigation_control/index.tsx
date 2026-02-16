@@ -266,7 +266,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                       }
                     )}
                     titleSize="xs"
-                    icon={<EuiIcon type="productRobot" size="xxl" />}
+                    icon={<EuiIcon type="productAgent" size="xxl" />}
                     data-test-subj="aiAssistantAgentCard"
                     isDisabled={!hasAgentBuilder}
                   />

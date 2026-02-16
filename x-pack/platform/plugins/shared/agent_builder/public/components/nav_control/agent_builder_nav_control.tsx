@@ -101,7 +101,7 @@ export function AgentBuilderNavControl() {
           size="s"
           fullWidth={false}
           minWidth={0}
-          iconType="productRobot"
+          iconType="productAgent"
         >
           <FormattedMessage
             id="xpack.agentBuilder.navControl.linkLabel"

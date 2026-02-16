@@ -45,7 +45,7 @@ export const TryAIAgentContextMenuItem: React.FC<{
             <EuiButton
               aria-label={i18n.TRY_AI_AGENT}
               onClick={() => handleOpenAIAgentModal('security_settings_menu')}
-              iconType="productRobot"
+              iconType="productAgent"
               color="accent"
               size="s"
               fullWidth
@@ -63,7 +63,7 @@ export const TryAIAgentContextMenuItem: React.FC<{
         <EuiButton
           aria-label={i18n.TRY_AI_AGENT}
           onClick={() => handleOpenAIAgentModal('security_settings_menu')}
-          iconType="productRobot"
+          iconType="productAgent"
           color="accent"
           size="s"
           fullWidth

@@ -203,7 +203,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
     />,
     <EuiContextMenuItem
       key="agents"
-      icon={<EuiIcon type="productRobot" />}
+      icon={<EuiIcon type="productAgent" />}
       onClick={closePopover}
       href={createAgentBuilderUrl(appPaths.agents.list)}
       data-test-subj="agentBuilderActionsAgents"
