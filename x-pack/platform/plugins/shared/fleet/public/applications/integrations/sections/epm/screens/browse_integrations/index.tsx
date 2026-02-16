@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexItem, EuiFlexGroup, useEuiTheme, EuiSpacer } from '@elastic/eui';
 
-import { useBreadcrumbs } from '../../../../hooks';
+import { useBreadcrumbs, useStartServices } from '../../../../hooks';
 import { NoEprCallout } from '../../components/no_epr_callout';
 import { categoryExists } from '../home';
 
@@ -23,6 +23,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
 }) => {
   useBreadcrumbs('integrations_all');
 
+  const { automaticImportVTwo } = useStartServices();
   const euiTheme = useEuiTheme();
 
   const {
@@ -75,6 +76,9 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
         categories={mainCategories}
         selectedCategory={selectedCategory}
         onCategoryChange={onCategoryChange}
+        CreateIntegrationCardButton={
+          automaticImportVTwo?.components.CreateIntegrationSideCardButton
+        }
       />
       <EuiFlexItem grow={5}>
         <EuiFlexGroup direction="column" gutterSize="none">

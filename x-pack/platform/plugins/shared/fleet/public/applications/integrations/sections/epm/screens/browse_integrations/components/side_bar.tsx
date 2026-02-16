@@ -86,33 +86,42 @@ const StickySidebar = styled(EuiFlexItem)`
   padding-right: ${(props) => props.theme.euiTheme.size.l};
 `;
 
-export const Sidebar: React.FC<Props> = ({
+export interface SidebarProps extends Props {
+  CreateIntegrationCardButton?: React.ComponentType<{ compressed?: boolean }>;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({
   isLoading,
   categories,
   selectedCategory,
   onCategoryChange,
+  CreateIntegrationCardButton,
 }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
     <StickySidebar>
-      <EuiAccordion
-        id="categoriesUserIntegrationsAccordion"
-        buttonContent={i18n.translate('xpack.fleet.epmList.userIntegrationAccordionLabel', {
-          defaultMessage: 'Your created integrations',
-        })}
-        buttonProps={{
-          style: {
-            fontWeight: euiTheme.font.weight.bold,
-          },
-        }}
-        initialIsOpen={true}
-        paddingSize="none"
-      >
-        <EuiSpacer size="s" />
-        TODO
-      </EuiAccordion>
-      <EuiSpacer size="m" />
+      {CreateIntegrationCardButton && (
+        <>
+          <EuiAccordion
+            id="categoriesUserIntegrationsAccordion"
+            buttonContent={i18n.translate('xpack.fleet.epmList.userIntegrationAccordionLabel', {
+              defaultMessage: 'Your created integrations',
+            })}
+            buttonProps={{
+              style: {
+                fontWeight: euiTheme.font.weight.bold,
+              },
+            }}
+            initialIsOpen={true}
+            paddingSize="none"
+          >
+            <EuiSpacer size="s" />
+            <CreateIntegrationCardButton compressed />
+          </EuiAccordion>
+          <EuiSpacer size="m" />
+        </>
+      )}
       <EuiAccordion
         id="categoriesDevelopedByElasticAccordion"
         buttonContent={i18n.translate('xpack.fleet.epmList.filterByCategoryAccordionLabel', {

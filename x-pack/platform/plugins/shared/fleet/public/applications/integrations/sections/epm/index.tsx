@@ -22,7 +22,7 @@ import { CreateIntegration } from './screens/create';
 import { CustomLanguagesOverview } from './screens/detail/custom_languages_overview';
 
 export const EPMApp: React.FunctionComponent = () => {
-  const { automaticImport } = useStartServices();
+  const { automaticImportVTwo } = useStartServices();
   useBreadcrumbs('integrations');
 
   return (
@@ -45,8 +45,13 @@ export const EPMApp: React.FunctionComponent = () => {
           </React.Suspense>
         </IntegrationsStateContextProvider>
       </Route>
-      {automaticImport && (
+      {automaticImportVTwo && (
         <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_create}>
+          <CreateIntegration />
+        </Route>
+      )}
+      {automaticImportVTwo && (
+        <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_upload}>
           <CreateIntegration />
         </Route>
       )}
