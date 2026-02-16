@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/244198
   describe('lens layer actions tests', () => {
     it('should allow creation of lens xy chart', async () => {
       await visualize.navigateToNewVisualization();
