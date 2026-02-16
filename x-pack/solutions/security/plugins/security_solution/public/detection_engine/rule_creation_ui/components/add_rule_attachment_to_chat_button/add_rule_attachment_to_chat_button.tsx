@@ -25,8 +25,6 @@ import {
 } from '../../../../agent_builder/components/prompts';
 import type { AgentBuilderAddToChatTelemetry } from '../../../../agent_builder/hooks/use_report_add_to_chat';
 import { formatRule } from '../../pages/rule_creation/helpers';
-import { getStepsData } from '../../../common/helpers';
-import { useKibana } from '../../../../common/lib/kibana';
 
 interface AddRuleAttachmentFromFormProps {
   defineStepData: DefineStepRule;
@@ -64,7 +62,6 @@ const isFormProps = (
 
 export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButtonProps> = (props) => {
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
-  const { triggersActionsUi } = useKibana().services;
   const pathway = props.pathway ?? 'rule_creation';
   const mode = props.mode ?? 'creation';
 
@@ -91,7 +88,7 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
       },
       attachmentPrompt,
     };
-  }, [mode, props, triggersActionsUi.actionTypeRegistry]);
+  }, [mode, props]);
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(ruleAttachment);
 

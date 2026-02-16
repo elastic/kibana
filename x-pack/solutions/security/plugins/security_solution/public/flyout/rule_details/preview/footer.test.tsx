@@ -11,14 +11,15 @@ import { RULE_PREVIEW_FOOTER_TEST_ID, RULE_PREVIEW_OPEN_RULE_FLYOUT_TEST_ID } fr
 import { PreviewFooter } from './footer';
 import { useRuleDetailsLink } from '../../document_details/shared/hooks/use_rule_details_link';
 import { TestProviders } from '../../../common/mock';
+import type { RuleResponse } from '../../../../common/api/detection_engine';
 
 jest.mock('../../document_details/shared/hooks/use_rule_details_link');
 
 const renderRulePreviewFooter = () =>
   render(
     <TestProviders>
-      <PreviewFooter ruleId="ruleid" />
-    </TestProviders>
+      <PreviewFooter ruleId="ruleid" rule={{} as RuleResponse} />
+    </TestProviders>  
   );
 
 describe('<RulePreviewFooter />', () => {
