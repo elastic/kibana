@@ -7,7 +7,7 @@
 
 import { merge } from 'lodash';
 import path from 'path';
-import { load as loadYaml } from 'js-yaml';
+import { parse as parseYaml } from 'yaml';
 import { readFileSync } from 'fs';
 import { samlAuthentication } from '@kbn/cypress-test-helper/src/auth/saml_auth';
 import type { YamlRoleDefinitions } from './lib';
@@ -18,7 +18,7 @@ const ROLES_YAML_FILE_PATH = path.join(
   `${__dirname}/support`,
   'project_controller_osquery_roles.yml'
 );
-const roleDefinitions = loadYaml(readFileSync(ROLES_YAML_FILE_PATH, 'utf8')) as YamlRoleDefinitions;
+const roleDefinitions = parseYaml(readFileSync(ROLES_YAML_FILE_PATH, 'utf8')) as YamlRoleDefinitions;
 
 export const getCypressBaseConfig = (
   overrides: Cypress.ConfigOptions = {}
