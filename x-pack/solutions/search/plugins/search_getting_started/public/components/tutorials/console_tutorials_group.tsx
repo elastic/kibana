@@ -12,9 +12,9 @@ import {
   EuiFlexItem,
   EuiText,
   EuiImage,
-  useIsWithinBreakpoints,
   EuiFlexGrid,
   EuiButtonEmpty,
+  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -38,8 +38,8 @@ const EXPAND_LIMIT = 3;
 export const ConsoleTutorialsGroup = () => {
   const { application, console: consolePlugin, share } = useKibana().services;
   const assetBasePath = useAssetBasePath();
-  const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
-  const isSmallBreakpoint = useIsWithinBreakpoints(['s']);
+  const isMediumBreakpoint = useIsWithinMaxBreakpoint('m');
+  const isSmallBreakpoint = useIsWithinMaxBreakpoint('s');
   const tutorialColumns = isSmallBreakpoint ? 1 : isMediumBreakpoint ? 2 : 3;
   const [expanded, setExpanded] = useState(false);
   const toggleExpand = () => {
@@ -92,6 +92,22 @@ export const ConsoleTutorialsGroup = () => {
         request: consoleTutorials.esql,
         image: `${assetBasePath}/search_observe_illustration.svg`,
         buttonRef: React.createRef<HTMLButtonElement>(),
+      },
+      {
+        title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.agentBuilderTitle', {
+          defaultMessage: 'Agent builder',
+        }),
+        dataTestSubj: 'console_tutorials_agent_builder',
+        description: i18n.translate(
+          'xpack.searchGettingStarted.consoleTutorials.agentBuilderDescription',
+          {
+            defaultMessage: 'Learn how to use the Agent Builder to create and manage agents.',
+          }
+        ),
+        request: consoleTutorials.agentBuilder,
+        image: `${assetBasePath}/search_task_automation.svg`,
+        buttonRef: React.createRef<HTMLButtonElement>(),
+        isNew: true,
       },
       {
         title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.tsdsTitle', {
