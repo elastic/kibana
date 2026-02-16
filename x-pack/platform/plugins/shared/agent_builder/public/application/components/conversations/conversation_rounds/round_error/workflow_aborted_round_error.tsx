@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiText } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -17,7 +17,7 @@ interface WorkflowAbortedRoundErrorProps {
 }
 
 const title = i18n.translate('xpack.agentBuilder.round.error.workflowAborted.title', {
-  defaultMessage: 'Workflow aborted',
+  defaultMessage: 'Conversation Aborted',
 });
 
 export const WorkflowAbortedRoundError: React.FC<WorkflowAbortedRoundErrorProps> = ({ error }) => {
@@ -32,19 +32,21 @@ export const WorkflowAbortedRoundError: React.FC<WorkflowAbortedRoundErrorProps>
       css={borderRadiusXlStyles}
       data-test-subj="agentBuilderRoundErrorWorkflowAborted"
     >
-      {workflowName ? (
-        <FormattedMessage
-          id="xpack.agentBuilder.round.error.workflowAborted.descriptionWithWorkflow"
-          defaultMessage='The workflow "{workflowName}" aborted this run: {message}'
-          values={{ workflowName, message }}
-        />
-      ) : (
-        <FormattedMessage
-          id="xpack.agentBuilder.round.error.workflowAborted.description"
-          defaultMessage="Execution was aborted by a workflow: {message}"
-          values={{ message }}
-        />
-      )}
+      <EuiText size="s">
+        {workflowName ? (
+          <FormattedMessage
+            id="xpack.agentBuilder.round.error.workflowAborted.descriptionWithWorkflow"
+            defaultMessage='The workflow "{workflowName}" aborted this run: {message}'
+            values={{ workflowName, message }}
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.agentBuilder.round.error.workflowAborted.description"
+            defaultMessage="Execution was aborted by a workflow: {message}"
+            values={{ message }}
+          />
+        )}
+      </EuiText>
     </EuiCallOut>
   );
 };
