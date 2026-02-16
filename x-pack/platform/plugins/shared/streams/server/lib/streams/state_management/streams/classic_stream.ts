@@ -17,7 +17,7 @@ import type {
 } from '@kbn/streams-schema';
 import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
 import { validateStreamlang } from '@kbn/streamlang';
-import { isMappingProperties } from '@kbn/streams-schema/src/fields';
+import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 import {
   isDisabledLifecycleFailureStore,
   isInheritFailureStore,
@@ -41,6 +41,39 @@ import { StreamActiveRecord } from '../stream_active_record/stream_active_record
 import type { StateDependencies, StreamChange } from '../types';
 import { formatSettings, settingsUpdateRequiresRollover, validateQueryStreams } from './helpers';
 import { validateSettings, validateSettingsWithDryRun } from './validate_settings';
+
+function getClassicFieldOverrideMappings(
+  fieldOverrides: unknown
+): StreamsMappingProperties | undefined {
+  if (!fieldOverrides || typeof fieldOverrides !== 'object') {
+    return undefined;
+  }
+
+  const mappings: StreamsMappingProperties = {};
+
+  for (const [fieldName, config] of Object.entries(fieldOverrides)) {
+    if (!config || typeof config !== 'object') {
+      continue;
+    }
+
+    // Streams supports storing metadata on field overrides (e.g. `description`) that ES mappings
+    // don't understand. Filter that metadata out when building the mapping update payload.
+    const { description: _description, ...rest } = config as Record<string, unknown>;
+
+    // If there is no ES mapping `type`, then this override is metadata-only (e.g. description for a dynamic field).
+    // Those should be stored but must not be sent to ES.
+    const type = rest.type;
+    if (typeof type !== 'string' || type === 'system') {
+      continue;
+    }
+
+    // At this point we've verified a valid mapping `type` exists, but TS can't fully prove
+    // `rest` matches the ES mapping union type. We intentionally keep runtime validation minimal here.
+    mappings[fieldName] = rest as unknown as StreamsMappingProperties[string];
+  }
+
+  return Object.keys(mappings).length > 0 ? mappings : undefined;
+}
 
 interface ClassicStreamChanges extends StreamChanges {
   processing: boolean;
@@ -216,37 +249,41 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     }
 
     if (this._changes.field_overrides) {
-      const response = (await this.dependencies.scopedClusterClient.asCurrentUser.transport.request(
-        {
-          method: 'PUT',
-          path: `/_data_stream/${this._definition.name}/_mappings?dry_run=true`,
-          body: {
-            properties: this._definition.ingest.classic.field_overrides,
-            _meta: {
-              managed_by: 'streams',
+      const mappings = getClassicFieldOverrideMappings(
+        this._definition.ingest.classic.field_overrides
+      );
+      if (mappings) {
+        const response =
+          (await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
+            method: 'PUT',
+            path: `/_data_stream/${this._definition.name}/_mappings?dry_run=true`,
+            body: {
+              properties: mappings,
+              _meta: {
+                managed_by: 'streams',
+              },
             },
-          },
+          })) as DataStreamMappingsUpdateResponse;
+        if (response.data_streams.length === 0) {
+          return {
+            isValid: false,
+            errors: [
+              new Error(
+                `Cannot create Classic stream ${this.definition.name} due to existing Data Stream mappings`
+              ),
+            ],
+          };
         }
-      )) as DataStreamMappingsUpdateResponse;
-      if (response.data_streams.length === 0) {
-        return {
-          isValid: false,
-          errors: [
-            new Error(
-              `Cannot create Classic stream ${this.definition.name} due to existing Data Stream mappings`
-            ),
-          ],
-        };
-      }
-      if (response.data_streams[0].error) {
-        return {
-          isValid: false,
-          errors: [
-            new Error(
-              `Cannot create Classic stream ${this.definition.name} due to error in Data Stream mappings: ${response.data_streams[0].error}`
-            ),
-          ],
-        };
+        if (response.data_streams[0].error) {
+          return {
+            isValid: false,
+            errors: [
+              new Error(
+                `Cannot create Classic stream ${this.definition.name} due to error in Data Stream mappings: ${response.data_streams[0].error}`
+              ),
+            ],
+          };
+        }
       }
     }
 
@@ -358,15 +395,15 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       });
     }
 
-    if (
-      this._definition.ingest.classic.field_overrides &&
-      isMappingProperties(this._definition.ingest.classic.field_overrides)
-    ) {
+    const mappings = getClassicFieldOverrideMappings(
+      this._definition.ingest.classic.field_overrides
+    );
+    if (mappings) {
       actions.push({
         type: 'update_data_stream_mappings',
         request: {
           name: this._definition.name,
-          mappings: this._definition.ingest.classic.field_overrides,
+          mappings,
         },
       });
     }
@@ -471,17 +508,18 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     }
 
     if (this._changes.field_overrides) {
-      const mappings = this._definition.ingest.classic.field_overrides || {};
-      if (!isMappingProperties(mappings)) {
-        throw new Error('Field overrides must be a valid mapping properties object');
+      const mappings = getClassicFieldOverrideMappings(
+        this._definition.ingest.classic.field_overrides
+      );
+      if (mappings) {
+        actions.push({
+          type: 'update_data_stream_mappings',
+          request: {
+            name: this._definition.name,
+            mappings,
+          },
+        });
       }
-      actions.push({
-        type: 'update_data_stream_mappings',
-        request: {
-          name: this._definition.name,
-          mappings,
-        },
-      });
     }
 
     actions.push({

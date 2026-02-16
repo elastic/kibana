@@ -11,6 +11,7 @@ import type { Query } from '@kbn/es-query';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import type { APIReturnType, StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { SampleDocument } from '@kbn/streams-schema';
+import type { FieldDefinition } from '@kbn/streams-schema';
 import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 import type { PreviewDocsFilterOption } from './simulation_documents_search';
 
@@ -50,6 +51,7 @@ export type SimulationEvent =
   | { type: 'simulation.clearConditionFilter' }
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
   | { type: 'simulation.fields.map'; field: MappedSchemaField }
+  | { type: 'simulation.fields.stageDocOnlyOverride'; fieldName: string; description?: string }
   | { type: 'simulation.fields.unmap'; fieldName: string }
   | { type: 'simulation.receive_samples'; samples: SampleDocumentWithUIAttributes[] }
   | { type: 'simulation.receive_steps'; steps: StreamlangStepWithUIAttributes[] }
@@ -61,6 +63,13 @@ export type SimulationEvent =
 export interface SimulationContext {
   detectedSchemaFields: SchemaField[];
   detectedSchemaFieldsCache: Map<string, SchemaField>;
+  /**
+   * User-staged typeless documentation-only overrides.
+   *
+   * Important: this must only include entries that were explicitly staged by the user,
+   * not just metadata descriptions coming from simulation results.
+   */
+  docOnlyOverrides: FieldDefinition;
   previewDocsFilter: PreviewDocsFilterOption;
   explicitlyEnabledPreviewColumns: string[];
   explicitlyDisabledPreviewColumns: string[];

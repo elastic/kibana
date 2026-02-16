@@ -124,6 +124,12 @@ export const FIELD_TYPE_MAP = {
     }),
     readonly: true,
   },
+  unmapped: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableUnmappedType', {
+      defaultMessage: 'Unmapped',
+    }),
+    readonly: false,
+  },
 } as const;
 
 export type FieldTypeOption = keyof typeof FIELD_TYPE_MAP;
@@ -194,6 +200,11 @@ export const TABLE_COLUMNS = {
       defaultMessage: 'Format',
     }),
   },
+  description: {
+    display: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTabledescriptionHeader', {
+      defaultMessage: 'Description',
+    }),
+  },
   parent: {
     display: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableFieldParentHeader', {
       defaultMessage: 'Field Parent (Stream)',
@@ -222,6 +233,7 @@ export const DEFAULT_TABLE_COLUMN_NAMES: TableColumnName[] = [
   'name',
   'type',
   'format',
+  'description',
   'parent',
   'status',
 ];

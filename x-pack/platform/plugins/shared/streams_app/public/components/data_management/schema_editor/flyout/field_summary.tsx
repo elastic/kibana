@@ -12,6 +12,7 @@ import {
   EuiHorizontalRule,
   EuiIconTip,
   EuiSpacer,
+  EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
@@ -46,6 +47,14 @@ const FIELD_SUMMARIES = {
       defaultMessage: 'Format',
     }),
   },
+  fieldDescription: {
+    label: i18n.translate(
+      'xpack.streams.streamDetailSchemaEditorFieldSummaryFieldDescriptionHeader',
+      {
+        defaultMessage: 'Description',
+      }
+    ),
+  },
   fieldParent: {
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldSummaryFieldParentHeader', {
       defaultMessage: 'Field Parent',
@@ -56,6 +65,7 @@ const FIELD_SUMMARIES = {
 interface FieldSummaryProps {
   field: SchemaField;
   isEditing: boolean;
+  isDescriptionOnlyEditing?: boolean;
   toggleEditMode: () => void;
   stream: Streams.ingest.all.Definition;
   onChange: (field: Partial<SchemaField>) => void;
@@ -63,11 +73,20 @@ interface FieldSummaryProps {
 }
 
 export const FieldSummary = (props: FieldSummaryProps) => {
-  const { field, isEditing, toggleEditMode, onChange, stream, enableGeoPointSuggestions } = props;
+  const {
+    field,
+    isEditing,
+    isDescriptionOnlyEditing = false,
+    toggleEditMode,
+    onChange,
+    stream,
+    enableGeoPointSuggestions,
+  } = props;
 
   const router = useStreamsAppRouter();
 
   const streamType = Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic';
+  const canEditMappingControls = isEditing && !isDescriptionOnlyEditing;
 
   return (
     <>
@@ -161,7 +180,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
           <EuiFlexItem grow={2}>
             <FieldFormType
               field={field}
-              isEditing={isEditing}
+              isEditing={canEditMappingControls}
               onTypeChange={(type) => onChange({ type })}
               streamType={streamType}
               enableGeoPointSuggestions={enableGeoPointSuggestions}
@@ -180,7 +199,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={2}>
-                {isEditing ? (
+                {canEditMappingControls ? (
                   <FieldFormFormat
                     value={field.format}
                     onChange={(format) => onChange({ format })}
@@ -193,6 +212,32 @@ export const FieldSummary = (props: FieldSummaryProps) => {
             <EuiHorizontalRule margin="xs" />
           </>
         )}
+
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <EuiTitle size="xxs">
+              <span>{FIELD_SUMMARIES.fieldDescription.label}</span>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={2}>
+            {isEditing ? (
+              <EuiTextArea
+                data-test-subj="streamsAppFieldSummaryDescriptionTextArea"
+                value={field.description ?? ''}
+                onChange={(e) => onChange({ description: e.target.value || undefined })}
+                placeholder={i18n.translate('xpack.streams.fieldSummary.descriptionPlaceholder', {
+                  defaultMessage: 'Add a description for this field...',
+                })}
+                rows={3}
+                fullWidth
+              />
+            ) : (
+              `${field.description ?? EMPTY_CONTENT}`
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiHorizontalRule margin="xs" />
 
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>

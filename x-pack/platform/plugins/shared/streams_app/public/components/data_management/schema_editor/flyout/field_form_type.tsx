@@ -102,6 +102,11 @@ export const FieldTypeSelector = ({
           if (streamType !== 'classic') return false;
           if (enableGeoPointSuggestions === false) return false;
         }
+        // Classic streams do not support description-only overrides (unmapped type).
+        // Users must specify a real type to add a description.
+        if (optionKey === 'unmapped' && streamType === 'classic') {
+          return false;
+        }
         return true;
       })
       .map((optionKey) => ({

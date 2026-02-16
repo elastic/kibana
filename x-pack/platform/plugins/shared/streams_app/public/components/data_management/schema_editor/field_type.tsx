@@ -16,7 +16,7 @@ export const FieldType = ({
   type,
   aliasFor,
 }: {
-  type: FieldDefinitionConfig['type'];
+  type: NonNullable<FieldDefinitionConfig['type']>;
   aliasFor?: string;
 }) => {
   if (aliasFor) {

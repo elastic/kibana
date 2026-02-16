@@ -9,7 +9,7 @@ import { omit } from 'lodash';
 import type { FieldDefinitionConfig } from '../fields';
 
 // Parameters that we consider first class and provide a curated experience for, or are added as metadata.
-const FIRST_CLASS_PARAMETERS = ['type', 'format', 'from'];
+const FIRST_CLASS_PARAMETERS = ['type', 'format', 'from', 'description'];
 
 // Advanced parameters that we provide a generic experience (JSON blob) for
 export const getAdvancedParameters = (fieldName: string, fieldConfig: FieldDefinitionConfig) => {

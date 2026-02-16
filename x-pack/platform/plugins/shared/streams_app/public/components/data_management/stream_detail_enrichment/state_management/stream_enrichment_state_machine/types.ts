@@ -92,6 +92,7 @@ export type StreamEnrichmentEvent =
   | { type: 'dataSources.openManagement' }
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
   | { type: 'simulation.fields.map'; field: MappedSchemaField }
+  | { type: 'simulation.fields.stageDocOnlyOverride'; fieldName: string; description?: string }
   | { type: 'simulation.fields.unmap'; fieldName: string }
   | { type: 'previewColumns.updateExplicitlyEnabledColumns'; columns: string[] }
   | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }

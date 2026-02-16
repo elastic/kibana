@@ -46,19 +46,34 @@ export const getGeoPointSuggestion = ({
   return null;
 };
 
-export const convertToFieldDefinitionConfig = (
-  field: MappedSchemaField
-): FieldDefinitionConfig => ({
-  type: field.type,
-  ...(field.format && field.type === 'date' ? { format: field.format as string } : {}),
-  ...(field.additionalParameters && Object.keys(field.additionalParameters).length > 0
-    ? field.additionalParameters
-    : {}),
-});
+export const convertToFieldDefinitionConfig = (field: MappedSchemaField): FieldDefinitionConfig => {
+  // Legacy doc-only fields (pre typeless override) only have type and description.
+  // Persist them in the new typeless form to avoid freezing mappings.
+  if (field.type === 'unmapped') {
+    return {
+      description: field.description!,
+    };
+  }
+
+  if (field.type === 'system') {
+    // `system` is a UI-only pseudo-type and must never be persisted in a stream definition.
+    throw new Error('Cannot convert system-managed field type to FieldDefinitionConfig');
+  }
+
+  return {
+    type: field.type,
+    ...(field.format && field.type === 'date' ? { format: field.format as string } : {}),
+    ...(field.description ? { description: field.description } : {}),
+    ...(field.additionalParameters && Object.keys(field.additionalParameters).length > 0
+      ? field.additionalParameters
+      : {}),
+  } as FieldDefinitionConfig;
+};
 
 export function isFieldUncommitted(field: SchemaEditorField, storedFields: SchemaEditorField[]) {
   const fieldDefaults = {
     format: undefined,
+    description: undefined,
     additionalParameters: {},
   };
   // Check if field is new (not in stored fields)
@@ -89,12 +104,33 @@ export const buildSchemaSavePayload = (
   definition: Streams.ingest.all.GetResponse,
   fields: SchemaField[]
 ): { ingest: IngestUpsertRequest } => {
-  const mappedFields = fields
-    .filter((field) => field.status === 'mapped')
-    .reduce((acc, field) => {
-      acc[field.name] = convertToFieldDefinitionConfig(field as MappedSchemaField);
-      return acc;
-    }, {} as Record<string, FieldDefinitionConfig>);
+  const persistedFields = fields.reduce((acc, field) => {
+    const hasNonEmptyDescription = Boolean(
+      field.description && field.description.trim().length > 0
+    );
+
+    // Persist:
+    // - mapped fields (real overrides)
+    // - doc-only overrides (description-only), even if status is 'unmapped'
+    if (field.status === 'mapped') {
+      // UI-only pseudo-type; never persist.
+      if (field.type === 'system') {
+        return acc;
+      }
+      // For legacy doc-only `type: 'unmapped'`, only persist when description is present.
+      if (field.type === 'unmapped') {
+        if (hasNonEmptyDescription) {
+          acc[field.name] = { description: field.description!.trim() };
+        }
+      } else {
+        acc[field.name] = convertToFieldDefinitionConfig(field as MappedSchemaField);
+      }
+    } else if (field.status === 'unmapped' && hasNonEmptyDescription) {
+      acc[field.name] = { description: field.description!.trim() };
+    }
+
+    return acc;
+  }, {} as Record<string, FieldDefinitionConfig>);
 
   return {
     ingest: {
@@ -104,13 +140,13 @@ export const buildSchemaSavePayload = (
         ? {
             wired: {
               ...definition.stream.ingest.wired,
-              fields: mappedFields,
+              fields: persistedFields,
             },
           }
         : {
             classic: {
               ...definition.stream.ingest.classic,
-              field_overrides: mappedFields,
+              field_overrides: persistedFields,
             },
           }),
     },

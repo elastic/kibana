@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { useAbortController, useAbortableAsync } from '@kbn/react-hooks';
 import { Streams, getAdvancedParameters } from '@kbn/streams-schema';
-import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
@@ -141,15 +140,9 @@ export const useSchemaFields = ({
   );
 
   const pendingChangesCount = useMemo(() => {
-    const addedOrChanged = fields.filter((field) => {
-      const stored = storedFields.find((storedField) => storedField.name === field.name);
-      if (!stored) {
-        return field.status !== 'unmapped';
-      }
-      return !isEqual(field, stored);
-    });
-
-    return addedOrChanged.length;
+    // Reuse isFieldUncommitted for consistent comparison logic
+    // (it handles field defaults like additionalParameters: {} properly)
+    return fields.filter((field) => isFieldUncommitted(field, storedFields)).length;
   }, [fields, storedFields]);
 
   const discardChanges = useCallback(() => {
@@ -224,32 +217,73 @@ export const useSchemaFields = ({
 };
 
 export const getDefinitionFields = (definition: Streams.ingest.all.GetResponse): SchemaField[] => {
-  let inheritedFields: SchemaField[] = [];
+  const isWired = Streams.WiredStream.GetResponse.is(definition);
 
-  if (Streams.WiredStream.GetResponse.is(definition)) {
-    inheritedFields = Object.entries(definition.inherited_fields).map(([name, field]) => ({
-      name,
-      type: field.type,
-      format: 'format' in field ? field.format : undefined,
-      additionalParameters: getAdvancedParameters(name, field),
-      parent: field.from,
-      alias_for: field.alias_for,
-      status: 'inherited',
-    }));
+  const inheritedFieldsByName = new Map<string, SchemaField>();
+  if (isWired) {
+    for (const [name, field] of Object.entries(definition.inherited_fields)) {
+      inheritedFieldsByName.set(name, {
+        name,
+        type: field.type,
+        format: 'format' in field ? field.format : undefined,
+        description: 'description' in field ? field.description : undefined,
+        additionalParameters: getAdvancedParameters(name, field),
+        parent: field.from,
+        alias_for: field.alias_for,
+        status: 'inherited',
+      });
+    }
   }
 
-  const mappedFields: SchemaField[] = Object.entries(
-    Streams.WiredStream.GetResponse.is(definition)
-      ? definition.stream.ingest.wired.fields
-      : definition.stream.ingest.classic.field_overrides || {}
-  ).map(([name, field]) => ({
-    name,
-    type: field.type,
-    format: 'format' in field ? field.format : undefined,
-    additionalParameters: getAdvancedParameters(name, field),
-    parent: definition.stream.name,
-    status: 'mapped',
-  }));
+  const typedOverrides: SchemaField[] = [];
+  const docOnlyOverrides: SchemaField[] = [];
+  const typedOverrideNames = new Set<string>();
 
-  return [...mappedFields, ...inheritedFields];
+  const definitionFields = isWired
+    ? definition.stream.ingest.wired.fields
+    : definition.stream.ingest.classic.field_overrides || {};
+
+  for (const [name, field] of Object.entries(definitionFields)) {
+    const type = field.type;
+    const isDocOnlyOverride = !type || type === 'unmapped';
+
+    // Doc-only override (typeless `{ description }`), or legacy `type: 'unmapped'`.
+    if (isDocOnlyOverride) {
+      const inherited = inheritedFieldsByName.get(name);
+      if (inherited) {
+        // Merge doc-only override into inherited view so the mapping continues to be inherited.
+        inheritedFieldsByName.set(name, {
+          ...inherited,
+          description:
+            'description' in field && field.description !== undefined
+              ? field.description
+              : inherited.description,
+        });
+      } else {
+        docOnlyOverrides.push({
+          name,
+          parent: definition.stream.name,
+          status: 'unmapped',
+          description: 'description' in field ? field.description : undefined,
+        });
+      }
+      continue;
+    }
+
+    typedOverrideNames.add(name);
+    typedOverrides.push({
+      name,
+      type,
+      format: 'format' in field ? field.format : undefined,
+      description: 'description' in field ? field.description : undefined,
+      additionalParameters: getAdvancedParameters(name, field),
+      parent: definition.stream.name,
+      status: 'mapped',
+    });
+  }
+
+  const inheritedFields = [...inheritedFieldsByName.values()];
+  const filteredInheritedFields = inheritedFields.filter((f) => !typedOverrideNames.has(f.name));
+
+  return [...typedOverrides, ...docOnlyOverrides, ...filteredInheritedFields];
 };

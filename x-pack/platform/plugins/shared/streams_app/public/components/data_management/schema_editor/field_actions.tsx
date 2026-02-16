@@ -77,6 +77,16 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
       );
     };
 
+    const clearDescriptionAction = {
+      name: i18n.translate('xpack.streams.actions.clearDescriptionLabel', {
+        defaultMessage: 'Clear description',
+      }),
+      onClick: () => {
+        const { description, ...fieldWithoutDescription } = field;
+        onFieldUpdate(fieldWithoutDescription as SchemaField);
+      },
+    };
+
     const viewFieldAction = {
       name: i18n.translate('xpack.streams.actions.viewFieldLabel', {
         defaultMessage: 'View field',
@@ -84,17 +94,33 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
       onClick: () => openFlyout(),
     };
 
+    const editFieldAction = {
+      name: i18n.translate('xpack.streams.actions.editFieldLabel', {
+        defaultMessage: 'Edit field',
+      }),
+      onClick: () => openFlyout({ isEditingByDefault: true }),
+    };
+
+    // Check if this field has a real ES mapping (not type: 'unmapped') in a parent stream.
+    // If the parent has type: 'unmapped', the child should still be able to map it.
+    const inheritedField = fields.find((f) => f.name === field.name && f.status === 'inherited');
+    const hasRealMappingInParent = Boolean(
+      inheritedField?.type && inheritedField.type !== 'unmapped'
+    );
+    // For "Unmap" action, we need to know if there's ANY inherited entry (even unmapped)
+    const isInheritedFromParent = !!inheritedField;
+
     switch (field.status) {
       case 'mapped':
-        actions = [
-          viewFieldAction,
-          {
-            name: i18n.translate('xpack.streams.actions.editFieldLabel', {
-              defaultMessage: 'Edit field',
-            }),
-            onClick: () => openFlyout({ isEditingByDefault: true }),
-          },
-          {
+        actions = [viewFieldAction, editFieldAction];
+        if (field.description) {
+          actions.push(clearDescriptionAction);
+        }
+        // Don't show "Unmap field" for:
+        // - Fields inherited from parent (the parent's mapping or documentation still applies)
+        // - Documentation-only fields (type === 'unmapped') since there's nothing to unmap
+        if (!isInheritedFromParent && field.type !== 'unmapped') {
+          actions.push({
             name: i18n.translate('xpack.streams.actions.unpromoteFieldLabel', {
               defaultMessage: 'Unmap field',
             }),
@@ -105,21 +131,16 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
                 status: 'unmapped',
               } as SchemaField);
             },
-          },
-        ];
+          });
+        }
         break;
       case 'unmapped':
-        actions = [
-          viewFieldAction,
-          {
-            name: i18n.translate('xpack.streams.actions.mapFieldLabel', {
-              defaultMessage: 'Map field',
-            }),
-            onClick: () => openFlyout({ isEditingByDefault: true }),
-          },
-        ];
+        actions = [viewFieldAction, editFieldAction];
+        if (field.description) {
+          actions.push(clearDescriptionAction);
+        }
 
-        if (enableGeoPointSuggestions !== false) {
+        if (enableGeoPointSuggestions !== false && !hasRealMappingInParent) {
           const geoSuggestion = getGeoPointSuggestion({
             fieldName: field.name,
             fields,
@@ -138,7 +159,10 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
         }
         break;
       case 'inherited':
-        actions = [viewFieldAction];
+        actions = [viewFieldAction, editFieldAction];
+        if (field.description) {
+          actions.push(clearDescriptionAction);
+        }
         break;
     }
 

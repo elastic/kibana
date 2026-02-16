@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { intersectionBy, omit } from 'lodash';
+import { intersectionBy } from 'lodash';
 import type { ContentPackIncludedObjects, ContentPackStream } from '@kbn/content-packs-schema';
 import { ROOT_STREAM_ID, isIncludeAll } from '@kbn/content-packs-schema';
 import { type FieldDefinition } from '@kbn/streams-schema';
@@ -84,7 +84,7 @@ export function withoutBaseFields(fields: FieldDefinition): FieldDefinition {
   return Object.keys(fields)
     .filter((key) => !baseFields[key])
     .reduce((filtered, key) => {
-      filtered[key] = omit(fields[key], 'from');
+      filtered[key] = fields[key];
       return filtered;
     }, {} as FieldDefinition);
 }

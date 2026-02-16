@@ -26,15 +26,34 @@ export function validateAncestorFields({
       if (!Object.hasOwn(fields, fieldName)) {
         continue;
       }
-      if (
-        Object.entries(ancestor.ingest.wired.fields).some(
-          ([ancestorFieldName, attr]) =>
-            attr.type !== fields[fieldName].type && ancestorFieldName === fieldName
-        )
-      ) {
-        throw new MalformedFieldsError(
-          `Field ${fieldName} is already defined with incompatible type in the parent stream ${ancestor.name}`
-        );
+      const ancestorField = ancestor.ingest.wired.fields[fieldName];
+      if (ancestorField) {
+        const fieldType = fields[fieldName].type;
+        // Prevent setting type: 'unmapped' on a field that is mapped in the parent
+        // This would be misleading as it suggests the field can be unmapped, but
+        // the parent's mapping still applies
+        if (
+          fieldType === 'unmapped' &&
+          ancestorField.type !== 'unmapped' &&
+          ancestorField.type !== 'system'
+        ) {
+          throw new MalformedFieldsError(
+            `Field ${fieldName} cannot be set to 'unmapped' because it is mapped in the parent stream ${ancestor.name}. ` +
+              `To add a description, omit the type or use the same type as the parent.`
+          );
+        }
+        // Check for incompatible type changes (different non-unmapped types)
+        // Allow: parent has 'unmapped' type → child can set any type (this is the expected use case
+        // where a field is documented in a parent but mapped in a child)
+        if (
+          fieldType !== undefined &&
+          ancestorField.type !== fieldType &&
+          ancestorField.type !== 'unmapped'
+        ) {
+          throw new MalformedFieldsError(
+            `Field ${fieldName} is already defined with incompatible type in the parent stream ${ancestor.name}`
+          );
+        }
       }
       if (
         !namespacePrefixes.some((prefix) => fieldName.startsWith(prefix)) &&
@@ -123,11 +142,13 @@ export function validateDescendantFields({
 }) {
   for (const descendant of descendants) {
     for (const fieldName in fields) {
+      const fieldType = fields[fieldName].type;
       if (
         Object.hasOwn(fields, fieldName) &&
+        fieldType !== undefined &&
         Object.entries(descendant.ingest.wired.fields).some(
           ([descendantFieldName, attr]) =>
-            attr.type !== fields[fieldName].type && descendantFieldName === fieldName
+            descendantFieldName === fieldName && attr.type !== undefined && attr.type !== fieldType
         )
       ) {
         throw new MalformedFieldsError(

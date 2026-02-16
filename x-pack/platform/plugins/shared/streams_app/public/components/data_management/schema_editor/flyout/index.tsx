@@ -74,6 +74,8 @@ export const SchemaEditorFlyout = ({
     });
   }, [enableGeoPointSuggestions, field.name, fields, stream]);
 
+  const streamType = Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic';
+
   const initialField = useMemo(() => {
     if (applyGeoPointSuggestionProp && geoPointSuggestion) {
       return {
@@ -83,8 +85,16 @@ export const SchemaEditorFlyout = ({
         parent: field.parent,
       };
     }
+    // For wired streams, doc-only overrides are stored without a type.
+    // Default to 'unmapped' so the type dropdown shows the correct selection.
+    if (streamType === 'wired' && field.status === 'unmapped' && !field.type) {
+      return {
+        ...field,
+        type: 'unmapped' as const,
+      };
+    }
     return field;
-  }, [applyGeoPointSuggestionProp, geoPointSuggestion, field]);
+  }, [applyGeoPointSuggestionProp, geoPointSuggestion, field, streamType]);
 
   const [nextField, setNextField] = useReducer(
     (prev: SchemaField, updated: Partial<SchemaField>) =>
@@ -96,6 +106,14 @@ export const SchemaEditorFlyout = ({
   );
 
   const hasValidFieldType = nextField.type !== undefined;
+  // Description-only editing is only allowed for wired streams.
+  // Classic streams require a type to be specified to add a description.
+  const isDescriptionOnlyEditing =
+    isEditing && streamType === 'wired' && field.status === 'inherited';
+  const hasDescriptionChanged =
+    (nextField.description ?? undefined) !== (field.description ?? undefined);
+  const isInheritedDescriptionOnlyEditing =
+    isDescriptionOnlyEditing && field.status === 'inherited';
 
   const onValidate = ({
     isValid,
@@ -179,18 +197,21 @@ export const SchemaEditorFlyout = ({
           <FieldSummary
             field={nextField}
             isEditing={isEditing}
+            isDescriptionOnlyEditing={isDescriptionOnlyEditing}
             toggleEditMode={toggleEditMode}
             onChange={setNextField}
             stream={stream}
             enableGeoPointSuggestions={enableGeoPointSuggestions}
           />
-          <AdvancedFieldMappingOptions
-            value={nextField.additionalParameters}
-            onChange={(additionalParameters) => setNextField({ additionalParameters })}
-            onValidate={setValidAdvancedFieldMappings}
-            isEditing={isEditing}
-          />
-          {withFieldSimulation && (
+          {nextField.type !== 'unmapped' && !isDescriptionOnlyEditing && (
+            <AdvancedFieldMappingOptions
+              value={nextField.additionalParameters}
+              onChange={(additionalParameters) => setNextField({ additionalParameters })}
+              onValidate={setValidAdvancedFieldMappings}
+              isEditing={isEditing}
+            />
+          )}
+          {withFieldSimulation && nextField.type !== 'unmapped' && !isDescriptionOnlyEditing && (
             <EuiFlexItem grow={false}>
               <SamplePreviewTable stream={stream} nextField={nextField} onValidate={onValidate} />
             </EuiFlexItem>
@@ -215,13 +236,42 @@ export const SchemaEditorFlyout = ({
               disabled={
                 !hasValidFieldType ||
                 !isValidAdvancedFieldMappings ||
+                (isInheritedDescriptionOnlyEditing && !hasDescriptionChanged) ||
                 (!isValidSimulation && !isExpensiveQueriesError)
               }
               onClick={() => {
-                onStage({
-                  ...nextField,
-                  status: 'mapped',
-                } as SchemaField);
+                const stagedParent = stream.name;
+
+                const stagedField = (() => {
+                  if (isDescriptionOnlyEditing) {
+                    // In description-only mode, ensure we only persist the allowed parts.
+                    if (field.status === 'inherited') {
+                      return {
+                        ...field,
+                        description: nextField.description,
+                        parent: stagedParent,
+                        status: 'unmapped',
+                      } as SchemaField;
+                    }
+
+                    if (nextField.type === 'unmapped') {
+                      return {
+                        name: nextField.name,
+                        parent: stagedParent,
+                        status: 'unmapped',
+                        description: nextField.description,
+                      } as SchemaField;
+                    }
+                  }
+
+                  return {
+                    ...nextField,
+                    parent: stagedParent,
+                    status: 'mapped',
+                  } as SchemaField;
+                })();
+
+                onStage(stagedField);
                 if (onClose) onClose();
               }}
             >
