@@ -10,7 +10,7 @@
 import { omit } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
-import type { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { EsWorkflow } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
@@ -20,12 +20,10 @@ import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import { getNextPollInterval } from '../constants';
+import type { StrategyResult } from '../types';
+import { toExecutionModel } from '../utils';
 
-export interface StrategyResult {
-  status: 'completed' | 'failed' | 'waiting';
-  output?: Record<string, unknown>;
-  error?: Error;
-}
+export type { StrategyResult } from '../types';
 
 interface SubWorkflowWaitState {
   workflowId: string;
@@ -73,8 +71,9 @@ export class WorkflowExecuteSyncStrategy {
     try {
       // Schedule sub-workflow execution
       const workflowExecution = this.stepExecutionRuntime.workflowExecution;
+      const isTestRun = !!this.stepExecutionRuntime.workflowExecution.isTestRun;
       const { workflowExecutionId } = await this.workflowsExecutionEngine.executeWorkflow(
-        this.toExecutionModel(workflow),
+        toExecutionModel(workflow, isTestRun),
         {
           spaceId,
           inputs,
@@ -191,20 +190,6 @@ export class WorkflowExecuteSyncStrategy {
     } catch (error) {
       return { status: 'failed', error: error as Error };
     }
-  }
-
-  private toExecutionModel(workflow: EsWorkflow): WorkflowExecutionEngineModel {
-    const isTestRun = !!this.stepExecutionRuntime.workflowExecution.isTestRun;
-    return {
-      id: workflow.id,
-      name: workflow.name,
-      enabled: workflow.enabled,
-      definition: workflow.definition,
-      yaml: workflow.yaml,
-      // Note: spaceId is not part of EsWorkflow type, but we have it from the context
-      // The execution engine will use the spaceId from the execution context
-      isTestRun,
-    };
   }
 
   /**
