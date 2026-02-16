@@ -290,12 +290,9 @@ async function runConfigs(
 
           results.push({ config, code, durationMs, slowTestsFile, failedTests });
 
-          // Print buffered output after completion, using Buildkite collapsible sections:
-          //   +++ (collapsed) for passing configs — full output preserved but hidden
-          //   --- (expanded) for failing configs — immediately visible
           const sec = Math.round(durationMs / 1000);
-
           const relConfigPath = relative(REPO_ROOT, config);
+
           // Buildkite collapsible sections:
           //   --- (collapsed) for passing configs — full output preserved but hidden
           //   +++ (expanded) for failing configs — immediately visible

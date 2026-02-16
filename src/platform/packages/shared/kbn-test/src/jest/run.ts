@@ -183,7 +183,9 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
     if (isInBuildkite() && resolvedConfigPath) {
       const relConfig = relative(REPO_ROOT, resolvedConfigPath);
       process.on('exit', () => {
-        if (process.exitCode === 0) {
+        // process.exitCode is 0 or undefined for success (Jest only sets it for failures).
+        // Both are falsy, while failure codes (1, etc.) are truthy.
+        if (!process.exitCode) {
           log.info(`[jest-checkpoint] Marking ${relConfig} as completed`);
           markConfigCompletedSync(relConfig);
         }
