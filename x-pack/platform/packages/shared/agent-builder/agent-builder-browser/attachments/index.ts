@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export type {
-  AttachmentUIDefinition,
-  AttachmentServiceStartContract,
-  AttachmentContentProps,
-  AttachmentEditorProps,
-} from './contract';
+export type { AttachmentUIDefinition, AttachmentServiceStartContract } from './contract';

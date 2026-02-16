@@ -143,6 +143,15 @@ const stateSchemaV6 = stateSchemaV5.extends({
   total_filled_gap_duration_ms: schema.number(),
 });
 
+const stateSchemaV7 = stateSchemaV6.extends({
+  count_rules_with_api_key_created_by_user: schema.number(),
+});
+
+const stateSchemaV8 = stateSchemaV7.extends({
+  count_rules_with_elasticagent_tag: schema.number(),
+  count_rules_with_elasticagent_tag_by_type: schema.recordOf(schema.string(), schema.number()),
+});
+
 export const stateSchemaByVersion = {
   1: {
     // A task that was created < 8.10 will go through this "up" migration
@@ -276,9 +285,25 @@ export const stateSchemaByVersion = {
     }),
     schema: stateSchemaV6,
   },
+  7: {
+    up: (state: Record<string, unknown>) => ({
+      ...stateSchemaByVersion[6].up(state),
+      count_rules_with_api_key_created_by_user: state.count_rules_with_api_key_created_by_user || 0,
+    }),
+    schema: stateSchemaV7,
+  },
+  8: {
+    up: (state: Record<string, unknown>) => ({
+      ...stateSchemaByVersion[7].up(state),
+      count_rules_with_elasticagent_tag: state.count_rules_with_elasticagent_tag || 0,
+      count_rules_with_elasticagent_tag_by_type:
+        state.count_rules_with_elasticagent_tag_by_type || {},
+    }),
+    schema: stateSchemaV8,
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[6].schema;
+const latestTaskStateSchema = stateSchemaByVersion[8].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {
@@ -321,6 +346,8 @@ export const emptyState: LatestTaskStateSchema = {
     warning: 0,
   },
   count_rules_with_tags: 0,
+  count_rules_with_elasticagent_tag: 0,
+  count_rules_with_elasticagent_tag_by_type: {},
   count_rules_by_notify_when: {
     on_action_group_change: 0,
     on_active_alert: 0,
@@ -367,4 +394,5 @@ export const emptyState: LatestTaskStateSchema = {
   count_ignored_fields_by_rule_type: {},
   count_rules_with_linked_dashboards: 0,
   count_rules_with_investigation_guide: 0,
+  count_rules_with_api_key_created_by_user: 0,
 };
