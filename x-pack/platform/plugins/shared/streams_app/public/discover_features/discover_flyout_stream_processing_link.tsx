@@ -10,7 +10,6 @@ import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import {
   EuiLoadingSpinner,
   EuiLink,
-  EuiIcon,
   EuiFlexGroup,
   EuiToolTip,
   useEuiTheme,
@@ -18,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX } from '../../common/url_schema/common';
@@ -65,13 +63,6 @@ export function DiscoverFlyoutStreamProcessingLink({
     <EuiLink href={href}>
       <EuiToolTip content={message} display="block">
         <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiIcon
-            type="sparkles"
-            size="s"
-            css={css`
-              margin-left: ${euiTheme.size.s};
-            `}
-          />
           <EuiText size="xs" className="eui-textTruncate">
             {message}
           </EuiText>
