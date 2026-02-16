@@ -327,7 +327,7 @@ describe('EditDslStepsFlyout', () => {
       expect(getPanel(2)).toBeVisible();
 
       const panel = withinStep(2);
-      expect(panel.getByTestId(`${DATA_TEST_SUBJ}AfterValue`)).toHaveValue(12);
+      expect(panel.getByTestId(`${DATA_TEST_SUBJ}AfterValue`)).toHaveValue(22);
       expect(panel.getByTestId(`${DATA_TEST_SUBJ}AfterUnit`)).toHaveValue('d');
       expect(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`)).toHaveValue(4);
       expect(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalUnit`)).toHaveValue('h');
@@ -427,7 +427,7 @@ describe('EditDslStepsFlyout', () => {
           downsample: [
             { after: '40d', fixed_interval: '5d' },
             { after: '41d', fixed_interval: '10d' },
-            { after: '42d', fixed_interval: '20d' },
+            { after: '82d', fixed_interval: '20d' },
           ],
         },
       });

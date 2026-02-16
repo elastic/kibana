@@ -105,7 +105,7 @@ export const DslStepsFlyoutArrayView = ({
       const previousAfterNum = Number(previousStep.afterValue);
       const safePreviousAfterNum =
         Number.isFinite(previousAfterNum) && previousAfterNum >= 0 ? previousAfterNum : 0;
-      const nextAfterValue = String(safePreviousAfterNum + 1);
+      const nextAfterValue = String(safePreviousAfterNum * 2);
       const nextAfterMs = toMilliseconds(nextAfterValue, previousAfterUnit);
 
       const previousFixedUnit = previousStep.fixedIntervalUnit ?? 'd';
