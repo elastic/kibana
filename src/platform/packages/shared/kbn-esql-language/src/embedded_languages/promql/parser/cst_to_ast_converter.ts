@@ -324,7 +324,23 @@ export class PromQLCstToAstConverter {
     const metric = identCtx ? this.fromIdentifier(identCtx) : undefined;
 
     const labelsCtx = ctx.labels();
-    const labelMap = labelsCtx ? this.fromLabels(labelsCtx) : undefined;
+    let labelMap: ast.PromQLLabelMap | undefined;
+
+    if (labelsCtx) {
+      labelMap = this.fromLabels(labelsCtx);
+    } else if (ctx.LCB()) {
+      // Empty braces {} - create empty labelMap
+      const lcbToken = ctx.LCB().symbol;
+      const rcbToken = ctx.RCB()?.symbol ?? lcbToken;
+      labelMap = PromQLBuilder.labelMap([], {
+        text: '{}',
+        location: {
+          min: lcbToken.start + this.offset,
+          max: (rcbToken.stop ?? rcbToken.start) + this.offset,
+        },
+        incomplete: !ctx.RCB(),
+      });
+    }
 
     return { metric, labelMap };
   }
