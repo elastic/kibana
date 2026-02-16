@@ -59,8 +59,9 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
     onRestoreRecentlyClosedGroup,
     onClearRecentlyClosed,
   }) => {
-    const [isPopoverOpen, setPopover] = useState(false);
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [previewTabId, setPreviewTabId] = useState<string | null>(null);
+    const [menuOpenedAt, setMenuOpenedAt] = useState<number | null>(null);
     const contextMenuPopoverId = useGeneratedHtmlId();
 
     const menuButtonLabel = i18n.translate('unifiedTabs.tabsBarMenu.tabsBarMenuButton', {
@@ -68,8 +69,10 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
     });
 
     const closePopover = useCallback(() => {
-      setPopover(false);
-    }, [setPopover]);
+      setIsPopoverOpen(false);
+      setPreviewTabId(null);
+      setMenuOpenedAt(null);
+    }, [setIsPopoverOpen]);
 
     const getOpenedTabItemContents = useCallback((item: TabItem): React.ReactNode => {
       return <EuiTextTruncate truncation="middle" text={item.label} title={undefined} />;
@@ -175,6 +178,11 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
         return [];
       }
 
+      // Capture a stable "now" for relative timestamps. This prevents the UI from updating
+      // the "X minutes ago" strings on re-renders (e.g. when hovering to show previews).
+      // The value is refreshed only when the popover is opened.
+      const referenceNow = moment(menuOpenedAt ?? Date.now());
+
       // Group by closedAt (batch close), while preserving the incoming item order per group.
       const groups = new Map<number, RecentlyClosedTabItem[]>();
       for (const item of recentlyClosedItems) {
@@ -197,9 +205,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
         }
 
         const momentClosedAt = moment(closedAt);
-        // Recompute relative times whenever the popover is (re)opened.
-        const now = isPopoverOpen ? moment() : moment();
-        const formattedTime = momentClosedAt?.isValid() ? momentClosedAt.from(now) : '';
+        const formattedTime = momentClosedAt?.isValid() ? momentClosedAt.from(referenceNow) : '';
 
         if (groupItems.length === 1) {
           const tab = groupItems[0];
@@ -356,13 +362,13 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
     }, [
       recentlyClosedItems,
       getRecentlyClosedItemContents,
-      isPopoverOpen,
       onSelectRecentlyClosed,
       onRestoreRecentlyClosedGroup,
       closePopover,
       getPreviewData,
       previewTabId,
       setPreviewTabId,
+      menuOpenedAt,
     ]);
 
     return (
@@ -387,7 +393,13 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
               data-test-subj="unifiedTabs_tabsBarMenuButton"
               iconType="arrowDown"
               onClick={() => {
-                setPopover((prev) => !prev);
+                const isOpen = !isPopoverOpen;
+                setIsPopoverOpen(isOpen);
+                if (isOpen) {
+                  setMenuOpenedAt(Date.now());
+                } else {
+                  setMenuOpenedAt(null);
+                }
               }}
             />
           </EuiToolTip>
