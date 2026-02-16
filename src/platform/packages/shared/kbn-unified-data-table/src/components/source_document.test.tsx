@@ -49,6 +49,7 @@ describe('Unified data table source document cell rendering', function () {
         shouldShowFieldHandler={() => false}
         maxEntries={100}
         isPlainRecord={true}
+        columnsMeta={undefined}
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
@@ -79,6 +80,7 @@ describe('Unified data table source document cell rendering', function () {
         shouldShowFieldHandler={() => true}
         maxEntries={100}
         isPlainRecord={true}
+        columnsMeta={undefined}
       />
     );
 

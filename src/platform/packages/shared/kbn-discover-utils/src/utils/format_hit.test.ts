@@ -39,7 +39,8 @@ describe('formatHit', () => {
       dataViewMock,
       (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
       220,
-      fieldFormatsMock
+      fieldFormatsMock,
+      undefined
     );
     expect(formatted).toEqual([
       ['extension', 'formatted:png', 'extension'],
@@ -64,7 +65,8 @@ describe('formatHit', () => {
       dataViewMock,
       (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
       220,
-      fieldFormatsMock
+      fieldFormatsMock,
+      undefined
     );
     expect(formatted.map(([fieldName]) => fieldName)).toEqual([
       'message',
@@ -81,7 +83,8 @@ describe('formatHit', () => {
       dataViewMock,
       (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
       2,
-      fieldFormatsMock
+      fieldFormatsMock,
+      undefined
     );
     expect(formatted).toEqual([
       ['extension', 'formatted:png', 'extension'],
@@ -96,7 +99,8 @@ describe('formatHit', () => {
       dataViewMock,
       (fieldName) => ['_index', 'message', 'object.value'].includes(fieldName),
       220,
-      fieldFormatsMock
+      fieldFormatsMock,
+      undefined
     );
     expect(formatted).toEqual([
       ['message', 'formatted:foobar', 'message'],
@@ -125,7 +129,8 @@ describe('formatHit', () => {
       dataViewMock,
       (fieldName) => ['_index', 'object'].includes(fieldName),
       220,
-      fieldFormatsMock
+      fieldFormatsMock,
+      undefined
     );
 
     expect(formatted).toEqual([
@@ -142,7 +147,8 @@ describe('formatHit', () => {
       dataViewMock,
       (fieldName) => ['_index', 'bytes'].includes(fieldName),
       220,
-      fieldFormatsMock
+      fieldFormatsMock,
+      undefined
     );
     expect(formatted).toEqual([
       ['bytesDisplayName', 'formatted:123', 'bytes'],

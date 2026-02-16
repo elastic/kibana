@@ -8,7 +8,11 @@
  */
 
 import React, { useMemo } from 'react';
-import { SourceDocument, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import {
+  SourceDocument,
+  type DataGridCellValueElementProps,
+  type DataTableColumnsMeta,
+} from '@kbn/unified-data-table';
 import type { ShouldShowFieldInTableHandler, DataTableRecord } from '@kbn/discover-utils';
 import {
   getMessageFieldWithFallbacks,
@@ -28,6 +32,7 @@ interface ContentProps extends DataGridCellValueElementProps {
   isCompressed: boolean;
   isSingleLine?: boolean;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
+  columnsMeta: DataTableColumnsMeta | undefined;
 }
 
 const LogMessage = ({
@@ -97,6 +102,7 @@ export const Content = ({
   isSingleLine = false,
   row,
   shouldShowFieldHandler,
+  columnsMeta,
 }: ContentProps) => {
   // Use OTel fallback version that returns the actual field name used
   const { field, value } = getMessageFieldWithFallbacks(row.flattened);
@@ -125,13 +131,20 @@ export const Content = ({
       shouldShowFieldHandler={shouldShowFieldHandler}
       isCompressed={isCompressed}
       row={row}
+      columnsMeta={columnsMeta}
     />
   );
 };
 
 type FormattedSourceDocumentProps = Pick<
   ContentProps,
-  'columnId' | 'dataView' | 'fieldFormats' | 'isCompressed' | 'row' | 'shouldShowFieldHandler'
+  | 'columnId'
+  | 'dataView'
+  | 'fieldFormats'
+  | 'isCompressed'
+  | 'row'
+  | 'shouldShowFieldHandler'
+  | 'columnsMeta'
 >;
 
 const FormattedSourceDocument = ({ row, ...props }: FormattedSourceDocumentProps) => {

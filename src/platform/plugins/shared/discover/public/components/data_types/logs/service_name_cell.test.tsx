@@ -46,6 +46,7 @@ const renderCell = (serviceNameField: string, record: DataTableRecord) => {
     dataView: dataViewMock,
     density: DataGridDensity.COMPACT,
     rowHeight: 1,
+    columnsMeta: undefined,
   };
   const ServiceNameCell = getServiceNameCell(serviceNameField, cellRenderersExtensionParamsMock);
   render(

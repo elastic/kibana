@@ -207,6 +207,7 @@ describe('logsDataSourceProfileProvider', () => {
         dataView: dataViewWithTimefieldMock,
         density: DataGridDensity.COMPACT,
         rowHeight: 0,
+        columnsMeta: undefined,
       };
       const cellRenderers = getCellRenderers?.(getCellRenderersParams);
 

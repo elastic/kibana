@@ -17,7 +17,7 @@ import { SummaryColumn } from './summary_column';
 export type SummaryColumnGetterDeps = CellRenderersExtensionParams;
 
 export const getSummaryColumn = (params: SummaryColumnGetterDeps) => {
-  const { actions, dataView, density, rowHeight } = params;
+  const { actions, dataView, density, rowHeight, columnsMeta } = params;
   const shouldShowFieldHandler = createGetShouldShowFieldHandler(dataView);
 
   return (props: Omit<SummaryColumnProps, 'core' | 'share'>) => (
@@ -27,6 +27,7 @@ export const getSummaryColumn = (params: SummaryColumnGetterDeps) => {
       onFilter={actions.addFilter}
       rowHeight={rowHeight}
       shouldShowFieldHandler={shouldShowFieldHandler}
+      columnsMeta={columnsMeta}
     />
   );
 };

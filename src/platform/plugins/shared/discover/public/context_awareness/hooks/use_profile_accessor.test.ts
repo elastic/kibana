@@ -37,6 +37,7 @@ const getCellRenderersParams = {
   dataView: dataViewWithTimefieldMock,
   density: DataGridDensity.COMPACT,
   rowHeight: 0,
+  columnsMeta: undefined,
 };
 
 describe('useProfileAccessor', () => {

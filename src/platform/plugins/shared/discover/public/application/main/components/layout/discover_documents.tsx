@@ -435,8 +435,9 @@ function DiscoverDocumentsComponent({
       dataView,
       density: cellRendererDensity,
       rowHeight: cellRendererRowHeight,
+      columnsMeta,
     }),
-    [onAddFilter, dataView, cellRendererDensity, cellRendererRowHeight]
+    [onAddFilter, dataView, cellRendererDensity, cellRendererRowHeight, columnsMeta]
   );
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');

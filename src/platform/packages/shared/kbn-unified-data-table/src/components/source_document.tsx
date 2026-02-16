@@ -10,6 +10,7 @@
 import React, { Fragment } from 'react';
 import { css } from '@emotion/react';
 import type {
+  DataTableColumnsMeta,
   DataTableRecord,
   EsHitRecord,
   FormattedHit,
@@ -18,6 +19,7 @@ import type {
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { formatFieldValue, formatHit } from '@kbn/discover-utils';
+import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -43,6 +45,7 @@ export function SourceDocument({
   dataTestSubj = 'discoverCellDescriptionList',
   className,
   isCompressed = true,
+  columnsMeta,
 }: {
   useTopLevelObjectColumns: boolean;
   row: DataTableRecord;
@@ -55,6 +58,7 @@ export function SourceDocument({
   dataTestSubj?: string;
   className?: string;
   isCompressed?: boolean;
+  columnsMeta: DataTableColumnsMeta | undefined;
 }) {
   const styles = useMemoCss(componentStyles);
   const pairs: FormattedHit = useTopLevelObjectColumns
@@ -63,9 +67,10 @@ export function SourceDocument({
         columnId,
         dataView,
         shouldShowFieldHandler,
-        fieldFormats
+        fieldFormats,
+        columnsMeta
       ).slice(0, maxEntries)
-    : formatHit(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
+    : formatHit(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats, columnsMeta);
 
   return (
     <EuiDescriptionList
@@ -104,7 +109,8 @@ function getTopLevelObjectPairs(
   columnId: string,
   dataView: DataView,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
-  fieldFormats: FieldFormatsStart
+  fieldFormats: FieldFormatsStart,
+  columnsMeta: DataTableColumnsMeta | undefined
 ) {
   const innerColumns = getInnerColumns(row.fields as Record<string, unknown[]>, columnId);
   // Put the most important fields first
@@ -112,7 +118,11 @@ function getTopLevelObjectPairs(
   const highlightPairs: FormattedHit = [];
   const sourcePairs: FormattedHit = [];
   Object.entries(innerColumns).forEach(([key, values]) => {
-    const subField = dataView.getFieldByName(key);
+    const subField = getDataViewFieldOrCreateFromColumnMeta({
+      dataView,
+      fieldName: key,
+      columnMeta: columnsMeta?.[key],
+    });
     const displayKey = dataView.fields.getByName
       ? dataView.fields.getByName(key)?.displayName
       : undefined;

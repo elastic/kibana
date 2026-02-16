@@ -180,6 +180,7 @@ export function ContextAppContent({
         consumer: 'discover',
         configRowHeight,
       }),
+      columnsMeta: undefined, // ES|QL is not supported in Surrounding Documents, so columnsMeta is not needed
     });
   }, [addFilter, configRowHeight, dataView, getCellRenderersAccessor, services.storage]);
 
