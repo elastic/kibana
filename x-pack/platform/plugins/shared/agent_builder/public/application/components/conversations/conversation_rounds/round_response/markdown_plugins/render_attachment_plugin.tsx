@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import type {
   VersionedAttachment,
   AttachmentVersionRef,
@@ -15,6 +16,7 @@ import {
 } from '@kbn/agent-builder-common/tools/custom_rendering';
 import type { AttachmentsService } from '../../../../../../services';
 import { createTagParser } from './utils';
+import { AttachmentWithActions } from '../AttachmentWithActions';
 
 /**
  * Parser for <render_attachment> tags in markdown.
@@ -58,11 +60,46 @@ export const createRenderAttachmentRenderer = ({
   isSidebar,
 }: RenderAttachmentRendererProps) => {
   return (props: RenderAttachmentElementAttributes) => {
-    // TODO: Implement the renderer
-    // 1. Find the attachment by ID in conversationAttachments
-    // 2. Resolve the version (explicit or from attachmentRefs)
-    // 3. Get the renderContent function from attachmentsService
-    // 4. Render the attachment content with action buttons
-    return null;
+    const { attachmentId, version: explicitVersion } = props;
+
+    if (!attachmentId || !conversationId) {
+      return null;
+    }
+
+    const attachment = conversationAttachments?.find((att) => att.id === attachmentId);
+
+    if (!attachment) {
+      return null;
+    }
+
+    // Resolve version: explicit > from refs > current_version
+    let versionToUse: number;
+    if (explicitVersion !== undefined) {
+      versionToUse =
+        typeof explicitVersion === 'string' ? parseInt(explicitVersion, 10) : explicitVersion;
+    } else {
+      const refVersion = attachmentRefs?.find((r) => r.attachment_id === attachmentId)?.version;
+      versionToUse = refVersion ?? attachment.current_version;
+    }
+
+    const versionData = attachment.versions.find((v) => v.version === versionToUse);
+
+    if (!versionData) {
+      return null;
+    }
+
+    return (
+      <AttachmentWithActions
+        attachment={{
+          id: attachment.id,
+          type: attachment.type,
+          data: versionData.data,
+          hidden: attachment.hidden,
+        }}
+        conversationId={conversationId}
+        attachmentsService={attachmentsService}
+        isSidebar={isSidebar}
+      />
+    );
   };
 };
