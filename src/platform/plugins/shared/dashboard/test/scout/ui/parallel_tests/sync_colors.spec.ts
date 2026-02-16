@@ -8,7 +8,8 @@
  */
 
 import type { DebugState } from '@elastic/charts';
-import { spaceTest, expect, tags } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import type { PageObjects } from '@kbn/scout';
 import type { ScoutPage } from '@kbn/scout';
 import {
