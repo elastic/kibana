@@ -65,22 +65,22 @@ const getPromqlFunctionSuggestion = (fn: PromQLFunctionDefinition): ISuggestionI
 };
 
 /* Returns all PROMQL function suggestions suitable for autocomplete. */
-export const getPromqlFunctionSuggestions = (): ISuggestionItem[] => {
+const buildPromqlFunctionSuggestions = (): ISuggestionItem[] => {
   return promqlFunctionDefinitions
     .filter((fn) => !fn.ignoreAsSuggestion)
     .map((fn) => withAutoSuggest(getPromqlFunctionSuggestion(fn)));
 };
 
-export const getPromqlFunctionSuggestionsForReturnTypes = (
-  returnTypes: PromQLFunctionParamType[]
+export const getPromqlFunctionSuggestions = (
+  returnTypes: PromQLFunctionParamType[] = []
 ): ISuggestionItem[] => {
   if (!returnTypes.length) {
-    return getPromqlFunctionSuggestions();
+    return buildPromqlFunctionSuggestions();
   }
 
   const allowed = new Set(returnTypes);
 
-  return getPromqlFunctionSuggestions().filter((suggestion) => {
+  return buildPromqlFunctionSuggestions().filter((suggestion) => {
     const definition = getPromqlFunctionDefinition(suggestion.label);
     if (!definition?.signatures.length) {
       return false;
@@ -100,6 +100,22 @@ export const getPromqlFunctionDefinition = (
 
   const normalized = name.toLowerCase();
   return promqlFunctionDefinitions.find((fn) => fn.name.toLowerCase() === normalized);
+};
+
+/* Returns the PromQL operator definition matching the provided operator symbol. */
+export const getPromqlOperatorDefinition = (
+  operator: string | undefined
+): PromQLFunctionDefinition | undefined => {
+  if (!operator) {
+    return undefined;
+  }
+
+  const normalized = operator.toLowerCase();
+  return promqlOperatorDefinitions.find(
+    ({ operator: symbol, name, signatures }) =>
+      (symbol ?? name)?.toLowerCase() === normalized &&
+      signatures.some(({ params }) => params.length >= 2)
+  );
 };
 
 /* Extracts param types for a specific PromQL function parameter index. */
@@ -149,8 +165,24 @@ const buildPromqlSymbolSuggestion = (definition: PromQLFunctionDefinition): ISug
 /* Returns all PromQL operator suggestions suitable for autocomplete. */
 export const getPromqlOperatorSuggestions = (): ISuggestionItem[] => {
   return promqlOperatorDefinitions
-    .filter((op) => !op.ignoreAsSuggestion)
+    .filter((op) => !op.ignoreAsSuggestion && op.signatures.some((sig) => sig.params.length >= 2))
     .map((op) => buildPromqlSymbolSuggestion(op));
+};
+
+/* Extracts rhs param types for a PromQL binary operator from operator signatures. */
+export const getBinaryOperatorParamTypes = (
+  operator: string,
+  paramIndex: number
+): PromQLFunctionParamType[] => {
+  const definition = getPromqlOperatorDefinition(operator);
+
+  if (!definition) {
+    return [];
+  }
+
+  return definition.signatures
+    .map((signature) => signature.params[paramIndex]?.type)
+    .filter((paramType): paramType is PromQLFunctionParamType => Boolean(paramType));
 };
 
 /* Returns all PromQL label matcher suggestions suitable for autocomplete. */
