@@ -123,7 +123,11 @@ describe('Options list popover', () => {
 
   test('renders available options for assignee ids field', async () => {
     const contextMock = getOptionsListContextMock();
-    contextMock.componentApi.fieldName$.next('kibana.alert.workflow_assignee_ids');
+    (
+      contextMock.componentApi.fieldName$ as unknown as {
+        next: (value: string) => void;
+      }
+    ).next('kibana.alert.workflow_assignee_ids');
     contextMock.componentApi.setAvailableOptions([{ value: 'uid-1', docCount: 1 }]);
 
     const suggestionsComponent = mountComponent(contextMock);
@@ -135,7 +139,11 @@ describe('Options list popover', () => {
 
   test('assignee field does not render a local search input in this component', async () => {
     const contextMock = getOptionsListContextMock();
-    contextMock.componentApi.fieldName$.next('kibana.alert.workflow_assignee_ids');
+    (
+      contextMock.componentApi.fieldName$ as unknown as {
+        next: (value: string) => void;
+      }
+    ).next('kibana.alert.workflow_assignee_ids');
     contextMock.componentApi.setAvailableOptions([
       { value: 'uid-1', docCount: 1 },
       { value: 'uid-2', docCount: 1 },
@@ -154,7 +162,11 @@ describe('Options list popover', () => {
 
   test('assignee search does not call user profile suggest in this component', async () => {
     const contextMock = getOptionsListContextMock();
-    contextMock.componentApi.fieldName$.next('kibana.alert.workflow_assignee_ids');
+    (
+      contextMock.componentApi.fieldName$ as unknown as {
+        next: (value: string) => void;
+      }
+    ).next('kibana.alert.workflow_assignee_ids');
     contextMock.componentApi.setSearchString('user');
 
     const suggestionsComponent = mountComponent(contextMock);
@@ -168,7 +180,11 @@ describe('Options list popover', () => {
 
   test('assignee search falls back to default suggestions when user search fails', async () => {
     const contextMock = getOptionsListContextMock();
-    contextMock.componentApi.fieldName$.next('kibana.alert.workflow_assignee_ids');
+    (
+      contextMock.componentApi.fieldName$ as unknown as {
+        next: (value: string) => void;
+      }
+    ).next('kibana.alert.workflow_assignee_ids');
     contextMock.componentApi.setAvailableOptions([{ value: 'uid-1', docCount: 1 }]);
     contextMock.componentApi.setSearchString('user');
 
@@ -187,7 +203,11 @@ describe('Options list popover', () => {
 
   test('hideExists removes exists option and still allows selecting available values', async () => {
     const contextMock = getOptionsListContextMock();
-    contextMock.componentApi.fieldName$.next('kibana.alert.workflow_assignee_ids');
+    (
+      contextMock.componentApi.fieldName$ as unknown as {
+        next: (value: string) => void;
+      }
+    ).next('kibana.alert.workflow_assignee_ids');
     contextMock.componentApi.setAvailableOptions([{ value: 'uid-1', docCount: 1 }]);
     // emulate FilterGroup hiding the built-in exists option
     const suggestionsComponent = mountComponent({
@@ -206,7 +226,11 @@ describe('Options list popover', () => {
 
   test('does not fetch user profiles for non-assignee fields', async () => {
     const contextMock = getOptionsListContextMock();
-    contextMock.componentApi.fieldName$.next('host.name');
+    (
+      contextMock.componentApi.fieldName$ as unknown as {
+        next: (value: string) => void;
+      }
+    ).next('host.name');
     contextMock.componentApi.setAvailableOptions([{ value: 'uid-1', docCount: 1 }]);
 
     const suggestionsComponent = mountComponent(contextMock);

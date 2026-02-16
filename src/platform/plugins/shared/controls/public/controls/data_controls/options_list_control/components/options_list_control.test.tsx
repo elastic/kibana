@@ -18,13 +18,12 @@ import { OptionsListControlContext } from '../options_list_context_provider';
 import type { OptionsListComponentApi } from '../types';
 import { OptionsListControl } from './options_list_control';
 
-let httpPostMock: jest.Mock;
+const mockHttpPost = jest.fn();
 jest.mock('../../../../services/kibana_services', () => {
-  httpPostMock = jest.fn();
   return {
     coreServices: {
       http: {
-        post: (...args: unknown[]) => httpPostMock(...args),
+        post: (...args: unknown[]) => mockHttpPost(...args),
       },
     },
   };
@@ -132,10 +131,14 @@ describe('Options list control', () => {
   test('assignee field renders avatar stack instead of raw ids', async () => {
     const contextMock = getOptionsListContextMock();
     contextMock.componentApi.uuid = 'testAssignees';
-    contextMock.componentApi.fieldName$.next('kibana.alert.workflow_assignee_ids');
+    (
+      contextMock.componentApi.fieldName$ as unknown as {
+        next: (value: string) => void;
+      }
+    ).next('kibana.alert.workflow_assignee_ids');
     contextMock.componentApi.setSelectedOptions(['uid-1', 'uid-2']);
 
-    httpPostMock.mockResolvedValueOnce([
+    mockHttpPost.mockResolvedValueOnce([
       {
         uid: 'uid-1',
         enabled: true,
@@ -157,10 +160,14 @@ describe('Options list control', () => {
     expect(control.queryByText('uid-2')).not.toBeInTheDocument();
   });
 
-  test('assignee field shows a dedicated avatar for \"No assignees\" selection', async () => {
+  test('assignee field shows a dedicated avatar for "No assignees" selection', async () => {
     const contextMock = getOptionsListContextMock();
     contextMock.componentApi.uuid = 'testNoAssignees';
-    contextMock.componentApi.fieldName$.next('kibana.alert.workflow_assignee_ids');
+    (
+      contextMock.componentApi.fieldName$ as unknown as {
+        next: (value: string) => void;
+      }
+    ).next('kibana.alert.workflow_assignee_ids');
     contextMock.componentApi.setSelectedOptions(['__options_list_no_assignees__']);
 
     const control = mountComponent(contextMock);
