@@ -176,12 +176,8 @@ module.exports = (_, argv) => {
       ignored: /[\\/]node_modules[\\/](?!@elastic[\\/]eui)/,
     },
 
-    // snapshot: {
-    //  managedPaths: [/^(.+?[\\/]node_modules[\\/])(?!@elastic[\\/]eui)/],
-    // },
-
-    // so far only disabling cache worked but we should re-enable it for better performance
-    // and make `node_modules/@elastic/eui` work at the same time
+    // disabling cache doesn't impact performance for regular Kibana users
+    // but it's needed for when running the watcher to watch for changes in `node_modules/@elastic/eui*`
     cache: false,
 
     plugins: [
