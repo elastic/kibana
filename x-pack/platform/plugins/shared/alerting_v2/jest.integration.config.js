@@ -8,5 +8,7 @@
 module.exports = {
   preset: '@kbn/test/jest_integration',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/plugins/shared/alerting_v2'],
+  roots: [
+    '<rootDir>/x-pack/platform/plugins/shared/alerting_v2/server/lib/dispatcher/integration_tests',
+  ],
 };
