@@ -11,10 +11,10 @@ import type { Template } from '../../../../common/types/domain/template/v1';
 import { TestProviders } from '../../../common/mock';
 import { useTemplatesActions } from './use_templates_actions';
 import { useCasesEditTemplateNavigation } from '../../../common/navigation';
-import { useDeleteTemplate } from './use_delete_template';
+import { useBulkDeleteTemplates } from './use_bulk_delete_templates';
 import { useUpdateTemplate } from './use_update_template';
 import { useCreateTemplate } from './use_create_template';
-import { useExportTemplate } from './use_export_template';
+import { useBulkExportTemplates } from './use_bulk_export_templates';
 import { useCasesToast } from '../../../common/use_cases_toast';
 
 jest.mock('../../../common/navigation/hooks', () => ({
@@ -22,17 +22,17 @@ jest.mock('../../../common/navigation/hooks', () => ({
   useCasesEditTemplateNavigation: jest.fn(),
 }));
 
-jest.mock('./use_delete_template');
+jest.mock('./use_bulk_delete_templates');
 jest.mock('./use_update_template');
 jest.mock('./use_create_template');
-jest.mock('./use_export_template');
+jest.mock('./use_bulk_export_templates');
 jest.mock('../../../common/use_cases_toast');
 
 const useCasesEditTemplateNavigationMock = useCasesEditTemplateNavigation as jest.Mock;
-const useDeleteTemplateMock = useDeleteTemplate as jest.Mock;
+const useBulkDeleteTemplatesMock = useBulkDeleteTemplates as jest.Mock;
 const useUpdateTemplateMock = useUpdateTemplate as jest.Mock;
 const useCreateTemplateMock = useCreateTemplate as jest.Mock;
-const useExportTemplateMock = useExportTemplate as jest.Mock;
+const useBulkExportTemplatesMock = useBulkExportTemplates as jest.Mock;
 const useCasesToastMock = useCasesToast as jest.Mock;
 
 describe('useTemplatesActions', () => {
@@ -58,10 +58,10 @@ describe('useTemplatesActions', () => {
 
   let consoleSpy: jest.SpyInstance;
   const navigateToCasesEditTemplateMock = jest.fn();
-  const deleteTemplateMock = jest.fn();
+  const bulkDeleteTemplatesMock = jest.fn();
   const setDefaultTemplateMock = jest.fn();
   const cloneTemplateMock = jest.fn();
-  const exportTemplateMock = jest.fn();
+  const bulkExportTemplatesMock = jest.fn();
   const showSuccessToastMock = jest.fn();
 
   beforeEach(() => {
@@ -70,8 +70,8 @@ describe('useTemplatesActions', () => {
       navigateToCasesEditTemplate: navigateToCasesEditTemplateMock,
       getCasesEditTemplateUrl: jest.fn(),
     });
-    useDeleteTemplateMock.mockReturnValue({
-      mutate: deleteTemplateMock,
+    useBulkDeleteTemplatesMock.mockReturnValue({
+      mutate: bulkDeleteTemplatesMock,
       isLoading: false,
     });
     useUpdateTemplateMock.mockReturnValue({
@@ -82,8 +82,8 @@ describe('useTemplatesActions', () => {
       mutate: cloneTemplateMock,
       isLoading: false,
     });
-    useExportTemplateMock.mockReturnValue({
-      mutate: exportTemplateMock,
+    useBulkExportTemplatesMock.mockReturnValue({
+      mutate: bulkExportTemplatesMock,
       isLoading: false,
     });
     useCasesToastMock.mockReturnValue({
@@ -220,7 +220,7 @@ describe('useTemplatesActions', () => {
     expect(showSuccessToastMock).toHaveBeenCalledWith('Template Template 1 was set as default');
   });
 
-  it('handleExport calls exportTemplate mutation with template id', () => {
+  it('handleExport calls bulk export mutation with template id', () => {
     const { result } = renderHook(() => useTemplatesActions(), { wrapper });
 
     expect(typeof result.current.handleExport).toBe('function');
@@ -229,7 +229,9 @@ describe('useTemplatesActions', () => {
       result.current.handleExport(mockTemplate);
     });
 
-    expect(exportTemplateMock).toHaveBeenCalledWith({ templateId: mockTemplate.templateId });
+    expect(bulkExportTemplatesMock).toHaveBeenCalledWith({
+      templateIds: [mockTemplate.templateId],
+    });
   });
 
   it('handleDelete sets templateToDelete', () => {
@@ -244,7 +246,7 @@ describe('useTemplatesActions', () => {
     expect(result.current.templateToDelete).toEqual(mockTemplate);
   });
 
-  it('confirmDelete calls deleteTemplate mutation and clears templateToDelete', () => {
+  it('confirmDelete calls bulk delete mutation and clears templateToDelete', () => {
     const { result } = renderHook(() => useTemplatesActions(), { wrapper });
 
     act(() => {
@@ -257,18 +259,20 @@ describe('useTemplatesActions', () => {
       result.current.confirmDelete();
     });
 
-    expect(deleteTemplateMock).toHaveBeenCalledWith({ templateId: mockTemplate.templateId });
+    expect(bulkDeleteTemplatesMock).toHaveBeenCalledWith({
+      templateIds: [mockTemplate.templateId],
+    });
     expect(result.current.templateToDelete).toBeNull();
   });
 
-  it('passes onDeleteSuccess to useDeleteTemplate hook', () => {
+  it('passes onDeleteSuccess to useBulkDeleteTemplates hook', () => {
     const onDeleteSuccessMock = jest.fn();
     renderHook(() => useTemplatesActions({ onDeleteSuccess: onDeleteSuccessMock }), {
       wrapper,
     });
 
-    // Verify useDeleteTemplate was called with the onSuccess callback
-    expect(useDeleteTemplateMock).toHaveBeenCalledWith({
+    // Verify useBulkDeleteTemplates was called with the onSuccess callback
+    expect(useBulkDeleteTemplatesMock).toHaveBeenCalledWith({
       onSuccess: onDeleteSuccessMock,
     });
   });
@@ -286,7 +290,7 @@ describe('useTemplatesActions', () => {
       result.current.cancelDelete();
     });
 
-    expect(deleteTemplateMock).not.toHaveBeenCalled();
+    expect(bulkDeleteTemplatesMock).not.toHaveBeenCalled();
     expect(result.current.templateToDelete).toBeNull();
   });
 
