@@ -7,12 +7,11 @@
 
 import type { RestoreConfig, LoadResult } from '../types';
 import { getErrorMessage } from '../utils';
-import { resolveRepository } from '../repository';
 import { getSnapshotMetadata, deleteRepository, generateRepoName } from './repository';
 import { filterIndicesToRestore, restoreIndices } from './restore';
 
 export async function restoreSnapshot(config: RestoreConfig): Promise<LoadResult> {
-  const { esClient, log, snapshotName, indices } = config;
+  const { esClient, log, repository, snapshotName, indices } = config;
 
   const result: LoadResult = {
     success: false,
@@ -22,7 +21,6 @@ export async function restoreSnapshot(config: RestoreConfig): Promise<LoadResult
   };
 
   const repoName = generateRepoName();
-  const repository = resolveRepository(config);
 
   try {
     repository.validate();

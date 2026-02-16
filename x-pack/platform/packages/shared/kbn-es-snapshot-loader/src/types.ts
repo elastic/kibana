@@ -24,11 +24,7 @@ export interface SnapshotInfo {
 interface BaseConfig {
   esClient: Client;
   log: ToolingLog;
-  repository?: RepositoryStrategy;
-  /**
-   * @deprecated Use `repository` instead.
-   */
-  snapshotUrl?: string;
+  repository: RepositoryStrategy;
   // If omitted, the loader will select the latest SUCCESS snapshot in the repository.
   snapshotName?: string;
 }

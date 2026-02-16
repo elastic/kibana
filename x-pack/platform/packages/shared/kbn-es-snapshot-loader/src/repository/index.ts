@@ -5,33 +5,6 @@
  * 2.0.
  */
 
-import type { RepositoryStrategy } from './types';
-import { createUrlRepository } from './url_repository';
-
-interface ResolveRepositoryParams {
-  repository?: RepositoryStrategy;
-  snapshotUrl?: string;
-}
-
-export function resolveRepository({
-  repository,
-  snapshotUrl,
-}: ResolveRepositoryParams): RepositoryStrategy {
-  if (repository && snapshotUrl) {
-    throw new Error('Cannot provide both repository and snapshotUrl');
-  }
-
-  if (repository) {
-    return repository;
-  }
-
-  if (snapshotUrl) {
-    return createUrlRepository(snapshotUrl);
-  }
-
-  throw new Error('Either repository or snapshotUrl must be provided');
-}
-
 export * from './types';
 export * from './gcs_repository';
 export * from './url_repository';

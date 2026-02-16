@@ -28,8 +28,8 @@ export function createGcsRepository(config: GcsRepositoryConfig): RepositoryStra
           type: 'gcs',
           settings: {
             bucket: config.bucket,
-            ...(config.basePath ? { base_path: config.basePath } : {}),
-            ...(config.client ? { client: config.client } : {}),
+            ...(config.basePath && { base_path: config.basePath }),
+            ...(config.client && { client: config.client }),
           },
         },
       });

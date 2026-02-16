@@ -9,7 +9,6 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ReplayConfig, LoadResult } from '../types';
 import { extractDataStreamName, getMissingDataStreams, getErrorMessage } from '../utils';
-import { resolveRepository } from '../repository';
 import { getSnapshotMetadata, deleteRepository, generateRepoName } from '../restore/repository';
 import { filterIndicesToRestore, restoreIndices } from '../restore/restore';
 import { createTimestampPipeline, deletePipeline } from './pipeline';
@@ -53,7 +52,7 @@ export async function getMaxTimestampFromData({
 }
 
 export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> {
-  const { esClient, log, snapshotName, patterns, concurrency } = config;
+  const { esClient, log, repository, snapshotName, patterns, concurrency } = config;
 
   const result: LoadResult = {
     success: false,
@@ -66,7 +65,6 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
 
   const repoName = generateRepoName();
   const pipelineName = `snapshot-loader-timestamp-pipeline-${repoName}`;
-  const repository = resolveRepository(config);
 
   try {
     repository.validate();
