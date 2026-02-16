@@ -153,6 +153,9 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
           ...('prefix' in secondaryMetric && secondaryMetric.prefix
             ? { secondaryLabel: secondaryMetric.prefix }
             : {}),
+          ...('label_position' in secondaryMetric && secondaryMetric.label_position
+            ? { secondaryLabelPosition: secondaryMetric.label_position }
+            : {}),
           secondaryAlign:
             'alignments' in primaryMetric ? primaryMetric.alignments?.value : undefined,
           ...('compare' in secondaryMetric && secondaryMetric.compare
@@ -412,6 +415,10 @@ function enrichConfigurationWithVisualizationProperties(
 
     if (visualization.secondaryLabel || visualization.secondaryPrefix) {
       secondaryMetric.prefix = visualization.secondaryLabel ?? visualization.secondaryPrefix;
+    }
+
+    if (visualization.secondaryLabelPosition) {
+      secondaryMetric.label_position = visualization.secondaryLabelPosition;
     }
 
     if (visualization.secondaryTrend?.type === 'static' && visualization.secondaryTrend?.color) {

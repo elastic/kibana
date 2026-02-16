@@ -30,7 +30,11 @@ import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
-import { horizontalAlignmentSchema, leftRightAlignmentSchema } from '../alignments';
+import {
+  horizontalAlignmentSchema,
+  leftRightAlignmentSchema,
+  beforeAfterAlignmentSchema,
+} from '../alignments';
 
 const compareToSchemaShared = schema.object(
   {
@@ -180,6 +184,15 @@ const metricStateSecondaryMetricOptionsSchema = {
    * Prefix
    */
   prefix: schema.maybe(schema.string({ meta: { description: 'Prefix' } })),
+  /**
+   * Label position relative to the secondary metric value. Possible values:
+   * - 'before': Label appears before the value
+   * - 'after': Label appears after the value
+   */
+  label_position: beforeAfterAlignmentSchema({
+    meta: { description: 'Label position relative to the secondary metric value' },
+    defaultValue: LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition,
+  }),
   /**
    * Compare to
    */
