@@ -14,13 +14,10 @@ import type { EuiBreadcrumb, EuiBasicTableColumn, EuiSearchBarProps } from '@ela
 import { EuiSpacer, EuiText, EuiInMemoryTable } from '@elastic/eui';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { BoldCode, StyledTime } from './styles';
 import { GeneratedText } from '../generated_text';
-import {
-  CellActionsMode,
-  SecurityCellActions,
-  SecurityCellActionsTrigger,
-} from '../../../common/components/cell_actions';
+import { CellActionsMode, SecurityCellActions } from '../../../common/components/cell_actions';
 import { getSourcererScopeId } from '../../../helpers';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
@@ -220,7 +217,7 @@ function EventDetailFields({ event, id }: { event: SafeResolverEvent; id: string
               value: data.description,
             }}
             visibleCellActions={5}
-            triggerId={SecurityCellActionsTrigger.DEFAULT}
+            triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
             mode={CellActionsMode.HOVER_DOWN}
             sourcererScopeId={getSourcererScopeId(id)}
             metadata={{ scopeId: id }}
