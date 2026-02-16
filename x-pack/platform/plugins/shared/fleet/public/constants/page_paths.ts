@@ -101,7 +101,6 @@ export const FLEET_ROUTING_PATHS = {
 
 export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';
 export const INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM = 'onlyAgentless';
-export const INTEGRATIONS_SHOW_BETA_QUERYPARAM = 'showBeta';
 export const INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM = 'showDeprecated';
 export const INTEGRATIONS_ROUTING_PATHS = {
   integrations: '/:tabId',
@@ -136,14 +135,12 @@ export const pagePathGetters: {
     category,
     subCategory,
     onlyAgentless,
-    showBeta,
     showDeprecated,
   }: {
     searchTerm?: string;
     category?: string;
     subCategory?: string;
     onlyAgentless?: boolean;
-    showBeta?: boolean;
     showDeprecated?: boolean;
   }) => {
     const categoryPath =
@@ -159,11 +156,6 @@ export const pagePathGetters: {
     if (onlyAgentless) {
       queryParams.set(INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM, 'true');
     }
-    // Only add showBeta to URL when explicitly true, otherwise omit to fall back to default
-    if (showBeta === true) {
-      queryParams.set(INTEGRATIONS_SHOW_BETA_QUERYPARAM, 'true');
-    }
-    // Only add showDeprecated to URL when explicitly true, otherwise omit to fall back to default
     if (showDeprecated === true) {
       queryParams.set(INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM, 'true');
     }

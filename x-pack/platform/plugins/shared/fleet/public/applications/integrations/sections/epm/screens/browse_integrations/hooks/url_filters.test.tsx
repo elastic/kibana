@@ -10,7 +10,7 @@ import { useHistory } from 'react-router-dom';
 
 import { useUrlParams } from '../../../../../../../hooks';
 
-import { STATUS_BETA, STATUS_DEPRECATED } from '../types';
+import { STATUS_DEPRECATED } from '../types';
 
 import { useAddUrlFilters, useUrlFilters } from './url_filters';
 
@@ -38,17 +38,6 @@ describe('useUrlFilters', () => {
     expect(result.current.status).toBeUndefined();
   });
 
-  it('returns STATUS_BETA when status=beta in URL', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
-      urlParams: { status: 'beta' },
-      toUrlParams: jest.fn(),
-    });
-
-    const { result } = renderHook(() => useUrlFilters());
-
-    expect(result.current.status).toEqual([STATUS_BETA]);
-  });
-
   it('returns STATUS_DEPRECATED when status=deprecated in URL', () => {
     (useUrlParams as jest.Mock).mockReturnValue({
       urlParams: { status: 'deprecated' },
@@ -58,17 +47,6 @@ describe('useUrlFilters', () => {
     const { result } = renderHook(() => useUrlFilters());
 
     expect(result.current.status).toEqual([STATUS_DEPRECATED]);
-  });
-
-  it('returns STATUS_BETA and STATUS_DEPRECATED when both status values in URL', () => {
-    (useUrlParams as jest.Mock).mockReturnValue({
-      urlParams: { status: ['beta', 'deprecated'] },
-      toUrlParams: jest.fn(),
-    });
-
-    const { result } = renderHook(() => useUrlFilters());
-
-    expect(result.current.status).toEqual([STATUS_BETA, STATUS_DEPRECATED]);
   });
 
   it('ignores invalid status values', () => {
@@ -84,13 +62,13 @@ describe('useUrlFilters', () => {
 
   it('filters out invalid values from array', () => {
     (useUrlParams as jest.Mock).mockReturnValue({
-      urlParams: { status: [STATUS_BETA, 'invalid', STATUS_DEPRECATED] },
+      urlParams: { status: ['invalid', STATUS_DEPRECATED] },
       toUrlParams: jest.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
 
-    expect(result.current.status).toEqual([STATUS_BETA, STATUS_DEPRECATED]);
+    expect(result.current.status).toEqual([STATUS_DEPRECATED]);
   });
 
   it('parses search query from URL', () => {
@@ -143,33 +121,21 @@ describe('useAddUrlFilters', () => {
     });
   });
 
-  it('adds status=beta to URL when set', () => {
+  it('adds status=deprecated to URL when set', () => {
     const { result } = renderHook(() => useAddUrlFilters());
 
     act(() => {
-      result.current({ status: ['beta'] });
+      result.current({ status: ['deprecated'] });
     });
 
     expect(mockPush).toHaveBeenCalledWith({
-      search: 'status=beta',
-    });
-  });
-
-  it('adds both status values to URL when set', () => {
-    const { result } = renderHook(() => useAddUrlFilters());
-
-    act(() => {
-      result.current({ status: ['beta', 'deprecated'] });
-    });
-
-    expect(mockPush).toHaveBeenCalledWith({
-      search: 'status=beta&status=deprecated',
+      search: 'status=deprecated',
     });
   });
 
   it('removes status from URL when set to undefined', () => {
     (useUrlParams as jest.Mock).mockReturnValue({
-      urlParams: { status: 'beta' },
+      urlParams: { status: 'deprecated' },
       toUrlParams: mockToUrlParams,
     });
 
@@ -186,7 +152,7 @@ describe('useAddUrlFilters', () => {
 
   it('removes status from URL when set to empty array', () => {
     (useUrlParams as jest.Mock).mockReturnValue({
-      urlParams: { status: 'beta' },
+      urlParams: { status: 'deprecated' },
       toUrlParams: mockToUrlParams,
     });
 
@@ -210,14 +176,14 @@ describe('useAddUrlFilters', () => {
     const { result } = renderHook(() => useAddUrlFilters());
 
     act(() => {
-      result.current({ status: ['beta'] });
+      result.current({ status: ['deprecated'] });
     });
 
     expect(mockPush).toHaveBeenCalledWith({
       search: expect.stringContaining('q=apache'),
     });
     expect(mockPush).toHaveBeenCalledWith({
-      search: expect.stringContaining('status=beta'),
+      search: expect.stringContaining('status=deprecated'),
     });
   });
 
@@ -225,7 +191,7 @@ describe('useAddUrlFilters', () => {
     const { result } = renderHook(() => useAddUrlFilters());
 
     act(() => {
-      result.current({ status: ['beta'] }, { replace: true });
+      result.current({ status: ['deprecated'] }, { replace: true });
     });
 
     expect(mockReplace).toHaveBeenCalled();

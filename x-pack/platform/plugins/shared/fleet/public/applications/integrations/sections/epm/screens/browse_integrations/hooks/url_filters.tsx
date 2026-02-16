@@ -17,7 +17,7 @@ import type {
   IntegrationStatusFilterType,
 } from '../types';
 
-const VALID_STATUSES: IntegrationStatusFilterType[] = ['beta', 'deprecated'];
+const VALID_STATUSES: IntegrationStatusFilterType[] = ['deprecated'];
 
 function isValidStatus(value: string): value is IntegrationStatusFilterType {
   return (VALID_STATUSES as string[]).includes(value);

@@ -15,6 +15,7 @@ import {
   INTEGRATIONS_ROUTING_PATHS,
   INTEGRATIONS_SEARCH_QUERYPARAM,
   INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM,
+  INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM,
 } from '../../../../constants';
 import { DefaultLayout } from '../../../../layouts';
 import { ExperimentalFeaturesService, isPackageUpdatable } from '../../../../services';
@@ -46,17 +47,14 @@ export const getParams = (params: CategoryParams, search: string) => {
   const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
   const onlyAgentlessParam = queryParams.get(INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM) === 'true';
 
-  // Return undefined if param is not present, so we can fall back to the global setting
-  const showBetaParam = queryParams.get('showBeta') === 'true' ? true : undefined;
-
-  const showDeprecatedParam = queryParams.get('showDeprecated') === 'true' ? true : undefined;
+  const showDeprecatedParam =
+    queryParams.get(INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM) === 'true' ? true : undefined;
 
   return {
     selectedCategory,
     searchParam,
     selectedSubcategory: subcategory,
     onlyAgentless: onlyAgentlessParam,
-    showBeta: showBetaParam,
     showDeprecated: showDeprecatedParam,
   };
 };

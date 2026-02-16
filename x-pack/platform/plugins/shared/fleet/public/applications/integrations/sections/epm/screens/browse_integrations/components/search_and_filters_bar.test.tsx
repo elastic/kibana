@@ -12,29 +12,18 @@ import { EuiThemeProvider } from '@elastic/eui';
 
 const mockUseUrlFilters = jest.fn();
 const mockUseAddUrlFilters = jest.fn();
-const mockUseAuthz = jest.fn();
-const mockUseStartServices = jest.fn();
-const mockUsePutSettingsMutation = jest.fn();
 
 jest.mock('../hooks/url_filters', () => ({
   useUrlFilters: () => mockUseUrlFilters(),
   useAddUrlFilters: () => mockUseAddUrlFilters(),
 }));
 
-jest.mock('../../../../../hooks', () => ({
-  useAuthz: () => mockUseAuthz(),
-  useStartServices: () => mockUseStartServices(),
-  usePutSettingsMutation: () => mockUsePutSettingsMutation(),
-}));
+jest.mock('../../../../../hooks', () => ({}));
 
 import { SearchAndFiltersBar } from './search_and_filters_bar';
 
 describe('SearchAndFiltersBar', () => {
   const mockAddUrlFilters = jest.fn();
-  const mockMutateAsync = jest.fn();
-  const mockToasts = {
-    addError: jest.fn(),
-  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -44,15 +33,6 @@ describe('SearchAndFiltersBar', () => {
       status: undefined,
     });
     mockUseAddUrlFilters.mockReturnValue(mockAddUrlFilters);
-    mockUseAuthz.mockReturnValue({
-      fleet: { allSettings: true },
-    });
-    mockUseStartServices.mockReturnValue({
-      notifications: { toasts: mockToasts },
-    });
-    mockUsePutSettingsMutation.mockReturnValue({
-      mutateAsync: mockMutateAsync,
-    });
   });
 
   function renderSearchAndFiltersBar() {
@@ -69,23 +49,6 @@ describe('SearchAndFiltersBar', () => {
     it('renders the status filter button', () => {
       const { getByTestId } = renderSearchAndFiltersBar();
       expect(getByTestId('browseIntegrations.searchBar.statusBtn')).toBeInTheDocument();
-    });
-
-    it('shows active filter indicator when beta is selected', () => {
-      mockUseUrlFilters.mockReturnValue({
-        q: undefined,
-        sort: undefined,
-        status: ['beta'],
-      });
-
-      const { getByTestId, container } = renderSearchAndFiltersBar();
-      const button = getByTestId('browseIntegrations.searchBar.statusBtn');
-
-      expect(button).toHaveClass('euiFilterButton-hasActiveFilters');
-
-      const badge = container.querySelector('.euiNotificationBadge');
-      expect(badge).toBeInTheDocument();
-      expect(badge).toHaveTextContent('1');
     });
 
     it('shows active filter indicator when deprecated is selected', () => {
@@ -105,40 +68,6 @@ describe('SearchAndFiltersBar', () => {
       expect(badge).toHaveTextContent('1');
     });
 
-    it('shows correct count when both filters are active', () => {
-      mockUseUrlFilters.mockReturnValue({
-        q: undefined,
-        sort: undefined,
-        status: ['beta', 'deprecated'],
-      });
-
-      const { getByTestId, container } = renderSearchAndFiltersBar();
-      const button = getByTestId('browseIntegrations.searchBar.statusBtn');
-
-      expect(button).toHaveClass('euiFilterButton-hasActiveFilters');
-
-      const badge = container.querySelector('.euiNotificationBadge');
-      expect(badge).toBeInTheDocument();
-      expect(badge).toHaveTextContent('2');
-    });
-
-    it('calls addUrlFilters when beta option is toggled', async () => {
-      mockMutateAsync.mockResolvedValue({ error: null });
-
-      const { getByTestId } = renderSearchAndFiltersBar();
-
-      fireEvent.click(getByTestId('browseIntegrations.searchBar.statusBtn'));
-
-      const betaOption = getByTestId('browseIntegrations.searchBar.statusBetaOption');
-      fireEvent.click(betaOption);
-
-      await waitFor(() => {
-        expect(mockAddUrlFilters).toHaveBeenCalledWith({
-          status: ['beta'],
-        });
-      });
-    });
-
     it('calls addUrlFilters when deprecated option is toggled', async () => {
       const { getByTestId } = renderSearchAndFiltersBar();
 
@@ -155,19 +84,18 @@ describe('SearchAndFiltersBar', () => {
     });
 
     it('removes filter from URL when option is unchecked', async () => {
-      mockMutateAsync.mockResolvedValue({ error: null });
       mockUseUrlFilters.mockReturnValue({
         q: undefined,
         sort: undefined,
-        status: ['beta'],
+        status: ['deprecated'],
       });
 
       const { getByTestId } = renderSearchAndFiltersBar();
 
       fireEvent.click(getByTestId('browseIntegrations.searchBar.statusBtn'));
 
-      const betaOption = getByTestId('browseIntegrations.searchBar.statusBetaOption');
-      fireEvent.click(betaOption);
+      const deprecatedOption = getByTestId('browseIntegrations.searchBar.statusDeprecatedOption');
+      fireEvent.click(deprecatedOption);
 
       await waitFor(() => {
         expect(mockAddUrlFilters).toHaveBeenCalledWith({
@@ -219,11 +147,10 @@ describe('SearchAndFiltersBar', () => {
 
   describe('Integration Tests', () => {
     it('all filter components work together', async () => {
-      mockMutateAsync.mockResolvedValue({ error: null });
       mockUseUrlFilters.mockReturnValue({
         q: 'apache',
         sort: 'a-z',
-        status: ['beta', 'deprecated'],
+        status: ['deprecated'],
       });
 
       const { getByTestId, container } = renderSearchAndFiltersBar();
@@ -237,7 +164,7 @@ describe('SearchAndFiltersBar', () => {
       expect(statusButton).toHaveClass('euiFilterButton-hasActiveFilters');
       const badge = container.querySelector('.euiNotificationBadge');
       expect(badge).toBeInTheDocument();
-      expect(badge).toHaveTextContent('2');
+      expect(badge).toHaveTextContent('1');
 
       // Sort button should show selection
       const sortButton = getByTestId('browseIntegrations.searchBar.sortBtn');
