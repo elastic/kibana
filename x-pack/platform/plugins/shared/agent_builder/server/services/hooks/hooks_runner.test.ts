@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { isHooksExecutionError, ToolResultType } from '@kbn/agent-builder-common';
+import {
+  AgentBuilderErrorCode,
+  isHooksExecutionError,
+  ToolResultType,
+} from '@kbn/agent-builder-common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createHooksRunner } from './hooks_runner';
 import type { CreateHooksRunnerDeps } from './hooks_runner';
@@ -139,6 +143,7 @@ describe('createHooksRunner', () => {
     }).run;
 
     await expect(run(HookLifecycle.beforeAgent, baseContext)).rejects.toMatchObject({
+      code: AgentBuilderErrorCode.hookExecutionError,
       message: expect.stringContaining('timed out after 50ms'),
       meta: expect.objectContaining({
         hookId: 'slow-hook',

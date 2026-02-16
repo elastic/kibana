@@ -12,9 +12,10 @@ import type {
 } from '@kbn/agent-builder-server';
 import {
   createWorkflowAbortedError,
+  createWorkflowExecutionError,
   AGENT_WORKFLOWS_FEATURE_FLAG,
 } from '@kbn/agent-builder-common';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
+import { ExecutionStatus, WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import type { Logger } from '@kbn/logging';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { InternalStartServices } from '../../services/types';
@@ -103,11 +104,17 @@ export async function runBeforeAgentWorkflows({
     });
 
     if (!result.success) {
-      logger.warn(`Workflow execution failed: ${result.error}`);
-      throw new Error(result.error);
+      throw createWorkflowExecutionError(result.error, { workflow: workflowId });
     }
 
     const execution = result.execution;
+    if (execution.status === ExecutionStatus.FAILED) {
+      const workflowName = execution.workflow_name ?? execution.workflow_id;
+      const errorMessage = execution.error_message ?? `Workflow "${workflowName}" failed`;
+
+      throw createWorkflowExecutionError(errorMessage, { workflow: workflowName });
+    }
+
     logger.debug(
       `Workflow execution finished: ${execution.workflow_id} (${execution.execution_id})`
     );
