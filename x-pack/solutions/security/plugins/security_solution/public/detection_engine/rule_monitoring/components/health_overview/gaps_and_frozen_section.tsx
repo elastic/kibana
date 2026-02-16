@@ -8,8 +8,13 @@
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import React, { memo } from 'react';
 import type { HealthData } from './constants';
+import * as i18n from './translations';
 
-export const GapsAndFrozenSection = memo<{ health: HealthData }>(({ health }) => {
+export const GapsAndFrozenSection = memo(function GapsAndFrozenSection({
+  health,
+}: {
+  health: HealthData;
+}) {
   const stats = health.stats_over_interval;
   const { total: totalGaps, total_duration_s: gapDuration } = stats.number_of_detected_gaps;
   const frozenCount = stats.frozen_indices_queried_max_count;
@@ -19,25 +24,24 @@ export const GapsAndFrozenSection = memo<{ health: HealthData }>(({ health }) =>
       <EuiFlexItem>
         <EuiStat
           title={totalGaps}
-          description="Total Detected Gaps"
+          description={i18n.TOTAL_DETECTED_GAPS}
           titleColor={totalGaps > 0 ? 'danger' : 'default'}
         />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiStat
           title={`${gapDuration}s`}
-          description="Total Gap Duration"
+          description={i18n.TOTAL_GAP_DURATION}
           titleColor={gapDuration > 0 ? 'danger' : 'default'}
         />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiStat
           title={frozenCount}
-          description="Frozen Indices Queried (Max)"
+          description={i18n.FROZEN_INDICES_QUERIED}
           titleColor={frozenCount > 0 ? 'accent' : 'default'}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 });
-GapsAndFrozenSection.displayName = 'GapsAndFrozenSection';

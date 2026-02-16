@@ -79,12 +79,10 @@ export const DetectionEngineSpaceRulesHealthPage = memo(
 
       return (
         <>
-          {/* ── 1. Health Overview KPI Cards ───────────────────────── */}
           <HealthOverviewCards health={health} />
 
           <EuiSpacer size="l" />
 
-          {/* ── 2. Rule Inventory ──────────────────────────────────── */}
           <EuiFlexGroup>
             <EuiFlexItem>
               <SectionPanel title="Rules by Status">
@@ -134,7 +132,6 @@ export const DetectionEngineSpaceRulesHealthPage = memo(
 
           <EuiSpacer size="l" />
 
-          {/* ── 3. Execution Health (24h) ──────────────────────────── */}
           <EuiFlexGroup>
             <EuiFlexItem>
               <SectionPanel title="Execution Outcomes (24h)">
@@ -166,33 +163,28 @@ export const DetectionEngineSpaceRulesHealthPage = memo(
 
           <EuiSpacer size="l" />
 
-          {/* ── 4. Performance Percentiles ─────────────────────────── */}
           <SectionPanel title="Performance Percentiles">
             <PerformanceSection health={health} />
           </SectionPanel>
 
           <EuiSpacer size="l" />
 
-          {/* ── 5. Gaps & Frozen Indices ───────────────────────────── */}
           <SectionPanel title="Gaps & Frozen Indices">
             <GapsAndFrozenSection health={health} />
           </SectionPanel>
 
           <EuiSpacer size="l" />
 
-          {/* ── 6. Top Errors & Warnings ───────────────────────────── */}
           <TopMessagesSection health={health} />
 
           <EuiSpacer size="l" />
 
-          {/* ── 7. Historical Trends ───────────────────────────────── */}
           <SectionPanel title="Historical Trends">
             <HistoricalTrendsSection health={health} />
           </SectionPanel>
 
           <EuiSpacer size="l" />
 
-          {/* ── Raw API Response (debug) ───────────────────────────── */}
           <EuiAccordion id="rawData" buttonContent="Raw API Response" paddingSize="m">
             <EuiCodeBlock language="json" fontSize="m" paddingSize="m">
               {JSON.stringify(spaceRulesHealth.data, null, 2)}

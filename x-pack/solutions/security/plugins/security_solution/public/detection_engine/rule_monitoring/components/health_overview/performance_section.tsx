@@ -12,6 +12,7 @@ import React, { memo, useMemo } from 'react';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import type { HealthData } from './constants';
 import { CHART_HEIGHT, getP } from './constants';
+import * as i18n from './translations';
 
 interface PerformanceRow {
   metric: string;
@@ -33,24 +34,28 @@ const buildPerfRow = (
 });
 
 const PERF_COLUMNS: Array<EuiBasicTableColumn<PerformanceRow>> = [
-  { field: 'metric', name: 'Metric', width: '30%' },
+  { field: 'metric', name: i18n.METRIC_COLUMN, width: '30%' },
   { field: 'p50', name: 'p50', render: (v: number) => `${Math.round(v)} ms` },
   { field: 'p95', name: 'p95', render: (v: number) => `${Math.round(v)} ms` },
   { field: 'p99', name: 'p99', render: (v: number) => `${Math.round(v)} ms` },
   { field: 'p999', name: 'p99.9', render: (v: number) => `${Math.round(v)} ms` },
 ];
 
-export const PerformanceSection = memo<{ health: HealthData }>(({ health }) => {
+export const PerformanceSection = memo(function PerformanceSection({
+  health,
+}: {
+  health: HealthData;
+}) {
   const baseTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
   const stats = health.stats_over_interval;
 
   const rows = useMemo<PerformanceRow[]>(
     () => [
-      buildPerfRow('Execution Duration', stats.execution_duration_ms),
-      buildPerfRow('Search Duration', stats.search_duration_ms),
-      buildPerfRow('Indexing Duration', stats.indexing_duration_ms),
-      buildPerfRow('Schedule Delay', stats.schedule_delay_ms),
+      buildPerfRow(i18n.EXECUTION_DURATION, stats.execution_duration_ms),
+      buildPerfRow(i18n.SEARCH_DURATION, stats.search_duration_ms),
+      buildPerfRow(i18n.INDEXING_DURATION, stats.indexing_duration_ms),
+      buildPerfRow(i18n.SCHEDULE_DELAY, stats.schedule_delay_ms),
     ],
     [stats]
   );
@@ -97,10 +102,9 @@ export const PerformanceSection = memo<{ health: HealthData }>(({ health }) => {
       <EuiBasicTable
         items={rows}
         columns={PERF_COLUMNS}
-        tableCaption="Performance Percentiles"
+        tableCaption={i18n.PERFORMANCE_TABLE_CAPTION}
         compressed
       />
     </>
   );
 });
-PerformanceSection.displayName = 'PerformanceSection';

@@ -11,8 +11,13 @@ import React, { memo, useMemo } from 'react';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import type { HealthData } from './constants';
 import { CHART_HEIGHT, LOG_LEVELS } from './constants';
+import * as i18n from './translations';
 
-export const LoggedMessagesBar = memo<{ health: HealthData }>(({ health }) => {
+export const LoggedMessagesBar = memo(function LoggedMessagesBar({
+  health,
+}: {
+  health: HealthData;
+}) {
   const baseTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
   const { number_of_logged_messages } = health.stats_over_interval;
@@ -31,7 +36,7 @@ export const LoggedMessagesBar = memo<{ health: HealthData }>(({ health }) => {
   const data = useMemo(
     () =>
       LOG_LEVELS.map((level) => ({
-        category: 'Log Messages',
+        category: i18n.LOG_MESSAGES_CATEGORY,
         level: level.charAt(0).toUpperCase() + level.slice(1),
         count: number_of_logged_messages.by_level?.[level] ?? 0,
       })),
@@ -42,8 +47,8 @@ export const LoggedMessagesBar = memo<{ health: HealthData }>(({ health }) => {
     return (
       <EuiEmptyPrompt
         iconType="visBarVertical"
-        title={<h4>{'No logged messages'}</h4>}
-        body={<p>{'No logged messages in the selected interval.'}</p>}
+        title={<h4>{i18n.NO_LOGGED_MESSAGES_TITLE}</h4>}
+        body={<p>{i18n.NO_LOGGED_MESSAGES_BODY}</p>}
       />
     );
   }
@@ -66,4 +71,3 @@ export const LoggedMessagesBar = memo<{ health: HealthData }>(({ health }) => {
     </Chart>
   );
 });
-LoggedMessagesBar.displayName = 'LoggedMessagesBar';

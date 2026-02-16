@@ -13,13 +13,14 @@ export interface SectionPanelProps {
   children: React.ReactNode;
 }
 
-export const SectionPanel = memo<SectionPanelProps>(({ title, children }) => (
-  <EuiPanel hasShadow={false} hasBorder paddingSize="m">
-    <EuiTitle size="xxs">
-      <h4>{title}</h4>
-    </EuiTitle>
-    <EuiSpacer size="s" />
-    {children}
-  </EuiPanel>
-));
-SectionPanel.displayName = 'SectionPanel';
+export const SectionPanel = memo(function SectionPanel({ title, children }: SectionPanelProps) {
+  return (
+    <EuiPanel hasShadow={false} hasBorder paddingSize="m">
+      <EuiTitle size="xxs">
+        <h4>{title}</h4>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      {children}
+    </EuiPanel>
+  );
+});

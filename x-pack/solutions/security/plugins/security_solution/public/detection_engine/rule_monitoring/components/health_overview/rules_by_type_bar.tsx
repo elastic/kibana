@@ -11,8 +11,9 @@ import React, { memo, useMemo } from 'react';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import type { HealthData } from './constants';
 import { CHART_HEIGHT, getRuleTypeName } from './constants';
+import * as i18n from './translations';
 
-export const RulesByTypeBar = memo<{ health: HealthData }>(({ health }) => {
+export const RulesByTypeBar = memo(function RulesByTypeBar({ health }: { health: HealthData }) {
   const baseTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
   const { by_type } = health.state_at_the_moment.number_of_rules;
@@ -29,8 +30,8 @@ export const RulesByTypeBar = memo<{ health: HealthData }>(({ health }) => {
     return (
       <EuiEmptyPrompt
         iconType="visBarVertical"
-        title={<h4>{'No rule types'}</h4>}
-        body={<p>{'No rule type data available.'}</p>}
+        title={<h4>{i18n.NO_RULE_TYPES_TITLE}</h4>}
+        body={<p>{i18n.NO_RULE_TYPES_BODY}</p>}
       />
     );
   }
@@ -40,7 +41,7 @@ export const RulesByTypeBar = memo<{ health: HealthData }>(({ health }) => {
       <Settings baseTheme={baseTheme} showLegend={false} rotation={90} />
       <BarSeries
         id="rulesByType"
-        name="Rules"
+        name={i18n.RULES_SERIES_NAME}
         data={data}
         xAccessor="type"
         yAccessors={['count']}
@@ -53,4 +54,3 @@ export const RulesByTypeBar = memo<{ health: HealthData }>(({ health }) => {
     </Chart>
   );
 });
-RulesByTypeBar.displayName = 'RulesByTypeBar';

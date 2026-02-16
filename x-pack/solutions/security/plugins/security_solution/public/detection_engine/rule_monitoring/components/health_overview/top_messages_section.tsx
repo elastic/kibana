@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiBasicTable, EuiText } from '@elastic/eui'
 import React, { memo } from 'react';
 import { SectionPanel } from '../section_panel';
 import type { HealthData } from './constants';
+import * as i18n from './translations';
 
 interface TopMessageItem {
   message: string;
@@ -17,33 +18,37 @@ interface TopMessageItem {
 }
 
 const TOP_MSG_COLUMNS: Array<EuiBasicTableColumn<TopMessageItem>> = [
-  { field: 'message', name: 'Message', truncateText: true, width: '80%' },
-  { field: 'count', name: 'Count', width: '20%', align: 'right' },
+  { field: 'message', name: i18n.MESSAGE_COLUMN, truncateText: true, width: '80%' },
+  { field: 'count', name: i18n.COUNT_COLUMN, width: '20%', align: 'right' },
 ];
 
-export const TopMessagesSection = memo<{ health: HealthData }>(({ health }) => {
+export const TopMessagesSection = memo(function TopMessagesSection({
+  health,
+}: {
+  health: HealthData;
+}) {
   const { top_errors: topErrors = [], top_warnings: topWarnings = [] } = health.stats_over_interval;
 
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <SectionPanel title="Top Errors">
+        <SectionPanel title={i18n.TOP_ERRORS_TITLE}>
           {topErrors.length > 0 ? (
             <EuiBasicTable items={topErrors} columns={TOP_MSG_COLUMNS} compressed />
           ) : (
             <EuiText size="s" color="subdued">
-              {'No errors recorded.'}
+              {i18n.NO_ERRORS_RECORDED}
             </EuiText>
           )}
         </SectionPanel>
       </EuiFlexItem>
       <EuiFlexItem>
-        <SectionPanel title="Top Warnings">
+        <SectionPanel title={i18n.TOP_WARNINGS_TITLE}>
           {topWarnings.length > 0 ? (
             <EuiBasicTable items={topWarnings} columns={TOP_MSG_COLUMNS} compressed />
           ) : (
             <EuiText size="s" color="subdued">
-              {'No warnings recorded.'}
+              {i18n.NO_WARNINGS_RECORDED}
             </EuiText>
           )}
         </SectionPanel>
@@ -51,4 +56,3 @@ export const TopMessagesSection = memo<{ health: HealthData }>(({ health }) => {
     </EuiFlexGroup>
   );
 });
-TopMessagesSection.displayName = 'TopMessagesSection';

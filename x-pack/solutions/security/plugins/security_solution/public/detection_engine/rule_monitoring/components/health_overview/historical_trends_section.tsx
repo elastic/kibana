@@ -18,10 +18,15 @@ import React, { memo, useMemo } from 'react';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import type { HealthData } from './constants';
 import { getP } from './constants';
+import * as i18n from './translations';
 
 const LINE_STYLE = { point: { visible: 'never' as const } };
 
-export const HistoricalTrendsSection = memo<{ health: HealthData }>(({ health }) => {
+export const HistoricalTrendsSection = memo(function HistoricalTrendsSection({
+  health,
+}: {
+  health: HealthData;
+}) {
   const baseTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
   const { buckets } = health.history_over_interval;
@@ -58,8 +63,8 @@ export const HistoricalTrendsSection = memo<{ health: HealthData }>(({ health })
     return (
       <EuiEmptyPrompt
         iconType="visLine"
-        title={<h4>{'No historical data'}</h4>}
-        body={<p>{'Historical buckets are not available for the selected interval.'}</p>}
+        title={<h4>{i18n.NO_HISTORICAL_DATA_TITLE}</h4>}
+        body={<p>{i18n.NO_HISTORICAL_DATA_BODY}</p>}
       />
     );
   }
@@ -69,14 +74,14 @@ export const HistoricalTrendsSection = memo<{ health: HealthData }>(({ health })
       {/* Executions over time */}
       <EuiFlexItem>
         <EuiTitle size="xxs">
-          <h5>{'Executions Over Time'}</h5>
+          <h5>{i18n.EXECUTIONS_OVER_TIME}</h5>
         </EuiTitle>
         <EuiSpacer size="xs" />
         <Chart size={{ height: 180 }}>
           <Settings baseTheme={baseTheme} showLegend legendPosition="right" />
           <LineSeries
             id="total-executions"
-            name="Total"
+            name={i18n.TOTAL_SERIES}
             data={executionData}
             xAccessor="x"
             yAccessors={['total']}
@@ -87,7 +92,7 @@ export const HistoricalTrendsSection = memo<{ health: HealthData }>(({ health })
           />
           <LineSeries
             id="failed-executions"
-            name="Failed"
+            name={i18n.FAILED_SERIES}
             data={executionData}
             xAccessor="x"
             yAccessors={['failed']}
@@ -104,14 +109,14 @@ export const HistoricalTrendsSection = memo<{ health: HealthData }>(({ health })
       {/* Schedule delay over time */}
       <EuiFlexItem>
         <EuiTitle size="xxs">
-          <h5>{'p95 Schedule Delay Over Time'}</h5>
+          <h5>{i18n.P95_DELAY_OVER_TIME}</h5>
         </EuiTitle>
         <EuiSpacer size="xs" />
         <Chart size={{ height: 180 }}>
           <Settings baseTheme={baseTheme} showLegend={false} />
           <LineSeries
             id="p95-delay"
-            name="p95 Delay (ms)"
+            name={i18n.P95_DELAY_SERIES}
             data={delayData}
             xAccessor="x"
             yAccessors={['p95']}
@@ -128,14 +133,14 @@ export const HistoricalTrendsSection = memo<{ health: HealthData }>(({ health })
       {/* Gaps over time */}
       <EuiFlexItem>
         <EuiTitle size="xxs">
-          <h5>{'Detected Gaps Over Time'}</h5>
+          <h5>{i18n.GAPS_OVER_TIME}</h5>
         </EuiTitle>
         <EuiSpacer size="xs" />
         <Chart size={{ height: 180 }}>
           <Settings baseTheme={baseTheme} showLegend={false} />
           <LineSeries
             id="gaps-over-time"
-            name="Gaps"
+            name={i18n.GAPS_SERIES}
             data={gapData}
             xAccessor="x"
             yAccessors={['gaps']}
@@ -151,4 +156,3 @@ export const HistoricalTrendsSection = memo<{ health: HealthData }>(({ health })
     </EuiFlexGroup>
   );
 });
-HistoricalTrendsSection.displayName = 'HistoricalTrendsSection';

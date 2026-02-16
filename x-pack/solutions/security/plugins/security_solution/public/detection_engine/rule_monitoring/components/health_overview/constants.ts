@@ -7,9 +7,6 @@
 
 import type { GetSpaceHealthResponse } from '../../../../../common/api/detection_engine';
 
-/**
- * The health snapshot shape used as a prop across all health visualization components.
- */
 export type HealthData = GetSpaceHealthResponse['health'];
 
 export const RULE_TYPE_NAMES: Record<string, string> = {
@@ -30,7 +27,6 @@ export const CHART_HEIGHT = 220;
 export const getRuleTypeName = (key: string): string =>
   RULE_TYPE_NAMES[key] ?? key.replace('siem.', '').replace('Rule', '');
 
-/** Safely read a percentile value regardless of key format (p50, 50.0, 50). */
 export const getP = (
   percentiles: Record<string, number> | undefined,
   ...keys: string[]

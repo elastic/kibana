@@ -33,73 +33,79 @@ export interface DonutChartProps {
 }
 
 /** Re-usable donut chart built on top of Partition (sunburst with a hole). */
-export const DonutChart = memo<DonutChartProps>(
-  ({ id, data, colors, total, height = DEFAULT_HEIGHT, centerLabel, emptyTitle, emptyBody }) => {
-    const baseTheme = useElasticChartsTheme();
+export const DonutChart = memo(function DonutChart({
+  id,
+  data,
+  colors,
+  total,
+  height = DEFAULT_HEIGHT,
+  centerLabel,
+  emptyTitle,
+  emptyBody,
+}: DonutChartProps) {
+  const baseTheme = useElasticChartsTheme();
 
-    const donutTheme: PartialTheme = useMemo(
-      () => ({
-        partition: {
-          emptySizeRatio: 0.4,
-          linkLabel: { maxCount: 0, fontSize: 0, textColor: 'transparent' },
-          minFontSize: 0,
-          maxFontSize: 0,
-        },
-      }),
-      []
-    );
+  const donutTheme: PartialTheme = useMemo(
+    () => ({
+      partition: {
+        emptySizeRatio: 0.4,
+        linkLabel: { maxCount: 0, fontSize: 0, textColor: 'transparent' },
+        minFontSize: 0,
+        maxFontSize: 0,
+      },
+    }),
+    []
+  );
 
-    if (total === 0) {
-      return (
-        <EuiEmptyPrompt
-          iconType="visArea"
-          title={<h4>{emptyTitle ?? 'No data'}</h4>}
-          body={<p>{emptyBody ?? 'No data available.'}</p>}
-        />
-      );
-    }
-
+  if (total === 0) {
     return (
-      <div style={{ position: 'relative' }}>
-        <Chart size={{ height }}>
-          <Settings baseTheme={baseTheme} theme={donutTheme} showLegend legendPosition="right" />
-          <Partition
-            id={id}
-            data={data}
-            layout={PartitionLayout.sunburst}
-            valueAccessor={(d) => d.value}
-            layers={[
-              {
-                groupByRollup: (d: { label: string }) => d.label,
-                shape: {
-                  fillColor: (_key: string | number, sortIndex: number) =>
-                    colors[sortIndex % colors.length],
-                },
-              },
-            ]}
-          />
-        </Chart>
-        <div
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '35%',
-            transform: 'translate(-50%, -50%)',
-            textAlign: 'center',
-            pointerEvents: 'none',
-          }}
-        >
-          <EuiText size="m">
-            <strong>{total}</strong>
-          </EuiText>
-          {centerLabel && (
-            <EuiText size="xs" color="subdued">
-              {centerLabel}
-            </EuiText>
-          )}
-        </div>
-      </div>
+      <EuiEmptyPrompt
+        iconType="visArea"
+        title={<h4>{emptyTitle ?? 'No data'}</h4>}
+        body={<p>{emptyBody ?? 'No data available.'}</p>}
+      />
     );
   }
-);
-DonutChart.displayName = 'DonutChart';
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <Chart size={{ height }}>
+        <Settings baseTheme={baseTheme} theme={donutTheme} showLegend legendPosition="right" />
+        <Partition
+          id={id}
+          data={data}
+          layout={PartitionLayout.sunburst}
+          valueAccessor={(d) => d.value}
+          layers={[
+            {
+              groupByRollup: (d: { label: string }) => d.label,
+              shape: {
+                fillColor: (_key: string | number, sortIndex: number) =>
+                  colors[sortIndex % colors.length],
+              },
+            },
+          ]}
+        />
+      </Chart>
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '35%',
+          transform: 'translate(-50%, -50%)',
+          textAlign: 'center',
+          pointerEvents: 'none',
+        }}
+      >
+        <EuiText size="m">
+          <strong>{total}</strong>
+        </EuiText>
+        {centerLabel && (
+          <EuiText size="xs" color="subdued">
+            {centerLabel}
+          </EuiText>
+        )}
+      </div>
+    </div>
+  );
+});
