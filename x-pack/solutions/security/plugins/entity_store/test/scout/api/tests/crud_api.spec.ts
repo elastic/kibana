@@ -188,7 +188,9 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     const resp = await esClient.search({
       index: UPDATES_DATASTREAM,
       query: {
-        match_all: {},
+        wildcard: {
+          'entity.id': 'required-id-*-bulk',
+        },
       },
     });
     expect(resp.hits.hits).toHaveLength(2);

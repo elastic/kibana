@@ -129,6 +129,7 @@ export class CRUDClient {
     await this.esClient.bulk({
       index: getUpdatesEntitiesDataStreamName(this.namespace),
       operations,
+      refresh: 'wait_for',
     });
   }
 
