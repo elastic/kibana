@@ -29,6 +29,7 @@ import {
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
+  ENABLE_DE_HEALTH_UI_SETTING,
   DEFAULT_THREAT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
@@ -338,6 +339,26 @@ export const initUiSettings = (
       }),
       solutionViews: ['classic', 'security'],
     },
+    ...(experimentalFeatures.deHealthUIEnabled && {
+      [ENABLE_DE_HEALTH_UI_SETTING]: {
+        name: i18n.translate('xpack.securitySolution.uiSettings.deHealthUIEnabledLabel', {
+          defaultMessage: 'Enable Detection Engine Health UI',
+        }),
+        description: i18n.translate(
+          'xpack.securitySolution.uiSettings.deHealthUIEnabledDescription',
+          {
+            defaultMessage: `Enable the Detection Engine Health UI within Security Solution. When enabled, you can access the new Detection Engine Health page through the navigation menu.`,
+          }
+        ),
+        type: 'boolean',
+        value: false,
+        category: [APP_ID],
+        requiresPageReload: true,
+        schema: schema.boolean(),
+        solutionViews: ['classic', 'security'],
+        technicalPreview: true,
+      },
+    }),
     [NEWS_FEED_URL_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.newsFeedUrl', {
         defaultMessage: 'News feed URL',
