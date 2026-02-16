@@ -98,6 +98,38 @@ describe('parseError', () => {
 
       expect(result.type).toBeUndefined();
     });
+
+    it('returns statusCode equivalent to error.meta.statusCode', () => {
+      // This test verifies that parseError().statusCode is equivalent to the old pattern
+      // of accessing error.meta?.statusCode directly on ResponseError.
+      // The ResponseError class has a statusCode getter that returns meta.statusCode.
+      const responseError = createResponseError(404, {
+        error: {
+          type: 'index_not_found_exception',
+          reason: 'no such index [test]',
+        },
+      });
+
+      const result = parseError(responseError);
+
+      // Verify equivalence: parseError().statusCode should equal error.meta?.statusCode
+      expect(result.statusCode).toBe(responseError.meta?.statusCode);
+      expect(result.statusCode).toBe(404);
+    });
+
+    it('returns statusCode equivalent to error.meta.statusCode for various status codes', () => {
+      // Test multiple status codes to ensure equivalence across different responses
+      const statusCodes = [400, 401, 403, 404, 409, 500, 502, 503];
+
+      for (const code of statusCodes) {
+        const responseError = createResponseError(code, {});
+        const result = parseError(responseError);
+
+        // Verify equivalence for each status code
+        expect(result.statusCode).toBe(responseError.meta?.statusCode);
+        expect(result.statusCode).toBe(code);
+      }
+    });
   });
 
   describe('with standard Error', () => {
