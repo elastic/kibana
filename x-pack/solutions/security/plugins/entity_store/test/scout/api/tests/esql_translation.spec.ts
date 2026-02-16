@@ -11,7 +11,7 @@ import {
   COMMON_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
-  UPDATES_INDEX,
+  UPDATES_DATASTREAM,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { getEuidEsqlFilterBasedOnDocument } from '../../../../common/domain/euid/esql';
@@ -58,7 +58,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('generic', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${UPDATES_DATASTREAM} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
         drop_null_columns: true,
@@ -79,7 +79,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('host', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${UPDATES_DATASTREAM} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
         drop_null_columns: true,
@@ -103,7 +103,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('host', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${UPDATES_DATASTREAM} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
         drop_null_columns: true,
@@ -124,7 +124,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('user', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${UPDATES_DATASTREAM} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
         drop_null_columns: true,
@@ -148,7 +148,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('user', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${UPDATES_DATASTREAM} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
         drop_null_columns: true,
@@ -172,7 +172,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('service', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${UPDATES_DATASTREAM} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
         drop_null_columns: true,
@@ -193,7 +193,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('service', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${UPDATES_DATASTREAM} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
         drop_null_columns: true,

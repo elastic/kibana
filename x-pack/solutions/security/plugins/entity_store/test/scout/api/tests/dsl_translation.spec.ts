@@ -11,7 +11,7 @@ import {
   COMMON_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
-  UPDATES_INDEX,
+  UPDATES_DATASTREAM,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { getEuidDslFilterBasedOnDocument } from '../../../../common/domain/euid/dsl';
@@ -65,7 +65,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       expect(dsl).toBeDefined();
 
       const result = await esClient.search({
-        index: UPDATES_INDEX,
+        index: UPDATES_DATASTREAM,
         query: { ...dsl },
         size: 10,
       });
@@ -85,7 +85,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       expect(dsl).toBeDefined();
 
       const result = await esClient.search({
-        index: UPDATES_INDEX,
+        index: UPDATES_DATASTREAM,
         query: { ...dsl },
         size: 10,
       });
@@ -108,7 +108,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       expect(dsl).toBeDefined();
 
       const result = await esClient.search({
-        index: UPDATES_INDEX,
+        index: UPDATES_DATASTREAM,
         query: { ...dsl },
         size: 10,
       });
@@ -129,7 +129,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       expect(dsl).toBeDefined();
 
       const result = await esClient.search({
-        index: UPDATES_INDEX,
+        index: UPDATES_DATASTREAM,
         query: { ...dsl },
         size: 10,
       });
@@ -153,7 +153,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       expect(dsl).toBeDefined();
 
       const result = await esClient.search({
-        index: UPDATES_INDEX,
+        index: UPDATES_DATASTREAM,
         query: { ...dsl },
         size: 10,
       });
@@ -175,7 +175,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       expect(dsl).toBeDefined();
 
       const result = await esClient.search({
-        index: UPDATES_INDEX,
+        index: UPDATES_DATASTREAM,
         query: { ...dsl },
         size: 10,
       });
@@ -196,7 +196,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       expect(dsl).toBeDefined();
 
       const result = await esClient.search({
-        index: UPDATES_INDEX,
+        index: UPDATES_DATASTREAM,
         query: { ...dsl },
         size: 10,
       });
