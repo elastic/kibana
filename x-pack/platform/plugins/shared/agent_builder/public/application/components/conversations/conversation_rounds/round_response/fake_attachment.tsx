@@ -5,14 +5,25 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
+import { useConversationContext } from '../../../../context/conversation/conversation_context';
 import { useAttachmentPanel } from '../../../../context/attachment_panel/attachment_panel_context';
+import { AttachmentPanelContent } from '../../attachment_panel/attachment_panel_content';
 
 const styles = css`
   width: 100%;
-  border: 3px solid red;
+  border: 3px solid green;
   border-radius: 4px;
   padding: 32px;
   margin: 16px 0;
@@ -20,6 +31,18 @@ const styles = css`
 
 export const FakeAttachment = ({ attachmentId }: { attachmentId: string }) => {
   const { openPanel } = useAttachmentPanel();
+  const { isEmbeddedContext } = useConversationContext();
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+
+  const onClick = useCallback(() => {
+    if (isEmbeddedContext) {
+      // open flyout in embedded context
+      setIsFlyoutOpen(true);
+    } else {
+      // open split panel in full-screen
+      openPanel(attachmentId);
+    }
+  }, [isEmbeddedContext, openPanel, attachmentId]);
 
   return (
     <>
@@ -34,7 +57,7 @@ export const FakeAttachment = ({ attachmentId }: { attachmentId: string }) => {
             <EuiButton color="text" size="s">
               Secondary
             </EuiButton>
-            <EuiButton color="primary" size="s" onClick={() => openPanel(attachmentId)}>
+            <EuiButton color="primary" size="s" onClick={onClick}>
               Preview
             </EuiButton>
           </EuiFlexGroup>
@@ -44,7 +67,7 @@ export const FakeAttachment = ({ attachmentId }: { attachmentId: string }) => {
         css={css`
           width: 100%;
           height: 400px;
-          border: 3px solid red;
+          border: 3px solid green;
           border-radius: 4px;
           display: flex;
           justify-content: center;
@@ -55,6 +78,25 @@ export const FakeAttachment = ({ attachmentId }: { attachmentId: string }) => {
           <h3>Inline Attachment (2) - {attachmentId}</h3>
         </EuiText>
       </EuiFlexGroup>
+      {isFlyoutOpen && (
+        <EuiFlyout
+          aria-labelledby="attachmentPanelContent"
+          onClose={() => setIsFlyoutOpen(false)}
+          size="m"
+          css={css`
+            border: 3px solid green;
+          `}
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2>Canvas Mode (Flyout)</h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <AttachmentPanelContent attachmentId={attachmentId} />
+          </EuiFlyoutBody>
+        </EuiFlyout>
+      )}
     </>
   );
 };

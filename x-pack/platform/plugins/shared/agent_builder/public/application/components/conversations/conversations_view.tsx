@@ -47,7 +47,7 @@ const ConversationWithAttachmentPanel: React.FC = () => {
   const attachmentPanelStyles = css`
     height: 100%;
     width: 50%;
-    border: 3px solid red;
+    border: 3px solid green;
   `;
 
   return (

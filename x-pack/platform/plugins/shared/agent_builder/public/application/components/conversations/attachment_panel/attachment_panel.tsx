@@ -6,15 +6,9 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiButtonIcon,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AttachmentPanelContent } from './attachment_panel_content';
 
 interface AttachmentPanelProps {
   onClose: () => void;
@@ -51,9 +45,7 @@ export const AttachmentPanel: React.FC<AttachmentPanelProps> = ({ onClose, attac
       </EuiFlexItem>
 
       <EuiFlexItem grow css={contentStyles}>
-        <EuiText>
-          <p>Attachment ID: {attachmentId || 'No attachment selected'}</p>
-        </EuiText>
+        <AttachmentPanelContent attachmentId={attachmentId} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
