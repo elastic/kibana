@@ -187,6 +187,23 @@ export class RulesClient {
     }
   }
 
+  public async getRules(ids: string[]): Promise<RuleResponse[]> {
+    const result = await this.rulesSavedObjectService.bulkGetByIds(ids);
+
+    return result.flatMap((doc) => {
+      if ('error' in doc) {
+        if (doc.error.statusCode === 404) {
+          return [];
+        }
+        throw Boom.boomify(new Error(doc.error.message), {
+          statusCode: doc.error.statusCode,
+        });
+      }
+
+      return [transformRuleSoAttributesToRuleApiResponse(doc.id, doc.attributes)];
+    });
+  }
+
   public async deleteRule({ id }: { id: string }): Promise<void> {
     const { spaceId } = this.getSpaceContext();
 
