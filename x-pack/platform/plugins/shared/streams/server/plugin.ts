@@ -269,8 +269,41 @@ export class StreamsPlugin
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
 
+    this.createFromConfig(core);
+
     return {};
   }
 
   public stop() {}
+
+  private async createFromConfig(core: CoreStart): Promise<void> {
+    const esClient = core.elasticsearch.client.asInternalUser;
+
+    for (const componentTemplate of this.config.component_templates) {
+      try {
+        await esClient.cluster.putComponentTemplate(componentTemplate);
+        this.logger.info(`Successfully created component template ${componentTemplate.name}`);
+      } catch (error) {
+        this.logger.error(`Error creating component template ${componentTemplate.name}: ${error}`);
+      }
+    }
+
+    for (const indexTemplate of this.config.index_templates) {
+      try {
+        await esClient.indices.putIndexTemplate(indexTemplate);
+        this.logger.info(`Successfully created index template ${indexTemplate.name}`);
+      } catch (error) {
+        this.logger.error(`Error creating index template ${indexTemplate.name}: ${error}`);
+      }
+    }
+
+    for (const pipeline of this.config.pipelines) {
+      try {
+        await esClient.ingest.putPipeline(pipeline);
+        this.logger.info(`Successfully created ingest pipeline ${pipeline.id}`);
+      } catch (error) {
+        this.logger.error(`Error creating ingest pipeline ${pipeline.id}: ${error}`);
+      }
+    }
+  }
 }

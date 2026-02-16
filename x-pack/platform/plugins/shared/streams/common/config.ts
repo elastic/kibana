@@ -5,10 +5,23 @@
  * 2.0.
  */
 
+import type {
+  IngestPutPipelineRequest,
+  IndicesPutIndexTemplateRequest,
+  ClusterPutComponentTemplateRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-export const configSchema = schema.object({});
+export const configSchema = schema.object({
+  component_templates: schema.arrayOf<ClusterPutComponentTemplateRequest>(schema.any(), {
+    defaultValue: [],
+  }),
+  index_templates: schema.arrayOf<IndicesPutIndexTemplateRequest>(schema.any(), {
+    defaultValue: [],
+  }),
+  pipelines: schema.arrayOf<IngestPutPipelineRequest>(schema.any(), { defaultValue: [] }),
+});
 
 export type StreamsConfig = TypeOf<typeof configSchema>;
 
