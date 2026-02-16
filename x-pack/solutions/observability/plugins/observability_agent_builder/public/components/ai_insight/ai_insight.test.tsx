@@ -83,6 +83,11 @@ describe('AiInsight', () => {
         analytics: {
           reportEvent: mockReportEvent,
         },
+        notifications: {
+          feedback: {
+            isEnabled: jest.fn().mockReturnValue(true),
+          },
+        },
       },
     });
     mockUseLicense.mockReturnValue({
