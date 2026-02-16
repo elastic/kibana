@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
 import { type Document, isSeq, parseDocument } from 'yaml';
-import { getTriggerNodes, getTriggersPair } from '../../../../../common/lib/yaml';
-import { getIndentLevelFromLineNumber } from '../get_indent_level';
-import { prependIndentToLines } from '../prepend_indent_to_lines';
-import { getMonacoRangeFromYamlNode } from '../utils';
+import type { monaco } from '@kbn/monaco';
 import { generateTriggerSnippet } from './generate_trigger_snippet';
 import {
   createReplacementRange,
@@ -21,6 +17,10 @@ import {
   getInsertRangeAndTextForTriggers,
   getSectionKeyInfo,
 } from './snippet_insertion_utils';
+import { getTriggerNodes, getTriggersPair } from '../../../../../common/lib/yaml';
+import { getIndentLevelFromLineNumber } from '../get_indent_level';
+import { prependIndentToLines } from '../prepend_indent_to_lines';
+import { getMonacoRangeFromYamlNode } from '../utils';
 
 // Algorithm:
 // 1. Check if triggers section exists (even if empty or has empty items)
