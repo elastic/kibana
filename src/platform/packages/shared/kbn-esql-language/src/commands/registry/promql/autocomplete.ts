@@ -19,7 +19,7 @@ import {
 } from '../../definitions/utils/promql';
 import { getFunctionParamIndexAtCursor } from './utils';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
-import { SuggestionCategory } from '../../../shared/sorting';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting';
 import {
   ESQL_NUMBER_TYPES,
   ESQL_STRING_TYPES,

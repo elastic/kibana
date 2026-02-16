@@ -22,7 +22,7 @@ import type {
   ToolResultStore,
 } from '@kbn/agent-builder-server';
 import { isToolResultId } from '@kbn/agent-builder-server';
-import { ToolResultType } from '@kbn/agent-builder-common';
+import { isVisualizationResult } from '@kbn/agent-builder-common/tools';
 import {
   DEFAULT_PANEL_HEIGHT,
   SMALL_PANEL_WIDTH,
@@ -133,7 +133,7 @@ export const resolveLensConfig = (
     }
 
     const result = resultStore.get(panel);
-    if (result.type !== ToolResultType.visualization) {
+    if (!isVisualizationResult(result)) {
       throw new Error(
         `Provided tool_result_id "${panel}" is not a visualization result (got "${result.type}").`
       );

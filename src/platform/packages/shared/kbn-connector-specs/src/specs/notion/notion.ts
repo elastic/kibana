@@ -124,7 +124,7 @@ export const NotionConnector: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('ore.kibanaConnectorSpecs.notion.test.description', {
+    description: i18n.translate('core.kibanaConnectorSpecs.notion.test.description', {
       defaultMessage: 'Verifies Notion connection by fetching metadata about given data source',
     }),
     // TODO: might need to accept some input here in order to pass to the API endpoint to test

@@ -14,6 +14,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./converse/tool_calling.ts'));
     loadTestFile(require.resolve('./converse/attachments.ts'));
     loadTestFile(require.resolve('./converse/error_handling.ts'));
+    loadTestFile(require.resolve('./converse/regenerate.ts'));
     loadTestFile(require.resolve('./tools/builtin_tools.ts'));
     loadTestFile(require.resolve('./tools/builtin_tools_internal.ts'));
     loadTestFile(require.resolve('./tools/esql_tools.ts'));

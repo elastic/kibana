@@ -38,6 +38,19 @@ jest.mock('@kbn/monaco', () => ({
   },
 }));
 
+jest.mock('monaco-promql', () => ({
+  promLanguageDefinition: {
+    id: 'promql',
+    extensions: ['.promql'],
+    aliases: [],
+    mimetypes: [],
+    loader: jest.fn().mockResolvedValue({
+      language: { tokenizer: { root: [] } },
+      languageConfiguration: {},
+    }),
+  },
+}));
+
 jest.mock('./lookup_join', () => {
   return {
     useCanCreateLookupIndex: jest.fn().mockReturnValue(jest.fn().mockReturnValue(true)),

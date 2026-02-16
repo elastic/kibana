@@ -11,6 +11,7 @@ import type {
   ChatEvent,
   ConverseInput,
   AgentConfigurationOverrides,
+  ConversationAction,
 } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
@@ -85,4 +86,8 @@ export interface ChatConverseParams {
    * These override the stored agent configuration for this execution only.
    */
   configurationOverrides?: AgentConfigurationOverrides;
+  /**
+   * The action to perform: "regenerate" re-executes the last round with original input (requires conversation_id).
+   */
+  action?: ConversationAction;
 }

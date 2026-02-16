@@ -7,6 +7,7 @@
 
 import { identifyFeatures } from '@kbn/streams-ai';
 import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
+import { tags } from '@kbn/scout';
 import { evaluate } from '../src/evaluate';
 import type { StreamsEvaluationWorkerFixtures } from '../src/types';
 import type {
@@ -17,69 +18,73 @@ import { FEATURE_IDENTIFICATION_DATASETS } from './features_identification_datas
 
 evaluate.describe.configure({ timeout: 300_000 });
 
-evaluate.describe('Streams features identification', { tag: '@svlOblt' }, () => {
-  async function runFeatureIdentificationExperiment(
-    dataset: FeatureIdentificationEvaluationDataset,
-    {
-      phoenixClient,
-      inferenceClient,
-      logger,
-      evaluators,
-    }: Pick<
-      StreamsEvaluationWorkerFixtures,
-      'phoenixClient' | 'inferenceClient' | 'logger' | 'evaluators'
-    >
-  ) {
-    await phoenixClient.runExperiment(
+evaluate.describe(
+  'Streams features identification',
+  { tag: tags.serverless.observability.complete },
+  () => {
+    async function runFeatureIdentificationExperiment(
+      dataset: FeatureIdentificationEvaluationDataset,
       {
-        dataset,
-        concurrency: 1,
-        task: async ({ input }: { input: FeatureIdentificationEvaluationExample['input'] }) => {
-          const { features } = await identifyFeatures({
-            streamName: 'logs.test',
-            sampleDocuments: input.sample_documents,
-            systemPrompt: featuresPrompt,
-            inferenceClient,
-            logger,
-            signal: new AbortController().signal,
-          });
-
-          return { features };
-        },
-      },
-      [
+        phoenixClient,
+        inferenceClient,
+        logger,
+        evaluators,
+      }: Pick<
+        StreamsEvaluationWorkerFixtures,
+        'phoenixClient' | 'inferenceClient' | 'logger' | 'evaluators'
+      >
+    ) {
+      await phoenixClient.runExperiment(
         {
-          name: 'feature_correctness',
-          kind: 'LLM',
-          evaluate: async ({ input, output, expected, metadata }) => {
-            const result = await evaluators.criteria(expected.criteria).evaluate({
-              input,
-              expected,
-              output: output.features,
-              metadata,
+          dataset,
+          concurrency: 1,
+          task: async ({ input }: { input: FeatureIdentificationEvaluationExample['input'] }) => {
+            const { features } = await identifyFeatures({
+              streamName: 'logs.test',
+              sampleDocuments: input.sample_documents,
+              systemPrompt: featuresPrompt,
+              inferenceClient,
+              logger,
+              signal: new AbortController().signal,
             });
 
-            return result;
+            return { features };
           },
         },
-      ]
-    );
-  }
+        [
+          {
+            name: 'feature_correctness',
+            kind: 'LLM',
+            evaluate: async ({ input, output, expected, metadata }) => {
+              const result = await evaluators.criteria(expected.criteria).evaluate({
+                input,
+                expected,
+                output: output.features,
+                metadata,
+              });
 
-  // Run evaluation for each dataset
-  FEATURE_IDENTIFICATION_DATASETS.forEach((dataset) => {
-    evaluate.describe(dataset.name, () => {
-      evaluate(
-        'feature identification',
-        async ({ evaluators, inferenceClient, logger, phoenixClient }) => {
-          await runFeatureIdentificationExperiment(dataset, {
-            inferenceClient,
-            logger,
-            phoenixClient,
-            evaluators,
-          });
-        }
+              return result;
+            },
+          },
+        ]
       );
+    }
+
+    // Run evaluation for each dataset
+    FEATURE_IDENTIFICATION_DATASETS.forEach((dataset) => {
+      evaluate.describe(dataset.name, () => {
+        evaluate(
+          'feature identification',
+          async ({ evaluators, inferenceClient, logger, phoenixClient }) => {
+            await runFeatureIdentificationExperiment(dataset, {
+              inferenceClient,
+              logger,
+              phoenixClient,
+              evaluators,
+            });
+          }
+        );
+      });
     });
-  });
-});
+  }
+);

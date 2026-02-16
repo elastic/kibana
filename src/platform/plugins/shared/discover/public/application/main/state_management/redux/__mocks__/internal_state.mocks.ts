@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DiscoverServices } from '../../../../../build_services';
+import { DataSourceType } from '../../../../../../common/data_sources';
 import { DEFAULT_TAB_STATE } from '../constants';
-import type { RecentlyClosedTabState, TabState } from '../types';
+import type { DiscoverAppState, RecentlyClosedTabState, TabState } from '../types';
+import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
 
 export const getTabStateMock = (partial: Partial<TabState> & Pick<TabState, 'id'>): TabState => ({
   ...DEFAULT_TAB_STATE,
@@ -19,3 +23,52 @@ export const getTabStateMock = (partial: Partial<TabState> & Pick<TabState, 'id'
 export const getRecentlyClosedTabStateMock = (
   partial: Partial<RecentlyClosedTabState> & Pick<RecentlyClosedTabState, 'id' | 'closedAt'>
 ): RecentlyClosedTabState => ({ ...getTabStateMock(partial), closedAt: partial.closedAt });
+
+export const getPersistedTabMock = ({
+  tabId = 'test-tab',
+  dataView,
+  appStateOverrides = {},
+  globalStateOverrides = {},
+  initialInternalStateOverrides = {},
+  timeRestore = false,
+  services,
+}: {
+  tabId?: string;
+  dataView: DataView;
+  appStateOverrides?: Partial<DiscoverAppState>;
+  globalStateOverrides?: Partial<TabState['globalState']>;
+  initialInternalStateOverrides?: Partial<TabState['initialInternalState']>;
+  timeRestore?: boolean;
+  services: DiscoverServices;
+}) => {
+  const defaultQuery = { query: '', language: 'kuery' };
+  const query = appStateOverrides.query || defaultQuery;
+
+  return fromTabStateToSavedObjectTab({
+    tab: getTabStateMock({
+      id: tabId,
+      initialInternalState: {
+        serializedSearchSource: {
+          index: dataView.id,
+          query,
+        },
+        ...initialInternalStateOverrides,
+      },
+      appState: {
+        query,
+        columns: [],
+        dataSource: {
+          type: DataSourceType.DataView,
+          dataViewId: dataView.id!,
+        },
+        sort: [['@timestamp', 'desc']],
+        interval: 'auto',
+        hideChart: false,
+        ...appStateOverrides,
+      },
+      globalState: globalStateOverrides,
+    }),
+    timeRestore,
+    services,
+  });
+};

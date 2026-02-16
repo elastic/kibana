@@ -10,14 +10,17 @@
 import { within } from '../../../ast/location';
 import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '../../../types';
 import { findFinalWord } from '../../definitions/utils/autocomplete/helpers';
-import { childrenOfPromqlNode, findPromqlAstPosition } from '../../../promql/traversal';
-import { PromQLParser } from '../../../promql';
+import {
+  childrenOfPromqlNode,
+  findPromqlAstPosition,
+} from '../../../embedded_languages/promql/ast/traversal';
+import { PromQLParser } from '../../../embedded_languages/promql';
 import type {
   PromQLAstNode,
   PromQLAstQueryExpression,
   PromQLFunction,
   PromQLPositionResult,
-} from '../../../promql/types';
+} from '../../../embedded_languages/promql/types';
 import {
   getPromqlFunctionDefinition,
   isPromqlAcrossSeriesFunction,
