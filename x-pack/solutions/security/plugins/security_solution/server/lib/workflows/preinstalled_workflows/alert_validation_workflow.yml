@@ -1,0 +1,618 @@
+# =============================================================================
+# Security Alert Validation Workflow
+# =============================================================================
+#
+# Purpose:
+#   Automatically triages security alerts using an AI agent. For each
+#   triggered alert the workflow gathers contextual enrichment data
+#   (prevalence, related alerts, rule metadata, fire count, close history),
+#   sends the enriched context to an LLM-based agent for classification
+#   (true_positive / false_positive / inconclusive), records the verdict as
+#   an alert note, applies workflow tags, and optionally auto-closes alerts
+#   classified as false positives with high confidence.
+#
+# Flow:
+#   - Initialise workflow variables (tag prefix, version).
+#   - For each alert in the trigger batch:
+#     - Skip if already validated (unless override_previous is true).
+#     - Add an "execution started" note to the alert timeline.
+#     - Gather enrichment data (close history, global prevalence,
+#       related alerts graph, rule fire count, rule metadata).
+#     - Build human-readable timeline strings for the seed and related
+#       alerts.
+#     - Invoke the AI agent with the enriched context and a structured
+#       output schema (classification, confidence, rationale, factors).
+#     - Write the verdict note back to the alert timeline.
+#     - Apply workflow tags to the seed alert.
+#     - Auto-close the alert if it meets the false-positive thresholds.
+#
+# Author: Elastic
+# =============================================================================
+
+name: "security.alert.validation"
+enabled: true
+description: "Security alert validation workflow. Author: Elastic"
+version: "1"
+tags:
+  - security
+  - alert_validation
+
+triggers:
+  - type: alert
+
+# ---------------------------------------------------------------------------
+# Configuration constants
+# ---------------------------------------------------------------------------
+# Adjust these values to tune workflow behaviour without editing step logic.
+consts:
+  workflow_version: "v0.0.1"
+
+  # When false, the workflow exits early if the alert already carries the
+  # workflow tag prefix. Set to true to re-evaluate previously validated alerts.
+  override_previous: true
+
+  # --- Auto-close settings ---------------------------------------------------
+  # Automatically close alerts classified as false_positive when their
+  # confidence score AND confidence level fall within the defined thresholds.
+  auto_close_enabled: true
+
+  # Confidence thresholds (0–1 scale) — reserved for future use
+  auto_close_confidence_score_min_threshold: 0.85
+  auto_close_confidence_score_max_threshold: 1.0
+
+  # Tag suffix appended when an alert is auto-closed by this workflow
+  closed_tag_suffix: "closed-by-agent"
+
+# =============================================================================
+# Steps
+# =============================================================================
+steps:
+
+  # ---------------------------------------------------------------------------
+  # Initialise workflow-scoped variables
+  # ---------------------------------------------------------------------------
+  # Derive normalised names and a tag prefix that is used throughout the
+  # workflow to mark and identify alerts processed by this execution.
+  - name: set_workflow_variables
+    type: data.set
+    with:
+      running_note: false
+      normalized_name: "{{ workflow.name | downcase | replace: ' ', '_' }}"
+      normalized_version: "{{ consts.workflow_version | downcase | replace: ' ', '_' }}"
+      tag_prefix: "workflow.{{ workflow.name | downcase | replace: ' ', '_' }}"
+
+  # ---------------------------------------------------------------------------
+  # Iterate over each alert in the trigger batch
+  # ---------------------------------------------------------------------------
+  - name: loop_over_results
+    type: foreach
+    foreach: "{{ event.alerts | json }}"
+    steps:
+      # Log a link to the alert for traceability at the start of processing.
+      - name: log_alert_link
+        type: console
+        with:
+          message: >-
+            Processing alert {{ foreach.item._id }}:
+            /app/security/alerts/redirect/{{ foreach.item._id }}
+
+      # -----------------------------------------------------------------------
+      # Build the "already validated" check expression
+      # -----------------------------------------------------------------------
+      # Creates a Liquid expression that evaluates to true when the alert's
+      # workflow_tags array already contains the workflow tag prefix.
+      - name: build_already_validated_expr
+        type: data.set
+        with:
+          already_validated_expr: 'tag == "{{ variables.tag_prefix }}"'
+
+      - name: build_already_validated_condition
+        type: data.set
+        with:
+          already_validated_condition: "${{ foreach.item.kibana.alert.workflow_tags | has_exp: 'tag', variables.already_validated_expr }}"
+
+      # -----------------------------------------------------------------------
+      # Gate: skip if the alert was already validated
+      # -----------------------------------------------------------------------
+      - name: already_validated
+        type: if
+        condition: "${{ variables.already_validated_condition and consts.override_previous == false }}"
+        steps:
+          - name: log_already_validated
+            type: console
+            with:
+              message: >-
+                Alert {{ foreach.item._id }} has already been validated.
+                Remove the "{{ variables.tag_prefix }}" tag to re-run.
+        else:
+
+          # -------------------------------------------------------------------
+          # Add an "execution started" note to the alert timeline
+          # -------------------------------------------------------------------
+          - name: add_execution_started_note_to_alert
+            type: kibana.request
+            with:
+              method: PATCH
+              path: /api/note
+              body:
+                note:
+                  eventId: '{{ foreach.item._id }}'
+                  note: |
+                    ⏳ [{{workflow.name}}:{{execution.id}}]({{execution.url}})
+
+                    ---
+                  timelineId: ''
+              headers:
+                kbn-xsrf: string
+                Content-Type: application/json
+
+          # Persist the created note ID so we can update it later with the
+          # verdict or an error message.
+          - name: set_note_id
+            type: data.set
+            with:
+              note_id: "{{ steps.add_execution_started_note_to_alert.output.note.noteId }}"
+
+          # -------------------------------------------------------------------
+          # Gather enrichment data
+          # -------------------------------------------------------------------
+          # Each step below fetches a different facet of context that the AI
+          # agent will use to classify the alert.
+
+          # Close history: how often this rule's alerts have been closed and
+          # the distribution of close reasons (e.g. false_positive, resolved).
+          # Looks back from the alert timestamp so results are relative to
+          # when the alert actually fired, not when the workflow runs.
+          - name: get_close_history
+            type: security.getCloseHistory
+            with:
+              ruleId: "{{event.rule.id}}"
+              timestamp: '{{foreach.item["@timestamp"]}}'
+              time_range: "30d"
+
+          # Global prevalence: total alert count, unique hosts, unique users,
+          # and top-N hosts for this rule across the environment.
+          # Uses the alert timestamp as the anchor so prevalence reflects
+          # the state of the environment at the time the alert was raised.
+          - name: get_global_prevalence
+            type: security.getGlobalPrevalence
+            with:
+              ruleId: "{{event.rule.id}}"
+              timestamp: '{{foreach.item["@timestamp"]}}'
+              time_range: "24h"
+
+          # Rule fire count: how many times the rule fired in a recent window.
+          # Anchored to the alert timestamp so the count covers the window
+          # leading up to the alert, not the current moment.
+          - name: get_rule_fire_count
+            type: security.getRuleFireCount
+            with:
+              ruleId: "{{event.rule.id}}"
+              timestamp: '{{foreach.item["@timestamp"]}}'
+              time_range: "1h"
+
+          # Rule metadata: name, description, severity, MITRE ATT&CK mapping.
+          - name: get_rule_metadata
+            type: security.getRuleMetadata
+            with:
+              ruleId: "{{event.rule.id}}"
+
+          # Related alerts: builds a graph of alerts that share entity values
+          # (host, user, process, IP, etc.) with the seed alert. Scores edges
+          # by field weight to surface the most relevant connections.
+          - name: get_related_alerts
+            type: security.getRelatedAlerts
+            with:
+              alertId: "{{foreach.item._id}}"
+              alertIndex: "{{foreach.item._index}}"
+              include_seed: true
+              entity_fields:
+                # --- Strong, stable identifiers (likely same attack) ---
+                - field: "process.entity_id"
+                  score: 5
+                - field: "agent.id"
+                  score: 4
+                - field: "entity.id"
+                  score: 4
+                - field: "host.id"
+                  score: 4
+
+                # --- Identity-level correlation ---
+                - field: "user.id"
+                  score: 4
+                - field: "user.name"
+                  score: 2
+
+                # --- Host-level correlation ---
+                - field: "host.name"
+                  score: 2
+                - field: "host.hostname"
+                  score: 2
+
+                # --- Service / workload identity ---
+                - field: "service.id"
+                  score: 2
+
+                # --- Network-based correlation (weaker, noisier) ---
+                - field: "source.ip"
+                  score: 1
+                  aliases:
+                    - field: "destination.ip"
+                      score: 4 # lateral-movement detection
+                - field: "destination.ip"
+                  score: 1
+                  aliases:
+                    - field: "source.ip"
+                      score: 4 # lateral-movement detection
+
+                # --- Container / cloud (contextual) ---
+                - field: "container.id"
+                  score: 2
+              min_entity_score: 4
+              # Ignore common service accounts that create false correlation chains
+              ignore_entities:
+                - field: "user.name"
+                  values: ["root", "SYSTEM", "Administrator"]
+              seed_window: "1h"
+              expand_window: "1h"
+              max_depth: 100
+              max_alerts: 20
+
+          # -------------------------------------------------------------------
+          # Build timeline strings for the seed and related alerts
+          # -------------------------------------------------------------------
+          # Timeline strings are short, human-readable summaries of each alert
+          # that the AI agent can scan quickly.
+
+          # Initialise the accumulator array for related alert lines.
+          - name: init_related_alert_lines
+            type: data.set
+            with:
+              related_alert_lines: []
+
+          # Iterate over every related alert and build a line for each.
+          - name: build_related_alert_lines
+            type: foreach
+            foreach: "{{ steps.get_related_alerts.output.alerts_sorted | json }}"
+            steps:
+              - name: get_related_alert_timeline_string
+                type: security.getAlertTimelineString
+                with:
+                  alertId: "{{ foreach.item.alert_id }}"
+                  alertIndex: "{{ foreach.item.alert_index }}"
+
+              - name: set_related_alert_line
+                type: data.set
+                with:
+                  related_alert_line: "{{foreach.item.alert_index}}:{{ foreach.item.alert_id }}: {{ steps.get_related_alert_timeline_string.output.timeline_string }}"
+
+              - name: push_related_alert_line
+                type: data.set
+                with:
+                  related_alert_lines: "${{ variables.related_alert_lines | push: variables.related_alert_line }}"
+                  
+          # Timeline string for the seed alert (used as an LLM attachment label).
+          - name: get_seed_timeline_string
+            type: security.getAlertTimelineString
+            with:
+              alertId: "{{ foreach.item._id }}"
+              alertIndex: "{{ foreach.item._index }}"
+
+          # -------------------------------------------------------------------
+          # Invoke the AI agent for classification
+          # -------------------------------------------------------------------
+          # Sends the enriched context (prevalence, related alerts, rule info,
+          # fire count) and the raw alert as an attachment to the AI agent.
+          # The agent returns a structured JSON object conforming to the schema
+          # defined below.
+          - name: onechat_runAgent_step
+            type: ai.agent
+            agent-id: "elastic-ai-agent"
+            connector-id: gpt41Azure
+            create-conversation: true
+            on-failure:
+              retry:
+                max-attempts: 5
+                delay: "30s"
+            with:
+              message: |
+                <role>
+                You are a security analyst reasoning over a detection alert. Determine whether the alert is a true positive or a false positive.
+
+                You may use tools to gather more context about this alert. Your verdict must be defensible from literal alert fields, the gathered context and general security knowledge. Do not invent facts; identify what is present, what is missing, and what matters.
+                </role>
+
+                <operational_constraints>
+                Output only the required schema. Do not ask clarifying questions. Reflect uncertainty via confidence_score. Do not fabricate command syntax, tools, or unseen file paths.
+
+                Missing Critical Fields reduce confidence only and must not change the classification.
+                </operational_constraints>
+
+                <verdict_semantics>
+                true_positive: Observable behavior demonstrates or closely simulates expected rule firing expectations. Requires positive indicators — proved harm, confirmed attack techniques, or corroborated events that cohere into rule logic.
+                false_positive: Observable behavior is consistent with routine legitimate operations and does not meet the expected rule firing expectations. When context is thin, confidence is lower but the classification remains likely_false_positive if the behavior itself is routine.
+                inconclusive: It is not possible to determine the classification of the alert based on the available information.
+                </verdict_semantics>
+
+                <epistemic_framework>
+                Apply hypothesis testing: weigh observable evidence against competing explanations.
+
+                Use available tools to gather required context such as details about related alerts or other events.
+
+                Missing context lowers confidence but must not change classification.
+                </epistemic_framework>
+
+                <reasoning_process>
+                1. Gather Context via search tools.
+                2. Characterize the Event: Describe who did what, where, when, and how using literal fields. Explain why the rule fired.
+                3. Establish Baseline & Evidence:
+                   a. Expected behavior (generic + historical)
+                   b. False positive anchors (observable routine behavior)
+                   c. Observable anomalies (must be present, not inferred)
+                   d. Missing critical fields (confidence impact only)
+                4. Evaluate Hypotheses:
+                   - Assess Attack Chain: Complete, Partial, or Absent based on observable evidence.
+                5. Apply Decision Gates:
+                   - Gate A (Proved Harm) → Gate B (Strong TP indicators) → Gate C (Routine ops) → Gate D (Insufficient evidence).
+                6. Produce Rationale:
+                   - Cite applied gate, key evidence, anomalies, missing fields, and confidence justification.
+                </reasoning_process>
+
+                ## Preliminary Context
+
+                ### Global Prevalence
+                {{steps.get_global_prevalence.output.message}}
+
+                Total alerts: {{steps.get_global_prevalence.output.total_alerts}}
+                Unique hosts: {{steps.get_global_prevalence.output.unique_hosts}}
+                Unique users: {{steps.get_global_prevalence.output.unique_users}}
+
+                {% if steps.get_global_prevalence.output.top_hosts and steps.get_global_prevalence.output.top_hosts.size > 0 -%}
+                ##### Top Hosts
+                {%- for host in steps.get_global_prevalence.output.top_hosts %}
+                - {{ host.host_name }}: {{host.alert_count}} alerts
+                {%- endfor %}
+                {%- endif %}
+
+                ### Related Alerts
+                Graph nodes: {{steps.get_related_alerts.output.stats.nodes}}
+
+                Graph edges: {{steps.get_related_alerts.output.stats.edges}}
+
+                {% if variables.related_alert_lines and variables.related_alert_lines.size > 0 -%}
+                {%- for line in variables.related_alert_lines %}
+                - {{ line }}
+                {%- endfor %}
+                {%- endif %}
+
+                ### Rule: {{steps.get_rule_metadata.output.metadata.rule_name}}
+                {{steps.get_rule_metadata.output.metadata.rule_description}}
+                {% capture metadata %}
+                {% if steps.get_rule_metadata.output.metadata.severity -%}
+                Severity: {{ steps.get_rule_metadata.output.metadata.severity }}
+                {%- endif %}
+                {% if steps.get_rule_metadata.output.metadata.rule_type -%}
+                Type: {{ steps.get_rule_metadata.output.metadata.rule_type }}
+                {%- endif %}
+                {% if steps.get_rule_metadata.output.metadata.rule_id -%}
+                Id: {{ steps.get_rule_metadata.output.metadata.rule_id }}
+                {%- endif %}
+                {% if steps.get_rule_metadata.output.metadata.rule_uuid -%}
+                UUID: {{ steps.get_rule_metadata.output.metadata.rule_uuid }}
+                {%- endif %}
+                {% if steps.get_rule_metadata.output.metadata.threat_framework -%}
+                Threat framework: {{ steps.get_rule_metadata.output.metadata.threat_framework }}
+                {%- endif %}
+                {% if steps.get_rule_metadata.output.metadata.threat_tactic and steps.get_rule_metadata.output.metadata.threat_tactic.name -%}
+                Tactic: {{ steps.get_rule_metadata.output.metadata.threat_tactic.name }}
+                {%- endif %}
+                {% if steps.get_rule_metadata.output.metadata.threat_technique and steps.get_rule_metadata.output.metadata.threat_technique.name -%}
+                Technique: {{ steps.get_rule_metadata.output.metadata.threat_technique.name }}
+                {%- endif %}
+                {% endcapture %}
+                {{ metadata | strip }}
+
+                ### Rule Fire Count
+                {{steps.get_rule_fire_count.output.message}}
+
+              attachments:
+                - type: "security.alert"
+                  data:
+                    alert: "{{ foreach.item | json:2 }}"
+                    attachmentLabel: "{{ steps.get_seed_timeline_string.output.attachment_label }}"
+
+              # Structured output schema the AI agent must conform to.
+              schema:
+                type: object
+                properties:
+                  classification:
+                    type: string
+                    enum:
+                      - false_positive
+                      - true_positive
+                      - inconclusive
+                    description: Classification of the alert based on analysis
+                  confidence_score:
+                    type: number
+                    minimum: 0
+                    maximum: 100
+                    description: Confidence score from 0-100 indicating certainty of the classification
+                  rationale:
+                    type: string
+                    description: Human-readable explanation of the classification decision
+                  contributing_factors:
+                    type: array
+                    items:
+                      type: string
+                    description: List of factors that contributed to the classification decision
+                required:
+                  - classification
+                  - confidence_score
+                  - rationale
+                  - contributing_factors
+
+          # -------------------------------------------------------------------
+          # Guard: ensure the AI agent returned a valid classification
+          # -------------------------------------------------------------------
+          # If no classification was returned, update the note with an error
+          # and abort processing for this alert.
+          - name: check_if_output_exists
+            type: if
+            condition: "not steps.onechat_runAgent_step.output.structured_output.classification:*"
+            steps:
+              - name: add_no_data_note_to_alert
+                type: kibana.request
+                with:
+                  method: PATCH
+                  path: /api/note
+                  body:
+                    noteId: "{{variables.note_id}}"
+                    note:
+                      eventId: '{{ foreach.item._id }}'
+                      timelineId: ''
+                      note: |
+                        ❌ [{{workflow.name}}:{{execution.id}}]({{execution.url}})
+
+                        ---
+                        Error: No classification returned.
+              # TODO: Replace this with a proper workflow exit/abort step
+              #       once the workflow engine supports one.
+              - name: fail_workflow
+                type: http
+                with:
+                  method: GET
+                  url: "---exit-workflow---"
+
+          # -------------------------------------------------------------------
+          # Write the verdict note to the alert timeline
+          # -------------------------------------------------------------------
+          - name: add_verdict_note_to_alert
+            type: kibana.request
+            with:
+              method: PATCH
+              path: /api/note
+              body:
+                noteId: "{{variables.note_id}}"
+                note:
+                  eventId: '{{ foreach.item._id }}'
+                  note: |
+                    ✅ [{{workflow.name}}:{{execution.id}}]({{execution.url}})
+
+                    ---
+                    ## Automated Alert Analysis
+                    ### Classification
+                    **{{ steps.onechat_runAgent_step.output.structured_output.classification }}**
+
+                    ### Confidence Score
+                    {{ steps.onechat_runAgent_step.output.structured_output.confidence_score }} / 100
+
+                    ### Rationale
+                    {{ steps.onechat_runAgent_step.output.structured_output.rationale }}
+
+                    ### Contributing Factors
+                    {% for factor in steps.onechat_runAgent_step.output.structured_output.contributing_factors %}
+                    - {{ factor }}
+                    {%- endfor %}
+
+                    ### Related Alert IDs
+                    {% for alert in steps.onechat_runAgent_step.output.structured_output.related_alert_ids %}
+                    - [{{ alert.alert_id }}](/app/security/alerts/redirect/{{ alert.alert_id }})
+                    {%- endfor %}
+
+
+                    ### Timestamp
+                    {{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S' }}
+
+                    {% if steps.onechat_runAgent_step.output.conversation_id -%}
+                    ### Conversation
+                    [Continue conversation](/app/agent_builder/conversations/{{ steps.onechat_runAgent_step.output.conversation_id }})
+                    {%- endif %}
+
+                  timelineId: ''
+              headers:
+                kbn-xsrf: string
+                Content-Type: application/json
+
+          # -------------------------------------------------------------------
+          # Apply workflow tags to the seed alert
+          # -------------------------------------------------------------------
+          # Tags follow the convention:
+          #   workflow.<name>                              — marks the alert as processed
+          #   workflow.<name>.version.<ver>                — tracks the workflow version
+          #   workflow.<name>.output.classification.<cls>  — records the verdict
+
+          # Build a filter expression to find any existing workflow tags
+          # (used for tag replacement on re-runs).
+          - name: build_tags_filter_expr
+            type: data.set
+            with:
+              tags_filter_expr: 'tag contains "{{ variables.tag_prefix }}."'
+
+          - name: set_tags
+            type: data.set
+            with:
+              tags_to_add:
+                - "{{ variables.tag_prefix }}"
+                - "{{ variables.tag_prefix }}.version.{{ variables.normalized_version }}"
+                - "{{ variables.tag_prefix }}.output.classification.{{ steps.onechat_runAgent_step.output.structured_output.classification | downcase }}"
+              tags_to_remove: "${{ foreach.item.kibana.alert.workflow_tags | where_exp: 'tag', variables.tags_filter_expr }}"
+
+          # Remove stale tags first (if any) to avoid conflicts with the add.
+          - name: has_tags_to_remove
+            type: if
+            condition: "${{ variables.tags_to_remove | has_exp: 'item', 'true' }}"
+            steps:
+              - name: remove_stale_tags
+                type: kibana.SetAlertTags
+                with:
+                  ids:
+                    - '{{ foreach.item._id }}'
+                  tags:
+                    tags_to_remove: "${{ variables.tags_to_remove }}"
+                    tags_to_add: []
+
+          # Add the new tags for this execution.
+          - name: add_result_tags
+            type: kibana.SetAlertTags
+            with:
+              ids:
+                - '{{ foreach.item._id }}'
+              tags:
+                tags_to_remove: []
+                tags_to_add: "${{ variables.tags_to_add }}"
+
+          # -------------------------------------------------------------------
+          # Auto-close: close the alert if it meets FP thresholds
+          # -------------------------------------------------------------------
+          # When auto_close_enabled is true and the alert is classified as
+          # false_positive with a confidence score within the configured
+          # thresholds, the alert is tagged and closed automatically.
+          # TODO: Also check auto_close_confidence_score_min/max_threshold once
+          #       the AI agent output includes a normalised confidence value.
+          - name: check_auto_close_conditions
+            type: if
+            condition: >-
+              consts.auto_close_enabled: true
+              and steps.onechat_runAgent_step.output.structured_output.classification: "false_positive"
+              and steps.onechat_runAgent_step.output.structured_output.confidence_score >= {{ consts.auto_close_confidence_score_min_threshold }}
+              and steps.onechat_runAgent_step.output.structured_output.confidence_score <= {{ consts.auto_close_confidence_score_max_threshold }}
+            steps:
+              # Tag the alert so it can be identified as auto-closed.
+              - name: set_close_tags
+                type: kibana.SetAlertTags
+                with:
+                  ids:
+                    - '{{ foreach.item._id }}'
+                  tags:
+                    tags_to_remove: []
+                    tags_to_add:
+                      - "{{variables.tag_prefix}}.{{consts.closed_tag_suffix}}"
+
+              # Close the alert with reason "false_positive".
+              - name: close_alert_as_false_positive
+                type: kibana.SetAlertsStatus
+                with:
+                  status: 'closed'
+                  signal_ids:
+                    - '{{ foreach.item._id }}'
+                  reason: 'false_positive'
