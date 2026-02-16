@@ -128,6 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
         ...browserMonitorJson,
         locations: [LOCAL_LOCATION, pvtLoc],
         maintenance_windows: [mwObject.id],
+        timeout: null,
       };
 
       const createResponse = await monitorTestService.createMonitor({
