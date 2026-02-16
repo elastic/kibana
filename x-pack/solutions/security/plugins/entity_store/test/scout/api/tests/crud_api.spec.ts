@@ -8,7 +8,7 @@
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import type { Client } from '@elastic/elasticsearch';
-import type { Entity } from '../../../../common/domain/definitions/entity.gen';
+import type { HostEntity } from '../../../../common/domain/definitions/entity.gen';
 import {
   COMMON_HEADERS,
   ENTITY_STORE_ROUTES,
@@ -96,16 +96,62 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       }
     );
     expect(createWithForce.statusCode).toBe(200);
+    expect(await countEntitiesByID(esClient, LATEST_INDEX, entityObj.entity.id)).toBe(1);
+  });
+
+  apiTest('Should perform an upsert', async ({ apiClient, esClient }) => {
+    const entityObj: Entity = {
+      entity: {
+        id: 'this-is-upsert',
+      },
+      host: {
+        name: 'this-is-upsert',
+        entity: {
+          id: 'this-is-upsert',
+        },
+      },
+    };
+
+    const create = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPSERT('host'), {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: entityObj,
+    });
+    expect(create.statusCode).toBe(200);
+    expect(await countEntitiesByID(esClient, LATEST_INDEX, entityObj.entity.id)).toBe(1);
+
+    const upsert = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPSERT('host') + '?force=true', {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {
+        entity: {
+          id: entityObj.host.entity.id,
+          name: 'this-is-upsert',
+        },
+        host: {
+          name: 'this-is-upsert',
+        },
+      },
+    });
+    expect(upsert.statusCode).toBe(200);
 
     const entities = await esClient.search({
       index: LATEST_INDEX,
       query: {
         term: {
-          'entity.id': entityObj.entity.id,
+          'host.entity.id': entityObj.entity.id,
         },
       },
     });
-    expect(await countEntitiesByID(esClient, LATEST_INDEX, entityObj.entity.id)).toBe(1);
+    expect(entities.hits.hits).toHaveLength(1);
+    const received = entities.hits.hits[0]._source as HostEntity;
+    expect(received.entity).toBeUndefined();
+    expect(received.host).toMatchObject({
+      entity: {
+        id: entityObj.host.entity.id,
+      },
+      name: 'this-is-upsert',
+    });
   });
 });
 
@@ -113,8 +159,9 @@ async function countEntitiesByID(esClient: Client, index: string, id: string): P
   const resp = await esClient.search({
     index,
     query: {
-      term: {
-        'entity.id': id,
+      bool: {
+        should: [{ term: { 'entity.id': id } }, { term: { 'host.entity.id': id } }],
+        minimum_should_match: 1,
       },
     },
   });
