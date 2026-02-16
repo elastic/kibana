@@ -19,6 +19,7 @@ import type { EvaluatorParams } from '@kbn/evals/src/types';
 import type { EvaluationCriterion } from '@kbn/evals/src/evaluators/criteria';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import kbnDatemath from '@kbn/datemath';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { evaluate } from '../src/evaluate';
 import type { SignificantEventsEvaluationExample } from './significant_events_datasets';
 import { SIGNIFICANT_EVENTS_DATASETS } from './significant_events_datasets';
@@ -96,7 +97,8 @@ const validateQuery = async ({
   // 2. Execution Verification (only when syntax is valid)
   let isExecutionHit = false;
   if (syntaxResult.passed) {
-    const searchResult = await esClient.search({ index: testIndex, q: kql });
+    const dsl = toElasticsearchQuery(fromKueryExpression(kql));
+    const searchResult = await esClient.search({ index: testIndex, query: dsl });
     const total = searchResult.hits.total;
     const hits = typeof total === 'number' ? total : total?.value ?? 0;
     isExecutionHit = hits > 0;
