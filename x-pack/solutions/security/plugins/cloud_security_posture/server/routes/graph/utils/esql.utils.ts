@@ -94,7 +94,7 @@ export const formatJsonProperty = (propertyName: string, valueVar: string): stri
  */
 export const buildLookupJoinEsql = (lookupIndexName: string): string => {
   return `| DROP entity.id
-| DROP entity.target.id  
+| DROP entity.target.id
 // rename entity.*fields before next pipeline to avoid name collisions
 | EVAL entity.id = actorEntityId
 | LOOKUP JOIN ${lookupIndexName} ON entity.id
@@ -102,7 +102,7 @@ export const buildLookupJoinEsql = (lookupIndexName: string): string => {
 | RENAME actorEntityType    = entity.type
 | RENAME actorEntitySubType = entity.sub_type
 | RENAME actorHostIp        = host.ip
-| RENAME actorLookupEntityId = entity.id 
+| RENAME actorLookupEntityId = entity.id
 
 | EVAL entity.id = targetEntityId
 | LOOKUP JOIN ${lookupIndexName} ON entity.id

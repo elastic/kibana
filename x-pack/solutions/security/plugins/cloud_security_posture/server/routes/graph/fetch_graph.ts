@@ -39,6 +39,7 @@ interface BuildEsqlQueryParams {
   isEnrichPolicyExists: boolean;
   spaceId: string;
   alertsMappingsIncluded: boolean;
+  pinnedIds?: string[];
 }
 
 export const fetchGraph = async ({
@@ -51,6 +52,7 @@ export const fetchGraph = async ({
   indexPatterns,
   spaceId,
   esQuery,
+  pinnedIds,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
@@ -61,6 +63,7 @@ export const fetchGraph = async ({
   indexPatterns: string[];
   spaceId: string;
   esQuery?: EsQuery;
+  pinnedIds?: string[];
 }): Promise<EsqlToRecords<GraphEdge>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
 
@@ -93,6 +96,7 @@ export const fetchGraph = async ({
     isEnrichPolicyExists,
     spaceId,
     alertsMappingsIncluded,
+    pinnedIds,
   });
 
   logger.trace(`Executing query [${query}]`);
@@ -109,6 +113,7 @@ export const fetchGraph = async ({
         ...originEventIds
           .filter((originEventId) => originEventId.isAlert)
           .map((originEventId, idx) => ({ [`og_alrt_id${idx}`]: originEventId.id })),
+        ...(pinnedIds ?? []).map((id, idx) => ({ [`pinned_id${idx}`]: id })),
       ],
     })
     .toRecords<GraphEdge>();
@@ -274,6 +279,25 @@ const buildEnrichedEntityFieldsEsql = (): string => {
   )`;
 };
 
+/**
+ * Generates ESQL statement for evaluating pinned IDs.
+ * This checks if the document _id, actorEntityId, or targetEntityId matches any of the pinned IDs.
+ */
+const buildPinnedEsql = (pinnedIds?: string[]): string => {
+  if (!pinnedIds || pinnedIds.length === 0) {
+    return '| EVAL pinned = TO_STRING(null)';
+  }
+
+  const pinnedParamsStr = pinnedIds.map((_id, idx) => `?pinned_id${idx}`).join(', ');
+
+  return `| EVAL pinned = CASE(
+    _id IN (${pinnedParamsStr}), _id,
+    actorEntityId IN (${pinnedParamsStr}), actorEntityId,
+    targetEntityId IN (${pinnedParamsStr}), targetEntityId,
+    null
+  )`;
+};
+
 const buildEsqlQuery = ({
   indexPatterns,
   originEventIds,
@@ -282,6 +306,7 @@ const buildEsqlQuery = ({
   isEnrichPolicyExists,
   spaceId,
   alertsMappingsIncluded,
+  pinnedIds,
 }: BuildEsqlQueryParams): string => {
   const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
   const enrichPolicyName = getEnrichPolicyId(spaceId);
@@ -325,6 +350,7 @@ const buildEsqlQuery = ({
 ${targetEntityIdEvals}
 | MV_EXPAND actorEntityId
 | MV_EXPAND targetEntityId
+${buildPinnedEsql(pinnedIds)}
 | EVAL actorEntityFieldHint = CASE(
 ${actorFieldHintCases},
     ""
@@ -457,9 +483,12 @@ ${buildEnrichedEntityFieldsEsql()}
       targetEntityType,
       targetEntitySubType,
       isOrigin,
-      isOriginAlert
+      isOriginAlert,
+      pinned
+| EVAL pinnedSort = CASE(pinned IS NULL, 1, 0)
+| SORT pinnedSort ASC, action DESC, isOrigin
 | LIMIT 1000
-| SORT action DESC, isOrigin`;
+| DROP pinnedSort`;
 
   return query;
 };

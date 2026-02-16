@@ -518,4 +518,91 @@ describe('fetchGraph', () => {
       expect(hasTargetCheck).toBe(false);
     });
   });
+
+  describe('Pinned IDs', () => {
+    it('should include pinned parameters when pinnedIds are provided', async () => {
+      const pinnedIds = ['entity-1', 'entity-2'];
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+        pinnedIds,
+      };
+
+      await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      // Verify EVAL pinned CASE statement is present with _id, actorEntityId, and targetEntityId checks
+      expect(query).toContain('EVAL pinned = CASE(');
+      expect(query).toContain('_id IN (?pinned_id0, ?pinned_id1)');
+      expect(query).toContain('actorEntityId IN (?pinned_id0, ?pinned_id1)');
+      expect(query).toContain('targetEntityId IN (?pinned_id0, ?pinned_id1)');
+    });
+
+    it('should use null fallback for pinned when no pinnedIds are provided', async () => {
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+        pinnedIds: undefined,
+      };
+
+      await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      // Verify fallback EVAL pinned = TO_STRING(null) is present
+      expect(query).toContain('EVAL pinned = TO_STRING(null)');
+
+      // Verify no pinned_id params
+      const pinnedParams = esqlCallArgs[0].params
+        // @ts-ignore: field is typed as Record<string, string>[]
+        ?.filter((p) => Object.keys(p)[0]?.startsWith('pinned_id'));
+      expect(pinnedParams).toHaveLength(0);
+    });
+
+    it('should use null fallback for pinned when pinnedIds is empty array', async () => {
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+        pinnedIds: [],
+      };
+
+      await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      // Verify fallback EVAL pinned = TO_STRING(null) is present
+      expect(query).toContain('EVAL pinned = TO_STRING(null)');
+    });
+  });
 });
