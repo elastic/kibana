@@ -10,18 +10,19 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import type { EuiButtonSize } from '@elastic/eui';
-import { AiButtonBase } from './ai_button_base';
+import { AiButtonDefault } from './ai_button_default';
 import { AiButtonAccent } from './ai_button_accent';
 import { AiButtonEmpty } from './ai_button_empty';
 import { AiButtonIcon } from './ai_button_icon';
-import type { AiButtonVariant } from './ai_button_internal';
+import { AiButton } from './ai_button';
+import type { AiButtonVariant } from './ai_button_base';
 
 interface StoryArgs {
   label: string;
   size: EuiButtonSize;
   isDisabled: boolean;
   withIcon: boolean;
-  icon: 'aiLogo' | 'sparkles' | 'productAgent';
+  icon: 'aiAssistantLogo' | 'sparkles' | 'productAgent';
 }
 
 export default {
@@ -32,7 +33,7 @@ export default {
     label: { control: 'text' },
     isDisabled: { control: 'boolean' },
     withIcon: { control: 'boolean' },
-    icon: { control: 'select', options: ['aiLogo', 'sparkles', 'productAgent'] },
+    icon: { control: 'select', options: ['aiAssistantLogo', 'sparkles', 'productAgent'] },
   },
 } as Meta<StoryArgs>;
 
@@ -43,9 +44,9 @@ export const Default: StoryObj<StoryArgs> = {
     const iconProps = withIcon ? { iconType: icon } : {};
 
     return (
-      <AiButtonBase size={size} isDisabled={isDisabled} {...iconProps}>
+      <AiButtonDefault size={size} isDisabled={isDisabled} {...iconProps}>
         {label}
-      </AiButtonBase>
+      </AiButtonDefault>
     );
   },
   args: {
@@ -53,7 +54,7 @@ export const Default: StoryObj<StoryArgs> = {
     size: 's',
     isDisabled: false,
     withIcon: false,
-    icon: 'aiLogo',
+    icon: 'aiAssistantLogo',
   },
   argTypes: {
     size: { control: 'select', options: ['s', 'm'] },
@@ -77,7 +78,7 @@ export const Accent: StoryObj<StoryArgs> = {
     size: 's',
     isDisabled: false,
     withIcon: true,
-    icon: 'aiLogo',
+    icon: 'aiAssistantLogo',
   },
   argTypes: {
     size: { control: 'select', options: ['s', 'm'] },
@@ -101,7 +102,31 @@ export const Empty: StoryObj<StoryArgs> = {
     size: 's',
     isDisabled: false,
     withIcon: true,
-    icon: 'aiLogo',
+    icon: 'aiAssistantLogo',
+  },
+  argTypes: {
+    size: { control: 'select', options: ['xs', 's', 'm'] },
+  },
+};
+
+export const Outlined: StoryObj<StoryArgs> = {
+  render: (args) => {
+    const { label, size, isDisabled, withIcon, icon } = args;
+
+    const iconProps = withIcon ? { iconType: icon } : {};
+
+    return (
+      <AiButton variant="outlined" size={size} isDisabled={isDisabled} {...iconProps}>
+        {label}
+      </AiButton>
+    );
+  },
+  args: {
+    label: 'AI Assistant',
+    size: 's',
+    isDisabled: false,
+    withIcon: true,
+    icon: 'aiAssistantLogo',
   },
   argTypes: {
     size: { control: 'select', options: ['xs', 's', 'm'] },
@@ -112,7 +137,7 @@ interface IconOnlyStoryArgs {
   label: string;
   size: EuiButtonSize;
   isDisabled: boolean;
-  icon: 'aiLogo' | 'sparkles' | 'productAgent';
+  icon: 'aiAssistantLogo' | 'sparkles' | 'productAgent';
   variant: AiButtonVariant;
   appName: string;
 }
@@ -134,7 +159,6 @@ export const IconOnly: StoryObj<IconOnlyStoryArgs> = {
         iconType={icon}
         variant={variant}
         appName={appName}
-        onClick={() => undefined}
       />
     );
   },
@@ -142,7 +166,7 @@ export const IconOnly: StoryObj<IconOnlyStoryArgs> = {
     label: 'AI Assistant',
     size: 's',
     isDisabled: false,
-    icon: 'aiLogo',
+    icon: 'aiAssistantLogo',
     variant: 'base',
     appName: 'AI Assistant',
   },
@@ -150,8 +174,8 @@ export const IconOnly: StoryObj<IconOnlyStoryArgs> = {
     label: { control: 'text' },
     appName: { control: 'text' },
     isDisabled: { control: 'boolean' },
-    icon: { control: 'select', options: ['aiLogo', 'sparkles', 'productAgent'] },
-    variant: { control: 'select', options: ['base', 'accent', 'empty'] },
+    icon: { control: 'select', options: ['aiAssistantLogo', 'sparkles', 'productAgent'] },
+    variant: { control: 'select', options: ['base', 'accent', 'empty', 'outlined'] },
     size: { control: 'select', options: ['xs', 's', 'm'] },
   },
 };

@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/ai-components/ai_button/src'],
+import React from 'react';
+
+import { AiButtonBase } from './ai_button_base';
+import type { AiButtonBaseProps } from './ai_button_base';
+
+export type AiButtonProps = AiButtonBaseProps;
+
+export const AiButton = (props: AiButtonProps) => {
+  return <AiButtonBase {...props} />;
 };

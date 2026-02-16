@@ -83,7 +83,7 @@ export interface AiButtonGradientStyleOptions {
    * When provided, variant-specific gradient behavior can be applied.
    * This is optional to keep backwards compatibility with existing `fill` callers.
    */
-  readonly variant?: 'accent' | 'base' | 'empty';
+  readonly variant?: 'accent' | 'base' | 'empty' | 'outlined';
 }
 
 export interface AiButtonGradientStyles {
@@ -137,7 +137,7 @@ const getForegroundColors = ({
   isDarkMode: boolean;
   variant?: AiButtonVariant;
 }): AiGradientColors => {
-  if (isDarkMode && (variant === 'accent' || variant === 'empty')) {
+  if (isDarkMode && (variant === 'accent' || variant === 'empty' || variant === 'outlined')) {
     return darkModeBaseBackgroundColors;
   }
 
@@ -170,9 +170,17 @@ export const useAiButtonGradientStyles = ({
   return useMemo(() => {
     const resolvedVariant = (variant ?? (fill ? 'accent' : 'base')) as AiButtonVariant;
 
+    const emptyBackground = 'transparent';
+
     let buttonBackground: string;
     if (resolvedVariant === 'empty') {
-      buttonBackground = isDarkMode ? '#000' : '#FFFFFF';
+      buttonBackground = emptyBackground;
+    } else if (resolvedVariant === 'outlined') {
+      // Same background as `empty`, but with a gradient border matching the filled/accent background gradient.
+      const borderGradient = makeButtonBackgroundGradient(
+        isDarkMode ? darkModeFilledBackgroundColors : lightModeFilledBackgroundColors
+      );
+      buttonBackground = `linear-gradient(${emptyBackground}, ${emptyBackground}) padding-box, ${borderGradient} border-box`;
     } else if (resolvedVariant === 'accent') {
       buttonBackground = makeButtonBackgroundGradient(
         isDarkMode ? darkModeFilledBackgroundColors : lightModeFilledBackgroundColors
@@ -193,6 +201,7 @@ export const useAiButtonGradientStyles = ({
 
     const buttonCss = css`
       background: ${buttonBackground} !important;
+      ${resolvedVariant === 'outlined' ? 'border: 1px solid transparent;' : ''}
       border-radius: 4px;
       ${buttonForegroundColor ? `color: ${buttonForegroundColor} !important;` : ''}
 
@@ -251,7 +260,7 @@ export interface SvgAiGradientOptions {
   /**
    * When provided, variant-specific gradient behavior can be applied.
    */
-  readonly variant?: 'accent' | 'base' | 'empty';
+  readonly variant?: 'accent' | 'base' | 'empty' | 'outlined';
 }
 
 export const useSvgAiGradient = ({

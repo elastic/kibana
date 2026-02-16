@@ -11,7 +11,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { css } from '@emotion/react';
 
-import { AiButtonInternal } from './ai_button_internal';
+import { AiButtonBase } from './ai_button_base';
 
 const mockUseAiButtonGradientStyles = jest.fn();
 const mockUseSvgAiGradient = jest.fn();
@@ -36,9 +36,9 @@ beforeEach(() => {
   mockUseSvgAiGradient.mockReturnValue(defaultSvgGradient);
 });
 
-describe('<AiButtonInternal />', () => {
+describe('<AiButtonBase />', () => {
   it('base variant renders label text', () => {
-    render(<AiButtonInternal variant="base">AI Assistant</AiButtonInternal>);
+    render(<AiButtonBase variant="base">AI Assistant</AiButtonBase>);
 
     expect(screen.getByText('AI Assistant')).toBeInTheDocument();
     expect(mockUseAiButtonGradientStyles).toHaveBeenCalledWith(
@@ -50,7 +50,7 @@ describe('<AiButtonInternal />', () => {
   });
 
   it('accent variant renders EuiButton with fill', () => {
-    render(<AiButtonInternal variant="accent">AI Assistant</AiButtonInternal>);
+    render(<AiButtonBase variant="accent">AI Assistant</AiButtonBase>);
 
     expect(mockUseAiButtonGradientStyles).toHaveBeenCalledWith(
       expect.objectContaining({ fill: true, variant: 'accent' })
@@ -61,7 +61,7 @@ describe('<AiButtonInternal />', () => {
   });
 
   it('empty variant uses EuiButtonEmpty', () => {
-    const { container } = render(<AiButtonInternal variant="empty">AI Assistant</AiButtonInternal>);
+    const { container } = render(<AiButtonBase variant="empty">AI Assistant</AiButtonBase>);
 
     expect(container.querySelector('.euiButtonEmpty')).toBeTruthy();
     expect(mockUseAiButtonGradientStyles).toHaveBeenCalledWith(
@@ -74,7 +74,7 @@ describe('<AiButtonInternal />', () => {
 
   it('iconOnly variant renders EuiButtonIcon', () => {
     const { container } = render(
-      <AiButtonInternal
+      <AiButtonBase
         variant="base"
         iconOnly
         iconType="sparkles"
@@ -94,7 +94,7 @@ describe('<AiButtonInternal />', () => {
         iconGradientCss,
       });
 
-      render(<AiButtonInternal variant="base">Gradient check</AiButtonInternal>);
+      render(<AiButtonBase variant="base">Gradient check</AiButtonBase>);
 
       expect(screen.getByTestId('svg-ai-gradient-defs')).toBeInTheDocument();
     }
@@ -108,7 +108,7 @@ describe('<AiButtonInternal />', () => {
         iconGradientCss,
       });
 
-      render(<AiButtonInternal variant="base">Gradient check</AiButtonInternal>);
+      render(<AiButtonBase variant="base">Gradient check</AiButtonBase>);
 
       expect(screen.queryByTestId('svg-ai-gradient-defs')).not.toBeInTheDocument();
     }

@@ -11,18 +11,20 @@ date: 2026-02-11
 
 Shared AI-related visual components for Kibana.
 
-For now, this package contains the `AiButton` components: `AiButtonBase`, `AiButtonAccent`, `AiButtonEmpty`, and `AiButtonIconOnly` (see `ai_button/`). In the future we plan to add other AI-related visual components.
+For now, this package contains the `AiButton` components: `AiButton` (parent), `AiButtonDefault`, `AiButtonAccent`, `AiButtonEmpty`, and `AiButtonIcon` (see `ai_button/`). In the future we plan to add other AI-related visual components.
 
 ## Usage
 
 ```tsx
-import { AiButtonBase } from '@kbn/shared-ux-ai-components';
+import { AiButton, AiButtonDefault } from '@kbn/shared-ux-ai-components';
 
-<AiButtonBase onClick={() => undefined}>AI Button</AiButtonBase>;
+<AiButton onClick={() => undefined}>AI Button</AiButton>;
+
+<AiButtonDefault onClick={() => undefined}>AI Button</AiButtonDefault>;
 
 <AiButtonAccent onClick={() => undefined}>AI Button</AiButtonAccent>;
 
-<AiButtonIcon iconType="aiLogo" onClick={() => undefined} />;
+<AiButtonIcon iconType="aiAssistantLogo" onClick={() => undefined} />;
 
 <AiButtonEmpty onClick={() => undefined}>AI Button</AiButtonEmpty>;
 ```

@@ -7,8 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/ai-components/ai_button/src'],
+import React from 'react';
+
+import { AiButtonBase, type AiButtonProps } from './ai_button_base';
+
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+
+export type AiButtonDefaultProps = DistributiveOmit<
+  Extract<AiButtonProps, { iconOnly?: false; variant?: 'accent' | 'base' }>,
+  'variant'
+>;
+
+export const AiButtonDefault = (props: AiButtonDefaultProps) => {
+  return <AiButtonBase {...props} variant="base" />;
 };

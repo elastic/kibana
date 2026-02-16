@@ -8,15 +8,16 @@
  */
 
 import React from 'react';
-import type { EuiButtonEmptyProps } from '@elastic/eui';
 
-import { AiButtonInternal } from './ai_button_internal';
+import { AiButtonBase, type AiButtonProps } from './ai_button_base';
 
-export type AiButtonEmptyProps = EuiButtonEmptyProps & {
-  children: React.ReactNode;
-  iconType?: EuiButtonEmptyProps['iconType'] | 'aiLogo';
-};
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+
+export type AiButtonEmptyProps = DistributiveOmit<
+  Extract<AiButtonProps, { iconOnly?: false; variant: 'empty' }>,
+  'variant'
+>;
 
 export const AiButtonEmpty = (props: AiButtonEmptyProps) => {
-  return <AiButtonInternal {...props} variant="empty" />;
+  return <AiButtonBase {...props} variant="empty" />;
 };

@@ -8,21 +8,17 @@
  */
 
 import React from 'react';
-import type { EuiButtonIconPropsForButton } from '@elastic/eui';
 
-import { AiButtonInternal, type AiButtonVariant } from './ai_button_internal';
+import { AiButtonBase, type AiButtonBaseProps } from './ai_button_base';
 
-export type AiButtonIconProps = Omit<
-  EuiButtonIconPropsForButton,
-  'children' | 'display' | 'iconType'
-> & {
-  variant?: AiButtonVariant;
-  appName?: string;
-  iconType: EuiButtonIconPropsForButton['iconType'] | 'aiLogo';
-  'aria-label': string;
-};
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+
+export type AiButtonIconProps = DistributiveOmit<
+  Extract<AiButtonBaseProps, { iconOnly: true }>,
+  'iconOnly'
+>;
 
 export const AiButtonIcon = (props: AiButtonIconProps) => {
   const { variant = 'base', ...rest } = props;
-  return <AiButtonInternal {...rest} iconOnly variant={variant} />;
+  return <AiButtonBase {...rest} iconOnly variant={variant} />;
 };

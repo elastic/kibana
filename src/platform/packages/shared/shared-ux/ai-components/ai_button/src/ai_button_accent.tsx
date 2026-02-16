@@ -8,14 +8,16 @@
  */
 
 import React from 'react';
-import type { EuiButtonProps } from '@elastic/eui';
 
-import { AiButtonInternal } from './ai_button_internal';
+import { AiButtonBase, type AiButtonProps } from './ai_button_base';
 
-export const AiButtonAccent = (
-  props: Omit<EuiButtonProps, 'fill' | 'iconType'> & {
-    iconType?: EuiButtonProps['iconType'] | 'aiLogo';
-  }
-) => {
-  return <AiButtonInternal {...props} variant="accent" />;
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+
+export type AiButtonAccentProps = DistributiveOmit<
+  Extract<AiButtonProps, { iconOnly?: false; variant?: 'accent' | 'base' }>,
+  'variant'
+>;
+
+export const AiButtonAccent = (props: AiButtonAccentProps) => {
+  return <AiButtonBase {...props} variant="accent" />;
 };
