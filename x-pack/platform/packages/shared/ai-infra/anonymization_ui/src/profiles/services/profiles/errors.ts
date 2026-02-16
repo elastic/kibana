@@ -1,0 +1,114 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { isObjectRecord } from '../../utils/is_object_record';
+
+export type ProfilesApiErrorKind =
+  | 'conflict'
+  | 'forbidden'
+  | 'unauthorized'
+  | 'not_found'
+  | 'network'
+  | 'unknown';
+
+export interface ProfilesApiError extends Error {
+  kind: ProfilesApiErrorKind;
+  statusCode?: number;
+  body?: unknown;
+}
+
+const PROFILES_API_ERROR_KINDS: readonly ProfilesApiErrorKind[] = [
+  'conflict',
+  'forbidden',
+  'unauthorized',
+  'not_found',
+  'network',
+  'unknown',
+];
+
+const isProfilesApiErrorKind = (kind: unknown): kind is ProfilesApiErrorKind =>
+  typeof kind === 'string' &&
+  PROFILES_API_ERROR_KINDS.some((candidateKind) => candidateKind === kind);
+
+const getStatusCode = (error: unknown): number | undefined => {
+  if (!isObjectRecord(error)) {
+    return undefined;
+  }
+
+  const statusCode = error.statusCode;
+  if (typeof statusCode === 'number') {
+    return statusCode;
+  }
+
+  return undefined;
+};
+
+const getBody = (error: unknown): unknown => {
+  if (!isObjectRecord(error)) {
+    return undefined;
+  }
+
+  return error.body;
+};
+
+const toMessage = (statusCode?: number, body?: unknown) => {
+  if (isObjectRecord(body) && typeof body.message === 'string') {
+    return body.message;
+  }
+
+  if (statusCode) {
+    return `Profiles API request failed with status ${statusCode}`;
+  }
+
+  return 'Profiles API request failed';
+};
+
+class ProfilesApiErrorImpl extends Error implements ProfilesApiError {
+  constructor(
+    public kind: ProfilesApiErrorKind,
+    public statusCode: number | undefined,
+    public body: unknown
+  ) {
+    super(toMessage(statusCode, body));
+    this.name = 'ProfilesApiError';
+  }
+}
+
+export const isProfilesApiError = (error: unknown): error is ProfilesApiError => {
+  if (!isObjectRecord(error)) {
+    return false;
+  }
+
+  return isProfilesApiErrorKind(error.kind);
+};
+
+export const mapProfilesApiError = (error: unknown): ProfilesApiError => {
+  const statusCode = getStatusCode(error);
+  const body = getBody(error);
+
+  if (statusCode === 409) {
+    return new ProfilesApiErrorImpl('conflict', statusCode, body);
+  }
+
+  if (statusCode === 403) {
+    return new ProfilesApiErrorImpl('forbidden', statusCode, body);
+  }
+
+  if (statusCode === 401) {
+    return new ProfilesApiErrorImpl('unauthorized', statusCode, body);
+  }
+
+  if (statusCode === 404) {
+    return new ProfilesApiErrorImpl('not_found', statusCode, body);
+  }
+
+  if (statusCode === 0 || !statusCode) {
+    return new ProfilesApiErrorImpl('network', statusCode, body);
+  }
+
+  return new ProfilesApiErrorImpl('unknown', statusCode, body);
+};
