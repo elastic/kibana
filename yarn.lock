@@ -6381,6 +6381,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dashboard-agent-common@link:x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dashboard-agent-plugin@link:x-pack/platform/plugins/shared/dashboard_agent":
   version "0.0.0"
   uid ""
@@ -6490,6 +6494,10 @@
   uid ""
 
 "@kbn/dataset-quality-plugin@link:x-pack/platform/plugins/shared/dataset_quality":
+  version "0.0.0"
+  uid ""
+
+"@kbn/date-range-picker@link:src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker":
   version "0.0.0"
   uid ""
 
@@ -9485,19 +9493,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ui-actions-enhanced-examples-plugin@link:x-pack/examples/ui_actions_enhanced_examples":
-  version "0.0.0"
-  uid ""
-
 "@kbn/ui-actions-enhanced-plugin@link:src/platform/plugins/shared/ui_actions_enhanced":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ui-actions-examples-plugin@link:examples/ui_action_examples":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ui-actions-explorer-plugin@link:examples/ui_actions_explorer":
   version "0.0.0"
   uid ""
 
