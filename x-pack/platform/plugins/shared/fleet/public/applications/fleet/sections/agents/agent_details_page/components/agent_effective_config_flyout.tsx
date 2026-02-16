@@ -18,15 +18,18 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiLoadingSpinner,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type { Agent } from '../../../../types';
 import { MAX_FLYOUT_WIDTH } from '../../../../constants';
+import { useGetAgentEffectiveConfigQuery } from '../../../../hooks';
 
 export const AgentEffectiveConfigFlyout = memo<{ agent: Agent; onClose: () => void }>(
   ({ agent, onClose }) => {
+    const { data: agentData, isLoading } = useGetAgentEffectiveConfigQuery(agent.id);
     const agentName =
       typeof agent.local_metadata?.host?.hostname === 'string'
         ? agent.local_metadata.host.hostname
@@ -35,16 +38,12 @@ export const AgentEffectiveConfigFlyout = memo<{ agent: Agent; onClose: () => vo
     const flyoutTitleId = useGeneratedHtmlId();
 
     const effectiveConfigYaml = useMemo(() => {
-      if (typeof agent.effective_config === 'string') {
-        return agent.effective_config;
-      }
-
-      if (agent.effective_config) {
-        return dump(agent.effective_config, { noRefs: true });
+      if (agentData?.effective_config) {
+        return dump(agentData.effective_config, { noRefs: true });
       }
 
       return '';
-    }, [agent.effective_config]);
+    }, [agentData?.effective_config]);
 
     const downloadFile = () => {
       const link = document.createElement('a');
@@ -69,9 +68,13 @@ export const AgentEffectiveConfigFlyout = memo<{ agent: Agent; onClose: () => vo
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiCodeBlock language="yaml" isCopyable>
-            {effectiveConfigYaml}
-          </EuiCodeBlock>
+          {isLoading ? (
+            <EuiLoadingSpinner />
+          ) : (
+            <EuiCodeBlock language="yaml" isCopyable>
+              {effectiveConfigYaml}
+            </EuiCodeBlock>
+          )}
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
@@ -84,7 +87,7 @@ export const AgentEffectiveConfigFlyout = memo<{ agent: Agent; onClose: () => vo
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton iconType="download" onClick={downloadFile}>
+              <EuiButton iconType="download" onClick={downloadFile} isLoading={isLoading}>
                 <FormattedMessage
                   id="xpack.fleet.agentDetails.effectiveConfigFlyoutDownloadButtonLabel"
                   defaultMessage="Download Config"

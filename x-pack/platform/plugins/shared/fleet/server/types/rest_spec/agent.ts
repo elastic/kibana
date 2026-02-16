@@ -360,6 +360,16 @@ export const GetOneAgentRequestSchema = {
   }),
 };
 
+export const GetAgentEffectiveConfigRequestSchema = {
+  params: schema.object({
+    agentId: schema.string(),
+  }),
+};
+
+export const GetAgentEffectiveConfigResponseSchema = schema.object({
+  effective_config: schema.any(),
+});
+
 export const PostNewAgentActionRequestSchema = {
   body: schema.object({
     action: NewAgentActionSchema,

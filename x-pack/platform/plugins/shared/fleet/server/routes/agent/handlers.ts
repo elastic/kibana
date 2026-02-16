@@ -49,6 +49,8 @@ import { getCurrentNamespace } from '../../services/spaces/get_current_namespace
 import { getPackageInfo } from '../../services/epm/packages';
 import { generateTemplateIndexPattern } from '../../services/epm/elasticsearch/template/template';
 import { buildAgentStatusRuntimeField } from '../../services/agents/build_status_runtime_field';
+import { appContextService } from '../../services';
+import { AGENTS_INDEX } from '../../constants';
 
 async function verifyNamespace(agent: Agent, namespace?: string) {
   if (!(await isAgentInNamespace(agent, namespace))) {
@@ -85,6 +87,19 @@ export const getAgentHandler: FleetRequestHandler<
 
     throw error;
   }
+};
+
+export const getAgentEffectiveConfigHandler: FleetRequestHandler<
+  TypeOf<typeof GetOneAgentRequestSchema.params>,
+  TypeOf<typeof GetOneAgentRequestSchema.query>
+> = async (context, request, response) => {
+  const esClient = appContextService.getInternalUserESClient();
+  const agentDoc = await esClient.get({
+    index: AGENTS_INDEX,
+    id: request.params.agentId,
+    _source: ['effective_config'],
+  });
+  return response.ok({ body: { effective_config: (agentDoc._source as any).effective_config } });
 };
 
 export const deleteAgentHandler: FleetRequestHandler<

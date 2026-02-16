@@ -84,7 +84,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                             defaultMessage="CPU"
                           />
                           &nbsp;
-                          <EuiIcon type="info" />
+                          <EuiIcon type="info" aria-hidden={true} />
                         </span>
                       </EuiToolTip>
                     ),
@@ -106,7 +106,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                             defaultMessage="Memory"
                           />
                           &nbsp;
-                          <EuiIcon type="info" />
+                          <EuiIcon type="info" aria-hidden={true} />
                         </span>
                       </EuiToolTip>
                     ),
@@ -137,7 +137,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 <EuiFlexItem grow={false}>
                   <AgentDashboardLink agent={agent} agentPolicy={agentPolicy} />
                 </EuiFlexItem>
-                {agent.effective_config && (
+                {agent.type === 'OPAMP' && (
                   <EuiFlexItem grow={false}>
                     <EuiButtonCompressed onClick={() => setEffectiveConfigFlyoutOpen(true)}>
                       {' '}
