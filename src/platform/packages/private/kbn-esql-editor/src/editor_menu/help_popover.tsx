@@ -42,6 +42,8 @@ export const HelpPopover: React.FC<{
 
   const { euiTheme } = useEuiTheme();
   const actions = useEsqlEditorActions();
+  const currentQueryRef = useRef<string>('');
+  currentQueryRef.current = actions?.currentQuery ?? '';
 
   const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
   const [isESQLMenuPopoverOpen, setIsESQLMenuPopoverOpen] = useState(false);
@@ -71,20 +73,31 @@ export const HelpPopover: React.FC<{
 
   useEffect(() => {
     let isMounted = true;
+    if (!isESQLMenuPopoverOpen) {
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    const resetDataviewDerived = () => {
+      setDataviewDerived({
+        queryForRecommendedQueries: '',
+        timeFieldName: undefined,
+        categorizationField: undefined,
+        dataviewName: undefined,
+      });
+    };
+
     const getDataViewForQuery = async () => {
-      if (!actions?.currentQuery) {
-        setDataviewDerived({
-          queryForRecommendedQueries: '',
-          timeFieldName: undefined,
-          categorizationField: undefined,
-          dataviewName: undefined,
-        });
+      const currentQuery = currentQueryRef.current;
+      if (!currentQuery) {
+        resetDataviewDerived();
         return;
       }
       try {
         const dataView = await getESQLAdHocDataview({
           dataViewsService: data.dataViews,
-          query: actions.currentQuery,
+          query: currentQuery,
           http,
         });
         if (!isMounted) return;
@@ -100,31 +113,21 @@ export const HelpPopover: React.FC<{
             dataviewName: dataView.name,
           });
         } else {
-          setDataviewDerived({
-            queryForRecommendedQueries: '',
-            timeFieldName: undefined,
-            categorizationField: undefined,
-            dataviewName: undefined,
-          });
+          resetDataviewDerived();
         }
       } catch (error) {
         if (isMounted) {
-          setDataviewDerived({
-            queryForRecommendedQueries: '',
-            timeFieldName: undefined,
-            categorizationField: undefined,
-            dataviewName: undefined,
-          });
+          resetDataviewDerived();
         }
       }
     };
-
+    console.log('boom');
     getDataViewForQuery();
 
     return () => {
       isMounted = false;
     };
-  }, [actions?.currentQuery, data.dataViews, http]);
+  }, [data.dataViews, http, isESQLMenuPopoverOpen]);
 
   const { queryForRecommendedQueries, timeFieldName, categorizationField, dataviewName } =
     dataviewDerived;

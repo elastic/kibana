@@ -78,7 +78,9 @@ describe('HelpPopover', () => {
   it('should have recommended queries if a dataview is available', async () => {
     await renderHelpPopover(stubIndexPattern);
     await userEvent.click(screen.getByTestId('esql-help-popover-button'));
-    expect(screen.queryByTestId('esql-recommended-queries')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByTestId('esql-recommended-queries')).toBeInTheDocument();
+    });
   });
 
   it('should not have feedback if feedback is not enabled', async () => {
@@ -99,6 +101,7 @@ describe('HelpPopover', () => {
     await renderHelpPopover(stubIndexPattern);
     const esqlQuery = `FROM ${stubIndexPattern.name}`;
 
+    await userEvent.click(screen.getByTestId('esql-help-popover-button'));
     await waitFor(() => {
       expect(startMock.http.get).toHaveBeenCalledTimes(1);
       expect(startMock.http.get).toHaveBeenCalledWith(
@@ -106,7 +109,6 @@ describe('HelpPopover', () => {
       );
     });
 
-    await userEvent.click(screen.getByTestId('esql-help-popover-button'));
     expect(screen.queryByTestId('esql-recommended-queries')).toBeInTheDocument();
     await waitFor(() => userEvent.click(screen.getByTestId('esql-recommended-queries')));
 
@@ -121,11 +123,11 @@ describe('HelpPopover', () => {
     startMock.http.get.mockRejectedValueOnce(new Error('Network error'));
 
     await renderHelpPopover(stubIndexPattern);
+    await userEvent.click(screen.getByTestId('esql-help-popover-button'));
     await waitFor(() => {
       expect(startMock.http.get).toHaveBeenCalledTimes(1);
     });
 
-    await userEvent.click(screen.getByTestId('esql-help-popover-button'));
     expect(screen.queryByTestId('esql-recommended-queries')).toBeInTheDocument();
   });
 
