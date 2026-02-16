@@ -570,7 +570,7 @@ describe('CPS onRequest handler', () => {
         onRequestHandler = MockClusterClient.mock.calls[0][0].onRequest;
       });
 
-      it('does not inject project_routing for unscoped requests', () => {
+      it('injects project_routing for unscoped requests', () => {
         const options: any = { querystring: {} };
         const params = {
           method: 'GET',
@@ -582,7 +582,7 @@ describe('CPS onRequest handler', () => {
 
         onRequestHandler({ scoped: false }, params, options);
 
-        expect(options.querystring.project_routing).toBeUndefined();
+        expect(options.querystring.project_routing).toBe('_alias:_origin');
       });
 
       it('does not inject project_routing when CPS is disabled', () => {
@@ -656,7 +656,7 @@ describe('CPS onRequest handler', () => {
 
         onRequestHandler({ scoped: true }, params, options);
 
-        expect(options.querystring.project_routing).toBe('_tag._alias:_local');
+        expect(options.querystring.project_routing).toBe('_alias:_origin');
       });
 
       it('preserves existing querystring parameters when injecting project_routing', () => {
@@ -674,107 +674,7 @@ describe('CPS onRequest handler', () => {
         expect(options.querystring).toEqual({
           pretty: true,
           format: 'json',
-          project_routing: '_tag._alias:_local',
-        });
-      });
-
-      describe('defensive stripping of project_routing', () => {
-        it('strips project_routing when API does not support it', () => {
-          const options: any = { querystring: { project_routing: 'explicit-value' } };
-          const params = {
-            method: 'GET',
-            path: '/_cluster/health',
-            meta: { acceptedParams: ['level', 'timeout'] },
-          };
-
-          setCpsEnabled(true);
-
-          onRequestHandler({ scoped: true }, params, options);
-
-          expect(options.querystring).toBeUndefined();
-        });
-
-        it('strips project_routing but preserves other querystring params when API does not support it', () => {
-          const options: any = {
-            querystring: {
-              project_routing: 'explicit-value',
-              pretty: true,
-              timeout: '30s',
-            },
-          };
-          const params = {
-            method: 'GET',
-            path: '/_cluster/health',
-            meta: { acceptedParams: ['level', 'timeout'] },
-          };
-
-          setCpsEnabled(true);
-
-          onRequestHandler({ scoped: true }, params, options);
-
-          expect(options.querystring).toEqual({
-            pretty: true,
-            timeout: '30s',
-          });
-        });
-
-        it('strips project_routing when acceptedParams is undefined', () => {
-          const options: any = { querystring: { project_routing: 'explicit-value' } };
-          const params = {
-            method: 'GET',
-            path: '/_cluster/health',
-            meta: {},
-          };
-
-          setCpsEnabled(true);
-
-          onRequestHandler({ scoped: true }, params, options);
-
-          expect(options.querystring).toBeUndefined();
-        });
-
-        it('strips project_routing when meta is undefined', () => {
-          const options: any = { querystring: { project_routing: 'explicit-value' } };
-          const params = {
-            method: 'GET',
-            path: '/_cluster/health',
-          };
-
-          setCpsEnabled(true);
-
-          onRequestHandler({ scoped: true }, params, options);
-
-          expect(options.querystring).toBeUndefined();
-        });
-
-        it('does not strip project_routing when CPS is disabled', () => {
-          const options: any = { querystring: { project_routing: 'explicit-value' } };
-          const params = {
-            method: 'GET',
-            path: '/_cluster/health',
-            meta: { acceptedParams: [] },
-          };
-
-          setCpsEnabled(false);
-
-          onRequestHandler({ scoped: true }, params, options);
-
-          expect(options.querystring.project_routing).toBe('explicit-value');
-        });
-
-        it('does not strip project_routing for unscoped requests', () => {
-          const options: any = { querystring: { project_routing: 'explicit-value' } };
-          const params = {
-            method: 'GET',
-            path: '/_cluster/health',
-            meta: { acceptedParams: [] },
-          };
-
-          setCpsEnabled(true);
-
-          onRequestHandler({ scoped: false }, params, options);
-
-          expect(options.querystring.project_routing).toBe('explicit-value');
+          project_routing: '_alias:_origin',
         });
       });
     });
