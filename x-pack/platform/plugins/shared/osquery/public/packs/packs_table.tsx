@@ -22,10 +22,12 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { useKibana, useRouterNavigate } from '../common/lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import { usePacks } from './use_packs';
 import { ActiveStateSwitch } from './active_state_switch';
 import { AgentsPolicyLink } from '../agent_policies/agents_policy_link';
 import type { PackSavedObject } from './types';
+import { PackRowActions } from './pack_row_actions';
 
 const updatedAtCss = {
   whiteSpace: 'nowrap' as const,
@@ -82,6 +84,7 @@ export const AgentPoliciesPopover = ({ agentPolicyIds = [] }: { agentPolicyIds?:
 
 const PacksTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
+  const queryHistoryRework = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { push } = useHistory();
   const { data, isLoading } = usePacks({});
 
@@ -208,6 +211,14 @@ const PacksTableComponent = () => {
           },
         ],
       } as EuiTableActionsColumnType<PackSavedObject>,
+      ...(queryHistoryRework
+        ? [
+            {
+              width: '40px',
+              render: (item: PackSavedObject) => <PackRowActions item={item} />,
+            },
+          ]
+        : []),
     ],
     [
       permissions.runSavedQueries,
@@ -217,6 +228,7 @@ const PacksTableComponent = () => {
       renderPlayAction,
       renderQueries,
       renderUpdatedAt,
+      queryHistoryRework,
     ]
   );
 
