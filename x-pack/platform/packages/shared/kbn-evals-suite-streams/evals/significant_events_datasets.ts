@@ -7,6 +7,7 @@
 
 import type { Feature } from '@kbn/streams-schema';
 import { GROK_PATTERN_DATASETS } from './pattern_extraction_datasets';
+import type { KqlSubstringExpectation } from './significant_events_metrics';
 
 /**
  * Ground truth data for significant events evaluation.
@@ -16,8 +17,8 @@ export interface SignificantEventsGroundTruth {
   expected_query: {
     // Categories of queries we expect to see (e.g., 'security', 'operational')
     categories: string[];
-    // Specific KQL substrings that should be present in the generated query
-    kql_substrings?: string[];
+    // KQL substring expectations -- each entry must be satisfied by at least one query
+    kql_substrings?: KqlSubstringExpectation[];
   };
 }
 
@@ -228,7 +229,7 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
         output: {
           expected_query: {
             categories: ['security'],
-            kql_substrings: ['"Failed password"'],
+            kql_substrings: ['Failed password'],
           },
         },
         metadata: {
@@ -284,7 +285,7 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
         output: {
           expected_query: {
             categories: ['operational'],
-            kql_substrings: ['"Started" or "Stopping"'],
+            kql_substrings: [['Started', 'Stopping']],
           },
         },
         metadata: {
@@ -379,7 +380,7 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
         }),
         output: {
           expected_query: {
-            categories: ['error', 'web'],
+            categories: ['error'],
             kql_substrings: [
               'http.response.status_code >= 500 and http.response.status_code < 600',
             ],
@@ -477,7 +478,7 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
         }),
         output: {
           expected_query: {
-            categories: ['error', 'devops'],
+            categories: ['error'],
             kql_substrings: ['error', 'image', 'not found'],
           },
         },
@@ -525,7 +526,7 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
         }),
         output: {
           expected_query: {
-            categories: ['error', 'devops'],
+            categories: ['error'],
             kql_substrings: ['error', 'CrashLoopBackOff'],
           },
         },
@@ -570,7 +571,7 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
         }),
         output: {
           expected_query: {
-            categories: ['error', 'database'],
+            categories: ['error'],
             kql_substrings: ['error', 'connect', 'database'],
           },
         },
@@ -623,8 +624,8 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
         }),
         output: {
           expected_query: {
-            categories: ['operational', 'system'],
-            kql_substrings: ['warn or critical', 'full'],
+            categories: ['resource_health'],
+            kql_substrings: [['warn', 'critical'], 'full'],
           },
         },
         metadata: {
@@ -678,7 +679,7 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
         })(),
         output: {
           expected_query: {
-            categories: ['operational', 'web'],
+            categories: ['error'],
             kql_substrings: ['4??', '5??'],
           },
         },
@@ -717,8 +718,8 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
         })(),
         output: {
           expected_query: {
-            categories: ['operational', 'system'],
-            kql_substrings: ['error or fail*'],
+            categories: ['operational'],
+            kql_substrings: [['error', 'fail*']],
           },
         },
         metadata: {

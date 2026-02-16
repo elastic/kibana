@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { fromKueryExpression } from '@kbn/es-query';
-
 import {
   SIGNIFICANT_EVENT_TYPE_CONFIGURATION,
   SIGNIFICANT_EVENT_TYPE_ERROR,
@@ -23,6 +21,16 @@ import kbnDatemath from '@kbn/datemath';
 import { evaluate } from '../src/evaluate';
 import type { SignificantEventsEvaluationExample } from './significant_events_datasets';
 import { SIGNIFICANT_EVENTS_DATASETS } from './significant_events_datasets';
+import {
+  checkKqlSyntax,
+  checkCategoryCompliance,
+  checkSeverityCompliance,
+  checkEvidenceGrounding,
+  checkTitleQuality,
+  calculateSignificantEventsQuality,
+  buildMetricsReasoning,
+  type QueryValidationDetail,
+} from './significant_events_metrics';
 
 const ALLOWED_CATEGORIES = [
   SIGNIFICANT_EVENT_TYPE_OPERATIONAL,
@@ -30,12 +38,74 @@ const ALLOWED_CATEGORIES = [
   SIGNIFICANT_EVENT_TYPE_RESOURCE_HEALTH,
   SIGNIFICANT_EVENT_TYPE_ERROR,
   SIGNIFICANT_EVENT_TYPE_SECURITY,
-];
+] as const;
 
 type SignificantEventsQuery = Awaited<
   ReturnType<typeof generateSignificantEvents>
 >['queries'][number];
 
+/**
+ * Validate a single generated query by running all atomic checks.
+ * ES execution check is performed only when syntax is valid.
+ */
+const validateQuery = async ({
+  query,
+  sampleLogs,
+  testIndex,
+  esClient,
+}: {
+  query: SignificantEventsQuery;
+  sampleLogs: string[];
+  testIndex: string;
+  esClient: ElasticsearchClient;
+}): Promise<QueryValidationDetail> => {
+  const { kql, title, category, severity_score: severityScore, evidence } = query;
+
+  // 1. KQL Syntax
+  const syntaxResult = checkKqlSyntax(kql);
+
+  // 2. Execution Verification (only when syntax is valid)
+  let isExecutionHit = false;
+  if (syntaxResult.passed) {
+    const searchResult = await esClient.search({ index: testIndex, q: kql });
+    const total = searchResult.hits.total;
+    const hits = typeof total === 'number' ? total : total?.value ?? 0;
+    isExecutionHit = hits > 0;
+  }
+
+  // 3. Category Compliance
+  const categoryResult = checkCategoryCompliance(category, ALLOWED_CATEGORIES);
+
+  // 4. Severity Compliance
+  const severityResult = checkSeverityCompliance(severityScore);
+
+  // 5. Evidence Grounding
+  const evidenceResult = checkEvidenceGrounding(evidence, sampleLogs);
+
+  // 6. Title Quality
+  const titleResult = checkTitleQuality(title);
+
+  return {
+    kql,
+    title,
+    category,
+    severityScore,
+    isSyntaxValid: syntaxResult.passed,
+    isExecutionHit,
+    isCategoryCompliant: categoryResult.passed,
+    isSeverityCompliant: severityResult.passed,
+    hasValidEvidence: evidenceResult.passed,
+    hasMeaningfulTitle: titleResult.passed,
+  };
+};
+
+/**
+ * Code-based evaluator that validates generated significant event queries
+ * against deterministic rules and ground truth expectations.
+ *
+ * Returns an overall quality score (0-1) with per-query validation details
+ * and structured reasoning.
+ */
 const codeBasedEvaluator = {
   name: 'significant_events_code_evaluator',
   kind: 'CODE' as const,
@@ -43,6 +113,7 @@ const codeBasedEvaluator = {
     output,
     esClient,
     input,
+    expected,
     metadata,
   }: EvaluatorParams<
     SignificantEventsEvaluationExample,
@@ -56,92 +127,29 @@ const codeBasedEvaluator = {
       return {
         score: 0,
         reasoning: 'No queries generated',
-        details: {
-          syntaxValidityRate: 0,
-          executionHitRate: 0,
-        },
+        details: {},
       };
     }
 
-    let validSyntaxCount = 0;
-    let executionHitCount = 0;
-    const validationDetails = [];
-
+    const validationDetails: QueryValidationDetail[] = [];
     for (const query of queries) {
-      const { kql, category, severity_score, evidence } = query;
-      const { sample_logs } = input;
-
-      // 1. KQL Syntax Validation
-      let isSyntaxValid = false;
-      try {
-        fromKueryExpression(kql);
-        isSyntaxValid = true;
-        validSyntaxCount++;
-      } catch (e) {
-        // KQL is invalid
-      }
-
-      // 2. Execution Verification
-      let isExecutionHit = false;
-      if (isSyntaxValid) {
-        const searchResult = await esClient.search({
-          index: metadata.test_index,
-          q: kql,
-        });
-        const total = searchResult.hits.total;
-        const hits = typeof total === 'number' ? total : total?.value ?? 0;
-        if (hits > 0) {
-          isExecutionHit = true;
-          executionHitCount++;
-        }
-      }
-
-      // 3. Category Compliance
-      const isCategoryCompliant = ALLOWED_CATEGORIES.includes(category);
-
-      // 4. Severity Score Compliance
-      const isSeverityCompliant = severity_score >= 0 && severity_score <= 100;
-
-      // 5. Evidence Validation
-      const evidenceValidation: {
-        allEvidenceFound: boolean;
-        missingEvidence: string[];
-      } = {
-        allEvidenceFound: true,
-        missingEvidence: [],
-      };
-      if (evidence && evidence.length > 0) {
-        const allLogs = sample_logs.join('\n');
-        const missing = evidence.filter((ev: string) => !allLogs.includes(ev));
-        if (missing.length > 0) {
-          evidenceValidation.allEvidenceFound = false;
-          evidenceValidation.missingEvidence = missing;
-        }
-      }
-
-      validationDetails.push({
-        kql,
-        isSyntaxValid,
-        isExecutionHit,
-        isCategoryCompliant,
-        isSeverityCompliant,
-        evidenceValidation,
-      });
+      validationDetails.push(
+        await validateQuery({
+          query,
+          sampleLogs: input.sample_logs,
+          testIndex: metadata.test_index ?? '',
+          esClient,
+        })
+      );
     }
 
-    const syntaxValidityRate = validSyntaxCount / queries.length;
-    const executionHitRate = executionHitCount / queries.length;
-
-    // The final score is a simple average of the two main metrics.
-    const score = (syntaxValidityRate + executionHitRate) / 2;
+    // Calculate aggregate metrics against ground truth
+    const metrics = calculateSignificantEventsQuality(validationDetails, expected.expected_query);
 
     return {
-      score,
-      details: {
-        syntaxValidityRate,
-        executionHitRate,
-        queries: validationDetails,
-      },
+      score: metrics.overallQuality,
+      details: { ...metrics, queries: validationDetails },
+      reasoning: buildMetricsReasoning(metrics),
     };
   },
 };
