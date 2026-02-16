@@ -46,8 +46,6 @@ import type {
   ConvertApiKeysResult,
 } from './types';
 import type { AlertingPluginsStart } from '../plugin';
-import errorMap from 'zod/v3/locales/en';
-import { theme } from '@kbn/expressions-plugin/common';
 
 const PROVISION_UIAM_API_KEYS_FLAG = 'alerting.rules.provisionUiamApiKeys';
 const API_KEY_PROVISIONING_TASK_TASK_SCHEDULE: IntervalSchedule = { interval: '1h' };
