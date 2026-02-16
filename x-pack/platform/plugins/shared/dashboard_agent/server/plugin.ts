@@ -37,7 +37,7 @@ export class DashboardAgentPlugin
     coreSetup: CoreSetup<DashboardAgentStartDependencies, DashboardAgentPluginStart>,
     setupDeps: DashboardAgentSetupDependencies
   ): DashboardAgentPluginSetup {
-    this.logger.debug('Setting up Dashboard Agent plugin');
+    this.logger.debug('Setting up Dashboard skills and tools');
 
     getIsDashboardAgentEnabled(coreSetup)
       .then((isDashboardAgentEnabled) => {

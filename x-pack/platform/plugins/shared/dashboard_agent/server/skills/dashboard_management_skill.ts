@@ -495,6 +495,11 @@ On error, the dashboard was not created or updated. Inform the user about what w
 `,
     },
   ],
-  getAllowedTools: () => [platformCoreTools.generateEsql, platformCoreTools.executeEsql],
+  getAllowedTools: () => [
+    platformCoreTools.listIndices,
+    platformCoreTools.getIndexMapping,
+    platformCoreTools.generateEsql,
+    platformCoreTools.executeEsql,
+  ],
   getInlineTools: () => [manageDashboardTool()],
 });
