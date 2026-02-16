@@ -24,14 +24,43 @@ jobs:
               // { user: 'kibanamachine', branchPrefix: 'api_docs', baseMatch: /^main$/ },
               // { user: 'kibanamachine', branchPrefix: 'backport', baseNotMatch: /^main$/ },
               { user: 'kibanamachine', branchPrefix: 'scout_metadata_update' },
-              // { user: 'elasticmachine', branchPrefix: 'update-bundled-packages' },
+              // { user: 'elasticmachine', branchPrefix: 'update-bundled-packages', paths: ['fleet_packages.json'] },
             ];
+
+            // Fetch the list of changed files in the PR
+            const files = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+            });
+
+            const changedFiles = files.data.map(file => file.filename);
+            core.info(`Changed files: ${changedFiles.join(', ')}`);
 
             const matches = whitelist.some((rule) => {
               if (rule.user !== user) return false;
               if (!headRef.startsWith(rule.branchPrefix)) return false;
               if (rule.baseMatch && !rule.baseMatch.test(baseRef)) return false;
               if (rule.baseNotMatch && rule.baseNotMatch.test(baseRef)) return false;
+
+              // If paths is specified, verify at least one changed file matches
+              if (rule.paths) {
+                const hasMatchingFile = changedFiles.some(file => 
+                  rule.paths.some(path => {
+                    // Support glob patterns
+                    if (path.includes('*')) {
+                      const regex = new RegExp('^' + path.replace(/\*/g, '.*') + '$');
+                      return regex.test(file);
+                    }
+                    return file === path;
+                  })
+                );
+                if (!hasMatchingFile) {
+                  core.info(`File check failed for rule ${rule.user}/${rule.branchPrefix}: no changed files match paths`);
+                  return false;
+                }
+              }
+
               return true;
             });
 
