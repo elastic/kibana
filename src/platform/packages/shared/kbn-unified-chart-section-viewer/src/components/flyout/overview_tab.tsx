@@ -78,8 +78,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
   // Helper function to create description list items
   const createDescriptionListItem = useCallback(
     (
-      titleKey: string,
-      titleDefaultMessage: string,
+      title: React.ReactNode,
       value: React.ReactNode,
       dataTestSubj?: string
     ) => ({
@@ -96,11 +95,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
             `}
           >
             <EuiText size="xs">
-              <strong>
-                {i18n.translate(`metricsExperience.overviewTab.strong.${titleKey}`, {
-                  defaultMessage: titleDefaultMessage,
-                })}
-              </strong>
+              <strong>{title}</strong>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{value}</EuiFlexItem>
@@ -114,15 +109,17 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
   const descriptionListItems = useMemo(
     () => [
       createDescriptionListItem(
-        'dataStreamLabel',
-        'Data stream',
+        i18n.translate('metricsExperience.overviewTab.strong.dataStreamLabel', {
+          defaultMessage: 'Data stream',
+        }),
         <EuiText color="primary" size="s">
           {metric.index}
         </EuiText>
       ),
       createDescriptionListItem(
-        'fieldTypeLabel',
-        'Field type',
+        i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
+          defaultMessage: 'Field type',
+        }),
         <div>
           <EuiBadge>{metric.type}</EuiBadge>
         </div>
@@ -130,11 +127,10 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
       ...(unitLabel
         ? [
             createDescriptionListItem(
-              'metricUnitLabel',
-              'Metric unit',
-              <div>
-                <EuiBadge>{unitLabel}</EuiBadge>
-              </div>,
+              i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
+                defaultMessage: 'Metric unit',
+              }),
+              <EuiBadge>{unitLabel}</EuiBadge>,
               'metricsExperienceFlyoutOverviewTabMetricUnitLabel'
             ),
           ]
@@ -142,8 +138,9 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
       ...(metric.instrument
         ? [
             createDescriptionListItem(
-              'metricTypeLabel',
-              'Metric type',
+              i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
+                defaultMessage: 'Metric type',
+              }),
               <div>
                 <EuiBadge>{metric.instrument}</EuiBadge>
               </div>,
