@@ -14,6 +14,22 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { VisualizationListItem } from './types';
 
 const getBadge = (item: VisualizationListItem) => {
+  return (
+    <EuiBetaBadge
+      className="visListingTable__betaIcon"
+      label="B"
+      title={i18n.translate('visualizations.listing.betaTitle', {
+        defaultMessage: 'Beta',
+      })}
+      tooltipContent={i18n.translate('visualizations.listing.betaTooltip', {
+        defaultMessage:
+          'This visualization is in beta and is subject to change. The design and code is less mature than official GA ' +
+          'features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA ' +
+          'features',
+      })}
+    />
+  );
+
   if (item.stage === 'beta') {
     return (
       <EuiBetaBadge
@@ -72,10 +88,11 @@ export const getCustomColumn = () => {
     }),
     sortable: true,
     width: '150px',
+
     render: (field: string, record: VisualizationListItem) => {
       if (!record.error) {
         return (
-          <span>
+          <span className="eui-textNoWrap">
             {renderItemTypeIcon(record)}
             {record.typeTitle}
             {getBadge(record)}
@@ -86,7 +103,7 @@ export const getCustomColumn = () => {
       if (!record.typeTitle) {
         return (
           <EuiToolTip position="left" content={record.error}>
-            <span tabIndex={0}>
+            <span tabIndex={0} className="eui-textNoWrap">
               <EuiIcon
                 className="visListingTable__typeIcon"
                 aria-hidden="true"
@@ -102,7 +119,7 @@ export const getCustomColumn = () => {
 
       return (
         <EuiToolTip position="left" content={record.error}>
-          <span tabIndex={0}>
+          <span tabIndex={0} className="eui-textNoWrap">
             <EuiIcon
               className="visListingTable__typeIcon"
               aria-hidden="true"

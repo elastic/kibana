@@ -265,7 +265,7 @@ export const useCasesColumns = ({
           }
           return getEmptyCellValue();
         },
-        width: '15%',
+        style: { width: '130px', minWidth: '130px' },
       },
       updatedAt: {
         field: casesColumnsConfig.updatedAt.field,
@@ -281,7 +281,7 @@ export const useCasesColumns = ({
           }
           return getEmptyCellValue();
         },
-        width: '15%',
+        style: { width: '130px', minWidth: '130px' },
       },
       externalIncident: {
         // no field
