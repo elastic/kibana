@@ -283,7 +283,7 @@ x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lists.t
 
 ## 8. Testing with OpenTelemetry Demo
 
-The [OpenTelemetry Demo](https://github.com/elastic/opentelemetry-demo) is a microservices application that generates realistic Observability data (traces, logs, metrics) and supports feature flags to simulate various failure scenarios. Use it to test tools against real-world-like incidents.
+The [OpenTelemetry Demo](https://github.com/elastic/opentelemetry-demo) is a microservices application that generates realistic Observability data (traces, logs, metrics) and supports feature flags to simulate various failure scenarios. Use it to validate the Observability Agent and individual tools against real-world-like incidents.
 
 ### Starting the OTel Demo
 
