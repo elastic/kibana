@@ -23,6 +23,10 @@ import { CiStatsClient } from './client';
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';
 import { filterEmptyJestConfigs } from './get_tests_from_config';
+import {
+  getAffectedPackagesForFiltering,
+  filterConfigsByAffectedPackages,
+} from '../affected-packages';
 import { collectEnvFromLabels, expandAgentQueue, getRequiredEnv } from '#pipeline-utils';
 
 const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
@@ -180,7 +184,28 @@ export async function pickTestGroupRunOrder() {
       })
     : [];
 
-  if (!ftrConfigsByQueue.size && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
+  // Apply affected package filtering
+  const affectedPackages = await getAffectedPackagesForFiltering(process.env.GITHUB_PR_MERGE_BASE);
+  const filteredJestUnitConfigs = filterConfigsByAffectedPackages(
+    jestUnitConfigs,
+    affectedPackages
+  );
+  console.warn(
+    `Filtering Jest unit tests for affected packages: ${jestUnitConfigs.length} -> ${filteredJestUnitConfigs.length}`
+  );
+  const filteredJestIntegrationConfigs = filterConfigsByAffectedPackages(
+    jestIntegrationConfigs,
+    affectedPackages
+  );
+  console.warn(
+    `Filtering Jest integration tests for affected packages: ${jestIntegrationConfigs.length} -> ${filteredJestIntegrationConfigs.length}`
+  );
+
+  if (
+    !ftrConfigsByQueue.size &&
+    !filteredJestUnitConfigs.length &&
+    !filteredJestIntegrationConfigs.length
+  ) {
     throw new Error('unable to find any unit, integration, or FTR configs');
   }
 
@@ -244,14 +269,14 @@ export async function pickTestGroupRunOrder() {
         defaultMin: 4,
         maxMin: JEST_MAX_MINUTES,
         overheadMin: 0.2,
-        names: jestUnitConfigs,
+        names: filteredJestUnitConfigs,
       },
       {
         type: INTEGRATION_TYPE,
         defaultMin: 60,
         maxMin: JEST_MAX_MINUTES,
         overheadMin: 0.2,
-        names: jestIntegrationConfigs,
+        names: filteredJestIntegrationConfigs,
       },
       ...Array.from(ftrConfigsByQueue).map(([queue, names]) => ({
         type: FUNCTIONAL_TYPE,
