@@ -231,6 +231,78 @@ test('can visit COMPLETION command', () => {
   expect(list).toEqual(['COMPLETION']);
 });
 
+test('can visit MMR command', () => {
+  const { ast } = EsqlQuery.fromSrc(`
+    FROM movies
+      | MMR [0.5, 0.4, 0.3, 0.2]::dense_vector ON genre LIMIT 10 WITH { "lambda": 0.5 }
+  `);
+  const visitor = new Visitor()
+    .on('visitLiteralExpression', (ctx) => {
+      if (ctx.node.literalType === 'integer' || ctx.node.literalType === 'double') {
+        return ctx.node.value;
+      }
+
+      if (ctx.node.literalType === 'keyword') {
+        return ctx.node.value;
+      }
+
+      return null;
+    })
+    .on('visitMapExpression', (ctx) => {
+      return [...ctx.visitEntries(null)].flat();
+    })
+    .on('visitMapEntryExpression', (ctx) => {
+      return [ctx.visitKey(null), ctx.visitValue(null)];
+    })
+    .on('visitListLiteralExpression', (ctx) => {
+      return [...ctx.visitElements(null)].flat();
+    })
+    .on('visitInlineCastExpression', (ctx) => {
+      return [ctx.node.castType, ctx.visitValue(null)];
+    })
+    .on('visitColumnExpression', (ctx) => {
+      return ctx.node.name;
+    })
+    .on('visitCommandOption', (ctx) => {
+      if (ctx.node.name === 'on') {
+        return [...ctx.visitArguments(null)].flat();
+      }
+
+      if (ctx.node.name === 'limit') {
+        return [...ctx.visitArguments(null)].flat();
+      }
+
+      if (ctx.node.name === 'with') {
+        return [...ctx.visitArguments(null)].flat();
+      }
+
+      return null;
+    })
+    .on('visitMmrCommand', (ctx) => {
+      return [...ctx.visitArgs(null), ...ctx.visitOptions()].flat();
+    })
+    .on('visitExpression', () => {
+      return null;
+    })
+    .on('visitCommand', () => {
+      return null;
+    })
+    .on('visitQuery', (ctx) => {
+      return [...ctx.visitCommands()].flat();
+    });
+  const list = visitor.visitQuery(ast).flat().filter(Boolean);
+
+  expect(list).toContain('dense_vector');
+  expect(list).toContain(0.5);
+  expect(list).toContain(0.4);
+  expect(list).toContain(0.3);
+  expect(list).toContain(0.2);
+  expect(list).toContain('genre');
+  expect(list).toContain(10);
+  expect(list).toContain('"lambda"');
+  expect(list).toContain(0.5);
+});
+
 test('can visit FROM command with complex subqueries', () => {
   const { ast } = EsqlQuery.fromSrc(`
     FROM index1,
