@@ -171,7 +171,7 @@ test.describe('Alerts', () => {
         );
       });
 
-      await test.step('navigate to details step and set custom rule name', async () => {
+      await test.step('navigates to details step and set custom rule name', async () => {
         await alertsControls.addRuleFlyout.jumpToStep('details');
         await alertsControls.addRuleFlyout.fillName(RULE_NAME);
         await expect(alertsControls.addRuleFlyout.nameInput).toHaveValue(RULE_NAME);
