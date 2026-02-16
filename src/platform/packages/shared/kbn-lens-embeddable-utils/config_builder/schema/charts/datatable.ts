@@ -53,14 +53,16 @@ const sortingSchema = schema.oneOf(
         column_type: schema.literal('pivoted_metric'),
         index: schema.number({
           min: 0,
-          meta: { description: '0-based index into the "metrics" array for the metric to sort; use "values" to identify the pivoted column' },
+          meta: {
+            description:
+              '0-based index into the "metrics" array for the metric to sort; use "values" to identify the pivoted column',
+          },
         }),
         values: schema.arrayOf(schema.string(), {
           minSize: 1,
           maxSize: 20,
           meta: {
-            description:
-              'Array of pivot values, one for each split_metrics_by column in order',
+            description: 'Array of pivot values, one for each split_metrics_by column in order',
           },
         }),
         direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
