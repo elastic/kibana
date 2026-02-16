@@ -132,8 +132,8 @@ export async function getToolHandler({
   }
   // For each trace.id, we want to fetch all documents with an extended time window to try capture the full trace (transactions, spans, errors, and logs)
   const traceTimeWindow = {
-    start: moment(startTime).subtract(1, 'hour').valueOf(),
-    end: moment(endTime).add(1, 'hour').valueOf(),
+    start: moment(startTime).subtract(5, 'minutes').valueOf(),
+    end: moment(endTime).add(5, 'minutes').valueOf(),
   };
   const traces = await fetchTraceDocuments({
     esClient,
