@@ -9,10 +9,14 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import type { WorkflowDetailDto } from '@kbn/workflows';
+import { getErrorMessage } from './get_error_message';
 import type { WorkflowsServices } from '../../../../../types';
 import type { WorkflowsResponse } from '../../../model/types';
 import type { RootState } from '../../types';
 import { initialWorkflowsState, setWorkflows } from '../slice';
+
+/** Maximum number of workflows to fetch for autocomplete/lookup. */
+const MAX_WORKFLOWS_LOOKUP_SIZE = 1000;
 
 export type LoadWorkflowsParams = void;
 export type LoadWorkflowsResponse = WorkflowsResponse;
@@ -29,13 +33,22 @@ export const loadWorkflowsThunk = createAsyncThunk<
       total: number;
     }>('/api/workflows/search', {
       body: JSON.stringify({
-        size: 1000, // Fetch up to 1000 workflows for lookup
+        size: MAX_WORKFLOWS_LOOKUP_SIZE,
         page: 1,
       }),
     });
 
+    if (!Array.isArray(response.results)) {
+      const invalidMessage = 'Invalid workflows search response: results is not an array';
+      notifications.toasts.addError(new Error(invalidMessage), {
+        title: 'Failed to load workflows',
+      });
+      dispatch(setWorkflows(initialWorkflowsState));
+      return rejectWithValue(invalidMessage);
+    }
+
     const workflowsMap: WorkflowsResponse['workflows'] = {};
-    (response.results || []).forEach((workflow) => {
+    response.results.forEach((workflow) => {
       // Only use inputs if they're in legacy array format (for autocomplete)
       // JSON Schema format inputs are not used by autocomplete
       const inputs = workflow.definition?.inputs;
@@ -60,9 +73,9 @@ export const loadWorkflowsThunk = createAsyncThunk<
 
     return workflowsResponse;
   } catch (error) {
-    const errorMessage = error.body?.message || error.message || 'Failed to load workflows';
+    const errorMessage = getErrorMessage(error, 'Failed to load workflows');
 
-    notifications.toasts.addError(errorMessage, {
+    notifications.toasts.addError(new Error(errorMessage), {
       title: 'Failed to load workflows',
     });
     dispatch(setWorkflows(initialWorkflowsState));

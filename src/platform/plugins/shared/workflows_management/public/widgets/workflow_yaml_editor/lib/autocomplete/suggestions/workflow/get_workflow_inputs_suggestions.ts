@@ -14,6 +14,7 @@ import type { LegacyWorkflowInput } from '@kbn/workflows';
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { WorkflowInputChoiceSchema } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
+import { getInputPlaceholderValue } from './workflow_input_placeholder';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 
 type WorkflowInputChoice = z.infer<typeof WorkflowInputChoiceSchema>;
@@ -64,33 +65,7 @@ function buildInputDocumentation(input: LegacyWorkflowInput): string {
  * Determines the insert text for a workflow input based on its type and default value
  */
 function getInputInsertText(input: LegacyWorkflowInput): string {
-  const inputName = input.name;
-  const hasDefault = input.default !== undefined;
-
-  if (hasDefault) {
-    return `${inputName}: ${JSON.stringify(input.default)}`;
-  }
-
-  // Otherwise, insert placeholder based on type
-  switch (input.type) {
-    case 'string':
-      return `${inputName}: ""`;
-    case 'number':
-      return `${inputName}: 0`;
-    case 'boolean':
-      return `${inputName}: false`;
-    case 'choice': {
-      const choiceInput = input as WorkflowInputChoice;
-      if (choiceInput.options && choiceInput.options.length > 0) {
-        return `${inputName}: "${choiceInput.options[0]}"`;
-      }
-      return `${inputName}: ""`;
-    }
-    case 'array':
-      return `${inputName}: []`;
-    default:
-      return `${inputName}: ""`;
-  }
+  return `${input.name}: ${getInputPlaceholderValue(input)}`;
 }
 
 /**

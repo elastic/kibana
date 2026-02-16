@@ -16,6 +16,15 @@ import {
 } from '../../../../../../common/lib/regex';
 import { parsePath } from '../../../../../../common/lib/zod';
 
+/** Reserved keys in workflow step YAML that are not workflow inputs (handled by other parsers). */
+const WORKFLOW_STEP_KNOWN_KEYS = [
+  'foreach',
+  'type',
+  'connector-id',
+  'workflow-id',
+  'inputs',
+] as const;
+
 interface BaseLineParseResult {
   fullKey: string;
   matchType: string;
@@ -93,13 +102,14 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
     /^(?<prefix>\s*(?:tzid|timezone)\s*:\s*)(?<value>.*)$/
   );
   if (timezoneFieldMatch && timezoneFieldMatch.groups) {
-    const timezonePrefix = timezoneFieldMatch.groups.value.trim();
+    const groups = timezoneFieldMatch.groups;
+    const prefix = groups.prefix;
+    const timezonePrefix = groups.value.trim();
     return {
       matchType: 'timezone',
       fullKey: timezonePrefix,
       match: timezoneFieldMatch,
-      // @ts-expect-error upgrade typescript v5.9.3
-      valueStartIndex: timezoneFieldMatch.groups?.prefix.length + 1 ?? 0,
+      valueStartIndex: (typeof prefix === 'string' ? prefix.length : 0) + 1,
     };
   }
 
@@ -281,9 +291,10 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
   if (workflowInputKeyMatch && workflowInputKeyMatch.groups) {
     const key = workflowInputKeyMatch.groups.key;
     // Don't match known keywords that should be handled by other parsers
-    // Use case-insensitive comparison to catch mixed-case variants
-    const knownKeywords = ['foreach', 'type', 'connector-id', 'workflow-id', 'inputs'];
-    if (!knownKeywords.includes(key.toLowerCase())) {
+    const isKnownKey = WORKFLOW_STEP_KNOWN_KEYS.some(
+      (known) => key.toLowerCase() === known.toLowerCase()
+    );
+    if (!isKnownKey) {
       const inputValue = workflowInputKeyMatch.groups?.value.trim() ?? '';
       return {
         matchType: 'workflow-inputs',

@@ -10,12 +10,7 @@
 import YAML, { isMap, isPair, isScalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import type { LegacyWorkflowInput } from '@kbn/workflows';
-// WorkflowInputChoiceSchema is needed as a value for typeof, not just as a type
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { WorkflowInputChoiceSchema } from '@kbn/workflows';
-import type { z } from '@kbn/zod/v4';
-
-type WorkflowInputChoice = z.infer<typeof WorkflowInputChoiceSchema>;
+import { getInputPlaceholderValue } from './workflow_input_placeholder';
 import type { WorkflowsResponse } from '../../../../../../entities/workflows/model/types';
 import type { StepInfo } from '../../../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import { getIndentLevelFromLineNumber } from '../../../get_indent_level';
@@ -60,39 +55,7 @@ function getInputValue(
   index: number,
   useSnippetPlaceholders: boolean
 ): string {
-  let value: string;
-
-  // Use default value if available, otherwise use placeholder based on type
-  if (input.default !== undefined) {
-    value = JSON.stringify(input.default);
-  } else {
-    switch (input.type) {
-      case 'string':
-        value = '""';
-        break;
-      case 'number':
-        value = '0';
-        break;
-      case 'boolean':
-        value = 'false';
-        break;
-      case 'choice':
-        const choiceInput = input as WorkflowInputChoice;
-        if (choiceInput.options && choiceInput.options.length > 0) {
-          value = JSON.stringify(choiceInput.options[0]);
-        } else {
-          value = '""';
-        }
-        break;
-      case 'array':
-        value = '[]';
-        break;
-      default:
-        value = '""';
-    }
-  }
-
-  // Use snippet placeholder only for insertion, not for replacement
+  const value = getInputPlaceholderValue(input);
   if (useSnippetPlaceholders) {
     return `\${${index + 1}:${value}}`;
   }
