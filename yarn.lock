@@ -7721,6 +7721,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/mini-apps@link:src/platform/plugins/shared/mini_apps":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-agg-utils@link:x-pack/platform/packages/private/ml/agg_utils":
   version "0.0.0"
   uid ""
@@ -8546,6 +8550,10 @@
   uid ""
 
 "@kbn/screenshotting-server@link:src/platform/packages/private/kbn-screenshotting-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/script-panel@link:src/platform/plugins/shared/script_panel":
   version "0.0.0"
   uid ""
 

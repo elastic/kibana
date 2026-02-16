@@ -33,5 +33,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./ui_counters'));
     loadTestFile(require.resolve('./telemetry'));
     loadTestFile(require.resolve('./esql'));
+    loadTestFile(require.resolve('./mini_apps'));
   });
 }

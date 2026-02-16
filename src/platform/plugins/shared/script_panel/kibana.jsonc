@@ -13,7 +13,8 @@
       "embeddable",
       "uiActions",
       "data",
-      "expressions"
+      "expressions",
+      "kibanaUtils"
     ]
   }
 }
