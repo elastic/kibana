@@ -113,24 +113,24 @@ describe('UiamApiKeyProvisioningTask', () => {
   });
 
   describe('start', () => {
-    it('does not subscribe or schedule when not serverless', () => {
+    it('does not subscribe or schedule when not serverless', async () => {
       const core = coreMock.createStart();
       const ensureScheduled = jest.fn();
       const removeIfExists = jest.fn();
       const taskManager = { ensureScheduled, removeIfExists } as never;
 
       const task = new UiamApiKeyProvisioningTask({ logger, isServerless: false });
-      task.start({ core, taskManager });
+      await task.start({ core, taskManager });
 
       expect(ensureScheduled).not.toHaveBeenCalled();
       expect(core.featureFlags.getBooleanValue$).not.toHaveBeenCalled();
     });
 
-    it('logs error and returns when taskManager is missing and serverless', () => {
+    it('logs error and returns when taskManager is missing and serverless', async () => {
       const core = coreMock.createStart();
 
       const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
-      task.start({ core, taskManager: undefined as never });
+      await task.start({ core, taskManager: undefined as never });
 
       expect(logger.error).toHaveBeenCalledWith(
         `Missing required task manager service during start of ${API_KEY_PROVISIONING_TASK_TYPE}`,
@@ -147,7 +147,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       const taskManager = { ensureScheduled, removeIfExists } as never;
 
       const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
-      task.start({ core, taskManager });
+      await task.start({ core, taskManager });
 
       await new Promise<void>((resolve) => setImmediate(resolve));
 
@@ -178,7 +178,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       const taskManager = { ensureScheduled, removeIfExists } as never;
 
       const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
-      task.start({ core, taskManager });
+      await task.start({ core, taskManager });
 
       flag$.next(true);
       await new Promise<void>((resolve) => setImmediate(resolve));
@@ -201,7 +201,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       const taskManager = { ensureScheduled, removeIfExists: jest.fn() } as never;
 
       const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
-      task.start({ core, taskManager });
+      await task.start({ core, taskManager });
 
       await new Promise<void>((resolve) => setImmediate(resolve));
 
@@ -220,7 +220,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       const taskManager = { ensureScheduled, removeIfExists } as never;
 
       const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
-      task.start({ core, taskManager });
+      await task.start({ core, taskManager });
 
       flag$.next(true);
       await new Promise<void>((resolve) => setImmediate(resolve));
