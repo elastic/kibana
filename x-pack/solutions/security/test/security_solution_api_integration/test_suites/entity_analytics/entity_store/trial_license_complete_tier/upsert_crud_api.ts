@@ -57,11 +57,9 @@ export default function (providerContext: FtrProviderContext) {
 
       beforeEach(async () => {
         // This test only validates user entity behavior, so enable only the user engine
-        // Pass COMMON_DATASTREAM_NAME so the transform reads from our test data
-        await enableEntityStore(providerContext, {
-          entityTypes: ['user'],
-          extraIndexPatterns: [COMMON_DATASTREAM_NAME],
-        });
+        // Note: COMMON_DATASTREAM_NAME (logs-elastic_agent.cloudbeat-test) is already covered
+        // by the default Entity Store patterns (logs-*), so no extraIndexPatterns needed
+        await enableEntityStore(providerContext, { entityTypes: ['user'] });
         log.info('beforeEach complete');
       });
 

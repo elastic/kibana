@@ -47,10 +47,13 @@ export async function enableEntityStore(
       }/${RETRIES})...`
     );
 
+    // Only include indexPattern if it has a value, otherwise use API defaults
+    const requestBody = indexPattern ? { indexPattern, entityTypes } : { entityTypes };
+
     const response = await supertest
       .post('/api/entity_store/enable')
       .set('kbn-xsrf', 'xxxx')
-      .send({ indexPattern, entityTypes });
+      .send(requestBody);
 
     if (response.statusCode !== 200) {
       log.error(`Enable request failed: ${response.statusCode} - ${JSON.stringify(response.body)}`);
