@@ -42,8 +42,9 @@ const TestWrapper: React.FC<{
 };
 
 describe('ErrorCallOut', () => {
+  // Create mock errors - using 'as' cast since we're testing error display, not field names
   const createErrors = (
-    errorMap: Partial<Record<keyof FormValues, { message?: string }>>
+    errorMap: Record<string, { message?: string }>
   ): FieldErrors<FormValues> => {
     return errorMap as FieldErrors<FormValues>;
   };
@@ -51,7 +52,7 @@ describe('ErrorCallOut', () => {
   describe('when form is not submitted', () => {
     it('returns null even when there are errors', () => {
       const errors = createErrors({
-        name: { message: 'Name is required' },
+        metadata: { message: 'Name is required' },
       });
 
       const { container } = render(
@@ -77,7 +78,7 @@ describe('ErrorCallOut', () => {
 
     it('displays the error callout with a single error message', () => {
       const errors = createErrors({
-        name: { message: 'Name is required' },
+        metadata: { message: 'Name is required' },
       });
 
       render(
@@ -92,8 +93,8 @@ describe('ErrorCallOut', () => {
 
     it('displays multiple error messages', () => {
       const errors = createErrors({
-        name: { message: 'Name is required' },
-        query: { message: 'Query is invalid' },
+        metadata: { message: 'Name is required' },
+        evaluation: { message: 'Query is invalid' },
         timeField: { message: 'Time field is required' },
       });
 
@@ -110,8 +111,8 @@ describe('ErrorCallOut', () => {
 
     it('filters out errors without messages', () => {
       const errors = createErrors({
-        name: { message: 'Name is required' },
-        query: { message: undefined },
+        metadata: { message: 'Name is required' },
+        evaluation: { message: undefined },
         timeField: { message: '' },
       });
 
@@ -130,7 +131,7 @@ describe('ErrorCallOut', () => {
 
     it('renders the callout with danger color', () => {
       const errors = createErrors({
-        name: { message: 'Name is required' },
+        metadata: { message: 'Name is required' },
       });
 
       const { container } = render(
