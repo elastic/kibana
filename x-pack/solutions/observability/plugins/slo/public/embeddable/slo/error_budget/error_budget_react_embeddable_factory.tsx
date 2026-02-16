@@ -50,8 +50,8 @@ export const getErrorBudgetEmbeddableFactory = ({
       const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getErrorBudgetPanelTitle());
       const sloErrorBudgetManager = initializeStateManager<ErrorBudgetCustomInput>(initialState, {
-        sloId: undefined,
-        sloInstanceId: undefined,
+        slo_id: undefined,
+        slo_instance_id: undefined,
       });
       const reload$ = new Subject<boolean>();
 
@@ -69,8 +69,8 @@ export const getErrorBudgetEmbeddableFactory = ({
         anyStateChange$: merge(titleManager.anyStateChange$, sloErrorBudgetManager.anyStateChange$),
         getComparators: () => ({
           ...titleComparators,
-          sloId: 'referenceEquality',
-          sloInstanceId: 'referenceEquality',
+          slo_id: 'referenceEquality',
+          slo_instance_id: 'referenceEquality',
         }),
         onReset: (lastState) => {
           sloErrorBudgetManager.reinitializeState(lastState);

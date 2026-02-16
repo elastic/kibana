@@ -22,8 +22,8 @@ export interface EmbeddableSloProps {
 }
 
 export interface ErrorBudgetCustomInput {
-  sloId: string | undefined;
-  sloInstanceId: string | undefined;
+  slo_id: string | undefined;
+  slo_instance_id: string | undefined;
 }
 
 export type SloErrorBudgetEmbeddableState = SerializedTitles & ErrorBudgetCustomInput;
