@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
+  EuiImage,
   EuiIcon,
   EuiLink,
   EuiPanel,
@@ -21,12 +21,13 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useKibana } from '../../common/hooks/use_kibana';
+import autoImportIntegrationsImage from '../../common/images/auto_import_integrations.svg';
 
-export interface CreateIntegrationCardButtonProps {
+export interface CreateIntegrationSideCardButtonProps {
   compressed?: boolean;
 }
 
-export const CreateIntegrationCardButton = React.memo<CreateIntegrationCardButtonProps>(
+export const CreateIntegrationSideCardButton = React.memo<CreateIntegrationSideCardButtonProps>(
   ({ compressed = false }) => {
     const { getUrlForApp, navigateToUrl } = useKibana().services.application;
     const { euiTheme } = useEuiTheme();
@@ -37,7 +38,7 @@ export const CreateIntegrationCardButton = React.memo<CreateIntegrationCardButto
     );
 
     const uploadHref = useMemo(
-      () => getUrlForApp('integrations', { path: '/create/upload' }),
+      () => getUrlForApp('integrations', { path: '/upload' }),
       [getUrlForApp]
     );
 
@@ -60,11 +61,12 @@ export const CreateIntegrationCardButton = React.memo<CreateIntegrationCardButto
     return (
       <EuiPanel
         hasShadow={false}
-        hasBorder={false}
-        paddingSize="m"
+        hasBorder={true}
+        paddingSize={compressed ? 's' : 'm'}
         data-test-subj="createIntegrationCardButton"
         css={css`
-          background-color: ${euiTheme.colors.backgroundBasePrimary};
+          background-color: #d7e3e6;
+          border-color: #b9c8d0;
           border-radius: ${euiTheme.border.radius.medium};
         `}
       >
@@ -77,14 +79,22 @@ export const CreateIntegrationCardButton = React.memo<CreateIntegrationCardButto
           </h3>
         </EuiTitle>
 
-        <EuiSpacer size="s" />
+        <EuiSpacer size={compressed ? 's' : 'm'} />
 
-        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="flexStart">
+        <EuiFlexGroup gutterSize={compressed ? 's' : 'm'} responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="monitoringApp" size="xxl" color={euiTheme.colors.primary} />
+            <EuiImage
+              alt=""
+              src={autoImportIntegrationsImage}
+              css={css`
+                width: ${compressed ? '84px' : '108px'};
+                min-width: ${compressed ? '84px' : '108px'};
+                display: block;
+              `}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText size="xs">
+            <EuiText size={compressed ? 'xs' : 's'}>
               <FormattedMessage
                 id="xpack.automaticImportV2.createIntegrationDescription"
                 defaultMessage="Use AI to create a new one or {uploadLink}"
@@ -108,7 +118,7 @@ export const CreateIntegrationCardButton = React.memo<CreateIntegrationCardButto
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiHorizontalRule margin="s" />
+        <EuiSpacer size={compressed ? 's' : 'm'} />
 
         {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
         <EuiLink
@@ -126,9 +136,10 @@ export const CreateIntegrationCardButton = React.memo<CreateIntegrationCardButto
             hasBorder={false}
             paddingSize="s"
             css={css`
-              border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.primary};
+              width: 100%;
+              border: none;
               border-radius: ${euiTheme.border.radius.medium};
-              background-color: transparent;
+              background-color: #bccbe4;
             `}
           >
             <EuiFlexGroup
@@ -138,10 +149,10 @@ export const CreateIntegrationCardButton = React.memo<CreateIntegrationCardButto
               responsive={false}
             >
               <EuiFlexItem grow={false}>
-                <EuiIcon type="plusInCircle" size="s" />
+                <EuiIcon type="plusInCircle" size="m" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="xs">
+                <EuiText size={compressed ? 'xs' : 'm'}>
                   <strong>
                     <FormattedMessage
                       id="xpack.automaticImportV2.createIntegrationButton"
@@ -157,4 +168,4 @@ export const CreateIntegrationCardButton = React.memo<CreateIntegrationCardButto
     );
   }
 );
-CreateIntegrationCardButton.displayName = 'CreateIntegrationCardButton';
+CreateIntegrationSideCardButton.displayName = 'CreateIntegrationCardButton';

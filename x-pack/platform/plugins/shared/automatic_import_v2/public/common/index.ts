@@ -28,12 +28,15 @@ export {
 export {
   FLEET_PACKAGES_PATH,
   AUTOMATIC_IMPORT_INTEGRATIONS_PATH,
+  runInstallPackage,
   getInstalledPackages,
   createIntegration,
   getIntegrationById,
 } from './lib/api';
+export { getIntegrationNameFromResponse } from './lib/api_parsers';
 
 export type {
+  RequestDeps,
   CreateUpdateIntegrationRequest,
   UploadSamplesRequest,
   GetDataStreamResultsResponse,

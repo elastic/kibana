@@ -21,7 +21,7 @@ import type {
 } from './types';
 import { useGetIntegrationById } from './common';
 import { getCreateIntegrationLazy } from './components/create_integration';
-import { getCreateIntegrationCardButtonLazy } from './components/create_integration_card_button';
+import { getCreateIntegrationSideCardButtonLazy } from './components/create_integration_card_button';
 
 export class AutomaticImportV2Plugin
   implements Plugin<AutomaticImportV2PluginSetup, AutomaticImportV2PluginStart>
@@ -60,7 +60,7 @@ export class AutomaticImportV2Plugin
       },
       components: {
         CreateIntegration: getCreateIntegrationLazy(services),
-        CreateIntegrationCardButton: getCreateIntegrationCardButtonLazy(),
+        CreateIntegrationSideCardButton: getCreateIntegrationSideCardButtonLazy(),
       },
     };
   }
