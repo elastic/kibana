@@ -43,7 +43,7 @@
 - For new tests, prefer using Scout
 
 ### Scout (UI/API with Playwright)
-`node scripts/scout.js run-tests --stateful --config <scoutConfigPath>` (or `--testFiles <specPath1,specPath2>`)
+`node scripts/scout run-tests --arch stateful --domain classic --config <scoutConfigPath>` (or `--testFiles <specPath1,specPath2>`)
 
 ## Code Style Guidelines
 Follow existing patterns in the target area first; below are common defaults.

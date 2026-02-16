@@ -279,6 +279,12 @@ const RESTRICTED_IMPORTS = [
     name: '@testing-library/react-hooks',
     message: 'Please use @testing-library/react instead',
   },
+  {
+    name: '@elastic/ecs',
+    importNames: ['EcsFlat'],
+    message:
+      'Do not import fields metadata directly in Kibana, as they can bloat the bundle size. Instead, consume metadata fields from @kbn/fields-metadata-plugin, which handles scoped field metadata retrieval (ECS, OTel, etc.).',
+  },
   ...[
     'Alt',
     'Alternative',
@@ -1053,6 +1059,16 @@ module.exports = {
             name: 'semver',
             message: 'Please use "semver/*/{function}" instead',
           },
+        ],
+      },
+    },
+    {
+      files: ['x-pack/platform/plugins/shared/fields_metadata/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          // Exclude @elastic/ecs from restricted imports for the fields metadata plugin.
+          ...RESTRICTED_IMPORTS.filter(({ name }) => name !== '@elastic/ecs'),
         ],
       },
     },
@@ -2715,7 +2731,8 @@ module.exports = {
         '@kbn/eslint/scout_test_file_naming': 'error',
         '@kbn/eslint/scout_require_global_setup_hook_in_parallel_tests': 'error',
         '@kbn/eslint/scout_no_es_archiver_in_parallel_tests': 'error',
-        '@kbn/eslint/scout_require_api_client_in_api_test': 'error',
+        '@kbn/eslint/scout_no_cross_boundary_imports': 'error',
+        '@kbn/eslint/scout_expect_import': 'error',
         '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
     },
@@ -2731,14 +2748,6 @@ module.exports = {
           'error',
           { alternativeFixtures: ['esClient'] },
         ],
-      },
-    },
-    {
-      // Ensure correct expect import path in solutions scout API tests
-      files: ['x-pack/solutions/**/plugins/**/test/scout/api/**/*.ts'],
-      rules: {
-        '@kbn/eslint/scout_expect_import': 'error',
-        '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
     },
     {
