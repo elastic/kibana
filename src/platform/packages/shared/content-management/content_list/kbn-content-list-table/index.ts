@@ -25,5 +25,8 @@ export {
 export { NameColumn, NameCell, type NameColumnProps, type NameCellProps } from './src/column';
 export type { ColumnNamespace, ColumnProps } from './src/column';
 
+// Selection hook.
+export { useSelection, type UseSelectionReturn } from './src/hooks';
+
 // Empty state.
 export { EmptyState, type EmptyStateProps } from './src/empty_state';

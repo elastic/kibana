@@ -11,9 +11,16 @@ import type { ContentListClientState, ContentListAction } from './types';
 import { CONTENT_LIST_ACTIONS } from './types';
 
 /**
+ * Default selection state.
+ */
+export const DEFAULT_SELECTION = {
+  selectedIds: [] as string[],
+};
+
+/**
  * State reducer for client-controlled state.
  *
- * Handles only user-driven state mutations (filters, sort).
+ * Handles only user-driven state mutations (filters, sort, selection).
  * Query data (items, loading, error) is managed by React Query directly.
  *
  * @param state - Current client state.
@@ -32,6 +39,20 @@ export const reducer = (
           field: action.payload.field,
           direction: action.payload.direction,
         },
+      };
+
+    case CONTENT_LIST_ACTIONS.SET_SELECTION:
+      return {
+        ...state,
+        selection: {
+          selectedIds: action.payload.ids,
+        },
+      };
+
+    case CONTENT_LIST_ACTIONS.CLEAR_SELECTION:
+      return {
+        ...state,
+        selection: { ...DEFAULT_SELECTION },
       };
 
     default:

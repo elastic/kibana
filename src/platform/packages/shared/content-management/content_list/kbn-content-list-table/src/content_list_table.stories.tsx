@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import {
   EuiPanel,
@@ -25,8 +25,14 @@ import {
   useContentListItems,
   useContentListSort,
   useContentListConfig,
+  useContentListSelection,
 } from '@kbn/content-list-provider';
-import type { ContentListItem, FindItemsParams, FindItemsResult } from '@kbn/content-list-provider';
+import type {
+  ContentListItemConfig,
+  FindItemsParams,
+  FindItemsResult,
+} from '@kbn/content-list-provider';
+import { ContentListToolbar } from '@kbn/content-list-toolbar';
 import { MOCK_DASHBOARDS, createMockFindItems } from '@kbn/content-list-mock-data/storybook';
 import { ContentListTable } from './content_list_table';
 
@@ -49,6 +55,8 @@ const createStoryFindItems = (options?: {
 }) => {
   const { items = MOCK_DASHBOARDS, delay = 0, isEmpty = false } = options ?? {};
 
+  const availableItems = items;
+
   return async (params: FindItemsParams): Promise<FindItemsResult> => {
     // Simulate network delay.
     if (delay > 0) {
@@ -61,7 +69,7 @@ const createStoryFindItems = (options?: {
     }
 
     // Use mock findItems for sorting logic.
-    const mockFindItems = createMockFindItems({ items });
+    const mockFindItems = createMockFindItems({ items: availableItems });
     const result = await mockFindItems({
       searchQuery: params.searchQuery,
       filters: {},
@@ -94,6 +102,8 @@ interface StateDiagnosticPanelProps {
   showDescription?: boolean;
   /** Whether the custom type column is shown. */
   showTypeColumn?: boolean;
+  /** Whether selection is enabled. */
+  showSelection?: boolean;
 }
 
 /**
@@ -103,14 +113,22 @@ const StateDiagnosticPanel = ({
   defaultOpen = false,
   showDescription = true,
   showTypeColumn = true,
+  showSelection = false,
 }: StateDiagnosticPanelProps) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const { items, totalItems, isLoading, error } = useContentListItems();
   const { field: sortField, direction: sortDirection } = useContentListSort();
+  const { selectedIds, selectedCount } = useContentListSelection();
   const config = useContentListConfig();
 
   // Generate JSX code based on current configuration.
   const tableJsx = useMemo(() => {
+    const parts: string[] = [];
+
+    if (showSelection) {
+      parts.push('<ContentListToolbar />');
+    }
+
     const columnChildren: string[] = [];
 
     // Name column with optional description.
@@ -130,15 +148,17 @@ const StateDiagnosticPanel = ({
   />`);
     }
 
-    return `<ContentListTable title="…">
+    parts.push(`<ContentListTable title="…">
 ${columnChildren.join('\n')}
-</ContentListTable>`;
-  }, [showDescription, showTypeColumn]);
+</ContentListTable>`);
+
+    return parts.join('\n');
+  }, [showDescription, showTypeColumn, showSelection]);
 
   return (
     <>
       <EuiSpacer size="l" />
-      <EuiPanel color="subdued" hasBorder paddingSize={isOpen ? 'm' : 's'}>
+      <EuiPanel color="plain" hasBorder={false} hasShadow={false} paddingSize={isOpen ? 'm' : 's'}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
@@ -160,6 +180,11 @@ ${columnChildren.join('\n')}
                   {items.length}/{totalItems} items
                 </EuiBadge>
               </EuiFlexItem>
+              {selectedCount > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="accent">{selectedCount} selected</EuiBadge>
+                </EuiFlexItem>
+              )}
               {isLoading && (
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="primary">Loading…</EuiBadge>
@@ -184,6 +209,16 @@ ${columnChildren.join('\n')}
                   )}
                 </EuiText>
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <strong>Selection:</strong>{' '}
+                  {config.supports.selection ? (
+                    <EuiBadge color="success">Enabled</EuiBadge>
+                  ) : (
+                    <EuiBadge color="hollow">Disabled</EuiBadge>
+                  )}
+                </EuiText>
+              </EuiFlexItem>
             </EuiFlexGroup>
 
             <EuiSpacer size="m" />
@@ -193,15 +228,29 @@ ${columnChildren.join('\n')}
                 <EuiTitle size="xxs">
                   <h3>Sort</h3>
                 </EuiTitle>
-                <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+                <EuiCodeBlock language="json" fontSize="s" paddingSize="s" transparentBackground>
                   {JSON.stringify({ field: sortField, direction: sortDirection }, null, 2)}
                 </EuiCodeBlock>
               </EuiFlexItem>
+              {showSelection && (
+                <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
+                  <EuiTitle size="xxs">
+                    <h3>Selection</h3>
+                  </EuiTitle>
+                  <EuiCodeBlock language="json" fontSize="s" paddingSize="s" transparentBackground>
+                    {JSON.stringify(
+                      { selectedCount, selectedIds: selectedIds.slice(0, 5) },
+                      null,
+                      2
+                    )}
+                  </EuiCodeBlock>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={2} style={{ minWidth: 300 }}>
                 <EuiTitle size="xxs">
                   <h3>Table JSX</h3>
                 </EuiTitle>
-                <EuiCodeBlock language="tsx" fontSize="s" paddingSize="s">
+                <EuiCodeBlock language="tsx" fontSize="s" paddingSize="s" transparentBackground>
                   {tableJsx}
                 </EuiCodeBlock>
               </EuiFlexItem>
@@ -256,6 +305,7 @@ interface PlaygroundArgs {
   tableLayout: 'auto' | 'fixed';
   showDescription: boolean;
   showTypeColumn: boolean;
+  showSelection: boolean;
   hasClickableRows: boolean;
   showDiagnostics: boolean;
 }
@@ -266,7 +316,7 @@ const { Column } = ContentListTable;
 
 /**
  * Wrapper component for the Playground story.
- * Handles stable prop references via useMemo.
+ * Handles stable prop references via `useMemo`.
  */
 const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
   const labels = useMemo(
@@ -282,17 +332,24 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
     return { findItems };
   }, [args.isLoading, args.hasItems]);
 
+  // Use a ref to keep `getHref` stable while still logging to the actions panel.
+  const entityNameRef = useRef(args.entityName);
+  entityNameRef.current = args.entityName;
+
   const itemConfig = useMemo(() => {
-    if (!args.hasClickableRows) {
-      return undefined;
+    const config: ContentListItemConfig = {};
+
+    if (args.hasClickableRows) {
+      config.getHref = (item) => {
+        return `#/${entityNameRef.current}/${item.id}`;
+      };
     }
-    return {
-      getHref: (item: ContentListItem) => `#/${args.entityName}/${item.id}`,
-    };
-  }, [args.hasClickableRows, args.entityName]);
+
+    return Object.keys(config).length > 0 ? config : undefined;
+  }, [args.hasClickableRows]);
 
   // Key forces re-mount when configuration changes.
-  const key = `${args.hasItems}-${args.isLoading}-${args.isReadOnly}`;
+  const key = `${args.hasItems}-${args.isLoading}-${args.isReadOnly}-${args.showSelection}`;
 
   return (
     <ContentListProvider
@@ -306,30 +363,36 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
         sorting: {
           initialSort: { field: 'title', direction: 'asc' },
         },
+        selection: args.showSelection,
       }}
     >
-      <ContentListTable
-        title={`${args.entityNamePlural} table`}
-        compressed={args.compressed}
-        tableLayout={args.tableLayout}
-      >
-        <Column.Name showDescription={args.showDescription} />
-        {args.showTypeColumn && (
-          <Column
-            id="type"
-            name="Type"
-            width="20%"
-            render={(item) => <EuiBadge color="hollow">{item.type ?? 'unknown'}</EuiBadge>}
+      <EuiPanel paddingSize="xl">
+        <ContentListToolbar />
+        <EuiSpacer size="m" />
+        <ContentListTable
+          title={`${args.entityNamePlural} table`}
+          compressed={args.compressed}
+          tableLayout={args.tableLayout}
+        >
+          <Column.Name showDescription={args.showDescription} />
+          {args.showTypeColumn && (
+            <Column
+              id="type"
+              name="Type"
+              width="20%"
+              render={(item) => <EuiBadge color="hollow">{item.type ?? 'unknown'}</EuiBadge>}
+            />
+          )}
+        </ContentListTable>
+        {args.showDiagnostics && (
+          <StateDiagnosticPanel
+            defaultOpen
+            showDescription={args.showDescription}
+            showTypeColumn={args.showTypeColumn}
+            showSelection={args.showSelection}
           />
         )}
-      </ContentListTable>
-      {args.showDiagnostics && (
-        <StateDiagnosticPanel
-          defaultOpen
-          showDescription={args.showDescription}
-          showTypeColumn={args.showTypeColumn}
-        />
-      )}
+      </EuiPanel>
     </ContentListProvider>
   );
 };
@@ -344,6 +407,7 @@ export const Table: PlaygroundStory = {
     isLoading: false,
     isReadOnly: false,
     showTypeColumn: false,
+    showSelection: true,
     hasClickableRows: true,
     showDescription: true,
     entityName: 'dashboard',
@@ -398,6 +462,12 @@ export const Table: PlaygroundStory = {
       control: 'boolean',
       description: 'Add a custom "Type" column to demonstrate custom columns.',
       table: { category: 'Columns' },
+    },
+    showSelection: {
+      control: 'boolean',
+      description:
+        'Enable row selection with checkboxes. Shows a delete button in the toolbar that clears the selection when clicked.',
+      table: { category: 'Selection' },
     },
     hasClickableRows: {
       control: 'boolean',

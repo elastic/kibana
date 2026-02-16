@@ -14,3 +14,7 @@ export { isSortingConfig } from './types';
 // Sorting feature.
 export type { SortField, SortOption, SortingConfig, UseContentListSortReturn } from './sorting';
 export { useContentListSort } from './sorting';
+
+// Selection feature.
+export type { UseContentListSelectionReturn } from './selection';
+export { useContentListSelection } from './selection';
