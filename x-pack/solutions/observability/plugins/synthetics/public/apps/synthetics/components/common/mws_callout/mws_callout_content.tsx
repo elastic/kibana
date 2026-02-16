@@ -4,31 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MaintenanceWindow } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/types';
 import { MaintenanceWindowsLink } from '../../monitor_add_edit/fields/maintenance_windows/create_maintenance_windows_btn';
-import { selectDynamicSettings } from '../../../state/settings/selectors';
-import { getDynamicSettingsAction } from '../../../state/settings/actions';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../common/constants/settings_defaults';
+import { useSyncInterval } from './use_sync_interval';
 
 export const MwsCalloutContent = ({ activeMWs }: { activeMWs: MaintenanceWindow[] }) => {
-  const dispatch = useDispatch();
-  const { settings } = useSelector(selectDynamicSettings);
-
-  useEffect(() => {
-    if (!settings) {
-      dispatch(getDynamicSettingsAction.get());
-    }
-  }, [dispatch, settings]);
-
-  const syncInterval =
-    settings?.privateLocationsSyncInterval ??
-    DYNAMIC_SETTINGS_DEFAULTS.privateLocationsSyncInterval ??
-    5;
+  const syncInterval = useSyncInterval();
 
   if (activeMWs.length) {
     return (
