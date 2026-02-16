@@ -11,7 +11,7 @@ import {
   COMMON_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
-  UPDATES_INDEX,
+  UPDATES_DATASTREAM,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { getEuidPainlessEvaluation } from '../../../../common/domain/euid/painless';
@@ -69,7 +69,7 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
         const emitScript = toRuntimeFieldEmitScript(returnScript);
 
         const result = await esClient.search({
-          index: UPDATES_INDEX,
+          index: UPDATES_DATASTREAM,
           body: {
             query: { match_all: {} },
             runtime_mappings: {
