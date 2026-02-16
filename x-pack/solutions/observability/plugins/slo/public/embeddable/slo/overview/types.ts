@@ -15,11 +15,6 @@ import type {
   PublishesWritableTitle,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-// import type {
-//   OverviewEmbeddableState,
-//   SingleOverviewEmbeddableState,
-//   GroupOverviewEmbeddableState,
-// } from '../../../../server/lib/embeddables/schema';
 
 import type {
   SingleOverviewCustomState,
