@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-import { createFieldTestingConfig } from '../base.jest.integration.config';
-
-export default createFieldTestingConfig({
-  testsDirectory: 'type_specific',
-  groupNumber: 2,
-  totalGroups: 2,
-});
+export { EditIlmPhasesFlyout } from './edit_ilm_phases_flyout';
+export type { EditIlmPhasesFlyoutProps } from './types';
