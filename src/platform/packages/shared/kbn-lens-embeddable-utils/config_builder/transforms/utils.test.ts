@@ -24,6 +24,7 @@ import type {
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
   FormBasedLayer,
+  ReferenceBasedIndexPatternColumn,
 } from '@kbn/lens-common';
 import type { TextBasedLayer } from '@kbn/lens-common';
 import type { LensApiState, MetricState } from '../schema';
@@ -134,6 +135,98 @@ describe('addLayerColumn', () => {
         },
       }
     `);
+  });
+
+  test('adds column with reference column', () => {
+    const layer: PersistedIndexPatternLayer = {
+      columns: {},
+      columnOrder: [],
+    };
+
+    const parentColumn: ReferenceBasedIndexPatternColumn = {
+      operationType: 'counter_rate',
+      label: 'Counter rate',
+      dataType: 'number',
+      isBucketed: false,
+      references: [],
+    };
+
+    const referenceColumn: GenericIndexPatternColumn = {
+      operationType: 'max',
+      sourceField: 'bytes',
+      label: 'Max of bytes',
+      dataType: 'number',
+      isBucketed: false,
+    };
+
+    addLayerColumn(layer, 'metric', [parentColumn, referenceColumn]);
+
+    expect(layer.columns.metric).toBeDefined();
+    expect(layer.columns.metric_reference).toBeDefined();
+    expect(layer.columns.metric).toHaveProperty('references', ['metric_reference']);
+    expect(layer.columnOrder).toEqual(['metric', 'metric_reference']);
+  });
+
+  test('adds reference column to the beginning when first=true', () => {
+    const layer: PersistedIndexPatternLayer = {
+      columns: {},
+      columnOrder: ['existing'],
+    };
+
+    const parentColumn: ReferenceBasedIndexPatternColumn = {
+      operationType: 'cumulative_sum',
+      label: 'Cumulative sum',
+      dataType: 'number',
+      isBucketed: false,
+      references: [],
+    };
+
+    const referenceColumn: GenericIndexPatternColumn = {
+      operationType: 'sum',
+      sourceField: 'sales',
+      label: 'Sum of sales',
+      dataType: 'number',
+      isBucketed: false,
+    };
+
+    addLayerColumn(layer, 'metric', [parentColumn, referenceColumn], true);
+
+    expect(layer.columns.metric).toBeDefined();
+    expect(layer.columns.metric_reference).toBeDefined();
+    expect(layer.columns.metric).toHaveProperty('references', ['metric_reference']);
+    expect(layer.columnOrder).toEqual(['metric_reference', 'metric', 'existing']);
+  });
+
+  test('adds column with postfix and reference', () => {
+    const layer: PersistedIndexPatternLayer = {
+      columns: {},
+      columnOrder: [],
+    };
+
+    const parentColumn: ReferenceBasedIndexPatternColumn = {
+      operationType: 'moving_average',
+      label: 'Moving average',
+      dataType: 'number',
+      isBucketed: false,
+      references: [],
+    };
+
+    const referenceColumn: GenericIndexPatternColumn = {
+      operationType: 'sum',
+      sourceField: 'count',
+      label: 'Sum of count',
+      dataType: 'number',
+      isBucketed: false,
+    };
+
+    addLayerColumn(layer, 'metric', [parentColumn, referenceColumn], false, '_trendline');
+
+    expect(layer.columns.metric_trendline).toBeDefined();
+    expect(layer.columns.metric_trendline_reference).toBeDefined();
+    expect(layer.columns.metric_trendline).toHaveProperty('references', [
+      'metric_trendline_reference',
+    ]);
+    expect(layer.columnOrder).toEqual(['metric_trendline', 'metric_trendline_reference']);
   });
 });
 
