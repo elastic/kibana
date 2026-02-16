@@ -4414,6 +4414,22 @@
       }
     }
   },
+  "uiam_api_keys_provisioning_status": {
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "entityId": {
+        "type": "keyword"
+      },
+      "entityType": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "keyword"
+      }
+    }
+  },
   "upgrade-assistant-ml-upgrade-operation": {
     "dynamic": false,
     "properties": {

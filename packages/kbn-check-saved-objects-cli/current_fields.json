@@ -1327,6 +1327,12 @@
   "ui-metric": [
     "count"
   ],
+  "uiam_api_keys_provisioning_status": [
+    "@timestamp",
+    "entityId",
+    "entityType",
+    "status"
+  ],
   "upgrade-assistant-ml-upgrade-operation": [
     "snapshotId"
   ],
