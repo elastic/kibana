@@ -134,7 +134,7 @@ export const command = {
       vscodeConfig
         ? time('update vscode config', async () => {
             // Update vscode settings
-            await run('node', ['scripts/update_vscode_config']);
+            await run('node', ['scripts/update_vscode_config.ts']);
             log.success('vscode config updated');
           })
         : undefined,
