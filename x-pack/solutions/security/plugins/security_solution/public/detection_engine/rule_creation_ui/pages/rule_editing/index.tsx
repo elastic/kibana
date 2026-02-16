@@ -552,7 +552,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                               scheduleStepData={scheduleStepData}
                               actionsStepData={actionsStepData}
                               actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
-                              size="s"
+                              pathway="rule_editing"
                               mode="exploration"
                             />
                           ) : undefined

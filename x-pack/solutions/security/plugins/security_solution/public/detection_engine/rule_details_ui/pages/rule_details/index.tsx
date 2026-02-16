@@ -709,8 +709,7 @@ export const RuleDetailsPage = connector(
                             {rule != null && (
                               <AddRuleAttachmentToChatButton
                                 rule={rule}
-                                size="s"
-                                pathway="rules_table"
+                                pathway="rule_details"
                                 mode="exploration"
                               />
                             )}

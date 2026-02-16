@@ -826,8 +826,8 @@ const CreateRulePageComponent: React.FC<{
           scheduleStepData={scheduleStepData}
           actionsStepData={actionsStepData}
           actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
-          size="s"
           mode="creation"
+          pathway="rule_creation"
         />
       ) : undefined,
     [

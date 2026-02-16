@@ -14,10 +14,13 @@ export interface AgentBuilderAddToChatTelemetry {
    */
   pathway:
     | 'alerts_flyout'
+    | 'alerts_flyout_rule_summary'
     | 'entity_highlights'
     | 'entity_risk_contribution'
     | 'rules_table'
     | 'rule_creation'
+    | 'rule_editing'
+    | 'rule_details'
     | 'rule_failure'
     | 'attack_discovery_take_action'
     | 'attack_discovery_top'
