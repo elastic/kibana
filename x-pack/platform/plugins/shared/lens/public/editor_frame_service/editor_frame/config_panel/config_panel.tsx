@@ -325,17 +325,17 @@ export function ConfigPanel(
         .lnsApp & {
           /* Add left padding and negative margin to create space for drag-drop extra targets
              (e.g., "Alt/Option to duplicate" tooltip) that are positioned to the left of drop zones.
-             The 400px matches euiTheme.components.forms.maxWidth. */
+             Extra targets have max-width: 400px and 8px gap. Using 450px for safety. */
           padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.xl}
-            calc(400px + ${euiTheme.size.base});
-          margin-left: -400px;
+            calc(450px + ${euiTheme.size.base});
+          margin-left: -450px;
           /* Background gradient: transparent in the extended left area (for tooltips),
              solid color for the visible content area */
           background: linear-gradient(
             to right,
             transparent 0,
-            transparent 400px,
-            ${euiTheme.colors.emptyShade} 400px
+            transparent 450px,
+            ${euiTheme.colors.emptyShade} 450px
           );
           /* Note: overflow scrolling is handled by the parent lnsConfigPanelScrollContainer */
           ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {

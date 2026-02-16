@@ -519,18 +519,18 @@ export function LensEditConfigurationFlyout({
                 overflow-x: hidden !important;
                 pointer-events: none;
 
-                /* Extend the scroll container to the left to accommodate drag-drop extra targets
-                   (e.g., "Alt/Option to duplicate" tooltip) that are positioned to the left of drop zones. */
-                padding-left: ${euiTheme.euiTheme.components.forms.maxWidth};
-                margin-left: -${euiTheme.euiTheme.components.forms.maxWidth};
+                /* Extend the scroll container to the left to accommodate drag-drop extra targets.
+                   The extra targets have max-width: 400px and are positioned with an 8px gap.
+                   Using 450px (400px + 8px gap + buffer) to ensure they're fully visible. */
+                padding-left: 450px;
+                margin-left: -450px;
                 /* Background gradient: transparent in the extended left area (for drag-drop tooltips),
                    solid color for the visible content area */
                 background: linear-gradient(
                   to right,
                   transparent 0,
-                  transparent ${euiTheme.euiTheme.components.forms.maxWidth},
-                  ${euiTheme.euiTheme.colors.emptyShade}
-                    ${euiTheme.euiTheme.components.forms.maxWidth}
+                  transparent 450px,
+                  ${euiTheme.euiTheme.colors.emptyShade} 450px
                 );
                 > * {
                   pointer-events: auto;

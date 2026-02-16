@@ -274,9 +274,10 @@ const componentStyles = {
       overflowX: 'hidden',
       // Extend the scroll container to the left to accommodate drag-drop extra targets
       // (e.g., "Alt/Option to duplicate" tooltip) that are positioned to the left of drop zones.
+      // Extra targets have max-width: 400px and 8px gap. Using 450px for safety.
       // Use transparent background here - the EuiForm inside has its own background.
-      paddingLeft: 400,
-      marginLeft: -400,
+      paddingLeft: 450,
+      marginLeft: -450,
     }),
   visualizationToolbar: ({ euiTheme }: UseEuiTheme) =>
     css({
