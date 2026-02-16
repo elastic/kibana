@@ -98,3 +98,5 @@ export const TEXT_BASED_LANGUAGE_ERROR = 'text_based_lang_error';
 
 export const URL_CONFLICT = 'url-conflict';
 export const MISSING_TIME_RANGE_ON_EMBEDDABLE = 'missing-time-range-on-embeddable';
+
+export const DATATABLE_COLOR_MISMATCH = 'datatable_color_mismatch';

@@ -9,6 +9,7 @@ import React from 'react';
 
 import type { Ast } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ThemeServiceStart } from '@kbn/core/public';
 import type { PaletteRegistry } from '@kbn/coloring';
 import {
@@ -32,6 +33,7 @@ import type {
   VisualizationSuggestion,
   DatatableVisualizationState,
   Visualization,
+  UserMessage,
 } from '@kbn/lens-common';
 import {
   DEFAULT_HEADER_ROW_HEIGHT,
@@ -40,6 +42,7 @@ import {
   LENS_ROW_HEIGHT_MODE,
   LENS_DATAGRID_DENSITY,
 } from '@kbn/lens-common';
+import { getDatatableColumn } from '../../../common/expressions/impl/datatable/utils';
 import type { FormatFactory } from '../../../common/types';
 import { getDefaultSummaryLabel } from '../../../common/expressions/impl/datatable/summary';
 import {
@@ -65,6 +68,7 @@ import {
   TableDimensionEditor,
   TableDimensionEditorAdditionalSection,
 } from './components';
+import { DATATABLE_COLOR_MISMATCH } from '../../user_messages_ids';
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
   defaultMessage: 'Table',
@@ -812,6 +816,104 @@ export const getDatatableVisualization = ({
         rows,
       },
     ];
+  },
+
+  getUserMessages(state, { frame }): UserMessage[] {
+    const warnings: UserMessage[] = [];
+    const { datasourceLayers, activeData } = frame;
+    const datasource = datasourceLayers?.[state.layerId];
+    const currentData = activeData?.[state.layerId];
+
+    if (!datasource || !currentData || state.columns.length === 0) {
+      return warnings;
+    }
+
+    // Check for color config mismatches
+    state.columns.forEach((column, index) => {
+      const { colorMode, palette, colorMapping } = column;
+
+      // Only check columns with coloring enabled
+      if (!colorMode || colorMode === 'none') {
+        return;
+      }
+
+      const columnMeta = getDatatableColumn(currentData, column.columnId)?.meta;
+      const { isCategory: isBucketable } = getAccessorType(
+        datasource,
+        column.columnId,
+        columnMeta?.type
+      );
+      const colorByTerms = isBucketable;
+      const isValueBasedPalette = Boolean(palette?.params?.stops?.length);
+
+      // Detect mismatches
+      const hasColorMappingOnNumeric = !colorByTerms && colorMapping != null;
+      const hasValuePaletteOnBucket = colorByTerms && isValueBasedPalette;
+
+      if (hasColorMappingOnNumeric || hasValuePaletteOnBucket) {
+        // Get column info for user-friendly message
+        const operation = datasource.getOperationForColumnId(column.columnId);
+        const columnIndex = index + 1;
+        const columnName = operation?.label;
+        const columnLabelText = columnName
+          ? i18n.translate('xpack.lens.datatableVisualization.columnLabelWithIndex', {
+              defaultMessage: 'column {index} ({label})',
+              values: { index: columnIndex, label: columnName },
+            })
+          : i18n.translate('xpack.lens.datatableVisualization.columnLabelWithoutName', {
+              defaultMessage: 'column {index}',
+              values: { index: columnIndex },
+            });
+
+        if (hasColorMappingOnNumeric) {
+          warnings.push({
+            uniqueId: `${DATATABLE_COLOR_MISMATCH}_${column.columnId}`,
+            severity: 'warning',
+            shortMessage: i18n.translate(
+              'xpack.lens.datatableVisualization.colorMismatchShortMessage',
+              {
+                defaultMessage: 'Color configuration mismatch',
+              }
+            ),
+            longMessage: (
+              <FormattedMessage
+                id="xpack.lens.datatableVisualization.colorMismatchNumericLongMessage"
+                defaultMessage="The color mapping configuration is not appropriate for {columnLabel}. Default color by value has been applied instead."
+                values={{
+                  columnLabel: <strong>{columnLabelText}</strong>,
+                }}
+              />
+            ),
+            fixableInEditor: true,
+            displayLocations: [{ id: 'toolbar' }],
+          });
+        } else if (hasValuePaletteOnBucket) {
+          warnings.push({
+            uniqueId: `${DATATABLE_COLOR_MISMATCH}_${column.columnId}`,
+            severity: 'warning',
+            shortMessage: i18n.translate(
+              'xpack.lens.datatableVisualization.colorMismatchShortMessage',
+              {
+                defaultMessage: 'Color configuration mismatch',
+              }
+            ),
+            longMessage: (
+              <FormattedMessage
+                id="xpack.lens.datatableVisualization.colorMismatchTermsLongMessage"
+                defaultMessage="The color by value configuration is not appropriate for {columnLabel}. Default color mapping has been applied instead."
+                values={{
+                  columnLabel: <strong>{columnLabelText}</strong>,
+                }}
+              />
+            ),
+            fixableInEditor: true,
+            displayLocations: [{ id: 'toolbar' }],
+          });
+        }
+      }
+    });
+
+    return warnings;
   },
 
   getVisualizationInfo(state) {

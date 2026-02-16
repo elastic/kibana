@@ -414,10 +414,12 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       let appliedPalette = hasColorConfigMismatch ? undefined : palette;
       let appliedColorMapping = hasColorConfigMismatch ? undefined : colorMapping;
 
-      // Apply defaults when colorMode is set but no color config provided
-      if (!hasColorConfigMismatch && !palette && !colorMapping) {
+      const shouldApplyDefaults = (!palette && !colorMapping) || hasColorConfigMismatch;
+
+      if (shouldApplyDefaults) {
         if (colorByTerms) {
           appliedColorMapping = JSON.stringify(DEFAULT_COLOR_MAPPING_CONFIG);
+          appliedPalette = undefined;
         } else {
           const dataBounds = minMaxByColumnId.get(originalId) ?? getFallbackDataBounds();
           const { palette: defaultPalette } = getColorByValuePalette(
@@ -438,6 +440,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
               continuity: defaultPalette.params?.continuity,
             },
           };
+          appliedColorMapping = undefined;
         }
       }
 
