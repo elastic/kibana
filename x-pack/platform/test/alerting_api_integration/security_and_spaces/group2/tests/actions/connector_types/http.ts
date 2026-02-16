@@ -19,9 +19,9 @@ import {
   ExternalServiceSimulator,
   getHttpServer,
 } from '@kbn/actions-simulators-plugin/server/plugin';
+import { AuthType } from '@kbn/connector-schemas/common/auth/constants';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog, ObjectRemover } from '../../../../../common/lib';
-import { AuthType } from '@kbn/connector-schemas/common/auth/constants';
 
 const defaultValues: Record<string, any> = {
   headers: null,
