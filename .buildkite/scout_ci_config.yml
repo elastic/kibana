@@ -42,3 +42,8 @@ packages:
 # Define test configs to be excluded from automatic discovery & execution in CI environment (process.env.CI=true)
 excluded_configs:
   - x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel.playwright.config.ts
+  # Osquery tests require Docker for Fleet Server and Elastic Agent containers,
+  # which are not available on standard Scout CI agents. These tests run via
+  # the dedicated .buildkite/pipelines/pull_request/security_solution/osquery_scout.yml pipeline.
+  - x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel.playwright.config.ts
+  - x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel.playwright.config.ts

@@ -21,17 +21,42 @@ echo "Docker is available ✅"
 echo "--- Cleaning up stale Docker containers"
 docker rm -f scout-fleet-server scout-osquery-agent-0 scout-osquery-agent-1 2>/dev/null || true
 
-SCOUT_CONFIG="x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/playwright.config.ts"
+SCOUT_CONFIG="x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel.playwright.config.ts"
 
-echo "--- Running Scout tests: $SCOUT_CONFIG"
+echo "--- Running Scout tests (stateful): $SCOUT_CONFIG"
 
 set +e
 node scripts/scout.js run-tests \
-  --stateful \
+  --arch stateful \
+  --domain classic \
   --config "$SCOUT_CONFIG" \
-  --kibana-install-dir "$KIBANA_BUILD_LOCATION"
-status=$?
+  --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
+status_stateful=$?
 set -e
+
+# Clean up Docker containers between runs
+echo "--- Cleaning up Docker containers between runs"
+docker rm -f scout-fleet-server scout-osquery-agent-0 scout-osquery-agent-1 2>/dev/null || true
+
+echo "--- Running Scout tests (serverless security): $SCOUT_CONFIG"
+
+set +e
+node scripts/scout.js run-tests \
+  --arch serverless \
+  --domain security_complete \
+  --config "$SCOUT_CONFIG" \
+  --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
+status_serverless=$?
+set -e
+
+# Use the worst exit code
+if [ $status_stateful -ne 0 ]; then
+  status=$status_stateful
+elif [ $status_serverless -ne 0 ]; then
+  status=$status_serverless
+else
+  status=0
+fi
 
 # Clean up Docker containers after test run
 echo "--- Cleaning up Docker containers"
