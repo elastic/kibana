@@ -50,10 +50,8 @@ test.describe(
       // Verify agents tab exists
       await expect(fleetHome.getAgentsTab()).toBeVisible();
 
-      const defaultPolicyCount = config.isCloud ? 1 : 0;
-
       await expect(fleetHome.getAgentPoliciesTab()).toHaveCount(0);
-      await expect(fleetHome.getSettingsTab()).toHaveCount(defaultPolicyCount);
+      await expect(fleetHome.getSettingsTab()).toHaveCount(0);
       await expect(fleetHome.getUninstallTokensTab()).toHaveCount(0);
     });
   }
