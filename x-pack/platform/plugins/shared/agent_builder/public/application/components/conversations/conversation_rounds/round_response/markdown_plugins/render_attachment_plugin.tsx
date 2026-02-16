@@ -16,7 +16,7 @@ import {
 } from '@kbn/agent-builder-common/tools/custom_rendering';
 import type { AttachmentsService } from '../../../../../../services';
 import { createTagParser } from './utils';
-import { AttachmentWithActions } from '../AttachmentWithActions';
+import { AttachmentWithActions } from '../attachment_with_actions';
 
 /**
  * Parser for <render_attachment> tags in markdown.
