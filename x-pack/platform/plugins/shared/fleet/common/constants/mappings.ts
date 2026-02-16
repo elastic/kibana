@@ -101,6 +101,9 @@ export const AGENT_MAPPINGS = {
         version: {
           type: 'keyword',
         },
+        type: {
+          type: 'keyword',
+        },
       },
     },
     default_api_key: {
@@ -370,6 +373,18 @@ export const AGENT_MAPPINGS = {
     // added to allow validation on status field
     status: {
       type: 'keyword',
+    },
+    sequence_num: {
+      type: 'integer',
+    },
+    capabilities: {
+      type: 'keyword',
+    },
+    identifying_attributes: {
+      type: 'object',
+    },
+    non_identifying_attributes: {
+      type: 'object',
     },
   },
 } as const;

@@ -18,6 +18,7 @@ import {
   EuiSkeletonText,
   EuiToolTip,
   EuiButton,
+  euiTextBreakWord,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -420,7 +421,11 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                   </FlexItemWithMinWidth>
                   {agent.capabilities.sort().map((capability) => (
                     <FlexItemWithMinWidth grow={false} key={capability}>
-                      <EuiDescriptionListDescription className="eui-textTruncate">
+                      <EuiDescriptionListDescription
+                        css={`
+                          ${euiTextBreakWord()};
+                        `}
+                      >
                         {capability}
                       </EuiDescriptionListDescription>
                     </FlexItemWithMinWidth>
