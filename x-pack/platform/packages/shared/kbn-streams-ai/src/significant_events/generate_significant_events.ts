@@ -125,7 +125,9 @@ export async function generateSignificantEvents({
         dataset_analysis: formattedAnalysis ? JSON.stringify(formattedAnalysis) : '',
         description: system?.description || stream.description,
         features: JSON.stringify(
-          features.map((feature) => omit(feature, ['id', 'status', 'last_seen']))
+          features.map((feature) =>
+            omit(feature, ['uuid', 'id', 'status', 'last_seen', 'expires_at'])
+          )
         ),
         computed_feature_instructions: getComputedFeatureInstructions(),
       },
