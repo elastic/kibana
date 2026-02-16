@@ -29,9 +29,9 @@ export const bulkDeleteRules = async ({
   const allErrors: BulkOperationError[] = [];
 
   for (const idsChunk of chunks) {
-    const result = await rulesClient.bulkDeleteRules({ ids: idsChunk });
-    allRules.push(...(result.rules as RuleAlertType[]));
-    allErrors.push(...result.errors);
+    const { rules, errors } = await rulesClient.bulkDeleteRules({ ids: idsChunk });
+    allRules.push(...(rules as RuleAlertType[]));
+    allErrors.push(...errors);
   }
 
   return { rules: allRules, errors: allErrors };
