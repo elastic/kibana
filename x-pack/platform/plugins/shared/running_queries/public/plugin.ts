@@ -24,7 +24,6 @@ export class RunningQueriesPlugin
       RunningQueriesStartDependencies
     >
 {
-
   public setup(
     core: CoreSetup<RunningQueriesStartDependencies>,
     plugins: RunningQueriesSetupDependencies
