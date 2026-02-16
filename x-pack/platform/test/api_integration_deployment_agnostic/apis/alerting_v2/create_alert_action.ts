@@ -56,41 +56,53 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     after(async () => {
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       await Promise.all([
-        esClient.deleteByQuery({
-          index: ALERTS_EVENTS_INDEX,
-          query: { match_all: {} },
-          refresh: true,
-          wait_for_completion: true,
-          conflicts: 'proceed',
-        }),
-        esClient.deleteByQuery({
+        esClient.deleteByQuery(
+          {
+            index: ALERTS_EVENTS_INDEX,
+            query: { match_all: {} },
+            refresh: true,
+            wait_for_completion: true,
+            conflicts: 'proceed',
+          },
+          { ignore: [404] }
+        ),
+        esClient.deleteByQuery(
+          {
+            index: ALERTS_ACTIONS_INDEX,
+            query: { match_all: {} },
+            refresh: true,
+            wait_for_completion: true,
+            conflicts: 'proceed',
+          },
+          { ignore: [404] }
+        ),
+      ]);
+    });
+
+    beforeEach(async () => {
+      await esClient.deleteByQuery(
+        {
           index: ALERTS_ACTIONS_INDEX,
           query: { match_all: {} },
           refresh: true,
           wait_for_completion: true,
           conflicts: 'proceed',
-        }),
-      ]);
-    });
-
-    beforeEach(async () => {
-      await esClient.deleteByQuery({
-        index: ALERTS_ACTIONS_INDEX,
-        query: { match_all: {} },
-        refresh: true,
-        wait_for_completion: true,
-        conflicts: 'proceed',
-      });
+        },
+        { ignore: [404] }
+      );
     });
 
     afterEach(async () => {
-      await esClient.deleteByQuery({
-        index: ALERTS_ACTIONS_INDEX,
-        query: { match_all: {} },
-        refresh: true,
-        wait_for_completion: true,
-        conflicts: 'proceed',
-      });
+      await esClient.deleteByQuery(
+        {
+          index: ALERTS_ACTIONS_INDEX,
+          query: { match_all: {} },
+          refresh: true,
+          wait_for_completion: true,
+          conflicts: 'proceed',
+        },
+        { ignore: [404] }
+      );
     });
 
     async function getLatestAction() {
