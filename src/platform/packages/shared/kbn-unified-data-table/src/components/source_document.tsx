@@ -9,7 +9,11 @@
 
 import React, { Fragment, type ReactNode } from 'react';
 import { css } from '@emotion/react';
-import type { DataTableRecord, ShouldShowFieldInTableHandler, FormattedHitReact } from '@kbn/discover-utils/types';
+import type {
+  DataTableRecord,
+  ShouldShowFieldInTableHandler,
+  FormattedHitReact,
+} from '@kbn/discover-utils/types';
 import { formatHitReact, FormatFieldValueReact } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
