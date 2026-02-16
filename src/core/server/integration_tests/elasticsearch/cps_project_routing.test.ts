@@ -598,7 +598,7 @@ describe('CPS project_routing on serverless ES', () => {
     });
   });
 
-  describe('combined with other querystring params', () => {
+  describe('combined with other params', () => {
     it('works with pretty=true', async () => {
       const response = await client.search(
         {
@@ -715,6 +715,8 @@ describe('CPS project_routing on serverless ES', () => {
         JSON.stringify({ index: TEST_INDEX }) +
         '\n' +
         JSON.stringify({ query: { term: { category: 'beta' } } }) +
+        '\n' +
+        JSON.stringify({ project_routing: LOCAL_PROJECT_ROUTING, }) +
         '\n';
 
       const response: any = await client.transport.request(
@@ -722,9 +724,6 @@ describe('CPS project_routing on serverless ES', () => {
           method: 'POST',
           path: '/_msearch',
           body: ndjson,
-          querystring: {
-            project_routing: LOCAL_PROJECT_ROUTING,
-          },
         },
         {
           headers: {
