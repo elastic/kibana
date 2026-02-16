@@ -115,13 +115,6 @@ const projectModeBackgroundStyles = (euiThemeContext: UseEuiTheme) => {
 // temporary hacks that need to be removed after better flyout and global sidenav customization support in EUI
 // https://github.com/elastic/eui/issues/8820
 const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: ChromeStyle) => css`
-  // adjust position of the classic/project side-navigation
-  .kbnBody .euiFlyout.euiCollapsibleNav {
-    ${logicalCSS('top', layoutVar('application.top', '0px'))};
-    ${logicalCSS('left', layoutVar('application.left', '0px'))};
-    ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
-  }
-
   .kbnBody {
     // overlay mask "belowHeader" should only cover the application area
     .euiOverlayMask[data-relative-to-header='below'] {
@@ -143,6 +136,9 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: C
       `&:not([data-managed-flyout-layout-mode="side-by-side"][data-managed-flyout-level="child"]) {
           border-top-right-radius: ${_euiTheme.border.radius.medium};
           border-bottom-right-radius: ${_euiTheme.border.radius.medium};
+          .euiFlyoutFooter {
+            border-bottom-right-radius: ${_euiTheme.border.radius.medium};
+          }
         }`}
     }
 
