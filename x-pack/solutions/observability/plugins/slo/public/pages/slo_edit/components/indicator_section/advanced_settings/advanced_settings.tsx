@@ -215,7 +215,7 @@ function AdvancedSettingsVerticalLayout() {
   const accordionButtonContent = (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiIcon type="controlsVertical" size="m" aria-label={LABELS.advancedSettings} />
+        <EuiIcon type="controlsVertical" size="m" aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle size="xxs">
