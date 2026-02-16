@@ -11,7 +11,6 @@ import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plug
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isObject } from 'lodash';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { createDataSource } from '../../../../../common/data_sources';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState, TabState } from './types';
@@ -19,6 +18,7 @@ import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size'
 import { DEFAULT_TAB_STATE } from './constants';
 import { parseControlGroupJson } from './utils';
 import { createSearchSource } from '../utils/create_search_source';
+import type { ReactiveTabRuntimeState } from './runtime_state';
 
 export const fromSavedObjectTabToTabState = ({
   tab,
@@ -123,15 +123,18 @@ export const fromTabStateToSavedObjectTab = ({
   tab,
   overridenTimeRestore,
   services,
-  dataView,
+  tabRuntimeState,
 }: {
   tab: TabState;
   overridenTimeRestore?: boolean;
   services: DiscoverServices;
-  dataView?: DataView;
+  tabRuntimeState: ReactiveTabRuntimeState | undefined;
 }): DiscoverSessionTab => {
   const allowedSampleSize = getAllowedSampleSize(tab.appState.sampleSize, services.uiSettings);
   const timeRestore = overridenTimeRestore ?? tab.attributes.timeRestore ?? false;
+
+  const isTabInitialized = Boolean(tabRuntimeState?.stateContainer$.getValue());
+  const dataView = isTabInitialized ? tabRuntimeState?.currentDataView$.getValue() : undefined;
 
   const serializedSearchSource = dataView
     ? createSearchSource({

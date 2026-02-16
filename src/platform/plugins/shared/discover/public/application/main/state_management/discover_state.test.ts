@@ -419,6 +419,7 @@ describe('Discover state', () => {
                 },
               }),
               services,
+              tabRuntimeState: undefined,
             }),
           ],
         });
@@ -446,6 +447,7 @@ describe('Discover state', () => {
                 },
               }),
               services,
+              tabRuntimeState: undefined,
             }),
           ],
         });

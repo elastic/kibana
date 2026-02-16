@@ -50,6 +50,7 @@ describe('useUnsavedChanges', () => {
         },
       }),
       services,
+      tabRuntimeState: undefined,
     });
 
     return createDiscoverSessionMock({

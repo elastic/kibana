@@ -89,5 +89,6 @@ export const getPersistedTabMock = ({
     }),
     overridenTimeRestore,
     services,
+    tabRuntimeState: undefined,
   });
 };

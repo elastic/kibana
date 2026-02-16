@@ -36,6 +36,7 @@ const setup = async () => {
       },
     }),
     services,
+    tabRuntimeState: undefined,
   });
   const persistedDiscoverSession = createDiscoverSessionMock({
     id: 'test-id',
@@ -153,6 +154,7 @@ describe('selectHasUnsavedChanges', () => {
           },
         }),
         services,
+        tabRuntimeState: undefined,
       });
 
       const persistedDiscoverSession = createDiscoverSessionMock({

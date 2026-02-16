@@ -170,6 +170,7 @@ describe('onSaveDiscoverSession', () => {
           },
         }),
         services,
+        tabRuntimeState: undefined,
       });
       const dataViewWithTimeFieldTab = fromTabStateToSavedObjectTab({
         tab: getTabStateMock({
@@ -179,6 +180,7 @@ describe('onSaveDiscoverSession', () => {
           },
         }),
         services,
+        tabRuntimeState: undefined,
       });
       const adHocDataViewNoTimeFieldTab = fromTabStateToSavedObjectTab({
         tab: getTabStateMock({
@@ -188,6 +190,7 @@ describe('onSaveDiscoverSession', () => {
           },
         }),
         services,
+        tabRuntimeState: undefined,
       });
       const adHocDataViewWithTimeFieldTab = fromTabStateToSavedObjectTab({
         tab: getTabStateMock({
@@ -200,6 +203,7 @@ describe('onSaveDiscoverSession', () => {
           },
         }),
         services,
+        tabRuntimeState: undefined,
       });
 
       it("should set isTimeBased to false if no tab's data view is time based", async () => {
@@ -248,10 +252,12 @@ describe('onSaveDiscoverSession', () => {
       const noTimeRestoreTab = fromTabStateToSavedObjectTab({
         tab: getTabStateMock({ id: 'noTimeRestoreTab', attributes: { timeRestore: false } }),
         services,
+        tabRuntimeState: undefined,
       });
       const timeRestoreTab = fromTabStateToSavedObjectTab({
         tab: getTabStateMock({ id: 'timeRestoreTab', attributes: { timeRestore: true } }),
         services,
+        tabRuntimeState: undefined,
       });
       let { saveModal } = await setup({
         additionalPersistedTabs: [noTimeRestoreTab],

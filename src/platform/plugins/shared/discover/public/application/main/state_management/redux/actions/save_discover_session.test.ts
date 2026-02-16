@@ -420,6 +420,7 @@ describe('saveDiscoverSession', () => {
               },
             }),
             services,
+            tabRuntimeState: undefined,
           }),
         ],
       });
@@ -465,6 +466,7 @@ describe('saveDiscoverSession', () => {
               },
             }),
             services,
+            tabRuntimeState: undefined,
           }),
         ],
       });
@@ -507,6 +509,7 @@ describe('saveDiscoverSession', () => {
               },
             }),
             services,
+            tabRuntimeState: undefined,
           }),
         ],
       });

@@ -68,35 +68,28 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     const updatedTabs: DiscoverSessionTab[] = await Promise.all(
       currentTabs.map(async (tab) => {
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
-        const tabStateContainer = tabRuntimeState.stateContainer$.getValue();
         const overriddenVisContextAfterInvalidation = tab.overriddenVisContextAfterInvalidation;
 
-        let updatedTab: DiscoverSessionTab;
+        const updatedTab = cloneDeep(
+          fromTabStateToSavedObjectTab({
+            tab,
+            overridenTimeRestore: newTimeRestore,
+            tabRuntimeState,
+            services,
+          })
+        );
 
-        if (tabStateContainer) {
-          const currentDataView = tabRuntimeState.currentDataView$.getValue();
-
-          updatedTab = cloneDeep(
-            fromTabStateToSavedObjectTab({
-              tab,
-              overridenTimeRestore: newTimeRestore,
-              dataView: currentDataView,
-              services,
-            })
-          );
-        } else {
-          updatedTab = cloneDeep(
-            fromTabStateToSavedObjectTab({
-              tab,
-              overridenTimeRestore: newTimeRestore,
-              services,
-            })
-          );
-          if (newTimeRestore && !updatedTab.timeRange && selectedTab?.globalState.timeRange) {
-            // assign the current time range of the selected tab if time restore is enabled and no time range was set yet for this tab
-            updatedTab.timeRange = selectedTab.globalState.timeRange;
-            updatedTab.refreshInterval = selectedTab.globalState.refreshInterval;
-          }
+        // For non-initialized tabs, assign the current time range of the selected tab
+        // if time restore is enabled and no time range was set yet for this tab
+        const isTabInitialized = Boolean(tabRuntimeState.stateContainer$.getValue());
+        if (
+          !isTabInitialized &&
+          newTimeRestore &&
+          !updatedTab.timeRange &&
+          selectedTab?.globalState.timeRange
+        ) {
+          updatedTab.timeRange = selectedTab.globalState.timeRange;
+          updatedTab.refreshInterval = selectedTab.globalState.refreshInterval;
         }
 
         if (newCopyOnSave) {

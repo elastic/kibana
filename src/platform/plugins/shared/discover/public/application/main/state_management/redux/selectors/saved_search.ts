@@ -56,19 +56,12 @@ export const selectTabSavedSearch = async (
   }
 ): Promise<SavedSearch | undefined> => {
   const tabState = selectTab(state, tabId);
-  const currentDataView = selectTabRuntimeState(
-    runtimeStateManager,
-    tabId
-  ).currentDataView$.getValue();
-
-  if (!currentDataView) {
-    return undefined;
-  }
+  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
 
   return fromSavedObjectTabToSavedSearch({
     tab: fromTabStateToSavedObjectTab({
       tab: tabState,
-      dataView: currentDataView,
+      tabRuntimeState,
       services,
     }),
     discoverSession: undefined,

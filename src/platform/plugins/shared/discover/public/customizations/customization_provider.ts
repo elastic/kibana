@@ -89,18 +89,11 @@ export const getExtendedDiscoverStateContainer = (
     },
     getSavedSearchFromCurrentTab: async () => {
       const tabState = selectTab(stateContainer.internalState.getState(), tabId);
-      const currentDataView = selectTabRuntimeState(
-        stateContainer.runtimeStateManager,
-        tabId
-      ).currentDataView$.getValue();
-
-      if (!currentDataView) {
-        return undefined;
-      }
+      const tabRuntimeState = selectTabRuntimeState(stateContainer.runtimeStateManager, tabId);
 
       const tab = fromTabStateToSavedObjectTab({
         tab: tabState,
-        dataView: currentDataView,
+        tabRuntimeState,
         services,
       });
 
