@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/core-ui-settings-common'
   - '@kbn/config-schema'
   - '@kbn/licensing-types'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -38,5 +39,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - common/**/*
+    - test/**/*
     - '!target/**/*'
 tasks: {}

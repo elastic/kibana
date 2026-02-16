@@ -4,12 +4,12 @@
     "outDir": "target/types"
   },
   "include": [
-    "*.ts", 
-    "common/**/*", 
-    "public/**/*", 
-    "server/**/*", 
-    "../../../../../typings/**/*", 
-    "test/scout/**/*",
+    "*.ts",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../../../typings/**/*",
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/spaces-plugin",
@@ -141,10 +141,9 @@
     "@kbn/esql-language",
     "@kbn/cps",
     "@kbn/kql",
-    "@kbn/controls-constants",
     "@kbn/core-base-browser-mocks",
     "@kbn/react-kibana-context-env",
-    "@kbn/scout",
+    "@kbn/scout"
   ],
   "exclude": ["target/**/*"]
 }
