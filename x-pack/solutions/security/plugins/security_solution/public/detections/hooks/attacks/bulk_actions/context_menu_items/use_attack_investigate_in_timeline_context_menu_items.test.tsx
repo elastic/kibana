@@ -7,7 +7,6 @@
 
 import { renderHook } from '@testing-library/react';
 import { useAttackInvestigateInTimelineContextMenuItems } from './use_attack_investigate_in_timeline_context_menu_items';
-import type { MouseEvent } from 'react';
 import { useBulkAttackInvestigateInTimelineItems } from '../bulk_action_items/use_bulk_attack_investigate_in_timeline_items';
 
 jest.mock('../bulk_action_items/use_bulk_attack_investigate_in_timeline_items');
@@ -62,35 +61,24 @@ describe('useAttackInvestigateInTimelineContextMenuItems', () => {
       })
     );
 
-    expect(mockUseBulkAttackInvestigateInTimelineItems).toHaveBeenCalled();
+    expect(mockUseBulkAttackInvestigateInTimelineItems).toHaveBeenCalledWith({
+      closePopover: undefined,
+    });
   });
 
-  it('should call closePopover on click', () => {
+  it('should pass closePopover to useBulkAttackInvestigateInTimelineItems', () => {
     const closePopover = jest.fn();
-    const onClick = jest.fn();
-    mockUseBulkAttackInvestigateInTimelineItems.mockReturnValue({
-      items: [
-        {
-          label: 'Investigate in timeline',
-          key: 'attack-investigate-in-timeline-action-item',
-          'data-test-subj': 'attack-investigate-in-timeline-action-item',
-          disableOnQuery: true,
-          onClick,
-        },
-      ],
-      panels: [],
-    });
 
-    const { result } = renderHook(() =>
+    renderHook(() =>
       useAttackInvestigateInTimelineContextMenuItems({
         attacksWithTimelineAlerts: [{ attackId: 'attack-1', relatedAlertIds: ['alert-1'] }],
         closePopover,
       })
     );
 
-    result.current.items[0]?.onClick?.({} as MouseEvent);
-    expect(closePopover).toHaveBeenCalledTimes(1);
-    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(mockUseBulkAttackInvestigateInTimelineItems).toHaveBeenCalledWith({
+      closePopover,
+    });
   });
 
   it('should return empty panels', () => {

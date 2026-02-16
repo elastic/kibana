@@ -6,7 +6,6 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { MouseEvent } from 'react';
 import { useAttackCaseContextMenuItems } from './use_attack_case_context_menu_items';
 import { useBulkAttackCaseItems } from '../bulk_action_items/use_bulk_attack_case_items';
 
@@ -92,26 +91,13 @@ describe('useAttackCaseContextMenuItems', () => {
     );
 
     expect(mockUseBulkAttackCaseItems).toHaveBeenCalledWith({
+      closePopover: undefined,
       title: 'Attack title',
     });
   });
 
-  it('should close popover on click', () => {
-    const onClick = jest.fn();
-    mockUseBulkAttackCaseItems.mockReturnValue({
-      items: [
-        {
-          label: 'Add to existing case',
-          key: 'attack-add-to-existing-case',
-          'data-test-subj': 'attack-add-to-existing-case',
-          disableOnQuery: true,
-          onClick,
-        },
-      ],
-      panels: [],
-    });
-
-    const { result } = renderHook(() =>
+  it('should pass closePopover to useBulkAttackCaseItems', () => {
+    renderHook(() =>
       useAttackCaseContextMenuItems({
         attacksWithCase: [
           {
@@ -125,9 +111,10 @@ describe('useAttackCaseContextMenuItems', () => {
       })
     );
 
-    result.current.items[0]?.onClick?.({} as MouseEvent);
-    expect(closePopover).toHaveBeenCalledTimes(1);
-    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(mockUseBulkAttackCaseItems).toHaveBeenCalledWith({
+      closePopover,
+      title: 'Attack title',
+    });
   });
 
   it('should return empty panels', () => {

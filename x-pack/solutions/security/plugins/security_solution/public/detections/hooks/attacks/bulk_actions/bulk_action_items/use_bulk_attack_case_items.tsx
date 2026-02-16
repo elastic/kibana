@@ -27,6 +27,8 @@ export interface UseBulkAttackCaseItemsProps {
   title: string;
   /** Optional callback when add-to-case action is triggered */
   onCasesAdd?: () => void;
+  /** Optional callback to close the popover after triggering action */
+  closePopover?: () => void;
 }
 
 /**
@@ -35,6 +37,7 @@ export interface UseBulkAttackCaseItemsProps {
 export const useBulkAttackCaseItems = ({
   title,
   onCasesAdd,
+  closePopover,
 }: UseBulkAttackCaseItemsProps): BulkAttackActionItems => {
   const {
     services: { cases },
@@ -82,8 +85,9 @@ export const useBulkAttackCaseItems = ({
         .filter((comment): comment is string => comment != null);
 
       onAddToNewCase({ alertIds, markdownComments });
+      closePopover?.();
     },
-    [onAddToNewCase]
+    [closePopover, onAddToNewCase]
   );
 
   const onAddToExistingCaseClick = useCallback<Required<BulkActionsConfig>['onClick']>(
@@ -111,8 +115,9 @@ export const useBulkAttackCaseItems = ({
         .filter((comment): comment is string => comment != null);
 
       onAddToExistingCase({ alertIds, markdownComments });
+      closePopover?.();
     },
-    [onAddToExistingCase]
+    [closePopover, onAddToExistingCase]
   );
 
   const items = useMemo<BulkActionsConfig[]>(

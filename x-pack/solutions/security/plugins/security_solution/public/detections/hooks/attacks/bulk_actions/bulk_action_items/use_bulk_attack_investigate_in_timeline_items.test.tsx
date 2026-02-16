@@ -60,11 +60,14 @@ describe('useBulkAttackInvestigateInTimelineItems', () => {
 
   it('should call investigateInTimeline on click', async () => {
     const investigateInTimeline = jest.fn();
+    const closePopover = jest.fn();
     mockUseInvestigateInTimeline.mockReturnValue({
       investigateInTimeline,
     } as unknown as ReturnType<typeof useInvestigateInTimeline>);
 
-    const { result } = renderHook(() => useBulkAttackInvestigateInTimelineItems(), { wrapper });
+    const { result } = renderHook(() => useBulkAttackInvestigateInTimelineItems({ closePopover }), {
+      wrapper,
+    });
     await result.current.items[0]?.onClick?.(
       [
         {
@@ -80,6 +83,7 @@ describe('useBulkAttackInvestigateInTimelineItems', () => {
     );
 
     expect(investigateInTimeline).toHaveBeenCalledTimes(1);
+    expect(closePopover).toHaveBeenCalledTimes(1);
   });
 
   it('should return empty panels', () => {

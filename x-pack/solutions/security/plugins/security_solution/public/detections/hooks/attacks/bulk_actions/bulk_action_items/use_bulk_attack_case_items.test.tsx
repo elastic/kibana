@@ -105,9 +105,13 @@ describe('useBulkAttackCaseItems', () => {
   });
 
   it('should pass unique alert ids and markdown comments to onAddToNewCase', async () => {
-    const { result } = renderHook(() => useBulkAttackCaseItems({ title: 'attack title' }), {
-      wrapper,
-    });
+    const closePopover = jest.fn();
+    const { result } = renderHook(
+      () => useBulkAttackCaseItems({ title: 'attack title', closePopover }),
+      {
+        wrapper,
+      }
+    );
 
     await result.current.items[0]?.onClick?.(
       [
@@ -138,12 +142,17 @@ describe('useBulkAttackCaseItems', () => {
       alertIds: ['alert-1', 'alert-2', 'alert-3'],
       markdownComments: ['markdown 1', 'markdown 2'],
     });
+    expect(closePopover).toHaveBeenCalledTimes(1);
   });
 
   it('should pass unique alert ids and markdown comments to onAddToExistingCase', async () => {
-    const { result } = renderHook(() => useBulkAttackCaseItems({ title: 'attack title' }), {
-      wrapper,
-    });
+    const closePopover = jest.fn();
+    const { result } = renderHook(
+      () => useBulkAttackCaseItems({ title: 'attack title', closePopover }),
+      {
+        wrapper,
+      }
+    );
 
     await result.current.items[1]?.onClick?.(
       [
@@ -174,6 +183,7 @@ describe('useBulkAttackCaseItems', () => {
       alertIds: ['alert-1', 'alert-2'],
       markdownComments: ['markdown 1', 'markdown 2'],
     });
+    expect(closePopover).toHaveBeenCalledTimes(1);
   });
 
   it('should return empty panels', () => {

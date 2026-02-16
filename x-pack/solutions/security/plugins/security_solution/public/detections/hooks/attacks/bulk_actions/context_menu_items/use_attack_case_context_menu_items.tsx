@@ -35,6 +35,7 @@ export const useAttackCaseContextMenuItems = ({
 }: UseAttackCaseContextMenuItemsProps): BulkAttackContextMenuItems => {
   const bulkActionItems = useBulkAttackCaseItems({
     title,
+    closePopover,
   });
 
   const alertItems = useMemo(
@@ -63,20 +64,5 @@ export const useAttackCaseContextMenuItems = ({
     [bulkActionItems, alertItems, closePopover, clearSelection, setIsLoading, refresh]
   );
 
-  return useMemo(
-    () => ({
-      ...contextMenuItems,
-      // Add-to-case opens another flyout/modal so we close the current popover immediately.
-      items: contextMenuItems.items.map((item) => ({
-        ...item,
-        onClick: item.onClick
-          ? (event) => {
-              item.onClick?.(event);
-              closePopover?.();
-            }
-          : undefined,
-      })),
-    }),
-    [closePopover, contextMenuItems]
-  );
+  return contextMenuItems;
 };

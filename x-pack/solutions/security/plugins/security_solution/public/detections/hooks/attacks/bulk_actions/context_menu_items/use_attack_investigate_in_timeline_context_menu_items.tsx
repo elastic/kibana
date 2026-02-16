@@ -28,7 +28,7 @@ export const useAttackInvestigateInTimelineContextMenuItems = ({
   setIsLoading,
   refresh,
 }: UseAttackInvestigateInTimelineContextMenuItemsProps): BulkAttackContextMenuItems => {
-  const bulkActionItems = useBulkAttackInvestigateInTimelineItems();
+  const bulkActionItems = useBulkAttackInvestigateInTimelineItems({ closePopover });
 
   const alertItems = useMemo(
     () =>
@@ -53,19 +53,5 @@ export const useAttackInvestigateInTimelineContextMenuItems = ({
     [bulkActionItems, alertItems, closePopover, clearSelection, setIsLoading, refresh]
   );
 
-  return useMemo(
-    () => ({
-      ...contextMenuItems,
-      items: contextMenuItems.items.map((item) => ({
-        ...item,
-        onClick: item.onClick
-          ? (event) => {
-              item.onClick?.(event);
-              closePopover?.();
-            }
-          : undefined,
-      })),
-    }),
-    [closePopover, contextMenuItems]
-  );
+  return contextMenuItems;
 };

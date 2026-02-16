@@ -15,10 +15,17 @@ import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../components/alerts_ta
 import { ALERT_ATTACK_DISCOVERY_ALERT_IDS } from '../constants';
 import type { BulkAttackActionItems } from '../types';
 
+export interface UseBulkAttackInvestigateInTimelineItemsProps {
+  /** Optional callback to close the popover after triggering action */
+  closePopover?: () => void;
+}
+
 /**
  * Hook that provides bulk action items for investigating attacks in Timeline.
  */
-export const useBulkAttackInvestigateInTimelineItems = (): BulkAttackActionItems => {
+export const useBulkAttackInvestigateInTimelineItems = ({
+  closePopover,
+}: UseBulkAttackInvestigateInTimelineItemsProps = {}): BulkAttackActionItems => {
   const { investigateInTimeline } = useInvestigateInTimeline();
   const {
     timelinePrivileges: { read: canUseTimeline },
@@ -41,8 +48,9 @@ export const useBulkAttackInvestigateInTimelineItems = (): BulkAttackActionItems
       investigateInTimeline({
         filters: alertIdFilters,
       });
+      closePopover?.();
     },
-    [investigateInTimeline]
+    [closePopover, investigateInTimeline]
   );
 
   const items = useMemo<BulkActionsConfig[]>(
