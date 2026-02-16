@@ -23,8 +23,8 @@ const PAGE_TITLE = i18n.translate(
 export const EntityAnalyticsWatchlistsManagementPage = () => {
   return (
     <>
-      <SecuritySolutionPageWrapper>
-        <HeaderPage title={PAGE_TITLE} data-test-subj="watchlistManagementPage" />
+      <SecuritySolutionPageWrapper data-test-subj="watchlistManagementPage">
+        <HeaderPage title={PAGE_TITLE} />
         <EuiFlexGroup direction="column" gutterSize="l" />
       </SecuritySolutionPageWrapper>
       <SpyRoute pageName={SecurityPageName.entityAnalyticsWatchlists} />
