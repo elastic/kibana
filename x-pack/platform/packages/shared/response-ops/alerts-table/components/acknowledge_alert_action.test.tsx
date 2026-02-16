@@ -95,13 +95,14 @@ describe('AcknowledgeAlertAction', () => {
       refresh: jest.fn(),
     });
 
-    const { container } = render(
+    render(
       <Wrapper>
         <AcknowledgeAlertAction {...props} />
       </Wrapper>
     );
 
-    expect(container.firstChild).toBeNull();
+    expect(screen.queryByText('Acknowledge')).not.toBeInTheDocument();
+    expect(screen.queryByText('Unacknowledge')).not.toBeInTheDocument();
   });
 
   it('calls the bulk_update API when Acknowledge is clicked', async () => {

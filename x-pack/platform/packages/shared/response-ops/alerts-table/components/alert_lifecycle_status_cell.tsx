@@ -61,6 +61,7 @@ export const AlertLifecycleStatusCell: CellComponent = memo((props) => {
             )}
           >
             <EuiBadge
+              data-test-subj="alertAcknowledgedBadge"
               iconType="check"
               color="hollow"
               tabIndex={0}

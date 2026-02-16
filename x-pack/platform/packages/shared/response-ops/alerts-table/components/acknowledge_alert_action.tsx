@@ -6,8 +6,7 @@
  */
 
 import { EuiContextMenuItem } from '@elastic/eui';
-import React, { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { useCallback, useMemo } from 'react';
 import {
   ALERT_RULE_UUID,
   ALERT_STATUS,
@@ -19,8 +18,8 @@ import type { AdditionalContext, AlertActionsProps } from '../types';
 import { ACKNOWLEDGE, UNACKNOWLEDGE } from '../translations';
 import { typedMemo } from '../utils/react';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
+import { useBulkUpdateWorkflowStatus } from '../hooks/use_bulk_update_workflow_status';
 
-const BULK_UPDATE_PATH = '/internal/rac/alerts/bulk_update';
 const FALLBACK_ALERTS_INDEX = '.alerts-*';
 
 /**
@@ -38,6 +37,10 @@ export const AcknowledgeAlertAction = typedMemo(
     const {
       services: { http, notifications },
     } = useAlertsTableContext();
+    const { mutateAsync: updateWorkflowStatus } = useBulkUpdateWorkflowStatus({
+      http,
+      notifications,
+    });
 
     const alertId = (alert._id ?? alert[ALERT_UUID]?.[0]) as string | undefined;
     const alertIndex = (alert._index as string) ?? FALLBACK_ALERTS_INDEX;
@@ -49,42 +52,18 @@ export const AcknowledgeAlertAction = typedMemo(
     const isOpen = workflowStatus === 'open' || workflowStatus == null;
     const isAcknowledged = workflowStatus === 'acknowledged';
 
-    const canAcknowledge = isActive && isOpen;
+    const canAcknowledge = useMemo(() => isActive && isOpen, [isActive, isOpen]);
     const canUnacknowledge = isAcknowledged;
 
     const handleClick = useCallback(async () => {
       if (!alertId) return;
 
       const newStatus = canAcknowledge ? 'acknowledged' : 'open';
-      try {
-        await http.post(BULK_UPDATE_PATH, {
-          body: JSON.stringify({
-            ids: [alertId],
-            status: newStatus,
-            index: alertIndex,
-          }),
-        });
-        notifications.toasts.addSuccess(
-          newStatus === 'acknowledged'
-            ? i18n.translate('xpack.responseOpsAlertsTable.actions.alertAcknowledged', {
-                defaultMessage: 'Alert acknowledged',
-              })
-            : i18n.translate('xpack.responseOpsAlertsTable.actions.alertUnacknowledged', {
-                defaultMessage: 'Alert unacknowledged',
-              })
-        );
-      } catch (error) {
-        notifications.toasts.addError(error.body?.message ? new Error(error.body.message) : error, {
-          title: i18n.translate('xpack.responseOpsAlertsTable.actions.acknowledgeError', {
-            defaultMessage: 'Error updating alert status',
-          }),
-        });
-      }
+      await updateWorkflowStatus({ ids: [alertId], status: newStatus, index: alertIndex });
       onActionExecuted?.();
       refresh();
-    }, [alertId, alertIndex, canAcknowledge, http, notifications, onActionExecuted, refresh]);
+    }, [alertId, alertIndex, canAcknowledge, updateWorkflowStatus, onActionExecuted, refresh]);
 
-    // Only show when we can acknowledge or unacknowledge
     if ((!canAcknowledge && !canUnacknowledge) || !alertId || !ruleId) {
       return null;
     }
