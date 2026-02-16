@@ -26,7 +26,7 @@ import {
   DEFAULT_CONFIG,
 } from '../../fixtures';
 
-const { PAGE_SIZE, TOTAL_PAGES } = PAGINATION;
+const { PAGE_SIZE, TOTAL_PAGES, LAST_PAGE_CARDS } = PAGINATION;
 
 const SEARCH_TERM = 'gauge_2';
 const EXPECTED_SEARCH_RESULTS = DEFAULT_CONFIG.metrics.filter((m) =>
@@ -44,6 +44,7 @@ spaceTest.describe(
       await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.TSDB_LOGS);
       await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME.TSDB_LOGS);
 
+      await cleanMetricsTestIndex(esClient);
       await createMetricsTestIndex(esClient);
       await insertMetricsDocuments(esClient);
 
@@ -68,20 +69,25 @@ spaceTest.describe(
       await spaceTest.step('pagination is visible', async () => {
         await expect(metricsExperience.grid).toBeVisible();
         await expect(metricsExperience.pagination.container).toBeVisible();
+        await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
       });
 
       await spaceTest.step('navigate to last page and grid updates', async () => {
         await metricsExperience.pagination.getPageButton(TOTAL_PAGES - 1).click();
         await expect(metricsExperience.grid).toBeVisible();
+        await expect(metricsExperience.cards).toHaveCount(LAST_PAGE_CARDS);
       });
 
       await spaceTest.step('navigate using next and prev arrows', async () => {
         await metricsExperience.pagination.getPageButton(0).click();
         await expect(metricsExperience.grid).toBeVisible();
+        await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
         await metricsExperience.pagination.nextButton.click();
         await expect(metricsExperience.grid).toBeVisible();
+        await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
         await metricsExperience.pagination.prevButton.click();
         await expect(metricsExperience.grid).toBeVisible();
+        await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
       });
     });
 
