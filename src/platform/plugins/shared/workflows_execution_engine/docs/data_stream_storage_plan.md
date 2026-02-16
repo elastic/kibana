@@ -8,7 +8,7 @@ Internal workflow indices (`.workflows-executions` and `.workflows-step-executio
 
 ## Current model
 
-Step executions are **mutable objects**: each step execution uses an **upsert** model. Updates are **sequential**, so there are no race conditions. Step execution IDs are **deterministic**, derived from step scope and step name.
+Step executions are **mutable objects**: each step execution uses an **upsert** model. Our current model does not suffer from Elasticsearch update issues such as race conditions: upserts are always **sequential** and we never touch multiple documents in parallel. Step execution IDs are **deterministic**, derived from step scope and step name.
 
 ---
 
@@ -78,7 +78,7 @@ Extend the Kibana Data Streams client with an mget (or get) that uses the Elasti
 
 ### Option 3: Stay on regular indexes (hot indexes + data streams for history)
 
-**Option 3 does not change the current execution model.** Everything stays exactly the same. The only change is that we add data streams and will have one more persistence call (writes go to both hot indexes and data streams).
+**Option 3 does not change the current execution model.** Everything stays exactly the same: upserts remain sequential and we never touch multiple documents in parallel, so we do not introduce Elasticsearch update issues such as race conditions. The only change is that we add data streams and will have one more persistence call (writes go to both hot indexes and data streams).
 
 Use **regular indexes** for execution; add **data streams** only for user-facing history. Execution engine stays on indexes with mget; history and ILM live on data streams.
 
@@ -103,11 +103,3 @@ Use **regular indexes** for execution; add **data streams** only for user-facing
 - To show **live** executions, the polled endpoint used by the UI must read from the **hot indexes** so the user sees up-to-date status without refresh lag.
 - For **historical** views, the same (or another) endpoint reads from the **data streams**.
 - The API needs a **condition** to decide when to read from hot indexes vs data streams (e.g. “recent / in progress” → hot; “older / completed” → data streams).
-
----
-
-## Recommendation
-
-- If you **need data streams** (ILM, stream semantics, etc.): use **Option 1 (hybrid)** — data stream client for writes, direct mget for reads — to avoid lag while keeping data stream benefits.
-- If data streams are only exploratory: **Option 3** is the lowest-risk path today.
-- **Option 2** is the right long-term direction if multiple plugins need consistent, low-latency reads from data streams; it can be done as a follow-up.
