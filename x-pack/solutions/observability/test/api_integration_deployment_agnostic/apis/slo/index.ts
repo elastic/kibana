@@ -26,5 +26,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./health_scan'));
     loadTestFile(require.resolve('./search_slo_definitions'));
     loadTestFile(require.resolve('./get_slo_grouped_stats'));
+    loadTestFile(require.resolve('./ai_bulk_create_slos'));
+    loadTestFile(require.resolve('./ai_discover_slos'));
   });
 }

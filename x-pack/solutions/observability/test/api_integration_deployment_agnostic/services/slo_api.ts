@@ -427,5 +427,40 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
 
       return body;
     },
+
+    async aiBulkCreate(
+      slos: CreateSLOInput[],
+      roleAuthc: RoleCredentials,
+      expectedStatus: number = 200
+    ) {
+      const { body } = await supertestWithoutAuth
+        .post(`/internal/slo/ai/bulk-create`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ slos })
+        .expect(expectedStatus);
+
+      return body;
+    },
+
+    async aiDiscover(
+      roleAuthc: RoleCredentials,
+      params?: { connectorId?: string },
+      expectedStatus: number = 200
+    ) {
+      const req = supertestWithoutAuth
+        .post(`/internal/slo/ai/discover`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader());
+
+      if (params?.connectorId) {
+        req.send({ connectorId: params.connectorId });
+      } else {
+        req.send();
+      }
+
+      const { body } = await req.expect(expectedStatus);
+      return body;
+    },
   };
 }
