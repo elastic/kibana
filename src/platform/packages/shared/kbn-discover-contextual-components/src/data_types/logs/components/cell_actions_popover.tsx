@@ -39,10 +39,7 @@ import {
   filterOutText,
   openCellActionPopoverAriaText,
 } from './translations';
-import {
-  truncateAndPreserveHighlightTags,
-  extractTextAndMarkTags,
-} from './utils';
+import { truncateAndPreserveHighlightTags, extractTextAndMarkTags } from './utils';
 
 interface CellActionsPopoverProps {
   onFilter?: DocViewFilterFn;

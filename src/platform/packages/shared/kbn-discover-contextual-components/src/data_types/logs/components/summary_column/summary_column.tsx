@@ -20,7 +20,6 @@ import {
   getMessageFieldWithFallbacks,
 } from '@kbn/discover-utils';
 import { getAvailableTraceFields, escapeAndPreserveHighlightTags } from '@kbn/discover-utils/src';
-import { escape } from 'lodash';
 import { Resource } from './resource';
 import { Content } from './content';
 import {
