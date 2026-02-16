@@ -6,7 +6,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import type { RulesPage } from './rules_page';
 
 export class AlertPage {

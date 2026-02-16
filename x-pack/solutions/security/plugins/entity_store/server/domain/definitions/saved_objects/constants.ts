@@ -6,7 +6,9 @@
  */
 
 import { z } from '@kbn/zod';
-import { EntityType } from '../entity_schema';
+import { TasksConfig } from '../../../tasks/config';
+import { EntityStoreTaskType } from '../../../tasks/constants';
+import { EntityType } from '../../../../common/domain/definitions/entity_schema';
 
 export type EngineStatus = z.infer<typeof EngineStatus>;
 export const EngineStatus = z.enum(['installing', 'started', 'stopped', 'updating', 'error']);
@@ -32,7 +34,7 @@ export const LogExtractionState = z.object({
   frequency: z
     .string()
     .regex(/[smdh]$/)
-    .default('30s'),
+    .default(TasksConfig[EntityStoreTaskType.Values.extractEntity].interval),
   paginationTimestamp: z.string().optional(),
   lastExecutionTimestamp: z.string().optional(),
 });
@@ -40,7 +42,7 @@ export const LogExtractionState = z.object({
 export type EngineError = z.infer<typeof EngineError>;
 export const EngineError = z.object({
   message: z.string(),
-  action: z.literal('init'),
+  action: z.enum(['init', 'extractLogs']),
 });
 
 export type VersionState = z.infer<typeof VersionState>;

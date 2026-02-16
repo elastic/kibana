@@ -8,14 +8,12 @@
 import React, { useEffect, useMemo, memo, useCallback } from 'react';
 import { EuiForm, euiBreakpoint, useEuiTheme, useEuiOverflowScroll } from '@elastic/eui';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import {
-  UPDATE_FILTER_REFERENCES_ACTION,
-  UPDATE_FILTER_REFERENCES_TRIGGER,
-} from '@kbn/unified-search-plugin/public';
+import { UPDATE_FILTER_REFERENCES_ACTION } from '@kbn/unified-search-plugin/public';
 
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { css } from '@emotion/react';
 import type { AddLayerFunction, DragDropOperation, Visualization } from '@kbn/lens-common';
+import { UPDATE_FILTER_REFERENCES_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   changeIndexPattern,
   onDropToDimension,
@@ -37,6 +35,7 @@ import {
   selectVisualization,
   selectSelectedLayerId,
   registerLibraryAnnotationGroup,
+  selectCanEditTextBasedQuery,
 } from '../../../state_management';
 import { useEditorFrameService } from '../../editor_frame_service_context';
 import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
@@ -60,7 +59,8 @@ export function ConfigPanel(
   }
 ) {
   const { datasourceMap } = useEditorFrameService();
-  const { activeVisualization, canEditTextBasedQuery, indexPatternService } = props;
+  const { activeVisualization, indexPatternService } = props;
+  const canEditTextBasedQuery = useLensSelector(selectCanEditTextBasedQuery);
   const { activeDatasourceId, visualization, datasourceStates } = useLensSelector(
     (state) => state.lens
   );

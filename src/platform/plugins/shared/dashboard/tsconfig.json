@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", ".storybook/**/*.ts", "common/**/*", "public/**/*", "server/**/*"],
+  "include": ["*.ts", ".storybook/**/*.ts", "common/**/*", "public/**/*", "server/**/*", "test/scout/**/*", "test/scout_oas_schema/**/*", "test/scout_oas_schema/**/*.json"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/inspector-plugin",
@@ -47,7 +47,7 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/content-management-table-list-view",
+    "@kbn/content-management-tabbed-table-list-view",
     "@kbn/content-management-table-list-view-table",
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/content-management-content-editor",
@@ -97,9 +97,12 @@
     "@kbn/core-http-server",
     "@kbn/core-chrome-layout-utils",
     "@kbn/cps",
+    "@kbn/scout",
+    "@kbn/test",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-chrome-app-menu",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
+    "@kbn/scout",
   ],
   "exclude": ["target/**/*"]
 }

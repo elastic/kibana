@@ -8,7 +8,7 @@
 import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type { EnrichmentDataSource } from '../../common/url_schema';
 
-type StreamType = 'wired' | 'classic' | 'unknown';
+type StreamType = 'wired' | 'classic' | 'query' | 'unknown';
 
 type ConfigurationMode = 'interactive' | 'yaml';
 

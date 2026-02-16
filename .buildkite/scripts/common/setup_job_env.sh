@@ -148,6 +148,7 @@ EOF
   fi
 }
 
+
 # Set up GCS Service Account for CDN
 {
   GCS_SA_CDN_KEY="$(vault_get gcs-sa-cdn-prod key)"
@@ -199,6 +200,19 @@ EOF
   export VAULT_ROLE_ID
   VAULT_SECRET_ID="$(vault_get kibana-buildkite-vault-credentials secret-id)"
   export VAULT_SECRET_ID
+}
+
+# Set up EIS Cloud Connected Mode (CCM) API key
+# Note: This secret is in the legacy vault, requires approle authentication
+{
+  if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
+    echo "FTR_EIS_CCM was set - exposing EIS CCM API key"
+    VAULT_TOKEN_COPY="${VAULT_TOKEN:-}"
+    VAULT_TOKEN=$(VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
+    VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print "$VAULT_TOKEN"
+    export KIBANA_EIS_CCM_API_KEY="$(vault read -address=$LEGACY_VAULT_ADDR -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"
+    VAULT_TOKEN="$VAULT_TOKEN_COPY"
+  fi
 }
 
 # Inject moon remote-cache credentials on CI

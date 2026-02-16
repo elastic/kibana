@@ -24,7 +24,7 @@ export class ExtensionsService {
   private _badges: IndexBadge[] = [
     {
       matchIndex: (index) => {
-        return index.isFrozen;
+        return !!index.isFrozen;
       },
       label: i18n.translate('xpack.idxMgmt.frozenBadgeLabel', {
         defaultMessage: 'Frozen',
@@ -36,7 +36,7 @@ export class ExtensionsService {
   private _toggles: IndexToggle[] = [
     {
       matchIndex: (index) => {
-        return index.hidden;
+        return !!index.hidden;
       },
       label: i18n.translate('xpack.idxMgmt.indexTable.hiddenIndicesSwitchLabel', {
         defaultMessage: 'Include hidden indices',

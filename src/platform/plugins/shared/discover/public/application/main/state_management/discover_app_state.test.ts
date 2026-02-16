@@ -61,7 +61,6 @@ describe('Test discover app state', () => {
           serializedSearchSource: { index: dataViewWithTimefieldMock.id },
         },
       }),
-      timeRestore: false,
       services,
     });
 
@@ -116,7 +115,7 @@ describe('Test discover app state', () => {
         rowHeight: false,
         breakdownField: false,
       });
-      await initializeSingleTab({ tabId: getCurrentTab().id });
+      await initializeSingleTab({ tabId: getCurrentTab().id, skipWaitForDataFetching: true });
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         hideChart: true,
@@ -136,7 +135,7 @@ describe('Test discover app state', () => {
         rowHeight: false,
         breakdownField: false,
       });
-      await initializeSingleTab({ tabId: getCurrentTab().id });
+      await initializeSingleTab({ tabId: getCurrentTab().id, skipWaitForDataFetching: true });
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: true,
@@ -156,7 +155,7 @@ describe('Test discover app state', () => {
         rowHeight: false,
         breakdownField: false,
       });
-      await initializeSingleTab({ tabId: getCurrentTab().id });
+      await initializeSingleTab({ tabId: getCurrentTab().id, skipWaitForDataFetching: true });
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         hideChart: true,
@@ -176,7 +175,7 @@ describe('Test discover app state', () => {
         rowHeight: false,
         breakdownField: false,
       });
-      await initializeSingleTab({ tabId: getCurrentTab().id });
+      await initializeSingleTab({ tabId: getCurrentTab().id, skipWaitForDataFetching: true });
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         hideChart: false,
@@ -199,7 +198,7 @@ describe('Test discover app state', () => {
         rowHeight: false,
         breakdownField: false,
       });
-      await initializeSingleTab({ tabId: getCurrentTab().id });
+      await initializeSingleTab({ tabId: getCurrentTab().id, skipWaitForDataFetching: true });
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: false,

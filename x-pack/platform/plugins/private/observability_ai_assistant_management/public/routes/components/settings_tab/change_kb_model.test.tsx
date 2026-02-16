@@ -35,23 +35,20 @@ jest.mock('@kbn/ai-assistant/src/hooks', () => ({
   }),
 }));
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      notifications: {
-        toasts: {
-          addSuccess: jest.fn(),
-          addError: jest.fn(),
-          addWarning: jest.fn(),
-          addInfo: jest.fn(),
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const { notificationServiceMock } = jest.requireActual('@kbn/core/public/mocks');
+
+  return {
+    useKibana: () => ({
+      services: {
+        notifications: notificationServiceMock.createStartContract(),
+        overlays: {
+          openConfirm: jest.fn(() => Promise.resolve(true)),
         },
       },
-      overlays: {
-        openConfirm: jest.fn(() => Promise.resolve(true)),
-      },
-    },
-  }),
-}));
+    }),
+  };
+});
 
 const mockSetEisKnowledgeBaseCalloutDismissed = jest.fn();
 

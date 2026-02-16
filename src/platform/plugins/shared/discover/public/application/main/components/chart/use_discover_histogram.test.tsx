@@ -9,14 +9,14 @@
 
 import React from 'react';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { FetchStatus } from '../../../types';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { useDiscoverHistogram, type UseUnifiedHistogramOptions } from './use_discover_histogram';
 import { setTimeout } from 'timers/promises';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type {
   UnifiedHistogramFetchParamsExternal,
@@ -30,11 +30,8 @@ import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_message
 import type { UnifiedHistogramCustomization } from '../../../../customizations/customization_types/histogram_customization';
 import { useDiscoverCustomization } from '../../../../customizations';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
-import { internalStateActions } from '../../state_management/redux';
-import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
-import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
-import type { ScopedProfilesManager } from '../../../../context_awareness';
-import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
+import { internalStateActions, selectTabRuntimeState } from '../../state_management/redux';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DiscoverLatestFetchDetails } from '../../state_management/discover_data_state_container';
 
@@ -86,36 +83,46 @@ const mockHistogramCustomization: UnifiedHistogramCustomization = {
 const mockCheckHitCount = checkHitCount as jest.MockedFunction<typeof checkHitCount>;
 
 describe('useDiscoverHistogram', () => {
-  const getStateContainer = () => {
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    stateContainer.internalState.dispatch(
-      stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+  const setup = async () => {
+    const toolkit = getDiscoverInternalStateMock();
+
+    await toolkit.initializeTabs();
+
+    const { stateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
+
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: toolkit.getCurrentTab().id,
         appState: {
           interval: 'auto',
           hideChart: false,
         },
       })
     );
-    return stateContainer;
+
+    return { toolkit, stateContainer };
   };
 
   const renderUseDiscoverHistogram = async ({
-    stateContainer = getStateContainer(),
-    scopedProfilesManager,
+    toolkit,
     options,
   }: {
-    stateContainer?: DiscoverStateContainer;
-    scopedProfilesManager?: ScopedProfilesManager;
+    toolkit?: InternalStateMockToolkit;
     options?: UseUnifiedHistogramOptions;
   } = {}) => {
+    if (!toolkit) {
+      ({ toolkit } = await setup());
+    }
+
+    const stateContainer = selectTabRuntimeState(
+      toolkit.runtimeStateManager,
+      toolkit.getCurrentTab().id
+    ).stateContainer$.getValue()!;
+
     const Wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
-      <DiscoverTestProvider
-        stateContainer={stateContainer}
-        scopedProfilesManager={scopedProfilesManager}
-        runtimeState={{ currentDataView: dataViewMockWithTimeField, adHocDataViews: [] }}
-      >
-        {children}
-      </DiscoverTestProvider>
+      <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
     );
 
     const hook = renderHook(() => useDiscoverHistogram(stateContainer, options), {
@@ -180,12 +187,6 @@ describe('useDiscoverHistogram', () => {
     });
 
     it('should return the isChartLoading params for ES|QL mode', async () => {
-      const stateContainer = getStateContainer();
-      stateContainer.internalState.dispatch(
-        stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
-          appState: { query: { esql: 'from *' } },
-        })
-      );
       const { hook } = await renderUseDiscoverHistogram();
       const isChartLoading = hook.result.current.isChartLoading;
       expect(isChartLoading).toBe(false);
@@ -208,11 +209,11 @@ describe('useDiscoverHistogram', () => {
     });
 
     it('should sync Unified Histogram state with the state container', async () => {
-      const stateContainer = getStateContainer();
+      const { toolkit, stateContainer } = await setup();
       const updateAppStateSpy = jest.spyOn(internalStateActions, 'updateAppState').mockClear();
       const inspectorAdapters = { requests: new RequestAdapter(), lensRequests: undefined };
       stateContainer.dataState.inspectorAdapters = inspectorAdapters;
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const { hook } = await renderUseDiscoverHistogram({ toolkit });
       const lensRequestAdapter = new RequestAdapter();
       const state = {
         chartHidden: true,
@@ -235,9 +236,10 @@ describe('useDiscoverHistogram', () => {
     });
 
     it('should not sync Unified Histogram state with the state container if there are no changes', async () => {
-      const stateContainer = getStateContainer();
+      const { toolkit, stateContainer } = await setup();
       const updateAppStateSpy = jest.spyOn(internalStateActions, 'updateAppState').mockClear();
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const setAppStateSpy = jest.spyOn(internalStateActions, 'setAppState').mockClear();
+      const { hook } = await renderUseDiscoverHistogram({ toolkit });
       const containerState = stateContainer.getCurrentTab().appState;
       const state = {
         chartHidden: containerState.hideChart,
@@ -249,12 +251,13 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
-      expect(updateAppStateSpy).not.toHaveBeenCalled();
+      expect(updateAppStateSpy).toHaveBeenCalled();
+      expect(setAppStateSpy).not.toHaveBeenCalled();
     });
 
     it('should sync the state container state with Unified Histogram', async () => {
-      const stateContainer = getStateContainer();
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const { toolkit, stateContainer } = await setup();
+      const { hook } = await renderUseDiscoverHistogram({ toolkit });
       const api = createMockUnifiedHistogramApi();
       let params: Partial<UnifiedHistogramState> = {};
       api.setTotalHits = jest.fn((p) => {
@@ -277,8 +280,8 @@ describe('useDiscoverHistogram', () => {
     });
 
     it('should exclude totalHitsStatus and totalHitsResult from Unified Histogram state updates', async () => {
-      const stateContainer = getStateContainer();
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const { toolkit, stateContainer } = await setup();
+      const { hook } = await renderUseDiscoverHistogram({ toolkit });
       const containerState = stateContainer.getCurrentTab().appState;
       const state = {
         chartHidden: containerState.hideChart,
@@ -300,13 +303,18 @@ describe('useDiscoverHistogram', () => {
           appState: { hideChart: true },
         })
       );
-      expect(Object.keys(params ?? {})).toEqual(['chartHidden']);
+      await waitFor(() => {
+        expect(params).toEqual({ chartHidden: true });
+      });
       params = {};
       stateContainer.internalState.dispatch(
         stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
           appState: { hideChart: false },
         })
       );
+      await waitFor(() => {
+        expect(params).toEqual({ chartHidden: false });
+      });
       act(() => {
         subject$.next({
           ...state,
@@ -314,12 +322,15 @@ describe('useDiscoverHistogram', () => {
           totalHitsResult: 100,
         });
       });
-      expect(Object.keys(params ?? {})).toEqual(['chartHidden']);
+      await waitFor(() => {
+        expect(params).toEqual({ chartHidden: false });
+      });
     });
 
     it('should update total hits when the total hits state changes', async () => {
-      const stateContainer = getStateContainer();
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const { toolkit, stateContainer } = await setup();
+      mockCheckHitCount.mockClear();
+      const { hook } = await renderUseDiscoverHistogram({ toolkit });
       const containerState = stateContainer.getCurrentTab().appState;
       const state = {
         chartHidden: containerState.hideChart,
@@ -360,8 +371,9 @@ describe('useDiscoverHistogram', () => {
       };
 
       mockData.query.getState = () => mockQueryState;
-      const stateContainer = getStateContainer();
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const { toolkit, stateContainer } = await setup();
+      mockCheckHitCount.mockClear();
+      const { hook } = await renderUseDiscoverHistogram({ toolkit });
       const containerState = stateContainer.getCurrentTab().appState;
       const error = new Error('test');
       const state = {
@@ -391,13 +403,13 @@ describe('useDiscoverHistogram', () => {
     });
 
     it('should set isChartLoading to true for fetch start', async () => {
-      const stateContainer = getStateContainer();
+      const { toolkit, stateContainer } = await setup();
       stateContainer.internalState.dispatch(
         stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
           appState: { query: { esql: 'from *' } },
         })
       );
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const { hook } = await renderUseDiscoverHistogram({ toolkit });
       act(() => {
         stateContainer.dataState.data$.documents$.next({ fetchStatus: FetchStatus.LOADING });
       });
@@ -410,7 +422,7 @@ describe('useDiscoverHistogram', () => {
 
     it('should use timerange + timeRangeRelative + query given by the internalState', async () => {
       const fetch$ = new Subject<DiscoverLatestFetchDetails>();
-      const stateContainer = getStateContainer();
+      const { toolkit, stateContainer } = await setup();
       const timeRangeAbs = { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
       const timeRangeRel = { from: 'now-15m', to: 'now' };
       const query = { esql: 'from *' };
@@ -430,7 +442,7 @@ describe('useDiscoverHistogram', () => {
           },
         })
       );
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const { hook } = await renderUseDiscoverHistogram({ toolkit });
       const api = createMockUnifiedHistogramApi();
       jest.spyOn(api.state$, 'subscribe');
       act(() => {
@@ -453,15 +465,14 @@ describe('useDiscoverHistogram', () => {
   });
 
   describe('fetching', () => {
-    const setup = async ({
-      customStateContainer,
-    }: {
-      customStateContainer?: DiscoverStateContainer;
-    }) => {
+    const setupFetching = async ({ toolkit }: { toolkit: InternalStateMockToolkit }) => {
       const fetch$ = new Subject<DiscoverLatestFetchDetails>();
-      const stateContainer = customStateContainer ?? getStateContainer();
+      const stateContainer = selectTabRuntimeState(
+        toolkit.runtimeStateManager,
+        toolkit.getCurrentTab().id
+      ).stateContainer$.getValue()!;
       stateContainer.dataState.fetchChart$ = fetch$;
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const { hook } = await renderUseDiscoverHistogram({ toolkit });
       const api = createMockUnifiedHistogramApi();
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
@@ -481,27 +492,29 @@ describe('useDiscoverHistogram', () => {
     };
 
     it('should call fetch when fetchChart$ is triggered', async () => {
-      await setup({});
+      const { toolkit } = await setup();
+      await setupFetching({ toolkit });
     });
 
     it('should call fetch when only visContext changes', async () => {
-      const stateContainer = getStateContainer();
+      const { toolkit, stateContainer } = await setup();
       stateContainer.internalState.dispatch(
         stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
           appState: { query: { esql: 'from logs*' } },
         })
       );
-      const { api } = await setup({ customStateContainer: stateContainer });
+      const { api } = await setupFetching({ toolkit });
       const visContext = {
         attributes: {},
         requestData: {},
         suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
       } as UnifiedHistogramVisContext;
       act(() => {
-        stateContainer.savedSearchState.set({
-          ...stateContainer.savedSearchState.getState(),
-          visContext,
-        });
+        stateContainer.internalState.dispatch(
+          stateContainer.injectCurrentTab(internalStateActions.updateAttributes)({
+            attributes: { visContext },
+          })
+        );
       });
       expect(api.fetch).toHaveBeenCalledTimes(2);
       expect(api.fetch).toHaveBeenLastCalledWith(
@@ -510,13 +523,13 @@ describe('useDiscoverHistogram', () => {
     });
 
     it('should call fetch when only breakdownField changes', async () => {
-      const stateContainer = getStateContainer();
+      const { toolkit, stateContainer } = await setup();
       stateContainer.internalState.dispatch(
         stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
           appState: { query: { esql: 'from logs*' } },
         })
       );
-      const { api } = await setup({ customStateContainer: stateContainer });
+      const { api } = await setupFetching({ toolkit });
       const breakdownField = 'host.name';
       act(() => {
         stateContainer.internalState.dispatch(
@@ -530,13 +543,13 @@ describe('useDiscoverHistogram', () => {
     });
 
     it('should call fetch when only timeInterval changes', async () => {
-      const stateContainer = getStateContainer();
+      const { toolkit, stateContainer } = await setup();
       stateContainer.internalState.dispatch(
         stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
           appState: { query: { language: 'kuery', query: 'test' } },
         })
       );
-      const { api } = await setup({ customStateContainer: stateContainer });
+      const { api } = await setupFetching({ toolkit });
       const timeInterval = 'm';
       act(() => {
         stateContainer.internalState.dispatch(
@@ -553,8 +566,8 @@ describe('useDiscoverHistogram', () => {
   describe('customization', () => {
     test('should use custom values provided by customization fwk ', async () => {
       mockUseCustomizations = true;
-      const stateContainer = getStateContainer();
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const { toolkit } = await setup();
+      const { hook } = await renderUseDiscoverHistogram({ toolkit });
 
       expect(hook.result.current.onFilter).toEqual(mockHistogramCustomization.onFilter);
       expect(hook.result.current.onBrushEnd).toEqual(mockHistogramCustomization.onBrushEnd);
@@ -567,13 +580,13 @@ describe('useDiscoverHistogram', () => {
 
   describe('context awareness', () => {
     it('should modify vis attributes based on profile', async () => {
-      const stateContainer = getStateContainer();
-      const { profilesManagerMock, scopedEbtManagerMock } = createContextAwarenessMocks();
-      const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager({
-        scopedEbtManager: scopedEbtManagerMock,
-      });
-      scopedProfilesManager.resolveDataSourceProfile({});
-      const { hook } = await renderUseDiscoverHistogram({ scopedProfilesManager, stateContainer });
+      const { toolkit, stateContainer } = await setup();
+      const scopedProfilesManager = selectTabRuntimeState(
+        toolkit.runtimeStateManager,
+        toolkit.getCurrentTab().id
+      ).scopedProfilesManager$.getValue();
+      await scopedProfilesManager.resolveDataSourceProfile({});
+      const { hook } = await renderUseDiscoverHistogram({ toolkit });
 
       let getModifiedVisAttributes:
         | UnifiedHistogramFetchParamsExternal['getModifiedVisAttributes']

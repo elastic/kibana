@@ -10,17 +10,26 @@
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
 import type { ESQLAstAllCommands } from '../../../types';
 import { specialIndicesToSuggestions, sourceExists } from '../../definitions/utils/sources';
-import { getFragmentData } from '../../definitions/utils/autocomplete/helpers';
+import { getFragmentData, withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { getDateLiterals } from '../../definitions/utils/literals';
-import { getPromqlFunctionSuggestions } from '../../definitions/utils/promql';
+import {
+  getPromqlFunctionSuggestions,
+  getPromqlFunctionSuggestionsForReturnTypes,
+  getPromqlLabelMatcherSuggestions,
+  getMetricTypesForSignature,
+} from '../../definitions/utils/promql';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
+import { ESQL_NUMBER_TYPES, ESQL_STRING_TYPES } from '../../definitions/types';
 import {
   assignCompletionItem,
+  buildAddValuePlaceholder,
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
   getPromqlParamKeySuggestions,
   pipeCompleteItem,
   promqlByCompleteItem,
+  promqlLabelSelectorItem,
+  promqlRangeSelectorItem,
   valuePlaceholderConstant,
 } from '../complete_items';
 import {
@@ -34,6 +43,17 @@ import {
   isParamValueComplete,
   isAtValidColumnSuggestionPosition,
 } from './utils';
+import { findPipeOutsideQuotes } from '../../definitions/utils/shared';
+import { SuggestionCategory } from '../../../language/autocomplete/utils';
+
+let commaWithAutoSuggest: ISuggestionItem | undefined;
+const getCommaWithAutoSuggest = (): ISuggestionItem => {
+  if (!commaWithAutoSuggest) {
+    commaWithAutoSuggest = withAutoSuggest({ ...commaCompleteItem, text: ', ' });
+  }
+
+  return commaWithAutoSuggest;
+};
 
 export async function autocomplete(
   query: string,
@@ -45,9 +65,10 @@ export async function autocomplete(
   const innerText = query.substring(0, cursorPosition);
   const commandStart = command.location.min; // Don't assume 0; PROMQL can start in a subquery in the future.
   const innerCommandText = innerText.substring(commandStart);
+  const cursorRelativeToCommand = cursorPosition - commandStart;
   // We can't rely on command.location.max: it can stop at a mis-parsed last param, so we'd either
   // truncate or include the wrong text. The first pipe is the only stable delimiter here for now.
-  const pipeIndex = query.indexOf('|', commandStart);
+  const pipeIndex = findPipeOutsideQuotes(query, commandStart);
   const commandText = query.substring(commandStart, pipeIndex === -1 ? query.length : pipeIndex);
   const position = getPosition(innerText, command, commandText);
   const needsWrappedQuery = isAfterCustomColumnAssignment(innerCommandText);
@@ -61,7 +82,7 @@ export async function autocomplete(
 
       const canSuggestColumn =
         areRequiredPromqlParamsPresent(usedParams) &&
-        isAtValidColumnSuggestionPosition(commandText, cursorPosition - commandStart);
+        isAtValidColumnSuggestionPosition(commandText, cursorRelativeToCommand);
       const columnSuggestion = canSuggestColumn
         ? getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
         : undefined;
@@ -69,6 +90,9 @@ export async function autocomplete(
       const baseSuggestions = [
         ...availableParamSuggestions,
         ...(columnSuggestion ? [columnSuggestion] : []),
+        ...(canSuggestColumn
+          ? buildFieldSuggestions(context, ESQL_NUMBER_TYPES, needsWrappedQuery ? 'wrap' : 'plain')
+          : []),
         ...(canSuggestColumn ? wrapFunctionSuggestions(needsWrappedQuery) : []),
       ];
 
@@ -86,31 +110,69 @@ export async function autocomplete(
       return [assignCompletionItem];
 
     case 'after_param_equals':
-      if (isParamValueComplete(commandText, cursorPosition - commandStart, position.currentParam)) {
+      if (isParamValueComplete(commandText, cursorRelativeToCommand, position.currentParam)) {
         return [];
       }
 
       return suggestParamValues(position.currentParam, context);
 
     case 'inside_grouping':
-      // Labels not yet supported - return empty suggestions
-      return [];
+      return position.isCompleteLabel
+        ? [getCommaWithAutoSuggest()]
+        : buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain');
+
+    case 'after_label_brace':
+      return position.isCompleteLabel
+        ? [getCommaWithAutoSuggest()]
+        : buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain');
+    case 'after_label_name':
+      return getPromqlLabelMatcherSuggestions();
+    case 'after_label_operator':
+      return [valuePlaceholderConstant];
+
+    case 'after_metric': {
+      return position.signatureTypes?.includes('range_vector') && !position.selector?.duration
+        ? [promqlLabelSelectorItem, promqlRangeSelectorItem]
+        : [promqlLabelSelectorItem];
+    }
+
+    case 'after_label_selector': {
+      return position.signatureTypes?.includes('range_vector') && position.canSuggestRangeSelector
+        ? [promqlRangeSelectorItem]
+        : [];
+    }
 
     case 'inside_query':
-      return [];
+      return position.canAddGrouping ? [promqlByCompleteItem] : [];
+
+    case 'after_complete_arg':
+      return position.canSuggestCommaInFunctionArgs ? [getCommaWithAutoSuggest()] : [];
 
     case 'after_open_paren':
-      return wrapFunctionSuggestions(needsWrappedQuery);
+    case 'inside_function_args': {
+      if (position.canSuggestCommaInFunctionArgs) {
+        return [getCommaWithAutoSuggest()];
+      }
+      const signatureTypes = position.signatureTypes ?? [];
+      const types = getMetricTypesForSignature(signatureTypes);
 
-    case 'after_complete_expression':
-      // Future: suggest binary operators (+, -, *, /, etc.)
-      return [];
+      const expectsOnlyScalar =
+        signatureTypes.length > 0 && signatureTypes.every((type) => type === 'scalar');
+      const scalarValues = expectsOnlyScalar ? [buildAddValuePlaceholder('number')] : [];
 
-    case 'inside_function_args':
-      return getPromqlFunctionSuggestions();
+      const metrics = expectsOnlyScalar
+        ? []
+        : buildFieldSuggestions(context, types, needsWrappedQuery ? 'wrap' : 'plain');
 
-    case 'before_grouping':
-      return [promqlByCompleteItem];
+      const functions = expectsOnlyScalar
+        ? []
+        : wrapFunctionSuggestions(
+            needsWrappedQuery,
+            getPromqlFunctionSuggestionsForReturnTypes(signatureTypes)
+          );
+
+      return [...scalarValues, ...metrics, ...functions];
+    }
 
     case 'after_query': {
       const suggestions: ISuggestionItem[] = [pipeCompleteItem];
@@ -252,10 +314,15 @@ function suggestParamValues(
   return [valuePlaceholderConstant];
 }
 
-/* Wraps function suggestions in parentheses when needed for column assignment syntax. */
-function wrapFunctionSuggestions(wrap: boolean): ISuggestionItem[] {
-  const suggestions = getPromqlFunctionSuggestions();
+// ============================================================================
+// Field Suggestions
+// ============================================================================
 
+/* Wraps function suggestions in parentheses when needed for column assignment syntax. */
+function wrapFunctionSuggestions(
+  wrap: boolean,
+  suggestions: ISuggestionItem[] = getPromqlFunctionSuggestions()
+): ISuggestionItem[] {
   if (!wrap) {
     return suggestions;
   }
@@ -264,4 +331,28 @@ function wrapFunctionSuggestions(wrap: boolean): ISuggestionItem[] {
     ...suggestion,
     text: `(${suggestion.text})`,
   }));
+}
+
+function buildFieldSuggestions(
+  context: ICommandContext | undefined,
+  types: readonly string[] | undefined,
+  wrap: 'wrap' | 'plain'
+): ISuggestionItem[] {
+  if (!context?.columns) {
+    return [];
+  }
+
+  return Array.from(context.columns.values())
+    .filter((column) => !column.userDefined && (!types || types.includes(column.type)))
+    .map((column) => {
+      const text = wrap === 'wrap' ? `(${column.name})` : `${column.name} `;
+
+      return withAutoSuggest({
+        label: column.name,
+        text,
+        kind: 'Field',
+        detail: column.type,
+        category: SuggestionCategory.FIELD,
+      });
+    });
 }

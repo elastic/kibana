@@ -23,9 +23,9 @@ import {
 } from './get_anomaly_detection_jobs/tool';
 import { OBSERVABILITY_GET_ALERTS_TOOL_ID, createGetAlertsTool } from './get_alerts/tool';
 import {
-  OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID,
-  createGetLogCategoriesTool,
-} from './get_log_categories/tool';
+  OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
+  createGetLogGroupsTool,
+} from './get_log_groups/tool';
 import {
   OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
   createGetCorrelatedLogsTool,
@@ -40,6 +40,10 @@ import {
   createGetTraceMetricsTool,
   OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
 } from './get_trace_metrics/tool';
+import {
+  createGetRuntimeMetricsTool,
+  OBSERVABILITY_GET_RUNTIME_METRICS_TOOL_ID,
+} from './get_runtime_metrics/tool';
 import {
   OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
   createGetLogChangePointsTool,
@@ -65,12 +69,13 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
   OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
   OBSERVABILITY_GET_ALERTS_TOOL_ID,
-  OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID,
+  OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
   OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
   OBSERVABILITY_GET_HOSTS_TOOL_ID,
   OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+  OBSERVABILITY_GET_RUNTIME_METRICS_TOOL_ID,
   OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
@@ -94,12 +99,13 @@ export async function registerTools({
     createRunLogRateAnalysisTool({ core, logger }),
     createGetAnomalyDetectionJobsTool({ core, plugins, logger }),
     createGetAlertsTool({ core, logger }),
-    createGetLogCategoriesTool({ core, logger }),
+    createGetLogGroupsTool({ core, plugins, logger }),
     createGetServicesTool({ core, plugins, dataRegistry, logger }),
     createDownstreamDependenciesTool({ core, dataRegistry, logger }),
     createGetCorrelatedLogsTool({ core, logger }),
     createGetHostsTool({ core, logger, dataRegistry }),
     createGetTraceMetricsTool({ core, plugins, logger }),
+    createGetRuntimeMetricsTool({ core, plugins, logger }),
     createGetLogChangePointsTool({ core, plugins, logger }),
     createGetMetricChangePointsTool({ core, plugins, logger }),
     createGetTraceChangePointsTool({ core, plugins, logger }),

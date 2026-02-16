@@ -15,7 +15,7 @@ export { createPlaywrightConfig } from './config';
 export { createLazyPageObject } from './page_objects/utils';
 
 // Matchers
-export { expect } from './expect';
+export { expect } from './matchers/ui';
 
 // Types for Playwright options
 export type { ScoutPlaywrightOptions, ScoutTestOptions } from './types';
@@ -43,7 +43,12 @@ export type { ApiServicesFixture } from './fixtures/scope/worker/apis';
 export { synthtraceFixture } from './fixtures/scope/worker/synthtrace';
 
 // Other worker types
-export type { SamlAuth, SynthtraceFixture, RequestAuthFixture } from './fixtures/scope/worker';
+export type {
+  SamlAuth,
+  SynthtraceFixture,
+  RequestAuthFixture,
+  SpaceSolutionView,
+} from './fixtures/scope/worker';
 
 // Tagging utility
 export { tags } from './tags';

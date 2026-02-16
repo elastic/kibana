@@ -17,7 +17,6 @@ import type {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/public';
-import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type {
   getLazyLiveQueryField,
   getLazyOsqueryAction,
@@ -26,6 +25,28 @@ import type {
 } from './shared_components';
 import type { useAllLiveQueries, UseAllLiveQueriesConfig } from './actions/use_all_live_queries';
 import type { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
+
+/**
+ * Minimal DataProvider type for timeline integration within the osquery plugin.
+ * This is a local definition to avoid direct dependency on @kbn/timelines-plugin.
+ * The structure is compatible with the timelines plugin's DataProvider type.
+ *
+ * @internal Use this only within the osquery plugin. For security_solution,
+ * import DataProvider from 'timelines/components/timeline/data_providers/data_provider'.
+ */
+export interface OsqueryDataProvider {
+  id: string;
+  name: string;
+  enabled: boolean;
+  excluded: boolean;
+  kqlQuery: string;
+  queryMatch: {
+    field: string;
+    value: string | string[];
+    operator: ':' | ':*' | 'includes';
+  };
+  and: Omit<OsqueryDataProvider, 'and'>[];
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
@@ -53,7 +74,6 @@ export interface StartPlugins {
   security: SecurityPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesPublicStart;
-  timelines: TimelinesUIStart;
   appName?: string;
 }
 
@@ -63,3 +83,5 @@ export interface SetupPlugins {
 }
 
 export type StartServices = CoreStart & StartPlugins;
+
+export type AddToTimelineHandler = (dataProviders: OsqueryDataProvider[]) => void;

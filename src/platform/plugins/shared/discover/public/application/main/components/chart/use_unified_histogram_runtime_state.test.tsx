@@ -10,11 +10,10 @@
 import { renderHook } from '@testing-library/react';
 import { useUnifiedHistogramRuntimeState } from './use_unified_histogram_runtime_state';
 import { useDiscoverHistogram } from './use_discover_histogram';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
+import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import React from 'react';
-import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { DEFAULT_HISTOGRAM_KEY_PREFIX, selectTabRuntimeState } from '../../state_management/redux';
 
 jest.mock('./use_discover_histogram', () => ({
@@ -26,32 +25,40 @@ const useDiscoverHistogramMock = useDiscoverHistogram as jest.MockedFunction<
 >;
 
 describe('useUnifiedHistogramRuntimeState', () => {
-  const getStateContainer = () => getDiscoverStateMock({ isTimeBased: true });
+  const setup = async () => {
+    const toolkit = getDiscoverInternalStateMock();
 
-  const renderUseUnifiedHistogramRuntimeState = (
-    {
-      stateContainer,
-      localStorageKeyPrefix,
-    }: {
-      stateContainer: DiscoverStateContainer;
-      localStorageKeyPrefix?: string;
-    } = {
-      stateContainer: getStateContainer(),
+    await toolkit.initializeTabs();
+
+    const { stateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
+
+    return { toolkit, stateContainer };
+  };
+
+  const renderUseUnifiedHistogramRuntimeState = async ({
+    toolkit,
+    localStorageKeyPrefix,
+  }: {
+    toolkit?: InternalStateMockToolkit;
+    localStorageKeyPrefix?: string;
+  } = {}) => {
+    if (!toolkit) {
+      ({ toolkit } = await setup());
     }
-  ) => {
-    const Wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
-      <DiscoverTestProvider
-        stateContainer={stateContainer}
-        runtimeState={{ currentDataView: dataViewMockWithTimeField, adHocDataViews: [] }}
-      >
-        {children}
-      </DiscoverTestProvider>
-    );
+
+    const stateContainer = selectTabRuntimeState(
+      toolkit.runtimeStateManager,
+      toolkit.getCurrentTab().id
+    ).stateContainer$.getValue()!;
 
     const hook = renderHook(
       () => useUnifiedHistogramRuntimeState(stateContainer, localStorageKeyPrefix),
       {
-        wrapper: Wrapper,
+        wrapper: ({ children }) => (
+          <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
+        ),
       }
     );
 
@@ -62,14 +69,14 @@ describe('useUnifiedHistogramRuntimeState', () => {
     useDiscoverHistogramMock.mockImplementation(jest.fn());
   });
 
-  it('should return the current tab id', () => {
-    const { hook, stateContainer } = renderUseUnifiedHistogramRuntimeState();
+  it('should return the current tab id', async () => {
+    const { hook, stateContainer } = await renderUseUnifiedHistogramRuntimeState();
 
     expect(hook.result.current.currentTabId).toBe(stateContainer.getCurrentTab().id);
   });
 
-  it('should call useDiscoverHistogramMock with correct arguments', () => {
-    const { stateContainer } = renderUseUnifiedHistogramRuntimeState();
+  it('should call useDiscoverHistogramMock with correct arguments', async () => {
+    const { stateContainer } = await renderUseUnifiedHistogramRuntimeState();
 
     expect(useDiscoverHistogramMock).toBeCalledWith(
       stateContainer,
@@ -79,12 +86,12 @@ describe('useUnifiedHistogramRuntimeState', () => {
     );
   });
 
-  it('should call useDiscoverHistogramMock with initialLayoutProps for default local storage key prefix', () => {
-    const stateContainer = getStateContainer();
+  it('should call useDiscoverHistogramMock with initialLayoutProps for default local storage key prefix', async () => {
+    const { toolkit, stateContainer } = await setup();
 
     const histogramConfig$ = selectTabRuntimeState(
-      stateContainer.runtimeStateManager,
-      stateContainer.getCurrentTab().id
+      toolkit.runtimeStateManager,
+      toolkit.getCurrentTab().id
     ).unifiedHistogramConfig$;
 
     histogramConfig$.next({
@@ -95,7 +102,7 @@ describe('useUnifiedHistogramRuntimeState', () => {
       },
     });
 
-    renderUseUnifiedHistogramRuntimeState({ stateContainer });
+    await renderUseUnifiedHistogramRuntimeState({ toolkit });
 
     expect(useDiscoverHistogramMock).toBeCalledWith(
       stateContainer,
@@ -105,13 +112,13 @@ describe('useUnifiedHistogramRuntimeState', () => {
     );
   });
 
-  it('should call useDiscoverHistogramMock with initialLayoutProps for custom local storage key prefix', () => {
+  it('should call useDiscoverHistogramMock with initialLayoutProps for custom local storage key prefix', async () => {
     const localStorageKeyPrefix = 'customKeyPrefix';
-    const stateContainer = getStateContainer();
+    const { toolkit, stateContainer } = await setup();
 
     const histogramConfig$ = selectTabRuntimeState(
-      stateContainer.runtimeStateManager,
-      stateContainer.getCurrentTab().id
+      toolkit.runtimeStateManager,
+      toolkit.getCurrentTab().id
     ).unifiedHistogramConfig$;
 
     histogramConfig$.next({
@@ -122,8 +129,8 @@ describe('useUnifiedHistogramRuntimeState', () => {
       },
     });
 
-    renderUseUnifiedHistogramRuntimeState({
-      stateContainer,
+    await renderUseUnifiedHistogramRuntimeState({
+      toolkit,
       localStorageKeyPrefix,
     });
 

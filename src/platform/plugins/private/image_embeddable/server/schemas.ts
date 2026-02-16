@@ -9,7 +9,9 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
+import { IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS } from '../common';
 
 const imageFileSrcSchema = schema.object({
   type: schema.literal('file'),
@@ -55,21 +57,25 @@ const imageConfigSchema = schema.object({
   backgroundColor: schema.maybe(schema.string()),
 });
 
-export const imageEmbeddableSchema = schema.allOf(
-  [
-    schema.object({
-      imageConfig: imageConfigSchema,
-      enhancements: schema.maybe(schema.any()),
-    }),
-    serializedTitlesSchema,
-  ],
-  {
-    meta: {
-      description: 'Image embeddable schema',
-    },
-  }
-);
+export function getImageEmbeddableSchema(getDrilldownsSchemas: GetDrilldownsSchemaFnType) {
+  return schema.allOf(
+    [
+      getDrilldownsSchemas(IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS),
+      schema.object({
+        imageConfig: imageConfigSchema,
+      }),
+      serializedTitlesSchema,
+    ],
+    {
+      meta: {
+        description: 'Image embeddable schema',
+      },
+    }
+  );
+}
+
+// TODO - snake_caseify all of these schemas
 
 export type ImageConfig = TypeOf<typeof imageConfigSchema>;
 export type ImageConfigState = TypeOf<typeof imageConfigSchema>;
-export type ImageEmbeddableState = TypeOf<typeof imageEmbeddableSchema>;
+export type ImageEmbeddableState = TypeOf<ReturnType<typeof getImageEmbeddableSchema>>;

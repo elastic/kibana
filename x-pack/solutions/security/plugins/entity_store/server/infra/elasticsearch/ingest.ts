@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 
@@ -15,6 +16,7 @@ interface IngestEntitiesParams {
   esIdField: string;
   targetIndex: string;
   logger: Logger;
+  abortController?: AbortController;
 }
 
 /**
@@ -33,7 +35,13 @@ export async function ingestEntities({
   esIdField,
   targetIndex,
   logger,
+  abortController,
 }: IngestEntitiesParams) {
+  const options: TransportRequestOptions = {};
+  if (abortController?.signal) {
+    options.signal = abortController.signal;
+  }
+
   const { columns, values } = esqlResponse;
   if (values.length === 0) return;
 
@@ -64,23 +72,26 @@ export async function ingestEntities({
   }
 
   // This processes documents one at a time and handles batching automatically
-  await esClient.helpers.bulk({
-    datasource: documentGenerator(),
-    index: targetIndex,
-    refresh: true,
-    flushBytes: BATCH_SIZE,
-    concurrency: 1, // Process sequentially to minimize memory
-    retries: 2,
-    onDocument: (doc) => {
-      const { _id, ...document } = doc;
-      return [{ index: { _index: targetIndex, _id: _id as string } }, document];
+  await esClient.helpers.bulk(
+    {
+      datasource: documentGenerator(),
+      index: targetIndex,
+      refresh: true,
+      flushBytes: BATCH_SIZE,
+      concurrency: 1, // Process sequentially to minimize memory
+      retries: 2,
+      onDocument: (doc) => {
+        const { _id, ...document } = doc;
+        return [{ index: { _index: targetIndex, _id: _id as string } }, document];
+      },
+      onDrop: (dropped) => {
+        // Log dropped documents but don't throw - allows bulk operation to continue
+        // The helpers.bulk will return stats about failed documents
+        // You can check the return value if you need to handle failures
+        const errorReason = dropped.error?.reason || 'unknown error';
+        logger.error(`entity dropped from bulk operation (reason: ${errorReason})`);
+      },
     },
-    onDrop: (dropped) => {
-      // Log dropped documents but don't throw - allows bulk operation to continue
-      // The helpers.bulk will return stats about failed documents
-      // You can check the return value if you need to handle failures
-      const errorReason = dropped.error?.reason || 'unknown error';
-      logger.error(`entity dropped from bulk operation (reason: ${errorReason})`);
-    },
-  });
+    options
+  );
 }

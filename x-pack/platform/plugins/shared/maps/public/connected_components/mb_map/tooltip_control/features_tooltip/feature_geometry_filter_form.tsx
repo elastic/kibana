@@ -12,13 +12,17 @@ import type { Filter } from '@kbn/es-query';
 import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import type { MultiPolygon, Polygon } from 'geojson';
 import rison from '@kbn/rison';
-import { URL_MAX_LENGTH } from '@kbn/core/public';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { buildGeoShapeFilter } from '../../../../../common/elasticsearch_util';
 import { GeometryFilterForm } from '../../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
 
 // over estimated and imprecise value to ensure filter has additional room for any meta keys added when filter is mapped.
 const META_OVERHEAD = 100;
+
+/**
+ * Based on chromium's displayable URL length guidelines.
+ */
+const CHROMIUM_MAX_URL_LENGTH = 32 * 1000;
 
 interface Props {
   onClose: () => void;
@@ -99,7 +103,7 @@ export class FeatureGeometryFilterForm extends Component<Props, State> {
     // No elasticsearch support for pre-indexed shapes and geo_point spatial queries.
     if (
       window.location.href.length + rison.encode(filter).length + META_OVERHEAD >
-      URL_MAX_LENGTH
+      CHROMIUM_MAX_URL_LENGTH
     ) {
       this.setState({
         errorMsg: i18n.translate('xpack.maps.tooltip.geometryFilterForm.filterTooLargeMessage', {

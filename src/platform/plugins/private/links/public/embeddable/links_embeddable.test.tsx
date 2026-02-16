@@ -139,7 +139,7 @@ describe('getLinksEmbeddableFactory', () => {
     const byRefState: LinksEmbeddableState = {
       title: 'my links',
       description: 'just a few links',
-      hidePanelTitles: false,
+      hide_title: false,
       savedObjectId: '123',
     };
 
@@ -158,7 +158,7 @@ describe('getLinksEmbeddableFactory', () => {
       expect(api.serializeState()).toEqual({
         title: 'my links',
         description: 'just a few links',
-        hidePanelTitles: false,
+        hide_title: false,
         savedObjectId: '123',
       });
       expect(await api.canUnlinkFromLibrary()).toBe(true);
@@ -171,7 +171,7 @@ describe('getLinksEmbeddableFactory', () => {
       expect(api.getSerializedStateByValue()).toEqual({
         title: 'my links',
         description: 'just a few links',
-        hidePanelTitles: false,
+        hide_title: false,
         links: getLinks(),
         layout: 'vertical',
       });
@@ -182,7 +182,7 @@ describe('getLinksEmbeddableFactory', () => {
     const byValueState: LinksEmbeddableState = {
       description: 'just a few links',
       title: 'my links',
-      hidePanelTitles: true,
+      hide_title: true,
       links: getLinks(),
       layout: 'horizontal',
     };
@@ -203,7 +203,7 @@ describe('getLinksEmbeddableFactory', () => {
       expect(api.serializeState()).toEqual({
         title: 'my links',
         description: 'just a few links',
-        hidePanelTitles: true,
+        hide_title: true,
         links: getLinks(),
         layout: 'horizontal',
       });
@@ -225,7 +225,7 @@ describe('getLinksEmbeddableFactory', () => {
       expect(api.getSerializedStateByReference(newId)).toEqual({
         title: 'my links',
         description: 'just a few links',
-        hidePanelTitles: true,
+        hide_title: true,
         savedObjectId: '333',
       });
     });

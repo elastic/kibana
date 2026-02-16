@@ -12,14 +12,14 @@
  *
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
- * Registry groups: 140
+ * Registry groups: 142
  * Metric groups: 497
  * Hardcoded fields: 34
- * Total fields: 1186
+ * Total fields: 1191
  *
  * @internal
  *
- * WARNING: This object contains 1186+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1191+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -1996,6 +1996,19 @@ export const semconvFlat = {
     description: 'The name of the model that generated the response.',
     type: 'keyword',
     example: 'gpt-4-0613',
+  },
+  'gen_ai.retrieval.documents': {
+    name: 'gen_ai.retrieval.documents',
+    description: 'The documents retrieved.',
+    type: 'keyword',
+    example:
+      '[{"id":"doc_123","score":0.95},{"id":"doc_456","score":0.87},{"id":"doc_789","score":0.82}]',
+  },
+  'gen_ai.retrieval.query.text': {
+    name: 'gen_ai.retrieval.query.text',
+    description: 'The query text used for retrieval.',
+    type: 'keyword',
+    example: 'What is the capital of France?',
   },
   'gen_ai.system_instructions': {
     name: 'gen_ai.system_instructions',
@@ -5696,6 +5709,44 @@ export const semconvFlat = {
     description: 'Parent-child Reference type',
     type: 'keyword',
   },
+  'oracle.db.domain': {
+    name: 'oracle.db.domain',
+    description: 'The database domain associated with the connection.',
+    type: 'keyword',
+    example: 'example.com',
+  },
+  'oracle.db.instance.name': {
+    name: 'oracle.db.instance.name',
+    description:
+      'The instance name associated with the connection in an Oracle Real Application Clusters environment.',
+    type: 'keyword',
+    example: 'ORCL1',
+  },
+  'oracle.db.name': {
+    name: 'oracle.db.name',
+    description: 'The database name associated with the connection.',
+    type: 'keyword',
+    example: 'ORCL1',
+  },
+  'oracle.db.pdb': {
+    name: 'oracle.db.pdb',
+    description: 'The pluggable database (PDB) name associated with the connection.',
+    type: 'keyword',
+    example: 'PDB1',
+  },
+  'oracle.db.service': {
+    name: 'oracle.db.service',
+    description: 'The service name currently associated with the database connection.',
+    type: 'keyword',
+    example: 'order-processing-service',
+  },
+  'oracle_cloud.realm': {
+    name: 'oracle_cloud.realm',
+    description:
+      'The OCI realm identifier that indicates the isolated partition in which the tenancy and its resources reside.',
+    type: 'keyword',
+    example: 'oc1',
+  },
   'os.build_id': {
     name: 'os.build_id',
     description: 'Unique identifier for a particular build or compilation of the operating system.',
@@ -6077,27 +6128,6 @@ export const semconvFlat = {
     description: 'The Schema URL for the resource.',
     type: 'keyword',
   },
-  'rpc.message.compressed_size': {
-    name: 'rpc.message.compressed_size',
-    description: 'Compressed size of the message in bytes.',
-    type: 'long',
-  },
-  'rpc.message.id': {
-    name: 'rpc.message.id',
-    description:
-      'MUST be calculated as two different counters starting from `1` one for sent messages and one for received message.',
-    type: 'long',
-  },
-  'rpc.message.type': {
-    name: 'rpc.message.type',
-    description: 'Whether this is a received or sent message.',
-    type: 'keyword',
-  },
-  'rpc.message.uncompressed_size': {
-    name: 'rpc.message.uncompressed_size',
-    description: 'Uncompressed size of the message in bytes.',
-    type: 'long',
-  },
   'rpc.method': {
     name: 'rpc.method',
     description:
@@ -6220,6 +6250,12 @@ export const semconvFlat = {
     description: 'Server port number.',
     type: 'long',
     example: '80',
+  },
+  'service.criticality': {
+    name: 'service.criticality',
+    description: 'The operational criticality of the service.',
+    type: 'keyword',
+    example: 'critical',
   },
   'service.instance.id': {
     name: 'service.instance.id',

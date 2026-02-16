@@ -6,9 +6,13 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import { AttachmentType } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createAttachmentTools } from '.';
 
 describe('attachment tools', () => {
@@ -19,13 +23,35 @@ describe('attachment tools', () => {
       id: type,
       validate: (input: unknown) => ({ valid: true, data: input }),
       format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+      isReadonly: false,
     } as any);
 
   beforeEach(() => {
     attachmentManager = createAttachmentStateManager([], { getTypeDefinition });
   });
 
-  const getTools = () => createAttachmentTools({ attachmentManager });
+  const attachmentsService = {
+    getTypeDefinition: () => ({
+      id: 'text',
+      validate: (input: unknown) => ({ valid: true, data: input }),
+      format: (attachment: { data: unknown }) => ({
+        getRepresentation: () => ({
+          type: 'text',
+          value: `formatted:${String(attachment.data)}`,
+        }),
+      }),
+      isReadonly: false,
+    }),
+  } as any;
+
+  const formatContext = { request: httpServerMock.createKibanaRequest(), spaceId: 'default' };
+
+  const getTools = () =>
+    createAttachmentTools({
+      attachmentManager,
+      attachmentsService,
+      formatContext,
+    });
   const getTool = (id: string) => getTools().find((t) => t.id === id)!;
 
   describe('attachment_add', () => {
@@ -40,6 +66,31 @@ describe('attachment tools', () => {
       expect(result.results[0].type).toBe(ToolResultType.other);
       expect((result.results[0] as any).data.type).toBe('text');
       expect((result.results[0] as any).data.attachment_id).toBeDefined();
+    });
+
+    it('returns error for read-only attachment types', async () => {
+      const readonlyAttachmentsService = {
+        getTypeDefinition: () => ({
+          id: 'text',
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          isReadonly: true,
+        }),
+      } as any;
+
+      const tool = createAttachmentTools({
+        attachmentManager,
+        attachmentsService: readonlyAttachmentsService,
+        formatContext,
+      }).find((t) => t.id === 'platform.core.attachment_add')!;
+
+      const result = (await tool.handler(
+        { type: 'text', data: 'hello world', description: 'Test' },
+        {} as any
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      expect((result.results[0] as any).data.message).toContain('read-only');
     });
 
     it('creates an attachment with a custom ID', async () => {
@@ -105,6 +156,71 @@ describe('attachment tools', () => {
       expect((result.results[0] as any).data.data).toBe('hello');
     });
 
+    it('reads a visualization attachment that was resolved from origin at add time', async () => {
+      const resolvedData = {
+        query: 'My Lens',
+        visualization: { layers: [] },
+        chart_type: 'bar',
+        esql: 'FROM index',
+      };
+      const customAttachmentsService = {
+        getTypeDefinition: () =>
+          ({
+            id: AttachmentType.visualization,
+            validate: (input: unknown) => ({ valid: true, data: input }),
+            validateOrigin: (input: unknown) => ({ valid: true, data: input }),
+            format: (formattedAttachment: Attachment) => ({
+              getRepresentation: () => ({
+                type: 'text',
+                value: JSON.stringify(formattedAttachment.data),
+              }),
+            }),
+            resolve: async () => resolvedData,
+            isReadonly: false,
+          } as unknown as AttachmentTypeDefinition),
+      } as any;
+      const resolveAttachmentManager = createAttachmentStateManager([], {
+        getTypeDefinition: customAttachmentsService.getTypeDefinition,
+      });
+
+      // Add the attachment with origin — content is resolved during add()
+      const resolveContext = {
+        request: httpServerMock.createKibanaRequest(),
+        spaceId: 'default',
+        savedObjectsClient: {} as any,
+      };
+      const attachment = await resolveAttachmentManager.add(
+        {
+          type: AttachmentType.visualization,
+          origin: { saved_object_id: 'so-123' },
+          description: 'Lens ref',
+        },
+        undefined,
+        resolveContext
+      );
+
+      // Verify origin is stored on the attachment
+      expect(attachment.origin).toEqual({ saved_object_id: 'so-123' });
+
+      // Read should return the resolved data directly — no raw_data, no re-resolve
+      const tool = createAttachmentTools({
+        attachmentManager: resolveAttachmentManager,
+        attachmentsService: customAttachmentsService,
+        formatContext,
+      }).find((t) => t.id === 'platform.core.attachment_read')!;
+
+      const result = (await tool.handler(
+        { attachment_id: attachment.id },
+        {} as any
+      )) as ToolHandlerStandardReturn;
+
+      expect((result.results[0] as any).data.type).toBe(AttachmentType.visualization);
+      // Data is the resolved content stored directly
+      expect((result.results[0] as any).data.data).toEqual(resolvedData);
+      // No raw_data field in the response
+      expect((result.results[0] as any).data.raw_data).toBeUndefined();
+    });
+
     it('reads a specific version', async () => {
       const attachment = await attachmentManager.add({
         type: 'text',
@@ -168,6 +284,37 @@ describe('attachment tools', () => {
       )) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.error);
+    });
+
+    it('returns error for read-only attachments', async () => {
+      const readonlyAttachmentsService = {
+        getTypeDefinition: () => ({
+          id: 'text',
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          isReadonly: true,
+        }),
+      } as any;
+
+      const tool = createAttachmentTools({
+        attachmentManager,
+        attachmentsService: readonlyAttachmentsService,
+        formatContext,
+      }).find((t) => t.id === 'platform.core.attachment_update')!;
+
+      const attachment = await attachmentManager.add({
+        type: 'text',
+        data: 'v1',
+        description: 'Test',
+      });
+
+      const result = (await tool.handler(
+        { attachment_id: attachment.id, data: 'v2' },
+        {} as any
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      expect((result.results[0] as any).data.message).toContain('read-only');
     });
   });
 

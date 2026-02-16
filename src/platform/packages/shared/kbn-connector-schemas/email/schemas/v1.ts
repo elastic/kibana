@@ -48,6 +48,7 @@ export const ParamsSchemaProps = {
   to: emailSchema.default([]),
   cc: emailSchema.default([]),
   bcc: emailSchema.default([]),
+  replyTo: z.array(z.string().max(512)).max(10).optional(),
   subject: z.string(),
   message: z.string(),
   messageHTML: z.string().nullable().default(null),
