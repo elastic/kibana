@@ -313,6 +313,7 @@ test.describe(
       };
 
       await test.step('cpu section', async () => {
+        await expect(assetDetailsPage.hostOverviewTab.metricsCpuUsageChart).toBeVisible();
         await assetDetailsPage.hostOverviewTab.metricsCpuShowAllButton.click();
         await expect(assetDetailsPage.hostMetricsTab.tab).toHaveAttribute('aria-selected', 'true');
         await expect(assetDetailsPage.hostMetricsTab.cpuSectionTitle).toBeInViewport();
@@ -320,6 +321,7 @@ test.describe(
       });
 
       await test.step('memory section', async () => {
+        await expect(assetDetailsPage.hostOverviewTab.metricsMemoryUsageChart).toBeVisible();
         await assetDetailsPage.hostOverviewTab.metricsMemoryShowAllButton.click();
         await expect(assetDetailsPage.hostMetricsTab.tab).toHaveAttribute('aria-selected', 'true');
         await expect(assetDetailsPage.hostMetricsTab.memorySectionTitle).toBeInViewport();
@@ -327,6 +329,7 @@ test.describe(
       });
 
       await test.step('network section', async () => {
+        await expect(assetDetailsPage.hostOverviewTab.metricsNetworkChart).toBeVisible();
         await assetDetailsPage.hostOverviewTab.metricsNetworkShowAllButton.click();
         await expect(assetDetailsPage.hostMetricsTab.tab).toHaveAttribute('aria-selected', 'true');
         await expect(assetDetailsPage.hostMetricsTab.networkSectionTitle).toBeInViewport();
@@ -334,6 +337,7 @@ test.describe(
       });
 
       await test.step('disk section', async () => {
+        await expect(assetDetailsPage.hostOverviewTab.metricsDiskUsageChart).toBeVisible();
         await assetDetailsPage.hostOverviewTab.metricsDiskShowAllButton.click();
         await expect(assetDetailsPage.hostMetricsTab.tab).toHaveAttribute('aria-selected', 'true');
         await expect(assetDetailsPage.hostMetricsTab.diskSectionTitle).toBeInViewport();
