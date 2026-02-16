@@ -30,7 +30,6 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/unified-search-plugin'
   - '@kbn/ui-actions-plugin'
-  - '@kbn/image-embeddable-plugin'
   - '@kbn/presentation-containers'
   - '@kbn/presentation-publishing'
   - '@kbn/deeplinks-analytics'

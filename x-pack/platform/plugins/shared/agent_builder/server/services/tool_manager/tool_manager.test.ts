@@ -175,19 +175,88 @@ describe('ToolManager', () => {
       const mappings = toolManager.getToolIdMapping();
       expect(mappings.size).toBeGreaterThan(0);
     });
+  });
 
-    it('handles event emitter when provided', async () => {
+  describe('setEventEmitter', () => {
+    it('passes the event emitter to toolToLangchain when set', async () => {
+      const { toolToLangchain } = jest.requireMock('@kbn/agent-builder-genai-utils/langchain') as {
+        toolToLangchain: jest.Mock;
+      };
+
       const tool = createMockExecutableTool('tool-1');
       const eventEmitter = jest.fn();
+
+      toolManager.setEventEmitter(eventEmitter);
 
       await toolManager.addTools({
         type: ToolManagerToolType.executable,
         tools: tool,
         logger: mockLogger,
-        eventEmitter,
       });
 
-      expect(toolManager.list()).toHaveLength(1);
+      expect(toolToLangchain).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sendEvent: eventEmitter,
+        })
+      );
+    });
+
+    it('uses the event emitter for tools added in subsequent addTools calls', async () => {
+      const { toolToLangchain } = jest.requireMock('@kbn/agent-builder-genai-utils/langchain') as {
+        toolToLangchain: jest.Mock;
+      };
+      toolToLangchain.mockClear();
+
+      const eventEmitter = jest.fn();
+      toolManager.setEventEmitter(eventEmitter);
+
+      // First addTools call
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: createMockExecutableTool('tool-1'),
+        logger: mockLogger,
+      });
+
+      // Second addTools call (simulating skill tools being added later)
+      await toolManager.addTools(
+        {
+          type: ToolManagerToolType.executable,
+          tools: createMockExecutableTool('skill-tool'),
+          logger: mockLogger,
+        },
+        { dynamic: true }
+      );
+
+      // Both calls should have received the event emitter
+      expect(toolToLangchain).toHaveBeenCalledTimes(2);
+      expect(toolToLangchain).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ sendEvent: eventEmitter })
+      );
+      expect(toolToLangchain).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ sendEvent: eventEmitter })
+      );
+    });
+
+    it('does not pass event emitter when not set', async () => {
+      const { toolToLangchain } = jest.requireMock('@kbn/agent-builder-genai-utils/langchain') as {
+        toolToLangchain: jest.Mock;
+      };
+
+      const tool = createMockExecutableTool('tool-1');
+
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: tool,
+        logger: mockLogger,
+      });
+
+      expect(toolToLangchain).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sendEvent: undefined,
+        })
+      );
     });
   });
 
