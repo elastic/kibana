@@ -89,7 +89,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
 
   const buttons = [
     ...((isInsideHistogram && isSidebarCollapsed) ||
-    (isInsideDiscoverContent && isSidebarCollapsed && (isChartHidden || !isChartAvailable))
+    (isInsideDiscoverContent && isSidebarCollapsed && !isChartAvailable)
       ? [
           {
             label: i18n.translate('discover.panelsToggle.showSidebarButton', {
