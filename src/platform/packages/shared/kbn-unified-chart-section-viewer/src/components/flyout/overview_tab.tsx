@@ -86,7 +86,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
         <EuiFlexGroup
           alignItems="center"
           gutterSize="s"
-          {...(dataTestSubj ? { 'data-test-subj': dataTestSubj } : {})}
+          data-test-subj={dataTestSubj}
         >
           <EuiFlexItem
             grow={false}
