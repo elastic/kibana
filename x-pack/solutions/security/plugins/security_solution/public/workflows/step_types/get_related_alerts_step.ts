@@ -155,10 +155,13 @@ export const getRelatedAlertsStepDefinition: PublicStepDefinition = {
   label: i18n.translate('xpack.securitySolution.workflows.steps.getRelatedAlerts.label', {
     defaultMessage: 'Get Related Alerts',
   }),
-  description: i18n.translate('xpack.securitySolution.workflows.steps.getRelatedAlerts.description', {
-    defaultMessage:
-      'Build a graph of alerts related by shared entities (or score threshold) within an expanding time window',
-  }),
+  description: i18n.translate(
+    'xpack.securitySolution.workflows.steps.getRelatedAlerts.description',
+    {
+      defaultMessage:
+        'Build a graph of alerts related by shared entities (or score threshold) within an expanding time window',
+    }
+  ),
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/link')
       .then(({ icon }) => ({ default: icon }))

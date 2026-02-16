@@ -38,9 +38,13 @@ export const getAlertHistoryStepDefinition: PublicStepDefinition = {
   label: i18n.translate('xpack.securitySolution.workflows.steps.getAlertHistory.label', {
     defaultMessage: 'Get Alert History',
   }),
-  description: i18n.translate('xpack.securitySolution.workflows.steps.getAlertHistory.description', {
-    defaultMessage: 'Get historical trigger rates for a rule showing how often it fired over time',
-  }),
+  description: i18n.translate(
+    'xpack.securitySolution.workflows.steps.getAlertHistory.description',
+    {
+      defaultMessage:
+        'Get historical trigger rates for a rule showing how often it fired over time',
+    }
+  ),
   // Icon will default to 'kibana' if not provided
   documentation: {
     details: i18n.translate(

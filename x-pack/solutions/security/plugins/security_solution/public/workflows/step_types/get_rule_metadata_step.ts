@@ -50,10 +50,13 @@ export const getRuleMetadataStepDefinition: PublicStepDefinition = {
   label: i18n.translate('xpack.securitySolution.workflows.steps.getRuleMetadata.label', {
     defaultMessage: 'Get Rule Metadata',
   }),
-  description: i18n.translate('xpack.securitySolution.workflows.steps.getRuleMetadata.description', {
-    defaultMessage:
-      'Get rule metadata including severity, rule type, category, and other rule information',
-  }),
+  description: i18n.translate(
+    'xpack.securitySolution.workflows.steps.getRuleMetadata.description',
+    {
+      defaultMessage:
+        'Get rule metadata including severity, rule type, category, and other rule information',
+    }
+  ),
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/list').then(({ icon }) => ({ default: icon }))
   ),

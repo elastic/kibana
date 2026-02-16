@@ -50,9 +50,13 @@ export const getGlobalPrevalenceStepDefinition: PublicStepDefinition = {
   label: i18n.translate('xpack.securitySolution.workflows.steps.getGlobalPrevalence.label', {
     defaultMessage: 'Get Global Prevalence',
   }),
-  description: i18n.translate('xpack.securitySolution.workflows.steps.getGlobalPrevalence.description', {
-    defaultMessage: 'Check if a rule is triggering across many hosts to determine prevalence level',
-  }),
+  description: i18n.translate(
+    'xpack.securitySolution.workflows.steps.getGlobalPrevalence.description',
+    {
+      defaultMessage:
+        'Check if a rule is triggering across many hosts to determine prevalence level',
+    }
+  ),
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/globe')
       .then(({ icon }) => ({ default: icon }))
