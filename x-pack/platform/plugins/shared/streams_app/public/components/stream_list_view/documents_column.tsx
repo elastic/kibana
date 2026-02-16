@@ -179,6 +179,10 @@ const LoadingPlaceholder = () => {
         white-space: nowrap;
         padding-right: ${euiTheme.size.xl};
       `}
+      role="group"
+      aria-label={i18n.translate('xpack.streams.documentsColumn.loadingLabel', {
+        defaultMessage: 'Loading documents data',
+      })}
     >
       <EuiFlexGroup>
         <EuiFlexItem
