@@ -31,8 +31,8 @@ const querySchema = z.object({
 export function registerCRUDUpsertBulk(router: EntityStorePluginRouter) {
   router.versioned
     .put({
-      path: '/api/entity-store/entities/bulk',
-      access: 'public',
+      path: '/internal/security/entity-store/entities/bulk',
+      access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -40,7 +40,7 @@ export function registerCRUDUpsertBulk(router: EntityStorePluginRouter) {
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v2,
         validate: {
           request: {
             body: buildRouteValidationWithZod(bodySchema),

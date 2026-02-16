@@ -20,8 +20,8 @@ const paramsSchema = z.object({
 export function registerCRUDDelete(router: EntityStorePluginRouter) {
   router.versioned
     .delete({
-      path: '/api/entity-store/entities/{id}',
-      access: 'public',
+      path: '/internal/security/entity-store/entities/{id}',
+      access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -29,7 +29,7 @@ export function registerCRUDDelete(router: EntityStorePluginRouter) {
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v2,
         validate: {
           request: {
             params: buildRouteValidationWithZod(paramsSchema),
