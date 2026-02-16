@@ -57,9 +57,7 @@ describe('CertMonitors', () => {
 
   it('shows all monitors after clicking "+N more"', () => {
     const monitors = createMockMonitors(15);
-    const { getByText, getByTestId, queryByTestId } = render(
-      <CertMonitors monitors={monitors} />
-    );
+    const { getByText, getByTestId, queryByTestId } = render(<CertMonitors monitors={monitors} />);
 
     fireEvent.click(getByTestId('certMonitorsViewAll'));
 
