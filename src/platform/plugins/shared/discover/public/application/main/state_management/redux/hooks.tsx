@@ -25,20 +25,8 @@ import {
   type InternalStateStore,
 } from './internal_state';
 import { selectTab } from './selectors';
-import { type TabActionInjector, createTabActionInjector } from './utils';
+import { type InjectedActionArgs, type TabActionInjector, createTabActionInjector } from './utils';
 import type { ChartPortalNode } from '../../components/chart';
-
-type WithoutTabId<TPayload extends TabActionPayload> = Omit<TPayload, 'tabId'>;
-type RequiredKeys<T> = {
-  [K in keyof T]-?: {} extends Pick<T, K> ? never : K;
-}[keyof T];
-
-type DispatchCurrentTabArgs<TPayload extends TabActionPayload> =
-  keyof WithoutTabId<TPayload> extends never
-    ? []
-    : RequiredKeys<WithoutTabId<TPayload>> extends never
-    ? [payload?: WithoutTabId<TPayload>]
-    : [payload: WithoutTabId<TPayload>];
 
 type DispatchReturn<TReturn> = TReturn extends (...args: infer _Args) => infer R ? R : TReturn;
 
@@ -114,7 +102,7 @@ export const useCurrentTabDispatch = () => {
   return useMemo(() => {
     return function dispatchCurrentTab<TPayload extends TabActionPayload, TReturn>(
       actionCreator: (params: TPayload) => TReturn,
-      ...args: DispatchCurrentTabArgs<TPayload>
+      ...args: InjectedActionArgs<TPayload>
     ): DispatchReturn<TReturn> {
       const injected = injectCurrentTab(actionCreator);
       const actionOrThunk = (injected as (...a: unknown[]) => unknown)(...args) as TReturn;

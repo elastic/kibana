@@ -50,13 +50,17 @@ export const createInternalStateAsyncThunk: CreateInternalStateAsyncThunk = ((
 }) as CreateInternalStateAsyncThunk;
 
 type WithoutTabId<TPayload extends TabActionPayload> = Omit<TPayload, 'tabId'>;
-type VoidIfEmpty<T> = keyof T extends never ? void : T;
+type MaybeActionArgs<T> = keyof T extends never ? [] : {} extends T ? [payload?: T] : [payload: T];
+
+export type InjectedActionArgs<TPayload extends TabActionPayload> = MaybeActionArgs<
+  WithoutTabId<TPayload>
+>;
 
 export const createTabActionInjector =
   (tabId: string) =>
   <TPayload extends TabActionPayload, TReturn>(actionCreator: (params: TPayload) => TReturn) =>
-  (payload: VoidIfEmpty<WithoutTabId<TPayload>>) => {
-    return actionCreator({ ...(payload ?? {}), tabId } as TPayload);
+  (...[payload]: InjectedActionArgs<TPayload>) => {
+    return actionCreator({ ...payload, tabId } as TPayload);
   };
 
 export type TabActionInjector = ReturnType<typeof createTabActionInjector>;
