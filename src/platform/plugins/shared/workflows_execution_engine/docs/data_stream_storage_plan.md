@@ -2,7 +2,7 @@
 
 ## Context: why we are considering data streams
 
-Migration of workflow step execution storage to Data Streams is being considered in response to [elastic/security-team#15147](https://github.com/elastic/security-team/issues/15147).
+Internal workflow indices (`.workflows-executions` and `.workflows-step-executions`) are created without any lifecycle policies. They grow unchecked and there is no automated way to limit their size. In deployments used for monitoring and testing workflows, this leads to excessive disk use, especially on hot nodes. Unlike these regular indices, data streams use backing indices that roll over and can be deleted automatically according to retention, so size and disk impact stay under control. We are considering data streams for workflow execution storage so that retention and lifecycle are built in and we avoid unbounded growth of workflow-related data.
 
 ---
 
@@ -57,6 +57,8 @@ At the **Elasticsearch** API level, mget is supported for data streams (you can 
 
 ## Options
 
+**Option 1 and Option 2** are complex effort: they require significant changes to the current execution model.
+
 ### Option 1: Hybrid — data stream for writes, direct Elasticsearch mget for reads
 
 Use the data stream client only for **writes**. For **reads**, call the underlying Elasticsearch client’s mget against the same data stream (by name). No refresh lag and no change to the platform client.
@@ -76,11 +78,14 @@ Extend the Kibana Data Streams client with an mget (or get) that uses the Elasti
 
 ### Option 3: Stay on regular indexes (hot indexes + data streams for history)
 
+**Option 3 does not change the current execution model.** Everything stays exactly the same. The only change is that we add data streams and will have one more persistence call (writes go to both hot indexes and data streams).
+
 Use **regular indexes** for execution; add **data streams** only for user-facing history. Execution engine stays on indexes with mget; history and ILM live on data streams.
 
 **Hot indexes (execution engine only)**  
 
 - **`.workflows-executions`** and **`.workflows-step-executions`** — regular indexes where we create/update documents. They are **hot**: actively used by the execution engine and must stay very fast.
+  - **Small size** — Hot indexes must be kept small so they stay fast and do not consume excessive disk on hot nodes.
   - **Time-series order** — Index documents sorted by **timestamp ASC** so the hot indexes behave as time-series. This improves **deleteByQuery** performance when removing old documents (e.g. by age).
   - **Minimal indexed fields** — e.g. only what’s needed for ILM (e.g. status).
   - **ILM policy** — delete old documents on a schedule (e.g. every day or week).
