@@ -27,7 +27,10 @@ import {
 
 export function runTelemetryCheck() {
   run(
-    async ({ flags: { baselineSha, fix, 'ignore-stored-json': ignoreStoredJson, path }, log }) => {
+    async ({
+      flags: { baselineSha, fix, 'ignore-stored-json': ignoreStoredJson, path, root, packages },
+      log,
+    }) => {
       if (typeof baselineSha !== 'undefined' && typeof baselineSha !== 'string') {
         throw createFailError(
           `${chalk.white.bgRed(
@@ -41,6 +44,16 @@ export function runTelemetryCheck() {
 
       if (typeof path === 'boolean') {
         throw createFailError(`${chalk.white.bgRed(' TELEMETRY ERROR ')} --path require a value`);
+      }
+
+      if (typeof root === 'boolean') {
+        throw createFailError(`${chalk.white.bgRed(' TELEMETRY ERROR ')} --root requires a value`);
+      }
+
+      if (typeof packages === 'boolean') {
+        throw createFailError(
+          `${chalk.white.bgRed(' TELEMETRY ERROR ')} --packages requires a value`
+        );
       }
 
       if (fix && typeof path !== 'undefined') {
@@ -57,23 +70,44 @@ export function runTelemetryCheck() {
         );
       }
 
+      // Parse root filter from --root flag
+      const rootFilter = root ? (Array.isArray(root) ? root : [root]) : undefined;
+
+      // Parse packages list for filtering (used by extractCollectorsTask for single-program optimization)
+      const packagesString = Array.isArray(packages) ? packages.join(',') : packages;
+      const packagesList = packagesString ? packagesString.split(',').filter(Boolean) : undefined;
+
+      // Track if we're doing a filtered (partial) check
+      const isFilteredCheck = Boolean(packagesList && packagesList.length > 0);
+
+      if (isFilteredCheck) {
+        log.info(`Filtering to ${packagesList!.length} package(s)`);
+      }
+
       const list = new Listr<TaskContext>(
         [
           {
             title: 'Checking .telemetryrc.json files',
-            task: (context, task) => task.newListr(parseConfigsTask(), { exitOnError: true }),
+            task: (context, task) =>
+              task.newListr(parseConfigsTask(rootFilter), { exitOnError: true }),
           },
           {
             title: 'Extracting Collectors',
             task: (context, task) =>
-              task.newListr(extractCollectorsTask(context, path), { exitOnError: true }),
+              task.newListr(
+                extractCollectorsTask(context, {
+                  restrictProgramToPath: path,
+                  packageFilter: packagesList,
+                }),
+                { exitOnError: true }
+              ),
           },
           {
             enabled: () => typeof path !== 'undefined',
             title: 'Checking collectors in --path are not excluded',
             task: (context) => {
-              const totalCollections = context.roots.reduce((acc, root) => {
-                return acc + (root.parsedCollections?.length || 0);
+              const totalCollections = context.roots.reduce((acc, curr) => {
+                return acc + (curr.parsedCollections?.length || 0);
               }, 0);
               const collectorsInPath = Array.isArray(path) ? path.length : 1;
 
@@ -91,6 +125,13 @@ export function runTelemetryCheck() {
           },
           {
             enabled: (_) => fix || !ignoreStoredJson,
+            skip: () => {
+              // Skip schema comparison for filtered checks - partial schema can't be compared to full stored schema
+              if (isFilteredCheck) {
+                return 'Skipping schema comparison for filtered check (use without --packages for full validation)';
+              }
+              return false;
+            },
             title: 'Checking Matching collector.schema against stored json files',
             task: (context, task) =>
               task.newListr(checkMatchingSchemasTask(context, !fix), { exitOnError: true }),
@@ -151,12 +192,18 @@ export function runTelemetryCheck() {
           baseline: 'baselineSha',
         },
         boolean: ['fix'],
-        string: ['baselineSha'],
+        string: ['baselineSha', 'root', 'packages'],
         default: {
           fix: false,
         },
         allowUnexpected: true,
         guessTypesForUnexpectedFlags: true,
+        help: `
+          --root             Filter to only scan specific roots (can be specified multiple times).
+                             Example: --root src/platform --root x-pack/solutions/observability
+          --packages         Comma-separated list of package paths to check. When provided,
+                             creates a single TypeScript program for faster execution.
+        `,
       },
     }
   );

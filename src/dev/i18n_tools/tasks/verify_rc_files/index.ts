@@ -9,3 +9,4 @@
 
 export { mergeConfigs } from './merge_configs';
 export { checkConfigs } from './check_configs';
+export { filterConfigByPaths } from './i18n_config';

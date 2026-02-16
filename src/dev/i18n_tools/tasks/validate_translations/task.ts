@@ -25,10 +25,11 @@ export const validateTranslationsTask: TaskSignature<TaskOptions> = (
   const { config } = context;
   const errorReporter = new ErrorReporter({ name: 'Validate Translations' });
 
+  // If no paths are configured (e.g., after filtering to packages with no i18n),
+  // skip gracefully instead of throwing an error
   if (!config || !Object.keys(config.paths).length) {
-    throw errorReporter.reportFailure(
-      'None of input paths is covered by the mappings in .i18nrc.json'
-    );
+    task.skip('No i18n namespaces to validate for the specified paths.');
+    return;
   }
 
   return task.newListr(
