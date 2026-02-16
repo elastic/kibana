@@ -478,8 +478,6 @@ async function writeSummary(results: JestConfigResult[], log: ToolingLog, totalM
     const statusIcon = r.code === 0 ? '✅' : '❌';
 
     let slowTestCount = '0';
-    let topSlowTests: SlowTest[] = [];
-    let slowTests: SlowTest[] = [];
 
     if (r.slowTestsFile) {
       try {
@@ -490,85 +488,17 @@ async function writeSummary(results: JestConfigResult[], log: ToolingLog, totalM
 
         if (fileExists) {
           const content = await fs.readFile(r.slowTestsFile, 'utf8');
-          slowTests = JSON.parse(content);
+          const slowTests: SlowTest[] = JSON.parse(content);
           if (slowTests.length > 0) {
             slowTestCount = slowTests.length.toString();
-            // Get top 5 slowest tests for this config
-            topSlowTests = slowTests.sort((a, b) => b.duration - a.duration).slice(0, 5);
           }
         }
-      } catch (error) {
+      } catch {
         // Skip files that can't be read
       }
     }
 
-    // Add main config row
-    // i.e.: | src/plugins/core/core.test.ts | ✅ | 3 | 30s |
-    table.push([chalk.bold(relativePath), statusIcon, slowTestCount, `${sec}s`]);
-
-    // Add failed tests if any
-    if (r.failedTests && r.failedTests.length > 0) {
-      table.push([{ colSpan: 4, content: `${chalk.bold.red('  Failed tests:')}` }]);
-
-      // Group failed tests by file path
-      const failedTestsByFile = new Map<string, FailedTest[]>();
-      for (const test of r.failedTests) {
-        const testRelativePath = relative(cwd, test.filePath);
-        if (!failedTestsByFile.has(testRelativePath)) {
-          failedTestsByFile.set(testRelativePath, []);
-        }
-        failedTestsByFile.get(testRelativePath)!.push(test);
-      }
-
-      // Display grouped failed tests
-      for (const [filePath, tests] of failedTestsByFile) {
-        table.push([`  ${filePath}`]);
-
-        for (const test of tests) {
-          table.push([`    ${test.fullName}`, '❌', '', '']);
-        }
-      }
-    }
-
-    // Add top 5 slow tests as indented rows
-    // i.e.: | src/plugins/core/core.test.ts | ⚠️ | 0.1s |
-    if (topSlowTests.length > 0) {
-      // Add header row for slow tests
-      table.push([
-        {
-          colSpan: 4,
-          content: `${chalk.bold.yellow(
-            `${topSlowTests.length > 4 ? 'Top' : ''} Slow tests (> 300ms): (Showing ${
-              topSlowTests.length
-            } of ${slowTests.length})`
-          )}`,
-        },
-      ]);
-
-      // Group tests by file path
-      const testsByFile = new Map<string, SlowTest[]>();
-      for (const test of topSlowTests) {
-        const testRelativePath = relative(cwd, test.filePath);
-
-        if (!testsByFile.has(testRelativePath)) {
-          testsByFile.set(testRelativePath, []);
-        }
-
-        testsByFile.get(testRelativePath)!.push(test);
-      }
-
-      // Display grouped tests
-      for (const [filePath, tests] of testsByFile) {
-        table.push([`  ${filePath}`]);
-
-        for (const test of tests) {
-          const durationFormatted =
-            test.duration >= 1000 ? `${(test.duration / 1000).toFixed(1)}s` : `${test.duration}ms`;
-
-          table.push([`    ${test.fullName}`, '⚠️', '', durationFormatted]);
-        }
-      }
-    }
+    table.push([relativePath, statusIcon, slowTestCount, `${sec}s`]);
   }
 
   log.info(table.toString());
