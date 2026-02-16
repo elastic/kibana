@@ -58,6 +58,8 @@ const TemplateWithSearchMetaSchema = TemplateSchema.extend({
   fieldSearchMatches: z.boolean(),
 });
 
+export type TemplateListItem = z.infer<typeof TemplateWithSearchMetaSchema>;
+
 export const TemplatesFindResponseSchema = z.object({
   templates: z.array(TemplateWithSearchMetaSchema),
   page: z.number(),
