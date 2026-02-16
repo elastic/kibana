@@ -40,6 +40,7 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import { ExecutionType, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import type { ConnectorInstanceConfig } from '@kbn/workflows/types/v1';
 import type {
   IWorkflowEventLoggerService,
   LogSearchResult,
@@ -1351,11 +1352,21 @@ export class WorkflowsService {
           name: connector.name,
           isPreconfigured: connector.isPreconfigured,
           isDeprecated: connector.isDeprecated,
+          ...this.getConnectorInstanceConfig(connector),
         });
       }
     });
 
     return { connectorsByType, totalConnectors: connectors.length };
+  }
+
+  private getConnectorInstanceConfig(
+    connector: FindActionResult
+  ): { config: ConnectorInstanceConfig } | undefined {
+    if (connector.actionTypeId === '.inference') {
+      return { config: { taskType: connector.config?.taskType } };
+    }
+    return undefined;
   }
 
   public async getWorkflowZodSchema(
