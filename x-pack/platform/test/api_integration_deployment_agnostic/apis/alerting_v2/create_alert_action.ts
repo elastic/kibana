@@ -43,12 +43,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         esClient.index({
           index: ALERTS_EVENTS_INDEX,
           document: olderAlertEvent,
-          refresh: 'wait_for',
+          refresh: true,
         }),
         esClient.index({
           index: ALERTS_EVENTS_INDEX,
           document: alertEvent,
-          refresh: 'wait_for',
+          refresh: true,
         }),
       ]);
     });
@@ -61,23 +61,35 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           query: { match_all: {} },
           refresh: true,
           wait_for_completion: true,
+          conflicts: 'proceed',
         }),
         esClient.deleteByQuery({
           index: ALERTS_ACTIONS_INDEX,
           query: { match_all: {} },
           refresh: true,
           wait_for_completion: true,
+          conflicts: 'proceed',
         }),
       ]);
     });
 
-    afterEach(async () => {
-      // Clean up actions after each test
+    beforeEach(async () => {
       await esClient.deleteByQuery({
         index: ALERTS_ACTIONS_INDEX,
         query: { match_all: {} },
         refresh: true,
         wait_for_completion: true,
+        conflicts: 'proceed',
+      });
+    });
+
+    afterEach(async () => {
+      await esClient.deleteByQuery({
+        index: ALERTS_ACTIONS_INDEX,
+        query: { match_all: {} },
+        refresh: true,
+        wait_for_completion: true,
+        conflicts: 'proceed',
       });
     });
 

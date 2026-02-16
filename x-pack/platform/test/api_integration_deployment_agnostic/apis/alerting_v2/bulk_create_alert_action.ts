@@ -57,12 +57,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           query: { match_all: {} },
           refresh: true,
           wait_for_completion: true,
+          conflicts: 'proceed',
         }),
         esClient.deleteByQuery({
           index: ALERTS_ACTIONS_INDEX,
           query: { match_all: {} },
           refresh: true,
           wait_for_completion: true,
+          conflicts: 'proceed',
         }),
       ]);
     });
@@ -77,7 +79,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    afterEach(async () => {
+    async function deleteAllActions() {
       await esClient.deleteByQuery({
         index: ALERTS_ACTIONS_INDEX,
         query: { match_all: {} },
@@ -85,7 +87,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         wait_for_completion: true,
         conflicts: 'proceed',
       });
-    });
+    }
 
     async function getAllActions() {
       const result = await esClient.search({
@@ -108,6 +110,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('should process single valid action and return counts', async () => {
+      await deleteAllActions();
+
       const response = await supertestWithoutAuth
         .post(BULK_ALERT_ACTION_API_PATH)
         .set(roleAuthc.apiKeyHeader)
@@ -124,6 +128,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('should process multiple valid actions and write all documents', async () => {
+      await deleteAllActions();
       const response = await supertestWithoutAuth
         .post(BULK_ALERT_ACTION_API_PATH)
         .set(roleAuthc.apiKeyHeader)
@@ -147,6 +152,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('should handle mixed valid/invalid group hashes with partial success', async () => {
+      await deleteAllActions();
       const response = await supertestWithoutAuth
         .post(BULK_ALERT_ACTION_API_PATH)
         .set(roleAuthc.apiKeyHeader)
@@ -174,6 +180,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('should return processed 0 when all group hashes are invalid', async () => {
+      await deleteAllActions();
       const response = await supertestWithoutAuth
         .post(BULK_ALERT_ACTION_API_PATH)
         .set(roleAuthc.apiKeyHeader)
@@ -191,6 +198,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('should handle different action types in bulk', async () => {
+      await deleteAllActions();
       const response = await supertestWithoutAuth
         .post(BULK_ALERT_ACTION_API_PATH)
         .set(roleAuthc.apiKeyHeader)
