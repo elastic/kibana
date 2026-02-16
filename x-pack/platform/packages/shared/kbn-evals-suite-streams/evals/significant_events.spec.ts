@@ -16,7 +16,9 @@ import {
 } from '@kbn/streams-ai/src/significant_events/types';
 import { generateSignificantEvents } from '@kbn/streams-ai';
 import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/prompt';
-
+import { tags } from '@kbn/scout';
+import type { EvaluatorParams } from '@kbn/evals/src/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { evaluate } from '../src/evaluate';
 import type { SignificantEventsEvaluationExample } from './significant_events_datasets';
 import { SIGNIFICANT_EVENTS_DATASETS } from './significant_events_datasets';
@@ -206,19 +208,19 @@ evaluate.describe(
                           test_index: testIndex,
                         },
                       },
-                    },
-                  ],
-                },
-                task: async () => {
-                  const { stream } = await apiServices.streams.getStreamDefinition(testIndex);
-                  const { queries } = await generateSignificantEvents({
-                    stream,
-                    inferenceClient,
-                    logger,
-                    signal: new AbortController().signal,
-                    systemPrompt: significantEventsPrompt,
-                    getFeatures: async () => example.input.features,
-                  });
+                    ],
+                  },
+                  task: async () => {
+                    const { stream } = await apiServices.streams.getStreamDefinition(testIndex);
+                    const { queries } = await generateSignificantEvents({
+                      stream,
+                      esClient,
+                      inferenceClient,
+                      logger,
+                      signal: new AbortController().signal,
+                      systemPrompt: significantEventsPrompt,
+                      getFeatures: async () => example.input.features,
+                    });
 
                     // The task should return the array of generated queries
                     return queries;
@@ -257,39 +259,12 @@ evaluate.describe(
       });
     });
 
-  evaluate(
-    'empty datastream',
-    async ({ executorClient, evaluators, esClient, inferenceClient, logger, apiServices }) => {
-      const testIndex = `logs-sig-events-test-${Date.now()}`;
-      await esClient.indices.createDataStream({ name: testIndex });
-      await executorClient.runExperiment(
-        {
-          dataset: {
-            name: 'sig_events: empty datastream',
-            description: 'Significant events query generation with empty stream data',
-            examples: [
-              {
-                input: {},
-                output: {},
-                metadata: {},
-              },
-            ],
-          },
-          task: async () => {
-            const { stream } = await apiServices.streams.getStreamDefinition(testIndex);
-            const { queries } = await generateSignificantEvents({
-              stream,
-              inferenceClient,
-              logger,
-              signal: new AbortController().signal,
-              systemPrompt: significantEventsPrompt,
-              getFeatures: async () => [],
-            });
-
-            return queries;
-          },
-        },
-        [
+    evaluate(
+      'empty datastream',
+      async ({ executorClient, evaluators, esClient, inferenceClient, logger, apiServices }) => {
+        const testIndex = `logs-sig-events-test-${Date.now()}`;
+        await esClient.indices.createDataStream({ name: testIndex });
+        await executorClient.runExperiment(
           {
             dataset: {
               name: 'sig_events: empty datastream',
@@ -306,14 +281,12 @@ evaluate.describe(
               const { stream } = await apiServices.streams.getStreamDefinition(testIndex);
               const { queries } = await generateSignificantEvents({
                 stream,
-                start: kbnDatemath.parse('now-24h')!.valueOf(),
-                end: kbnDatemath.parse('now')!.valueOf(),
                 esClient,
                 inferenceClient,
                 logger,
                 signal: new AbortController().signal,
                 systemPrompt: significantEventsPrompt,
-                features: [],
+                getFeatures: async () => [],
               });
 
               return queries;
