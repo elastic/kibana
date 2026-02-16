@@ -130,7 +130,6 @@ async function configureKeystore(
       chalk.bold(secureSettingName),
       chalk.bold(secureSettingValue)
     );
-
     await execa(ES_KEYSTORE_BIN, ['add', secureSettingName, '-x'], {
       input: secureSettingValue,
       cwd: installPath,
