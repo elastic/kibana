@@ -54,7 +54,7 @@ Standard workflows:
 
 Remember:
 - Tag with `['agent-builder-tool']` to expose as AI tool
-- Use `<%= stackConnectorId %>` for connector-id
+- Use `<%= your-source-stack-connector-id %>` for connector-id, where your-source is the id of the newly created data source type
 - Use `${{ inputs.param_name }}` for input references
 
 ## Step 4: Tell the user you're done

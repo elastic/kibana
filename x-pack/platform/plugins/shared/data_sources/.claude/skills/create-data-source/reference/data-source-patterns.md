@@ -61,10 +61,12 @@ export const yourSourceDataSource: DataSource = {
 
   iconType: '.your-source',             // Must match ConnectorIconsMap key
 
-  stackConnector: {
-    type: '.your-source',               // The stack connector type ID
-    config: {},
-  },
+  stackConnectors: [
+    {
+        type: '.your-source',               // The stack connector type ID
+        config: {},
+    }
+  ],
 
   workflows: {
     directory: __dirname + '/workflows',
