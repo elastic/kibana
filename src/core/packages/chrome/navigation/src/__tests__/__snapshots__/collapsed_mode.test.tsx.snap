@@ -15,7 +15,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
         id="generated-id_euiToolTipAnchor"
       >
         <div
-          class="css-fudlyt-wrapperStyles"
+          class="css-1lxxlvf-wrapperStyles"
           data-test-subj="kbnChromeNav-logoWrapper"
         >
           <a

@@ -50,6 +50,7 @@ const renderLandingPage = async (overrides: Partial<AppDependencies> = {}) => {
     chromeStyle: 'classic',
     coreStart,
     hasEnterpriseLicense: false,
+    getAutoOpsStatusHook: () => () => ({ isCloudConnectAutoopsEnabled: false, isLoading: false }),
     ...overrides,
   };
 

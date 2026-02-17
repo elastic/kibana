@@ -6,6 +6,7 @@
  */
 
 export type { AuthenticationServiceStart } from './authentication_service';
+export type { ClientAuthentication } from './client_authentication';
 
 export type {
   NativeAPIKeysType,

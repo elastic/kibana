@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 import objectHash from 'object-hash';
 import type { IndexStorageSettings } from '..';
 
 export function getSchemaVersion(storage: IndexStorageSettings): string {
-  const version = objectHash(stringify(storage.schema.properties));
+  const version = objectHash(stableStringify(storage.schema.properties));
   return version;
 }
