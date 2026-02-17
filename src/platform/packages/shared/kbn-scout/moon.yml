@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/core-http-common'
   - '@kbn/axe-config'
+  - '@kbn/peggy'
   - '@kbn/apm-synthtrace'
   - '@kbn/apm-synthtrace-client'
 tags:
