@@ -167,17 +167,14 @@ describe('SchemaEditorFlyout (description-only restrictions)', () => {
       });
     });
 
-    it('allows only editing description for documentation-only fields (type: unmapped) and stages a minimal payload', async () => {
-      const documentationOnlyField = {
+    it('allows only editing description for documentation-only fields (status: unmapped) and stages a minimal payload', async () => {
+      // Doc-only fields from getDefinitionFields have status: 'unmapped' without a type property
+      const documentationOnlyField: SchemaField = {
         name: 'attributes.documented_only',
         parent: 'logs.test',
-        status: 'mapped',
-        type: 'unmapped',
+        status: 'unmapped',
         description: 'original description',
-        // Extra properties should not leak into the staged payload in description-only mode
-        format: 'epoch_millis',
-        additionalParameters: { ignore_above: 256 },
-      } as unknown as SchemaField;
+      };
 
       const { onStage, stream } = renderFlyout({ field: documentationOnlyField });
 
@@ -205,11 +202,11 @@ describe('SchemaEditorFlyout (description-only restrictions)', () => {
       expect(stagedField).not.toHaveProperty('additionalParameters');
     });
 
-    it('defaults to "unmapped" type when editing a doc-only field saved without type', async () => {
+    it('hides type selector for doc-only fields (status: unmapped without type)', async () => {
       // This tests the scenario where:
-      // 1. User edits a field, sets it to unmapped, adds description, saves
+      // 1. User previously edited a field, set it as a doc-only override with just a description
       // 2. The field is stored as { status: 'unmapped', description: '...' } without a type
-      // 3. When re-editing, the type dropdown should show "Unmapped" selected (not empty)
+      // 3. When re-editing, the type selector should be hidden (description-only mode)
       const docOnlyFieldWithoutType: SchemaField = {
         name: 'attributes.documented_field',
         parent: 'logs.test',

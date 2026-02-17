@@ -543,11 +543,11 @@ describe('useSchemaFields', () => {
       expect(result.current.pendingChangesCount).toBe(0);
     });
 
-    it('extracts fields with type "unmapped" from wired stream definition with status "mapped"', () => {
+    it('extracts fields with type "unmapped" from wired stream definition as doc-only overrides', () => {
       // Fields with type: 'unmapped' are documentation-only fields that exist in the definition
-      // but are not mapped to Elasticsearch. The getDefinitionFields function correctly assigns
-      // them status: 'mapped' (since they ARE in the definition). The UI layer (schema_editor_table.tsx)
-      // then handles the display by showing them as "Unmapped" status and hiding the type.
+      // but are not mapped to Elasticsearch. The getDefinitionFields function returns them with
+      // status: 'unmapped' (no type property) since they don't have a real ES mapping.
+      // The UI layer handles these as "doc-only" overrides that only store descriptions.
       const definition = createMockWiredStreamDefinition({
         stream: {
           name: 'logs.wired-test',
@@ -576,14 +576,15 @@ describe('useSchemaFields', () => {
       expect(fields).toContainEqual(
         expect.objectContaining({
           name: 'attributes.documented_unmapped_field',
-          type: 'unmapped',
           description: 'This field is documented but not mapped',
-          status: 'mapped', // This is correct - it's in the definition
+          status: 'unmapped', // Doc-only fields are returned with status 'unmapped'
         })
       );
     });
 
-    it('extracts fields with type "unmapped" from classic stream definition', () => {
+    it('extracts fields with type "unmapped" from classic stream definition as doc-only overrides', () => {
+      // Similar to wired streams, classic streams with type: 'unmapped' are doc-only overrides.
+      // They are returned with status: 'unmapped' (no type property).
       const definition = createMockClassicStreamDefinition({
         stream: {
           name: 'logs.classic-test',
@@ -611,9 +612,8 @@ describe('useSchemaFields', () => {
       expect(fields).toContainEqual(
         expect.objectContaining({
           name: 'attributes.documented_unmapped_field',
-          type: 'unmapped',
           description: 'Classic stream documented unmapped field',
-          status: 'mapped',
+          status: 'unmapped', // Doc-only fields are returned with status 'unmapped'
         })
       );
     });

@@ -108,8 +108,13 @@ export const SchemaEditorFlyout = ({
   const hasValidFieldType = nextField.type !== undefined;
   // Description-only editing is only allowed for wired streams.
   // Classic streams require a type to be specified to add a description.
+  // This applies to:
+  // 1. Inherited fields (can only add description override)
+  // 2. Doc-only fields (status: 'unmapped' without a type, or type: 'unmapped')
+  const isDocOnlyField =
+    field.status === 'unmapped' && (!field.type || field.type === 'unmapped');
   const isDescriptionOnlyEditing =
-    isEditing && streamType === 'wired' && field.status === 'inherited';
+    isEditing && streamType === 'wired' && (field.status === 'inherited' || isDocOnlyField);
   const hasDescriptionChanged =
     (nextField.description ?? undefined) !== (field.description ?? undefined);
   const isInheritedDescriptionOnlyEditing =
@@ -234,9 +239,13 @@ export const SchemaEditorFlyout = ({
             <EuiButton
               data-test-subj="streamsAppSchemaEditorFieldStageButton"
               disabled={
-                !hasValidFieldType ||
+                // In description-only mode, we don't require a valid field type
+                (!isDescriptionOnlyEditing && !hasValidFieldType) ||
                 !isValidAdvancedFieldMappings ||
+                // For inherited fields in description-only mode, require description change
                 (isInheritedDescriptionOnlyEditing && !hasDescriptionChanged) ||
+                // For doc-only fields in description-only mode, require description change
+                (isDescriptionOnlyEditing && isDocOnlyField && !hasDescriptionChanged) ||
                 (!isValidSimulation && !isExpensiveQueriesError)
               }
               onClick={() => {
@@ -246,6 +255,7 @@ export const SchemaEditorFlyout = ({
                   if (isDescriptionOnlyEditing) {
                     // In description-only mode, ensure we only persist the allowed parts.
                     if (field.status === 'inherited') {
+                      // For inherited fields, keep the original field properties but update description
                       return {
                         ...field,
                         description: nextField.description,
@@ -254,14 +264,13 @@ export const SchemaEditorFlyout = ({
                       } as SchemaField;
                     }
 
-                    if (nextField.type === 'unmapped') {
-                      return {
-                        name: nextField.name,
-                        parent: stagedParent,
-                        status: 'unmapped',
-                        description: nextField.description,
-                      } as SchemaField;
-                    }
+                    // For doc-only fields (status: 'unmapped' without type), return minimal payload
+                    return {
+                      name: nextField.name,
+                      parent: stagedParent,
+                      status: 'unmapped',
+                      description: nextField.description,
+                    } as SchemaField;
                   }
 
                   return {
