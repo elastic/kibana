@@ -21,6 +21,7 @@ const INTERNAL_INFERENCE_CONNECTORS = [
   'Elastic-Managed-LLM',
   'Anthropic-Claude-Sonnet-3-7',
   'Anthropic-Claude-Sonnet-4-5',
+  'Anthropic-Claude-Sonnet-4-6',
   'Anthropic-Claude-Opus-4-5',
   'Anthropic-Claude-Opus-4-6',
   'Anthropic-Claude-Haiku-4-5',
