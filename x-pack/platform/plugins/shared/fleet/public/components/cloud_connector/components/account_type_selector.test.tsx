@@ -38,11 +38,13 @@ describe('AccountTypeSelector', () => {
   });
 
   describe('rendering', () => {
-    it('renders account type label', () => {
+    it('renders account type options and description', () => {
       renderSelector();
-      expect(screen.getByText('Cloud connector account type')).toBeInTheDocument();
       expect(screen.getByText('Organization account')).toBeInTheDocument();
       expect(screen.getByText('Single account')).toBeInTheDocument();
+      expect(
+        screen.getByText('Select between single account or organization account.')
+      ).toBeInTheDocument();
 
       expect(screen.getByTestId(ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SELECTOR)).toBeInTheDocument();
       expect(
@@ -50,6 +52,24 @@ describe('AccountTypeSelector', () => {
       ).toBeInTheDocument();
       expect(
         screen.getByTestId(ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SINGLE_ACCOUNT)
+      ).toBeInTheDocument();
+    });
+
+    it('renders organization description when organization is selected', () => {
+      renderSelector({ selectedAccountType: ORGANIZATION_ACCOUNT });
+      expect(
+        screen.getByText(
+          'Connect Elastic to every account (current and future) in your cloud organization by providing Elastic with read-only access.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('renders single account description when single account is selected', () => {
+      renderSelector({ selectedAccountType: SINGLE_ACCOUNT });
+      expect(
+        screen.getByText(
+          'Deploying to a single account is suitable for an initial POC. To ensure complete coverage, it is recommended to deploy at the organization level.'
+        )
       ).toBeInTheDocument();
     });
   });
@@ -91,33 +111,33 @@ describe('AccountTypeSelector', () => {
   });
 
   describe('onChange callback', () => {
-    it('calls onChange with organization-account when Organization is clicked', () => {
+    it('calls onChange with organization-account when Organization button is clicked', () => {
       renderSelector({ selectedAccountType: SINGLE_ACCOUNT });
 
-      const organizationWrapper = screen.getByTestId(
+      const organizationRadio = screen.getByTestId(
         ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.ORGANIZATION
       );
-      const organizationRadio = organizationWrapper.querySelector('input') as HTMLInputElement;
-      fireEvent.click(organizationRadio);
+      const organizationButton = organizationRadio.closest('button') as HTMLButtonElement;
+      fireEvent.click(organizationButton);
 
       expect(mockOnChange).toHaveBeenCalledWith(ORGANIZATION_ACCOUNT);
     });
 
-    it('calls onChange with single-account when Single Account is clicked', () => {
+    it('calls onChange with single-account when Single Account button is clicked', () => {
       renderSelector({ selectedAccountType: ORGANIZATION_ACCOUNT });
 
-      const singleAccountWrapper = screen.getByTestId(
+      const singleAccountRadio = screen.getByTestId(
         ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SINGLE_ACCOUNT
       );
-      const singleAccountRadio = singleAccountWrapper.querySelector('input') as HTMLInputElement;
-      fireEvent.click(singleAccountRadio);
+      const singleAccountButton = singleAccountRadio.closest('button') as HTMLButtonElement;
+      fireEvent.click(singleAccountButton);
 
       expect(mockOnChange).toHaveBeenCalledWith(SINGLE_ACCOUNT);
     });
   });
 
   describe('disabled state', () => {
-    it('disables radio buttons when disabled prop is true', () => {
+    it('disables buttons when disabled prop is true', () => {
       renderSelector({ disabled: true });
 
       const organizationWrapper = screen.getByTestId(
@@ -127,14 +147,14 @@ describe('AccountTypeSelector', () => {
         ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SINGLE_ACCOUNT
       );
 
-      const organizationRadio = organizationWrapper.querySelector('input') as HTMLInputElement;
-      const singleAccountRadio = singleAccountWrapper.querySelector('input') as HTMLInputElement;
+      const organizationButton = organizationWrapper.closest('button') as HTMLButtonElement;
+      const singleAccountButton = singleAccountWrapper.closest('button') as HTMLButtonElement;
 
-      expect(organizationRadio.disabled).toBe(true);
-      expect(singleAccountRadio.disabled).toBe(true);
+      expect(organizationButton.disabled).toBe(true);
+      expect(singleAccountButton.disabled).toBe(true);
     });
 
-    it('enables radio buttons when disabled prop is false', () => {
+    it('enables buttons when disabled prop is false', () => {
       renderSelector({ disabled: false });
 
       const organizationWrapper = screen.getByTestId(
@@ -144,14 +164,14 @@ describe('AccountTypeSelector', () => {
         ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SINGLE_ACCOUNT
       );
 
-      const organizationRadio = organizationWrapper.querySelector('input') as HTMLInputElement;
-      const singleAccountRadio = singleAccountWrapper.querySelector('input') as HTMLInputElement;
+      const organizationButton = organizationWrapper.closest('button') as HTMLButtonElement;
+      const singleAccountButton = singleAccountWrapper.closest('button') as HTMLButtonElement;
 
-      expect(organizationRadio.disabled).toBe(false);
-      expect(singleAccountRadio.disabled).toBe(false);
+      expect(organizationButton.disabled).toBe(false);
+      expect(singleAccountButton.disabled).toBe(false);
     });
 
-    it('enables radio buttons by default when disabled prop is not provided', () => {
+    it('enables buttons by default when disabled prop is not provided', () => {
       renderSelector();
 
       const organizationWrapper = screen.getByTestId(
@@ -161,11 +181,11 @@ describe('AccountTypeSelector', () => {
         ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SINGLE_ACCOUNT
       );
 
-      const organizationRadio = organizationWrapper.querySelector('input') as HTMLInputElement;
-      const singleAccountRadio = singleAccountWrapper.querySelector('input') as HTMLInputElement;
+      const organizationButton = organizationWrapper.closest('button') as HTMLButtonElement;
+      const singleAccountButton = singleAccountWrapper.closest('button') as HTMLButtonElement;
 
-      expect(organizationRadio.disabled).toBe(false);
-      expect(singleAccountRadio.disabled).toBe(false);
+      expect(organizationButton.disabled).toBe(false);
+      expect(singleAccountButton.disabled).toBe(false);
     });
   });
 });

@@ -6,13 +6,16 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS } from '../../../../common';
 
 import type { AccountType } from '../../../types';
 import { ORGANIZATION_ACCOUNT, SINGLE_ACCOUNT } from '../constants';
+
+import { BoxedRadioGroup, type BoxedRadioOption } from './boxed_radio_group';
 
 export interface AccountTypeSelectorProps {
   /** Currently selected account type */
@@ -23,20 +26,20 @@ export interface AccountTypeSelectorProps {
   disabled?: boolean;
 }
 
-const ACCOUNT_TYPE_OPTIONS = [
+const ACCOUNT_TYPE_OPTIONS: BoxedRadioOption[] = [
   {
     id: ORGANIZATION_ACCOUNT,
     label: i18n.translate('xpack.fleet.cloudConnector.accountTypeSelector.organizationLabel', {
       defaultMessage: 'Organization account',
     }),
-    'data-test-subj': ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.ORGANIZATION,
+    testId: ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.ORGANIZATION,
   },
   {
     id: SINGLE_ACCOUNT,
     label: i18n.translate('xpack.fleet.cloudConnector.accountTypeSelector.singleAccountLabel', {
       defaultMessage: 'Single account',
     }),
-    'data-test-subj': ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SINGLE_ACCOUNT,
+    testId: ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SINGLE_ACCOUNT,
   },
 ];
 
@@ -45,26 +48,49 @@ export const AccountTypeSelector: React.FC<AccountTypeSelectorProps> = ({
   onChange,
   disabled = false,
 }) => {
-  const handleChange = (optionId: string) => {
-    if (optionId === ORGANIZATION_ACCOUNT || optionId === SINGLE_ACCOUNT) {
-      onChange(optionId);
-    }
-  };
-
   return (
-    <EuiFormRow
-      label={i18n.translate('xpack.fleet.cloudConnector.accountTypeSelector.label', {
-        defaultMessage: 'Cloud connector account type',
-      })}
-      data-test-subj={ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SELECTOR}
-    >
-      <EuiRadioGroup
-        options={ACCOUNT_TYPE_OPTIONS}
-        idSelected={selectedAccountType}
-        onChange={handleChange}
+    <div data-test-subj={ACCOUNT_TYPE_SELECTOR_TEST_SUBJECTS.SELECTOR}>
+      <EuiText color="subdued" size="s">
+        <FormattedMessage
+          id="xpack.fleet.cloudConnector.accountTypeSelector.description"
+          defaultMessage="Select between single account or organization account."
+        />
+      </EuiText>
+      <EuiSpacer size="l" />
+      <BoxedRadioGroup
         disabled={disabled}
+        idSelected={selectedAccountType}
+        options={ACCOUNT_TYPE_OPTIONS}
+        onChange={(id) => {
+          if (id === ORGANIZATION_ACCOUNT || id === SINGLE_ACCOUNT) {
+            onChange(id);
+          }
+        }}
+        size="m"
         name="cloudConnectorAccountType"
       />
-    </EuiFormRow>
+      {selectedAccountType === ORGANIZATION_ACCOUNT && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiText color="subdued" size="s">
+            <FormattedMessage
+              id="xpack.fleet.cloudConnector.accountTypeSelector.organizationDescription"
+              defaultMessage="Connect Elastic to every account (current and future) in your cloud organization by providing Elastic with read-only access."
+            />
+          </EuiText>
+        </>
+      )}
+      {selectedAccountType === SINGLE_ACCOUNT && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiText color="subdued" size="s">
+            <FormattedMessage
+              id="xpack.fleet.cloudConnector.accountTypeSelector.singleAccountDescription"
+              defaultMessage="Deploying to a single account is suitable for an initial POC. To ensure complete coverage, it is recommended to deploy at the organization level."
+            />
+          </EuiText>
+        </>
+      )}
+    </div>
   );
 };
