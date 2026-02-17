@@ -6,13 +6,20 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { StreamDetailGeneralData } from '.';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import type { Streams } from '@kbn/streams-schema';
 
 let mockFlyoutOpen = false;
 let mockFlyoutHasUnsavedChanges = false;
+
+interface MockLifecycleSummaryProps {
+  onFlyoutOpenChange?: (isOpen: boolean) => void;
+  onFlyoutUnsavedChangesChange?: (hasUnsavedChanges: boolean) => void;
+}
+
+let mockLifecycleSummaryProps: MockLifecycleSummaryProps | undefined;
 
 jest.mock('@kbn/unsaved-changes-prompt', () => ({
   useUnsavedChangesPrompt: jest.fn(),
@@ -77,13 +84,8 @@ jest.mock('./modal', () => ({
 }));
 
 jest.mock('./lifecycle_summary', () => ({
-  LifecycleSummary: ({ onFlyoutOpenChange, onFlyoutUnsavedChangesChange }: any) => {
-    const ReactLocal = require('react');
-    ReactLocal.useEffect(() => {
-      onFlyoutOpenChange?.(mockFlyoutOpen);
-      onFlyoutUnsavedChangesChange?.(mockFlyoutHasUnsavedChanges);
-    }, [onFlyoutOpenChange, onFlyoutUnsavedChangesChange]);
-
+  LifecycleSummary: (props: MockLifecycleSummaryProps) => {
+    mockLifecycleSummaryProps = props;
     return <div data-test-subj="mockLifecycleSummary" />;
   },
 }));
@@ -100,6 +102,7 @@ describe('StreamDetailGeneralData unsaved changes prompt', () => {
     jest.clearAllMocks();
     mockFlyoutOpen = false;
     mockFlyoutHasUnsavedChanges = false;
+    mockLifecycleSummaryProps = undefined;
   });
 
   const definition = {
@@ -121,6 +124,11 @@ describe('StreamDetailGeneralData unsaved changes prompt', () => {
       <StreamDetailGeneralData definition={definition} refreshDefinition={jest.fn()} data={data} />
     );
 
+    act(() => {
+      mockLifecycleSummaryProps?.onFlyoutOpenChange?.(mockFlyoutOpen);
+      mockLifecycleSummaryProps?.onFlyoutUnsavedChangesChange?.(mockFlyoutHasUnsavedChanges);
+    });
+
     await waitFor(() => {
       expect(getPromptHasUnsavedChanges()).toBe(false);
     });
@@ -133,6 +141,11 @@ describe('StreamDetailGeneralData unsaved changes prompt', () => {
     render(
       <StreamDetailGeneralData definition={definition} refreshDefinition={jest.fn()} data={data} />
     );
+
+    act(() => {
+      mockLifecycleSummaryProps?.onFlyoutOpenChange?.(mockFlyoutOpen);
+      mockLifecycleSummaryProps?.onFlyoutUnsavedChangesChange?.(mockFlyoutHasUnsavedChanges);
+    });
 
     await waitFor(() => {
       expect(getPromptHasUnsavedChanges()).toBe(true);
