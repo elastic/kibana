@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/scout-security'
   - '@kbn/core-saved-objects-server'
+  - '@kbn/security-plugin'
 tags:
   - plugin
   - prod
