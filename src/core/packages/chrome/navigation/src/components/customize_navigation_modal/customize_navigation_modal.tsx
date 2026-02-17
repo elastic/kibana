@@ -20,6 +20,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiIconTip,
   EuiSpacer,
   EuiTitle,
   euiDragDropReorder,
@@ -32,6 +33,7 @@ import type {
   NavigationCustomization,
 } from '@kbn/core-chrome-browser';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LockedItem } from './locked_item';
 import { DraggableItem } from './draggable_item';
@@ -188,7 +190,7 @@ export const CustomizeNavigationModal = ({
         <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="core.ui.chrome.sideNavigation.customizeNavigation.modalTitle"
-            defaultMessage="Customize Navigation"
+            defaultMessage="Customize navigation"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -216,14 +218,32 @@ export const CustomizeNavigationModal = ({
           {hiddenItems.length > 0 && (
             <>
               <EuiSpacer size="m" />
-              <EuiTitle size="xxs">
-                <h4>
-                  <FormattedMessage
-                    id="core.ui.chrome.sideNavigation.customizeNavigation.moreLabel"
-                    defaultMessage="Always under More"
+              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xs">
+                    <h4>
+                      <FormattedMessage
+                        id="core.ui.chrome.sideNavigation.customizeNavigation.moreLabel"
+                        defaultMessage="Always under More"
+                      />
+                    </h4>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    color="subdued"
+                    content={i18n.translate(
+                      'core.ui.chrome.sideNavigation.customizeNavigation.moreTooltip',
+                      {
+                        defaultMessage:
+                          'When there is not enough space on the screen, some items that are visible, might also go under More',
+                      }
+                    )}
+                    position="right"
+                    type="info"
                   />
-                </h4>
-              </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
               <EuiSpacer size="s" />
               <EuiDragDropContext onDragEnd={onHiddenDragEnd}>
                 <EuiDroppable droppableId="hidden-nav-items" spacing="none">
