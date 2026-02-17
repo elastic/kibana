@@ -43,7 +43,23 @@ import type {
 } from '../../../../../../../common/endpoint/types';
 import { SCRIPT_LIBRARY_LABELS } from '../../../translations';
 import { EndpointScriptEditItem } from './script_edit_item';
-import type { ScriptsLibraryUrlParams } from '../scripts_library_url_params';
+
+const LabelTooltipWithOptionalInput = memo(
+  ({ input, label, tooltip }: { label?: string; input?: React.ReactNode; tooltip: string }) => {
+    return (
+      <EuiFlexGroup alignItems="flexStart" gutterSize="xs" direction="row" responsive={false}>
+        <EuiFlexItem grow={false}>
+          {input ? input : label ? <EndpointScriptEditItem label={label} /> : null}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip content={tooltip} type="info" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
+
+LabelTooltipWithOptionalInput.displayName = 'LabelTooltipWithOptionalInput';
 
 const buildDraft = (
   item?: EndpointScript & { file?: File }
@@ -75,11 +91,10 @@ export interface EndpointScriptEditFormProps {
     isValid: boolean;
   }) => void;
   scriptItem?: EndpointScript & { file?: File };
-  show: Extract<Required<ScriptsLibraryUrlParams>['show'], 'edit' | 'create'>;
   'data-test-subj'?: string;
 }
 export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
-  ({ error: submitError, onChange, scriptItem, show, 'data-test-subj': dataTestSubj }) => {
+  ({ error: submitError, onChange, scriptItem, 'data-test-subj': dataTestSubj }) => {
     const { euiTheme } = useEuiTheme();
 
     const [draftScript, setDraftScript] = useState<
@@ -411,23 +426,18 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
         </EuiFormRow>
 
         {/* requires input */}
-        <EuiFormRow>
-          <EuiFlexGroup alignItems="flexStart" gutterSize="xs" direction="row" responsive={false}>
-            <EuiFlexItem grow={false}>
+        <EuiFormRow data-test-subj={getTestId('requires-input-row')}>
+          <LabelTooltipWithOptionalInput
+            input={
               <EuiCheckbox
                 id="scriptRequiresInputCheckbox"
                 label={SCRIPT_LIBRARY_LABELS.flyout.body.edit.requiresInput.label}
                 checked={scriptItem?.requiresInput}
                 onChange={onChangeRequiresInput}
               />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                content={SCRIPT_LIBRARY_LABELS.flyout.body.edit.requiresInput.tooltip}
-                type="info"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            }
+            tooltip={SCRIPT_LIBRARY_LABELS.flyout.body.edit.requiresInput.tooltip}
+          />
         </EuiFormRow>
 
         {/* tags */}
@@ -451,8 +461,9 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
         {/* path to executable */}
         <EuiFormRow
           label={
-            <EndpointScriptEditItem
+            <LabelTooltipWithOptionalInput
               label={SCRIPT_LIBRARY_LABELS.flyout.body.details.pathToExecutable.label}
+              tooltip={SCRIPT_LIBRARY_LABELS.flyout.body.edit.pathToExecutable.tooltip}
             />
           }
           labelAppend={labelAppend}

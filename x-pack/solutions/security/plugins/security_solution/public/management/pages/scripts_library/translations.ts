@@ -383,7 +383,14 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
           label: i18n.translate(
             'xpack.securitySolution.scriptsLibrary.table.flyout.body.pathToExecutableLabel',
             {
-              defaultMessage: 'Path to executable file',
+              defaultMessage: 'Path to executable file (only for archive files)',
+            }
+          ),
+          tooltip: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.pathToExecutableTooltip',
+            {
+              defaultMessage:
+                'Enter the relative path to the main script inside the archive (zip/rar). Example: /src/main.py',
             }
           ),
         },
