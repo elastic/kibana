@@ -15,7 +15,7 @@ import {
   getEntitiesAliasPattern,
 } from '../constants';
 import { getComponentTemplateName } from './component_templates';
-import { ALL_ENTITY_TYPES } from '../definitions/entity_schema';
+import { ALL_ENTITY_TYPES } from '../../../common/domain/definitions/entity_schema';
 
 // Mostly copied from x-pack/platform/plugins/shared/entity_manager/server/lib/entities/templates/entities_latest_template.ts
 

@@ -41,6 +41,7 @@ import {
   selectEditorYamlDocument,
   selectSchema,
   setCursorPosition,
+  setIsYamlSynced,
   setYamlString,
 } from '../../../entities/workflows/store';
 import {
@@ -153,6 +154,13 @@ export const WorkflowYAMLEditor = ({
   const onChange = useCallback(
     (yaml: string) => {
       dispatch(setYamlString(yaml));
+    },
+    [dispatch]
+  );
+
+  const onSyncStateChange = useCallback(
+    (isSynced: boolean) => {
+      dispatch(setIsYamlSynced(isSynced));
     },
     [dispatch]
   );
@@ -470,9 +478,6 @@ export const WorkflowYAMLEditor = ({
       if (isTriggerType(action.id)) {
         insertTriggerSnippet(model, yamlDocumentCurrent, action.id, editor);
       } else {
-        if (!yamlDocumentCurrent) {
-          return;
-        }
         insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);
       }
       closeActionsPopover();
@@ -493,6 +498,8 @@ export const WorkflowYAMLEditor = ({
       // as we intercepted the setModelMarkers method, we need to check if the call is from the current editor to avoid setting markers which could come from other editors
       const editorUri = editorRef.current?.getModel()?.uri;
       if (model.uri.path !== editorUri?.path) {
+        // skip setting markers for other editors
+        setModelMarkers.call(monaco.editor, model, owner, markers);
         return;
       }
       const transformedMarkers = transformMonacoMarkers(model, owner, markers);
@@ -584,10 +591,12 @@ export const WorkflowYAMLEditor = ({
           editorDidMount={handleEditorDidMount}
           editorWillUnmount={handleEditorWillUnmount}
           onChange={onChange}
+          onSyncStateChange={onSyncStateChange}
           options={options}
           schemas={schemas}
           value={workflowYaml}
           enableFindAction={true}
+          dataTestSubj="workflowYamlEditor"
         />
       </div>
       <div css={styles.validationErrorsContainer}>

@@ -29,8 +29,8 @@ import { getUICapabilities } from './client/helpers/capabilities';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 import { registerCaseFileKinds } from './files';
-import { registerInternalAttachments } from './internal_attachments';
-import { registerActions } from './components/visualizations/actions';
+import { registerInternalAttachments } from './components/attachments';
+import { registerActions } from './components/attachments/lens/actions';
 import type {
   CasesPublicSetup,
   CasesPublicStart,

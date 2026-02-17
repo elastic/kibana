@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 
-test.describe('Home page', { tag: ['@ess'] }, () => {
+test.describe('Home page', { tag: tags.stateful.classic }, () => {
   const { rangeFrom } = testData.PROFILING_TEST_DATES;
   const rangeTo = '2023-04-18T00:05:00.000Z';
 

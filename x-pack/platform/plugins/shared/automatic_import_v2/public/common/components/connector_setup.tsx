@@ -150,14 +150,11 @@ export const ConnectorSetup: React.FC<ConnectorSetupProps> = ({ onConnectorCreat
                             size="xl"
                             color="text"
                             type={getIconForActionType(actionType.id)}
-                            data-test-subj="connectorActionId"
                           />
                         </Suspense>
                       </EuiFlexItem>
                       <EuiFlexItem>
-                        <EuiText size="s" data-test-subj="connectorActionName">
-                          {actionType.name}
-                        </EuiText>
+                        <EuiText size="s">{actionType.name}</EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiPanel>

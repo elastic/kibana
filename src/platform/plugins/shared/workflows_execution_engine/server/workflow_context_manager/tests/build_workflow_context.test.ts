@@ -50,6 +50,64 @@ describe('buildWorkflowContext', () => {
     cancelRequested: false,
   };
 
+  describe('execution context', () => {
+    it('should include executedBy and triggeredBy in execution context', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        createdBy: 'user@example.com',
+        executedBy: 'user@example.com',
+        triggeredBy: 'manual',
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.execution.executedBy).toBe('user@example.com');
+      expect(context.execution.triggeredBy).toBe('manual');
+    });
+
+    it('should default to unknown when executedBy is undefined', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        createdBy: 'legacy-user',
+        executedBy: undefined,
+        triggeredBy: 'manual',
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.execution.executedBy).toBe('unknown');
+      expect(context.execution.triggeredBy).toBe('manual');
+    });
+
+    it('should handle undefined executedBy and triggeredBy', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        createdBy: 'system',
+        executedBy: undefined,
+        triggeredBy: undefined,
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.execution.executedBy).toBe('unknown');
+      expect(context.execution.triggeredBy).toBeUndefined();
+    });
+
+    it('should include triggeredBy as scheduled for automated executions', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        createdBy: 'system',
+        executedBy: 'system',
+        triggeredBy: 'scheduled',
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.execution.executedBy).toBe('system');
+      expect(context.execution.triggeredBy).toBe('scheduled');
+    });
+  });
+
   describe('input default values', () => {
     it('should merge default input values when inputs are not provided', () => {
       const workflowDefinition: WorkflowYaml = {

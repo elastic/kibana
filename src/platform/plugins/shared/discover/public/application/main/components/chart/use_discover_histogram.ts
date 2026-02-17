@@ -19,7 +19,7 @@ import {
   UnifiedHistogramFetchStatus,
   type UnifiedHistogramFetchParamsExternal,
 } from '@kbn/unified-histogram';
-import { isEqual, intersection } from 'lodash';
+import { intersection } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map, pairwise, startWith } from 'rxjs';
@@ -86,6 +86,7 @@ export const useDiscoverHistogram = (
    */
 
   const [unifiedHistogramApi, setUnifiedHistogramApi] = useState<UnifiedHistogramApi>();
+  const chartHidden = useAppStateSelector((state) => state.hideChart);
 
   /**
    * Sync Unified Histogram state with Discover state
@@ -95,42 +96,38 @@ export const useDiscoverHistogram = (
     const subscription = createUnifiedHistogramStateObservable(
       unifiedHistogramApi?.state$
     )?.subscribe((changes) => {
-      const { lensRequestAdapter, ...stateChanges } = changes;
-      const appState = stateContainer.getCurrentTab().appState;
-      const oldState = {
-        hideChart: appState.hideChart,
-      };
-      const newState = { ...oldState, ...stateChanges };
+      const { lensRequestAdapter, hideChart } = changes;
 
       if ('lensRequestAdapter' in changes) {
         inspectorAdapters.lensRequests = lensRequestAdapter;
       }
 
-      if (!isEqual(oldState, newState)) {
-        dispatch(updateAppState({ appState: newState }));
+      if (typeof hideChart === 'boolean') {
+        // `updateAppState`checks internally for value changes before dispatching any action
+        dispatch(
+          updateAppState({
+            appState: {
+              hideChart,
+            },
+          })
+        );
       }
     });
 
     return () => {
       subscription?.unsubscribe();
     };
-  }, [dispatch, inspectorAdapters, stateContainer, unifiedHistogramApi?.state$, updateAppState]);
+  }, [dispatch, inspectorAdapters, unifiedHistogramApi?.state$, updateAppState]);
 
   /**
    * Sync URL query params with Unified Histogram
    */
 
   useEffect(() => {
-    const subscription = createAppStateObservable(stateContainer.appState$).subscribe((changes) => {
-      if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
-        unifiedHistogramApi?.setChartHidden(changes.chartHidden);
-      }
-    });
-
-    return () => {
-      subscription?.unsubscribe();
-    };
-  }, [stateContainer.appState$, unifiedHistogramApi]);
+    if (unifiedHistogramApi && typeof chartHidden === 'boolean') {
+      unifiedHistogramApi.setChartHidden(chartHidden);
+    }
+  }, [chartHidden, unifiedHistogramApi]);
 
   /**
    * Total hits
@@ -212,7 +209,6 @@ export const useDiscoverHistogram = (
     return allFilters.length ? allFilters : EMPTY_FILTERS;
   }, [appFilters, globalFilters]);
 
-  const chartHidden = useAppStateSelector((state) => state.hideChart);
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
@@ -460,27 +456,6 @@ const createUnifiedHistogramStateObservable = (state$?: Observable<UnifiedHistog
 
       if (prev?.chartHidden !== curr.chartHidden) {
         changes.hideChart = curr.chartHidden;
-      }
-
-      return changes;
-    }),
-    filter((changes) => Object.keys(changes).length > 0)
-  );
-};
-
-const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
-  return state$.pipe(
-    startWith(undefined),
-    pairwise(),
-    map(([prev, curr]) => {
-      const changes: Partial<UnifiedHistogramState> = {};
-
-      if (!curr) {
-        return changes;
-      }
-
-      if (prev?.hideChart !== curr.hideChart) {
-        changes.chartHidden = curr.hideChart;
       }
 
       return changes;

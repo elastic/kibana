@@ -7,37 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { of, type Observable } from 'rxjs';
 import type {
   SidebarSetup,
   SidebarStart,
   SidebarApp,
   SidebarAppId,
+  SidebarContext,
 } from '@kbn/core-chrome-sidebar';
 import { SidebarRegistryService } from './sidebar_registry_service';
 import { SidebarStateService } from './sidebar_state_service';
-import { SidebarAppStateService } from './sidebar_app_state_service';
 import { StorageHelper } from './storage_helper';
+import { createLiveStore } from './create_live_store';
 import { bind, memoize } from './utils';
 
-/** Composite service for sidebar: registry, UI state, and app params */
+/** Composite service for sidebar: registry, UI state, and app state */
 export class SidebarService {
   readonly registry: SidebarRegistryService;
-  readonly appState: SidebarAppStateService;
   readonly state: SidebarStateService;
+  private readonly storage: StorageHelper;
 
   constructor(params: { basePath: string }) {
     this.registry = new SidebarRegistryService();
-
-    const appStateStorage = new StorageHelper(`${params.basePath}:core.chrome.sidebar.app`);
-    this.appState = new SidebarAppStateService(this.registry, appStateStorage);
+    this.storage = new StorageHelper(`${params.basePath}:core.chrome.sidebar.app`);
 
     const stateStorage = new StorageHelper(`${params.basePath}:core.chrome.sidebar.state`);
-    this.state = new SidebarStateService(this.registry, this.appState, stateStorage);
+    this.state = new SidebarStateService(this.registry, stateStorage);
   }
 
   setup(): SidebarSetup {
     return {
-      registerApp: this.registry.registerApp,
+      registerApp: (app) => {
+        const update = this.registry.registerApp(app);
+        return (appUpdate) => {
+          update(appUpdate);
+          if (this.state.getCurrentAppId() === app.appId && !this.registry.isOpenable(app.appId)) {
+            this.state.close();
+          }
+        };
+      },
     };
   }
 
@@ -61,17 +69,46 @@ export class SidebarService {
 
   @bind
   @memoize
-  private getApp<TParams = unknown>(appId: SidebarAppId): SidebarApp<TParams> {
-    return {
-      open: (params?: Partial<TParams>) => this.state.open(appId, params),
+  private getApp<TState = undefined, TActions = undefined>(
+    appId: SidebarAppId
+  ): SidebarApp<TState, TActions> {
+    const def = this.registry.getApp(appId);
+
+    const base = {
+      open: () => this.state.open(appId),
       close: () => {
         if (this.state.getCurrentAppId() === appId) {
           this.state.close();
         }
       },
-      setParams: (params: Partial<TParams>) => this.appState.setParams(appId, params),
-      getParams: () => this.appState.getParams(appId),
-      getParams$: () => this.appState.getParams$(appId),
+      getStatus: () => this.registry.getApp(appId).status,
+      getStatus$: () => this.registry.getStatus$(appId),
+    };
+
+    // Stateless app - return with undefined state methods
+    if (!def.store) {
+      const empty$ = of(undefined as TState);
+      return {
+        ...base,
+        actions: undefined as TActions,
+        getState: () => undefined as TState,
+        getState$: () => empty$,
+      };
+    }
+
+    // Stateful app - create live store
+    const context: SidebarContext = {
+      open: () => this.state.open(appId),
+      close: () => this.state.close(),
+      isCurrent: () => this.state.getCurrentAppId() === appId,
+    };
+    const live = createLiveStore(appId, def.store, this.storage, context);
+
+    return {
+      ...base,
+      actions: live.actions as TActions,
+      getState: () => live.getState() as TState,
+      getState$: () => live.getState$() as Observable<TState>,
     };
   }
 }
