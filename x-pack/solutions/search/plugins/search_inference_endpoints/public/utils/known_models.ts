@@ -15,77 +15,62 @@ export interface KnownModelGroup {
 
 export const KNOWN_MODEL_GROUPS: KnownModelGroup[] = [
   {
-    groupId: 'elser_model',
-    groupLabel: i18n.translate('xpack.searchInferenceEndpoints.knownModelGroups.elserModel.label', {
-      defaultMessage: 'Elastic Learned Sparse EncodeR (ELSER)',
+    groupId: 'elastic',
+    groupLabel: i18n.translate('xpack.searchInferenceEndpoints.knownModelGroups.elastic.label', {
+      defaultMessage: 'Elastic',
     }),
-    groupTest: (modelId: string) => modelId.toLowerCase().includes('elser_model'),
+    groupTest: (modelId: string) => {
+      const normalizedModelId = modelId.toLowerCase();
+      return (
+        normalizedModelId.includes('elser_model') ||
+        normalizedModelId.includes('jina') ||
+        normalizedModelId.includes('rainbow-sprinkles') ||
+        normalizedModelId.includes('.rerank-v1')
+      );
+    },
   },
   {
-    groupId: 'anthropic-claude',
-    groupLabel: i18n.translate(
-      'xpack.searchInferenceEndpoints.knownModelGroups.anthropicClaude.label',
-      {
-        defaultMessage: 'Anthropic Claude',
-      }
-    ),
-    groupTest: (modelId: string) => modelId.toLowerCase().includes('claude'),
-  },
-  {
-    groupId: 'google-gemini',
-    groupLabel: i18n.translate(
-      'xpack.searchInferenceEndpoints.knownModelGroups.googleGemini.label',
-      {
-        defaultMessage: 'Google Gemini',
-      }
-    ),
-    groupTest: (modelId: string) => modelId.toLowerCase().includes('google-gemini'),
-  },
-  {
-    groupId: 'jina',
-    groupLabel: i18n.translate('xpack.searchInferenceEndpoints.knownModelGroups.jina.label', {
-      defaultMessage: 'Jina AI',
+    groupId: 'anthropic',
+    groupLabel: i18n.translate('xpack.searchInferenceEndpoints.knownModelGroups.anthropic.label', {
+      defaultMessage: 'Anthropic',
     }),
-    groupTest: (modelId: string) => modelId.toLowerCase().includes('jina'),
+    groupTest: (modelId: string) => {
+      const normalizedModelId = modelId.toLowerCase();
+      return normalizedModelId.includes('claude') || normalizedModelId.includes('anthropic');
+    },
   },
   {
-    groupId: 'openai-gpt',
-    groupLabel: i18n.translate('xpack.searchInferenceEndpoints.knownModelGroups.openAIGPT.label', {
-      defaultMessage: 'OpenAI GPT',
+    groupId: 'google',
+    groupLabel: i18n.translate('xpack.searchInferenceEndpoints.knownModelGroups.google.label', {
+      defaultMessage: 'Google',
     }),
-    groupTest: (modelId: string) => modelId.toLowerCase().includes('openai-gpt'),
+    groupTest: (modelId: string) => {
+      const normalizedModelId = modelId.toLowerCase();
+      return (
+        normalizedModelId.includes('google-gemini') ||
+        normalizedModelId.includes('google') ||
+        normalizedModelId.includes('gemini')
+      );
+    },
   },
   {
-    groupId: 'openai-text-embedding',
-    groupLabel: i18n.translate('xpack.searchInferenceEndpoints.knownModelGroups.openAIText.label', {
-      defaultMessage: 'OpenAI Text Embedding',
+    groupId: 'openai',
+    groupLabel: i18n.translate('xpack.searchInferenceEndpoints.knownModelGroups.openAI.label', {
+      defaultMessage: 'OpenAI',
     }),
-    groupTest: (modelId: string) => modelId.toLowerCase().includes('openai-text-embedding'),
-  },
-  {
-    groupId: 'rainbow-sprinkles',
-    groupLabel: i18n.translate(
-      'xpack.searchInferenceEndpoints.knownModelGroups.elasticRainbowSprinkles.label',
-      {
-        defaultMessage: 'Elastic Inference Service',
-      }
-    ),
-    groupTest: (modelId: string) => modelId.toLowerCase().includes('rainbow-sprinkles'),
-  },
-  {
-    groupId: '.rerank-v1',
-    groupLabel: i18n.translate(
-      'xpack.searchInferenceEndpoints.knownModelGroups.elasticRerank.label',
-      {
-        defaultMessage: 'Elastic Rerank v1',
-      }
-    ),
-    groupTest: (modelId: string) => modelId.toLowerCase().includes('.rerank-v1'),
+    groupTest: (modelId: string) => {
+      const normalizedModelId = modelId.toLowerCase();
+      return (
+        normalizedModelId.includes('openai-gpt') ||
+        normalizedModelId.includes('openai-text-embedding') ||
+        normalizedModelId.includes('openai')
+      );
+    },
   },
   {
     groupId: 'multilingual-e5',
     groupLabel: i18n.translate('xpack.searchInferenceEndpoints.knownModelGroups.e5.label', {
-      defaultMessage: 'E5',
+      defaultMessage: 'Multilingual E5',
     }),
     groupTest: (modelId: string) => modelId.toLowerCase().includes('multilingual-e5'),
   },

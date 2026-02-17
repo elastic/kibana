@@ -3,30 +3,7 @@
 exports[`useGroupedData should group endpoints by model_id 1`] = `
 Object {
   "data": Object {
-    ".rerank-v1": Object {
-      "endpoints": Array [
-        Object {
-          "inference_id": ".rerank-v1-elasticsearch",
-          "service": "elasticsearch",
-          "service_settings": Object {
-            "adaptive_allocations": Object {
-              "enabled": true,
-              "max_number_of_allocations": 32,
-              "min_number_of_allocations": 0,
-            },
-            "model_id": ".rerank-v1",
-            "num_threads": 1,
-          },
-          "task_settings": Object {
-            "return_documents": true,
-          },
-          "task_type": "rerank",
-        },
-      ],
-      "groupId": ".rerank-v1",
-      "groupLabel": "Elastic Rerank v1",
-    },
-    "anthropic-claude": Object {
+    "anthropic": Object {
       "endpoints": Array [
         Object {
           "inference_id": ".anthropic-claude-3.7-sonnet-chat_completion",
@@ -61,10 +38,10 @@ Object {
           "task_type": "completion",
         },
       ],
-      "groupId": "anthropic-claude",
-      "groupLabel": "Anthropic Claude",
+      "groupId": "anthropic",
+      "groupLabel": "Anthropic",
     },
-    "elser_model": Object {
+    "elastic": Object {
       "endpoints": Array [
         Object {
           "chunking_settings": Object {
@@ -98,11 +75,67 @@ Object {
           },
           "task_type": "sparse_embedding",
         },
+        Object {
+          "chunking_settings": Object {
+            "max_chunk_size": 250,
+            "sentence_overlap": 1,
+            "strategy": "sentence",
+          },
+          "inference_id": ".jina-embeddings-v3",
+          "service": "elastic",
+          "service_settings": Object {
+            "dimensions": 1024,
+            "model_id": "jina-embeddings-v3",
+            "similarity": "cosine",
+          },
+          "task_type": "text_embedding",
+        },
+        Object {
+          "inference_id": ".jina-reranker-v2-base-multilingual",
+          "service": "elastic",
+          "service_settings": Object {
+            "model_id": "jina-reranker-v2-base-multilingual",
+          },
+          "task_type": "rerank",
+        },
+        Object {
+          "inference_id": ".jina-reranker-v3",
+          "service": "elastic",
+          "service_settings": Object {
+            "model_id": "jina-reranker-v3",
+          },
+          "task_type": "rerank",
+        },
+        Object {
+          "inference_id": ".rainbow-sprinkles-elastic",
+          "service": "elastic",
+          "service_settings": Object {
+            "model_id": "rainbow-sprinkles",
+          },
+          "task_type": "chat_completion",
+        },
+        Object {
+          "inference_id": ".rerank-v1-elasticsearch",
+          "service": "elasticsearch",
+          "service_settings": Object {
+            "adaptive_allocations": Object {
+              "enabled": true,
+              "max_number_of_allocations": 32,
+              "min_number_of_allocations": 0,
+            },
+            "model_id": ".rerank-v1",
+            "num_threads": 1,
+          },
+          "task_settings": Object {
+            "return_documents": true,
+          },
+          "task_type": "rerank",
+        },
       ],
-      "groupId": "elser_model",
-      "groupLabel": "Elastic Learned Sparse EncodeR (ELSER)",
+      "groupId": "elastic",
+      "groupLabel": "Elastic",
     },
-    "google-gemini": Object {
+    "google": Object {
       "endpoints": Array [
         Object {
           "inference_id": ".google-gemini-2.5-flash-chat_completion",
@@ -152,8 +185,8 @@ Object {
           "task_type": "text_embedding",
         },
       ],
-      "groupId": "google-gemini",
-      "groupLabel": "Google Gemini",
+      "groupId": "google",
+      "groupLabel": "Google",
     },
     "gp-llm-v2": Object {
       "endpoints": Array [
@@ -176,43 +209,6 @@ Object {
       ],
       "groupId": "gp-llm-v2",
       "groupLabel": "gp-llm-v2",
-    },
-    "jina": Object {
-      "endpoints": Array [
-        Object {
-          "chunking_settings": Object {
-            "max_chunk_size": 250,
-            "sentence_overlap": 1,
-            "strategy": "sentence",
-          },
-          "inference_id": ".jina-embeddings-v3",
-          "service": "elastic",
-          "service_settings": Object {
-            "dimensions": 1024,
-            "model_id": "jina-embeddings-v3",
-            "similarity": "cosine",
-          },
-          "task_type": "text_embedding",
-        },
-        Object {
-          "inference_id": ".jina-reranker-v2-base-multilingual",
-          "service": "elastic",
-          "service_settings": Object {
-            "model_id": "jina-reranker-v2-base-multilingual",
-          },
-          "task_type": "rerank",
-        },
-        Object {
-          "inference_id": ".jina-reranker-v3",
-          "service": "elastic",
-          "service_settings": Object {
-            "model_id": "jina-reranker-v3",
-          },
-          "task_type": "rerank",
-        },
-      ],
-      "groupId": "jina",
-      "groupLabel": "Jina AI",
     },
     "multilingual-e5": Object {
       "endpoints": Array [
@@ -237,9 +233,9 @@ Object {
         },
       ],
       "groupId": "multilingual-e5",
-      "groupLabel": "E5",
+      "groupLabel": "Multilingual E5",
     },
-    "openai-gpt": Object {
+    "openai": Object {
       "endpoints": Array [
         Object {
           "inference_id": ".openai-gpt-4.1-chat_completion",
@@ -305,12 +301,6 @@ Object {
           },
           "task_type": "completion",
         },
-      ],
-      "groupId": "openai-gpt",
-      "groupLabel": "OpenAI GPT",
-    },
-    "openai-text-embedding": Object {
-      "endpoints": Array [
         Object {
           "chunking_settings": Object {
             "max_chunk_size": 250,
@@ -342,22 +332,8 @@ Object {
           "task_type": "text_embedding",
         },
       ],
-      "groupId": "openai-text-embedding",
-      "groupLabel": "OpenAI Text Embedding",
-    },
-    "rainbow-sprinkles": Object {
-      "endpoints": Array [
-        Object {
-          "inference_id": ".rainbow-sprinkles-elastic",
-          "service": "elastic",
-          "service_settings": Object {
-            "model_id": "rainbow-sprinkles",
-          },
-          "task_type": "chat_completion",
-        },
-      ],
-      "groupId": "rainbow-sprinkles",
-      "groupLabel": "Elastic Inference Service",
+      "groupId": "openai",
+      "groupLabel": "OpenAI",
     },
     "unknown_model": Object {
       "endpoints": Array [

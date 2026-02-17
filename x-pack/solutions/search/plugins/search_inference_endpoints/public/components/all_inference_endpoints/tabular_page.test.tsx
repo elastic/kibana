@@ -325,9 +325,9 @@ describe('When the tabular page is loaded', () => {
 
     it('should display accordions with tables for model groups', () => {
       const groupAccordions = screen.getAllByTestId(/-accordion$/);
-      expect(groupAccordions).toHaveLength(7);
+      expect(groupAccordions).toHaveLength(5);
       const groupTables = screen.getAllByTestId(/-table$/);
-      expect(groupTables).toHaveLength(7);
+      expect(groupTables).toHaveLength(5);
     });
 
     it('should have expected endpoint table columns', () => {
@@ -344,9 +344,9 @@ describe('When the tabular page is loaded', () => {
     it('should show expected group labels and endpoint counts', () => {
       const expectedGroups = [
         {
-          groupId: 'elser_model',
-          label: 'Elastic Learned Sparse EncodeR (ELSER)',
-          countLabel: '4 endpoints',
+          groupId: 'elastic',
+          label: 'Elastic',
+          countLabel: '6 endpoints',
         },
         {
           groupId: '.own_model',
@@ -355,17 +355,7 @@ describe('When the tabular page is loaded', () => {
         },
         {
           groupId: 'multilingual-e5',
-          label: 'E5',
-          countLabel: '1 endpoint',
-        },
-        {
-          groupId: '.rerank-v1',
-          label: 'Elastic Rerank v1',
-          countLabel: '1 endpoint',
-        },
-        {
-          groupId: 'rainbow-sprinkles',
-          label: 'Elastic Inference Service',
+          label: 'Multilingual E5',
           countLabel: '1 endpoint',
         },
         {
@@ -396,7 +386,7 @@ describe('When the tabular page is loaded', () => {
     });
 
     it('should disable delete action for preconfigured endpoints in grouped tables', () => {
-      const elserTable = screen.getByTestId('elser_model-table');
+      const elserTable = screen.getByTestId('elastic-table');
 
       const preconfiguredRow = within(elserTable).getByText('.elser-2-elastic').closest('tr');
 
@@ -414,7 +404,7 @@ describe('When the tabular page is loaded', () => {
     });
 
     it('should enable delete action for user-defined endpoints in grouped tables', () => {
-      const elserTable = screen.getByTestId('elser_model-table');
+      const elserTable = screen.getByTestId('elastic-table');
 
       const userDefinedRow = within(elserTable).getByText('custom-inference-id').closest('tr');
 

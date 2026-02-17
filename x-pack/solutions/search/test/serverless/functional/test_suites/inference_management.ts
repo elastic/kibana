@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           );
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByViewToBeDisplayed();
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByTable(
-            'elser_model'
+            'elastic'
           );
         });
         it('can switch to group by none', async () => {
@@ -51,7 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('can collapse group accordions', async () => {
-          const modelGroup = 'elser_model';
+          const modelGroup = 'elastic';
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByViewToBeDisplayed();
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByAccordionsToBeOpen(
             modelGroup
