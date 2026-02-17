@@ -70,6 +70,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
       // Pre-select sources that are already in the query
       setSelectedItems(selectedSources);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   useEffect(() => {
