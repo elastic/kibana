@@ -34,7 +34,7 @@ Analyze this data stream and determine if an ingest pipeline is needed. Use an *
 ```
 {{{parsing_processor}}}
 ```
-**Important:** The dataset analysis below shows documents AFTER this processor runs. But `simulate_pipeline` runs against ORIGINAL raw documents - so you MUST include this processor (or a modified version) as the first step in your pipeline to get the extracted fields. Add processors after it for date normalization, type conversions, and cleanup.
+**Important:** When a parsing processor is provided, the system has already determined that this data needs parsing. You MUST NOT commit an empty pipeline — use this processor (or a modified version) as the first step, then add date normalization, type conversions, and cleanup. The dataset analysis below shows documents AFTER this processor runs; `simulate_pipeline` runs against ORIGINAL raw documents, so include the parsing step to get the extracted fields.
 {{/parsing_processor}}
 
 {{^parsing_processor}}
