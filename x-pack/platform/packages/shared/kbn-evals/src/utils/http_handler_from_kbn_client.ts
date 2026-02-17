@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { HttpFetchOptions, HttpFetchOptionsWithPath, HttpHandler } from '@kbn/core/public';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { KbnClient } from '@kbn/test';
 import { KbnClientRequesterError } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -32,7 +33,8 @@ export function httpHandlerFromKbnClient({
     const options: HttpFetchOptionsWithPath =
       typeof args[0] === 'string' ? { path: args[0], ...(args[1] as any) } : args[0];
 
-    const { method = 'GET', body, asResponse, rawResponse, query, signal, headers } = options;
+    const { method = 'GET', body, asResponse, rawResponse, query, signal, headers, version } =
+      options;
 
     // Add a W3C baggage entry so Kibana can tag OTEL spans with the eval run id.
     // This enables correlating traces (traces-*) with eval score docs (kibana-evaluations*) via run_id.
@@ -48,6 +50,13 @@ export function httpHandlerFromKbnClient({
 
       const merged = existing ? `${existing},${baggageEntry}` : baggageEntry;
       nextHeaders[existingKey ?? 'baggage'] = merged;
+    }
+
+    if (version) {
+      const existingVersionHeader = Object.keys(nextHeaders).find(
+        (k) => k.toLowerCase() === ELASTIC_HTTP_VERSION_HEADER
+      );
+      nextHeaders[existingVersionHeader ?? ELASTIC_HTTP_VERSION_HEADER] = version;
     }
 
     const finalHeaders = Object.keys(nextHeaders).length ? nextHeaders : undefined;
