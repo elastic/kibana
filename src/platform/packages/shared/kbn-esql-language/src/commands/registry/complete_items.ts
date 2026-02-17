@@ -627,9 +627,6 @@ export function createResourceBrowserSuggestion(options: {
 }
 
 export function createIndicesBrowserSuggestion(
-  rangeToReplace?: { start: number; end: number },
-  filterText?: string,
-  insertText?: string,
   commandArgs?: Record<string, string>
 ): ISuggestionItem {
   return createResourceBrowserSuggestion({
@@ -643,9 +640,6 @@ export function createIndicesBrowserSuggestion(
       }
     ),
     commandId: 'esql.indicesBrowser.open',
-    rangeToReplace,
-    filterText,
-    insertText,
     commandArgs,
   });
 }
