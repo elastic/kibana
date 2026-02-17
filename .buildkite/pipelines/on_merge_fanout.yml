@@ -428,7 +428,7 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     timeout_in_minutes: 60
     depends_on: *on_merge_gates
-    parallelism: 20
+    parallelism: 22
     retry:
       automatic:
         - exit_status: '-1'
