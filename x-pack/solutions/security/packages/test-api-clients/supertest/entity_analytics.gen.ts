@@ -193,7 +193,7 @@ If a record already exists for the specified entity, that record is overwritten 
   },
   createWatchlist(props: CreateWatchlistProps, kibanaSpace: string = 'default') {
     return supertest
-      .post(getRouteUrlForSpace('/api/entity_analytics/watchlists', kibanaSpace))
+      .post(getRouteUrlForSpace('/api/entity_analytics/watchlists/management', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2026-01-28')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -427,7 +427,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
     return supertest
       .get(
         getRouteUrlForSpace(
-          replaceParams('/api/entity_analytics/watchlists/{id}', props.params),
+          replaceParams('/api/entity_analytics/watchlists/management/{id}', props.params),
           kibanaSpace
         )
       )
@@ -528,7 +528,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
   },
   listWatchlists(kibanaSpace: string = 'default') {
     return supertest
-      .get(getRouteUrlForSpace('/api/entity_analytics/watchlists/list', kibanaSpace))
+      .get(getRouteUrlForSpace('/api/entity_analytics/watchlists/management/list', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2026-01-28')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -686,7 +686,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
     return supertest
       .put(
         getRouteUrlForSpace(
-          replaceParams('/api/entity_analytics/watchlists/{id}', props.params),
+          replaceParams('/api/entity_analytics/watchlists/management/{id}', props.params),
           kibanaSpace
         )
       )

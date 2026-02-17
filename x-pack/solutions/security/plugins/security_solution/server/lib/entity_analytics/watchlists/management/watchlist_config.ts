@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  Logger,
+  SavedObject,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { SetOptional } from 'type-fest';
 import type { WatchlistObject } from '../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 import { getIndexForWatchlist } from '../entities/utils';
@@ -21,7 +26,27 @@ interface WatchlistConfigClientDeps {
   logger: Logger;
 }
 
-type WatchlistSavedObjectAttributes = Omit<WatchlistObject, 'createdAt' | 'updatedAt'>;
+type WatchlistSavedObjectAttributes = Omit<WatchlistObject, 'id' | 'createdAt' | 'updatedAt'>;
+type WatchlistUpdateAttrs = Partial<WatchlistSavedObjectAttributes>;
+
+const omitWatchlistMeta = (
+  watchlist: Partial<WatchlistObject>
+): Partial<WatchlistSavedObjectAttributes> => {
+  const {
+    id: _ignoredId,
+    createdAt: _ignoredCreatedAt,
+    updatedAt: _ignoredUpdatedAt,
+    ...attrs
+  } = watchlist;
+  return attrs;
+};
+
+const toWatchlistObject = (so: SavedObject<WatchlistSavedObjectAttributes>): WatchlistObject => ({
+  ...so.attributes,
+  id: so.id,
+  createdAt: so.created_at,
+  updatedAt: so.updated_at,
+});
 
 export class WatchlistConfigClient {
   constructor(private readonly deps: WatchlistConfigClientDeps) {}
@@ -29,12 +54,11 @@ export class WatchlistConfigClient {
   async create(
     attrs: SetOptional<WatchlistSavedObjectAttributes, 'managed'>
   ): Promise<WatchlistObject> {
-    const { attributes, created_at, updated_at, id } =
-      await this.deps.soClient.create<WatchlistSavedObjectAttributes>(
-        watchlistConfigTypeName,
-        { ...attrs, managed: attrs.managed ?? false },
-        { refresh: 'wait_for' }
-      );
+    const so = await this.deps.soClient.create<WatchlistSavedObjectAttributes>(
+      watchlistConfigTypeName,
+      { ...attrs, managed: attrs.managed ?? false },
+      { refresh: 'wait_for' }
+    );
 
     await createOrUpdateIndex({
       esClient: this.deps.esClient,
@@ -44,22 +68,16 @@ export class WatchlistConfigClient {
       },
     });
 
-    return {
-      ...attributes,
-      id,
-      createdAt: created_at,
-      updatedAt: updated_at,
-    };
+    return toWatchlistObject(so);
   }
 
-  async update(
-    id: string,
-    attrs: Partial<Omit<WatchlistSavedObjectAttributes, 'createdAt' | 'updatedAt'>>
-  ): Promise<WatchlistObject> {
+  async update(id: string, attrs: WatchlistUpdateAttrs): Promise<WatchlistObject> {
     const existing = await this.get(id);
-    const update: Partial<WatchlistObject> = {
-      ...existing,
-      ...attrs,
+    const existingAttrs = omitWatchlistMeta(existing);
+    const attrsNoMeta = omitWatchlistMeta(attrs);
+    const update: Partial<WatchlistSavedObjectAttributes> = {
+      ...existingAttrs,
+      ...attrsNoMeta,
     };
     await this.deps.soClient.update<WatchlistSavedObjectAttributes>(
       watchlistConfigTypeName,
@@ -79,19 +97,17 @@ export class WatchlistConfigClient {
       })
 
       .then((response) => {
-        return response.saved_objects.map((so) => ({
-          ...so.attributes,
-          id: so.id,
-          createdAt: so.created_at,
-          updatedAt: so.updated_at,
-        }));
+        return response.saved_objects.map((so) => toWatchlistObject(so));
       });
   }
 
   async get(id: string) {
     try {
-      const so = await this.deps.soClient.get<WatchlistObject>(watchlistConfigTypeName, id);
-      return so.attributes;
+      const so = await this.deps.soClient.get<WatchlistSavedObjectAttributes>(
+        watchlistConfigTypeName,
+        id
+      );
+      return toWatchlistObject(so);
     } catch (e) {
       if (e.output && e.output.statusCode === 404) {
         throw new Error(`Watchlist config '${id}' not found`);
