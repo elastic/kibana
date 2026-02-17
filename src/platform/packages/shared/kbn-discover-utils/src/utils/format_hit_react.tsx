@@ -157,7 +157,7 @@ export function formatHitReact(
   // off additional fields and instead show a summary how many more field exists.
   if (totalLength > maxEntries) {
     renderedPairs.push([
-      i18n.translate('discoverUtils.formatHit.moreFields', {
+      i18n.translate('discover.formatHit.moreFields', {
         defaultMessage: 'and {count} more {count, plural, one {field} other {fields}}',
         values: { count: totalLength - maxEntries },
       }),
