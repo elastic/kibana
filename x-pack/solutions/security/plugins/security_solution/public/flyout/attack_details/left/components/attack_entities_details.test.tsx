@@ -41,7 +41,7 @@ jest.mock('../../../document_details/left/components/user_details', () => ({
       data-timestamp={timestamp}
       data-scope-id={scopeId}
     >
-      UserDetails: {userName}
+      {'UserDetails:'} {userName}
     </div>
   ),
 }));
@@ -62,7 +62,7 @@ jest.mock('../../../document_details/left/components/host_details', () => ({
       data-timestamp={timestamp}
       data-scope-id={scopeId}
     >
-      HostDetails: {hostName}
+      {'HostDetails:'} {hostName}
     </div>
   ),
 }));
