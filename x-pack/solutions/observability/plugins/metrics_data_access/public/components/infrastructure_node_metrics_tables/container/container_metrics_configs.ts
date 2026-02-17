@@ -43,7 +43,7 @@ type ContainerMetricsFieldSemconvDocker =
 
 const containerMetricsQueryConfigSemconvDocker: MetricsQueryOptions<ContainerMetricsFieldSemconvDocker> =
   {
-    sourceFilter: 'dockerstatsreceiver.otel',
+    sourceFilter: 'event.dataset: "dockerstatsreceiver.otel"',
     groupByField: 'container.id',
     metricsMap: {
       [SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION]: {
@@ -64,7 +64,7 @@ type ContainerMetricsFieldSemconvK8s =
 
 const containerMetricsQueryConfigSemconvK8s: MetricsQueryOptions<ContainerMetricsFieldSemconvK8s> =
   {
-    sourceFilter: 'kubeletstatsreceiver.otel',
+    sourceFilter: 'event.dataset: "kubeletstatsreceiver.otel"',
     groupByField: 'container.id',
     metricsMap: {
       [SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION]: {

@@ -23,6 +23,7 @@ import {
   NumberCell,
   StepwisePagination,
 } from '../shared';
+
 import type { ContainerNodeMetricsRow } from './use_container_metrics_table';
 
 export interface ContainerMetricsTableProps {
