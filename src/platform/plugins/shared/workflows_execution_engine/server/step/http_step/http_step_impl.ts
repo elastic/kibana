@@ -17,6 +17,7 @@ import type { HttpGraphNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { z } from '@kbn/zod/v4';
 import type { UrlValidator } from '../../lib/url_validator';
+import { ResponseSizeLimitError } from '../errors';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
@@ -112,11 +113,16 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
       tags: ['http', method.toLowerCase()],
     });
 
+    const maxResponseSize = this.getMaxResponseSize();
     const config: AxiosRequestConfig = {
       url,
       method,
       headers,
       signal: this.stepExecutionRuntime.abortController.signal,
+      ...(maxResponseSize > 0 && {
+        maxContentLength: maxResponseSize,
+        maxBodyLength: maxResponseSize,
+      }),
       ...(body && { data: body }),
     };
 
@@ -196,6 +202,11 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
   }
 
   private mapAxiosError(error: AxiosError): ExecutionError {
+    // Detect maxContentLength / maxBodyLength exceeded (mid-stream abort by axios)
+    if (error.message && error.message.includes('maxContentLength')) {
+      return new ResponseSizeLimitError(-1, this.getMaxResponseSize(), this.step.name);
+    }
+
     if (error.code === 'ECONNREFUSED') {
       const url = new URL(this.step.with.url);
       return new ExecutionError({

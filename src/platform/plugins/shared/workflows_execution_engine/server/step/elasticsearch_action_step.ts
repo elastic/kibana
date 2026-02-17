@@ -11,9 +11,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any,  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { buildElasticsearchRequest } from '@kbn/workflows';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
+import { ResponseSizeLimitError } from './errors';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -78,6 +80,25 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
       const stepType = (this.step as any).configuration?.type || this.step.type;
       const stepWith = withInputs || this.step.with || (this.step as any).configuration?.with;
 
+      // Map ES transport maxResponseSize exceeded to our ResponseSizeLimitError
+      if (isMaximumResponseSizeExceededError(error)) {
+        const sizeLimitError = new ResponseSizeLimitError(
+          -1,
+          this.getMaxResponseSize(),
+          this.step.name
+        );
+        this.workflowLogger.logError(
+          `Elasticsearch action response size exceeded: ${stepType}`,
+          sizeLimitError,
+          {
+            event: { action: 'elasticsearch-action', outcome: 'failure' },
+            tags: ['elasticsearch', 'internal-action', 'error', 'response-size-exceeded'],
+            labels: { step_type: stepType, action_type: 'elasticsearch' },
+          }
+        );
+        return { input: stepWith, output: undefined, error: sizeLimitError };
+      }
+
       this.workflowLogger.logError(`Elasticsearch action failed: ${stepType}`, error, {
         event: { action: 'elasticsearch-action', outcome: 'failure' },
         tags: ['elasticsearch', 'internal-action', 'error'],
@@ -96,15 +117,21 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
     stepType: string,
     params: any
   ): Promise<any> {
+    const maxResponseSize = this.getMaxResponseSize();
+    const transportOptions = maxResponseSize > 0 ? { maxResponseSize } : {};
+
     // Support both raw API format and connector-driven syntax
     if (params.request) {
       // Raw API format: { request: { method, path, body } } - like Dev Console
       const { method = 'GET', path, body } = params.request;
-      return esClient.transport.request({ method, path, body });
+      return esClient.transport.request({ method, path, body }, transportOptions);
     } else if (stepType === 'elasticsearch.request') {
       // Special case: elasticsearch.request type uses raw API format at top level
       const { method = 'GET', path, body, headers } = params;
-      return esClient.transport.request({ method, path, body }, headers ? { headers } : {});
+      return esClient.transport.request(
+        { method, path, body },
+        { ...transportOptions, ...(headers ? { headers } : {}) }
+      );
     } else {
       // Use generated connector definitions to determine method and path (covers all 568+ ES APIs)
       const {
@@ -129,7 +156,7 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
         bulkBody,
       };
 
-      return esClient.transport.request(requestOptions);
+      return esClient.transport.request(requestOptions, transportOptions);
     }
   }
 }

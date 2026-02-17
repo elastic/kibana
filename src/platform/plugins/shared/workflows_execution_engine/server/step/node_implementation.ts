@@ -18,6 +18,7 @@ import { ExecutionError } from '@kbn/workflows/server';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import { ResponseSizeLimitError, parseByteSize, safeOutputSize } from './errors';
 
 export interface RunStepResult {
   input: any;
@@ -33,6 +34,7 @@ export interface BaseStep {
   if?: string;
   foreach?: string;
   timeout?: number;
+  'max-step-size'?: string;
   spaceId: string;
 }
 
@@ -121,6 +123,20 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       this.stepExecutionRuntime.setInput(input);
       const result = await this._run(input);
 
+      // Layer 2: Enforce output size limit before storing in execution state.
+      // This is the generic catch-all that protects every step type against context growth.
+      // Layer 1 (pre-emptive I/O enforcement) may have already caught this at the transport level.
+      if (result.output != null && !result.error) {
+        const maxBytes = this.getMaxResponseSize();
+        if (maxBytes > 0) {
+          const outputSize = safeOutputSize(result.output);
+          // outputSize === -1 means non-serializable (stream, circular ref) -- skip check
+          if (outputSize > 0 && outputSize > maxBytes) {
+            throw new ResponseSizeLimitError(outputSize, maxBytes, this.step.name);
+          }
+        }
+      }
+
       // Don't update step execution runtime if abort was initiated
       if (this.stepExecutionRuntime.abortController.signal.aborted) {
         if (stepSpan) {
@@ -161,6 +177,40 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
   // Subclasses implement this to execute the step logic
   protected abstract _run(input?: any): Promise<RunStepResult>;
+
+  /**
+   * Resolves the maximum response size for this step in bytes.
+   * Resolution order: step-level > workflow settings > plugin config > hardcoded default (10mb).
+   * Subclasses use this for both Layer 1 (pre-emptive I/O enforcement) and Layer 2 (output guard).
+   */
+  protected getMaxResponseSize(): number {
+    // 1. Step-level override (from YAML)
+    const stepLimit = this.step['max-step-size'];
+    if (stepLimit) {
+      return parseByteSize(stepLimit);
+    }
+
+    // 2. Workflow-level override (from YAML settings)
+    const workflowSettings = this.stepExecutionRuntime.contextManager.getContext().workflow
+      .settings;
+    const workflowLimit = workflowSettings?.['max-step-size'];
+    if (workflowLimit) {
+      return parseByteSize(workflowLimit);
+    }
+
+    // 3. Plugin config default (from kibana.yml)
+    const pluginConfig = this.stepExecutionRuntime.contextManager.getDependencies().config;
+    if (pluginConfig?.maxResponseSize) {
+      const configValue = pluginConfig.maxResponseSize;
+      // schema.byteSize() returns a ByteSizeValue object with getValueInBytes()
+      return typeof configValue === 'number'
+        ? configValue
+        : (configValue as any).getValueInBytes();
+    }
+
+    // 4. Hardcoded fallback
+    return parseByteSize('10mb');
+  }
 
   // Helper for handling on-failure, retries, etc.
   protected handleFailure(input: any, error: any): RunStepResult {

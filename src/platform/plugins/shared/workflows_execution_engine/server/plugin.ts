@@ -141,6 +141,7 @@ export class WorkflowsExecutionEnginePlugin
                 actions: pluginsStart.actions,
                 taskManager: pluginsStart.taskManager,
                 workflowsExtensions: pluginsStart.workflowsExtensions,
+                config,
               };
 
               await runWorkflow({
@@ -215,6 +216,7 @@ export class WorkflowsExecutionEnginePlugin
                 actions: pluginsStart.actions,
                 taskManager: pluginsStart.taskManager,
                 workflowsExtensions: pluginsStart.workflowsExtensions,
+                config,
               };
 
               await resumeWorkflow({
@@ -299,6 +301,7 @@ export class WorkflowsExecutionEnginePlugin
                 actions: pluginsStart.actions,
                 taskManager: pluginsStart.taskManager,
                 workflowsExtensions: pluginsStart.workflowsExtensions,
+                config,
               };
               const esClient = coreStart.elasticsearch.client.asInternalUser;
 
@@ -468,6 +471,7 @@ export class WorkflowsExecutionEnginePlugin
       actions: plugins.actions,
       taskManager: plugins.taskManager,
       workflowsExtensions: plugins.workflowsExtensions,
+      config: this.config,
     };
 
     // Helper function to create and persist a workflow execution

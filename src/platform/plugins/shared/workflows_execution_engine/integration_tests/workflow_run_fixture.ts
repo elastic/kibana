@@ -52,7 +52,9 @@ export class WorkflowRunFixture {
     http: {
       allowedHosts: ['*'],
     },
-  } as WorkflowsExecutionEngineConfig;
+    maxResponseSize: { getValueInBytes: () => 10 * 1024 * 1024 }, // 10mb default
+    collectQueueMetrics: false,
+  } as unknown as WorkflowsExecutionEngineConfig;
   public readonly fakeKibanaRequest = {} as KibanaRequest;
   public readonly workflowExecutionRepositoryMock = new WorkflowExecutionRepositoryMock();
   public readonly stepExecutionRepositoryMock = new StepExecutionRepositoryMock();

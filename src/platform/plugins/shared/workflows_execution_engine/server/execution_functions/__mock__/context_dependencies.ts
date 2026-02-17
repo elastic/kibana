@@ -19,4 +19,11 @@ export const mockContextDependencies = () => ({
   actions: actionsMock.createStart(),
   taskManager: taskManagerMock.createStart(),
   workflowsExtensions: workflowsExtensionsMock.createStart(),
+  config: {
+    enabled: true,
+    logging: { console: false },
+    http: { allowedHosts: ['*'] },
+    maxResponseSize: { getValueInBytes: () => 10 * 1024 * 1024 }, // 10mb
+    collectQueueMetrics: false,
+  },
 });

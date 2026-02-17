@@ -24,6 +24,7 @@ const configSchema = schema.object({
       }
     ),
   }),
+  maxResponseSize: schema.byteSize({ defaultValue: '10mb' }),
   collectQueueMetrics: schema.boolean({
     defaultValue: false,
     meta: {

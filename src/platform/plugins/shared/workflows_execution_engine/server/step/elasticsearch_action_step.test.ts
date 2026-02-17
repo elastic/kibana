@@ -42,7 +42,10 @@ describe('ElasticsearchActionStepImpl', () => {
 
     mockContextManager = {
       getContext: jest.fn().mockReturnValue({
-        workflow: { spaceId: 'default' },
+        workflow: { id: 'test', name: 'test', enabled: true, spaceId: 'default' },
+      }),
+      getDependencies: jest.fn().mockReturnValue({
+        config: { maxResponseSize: { getValueInBytes: () => 10 * 1024 * 1024 } },
       }),
       renderValueAccordingToContext: jest.fn((value) => value),
       getEsClientAsUser: jest.fn().mockReturnValue(mockEsClient),
@@ -100,12 +103,15 @@ describe('ElasticsearchActionStepImpl', () => {
       await (esStep as any)._run(step.with);
 
       expect(mockedBuildRequest).toHaveBeenCalledWith('elasticsearch.search', step.with);
-      expect(mockEsClient.transport.request).toHaveBeenCalledWith({
-        method: 'GET',
-        path: '/my-test/_search?size=10',
-        body: { query: { match_all: {} } },
-        bulkBody: undefined,
-      });
+      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
+        {
+          method: 'GET',
+          path: '/my-test/_search?size=10',
+          body: { query: { match_all: {} } },
+          bulkBody: undefined,
+        },
+        expect.objectContaining({ maxResponseSize: expect.any(Number) })
+      );
     });
 
     it('should call transport.request with bulkBody for bulk requests', async () => {
@@ -141,12 +147,15 @@ describe('ElasticsearchActionStepImpl', () => {
       await (esStep as any)._run(step.with);
 
       expect(mockedBuildRequest).toHaveBeenCalledWith('elasticsearch.bulk', step.with);
-      expect(mockEsClient.transport.request).toHaveBeenCalledWith({
-        method: 'POST',
-        path: '/my-test/_bulk',
-        body: undefined,
-        bulkBody: bulkOperations,
-      });
+      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
+        {
+          method: 'POST',
+          path: '/my-test/_bulk',
+          body: undefined,
+          bulkBody: bulkOperations,
+        },
+        expect.objectContaining({ maxResponseSize: expect.any(Number) })
+      );
     });
 
     it('should append query params to path when present', async () => {
@@ -178,12 +187,15 @@ describe('ElasticsearchActionStepImpl', () => {
 
       await (esStep as any)._run(step.with);
 
-      expect(mockEsClient.transport.request).toHaveBeenCalledWith({
-        method: 'POST',
-        path: '/my-test/_bulk?refresh=wait_for&pipeline=my-pipeline',
-        body: undefined,
-        bulkBody: [{ index: {} }, { field: 'value' }],
-      });
+      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
+        {
+          method: 'POST',
+          path: '/my-test/_bulk?refresh=wait_for&pipeline=my-pipeline',
+          body: undefined,
+          bulkBody: [{ index: {} }, { field: 'value' }],
+        },
+        expect.objectContaining({ maxResponseSize: expect.any(Number) })
+      );
     });
   });
 
@@ -213,11 +225,14 @@ describe('ElasticsearchActionStepImpl', () => {
 
       // Should not call buildElasticsearchRequest for raw format
       expect(mockedBuildRequest).not.toHaveBeenCalled();
-      expect(mockEsClient.transport.request).toHaveBeenCalledWith({
-        method: 'PUT',
-        path: '/my-index/_settings',
-        body: { 'index.number_of_replicas': 2 },
-      });
+      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
+        {
+          method: 'PUT',
+          path: '/my-index/_settings',
+          body: { 'index.number_of_replicas': 2 },
+        },
+        expect.objectContaining({ maxResponseSize: expect.any(Number) })
+      );
     });
 
     it('should use raw API format for elasticsearch.request step type', async () => {
@@ -244,7 +259,7 @@ describe('ElasticsearchActionStepImpl', () => {
       expect(mockedBuildRequest).not.toHaveBeenCalled();
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(
         { method: 'DELETE', path: '/my-index', body: undefined },
-        {}
+        expect.objectContaining({ maxResponseSize: expect.any(Number) })
       );
     });
 
@@ -272,7 +287,10 @@ describe('ElasticsearchActionStepImpl', () => {
 
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(
         { method: 'GET', path: '/my-index/_search', body: { query: { match_all: {} } } },
-        { headers: { 'X-Custom-Header': 'value' } }
+        expect.objectContaining({
+          maxResponseSize: expect.any(Number),
+          headers: { 'X-Custom-Header': 'value' },
+        })
       );
     });
   });

@@ -41,7 +41,12 @@ describe('HttpStepImpl', () => {
   beforeEach(() => {
     stepContextAbortController = new AbortController();
     mockContextManager = {
-      getContext: jest.fn(),
+      getContext: jest.fn().mockReturnValue({
+        workflow: { id: 'test', name: 'test', enabled: true, spaceId: 'default' },
+      }),
+      getDependencies: jest.fn().mockReturnValue({
+        config: { maxResponseSize: { getValueInBytes: () => 10 * 1024 * 1024 } },
+      }),
       renderValueAccordingToContext: jest.fn(<T>(value: T): T => value),
       abortController: stepContextAbortController,
     } as any;

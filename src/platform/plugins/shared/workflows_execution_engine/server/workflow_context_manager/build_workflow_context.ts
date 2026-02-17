@@ -50,6 +50,7 @@ export function buildWorkflowContext(
       name: workflowExecution.workflowDefinition?.name ?? '',
       enabled: workflowExecution.workflowDefinition?.enabled ?? false,
       spaceId: workflowExecution.spaceId,
+      settings: workflowExecution.workflowDefinition?.settings,
     },
     kibanaUrl,
     consts: workflowExecution.workflowDefinition?.consts ?? {},

@@ -145,7 +145,7 @@ const config: AxiosRequestConfig = {
 };
 ```
 
-**Error:** `ResponseSizeLimitError` with type `ResponseSizeLimitExceeded`.
+**Error:** `ResponseSizeLimitError` with type `StepSizeLimitExceeded`.
 
 **Coverage:** True pre-emptive. A 1 GB download is aborted after the configured limit (e.g., 10 MB). The remaining data is never read.
 
@@ -171,7 +171,7 @@ while (true) {
 return JSON.parse(Buffer.concat(chunks).toString('utf-8'));
 ```
 
-**Error:** `ResponseSizeLimitError` with type `ResponseSizeLimitExceeded`.
+**Error:** `ResponseSizeLimitError` with type `StepSizeLimitExceeded`.
 
 **Coverage:** True pre-emptive. The fetch response is aborted mid-stream.
 
@@ -192,7 +192,7 @@ RequestAbortedError: "The content length (N) is bigger than the maximum allowed 
 
 This is true mid-stream enforcement -- the same mechanism used by Kibana's own ES proxy transport and inference connector streaming.
 
-**Error:** `RequestAbortedError` caught and mapped to `ResponseSizeLimitError` with type `ResponseSizeLimitExceeded`.
+**Error:** `RequestAbortedError` caught and mapped to `ResponseSizeLimitError` with type `StepSizeLimitExceeded`.
 
 **Coverage:** True pre-emptive. A query returning 1 GB of results is aborted after the configured limit (e.g., 15 MB).
 
@@ -230,7 +230,7 @@ if (result.output !== undefined && result.output !== null) {
 }
 ```
 
-**Error:** `ResponseSizeLimitError` with type `ResponseSizeLimitExceeded`.
+**Error:** `ResponseSizeLimitError` with type `StepSizeLimitExceeded`.
 
 **What this protects against:**
 - Oversized outputs being stored in `WorkflowExecutionState`.
@@ -251,15 +251,17 @@ if (result.output !== undefined && result.output !== null) {
 
 ## Coverage Matrix
 
-| Step Type | OOM Prevention (Layer 1) | Context Protection (Layer 2) | Notes |
-|---|---|---|---|
-| `HttpStepImpl` | Yes -- axios `maxContentLength` aborts mid-stream | Yes -- base class output check | Full coverage |
-| `KibanaActionStepImpl` | Yes -- streaming reader aborts mid-stream | Yes -- base class output check | Full coverage |
-| `ElasticsearchActionStepImpl` | Yes -- `transport.request({ maxResponseSize })` aborts mid-stream | Yes -- base class output check | Full coverage |
-| `ConnectorStepImpl` | No -- `actionsClient.execute()` is opaque | Yes -- base class output check | OOM possible for connectors returning large data |
-| `CustomStepImpl` | No -- handler code is opaque | Yes -- base class output check | OOM possible if handler loads large data |
-| `DataSetStepImpl` | N/A -- no external I/O | Yes -- base class output check | Very low risk |
-| Control flow nodes | N/A | N/A | No data processing |
+| Step Type | OOM Prevention (Layer 1) | Context Protection (Layer 2) | Demo Workflow | Notes |
+|---|---|---|---|---|
+| `HttpStepImpl` | Yes -- axios `maxContentLength` aborts mid-stream | Yes -- base class output check | `test-response-size-limit.yaml` | Full coverage |
+| `KibanaActionStepImpl` | Yes -- streaming reader aborts mid-stream | Yes -- base class output check | `test-kibana-action-size-limit.yaml` | Full coverage |
+| `ElasticsearchActionStepImpl` | Yes -- `transport.request({ maxResponseSize })` aborts mid-stream | Yes -- base class output check | `test-es-size-limit.yaml` | Full coverage |
+| `ConnectorStepImpl` | No -- `actionsClient.execute()` is opaque | Yes -- base class output check | `test-connector-size-limit.yaml` | Layer 2 only |
+| `CustomStepImpl` | No -- handler code is opaque | Yes -- base class output check | -- | Layer 2 only |
+| `DataSetStepImpl` | N/A -- no external I/O | Yes -- base class output check | -- | Very low risk |
+| Control flow nodes | N/A | N/A | -- | No data processing |
+
+All demo workflows are in `workflows/examples/`. The ES workflow requires seeding test data first via `bash workflows/examples/seed-large-index.sh`.
 
 ---
 
@@ -271,10 +273,10 @@ All enforcement layers throw the same error type for consistency:
 class ResponseSizeLimitError extends ExecutionError {
   constructor(actualBytes: number, limitBytes: number, stepName: string) {
     super({
-      type: 'ResponseSizeLimitExceeded',
+      type: 'StepSizeLimitExceeded',
       message: `Step "${stepName}" response exceeded the size limit: ` +
                `${formatBytes(actualBytes)} > ${formatBytes(limitBytes)}. ` +
-               `Configure 'max-response-size' at the step or workflow level to adjust.`,
+               `Configure 'max-step-size' at the step or workflow level to adjust.`,
       details: { actualBytes, limitBytes },
     });
   }
@@ -301,7 +303,7 @@ Per-step override in workflow YAML:
 steps:
   - name: big_export
     type: kibana.export_objects
-    max-response-size: 100mb
+    max-step-size: 100mb
 ```
 
 ### 2. Workflow-level
@@ -310,7 +312,7 @@ Default for all steps in a workflow:
 
 ```yaml
 settings:
-  max-response-size: 10mb
+  max-step-size: 10mb
 ```
 
 ### 3. Plugin config (lowest priority, cluster-wide default)
@@ -324,7 +326,7 @@ workflowsExecutionEngine.maxResponseSize: 10mb
 ### Resolution
 
 ```
-step['max-response-size']  ??  workflow.settings['max-response-size']  ??  pluginConfig.maxResponseSize  ??  '10mb'
+step['max-step-size']  ??  workflow.settings['max-step-size']  ??  pluginConfig.maxResponseSize  ??  '10mb'
 ```
 
 ---
@@ -336,7 +338,7 @@ step['max-response-size']  ??  workflow.settings['max-response-size']  ??  plugi
 | `server/step/node_implementation.ts` | Add `enforceOutputSizeLimit()` and `getMaxResponseSize()` to base class; add size check in `run()` |
 | `server/step/errors.ts` | New file: `ResponseSizeLimitError` class |
 | `server/config.ts` | Add `maxResponseSize` to plugin config schema |
-| `kbn-workflows/spec/schema.ts` | Add `max-response-size` to `WorkflowSettingsSchema` and step base schema |
+| `kbn-workflows/spec/schema.ts` | Add `max-step-size` to `WorkflowSettingsSchema` and step base schema |
 | `server/step/http_step/http_step_impl.ts` | Add `maxContentLength`/`maxBodyLength` to axios config |
 | `server/step/elasticsearch_action_step.ts` | Pass `maxResponseSize` option to `transport.request()` |
 | `server/step/kibana_action_step.ts` | Replace `response.json()` with streaming body reader |
@@ -452,7 +454,7 @@ This gives **automatic context protection to every step type**, including any fu
 | ES step enforcement | `maxResponseSize` option on `transport.request()` -- native mid-stream abort |
 | Connector step enforcement | Post-hoc size check after `actionsClient.execute()` |
 | Plugin config | `maxResponseSize` field in `server/config.ts` |
-| Schema changes | `max-response-size` in `WorkflowSettingsSchema` and step base schema |
+| Schema changes | `max-step-size` in `WorkflowSettingsSchema` and step base schema |
 | Unit tests | Tests for base class enforcement, HTTP pre-emptive, Kibana pre-emptive, config resolution |
 
 ---
@@ -465,7 +467,7 @@ This RFC maps to the [Workflow Execution Limits & Guardrails epic](https://githu
 
 | Issue | Title | Phase | Covered by this RFC? | Notes |
 |---|---|---|---|---|
-| [#15838](https://github.com/elastic/security-team/issues/15838) | Step/Action-level memory and response size limits | Phase 1 | **Yes -- primary focus** | This RFC's Layer 1 (pre-emptive) and Layer 2 (post-hoc) directly implement this issue. Mid-stream HTTP/Kibana enforcement, post-hoc ES/connector enforcement, base-class output guard, per-step `max-response-size` config. |
+| [#15838](https://github.com/elastic/security-team/issues/15838) | Step/Action-level memory and response size limits | Phase 1 | **Yes -- primary focus** | This RFC's Layer 1 (pre-emptive) and Layer 2 (post-hoc) directly implement this issue. Mid-stream HTTP/Kibana enforcement, post-hoc ES/connector enforcement, base-class output guard, per-step `max-step-size` config. |
 | [#15746](https://github.com/elastic/security-team/issues/15746) | Workflow execution API responses too large (OOM incident) | Phase 1 | **Partially** | This RFC covers the step execution side (preventing large data from entering memory during workflow runs). The API response side (pagination, `_source_includes` filtering for `GET /api/workflowExecutions/{id}`, reducing hardcoded `size: 1000`) is a separate management-plugin concern not addressed here. |
 | [#15837](https://github.com/elastic/security-team/issues/15837) | Workflow-level execution limits | Phase 2 | **Partially** | This RFC's Layer 2 (base-class output guard) contributes to the "max total output size across all steps" requirement. However, the other limits in #15837 are **not covered**: max steps per workflow (150), max execution duration (24h), max workflow output size (5 MB), max steps started per minute (60). |
 | [#15840](https://github.com/elastic/security-team/issues/15840) | Foreach loop iteration limits | Phase 2 | **No** | Not addressed. Foreach iteration caps (2000) require changes to `ForeachNodeImpl`, not the memory/size enforcement described here. |

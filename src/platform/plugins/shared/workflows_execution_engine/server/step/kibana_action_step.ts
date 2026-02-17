@@ -15,6 +15,7 @@ import { buildKibanaRequest } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
+import { ResponseSizeLimitError } from './errors';
 import { getKibanaUrl } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
@@ -243,9 +244,70 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     const response = await fetch(fullUrl, fetchOptions);
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+      const errorBody = await this.readLimitedText(response, 1024 * 1024); // 1MB cap for errors
+      throw new Error(`HTTP ${response.status}: ${errorBody}`);
     }
 
-    return response.json();
+    return this.readResponseBody(response);
+  }
+
+  /**
+   * Reads a fetch Response body as a stream with size enforcement.
+   * Aborts mid-stream if the body exceeds the configured max response size.
+   * Handles null body (e.g., 204 No Content) gracefully.
+   */
+  private async readResponseBody(response: Response): Promise<any> {
+    if (!response.body) {
+      return null;
+    }
+
+    const maxSize = this.getMaxResponseSize();
+    const reader = response.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let totalBytes = 0;
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        totalBytes += value.byteLength;
+        if (maxSize > 0 && totalBytes > maxSize) {
+          reader.cancel();
+          throw new ResponseSizeLimitError(totalBytes, maxSize, this.step.name);
+        }
+        chunks.push(value);
+      }
+    } finally {
+      reader.releaseLock();
+    }
+
+    const text = Buffer.concat(chunks).toString('utf-8');
+    return text ? JSON.parse(text) : null;
+  }
+
+  /**
+   * Reads a response body with a hard byte limit, truncating if exceeded.
+   * Used for error responses where we want the error message but not OOM risk.
+   */
+  private async readLimitedText(response: Response, maxBytes: number): Promise<string> {
+    if (!response.body) return '';
+    const reader = response.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let totalBytes = 0;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        totalBytes += value.byteLength;
+        if (totalBytes > maxBytes) {
+          reader.cancel();
+          return Buffer.concat(chunks).toString('utf-8') + '... [truncated]';
+        }
+        chunks.push(value);
+      }
+    } finally {
+      reader.releaseLock();
+    }
+    return Buffer.concat(chunks).toString('utf-8');
   }
 }
