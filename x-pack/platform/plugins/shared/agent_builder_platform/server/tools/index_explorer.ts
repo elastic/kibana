@@ -23,7 +23,7 @@ const indexExplorerSchema = z.object({
     .string()
     .optional()
     .describe(
-      '(optional) Index pattern to filter indices by. Defaults to *. Cross-cluster search (CCS) is supported: use cluster:index or cluster:pattern (e.g. cluster:index*, *:logs-*).'
+      '(optional) Index pattern to filter indices by. Defaults to * (local indices only). Cross-cluster search (CCS) is supported: use cluster:index or cluster:pattern (e.g. cluster:index*, *:logs-*). Use the list_remote_clusters tool first to discover available remote clusters.'
     ),
 });
 
@@ -32,11 +32,13 @@ export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerS
     id: platformCoreTools.indexExplorer,
     type: ToolType.builtin,
     description: `List relevant indices, aliases and datastreams based on a natural language query.
-Cross-cluster search (CCS) is supported: indices/aliases/datastreams on remote clusters can be targeted using the cluster:index pattern (e.g. remote:logs-*, *:metrics-*) when the user or context specifies a remote cluster.
+With the default pattern '*', returns local indices only.
+
+Cross-cluster search (CCS) is supported: to target remote clusters, first use the list_remote_clusters tool to discover available remote clusters, then pass an explicit cluster:pattern via the indexPattern parameter (e.g. remote:logs-*, *:metrics-*).
 
 The 'indexPattern' parameter can be used to filter indices by a specific pattern, e.g. 'foo*' or 'cluster:index*'.
 This should *only* be used if you know what you're doing (e.g. if the user explicitly specified a pattern).
-Otherwise, leave it empty to search against all indices (default *).
+Otherwise, leave it empty to search against all local indices (default *).
 
 *Example:*
 User: "Show me my latest alerts"

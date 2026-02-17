@@ -181,14 +181,8 @@ export const indexExplorer = async ({
 }): Promise<IndexExplorerResponse> => {
   logger?.trace(() => `index_explorer - query="${nlQuery}", pattern="${indexPattern}"`);
 
-  // When pattern is '*', include remote clusters (CCS) by resolving both * and *:* and merging
-  const includeRemoteClusters = indexPattern === '*';
-  const perTypeLimit = indexPattern.includes(':') || includeRemoteClusters ? 50 : undefined;
-
   const sources = await listSearchSources({
     pattern: indexPattern,
-    perTypeLimit,
-    includeRemoteClusters,
     excludeIndicesRepresentedAsDatastream: true,
     excludeIndicesRepresentedAsAlias: false,
     esClient,

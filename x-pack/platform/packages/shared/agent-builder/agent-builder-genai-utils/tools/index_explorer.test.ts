@@ -73,7 +73,7 @@ describe('indexExplorer', () => {
     });
   });
 
-  it('passes includeKibanaIndices as false when indexPattern is "*"', async () => {
+  it('passes includeKibanaIndices as false and does not include remote clusters when indexPattern is "*"', async () => {
     await indexExplorer({
       nlQuery: 'test query',
       indexPattern: '*',
@@ -81,8 +81,10 @@ describe('indexExplorer', () => {
       model,
     });
 
+    // Default '*' pattern should only return local indices (no includeRemoteClusters)
     expect(listSearchSourcesMock).toHaveBeenCalledWith({
       pattern: '*',
+      perTypeLimit: undefined,
       excludeIndicesRepresentedAsDatastream: true,
       excludeIndicesRepresentedAsAlias: false,
       esClient,
@@ -100,6 +102,26 @@ describe('indexExplorer', () => {
 
     expect(listSearchSourcesMock).toHaveBeenCalledWith({
       pattern: 'logs-*',
+      perTypeLimit: undefined,
+      excludeIndicesRepresentedAsDatastream: true,
+      excludeIndicesRepresentedAsAlias: false,
+      esClient,
+      includeKibanaIndices: true,
+    });
+  });
+
+  it('sets perTypeLimit to 50 when indexPattern contains ":" (CCS pattern)', async () => {
+    await indexExplorer({
+      nlQuery: 'test query',
+      indexPattern: 'remote:logs-*',
+      esClient,
+      model,
+    });
+
+    // Explicit CCS pattern should increase perTypeLimit
+    expect(listSearchSourcesMock).toHaveBeenCalledWith({
+      pattern: 'remote:logs-*',
+      perTypeLimit: 50,
       excludeIndicesRepresentedAsDatastream: true,
       excludeIndicesRepresentedAsAlias: false,
       esClient,
