@@ -75,7 +75,7 @@ export function defineRoutes(routeOptions: DefineRoutesOptions) {
       },
       validate: {
         body: schema.object({
-          indices: schema.arrayOf(schema.string()),
+          indices: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
         }),
       },
     },
@@ -265,8 +265,8 @@ export function defineRoutes(routeOptions: DefineRoutesOptions) {
         body: schema.object({
           search_query: schema.string(),
           elasticsearch_query: schema.string(),
-          indices: schema.arrayOf(schema.string()),
-          size: schema.maybe(schema.number({ defaultValue: 10, min: 0 })),
+          indices: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
+          size: schema.maybe(schema.number({ defaultValue: 10, min: 0, max: 1000 })),
           from: schema.maybe(schema.number({ defaultValue: 0, min: 0 })),
         }),
       },
@@ -276,13 +276,6 @@ export function defineRoutes(routeOptions: DefineRoutesOptions) {
       const { elasticsearch_query: elasticsearchQuery, indices, size, from } = request.body;
 
       try {
-        if (indices.length === 0) {
-          return response.badRequest({
-            body: {
-              message: EMPTY_INDICES_ERROR_MESSAGE,
-            },
-          });
-        }
         let parsedElasticsearchQuery: Partial<SearchRequest>;
         try {
           parsedElasticsearchQuery = parseElasticsearchQuery(elasticsearchQuery)(
@@ -348,7 +341,7 @@ export function defineRoutes(routeOptions: DefineRoutesOptions) {
       },
       validate: {
         body: schema.object({
-          indices: schema.arrayOf(schema.string()),
+          indices: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
         }),
       },
     },
@@ -357,14 +350,6 @@ export function defineRoutes(routeOptions: DefineRoutesOptions) {
       const { indices } = request.body;
 
       try {
-        if (indices.length === 0) {
-          return response.badRequest({
-            body: {
-              message: EMPTY_INDICES_ERROR_MESSAGE,
-            },
-          });
-        }
-
         const mappings = await client.asCurrentUser.indices.getMapping({
           index: indices,
         });
@@ -401,8 +386,8 @@ export function defineRoutes(routeOptions: DefineRoutesOptions) {
         body: schema.object({
           query: schema.string(),
           elasticsearch_query: schema.string(),
-          indices: schema.arrayOf(schema.string()),
-          size: schema.maybe(schema.number({ defaultValue: 10, min: 0 })),
+          indices: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
+          size: schema.maybe(schema.number({ defaultValue: 10, min: 0, max: 1000 })),
           from: schema.maybe(schema.number({ defaultValue: 0, min: 0 })),
           chat_context: schema.maybe(
             schema.object({
@@ -423,13 +408,6 @@ export function defineRoutes(routeOptions: DefineRoutesOptions) {
         chat_context: chatContext,
       } = request.body;
 
-      if (indices.length === 0) {
-        return response.badRequest({
-          body: {
-            message: EMPTY_INDICES_ERROR_MESSAGE,
-          },
-        });
-      }
       let searchQuery: Partial<SearchRequest>;
       try {
         searchQuery = parseElasticsearchQuery(elasticsearchQuery)(request.body.query);
