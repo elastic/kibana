@@ -91,16 +91,16 @@ export const AiButtonBase = (props: AiButtonBaseProps) => {
       display: _display,
       iconOnly: _iconOnly,
       variant: _variant,
-      ...rest
+      ...euiIconProps
     } = props;
 
     return (
       <>
         {svgGradientDefs}
         <EuiButtonIcon
-          {...rest}
+          {...euiIconProps}
           css={[buttonCss, iconGradientCss, userCss]}
-          iconSize={rest.iconSize ?? getSyncedIconSize(rest.size)}
+          iconSize={euiIconProps.iconSize ?? getSyncedIconSize(euiIconProps.size)}
           iconType={resolvedIconType(iconType)}
         />
       </>
