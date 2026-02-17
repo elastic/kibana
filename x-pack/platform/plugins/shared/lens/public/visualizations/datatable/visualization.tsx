@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { ThemeServiceStart } from '@kbn/core/public';
 import type { PaletteRegistry } from '@kbn/coloring';
 import {
+  CUSTOM_PALETTE,
   DEFAULT_COLOR_MAPPING_CONFIG,
   getFallbackDataBounds,
   getOverridePaletteStops,
@@ -615,6 +616,7 @@ export const getDatatableVisualization = ({
             datasource?.getOperationForColumnId(column.columnId) ?? {};
           const hasNoSummaryRow = column.summaryRow == null || column.summaryRow === 'none';
           const canColor = isNumeric || isBucketable;
+          const colorByTerms = isBucketable;
           let isTransposable =
             !isTextBasedLanguage &&
             !datasource!.getOperationForColumnId(column.columnId)?.isBucketed;
@@ -640,7 +642,10 @@ export const getDatatableVisualization = ({
               palette:
                 !canColor || !column.palette
                   ? undefined
-                  : paletteService.get(column.palette.name).toExpression(paletteParams),
+                  : paletteService
+                      // The by value palette is a pseudo custom palette that is only custom from params level
+                      .get(colorByTerms ? column.palette.name : CUSTOM_PALETTE)
+                      .toExpression(paletteParams),
               colorMapping:
                 canColor && column.colorMapping ? JSON.stringify(column.colorMapping) : undefined,
               summaryRow: hasNoSummaryRow ? undefined : column.summaryRow!,
