@@ -215,7 +215,7 @@ export const promqlLabelSelectorItem: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.labelSelectorDoc', {
     defaultMessage: 'Filter by labels',
   }),
-  category: SuggestionCategory.CUSTOM_ACTION,
+  category: SuggestionCategory.PROMQL_METRIC_QUALIFIER,
 });
 
 export const promqlRangeSelectorItem: ISuggestionItem = withAutoSuggest({
@@ -228,7 +228,7 @@ export const promqlRangeSelectorItem: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.rangeSelectorDoc', {
     defaultMessage: 'Range selector (duration)',
   }),
-  category: SuggestionCategory.CUSTOM_ACTION,
+  category: SuggestionCategory.PROMQL_METRIC_QUALIFIER,
 });
 
 export const byCompleteItem: ISuggestionItem = withAutoSuggest({
