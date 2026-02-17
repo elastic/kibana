@@ -9,11 +9,35 @@ import { i18n } from '@kbn/i18n';
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
-import type { PreservedTimeUnit } from './types';
+import type { DslStepMetaFields, PreservedTimeUnit } from './types';
 import { toMilliseconds } from './utils';
 
 const { emptyField, isInteger } = fieldValidators;
-type AnyValidationFunc = ValidationFunc<any, any, any>;
+
+/**
+ * `hook-form-lib` validators receive a *flattened* `formData` object (keys like
+ * `_meta.downsampleSteps[0].afterValue`). We keep access centralized to reduce `any`/casts.
+ */
+type StreamsDslFlatFormData = Record<string, unknown>;
+type DslValidationFunc<V = unknown> = ValidationFunc<any, string, V>;
+type DslValidationArg<V = unknown> = Parameters<DslValidationFunc<V>>[0];
+
+type DslStepField = keyof DslStepMetaFields;
+const getStepFieldPath = (stepIndex: number, field: DslStepField): string =>
+  `_meta.downsampleSteps[${stepIndex}].${field}`;
+
+const asFlatFormData = (formData: unknown): StreamsDslFlatFormData =>
+  (formData ?? {}) as StreamsDslFlatFormData;
+
+const getAsString = (formData: unknown, path: string, fallback = ''): string => {
+  const value = asFlatFormData(formData)[path];
+  return value === undefined || value === null ? fallback : String(value);
+};
+
+const getAsNumber = (formData: unknown, path: string, fallback: number): number => {
+  const value = asFlatFormData(formData)[path];
+  return typeof value === 'number' ? value : fallback;
+};
 
 const FIVE_MINUTES_IN_MS = 5 * 60_000;
 
@@ -24,16 +48,15 @@ const getStepIndexFromPath = (path: string): number | null => {
   return Number.isFinite(index) ? index : null;
 };
 
-export const requiredAfterValue: AnyValidationFunc = (...args) => {
-  return emptyField(
+export const requiredAfterValue: DslValidationFunc = (arg) =>
+  emptyField(
     i18n.translate('xpack.streams.editDslStepsFlyout.afterRequired', {
       defaultMessage: 'A value is required.',
     })
-  )(...args);
-};
+  )(arg);
 
-export const afterMustBeNonNegative: AnyValidationFunc = (...args) => {
-  const [{ value, path }] = args as any as [{ value: unknown; path: string }];
+export const afterMustBeNonNegative: DslValidationFunc = (arg) => {
+  const { value, path } = arg as DslValidationArg;
 
   if (!/^_meta\.downsampleSteps\[\d+\]\.afterValue$/.test(path)) return;
 
@@ -48,32 +71,35 @@ export const afterMustBeNonNegative: AnyValidationFunc = (...args) => {
   }
 };
 
-export const afterMustBeInteger: AnyValidationFunc = (...args: Parameters<AnyValidationFunc>) => {
-  return isInteger({
+export const afterMustBeInteger: DslValidationFunc = (arg) =>
+  isInteger({
     message: i18n.translate('xpack.streams.editDslStepsFlyout.integerRequired', {
       defaultMessage: 'An integer is required.',
     }),
-  })(...args);
-};
+  })(arg);
 
-export const afterGreaterThanPreviousStep: AnyValidationFunc = (...args) => {
-  const [{ formData, path }] = args as any as [{ formData: Record<string, unknown>; path: string }];
+export const afterGreaterThanPreviousStep: DslValidationFunc = (arg) => {
+  const { formData, path } = arg as DslValidationArg;
 
   const stepIndex = getStepIndexFromPath(path);
   if (stepIndex === null) return;
   if (stepIndex === 0) return;
 
   const getAfterMs = (index: number): { ms: number; esFormat?: string } => {
-    const value = String((formData as any)[`_meta.downsampleSteps[${index}].afterValue`] ?? '');
-    const unit = String(
-      (formData as any)[`_meta.downsampleSteps[${index}].afterUnit`] ?? 'd'
+    const value = getAsString(formData, getStepFieldPath(index, 'afterValue'));
+    const unit = getAsString(
+      formData,
+      getStepFieldPath(index, 'afterUnit'),
+      'd'
     ) as PreservedTimeUnit;
     const computed = toMilliseconds(value, unit);
-    const ms =
-      (formData as any)[`_meta.downsampleSteps[${index}].afterToMilliSeconds`] ??
-      (Number.isFinite(computed) ? computed : -1);
-    const esFormat = value.trim() === '' ? undefined : `${Number(value)}${unit}`;
-    return { ms: typeof ms === 'number' ? ms : computed, esFormat };
+    const ms = getAsNumber(
+      formData,
+      getStepFieldPath(index, 'afterToMilliSeconds'),
+      Number.isFinite(computed) ? computed : -1
+    );
+    const esFormat = value.trim() === '' ? undefined : `${Number(value)}${String(unit)}`;
+    return { ms, esFormat };
   };
 
   const previous = getAfterMs(stepIndex - 1);
@@ -89,18 +115,15 @@ export const afterGreaterThanPreviousStep: AnyValidationFunc = (...args) => {
   }
 };
 
-export const requiredFixedIntervalValue: AnyValidationFunc = (...args) => {
-  return emptyField(
+export const requiredFixedIntervalValue: DslValidationFunc = (arg) =>
+  emptyField(
     i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalRequired', {
       defaultMessage: 'A value is required.',
     })
-  )(...args);
-};
+  )(arg);
 
-export const fixedIntervalMustBeGreaterThanZero: AnyValidationFunc = (
-  ...args: Parameters<AnyValidationFunc>
-) => {
-  const [{ value }] = args as any as [{ value: unknown }];
+export const fixedIntervalMustBeGreaterThanZero: DslValidationFunc = (arg) => {
+  const { value } = arg as DslValidationArg;
   if (value === '' || value === undefined || value === null) return;
   const num = Number(value);
   if (!Number.isFinite(num) || num <= 0) {
@@ -112,22 +135,17 @@ export const fixedIntervalMustBeGreaterThanZero: AnyValidationFunc = (
   }
 };
 
-export const fixedIntervalMustBeInteger: AnyValidationFunc = (
-  ...args: Parameters<AnyValidationFunc>
-) => {
-  return isInteger({
+export const fixedIntervalMustBeInteger: DslValidationFunc = (arg) =>
+  isInteger({
     message: i18n.translate('xpack.streams.editDslStepsFlyout.integerRequired', {
       defaultMessage: 'An integer is required.',
     }),
-  })(...args);
-};
+  })(arg);
 
 // Elasticsearch enforces a minimum downsampling `fixed_interval` of 5 minutes for data stream lifecycle
 // downsampling rounds.
-export const fixedIntervalMustBeAtLeastFiveMinutes: AnyValidationFunc = (...args) => {
-  const [{ value, formData, path }] = args as any as [
-    { value: unknown; formData: Record<string, unknown>; path: string }
-  ];
+export const fixedIntervalMustBeAtLeastFiveMinutes: DslValidationFunc = (arg) => {
+  const { value, formData, path } = arg as DslValidationArg;
 
   const stepIndex = getStepIndexFromPath(path);
   if (stepIndex === null) return;
@@ -137,8 +155,10 @@ export const fixedIntervalMustBeAtLeastFiveMinutes: AnyValidationFunc = (...args
   if (!Number.isFinite(num) || num <= 0) return;
   if (!Number.isInteger(num)) return;
 
-  const unit = String(
-    (formData as any)[`_meta.downsampleSteps[${stepIndex}].fixedIntervalUnit`] ?? 'd'
+  const unit = getAsString(
+    formData,
+    getStepFieldPath(stepIndex, 'fixedIntervalUnit'),
+    'd'
   ) as PreservedTimeUnit;
   const milliseconds = toMilliseconds(String(value), unit);
   if (!Number.isFinite(milliseconds) || milliseconds <= 0) return;
@@ -152,19 +172,19 @@ export const fixedIntervalMustBeAtLeastFiveMinutes: AnyValidationFunc = (...args
   }
 };
 
-export const fixedIntervalMultipleOfPreviousStep: AnyValidationFunc = (...args) => {
-  const [{ formData, path }] = args as any as [{ formData: Record<string, unknown>; path: string }];
+export const fixedIntervalMultipleOfPreviousStep: DslValidationFunc = (arg) => {
+  const { formData, path } = arg as DslValidationArg;
 
   const stepIndex = getStepIndexFromPath(path);
   if (stepIndex === null) return;
   if (stepIndex === 0) return;
 
   const getIntervalFor = (index: number) => {
-    const value = String(
-      (formData as any)[`_meta.downsampleSteps[${index}].fixedIntervalValue`] ?? ''
-    );
-    const unit = String(
-      (formData as any)[`_meta.downsampleSteps[${index}].fixedIntervalUnit`] ?? 'd'
+    const value = getAsString(formData, getStepFieldPath(index, 'fixedIntervalValue'));
+    const unit = getAsString(
+      formData,
+      getStepFieldPath(index, 'fixedIntervalUnit'),
+      'd'
     ) as PreservedTimeUnit;
 
     if (!value || !unit) return null;
