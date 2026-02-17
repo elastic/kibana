@@ -6,6 +6,7 @@
   "include": ["**/*"],
   "kbn_references": [
     "@kbn/scout",
+    { "path": "../../scout_osquery/ui/tsconfig.json" }
   ],
   "exclude": ["target/**/*"]
 }
