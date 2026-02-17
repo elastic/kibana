@@ -522,7 +522,7 @@ async function slackRequestWithRateLimitRetry<TData>(params: {
  * MVP:
  * - channels:read - to list channels/conversations (public/private/DMs depending on workspace + membership)
  * - chat:write - for sending messages to public channels
-  * - search:read.public (and related granular scopes) - for searching messages (requires a user token)
+ * - search:read.public (and related granular scopes) - for searching messages (requires a user token)
  *
  * Optional (possible future usage):
  * - groups:read - to list private channels (future)
@@ -619,17 +619,18 @@ export const Slack: ConnectorSpec = {
 
         try {
           ctx.log.debug(`Slack searchMessages request`);
-          const response = await slackRequestWithRateLimitRetry<SlackAssistantSearchContextResponse>({
-            ctx,
-            action: 'searchMessages',
-            maxRetries: 5,
-            request: () =>
-              ctx.client.post(`${SLACK_API_BASE}/assistant.search.context`, requestBody, {
-                headers: {
-                  'Content-Type': 'application/json; charset=utf-8',
-                },
-              }),
-          });
+          const response =
+            await slackRequestWithRateLimitRetry<SlackAssistantSearchContextResponse>({
+              ctx,
+              action: 'searchMessages',
+              maxRetries: 5,
+              request: () =>
+                ctx.client.post(`${SLACK_API_BASE}/assistant.search.context`, requestBody, {
+                  headers: {
+                    'Content-Type': 'application/json; charset=utf-8',
+                  },
+                }),
+            });
 
           if (!response.data.ok) {
             throw new Error(
