@@ -11,7 +11,7 @@ import type { BehaviorSubject } from 'rxjs';
 
 import type { ControlsGroupState, PinnedControlLayoutState } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
+import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-publishing';
 import type {
   PublishesDisabledActionIds,
   PublishesUnifiedSearch,
