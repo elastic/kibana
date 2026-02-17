@@ -16,6 +16,7 @@ import {
   FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE,
   FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE,
   OTEL_COLLECTOR_INPUT_TYPE,
+  USE_APM_VAR_NAME,
 } from '../../../common/constants';
 
 import { getNormalizedDataStreams } from '../../../common/services';
@@ -194,7 +195,7 @@ export function storedPackagePoliciesToAgentPermissions(
               }
 
               const dataStreams_: DataStreamMeta[] = [];
-
+              const isOtelInput = input.type === OTEL_COLLECTOR_INPUT_TYPE;
               input.streams
                 .filter((s) => s.enabled)
                 .forEach((stream) => {
@@ -213,6 +214,28 @@ export function storedPackagePoliciesToAgentPermissions(
                   }
 
                   dataStreams_.push(ds);
+
+                  if (isOtelInput && stream.data_stream.type === 'traces') {
+                    // For traces allow to send span event to logs-generic.otel-{namespace}
+                    dataStreams_.push({
+                      type: 'logs',
+                      dataset: 'generic.otel',
+                      elasticsearch: {
+                        dynamic_namespace: stream.data_stream.elasticsearch?.dynamic_namespace,
+                      },
+                    });
+
+                    if (stream.vars?.[USE_APM_VAR_NAME]?.value === true) {
+                      dataStreams_.push({
+                        type: 'metrics',
+                        dataset: 'generic',
+                        elasticsearch: {
+                          dynamic_dataset: true,
+                          dynamic_namespace: true,
+                        },
+                      });
+                    }
+                  }
                 });
 
               return dataStreams_;
