@@ -238,7 +238,7 @@ test('can visit MMR command', () => {
   `);
   const visitor = new Visitor()
     .on('visitLiteralExpression', (ctx) => {
-return ctx.node.value;
+      return ctx.node.value;
     })
     .on('visitMapExpression', (ctx) => {
       return [...ctx.visitEntries(null)].flat();
