@@ -15,11 +15,9 @@ import type {
   DiscoverSetup,
   DiscoverStart,
 } from '@kbn/discover-plugin/public';
-import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import { from, map } from 'rxjs';
 import {
   ControlGroupRenderer,
   type ControlPanelsState,
@@ -120,26 +118,19 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
             });
           }, []);
 
-          const persistedSession$ = from(stateContainer.internalState).pipe(
-            map((state) => state.persistedDiscoverSession)
-          );
-          const persistedSession = useObservable<DiscoverSession | undefined>(
-            persistedSession$,
-            stateContainer.internalState.getState().persistedDiscoverSession
-          );
-
           return (
             <EuiFlexItem grow={false}>
               <EuiPopover
                 button={
                   <EuiButton
+                    size="s"
                     iconType="arrowDown"
                     iconSide="right"
                     fullWidth
                     onClick={togglePopover}
                     data-test-subj="logsViewSelectorButton"
                   >
-                    {persistedSession?.title ?? 'None selected'}
+                    {'None selected'}
                   </EuiButton>
                 }
                 isOpen={isPopoverOpen}
@@ -161,7 +152,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                               discoverSessionId: savedSearch.id,
                             })
                           ),
-                        icon: savedSearch.id === persistedSession?.id ? 'check' : 'empty',
+                        icon: 'empty',
                         'data-test-subj': `logsViewSelectorOption-${savedSearch.attributes.title.replace(
                           /[^a-zA-Z0-9]/g,
                           ''
