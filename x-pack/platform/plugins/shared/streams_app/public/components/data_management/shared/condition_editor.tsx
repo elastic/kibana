@@ -72,11 +72,10 @@ export function ConditionEditor(props: ConditionEditorProps) {
 
   const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!conditionEditableInUi);
 
-  const conditionJsonString = useMemo(() => JSON.stringify(condition, null, 2), [condition]);
-
-  const [syntaxEditorText, setSyntaxEditorText] = useState(conditionJsonString);
-  const syntaxEditorTextRef = useRef(syntaxEditorText);
-  const lastSyncedConditionJsonRef = useRef(conditionJsonString);
+  const serializedCondition = useMemo(() => JSON.stringify(condition, null, 2), [condition]);
+  const [syntaxEditorValue, setSyntaxEditorValue] = useState(serializedCondition);
+  const syntaxEditorValueRef = useRef(syntaxEditorValue);
+  const lastSyncedSerializedConditionRef = useRef(serializedCondition);
   const prevUsingSyntaxEditorRef = useRef(usingSyntaxEditor);
   const lastReportedValidityRef = useRef<boolean | undefined>(undefined);
   const onValidityChangeRef = useRef(onValidityChange ?? (() => {}));
@@ -88,10 +87,6 @@ export function ConditionEditor(props: ConditionEditorProps) {
     lastReportedValidityRef.current = isValid;
     onValidityChangeRef.current(isValid);
   }, []);
-
-  useEffect(() => {
-    syntaxEditorTextRef.current = syntaxEditorText;
-  }, [syntaxEditorText]);
 
   useEffect(() => {
     onValidityChangeRef.current = onValidityChange ?? (() => {});
@@ -106,32 +101,28 @@ export function ConditionEditor(props: ConditionEditorProps) {
     // When switching modes, reset validity and ensure the editor starts from the canonical condition.
     if (prevUsingSyntaxEditorRef.current !== usingSyntaxEditor) {
       reportValidityChange(true);
-      if (usingSyntaxEditor) {
-        setSyntaxEditorText(conditionJsonString);
-        lastSyncedConditionJsonRef.current = conditionJsonString;
-      }
       prevUsingSyntaxEditorRef.current = usingSyntaxEditor;
     }
-  }, [conditionJsonString, reportValidityChange, usingSyntaxEditor]);
+  }, [reportValidityChange, usingSyntaxEditor]);
 
   useEffect(() => {
-    if (usingSyntaxEditor) return;
-
-    // Keep syntax text in sync while in UI mode so switching to syntax starts from current condition.
-    setSyntaxEditorText(conditionJsonString);
-    lastSyncedConditionJsonRef.current = conditionJsonString;
-  }, [conditionJsonString, usingSyntaxEditor]);
-
-  useEffect(() => {
-    if (!usingSyntaxEditor) return;
+    if (!usingSyntaxEditor) {
+      // Keep syntax editor text in sync while in UI mode so switching to syntax starts
+      // from the current canonical condition.
+      setSyntaxEditorValue(serializedCondition);
+      syntaxEditorValueRef.current = serializedCondition;
+      lastSyncedSerializedConditionRef.current = serializedCondition;
+      return;
+    }
 
     // If the parent updates the condition while the user hasn't edited the syntax editor,
     // sync the text. If the user has edited locally, keep their text to avoid clobbering.
-    if (syntaxEditorTextRef.current === lastSyncedConditionJsonRef.current) {
-      setSyntaxEditorText(conditionJsonString);
+    if (syntaxEditorValueRef.current === lastSyncedSerializedConditionRef.current) {
+      setSyntaxEditorValue(serializedCondition);
+      syntaxEditorValueRef.current = serializedCondition;
     }
-    lastSyncedConditionJsonRef.current = conditionJsonString;
-  }, [conditionJsonString, usingSyntaxEditor]);
+    lastSyncedSerializedConditionRef.current = serializedCondition;
+  }, [serializedCondition, usingSyntaxEditor]);
 
   // Check if the selected field is a date type AND the operator is "in range"
   const isDateFieldWithRange = useMemo(() => {
@@ -157,11 +148,6 @@ export function ConditionEditor(props: ConditionEditorProps) {
     [onConditionChange]
   );
 
-  const serializedCondition = useMemo(() => JSON.stringify(condition, null, 2), [condition]);
-  const [syntaxEditorValue, setSyntaxEditorValue] = useState(serializedCondition);
-  const syntaxEditorValueRef = useRef(syntaxEditorValue);
-  const lastSyncedSerializedConditionRef = useRef(serializedCondition);
-
   const debouncedEmitConditionChange = useMemo(() => {
     return debounce(
       (nextCondition: Condition) => {
@@ -179,16 +165,6 @@ export function ConditionEditor(props: ConditionEditorProps) {
       debouncedEmitConditionChange.cancel();
     };
   }, [debouncedEmitConditionChange]);
-
-  useEffect(() => {
-    // Keep the syntax editor in sync with external condition updates, but only when the user
-    // hasn't diverged from the last serialized value (so we don't clobber in-progress edits).
-    if (syntaxEditorValueRef.current === lastSyncedSerializedConditionRef.current) {
-      setSyntaxEditorValue(serializedCondition);
-      syntaxEditorValueRef.current = serializedCondition;
-    }
-    lastSyncedSerializedConditionRef.current = serializedCondition;
-  }, [serializedCondition]);
 
   const flushSyntaxEditorCondition = useCallback(() => {
     const currentValue = syntaxEditorValueRef.current;
