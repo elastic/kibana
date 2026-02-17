@@ -5,4 +5,3 @@
  * 2.0.
  */
 export { slackDataSource } from './data_type';
-

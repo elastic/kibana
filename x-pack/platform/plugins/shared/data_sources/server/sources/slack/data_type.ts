@@ -33,4 +33,3 @@ export const slackDataSource: DataSource = {
     directory: __dirname + '/workflows',
   },
 };
-
