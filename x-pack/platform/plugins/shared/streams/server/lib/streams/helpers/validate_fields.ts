@@ -142,9 +142,11 @@ export function validateDescendantFields({
 }) {
   for (const descendant of descendants) {
     for (const fieldName in fields) {
+      if (!Object.hasOwn(fields, fieldName)) {
+        continue;
+      }
       const fieldType = fields[fieldName].type;
       if (
-        Object.hasOwn(fields, fieldName) &&
         fieldType !== undefined &&
         Object.entries(descendant.ingest.wired.fields).some(
           ([descendantFieldName, attr]) =>
