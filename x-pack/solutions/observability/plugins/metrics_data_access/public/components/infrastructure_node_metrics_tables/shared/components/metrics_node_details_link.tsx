@@ -95,7 +95,7 @@ export const MetricsNodeDetailsLink = ({
         from: parse(timerange.from)?.valueOf(),
         to: parse(timerange.to)?.valueOf(),
       },
-      isOtel,
+      preferredSchema: isOtel ? 'semconv' : 'ecs',
     });
     return { href: assetDetails.href, onClick: assetDetails.onClick };
   }, [

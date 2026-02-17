@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { CoreProviders } from '../../../apps/common_providers';
-import type { IntegratedNodeMetricsTableProps } from '../shared';
+import type { IntegratedNodeMetricsTableProps, UseNodeMetricsTableOptions } from '../shared';
 import { PodMetricsTable } from './pod_metrics_table';
 import { usePodMetricsTable } from './use_pod_metrics_table';
 

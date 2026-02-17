@@ -6,7 +6,4 @@
  */
 
 export { ContainerMetricsTable } from './container_metrics_table';
-export {
-  useContainerMetricsTable,
-  type ContainerSemconvRuntime,
-} from './use_container_metrics_table';
+export { useContainerMetricsTable } from './use_container_metrics_table';

@@ -10,29 +10,27 @@ import { CoreProviders } from '../../../apps/common_providers';
 import type { IntegratedNodeMetricsTableProps } from '../shared';
 import { ContainerMetricsTable } from './container_metrics_table';
 import { useContainerMetricsTable } from './use_container_metrics_table';
-import type { ContainerSemconvRuntime } from './container_metrics_configs';
-
 type ContainerIntegratedProps = IntegratedNodeMetricsTableProps & {
-  semconvRuntime?: ContainerSemconvRuntime;
+  isK8sContainer?: boolean;
 };
 
 type HookedContainerMetricsTableProps = Pick<
   ContainerIntegratedProps,
-  'timerange' | 'kuery' | 'isOtel' | 'semconvRuntime' | 'metricsClient'
+  'timerange' | 'kuery' | 'isOtel' | 'isK8sContainer' | 'metricsClient'
 >;
 
 function HookedContainerMetricsTable({
   timerange,
   kuery,
   isOtel,
-  semconvRuntime,
+  isK8sContainer,
   metricsClient,
 }: HookedContainerMetricsTableProps) {
   const containerMetricsTableProps = useContainerMetricsTable({
     timerange,
     kuery,
     isOtel,
-    semconvRuntime,
+    isK8sContainer,
     metricsClient,
   });
   return (
@@ -40,7 +38,7 @@ function HookedContainerMetricsTable({
       {...containerMetricsTableProps}
       isOtel={isOtel}
       metricsIndices={containerMetricsTableProps.metricIndices}
-      semconvRuntime={semconvRuntime}
+      isK8sContainer={isK8sContainer}
     />
   );
 }
@@ -50,7 +48,7 @@ function ContainerMetricsTableWithProviders({
   kuery,
   sourceId,
   isOtel,
-  semconvRuntime,
+  isK8sContainer,
   metricsClient,
   ...coreProvidersProps
 }: ContainerIntegratedProps) {
@@ -61,7 +59,7 @@ function ContainerMetricsTableWithProviders({
         kuery={kuery}
         isOtel={isOtel}
         metricsClient={metricsClient}
-        semconvRuntime={semconvRuntime}
+        isK8sContainer={isK8sContainer}
       />
     </CoreProviders>
   );

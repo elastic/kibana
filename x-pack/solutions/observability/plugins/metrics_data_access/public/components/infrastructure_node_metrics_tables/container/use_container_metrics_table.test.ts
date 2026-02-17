@@ -88,7 +88,7 @@ describe('useContainerMetricsTable hook', () => {
     );
   });
 
-  it('should call useInfrastructureNodeMetrics with SemConv K8s metrics when isOtel is true and semconvRuntime is k8s', () => {
+  it('should call useInfrastructureNodeMetrics with SemConv K8s metrics when isOtel is true and isK8s is true', () => {
     const kuery = 'container.id: "some-k8s-container"';
 
     useInfrastructureNodeMetricsMock.mockReturnValue({
@@ -103,7 +103,7 @@ describe('useContainerMetricsTable hook', () => {
         kuery,
         metricsClient: createMetricsClientMock({}),
         isOtel: true,
-        semconvRuntime: 'k8s',
+        isK8sContainer: true,
       })
     );
 

@@ -23,7 +23,6 @@ import {
   NumberCell,
   StepwisePagination,
 } from '../shared';
-import type { ContainerSemconvRuntime } from './container_metrics_configs';
 import {
   SEMCONV_CONTAINER_CPU_LIMIT_UTILIZATION_DISPLAY,
   SEMCONV_CONTAINER_MEMORY_LIMIT_UTILIZATION_DISPLAY,
@@ -42,7 +41,7 @@ export interface ContainerMetricsTableProps {
   };
   isOtel?: boolean;
   metricsIndices?: string;
-  semconvRuntime?: ContainerSemconvRuntime;
+  isK8sContainer?: boolean;
 }
 
 export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
@@ -55,12 +54,12 @@ export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
     timerange,
     isOtel,
     metricsIndices,
-    semconvRuntime,
+    isK8sContainer,
   } = props;
 
   const columns = useMemo(
-    () => containerNodeColumns({ timerange, isOtel, metricsIndices, semconvRuntime }),
-    [timerange, isOtel, metricsIndices, semconvRuntime]
+    () => containerNodeColumns({ timerange, isOtel, metricsIndices, isK8sContainer }),
+    [timerange, isOtel, metricsIndices, isK8sContainer]
   );
 
   const sortSettings: EuiTableSortingType<ContainerNodeMetricsRow> = {
@@ -137,12 +136,12 @@ function containerNodeColumns({
   timerange,
   isOtel,
   metricsIndices,
-  semconvRuntime,
+  isK8sContainer,
 }: Pick<
   ContainerMetricsTableProps,
-  'timerange' | 'isOtel' | 'metricsIndices' | 'semconvRuntime'
+  'timerange' | 'isOtel' | 'metricsIndices' | 'isK8sContainer'
 >): Array<EuiBasicTableColumn<ContainerNodeMetricsRow>> {
-  const memoryUnit = isOtel && semconvRuntime === 'k8s' ? '%' : ' MB';
+  const memoryUnit = isOtel && isK8sContainer ? '%' : ' MB';
   return [
     {
       name: i18n.translate('xpack.metricsData.metricsTable.container.idColumnHeader', {

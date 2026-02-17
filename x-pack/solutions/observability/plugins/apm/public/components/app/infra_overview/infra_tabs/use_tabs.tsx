@@ -83,7 +83,7 @@ export function useTabs({
           timerange,
           kuery: containersFilter,
           isOtel,
-          semconvRuntime: podNames.length > 0 ? 'k8s' : 'docker',
+          isK8sContainer: podNames.length > 0,
         })}
     </>
   );

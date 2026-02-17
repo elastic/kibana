@@ -16,8 +16,6 @@ import {
   SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION,
 } from '../shared/constants';
 
-export type ContainerSemconvRuntime = 'k8s' | 'docker';
-
 // --- ECS (Elastic Common Schema) ---
 type ContainerMetricsFieldEcs =
   | typeof ECS_CONTAINER_CPU_USAGE_LIMIT_PCT
@@ -98,13 +96,9 @@ export const unpackMetricSemconvK8s = makeUnpackMetric(metricByFieldSemconvK8s);
 /** @deprecated Use metricByFieldEcs for ECS; use unpack from getUnpackMetricsForSchema for transform */
 export const metricByField = metricByFieldEcs;
 
-export function getOptionsForSchema(
-  isOtel: boolean,
-  semconvRuntime: ContainerSemconvRuntime,
-  kuery?: string
-) {
+export function getOptionsForSchema(isOtel: boolean, isK8sContainer?: boolean, kuery?: string) {
   if (isOtel) {
-    return semconvRuntime === 'k8s'
+    return isK8sContainer
       ? metricsToApiOptions(containerMetricsQueryConfigSemconvK8s, kuery)
       : metricsToApiOptions(containerMetricsQueryConfigSemconvDocker, kuery);
   }
