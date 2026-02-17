@@ -482,26 +482,26 @@ export function LensEditConfigurationFlyout({
         toolbar={toolbar}
         layerTabs={layerTabs}
       >
-          {/* Flex container for the flyout content layout.
+        {/* Flex container for the flyout content layout.
               Enables proper scroll behavior where accordion headers stay fixed
               and only the accordion content areas scroll independently. */}
         <EuiFlexGroup
           css={css`
             block-size: 100%;
-              /* Reset min-block-size to allow flex items to shrink below content size */
+            /* Reset min-block-size to allow flex items to shrink below content size */
             .euiFlexItem,
             .euiAccordion,
             .euiAccordion__triggerWrapper,
             .euiAccordion__childWrapper {
               min-block-size: 0;
             }
-              /* Make accordions flex containers to enable content scrolling */
+            /* Make accordions flex containers to enable content scrolling */
             .euiAccordion {
               display: flex;
               flex: 1;
               flex-direction: column;
             }
-              /* When accordion is open, its content area takes remaining space */
+            /* When accordion is open, its content area takes remaining space */
             .euiAccordion-isOpen {
               .euiAccordion__childWrapper {
                 // Override euiAccordion__childWrapper blockSize only when ES|QL mode is enabled
@@ -509,7 +509,7 @@ export function LensEditConfigurationFlyout({
                 flex: 1;
               }
             }
-              /* Scrollable accordion content area with custom scrollbar styling.
+            /* Scrollable accordion content area with custom scrollbar styling.
                  pointer-events handling allows drag-drop to work outside content bounds. */
             .euiAccordion__childWrapper {
               ${euiScrollBarStyles(euiTheme)}
@@ -522,7 +522,7 @@ export function LensEditConfigurationFlyout({
                 pointer-events: auto;
               }
             }
-              /* Advanced options nested accordion should not scroll independently */
+            /* Advanced options nested accordion should not scroll independently */
             .lnsIndexPatternDimensionEditor-advancedOptions {
               .euiAccordion__childWrapper {
                 flex: none;
@@ -533,7 +533,7 @@ export function LensEditConfigurationFlyout({
           direction="column"
           gutterSize="none"
         >
-            {/* Container for ES|QL editor - fixed height, doesn't grow */}
+          {/* Container for ES|QL editor - fixed height, doesn't grow */}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup
               css={css`
@@ -609,7 +609,7 @@ export function LensEditConfigurationFlyout({
             </EuiAccordion>
           </EuiFlexItem>
 
-            {/* Visualization parameters accordion - grows when open to fill available space */}
+          {/* Visualization parameters accordion - grows when open to fill available space */}
           <EuiFlexItem
             grow={isSuggestionsAccordionOpen ? 1 : false}
             data-test-subj="InlineEditingSuggestions"
