@@ -6,18 +6,12 @@
  */
 
 import { useMemo, useEffect } from 'react';
-import { getOriginalAlertIds } from '@kbn/elastic-assistant-common';
-import { useAttackDetailsContext } from '../context';
-import { normalizeToStringArray } from './use_header_data';
+import { useOriginalAlertIds } from './use_original_alert_ids';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { fetchQueryAlerts } from '../../../detections/containers/detection_engine/alerts/api';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
 
-const FIELD_ALERT_IDS = 'kibana.alert.attack_discovery.alert_ids' as const;
-const FIELD_REPLACEMENTS = 'kibana.alert.attack_discovery.replacements' as const;
 const TERMS_AGG_SIZE = 200;
-
-const EMPTY_REPLACEMENTS: Record<string, string> = {};
 
 interface TermsBucket {
   key: string | string[];
@@ -36,7 +30,7 @@ function bucketKeysToArray(buckets: TermsBucket[] | undefined): string[] {
   const names: string[] = [];
   for (const b of buckets) {
     const key = b.key;
-    if (typeof key === 'string') {
+    if (key && typeof key === 'string') {
       if (key) names.push(key);
     } else if (Array.isArray(key)) {
       key.forEach((k) => {
@@ -59,25 +53,7 @@ export interface UseAttackEntitiesListsResult {
  * Queries the detection alerts index filtered by the attack's alert IDs and uses terms aggregations.
  */
 export const useAttackEntitiesLists = (): UseAttackEntitiesListsResult => {
-  const { getFieldsData } = useAttackDetailsContext();
-
-  const alertIds = useMemo(
-    () => normalizeToStringArray(getFieldsData(FIELD_ALERT_IDS)),
-    [getFieldsData]
-  );
-
-  const replacements = useMemo(() => {
-    const value = getFieldsData(FIELD_REPLACEMENTS);
-    if (!value || typeof value === 'string' || Array.isArray(value)) {
-      return EMPTY_REPLACEMENTS;
-    }
-    return value as Record<string, string>;
-  }, [getFieldsData]);
-
-  const originalAlertIds = useMemo(
-    () => getOriginalAlertIds({ alertIds, replacements }),
-    [alertIds, replacements]
-  );
+  const originalAlertIds = useOriginalAlertIds();
 
   const query = useMemo(
     () => ({

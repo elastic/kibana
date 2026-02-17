@@ -63,10 +63,17 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
       <EuiFlexItem>
         <EuiTitle size="xs">
           <h3>
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.left.insights.entities.userDetailsTitle"
-              defaultMessage="User"
-            />
+            {userNames.length > 1 ? (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.left.insights.entities.userDetailsTitlePlural"
+                defaultMessage="Users"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.left.insights.entities.userDetailsTitle"
+                defaultMessage="User"
+              />
+            )}
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
@@ -74,7 +81,6 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
           <>
             <UserDetails
               key={`user-${index}-${userName}`}
-              showTitle={false}
               userName={userName}
               timestamp={timestampOrFallback}
               scopeId={scopeId}
@@ -87,10 +93,17 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
       <EuiFlexItem>
         <EuiTitle size="xs">
           <h3>
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.left.insights.entities.hostDetailsTitle"
-              defaultMessage="Host"
-            />
+            {hostNames.length > 1 ? (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.left.insights.entities.hostDetailsTitlePlural"
+                defaultMessage="Hosts"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.left.insights.entities.hostDetailsTitle"
+                defaultMessage="Host"
+              />
+            )}
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
@@ -98,7 +111,6 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
           <>
             <HostDetails
               key={`hostName-${index}-${hostName}`}
-              showTitle={false}
               hostName={hostName}
               timestamp={timestampOrFallback}
               scopeId={scopeId}
