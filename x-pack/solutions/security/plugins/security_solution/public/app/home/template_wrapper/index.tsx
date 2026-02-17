@@ -24,6 +24,7 @@ import { Timeline } from './timeline';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
 import { SecurityPageName } from '../../types';
+import { useHasFullScreenContent } from '../../../common/containers/use_full_screen';
 
 /**
  * Need to apply the styles via a className to effect the containing bottom bar
@@ -58,6 +59,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
   React.memo(({ children, ...rest }) => {
     const solutionNavProps = useSecuritySolutionNavigation();
     const [isTimelineBottomBarVisible] = useShowTimeline();
+    const hasFullScreenContent = useHasFullScreenContent();
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
       getTimelineShowStatus(state, TimelineId.active)
@@ -106,7 +108,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
                 </ExpandableFlyoutProvider>
               </AlertsContextProvider>
             </KibanaPageTemplate.Section>
-            {isTimelineBottomBarVisible && (
+            {isTimelineBottomBarVisible && !hasFullScreenContent && (
               <KibanaPageTemplate.BottomBar data-test-subj="timeline-bottom-bar-container">
                 <EuiThemeProvider colorMode={globalColorMode}>
                   <ExpandableFlyoutProvider urlKey={URL_PARAM_KEY.timelineFlyout}>
