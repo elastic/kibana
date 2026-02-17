@@ -10,13 +10,11 @@
 import type { Document } from 'yaml';
 import type { DynamicStepContextSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-import {
-  forLoopScopesContainingOffset,
-  getTemplateLocalContext,
-} from './extract_template_local_context';
+import { getTemplateLocalContext } from './extract_template_local_context';
 import { getForeachItemSchema } from './get_foreach_state_schema';
 import { getScalarValueAtOffset } from '../../../../common/lib/yaml/get_scalar_value_at_offset';
 import { getSchemaAtPath } from '../../../../common/lib/zod';
+import { forLoopScopesContainingOffset } from '../../../shared/lib/template_local_context_shared';
 
 /** LiquidJS forloop object schema (index, index0, rindex, rindex0, first, last, length) */
 const FORLOOP_SCHEMA = z.object({
