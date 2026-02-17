@@ -45,7 +45,9 @@ describe('RegexRulesPanel', () => {
     render(<RegexRulesPanel />);
 
     expect(
-      screen.getAllByPlaceholderText('Regex pattern (for example: /geoip\\..*/)')
+      screen.getAllByPlaceholderText(
+        'Regex pattern (for example: /\\b\\d{1,3}(?:\\.\\d{1,3}){3}\\b/)'
+      )
     ).toHaveLength(2);
   });
 
@@ -78,7 +80,7 @@ describe('RegexRulesPanel', () => {
     expect(screen.getByText('No regex rules configured')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Use regex rules to match patterns (for example specific path or token formats) and map those matches to an entity-class mask.'
+        'Use regex rules to match patterns in field values (for example email addresses or IP addresses) and map those matches to an entity-class mask.'
       )
     ).toBeInTheDocument();
   });

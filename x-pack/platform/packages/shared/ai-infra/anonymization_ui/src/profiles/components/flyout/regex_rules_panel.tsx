@@ -98,7 +98,7 @@ export const RegexRulesPanel = () => {
             }
             disabled={!isManageMode || isSubmitting}
             placeholder={i18n.translate('anonymizationUi.profiles.regexRules.patternPlaceholder', {
-              defaultMessage: 'Regex pattern (for example: /geoip\\..*/)',
+              defaultMessage: 'Regex pattern (for example: /\\b\\d{1,3}(?:\\.\\d{1,3}){3}\\b/)',
             })}
             fullWidth
           />
@@ -279,7 +279,7 @@ export const RegexRulesPanel = () => {
               placeholder={i18n.translate(
                 'anonymizationUi.profiles.regexRules.patternPlaceholder',
                 {
-                  defaultMessage: 'Regex pattern (for example: /geoip\\..*/)',
+                  defaultMessage: 'Regex pattern (for example: /\\b\\d{1,3}(?:\\.\\d{1,3}){3}\\b/)',
                 }
               )}
               disabled={!isManageMode || isSubmitting}
@@ -348,7 +348,7 @@ export const RegexRulesPanel = () => {
           <p>
             {i18n.translate('anonymizationUi.profiles.regexRules.emptyStateDescription', {
               defaultMessage:
-                'Use regex rules to match patterns (for example specific path or token formats) and map those matches to an entity-class mask.',
+                'Use regex rules to match patterns in field values (for example email addresses or IP addresses) and map those matches to an entity-class mask.',
             })}
           </p>
           <p>
