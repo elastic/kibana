@@ -73,14 +73,14 @@ export async function pickTestGroupRunOrder() {
 
   const JEST_MAX_MINUTES = process.env.JEST_MAX_MINUTES
     ? parseFloat(process.env.JEST_MAX_MINUTES)
-    : 40;
+    : 35;
   if (Number.isNaN(JEST_MAX_MINUTES)) {
     throw new Error(`invalid JEST_MAX_MINUTES: ${process.env.JEST_MAX_MINUTES}`);
   }
 
   const FUNCTIONAL_MAX_MINUTES = process.env.FUNCTIONAL_MAX_MINUTES
     ? parseFloat(process.env.FUNCTIONAL_MAX_MINUTES)
-    : 37;
+    : 30;
   if (Number.isNaN(FUNCTIONAL_MAX_MINUTES)) {
     throw new Error(`invalid FUNCTIONAL_MAX_MINUTES: ${process.env.FUNCTIONAL_MAX_MINUTES}`);
   }
@@ -276,6 +276,7 @@ export async function pickTestGroupRunOrder() {
         defaultMin: 4,
         maxMin: JEST_MAX_MINUTES,
         overheadMin: 0.2,
+        concurrency: 3,
         names: jestUnitConfigs,
       },
       {
@@ -283,6 +284,7 @@ export async function pickTestGroupRunOrder() {
         defaultMin: 60,
         maxMin: JEST_MAX_MINUTES,
         overheadMin: 0.2,
+        concurrency: 1,
         names: jestIntegrationConfigs,
       },
       ...Array.from(ftrConfigsByQueue).map(([queue, names]) => ({
