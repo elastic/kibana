@@ -209,7 +209,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
           <EuiModalBody>
             <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem>
-                <EuiFlexGroup direction="row" gutterSize="l">
+                <EuiFlexGroup direction="row" gutterSize="s">
                   {ENABLED_TRIGGER_TABS.map((trigger) => (
                     <EuiFlexItem key={trigger}>
                       <EuiButton

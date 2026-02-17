@@ -41,6 +41,6 @@ export const TRIGGER_TABS_DESCRIPTIONS: Record<WorkflowTriggerTab, string> = {
   }),
   historical: i18n.translate(
     'plugins.workflowsManagement.workflowsExecution.historicalTriggerDescription',
-    { defaultMessage: 'Reuse data from previous runs.' }
+    { defaultMessage: 'Reuse input data from previous executions.' }
   ),
 };

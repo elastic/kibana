@@ -14,9 +14,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIconTip,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
@@ -61,9 +63,11 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
       const total = executionsList?.total ?? 0;
       const results = executionsList?.results ?? [];
       if (!results.length) return [];
-      return results.map((execution, index) => {
+      return results.map((execution, index): EuiComboBoxOptionOption<string> => {
         const runNumber = total - index;
         return {
+          key: execution.id,
+          value: execution.id,
           label: i18n.translate('workflows.workflowExecuteModal.replayOptionLabel', {
             defaultMessage: 'Run #{runNumber} - {dateTime}',
             values: {
@@ -71,7 +75,24 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
               dateTime: getFormattedDateTime(new Date(execution.startedAt)) ?? execution.startedAt,
             },
           }),
-          key: execution.id,
+          prepend: (
+            <EuiIconTip
+              type={execution.isTestRun ? 'flask' : 'empty'}
+              aria-hidden={true}
+              content={
+                execution.isTestRun
+                  ? i18n.translate('workflows.workflowExecuteModal.testRun', {
+                      defaultMessage: 'Test run',
+                    })
+                  : undefined
+              }
+            />
+          ),
+          css: css`
+            .euiComboBoxOption__prepend {
+              margin-top: 3px; /* align the icon with the text */
+            }
+          `,
         };
       });
     }, [executionsList, getFormattedDateTime]);
@@ -106,7 +127,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
     }, [selectedExecution, replayInputsFromContext, setValue, setErrors]);
 
     const handleExecutionChange = useCallback((selected: EuiComboBoxOptionOption<string>[]) => {
-      const id = selected.length > 0 && selected[0].key ? String(selected[0].key) : null;
+      const id = selected.length > 0 && selected[0].value ? String(selected[0].value) : null;
       setSelectedExecutionId(id);
     }, []);
 
@@ -128,7 +149,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
     );
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexGroup direction="column" gutterSize="l">
         <EuiSpacer size="s" />
         <EuiFlexItem grow={false}>
           <EuiFormRow
@@ -154,20 +175,18 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
                 { defaultMessage: 'Search or select a previous run' }
               )}
               data-test-subj="workflowExecuteModalReplayExecutionComboBox"
+              css={css`
+                .euiComboBoxPlainTextSelection__prepend {
+                  margin-inline-end: 0px;
+                  margin-top: 3px; /* align the icon with the text */
+                }
+              `}
             />
           </EuiFormRow>
         </EuiFlexItem>
 
         {selectedExecution && (
           <>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                {i18n.translate('workflows.workflowExecuteModal.originalTriggerLabel', {
-                  defaultMessage: 'Original input: {trigger}',
-                  values: { trigger: getTriggerTypeLabel(selectedExecution.context) },
-                })}
-              </EuiText>
-            </EuiFlexItem>
             {errors && errors !== NOT_READY_SENTINEL && (
               <EuiFlexItem grow={false}>
                 <EuiCallOut
@@ -185,47 +204,17 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
             <EuiFlexItem>
               <EuiFormRow
                 label={i18n.translate('workflows.workflowExecuteModal.replayInputDataLabel', {
-                  defaultMessage: 'Input data (editable)',
+                  defaultMessage: 'Input data (original: {originalTrigger})',
+                  values: { originalTrigger: getTriggerTypeLabel(selectedExecution.context) },
                 })}
                 fullWidth
               >
-                {/* <CodeEditor
-                  languageId="json"
-                  value={value}
-                  fitToContent={{ minLines: 5, maxLines: 20 }}
-                  width="100%"
-                  onChange={(newValue) => {
-                    setValue(newValue);
-                    try {
-                      JSON.parse(newValue);
-                      setErrors(null);
-                    } catch {
-                      setErrors(
-                        i18n.translate('workflows.workflowExecuteModal.invalidJson', {
-                          defaultMessage: 'Invalid JSON',
-                        })
-                      );
-                    }
-                  }}
-                  dataTestSubj="workflowExecuteModalReplayJsonEditor"
-                  options={{
-                    language: 'json',
-                    minimap: { enabled: false },
-                    scrollBeyondLastLine: false,
-                    wordWrap: 'on',
-                    automaticLayout: true,
-                    lineNumbers: 'on',
-                    theme: WORKFLOWS_MONACO_EDITOR_THEME,
-                    formatOnType: true,
-                  }}
-                /> */}
-
                 <CodeEditor
                   languageId="json"
                   value={value}
                   fitToContent={{
                     minLines: 5,
-                    maxLines: 10,
+                    maxLines: 15,
                   }}
                   width="100%"
                   onChange={handleChange}
