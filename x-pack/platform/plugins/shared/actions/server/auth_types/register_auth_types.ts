@@ -8,8 +8,17 @@ import type { NormalizedAuthType } from '@kbn/connector-specs';
 import { authTypeSpecs } from '@kbn/connector-specs';
 import type { AuthTypeRegistry } from './auth_type_registry';
 
-export function registerAuthTypes(registry: AuthTypeRegistry) {
+export function registerAuthTypes(
+  registry: AuthTypeRegistry,
+  options: { enableOAuthAuthorizationCode?: boolean } = {}
+) {
+  const { enableOAuthAuthorizationCode = false } = options;
+
   for (const spec of Object.values(authTypeSpecs)) {
-    registry.register(spec as NormalizedAuthType);
+    const authType = spec as NormalizedAuthType;
+    if (authType.id === 'oauth_authorization_code' && !enableOAuthAuthorizationCode) {
+      continue;
+    }
+    registry.register(authType);
   }
 }

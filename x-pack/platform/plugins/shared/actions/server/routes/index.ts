@@ -36,11 +36,20 @@ export interface RouteOptions {
   usageCounter?: UsageCounter;
   logger: Logger;
   core: CoreSetup<ActionsPluginsStart>;
-  oauthRateLimiter: OAuthRateLimiter;
+  oauthRateLimiter?: OAuthRateLimiter;
+  oauthAuthorizationCodeEnabled?: boolean;
 }
 
 export function defineRoutes(opts: RouteOptions) {
-  const { router, licenseState, actionsConfigUtils, logger, core, oauthRateLimiter } = opts;
+  const {
+    router,
+    licenseState,
+    actionsConfigUtils,
+    logger,
+    core,
+    oauthRateLimiter,
+    oauthAuthorizationCodeEnabled = false,
+  } = opts;
 
   createConnectorRoute(router, licenseState);
   deleteConnectorRoute(router, licenseState);
@@ -52,9 +61,12 @@ export function defineRoutes(opts: RouteOptions) {
   getGlobalExecutionLogRoute(router, licenseState);
   getGlobalExecutionKPIRoute(router, licenseState);
 
-  getOAuthAccessToken(router, licenseState, actionsConfigUtils);
-  oauthAuthorizeRoute(router, licenseState, logger, core, oauthRateLimiter);
-  oauthCallbackRoute(router, licenseState, actionsConfigUtils, logger, core, oauthRateLimiter);
+  if (oauthAuthorizationCodeEnabled && oauthRateLimiter) {
+    getOAuthAccessToken(router, licenseState, actionsConfigUtils);
+    oauthAuthorizeRoute(router, licenseState, logger, core, oauthRateLimiter);
+    oauthCallbackRoute(router, licenseState, actionsConfigUtils, logger, core, oauthRateLimiter);
+  }
+
   getAllConnectorsIncludingSystemRoute(router, licenseState);
   listTypesWithSystemRoute(router, licenseState);
 }

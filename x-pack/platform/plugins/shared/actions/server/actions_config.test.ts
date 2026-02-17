@@ -46,6 +46,7 @@ const defaultActionsConfig: ActionsConfig = {
     authorize: { lookbackWindow: '1h', limit: 100 },
     callback: { lookbackWindow: '1h', limit: 100 },
   },
+  oauthAuthorizationCodeEnabled: false,
 };
 
 describe('ensureUriAllowed', () => {

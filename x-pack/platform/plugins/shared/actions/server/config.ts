@@ -213,6 +213,7 @@ export const configSchema = schema.object({
   ),
   rateLimiter: schema.maybe(rateLimiterSchema),
   oAuthRateLimit: oAuthRateLimitSchema,
+  oauthAuthorizationCodeEnabled: schema.boolean({ defaultValue: false }),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;

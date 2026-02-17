@@ -43,7 +43,8 @@ export function setupSavedObjects(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
   actionTypeRegistry: ActionTypeRegistry,
   taskManagerIndex: string,
-  inMemoryConnectors: InMemoryConnector[]
+  inMemoryConnectors: InMemoryConnector[],
+  oauthAuthorizationCodeEnabled: boolean = false
 ) {
   savedObjects.registerType({
     name: ACTION_SAVED_OBJECT_TYPE,
@@ -134,51 +135,60 @@ export function setupSavedObjects(
     modelVersions: connectorTokenModelVersions,
   });
 
+  const connectorTokenAttributesToEncrypt = new Set(['token']);
+  const connectorTokenAttributesToIncludeInAAD = new Set([
+    'connectorId',
+    'tokenType',
+    'expiresAt',
+    'createdAt',
+    'updatedAt',
+  ]);
+
+  if (oauthAuthorizationCodeEnabled) {
+    connectorTokenAttributesToEncrypt.add('refreshToken');
+    connectorTokenAttributesToIncludeInAAD.add('refreshTokenExpiresAt');
+  }
+
   encryptedSavedObjects.registerType({
     type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['token', 'refreshToken']),
-    attributesToIncludeInAAD: new Set([
-      'connectorId',
-      'tokenType',
-      'expiresAt',
-      'createdAt',
-      'updatedAt',
-      'refreshTokenExpiresAt',
-    ]),
+    attributesToEncrypt: connectorTokenAttributesToEncrypt,
+    attributesToIncludeInAAD: connectorTokenAttributesToIncludeInAAD,
   });
 
-  savedObjects.registerType({
-    name: OAUTH_STATE_SAVED_OBJECT_TYPE,
-    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
-    hidden: true,
-    namespaceType: 'agnostic',
-    mappings: oauthStateMappings,
-    management: {
-      importableAndExportable: false,
-    },
-    modelVersions: oauthStateModelVersions,
-    excludeOnUpgrade: async () => {
-      // Clean up expired states older than 1 hour
-      const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
-      return {
-        bool: {
-          must: [{ term: { type: 'oauth_state' } }, { range: { expiresAt: { lt: oneHourAgo } } }],
-        },
-      };
-    },
-  });
-  encryptedSavedObjects.registerType({
-    type: OAUTH_STATE_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['codeVerifier']),
-    attributesToIncludeInAAD: new Set([
-      'state',
-      'connectorId',
-      'authorizationUrl',
-      'scope',
-      'spaceId',
-      'createdAt',
-      'expiresAt',
-      'createdBy',
-    ]),
-  });
+  if (oauthAuthorizationCodeEnabled) {
+    savedObjects.registerType({
+      name: OAUTH_STATE_SAVED_OBJECT_TYPE,
+      indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      hidden: true,
+      namespaceType: 'agnostic',
+      mappings: oauthStateMappings,
+      management: {
+        importableAndExportable: false,
+      },
+      modelVersions: oauthStateModelVersions,
+      excludeOnUpgrade: async () => {
+        // Clean up expired states older than 1 hour
+        const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
+        return {
+          bool: {
+            must: [{ term: { type: 'oauth_state' } }, { range: { expiresAt: { lt: oneHourAgo } } }],
+          },
+        };
+      },
+    });
+    encryptedSavedObjects.registerType({
+      type: OAUTH_STATE_SAVED_OBJECT_TYPE,
+      attributesToEncrypt: new Set(['codeVerifier']),
+      attributesToIncludeInAAD: new Set([
+        'state',
+        'connectorId',
+        'authorizationUrl',
+        'scope',
+        'spaceId',
+        'createdAt',
+        'expiresAt',
+        'createdBy',
+      ]),
+    });
+  }
 }

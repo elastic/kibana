@@ -63,6 +63,7 @@ function getConfig(overrides = {}) {
       authorize: { lookbackWindow: '1h', limit: 100 },
       callback: { lookbackWindow: '1h', limit: 100 },
     },
+    oauthAuthorizationCodeEnabled: false,
     ...overrides,
   };
 }
@@ -117,6 +118,7 @@ describe('Actions Plugin', () => {
           authorize: { lookbackWindow: '1h', limit: 100 },
           callback: { lookbackWindow: '1h', limit: 100 },
         },
+        oauthAuthorizationCodeEnabled: false,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -515,6 +517,7 @@ describe('Actions Plugin', () => {
           authorize: { lookbackWindow: '1h', limit: 100 },
           callback: { lookbackWindow: '1h', limit: 100 },
         },
+        oauthAuthorizationCodeEnabled: false,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();

@@ -327,14 +327,17 @@ export class ActionsPlugin
     this.spaces = plugins.spaces;
 
     this.authTypeRegistry = new AuthTypeRegistry();
-    registerAuthTypes(this.authTypeRegistry);
+    registerAuthTypes(this.authTypeRegistry, {
+      enableOAuthAuthorizationCode: this.actionsConfig.oauthAuthorizationCodeEnabled,
+    });
 
     setupSavedObjects(
       core.savedObjects,
       plugins.encryptedSavedObjects,
       this.actionTypeRegistry!,
       plugins.taskManager.index,
-      this.inMemoryConnectors
+      this.inMemoryConnectors,
+      this.actionsConfig.oauthAuthorizationCodeEnabled
     );
 
     const usageCollection = plugins.usageCollection;
@@ -399,22 +402,24 @@ export class ActionsPlugin
       });
     }
 
+    let oauthRateLimiter: OAuthRateLimiter | undefined;
     // Initialize OAuth state cleanup task
-    initializeOAuthStateCleanupTask(this.logger, plugins.taskManager, core);
+    if (this.actionsConfig.oauthAuthorizationCodeEnabled) {
+      initializeOAuthStateCleanupTask(this.logger, plugins.taskManager, core);
+      // Initialize OAuth rate limiter
+      oauthRateLimiter = new OAuthRateLimiter({
+        config: this.actionsConfig.oAuthRateLimit,
+      });
+      this.logger.info(
+        `OAuth rate limiter initialized with authorize limit: ${this.actionsConfig.oAuthRateLimit.authorize.limit}`
+      );
+    }
 
     const subActionFramework = createSubActionConnectorFramework({
       actionTypeRegistry,
       logger: this.logger,
       actionsConfigUtils,
     });
-
-    // Initialize OAuth rate limiter
-    const oauthRateLimiter = new OAuthRateLimiter({
-      config: this.actionsConfig.oAuthRateLimit,
-    });
-    this.logger.info(
-      `OAuth rate limiter initialized with authorize limit: ${this.actionsConfig.oAuthRateLimit.authorize.limit}`
-    );
 
     // Routes
     defineRoutes({
@@ -425,6 +430,7 @@ export class ActionsPlugin
       logger: this.logger,
       core,
       oauthRateLimiter,
+      oauthAuthorizationCodeEnabled: this.actionsConfig.oauthAuthorizationCodeEnabled,
     });
 
     return {
@@ -678,7 +684,9 @@ export class ActionsPlugin
     this.eventLogService!.isEsContextReady()
       .then(() => {
         scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
-        scheduleOAuthStateCleanupTask(this.logger, plugins.taskManager);
+        if (this.actionsConfig.oauthAuthorizationCodeEnabled) {
+          scheduleOAuthStateCleanupTask(this.logger, plugins.taskManager);
+        }
       })
       .catch(() => {});
 
