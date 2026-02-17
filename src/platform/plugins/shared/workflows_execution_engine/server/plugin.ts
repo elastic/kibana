@@ -32,9 +32,9 @@ import {
 } from './execution_functions';
 import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';
+import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { UsageReportingService } from './metering/usage_reporting_service';
-import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
@@ -87,7 +87,7 @@ export class WorkflowsExecutionEnginePlugin
     core: CoreSetup<WorkflowsExecutionEnginePluginStartDeps, WorkflowsExecutionEnginePluginStart>,
     plugins: WorkflowsExecutionEnginePluginSetupDeps
   ) {
-    this.logger.debug('workflows-execution-engine: Setup');
+    this.logger.info('Workflows execution engine setup');
 
     // Register telemetry event schemas
     WorkflowExecutionTelemetryClient.setup(core.analytics);
@@ -110,7 +110,7 @@ export class WorkflowsExecutionEnginePlugin
       );
       this.logger.info('Workflows metering service initialized');
     } else {
-      this.logger.debug(
+      this.logger.info(
         'Workflows metering service not initialized: Usage API plugin is not available or not configured'
       );
     }
