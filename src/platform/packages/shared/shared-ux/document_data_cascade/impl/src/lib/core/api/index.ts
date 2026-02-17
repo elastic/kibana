@@ -158,17 +158,21 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
   );
 
   /** Notifies all subscribed listeners that the store snapshot may have changed. */
-  const notifyListeners = useCallback(() => {
-    const opts = optionsRef.current;
-    const { expanded: exp, rowSelection: sel } = latestStateRef.current;
-    const snap = storeRef.current.snapshot;
+  const notifyListeners = useMemo(
+    () =>
+      debounce(() => {
+        const opts = optionsRef.current;
+        const { expanded: exp, rowSelection: sel } = latestStateRef.current;
+        const snap = storeRef.current.snapshot;
 
-    snap.totalRowCount = opts.rows.length;
-    snap.expanded = exp;
-    snap.rowSelection = sel;
+        snap.totalRowCount = opts.rows.length;
+        snap.expanded = exp;
+        snap.rowSelection = sel;
 
-    storeRef.current.listeners.forEach((listener) => listener());
-  }, []);
+        storeRef.current.listeners.forEach((listener) => listener());
+      }, 100),
+    []
+  );
 
   /** scans updates from virtualizer instance and updates the store snapshot. */
   const collectVirtualizerStateChanges = useCallback(
