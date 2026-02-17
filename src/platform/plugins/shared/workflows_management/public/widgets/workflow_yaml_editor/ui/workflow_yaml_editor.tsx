@@ -452,7 +452,12 @@ export const WorkflowYAMLEditor = ({
     }
 
     const disposable = editorRef.current!.onDidChangeCursorPosition((event) => {
-      dispatch(setCursorPosition({ lineNumber: event.position.lineNumber }));
+      dispatch(
+        setCursorPosition({
+          lineNumber: event.position.lineNumber,
+          column: event.position.column,
+        })
+      );
     });
 
     return () => disposable.dispose();
