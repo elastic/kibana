@@ -109,6 +109,16 @@ export class StreamsAppPlugin
       appRoute: '/app/streams',
       category: DEFAULT_APP_CATEGORIES.management,
       order: 10000,
+      deepLinks: [
+        {
+          id: 'content',
+          title: i18n.translate('xpack.streams.contentLinkTitle', {
+            defaultMessage: 'Stream Content',
+          }),
+          path: '/_content',
+          visibleIn: [],
+        },
+      ],
       updater$: from(startServicesPromise).pipe(
         switchMap(([_, pluginsStart]) =>
           pluginsStart.streams.navigationStatus$.pipe(

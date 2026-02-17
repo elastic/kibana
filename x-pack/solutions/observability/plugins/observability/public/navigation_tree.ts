@@ -101,6 +101,15 @@ function createNavTree({
               link: 'streams' as const,
               icon: 'productStreamsWired',
             },
+            {
+              id: 'streamContent',
+              link: 'streams:content' as const,
+              title: i18n.translate('xpack.observability.obltNav.streamContent', {
+                defaultMessage: 'Stream Content',
+              }),
+              icon: 'documents',
+              sideNavStatus: 'visible' as const,
+            },
           ]
         : []),
       {
