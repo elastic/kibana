@@ -42,6 +42,7 @@ import type {
   DataStream,
   Index,
   IndexSettingsResponse,
+  MappingsResponse,
 } from '../../../common';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
@@ -529,7 +530,7 @@ export function loadIndex(indexName: string) {
 }
 
 export function useLoadIndexMappings(indexName: string) {
-  return useRequest<MappingTypeMapping>({
+  return useRequest<MappingsResponse>({
     path: `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`,
     method: 'get',
   });

@@ -32,7 +32,7 @@ export function registerDeleteDocumentRoute({ router, lib: { handleEsError } }: 
       const { indexName, id } = request.params;
 
       try {
-        await client.delete({ index: indexName, id });
+        await client.delete({ index: indexName, id, refresh: true });
         return response.ok();
       } catch (error) {
         return handleEsError({ error, response });

@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-// TODO: Move mappings type from Mappings editor here
+import type { MappingTypeMapping } from 'elasticsearch-8.x/lib/api/types';
 
+// TODO: Move mappings type from Mappings editor here
 export interface Mappings {
   [key: string]: any;
+}
+
+export interface MappingsResponse {
+  mappings: MappingTypeMapping;
 }

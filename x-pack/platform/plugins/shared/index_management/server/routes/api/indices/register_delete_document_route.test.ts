@@ -34,7 +34,7 @@ describe('Delete document API', () => {
 
       await router.runRequest(mockRequest);
 
-      expect(deleteMock).toHaveBeenCalledWith({ index: 'my-index', id: 'doc-1' });
+      expect(deleteMock).toHaveBeenCalledWith({ index: 'my-index', id: 'doc-1', refresh: true });
     });
 
     it('should return ok on success', async () => {

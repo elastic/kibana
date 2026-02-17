@@ -49,6 +49,7 @@ import { useMappingsStateListener } from '../../../../../components/mappings_edi
 import { parseMappings } from '../../../../../shared/parse_mappings';
 import { useUserPrivileges } from '../../../../../services/api';
 import { useLicense } from '../../../../../../hooks/use_license';
+import { IndexDocuments } from '../index_documents/index_documents';
 
 interface Props {
   indexDetails: Index;
@@ -84,6 +85,7 @@ export const DetailsPageOverviewV2: React.FunctionComponent<Props> = ({ indexDet
 
   const { data } = useUserPrivileges(indexDetails.name);
   const hasUpdateMappingsPrivileges = data?.privileges?.canManageIndex === true;
+  const hasDeleteDocumentsPrivileges = data?.privileges?.canDeleteDocuments === true;
 
   const sizeFormatted = formatBytes(size);
   const primarySizeFormatted = formatBytes(primarySize);
@@ -222,6 +224,13 @@ export const DetailsPageOverviewV2: React.FunctionComponent<Props> = ({ indexDet
               sharePlugin={share}
               application={core.application}
               consoleRequest={getConsoleRequest('ingestDataIndex', codeSnippetArguments)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <IndexDocuments
+              indexName={name}
+              mappings={mappingsData ?? undefined}
+              hasDeleteDocumentsPrivilege={hasDeleteDocumentsPrivileges}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
