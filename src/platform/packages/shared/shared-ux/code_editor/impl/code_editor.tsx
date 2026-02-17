@@ -662,12 +662,13 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               fontSize: isFullScreen ? 16 : 12,
               lineHeight: isFullScreen ? 24 : 21,
               contextmenu: enableCustomContextMenu,
-              fixedOverflowWidgets: true,
               // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
               'bracketPairColorization.enabled': false,
               ...options,
               // Explicit links prop always takes precedence over any value passed in options
               links,
+              // Explicit not possible to override because of the way the suggestion widget is rendered in a separate container
+              fixedOverflowWidgets: true,
             }}
           />
         </ReBroadcastMouseDownEvents>
