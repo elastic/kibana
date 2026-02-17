@@ -290,7 +290,7 @@ describe('fetchEsqlQuery', () => {
     it('should generate the correct query', async () => {
       const params = defaultParams;
       const { dateStart, dateEnd } = getTimeRange();
-      const query = getEsqlQuery(params, undefined, dateStart, dateEnd);
+      const query = getEsqlQuery(params, 1000, dateStart, dateEnd);
 
       expect(query).toMatchInlineSnapshot(`
         Object {
@@ -309,7 +309,7 @@ describe('fetchEsqlQuery', () => {
               ],
             },
           },
-          "query": "from test",
+          "query": "FROM test | LIMIT 1000",
         }
       `);
     });
@@ -322,7 +322,7 @@ describe('fetchEsqlQuery', () => {
         },
       };
       const { dateStart, dateEnd } = getTimeRange();
-      const query = getEsqlQuery(params, undefined, dateStart, dateEnd);
+      const query = getEsqlQuery(params, 1000, dateStart, dateEnd);
 
       expect(query).toMatchInlineSnapshot(`
         Object {
@@ -349,7 +349,7 @@ describe('fetchEsqlQuery', () => {
               "_tend": "2020-02-09T23:15:41.941Z",
             },
           ],
-          "query": "from test | where event.action == \\"execute\\" AND event.duration > 0 AND @timestamp > ?_tstart | stats duration = AVG(event.duration) BY BUCKET(@timestamp, 30, ?_tstart, ?_tend), event.provider | where duration > 0",
+          "query": "FROM test | WHERE event.action == \\"execute\\" AND event.duration > 0 AND @timestamp > ?_tstart | STATS duration = AVG(event.duration) BY BUCKET(@timestamp, 30, ?_tstart, ?_tend), event.provider | WHERE duration > 0 | LIMIT 1000",
         }
       `);
     });
@@ -376,7 +376,7 @@ describe('fetchEsqlQuery', () => {
               ],
             },
           },
-          "query": "from test | limit 100",
+          "query": "FROM test | LIMIT 100",
         }
       `);
     });

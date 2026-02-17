@@ -160,7 +160,6 @@ export function createChromeApi({
     hasHeaderBanner$: () => state.headerBanner.$.pipe(map((banner) => Boolean(banner))),
 
     // Chrome Style
-    getBodyClasses$: () => state.bodyClasses$,
     setChromeStyle: state.style.setChromeStyle,
     getChromeStyle$: () => state.style.chromeStyle$,
 
