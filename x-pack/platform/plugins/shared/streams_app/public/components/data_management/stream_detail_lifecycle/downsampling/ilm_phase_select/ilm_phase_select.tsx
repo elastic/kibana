@@ -20,10 +20,9 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { useIlmPhasesColorAndDescription } from '../../hooks/use_ilm_phases_color_and_description';
+import { ILM_PHASE_ORDER } from '../edit_ilm_phases_flyout/constants';
 
-const OPTIONS = ['hot', 'warm', 'cold', 'frozen', 'delete'] as const;
-
-export type IlmPhaseSelectOption = (typeof OPTIONS)[number];
+export type IlmPhaseSelectOption = (typeof ILM_PHASE_ORDER)[number];
 
 export interface IlmPhaseSelectRenderButtonProps {
   disabled: boolean;
@@ -78,7 +77,7 @@ export const IlmPhaseSelect = ({
 
   const availableOptions = useMemo(
     () =>
-      OPTIONS.filter(
+      ILM_PHASE_ORDER.filter(
         (option) => !selectedPhases.includes(option) && !excludedPhases.includes(option)
       ),
     [excludedPhases, selectedPhases]

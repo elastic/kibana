@@ -6,18 +6,22 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { LifecycleSummary } from './lifecycle_summary';
 import type { Streams, IngestStreamLifecycle } from '@kbn/streams-schema';
 
 // Mock the hooks
-const mockFetch = jest.fn().mockResolvedValue(undefined);
+const mockFetch = jest.fn();
+const mockStreamsRepositoryClient = { fetch: mockFetch };
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
 
 jest.mock('../../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     core: {
+      application: {
+        navigateToApp: jest.fn(),
+      },
       notifications: {
         toasts: {
           addSuccess: mockAddSuccess,
@@ -28,9 +32,7 @@ jest.mock('../../../../hooks/use_kibana', () => ({
     dependencies: {
       start: {
         streams: {
-          streamsRepositoryClient: {
-            fetch: mockFetch,
-          },
+          streamsRepositoryClient: mockStreamsRepositoryClient,
         },
       },
     },
@@ -111,6 +113,21 @@ describe('LifecycleSummary', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Default: avoid noisy async errors from useSnapshotRepositories
+    mockFetch.mockImplementation((endpoint: string) => {
+      if (endpoint === 'GET /internal/streams/lifecycle/_snapshot_repositories') {
+        return Promise.resolve({ repositories: [] });
+      }
+      return Promise.resolve(undefined);
+    });
+
+    // Default: avoid leaking per-test overrides
+    mockUseStreamsAppFetch.mockReturnValue({
+      value: undefined,
+      loading: false,
+      refresh: jest.fn(),
+    });
   });
 
   describe('DSL Lifecycle', () => {
@@ -171,7 +188,6 @@ describe('LifecycleSummary', () => {
 
       expect(screen.getByTestId('dataLifecycleSummary-skeleton')).toBeInTheDocument();
     });
-
     it('should open edit policy modal when removing an ILM phase with affected resources', async () => {
       const policies = [
         {
@@ -197,6 +213,9 @@ describe('LifecycleSummary', () => {
       mockFetch.mockImplementation((endpoint: string) => {
         if (endpoint === 'GET /internal/streams/lifecycle/_policies') {
           return Promise.resolve(policies);
+        }
+        if (endpoint === 'GET /internal/streams/lifecycle/_snapshot_repositories') {
+          return Promise.resolve({ repositories: [] });
         }
         return Promise.resolve(undefined);
       });
@@ -249,6 +268,9 @@ describe('LifecycleSummary', () => {
       mockFetch.mockImplementation((endpoint: string) => {
         if (endpoint === 'GET /internal/streams/lifecycle/_policies') {
           return Promise.resolve(policies);
+        }
+        if (endpoint === 'GET /internal/streams/lifecycle/_snapshot_repositories') {
+          return Promise.resolve({ repositories: [] });
         }
         return Promise.resolve(undefined);
       });

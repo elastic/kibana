@@ -8,23 +8,23 @@
 import type { RootSchema, SchemaObject } from '@elastic/ebt';
 import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type {
-  StreamsAIGrokSuggestionAcceptedProps,
-  StreamsAIDissectSuggestionAcceptedProps,
-  StreamsAttachmentClickEventProps,
-  StreamsAttachmentCountProps,
-  StreamsAttachmentLinkChangedProps,
-  StreamsAttachmentFlyoutOpenedProps,
-  StreamsAttachmentFlyoutActionProps,
-  StreamsChildStreamCreatedProps,
-  StreamsProcessingSavedProps,
-  StreamsRetentionChangedProps,
-  StreamsSchemaUpdatedProps,
-  StreamsSignificantEventsCreatedProps,
-  StreamsSignificantEventsSuggestionsGeneratedEventProps,
-  WiredStreamsStatusChangedProps,
-  StreamsFeatureIdentificationSavedProps,
-  StreamsFeatureIdentificationDeletedProps,
-  StreamsTabVisitedProps,
+    StreamsAIGrokSuggestionAcceptedProps,
+    StreamsAIDissectSuggestionAcceptedProps,
+    StreamsAttachmentClickEventProps,
+    StreamsAttachmentCountProps,
+    StreamsAttachmentLinkChangedProps,
+    StreamsAttachmentFlyoutOpenedProps,
+    StreamsAttachmentFlyoutActionProps,
+    StreamsChildStreamCreatedProps,
+    StreamsProcessingSavedProps,
+    StreamsRetentionChangedProps,
+    StreamsSchemaUpdatedProps,
+    StreamsSignificantEventsCreatedProps,
+    StreamsSignificantEventsSuggestionsGeneratedEventProps,
+    WiredStreamsStatusChangedProps,
+    StreamsFeatureIdentificationSavedProps,
+    StreamsFeatureIdentificationDeletedProps,
+    StreamsTabVisitedProps,
 } from './types';
 
 const attachmentTypeCountFields: Record<
@@ -476,6 +476,12 @@ const streamsTabVisitedSchema: RootSchema<StreamsTabVisitedProps> = {
         type: 'boolean',
         _meta: {
           description: 'Whether the user can manage failure store',
+        },
+      },
+      create_snapshot_repository: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the user can create snapshot repositories',
         },
       },
     },

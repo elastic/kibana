@@ -28,29 +28,59 @@ import { LifecycleBar } from './lifecycle_bar';
 import { DownsamplingBar } from './downsampling_bar';
 import { type LifecyclePhase } from './lifecycle_types';
 
-interface DataLifecycleSummaryProps {
+export interface DataLifecycleSummaryModel {
   phases: LifecyclePhase[];
   loading?: boolean;
-  onPhaseClick?: (phase: LifecyclePhase, index: number) => void;
   downsampleSteps?: DownsampleStep[];
   testSubjPrefix?: string;
-  isIlm?: boolean;
-  onRemovePhase?: (phaseName: string) => void;
-  onRemoveDownsampleStep?: (stepNumber: number) => void;
+}
+
+export interface DataLifecycleSummaryCapabilities {
   canManageLifecycle: boolean;
 }
 
+export interface DataLifecycleSummaryPhaseActions {
+  onPhaseClick?: (phase: LifecyclePhase, index: number) => void;
+  onRemovePhase?: (phaseName: string) => void;
+  onEditPhase?: (phaseName: string) => void;
+  showPhaseActions?: boolean;
+}
+
+export interface DataLifecycleSummaryDownsamplingActions {
+  onRemoveDownsampleStep?: (stepNumber: number) => void;
+  onEditDownsampleStep?: (stepNumber: number, phaseName?: string) => void;
+}
+
+export interface DataLifecycleSummaryUiState {
+  editedPhaseName?: string;
+  isEditLifecycleFlyoutOpen?: boolean;
+}
+
+interface DataLifecycleSummaryProps {
+  model: DataLifecycleSummaryModel;
+  capabilities: DataLifecycleSummaryCapabilities;
+  headerActions?: React.ReactNode;
+  phaseActions?: DataLifecycleSummaryPhaseActions;
+  downsamplingActions?: DataLifecycleSummaryDownsamplingActions;
+  uiState?: DataLifecycleSummaryUiState;
+}
+
 export const DataLifecycleSummary = ({
-  phases,
-  loading = false,
-  onPhaseClick,
-  downsampleSteps,
-  testSubjPrefix,
-  isIlm,
-  onRemovePhase,
-  onRemoveDownsampleStep,
-  canManageLifecycle,
+  model,
+  capabilities,
+  headerActions,
+  phaseActions,
+  downsamplingActions,
+  uiState,
 }: DataLifecycleSummaryProps) => {
+  const { phases, downsampleSteps, loading = false, testSubjPrefix } = model;
+  const { canManageLifecycle } = capabilities;
+  const { editedPhaseName, isEditLifecycleFlyoutOpen = false } = uiState ?? {};
+
+  const showPhaseActions =
+    phaseActions?.showPhaseActions ??
+    Boolean(phaseActions?.onEditPhase || phaseActions?.onRemovePhase);
+
   const isRetentionInfinite = !phases.some((p) => p.isDelete);
   const showSkeleton = loading && phases.length === 0;
 
@@ -71,13 +101,18 @@ export const DataLifecycleSummary = ({
         css={{ height: '100%' }}
       >
         <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s" grow={false}>
-          <EuiText>
-            <h5 data-test-subj="dataLifecycleSummary-title">
-              {i18n.translate('xpack.streams.streamDetailLifecycle.dataLifecycle', {
-                defaultMessage: 'Data lifecycle',
-              })}
-            </h5>
-          </EuiText>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <h5 data-test-subj="dataLifecycleSummary-title">
+                  {i18n.translate('xpack.streams.streamDetailLifecycle.dataLifecycle', {
+                    defaultMessage: 'Data lifecycle',
+                  })}
+                </h5>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{headerActions}</EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPanel>
 
         <EuiPanel grow hasShadow={false} hasBorder={false} paddingSize="s">
@@ -96,17 +131,23 @@ export const DataLifecycleSummary = ({
                   phases={phases}
                   gridTemplateColumns={gridTemplateColumns}
                   phaseColumnSpans={phaseColumnSpans}
-                  onPhaseClick={onPhaseClick}
+                  onPhaseClick={phaseActions?.onPhaseClick}
+                  showPhaseActions={showPhaseActions}
+                  onRemovePhase={phaseActions?.onRemovePhase}
+                  onEditPhase={phaseActions?.onEditPhase}
+                  editedPhaseName={editedPhaseName}
                   testSubjPrefix={testSubjPrefix}
-                  isIlm={isIlm}
-                  onRemovePhase={onRemovePhase}
                   canManageLifecycle={canManageLifecycle}
+                  isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
                 />
                 <DownsamplingBar
                   segments={downsamplingSegments}
                   gridTemplateColumns={gridTemplateColumns}
-                  onRemoveStep={onRemoveDownsampleStep}
+                  onRemoveStep={downsamplingActions?.onRemoveDownsampleStep}
+                  onEditStep={downsamplingActions?.onEditDownsampleStep}
+                  editedPhaseName={editedPhaseName}
                   canManageLifecycle={canManageLifecycle}
+                  isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
                 />
                 <EuiSpacer size="xs" />
                 <DataLifecycleTimeline

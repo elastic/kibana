@@ -154,6 +154,7 @@ describe('StreamDetailSchemaEditor', () => {
           read_failure_store: true,
           manage_failure_store: true,
           view_index_metadata: true,
+          create_snapshot_repository: true,
         },
       });
 
@@ -186,6 +187,7 @@ describe('StreamDetailSchemaEditor', () => {
           read_failure_store: false,
           manage_failure_store: false,
           view_index_metadata: true,
+          create_snapshot_repository: true,
         },
       });
 
@@ -517,6 +519,7 @@ describe('StreamDetailSchemaEditor', () => {
           read_failure_store: true,
           manage_failure_store: true,
           view_index_metadata: true,
+          create_snapshot_repository: true,
         },
       });
 
@@ -564,6 +567,7 @@ describe('StreamDetailSchemaEditor', () => {
           read_failure_store: true,
           manage_failure_store: true,
           view_index_metadata: true,
+          create_snapshot_repository: true,
         },
       });
 

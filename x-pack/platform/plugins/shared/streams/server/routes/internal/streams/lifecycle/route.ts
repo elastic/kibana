@@ -223,9 +223,39 @@ const lifecycleIlmPoliciesUpdateRoute = createServerRoute({
   },
 });
 
+const lifecycleSnapshotRepositoriesRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/lifecycle/_snapshot_repositories',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({}),
+  handler: async ({
+    request,
+    getScopedClients,
+  }): Promise<{ repositories: Array<{ name: string; type: string }> }> => {
+    const { scopedClusterClient } = await getScopedClients({ request });
+    const repositoriesByName = await scopedClusterClient.asCurrentUser.snapshot.getRepository({
+      name: '*',
+    });
+
+    const repositories = Object.entries(repositoriesByName).map(([name, { type }]) => ({
+      name,
+      type: type ?? '',
+    }));
+
+    return { repositories };
+  },
+});
+
 export const internalLifecycleRoutes = {
   ...lifecycleStatsRoute,
   ...lifecycleIlmExplainRoute,
   ...lifecycleIlmPoliciesRoute,
   ...lifecycleIlmPoliciesUpdateRoute,
+  ...lifecycleSnapshotRepositoriesRoute,
 };

@@ -286,4 +286,102 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
       await esClient.ilm.deleteLifecycle({ name: newPolicyName }).catch(() => {});
     }
   });
+
+  test('should edit a policy phase, add downsampling, and save', async ({
+    page,
+    esClient,
+    apiServices,
+  }) => {
+    const policyName = 'downsampling-policy-edit';
+
+    await esClient.ilm.deleteLifecycle({ name: policyName }).catch(() => {});
+    await esClient.ilm.putLifecycle({
+      name: policyName,
+      policy: {
+        phases: {
+          hot: {
+            actions: {
+              rollover: { max_age: '30d' },
+            },
+          },
+          warm: {
+            min_age: '1d',
+            actions: {},
+          },
+          delete: {
+            min_age: '7d',
+            actions: {
+              delete: {},
+            },
+          },
+        },
+      },
+    });
+
+    try {
+      // Ensure the policy is also used by another stream so saving edits requires confirmation.
+      const extraStreamName = 'logs.downsample-edit';
+      await apiServices.streams.forkStream('logs', extraStreamName, {
+        field: 'service.name',
+        eq: 'downsample-edit',
+      });
+      const extraStreamDefinition = await apiServices.streams.getStreamDefinition(extraStreamName);
+      await apiServices.streams.updateStream(extraStreamName, {
+        ingest: {
+          ...extraStreamDefinition.stream.ingest,
+          processing: omit(extraStreamDefinition.stream.ingest.processing, 'updated_at'),
+          lifecycle: { ilm: { policy: policyName } },
+        },
+      });
+
+      await openRetentionModal(page);
+      await toggleInheritSwitch(page, false);
+
+      // Click ILM policy button and select the policy
+      await page.getByRole('button', { name: 'ILM policy' }).click();
+      const ilmListbox = page.getByRole('listbox', { name: 'Filter options' });
+      await ilmListbox.waitFor();
+      await page.getByPlaceholder('Filter options').fill(policyName);
+      await page.getByTestId(`ilmPolicy-${policyName}`).click();
+      await saveRetentionChanges(page);
+
+      // Verify there is no downsampling step before editing
+      await expect(page.getByTestId('downsamplingBar-label')).toHaveCount(0);
+
+      // Edit warm phase and enable downsampling
+      await page.getByTestId('lifecyclePhase-warm-button').click();
+      await expect(page.getByTestId('lifecyclePhase-warm-editButton')).toBeVisible();
+      await page.getByTestId('lifecyclePhase-warm-editButton').click();
+
+      const flyout = page.getByTestId('streamsEditIlmPhasesFlyoutFromSummary');
+      await expect(flyout).toBeVisible();
+      await page.getByTestId('streamsEditIlmPhasesFlyoutFromSummaryTab-warm').click();
+
+      // Scope to the visible "Downsampling" section (hot/warm/cold all exist in the DOM)
+      await flyout.getByRole('switch', { name: 'Downsampling' }).click();
+
+      // Set an explicit interval to keep the rendered step deterministic
+      const intervalValue = page.locator(
+        '[data-test-subj="streamsEditIlmPhasesFlyoutFromSummaryDownsamplingIntervalValue"]:visible'
+      );
+      await expect(intervalValue).toBeVisible();
+      await intervalValue.fill('1');
+
+      const intervalUnit = page.locator(
+        '[data-test-subj="streamsEditIlmPhasesFlyoutFromSummaryDownsamplingIntervalUnit"]:visible'
+      );
+      await intervalUnit.selectOption('d');
+
+      await page.getByTestId('streamsEditIlmPhasesFlyoutFromSummarySaveButton').click();
+
+      await expect(page.getByTestId('editPolicyModalTitle')).toBeVisible();
+      await page.getByTestId('editPolicyModal-overwriteButton').click();
+
+      // Verify downsampling is rendered after saving edits
+      await expect(page.getByTestId('downsamplingBar-label')).toBeVisible();
+      await expect(page.getByTestId('downsamplingPhase-1d-label')).toBeVisible();
+    } finally {
+      await esClient.ilm.deleteLifecycle({ name: policyName }).catch(() => {});
+    }
+  });
 });
