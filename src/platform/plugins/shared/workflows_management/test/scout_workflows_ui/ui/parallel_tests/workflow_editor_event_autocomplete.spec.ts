@@ -12,8 +12,8 @@ import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../fixtures';
 import { cleanupWorkflowsAndRules } from '../fixtures/cleanup';
 import {
-  getManualTriggerEventAutocompleteYaml,
   getAlertTriggerEventAutocompleteYaml,
+  getManualTriggerEventAutocompleteYaml,
 } from '../fixtures/workflows';
 
 test.describe(

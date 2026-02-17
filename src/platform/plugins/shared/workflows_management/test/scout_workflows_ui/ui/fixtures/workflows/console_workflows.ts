@@ -213,4 +213,3 @@ steps:
     type: console
     with:
       message: "{{ event. }}"`;
-
