@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+// ---------------------------------------------------------------------------
+// Health Overview Cards
+// ---------------------------------------------------------------------------
+
 export const TOTAL_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.totalRules',
   { defaultMessage: 'Total Rules' }
@@ -29,12 +33,12 @@ export const ENABLED_PERCENTAGE = i18n.translate(
 
 export const TOTAL_EXECUTIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.totalExecutions',
-  { defaultMessage: 'Total Executions (24h)' }
+  { defaultMessage: 'Total Executions' }
 );
 
 export const FAILURES = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.failures',
-  { defaultMessage: 'Failures (24h)' }
+  { defaultMessage: 'Failures' }
 );
 
 export const DETECTED_GAPS = i18n.translate(
@@ -119,6 +123,10 @@ export const PERFORMANCE_TABLE_CAPTION = i18n.translate(
   { defaultMessage: 'Performance Percentiles' }
 );
 
+// ---------------------------------------------------------------------------
+// Gaps & Frozen
+// ---------------------------------------------------------------------------
+
 export const TOTAL_DETECTED_GAPS = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.totalDetectedGaps',
   { defaultMessage: 'Total Detected Gaps' }
@@ -133,6 +141,10 @@ export const FROZEN_INDICES_QUERIED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.frozenIndicesQueried',
   { defaultMessage: 'Frozen Indices Queried (Max)' }
 );
+
+// ---------------------------------------------------------------------------
+// Top Messages
+// ---------------------------------------------------------------------------
 
 export const MESSAGE_COLUMN = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.messageColumn',
@@ -163,6 +175,10 @@ export const NO_WARNINGS_RECORDED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.noWarningsRecorded',
   { defaultMessage: 'No warnings recorded.' }
 );
+
+// ---------------------------------------------------------------------------
+// Historical Trends
+// ---------------------------------------------------------------------------
 
 export const NO_HISTORICAL_DATA_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.noHistoricalDataTitle',
@@ -207,4 +223,83 @@ export const GAPS_OVER_TIME = i18n.translate(
 export const GAPS_SERIES = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.gapsSeries',
   { defaultMessage: 'Gaps' }
+);
+
+// ---------------------------------------------------------------------------
+// Health Interval Filter
+// ---------------------------------------------------------------------------
+
+export const INTERVAL_TYPE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.intervalTypeLabel',
+  { defaultMessage: 'Time range' }
+);
+
+export const GRANULARITY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.granularityLabel',
+  { defaultMessage: 'Granularity' }
+);
+
+export const FROM_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.fromLabel',
+  { defaultMessage: 'From' }
+);
+
+export const TO_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.toLabel',
+  { defaultMessage: 'To' }
+);
+
+export const LAST_HOUR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.lastHour',
+  { defaultMessage: 'Last hour' }
+);
+
+export const LAST_24_HOURS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.last24Hours',
+  { defaultMessage: 'Last 24 hours' }
+);
+
+export const LAST_WEEK = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.lastWeek',
+  { defaultMessage: 'Last week' }
+);
+
+export const LAST_MONTH = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.lastMonth',
+  { defaultMessage: 'Last month' }
+);
+
+export const LAST_YEAR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.lastYear',
+  { defaultMessage: 'Last year' }
+);
+
+export const CUSTOM_RANGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.customRange',
+  { defaultMessage: 'Custom range' }
+);
+
+export const GRANULARITY_MINUTE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.granularityMinute',
+  { defaultMessage: 'Minute' }
+);
+
+export const GRANULARITY_HOUR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.granularityHour',
+  { defaultMessage: 'Hour' }
+);
+
+export const GRANULARITY_DAY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.granularityDay',
+  { defaultMessage: 'Day' }
+);
+
+export const GRANULARITY_WEEK = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.granularityWeek',
+  { defaultMessage: 'Week' }
+);
+
+export const GRANULARITY_MONTH = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.granularityMonth',
+  { defaultMessage: 'Month' }
 );

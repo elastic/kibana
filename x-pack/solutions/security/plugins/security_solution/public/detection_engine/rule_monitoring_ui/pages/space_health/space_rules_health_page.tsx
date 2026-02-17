@@ -17,7 +17,8 @@ import {
   EuiCodeBlock,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import type { HealthIntervalParameters } from '../../../../../common/api/detection_engine';
 import { TechnicalPreviewBadge } from '../../../../common/components/technical_preview_badge';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
@@ -34,12 +35,19 @@ import {
   TopMessagesSection,
   HistoricalTrendsSection,
 } from '../../../rule_monitoring/components/health_overview';
+import { HealthIntervalFilter } from './health_interval_filter';
 
 export const DetectionEngineSpaceRulesHealthPage = memo(
   function DetectionEngineSpaceRulesHealthPage(): JSX.Element {
-    const spaceRulesHealth = useSpaceRulesHealth({});
+    const [interval, setInterval] = useState<HealthIntervalParameters | undefined>();
+    const requestBody = useMemo(() => (interval ? { interval } : {}), [interval]);
+    const spaceRulesHealth = useSpaceRulesHealth(requestBody);
     const isLoading = spaceRulesHealth.isLoading || spaceRulesHealth.isFetching;
     const { euiTheme } = useEuiTheme();
+
+    const handleIntervalChange = useCallback((params: HealthIntervalParameters) => {
+      setInterval(params);
+    }, []);
 
     const skeleton = useMemo(
       () => (
@@ -199,11 +207,18 @@ export const DetectionEngineSpaceRulesHealthPage = memo(
         <SecuritySolutionPageWrapper>
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
-              <EuiTitle size="s">
-                <h3>
-                  {'Detection Engine Space Rules Health'} <TechnicalPreviewBadge label="" />
-                </h3>
-              </EuiTitle>
+              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="s">
+                    <h3>
+                      {'Detection Engine Space Rules Health'} <TechnicalPreviewBadge label="" />
+                    </h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <HealthIntervalFilter onChange={handleIntervalChange} disabled={isLoading} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
               <EuiSpacer size="m" />
               {isLoading ? skeleton : dashboard}
             </EuiFlexItem>

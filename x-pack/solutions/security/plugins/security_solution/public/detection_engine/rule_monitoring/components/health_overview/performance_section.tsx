@@ -22,25 +22,6 @@ interface PerformanceRow {
   p999: number;
 }
 
-const buildPerfRow = (
-  label: string,
-  agg: { percentiles: Record<string, number> } | undefined
-): PerformanceRow => ({
-  metric: label,
-  p50: getP(agg?.percentiles, 'p50', '50.0', '50'),
-  p95: getP(agg?.percentiles, 'p95', '95.0', '95'),
-  p99: getP(agg?.percentiles, 'p99', '99.0', '99'),
-  p999: getP(agg?.percentiles, 'p99.9', '99.9'),
-});
-
-const PERF_COLUMNS: Array<EuiBasicTableColumn<PerformanceRow>> = [
-  { field: 'metric', name: i18n.METRIC_COLUMN, width: '30%' },
-  { field: 'p50', name: 'p50', render: (v: number) => `${Math.round(v)} ms` },
-  { field: 'p95', name: 'p95', render: (v: number) => `${Math.round(v)} ms` },
-  { field: 'p99', name: 'p99', render: (v: number) => `${Math.round(v)} ms` },
-  { field: 'p999', name: 'p99.9', render: (v: number) => `${Math.round(v)} ms` },
-];
-
 export const PerformanceSection = memo(function PerformanceSection({
   health,
 }: {
@@ -108,3 +89,22 @@ export const PerformanceSection = memo(function PerformanceSection({
     </>
   );
 });
+
+const buildPerfRow = (
+  label: string,
+  agg: { percentiles: Record<string, number> } | undefined
+): PerformanceRow => ({
+  metric: label,
+  p50: getP(agg?.percentiles, 'p50', '50.0', '50'),
+  p95: getP(agg?.percentiles, 'p95', '95.0', '95'),
+  p99: getP(agg?.percentiles, 'p99', '99.0', '99'),
+  p999: getP(agg?.percentiles, 'p99.9', '99.9'),
+});
+
+const PERF_COLUMNS: Array<EuiBasicTableColumn<PerformanceRow>> = [
+  { field: 'metric', name: i18n.METRIC_COLUMN, width: '30%' },
+  { field: 'p50', name: 'p50', render: (v: number) => `${Math.round(v)} ms` },
+  { field: 'p95', name: 'p95', render: (v: number) => `${Math.round(v)} ms` },
+  { field: 'p99', name: 'p99', render: (v: number) => `${Math.round(v)} ms` },
+  { field: 'p999', name: 'p99.9', render: (v: number) => `${Math.round(v)} ms` },
+];
