@@ -23,6 +23,12 @@ const createSetupContractMock = (): jest.Mocked<AgentBuilderPluginSetup> => {
     attachments: {
       registerType: jest.fn(),
     },
+    skills: {
+      register: jest.fn(),
+    },
+    hooks: {
+      register: jest.fn(),
+    },
   };
 };
 

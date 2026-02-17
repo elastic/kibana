@@ -16,6 +16,11 @@ import { KPIS_SECTION } from './kpis/kpis_section';
 import { TABLE_SECTION_TEST_ID } from './table/table_section';
 import { FILTER_BY_ASSIGNEES_BUTTON } from '../../../common/components/filter_by_assignees_popover/test_ids';
 
+jest.mock('./kpis/kpis_section', () => ({
+  KPIsSection: () => <div data-test-subj="attacks-kpis-section" />,
+  KPIS_SECTION: 'attacks-kpis-section',
+}));
+
 const dataView: DataView = createStubDataView({ spec: {} });
 
 describe('AttacksPageContent', () => {

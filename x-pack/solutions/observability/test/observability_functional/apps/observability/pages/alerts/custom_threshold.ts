@@ -20,6 +20,16 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const toasts = getService('toasts');
   const pageObjects = getPageObjects(['header']);
 
+  const closePopover = async () => {
+    await retry.waitFor('popover to close', async () => {
+      const isOpen = await testSubjects.exists('o11yClosablePopoverTitleButton', { timeout: 100 });
+      if (isOpen) {
+        await testSubjects.click('o11yClosablePopoverTitleButton');
+      }
+      return !isOpen;
+    });
+  };
+
   describe('Custom threshold rule', function () {
     this.tags('includeFirefox');
 
@@ -109,23 +119,25 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await find.clickByCssSelector(`option[value="avg"]`);
       const input1 = await find.byCssSelector('[data-test-subj="aggregationField"] input');
       await input1.type('metricset.rtt');
-      await testSubjects.click('o11yClosablePopoverTitleButton');
+
+      await closePopover();
+
       await retry.waitFor('first aggregation to happen', async () => {
         const aggregationNameA = await testSubjects.find('aggregationNameA');
         return (await aggregationNameA.getVisibleText()) === 'AVERAGE\nmetricset.rtt';
       });
-      await new Promise((r) => setTimeout(r, 1000));
 
       // set second aggregation
       await testSubjects.click('thresholdRuleCustomEquationEditorAddAggregationFieldButton');
       await testSubjects.click('aggregationNameB');
       await testSubjects.setValue('o11ySearchField', 'service.name : "opbeans-node"');
-      await testSubjects.click('o11yClosablePopoverTitleButton');
-      await retry.waitFor('first aggregation to happen', async () => {
+
+      await closePopover();
+
+      await retry.waitFor('second aggregation to happen', async () => {
         const aggregationNameB = await testSubjects.find('aggregationNameB');
         return (await aggregationNameB.getVisibleText()) === 'COUNT\nservice.name : "opbeans-node"';
       });
-      await new Promise((r) => setTimeout(r, 1000));
     });
 
     it('can set custom equation', async () => {
@@ -136,12 +148,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       );
       await customEquationField.click();
       await customEquationField.type('A - B');
-      await testSubjects.click('o11yClosablePopoverTitleButton');
+
+      await closePopover();
+
       await retry.waitFor('custom equation update to happen', async () => {
         const customEquation = await testSubjects.find('customEquation');
         return (await customEquation.getVisibleText()) === 'EQUATION\nA - B';
       });
-      await new Promise((r) => setTimeout(r, 1000));
     });
 
     it('can set threshold', async () => {

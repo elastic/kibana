@@ -25,7 +25,7 @@ export { KibanaPhoenixClient } from './src/kibana_phoenix_client/client';
 export { createQuantitativeCorrectnessEvaluators } from './src/evaluators/correctness';
 export { createQuantitativeGroundednessEvaluator } from './src/evaluators/groundedness';
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';
-export { withEvaluatorSpan } from './src/utils/tracing';
+export { withEvaluatorSpan, withTaskSpan, getCurrentTraceId } from './src/utils/tracing';
 export {
   containsAllTerms,
   extractAllStrings,
@@ -45,23 +45,17 @@ export type {
   EvaluatorDisplayOptions,
   EvaluatorDisplayGroup,
 } from './src/utils/reporting/report_table';
-export { formatReportData } from './src/utils/report_model_score';
 export { createTable } from './src/utils/reporting/report_table';
 export {
   EvaluationScoreRepository,
   type EvaluationScoreDocument,
-  parseScoreDocuments,
+  type EvaluatorStats,
+  type RunStats,
 } from './src/utils/score_repository';
-
-export { getUniqueEvaluatorNames, calculateOverallStats } from './src/utils/evaluation_stats';
-export type {
-  DatasetScore,
-  DatasetScoreWithStats,
-  EvaluatorStats,
-} from './src/utils/evaluation_stats';
 
 export { parseSelectedEvaluators, selectEvaluators } from './src/evaluators/filter';
 export { createSpanLatencyEvaluator } from './src/evaluators/trace_based';
+export { getGitMetadata, type GitMetadata } from './src/utils/git_metadata';
 
 export {
   createPrecisionAtKEvaluator,
@@ -76,3 +70,6 @@ export type {
   GroundTruthExtractor,
   RetrievedDoc,
 } from './src/evaluators/rag/types';
+
+// Re-export Scout tags here to avoid requiring a direct dependency on @kbn/scout for modules using @kbn/evals
+export { tags } from '@kbn/scout';

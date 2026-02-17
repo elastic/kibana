@@ -20,23 +20,28 @@ import {
   deleteNamespace,
   getMinikubeIp,
 } from './util/assert_minikube_available';
-import { getKubernetesManifests } from './get_kubernetes_manifests';
 import { getFullOtelCollectorConfig } from './get_otel_collector_config';
 import { writeFile } from './util/file_utils';
 import { readKibanaConfig } from './read_kibana_config';
 import { enableStreams } from './util/enable_streams';
-import { getScenarioById, type FailureScenario } from './failure_scenarios';
+import { createDataView } from './util/create_data_view';
+import { resolveKibanaUrl } from './util/resolve_kibana_url';
+import type { DemoType, FailureScenario } from './types';
+import {
+  getDemoConfig,
+  getDemoManifests,
+  getScenarioById,
+  getDemoServiceDefaults,
+} from './demo_registry';
 
-const DATA_DIR = Path.join(REPO_ROOT, 'data', 'otel_demo');
-const MANIFESTS_FILE_PATH = Path.join(DATA_DIR, 'otel-demo.yaml');
-const NAMESPACE = 'otel-demo';
+const DATA_DIR = Path.join(REPO_ROOT, 'data', 'demo_environments');
 
 /**
- * Stops and removes the OTel Demo from Kubernetes.
+ * Stops and removes a demo environment from Kubernetes.
  */
-async function down(log: ToolingLog) {
-  log.info('Stopping OTel Demo...');
-  await deleteNamespace(NAMESPACE);
+async function down(log: ToolingLog, namespace: string, demoName: string) {
+  log.info(`Stopping ${demoName}...`);
+  await deleteNamespace(namespace);
   // Also delete the ClusterRole and ClusterRoleBinding
   await execa
     .command('kubectl delete clusterrole otel-collector --ignore-not-found')
@@ -68,7 +73,7 @@ function normalizeElasticsearchHost(host: string): string {
 }
 
 /**
- * Ensures the OpenTelemetry Demo is running on Kubernetes (minikube) with
+ * Ensures a demo environment is running on Kubernetes (minikube) with
  * telemetry data being sent to Elasticsearch.
  *
  * This function:
@@ -76,41 +81,54 @@ function normalizeElasticsearchHost(host: string): string {
  * 2. Reads Elasticsearch configuration from kibana.dev.yml
  * 3. Enables the streams feature in Kibana (sets up logs index)
  * 4. Generates OTel Collector configuration with k8sattributes processor
- * 5. Generates Kubernetes manifests for the OTel Demo
+ * 5. Generates Kubernetes manifests for the demo
  * 6. Deploys to minikube using kubectl
  *
  * @param log - Tooling logger for output
  * @param signal - Abort signal for cleanup
+ * @param demoType - Type of demo to deploy (default: 'otel-demo')
  * @param configPath - Optional path to Kibana config file
  * @param logsIndex - Index name for logs (defaults to "logs")
+ * @param version - Demo version (defaults to demo's defaultVersion)
  * @param teardown - If true, stops and removes the deployment
  * @param scenarioIds - Optional list of failure scenario IDs to apply
  */
 export async function ensureOtelDemo({
   log,
   signal,
+  demoType = 'otel-demo',
   configPath,
   logsIndex = 'logs',
+  version,
   teardown = false,
   scenarioIds = [],
 }: {
   log: ToolingLog;
   signal: AbortSignal;
+  demoType?: DemoType;
   configPath?: string | undefined;
   logsIndex?: string;
+  version?: string;
   teardown?: boolean;
   scenarioIds?: string[];
 }) {
   await assertKubectlAvailable();
   await assertMinikubeAvailable();
 
+  // Get demo configuration
+  const demoConfig = getDemoConfig(demoType);
+  const demoVersion = version || demoConfig.defaultVersion;
+  const namespace = demoConfig.namespace;
+  const manifestsFilePath = Path.join(DATA_DIR, `${demoType}.yaml`);
+
   if (teardown) {
-    await down(log);
-    log.success('OTel Demo stopped and removed from Kubernetes');
+    await down(log, namespace, demoConfig.displayName);
+    log.success(`${demoConfig.displayName} stopped and removed from Kubernetes`);
     return;
   }
 
-  log.info('Starting OpenTelemetry Demo on Kubernetes (minikube)...');
+  log.info(`Starting ${demoConfig.displayName} on Kubernetes (minikube)...`);
+  log.info(`  Version: ${demoVersion}`);
 
   // Ensure minikube is running
   log.info('Ensuring minikube is running...');
@@ -118,37 +136,54 @@ export async function ensureOtelDemo({
 
   // Read Kibana configuration to get Elasticsearch and Kibana server credentials
   const kibanaConfig = readKibanaConfig(log, configPath);
-  const elasticsearchConfig = kibanaConfig.elasticsearch;
-  const serverConfig = kibanaConfig.server;
+  const {
+    elasticsearch: elasticsearchConfig,
+    server: serverConfig,
+    kibanaCredentials,
+  } = kibanaConfig;
 
   const elasticsearchHost = normalizeElasticsearchHost(elasticsearchConfig.hosts);
   const elasticsearchUsername = elasticsearchConfig.username;
   const elasticsearchPassword = elasticsearchConfig.password;
 
-  const kibanaUrl = `http://${serverConfig.host}:${serverConfig.port}${serverConfig.basePath}`;
+  // Build the base Kibana URL from config
+  const kibanaHostname = `http://${serverConfig.host}:${serverConfig.port}${serverConfig.basePath}`;
+
+  // Resolve the actual Kibana URL by detecting any dev mode base path
+  // When running `yarn start` without `--no-base-path`, Kibana uses a random 3-letter prefix
+  const kibanaUrl = await resolveKibanaUrl(kibanaHostname, log);
 
   log.info(`Kibana: ${kibanaUrl}`);
   log.info(`Elasticsearch: ${elasticsearchHost}`);
   log.info(`Logs index: ${logsIndex}`);
 
   // Enable streams in Kibana (sets up the logs index)
+  // Uses Kibana credentials (defaults to elastic superuser) which has required manage_stream privilege
   await enableStreams({
     kibanaUrl,
-    username: elasticsearchUsername,
-    password: elasticsearchPassword,
+    username: kibanaCredentials.username,
+    password: kibanaCredentials.password,
+    log,
+  });
+
+  // Create a data view for logs (useful for Discover and dashboards)
+  await createDataView({
+    kibanaUrl,
+    username: kibanaCredentials.username,
+    password: kibanaCredentials.password,
     log,
   });
 
   // Stop any existing deployment
   log.debug('Removing existing deployment');
-  await down(log);
+  await down(log, namespace, demoConfig.displayName);
 
   // Process failure scenarios
   const activeScenarios: FailureScenario[] = [];
   const envOverrides: Record<string, Record<string, string>> = {};
 
   for (const id of scenarioIds) {
-    const scenario = getScenarioById(id);
+    const scenario = getScenarioById(demoType, id);
     if (scenario) {
       activeScenarios.push(scenario);
       log.info(`Applying failure scenario: ${chalk.yellow(scenario.name)}`);
@@ -181,11 +216,15 @@ export async function ensureOtelDemo({
     username: elasticsearchUsername,
     password: elasticsearchPassword,
     logsIndex,
+    namespace: demoConfig.namespace,
   });
 
   // Generate Kubernetes manifests with scenario overrides
   log.info('Generating Kubernetes manifests...');
-  const manifests = getKubernetesManifests({
+  const manifestGenerator = getDemoManifests(demoType);
+  const manifests = manifestGenerator.generate({
+    config: demoConfig,
+    version: demoVersion,
     elasticsearchEndpoint: elasticsearchHost,
     username: elasticsearchUsername,
     password: elasticsearchPassword,
@@ -194,12 +233,12 @@ export async function ensureOtelDemo({
     envOverrides,
   });
 
-  log.debug(`Writing manifests to ${MANIFESTS_FILE_PATH}`);
-  await writeFile(MANIFESTS_FILE_PATH, manifests);
+  log.debug(`Writing manifests to ${manifestsFilePath}`);
+  await writeFile(manifestsFilePath, manifests);
 
   // Apply the manifests
   log.info('Deploying to Kubernetes...');
-  await execa.command(`kubectl apply -f ${MANIFESTS_FILE_PATH}`, {
+  await execa.command(`kubectl apply -f ${manifestsFilePath}`, {
     stdio: 'inherit',
   });
 
@@ -208,17 +247,28 @@ export async function ensureOtelDemo({
 
   const waitAndReport = async () => {
     try {
-      await waitForPodsReady(NAMESPACE, 300);
+      await waitForPodsReady(namespace, 300);
 
       const minikubeIp = await getMinikubeIp();
 
       log.write('');
       log.write(
-        `${chalk.green('✔')} OTel Demo deployed successfully and connected to ${elasticsearchHost}`
+        `${chalk.green('✔')} ${
+          demoConfig.displayName
+        } deployed successfully and connected to ${elasticsearchHost}`
       );
       log.write('');
-      log.write(`  ${chalk.bold('Web Store:')}        http://${minikubeIp}:30080`);
+
+      if (demoConfig.frontendService) {
+        log.write(
+          `  ${chalk.bold('Web Store:')}        http://${minikubeIp}:${
+            demoConfig.frontendService.nodePort
+          }`
+        );
+      }
+
       log.write(`  ${chalk.bold('Logs Index:')}       ${logsIndex}`);
+
       if (activeScenarios.length > 0) {
         log.write(
           `  ${chalk.bold('Active Scenarios:')} ${chalk.yellow(
@@ -227,14 +277,22 @@ export async function ensureOtelDemo({
         );
       }
       log.write('');
-      log.write(chalk.dim('  To access the frontend, run:'));
-      log.write(chalk.dim(`    minikube service frontend-external -n ${NAMESPACE}`));
-      log.write('');
+
+      if (demoConfig.frontendService) {
+        log.write(chalk.dim('  To access the frontend, run:'));
+        log.write(
+          chalk.dim(
+            `    minikube service ${demoConfig.frontendService.name}-external -n ${namespace}`
+          )
+        );
+        log.write('');
+      }
+
       log.write(chalk.dim('  To view pod logs:'));
-      log.write(chalk.dim(`    kubectl logs -f -n ${NAMESPACE} -l app=frontend`));
+      log.write(chalk.dim(`    kubectl logs -f -n ${namespace} -l app=frontend`));
       log.write('');
       log.write(chalk.dim('  To stop the demo:'));
-      log.write(chalk.dim('    node scripts/otel_demo.js --teardown'));
+      log.write(chalk.dim(`    node scripts/otel_demo.js --demo ${demoType} --teardown`));
       log.write('');
     } catch (error) {
       log.error(`Failed to deploy: ${error}`);
@@ -247,7 +305,7 @@ export async function ensureOtelDemo({
   log.info('Streaming pod logs (Ctrl+C to stop)...');
   try {
     await execa.command(
-      `kubectl logs -f -n ${NAMESPACE} -l app=otel-collector --max-log-requests=10`,
+      `kubectl logs -f -n ${namespace} -l app=otel-collector --max-log-requests=10`,
       {
         stdio: 'inherit',
         cleanup: true,
@@ -260,76 +318,52 @@ export async function ensureOtelDemo({
 }
 
 /**
- * Default environment values for services (used for reset)
- */
-const SERVICE_DEFAULTS: Record<string, Record<string, string>> = {
-  cart: {
-    VALKEY_ADDR: 'valkey:6379',
-    FLAGD_HOST: 'flagd',
-  },
-  checkout: {
-    GOMEMLIMIT: '16MiB',
-    CURRENCY_SERVICE_ADDR: 'currency:7285',
-    PAYMENT_SERVICE_ADDR: 'payment:50051',
-  },
-  frontend: {
-    CURRENCY_SERVICE_ADDR: 'currency:7285',
-    PRODUCT_CATALOG_SERVICE_ADDR: 'product-catalog:3550',
-    WEB_OTEL_SERVICE_NAME: 'frontend-web',
-    OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4317',
-  },
-  'load-generator': {
-    LOCUST_USERS: '10',
-  },
-  recommendation: {
-    OTEL_SERVICE_NAME: 'recommendation',
-    FLAGD_HOST: 'flagd',
-  },
-  payment: {
-    FLAGD_HOST: 'flagd',
-  },
-};
-
-/**
- * Patches failure scenarios onto a running OTel Demo cluster.
+ * Patches failure scenarios onto a running demo cluster.
  * Uses kubectl set env to update deployments without full redeployment.
  *
  * @param log - Tooling logger for output
+ * @param demoType - Type of demo to patch (default: 'otel-demo')
  * @param scenarioIds - List of scenario IDs to apply (empty = no changes unless reset)
  * @param reset - If true, resets all services to defaults
  */
 export async function patchScenarios({
   log,
+  demoType = 'otel-demo',
   scenarioIds = [],
   reset = false,
 }: {
   log: ToolingLog;
+  demoType?: DemoType;
   scenarioIds?: string[];
   reset?: boolean;
 }) {
   await assertKubectlAvailable();
 
+  const demoConfig = getDemoConfig(demoType);
+  const namespace = demoConfig.namespace;
+  const serviceDefaults = getDemoServiceDefaults(demoType);
+
   // Check if namespace exists
   try {
-    await execa.command(`kubectl get namespace ${NAMESPACE}`);
+    await execa.command(`kubectl get namespace ${namespace}`);
   } catch {
     throw new Error(
-      `Namespace ${NAMESPACE} not found. Run 'node scripts/otel_demo.js' first to deploy.`
+      `Namespace ${namespace} not found. Run 'node scripts/otel_demo.js --demo ${demoType}' first to deploy.`
     );
   }
 
   if (reset) {
-    log.info('Resetting all scenarios to defaults...');
+    log.info(`Resetting all scenarios to defaults for ${demoConfig.displayName}...`);
 
     // Reset all services to their default values
-    for (const [service, defaults] of Object.entries(SERVICE_DEFAULTS)) {
+    for (const [service, defaults] of Object.entries(serviceDefaults)) {
       const envArgs = Object.entries(defaults)
         .map(([key, value]) => `${key}=${value}`)
         .join(' ');
 
       log.debug(`Resetting ${service}: ${envArgs}`);
       try {
-        await execa.command(`kubectl set env deployment/${service} -n ${NAMESPACE} ${envArgs}`, {
+        await execa.command(`kubectl set env deployment/${service} -n ${namespace} ${envArgs}`, {
           stdio: 'pipe',
         });
         log.info(`  ${chalk.green('✔')} Reset ${service}`);
@@ -351,7 +385,7 @@ export async function patchScenarios({
   const envChanges: Record<string, Record<string, string>> = {};
 
   for (const id of scenarioIds) {
-    const scenario = getScenarioById(id);
+    const scenario = getScenarioById(demoType, id);
     if (!scenario) {
       throw new Error(`Unknown scenario: ${id}`);
     }
@@ -377,7 +411,7 @@ export async function patchScenarios({
 
     log.debug(`Patching ${service}: ${envArgs}`);
     try {
-      await execa.command(`kubectl set env deployment/${service} -n ${NAMESPACE} ${envArgs}`, {
+      await execa.command(`kubectl set env deployment/${service} -n ${namespace} ${envArgs}`, {
         stdio: 'pipe',
       });
       log.info(`  ${chalk.green('✔')} Patched ${service}`);
@@ -390,8 +424,8 @@ export async function patchScenarios({
   log.success(`Applied ${scenarioIds.length} scenario(s). Pods will restart with new config.`);
   log.write('');
   log.write(chalk.dim('  To watch pod restarts:'));
-  log.write(chalk.dim(`    kubectl get pods -n ${NAMESPACE} -w`));
+  log.write(chalk.dim(`    kubectl get pods -n ${namespace} -w`));
   log.write('');
   log.write(chalk.dim('  To reset to defaults:'));
-  log.write(chalk.dim('    node scripts/otel_demo.js --reset'));
+  log.write(chalk.dim(`    node scripts/otel_demo.js --demo ${demoType} --reset`));
 }

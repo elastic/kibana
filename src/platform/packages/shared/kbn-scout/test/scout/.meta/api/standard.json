@@ -1,19 +1,21 @@
 {
-  "lastModified": "2026-01-30T09:09:05.817Z",
-  "sha1": "27359edb644efe10fa392b11fe175435adb081d2",
+  "lastModified": "2026-02-03T16:06:40.631Z",
+  "sha1": "2c249d0d69b356fc5842679e42ff18439aea04ad",
   "tests": [
     {
       "id": "f44f18cc703276d-178a4921f7b18d0",
       "title": "Alerting Rules helpers should fetch alert with 'alerting.rules.get'",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/alerting_rules.spec.ts",
-        "line": 46,
-        "column": 10
+        "line": 49,
+        "column": 12
       }
     },
     {
@@ -21,13 +23,15 @@
       "title": "Alerting Rules helpers should update alert with 'alerting.rules.update'",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/alerting_rules.spec.ts",
-        "line": 54,
-        "column": 10
+        "line": 57,
+        "column": 12
       }
     },
     {
@@ -35,13 +39,15 @@
       "title": "Alerting Rules helpers should enable/disable rule",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/alerting_rules.spec.ts",
-        "line": 62,
-        "column": 10
+        "line": 65,
+        "column": 12
       }
     },
     {
@@ -49,13 +55,15 @@
       "title": "Alerting Rules helpers should find rule with 'alerting.rules.find'",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/alerting_rules.spec.ts",
-        "line": 78,
-        "column": 10
+        "line": 81,
+        "column": 12
       }
     },
     {
@@ -63,13 +71,15 @@
       "title": "Alerting Rules helpers should mute/unmute rule",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/alerting_rules.spec.ts",
-        "line": 91,
-        "column": 10
+        "line": 94,
+        "column": 12
       }
     },
     {
@@ -77,13 +87,15 @@
       "title": "Alerting Rules helpers should mute/unmute alert for rule",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/alerting_rules.spec.ts",
-        "line": 109,
-        "column": 10
+        "line": 112,
+        "column": 12
       }
     },
     {
@@ -91,13 +103,15 @@
       "title": "Alerting Rules helpers should snooze/unsnooze rule",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/alerting_rules.spec.ts",
-        "line": 129,
-        "column": 10
+        "line": 132,
+        "column": 12
       }
     },
     {
@@ -105,13 +119,15 @@
       "title": "Cases Helpers should fetch case with 'cases.get'",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
-        "line": 39,
-        "column": 10
+        "line": 42,
+        "column": 12
       }
     },
     {
@@ -119,13 +135,15 @@
       "title": "Cases Helpers should update case with a new severity with 'cases.update'",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
-        "line": 44,
-        "column": 10
+        "line": 47,
+        "column": 12
       }
     },
     {
@@ -133,13 +151,15 @@
       "title": "Cases Helpers should add a new connector to a case",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
-        "line": 61,
-        "column": 10
+        "line": 67,
+        "column": 12
       }
     },
     {
@@ -147,13 +167,15 @@
       "title": "Cases Helpers should delete multiple cases",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
-        "line": 79,
-        "column": 10
+        "line": 85,
+        "column": 12
       }
     },
     {
@@ -161,13 +183,15 @@
       "title": "Cases Helpers should delete cases by tags",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
-        "line": 99,
-        "column": 10
+        "line": 105,
+        "column": 12
       }
     },
     {
@@ -175,13 +199,15 @@
       "title": "Cases Helpers should post and find a comment",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
-        "line": 126,
-        "column": 10
+        "line": 132,
+        "column": 12
       }
     },
     {
@@ -189,13 +215,15 @@
       "title": "Cases Helpers should post an alert",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
-        "line": 147,
-        "column": 10
+        "line": 153,
+        "column": 12
       }
     },
     {
@@ -203,13 +231,15 @@
       "title": "Cases Helpers should search for a case by category",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/cases.spec.ts",
-        "line": 160,
-        "column": 10
+        "line": 166,
+        "column": 12
       }
     },
     {
@@ -217,13 +247,15 @@
       "title": "Data Views API Service should get all data views with getAll()",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
-        "line": 44,
-        "column": 10
+        "line": 47,
+        "column": 12
       }
     },
     {
@@ -231,13 +263,15 @@
       "title": "Data Views API Service should get a single data view by ID with get()",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
-        "line": 57,
-        "column": 10
+        "line": 60,
+        "column": 12
       }
     },
     {
@@ -245,13 +279,15 @@
       "title": "Data Views API Service should handle get() for non-existent data view",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
-        "line": 66,
-        "column": 10
+        "line": 69,
+        "column": 12
       }
     },
     {
@@ -259,13 +295,15 @@
       "title": "Data Views API Service should delete a data view with delete()",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
-        "line": 75,
-        "column": 10
+        "line": 78,
+        "column": 12
       }
     },
     {
@@ -273,13 +311,15 @@
       "title": "Data Views API Service should handle delete() for non-existent data view",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
-        "line": 100,
-        "column": 10
+        "line": 103,
+        "column": 12
       }
     },
     {
@@ -287,13 +327,15 @@
       "title": "Data Views API Service should find data views with a predicate using find()",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
-        "line": 109,
-        "column": 10
+        "line": 112,
+        "column": 12
       }
     },
     {
@@ -301,13 +343,15 @@
       "title": "Data Views API Service should return empty array when find() predicate matches nothing",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
-        "line": 165,
-        "column": 10
+        "line": 168,
+        "column": 12
       }
     },
     {
@@ -315,13 +359,15 @@
       "title": "Data Views API Service should delete a data view by title with deleteByTitle()",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
-        "line": 177,
-        "column": 10
+        "line": 180,
+        "column": 12
       }
     },
     {
@@ -329,13 +375,15 @@
       "title": "Data Views API Service should return 200 when deleteByTitle() is called with non-existent title",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
-        "line": 206,
-        "column": 10
+        "line": 209,
+        "column": 12
       }
     },
     {
@@ -343,13 +391,15 @@
       "title": "Data Views API Service should delete only the first matching data view when multiple have same title",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
-        "line": 218,
-        "column": 10
+        "line": 221,
+        "column": 12
       }
     },
     {
@@ -357,13 +407,15 @@
       "title": "Data Views API Service should handle multiple data views operations",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
-        "line": 269,
-        "column": 10
+        "line": 272,
+        "column": 12
       }
     },
     {
@@ -371,13 +423,15 @@
       "title": "Data Views API Service should not throw error when deleting already deleted data view",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
-        "line": 325,
-        "column": 10
+        "line": 330,
+        "column": 12
       }
     },
     {
@@ -385,13 +439,15 @@
       "title": "Data Views API Service should handle deleteByTitle() when called twice",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/data_views.spec.ts",
-        "line": 353,
-        "column": 10
+        "line": 358,
+        "column": 12
       }
     },
     {
@@ -399,13 +455,15 @@
       "title": "Fleet Integration Management should install a custom integration",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 25,
-        "column": 10
+        "line": 28,
+        "column": 12
       }
     },
     {
@@ -413,13 +471,15 @@
       "title": "Fleet Integration Management should delete an integration and return status code",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 31,
-        "column": 10
+        "line": 34,
+        "column": 12
       }
     },
     {
@@ -427,13 +487,15 @@
       "title": "Fleet Integration Management should handle delete of non-existent integration",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 41,
-        "column": 10
+        "line": 44,
+        "column": 12
       }
     },
     {
@@ -441,13 +503,15 @@
       "title": "Fleet Agent Policies Management should get agent policies with query parameters",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 67,
-        "column": 10
+        "line": 74,
+        "column": 12
       }
     },
     {
@@ -455,13 +519,15 @@
       "title": "Fleet Agent Policies Management should create an agent policy with additional parameters",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 78,
-        "column": 10
+        "line": 85,
+        "column": 12
       }
     },
     {
@@ -469,13 +535,15 @@
       "title": "Fleet Agent Policies Management should update an agent policy",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 98,
-        "column": 10
+        "line": 105,
+        "column": 12
       }
     },
     {
@@ -483,13 +551,15 @@
       "title": "Fleet Agent Policies Management should bulk get agent policies",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 123,
-        "column": 10
+        "line": 130,
+        "column": 12
       }
     },
     {
@@ -497,13 +567,15 @@
       "title": "Fleet Agent Policies Management should delete an agent policy",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 149,
-        "column": 10
+        "line": 156,
+        "column": 12
       }
     },
     {
@@ -511,13 +583,15 @@
       "title": "Fleet Agent Policies Management should delete an agent policy with force flag",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 163,
-        "column": 10
+        "line": 170,
+        "column": 12
       }
     },
     {
@@ -525,13 +599,15 @@
       "title": "Fleet Outputs Management should get all outputs",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 189,
-        "column": 10
+        "line": 200,
+        "column": 12
       }
     },
     {
@@ -539,13 +615,15 @@
       "title": "Fleet Outputs Management should get a specific output by ID",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 197,
-        "column": 10
+        "line": 208,
+        "column": 12
       }
     },
     {
@@ -553,13 +631,15 @@
       "title": "Fleet Outputs Management should create an output with additional parameters",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 211,
-        "column": 10
+        "line": 222,
+        "column": 12
       }
     },
     {
@@ -567,13 +647,15 @@
       "title": "Fleet Outputs Management should delete an output",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 232,
-        "column": 10
+        "line": 243,
+        "column": 12
       }
     },
     {
@@ -581,13 +663,15 @@
       "title": "Fleet Server Hosts Management should get fleet server hosts",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 263,
-        "column": 10
+        "line": 278,
+        "column": 12
       }
     },
     {
@@ -595,13 +679,15 @@
       "title": "Fleet Server Hosts Management should create a fleet server host with parameters",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 270,
-        "column": 10
+        "line": 285,
+        "column": 12
       }
     },
     {
@@ -609,13 +695,15 @@
       "title": "Fleet Server Hosts Management should delete a fleet server host",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 287,
-        "column": 10
+        "line": 302,
+        "column": 12
       }
     },
     {
@@ -623,13 +711,15 @@
       "title": "Fleet Agent Management should setup fleet agents",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 305,
-        "column": 10
+        "line": 324,
+        "column": 12
       }
     },
     {
@@ -637,13 +727,15 @@
       "title": "Fleet Agent Management should get agents with query parameters",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 311,
-        "column": 10
+        "line": 330,
+        "column": 12
       }
     },
     {
@@ -651,13 +743,15 @@
       "title": "Fleet Agent Management should handle delete of non-existent agent",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 321,
-        "column": 10
+        "line": 340,
+        "column": 12
       }
     },
     {
@@ -665,13 +759,15 @@
       "title": "Fleet API Error Handling should handle bulk get with non-existent policy IDs",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 332,
-        "column": 10
+        "line": 355,
+        "column": 12
       }
     },
     {
@@ -679,13 +775,20 @@
       "title": "SAML Auth fixture should create a session for 'admin' role",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSecurity",
-        "@svlSecurityEssentials",
-        "@svlSecurityEase",
-        "@svlOblt",
-        "@svlLogsEssentials",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/auth/saml_login.spec.ts",
@@ -698,13 +801,20 @@
       "title": "SAML Auth fixture should create API Key for 'admin' role",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSecurity",
-        "@svlSecurityEssentials",
-        "@svlSecurityEase",
-        "@svlOblt",
-        "@svlLogsEssentials",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/auth/saml_login.spec.ts",

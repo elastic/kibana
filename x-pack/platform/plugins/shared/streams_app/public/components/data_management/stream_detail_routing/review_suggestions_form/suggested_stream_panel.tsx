@@ -30,7 +30,7 @@ import {
 } from '../state_management/stream_routing_state_machine/use_stream_routing';
 import { SelectablePanel } from './selectable_panel';
 import { ConditionPanel, VerticalRule } from '../../shared';
-import { StreamNameFormRow, useChildStreamInput } from '../stream_name_form_row';
+import { StreamNameFormRow, useChildStreamInput } from '../../../stream_name_form_row';
 import { RoutingConditionEditor } from '../routing_condition_editor';
 import { processCondition } from '../utils';
 import { EditSuggestedRuleControls } from '../control_bars';
@@ -50,18 +50,25 @@ export function SuggestedStreamPanel({
   onPreview(toggle: boolean): void;
   index: number;
   onEdit(index: number, suggestion: PartitionSuggestion): void;
-  onSave?: () => void;
+  onSave?: (suggestion: PartitionSuggestion) => void;
 }) {
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const { changeSuggestionNameDebounced, changeSuggestionCondition, reviewSuggestedRule } =
     useStreamRoutingEvents();
 
-  const editedSuggestion = routingSnapshot.context.editedSuggestion;
-  const isEditing =
-    routingSnapshot.matches({ ready: 'editingSuggestedRule' }) &&
-    routingSnapshot.context.editingSuggestionIndex === index;
+  const isEditing = useStreamsRoutingSelector(
+    (snapshot) =>
+      snapshot.matches({ ready: { ingestMode: 'editingSuggestedRule' } }) &&
+      snapshot.context.editingSuggestionIndex === index
+  );
+  const editedSuggestionForPanel = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({ ready: { ingestMode: 'editingSuggestedRule' } }) &&
+    snapshot.context.editingSuggestionIndex === index
+      ? snapshot.context.editedSuggestion
+      : null
+  );
 
-  const currentSuggestion = isEditing && editedSuggestion ? editedSuggestion : partition;
+  const currentSuggestion =
+    isEditing && editedSuggestionForPanel ? editedSuggestionForPanel : partition;
   const matchRate = useMatchRate(definition, currentSuggestion);
 
   const selectedPreview = useStreamSamplesSelector((snapshot) => snapshot.context.selectedPreview);
@@ -121,7 +128,7 @@ export function SuggestedStreamPanel({
             isSuggestionRouting={true}
           />
           <EditSuggestedRuleControls
-            onSave={onSave}
+            onSave={onSave ? () => onSave(currentSuggestion) : undefined}
             onAccept={() => reviewSuggestedRule(currentSuggestion.name || partition.name)}
             conditionError={conditionError}
             isStreamNameValid={isStreamNameValid}
