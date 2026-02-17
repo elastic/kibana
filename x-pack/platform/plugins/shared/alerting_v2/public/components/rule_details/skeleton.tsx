@@ -60,29 +60,22 @@ export const Skeleton: React.FunctionComponent = () => {
       />
 
       <EuiSpacer size="m" />
-      <EuiFlexGroup responsive={false}>
-        <EuiFlexItem grow={2}>
-          <EuiPanel color="subdued" hasBorder={false} paddingSize="m">
-            <EuiSkeletonTitle size="s" />
-            <EuiSpacer size="m" />
-            <EuiSkeletonText lines={4} />
 
-            <EuiSpacer size="m" />
-            <EuiSkeletonTitle size="xs" />
-            <EuiSpacer size="s" />
-            <EuiPanel hasBorder paddingSize="m" css={{ width: '100%' }}>
-              <EuiSkeletonText lines={8} />
-            </EuiPanel>
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <EuiPanel hasBorder paddingSize="m">
-            <EuiSkeletonTitle size="s" />
-            <EuiSpacer size="m" />
-            <EuiSkeletonText lines={3} />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiPanel color="subdued" hasBorder={false} paddingSize="m">
+        <EuiSkeletonTitle size="s" />
+        <EuiSpacer size="m" />
+        <EuiSkeletonText lines={4} />
+      </EuiPanel>
+
+      <EuiSpacer size="s" />
+
+      <EuiPanel color="subdued" hasBorder={false} paddingSize="m">
+        <EuiSkeletonTitle size="s" />
+        <EuiSpacer size="s" />
+        <EuiPanel hasBorder paddingSize="none" css={{ width: '100%' }}>
+          <EuiSkeletonText lines={8} />
+        </EuiPanel>
+      </EuiPanel>
 
       <EuiSpacer size="m" />
     </>
