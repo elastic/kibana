@@ -50,6 +50,12 @@ interface ProjectNavigationObservables {
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
   activeDataTestSubj$?: Observable<string | undefined>;
   isEditing$: Observable<boolean>;
+  getNavigationPrimaryItems: () => import('@kbn/core-chrome-browser').NavigationItemInfo[];
+  setNavigationCustomization: (
+    id: import('@kbn/core-chrome-browser').SolutionId,
+    customization: import('@kbn/core-chrome-browser').NavigationCustomization | undefined
+  ) => void;
+  setIsEditingNavigation: (isEditing: boolean) => void;
 }
 
 export interface ChromeComponentsDeps {
@@ -148,6 +154,9 @@ export const createChromeComponents = ({
       onToggleCollapsed: state.sideNav.collapsed.set,
       isFeedbackEnabled$: state.feedback.isEnabled$,
       isEditing$: projectNavigation.isEditing$,
+      getNavigationPrimaryItems: projectNavigation.getNavigationPrimaryItems,
+      setNavigationCustomization: projectNavigation.setNavigationCustomization,
+      setIsEditingNavigation: projectNavigation.setIsEditingNavigation,
     };
 
     return (

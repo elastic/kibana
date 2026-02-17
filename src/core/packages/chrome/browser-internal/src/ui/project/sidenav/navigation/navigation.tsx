@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
-import { Navigation as NavigationComponent } from '@kbn/core-chrome-navigation';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Navigation as NavigationComponent, CustomizeNavigationModal } from '@kbn/core-chrome-navigation';
 import type { Observable } from 'rxjs';
 import { combineLatest, EMPTY } from 'rxjs';
 import classnames from 'classnames';
 import type {
   ChromeNavLink,
   ChromeProjectNavigationNode,
+  NavigationCustomization,
+  NavigationItemInfo,
   NavigationTreeDefinitionUI,
+  SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { IBasePath as BasePath } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
@@ -48,6 +51,14 @@ export interface ChromeNavigationProps {
   // collapse toggle callback
   onToggleCollapsed: (isCollapsed: boolean) => void;
 
+  // customize navigation
+  getNavigationPrimaryItems: () => NavigationItemInfo[];
+  setNavigationCustomization: (
+    id: SolutionId,
+    customization: NavigationCustomization | undefined
+  ) => void;
+  setIsEditingNavigation: (isEditing: boolean) => void;
+
   // other
   dataTestSubj$?: Observable<string | undefined>;
 }
@@ -58,6 +69,15 @@ export const Navigation = (props: ChromeNavigationProps) => {
   const feedbackUrlParams = useObservable(props.feedbackUrlParams$ ?? EMPTY, undefined);
   const isFeedbackEnabled = useObservable(props.isFeedbackEnabled$ ?? EMPTY, true);
   const isEditing = useObservable(props.isEditing$, false);
+  const [isCustomizeModalOpen, setIsCustomizeModalOpen] = useState(false);
+
+  const handleOpenCustomizeModal = useCallback(() => {
+    setIsCustomizeModalOpen(true);
+  }, []);
+
+  const handleCloseCustomizeModal = useCallback(() => {
+    setIsCustomizeModalOpen(false);
+  }, []);
 
   if (!state) {
     return null;
@@ -82,8 +102,18 @@ export const Navigation = (props: ChromeNavigationProps) => {
         setWidth={props.setWidth}
         onToggleCollapsed={props.onToggleCollapsed}
         activeItemId={activeItemId}
+        onCustomizeNavigation={handleOpenCustomizeModal}
         data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV2')}
       />
+      {isCustomizeModalOpen && (
+        <CustomizeNavigationModal
+          solutionId={solutionId}
+          onClose={handleCloseCustomizeModal}
+          getNavigationPrimaryItems={props.getNavigationPrimaryItems}
+          setNavigationCustomization={props.setNavigationCustomization}
+          setIsEditingNavigation={props.setIsEditingNavigation}
+        />
+      )}
     </KibanaSectionErrorBoundary>
   );
 };
