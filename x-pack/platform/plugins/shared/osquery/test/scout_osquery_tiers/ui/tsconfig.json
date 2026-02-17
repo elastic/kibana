@@ -6,9 +6,6 @@
   "include": ["**/*"],
   "kbn_references": [
     "@kbn/scout",
-    "@kbn/es",
-    "@kbn/test",
-    "@kbn/dev-utils",
   ],
   "exclude": ["target/**/*"]
 }
