@@ -22,7 +22,7 @@ import {
 import { createExecutionContext } from '../execution_context';
 
 /**
- * Raw input from the task runner. Contains an AbortSignal but no ExecutionContext yet.
+ * Raw input from the task runner.
  * The pipeline creates the ExecutionContext from the signal.
  */
 export interface RuleExecutionPipelineInput {

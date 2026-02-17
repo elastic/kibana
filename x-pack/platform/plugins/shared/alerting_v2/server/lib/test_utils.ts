@@ -99,12 +99,6 @@ export function createRuleSoAttributes(
   };
 }
 
-export async function* createBatchStream<T>(batches: T[][]): AsyncIterable<T[]> {
-  for (const batch of batches) {
-    yield batch;
-  }
-}
-
 export async function* createRowBatchStream<T>(rows: Array<T>): AsyncIterable<Array<T>> {
   if (rows.length > 0) {
     yield rows;
