@@ -15,7 +15,12 @@ import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
 import { indexDescription, timeRangeSchemaOptional } from '../../utils/tool_schemas';
-import { DEFAULT_MAX_TRACES, DEFAULT_TIME_RANGE, DEFAULT_TRACE_FIELDS } from './constants';
+import {
+  DEFAULT_MAX_DOCS_PER_TRACE,
+  DEFAULT_MAX_TRACES,
+  DEFAULT_TIME_RANGE,
+  DEFAULT_TRACE_FIELDS,
+} from './constants';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { getToolHandler } from './handler';
 
@@ -32,12 +37,12 @@ const getTracesSchema = z.object({
   maxTraces: z
     .number()
     .optional()
-    .default(10)
+    .default(DEFAULT_MAX_TRACES)
     .describe('Maximum number of traces to return. Defaults to 10.'),
   maxDocsPerTrace: z
     .number()
     .optional()
-    .default(DEFAULT_MAX_TRACES)
+    .default(DEFAULT_MAX_DOCS_PER_TRACE)
     .describe('Maximum number of documents to return per trace. Defaults to 100.'),
 
   fields: z

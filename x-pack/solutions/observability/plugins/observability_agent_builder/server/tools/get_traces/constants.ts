@@ -86,7 +86,8 @@ export const DEFAULT_TRACE_FIELDS = [
   URL_FULL,
 ];
 
-export const DEFAULT_MAX_TRACES = 100;
+export const DEFAULT_MAX_TRACES = 10;
+export const DEFAULT_MAX_DOCS_PER_TRACE = 100;
 
 export const DEFAULT_TIME_RANGE = {
   start: 'now-1h',
