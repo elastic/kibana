@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
+import { omit } from 'lodash';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 import {
@@ -20,7 +20,7 @@ import {
 
 test.describe(
   'Stream data retention - custom retention periods',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: ['@ess', '@svlOblt'] },
   () => {
     test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
@@ -126,6 +126,82 @@ test.describe(
 
       // Close the popover by pressing Escape
       await page.keyboard.press('Escape');
+    });
+
+    test('should delete a downsampling step from a DSL lifecycle', async ({
+      page,
+      apiServices,
+      pageObjects,
+    }) => {
+      const streamName = 'logs.nginx';
+      const streamDefinition = await apiServices.streams.getStreamDefinition(streamName);
+      await apiServices.streams.updateStream(streamName, {
+        ingest: {
+          ...streamDefinition.stream.ingest,
+          processing: omit(streamDefinition.stream.ingest.processing, 'updated_at'),
+          lifecycle: {
+            dsl: {
+              data_retention: '30d',
+              downsample: [{ after: '1d', fixed_interval: '1h' }],
+            },
+          },
+        },
+      });
+
+      await pageObjects.streams.gotoDataRetentionTab(streamName);
+
+      // Verify downsampling is rendered for the DSL lifecycle
+      await expect(page.getByTestId('downsamplingBar-label')).toBeVisible();
+
+      // Delete the downsampling step
+      await page.getByTestId('downsamplingPhase-1h-label').click();
+      await page.getByTestId('downsamplingPopover-step1-removeButton').click();
+
+      await expect(page.getByTestId('downsamplingBar-label')).toHaveCount(0);
+    });
+
+    test('should edit a downsampling step in a DSL lifecycle', async ({
+      page,
+      apiServices,
+      pageObjects,
+    }) => {
+      const streamName = 'logs.nginx';
+      const streamDefinition = await apiServices.streams.getStreamDefinition(streamName);
+      await apiServices.streams.updateStream(streamName, {
+        ingest: {
+          ...streamDefinition.stream.ingest,
+          processing: omit(streamDefinition.stream.ingest.processing, 'updated_at'),
+          lifecycle: {
+            dsl: {
+              data_retention: '30d',
+              downsample: [{ after: '1d', fixed_interval: '1h' }],
+            },
+          },
+        },
+      });
+
+      await pageObjects.streams.gotoDataRetentionTab(streamName);
+
+      // Open the downsampling step popover and edit the step
+      await page.getByTestId('downsamplingPhase-1h-label').click();
+      await page.getByTestId('downsamplingPopover-step1-editButton').click();
+
+      await expect(page.getByTestId('streamsEditDslStepsFlyoutFromSummary')).toBeVisible();
+      const stepPanel = page.getByTestId('streamsEditDslStepsFlyoutFromSummaryPanel-step-0');
+      await expect(stepPanel).toBeVisible();
+
+      await stepPanel
+        .getByTestId('streamsEditDslStepsFlyoutFromSummaryFixedIntervalValue')
+        .fill('2');
+      await stepPanel
+        .getByTestId('streamsEditDslStepsFlyoutFromSummaryFixedIntervalUnit')
+        .selectOption('h');
+
+      await page.getByTestId('streamsEditDslStepsFlyoutFromSummarySaveButton').click();
+
+      await expect(page.getByTestId('streamsEditDslStepsFlyoutFromSummary')).toHaveCount(0);
+      await expect(page.getByTestId('downsamplingPhase-2h-label')).toBeVisible();
+      await expect(page.getByTestId('downsamplingPhase-1h-label')).toHaveCount(0);
     });
   }
 );
