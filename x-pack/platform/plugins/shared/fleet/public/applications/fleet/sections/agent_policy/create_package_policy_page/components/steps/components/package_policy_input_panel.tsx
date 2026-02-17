@@ -97,7 +97,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   }) => {
     const defaultDataStreamId = useDataStreamId();
     const { isAgentlessEnabled } = useAgentless();
-    const showTopLevelDescription = packagePolicyInput.streams.length === 1;
     // Showing streams toggle state
     const [isShowingStreams, setIsShowingStreams] = useState<boolean>(() =>
       shouldShowStreamsByDefault(
@@ -159,6 +158,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
           .filter((stream) => Boolean(stream.packagePolicyInputStream)),
       [packageInputStreamShouldBeVisible, packageInputStreams, packagePolicyInput.streams]
     );
+    const showTopLevelDescription = inputStreams.length === 1;
 
     return (
       <>
