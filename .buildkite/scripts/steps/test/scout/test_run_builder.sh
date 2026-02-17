@@ -32,7 +32,7 @@ node scripts/scout.js run-tests \
   --config src/platform/packages/shared/kbn-scout/test/scout/api/parallel.playwright.config.ts \
   --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
 
-source .buildkite/scripts/steps/test/scout_upload_report_events.sh
+source .buildkite/scripts/steps/test/scout/upload_report_events.sh
 
 echo '--- Producing Scout Test Execution Steps'
 ts-node "$(dirname "${0}")/test_run_builder.ts"
