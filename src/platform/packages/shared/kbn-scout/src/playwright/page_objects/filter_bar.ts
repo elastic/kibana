@@ -52,8 +52,12 @@ export class FilterBar {
     await expect(filterParamsInput).toBeEditable();
     await filterParamsInput.focus();
     await this.page.typeWithDelay('[data-test-subj="filterParams"] input', options.value);
-    // save filter
+    // save filter and wait for popover to close
     await this.page.testSubj.click('saveFilter');
+    await expect(
+      this.page.testSubj.locator('addFilterPopover'),
+      'Filter popover should close after saving'
+    ).toBeHidden();
 
     await expect(
       this.page.testSubj.locator('^filter-badge'),
