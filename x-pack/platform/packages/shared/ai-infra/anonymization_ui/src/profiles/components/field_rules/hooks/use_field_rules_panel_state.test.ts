@@ -114,8 +114,9 @@ describe('useFieldRulesPanelState', () => {
       result.current.applyBulkAction();
     });
 
-    const hostRule = result.current.allRules.find((rule) => rule.field === 'host.name');
-    const userRule = result.current.allRules.find((rule) => rule.field === 'user.email');
+    const nextRules = onFieldRulesChange.mock.calls[0][0] as FieldRule[];
+    const hostRule = nextRules.find((rule) => rule.field === 'host.name');
+    const userRule = nextRules.find((rule) => rule.field === 'user.email');
     expect(hostRule).toMatchObject({ allowed: true, anonymized: true, entityClass: 'HOST_NAME' });
     expect(userRule).toMatchObject({ allowed: true, anonymized: true, entityClass: 'EMAIL' });
   });
@@ -133,7 +134,8 @@ describe('useFieldRulesPanelState', () => {
       result.current.onRuleEntityClassChange('user.email', '');
     });
 
-    const userRule = result.current.allRules.find((rule) => rule.field === 'user.email');
+    const nextRules = onFieldRulesChange.mock.calls[0][0] as FieldRule[];
+    const userRule = nextRules.find((rule) => rule.field === 'user.email');
     expect(userRule).toMatchObject({ allowed: true, anonymized: true, entityClass: '' });
   });
 
@@ -155,8 +157,11 @@ describe('useFieldRulesPanelState', () => {
     act(() => {
       result.current.onRuleActionChange('host.name', FIELD_RULE_ACTION_DENY);
     });
-
-    expect(result.current.policyCounters).toEqual({
+    const nextRules = onFieldRulesChange.mock.calls[0][0] as FieldRule[];
+    const denyCount = nextRules.filter((rule) => !rule.allowed).length;
+    const anonymizeCount = nextRules.filter((rule) => rule.allowed && rule.anonymized).length;
+    const allowCount = nextRules.filter((rule) => rule.allowed && !rule.anonymized).length;
+    expect({ allow: allowCount, anonymize: anonymizeCount, deny: denyCount }).toEqual({
       allow: 2,
       anonymize: 1,
       deny: 1,

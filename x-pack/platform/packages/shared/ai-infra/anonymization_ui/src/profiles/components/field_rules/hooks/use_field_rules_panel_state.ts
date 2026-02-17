@@ -22,7 +22,6 @@ export const useFieldRulesPanelState = ({
   fieldRules,
   onFieldRulesChange,
 }: UseFieldRulesPanelStateParams) => {
-  const [allRules, setAllRules] = useState<FieldRule[]>(fieldRules);
   const [fieldSearchQuery, setFieldSearchQuery] = useState('');
   const [fieldActionFilter, setFieldActionFilter] =
     useState<(typeof FIELD_ACTION_OPTIONS)[number]['value']>('all');
@@ -32,25 +31,20 @@ export const useFieldRulesPanelState = ({
   const [bulkEntityClass, setBulkEntityClass] = useState('REDACTED');
 
   useEffect(() => {
-    setAllRules(fieldRules);
     setSelectedFields([]);
   }, [fieldRules]);
 
   const updateAllRules = useCallback(
     (updater: (currentRules: FieldRule[]) => FieldRule[]) => {
-      setAllRules((currentRules) => {
-        const nextRules = updater(currentRules);
-        onFieldRulesChange(nextRules);
-        return nextRules;
-      });
+      onFieldRulesChange(updater(fieldRules));
     },
-    [onFieldRulesChange]
+    [fieldRules, onFieldRulesChange]
   );
 
   const normalizedSearchQuery = fieldSearchQuery.trim().toLowerCase();
   const filteredRules = useMemo(
     () =>
-      allRules.filter((rule) => {
+      fieldRules.filter((rule) => {
         if (fieldActionFilter !== 'all' && toFieldAction(rule) !== fieldActionFilter) {
           return false;
         }
@@ -59,7 +53,7 @@ export const useFieldRulesPanelState = ({
         }
         return rule.field.toLowerCase().includes(normalizedSearchQuery);
       }),
-    [allRules, fieldActionFilter, normalizedSearchQuery]
+    [fieldRules, fieldActionFilter, normalizedSearchQuery]
   );
   const rankedRules = useMemo(
     () =>
@@ -78,10 +72,10 @@ export const useFieldRulesPanelState = ({
     [fieldPageIndex, rankedRules]
   );
 
-  const allRuleFields = useMemo(() => allRules.map((rule) => rule.field), [allRules]);
+  const allRuleFields = useMemo(() => fieldRules.map((rule) => rule.field), [fieldRules]);
   const selectedCount = selectedFields.length;
   const allFieldsSelected = allRuleFields.length > 0 && selectedCount === allRuleFields.length;
-  const policyCounters = useMemo(() => countPolicies(allRules), [allRules]);
+  const policyCounters = useMemo(() => countPolicies(fieldRules), [fieldRules]);
 
   const toggleSelectAllFields = useCallback(() => {
     if (allFieldsSelected) {
@@ -140,7 +134,7 @@ export const useFieldRulesPanelState = ({
     setBulkEntityClass,
     pagedRules,
     filteredRules: rankedRules,
-    allRules,
+    allRules: fieldRules,
     selectedFields,
     setSelectedFields,
     allFieldsSelected,
