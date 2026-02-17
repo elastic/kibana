@@ -25,7 +25,7 @@ import { ActionsMenuButton } from './actions_menu_button';
 import {
   useAlertTriggerDecorations,
   useConnectorTypeDecorations,
-  useFocusedStepOutline,
+  useFocusedStepDecoration,
   useLineDifferencesDecorations,
   useStepDecorationsInExecution,
   useTriggerTypeDecorations,
@@ -203,7 +203,6 @@ export const WorkflowYAMLEditor = ({
   // Styles
   const styles = useWorkflowEditorStyles();
   const [positionStyles, setPositionStyles] = useState<{ top: string; right: string } | null>(null);
-  const { styles: stepOutlineStyles } = useFocusedStepOutline(editorRef.current);
   const { styles: stepExecutionStyles } = useStepDecorationsInExecution(editorRef.current);
 
   useWorkflowsMonacoTheme();
@@ -383,6 +382,8 @@ export const WorkflowYAMLEditor = ({
     };
   }, []);
 
+  useFocusedStepDecoration(editorRef.current);
+
   // Decorations
   useTriggerTypeDecorations({
     editor: editorRef.current,
@@ -520,7 +521,7 @@ export const WorkflowYAMLEditor = ({
   }, [workflowJsonSchemaStrict, notifications]);
 
   return (
-    <div css={css([styles.container, stepOutlineStyles, stepExecutionStyles])} ref={containerRef}>
+    <div css={css([styles.container, stepExecutionStyles])} ref={containerRef}>
       <GlobalWorkflowEditorStyles />
       <ActionsMenuPopover
         anchorPosition="upCenter"
