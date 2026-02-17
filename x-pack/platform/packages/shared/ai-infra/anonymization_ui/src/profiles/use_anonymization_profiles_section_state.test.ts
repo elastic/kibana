@@ -166,7 +166,7 @@ describe('useAnonymizationProfilesSectionState', () => {
 
     expect(onCreateSuccess).toHaveBeenCalledTimes(1);
     expect(reset).toHaveBeenCalledTimes(1);
-    expect(result.current.flyoutState).toEqual({ mode: 'create' });
+    expect(result.current.flyoutState).toBeNull();
   });
 
   it('stores conflict profile id and calls onCreateConflict', async () => {
