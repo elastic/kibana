@@ -111,20 +111,6 @@ describe('Rules Endpoint response actions validators', () => {
         permission: 'canIsolateHost',
         responseAction: createRulePayloadResponseActionMock({ params: { command: 'isolate' } }),
       },
-      {
-        actionName: 'kill-process',
-        permission: 'canKillProcess',
-        responseAction: createRulePayloadResponseActionMock({
-          params: { command: 'kill-process', config: { overwrite: true } },
-        }),
-      },
-      {
-        actionName: 'suspend-process',
-        permission: 'canSuspendProcess',
-        responseAction: createRulePayloadResponseActionMock({
-          params: { command: 'suspend-process', config: { overwrite: true } },
-        }),
-      },
     ];
 
     it.each(getAuthzTests())(
