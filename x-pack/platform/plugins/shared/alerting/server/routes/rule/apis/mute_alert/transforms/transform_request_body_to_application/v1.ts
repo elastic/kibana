@@ -9,7 +9,7 @@ import type { SnoozeCondition } from '@kbn/alerting-types';
 import type { MuteAlertRequestBodyV1 } from '../../../../../../../common/routes/rule/apis/mute_alert';
 
 export const transformRequestBodyToApplication = (
-  body?: MuteAlertRequestBodyV1
+  body?: MuteAlertRequestBodyV1 | null
 ): {
   expiresAt?: string;
   conditions?: SnoozeCondition[];

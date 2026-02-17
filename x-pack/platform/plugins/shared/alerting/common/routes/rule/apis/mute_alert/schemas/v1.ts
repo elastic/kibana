@@ -67,7 +67,7 @@ const snoozeConditionSchema = schema.object({
  * When provided, creates a conditional per-alert snooze with time-based expiry
  * and/or field-change conditions. When absent, behaves as a simple indefinite mute.
  */
-export const muteAlertBodySchema = schema.maybe(
+export const muteAlertBodySchema = schema.nullable(
   schema.object({
     expires_at: schema.maybe(
       schema.string({
