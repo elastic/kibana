@@ -21,7 +21,7 @@ export {
 } from './var_group_helpers';
 export type { VarGroupSelection } from './var_group_helpers';
 export {
-  computePolicyEffects,
+  computeVarGroupPolicyEffects,
   registerPolicyEffectHandler,
   cloudConnectorPolicyEffect,
 } from './var_group_policy_effects';

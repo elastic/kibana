@@ -26,6 +26,7 @@ const _allowedExperimentalValues = {
   enableSloTemplates: true,
   newBrowseIntegrationUx: false, // When enabled integrations, browse integrations page will use the new UX.
   enableVersionSpecificPolicies: false, // When enabled, version specific policies will be created when packages use agent version conditions
+  enableCloudConnectorVarGroups: false, // When enabled, cloud connector support is activated for integrations using var_groups in their package spec.
 };
 
 /**

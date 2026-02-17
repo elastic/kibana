@@ -40,6 +40,8 @@ import {
 import { isAdvancedVar, shouldShowVar, isVarRequiredByVarGroup } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
 
+import { ExperimentalFeaturesService } from '../../../../../services';
+
 import { PackagePolicyInputVarField, VarGroupSelector, useVarGroupSelections } from './components';
 import { useOutputs } from './components/hooks';
 
@@ -75,6 +77,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     isAgentlessSelected = false,
   }) => {
     const { docLinks, cloud } = useStartServices();
+    const { enableCloudConnectorVarGroups } = ExperimentalFeaturesService.get();
 
     // Form show/hide states
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(noAdvancedToggle);
@@ -82,16 +85,18 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     // Var group selections - derives from policy, initializes defaults, handles changes.
     // packagePolicy is passed so that policy effects (e.g., supports_cloud_connector flag
     // and supports_cloud_connectors var) are computed when the selection changes.
+    // When enableCloudConnectorVarGroups is false, packagePolicy is omitted to skip
+    // cloud connector policy effects computation.
     const { selections: varGroupSelections, handleSelectionChange: handleVarGroupSelectionChange } =
       useVarGroupSelections({
         varGroups: packageInfo.var_groups,
         savedSelections: packagePolicy.var_group_selections,
         isAgentlessEnabled: isAgentlessSelected,
         onSelectionsChange: updatePackagePolicy,
-        packagePolicy,
+        packagePolicy: enableCloudConnectorVarGroups ? packagePolicy : undefined,
       });
 
-    // Cloud connector state from var_group selections
+    // Cloud connector state from var_group selections (gated by feature flag)
     const {
       isCloudConnector,
       cloudProvider,
@@ -99,7 +104,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       cloudConnectorVars,
       handleCloudConnectorUpdate,
     } = useVarGroupCloudConnector({
-      varGroups: packageInfo.var_groups,
+      varGroups: enableCloudConnectorVarGroups ? packageInfo.var_groups : undefined,
       varGroupSelections,
       updatePackagePolicy,
     });

@@ -10,7 +10,7 @@ import type { RegistryVarGroup } from '../../../../types';
 
 import {
   cloudConnectorPolicyEffect,
-  computePolicyEffects,
+  computeVarGroupPolicyEffects,
   registerPolicyEffectHandler,
 } from './var_group_policy_effects';
 import type { VarGroupSelection } from './var_group_helpers';
@@ -261,12 +261,12 @@ describe('var_group_policy_effects', () => {
     });
   });
 
-  describe('computePolicyEffects', () => {
+  describe('computeVarGroupPolicyEffects', () => {
     it('should return null when varGroups is undefined', () => {
       const packagePolicy = createMockPackagePolicy();
       const selections: VarGroupSelection = {};
 
-      const result = computePolicyEffects(packagePolicy, selections, undefined);
+      const result = computeVarGroupPolicyEffects(packagePolicy, selections, undefined);
 
       expect(result).toBeNull();
     });
@@ -275,7 +275,7 @@ describe('var_group_policy_effects', () => {
       const packagePolicy = createMockPackagePolicy();
       const selections: VarGroupSelection = {};
 
-      const result = computePolicyEffects(packagePolicy, selections, []);
+      const result = computeVarGroupPolicyEffects(packagePolicy, selections, []);
 
       expect(result).toBeNull();
     });
@@ -285,7 +285,7 @@ describe('var_group_policy_effects', () => {
       const varGroups = createMockVarGroups();
       const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
 
-      const result = computePolicyEffects(packagePolicy, selections, varGroups);
+      const result = computeVarGroupPolicyEffects(packagePolicy, selections, varGroups);
 
       expect(result).toEqual({
         supports_cloud_connector: true,
@@ -304,7 +304,7 @@ describe('var_group_policy_effects', () => {
       const varGroups = createMockVarGroups();
       const selections: VarGroupSelection = { auth_method: 'manual' };
 
-      const result = computePolicyEffects(packagePolicy, selections, varGroups);
+      const result = computeVarGroupPolicyEffects(packagePolicy, selections, varGroups);
 
       expect(customHandler).toHaveBeenCalledWith(packagePolicy, selections, varGroups);
       expect(result).toMatchObject({ custom_field: 'test' });

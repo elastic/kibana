@@ -116,9 +116,10 @@ export function registerPolicyEffectHandler(handler: PolicyEffectHandler): void 
 
 /**
  * Compute all policy effects based on the current var_group selections.
- * Aggregates results from all registered handlers.
+ * Aggregates results from all registered handlers (e.g., setting
+ * supports_cloud_connector and supports_cloud_connectors var).
  */
-export function computePolicyEffects(
+export function computeVarGroupPolicyEffects(
   packagePolicy: NewPackagePolicy,
   varGroupSelections: VarGroupSelection,
   varGroups: RegistryVarGroup[] | undefined
