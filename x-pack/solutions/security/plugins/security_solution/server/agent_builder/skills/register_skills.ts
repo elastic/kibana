@@ -26,8 +26,8 @@ export const registerSkills = async ({
   kibanaVersion,
   logger,
 }: RegisterSkillsOpts): Promise<void> => {
-  await agentBuilder.skill.registerSkill(
+  await agentBuilder.skills.register(
     getEntityAnalysisSkill({ getStartServices, kibanaVersion, logger })
   );
-  // await agentBuilder.skill.registerSkill(alertAnalysisSampleSkill);
+  // await agentBuilder.skills.register(alertAnalysisSampleSkill);
 };

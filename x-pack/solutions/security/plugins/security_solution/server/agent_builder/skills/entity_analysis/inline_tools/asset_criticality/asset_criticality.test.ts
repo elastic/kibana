@@ -19,139 +19,50 @@ describe('QUERY_FNS', () => {
 
   describe('queryAssetCriticality', () => {
     it('should query and format response correctly', async () => {
-      const query = `FROM risk-score-latest
-  | WHERE host.risk.calculated_score_norm IS NOT NULL
-  | KEEP @timestamp, host.risk.calculated_score_norm, host.risk.calculated_level, host.risk.id_value, host.risk.id_field
-  | SORT host.risk.calculated_score_norm DESC
+      const query = `FROM asset-criticality-index
+  | WHERE criticality_level IS NOT NULL AND criticality_level != "deleted"
+  | EVAL numerical_level = CASE(criticality_level == "low_impact", 1, criticality_level == "medium_impact", 2, criticality_level == "high_impact", 3, criticality_level == "extreme_impact", 4)
+  | KEEP @timestamp, criticality_level, id_field, id_value, numerical_level
+  | SORT numerical_level DESC, id_value ASC
   | LIMIT 10`;
       const response = {
-        took: 8,
+        took: 333,
         is_partial: false,
-        completion_time_in_millis: 1770937345947,
-        documents_found: 10,
-        values_loaded: 50,
-        start_time_in_millis: 1770937345939,
-        expiration_time_in_millis: 1771369345917,
+        completion_time_in_millis: 1771356298186,
+        documents_found: 1,
+        values_loaded: 4,
+        start_time_in_millis: 1771356297853,
+        expiration_time_in_millis: 1771788298033,
         columns: [
           {
             name: '@timestamp',
             type: 'date',
           },
           {
-            name: 'host.risk.calculated_score_norm',
-            type: 'double',
-          },
-          {
-            name: 'host.risk.calculated_level',
+            name: 'criticality_level',
             type: 'keyword',
           },
           {
-            name: 'host.risk.id_field',
+            name: 'id_field',
             type: 'keyword',
           },
           {
-            name: 'host.risk.id_value',
+            name: 'id_value',
             type: 'keyword',
+          },
+          {
+            name: 'numerical_level',
+            type: 'integer',
           },
         ],
         values: [
-          ['2026-02-12T22:22:18.629Z', 91.25021362304688, 'Critical', 'host.name', 'host-1'],
-          [
-            '2026-02-12T22:22:18.629Z',
-            73.57698822021484,
-            'High',
-            'host.name',
-            'quarterly-caption.net',
-          ],
-          [
-            '2026-02-12T22:22:18.629Z',
-            73.57698822021484,
-            'High',
-            'host.name',
-            'second-hand-decryption.name',
-          ],
-          [
-            '2026-02-12T22:22:18.629Z',
-            73.57698822021484,
-            'High',
-            'host.name',
-            'ignorant-cleaner.org',
-          ],
-          ['2026-02-12T22:22:18.629Z', 73.57698822021484, 'High', 'host.name', 'junior-hovel.net'],
+          ['2026-02-17T19:20:00.792Z', 'high_impact', 'host.name', 'unfortunate-cruelty.name', 3],
         ],
       };
 
       esClient.esql.query.mockResolvedValue(response);
 
-      const result = await queryTopRisks({
-        entityType: 'host',
-        latestIndex,
-        timeseriesIndex,
-        esClient,
-      });
-
-      expect(esClient.esql.query).toHaveBeenCalledWith({ query, drop_null_columns: true });
-
-      expect(result).toEqual([
-        {
-          tool_result_id: expect.any(String),
-          type: ToolResultType.esqlResults,
-          data: { query, columns: response.columns, values: response.values },
-        },
-      ]);
-    });
-
-    it('should query and format response correctly for users', async () => {
-      const query = `FROM risk-score-latest
-  | WHERE user.risk.calculated_score_norm IS NOT NULL
-  | KEEP @timestamp, user.risk.calculated_score_norm, user.risk.calculated_level, user.risk.id_value, user.risk.id_field
-  | SORT user.risk.calculated_score_norm DESC
-  | LIMIT 10`;
-      const response = {
-        took: 8,
-        is_partial: false,
-        completion_time_in_millis: 1770937345947,
-        documents_found: 10,
-        values_loaded: 50,
-        start_time_in_millis: 1770937345939,
-        expiration_time_in_millis: 1771369345917,
-        columns: [
-          {
-            name: '@timestamp',
-            type: 'date',
-          },
-          {
-            name: 'user.risk.calculated_score_norm',
-            type: 'double',
-          },
-          {
-            name: 'user.risk.calculated_level',
-            type: 'keyword',
-          },
-          {
-            name: 'user.risk.id_field',
-            type: 'keyword',
-          },
-          {
-            name: 'user.risk.id_value',
-            type: 'keyword',
-          },
-        ],
-        values: [
-          ['2026-02-12T22:22:18.629Z', 91.25021362304688, 'Critical', 'host.name', 'user-1'],
-          ['2026-02-12T22:22:18.629Z', 73.57698822021484, 'High', 'host.name', 'user-2'],
-          ['2026-02-12T22:22:18.629Z', 73.57698822021484, 'High', 'host.name', 'user-3'],
-        ],
-      };
-
-      esClient.esql.query.mockResolvedValue(response);
-
-      const result = await queryTopRisks({
-        entityType: 'user',
-        latestIndex,
-        timeseriesIndex,
-        esClient,
-      });
+      const result = await queryAssetCriticality({ entityType: 'host', index, esClient });
 
       expect(esClient.esql.query).toHaveBeenCalledWith({ query, drop_null_columns: true });
 
@@ -165,20 +76,29 @@ describe('QUERY_FNS', () => {
     });
 
     it('should use limit if defined', async () => {
-      await queryTopRisks({
-        entityType: 'user',
-        latestIndex,
-        timeseriesIndex,
-        esClient,
-        limit: 20,
-      });
+      await queryAssetCriticality({ entityType: 'user', index, esClient, limit: 20 });
 
       expect(esClient.esql.query).toHaveBeenCalledWith({
-        query: `FROM risk-score-latest
-  | WHERE user.risk.calculated_score_norm IS NOT NULL
-  | KEEP @timestamp, user.risk.calculated_score_norm, user.risk.calculated_level, user.risk.id_value, user.risk.id_field
-  | SORT user.risk.calculated_score_norm DESC
+        query: `FROM asset-criticality-index
+  | WHERE criticality_level IS NOT NULL AND criticality_level != "deleted"
+  | EVAL numerical_level = CASE(criticality_level == "low_impact", 1, criticality_level == "medium_impact", 2, criticality_level == "high_impact", 3, criticality_level == "extreme_impact", 4)
+  | KEEP @timestamp, criticality_level, id_field, id_value, numerical_level
+  | SORT numerical_level DESC, id_value ASC
   | LIMIT 20`,
+        drop_null_columns: true,
+      });
+    });
+
+    it('should use entityId if defined', async () => {
+      await queryAssetCriticality({ entityType: 'user', index, esClient, entityId: 'user-123' });
+
+      expect(esClient.esql.query).toHaveBeenCalledWith({
+        query: `FROM asset-criticality-index
+  | WHERE criticality_level IS NOT NULL AND criticality_level != "deleted" AND id_value == "user-123"
+  | EVAL numerical_level = CASE(criticality_level == "low_impact", 1, criticality_level == "medium_impact", 2, criticality_level == "high_impact", 3, criticality_level == "extreme_impact", 4)
+  | KEEP @timestamp, criticality_level, id_field, id_value, numerical_level
+  | SORT numerical_level DESC, id_value ASC
+  | LIMIT 10`,
         drop_null_columns: true,
       });
     });
