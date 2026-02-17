@@ -819,19 +819,15 @@ const CreateRulePageComponent: React.FC<{
 
   const addToChatButton = useMemo(
     () =>
-      sendToAgentChat ? (
-        <AddRuleAttachmentToChatButton
+      <AddRuleAttachmentToChatButton
           defineStepData={defineStepData}
           aboutStepData={aboutStepData}
           scheduleStepData={scheduleStepData}
           actionsStepData={actionsStepData}
           actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
-          mode="creation"
           pathway="rule_creation"
-        />
-      ) : undefined,
+        />,
     [
-      sendToAgentChat,
       defineStepData,
       aboutStepData,
       scheduleStepData,

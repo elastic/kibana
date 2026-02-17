@@ -710,7 +710,6 @@ export const RuleDetailsPage = connector(
                               <AddRuleAttachmentToChatButton
                                 rule={rule}
                                 pathway="rule_details"
-                                mode="exploration"
                               />
                             )}
                           </EuiFlexItem>

@@ -553,7 +553,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                               actionsStepData={actionsStepData}
                               actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
                               pathway="rule_editing"
-                              mode="exploration"
                             />
                           ) : undefined
                         }

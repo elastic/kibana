@@ -19,10 +19,7 @@ import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_a
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
-import {
-  RULE_ATTACHMENT_PROMPT,
-  RULE_EXPLORATION_ATTACHMENT_PROMPT,
-} from '../../../../agent_builder/components/prompts';
+import { RULE_EXPLORATION_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
 import type { AgentBuilderAddToChatTelemetry } from '../../../../agent_builder/hooks/use_report_add_to_chat';
 import { formatRule } from '../../pages/rule_creation/helpers';
 
@@ -48,14 +45,14 @@ export type AddRuleAttachmentToChatButtonProps = (
   | AddRuleAttachmentFromFormProps
   | AddRuleAttachmentFromRuleResponseProps
 ) & {
-  pathway?: AgentBuilderAddToChatTelemetry['pathway'];
-  mode?: 'creation' | 'exploration';
+  pathway: AgentBuilderAddToChatTelemetry['pathway'];
 };
 
-export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButtonProps> = (props) => {
+export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButtonProps> = ({
+  pathway,
+  ...props
+}) => {
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
-  const pathway = props.pathway ?? 'rule_creation';
-  const mode = props.mode ?? 'creation';
 
   const {
     defineStepData,
@@ -85,10 +82,7 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
         )
       : rule;
     const attachmentLabel = formattedRule?.name;
-
-    const attachmentData = `<rule>${JSON.stringify(formattedRule)}</rule>`;
-    const attachmentPrompt =
-      mode === 'exploration' ? RULE_EXPLORATION_ATTACHMENT_PROMPT : RULE_ATTACHMENT_PROMPT;
+    const attachmentData = `${JSON.stringify(formattedRule)}`;
 
     return {
       attachmentType: SecurityAgentBuilderAttachments.rule,
@@ -96,9 +90,17 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
         text: attachmentData,
         attachmentLabel,
       },
-      attachmentPrompt,
+      attachmentPrompt: RULE_EXPLORATION_ATTACHMENT_PROMPT,
     };
-  }, [isFormBased, mode, defineStepData, aboutStepData, scheduleStepData, actionsStepData, actionTypeRegistry, rule]);
+  }, [
+    isFormBased,
+    defineStepData,
+    aboutStepData,
+    scheduleStepData,
+    actionsStepData,
+    actionTypeRegistry,
+    rule,
+  ]);
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(ruleAttachment);
 

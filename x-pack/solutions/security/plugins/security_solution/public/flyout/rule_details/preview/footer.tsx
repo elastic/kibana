@@ -38,7 +38,6 @@ export const PreviewFooter = memo(({ ruleId, rule }: PreviewFooterProps) => {
           <AddRuleAttachmentToChatButton
             rule={rule}
             pathway="alerts_flyout_rule_summary"
-            mode="exploration"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

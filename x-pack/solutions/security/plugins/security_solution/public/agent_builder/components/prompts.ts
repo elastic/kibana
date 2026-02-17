@@ -80,18 +80,6 @@ Formatting Requirements:
 
 export const ENTITY_PROMPT = `Investigate the entity and suggest next steps.`;
 
-export const RULE_ATTACHMENT_PROMPT = `Review the detection rule provided and help improve it. Analyze the rule's configuration including:
-- Query logic and data sources
-- MITRE ATT&CK mappings
-- Rule schedule and lookback periods
-- Tags
-- Rule name
-- Rule description
-
-Put each suggested field into copyable code block of new field value in markdown with named sections.
-
-Question:`;
-
 export const RULE_EXPLORATION_ATTACHMENT_PROMPT = `
 Analyze the attached Security detection rule and provide actionable insights.
 
@@ -138,4 +126,3 @@ When Suggesting Improvements:
 - Put each suggested field value in a separate, copyable code block with a clear label
 - If you need more context, ask concise follow-up questions
 `;
-
