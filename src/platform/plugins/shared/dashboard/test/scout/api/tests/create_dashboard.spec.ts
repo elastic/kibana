@@ -84,7 +84,6 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
       },
       body: {
         title,
-        spaces: [spaceId],
       },
       responseType: 'json',
     });
