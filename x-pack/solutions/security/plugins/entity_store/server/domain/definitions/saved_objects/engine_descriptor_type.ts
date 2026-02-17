@@ -168,6 +168,25 @@ const version2: SavedObjectsFullModelVersion = {
         },
       },
     },
+    {
+      type: 'data_backfill' as const,
+      backfillFn: (document) => {
+        const { logExtractionState } = document.attributes;
+        const additionalIndexPatterns = Array.isArray(logExtractionState?.additionalIndexPatterns)
+          ? logExtractionState.additionalIndexPatterns
+          : [];
+        const paginationId = logExtractionState?.paginationId ?? '';
+
+        return {
+          attributes: {
+            logExtractionState: {
+              additionalIndexPatterns,
+              paginationId,
+            },
+          },
+        };
+      },
+    },
   ],
   schemas: {
     create: engineDescriptorSchemaV2,
