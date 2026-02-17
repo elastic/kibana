@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiSelectable } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -50,10 +50,24 @@ interface BulkAlertClosingReasonComponentProps {
 const BulkAlertClosingReasonComponent: React.FC<BulkAlertClosingReasonComponentProps> = ({
   onSubmit,
 }) => {
-  const [options, setOptions] = useState(defaultClosingReasons);
   const {
     services: { uiSettings },
   } = useKibana<{ uiSettings: IUiSettingsClient }>();
+
+  const customClosingReasons = uiSettings.get<string[]>(DEFAULT_ALERT_CLOSE_REASONS_KEY);
+  const [options, setOptions] = useState<
+    EuiSelectableOption<{
+      key?: AlertClosingReason;
+    }>[]
+  >([
+    ...defaultClosingReasons,
+    ...customClosingReasons.map((reason) => {
+      return {
+        label: reason,
+        key: reason,
+      };
+    }),
+  ]);
 
   const selectedOption = useMemo(() => options.find((option) => option.checked), [options]);
 
@@ -62,19 +76,6 @@ const BulkAlertClosingReasonComponent: React.FC<BulkAlertClosingReasonComponentP
 
     onSubmit(selectedOption.key);
   }, [onSubmit, selectedOption]);
-
-  useEffect(() => {
-    const customClosingReasons = uiSettings.get<string[]>(DEFAULT_ALERT_CLOSE_REASONS_KEY);
-    setOptions([
-      ...defaultClosingReasons,
-      ...customClosingReasons.map((reason) => {
-        return {
-          label: reason,
-          key: reason,
-        };
-      }),
-    ]);
-  }, [uiSettings]);
 
   return (
     <>
