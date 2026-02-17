@@ -30,7 +30,7 @@ export const partitionByCcs = <T extends { name: string }>(
   const local: T[] = [];
   const remote: T[] = [];
   for (const r of resources) {
-    if(isCcsTarget(r.name)) {
+    if (isCcsTarget(r.name)) {
       remote.push(r);
     } else {
       local.push(r);

@@ -7,7 +7,11 @@
 
 import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { getIndexMappings, isCcsTarget, getFieldsFromFieldCaps } from '@kbn/agent-builder-genai-utils';
+import {
+  getIndexMappings,
+  isCcsTarget,
+  getFieldsFromFieldCaps,
+} from '@kbn/agent-builder-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
@@ -46,8 +50,7 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
 
       // Remote (CCS) indices: use _field_caps API (CCS-compatible fallback)
       if (remoteIndices.length > 0) {
-        const fieldsByIndex: Record<string, { fields: Array<{ path: string; type: string }> }> =
-          {};
+        const fieldsByIndex: Record<string, { fields: Array<{ path: string; type: string }> }> = {};
         await Promise.all(
           remoteIndices.map(async (idx) => {
             const fields = await getFieldsFromFieldCaps({

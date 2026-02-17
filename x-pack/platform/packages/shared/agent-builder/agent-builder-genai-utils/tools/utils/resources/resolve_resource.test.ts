@@ -79,7 +79,9 @@ describe('resolveResource', () => {
       (esClient.indices.resolveIndex as jest.Mock).mockResolvedValue({
         indices: [],
         aliases: [],
-        data_streams: [{ name: 'remote_cluster:logs-ds', backing_indices: [], timestamp_field: '@timestamp' }],
+        data_streams: [
+          { name: 'remote_cluster:logs-ds', backing_indices: [], timestamp_field: '@timestamp' },
+        ],
       });
 
       // _field_caps returns field metadata
