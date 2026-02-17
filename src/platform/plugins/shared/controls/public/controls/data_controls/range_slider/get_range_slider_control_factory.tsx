@@ -11,19 +11,17 @@ import React, { useEffect } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, map, merge, of, skip } from 'rxjs';
 
 import {
-  apiPublishesViewMode,
-  fetch$,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
-import {
   apiCanPinPanels,
   apiHasSections,
+  apiPublishesViewMode,
+  fetch$,
   initializeUnsavedChanges,
-} from '@kbn/presentation-containers';
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
-
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
+
 import { isCompressed } from '../../../control_group/utils/is_compressed';
 import {
   defaultDataControlComparators,

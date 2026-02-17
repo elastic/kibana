@@ -304,6 +304,38 @@ Expected one of:
         }),
         type: 'error',
       };
+    case 'promqlUnknownFunction':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlUnknownFunction', {
+          defaultMessage: '[PROMQL] Unknown function "{fn}"',
+          values: { fn: out.fn },
+        }),
+        type: 'error',
+      };
+    case 'promqlWrongNumberArgs':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlWrongNumberArgs', {
+          defaultMessage:
+            '[PROMQL] Wrong number of arguments for "{fn}". Expected {expected}, got {actual}',
+          values: { fn: out.fn, expected: out.expected, actual: out.actual },
+        }),
+        type: 'error',
+      };
+    case 'promqlGroupingNotAllowed':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlGroupingNotAllowed', {
+          defaultMessage: '[PROMQL] Grouping is only allowed on aggregation',
+        }),
+        type: 'error',
+      };
+    case 'promqlNoMatchingSignature':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlNoMatchingSignature', {
+          defaultMessage: '[PROMQL] Argument types require ({required}) for function "{fn}"',
+          values: { fn: out.fn, required: out.required },
+        }),
+        type: 'error',
+      };
     case 'wrongDissectOptionArgumentType':
       return {
         message: i18n.translate(

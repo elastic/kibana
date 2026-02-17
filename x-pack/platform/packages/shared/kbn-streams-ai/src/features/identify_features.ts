@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { uniqBy } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
 import { type BaseFeature, baseFeatureSchema } from '@kbn/streams-schema';
@@ -13,6 +14,7 @@ import { createIdentifyFeaturesPrompt } from './prompt';
 import { sumTokens } from '../helpers/sum_tokens';
 
 export interface IdentifyFeaturesOptions {
+  streamName: string;
   sampleDocuments: Array<Record<string, any>>;
   inferenceClient: BoundInferenceClient;
   systemPrompt: string;
@@ -21,6 +23,7 @@ export interface IdentifyFeaturesOptions {
 }
 
 export async function identifyFeatures({
+  streamName,
   sampleDocuments,
   systemPrompt,
   inferenceClient,
@@ -45,12 +48,24 @@ export async function identifyFeatures({
     })
   );
 
-  const features = response.toolCalls
-    .flatMap((toolCall) => toolCall.function.arguments.features)
-    .filter((feature) => {
-      const result = baseFeatureSchema.safeParse(feature);
-      return result.success;
-    });
+  const features = uniqBy(
+    response.toolCalls
+      .flatMap((toolCall) => toolCall.function.arguments.features)
+      .map((feature) => ({
+        ...feature,
+        stream_name: streamName,
+      }))
+      .filter((feature) => {
+        const result = baseFeatureSchema.safeParse(feature);
+        if (!result.success) {
+          return false;
+        }
+
+        // ensure that the feature has at least one stable identifying property
+        return Object.keys(feature.properties).length > 0;
+      }),
+    (feature) => feature.id
+  );
 
   return {
     features,

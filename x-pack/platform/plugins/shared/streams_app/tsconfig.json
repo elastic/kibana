@@ -54,7 +54,6 @@
     "@kbn/content-packs-schema",
     "@kbn/dashboard-plugin",
     "@kbn/deeplinks-analytics",
-    "@kbn/visualization-utils",
     "@kbn/calculate-auto",
     "@kbn/deeplinks-observability",
     "@kbn/ui-theme",
@@ -106,6 +105,7 @@
     "@kbn/react-query",
     "@kbn/timerange",
     "@kbn/inference-common",
+    "@kbn/esql",
     "@kbn/inference-endpoint-ui-common",
     "@kbn/stack-connectors-plugin",
   ]

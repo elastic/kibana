@@ -32,8 +32,8 @@ import {
   apiHasPinnedPanels,
   apiHasSections,
   initializeUnsavedChanges,
-} from '@kbn/presentation-containers';
-import { type PublishingSubject } from '@kbn/presentation-publishing';
+  type PublishingSubject,
+} from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
 import { isOptionsListESQLControlState, isValidSearch } from '../../../../common/options_list';

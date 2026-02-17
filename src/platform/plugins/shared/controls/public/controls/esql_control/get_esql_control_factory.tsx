@@ -14,8 +14,12 @@ import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { ESQLControlState } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { apiCanPinPanels, initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { type PublishingSubject, initializeStateManager } from '@kbn/presentation-publishing';
+import {
+  type PublishingSubject,
+  apiCanPinPanels,
+  initializeStateManager,
+  initializeUnsavedChanges,
+} from '@kbn/presentation-publishing';
 import type { OptionsListSelection } from '@kbn/controls-schemas';
 
 import { uiActionsService } from '../../services/kibana_services';
@@ -98,7 +102,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
             labelManager.reinitializeState(updatedState);
           };
           try {
-            await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
+            await uiActionsService.executeTriggerActions('ESQL_CONTROL_TRIGGER', {
               queryString: nextState.esqlQuery,
               variableType: nextState.variableType,
               controlType: nextState.controlType,

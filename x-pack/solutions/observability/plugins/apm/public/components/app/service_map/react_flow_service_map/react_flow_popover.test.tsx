@@ -17,6 +17,7 @@ import type {
   ServiceMapEdge,
 } from '../../../../../common/service_map';
 import { MarkerType } from '@xyflow/react';
+import { MOCK_DEFAULT_COLOR, MOCK_EUI_THEME } from './constants';
 
 // Mock the EUI theme
 jest.mock('@elastic/eui', () => {
@@ -26,13 +27,13 @@ jest.mock('@elastic/eui', () => {
     useEuiTheme: () => ({
       euiTheme: {
         colors: {
-          primary: '#0077CC',
-          backgroundBasePlain: '#ffffff',
-          lightShade: '#D3DAE6',
-          textPrimary: '#1a1c21',
-          textParagraph: '#343741',
-          text: '#1a1c21',
-          mediumShade: '#98A2B3',
+          primary: MOCK_EUI_THEME.colors.primary,
+          backgroundBasePlain: MOCK_EUI_THEME.colors.backgroundBasePlain,
+          lightShade: MOCK_EUI_THEME.colors.lightShade,
+          textPrimary: MOCK_EUI_THEME.colors.textPrimary,
+          textParagraph: MOCK_EUI_THEME.colors.textParagraph,
+          text: MOCK_EUI_THEME.colors.textPrimary,
+          mediumShade: MOCK_EUI_THEME.colors.mediumShade,
         },
         size: {
           xs: '4px',
@@ -261,8 +262,8 @@ describe('ReactFlowPopover', () => {
       source: 'service-a',
       target: 'dependency-b',
       type: 'default',
-      style: { stroke: '#98A2B3', strokeWidth: 1 },
-      markerEnd: { type: MarkerType.ArrowClosed, width: 18, height: 18, color: '#98A2B3' },
+      style: { stroke: MOCK_DEFAULT_COLOR, strokeWidth: 1 },
+      markerEnd: { type: MarkerType.ArrowClosed, width: 18, height: 18, color: MOCK_DEFAULT_COLOR },
       data: {
         isBidirectional: false,
         sourceData: { id: 'service-a', 'service.name': 'Service A' },
