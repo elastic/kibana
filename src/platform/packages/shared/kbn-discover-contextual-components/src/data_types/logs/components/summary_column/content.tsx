@@ -48,7 +48,7 @@ const LogMessage = ({
           className={className}
           data-test-subj="discoverDataTableMessageValue"
           // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: escapeAndPreserveHighlightTags(value) }}
+          dangerouslySetInnerHTML={{ __html: value }}
         />
       </div>
     );
@@ -59,7 +59,7 @@ const LogMessage = ({
       className={className}
       data-test-subj="discoverDataTableMessageValue"
       // eslint-disable-next-line react/no-danger
-      dangerouslySetInnerHTML={{ __html: escapeAndPreserveHighlightTags(value) }}
+      dangerouslySetInnerHTML={{ __html: value }}
     />
   );
 };
@@ -104,7 +104,10 @@ export const Content = ({
   const isDarkTheme = useKibanaIsDarkMode();
 
   const highlightedValue = useMemo(
-    () => (value ? getHighlightedMessage(value, row, euiTheme, isDarkTheme) : value),
+    () =>
+      value
+        ? getHighlightedMessage(escapeAndPreserveHighlightTags(value), row, euiTheme, isDarkTheme)
+        : escapeAndPreserveHighlightTags(value),
     [value, row, euiTheme, isDarkTheme]
   );
 
