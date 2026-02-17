@@ -153,6 +153,7 @@ export async function generateSignificantEvents({
           const startTime = Date.now();
 
           const queries = toolCall.function.arguments.queries;
+          let hasFailures = false;
 
           const queryValidationResults = queries.map((query) => {
             try {
@@ -179,7 +180,7 @@ export async function generateSignificantEvents({
                 error: undefined,
               };
             } catch (error) {
-              toolUsage.add_queries.failures = 1;
+              hasFailures = true;
               return {
                 query,
                 valid: false,
@@ -188,7 +189,9 @@ export async function generateSignificantEvents({
               };
             }
           });
-
+          if (hasFailures) {
+            toolUsage.add_queries.failures += 1;
+          }
           toolUsage.add_queries.latency_ms += Date.now() - startTime;
 
           return {
