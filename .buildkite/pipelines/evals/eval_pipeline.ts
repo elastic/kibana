@@ -88,7 +88,9 @@ function buildEvalsYaml({
       const evaluationConnectorIdEnv = evaluationConnectorId
         ? `          EVALUATION_CONNECTOR_ID: '${evaluationConnectorId}'`
         : null;
-      const includeEisModelsEnv = includeEisModels ? `          EVAL_INCLUDE_EIS_MODELS: '1'` : null;
+      const includeEisModelsEnv = includeEisModels
+        ? `          EVAL_INCLUDE_EIS_MODELS: '1'`
+        : null;
       return [
         `      - label: '${label}'`,
         `        key: ${key}`,
