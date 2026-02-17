@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/eslint-config'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/eslint-config"
+id: '@kbn/eslint-config'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-operations"
+  defaultOwner: '@elastic/kibana-operations'
 toolchain:
   default: node
 language: javascript
 project:
-  name: "@kbn/eslint-config"
+  name: '@kbn/eslint-config'
   description: Moon project for @kbn/eslint-config
-  channel: ""
-  owner: "@elastic/kibana-operations"
+  channel: ''
+  owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-eslint-config
 tags:

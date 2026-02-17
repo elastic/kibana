@@ -3,30 +3,30 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/plugin-helpers'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/plugin-helpers"
+id: '@kbn/plugin-helpers'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-operations"
+  defaultOwner: '@elastic/kibana-operations'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/plugin-helpers"
+  name: '@kbn/plugin-helpers'
   description: Moon project for @kbn/plugin-helpers
-  channel: ""
-  owner: "@elastic/kibana-operations"
+  channel: ''
+  owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-plugin-helpers
 dependsOn:
-  - "@kbn/dev-utils"
-  - "@kbn/optimizer"
-  - "@kbn/tooling-log"
-  - "@kbn/dev-cli-runner"
-  - "@kbn/dev-cli-errors"
-  - "@kbn/repo-info"
-  - "@kbn/jest-serializers"
-  - "@kbn/repo-packages"
-  - "@kbn/stdio-dev-helpers"
+  - '@kbn/dev-utils'
+  - '@kbn/optimizer'
+  - '@kbn/tooling-log'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/repo-info'
+  - '@kbn/jest-serializers'
+  - '@kbn/repo-packages'
+  - '@kbn/stdio-dev-helpers'
 tags:
   - shared-server
   - package
@@ -35,6 +35,6 @@ tags:
   - private
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks: {}

@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/node-libs-browser-webpack-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/node-libs-browser-webpack-plugin"
+id: '@kbn/node-libs-browser-webpack-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-operations"
+  defaultOwner: '@elastic/kibana-operations'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/node-libs-browser-webpack-plugin"
+  name: '@kbn/node-libs-browser-webpack-plugin'
   description: Moon project for @kbn/node-libs-browser-webpack-plugin
-  channel: ""
-  owner: "@elastic/kibana-operations"
+  channel: ''
+  owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-node-libs-browser-webpack-plugin
 tags:
@@ -28,17 +28,17 @@ fileGroups:
   src:
     - index.js
     - types.ts
-    - "!target/**/*"
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

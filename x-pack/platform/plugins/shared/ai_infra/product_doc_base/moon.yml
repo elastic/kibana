@@ -3,37 +3,37 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/product-doc-base-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/product-doc-base-plugin"
+id: '@kbn/product-doc-base-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/appex-ai-infra"
+  defaultOwner: '@elastic/appex-ai-infra'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/product-doc-base-plugin"
+  name: '@kbn/product-doc-base-plugin'
   description: Moon project for @kbn/product-doc-base-plugin
-  channel: ""
-  owner: "@elastic/appex-ai-infra"
+  channel: ''
+  owner: '@elastic/appex-ai-infra'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/ai_infra/product_doc_base
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/logging"
-  - "@kbn/config-schema"
-  - "@kbn/product-doc-common"
-  - "@kbn/core-saved-objects-server"
-  - "@kbn/core-http-browser"
-  - "@kbn/logging-mocks"
-  - "@kbn/licensing-plugin"
-  - "@kbn/task-manager-plugin"
-  - "@kbn/inference-common"
-  - "@kbn/core-security-server"
-  - "@kbn/ml-is-populated-object"
-  - "@kbn/i18n"
-  - "@kbn/licensing-types"
-  - "@kbn/fs"
-  - "@kbn/react-query"
+  - '@kbn/core'
+  - '@kbn/logging'
+  - '@kbn/config-schema'
+  - '@kbn/product-doc-common'
+  - '@kbn/core-saved-objects-server'
+  - '@kbn/core-http-browser'
+  - '@kbn/logging-mocks'
+  - '@kbn/licensing-plugin'
+  - '@kbn/task-manager-plugin'
+  - '@kbn/inference-common'
+  - '@kbn/core-security-server'
+  - '@kbn/ml-is-populated-object'
+  - '@kbn/i18n'
+  - '@kbn/licensing-types'
+  - '@kbn/fs'
+  - '@kbn/react-query'
 tags:
   - plugin
   - prod
@@ -48,18 +48,18 @@ fileGroups:
     - server/**/*
     - scripts/**/*
     - .storybook/**/*
-    - "!target/**/*"
-    - "!.storybook/**/*.js"
+    - '!target/**/*'
+    - '!.storybook/**/*.js'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

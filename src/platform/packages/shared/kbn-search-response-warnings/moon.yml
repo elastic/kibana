@@ -3,27 +3,27 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/search-response-warnings'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/search-response-warnings"
+id: '@kbn/search-response-warnings'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-data-discovery"
+  defaultOwner: '@elastic/kibana-data-discovery'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/search-response-warnings"
+  name: '@kbn/search-response-warnings'
   description: Moon project for @kbn/search-response-warnings
-  channel: ""
-  owner: "@elastic/kibana-data-discovery"
+  channel: ''
+  owner: '@elastic/kibana-data-discovery'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-search-response-warnings
 dependsOn:
-  - "@kbn/i18n"
-  - "@kbn/inspector-plugin"
-  - "@kbn/core"
-  - "@kbn/react-kibana-mount"
-  - "@kbn/core-i18n-browser"
-  - "@kbn/es-types"
+  - '@kbn/i18n'
+  - '@kbn/inspector-plugin'
+  - '@kbn/core'
+  - '@kbn/react-kibana-mount'
+  - '@kbn/core-i18n-browser'
+  - '@kbn/es-types'
 tags:
   - shared-browser
   - package
@@ -33,20 +33,20 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "*.ts"
+    - '*.ts'
     - src/**/*
     - __mocks__/**/*.ts
-    - "!target/**/*"
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

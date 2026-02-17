@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/ui-shared-deps-npm'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/ui-shared-deps-npm"
+id: '@kbn/ui-shared-deps-npm'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-operations"
+  defaultOwner: '@elastic/kibana-operations'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/ui-shared-deps-npm"
+  name: '@kbn/ui-shared-deps-npm'
   description: Moon project for @kbn/ui-shared-deps-npm
-  channel: ""
-  owner: "@elastic/kibana-operations"
+  channel: ''
+  owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-ui-shared-deps-npm
 dependsOn:
-  - "@kbn/repo-info"
+  - '@kbn/repo-info'
 tags:
   - is-webpack-built
   - package
@@ -27,10 +27,10 @@ tags:
   - private
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.js"
-    - "!**/*.config.js"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.js'
+    - '!**/*.config.js'
+    - '!target/**/*'
 tasks:
   build-webpack:
     command: yarn
@@ -39,7 +39,7 @@ tasks:
     deps:
       - ^:build-webpack
     inputs:
-      - "@group(src)"
+      - '@group(src)'
       - webpack.config.js
     outputs:
       - /target/build/src/platform/packages/private/kbn-ui-shared-deps-npm
@@ -54,7 +54,7 @@ tasks:
     deps:
       - ^:build-webpack
     inputs:
-      - "@group(src)"
+      - '@group(src)'
       - webpack.config.js
     outputs:
       - /target/build/src/platform/packages/private/kbn-ui-shared-deps-npm

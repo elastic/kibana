@@ -3,25 +3,25 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/telemetry-collection-xpack-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/telemetry-collection-xpack-plugin"
+id: '@kbn/telemetry-collection-xpack-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-core"
+  defaultOwner: '@elastic/kibana-core'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/telemetry-collection-xpack-plugin"
+  name: '@kbn/telemetry-collection-xpack-plugin'
   description: Moon project for @kbn/telemetry-collection-xpack-plugin
-  channel: ""
-  owner: "@elastic/kibana-core"
+  channel: ''
+  owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: x-pack/platform/plugins/private/telemetry_collection_xpack
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/telemetry-collection-manager-plugin"
-  - "@kbn/telemetry-plugin"
-  - "@kbn/usage-collection-plugin"
+  - '@kbn/core'
+  - '@kbn/telemetry-collection-manager-plugin'
+  - '@kbn/telemetry-plugin'
+  - '@kbn/usage-collection-plugin'
 tags:
   - plugin
   - prod
@@ -33,17 +33,17 @@ fileGroups:
     - common/**/*
     - server/**/*
     - schema/*.json
-    - "!target/**/*"
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

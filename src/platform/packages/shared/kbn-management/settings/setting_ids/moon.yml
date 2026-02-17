@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/management-settings-ids'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/management-settings-ids"
+id: '@kbn/management-settings-ids'
 type: unknown
 owners:
-  defaultOwner: "@elastic/appex-sharedux"
+  defaultOwner: '@elastic/appex-sharedux'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/management-settings-ids"
+  name: '@kbn/management-settings-ids'
   description: Moon project for @kbn/management-settings-ids
-  channel: ""
-  owner: "@elastic/appex-sharedux"
+  channel: ''
+  owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-management/settings/setting_ids
 tags:
@@ -25,7 +25,7 @@ tags:
   - shared
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks: {}

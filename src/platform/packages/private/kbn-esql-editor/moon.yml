@@ -3,50 +3,50 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/esql-editor'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/esql-editor"
+id: '@kbn/esql-editor'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-esql"
+  defaultOwner: '@elastic/kibana-esql'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/esql-editor"
+  name: '@kbn/esql-editor'
   description: Moon project for @kbn/esql-editor
-  channel: ""
-  owner: "@elastic/kibana-esql"
+  channel: ''
+  owner: '@elastic/kibana-esql'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-esql-editor
 dependsOn:
-  - "@kbn/i18n"
-  - "@kbn/monaco"
-  - "@kbn/es-query"
-  - "@kbn/core"
-  - "@kbn/kibana-react-plugin"
-  - "@kbn/language-documentation"
-  - "@kbn/test-jest-helpers"
-  - "@kbn/data-plugin"
-  - "@kbn/code-editor"
-  - "@kbn/fields-metadata-plugin"
-  - "@kbn/esql-utils"
-  - "@kbn/content-management-favorites-public"
-  - "@kbn/usage-collection-plugin"
-  - "@kbn/content-management-favorites-common"
-  - "@kbn/kibana-utils-plugin"
-  - "@kbn/ui-actions-plugin"
-  - "@kbn/esql-types"
-  - "@kbn/i18n-react"
-  - "@kbn/esql-language"
-  - "@kbn/restorable-state"
-  - "@kbn/licensing-types"
-  - "@kbn/index-editor"
-  - "@kbn/react-hooks"
-  - "@kbn/react-kibana-context-theme"
-  - "@kbn/calculate-width-from-char-count"
-  - "@kbn/kql"
-  - "@kbn/ebt-tools"
-  - "@kbn/shared-ux-utility"
-  - "@kbn/search-types"
+  - '@kbn/i18n'
+  - '@kbn/monaco'
+  - '@kbn/es-query'
+  - '@kbn/core'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/language-documentation'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/data-plugin'
+  - '@kbn/code-editor'
+  - '@kbn/fields-metadata-plugin'
+  - '@kbn/esql-utils'
+  - '@kbn/content-management-favorites-public'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/content-management-favorites-common'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/ui-actions-plugin'
+  - '@kbn/esql-types'
+  - '@kbn/i18n-react'
+  - '@kbn/esql-language'
+  - '@kbn/restorable-state'
+  - '@kbn/licensing-types'
+  - '@kbn/index-editor'
+  - '@kbn/react-hooks'
+  - '@kbn/react-kibana-context-theme'
+  - '@kbn/calculate-width-from-char-count'
+  - '@kbn/kql'
+  - '@kbn/ebt-tools'
+  - '@kbn/shared-ux-utility'
+  - '@kbn/search-types'
 tags:
   - shared-browser
   - package
@@ -56,19 +56,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

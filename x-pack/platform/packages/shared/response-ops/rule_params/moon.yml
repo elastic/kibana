@@ -3,26 +3,26 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/response-ops-rule-params'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/response-ops-rule-params"
+id: '@kbn/response-ops-rule-params'
 type: unknown
 owners:
-  defaultOwner: "@elastic/response-ops"
+  defaultOwner: '@elastic/response-ops'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/response-ops-rule-params"
+  name: '@kbn/response-ops-rule-params'
   description: Moon project for @kbn/response-ops-rule-params
-  channel: ""
-  owner: "@elastic/response-ops"
+  channel: ''
+  owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/response-ops/rule_params
 dependsOn:
-  - "@kbn/config-schema"
-  - "@kbn/ml-anomaly-utils"
-  - "@kbn/i18n"
-  - "@kbn/alerting-comparators"
-  - "@kbn/es-query"
+  - '@kbn/config-schema'
+  - '@kbn/ml-anomaly-utils'
+  - '@kbn/i18n'
+  - '@kbn/alerting-comparators'
+  - '@kbn/es-query'
 tags:
   - shared-common
   - package
@@ -32,18 +32,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

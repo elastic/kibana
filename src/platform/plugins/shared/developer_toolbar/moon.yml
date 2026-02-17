@@ -3,26 +3,26 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/developer-toolbar-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/developer-toolbar-plugin"
+id: '@kbn/developer-toolbar-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/appex-sharedux"
+  defaultOwner: '@elastic/appex-sharedux'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/developer-toolbar-plugin"
+  name: '@kbn/developer-toolbar-plugin'
   description: Moon project for @kbn/developer-toolbar-plugin
-  channel: ""
-  owner: "@elastic/appex-sharedux"
+  channel: ''
+  owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/plugins/shared/developer_toolbar
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/core-plugins-browser"
-  - "@kbn/developer-toolbar"
-  - "@kbn/core-chrome-layout-components"
-  - "@kbn/config-schema"
+  - '@kbn/core'
+  - '@kbn/core-plugins-browser'
+  - '@kbn/developer-toolbar'
+  - '@kbn/core-chrome-layout-components'
+  - '@kbn/config-schema'
 tags:
   - plugin
   - prod
@@ -34,5 +34,5 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
-    - "!target/**/*"
+    - '!target/**/*'
 tasks: {}

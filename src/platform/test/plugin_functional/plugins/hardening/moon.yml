@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/hardening-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/hardening-plugin"
+id: '@kbn/hardening-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-security"
+  defaultOwner: '@elastic/kibana-security'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/hardening-plugin"
+  name: '@kbn/hardening-plugin'
   description: Moon project for @kbn/hardening-plugin
-  channel: ""
-  owner: "@elastic/kibana-security"
+  channel: ''
+  owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: src/platform/test/plugin_functional/plugins/hardening
 dependsOn:
-  - "@kbn/core"
+  - '@kbn/core'
 tags:
   - plugin
   - prod
@@ -31,5 +31,5 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
-    - "!target/**/*"
+    - '!target/**/*'
 tasks: {}

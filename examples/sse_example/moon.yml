@@ -3,28 +3,28 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/sse-example-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/sse-example-plugin"
+id: '@kbn/sse-example-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-core"
+  defaultOwner: '@elastic/kibana-core'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/sse-example-plugin"
+  name: '@kbn/sse-example-plugin'
   description: Moon project for @kbn/sse-example-plugin
-  channel: ""
-  owner: "@elastic/kibana-core"
+  channel: ''
+  owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: examples/sse_example
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/core-plugins-server"
-  - "@kbn/developer-examples-plugin"
-  - "@kbn/react-kibana-context-render"
-  - "@kbn/sse-utils-client"
-  - "@kbn/sse-utils-server"
-  - "@kbn/sse-utils"
+  - '@kbn/core'
+  - '@kbn/core-plugins-server'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/react-kibana-context-render'
+  - '@kbn/sse-utils-client'
+  - '@kbn/sse-utils-server'
+  - '@kbn/sse-utils'
 tags:
   - plugin
   - prod
@@ -37,5 +37,5 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
-    - "!target/**/*"
+    - '!target/**/*'
 tasks: {}

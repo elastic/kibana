@@ -3,27 +3,27 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/repo-linter'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/repo-linter"
+id: '@kbn/repo-linter'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-operations"
+  defaultOwner: '@elastic/kibana-operations'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/repo-linter"
+  name: '@kbn/repo-linter'
   description: Moon project for @kbn/repo-linter
-  channel: ""
-  owner: "@elastic/kibana-operations"
+  channel: ''
+  owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-repo-linter
 dependsOn:
-  - "@kbn/repo-packages"
-  - "@kbn/tooling-log"
-  - "@kbn/ts-projects"
-  - "@kbn/repo-path"
-  - "@kbn/repo-info"
-  - "@kbn/some-dev-log"
+  - '@kbn/repo-packages'
+  - '@kbn/tooling-log'
+  - '@kbn/ts-projects'
+  - '@kbn/repo-path'
+  - '@kbn/repo-info'
+  - '@kbn/some-dev-log'
 tags:
   - shared-common
   - package
@@ -33,18 +33,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

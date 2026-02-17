@@ -3,31 +3,31 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/profiling-data-access-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/profiling-data-access-plugin"
+id: '@kbn/profiling-data-access-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/obs-presentation-team"
+  defaultOwner: '@elastic/obs-presentation-team'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/profiling-data-access-plugin"
+  name: '@kbn/profiling-data-access-plugin'
   description: Moon project for @kbn/profiling-data-access-plugin
-  channel: ""
-  owner: "@elastic/obs-presentation-team"
+  channel: ''
+  owner: '@elastic/obs-presentation-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/plugins/profiling_data_access
 dependsOn:
-  - "@kbn/config-schema"
-  - "@kbn/core"
-  - "@kbn/es-query"
-  - "@kbn/es-types"
-  - "@kbn/apm-utils"
-  - "@kbn/profiling-utils"
-  - "@kbn/fleet-plugin"
-  - "@kbn/cloud-plugin"
-  - "@kbn/spaces-plugin"
-  - "@kbn/observability-plugin"
+  - '@kbn/config-schema'
+  - '@kbn/core'
+  - '@kbn/es-query'
+  - '@kbn/es-types'
+  - '@kbn/apm-utils'
+  - '@kbn/profiling-utils'
+  - '@kbn/fleet-plugin'
+  - '@kbn/cloud-plugin'
+  - '@kbn/spaces-plugin'
+  - '@kbn/observability-plugin'
 tags:
   - plugin
   - prod
@@ -39,17 +39,17 @@ fileGroups:
     - common/**/*
     - server/**/*
     - jest.config.js
-    - "!target/**/*"
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

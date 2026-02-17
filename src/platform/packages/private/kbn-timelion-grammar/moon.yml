@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/timelion-grammar'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/timelion-grammar"
+id: '@kbn/timelion-grammar'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-visualizations"
+  defaultOwner: '@elastic/kibana-visualizations'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/timelion-grammar"
+  name: '@kbn/timelion-grammar'
   description: Moon project for @kbn/timelion-grammar
-  channel: ""
-  owner: "@elastic/kibana-visualizations"
+  channel: ''
+  owner: '@elastic/kibana-visualizations'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-timelion-grammar
 tags:
@@ -25,6 +25,6 @@ tags:
   - private
 fileGroups:
   src:
-    - "*.js"
-    - "!target/**/*"
+    - '*.js'
+    - '!target/**/*'
 tasks: {}

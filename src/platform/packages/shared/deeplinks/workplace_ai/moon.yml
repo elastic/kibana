@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/deeplinks-workplace-ai'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/deeplinks-workplace-ai"
+id: '@kbn/deeplinks-workplace-ai'
 type: unknown
 owners:
-  defaultOwner: "@elastic/search-kibana"
+  defaultOwner: '@elastic/search-kibana'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/deeplinks-workplace-ai"
+  name: '@kbn/deeplinks-workplace-ai'
   description: Moon project for @kbn/deeplinks-workplace-ai
-  channel: ""
-  owner: "@elastic/search-kibana"
+  channel: ''
+  owner: '@elastic/search-kibana'
   metadata:
     sourceRoot: src/platform/packages/shared/deeplinks/workplace_ai
 dependsOn: []
@@ -26,6 +26,6 @@ tags:
   - shared
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks: {}

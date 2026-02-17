@@ -3,28 +3,28 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/content-management-favorites-public'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/content-management-favorites-public"
+id: '@kbn/content-management-favorites-public'
 type: unknown
 owners:
-  defaultOwner: "@elastic/appex-sharedux"
+  defaultOwner: '@elastic/appex-sharedux'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/content-management-favorites-public"
+  name: '@kbn/content-management-favorites-public'
   description: Moon project for @kbn/content-management-favorites-public
-  channel: ""
-  owner: "@elastic/appex-sharedux"
+  channel: ''
+  owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/content-management/favorites/favorites_public
 dependsOn:
-  - "@kbn/i18n"
-  - "@kbn/core-http-browser"
-  - "@kbn/content-management-favorites-server"
-  - "@kbn/i18n-react"
-  - "@kbn/usage-collection-plugin"
-  - "@kbn/core-user-profile-browser"
-  - "@kbn/react-query"
+  - '@kbn/i18n'
+  - '@kbn/core-http-browser'
+  - '@kbn/content-management-favorites-server'
+  - '@kbn/i18n-react'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/core-user-profile-browser'
+  - '@kbn/react-query'
 tags:
   - shared-browser
   - package
@@ -34,19 +34,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

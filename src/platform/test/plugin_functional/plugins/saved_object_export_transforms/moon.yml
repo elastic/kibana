@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/saved-object-export-transforms-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/saved-object-export-transforms-plugin"
+id: '@kbn/saved-object-export-transforms-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-core"
+  defaultOwner: '@elastic/kibana-core'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/saved-object-export-transforms-plugin"
+  name: '@kbn/saved-object-export-transforms-plugin'
   description: Moon project for @kbn/saved-object-export-transforms-plugin
-  channel: ""
-  owner: "@elastic/kibana-core"
+  channel: ''
+  owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/platform/test/plugin_functional/plugins/saved_object_export_transforms
 dependsOn:
-  - "@kbn/core"
+  - '@kbn/core'
 tags:
   - plugin
   - prod
@@ -28,5 +28,5 @@ fileGroups:
   src:
     - index.ts
     - server/**/*.ts
-    - "!target/**/*"
+    - '!target/**/*'
 tasks: {}

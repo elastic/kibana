@@ -3,26 +3,26 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/mcp-dev-server'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/mcp-dev-server"
+id: '@kbn/mcp-dev-server'
 type: unknown
 owners:
-  defaultOwner: "@elastic/appex-ai-infra"
+  defaultOwner: '@elastic/appex-ai-infra'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/mcp-dev-server"
+  name: '@kbn/mcp-dev-server'
   description: Moon project for @kbn/mcp-dev-server
-  channel: ""
-  owner: "@elastic/appex-ai-infra"
+  channel: ''
+  owner: '@elastic/appex-ai-infra'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-mcp-dev-server
 dependsOn:
-  - "@kbn/dev-cli-runner"
-  - "@kbn/zod"
-  - "@kbn/repo-info"
-  - "@kbn/repo-packages"
-  - "@kbn/std"
+  - '@kbn/dev-cli-runner'
+  - '@kbn/zod'
+  - '@kbn/repo-info'
+  - '@kbn/repo-packages'
+  - '@kbn/std'
 tags:
   - shared-server
   - package
@@ -32,18 +32,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

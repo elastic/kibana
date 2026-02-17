@@ -3,33 +3,33 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/server-route-repository'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/server-route-repository"
+id: '@kbn/server-route-repository'
 type: unknown
 owners:
-  defaultOwner: "@elastic/observability-ui"
+  defaultOwner: '@elastic/observability-ui'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/server-route-repository"
+  name: '@kbn/server-route-repository'
   description: Moon project for @kbn/server-route-repository
-  channel: ""
-  owner: "@elastic/observability-ui"
+  channel: ''
+  owner: '@elastic/observability-ui'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-server-route-repository
 dependsOn:
-  - "@kbn/io-ts-utils"
-  - "@kbn/core-http-request-handler-context-server"
-  - "@kbn/core-http-server"
-  - "@kbn/core-lifecycle-server"
-  - "@kbn/logging"
-  - "@kbn/core"
-  - "@kbn/logging-mocks"
-  - "@kbn/server-route-repository-utils"
-  - "@kbn/zod"
-  - "@kbn/sse-utils-server"
-  - "@kbn/sse-utils"
-  - "@kbn/zod-helpers"
+  - '@kbn/io-ts-utils'
+  - '@kbn/core-http-request-handler-context-server'
+  - '@kbn/core-http-server'
+  - '@kbn/core-lifecycle-server'
+  - '@kbn/logging'
+  - '@kbn/core'
+  - '@kbn/logging-mocks'
+  - '@kbn/server-route-repository-utils'
+  - '@kbn/zod'
+  - '@kbn/sse-utils-server'
+  - '@kbn/sse-utils'
+  - '@kbn/zod-helpers'
 tags:
   - shared-server
   - package
@@ -39,18 +39,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

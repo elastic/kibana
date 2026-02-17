@@ -3,36 +3,36 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/ecs-data-quality-dashboard-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/ecs-data-quality-dashboard-plugin"
+id: '@kbn/ecs-data-quality-dashboard-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/security-threat-hunting-investigations"
+  defaultOwner: '@elastic/security-threat-hunting-investigations'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/ecs-data-quality-dashboard-plugin"
+  name: '@kbn/ecs-data-quality-dashboard-plugin'
   description: Moon project for @kbn/ecs-data-quality-dashboard-plugin
-  channel: ""
-  owner: "@elastic/security-threat-hunting-investigations"
+  channel: ''
+  owner: '@elastic/security-threat-hunting-investigations'
   metadata:
     sourceRoot: x-pack/solutions/security/plugins/ecs_data_quality_dashboard
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/core-http-server"
-  - "@kbn/licensing-plugin"
-  - "@kbn/core-http-request-handler-context-server"
-  - "@kbn/securitysolution-io-ts-utils"
-  - "@kbn/securitysolution-io-ts-types"
-  - "@kbn/i18n"
-  - "@kbn/core-http-router-server-mocks"
-  - "@kbn/logging-mocks"
-  - "@kbn/data-stream-adapter"
-  - "@kbn/spaces-plugin"
-  - "@kbn/core-elasticsearch-server-mocks"
-  - "@kbn/core-elasticsearch-server"
-  - "@kbn/core-security-common"
-  - "@kbn/datemath"
+  - '@kbn/core'
+  - '@kbn/core-http-server'
+  - '@kbn/licensing-plugin'
+  - '@kbn/core-http-request-handler-context-server'
+  - '@kbn/securitysolution-io-ts-utils'
+  - '@kbn/securitysolution-io-ts-types'
+  - '@kbn/i18n'
+  - '@kbn/core-http-router-server-mocks'
+  - '@kbn/logging-mocks'
+  - '@kbn/data-stream-adapter'
+  - '@kbn/spaces-plugin'
+  - '@kbn/core-elasticsearch-server-mocks'
+  - '@kbn/core-elasticsearch-server'
+  - '@kbn/core-security-common'
+  - '@kbn/datemath'
 tags:
   - plugin
   - prod
@@ -45,17 +45,17 @@ fileGroups:
     - server/lib/**/*
     - server/**/*
     - server/**/*.json
-    - "!target/**/*"
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

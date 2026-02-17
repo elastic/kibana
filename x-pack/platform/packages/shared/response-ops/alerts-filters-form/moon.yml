@@ -3,31 +3,31 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/response-ops-alerts-filters-form'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/response-ops-alerts-filters-form"
+id: '@kbn/response-ops-alerts-filters-form'
 type: unknown
 owners:
-  defaultOwner: "@elastic/response-ops"
+  defaultOwner: '@elastic/response-ops'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/response-ops-alerts-filters-form"
+  name: '@kbn/response-ops-alerts-filters-form'
   description: Moon project for @kbn/response-ops-alerts-filters-form
-  channel: ""
-  owner: "@elastic/response-ops"
+  channel: ''
+  owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/response-ops/alerts-filters-form
 dependsOn:
-  - "@kbn/response-ops-rules-apis"
-  - "@kbn/i18n"
-  - "@kbn/i18n-react"
-  - "@kbn/core-http-browser-mocks"
-  - "@kbn/core-notifications-browser-mocks"
-  - "@kbn/core-http-browser"
-  - "@kbn/core-notifications-browser"
-  - "@kbn/alerting-types"
-  - "@kbn/es-query"
-  - "@kbn/rule-data-utils"
+  - '@kbn/response-ops-rules-apis'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/core-http-browser-mocks'
+  - '@kbn/core-notifications-browser-mocks'
+  - '@kbn/core-http-browser'
+  - '@kbn/core-notifications-browser'
+  - '@kbn/alerting-types'
+  - '@kbn/es-query'
+  - '@kbn/rule-data-utils'
 tags:
   - shared-browser
   - package
@@ -37,19 +37,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

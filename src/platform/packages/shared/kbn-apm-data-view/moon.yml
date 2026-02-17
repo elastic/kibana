@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/apm-data-view'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/apm-data-view"
+id: '@kbn/apm-data-view'
 type: unknown
 owners:
-  defaultOwner: "@elastic/obs-presentation-team"
+  defaultOwner: '@elastic/obs-presentation-team'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/apm-data-view"
+  name: '@kbn/apm-data-view'
   description: Moon project for @kbn/apm-data-view
-  channel: ""
-  owner: "@elastic/obs-presentation-team"
+  channel: ''
+  owner: '@elastic/obs-presentation-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-apm-data-view
 tags:
@@ -25,6 +25,6 @@ tags:
   - shared
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks: {}

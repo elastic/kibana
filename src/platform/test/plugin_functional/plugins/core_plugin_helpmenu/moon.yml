@@ -3,27 +3,27 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/core-plugin-helpmenu-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/core-plugin-helpmenu-plugin"
+id: '@kbn/core-plugin-helpmenu-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-core"
+  defaultOwner: '@elastic/kibana-core'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/core-plugin-helpmenu-plugin"
+  name: '@kbn/core-plugin-helpmenu-plugin'
   description: Moon project for @kbn/core-plugin-helpmenu-plugin
-  channel: ""
-  owner: "@elastic/kibana-core"
+  channel: ''
+  owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/platform/test/plugin_functional/plugins/core_plugin_helpmenu
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/core-analytics-browser"
-  - "@kbn/core-i18n-browser"
-  - "@kbn/core-theme-browser"
-  - "@kbn/react-kibana-context-render"
-  - "@kbn/core-user-profile-browser"
+  - '@kbn/core'
+  - '@kbn/core-analytics-browser'
+  - '@kbn/core-i18n-browser'
+  - '@kbn/core-theme-browser'
+  - '@kbn/react-kibana-context-render'
+  - '@kbn/core-user-profile-browser'
 tags:
   - plugin
   - prod
@@ -34,5 +34,5 @@ fileGroups:
     - index.ts
     - public/**/*.ts
     - public/**/*.tsx
-    - "!target/**/*"
+    - '!target/**/*'
 tasks: {}

@@ -3,26 +3,26 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/user-profiles-consumer-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/user-profiles-consumer-plugin"
+id: '@kbn/user-profiles-consumer-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-security"
+  defaultOwner: '@elastic/kibana-security'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/user-profiles-consumer-plugin"
+  name: '@kbn/user-profiles-consumer-plugin'
   description: Moon project for @kbn/user-profiles-consumer-plugin
-  channel: ""
-  owner: "@elastic/kibana-security"
+  channel: ''
+  owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/features-plugin"
-  - "@kbn/security-plugin"
-  - "@kbn/spaces-plugin"
-  - "@kbn/config-schema"
+  - '@kbn/core'
+  - '@kbn/features-plugin'
+  - '@kbn/security-plugin'
+  - '@kbn/spaces-plugin'
+  - '@kbn/config-schema'
 tags:
   - plugin
   - prod
@@ -30,7 +30,7 @@ tags:
   - private
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks: {}

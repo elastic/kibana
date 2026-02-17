@@ -3,25 +3,25 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/core-security-browser-mocks'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/core-security-browser-mocks"
+id: '@kbn/core-security-browser-mocks'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-core"
+  defaultOwner: '@elastic/kibana-core'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/core-security-browser-mocks"
+  name: '@kbn/core-security-browser-mocks'
   description: Moon project for @kbn/core-security-browser-mocks
-  channel: ""
-  owner: "@elastic/kibana-core"
+  channel: ''
+  owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/security/browser-mocks
 dependsOn:
-  - "@kbn/core-security-browser"
-  - "@kbn/core-security-browser-internal"
-  - "@kbn/core-security-common"
-  - "@kbn/lazy-object"
+  - '@kbn/core-security-browser'
+  - '@kbn/core-security-browser-internal'
+  - '@kbn/core-security-common'
+  - '@kbn/lazy-object'
 tags:
   - shared-browser
   - package
@@ -31,19 +31,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

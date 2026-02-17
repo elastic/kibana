@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/core-feature-flags-browser'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/core-feature-flags-browser"
+id: '@kbn/core-feature-flags-browser'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-core"
+  defaultOwner: '@elastic/kibana-core'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/core-feature-flags-browser"
+  name: '@kbn/core-feature-flags-browser'
   description: Moon project for @kbn/core-feature-flags-browser
-  channel: ""
-  owner: "@elastic/kibana-core"
+  channel: ''
+  owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/feature-flags/browser
 dependsOn: []
@@ -26,7 +26,7 @@ tags:
   - shared
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks: {}

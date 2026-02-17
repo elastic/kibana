@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/security-api-integration-helpers'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/security-api-integration-helpers"
+id: '@kbn/security-api-integration-helpers'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-security"
+  defaultOwner: '@elastic/kibana-security'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/security-api-integration-helpers"
+  name: '@kbn/security-api-integration-helpers'
   description: Moon project for @kbn/security-api-integration-helpers
-  channel: ""
-  owner: "@elastic/kibana-security"
+  channel: ''
+  owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: x-pack/platform/test/security_api_integration/packages/helpers
 dependsOn:
-  - "@kbn/dev-utils"
-  - "@kbn/mock-idp-utils"
+  - '@kbn/dev-utils'
+  - '@kbn/mock-idp-utils'
 tags:
   - shared-common
   - package
@@ -29,18 +29,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

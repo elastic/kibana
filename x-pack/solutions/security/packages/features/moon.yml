@@ -3,29 +3,29 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/security-solution-features'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/security-solution-features"
+id: '@kbn/security-solution-features'
 type: unknown
 owners:
-  defaultOwner: "@elastic/security-threat-hunting-investigations"
+  defaultOwner: '@elastic/security-threat-hunting-investigations'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/security-solution-features"
+  name: '@kbn/security-solution-features'
   description: Moon project for @kbn/security-solution-features
-  channel: ""
-  owner: "@elastic/security-threat-hunting-investigations"
+  channel: ''
+  owner: '@elastic/security-threat-hunting-investigations'
   metadata:
     sourceRoot: x-pack/solutions/security/packages/features
 dependsOn:
-  - "@kbn/features-plugin"
-  - "@kbn/utility-types"
-  - "@kbn/i18n"
-  - "@kbn/core-application-common"
-  - "@kbn/cases-plugin"
-  - "@kbn/securitysolution-rules"
-  - "@kbn/securitysolution-list-constants"
-  - "@kbn/elastic-assistant-common"
+  - '@kbn/features-plugin'
+  - '@kbn/utility-types'
+  - '@kbn/i18n'
+  - '@kbn/core-application-common'
+  - '@kbn/cases-plugin'
+  - '@kbn/securitysolution-rules'
+  - '@kbn/securitysolution-list-constants'
+  - '@kbn/elastic-assistant-common'
 tags:
   - shared-common
   - package
@@ -35,19 +35,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

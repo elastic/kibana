@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/content-management-storybook'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/content-management-storybook"
+id: '@kbn/content-management-storybook'
 type: unknown
 owners:
-  defaultOwner: "@elastic/appex-sharedux"
+  defaultOwner: '@elastic/appex-sharedux'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/content-management-storybook"
+  name: '@kbn/content-management-storybook'
   description: Moon project for @kbn/content-management-storybook
-  channel: ""
-  owner: "@elastic/appex-sharedux"
+  channel: ''
+  owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/content-management/kbn-content-management-storybook
 dependsOn:
-  - "@kbn/content-list-mock-data"
-  - "@kbn/storybook"
+  - '@kbn/content-list-mock-data'
+  - '@kbn/storybook'
 tags:
   - shared-browser
   - package
@@ -28,7 +28,7 @@ tags:
   - private
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks: {}

@@ -3,42 +3,42 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/check-saved-objects-cli'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/check-saved-objects-cli"
+id: '@kbn/check-saved-objects-cli'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-core"
+  defaultOwner: '@elastic/kibana-core'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/check-saved-objects-cli"
+  name: '@kbn/check-saved-objects-cli'
   description: Moon project for @kbn/check-saved-objects-cli
-  channel: ""
-  owner: "@elastic/kibana-core"
+  channel: ''
+  owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: packages/kbn-check-saved-objects-cli
 dependsOn:
-  - "@kbn/some-dev-log"
-  - "@kbn/dev-cli-errors"
-  - "@kbn/core-saved-objects-base-server-internal"
-  - "@kbn/core-test-helpers-kbn-server"
-  - "@kbn/core-plugins-server-internal"
-  - "@kbn/core-saved-objects-migration-server-internal"
-  - "@kbn/dev-cli-runner"
-  - "@kbn/test"
-  - "@kbn/core-elasticsearch-client-server-mocks"
-  - "@kbn/safer-lodash-set"
-  - "@kbn/tooling-log"
-  - "@kbn/core-saved-objects-server"
-  - "@kbn/utils"
-  - "@kbn/dev-utils"
-  - "@kbn/core-saved-objects-server-internal"
-  - "@kbn/core-root-server-internal"
-  - "@kbn/core-test-helpers-so-type-serializer"
-  - "@kbn/core-saved-objects-api-server"
-  - "@kbn/migrator-test-kit"
-  - "@kbn/config-schema"
-  - "@kbn/repo-info"
+  - '@kbn/some-dev-log'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/core-saved-objects-base-server-internal'
+  - '@kbn/core-test-helpers-kbn-server'
+  - '@kbn/core-plugins-server-internal'
+  - '@kbn/core-saved-objects-migration-server-internal'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/test'
+  - '@kbn/core-elasticsearch-client-server-mocks'
+  - '@kbn/safer-lodash-set'
+  - '@kbn/tooling-log'
+  - '@kbn/core-saved-objects-server'
+  - '@kbn/utils'
+  - '@kbn/dev-utils'
+  - '@kbn/core-saved-objects-server-internal'
+  - '@kbn/core-root-server-internal'
+  - '@kbn/core-test-helpers-so-type-serializer'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/migrator-test-kit'
+  - '@kbn/config-schema'
+  - '@kbn/repo-info'
 tags:
   - shared-common
   - package
@@ -48,18 +48,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

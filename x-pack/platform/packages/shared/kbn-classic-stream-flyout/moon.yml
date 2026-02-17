@@ -3,26 +3,26 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/classic-stream-flyout'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/classic-stream-flyout"
+id: '@kbn/classic-stream-flyout'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-management"
+  defaultOwner: '@elastic/kibana-management'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/classic-stream-flyout"
+  name: '@kbn/classic-stream-flyout'
   description: Moon project for @kbn/classic-stream-flyout
-  channel: ""
-  owner: "@elastic/kibana-management"
+  channel: ''
+  owner: '@elastic/kibana-management'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-classic-stream-flyout
 dependsOn:
-  - "@kbn/i18n"
-  - "@kbn/i18n-react"
-  - "@kbn/storybook"
-  - "@kbn/index-management-shared-types"
-  - "@kbn/index-lifecycle-management-common-shared"
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/storybook'
+  - '@kbn/index-management-shared-types'
+  - '@kbn/index-lifecycle-management-common-shared'
 tags:
   - shared-common
   - package
@@ -32,20 +32,20 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
+    - '**/*.ts'
+    - '**/*.tsx'
     - .storybook/**/*.ts
-    - "!target/**/*"
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

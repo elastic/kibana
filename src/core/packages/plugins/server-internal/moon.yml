@@ -3,55 +3,55 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/core-plugins-server-internal'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/core-plugins-server-internal"
+id: '@kbn/core-plugins-server-internal'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-core"
+  defaultOwner: '@elastic/kibana-core'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/core-plugins-server-internal"
+  name: '@kbn/core-plugins-server-internal'
   description: Moon project for @kbn/core-plugins-server-internal
-  channel: ""
-  owner: "@elastic/kibana-core"
+  channel: ''
+  owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/plugins/server-internal
 dependsOn:
-  - "@kbn/std"
-  - "@kbn/config"
-  - "@kbn/config-schema"
-  - "@kbn/logging"
-  - "@kbn/utils"
-  - "@kbn/core-base-common"
-  - "@kbn/core-base-server-internal"
-  - "@kbn/core-elasticsearch-server-internal"
-  - "@kbn/core-node-server"
-  - "@kbn/core-saved-objects-base-server-internal"
-  - "@kbn/core-http-server"
-  - "@kbn/core-http-request-handler-context-server"
-  - "@kbn/core-lifecycle-server"
-  - "@kbn/core-lifecycle-server-internal"
-  - "@kbn/core-plugins-server"
-  - "@kbn/config-mocks"
-  - "@kbn/core-base-server-mocks"
-  - "@kbn/core-lifecycle-server-mocks"
-  - "@kbn/core-logging-server-mocks"
-  - "@kbn/core-node-server-mocks"
-  - "@kbn/repo-info"
-  - "@kbn/jest-serializers"
-  - "@kbn/core-environment-server-mocks"
-  - "@kbn/core-environment-server-internal"
-  - "@kbn/core-node-server-internal"
-  - "@kbn/core-plugins-base-server-internal"
-  - "@kbn/repo-packages"
-  - "@kbn/utility-types"
-  - "@kbn/core-plugins-contracts-server"
-  - "@kbn/projects-solutions-groups"
-  - "@kbn/core-di"
-  - "@kbn/core-di-internal"
-  - "@kbn/core-di-server"
-  - "@kbn/core-http-request-handler-context-server-internal"
+  - '@kbn/std'
+  - '@kbn/config'
+  - '@kbn/config-schema'
+  - '@kbn/logging'
+  - '@kbn/utils'
+  - '@kbn/core-base-common'
+  - '@kbn/core-base-server-internal'
+  - '@kbn/core-elasticsearch-server-internal'
+  - '@kbn/core-node-server'
+  - '@kbn/core-saved-objects-base-server-internal'
+  - '@kbn/core-http-server'
+  - '@kbn/core-http-request-handler-context-server'
+  - '@kbn/core-lifecycle-server'
+  - '@kbn/core-lifecycle-server-internal'
+  - '@kbn/core-plugins-server'
+  - '@kbn/config-mocks'
+  - '@kbn/core-base-server-mocks'
+  - '@kbn/core-lifecycle-server-mocks'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/core-node-server-mocks'
+  - '@kbn/repo-info'
+  - '@kbn/jest-serializers'
+  - '@kbn/core-environment-server-mocks'
+  - '@kbn/core-environment-server-internal'
+  - '@kbn/core-node-server-internal'
+  - '@kbn/core-plugins-base-server-internal'
+  - '@kbn/repo-packages'
+  - '@kbn/utility-types'
+  - '@kbn/core-plugins-contracts-server'
+  - '@kbn/projects-solutions-groups'
+  - '@kbn/core-di'
+  - '@kbn/core-di-internal'
+  - '@kbn/core-di-server'
+  - '@kbn/core-http-request-handler-context-server-internal'
 tags:
   - shared-server
   - package
@@ -61,18 +61,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

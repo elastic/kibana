@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/securitysolution-ecs'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/securitysolution-ecs"
+id: '@kbn/securitysolution-ecs'
 type: unknown
 owners:
-  defaultOwner: "@elastic/security-threat-hunting-investigations"
+  defaultOwner: '@elastic/security-threat-hunting-investigations'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/securitysolution-ecs"
+  name: '@kbn/securitysolution-ecs'
   description: Moon project for @kbn/securitysolution-ecs
-  channel: ""
-  owner: "@elastic/security-threat-hunting-investigations"
+  channel: ''
+  owner: '@elastic/security-threat-hunting-investigations'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-securitysolution-ecs
 tags:
@@ -26,18 +26,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

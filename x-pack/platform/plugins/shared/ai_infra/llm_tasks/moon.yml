@@ -3,29 +3,29 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/llm-tasks-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/llm-tasks-plugin"
+id: '@kbn/llm-tasks-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/appex-ai-infra"
+  defaultOwner: '@elastic/appex-ai-infra'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/llm-tasks-plugin"
+  name: '@kbn/llm-tasks-plugin'
   description: Moon project for @kbn/llm-tasks-plugin
-  channel: ""
-  owner: "@elastic/appex-ai-infra"
+  channel: ''
+  owner: '@elastic/appex-ai-infra'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/ai_infra/llm_tasks
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/logging"
-  - "@kbn/config-schema"
-  - "@kbn/product-doc-common"
-  - "@kbn/inference-plugin"
-  - "@kbn/product-doc-base-plugin"
-  - "@kbn/logging-mocks"
-  - "@kbn/inference-common"
+  - '@kbn/core'
+  - '@kbn/logging'
+  - '@kbn/config-schema'
+  - '@kbn/product-doc-common'
+  - '@kbn/inference-plugin'
+  - '@kbn/product-doc-base-plugin'
+  - '@kbn/logging-mocks'
+  - '@kbn/inference-common'
 tags:
   - plugin
   - prod
@@ -40,18 +40,18 @@ fileGroups:
     - server/**/*
     - scripts/**/*
     - .storybook/**/*
-    - "!target/**/*"
-    - "!.storybook/**/*.js"
+    - '!target/**/*'
+    - '!.storybook/**/*.js'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

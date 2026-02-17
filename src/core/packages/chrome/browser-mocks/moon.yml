@@ -3,27 +3,27 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/core-chrome-browser-mocks'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/core-chrome-browser-mocks"
+id: '@kbn/core-chrome-browser-mocks'
 type: unknown
 owners:
-  defaultOwner: "@elastic/appex-sharedux"
+  defaultOwner: '@elastic/appex-sharedux'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/core-chrome-browser-mocks"
+  name: '@kbn/core-chrome-browser-mocks'
   description: Moon project for @kbn/core-chrome-browser-mocks
-  channel: ""
-  owner: "@elastic/appex-sharedux"
+  channel: ''
+  owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/core/packages/chrome/browser-mocks
 dependsOn:
-  - "@kbn/utility-types"
-  - "@kbn/utility-types-jest"
-  - "@kbn/core-chrome-browser"
-  - "@kbn/core-chrome-browser-internal"
-  - "@kbn/lazy-object"
-  - "@kbn/core-chrome-sidebar-mocks"
+  - '@kbn/utility-types'
+  - '@kbn/utility-types-jest'
+  - '@kbn/core-chrome-browser'
+  - '@kbn/core-chrome-browser-internal'
+  - '@kbn/lazy-object'
+  - '@kbn/core-chrome-sidebar-mocks'
 tags:
   - shared-browser
   - package
@@ -33,19 +33,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

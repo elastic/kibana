@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/esql-composer'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/esql-composer"
+id: '@kbn/esql-composer'
 type: unknown
 owners:
-  defaultOwner: "@elastic/obs-presentation-team"
+  defaultOwner: '@elastic/obs-presentation-team'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/esql-composer"
+  name: '@kbn/esql-composer'
   description: Moon project for @kbn/esql-composer
-  channel: ""
-  owner: "@elastic/obs-presentation-team"
+  channel: ''
+  owner: '@elastic/obs-presentation-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-esql-composer
 dependsOn:
-  - "@kbn/esql-language"
+  - '@kbn/esql-language'
 tags:
   - shared-common
   - package
@@ -28,18 +28,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

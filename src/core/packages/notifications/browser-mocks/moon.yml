@@ -3,24 +3,24 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/core-notifications-browser-mocks'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/core-notifications-browser-mocks"
+id: '@kbn/core-notifications-browser-mocks'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-core"
+  defaultOwner: '@elastic/kibana-core'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/core-notifications-browser-mocks"
+  name: '@kbn/core-notifications-browser-mocks'
   description: Moon project for @kbn/core-notifications-browser-mocks
-  channel: ""
-  owner: "@elastic/kibana-core"
+  channel: ''
+  owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/notifications/browser-mocks
 dependsOn:
-  - "@kbn/utility-types-jest"
-  - "@kbn/core-notifications-browser"
-  - "@kbn/lazy-object"
+  - '@kbn/utility-types-jest'
+  - '@kbn/core-notifications-browser'
+  - '@kbn/lazy-object'
 tags:
   - shared-browser
   - package
@@ -30,18 +30,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

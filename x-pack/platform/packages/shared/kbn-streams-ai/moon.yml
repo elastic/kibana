@@ -3,35 +3,35 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/streams-ai'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/streams-ai"
+id: '@kbn/streams-ai'
 type: unknown
 owners:
-  defaultOwner: "@elastic/obs-onboarding-team @elastic/obs-sig-events-team"
+  defaultOwner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/streams-ai"
+  name: '@kbn/streams-ai'
   description: Moon project for @kbn/streams-ai
-  channel: ""
-  owner: "@elastic/obs-onboarding-team @elastic/obs-sig-events-team"
+  channel: ''
+  owner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-streams-ai
 dependsOn:
-  - "@kbn/ai-tools"
-  - "@kbn/std"
-  - "@kbn/core"
-  - "@kbn/streamlang"
-  - "@kbn/streams-schema"
-  - "@kbn/inference-common"
-  - "@kbn/zod"
-  - "@kbn/inference-prompt-utils"
-  - "@kbn/es-query"
-  - "@kbn/zod-helpers"
-  - "@kbn/fields-metadata-plugin"
-  - "@kbn/apm-utils"
-  - "@kbn/i18n"
-  - "@kbn/traced-es-client"
+  - '@kbn/ai-tools'
+  - '@kbn/std'
+  - '@kbn/core'
+  - '@kbn/streamlang'
+  - '@kbn/streams-schema'
+  - '@kbn/inference-common'
+  - '@kbn/zod'
+  - '@kbn/inference-prompt-utils'
+  - '@kbn/es-query'
+  - '@kbn/zod-helpers'
+  - '@kbn/fields-metadata-plugin'
+  - '@kbn/apm-utils'
+  - '@kbn/i18n'
+  - '@kbn/traced-es-client'
 tags:
   - shared-server
   - package
@@ -41,18 +41,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

@@ -3,40 +3,40 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/logs-data-access-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/logs-data-access-plugin"
+id: '@kbn/logs-data-access-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/obs-exploration-team"
+  defaultOwner: '@elastic/obs-exploration-team'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/logs-data-access-plugin"
+  name: '@kbn/logs-data-access-plugin'
   description: Moon project for @kbn/logs-data-access-plugin
-  channel: ""
-  owner: "@elastic/obs-exploration-team"
+  channel: ''
+  owner: '@elastic/obs-exploration-team'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/logs_data_access
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/data-plugin"
-  - "@kbn/data-views-plugin"
-  - "@kbn/calculate-auto"
-  - "@kbn/es-types"
-  - "@kbn/core-http-server"
-  - "@kbn/management-settings-ids"
-  - "@kbn/config-schema"
-  - "@kbn/core-ui-settings-common"
-  - "@kbn/i18n"
-  - "@kbn/core-saved-objects-server"
-  - "@kbn/core-ui-settings-server"
-  - "@kbn/core-ui-settings-browser"
-  - "@kbn/logging"
-  - "@kbn/core-saved-objects-api-server"
-  - "@kbn/es-query"
-  - "@kbn/use-tracked-promise"
-  - "@kbn/core-application-browser"
-  - "@kbn/i18n-react"
+  - '@kbn/core'
+  - '@kbn/data-plugin'
+  - '@kbn/data-views-plugin'
+  - '@kbn/calculate-auto'
+  - '@kbn/es-types'
+  - '@kbn/core-http-server'
+  - '@kbn/management-settings-ids'
+  - '@kbn/config-schema'
+  - '@kbn/core-ui-settings-common'
+  - '@kbn/i18n'
+  - '@kbn/core-saved-objects-server'
+  - '@kbn/core-ui-settings-server'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/logging'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/es-query'
+  - '@kbn/use-tracked-promise'
+  - '@kbn/core-application-browser'
+  - '@kbn/i18n-react'
 tags:
   - plugin
   - prod
@@ -49,17 +49,17 @@ fileGroups:
     - server/**/*
     - public/**/*
     - jest.config.js
-    - "!target/**/*"
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

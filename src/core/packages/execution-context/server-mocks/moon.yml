@@ -3,24 +3,24 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/core-execution-context-server-mocks'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/core-execution-context-server-mocks"
+id: '@kbn/core-execution-context-server-mocks'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-core"
+  defaultOwner: '@elastic/kibana-core'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/core-execution-context-server-mocks"
+  name: '@kbn/core-execution-context-server-mocks'
   description: Moon project for @kbn/core-execution-context-server-mocks
-  channel: ""
-  owner: "@elastic/kibana-core"
+  channel: ''
+  owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/execution-context/server-mocks
 dependsOn:
-  - "@kbn/core-execution-context-common"
-  - "@kbn/core-execution-context-server"
-  - "@kbn/core-execution-context-server-internal"
+  - '@kbn/core-execution-context-common'
+  - '@kbn/core-execution-context-server'
+  - '@kbn/core-execution-context-server-internal'
 tags:
   - shared-server
   - package
@@ -30,18 +30,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

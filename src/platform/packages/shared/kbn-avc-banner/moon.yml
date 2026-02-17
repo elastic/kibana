@@ -3,24 +3,24 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/avc-banner'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/avc-banner"
+id: '@kbn/avc-banner'
 type: unknown
 owners:
-  defaultOwner: "@elastic/security-defend-workflows"
+  defaultOwner: '@elastic/security-defend-workflows'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/avc-banner"
+  name: '@kbn/avc-banner'
   description: Moon project for @kbn/avc-banner
-  channel: ""
-  owner: "@elastic/security-defend-workflows"
+  channel: ''
+  owner: '@elastic/security-defend-workflows'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-avc-banner
 dependsOn:
-  - "@kbn/i18n"
-  - "@kbn/i18n-react"
-  - "@kbn/kibana-react-plugin"
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/kibana-react-plugin'
 tags:
   - shared-browser
   - package
@@ -30,19 +30,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

@@ -3,25 +3,25 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/shared-ux-page-kibana-no-data-mocks'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/shared-ux-page-kibana-no-data-mocks"
+id: '@kbn/shared-ux-page-kibana-no-data-mocks'
 type: unknown
 owners:
-  defaultOwner: "@elastic/appex-sharedux"
+  defaultOwner: '@elastic/appex-sharedux'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/shared-ux-page-kibana-no-data-mocks"
+  name: '@kbn/shared-ux-page-kibana-no-data-mocks'
   description: Moon project for @kbn/shared-ux-page-kibana-no-data-mocks
-  channel: ""
-  owner: "@elastic/appex-sharedux"
+  channel: ''
+  owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/shared-ux/page/kibana_no_data/mocks
 dependsOn:
-  - "@kbn/shared-ux-card-no-data-mocks"
-  - "@kbn/shared-ux-page-kibana-no-data-types"
-  - "@kbn/shared-ux-prompt-no-data-views-mocks"
-  - "@kbn/shared-ux-storybook-mock"
+  - '@kbn/shared-ux-card-no-data-mocks'
+  - '@kbn/shared-ux-page-kibana-no-data-types'
+  - '@kbn/shared-ux-prompt-no-data-views-mocks'
+  - '@kbn/shared-ux-storybook-mock'
 tags:
   - shared-common
   - package
@@ -30,6 +30,6 @@ tags:
   - shared
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks: {}

@@ -3,41 +3,41 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/entity-store'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/entity-store"
+id: '@kbn/entity-store'
 type: unknown
 owners:
-  defaultOwner: "@elastic/core-analysis"
+  defaultOwner: '@elastic/core-analysis'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/entity-store"
+  name: '@kbn/entity-store'
   description: Moon project for @kbn/entity-store
-  channel: ""
-  owner: "@elastic/core-analysis"
+  channel: ''
+  owner: '@elastic/core-analysis'
   metadata:
     sourceRoot: x-pack/solutions/security/plugins/entity_store
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/core-plugins-server"
-  - "@kbn/developer-examples-plugin"
-  - "@kbn/zod"
-  - "@kbn/logging"
-  - "@kbn/zod-helpers"
-  - "@kbn/task-manager-plugin"
-  - "@kbn/core-lifecycle-server"
-  - "@kbn/core-http-request-handler-context-server"
-  - "@kbn/core-http-server"
-  - "@kbn/config-schema"
-  - "@kbn/logging-mocks"
-  - "@kbn/spaces-plugin"
-  - "@kbn/core-saved-objects-api-server"
-  - "@kbn/data-views-plugin"
-  - "@kbn/es-types"
-  - "@kbn/security-plugin-types-server"
-  - "@kbn/encrypted-saved-objects-plugin"
-  - "@kbn/scout-security"
-  - "@kbn/core-saved-objects-server"
+  - '@kbn/core'
+  - '@kbn/core-plugins-server'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/zod'
+  - '@kbn/logging'
+  - '@kbn/zod-helpers'
+  - '@kbn/task-manager-plugin'
+  - '@kbn/core-lifecycle-server'
+  - '@kbn/core-http-request-handler-context-server'
+  - '@kbn/core-http-server'
+  - '@kbn/config-schema'
+  - '@kbn/logging-mocks'
+  - '@kbn/spaces-plugin'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/data-views-plugin'
+  - '@kbn/es-types'
+  - '@kbn/security-plugin-types-server'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/scout-security'
+  - '@kbn/core-saved-objects-server'
 tags:
   - plugin
   - prod
@@ -52,17 +52,17 @@ fileGroups:
     - public/**/*.tsx
     - server/**/*.ts
     - test/**/*.ts
-    - "!target/**/*"
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

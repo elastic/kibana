@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/deeplinks-agent-builder'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/deeplinks-agent-builder"
+id: '@kbn/deeplinks-agent-builder'
 type: unknown
 owners:
-  defaultOwner: "@elastic/search-kibana"
+  defaultOwner: '@elastic/search-kibana'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/deeplinks-agent-builder"
+  name: '@kbn/deeplinks-agent-builder'
   description: Moon project for @kbn/deeplinks-agent-builder
-  channel: ""
-  owner: "@elastic/search-kibana"
+  channel: ''
+  owner: '@elastic/search-kibana'
   metadata:
     sourceRoot: src/platform/packages/shared/deeplinks/agent_builder
 dependsOn: []
@@ -26,6 +26,6 @@ tags:
   - shared
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks: {}

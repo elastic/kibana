@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/open-telemetry-instrumented-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/open-telemetry-instrumented-plugin"
+id: '@kbn/open-telemetry-instrumented-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/obs-presentation-team"
+  defaultOwner: '@elastic/obs-presentation-team'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/open-telemetry-instrumented-plugin"
+  name: '@kbn/open-telemetry-instrumented-plugin'
   description: Moon project for @kbn/open-telemetry-instrumented-plugin
-  channel: ""
-  owner: "@elastic/obs-presentation-team"
+  channel: ''
+  owner: '@elastic/obs-presentation-team'
   metadata:
     sourceRoot: src/platform/test/common/plugins/otel_metrics
 dependsOn:
-  - "@kbn/core"
+  - '@kbn/core'
 tags:
   - plugin
   - prod
@@ -26,7 +26,7 @@ tags:
   - shared
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks: {}

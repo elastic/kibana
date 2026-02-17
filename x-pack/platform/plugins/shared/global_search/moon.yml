@@ -3,29 +3,29 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/global-search-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/global-search-plugin"
+id: '@kbn/global-search-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/appex-sharedux"
+  defaultOwner: '@elastic/appex-sharedux'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/global-search-plugin"
+  name: '@kbn/global-search-plugin'
   description: Moon project for @kbn/global-search-plugin
-  channel: ""
-  owner: "@elastic/appex-sharedux"
+  channel: ''
+  owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/global_search
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/licensing-plugin"
-  - "@kbn/i18n"
-  - "@kbn/test-jest-helpers"
-  - "@kbn/config-schema"
-  - "@kbn/utility-types"
-  - "@kbn/core-test-helpers-test-utils"
-  - "@kbn/licensing-types"
+  - '@kbn/core'
+  - '@kbn/licensing-plugin'
+  - '@kbn/i18n'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/config-schema'
+  - '@kbn/utility-types'
+  - '@kbn/core-test-helpers-test-utils'
+  - '@kbn/licensing-types'
 tags:
   - plugin
   - prod
@@ -37,17 +37,17 @@ fileGroups:
     - public/**/*
     - server/**/*
     - common/**/*
-    - "!target/**/*"
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

@@ -3,29 +3,29 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/fec-alerts-test-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/fec-alerts-test-plugin"
+id: '@kbn/fec-alerts-test-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-core"
+  defaultOwner: '@elastic/kibana-core'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/fec-alerts-test-plugin"
+  name: '@kbn/fec-alerts-test-plugin'
   description: Moon project for @kbn/fec-alerts-test-plugin
-  channel: ""
-  owner: "@elastic/kibana-core"
+  channel: ''
+  owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: x-pack/platform/test/functional_execution_context/plugins/alerts
 dependsOn:
-  - "@kbn/apm-config-loader"
-  - "@kbn/repo-info"
-  - "@kbn/core"
-  - "@kbn/alerting-plugin"
-  - "@kbn/encrypted-saved-objects-plugin"
-  - "@kbn/features-plugin"
-  - "@kbn/spaces-plugin"
-  - "@kbn/security-plugin"
+  - '@kbn/apm-config-loader'
+  - '@kbn/repo-info'
+  - '@kbn/core'
+  - '@kbn/alerting-plugin'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/features-plugin'
+  - '@kbn/spaces-plugin'
+  - '@kbn/security-plugin'
 tags:
   - plugin
   - prod
@@ -33,7 +33,7 @@ tags:
   - private
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks: {}

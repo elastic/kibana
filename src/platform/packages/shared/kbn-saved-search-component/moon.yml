@@ -3,31 +3,31 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/saved-search-component'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/saved-search-component"
+id: '@kbn/saved-search-component'
 type: unknown
 owners:
-  defaultOwner: "@elastic/obs-exploration-team"
+  defaultOwner: '@elastic/obs-exploration-team'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/saved-search-component"
+  name: '@kbn/saved-search-component'
   description: Moon project for @kbn/saved-search-component
-  channel: ""
-  owner: "@elastic/obs-exploration-team"
+  channel: ''
+  owner: '@elastic/obs-exploration-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-saved-search-component
 dependsOn:
-  - "@kbn/embeddable-plugin"
-  - "@kbn/shared-ux-utility"
-  - "@kbn/discover-utils"
-  - "@kbn/es-query"
-  - "@kbn/data-plugin"
-  - "@kbn/discover-plugin"
-  - "@kbn/i18n"
-  - "@kbn/saved-search-plugin"
-  - "@kbn/data-views-plugin"
-  - "@kbn/unified-data-table"
+  - '@kbn/embeddable-plugin'
+  - '@kbn/shared-ux-utility'
+  - '@kbn/discover-utils'
+  - '@kbn/es-query'
+  - '@kbn/data-plugin'
+  - '@kbn/discover-plugin'
+  - '@kbn/i18n'
+  - '@kbn/saved-search-plugin'
+  - '@kbn/data-views-plugin'
+  - '@kbn/unified-data-table'
 tags:
   - shared-browser
   - package
@@ -37,19 +37,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

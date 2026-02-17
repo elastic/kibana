@@ -3,29 +3,29 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/osquery-plugin-cypress'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/osquery-plugin-cypress"
+id: '@kbn/osquery-plugin-cypress'
 type: unknown
 owners:
-  defaultOwner: "@elastic/security-defend-workflows"
+  defaultOwner: '@elastic/security-defend-workflows'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/osquery-plugin-cypress"
+  name: '@kbn/osquery-plugin-cypress'
   description: Moon project for @kbn/osquery-plugin-cypress
-  channel: ""
-  owner: "@elastic/security-defend-workflows"
+  channel: ''
+  owner: '@elastic/security-defend-workflows'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/osquery/cypress
 dependsOn:
-  - "@kbn/cypress-config"
-  - "@kbn/fleet-plugin"
-  - "@kbn/cases-plugin"
-  - "@kbn/cypress-test-helper"
-  - "@kbn/security-plugin"
-  - "@kbn/test"
-  - "@kbn/tooling-log"
-  - "@kbn/osquery-plugin"
+  - '@kbn/cypress-config'
+  - '@kbn/fleet-plugin'
+  - '@kbn/cases-plugin'
+  - '@kbn/cypress-test-helper'
+  - '@kbn/security-plugin'
+  - '@kbn/test'
+  - '@kbn/tooling-log'
+  - '@kbn/osquery-plugin'
 tags:
   - functional-tests
   - package
@@ -34,9 +34,9 @@ tags:
   - private
 fileGroups:
   src:
-    - "**/*"
+    - '**/*'
     - ./cypress.config.ts
     - ./serverless_cypress.config.ts
     - ./serverless_cypress_qa.config.ts
-    - "!target/**/*"
+    - '!target/**/*'
 tasks: {}

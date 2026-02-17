@@ -3,27 +3,27 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/alerts-restricted-fixtures-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/alerts-restricted-fixtures-plugin"
+id: '@kbn/alerts-restricted-fixtures-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/response-ops"
+  defaultOwner: '@elastic/response-ops'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/alerts-restricted-fixtures-plugin"
+  name: '@kbn/alerts-restricted-fixtures-plugin'
   description: Moon project for @kbn/alerts-restricted-fixtures-plugin
-  channel: ""
-  owner: "@elastic/response-ops"
+  channel: ''
+  owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/alerting-plugin"
-  - "@kbn/config-schema"
-  - "@kbn/actions-plugin"
-  - "@kbn/encrypted-saved-objects-plugin"
-  - "@kbn/features-plugin"
+  - '@kbn/core'
+  - '@kbn/alerting-plugin'
+  - '@kbn/config-schema'
+  - '@kbn/actions-plugin'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/features-plugin'
 tags:
   - plugin
   - prod
@@ -34,5 +34,5 @@ fileGroups:
     - public/**/*
     - server/**/*
     - common/**/*
-    - "!target/**/*"
+    - '!target/**/*'
 tasks: {}

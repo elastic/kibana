@@ -3,32 +3,32 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/workflows-extensions'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/workflows-extensions"
+id: '@kbn/workflows-extensions'
 type: unknown
 owners:
-  defaultOwner: "@elastic/workflows-eng"
+  defaultOwner: '@elastic/workflows-eng'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/workflows-extensions"
+  name: '@kbn/workflows-extensions'
   description: Moon project for @kbn/workflows-extensions
-  channel: ""
-  owner: "@elastic/workflows-eng"
+  channel: ''
+  owner: '@elastic/workflows-eng'
   metadata:
     sourceRoot: src/platform/plugins/shared/workflows_extensions
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/workflows"
-  - "@kbn/zod"
-  - "@kbn/config-schema"
-  - "@kbn/crypto"
-  - "@kbn/scout"
-  - "@kbn/i18n"
-  - "@kbn/inference-plugin"
-  - "@kbn/inference-common"
-  - "@kbn/actions-plugin"
-  - "@kbn/utility-types"
+  - '@kbn/core'
+  - '@kbn/workflows'
+  - '@kbn/zod'
+  - '@kbn/config-schema'
+  - '@kbn/crypto'
+  - '@kbn/scout'
+  - '@kbn/i18n'
+  - '@kbn/inference-plugin'
+  - '@kbn/inference-common'
+  - '@kbn/actions-plugin'
+  - '@kbn/utility-types'
 tags:
   - plugin
   - prod
@@ -42,17 +42,17 @@ fileGroups:
     - public/**/*
     - server/**/*
     - test/**/*
-    - "!target/**/*"
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

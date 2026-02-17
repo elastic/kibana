@@ -3,33 +3,33 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/inference-cli'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/inference-cli"
+id: '@kbn/inference-cli'
 type: unknown
 owners:
-  defaultOwner: "@elastic/appex-ai-infra"
+  defaultOwner: '@elastic/appex-ai-infra'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/inference-cli"
+  name: '@kbn/inference-cli'
   description: Moon project for @kbn/inference-cli
-  channel: ""
-  owner: "@elastic/appex-ai-infra"
+  channel: ''
+  owner: '@elastic/appex-ai-infra'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-inference-cli
 dependsOn:
-  - "@kbn/inference-common"
-  - "@kbn/inference-plugin"
-  - "@kbn/sse-utils-client"
-  - "@kbn/tooling-log"
-  - "@kbn/kibana-api-cli"
-  - "@kbn/dev-cli-runner"
-  - "@kbn/inference-langchain"
-  - "@kbn/repo-info"
-  - "@kbn/core"
-  - "@kbn/telemetry"
-  - "@kbn/inference-tracing"
-  - "@kbn/logging"
+  - '@kbn/inference-common'
+  - '@kbn/inference-plugin'
+  - '@kbn/sse-utils-client'
+  - '@kbn/tooling-log'
+  - '@kbn/kibana-api-cli'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/inference-langchain'
+  - '@kbn/repo-info'
+  - '@kbn/core'
+  - '@kbn/telemetry'
+  - '@kbn/inference-tracing'
+  - '@kbn/logging'
 tags:
   - shared-common
   - package
@@ -39,18 +39,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

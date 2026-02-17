@@ -3,29 +3,29 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/product-intercept-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/product-intercept-plugin"
+id: '@kbn/product-intercept-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/appex-sharedux"
+  defaultOwner: '@elastic/appex-sharedux'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/product-intercept-plugin"
+  name: '@kbn/product-intercept-plugin'
   description: Moon project for @kbn/product-intercept-plugin
-  channel: ""
-  owner: "@elastic/appex-sharedux"
+  channel: ''
+  owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: x-pack/platform/plugins/private/product_intercept
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/core-analytics-browser"
-  - "@kbn/config-schema"
-  - "@kbn/i18n"
-  - "@kbn/intercepts-plugin"
-  - "@kbn/i18n-react"
-  - "@kbn/cloud-plugin"
-  - "@kbn/core-analytics-browser-mocks"
+  - '@kbn/core'
+  - '@kbn/core-analytics-browser'
+  - '@kbn/config-schema'
+  - '@kbn/i18n'
+  - '@kbn/intercepts-plugin'
+  - '@kbn/i18n-react'
+  - '@kbn/cloud-plugin'
+  - '@kbn/core-analytics-browser-mocks'
 tags:
   - plugin
   - prod
@@ -40,17 +40,17 @@ fileGroups:
     - server/**/*
     - test_helpers/**/*
     - storybook/**/*
-    - "!target/**/*"
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

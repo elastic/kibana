@@ -3,27 +3,27 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/ml-anomaly-utils'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/ml-anomaly-utils"
+id: '@kbn/ml-anomaly-utils'
 type: unknown
 owners:
-  defaultOwner: "@elastic/ml-ui"
+  defaultOwner: '@elastic/ml-ui'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/ml-anomaly-utils"
+  name: '@kbn/ml-anomaly-utils'
   description: Moon project for @kbn/ml-anomaly-utils
-  channel: ""
-  owner: "@elastic/ml-ui"
+  channel: ''
+  owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/ml/anomaly_utils
 dependsOn:
-  - "@kbn/i18n"
-  - "@kbn/ml-is-populated-object"
-  - "@kbn/field-types"
-  - "@kbn/utility-types"
-  - "@kbn/config-schema"
-  - "@kbn/es-query"
+  - '@kbn/i18n'
+  - '@kbn/ml-is-populated-object'
+  - '@kbn/field-types'
+  - '@kbn/utility-types'
+  - '@kbn/config-schema'
+  - '@kbn/es-query'
 tags:
   - shared-common
   - package
@@ -33,19 +33,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

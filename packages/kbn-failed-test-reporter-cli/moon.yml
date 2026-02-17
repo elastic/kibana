@@ -3,30 +3,30 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/failed-test-reporter-cli'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/failed-test-reporter-cli"
+id: '@kbn/failed-test-reporter-cli'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-operations"
+  defaultOwner: '@elastic/kibana-operations'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/failed-test-reporter-cli"
+  name: '@kbn/failed-test-reporter-cli'
   description: Moon project for @kbn/failed-test-reporter-cli
-  channel: ""
-  owner: "@elastic/kibana-operations"
+  channel: ''
+  owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-failed-test-reporter-cli
 dependsOn:
-  - "@kbn/ci-stats-reporter"
-  - "@kbn/dev-cli-runner"
-  - "@kbn/dev-cli-errors"
-  - "@kbn/dev-utils"
-  - "@kbn/tooling-log"
-  - "@kbn/ftr-screenshot-filename"
-  - "@kbn/jest-serializers"
-  - "@kbn/journeys"
-  - "@kbn/repo-info"
+  - '@kbn/ci-stats-reporter'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/dev-utils'
+  - '@kbn/tooling-log'
+  - '@kbn/ftr-screenshot-filename'
+  - '@kbn/jest-serializers'
+  - '@kbn/journeys'
+  - '@kbn/repo-info'
 tags:
   - shared-common
   - package
@@ -36,18 +36,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

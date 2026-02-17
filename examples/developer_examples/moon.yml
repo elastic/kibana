@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/developer-examples-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/developer-examples-plugin"
+id: '@kbn/developer-examples-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/appex-sharedux"
+  defaultOwner: '@elastic/appex-sharedux'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/developer-examples-plugin"
+  name: '@kbn/developer-examples-plugin'
   description: Moon project for @kbn/developer-examples-plugin
-  channel: ""
-  owner: "@elastic/appex-sharedux"
+  channel: ''
+  owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: examples/developer_examples
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/core-rendering-browser"
+  - '@kbn/core'
+  - '@kbn/core-rendering-browser'
 tags:
   - plugin
   - prod
@@ -31,5 +31,5 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
-    - "!target/**/*"
+    - '!target/**/*'
 tasks: {}

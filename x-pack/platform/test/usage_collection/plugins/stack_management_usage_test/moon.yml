@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/stack-management-usage-test-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/stack-management-usage-test-plugin"
+id: '@kbn/stack-management-usage-test-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-management"
+  defaultOwner: '@elastic/kibana-management'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/stack-management-usage-test-plugin"
+  name: '@kbn/stack-management-usage-test-plugin'
   description: Moon project for @kbn/stack-management-usage-test-plugin
-  channel: ""
-  owner: "@elastic/kibana-management"
+  channel: ''
+  owner: '@elastic/kibana-management'
   metadata:
     sourceRoot: x-pack/platform/test/usage_collection/plugins/stack_management_usage_test
 dependsOn:
-  - "@kbn/core"
+  - '@kbn/core'
 tags:
   - plugin
   - prod
@@ -28,5 +28,5 @@ fileGroups:
   src:
     - public/**/*.ts
     - public/**/*.tsx
-    - "!target/**/*"
+    - '!target/**/*'
 tasks: {}

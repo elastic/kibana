@@ -3,36 +3,36 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/cli-dev-mode'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/cli-dev-mode"
+id: '@kbn/cli-dev-mode'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-operations"
+  defaultOwner: '@elastic/kibana-operations'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/cli-dev-mode"
+  name: '@kbn/cli-dev-mode'
   description: Moon project for @kbn/cli-dev-mode
-  channel: ""
-  owner: "@elastic/kibana-operations"
+  channel: ''
+  owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-cli-dev-mode
 dependsOn:
-  - "@kbn/config"
-  - "@kbn/config-schema"
-  - "@kbn/logging"
-  - "@kbn/optimizer"
-  - "@kbn/server-http-tools"
-  - "@kbn/repo-info"
-  - "@kbn/ci-stats-reporter"
-  - "@kbn/jest-serializers"
-  - "@kbn/stdio-dev-helpers"
-  - "@kbn/tooling-log"
-  - "@kbn/repo-source-classifier"
-  - "@kbn/import-resolver"
-  - "@kbn/picomatcher"
-  - "@kbn/repo-packages"
-  - "@kbn/dev-utils"
+  - '@kbn/config'
+  - '@kbn/config-schema'
+  - '@kbn/logging'
+  - '@kbn/optimizer'
+  - '@kbn/server-http-tools'
+  - '@kbn/repo-info'
+  - '@kbn/ci-stats-reporter'
+  - '@kbn/jest-serializers'
+  - '@kbn/stdio-dev-helpers'
+  - '@kbn/tooling-log'
+  - '@kbn/repo-source-classifier'
+  - '@kbn/import-resolver'
+  - '@kbn/picomatcher'
+  - '@kbn/repo-packages'
+  - '@kbn/dev-utils'
 tags:
   - shared-server
   - package
@@ -42,18 +42,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

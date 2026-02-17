@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/alerting-rule-utils'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/alerting-rule-utils"
+id: '@kbn/alerting-rule-utils'
 type: unknown
 owners:
-  defaultOwner: "@elastic/actionable-obs-team"
+  defaultOwner: '@elastic/actionable-obs-team'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/alerting-rule-utils"
+  name: '@kbn/alerting-rule-utils'
   description: Moon project for @kbn/alerting-rule-utils
-  channel: ""
-  owner: "@elastic/actionable-obs-team"
+  channel: ''
+  owner: '@elastic/actionable-obs-team'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/alerting-rule-utils
 dependsOn:
-  - "@kbn/alerts-as-data-utils"
-  - "@kbn/object-utils"
+  - '@kbn/alerts-as-data-utils'
+  - '@kbn/object-utils'
 tags:
   - shared-common
   - package
@@ -29,18 +29,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

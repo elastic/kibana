@@ -3,30 +3,30 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/notifications-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/notifications-plugin"
+id: '@kbn/notifications-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/appex-sharedux"
+  defaultOwner: '@elastic/appex-sharedux'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/notifications-plugin"
+  name: '@kbn/notifications-plugin'
   description: Moon project for @kbn/notifications-plugin
-  channel: ""
-  owner: "@elastic/appex-sharedux"
+  channel: ''
+  owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/notifications
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/actions-plugin"
-  - "@kbn/licensing-plugin"
-  - "@kbn/utility-types"
-  - "@kbn/config-schema"
-  - "@kbn/logging"
-  - "@kbn/logging-mocks"
-  - "@kbn/licensing-types"
-  - "@kbn/lazy-object"
+  - '@kbn/core'
+  - '@kbn/actions-plugin'
+  - '@kbn/licensing-plugin'
+  - '@kbn/utility-types'
+  - '@kbn/config-schema'
+  - '@kbn/logging'
+  - '@kbn/logging-mocks'
+  - '@kbn/licensing-types'
+  - '@kbn/lazy-object'
 tags:
   - plugin
   - prod
@@ -39,17 +39,17 @@ fileGroups:
     - server/**/*.json
     - public/**/*
     - common/**/*
-    - "!target/**/*"
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/test-eui-helpers'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/test-eui-helpers"
+id: '@kbn/test-eui-helpers'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-visualizations"
+  defaultOwner: '@elastic/kibana-visualizations'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/test-eui-helpers"
+  name: '@kbn/test-eui-helpers'
   description: Moon project for @kbn/test-eui-helpers
-  channel: ""
-  owner: "@elastic/kibana-visualizations"
+  channel: ''
+  owner: '@elastic/kibana-visualizations'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-test-eui-helpers
 dependsOn: []
@@ -27,19 +27,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

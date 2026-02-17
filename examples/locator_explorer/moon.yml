@@ -3,25 +3,25 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/locator-explorer-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/locator-explorer-plugin"
+id: '@kbn/locator-explorer-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/appex-sharedux"
+  defaultOwner: '@elastic/appex-sharedux'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/locator-explorer-plugin"
+  name: '@kbn/locator-explorer-plugin'
   description: Moon project for @kbn/locator-explorer-plugin
-  channel: ""
-  owner: "@elastic/appex-sharedux"
+  channel: ''
+  owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: examples/locator_explorer
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/share-plugin"
-  - "@kbn/locator-examples-plugin"
-  - "@kbn/developer-examples-plugin"
+  - '@kbn/core'
+  - '@kbn/share-plugin'
+  - '@kbn/locator-examples-plugin'
+  - '@kbn/developer-examples-plugin'
 tags:
   - plugin
   - prod
@@ -33,5 +33,5 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
-    - "!target/**/*"
+    - '!target/**/*'
 tasks: {}

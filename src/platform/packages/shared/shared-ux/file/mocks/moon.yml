@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/shared-ux-file-mocks'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/shared-ux-file-mocks"
+id: '@kbn/shared-ux-file-mocks'
 type: unknown
 owners:
-  defaultOwner: "@elastic/appex-sharedux"
+  defaultOwner: '@elastic/appex-sharedux'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/shared-ux-file-mocks"
+  name: '@kbn/shared-ux-file-mocks'
   description: Moon project for @kbn/shared-ux-file-mocks
-  channel: ""
-  owner: "@elastic/appex-sharedux"
+  channel: ''
+  owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/shared-ux/file/mocks
 dependsOn:
-  - "@kbn/utility-types-jest"
-  - "@kbn/shared-ux-file-types"
+  - '@kbn/utility-types-jest'
+  - '@kbn/shared-ux-file-types'
 tags:
   - shared-common
   - package
@@ -28,6 +28,6 @@ tags:
   - shared
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks: {}

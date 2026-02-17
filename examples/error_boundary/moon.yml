@@ -3,25 +3,25 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/error-boundary-example-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/error-boundary-example-plugin"
+id: '@kbn/error-boundary-example-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/appex-sharedux"
+  defaultOwner: '@elastic/appex-sharedux'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/error-boundary-example-plugin"
+  name: '@kbn/error-boundary-example-plugin'
   description: Moon project for @kbn/error-boundary-example-plugin
-  channel: ""
-  owner: "@elastic/appex-sharedux"
+  channel: ''
+  owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: examples/error_boundary
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/developer-examples-plugin"
-  - "@kbn/shared-ux-error-boundary"
-  - "@kbn/shared-ux-page-kibana-template"
+  - '@kbn/core'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/shared-ux-error-boundary'
+  - '@kbn/shared-ux-page-kibana-template'
 tags:
   - plugin
   - prod
@@ -33,5 +33,5 @@ fileGroups:
     - common/**/*.ts
     - public/**/*.ts
     - public/**/*.tsx
-    - "!target/**/*"
+    - '!target/**/*'
 tasks: {}

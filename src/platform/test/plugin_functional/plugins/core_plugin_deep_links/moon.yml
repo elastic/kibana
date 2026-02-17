@@ -3,25 +3,25 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/core-plugin-deep-links-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/core-plugin-deep-links-plugin"
+id: '@kbn/core-plugin-deep-links-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-core"
+  defaultOwner: '@elastic/kibana-core'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/core-plugin-deep-links-plugin"
+  name: '@kbn/core-plugin-deep-links-plugin'
   description: Moon project for @kbn/core-plugin-deep-links-plugin
-  channel: ""
-  owner: "@elastic/kibana-core"
+  channel: ''
+  owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/platform/test/plugin_functional/plugins/core_plugin_deep_links
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/shared-ux-router"
-  - "@kbn/core-application-browser-internal"
-  - "@kbn/react-kibana-context-render"
+  - '@kbn/core'
+  - '@kbn/shared-ux-router'
+  - '@kbn/core-application-browser-internal'
+  - '@kbn/react-kibana-context-render'
 tags:
   - plugin
   - prod
@@ -32,5 +32,5 @@ fileGroups:
     - index.ts
     - public/**/*.ts
     - public/**/*.tsx
-    - "!target/**/*"
+    - '!target/**/*'
 tasks: {}

@@ -3,25 +3,25 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/kbn-genai-cli'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/kbn-genai-cli"
+id: '@kbn/kbn-genai-cli'
 type: unknown
 owners:
-  defaultOwner: "@elastic/obs-ai-team"
+  defaultOwner: '@elastic/obs-ai-team'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/kbn-genai-cli"
+  name: '@kbn/kbn-genai-cli'
   description: Moon project for @kbn/kbn-genai-cli
-  channel: ""
-  owner: "@elastic/obs-ai-team"
+  channel: ''
+  owner: '@elastic/obs-ai-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/packages/kbn-genai-cli
 dependsOn:
-  - "@kbn/inference-common"
-  - "@kbn/kibana-api-cli"
-  - "@kbn/inference-cli"
-  - "@kbn/zod"
+  - '@kbn/inference-common'
+  - '@kbn/kibana-api-cli'
+  - '@kbn/inference-cli'
+  - '@kbn/zod'
 tags:
   - shared-common
   - package
@@ -31,18 +31,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

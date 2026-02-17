@@ -3,27 +3,27 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/streamlang-yaml-editor'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/streamlang-yaml-editor"
+id: '@kbn/streamlang-yaml-editor'
 type: unknown
 owners:
-  defaultOwner: "@elastic/obs-onboarding-team"
+  defaultOwner: '@elastic/obs-onboarding-team'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/streamlang-yaml-editor"
+  name: '@kbn/streamlang-yaml-editor'
   description: Moon project for @kbn/streamlang-yaml-editor
-  channel: ""
-  owner: "@elastic/obs-onboarding-team"
+  channel: ''
+  owner: '@elastic/obs-onboarding-team'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-streamlang-yaml-editor
 dependsOn:
-  - "@kbn/i18n"
-  - "@kbn/monaco"
-  - "@kbn/streamlang"
-  - "@kbn/react-hooks"
-  - "@kbn/code-editor"
-  - "@kbn/streams-plugin"
+  - '@kbn/i18n'
+  - '@kbn/monaco'
+  - '@kbn/streamlang'
+  - '@kbn/react-hooks'
+  - '@kbn/code-editor'
+  - '@kbn/streams-plugin'
 tags:
   - shared-common
   - package
@@ -33,19 +33,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

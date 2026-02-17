@@ -3,33 +3,33 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/cloud-experiments-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/cloud-experiments-plugin"
+id: '@kbn/cloud-experiments-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-core"
+  defaultOwner: '@elastic/kibana-core'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/cloud-experiments-plugin"
+  name: '@kbn/cloud-experiments-plugin'
   description: Moon project for @kbn/cloud-experiments-plugin
-  channel: ""
-  owner: "@elastic/kibana-core"
+  channel: ''
+  owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: x-pack/platform/plugins/private/cloud_integrations/cloud_experiments
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/data-views-plugin"
-  - "@kbn/usage-collection-plugin"
-  - "@kbn/cloud-plugin"
-  - "@kbn/config-schema"
-  - "@kbn/logging"
-  - "@kbn/logging-mocks"
-  - "@kbn/core-plugins-browser"
-  - "@kbn/core-plugins-server"
-  - "@kbn/core-feature-flags-browser"
-  - "@kbn/core-feature-flags-server"
-  - "@kbn/config"
+  - '@kbn/core'
+  - '@kbn/data-views-plugin'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/cloud-plugin'
+  - '@kbn/config-schema'
+  - '@kbn/logging'
+  - '@kbn/logging-mocks'
+  - '@kbn/core-plugins-browser'
+  - '@kbn/core-plugins-server'
+  - '@kbn/core-feature-flags-browser'
+  - '@kbn/core-feature-flags-server'
+  - '@kbn/config'
 tags:
   - plugin
   - prod
@@ -42,17 +42,17 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - "!target/**/*"
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

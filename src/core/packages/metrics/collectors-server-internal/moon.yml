@@ -3,26 +3,26 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/core-metrics-collectors-server-internal'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/core-metrics-collectors-server-internal"
+id: '@kbn/core-metrics-collectors-server-internal'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-core"
+  defaultOwner: '@elastic/kibana-core'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/core-metrics-collectors-server-internal"
+  name: '@kbn/core-metrics-collectors-server-internal'
   description: Moon project for @kbn/core-metrics-collectors-server-internal
-  channel: ""
-  owner: "@elastic/kibana-core"
+  channel: ''
+  owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/metrics/collectors-server-internal
 dependsOn:
-  - "@kbn/logging"
-  - "@kbn/core-metrics-server"
-  - "@kbn/core-elasticsearch-client-server-internal"
-  - "@kbn/logging-mocks"
-  - "@kbn/core-elasticsearch-client-server-mocks"
+  - '@kbn/logging'
+  - '@kbn/core-metrics-server'
+  - '@kbn/core-elasticsearch-client-server-internal'
+  - '@kbn/logging-mocks'
+  - '@kbn/core-elasticsearch-client-server-mocks'
 tags:
   - shared-server
   - package
@@ -32,18 +32,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

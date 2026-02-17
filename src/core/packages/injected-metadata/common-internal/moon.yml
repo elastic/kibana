@@ -3,27 +3,27 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/core-injected-metadata-common-internal'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/core-injected-metadata-common-internal"
+id: '@kbn/core-injected-metadata-common-internal'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-core"
+  defaultOwner: '@elastic/kibana-core'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/core-injected-metadata-common-internal"
+  name: '@kbn/core-injected-metadata-common-internal'
   description: Moon project for @kbn/core-injected-metadata-common-internal
-  channel: ""
-  owner: "@elastic/kibana-core"
+  channel: ''
+  owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/core/packages/injected-metadata/common-internal
 dependsOn:
-  - "@kbn/config"
-  - "@kbn/ui-shared-deps-npm"
-  - "@kbn/core-base-common"
-  - "@kbn/core-custom-branding-common"
-  - "@kbn/core-logging-common-internal"
-  - "@kbn/core-ui-settings-common"
+  - '@kbn/config'
+  - '@kbn/ui-shared-deps-npm'
+  - '@kbn/core-base-common'
+  - '@kbn/core-custom-branding-common'
+  - '@kbn/core-logging-common-internal'
+  - '@kbn/core-ui-settings-common'
 tags:
   - shared-common
   - package
@@ -33,18 +33,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

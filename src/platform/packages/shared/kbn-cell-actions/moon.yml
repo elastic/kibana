@@ -3,31 +3,31 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/cell-actions'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/cell-actions"
+id: '@kbn/cell-actions'
 type: unknown
 owners:
-  defaultOwner: "@elastic/security-threat-hunting-investigations"
+  defaultOwner: '@elastic/security-threat-hunting-investigations'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/cell-actions"
+  name: '@kbn/cell-actions'
   description: Moon project for @kbn/cell-actions
-  channel: ""
-  owner: "@elastic/security-threat-hunting-investigations"
+  channel: ''
+  owner: '@elastic/security-threat-hunting-investigations'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-cell-actions
 dependsOn:
-  - "@kbn/ui-theme"
-  - "@kbn/i18n"
-  - "@kbn/core"
-  - "@kbn/data-plugin"
-  - "@kbn/es-query"
-  - "@kbn/ui-actions-plugin"
-  - "@kbn/field-types"
-  - "@kbn/data-views-plugin"
-  - "@kbn/core-notifications-browser"
-  - "@kbn/utility-types"
+  - '@kbn/ui-theme'
+  - '@kbn/i18n'
+  - '@kbn/core'
+  - '@kbn/data-plugin'
+  - '@kbn/es-query'
+  - '@kbn/ui-actions-plugin'
+  - '@kbn/field-types'
+  - '@kbn/data-views-plugin'
+  - '@kbn/core-notifications-browser'
+  - '@kbn/utility-types'
 tags:
   - shared-common
   - package
@@ -37,19 +37,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

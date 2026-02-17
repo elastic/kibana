@@ -3,27 +3,27 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/chart-expressions-common'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/chart-expressions-common"
+id: '@kbn/chart-expressions-common'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-visualizations"
+  defaultOwner: '@elastic/kibana-visualizations'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/chart-expressions-common"
+  name: '@kbn/chart-expressions-common'
   description: Moon project for @kbn/chart-expressions-common
-  channel: ""
-  owner: "@elastic/kibana-visualizations"
+  channel: ''
+  owner: '@elastic/kibana-visualizations'
   metadata:
     sourceRoot: src/platform/packages/shared/chart-expressions-common
 dependsOn:
-  - "@kbn/core-execution-context-common"
-  - "@kbn/expressions-plugin"
-  - "@kbn/data-plugin"
-  - "@kbn/coloring"
-  - "@kbn/i18n"
-  - "@kbn/field-formats-plugin"
+  - '@kbn/core-execution-context-common'
+  - '@kbn/expressions-plugin'
+  - '@kbn/data-plugin'
+  - '@kbn/coloring'
+  - '@kbn/i18n'
+  - '@kbn/field-formats-plugin'
 tags:
   - shared-common
   - package
@@ -33,19 +33,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

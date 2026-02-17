@@ -3,24 +3,24 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/cloud-integration-saml-provider-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/cloud-integration-saml-provider-plugin"
+id: '@kbn/cloud-integration-saml-provider-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-core"
+  defaultOwner: '@elastic/kibana-core'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/cloud-integration-saml-provider-plugin"
+  name: '@kbn/cloud-integration-saml-provider-plugin'
   description: Moon project for @kbn/cloud-integration-saml-provider-plugin
-  channel: ""
-  owner: "@elastic/kibana-core"
+  channel: ''
+  owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: x-pack/platform/test/cloud_integration/plugins/saml_provider
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/dev-utils"
-  - "@kbn/mock-idp-utils"
+  - '@kbn/core'
+  - '@kbn/dev-utils'
+  - '@kbn/mock-idp-utils'
 tags:
   - plugin
   - prod
@@ -28,7 +28,7 @@ tags:
   - private
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks: {}

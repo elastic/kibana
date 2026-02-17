@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/osquery-io-ts-types'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/osquery-io-ts-types"
+id: '@kbn/osquery-io-ts-types'
 type: unknown
 owners:
-  defaultOwner: "@elastic/security-defend-workflows"
+  defaultOwner: '@elastic/security-defend-workflows'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/osquery-io-ts-types"
+  name: '@kbn/osquery-io-ts-types'
   description: Moon project for @kbn/osquery-io-ts-types
-  channel: ""
-  owner: "@elastic/security-defend-workflows"
+  channel: ''
+  owner: '@elastic/security-defend-workflows'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-osquery-io-ts-types
 dependsOn:
-  - "@kbn/io-ts-utils"
+  - '@kbn/io-ts-utils'
 tags:
   - shared-common
   - package
@@ -28,18 +28,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

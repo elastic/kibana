@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/spaces-test-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/spaces-test-plugin"
+id: '@kbn/spaces-test-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-security"
+  defaultOwner: '@elastic/kibana-security'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/spaces-test-plugin"
+  name: '@kbn/spaces-test-plugin'
   description: Moon project for @kbn/spaces-test-plugin
-  channel: ""
-  owner: "@elastic/kibana-security"
+  channel: ''
+  owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin
 dependsOn:
-  - "@kbn/core"
+  - '@kbn/core'
 tags:
   - plugin
   - prod
@@ -29,5 +29,5 @@ fileGroups:
     - public/**/*
     - server/**/*
     - common/**/*
-    - "!target/**/*"
+    - '!target/**/*'
 tasks: {}

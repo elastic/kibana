@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/interactive-setup-test-endpoints-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/interactive-setup-test-endpoints-plugin"
+id: '@kbn/interactive-setup-test-endpoints-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-security"
+  defaultOwner: '@elastic/kibana-security'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/interactive-setup-test-endpoints-plugin"
+  name: '@kbn/interactive-setup-test-endpoints-plugin'
   description: Moon project for @kbn/interactive-setup-test-endpoints-plugin
-  channel: ""
-  owner: "@elastic/kibana-security"
+  channel: ''
+  owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: src/platform/test/interactive_setup_api_integration/plugins/test_endpoints
 dependsOn:
-  - "@kbn/core"
+  - '@kbn/core'
 tags:
   - plugin
   - prod
@@ -27,5 +27,5 @@ tags:
 fileGroups:
   src:
     - server/**/*.ts
-    - "!target/**/*"
+    - '!target/**/*'
 tasks: {}

@@ -3,26 +3,26 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/routing-example-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/routing-example-plugin"
+id: '@kbn/routing-example-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-core"
+  defaultOwner: '@elastic/kibana-core'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/routing-example-plugin"
+  name: '@kbn/routing-example-plugin'
   description: Moon project for @kbn/routing-example-plugin
-  channel: ""
-  owner: "@elastic/kibana-core"
+  channel: ''
+  owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: examples/routing_example
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/developer-examples-plugin"
-  - "@kbn/core-http-browser"
-  - "@kbn/config-schema"
-  - "@kbn/react-kibana-context-render"
+  - '@kbn/core'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/core-http-browser'
+  - '@kbn/config-schema'
+  - '@kbn/react-kibana-context-render'
 tags:
   - plugin
   - prod
@@ -35,5 +35,5 @@ fileGroups:
     - public/**/*.tsx
     - server/**/*.ts
     - common/**/*.ts
-    - "!target/**/*"
+    - '!target/**/*'
 tasks: {}

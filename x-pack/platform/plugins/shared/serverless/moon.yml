@@ -3,29 +3,29 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/serverless'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/serverless"
+id: '@kbn/serverless'
 type: unknown
 owners:
-  defaultOwner: "@elastic/appex-sharedux"
+  defaultOwner: '@elastic/appex-sharedux'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/serverless"
+  name: '@kbn/serverless'
   description: Moon project for @kbn/serverless
-  channel: ""
-  owner: "@elastic/appex-sharedux"
+  channel: ''
+  owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/serverless
 dependsOn:
-  - "@kbn/config-schema"
-  - "@kbn/core"
-  - "@kbn/core-chrome-browser"
-  - "@kbn/core-chrome-browser-internal"
-  - "@kbn/cloud-plugin"
-  - "@kbn/serverless-common-settings"
-  - "@kbn/i18n"
-  - "@kbn/management-cards-navigation"
+  - '@kbn/config-schema'
+  - '@kbn/core'
+  - '@kbn/core-chrome-browser'
+  - '@kbn/core-chrome-browser-internal'
+  - '@kbn/cloud-plugin'
+  - '@kbn/serverless-common-settings'
+  - '@kbn/i18n'
+  - '@kbn/management-cards-navigation'
 tags:
   - plugin
   - prod
@@ -39,17 +39,17 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
-    - "!target/**/*"
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

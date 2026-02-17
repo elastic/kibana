@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/content-management-table-list-view-common'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/content-management-table-list-view-common"
+id: '@kbn/content-management-table-list-view-common'
 type: unknown
 owners:
-  defaultOwner: "@elastic/appex-sharedux"
+  defaultOwner: '@elastic/appex-sharedux'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/content-management-table-list-view-common"
+  name: '@kbn/content-management-table-list-view-common'
   description: Moon project for @kbn/content-management-table-list-view-common
-  channel: ""
-  owner: "@elastic/appex-sharedux"
+  channel: ''
+  owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/content-management/table_list_view_common
 dependsOn:
-  - "@kbn/content-management-content-editor"
+  - '@kbn/content-management-content-editor'
 tags:
   - shared-common
   - package
@@ -27,6 +27,6 @@ tags:
   - shared
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks: {}

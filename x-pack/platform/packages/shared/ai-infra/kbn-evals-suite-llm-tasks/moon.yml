@@ -3,28 +3,28 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/evals-suite-llm-tasks'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/evals-suite-llm-tasks"
+id: '@kbn/evals-suite-llm-tasks'
 type: unknown
 owners:
-  defaultOwner: "@elastic/appex-ai-infra"
+  defaultOwner: '@elastic/appex-ai-infra'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/evals-suite-llm-tasks"
+  name: '@kbn/evals-suite-llm-tasks'
   description: Moon project for @kbn/evals-suite-llm-tasks
-  channel: ""
-  owner: "@elastic/appex-ai-infra"
+  channel: ''
+  owner: '@elastic/appex-ai-infra'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks
 dependsOn:
-  - "@kbn/evals"
-  - "@kbn/llm-tasks-plugin"
-  - "@kbn/product-doc-base-plugin"
-  - "@kbn/product-doc-common"
-  - "@kbn/inference-common"
-  - "@kbn/core"
-  - "@kbn/logging"
+  - '@kbn/evals'
+  - '@kbn/llm-tasks-plugin'
+  - '@kbn/product-doc-base-plugin'
+  - '@kbn/product-doc-common'
+  - '@kbn/inference-common'
+  - '@kbn/core'
+  - '@kbn/logging'
 tags:
   - functional-tests
   - package
@@ -34,18 +34,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

@@ -3,25 +3,25 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/management-settings-types'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/management-settings-types"
+id: '@kbn/management-settings-types'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-management"
+  defaultOwner: '@elastic/kibana-management'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/management-settings-types"
+  name: '@kbn/management-settings-types'
   description: Moon project for @kbn/management-settings-types
-  channel: ""
-  owner: "@elastic/kibana-management"
+  channel: ''
+  owner: '@elastic/kibana-management'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-management/settings/types
 dependsOn:
-  - "@kbn/analytics"
-  - "@kbn/core"
-  - "@kbn/core-ui-settings-common"
-  - "@kbn/management-settings-section-registry"
+  - '@kbn/analytics'
+  - '@kbn/core'
+  - '@kbn/core-ui-settings-common'
+  - '@kbn/management-settings-section-registry'
 tags:
   - shared-browser
   - package
@@ -30,6 +30,6 @@ tags:
   - shared
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks: {}

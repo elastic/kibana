@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/axe-config'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/axe-config"
+id: '@kbn/axe-config'
 type: unknown
 owners:
-  defaultOwner: "@elastic/appex-qa"
+  defaultOwner: '@elastic/appex-qa'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/axe-config"
+  name: '@kbn/axe-config'
   description: Moon project for @kbn/axe-config
-  channel: ""
-  owner: "@elastic/appex-qa"
+  channel: ''
+  owner: '@elastic/appex-qa'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-axe-config
 tags:
@@ -25,6 +25,6 @@ tags:
   - shared
 fileGroups:
   src:
-    - "**/*.ts"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '!target/**/*'
 tasks: {}

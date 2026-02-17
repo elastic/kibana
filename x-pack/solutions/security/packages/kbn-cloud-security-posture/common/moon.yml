@@ -3,30 +3,30 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/cloud-security-posture-common'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/cloud-security-posture-common"
+id: '@kbn/cloud-security-posture-common'
 type: unknown
 owners:
-  defaultOwner: "@elastic/contextual-security-apps"
+  defaultOwner: '@elastic/contextual-security-apps'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/cloud-security-posture-common"
+  name: '@kbn/cloud-security-posture-common'
   description: Moon project for @kbn/cloud-security-posture-common
-  channel: ""
-  owner: "@elastic/contextual-security-apps"
+  channel: ''
+  owner: '@elastic/contextual-security-apps'
   metadata:
     sourceRoot: x-pack/solutions/security/packages/kbn-cloud-security-posture/common
 dependsOn:
-  - "@kbn/config-schema"
-  - "@kbn/data-views-plugin"
-  - "@kbn/i18n"
-  - "@kbn/analytics"
-  - "@kbn/usage-collection-plugin"
-  - "@kbn/es-query"
-  - "@kbn/core"
-  - "@kbn/core-http-common"
-  - "@kbn/ftr-common-functional-services"
+  - '@kbn/config-schema'
+  - '@kbn/data-views-plugin'
+  - '@kbn/i18n'
+  - '@kbn/analytics'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/es-query'
+  - '@kbn/core'
+  - '@kbn/core-http-common'
+  - '@kbn/ftr-common-functional-services'
 tags:
   - shared-common
   - package
@@ -36,19 +36,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

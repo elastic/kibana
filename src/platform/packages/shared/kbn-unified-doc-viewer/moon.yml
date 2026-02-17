@@ -3,32 +3,32 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/unified-doc-viewer'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/unified-doc-viewer"
+id: '@kbn/unified-doc-viewer'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-data-discovery"
+  defaultOwner: '@elastic/kibana-data-discovery'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/unified-doc-viewer"
+  name: '@kbn/unified-doc-viewer'
   description: Moon project for @kbn/unified-doc-viewer
-  channel: ""
-  owner: "@elastic/kibana-data-discovery"
+  channel: ''
+  owner: '@elastic/kibana-data-discovery'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-unified-doc-viewer
 dependsOn:
-  - "@kbn/discover-utils"
-  - "@kbn/data-views-plugin"
-  - "@kbn/es-query"
-  - "@kbn/data-plugin"
-  - "@kbn/i18n-react"
-  - "@kbn/i18n"
-  - "@kbn/react-field"
-  - "@kbn/field-utils"
-  - "@kbn/core-analytics-browser-mocks"
-  - "@kbn/shared-ux-error-boundary"
-  - "@kbn/restorable-state"
+  - '@kbn/discover-utils'
+  - '@kbn/data-views-plugin'
+  - '@kbn/es-query'
+  - '@kbn/data-plugin'
+  - '@kbn/i18n-react'
+  - '@kbn/i18n'
+  - '@kbn/react-field'
+  - '@kbn/field-utils'
+  - '@kbn/core-analytics-browser-mocks'
+  - '@kbn/shared-ux-error-boundary'
+  - '@kbn/restorable-state'
 tags:
   - shared-browser
   - package
@@ -38,19 +38,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

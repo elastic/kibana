@@ -3,25 +3,25 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/moon'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/moon"
+id: '@kbn/moon'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-operations"
+  defaultOwner: '@elastic/kibana-operations'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/moon"
+  name: '@kbn/moon'
   description: Moon project for @kbn/moon
-  channel: ""
-  owner: "@elastic/kibana-operations"
+  channel: ''
+  owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-moon
 dependsOn:
-  - "@kbn/repo-info"
-  - "@kbn/dev-cli-runner"
-  - "@kbn/repo-packages"
-  - "@kbn/tooling-log"
+  - '@kbn/repo-info'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/repo-packages'
+  - '@kbn/tooling-log'
 tags:
   - shared-common
   - package
@@ -29,7 +29,7 @@ tags:
   - group-undefined
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks: {}

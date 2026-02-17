@@ -3,32 +3,32 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/global-search-bar-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/global-search-bar-plugin"
+id: '@kbn/global-search-bar-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/appex-sharedux"
+  defaultOwner: '@elastic/appex-sharedux'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/global-search-bar-plugin"
+  name: '@kbn/global-search-bar-plugin'
   description: Moon project for @kbn/global-search-bar-plugin
-  channel: ""
-  owner: "@elastic/appex-sharedux"
+  channel: ''
+  owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: x-pack/platform/plugins/private/global_search_bar
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/usage-collection-plugin"
-  - "@kbn/global-search-plugin"
-  - "@kbn/saved-objects-tagging-plugin"
-  - "@kbn/analytics"
-  - "@kbn/i18n-react"
-  - "@kbn/i18n"
-  - "@kbn/saved-objects-tagging-oss-plugin"
-  - "@kbn/core-chrome-browser"
-  - "@kbn/config-schema"
-  - "@kbn/shared-ux-utility"
+  - '@kbn/core'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/global-search-plugin'
+  - '@kbn/saved-objects-tagging-plugin'
+  - '@kbn/analytics'
+  - '@kbn/i18n-react'
+  - '@kbn/i18n'
+  - '@kbn/saved-objects-tagging-oss-plugin'
+  - '@kbn/core-chrome-browser'
+  - '@kbn/config-schema'
+  - '@kbn/shared-ux-utility'
 tags:
   - plugin
   - prod
@@ -40,17 +40,17 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - "!target/**/*"
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

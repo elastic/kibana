@@ -3,25 +3,25 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/storage-adapter'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/storage-adapter"
+id: '@kbn/storage-adapter'
 type: unknown
 owners:
-  defaultOwner: "@elastic/observability-ui"
+  defaultOwner: '@elastic/observability-ui'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/storage-adapter"
+  name: '@kbn/storage-adapter'
   description: Moon project for @kbn/storage-adapter
-  channel: ""
-  owner: "@elastic/observability-ui"
+  channel: ''
+  owner: '@elastic/observability-ui'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-storage-adapter
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/es-types"
-  - "@kbn/es-errors"
-  - "@kbn/core-test-helpers-kbn-server"
+  - '@kbn/core'
+  - '@kbn/es-types'
+  - '@kbn/es-errors'
+  - '@kbn/core-test-helpers-kbn-server'
 tags:
   - shared-server
   - package
@@ -31,19 +31,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

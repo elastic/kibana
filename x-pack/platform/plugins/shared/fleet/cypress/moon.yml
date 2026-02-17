@@ -3,28 +3,28 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/fleet-plugin-cypress'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/fleet-plugin-cypress"
+id: '@kbn/fleet-plugin-cypress'
 type: unknown
 owners:
-  defaultOwner: "@elastic/fleet"
+  defaultOwner: '@elastic/fleet'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/fleet-plugin-cypress"
+  name: '@kbn/fleet-plugin-cypress'
   description: Moon project for @kbn/fleet-plugin-cypress
-  channel: ""
-  owner: "@elastic/fleet"
+  channel: ''
+  owner: '@elastic/fleet'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/fleet/cypress
 dependsOn:
-  - "@kbn/test"
-  - "@kbn/axe-config"
-  - "@kbn/rison"
-  - "@kbn/actions-plugin"
-  - "@kbn/core-chrome-layout-constants"
-  - "@kbn/fleet-plugin"
-  - "@kbn/cypress-config"
+  - '@kbn/test'
+  - '@kbn/axe-config'
+  - '@kbn/rison'
+  - '@kbn/actions-plugin'
+  - '@kbn/core-chrome-layout-constants'
+  - '@kbn/fleet-plugin'
+  - '@kbn/cypress-config'
 tags:
   - functional-tests
   - package
@@ -33,6 +33,6 @@ tags:
   - private
 fileGroups:
   src:
-    - "**/*"
-    - "!target/**/*"
+    - '**/*'
+    - '!target/**/*'
 tasks: {}

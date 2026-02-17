@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/observability-utils-browser'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/observability-utils-browser"
+id: '@kbn/observability-utils-browser'
 type: unknown
 owners:
-  defaultOwner: "@elastic/observability-ui"
+  defaultOwner: '@elastic/observability-ui'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/observability-utils-browser"
+  name: '@kbn/observability-utils-browser'
   description: Moon project for @kbn/observability-utils-browser
-  channel: ""
-  owner: "@elastic/observability-ui"
+  channel: ''
+  owner: '@elastic/observability-ui'
   metadata:
     sourceRoot: x-pack/solutions/observability/packages/utils-browser
 dependsOn:
-  - "@kbn/data-plugin"
-  - "@kbn/core-ui-settings-browser"
+  - '@kbn/data-plugin'
+  - '@kbn/core-ui-settings-browser'
 tags:
   - shared-browser
   - package
@@ -29,19 +29,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

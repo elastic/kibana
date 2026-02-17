@@ -3,31 +3,31 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/actions-simulators-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/actions-simulators-plugin"
+id: '@kbn/actions-simulators-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/response-ops"
+  defaultOwner: '@elastic/response-ops'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/actions-simulators-plugin"
+  name: '@kbn/actions-simulators-plugin'
   description: Moon project for @kbn/actions-simulators-plugin
-  channel: ""
-  owner: "@elastic/response-ops"
+  channel: ''
+  owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/config-schema"
-  - "@kbn/encrypted-saved-objects-plugin"
-  - "@kbn/features-plugin"
-  - "@kbn/actions-plugin"
-  - "@kbn/alerting-api-integration-helpers"
-  - "@kbn/expect"
-  - "@kbn/dev-utils"
-  - "@kbn/zod"
-  - "@kbn/connector-specs"
+  - '@kbn/core'
+  - '@kbn/config-schema'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/features-plugin'
+  - '@kbn/actions-plugin'
+  - '@kbn/alerting-api-integration-helpers'
+  - '@kbn/expect'
+  - '@kbn/dev-utils'
+  - '@kbn/zod'
+  - '@kbn/connector-specs'
 tags:
   - plugin
   - prod
@@ -38,5 +38,5 @@ fileGroups:
     - public/**/*
     - server/**/*
     - common/**/*
-    - "!target/**/*"
+    - '!target/**/*'
 tasks: {}

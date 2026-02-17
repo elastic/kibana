@@ -3,27 +3,27 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/field-formats-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/field-formats-plugin"
+id: '@kbn/field-formats-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-data-discovery"
+  defaultOwner: '@elastic/kibana-data-discovery'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/field-formats-plugin"
+  name: '@kbn/field-formats-plugin'
   description: Moon project for @kbn/field-formats-plugin
-  channel: ""
-  owner: "@elastic/kibana-data-discovery"
+  channel: ''
+  owner: '@elastic/kibana-data-discovery'
   metadata:
     sourceRoot: src/platform/plugins/shared/field_formats
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/field-types"
-  - "@kbn/field-formats-common"
-  - "@kbn/utility-types"
-  - "@kbn/i18n"
-  - "@kbn/config-schema"
+  - '@kbn/core'
+  - '@kbn/field-types'
+  - '@kbn/field-formats-common'
+  - '@kbn/utility-types'
+  - '@kbn/i18n'
+  - '@kbn/config-schema'
 tags:
   - plugin
   - prod
@@ -38,17 +38,17 @@ fileGroups:
     - config.ts
     - common/**/*.json
     - public/**/*.json
-    - "!target/**/*"
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/dot-text-loader'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/dot-text-loader"
+id: '@kbn/dot-text-loader'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-operations"
+  defaultOwner: '@elastic/kibana-operations'
 toolchain:
   default: node
 language: javascript
 project:
-  name: "@kbn/dot-text-loader"
+  name: '@kbn/dot-text-loader'
   description: Moon project for @kbn/dot-text-loader
-  channel: ""
-  owner: "@elastic/kibana-operations"
+  channel: ''
+  owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-dot-text-loader
 tags:
@@ -30,10 +30,10 @@ tasks:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

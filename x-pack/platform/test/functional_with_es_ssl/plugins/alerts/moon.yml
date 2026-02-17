@@ -3,28 +3,28 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/alerting-fixture-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/alerting-fixture-plugin"
+id: '@kbn/alerting-fixture-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/response-ops"
+  defaultOwner: '@elastic/response-ops'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/alerting-fixture-plugin"
+  name: '@kbn/alerting-fixture-plugin'
   description: Moon project for @kbn/alerting-fixture-plugin
-  channel: ""
-  owner: "@elastic/response-ops"
+  channel: ''
+  owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/platform/test/functional_with_es_ssl/plugins/alerts
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/features-plugin"
-  - "@kbn/alerting-plugin"
-  - "@kbn/triggers-actions-ui-plugin"
-  - "@kbn/shared-ux-router"
-  - "@kbn/event-log-plugin"
-  - "@kbn/config-schema"
+  - '@kbn/core'
+  - '@kbn/features-plugin'
+  - '@kbn/alerting-plugin'
+  - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/shared-ux-router'
+  - '@kbn/event-log-plugin'
+  - '@kbn/config-schema'
 tags:
   - plugin
   - prod
@@ -32,7 +32,7 @@ tags:
   - private
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks: {}

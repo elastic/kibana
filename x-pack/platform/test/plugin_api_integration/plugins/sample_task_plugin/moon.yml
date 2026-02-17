@@ -3,26 +3,26 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/sample-task-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/sample-task-plugin"
+id: '@kbn/sample-task-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/response-ops"
+  defaultOwner: '@elastic/response-ops'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/sample-task-plugin"
+  name: '@kbn/sample-task-plugin'
   description: Moon project for @kbn/sample-task-plugin
-  channel: ""
-  owner: "@elastic/response-ops"
+  channel: ''
+  owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/task-manager-plugin"
-  - "@kbn/config-schema"
-  - "@kbn/security-plugin"
-  - "@kbn/core-http-server-utils"
+  - '@kbn/core'
+  - '@kbn/task-manager-plugin'
+  - '@kbn/config-schema'
+  - '@kbn/security-plugin'
+  - '@kbn/core-http-server-utils'
 tags:
   - plugin
   - prod
@@ -30,7 +30,7 @@ tags:
   - private
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks: {}

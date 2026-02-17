@@ -3,31 +3,31 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/runtime-fields-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/runtime-fields-plugin"
+id: '@kbn/runtime-fields-plugin'
 type: unknown
 owners:
-  defaultOwner: "@elastic/kibana-management"
+  defaultOwner: '@elastic/kibana-management'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/runtime-fields-plugin"
+  name: '@kbn/runtime-fields-plugin'
   description: Moon project for @kbn/runtime-fields-plugin
-  channel: ""
-  owner: "@elastic/kibana-management"
+  channel: ''
+  owner: '@elastic/kibana-management'
   metadata:
     sourceRoot: x-pack/platform/plugins/private/runtime_fields
 dependsOn:
-  - "@kbn/core"
-  - "@kbn/es-ui-shared-plugin"
-  - "@kbn/kibana-react-plugin"
-  - "@kbn/i18n"
-  - "@kbn/i18n-react"
-  - "@kbn/monaco"
-  - "@kbn/code-editor"
-  - "@kbn/code-editor-mock"
-  - "@kbn/react-kibana-mount"
-  - "@kbn/core-doc-links-browser-mocks"
+  - '@kbn/core'
+  - '@kbn/es-ui-shared-plugin'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/monaco'
+  - '@kbn/code-editor'
+  - '@kbn/code-editor-mock'
+  - '@kbn/react-kibana-mount'
+  - '@kbn/core-doc-links-browser-mocks'
 tags:
   - plugin
   - prod
@@ -37,17 +37,17 @@ tags:
 fileGroups:
   src:
     - public/**/*
-    - "!target/**/*"
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'

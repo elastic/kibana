@@ -3,26 +3,26 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/response-ops-form-generator'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: "@kbn/response-ops-form-generator"
+id: '@kbn/response-ops-form-generator'
 type: unknown
 owners:
-  defaultOwner: "@elastic/response-ops"
+  defaultOwner: '@elastic/response-ops'
 toolchain:
   default: node
 language: typescript
 project:
-  name: "@kbn/response-ops-form-generator"
+  name: '@kbn/response-ops-form-generator'
   description: Moon project for @kbn/response-ops-form-generator
-  channel: ""
-  owner: "@elastic/response-ops"
+  channel: ''
+  owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/response-ops/form-generator
 dependsOn:
-  - "@kbn/zod"
-  - "@kbn/i18n-react"
-  - "@kbn/connector-specs"
-  - "@kbn/es-ui-shared-plugin"
-  - "@kbn/i18n"
+  - '@kbn/zod'
+  - '@kbn/i18n-react'
+  - '@kbn/connector-specs'
+  - '@kbn/es-ui-shared-plugin'
+  - '@kbn/i18n'
 tags:
   - shared-browser
   - package
@@ -32,19 +32,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - "**/*.ts"
-    - "**/*.tsx"
-    - "!target/**/*"
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
 tasks:
   jest:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
   jestCI:
     args:
       - --config
       - $projectRoot/jest.config.js
     inputs:
-      - "@group(src)"
+      - '@group(src)'
