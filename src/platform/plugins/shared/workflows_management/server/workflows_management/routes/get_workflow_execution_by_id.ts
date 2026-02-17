@@ -40,11 +40,10 @@ export function registerGetWorkflowExecutionByIdRoute({
         const { workflowExecutionId } = request.params;
         const { includeInput, includeOutput } = request.query;
         const spaceId = spaces.getSpaceId(request);
-        const workflowExecution = await api.getWorkflowExecution(
-          workflowExecutionId,
-          spaceId,
-          { includeInput, includeOutput }
-        );
+        const workflowExecution = await api.getWorkflowExecution(workflowExecutionId, spaceId, {
+          includeInput,
+          includeOutput,
+        });
         if (!workflowExecution) {
           return response.notFound();
         }
