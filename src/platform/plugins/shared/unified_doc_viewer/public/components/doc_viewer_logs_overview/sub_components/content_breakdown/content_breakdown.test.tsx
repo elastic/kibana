@@ -32,7 +32,11 @@ const mockDataView = {
     getAll: () => [],
     getByName: () => undefined,
   },
-  getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+  getFormatterForField: jest.fn(() => ({
+    convert: (value: unknown) => value,
+    convertToReact: () => undefined,
+    hasReactSupport: () => false,
+  })),
 } as unknown as DataView;
 
 const buildHit = (fields: Record<string, unknown> = {}) =>
