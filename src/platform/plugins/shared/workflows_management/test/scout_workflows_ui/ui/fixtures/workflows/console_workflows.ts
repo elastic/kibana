@@ -184,3 +184,84 @@ triggers:
 steps:
   - name: hello_world_step
     type:`;
+
+/**
+ * Workflow with NO inputs and NO consts defined.
+ * Used for verifying that inputs/consts don't appear in autocomplete when undefined.
+ */
+export const getWorkflowWithoutInputsOrConstsYaml = (name: string) => `
+name: ${name}
+description: Simple workflow without inputs or consts
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: step1
+    type: console
+    with:
+      message: "{{ }}"`;
+
+/**
+ * Workflow with both inputs and consts defined.
+ * Used for verifying that inputs/consts appear in autocomplete only when defined.
+ */
+export const getWorkflowWithInputsAndConstsYaml = (name: string) => `
+name: ${name}
+description: Workflow with inputs and consts
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  - name: alertName
+    type: string
+    default: "test alert"
+  - name: severity
+    type: string
+    default: "medium"
+consts:
+  threshold: 100
+  region: us-east-1
+steps:
+  - name: step1
+    type: console
+    with:
+      message: "{{ }}"`;
+
+/**
+ * Workflow with only inputs defined (no consts).
+ * Used for verifying consts don't appear when not defined but inputs do.
+ */
+export const getWorkflowWithOnlyInputsYaml = (name: string) => `
+name: ${name}
+description: Workflow with only inputs
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  - name: message
+    type: string
+    default: "hello"
+steps:
+  - name: step1
+    type: console
+    with:
+      message: "{{ }}"`;
+
+/**
+ * Workflow with only consts defined (no inputs).
+ * Used for verifying inputs don't appear when not defined but consts do.
+ */
+export const getWorkflowWithOnlyConstsYaml = (name: string) => `
+name: ${name}
+description: Workflow with only consts
+enabled: true
+triggers:
+  - type: manual
+consts:
+  apiUrl: "https://api.example.com"
+  timeout: 30
+steps:
+  - name: step1
+    type: console
+    with:
+      message: "{{ }}"`;

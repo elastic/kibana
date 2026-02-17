@@ -9,6 +9,7 @@
 
 import type { monaco } from '@kbn/monaco';
 import { getShape } from '@kbn/workflows/common/utils/zod';
+import { z } from '@kbn/zod/v4';
 import { wrapAsMonacoSuggestion } from './wrap_as_monaco_suggestion';
 import { getDetailedTypeDescription } from '../../../../../../../common/lib/zod';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
@@ -107,8 +108,10 @@ export function getVariableSuggestions(autocompleteContext: AutocompleteContext)
 
   const shape = getShape(contextSchema);
 
-  // Get all keys from the current schema
-  const keys = Object.keys(shape);
+  // Get all keys from the current schema, excluding ZodNever types.
+  // ZodNever is used to mark schema properties (e.g. inputs, consts) that are
+  // not defined in the current workflow, so they should not appear as suggestions.
+  const keys = Object.keys(shape).filter((key) => !(shape[key] instanceof z.ZodNever));
 
   if (keys.length === 0) {
     return [];

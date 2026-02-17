@@ -18,6 +18,10 @@ export {
   getDummyWorkflowYaml,
   getInvalidWorkflowYaml,
   getIncompleteStepTypeYaml,
+  getWorkflowWithoutInputsOrConstsYaml,
+  getWorkflowWithInputsAndConstsYaml,
+  getWorkflowWithOnlyInputsYaml,
+  getWorkflowWithOnlyConstsYaml,
 } from './console_workflows';
 export {
   TEST_ALERTS_INDEX,
