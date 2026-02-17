@@ -119,12 +119,13 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
             logger: osqueryContext.logFactory.get('liveQuery'),
           });
           const username = currentUser?.username ?? undefined;
+          const userProfileUid = currentUser?.profile_uid ?? undefined;
           const space = await osqueryContext.service.getActiveSpace(request);
           const { response: osqueryAction, fleetActionsCount } = await createActionHandler(
             osqueryContext,
             request.body,
             {
-              metadata: { currentUser: username },
+              metadata: { currentUser: username, userProfileUid },
               alertData,
               space,
             }

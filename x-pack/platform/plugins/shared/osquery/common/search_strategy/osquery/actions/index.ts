@@ -29,6 +29,7 @@ export interface ActionDetails {
   agent_policy_ids: string[];
   agents: string[];
   user_id?: string;
+  user_profile_uid?: string;
   pack_id?: string;
   pack_name?: string;
   space_id?: string;
