@@ -104,7 +104,7 @@ function CascadeGroupingSelectionPopover({
           >
             <FormattedMessage
               id="discover.cascade.header.layoutSwitchLabel"
-              defaultMessage="Group By"
+              defaultMessage="Group by"
             />
           </EuiDataGridToolbarControl>
         </EuiFilterGroup>

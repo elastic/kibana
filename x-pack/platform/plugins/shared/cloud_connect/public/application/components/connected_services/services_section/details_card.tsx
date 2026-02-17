@@ -45,6 +45,7 @@ export interface ServiceCardProps {
   onEnable?: () => void;
   onDisable?: () => void;
   onOpen?: () => void;
+  onRotateApiKey?: () => void;
   isLoading?: boolean;
   isCardDisabled?: boolean;
   subscriptionRequired?: boolean;
@@ -104,6 +105,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   onEnable,
   onDisable,
   onOpen,
+  onRotateApiKey,
   isLoading = false,
   isCardDisabled = false,
   subscriptionRequired = false,
@@ -331,6 +333,24 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
       );
 
       const menuItems = [
+        ...(onRotateApiKey
+          ? [
+              <EuiContextMenuItem
+                key="rotate"
+                onClick={() => {
+                  closePopover();
+                  onRotateApiKey();
+                }}
+              >
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.cloudConnect.connectedServices.service.rotateApiKey"
+                    defaultMessage="Rotate API key"
+                  />
+                </EuiText>
+              </EuiContextMenuItem>,
+            ]
+          : []),
         <EuiContextMenuItem
           key="disable"
           onClick={() => {

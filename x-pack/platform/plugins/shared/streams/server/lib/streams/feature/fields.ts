@@ -8,10 +8,12 @@
 export const STREAM_NAME = 'stream.name';
 
 export const FEATURE_UUID = 'feature.uuid';
+export const FEATURE_ID = 'feature.id';
 export const FEATURE_TYPE = 'feature.type';
 export const FEATURE_DESCRIPTION = 'feature.description';
-export const FEATURE_NAME = 'feature.name';
-export const FEATURE_VALUE = 'feature.value';
+export const FEATURE_SUBTYPE = 'feature.subtype';
+export const FEATURE_TITLE = 'feature.title';
+export const FEATURE_PROPERTIES = 'feature.properties';
 export const FEATURE_CONFIDENCE = 'feature.confidence';
 export const FEATURE_EVIDENCE = 'feature.evidence';
 export const FEATURE_STATUS = 'feature.status';

@@ -18,7 +18,6 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { Sample } from '@kbn/grok-ui';
 import { i18n } from '@kbn/i18n';
 import type { GrokProcessor } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
@@ -26,6 +25,7 @@ import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { GrokExpressionsProvider, GrokSampleWithContext } from '@kbn/grok-ui';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
 import { useStreamDataViewFieldTypes } from '../../../hooks/use_stream_data_view_field_types';
@@ -47,6 +47,7 @@ import { selectDraftProcessor } from './state_management/interactive_mode_machin
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
   getAllFieldsInOrder,
+  getOriginalSampleDocument,
   getSourceField,
   getTableColumns,
   previewDocsFilterOptions,
@@ -327,10 +328,16 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
         };
   });
 
-  const grokCollection = useStreamEnrichmentSelector(
-    (machineState) => machineState.context.grokCollection
-  );
+  // Get grok patterns from the draft processor
+  const grokPatterns =
+    draftProcessor?.processor &&
+    'action' in draftProcessor.processor &&
+    draftProcessor.processor.action === 'grok'
+      ? draftProcessor.processor.patterns
+      : [];
 
+  // NOTE: Even when a Grok expression attempts to overwrite the configured field (e.g., message → message),
+  // we still enable grok mode and use the original (pre-transformation) value for highlighting.
   const grokMode =
     draftProcessor?.processor &&
     'action' in draftProcessor.processor &&
@@ -485,24 +492,12 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
             );
 
             if (typeof value === 'string') {
-              return (
-                <Sample
-                  grokCollection={grokCollection}
-                  draftGrokExpressions={draftProcessor.resources?.grokExpressions ?? []}
-                  sample={value}
-                />
-              );
+              return <GrokSampleWithContext sample={value} />;
             }
             return <>&nbsp;</>;
           }
         : undefined,
-    [
-      draftProcessor.resources?.grokExpressions,
-      grokCollection,
-      grokMode,
-      originalGrokFieldValues,
-      validGrokField,
-    ]
+    [grokMode, originalGrokFieldValues, validGrokField]
   );
 
   const hits = useMemo(() => {
@@ -514,8 +509,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const docViewerContext = useMemo(
     () => ({
-      originalSample:
-        originalSamples && currentDoc ? originalSamples[currentDoc.index].document : undefined,
+      originalSample: getOriginalSampleDocument(originalSamples, currentDoc?.index),
     }),
     [currentDoc, originalSamples]
   );
@@ -543,7 +537,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     [userSelectedViewMode, isViewModeForced, setViewMode]
   );
 
-  return (
+  const content = (
     <>
       <RowSelectionContext.Provider value={rowSelectionContextValue}>
         <MemoPreviewTable
@@ -573,6 +567,13 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
         />
       </DocViewerContext.Provider>
     </>
+  );
+
+  // Wrap with GrokExpressionsProvider when in grok mode to provide patterns to Sample components
+  return grokMode ? (
+    <GrokExpressionsProvider patterns={grokPatterns}>{content}</GrokExpressionsProvider>
+  ) : (
+    content
   );
 };
 

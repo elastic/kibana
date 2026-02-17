@@ -24,6 +24,7 @@ export type {
   GrantUiamAPIKeyParams,
   InvalidateUiamAPIKeyParams,
   UiamAPIKeysType,
+  ClientAuthentication,
 } from './src/authentication';
 export type {
   PrivilegeDeprecationsService,

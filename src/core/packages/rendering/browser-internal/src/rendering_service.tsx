@@ -10,7 +10,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, pairwise, startWith } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
@@ -37,8 +37,8 @@ export interface RenderingServiceContextDeps {
   i18n: I18nStart;
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
-  coreEnv: CoreEnv;
   chrome: InternalChromeStart;
+  coreEnv: CoreEnv;
 }
 
 export interface RenderingServiceRenderCoreDeps {
@@ -86,19 +86,10 @@ export class RenderingService implements IRenderingService {
     renderCoreDeps: RenderingServiceRenderCoreDeps,
     targetDomElement: HTMLDivElement
   ) {
-    const { chrome, featureFlags } = renderCoreDeps;
+    const { featureFlags } = renderCoreDeps;
     const debugLayout = getLayoutDebugFlag(featureFlags);
 
     const startServices = this.contextDeps.getValue()!;
-
-    const body = document.querySelector('body')!;
-    chrome
-      .getBodyClasses$()
-      .pipe(startWith<string[]>([]), pairwise())
-      .subscribe(([previousClasses, newClasses]) => {
-        body.classList.remove(...previousClasses);
-        body.classList.add(...newClasses);
-      });
 
     const layout: LayoutService = new GridLayout(renderCoreDeps, { debug: debugLayout });
 
@@ -135,6 +126,7 @@ export class RenderingService implements IRenderingService {
         theme={deps.theme}
         userProfile={deps.userProfile}
         coreEnv={deps.coreEnv}
+        chrome={deps.chrome}
       >
         {children}
       </KibanaRenderContextProvider>

@@ -25,10 +25,17 @@ export const QUERIES_COLUMN_HEADER = i18n.translate(
   }
 );
 
-export const SYSTEMS_COLUMN_HEADER = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsTree.systemsColumnName',
+export const FEATURES_COLUMN_HEADER = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.featuresColumnName',
   {
-    defaultMessage: 'Systems',
+    defaultMessage: 'Features',
+  }
+);
+
+export const ONBOARDING_STATUS_COLUMN_HEADER = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.onboardingStatusColumnName',
+  {
+    defaultMessage: 'Status',
   }
 );
 
@@ -58,10 +65,24 @@ export const STREAMS_TABLE_CAPTION_ARIA_LABEL = i18n.translate(
   }
 );
 
-export const RUN_STREAM_DISCOVERY_BUTTON_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsTree.runStreamDiscoveryButtonEmptyLabel',
+export const RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.runBulkStreamOnboardingButtonEmptyLabel',
   {
-    defaultMessage: 'Run Stream Discovery',
+    defaultMessage: 'Onboard Streams',
+  }
+);
+
+export const RUN_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.runStreamOnboardingButtonEmptyLabel',
+  {
+    defaultMessage: 'Onboard stream',
+  }
+);
+
+export const STOP_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.stopStreamOnboardingButtonEmptyLabel',
+  {
+    defaultMessage: 'Stop stream onboarding',
   }
 );
 
@@ -69,5 +90,19 @@ export const OCCURRENCES_CHART_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.occurrencesChartTitle',
   {
     defaultMessage: 'Detected event occurrences',
+  }
+);
+
+export const ONBOARDING_FAILURE_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.onboardingErrorTitle',
+  {
+    defaultMessage: 'Could not onboard stream',
+  }
+);
+
+export const ONBOARDING_SCHEDULING_FAILURE_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.schedulingErrorTitle',
+  {
+    defaultMessage: 'Could not schedule a task to onboard stream',
   }
 );

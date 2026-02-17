@@ -8,10 +8,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { filter, map } from 'rxjs';
+import { filter, map, combineLatest, type Subscription } from 'rxjs';
 import { createHashHistory } from 'history';
 import { BehaviorSubject } from 'rxjs';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
 
 import {
   createKbnUrlStateStorage,
@@ -33,6 +34,7 @@ import type {
   AppMountParameters,
   AppUpdater,
   ScopedHistory,
+  AppDeepLinkLocations,
 } from '@kbn/core/public';
 import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -68,16 +70,13 @@ import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plu
 import { css, injectGlobal } from '@emotion/css';
 import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import type { KqlPluginStart } from '@kbn/kql/public';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
-import {
-  aggBasedVisualizationTrigger,
-  dashboardVisualizationPanelTrigger,
-  visualizeEditorTrigger,
-} from './triggers';
 import type { VisEditorsRegistry } from './vis_editors_registry';
 import { createVisEditorsRegistry } from './vis_editors_registry';
 import { showNewVisModal } from './wizard';
+import { findListItems } from './utils/saved_visualize_utils';
 import { VisualizeLocatorDefinition } from '../common/locator';
 import { xyDimension as xyDimensionExpressionFunction } from '../common/expression_functions/xy_dimension';
 import { visDimension as visDimensionExpressionFunction } from '../common/expression_functions/vis_dimension';
@@ -133,6 +132,12 @@ export type VisualizationsSetup = TypesSetup & {
 };
 export interface VisualizationsStart extends TypesStart {
   showNewVisModal: typeof showNewVisModal;
+  findListItems: (
+    search: string,
+    size: number,
+    references?: Reference[],
+    referencesToExclude?: Reference[]
+  ) => ReturnType<typeof findListItems>;
 }
 
 export interface VisualizationsSetupDeps {
@@ -260,6 +265,9 @@ export class VisualizationsPlugin
     >
 {
   private readonly types: TypesService = new TypesService();
+  private appStateSubscription?: Subscription;
+  private urlUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private visibilityUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
@@ -290,7 +298,7 @@ export class VisualizationsPlugin
       baseUrl: core.http.basePath.prepend(VisualizeConstants.VISUALIZE_BASE_PATH),
       defaultSubUrl: '#/',
       storageKey: `lastUrl:${core.http.basePath.get()}:visualize`,
-      navLinkUpdater$: this.appStateUpdater,
+      navLinkUpdater$: this.urlUpdater,
       toastNotifications: core.notifications.toasts,
       stateParams: [
         {
@@ -323,6 +331,15 @@ export class VisualizationsPlugin
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
+
+    this.appStateSubscription = combineLatest([this.urlUpdater, this.visibilityUpdater]).subscribe(
+      ([urlUpdater, visibilityUpdater]) => {
+        this.appStateUpdater.next((app) => ({
+          ...urlUpdater(app),
+          ...visibilityUpdater(app),
+        }));
+      }
+    );
 
     const start = createStartServicesGetter(core.getStartServices);
     const listingViewRegistry: ListingViewRegistry = new Set();
@@ -459,9 +476,6 @@ export class VisualizationsPlugin
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
     expressions.registerFunction(xyDimensionExpressionFunction);
-    uiActions.registerTrigger(aggBasedVisualizationTrigger);
-    uiActions.registerTrigger(visualizeEditorTrigger);
-    uiActions.registerTrigger(dashboardVisualizationPanelTrigger);
     embeddable.registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
       const {
         plugins: { embeddable: embeddableStart, embeddableEnhanced: embeddableEnhancedStart },
@@ -493,10 +507,13 @@ export class VisualizationsPlugin
         return getTypes().get(visState.type)?.icon ?? '';
       },
     });
-    embeddable.registerLegacyURLTransform(VISUALIZE_EMBEDDABLE_TYPE, async () => {
-      const { getTransformOut } = await import('./embeddable/embeddable_module');
-      return getTransformOut(embeddable.transformEnhancementsOut);
-    });
+    embeddable.registerLegacyURLTransform(
+      VISUALIZE_EMBEDDABLE_TYPE,
+      async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
+        const { getTransformOut } = await import('./embeddable/embeddable_module');
+        return getTransformOut(transformDrilldownsOut);
+      }
+    );
 
     contentManagement.registry.register({
       id: CONTENT_ID,
@@ -529,6 +546,7 @@ export class VisualizationsPlugin
       savedSearch,
       dataViews,
       inspector,
+      serverless,
     }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
@@ -559,6 +577,14 @@ export class VisualizationsPlugin
 
     if (spaces) {
       setSpaces(spaces);
+      spaces.getActiveSpace$().subscribe((space) => {
+        if (!space) return;
+        const isServerless = Boolean(serverless);
+        const isSolutionView = space.solution && space.solution !== 'classic';
+        const visibleIn: AppDeepLinkLocations[] =
+          isServerless || isSolutionView ? [] : ['globalSearch', 'sideNav'];
+        this.visibilityUpdater.next(() => ({ visibleIn }));
+      });
     }
 
     if (savedObjectsTaggingOss) {
@@ -570,6 +596,8 @@ export class VisualizationsPlugin
     return {
       ...types,
       showNewVisModal,
+      findListItems: (search, size, references, referencesToExclude) =>
+        findListItems(types, search, size, references, referencesToExclude),
     };
   }
 
@@ -578,5 +606,6 @@ export class VisualizationsPlugin
     if (this.stopUrlTracking) {
       this.stopUrlTracking();
     }
+    this.appStateSubscription?.unsubscribe();
   }
 }
