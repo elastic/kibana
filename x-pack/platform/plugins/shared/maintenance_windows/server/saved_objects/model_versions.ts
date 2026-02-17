@@ -10,11 +10,7 @@ import type {
   SavedObjectsModelVersionMap,
 } from '@kbn/core-saved-objects-server';
 import type { TypeOf } from '@kbn/config-schema';
-import {
-  rawMaintenanceWindowSchemaV1,
-  rawMaintenanceWindowSchemaV2,
-  rawMaintenanceWindowSchemaV3,
-} from './schema';
+import { rawMaintenanceWindowSchemaV1, rawMaintenanceWindowSchemaV2 } from './schema';
 import { transformRRuleToCustomSchedule } from '../../common/transforms/rrule_to_custom/latest';
 
 type MaintenanceWindowV1 = TypeOf<typeof rawMaintenanceWindowSchemaV1>;
@@ -115,13 +111,6 @@ export const maintenanceWindowModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: rawMaintenanceWindowSchemaV2.extends({}, { unknowns: 'ignore' }),
       create: rawMaintenanceWindowSchemaV2,
-    },
-  },
-  '5': {
-    changes: [],
-    schemas: {
-      forwardCompatibility: rawMaintenanceWindowSchemaV3.extends({}, { unknowns: 'ignore' }),
-      create: rawMaintenanceWindowSchemaV3,
     },
   },
 };

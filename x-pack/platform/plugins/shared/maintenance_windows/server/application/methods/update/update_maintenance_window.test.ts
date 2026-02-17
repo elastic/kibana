@@ -109,11 +109,20 @@ describe('MaintenanceWindowClient - update', () => {
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       {
         ...updatedAttributes,
+        duration: 7200000,
         events: [
           { gte: '2023-03-26T23:00:00.000Z', lte: '2023-03-27T01:00:00.000Z' },
           { gte: '2023-03-28T23:00:00.000Z', lte: '2023-03-29T01:00:00.000Z' }, // Daylight savings
         ],
         expirationDate: moment(new Date(secondTimestamp)).tz('UTC').add(1, 'year').toISOString(),
+        rRule: {
+          byweekday: ['-1MO', 'WE'],
+          count: 2,
+          dtstart: '2023-03-26T00:00:00.000Z',
+          freq: 2,
+          interval: 1,
+          tzid: 'CET',
+        },
         createdAt: '2023-02-26T00:00:00.000Z',
         createdBy: 'test-user',
         updatedAt: updatedMetadata.updatedAt,
@@ -202,6 +211,11 @@ describe('MaintenanceWindowClient - update', () => {
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       {
         ...updatedAttributes,
+        duration: 86400000,
+        rRule: {
+          dtstart: '2023-06-26T00:00:00.000Z',
+          tzid: 'CET',
+        },
         schedule: {
           custom: {
             ...updatedAttributes.schedule.custom,

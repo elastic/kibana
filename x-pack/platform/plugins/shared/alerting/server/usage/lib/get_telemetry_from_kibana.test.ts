@@ -34,20 +34,20 @@ const mockedResponse = {
       attributes: {
         title: 'test_rule_1',
         enabled: true,
+        duration: 1800000,
         expirationDate: '2025-09-09T13:13:07.824Z',
         events: [],
-        schedule: {
-          custom: {
-            duration: '30m',
-            start: '2024-09-09T13:13:02.054Z',
-            timezone: 'Europe/Stockholm',
-          },
+        rRule: {
+          dtstart: '2024-09-09T13:13:02.054Z',
+          tzid: 'Europe/Stockholm',
+          freq: 0,
+          count: 1,
         },
         createdBy: null,
         updatedBy: null,
         createdAt: '2024-09-09T13:13:07.825Z',
         updatedAt: '2024-09-09T13:13:07.825Z',
-        scope: null,
+        scopedQuery: null,
       },
     },
     {
@@ -56,29 +56,24 @@ const mockedResponse = {
       attributes: {
         title: 'test_rule_2',
         enabled: true,
+        duration: 1800000,
         expirationDate: '2025-09-09T13:13:07.824Z',
         events: [],
-        schedule: {
-          custom: {
-            duration: '30m',
-            start: '2024-09-09T13:13:02.054Z',
-            timezone: 'Europe/Stockholm',
-            recurring: {
-              every: '1d',
-              onWeekDay: ['SU'],
-            },
-          },
+        rRule: {
+          dtstart: '2024-09-09T13:13:02.054Z',
+          tzid: 'Europe/Stockholm',
+          freq: 3,
+          interval: 1,
+          byweekday: ['SU'],
         },
         createdBy: null,
         updatedBy: null,
         createdAt: '2024-09-09T13:13:07.825Z',
         updatedAt: '2024-09-09T13:13:07.825Z',
-        scope: {
-          alerting: {
-            filters: [],
-            kql: 'kibana.alert.job_errors_results.job_id : * ',
-            dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"exists":{"field":"kibana.alert.job_errors_results.job_id"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
-          },
+        scopedQuery: {
+          filters: [],
+          kql: 'kibana.alert.job_errors_results.job_id : * ',
+          dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"exists":{"field":"kibana.alert.job_errors_results.job_id"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
         },
       },
     },
@@ -88,21 +83,21 @@ const mockedResponse = {
       attributes: {
         title: 'test_rule_3',
         enabled: true,
+        duration: 1800000,
         expirationDate: '2025-09-09T13:13:07.824Z',
         events: [],
-        schedule: {
-          custom: {
-            duration: '30m',
-            start: '2024-09-09T13:13:02.054Z',
-            timezone: 'Europe/Stockholm',
-            recurring: { every: '1d', onWeekDay: ['TU'] },
-          },
+        rRule: {
+          dtstart: '2024-09-09T13:13:02.054Z',
+          tzid: 'Europe/Stockholm',
+          freq: 3,
+          interval: 1,
+          byweekday: ['TU'],
         },
-        scope: null,
         createdBy: null,
         updatedBy: null,
         createdAt: '2024-09-09T13:13:07.825Z',
         updatedAt: '2024-09-09T13:13:07.825Z',
+        scopedQuery: null,
       },
     },
   ],
@@ -689,7 +684,7 @@ describe('kibana index telemetry', () => {
         type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
         namespaces: ['*'],
         perPage: 100,
-        fields: ['schedule', 'scope'],
+        fields: ['rRule', 'scopedQuery'],
       });
       expect(telemetry).toStrictEqual({
         count_mw_total: 3,
@@ -713,7 +708,7 @@ describe('kibana index telemetry', () => {
         type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
         namespaces: ['*'],
         perPage: 100,
-        fields: ['schedule', 'scope'],
+        fields: ['rRule', 'scopedQuery'],
       });
 
       expect(telemetry).toStrictEqual({
@@ -747,7 +742,7 @@ describe('kibana index telemetry', () => {
         type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
         namespaces: ['*'],
         perPage: 100,
-        fields: ['schedule', 'scope'],
+        fields: ['rRule', 'scopedQuery'],
       });
       expect(telemetry).toStrictEqual({
         count_mw_total: 2,

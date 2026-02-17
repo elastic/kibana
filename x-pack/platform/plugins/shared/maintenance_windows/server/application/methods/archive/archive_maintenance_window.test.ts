@@ -83,6 +83,14 @@ describe('MaintenanceWindowClient - archive', () => {
       'test-id',
       {
         ...mockMaintenanceWindow,
+        duration: 3600000,
+        rRule: {
+          count: 2,
+          dtstart: '2023-02-26T00:00:00.000Z',
+          freq: 2,
+          interval: 1,
+          tzid: 'UTC',
+        },
         events: [],
         expirationDate: new Date().toISOString(),
         updatedAt: updatedMetadata.updatedAt,
@@ -142,6 +150,14 @@ describe('MaintenanceWindowClient - archive', () => {
       'test-id',
       {
         ...mockMaintenanceWindow,
+        duration: 3600000,
+        rRule: {
+          count: 4,
+          dtstart: '2023-02-26T00:00:00.000Z',
+          freq: 2,
+          interval: 1,
+          tzid: 'UTC',
+        },
         schedule,
         events: [
           { gte: '2023-02-26T00:00:00.000Z', lte: '2023-02-26T01:00:00.000Z' },

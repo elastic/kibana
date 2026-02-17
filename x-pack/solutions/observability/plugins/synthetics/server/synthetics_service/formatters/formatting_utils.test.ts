@@ -296,6 +296,8 @@ describe('formatMWs', () => {
         timezone: 'UTC',
         recurring: {
           every: '1w',
+          onMonthDay: [15],
+          onMonth: [1, 3, 5],
           occurrences: 2,
         },
       },
@@ -310,16 +312,11 @@ describe('formatMWs', () => {
 
   it('should format maintenance windows with schedule', () => {
     const mws = [createMockMW()];
-
     const result = formatMWs(mws);
-    expect(result).toBeDefined();
-    const parsed = JSON.parse(result as string);
-    expect(parsed).toHaveLength(1);
-    expect(parsed[0]).toMatchObject({
-      freq: 'weekly',
-      duration: '3600000ms',
-    });
-    expect(parsed[0].rRule).toBeDefined();
+
+    expect(result).toEqual(
+      '[{"bymonthday":[15],"bymonth":[1,3,5],"count":2,"interval":1,"freq":"weekly","dtstart":"2023-02-26T00:00:00.000Z","tzid":"UTC","duration":"3600000ms"}]'
+    );
   });
 
   it('should handle maintenance windows with different duration formats', () => {

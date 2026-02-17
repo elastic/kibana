@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RRuleAttributes } from './r_rule_attributes';
 import type { AlertsFilterQueryAttributes } from './alerts_filter_query_attributes';
 import type { Schedule } from '../../application/types';
 
@@ -26,12 +27,15 @@ export interface MaintenanceWindowAttributes {
   title: string;
   enabled: boolean;
   expirationDate: string;
+  duration: number;
   events: MaintenanceWindowEventAttributes[];
   createdBy: string | null;
   updatedBy: string | null;
+  rRule: RRuleAttributes;
   createdAt: string;
   updatedAt: string;
   categoryIds?: MaintenanceWindowCategoryIdTypes[] | null;
+  scopedQuery?: AlertsFilterQueryAttributes | null;
   schedule: { custom: Schedule };
   scope?: {
     alerting: AlertsFilterQueryAttributes | null;

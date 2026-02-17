@@ -115,9 +115,7 @@ export const formatMWs = (mws?: MaintenanceWindow[], strRes = true) => {
     return;
   }
   const formatted = mws.map((mw) => {
-    const { rRule: mwRule } = mw?.schedule?.custom
-      ? transformCustomScheduleToRRule(mw.schedule.custom)
-      : {};
+    const { rRule: mwRule } = transformCustomScheduleToRRule(mw.schedule.custom);
     const durationInMilliseconds = getDurationInMilliseconds(mw.schedule.custom.duration);
 
     if (mw && mwRule) {

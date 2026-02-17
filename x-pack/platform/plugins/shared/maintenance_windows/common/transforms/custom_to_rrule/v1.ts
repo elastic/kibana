@@ -39,12 +39,12 @@ export const transformCustomScheduleToRRule = (
 
   return {
     rRule: {
-      ...(recurring?.onWeekDay ? { byweekday: recurring?.onWeekDay } : {}),
-      ...(recurring?.onMonthDay ? { bymonthday: recurring?.onMonthDay } : {}),
-      ...(recurring?.onMonth ? { bymonth: recurring?.onMonth } : {}),
-      ...(recurring?.end ? { until: recurring?.end } : {}),
-      ...(recurring?.occurrences ? { count: recurring?.occurrences } : {}),
-      ...(interval ? { interval: parseInt(interval, 10) } : {}),
+      ...(recurring?.onWeekDay !== undefined ? { byweekday: recurring?.onWeekDay } : {}),
+      ...(recurring?.onMonthDay !== undefined ? { bymonthday: recurring?.onMonthDay } : {}),
+      ...(recurring?.onMonth !== undefined ? { bymonth: recurring?.onMonth } : {}),
+      ...(recurring?.end !== undefined ? { until: recurring?.end } : {}),
+      ...(recurring?.occurrences !== undefined ? { count: recurring?.occurrences } : {}),
+      ...(interval !== undefined ? { interval: parseInt(interval, 10) } : {}),
       freq: transformedFrequency,
       dtstart: start,
       tzid: timezone ?? DEFAULT_TIMEZONE,

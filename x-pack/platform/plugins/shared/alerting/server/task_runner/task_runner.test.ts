@@ -738,11 +738,11 @@ describe('Task Runner', () => {
       {
         ...getMockMaintenanceWindow(),
         id: 'test-id-1',
-      } as MaintenanceWindow,
+      },
       {
         ...getMockMaintenanceWindow(),
         id: 'test-id-2',
-      } as MaintenanceWindow,
+      },
     ];
     const maintenanceWindowIds = ['test-id-1', 'test-id-2'];
     maintenanceWindowsService.getMaintenanceWindows.mockResolvedValue({
@@ -813,7 +813,7 @@ describe('Task Runner', () => {
         ...getMockMaintenanceWindow(),
         categoryIds: ['test'] as unknown as MaintenanceWindow['categoryIds'],
         id: 'test-id-1',
-      } as MaintenanceWindow,
+      },
     ];
     const maintenanceWindowIds = ['test-id-1'];
     maintenanceWindowsService.getMaintenanceWindows.mockResolvedValue({
