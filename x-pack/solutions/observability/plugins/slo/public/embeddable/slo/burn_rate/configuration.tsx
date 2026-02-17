@@ -29,6 +29,7 @@ import type { EmbeddableProps } from './types';
 interface Props {
   onCreate: (props: EmbeddableProps) => void;
   onCancel: () => void;
+  initialInput?: EmbeddableProps;
 }
 
 interface SloConfig {
@@ -36,9 +37,13 @@ interface SloConfig {
   sloInstanceId: string;
 }
 
-export function Configuration({ onCreate, onCancel }: Props) {
-  const [selectedSlo, setSelectedSlo] = useState<SloConfig>();
-  const [duration, setDuration] = useState<string>('1h');
+export function Configuration({ onCreate, onCancel, initialInput }: Props) {
+  const [selectedSlo, setSelectedSlo] = useState<SloConfig | undefined>(
+    initialInput
+      ? { sloId: initialInput.sloId, sloInstanceId: initialInput.sloInstanceId }
+      : undefined
+  );
+  const [duration, setDuration] = useState<string>(initialInput?.duration ?? '1h');
   const [hasError, setHasError] = useState(false);
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'burnRateConfigurationFlyout',

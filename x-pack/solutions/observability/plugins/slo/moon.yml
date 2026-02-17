@@ -123,6 +123,7 @@ dependsOn:
   - '@kbn/deeplinks-management'
   - '@kbn/deeplinks-observability'
   - '@kbn/observability-get-padded-alert-time-range-util'
+  - '@kbn/presentation-publishing-schemas'
 tags:
   - plugin
   - prod

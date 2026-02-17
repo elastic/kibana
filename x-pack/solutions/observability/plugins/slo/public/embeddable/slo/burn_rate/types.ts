@@ -21,13 +21,9 @@ export interface EmbeddableProps {
   reloadSubject?: Subject<boolean>;
 }
 
-export interface BurnRateCustomInput {
-  sloId: string;
-  sloInstanceId: string;
-  duration: string;
-}
+import type { BurnRateCustomState } from '../../../../common/embeddables/burn_rate/schema';
 
-export type SloBurnRateEmbeddableState = SerializedTitles & BurnRateCustomInput;
+export type SloBurnRateEmbeddableState = SerializedTitles & BurnRateCustomState;
 export type BurnRateApi = DefaultEmbeddableApi<SloBurnRateEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle;

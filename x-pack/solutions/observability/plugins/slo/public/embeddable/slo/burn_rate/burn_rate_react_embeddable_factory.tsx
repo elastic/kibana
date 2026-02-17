@@ -21,7 +21,9 @@ import { BehaviorSubject, Subject, merge } from 'rxjs';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { BurnRate } from './burn_rate';
 import { SLO_BURN_RATE_EMBEDDABLE_ID } from './constants';
-import type { BurnRateApi, BurnRateCustomInput, SloBurnRateEmbeddableState } from './types';
+import type { BurnRateApi, SloBurnRateEmbeddableState } from './types';
+import type { WithAllKeys } from '@kbn/presentation-publishing';
+import type { BurnRateCustomState } from '../../../../common/embeddables/burn_rate/schema';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { PluginContext } from '../../../context/plugin_context';
 
@@ -29,6 +31,12 @@ const getTitle = () =>
   i18n.translate('xpack.slo.burnRateEmbeddable.title', {
     defaultMessage: 'SLO Burn Rate',
   });
+
+const defaultBurnRateEmbeddableState: WithAllKeys<BurnRateCustomState> = {
+  slo_id: undefined,
+  slo_instance_id: undefined,
+  duration: undefined,
+};
 
 export const getBurnRateEmbeddableFactory = ({
   coreStart,
@@ -45,11 +53,10 @@ export const getBurnRateEmbeddableFactory = ({
       const deps = { ...coreStart, ...pluginsStart };
       const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getTitle());
-      const sloBurnRateManager = initializeStateManager<BurnRateCustomInput>(initialState, {
-        sloId: '',
-        sloInstanceId: '',
-        duration: '',
-      });
+      const sloBurnRateManager = initializeStateManager<BurnRateCustomState>(
+        initialState,
+        defaultBurnRateEmbeddableState
+      );
       const reload$ = new Subject<boolean>();
 
       function serializeState() {
@@ -66,8 +73,8 @@ export const getBurnRateEmbeddableFactory = ({
         serializeState,
         getComparators: () => ({
           ...titleComparators,
-          sloId: 'referenceEquality',
-          sloInstanceId: 'referenceEquality',
+          slo_id: 'referenceEquality',
+          slo_instance_id: 'referenceEquality',
           duration: 'referenceEquality',
         }),
         onReset: (lastSaved) => {
