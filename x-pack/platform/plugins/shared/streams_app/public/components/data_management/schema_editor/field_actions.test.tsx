@@ -259,7 +259,7 @@ describe('FieldActionsCell', () => {
 
       const actions = getMenuItemNames();
       expect(actions).toContain('View field');
-      expect(actions).toContain('Edit field');
+      expect(actions).toContain('Map field');
       expect(actions).not.toContain('Clear description');
     });
 
@@ -305,7 +305,7 @@ describe('FieldActionsCell', () => {
       expect(actions).not.toContain('Map as geo field');
     });
 
-    it('should show Edit action when parent has type: unmapped', async () => {
+    it('should show Map field action when parent has type: unmapped', async () => {
       // When parent has type: 'unmapped' (documentation-only), child should be able to map it
       const unmappedField: UnmappedSchemaField = {
         name: 'attributes.field1',
@@ -329,7 +329,7 @@ describe('FieldActionsCell', () => {
 
       const actions = getMenuItemNames();
       expect(actions).toContain('View field');
-      expect(actions).toContain('Edit field'); // Should show because parent only has documentation, not real mapping
+      expect(actions).toContain('Map field'); // Should show "Map field" because parent only has documentation, not real mapping
     });
 
     it('should call onFieldUpdate without description when Clear description is clicked', async () => {

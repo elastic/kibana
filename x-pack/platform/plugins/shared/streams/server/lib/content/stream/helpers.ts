@@ -89,6 +89,25 @@ export function withoutBaseFields(fields: FieldDefinition): FieldDefinition {
     }, {} as FieldDefinition);
 }
 
+/**
+ * Strips inherited field metadata (`from`, `alias_for`) from field definitions.
+ * Used when exporting content packs to produce clean FieldDefinition objects.
+ */
+export function withoutInheritedFieldMetadata(fields: FieldDefinition): FieldDefinition {
+  return Object.entries(fields).reduce((result, [key, fieldDef]) => {
+    const {
+      from: _from,
+      alias_for: _aliasFor,
+      ...cleanFieldDef
+    } = fieldDef as FieldDefinition[string] & {
+      from?: string;
+      alias_for?: string;
+    };
+    result[key] = cleanFieldDef;
+    return result;
+  }, {} as FieldDefinition);
+}
+
 export function scopeContentPackStreams({
   root,
   streams,
