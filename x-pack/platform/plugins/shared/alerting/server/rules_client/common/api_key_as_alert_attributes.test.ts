@@ -118,7 +118,7 @@ describe('apiKeyAsAlertAttributes', () => {
     });
   });
 
-  test('does not create the both API keys when createdByUser is true', () => {
+  test('does not create both API keys when createdByUser is true', () => {
     expect(() =>
       apiKeyAsRuleDomainProperties(
         {
