@@ -130,13 +130,19 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
         cy.getBySel('agentPolicyNameLink').contains(policyName).click();
         closeFleetTourIfVisible();
         cy.getBySel('addPackagePolicyButton').click();
-        cy.getBySel('comboBoxInput').type('osquery manager{downArrow}{enter}');
+        cy.getBySel('addIntegrationFlyout').should('exist');
         cy.getBySel('globalLoadingIndicator').should('not.exist');
+        cy.getBySel('comboBoxInput').type('osquery manager{downArrow}{enter}');
+        cy.get('body').then(($body) => {
+          if ($body.find('[role="option"]').length > 0) {
+            cy.get('[role="option"]').first().click();
+          }
+        });
 
         cy.getBySel('packagePolicyNameInput').clear();
         cy.getBySel('packagePolicyNameInput').should('have.value', '');
         cy.getBySel('packagePolicyNameInput').type(`${integrationName}`);
-        cy.getBySel('addIntegrationFlyout.submitBtn').click();
+        cy.getBySel('addIntegrationFlyout.submitBtn').should('be.enabled').click();
         cy.get(`[title="${integrationName}"]`, { timeout: 60000 }).should('exist');
         policyContainsIntegration(integrationName, policyName);
         checkDataStreamsInPolicyDetails();

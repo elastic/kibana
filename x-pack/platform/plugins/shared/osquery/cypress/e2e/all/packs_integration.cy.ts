@@ -67,9 +67,14 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         closeFleetTourIfVisible();
         cy.getBySel('addPackagePolicyButton').click();
         cy.getBySel('addIntegrationFlyout').should('exist');
-        cy.getBySel('comboBoxInput').type('osquery manager{downArrow}{enter}');
         cy.getBySel('globalLoadingIndicator').should('not.exist');
-        cy.getBySel('addIntegrationFlyout.submitBtn').click();
+        cy.getBySel('comboBoxInput').type('osquery manager{downArrow}{enter}');
+        cy.get('body').then(($body) => {
+          if ($body.find('[role="option"]').length > 0) {
+            cy.get('[role="option"]').first().click();
+          }
+        });
+        cy.getBySel('addIntegrationFlyout.submitBtn').should('be.enabled').click();
         closeModalIfVisible();
         navigateTo('app/osquery/packs');
         cy.getBySel(ADD_PACK_HEADER_BUTTON).click();
@@ -237,9 +242,15 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.getBySel('agentPolicyNameLink').contains(agentPolicy).click();
         closeFleetTourIfVisible();
         cy.getBySel('addPackagePolicyButton').click();
-        cy.getBySel('comboBoxInput').type('osquery manager{downArrow}{enter}');
+        cy.getBySel('addIntegrationFlyout').should('exist');
         cy.getBySel('globalLoadingIndicator').should('not.exist');
-        cy.getBySel('addIntegrationFlyout.submitBtn').click();
+        cy.getBySel('comboBoxInput').type('osquery manager{downArrow}{enter}');
+        cy.get('body').then(($body) => {
+          if ($body.find('[role="option"]').length > 0) {
+            cy.get('[role="option"]').first().click();
+          }
+        });
+        cy.getBySel('addIntegrationFlyout.submitBtn').should('be.enabled').click();
         closeModalIfVisible();
         cy.contains('osquery_manager-');
         request<{ items: PackagePolicy[] }>({

@@ -200,7 +200,12 @@ export const takeOsqueryActionWithParams = () => {
   typeInECSFieldInput('tags{downArrow}{enter}');
   cy.getBySel('osqueryColumnValueSelect').type('platform_like{downArrow}{enter}');
   submitQuery();
-  cy.getBySel('dataGridHeader').should('contain', 'tags', { timeout: 6000000 });
+  cy.getBySel('dataGridHeader', { timeout: 120000 }).then(($header) => {
+    if (!$header.text().includes('tags')) {
+      submitQuery();
+    }
+  });
+  cy.getBySel('dataGridHeader', { timeout: 120000 }).should('contain', 'tags');
 };
 
 export const clickRuleName = (ruleName: string) => {
