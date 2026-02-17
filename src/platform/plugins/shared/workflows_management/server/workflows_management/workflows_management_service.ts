@@ -96,6 +96,7 @@ export class WorkflowsService {
   private taskScheduler: WorkflowTaskScheduler | null = null;
   private readonly logger: Logger;
   private security?: SecurityServiceStart;
+  private readonly getPluginsStart: () => Promise<WorkflowsServerPluginStartDeps>;
   private getActionsClient: () => Promise<IUnsecuredActionsClient>;
   private getActionsClientWithRequest: (
     request: KibanaRequest
@@ -107,6 +108,7 @@ export class WorkflowsService {
     getPluginsStart: () => Promise<WorkflowsServerPluginStartDeps>
   ) {
     this.logger = logger;
+    this.getPluginsStart = getPluginsStart;
     this.getActionsClient = () =>
       getPluginsStart().then((plugins) => plugins.actions.getUnsecuredActionsClient());
     this.getActionsClientWithRequest = (request: KibanaRequest) =>
@@ -1380,7 +1382,9 @@ export class WorkflowsService {
       this.getPluginsStart(),
       this.getAvailableConnectors(spaceId, request),
     ]);
-    const registeredTriggerIds = plugins.workflowsExtensions.listTriggers().map((t) => t.id);
+    const registeredTriggerIds = plugins.workflowsExtensions
+      .listTriggers()
+      .map((trigger: { id: string }) => trigger.id);
     return getWorkflowZodSchema(connectorsByType, registeredTriggerIds);
   }
 }
