@@ -10,7 +10,7 @@
 import type React from 'react';
 import { useEffect, useRef } from 'react';
 import { type TriggerType, TriggerTypes } from '@kbn/workflows';
-import { triggerSchemas } from '../../../../common/trigger_schemas';
+import { triggerSchemas } from '../../../trigger_schemas';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 import { useKibana } from '../../../hooks/use_kibana';
 import {

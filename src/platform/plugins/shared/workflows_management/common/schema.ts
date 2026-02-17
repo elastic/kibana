@@ -31,7 +31,6 @@ import {
 } from './connector_action_schema';
 // Import the singleton instance of StepSchemas
 import { stepSchemas } from './step_schemas';
-import { triggerSchemas } from './trigger_schemas';
 
 /**
  * Get parameter schema for a specific sub-action
@@ -347,11 +346,11 @@ export function getAllConnectorsWithDynamic(
 }
 
 export const getWorkflowZodSchema = (
-  dynamicConnectorTypes: Record<string, ConnectorTypeInfo>
+  dynamicConnectorTypes: Record<string, ConnectorTypeInfo>,
+  registeredTriggerIds: string[] = []
 ): z.ZodType => {
   const allConnectors = getAllConnectorsWithDynamicInternal(dynamicConnectorTypes);
-  const registeredTriggers = triggerSchemas.getTriggerDefinitions().map((t) => t.id);
-  return generateYamlSchemaFromConnectors(allConnectors, registeredTriggers);
+  return generateYamlSchemaFromConnectors(allConnectors, registeredTriggerIds);
 };
 
 export const getWorkflowZodSchemaLoose = (

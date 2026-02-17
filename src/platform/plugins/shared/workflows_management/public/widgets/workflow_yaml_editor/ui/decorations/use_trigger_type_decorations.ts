@@ -14,7 +14,7 @@ import { isPair, isScalar, parseDocument } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
 import { getTriggerNodesWithType } from '../../../../../common/lib/yaml';
-import { triggerSchemas } from '../../../../../common/trigger_schemas';
+import { triggerSchemas } from '../../../../trigger_schemas';
 
 /** Marker class for custom (registered) triggers */
 export const CUSTOM_TRIGGER_INLINE_CLASS = 'custom-trigger-inline';

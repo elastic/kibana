@@ -31,7 +31,7 @@ import type {
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { stepSchemas } from '../common/step_schemas';
-import { triggerSchemas } from '../common/trigger_schemas';
+import { triggerSchemas } from './trigger_schemas';
 
 const VisibleIn: AppDeepLinkLocations[] = ['globalSearch', 'home', 'kibanaOverview', 'sideNav'];
 

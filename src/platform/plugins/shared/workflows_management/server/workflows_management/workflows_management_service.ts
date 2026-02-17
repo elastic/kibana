@@ -1376,7 +1376,11 @@ export class WorkflowsService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<z.ZodType> {
-    const { connectorsByType } = await this.getAvailableConnectors(spaceId, request);
-    return getWorkflowZodSchema(connectorsByType);
+    const [plugins, { connectorsByType }] = await Promise.all([
+      this.getPluginsStart(),
+      this.getAvailableConnectors(spaceId, request),
+    ]);
+    const registeredTriggerIds = plugins.workflowsExtensions.listTriggers().map((t) => t.id);
+    return getWorkflowZodSchema(connectorsByType, registeredTriggerIds);
   }
 }
