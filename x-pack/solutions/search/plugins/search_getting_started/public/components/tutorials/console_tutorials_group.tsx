@@ -20,7 +20,7 @@ import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { sortBy } from 'lodash';
+import { orderBy, sortBy } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
 import { SearchGettingStartedSectionHeading } from '../section_heading';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
@@ -31,7 +31,7 @@ interface TutorialMetadata {
   request: string;
   image: string;
   buttonRef: React.RefObject<HTMLButtonElement>;
-  isNew?: boolean;
+  publishedAt: Date;
 }
 const EXPAND_LIMIT = 3;
 
@@ -44,6 +44,16 @@ export const ConsoleTutorialsGroup = () => {
   const [expanded, setExpanded] = useState(false);
   const toggleExpand = () => {
     setExpanded((prev) => !prev);
+  };
+
+  /**
+   *
+   * @param publishedAt - The date the tutorial was published
+   * @returns true if the tutorial is new (less than 30 days old)
+   */
+  const isNew = (publishedAt: Date) => {
+    const thirtyDaysAgo = new Date(Date.now() - 1000 * 60 * 60 * 24 * 30);
+    return publishedAt > thirtyDaysAgo;
   };
 
   const tutorials: TutorialMetadata[] = useMemo(() => {
@@ -63,6 +73,7 @@ export const ConsoleTutorialsGroup = () => {
         request: consoleTutorials.basics,
         image: `${assetBasePath}/search_window_illustration.svg`,
         buttonRef: React.createRef<HTMLButtonElement>(),
+        publishedAt: new Date('2025-10-31'),
       },
       {
         title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.semanticTitle', {
@@ -79,6 +90,7 @@ export const ConsoleTutorialsGroup = () => {
         request: consoleTutorials.semanticSearch,
         image: `${assetBasePath}/search_results_illustration.svg`,
         buttonRef: React.createRef<HTMLButtonElement>(),
+        publishedAt: new Date('2025-10-31'),
       },
       {
         title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.esqlTitle', {
@@ -92,6 +104,7 @@ export const ConsoleTutorialsGroup = () => {
         request: consoleTutorials.esql,
         image: `${assetBasePath}/search_observe_illustration.svg`,
         buttonRef: React.createRef<HTMLButtonElement>(),
+        publishedAt: new Date('2025-10-31'),
       },
       {
         title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.agentBuilderTitle', {
@@ -101,13 +114,13 @@ export const ConsoleTutorialsGroup = () => {
         description: i18n.translate(
           'xpack.searchGettingStarted.consoleTutorials.agentBuilderDescription',
           {
-            defaultMessage: 'Learn how to use the Agent Builder to create and manage agents.',
+            defaultMessage: 'Learn how to use the Agent Builder APIs to create and manage agents.',
           }
         ),
         request: consoleTutorials.agentBuilder,
         image: `${assetBasePath}/search_task_automation.svg`,
         buttonRef: React.createRef<HTMLButtonElement>(),
-        isNew: true,
+        publishedAt: new Date('2026-02-18'),
       },
       {
         title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.tsdsTitle', {
@@ -121,10 +134,13 @@ export const ConsoleTutorialsGroup = () => {
         request: consoleTutorials.timeSeriesDataStreams,
         image: `${assetBasePath}/search_hourglass.svg`,
         buttonRef: React.createRef<HTMLButtonElement>(),
-        isNew: true,
+        publishedAt: new Date('2026-02-04'),
       },
     ];
-    return sortBy(items, 'isNew').slice(0, expanded ? undefined : EXPAND_LIMIT);
+    return orderBy(items, ({ publishedAt }) => publishedAt.getTime(), ['desc']).slice(
+      0,
+      expanded ? undefined : EXPAND_LIMIT
+    );
   }, [assetBasePath, expanded]);
 
   return (
@@ -146,7 +162,7 @@ export const ConsoleTutorialsGroup = () => {
               hasBorder
               title={tutorial.title}
               betaBadgeProps={{
-                label: tutorial.isNew
+                label: isNew(tutorial.publishedAt)
                   ? i18n.translate('xpack.searchGettingStarted.consoleTutorials.badge', {
                       defaultMessage: 'New',
                     })
