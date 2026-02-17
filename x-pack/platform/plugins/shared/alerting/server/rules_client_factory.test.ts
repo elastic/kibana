@@ -106,7 +106,7 @@ describe('RulesClientFactory', () => {
       securityService: securityServiceMock.createStart(),
       getAlertIndicesAlias: jest.fn(),
       alertsService: null,
-      isServerless: false,
+      isUiamSupported: false,
       isUiamEnabled: false,
     };
 
@@ -187,7 +187,7 @@ describe('RulesClientFactory', () => {
       alertsService: null,
       backfillClient,
       uiSettings: rulesClientFactoryParams.uiSettings,
-      isServerless: false,
+      isUiamSupported: false,
       isUiamEnabled: false,
     });
   });
@@ -246,7 +246,7 @@ describe('RulesClientFactory', () => {
       alertsService: null,
       backfillClient,
       uiSettings: rulesClientFactoryParams.uiSettings,
-      isServerless: false,
+      isUiamSupported: false,
       isUiamEnabled: false,
     });
   });
@@ -475,7 +475,7 @@ describe('RulesClientFactory', () => {
       securityService,
       securityPluginSetup,
       securityPluginStart,
-      isServerless: false,
+      isUiamSupported: false,
     });
 
     const request = mockRouter.createKibanaRequest({
@@ -499,7 +499,7 @@ describe('RulesClientFactory', () => {
       securityService,
       securityPluginSetup,
       securityPluginStart,
-      isServerless: false,
+      isUiamSupported: false,
     });
 
     const request = mockRouter.createKibanaRequest({

@@ -159,7 +159,7 @@ export function getFakeKibanaRequest(
   const requestHeaders: Headers = {};
 
   const shouldUseUiamApiKey =
-    context.isServerless && context.isUiamEnabled && context.apiKeyType === ApiKeyType.UIAM;
+    context.isUiamSupported && context.isUiamEnabled && context.apiKeyType === ApiKeyType.UIAM;
 
   if (shouldUseUiamApiKey) {
     if (!uiamApiKey) {

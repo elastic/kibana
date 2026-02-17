@@ -39,7 +39,7 @@ export async function invalidateApiKeysAndDeletePendingApiKeySavedObject({
       logger.error(`Failed to invalidate API Keys [count="${ids.length}"]`);
     } else {
       await Promise.all(
-        apiKeyIdsToInvalidate.map(async ({ id, apiKeyId }) => {
+        apiKeyIdsToInvalidate.map(async ({ id }) => {
           try {
             await savedObjectsClient.delete(savedObjectType, id);
             totalInvalidated++;
@@ -60,7 +60,7 @@ export async function invalidateApiKeysAndDeletePendingApiKeySavedObject({
       );
 
       if (response.apiKeysEnabled === true && response.result.error_count > 0) {
-        logger.error(`Failed to invalidate UIAM APIKey id: "${apiKeyId}"`);
+        logger.error(`Failed to invalidate UIAM APIKey id`);
       } else {
         try {
           await savedObjectsClient.delete(savedObjectType, id);

@@ -87,7 +87,7 @@ export interface RulesClientContext {
   readonly backfillClient: BackfillClient;
   readonly isSystemAction: (actionId: string) => boolean;
   readonly uiSettings: UiSettingsServiceStart;
-  readonly isServerless?: boolean;
+  readonly isUiamSupported?: boolean;
   readonly isUiamEnabled?: boolean;
 }
 

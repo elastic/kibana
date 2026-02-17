@@ -58,7 +58,7 @@ export interface RulesClientFactoryOpts {
   connectorAdapterRegistry: ConnectorAdapterRegistry;
   uiSettings: CoreStart['uiSettings'];
   securityService: CoreStart['security'];
-  isServerless: boolean;
+  isUiamSupported: boolean;
   isUiamEnabled: boolean;
 }
 
@@ -86,7 +86,7 @@ export class RulesClientFactory {
   private connectorAdapterRegistry!: ConnectorAdapterRegistry;
   private uiSettings!: CoreStart['uiSettings'];
   private securityService!: CoreStart['security'];
-  private isServerless: boolean = false;
+  private isUiamSupported: boolean = false;
   private isUiamEnabled: boolean = false;
 
   public initialize(options: RulesClientFactoryOpts) {
@@ -116,7 +116,7 @@ export class RulesClientFactory {
     this.connectorAdapterRegistry = options.connectorAdapterRegistry;
     this.uiSettings = options.uiSettings;
     this.securityService = options.securityService;
-    this.isServerless = options.isServerless;
+    this.isUiamSupported = options.isUiamSupported;
     this.isUiamEnabled = options.isUiamEnabled;
   }
 
@@ -204,7 +204,7 @@ export class RulesClientFactory {
       backfillClient: this.backfillClient,
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: this.uiSettings,
-      isServerless: this.isServerless,
+      isUiamSupported: this.isUiamSupported,
       isUiamEnabled: this.isUiamEnabled,
 
       async getUserName() {
@@ -219,7 +219,7 @@ export class RulesClientFactory {
         // API key for the user, instead of having the user create it themselves, which requires api_key
         // privileges
         let createUiamApiKeyResult;
-        const shouldCreateUiamApiKey = this.isServerless && this.isUiamEnabled;
+        const shouldCreateUiamApiKey = this.isUiamSupported && this.isUiamEnabled;
 
         if (shouldCreateUiamApiKey) {
           createUiamApiKeyResult = await securityService.authc.apiKeys.uiam?.grant(request, {
@@ -280,7 +280,7 @@ export class RulesClientFactory {
             );
           }
 
-          if (isUiamCredential(apiKey) && !this.isServerless) {
+          if (isUiamCredential(apiKey) && !this.isUiamSupported) {
             throw new Error('UIAM API keys should only be used in serverless environments');
           }
 

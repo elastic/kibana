@@ -250,6 +250,7 @@ export class AlertingPlugin {
   private readonly enabledRuleTypes: Set<string> | null = null;
   private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi>;
   private isUiamEnabled: boolean = false;
+  private isUiamSupported: boolean = false;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -603,6 +604,7 @@ export class AlertingPlugin {
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
     this.isUiamEnabled = core.security.authc.apiKeys.uiam !== null;
+    this.isUiamSupported = this.isServerless;
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes: [
@@ -657,7 +659,7 @@ export class AlertingPlugin {
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: core.uiSettings,
       securityService: core.security,
-      isServerless: this.isServerless,
+      isUiamSupported: this.isUiamSupported,
       isUiamEnabled: this.isUiamEnabled,
     });
 
@@ -741,6 +743,7 @@ export class AlertingPlugin {
       isServerless: this.isServerless,
       apiKeyType: (this.config.rules.apiKeyType as ApiKeyType) ?? ApiKeyType.ES,
       isUiamEnabled: this.isUiamEnabled,
+      isUiamSupported: this.isUiamSupported,
     });
 
     this.eventLogService!.registerSavedObjectProvider(
