@@ -124,12 +124,13 @@ async function fetchLogContext({
       maxTraces: 10,
       maxDocsPerTrace: 100,
     });
-    if (traces.length) {
+    const trace = traces[0];
+    if (trace) {
       context += dedent(`
       <TracesDocuments>
       Time window: ${windowStart} to ${windowEnd}
       \`\`\`json
-      ${JSON.stringify(traces, null, 2)}
+      ${JSON.stringify(traces[0], null, 2)}
       \`\`\`
       </TracesDocuments>
     `);
