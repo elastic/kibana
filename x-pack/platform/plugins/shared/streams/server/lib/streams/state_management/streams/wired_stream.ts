@@ -137,63 +137,65 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     // For new streams, only mark as changed if the value is non-empty/meaningful
     const isExistingStream = !!startingStateStreamDefinition;
 
-    this._changes.ownFields = computeChange(
+    this._changes.ownFields = computeChange({
       isExistingStream,
-      Object.keys(this._definition.ingest.wired.fields || {}).length > 0,
-      () =>
+      hasMeaningfulValue: Object.keys(this._definition.ingest.wired.fields || {}).length > 0,
+      hasChanged: () =>
         !_.isEqual(
           this._definition.ingest.wired.fields,
           startingStateStreamDefinition!.ingest.wired.fields
-        )
-    );
+        ),
+    });
 
-    this._changes.routing = computeChange(
+    this._changes.routing = computeChange({
       isExistingStream,
-      (this._definition.ingest.wired.routing || []).length > 0,
-      () =>
+      hasMeaningfulValue: (this._definition.ingest.wired.routing || []).length > 0,
+      hasChanged: () =>
         !_.isEqual(
           this._definition.ingest.wired.routing,
           startingStateStreamDefinition!.ingest.wired.routing
-        )
-    );
+        ),
+    });
 
-    this._changes.failure_store = computeChange(
+    this._changes.failure_store = computeChange({
       isExistingStream,
-      !isInheritFailureStore(this._definition.ingest.failure_store),
-      () =>
+      hasMeaningfulValue: !isInheritFailureStore(this._definition.ingest.failure_store),
+      hasChanged: () =>
         !_.isEqual(
           this._definition.ingest.failure_store,
           startingStateStreamDefinition!.ingest.failure_store
-        )
-    );
+        ),
+    });
 
-    this._changes.processing = computeChange(
+    this._changes.processing = computeChange({
       isExistingStream,
-      (this._definition.ingest.processing.steps || []).length > 0,
-      () =>
+      hasMeaningfulValue: (this._definition.ingest.processing.steps || []).length > 0,
+      hasChanged: () =>
         !_.isEqual(
           _.omit(this._definition.ingest.processing, ['updated_at']),
           _.omit(startingStateStreamDefinition!.ingest.processing, ['updated_at'])
-        )
-    );
+        ),
+    });
 
-    this._changes.lifecycle = computeChange(
+    this._changes.lifecycle = computeChange({
       isExistingStream,
-      !isInheritLifecycle(this._definition.ingest.lifecycle),
-      () =>
+      hasMeaningfulValue: !isInheritLifecycle(this._definition.ingest.lifecycle),
+      hasChanged: () =>
         !_.isEqual(
           this._definition.ingest.lifecycle,
           startingStateStreamDefinition!.ingest.lifecycle
-        )
-    );
+        ),
+    });
 
-    const hasSettings = Object.keys(this._definition.ingest.settings || {}).length > 0;
-    this._changes.settings = computeChange(
+    this._changes.settings = computeChange({
       isExistingStream,
-      hasSettings,
-      () =>
-        !_.isEqual(this._definition.ingest.settings, startingStateStreamDefinition!.ingest.settings)
-    );
+      hasMeaningfulValue: Object.keys(this._definition.ingest.settings || {}).length > 0,
+      hasChanged: () =>
+        !_.isEqual(
+          this._definition.ingest.settings,
+          startingStateStreamDefinition!.ingest.settings
+        ),
+    });
 
     this._changes.query_streams =
       !startingStateStreamDefinition ||

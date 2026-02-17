@@ -102,56 +102,56 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
 
     const isExistingStream = !!startingStateStreamDefinition;
 
-    this._changes.processing = computeChange(
+    this._changes.processing = computeChange({
       isExistingStream,
-      (this._definition.ingest.processing.steps || []).length > 0,
-      () =>
+      hasMeaningfulValue: (this._definition.ingest.processing.steps || []).length > 0,
+      hasChanged: () =>
         !_.isEqual(
           _.omit(this._definition.ingest.processing, ['updated_at']),
           _.omit(startingStateStreamDefinition!.ingest.processing, ['updated_at'])
-        )
-    );
+        ),
+    });
 
-    this._changes.lifecycle = computeChange(
+    this._changes.lifecycle = computeChange({
       isExistingStream,
-      !isInheritLifecycle(this._definition.ingest.lifecycle),
-      () =>
+      hasMeaningfulValue: !isInheritLifecycle(this._definition.ingest.lifecycle),
+      hasChanged: () =>
         !_.isEqual(
           this._definition.ingest.lifecycle,
           startingStateStreamDefinition!.ingest.lifecycle
-        )
-    );
+        ),
+    });
 
     // Prefetch effective settings for existing streams to allow sync comparison
     const effectiveSettings = isExistingStream ? await this.getEffectiveSettings() : undefined;
-    this._changes.settings = computeChange(
+    this._changes.settings = computeChange({
       isExistingStream,
-      Object.keys(this._definition.ingest.settings || {}).length > 0,
-      () => !_.isEqual(effectiveSettings, this._definition.ingest.settings)
-    );
+      hasMeaningfulValue: Object.keys(this._definition.ingest.settings || {}).length > 0,
+      hasChanged: () => !_.isEqual(effectiveSettings, this._definition.ingest.settings),
+    });
 
-    this._changes.field_overrides = computeChange(
+    this._changes.field_overrides = computeChange({
       isExistingStream,
-      !!(
+      hasMeaningfulValue: !!(
         this._definition.ingest.classic.field_overrides &&
         Object.keys(this._definition.ingest.classic.field_overrides).length > 0
       ),
-      () =>
+      hasChanged: () =>
         !_.isEqual(
           this._definition.ingest.classic.field_overrides,
           startingStateStreamDefinition!.ingest.classic.field_overrides
-        )
-    );
+        ),
+    });
 
-    this._changes.failure_store = computeChange(
+    this._changes.failure_store = computeChange({
       isExistingStream,
-      !isInheritFailureStore(this._definition.ingest.failure_store),
-      () =>
+      hasMeaningfulValue: !isInheritFailureStore(this._definition.ingest.failure_store),
+      hasChanged: () =>
         !_.isEqual(
           this._definition.ingest.failure_store,
           startingStateStreamDefinition!.ingest.failure_store
-        )
-    );
+        ),
+    });
 
     this._changes.query_streams =
       !startingStateStreamDefinition ||

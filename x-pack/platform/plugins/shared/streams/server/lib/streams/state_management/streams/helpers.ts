@@ -10,21 +10,26 @@ import type { BaseStream } from '@kbn/streams-schema/src/models/base';
 import type { State } from '../state';
 import type { ValidationResult } from '../stream_active_record/stream_active_record';
 
+interface ComputeChangeOptions {
+  /** Whether the stream already exists in the starting state */
+  isExistingStream: boolean;
+  /** Whether the new value is meaningful (non-empty/non-default) */
+  hasMeaningfulValue: boolean;
+  /** Whether the value changed compared to the starting state (only evaluated for existing streams) */
+  hasChanged: () => boolean;
+}
+
 /**
  * Determines if a change flag should be set for a stream property.
  *
  * For existing streams (isExistingStream=true): returns true if the values are not equal (hasChanged)
  * For new streams (isExistingStream=false): returns true if the value is meaningful/non-empty (hasMeaningfulValue)
- *
- * @param isExistingStream - Whether the stream already exists in the starting state
- * @param hasMeaningfulValue - Whether the new value is meaningful (non-empty/non-default)
- * @param hasChanged - Whether the value changed compared to the starting state (only evaluated for existing streams)
  */
-export function computeChange(
-  isExistingStream: boolean,
-  hasMeaningfulValue: boolean,
-  hasChanged: () => boolean
-): boolean {
+export function computeChange({
+  isExistingStream,
+  hasMeaningfulValue,
+  hasChanged,
+}: ComputeChangeOptions): boolean {
   return isExistingStream ? hasChanged() : hasMeaningfulValue;
 }
 
