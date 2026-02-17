@@ -119,7 +119,7 @@ describe('EditFilterList', () => {
     expect(mockFilters).toHaveBeenCalledWith({ filterId: 'safe_domains' });
 
     await waitFor(() => {
-      expect(getByTestId('mlNewFilterListDescriptionText')).toHaveValue(
+      expect(getByTestId('mlNewFilterListDescriptionText')).toHaveTextContent(
         'List of known safe domains'
       );
     });
@@ -143,7 +143,9 @@ describe('EditFilterList', () => {
     await userEvent.click(mlFilterListEditDescriptionButton);
 
     await waitFor(() => {
-      expect(getByTestId('mlNewFilterListDescriptionText')).toHaveValue('Known safe web domains');
+      expect(getByTestId('mlNewFilterListDescriptionText')).toHaveTextContent(
+        'Known safe web domains'
+      );
     });
   });
 
