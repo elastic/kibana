@@ -741,7 +741,6 @@ export const RuleDetailsPage = connector(
                   <TabNavigation navTabs={pageTabs} />
                   {ruleError}
                   <LegacyUrlConflictCallOut rule={rule} spacesApi={spacesApi} />
-                  <EuiSpacer />
                 </Display>
                 <StyledMinHeightTabContainer>
                   <Routes>
