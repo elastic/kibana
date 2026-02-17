@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { timerange } from '@kbn/synthtrace-client';
 import {
   type ApmSynthtraceEsClient,
@@ -123,10 +123,73 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const connections = await executeTopology({
           serviceName: FRONTEND_SERVICE.serviceName,
         });
+
         const targets = connections.map(getTargetName);
 
         expect(targets).to.contain(CHECKOUT_SERVICE.serviceName);
         expect(targets).to.contain(RECOMMENDATION_SERVICE.serviceName);
+      });
+
+      it('resolves service.name even when span.destination.service.resource differs', async () => {
+        // The trace-based pipeline joins exit spans with entry transactions
+        // via parent.id/span.id to resolve the downstream service.name
+        // (e.g., "checkout-proxy:5050" → "checkout-service").
+        const connections = await executeTopology({
+          serviceName: FRONTEND_SERVICE.serviceName,
+        });
+        const immediateTargets = connections
+          .filter((c) => getSourceName(c) === FRONTEND_SERVICE.serviceName)
+          .map(getTargetName)
+          .sort();
+
+        // Resolved service names — not raw resource names like "checkout-proxy:5050"
+        expect(immediateTargets).to.eql(
+          [CHECKOUT_SERVICE.serviceName, RECOMMENDATION_SERVICE.serviceName].sort()
+        );
+      });
+
+      it('depth=1 fast path returns resource names instead of resolved service names', async () => {
+        // The depth=1 downstream fast path queries pre-aggregated
+        // service_destination metrics (1m rollups) for O(1) performance.
+        // These metrics only contain span.destination.service.resource — there
+        // is no parent.id join, so targets appear as resource names.
+        const connections = await executeTopology({
+          serviceName: FRONTEND_SERVICE.serviceName,
+          direction: 'downstream',
+          depth: 1,
+        });
+        const targets = connections.map(getTargetName).sort();
+
+        expect(targets).to.eql(
+          [CHECKOUT_SERVICE.resource, RECOMMENDATION_SERVICE.resource].sort()
+        );
+      });
+
+      it('depth=1 fast path returns the same dependencies and metrics as trace-based', async () => {
+        const [traceBasedConnections, metricsBasedConnections] = await Promise.all([
+          executeTopology({ serviceName: FRONTEND_SERVICE.serviceName }),
+          executeTopology({
+            serviceName: FRONTEND_SERVICE.serviceName,
+            direction: 'downstream',
+            depth: 1,
+          }),
+        ]);
+
+        // Filter trace-based to immediate deps only (source = frontend)
+        const traceBasedImmediate = traceBasedConnections.filter(
+          (c) => getSourceName(c) === FRONTEND_SERVICE.serviceName
+        );
+
+        expect(metricsBasedConnections.length).to.be(traceBasedImmediate.length);
+
+        // Both paths query the same underlying service_destination metrics (1m rollups),
+        // so the RED metrics must match. Stringify+sort to compare as sets (order may differ).
+        const toSortedMetrics = (conns: ServiceTopologyConnection[]) =>
+          conns.map((c) => JSON.stringify(c.metrics)).sort();
+
+        expect(toSortedMetrics(metricsBasedConnections)).to.eql(
+          toSortedMetrics(traceBasedImmediate)
+        );
       });
     });
 
@@ -229,9 +292,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const sources = connections.map(getSourceName);
         const targets = connections.map(getTargetName);
 
-        // Direct deps of frontend
-        expect(targets).to.contain(CHECKOUT_SERVICE.serviceName);
-        expect(targets).to.contain(RECOMMENDATION_SERVICE.serviceName);
+        // Direct deps of frontend — depth=1 uses the metrics-based fast path which
+        // returns span.destination.service.resource instead of resolved service.name
+        expect(targets).to.contain(CHECKOUT_SERVICE.resource);
+        expect(targets).to.contain(RECOMMENDATION_SERVICE.resource);
 
         // All sources should be the root service only
         const uniqueSources = [...new Set(sources)];

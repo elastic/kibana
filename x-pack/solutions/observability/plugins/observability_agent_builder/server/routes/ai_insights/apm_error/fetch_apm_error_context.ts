@@ -88,7 +88,6 @@ export async function fetchApmErrorContext({
           request,
           serviceName,
           direction: 'downstream',
-          depth: 1,
           start,
           end,
         }),

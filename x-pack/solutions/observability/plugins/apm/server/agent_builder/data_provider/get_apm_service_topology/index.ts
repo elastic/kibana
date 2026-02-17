@@ -17,6 +17,7 @@ import { buildConnectionsFromSpans } from './build_connections_from_spans';
 import { getConnectionMetrics, finalizeConnections } from './get_connection_metrics';
 import { filterDownstreamConnections, filterUpstreamConnections } from './filter_connections';
 import { getTraceIdsFromExitSpansTargetingDependency } from './get_trace_ids_from_exit_spans';
+import { getImmediateDownstreamDependencies } from './get_immediate_downstream_dependencies';
 
 export type {
   TopologyDirection,
@@ -93,6 +94,17 @@ async function getDownstreamTopology({
   endMs: number;
   maxDepth?: number;
 }): Promise<ServiceTopologyResponse> {
+  // Fast path: depth=1 uses pre-aggregated metrics instead of trace scanning
+  if (maxDepth === 1) {
+    return getImmediateDownstreamDependencies({
+      apmEventClient,
+      logger,
+      serviceName,
+      startMs,
+      endMs,
+    });
+  }
+
   const { traceIds } = await getTraceSampleIds({
     config,
     apmEventClient,
