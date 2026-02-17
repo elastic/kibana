@@ -1973,6 +1973,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /.buildkite/scripts/steps/code_generation/cases_codegen.sh @elastic/kibana-cases
 /.buildkite/scripts/steps/security @elastic/kibana-security
 /.buildkite/scripts/steps/entity_store_performance @elastic/contextual-security
+/.buildkite/scripts/steps/test/scout/ @elastic/appex-qa @elastic/kibana-operations
 /kbn_pm/ @elastic/kibana-operations
 /x-pack/dev-tools @elastic/kibana-operations
 /catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads
@@ -3223,7 +3224,6 @@ packages/react @elastic/appex-sharedux
 src/platform/testfunctional/page_objects/solution_navigation.ts @elastic/appex-sharedux
 /x-pack/platform/test/serverless/functional/page_objects/svl_common_navigation.ts @elastic/appex-sharedux
 /x-pack/solutions/security/test/serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/appex-sharedux
-/x-pack/solutions/security/test/serverless/functional/test_suites/ftr/navigation.ts @elastic/appex-sharedux
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/intercepts/*.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
