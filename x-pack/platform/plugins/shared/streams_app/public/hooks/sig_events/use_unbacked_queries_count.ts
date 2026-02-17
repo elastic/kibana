@@ -6,7 +6,7 @@
  */
 
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
-import { useFetchErrorToast } from './use_fetch_error_toast';
+import { useFetchErrorToast } from '../use_fetch_error_toast';
 import { useQueriesApi } from './use_queries_api';
 
 export const UNBACKED_QUERIES_COUNT_QUERY_KEY = ['unbackedQueriesCount'] as const;

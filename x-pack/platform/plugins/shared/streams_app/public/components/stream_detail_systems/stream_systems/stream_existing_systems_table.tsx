@@ -21,7 +21,7 @@ import type { Streams, System } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import type { AIFeatures } from '../../../hooks/use_ai_features';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { useStreamSystemsApi } from '../../../hooks/use_stream_systems_api';
+import { useStreamSystemsApi } from '../../../hooks/sig_events/use_stream_systems_api';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { StreamSystemDetailsFlyout } from './stream_system_details_flyout';
 import { TableTitle } from './table_title';

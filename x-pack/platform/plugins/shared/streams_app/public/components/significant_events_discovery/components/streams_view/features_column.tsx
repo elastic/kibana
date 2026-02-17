@@ -9,7 +9,7 @@ import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { OnboardingResult, Streams, TaskResult } from '@kbn/streams-schema';
 import React from 'react';
-import { useStreamFeatures } from '../../../../hooks/use_stream_features';
+import { useStreamFeatures } from '../../../../hooks/sig_events/use_stream_features';
 
 interface FeaturesColumnProps {
   stream: Streams.all.Definition;

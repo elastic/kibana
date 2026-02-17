@@ -17,7 +17,7 @@ import {
   EuiToolTip,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { useStreamFeatures } from '../../hooks/use_stream_features';
+import { useStreamFeatures } from '../../hooks/sig_events/use_stream_features';
 import { useStreamSystems } from './stream_systems/hooks/use_stream_systems';
 import { StreamFeaturesAccordion } from './stream_features/stream_features_accordion';
 import { StreamSystemsAccordion } from './stream_systems/stream_systems_accordion';

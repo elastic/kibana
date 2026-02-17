@@ -28,7 +28,7 @@ import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
 import { EditableConditionPanel } from '../../data_management/shared';
 import { SystemEventsData } from './system_events_data';
-import { useStreamSystemsApi } from '../../../hooks/use_stream_systems_api';
+import { useStreamSystemsApi } from '../../../hooks/sig_events/use_stream_systems_api';
 
 export const StreamSystemDetailsFlyout = ({
   system,

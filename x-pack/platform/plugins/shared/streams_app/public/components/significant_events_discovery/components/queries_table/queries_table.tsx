@@ -31,13 +31,13 @@ import { orderBy } from 'lodash';
 import {
   useFetchSignificantEvents,
   type SignificantEventItem,
-} from '../../../../hooks/use_fetch_significant_events';
+} from '../../../../hooks/sig_events/use_fetch_significant_events';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useQueriesApi } from '../../../../hooks/use_queries_api';
+import { useQueriesApi } from '../../../../hooks/sig_events/use_queries_api';
 import {
   UNBACKED_QUERIES_COUNT_QUERY_KEY,
   useUnbackedQueriesCount,
-} from '../../../../hooks/use_unbacked_queries_count';
+} from '../../../../hooks/sig_events/use_unbacked_queries_count';
 import { LoadingPanel } from '../../../loading_panel';
 import { SparkPlot } from '../../../spark_plot';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';

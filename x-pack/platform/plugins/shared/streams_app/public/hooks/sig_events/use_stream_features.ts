@@ -9,8 +9,8 @@ import { useMemo } from 'react';
 import { isComputedFeature, type Feature, type Streams } from '@kbn/streams-schema';
 import type { QueryFunctionContext } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
-import { useFetchErrorToast } from './use_fetch_error_toast';
-import { useKibana } from './use_kibana';
+import { useFetchErrorToast } from '../use_fetch_error_toast';
+import { useKibana } from '../use_kibana';
 
 export const useStreamFeatures = (definition: Streams.all.Definition, deps: unknown[] = []) => {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;

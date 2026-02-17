@@ -22,7 +22,7 @@ import type { Feature, Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { upperFirst } from 'lodash';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useStreamFeaturesApi } from '../../../hooks/use_stream_features_api';
+import { useStreamFeaturesApi } from '../../../hooks/sig_events/use_stream_features_api';
 
 export function getConfidenceColor(confidence: number): string {
   if (confidence >= 70) return 'success';

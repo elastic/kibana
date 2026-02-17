@@ -11,7 +11,7 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AIFeatures } from '../../hooks/use_ai_features';
-import { useStreamSystemsApi } from '../../hooks/use_stream_systems_api';
+import { useStreamSystemsApi } from '../../hooks/sig_events/use_stream_systems_api';
 import { useTaskPolling } from '../../hooks/use_task_polling';
 import { StreamSystemsFlyout } from '../stream_detail_systems/stream_systems/stream_systems_flyout';
 import { ConnectorListButtonBase } from '../connector_list_button/connector_list_button';

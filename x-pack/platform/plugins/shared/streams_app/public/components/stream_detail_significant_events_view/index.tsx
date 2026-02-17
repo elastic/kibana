@@ -16,9 +16,9 @@ import {
   SELECTED_SYSTEMS_URL_PARAM,
 } from '../../constants';
 import { useAIFeatures } from '../../hooks/use_ai_features';
-import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
+import { useFetchSignificantEvents } from '../../hooks/sig_events/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
-import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
+import { useSignificantEventsApi } from '../../hooks/sig_events/use_significant_events_api';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useTimeRangeUpdate } from '../../hooks/use_time_range_update';
 import { useTimefilter } from '../../hooks/use_timefilter';

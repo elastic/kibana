@@ -16,7 +16,7 @@ import type { System, StreamQuery, Streams } from '@kbn/streams-schema';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics/constants';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { StreamSystemDetailsFlyout } from '../stream_detail_systems/stream_systems/stream_system_details_flyout';
-import type { SignificantEventItem } from '../../hooks/use_fetch_significant_events';
+import type { SignificantEventItem } from '../../hooks/sig_events/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { formatChangePoint } from './utils/change_point';
 import { SignificantEventsHistogramChart } from './significant_events_histogram';

@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiLoadingChart, useEuiTheme } f
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useFetchSignificantEvents } from '../../../../hooks/use_fetch_significant_events';
+import { useFetchSignificantEvents } from '../../../../hooks/sig_events/use_fetch_significant_events';
 import { getFormattedError } from '../../../../util/errors';
 import { SparkPlot } from '../../../spark_plot';
 

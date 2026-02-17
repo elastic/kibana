@@ -7,8 +7,8 @@
 
 import { useAbortController } from '@kbn/react-hooks';
 import { useMemo } from 'react';
-import { useKibana } from './use_kibana';
-import { getLast24HoursTimeRange } from '../util/time_range';
+import { useKibana } from '../use_kibana';
+import { getLast24HoursTimeRange } from '../../util/time_range';
 
 export function useOnboardingApi(connectorId?: string) {
   const {

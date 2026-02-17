@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import type { Feature } from '@kbn/streams-schema';
 import { upperFirst } from 'lodash';
 import React, { useState, useCallback } from 'react';
-import { useFetchFeatures } from '../../../../hooks/use_fetch_features';
+import { useFetchFeatures } from '../../../../hooks/sig_events/use_fetch_features';
 import { LoadingPanel } from '../../../loading_panel';
 import { FeatureDetailsFlyout } from '../../../stream_detail_systems/stream_features/feature_details_flyout';
 import { getConfidenceColor } from '../../../stream_detail_systems/stream_features/use_stream_features_table';

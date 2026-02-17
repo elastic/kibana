@@ -28,7 +28,7 @@ import { css } from '@emotion/css';
 import { v4 } from 'uuid';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useSignificantEventsApi } from '../../../hooks/use_significant_events_api';
+import { useSignificantEventsApi } from '../../../hooks/sig_events/use_significant_events_api';
 import type { AIFeatures } from '../../../hooks/use_ai_features';
 import { GeneratedFlowForm } from './generated_flow_form/generated_flow_form';
 import { ManualFlowForm } from './manual_flow_form/manual_flow_form';

@@ -9,7 +9,7 @@ import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import React from 'react';
-import { useFetchSignificantEvents } from '../../../../hooks/use_fetch_significant_events';
+import { useFetchSignificantEvents } from '../../../../hooks/sig_events/use_fetch_significant_events';
 
 interface QueriesColumnProps {
   streamName: string;
