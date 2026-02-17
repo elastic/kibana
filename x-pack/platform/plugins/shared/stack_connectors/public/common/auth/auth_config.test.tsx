@@ -830,7 +830,8 @@ describe('AuthConfig renders', () => {
     });
   });
 
-  describe('AuthConfig with showOAuth2Option on', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/249443
+  describe.skip('AuthConfig with showOAuth2Option on', () => {
     it('renders OAuth2 option when showOAuth2Option is explicitly set to true', async () => {
       const testFormData = {
         config: {
