@@ -238,15 +238,7 @@ test('can visit MMR command', () => {
   `);
   const visitor = new Visitor()
     .on('visitLiteralExpression', (ctx) => {
-      if (ctx.node.literalType === 'integer' || ctx.node.literalType === 'double') {
-        return ctx.node.value;
-      }
-
-      if (ctx.node.literalType === 'keyword') {
-        return ctx.node.value;
-      }
-
-      return null;
+return ctx.node.value;
     })
     .on('visitMapExpression', (ctx) => {
       return [...ctx.visitEntries(null)].flat();
