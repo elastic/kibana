@@ -109,8 +109,10 @@ const instanceofZodTypeKind = <Z extends z.ZodFirstPartyTypeKind>(
   return false;
 };
 
-const instanceofZodTypeObject = (type: z.ZodTypeAny): type is z.ZodObject<z.ZodRawShape> => {
-  return instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodObject);
+const instanceofZodTypeObject = (
+  type: z.ZodTypeAny | z4.ZodTypeAny
+): type is z.ZodObject<z.ZodRawShape> | z4.ZodObject<z4.ZodRawShape> => {
+  return instanceofZodTypeKind(type as z.ZodTypeAny, z.ZodFirstPartyTypeKind.ZodObject);
 };
 
 type ZodTypeLikeVoid = z.ZodVoid | z.ZodUndefined | z.ZodNever;
@@ -472,14 +474,6 @@ const getPassThroughShape = (knownParameters: KnownParameters, isPathParameter =
   return passThroughShape;
 };
 
-/**
- * Extract the object shape from a schema, handling both v3 and v4.
- * V4 objects also expose `.shape` in the classic API.
- */
-function getObjectShape(schema: z.ZodTypeAny): z.ZodRawShape {
-  return (schema as any).shape;
-}
-
 export const convertQuery = (schema: unknown) => {
   assertInstanceOfZodType(schema);
   const unwrappedSchema = unwrapZodType(schema, true);
@@ -494,9 +488,8 @@ export const convertQuery = (schema: unknown) => {
   if (!instanceofZodTypeObject(unwrappedSchema)) {
     throw createError('Query schema must be an _object_ schema validator!');
   }
-  const shape = getObjectShape(unwrappedSchema);
   return {
-    query: convertObjectMembersToParameterObjects(shape, false),
+    query: convertObjectMembersToParameterObjects(unwrappedSchema.shape, false),
     shared: {},
   };
 };
@@ -524,11 +517,10 @@ export const convertPathParameters = (schema: unknown, knownParameters: KnownPar
   if (!instanceofZodTypeObject(unwrappedSchema)) {
     throw createError('Parameters schema must be an _object_ schema validator!');
   }
-  const shape = getObjectShape(unwrappedSchema);
-  const schemaKeys = Object.keys(shape);
+  const schemaKeys = Object.keys(unwrappedSchema.shape);
   validatePathParameters(paramKeys, schemaKeys);
   return {
-    params: convertObjectMembersToParameterObjects(shape, true),
+    params: convertObjectMembersToParameterObjects(unwrappedSchema.shape, true),
     shared: {},
   };
 };
