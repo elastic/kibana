@@ -23,11 +23,11 @@ import { getShapeAt } from '../../../common/utils/zod';
 // import all needed request and response schemas generated from the OpenAPI spec
 import type { InternalConnectorContract } from '../../../types/latest';
 
-import { FetcherConfigSchema } from '../../schema';
+import { FetcherConfigSchema, KibanaStepMetaSchema } from '../../schema';
 
 // export contract
-export const GET_STREAMS_NAME_CONTRACT: InternalConnectorContract = {
-  type: 'kibana.get-streams-name',
+export const STREAMS_GET_CONTRACT: InternalConnectorContract = {
+  type: 'kibana.streams.get',
   summary: `Get a stream`,
   description: `**Spaces method and path for this operation:**
 
@@ -50,6 +50,7 @@ Fetches a stream definition and associated dashboards<br/><br/>[Required authori
     ...getShapeAt(get_streams_name_request, 'path'),
     ...getShapeAt(get_streams_name_request, 'query'),
     fetcher: FetcherConfigSchema,
+    ...KibanaStepMetaSchema,
   }),
   outputSchema: z.optional(z.looseObject({})),
 };

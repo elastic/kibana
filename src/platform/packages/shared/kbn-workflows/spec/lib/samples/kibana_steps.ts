@@ -136,20 +136,20 @@ export const KIBANA_VALID_SAMPLE_STEPS = [
   },
   // Streams
   {
-    name: 'get_streams',
-    type: 'kibana.get-streams',
+    name: 'list_streams',
+    type: 'kibana.streams.list',
     with: {},
   },
   {
     name: 'get_stream_by_name',
-    type: 'kibana.get-streams-name',
+    type: 'kibana.streams.get',
     with: {
       name: 'my-stream',
     },
   },
   {
     name: 'get_stream_significant_events',
-    type: 'kibana.get-streams-name-significant-events',
+    type: 'kibana.streams.get_significant_events',
     with: {
       name: 'my-stream',
       from: '2025-01-01T00:00:00.000Z',
@@ -244,8 +244,8 @@ export const KIBANA_INVALID_SAMPLE_STEPS = [
   // Streams
   {
     step: {
-      name: 'get_streams_with_invalid_fetcher',
-      type: 'kibana.get-streams',
+      name: 'list_streams_with_invalid_fetcher',
+      type: 'kibana.streams.list',
       with: {
         fetcher: {
           skip_ssl_verification: 'not_a_boolean',
@@ -258,7 +258,7 @@ export const KIBANA_INVALID_SAMPLE_STEPS = [
   {
     step: {
       name: 'get_stream_by_name_without_name',
-      type: 'kibana.get-streams-name',
+      type: 'kibana.streams.get',
       with: {},
     },
     zodErrorMessage: 'Invalid input: expected string, received undefined',
@@ -267,7 +267,7 @@ export const KIBANA_INVALID_SAMPLE_STEPS = [
   {
     step: {
       name: 'get_stream_significant_events_without_required_params',
-      type: 'kibana.get-streams-name-significant-events',
+      type: 'kibana.streams.get_significant_events',
       with: {
         name: 'my-stream',
       },

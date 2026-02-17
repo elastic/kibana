@@ -10,46 +10,48 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Source: /oas_docs/output/kibana.yaml, operations: get-streams
+ * Source: /oas_docs/output/kibana.yaml, operations: get-streams-name-significant-events
  *
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
 
 import { z } from '@kbn/zod/v4';
 
-import { get_streams_request } from './schemas/kibana_openapi_zod.gen';
+import { get_streams_name_significant_events_request } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
 import type { InternalConnectorContract } from '../../../types/latest';
 
-import { FetcherConfigSchema } from '../../schema';
+import { FetcherConfigSchema, KibanaStepMetaSchema } from '../../schema';
 
 // export contract
-export const GET_STREAMS_CONTRACT: InternalConnectorContract = {
-  type: 'kibana.get-streams',
-  summary: `Get stream list`,
+export const STREAMS_GET_SIGNIFICANT_EVENTS_CONTRACT: InternalConnectorContract = {
+  type: 'kibana.streams.get_significant_events',
+  summary: `Read the significant events`,
   description: `**Spaces method and path for this operation:**
 
-<div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams</span></div>
+<div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/significant_events</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-Fetches list of all streams<br/><br/>[Required authorization] Route required privileges: read_stream.`,
+Read the significant events<br/><br/>[Required authorization] Route required privileges: read_stream.`,
   methods: ['GET'],
-  patterns: ['/api/streams'],
-  documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-streams',
+  patterns: ['/api/streams/{name}/significant_events'],
+  documentation:
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-streams-name-significant-events',
   parameterTypes: {
     headerParams: [],
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['name'],
+    urlParams: ['from', 'to', 'bucketSize', 'query'],
     bodyParams: [],
   },
   paramsSchema: z.object({
-    ...getShapeAt(get_streams_request, 'body'),
-    ...getShapeAt(get_streams_request, 'path'),
-    ...getShapeAt(get_streams_request, 'query'),
+    ...getShapeAt(get_streams_name_significant_events_request, 'body'),
+    ...getShapeAt(get_streams_name_significant_events_request, 'path'),
+    ...getShapeAt(get_streams_name_significant_events_request, 'query'),
     fetcher: FetcherConfigSchema,
+    ...KibanaStepMetaSchema,
   }),
   outputSchema: z.optional(z.looseObject({})),
 };

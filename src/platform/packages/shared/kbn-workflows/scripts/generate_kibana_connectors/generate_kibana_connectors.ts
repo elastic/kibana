@@ -45,6 +45,7 @@ import type { OperationObjectWithOperationId } from '../shared/types';
 export async function run() {
   cleanGeneratedFolder();
   const contracts = generateContracts();
+  validateIncludedOperations(contracts);
   await generateZodSchemas(contracts);
   saveKibanaConnectors(contracts);
   eslintFixGeneratedCode({
@@ -58,6 +59,23 @@ export async function run() {
 function cleanGeneratedFolder() {
   fs.rmSync(KIBANA_GENERATED_OUTPUT_FOLDER_PATH, { recursive: true, force: true });
   fs.mkdirSync(KIBANA_GENERATED_OUTPUT_FOLDER_PATH);
+}
+
+/**
+ * Validates that every operation in INCLUDED_OPERATIONS was found in the OpenAPI spec.
+ * Fails loudly if an upstream API renamed or removed a route, instead of silently skipping it.
+ */
+function validateIncludedOperations(contracts: ContractMeta[]) {
+  const matchedOperationIds = new Set(contracts.flatMap((c) => c.operations.map((op) => op.id)));
+  const missingOperations = INCLUDED_OPERATIONS.filter((op) => !matchedOperationIds.has(op));
+  if (missingOperations.length > 0) {
+    throw new Error(
+      `The following operations from INCLUDED_OPERATIONS were not found in the OpenAPI spec: ${missingOperations.join(
+        ', '
+      )}. ` +
+        `The upstream API may have changed their operation IDs. Update INCLUDED_OPERATIONS accordingly.`
+    );
+  }
 }
 
 function saveKibanaConnectors(contracts: ContractMeta[]) {
@@ -246,13 +264,12 @@ function generateContractMetasFromPath(
     }
 
     // Use type override if available, otherwise use the default operationId
-    const typeBaseName = OPERATION_TYPE_OVERRIDES[operationId] ?? operationId;
+    const typeBaseName = OPERATION_TYPE_OVERRIDES[operationId]?.type ?? operationId;
     const type = `kibana.${typeBaseName}`;
     const summary = operation.summary ?? null;
     const description = operation.description ?? null;
     const parameterTypes = generateParameterTypes([operation], openApiDocument);
     const contractName = generateContractName(typeBaseName);
-    const schemaImports = [getRequestSchemaName(operationId), getResponseSchemaName(operationId)];
     const paramsSchemaString = generateParamsSchemaString(
       [operationId],
       {
@@ -263,6 +280,12 @@ function generateContractMetasFromPath(
       ['KibanaStepMetaSchema']
     );
     const outputSchemaString = generateOutputSchemaString([operation], openApiDocument);
+    const responseName = getResponseSchemaName(operationId);
+    const schemaImports = [
+      getRequestSchemaName(operationId),
+      // Only import response schema if it's actually referenced in the output schema
+      ...(outputSchemaString.includes(responseName) ? [responseName] : []),
+    ];
 
     contractMetas.push({
       type,
