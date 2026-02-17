@@ -135,11 +135,7 @@ const MaybeWrapper = ({
       size="s"
       hideCloseButton
       css={css`
-        // need to override the eui-flyout clip-path for dnd outside of the flyout
-        clip-path: none !important;
-        // Allow drag-drop extra targets to overflow horizontally
-        overflow-y: clip !important;
-        overflow-x: visible !important;
+        clip-path: none; // need to override the eui-flyout clip-path for dnd outside of the flyout
       `}
     >
       {children}

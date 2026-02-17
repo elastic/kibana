@@ -62,8 +62,6 @@ function DimensionButtonImpl({
         border-radius: ${euiTheme.border.radius};
         position: relative;
         line-height: 1;
-        /* Removed overflow: hidden to allow drag-drop overlay borders to be fully visible.
-           The ::before pseudo-element from domDroppable needs to show its border without clipping. */
         display: flex;
         align-items: center;
         gap: ${euiTheme.size.s};
