@@ -25,6 +25,7 @@ import {
   ContentListProvider,
   useContentListItems,
   useContentListSort,
+  useContentListSearch,
   useContentListConfig,
 } from '@kbn/content-list-provider';
 import type { FindItemsParams, FindItemsResult } from '@kbn/content-list-provider';
@@ -93,8 +94,9 @@ const StateDiagnosticPanel = ({
   useDeclarativeConfig = false,
 }: StateDiagnosticPanelProps) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  const { items, totalItems, isLoading } = useContentListItems();
+  const { items, totalItems, isLoading, isFetching } = useContentListItems();
   const { field: sortField, direction: sortDirection } = useContentListSort();
+  const { search } = useContentListSearch();
   const config = useContentListConfig();
 
   // Generate JSX code based on current configuration.
@@ -139,6 +141,11 @@ const StateDiagnosticPanel = ({
                   <EuiBadge color="primary">Loading...</EuiBadge>
                 </EuiFlexItem>
               )}
+              {isFetching && !isLoading && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="accent">Fetching...</EuiBadge>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -161,6 +168,14 @@ const StateDiagnosticPanel = ({
                 </EuiTitle>
                 <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
                   {JSON.stringify(config.features.sorting, null, 2)}
+                </EuiCodeBlock>
+              </EuiFlexItem>
+              <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
+                <EuiTitle size="xxs">
+                  <h3>Search</h3>
+                </EuiTitle>
+                <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+                  {JSON.stringify({ search, isFetching }, null, 2)}
                 </EuiCodeBlock>
               </EuiFlexItem>
               <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
