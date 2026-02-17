@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
+
 export {
   type MarkdownByReferenceState,
   type MarkdownByValueState,

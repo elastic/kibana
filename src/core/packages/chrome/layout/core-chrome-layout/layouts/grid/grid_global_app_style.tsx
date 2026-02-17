@@ -114,14 +114,7 @@ const projectModeBackgroundStyles = (euiThemeContext: UseEuiTheme) => {
 
 // temporary hacks that need to be removed after better flyout and global sidenav customization support in EUI
 // https://github.com/elastic/eui/issues/8820
-const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme']) => css`
-  // adjust position of the classic/project side-navigation
-  .kbnBody .euiFlyout.euiCollapsibleNav {
-    ${logicalCSS('top', layoutVar('application.top', '0px'))};
-    ${logicalCSS('left', layoutVar('application.left', '0px'))};
-    ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
-  }
-
+const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: ChromeStyle) => css`
   .kbnBody {
     // overlay mask "belowHeader" should only cover the application area
     .euiOverlayMask[data-relative-to-header='below'] {
@@ -129,6 +122,7 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme']) => css`
       ${logicalCSS('left', layoutVar('application.left', '0px'))};
       ${logicalCSS('right', layoutVar('application.right', '0px'))};
       ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
+      ${chromeStyle === 'project' && `border-radius: ${_euiTheme.border.radius.medium};`}
     }
 
     // adjust position of all the right flyouts relative to the application area
@@ -136,6 +130,16 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme']) => css`
       ${logicalCSS('top', layoutVar('application.top', '0px'))};
       ${logicalCSS('right', layoutVar('application.right', '0px'))};
       ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
+      // match the application area border-radius on the right edge,
+      // but not for side-by-side child flyouts since they aren't positioned at the rightmost edge
+      ${chromeStyle === 'project' &&
+      `&:not([data-managed-flyout-layout-mode="side-by-side"][data-managed-flyout-level="child"]) {
+          border-top-right-radius: ${_euiTheme.border.radius.medium};
+          border-bottom-right-radius: ${_euiTheme.border.radius.medium};
+          .euiFlyoutFooter {
+            border-bottom-right-radius: ${_euiTheme.border.radius.medium};
+          }
+        }`}
     }
 
     // if the overlay mask exists that is above the header, set the top, right and bottom of the right flyouts to 0
@@ -145,6 +149,7 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme']) => css`
       ${logicalCSS('top', 0)};
       ${logicalCSS('right', 0)};
       ${logicalCSS('bottom', 0)};
+      border-radius: 0;
     }
   }
 
@@ -178,12 +183,16 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme']) => css`
   }
 `;
 
+// TODO: https://github.com/elastic/kibana/issues/251035
+type ChromeStyle = 'project' | 'classic';
+
 interface GridLayoutGlobalStylesProps {
-  // TODO: https://github.com/elastic/kibana/issues/251035
-  chromeStyle?: 'project' | 'classic';
+  chromeStyle?: ChromeStyle;
 }
 
-export const GridLayoutGlobalStyles = ({ chromeStyle }: GridLayoutGlobalStylesProps) => {
+export const GridLayoutGlobalStyles = ({
+  chromeStyle = 'classic',
+}: GridLayoutGlobalStylesProps) => {
   const euiTheme = useEuiTheme();
   const isProjectStyle = chromeStyle === 'project';
 
@@ -192,7 +201,7 @@ export const GridLayoutGlobalStyles = ({ chromeStyle }: GridLayoutGlobalStylesPr
       <Global
         styles={[
           globalLayoutStyles(euiTheme),
-          globalTempHackStyles(euiTheme.euiTheme),
+          globalTempHackStyles(euiTheme.euiTheme, chromeStyle),
           // Only apply the decorative background for project mode
           isProjectStyle && projectModeBackgroundStyles(euiTheme),
         ]}
