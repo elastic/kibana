@@ -717,7 +717,7 @@ describe('CPS project_routing on serverless ES', () => {
         '\n' +
         JSON.stringify({ query: { term: { category: 'beta' } } }) +
         '\n' +
-        JSON.stringify({ project_routing: LOCAL_PROJECT_ROUTING, }) +
+        JSON.stringify({ project_routing: LOCAL_PROJECT_ROUTING }) +
         '\n';
 
       const response: any = await client.transport.request(
