@@ -332,6 +332,33 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Turns off custom suggestions on the embedded console [#241516]({{kib-pull}}241516).
 * Fixes an issue where form fields were resetting automatically when editing ingest pipeline settings [#237509]({{kib-pull}}237509).
 
+## 9.2.6 [kibana-9.2.6-release-notes]
+
+### Features and enhancements [kibana-9.2.6-features-enhancements]
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.6 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+
+### Fixes [kibana-9.2.6-fixes]
+
+**Alerting and cases**:
+* Rule execution fails due to null execution UUIDs [#252618]({{kib-pull}}252618).
+
+**Discover**:
+* Fixes handling of missing values [#251892]({{kib-pull}}251892).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.2.6 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.6 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Search**:
+* Reduces background polling on the Index Details page to avoid unnecessary API requests [#251446]({{kib-pull}}251446).
+* Fixes Beats tutorial authentication instructions in Serverless environments to show the correct API key-based configuration instead of unsupported `cloud.id`/`cloud.auth` instructions. [#253164]({{kib-pull}}253164).
+* Strips system-managed date fields from ingest pipelines before PUT [#252579]({{kib-pull}}252579).
+* APM: improve copy of missing trace relationship [#251850]({{kib-pull}}251850).
 
 ## 9.2.5 [kibana-9.2.5-release-notes]
 
