@@ -179,7 +179,7 @@ export async function generateSignificantEvents({
                 error: undefined,
               };
             } catch (error) {
-              toolUsage.add_queries.failures += 1;
+              toolUsage.add_queries.failures = 1;
               return {
                 query,
                 valid: false,
