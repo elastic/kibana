@@ -56,7 +56,7 @@ export const getAlertTimelineStringStepDefinition: PublicStepDefinition = {
     examples: [
       `## Generate a timeline-like string for an alert
 \`\`\`yaml
-- name: timeline_string
+- name: get_timeline_string
   type: security.getAlertTimelineString
   with:
     alertId: "{{ variables.alert_id }}"

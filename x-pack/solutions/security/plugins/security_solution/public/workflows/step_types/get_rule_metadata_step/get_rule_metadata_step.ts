@@ -74,7 +74,7 @@ export const getRuleMetadataStepDefinition: PublicStepDefinition = {
 - name: get_metadata
   type: security.getRuleMetadata
   with:
-    ruleId: "{{ event.alerts[0].kibana.alert.rule.rule_id }}"
+    ruleId: "{{ variables.rule_id }}"
 \`\`\``,
     ],
   },

@@ -187,9 +187,12 @@ export const getRelatedAlertsStepDefinition: PublicStepDefinition = {
   with:
     alertId: "{{ variables.alert_id }}"
     alertIndex: "{{ variables.alert_index }}"
+    include_seed: true
     entity_fields:
       - field: "process.entity_id"
         score: 5
+      - field: "agent.id"
+        score: 4
       - field: "user.id"
         score: 4
       - field: "host.name"
@@ -202,11 +205,11 @@ export const getRelatedAlertsStepDefinition: PublicStepDefinition = {
         score: 1
         aliases:
           - field: "destination.ip"
-            score: 3
+            score: 4
     min_entity_score: 4
     ignore_entities:
       - field: "user.name"
-        values: ["root", "SYSTEM"]
+        values: ["root", "SYSTEM", "Administrator"]
     seed_window: "1h"
     expand_window: "1h"
     max_depth: 3

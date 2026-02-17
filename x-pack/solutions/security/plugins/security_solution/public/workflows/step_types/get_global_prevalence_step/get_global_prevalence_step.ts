@@ -80,16 +80,16 @@ export const getGlobalPrevalenceStepDefinition: PublicStepDefinition = {
 - name: get_prevalence
   type: security.getGlobalPrevalence
   with:
-    ruleId: "{{ event.alerts[0].kibana.alert.rule.rule_id }}"
+    ruleId: "{{ variables.rule_id }}"
     time_range: "24h"
 \`\`\``,
-      `## Get global prevalence looking back 1h from an alert timestamp
+      `## Get global prevalence looking back 1h from a timestamp
 \`\`\`yaml
-- name: get_prevalence_at_alert_time
+- name: get_prevalence_at_time
   type: security.getGlobalPrevalence
   with:
-    ruleId: "{{ event.rule.id }}"
-    timestamp: "{{ event.@timestamp }}"
+    ruleId: "{{ variables.rule_id }}"
+    timestamp: "{{ variables.timestamp }}"
     time_range: "1h"
 \`\`\``,
     ],

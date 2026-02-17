@@ -60,7 +60,7 @@ export const getAlertHistoryStepDefinition: PublicStepDefinition = {
 - name: get_history
   type: security.getAlertHistory
   with:
-    ruleId: "{{ event.alerts[0].kibana.alert.rule.rule_id }}"
+    ruleId: "{{ variables.rule_id }}"
     time_range: "7d"
 \`\`\``,
     ],

@@ -112,7 +112,7 @@ export const getCloseHistoryStepDefinition: PublicStepDefinition = {
   type: security.getCloseHistory
   with:
     ruleId: "{{ variables.rule_id }}"
-    timestamp: "{{ event.@timestamp }}"
+    timestamp: "{{ variables.timestamp }}"
     time_range: "30d"
 \`\`\``,
       `## Get close history for same rule and entities

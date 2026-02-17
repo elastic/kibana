@@ -70,16 +70,16 @@ export const getRuleFireCountStepDefinition: PublicStepDefinition = {
 - name: get_fire_count
   type: security.getRuleFireCount
   with:
-    ruleId: "{{ event.alerts[0].kibana.alert.rule.rule_id }}"
+    ruleId: "{{ variables.rule_id }}"
     time_window: "24h"
 \`\`\``,
-      `## Get rule fire count ±1h around an alert timestamp
+      `## Get rule fire count ±1h around a timestamp
 \`\`\`yaml
-- name: get_fire_count_at_alert_time
+- name: get_fire_count_at_time
   type: security.getRuleFireCount
   with:
-    ruleId: "{{ event.rule.id }}"
-    timestamp: "{{ event.@timestamp }}"
+    ruleId: "{{ variables.rule_id }}"
+    timestamp: "{{ variables.timestamp }}"
     time_window: "1h"
 \`\`\``,
     ],
