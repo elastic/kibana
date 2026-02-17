@@ -7,8 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
-import type { DetectionAlert800 } from '../../../common/api/detection_engine/model/alerts';
+import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
+import type { DetectionAlert800 } from '../../../../common/api/detection_engine/model/alerts';
 
 const inputSchema = z.object({
   ruleId: z.string().describe('The rule ID to get metadata for'),

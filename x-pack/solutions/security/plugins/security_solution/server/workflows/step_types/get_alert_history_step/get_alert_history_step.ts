@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { estypes } from '@elastic/elasticsearch';
-import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
+import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 
 interface AlertHistoryAggregations {
   alerts_over_time: estypes.AggregationsDateHistogramAggregate;

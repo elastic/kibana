@@ -7,9 +7,9 @@
 
 import { z } from '@kbn/zod/v4';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
-import { buildRelatedAlertsGraph } from './get_related_alerts_step/graph_builder';
-import { parseTimeWindowToMs } from './get_related_alerts_step/time_window';
+import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
+import { buildRelatedAlertsGraph } from './graph_builder';
+import { parseTimeWindowToMs } from './time_window';
 
 const DEFAULT_ENTITY_FIELDS = ['host.name', 'user.name', 'service.name'] as const;
 interface EntityFieldConfig {

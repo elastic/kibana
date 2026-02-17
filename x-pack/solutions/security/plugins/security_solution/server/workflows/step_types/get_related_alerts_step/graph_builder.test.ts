@@ -39,12 +39,12 @@ const makeEsClient = (params: { seedIndex: string; seedId: string; docs: Doc[] }
   const { seedIndex, seedId, docs } = params;
 
   return {
-    search: jest.fn(async (req: Record<string, unknown>) => {
+    search: jest.fn(async <TSource>(req: Record<string, unknown>) => {
       const typedReq = req as unknown as SearchRequest;
       // Seed fetch
       if (typedReq.index === seedIndex) {
         const hit = docs.find((d) => d._index === seedIndex && d._id === seedId);
-        return { hits: { hits: hit ? [hit] : [] } };
+        return { hits: { hits: (hit ? [hit] : []) as unknown as Array<{ _source?: TSource }> } };
       }
 
       // Search queries
@@ -167,7 +167,7 @@ const makeEsClient = (params: { seedIndex: string; seedId: string; docs: Doc[] }
         sort: [h._source['@timestamp'], h._id],
       }));
 
-      return { hits: { hits: page } };
+      return { hits: { hits: page as unknown as Array<{ _source?: TSource }> } };
     }),
   };
 };

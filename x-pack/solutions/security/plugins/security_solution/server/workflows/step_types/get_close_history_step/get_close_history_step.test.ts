@@ -143,14 +143,14 @@ describe('getCloseHistory step', () => {
     it('matches alert entities when match_alert_entities is provided', async () => {
       const searchMock = jest.fn();
 
-      // First call: fetch the seed alert for entity info
+      // First call: fetch the seed alert for entity info (nested ECS structure)
       searchMock.mockResolvedValueOnce({
         hits: {
           hits: [
             {
               _source: {
-                'host.name': 'host-a',
-                'user.name': 'alice',
+                host: { name: 'host-a' },
+                user: { name: 'alice' },
               },
             },
           ],

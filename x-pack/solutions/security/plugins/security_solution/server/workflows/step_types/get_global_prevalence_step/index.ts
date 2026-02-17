@@ -1,0 +1,1 @@
+export { getGlobalPrevalenceStepDefinition } from './get_global_prevalence_step';

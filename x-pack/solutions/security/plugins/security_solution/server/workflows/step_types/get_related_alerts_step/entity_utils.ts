@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { DetectionAlert800 } from '../../../../common/api/detection_engine/model/alerts';
-
 export type IgnoreEntitiesConfig = Array<{ field: string; values: string[] }>;
 
 export const fieldToEntityLabel = (field: string): string => {
@@ -44,7 +42,7 @@ export const getValuesAtPath = (obj: unknown, path: readonly string[]): unknown[
 };
 
 export const extractEntityValues = (
-  source: DetectionAlert800 | undefined,
+  source: Record<string, unknown> | undefined,
   field: string,
   ignoreMap: Map<string, Set<string>>
 ): Set<string> => {

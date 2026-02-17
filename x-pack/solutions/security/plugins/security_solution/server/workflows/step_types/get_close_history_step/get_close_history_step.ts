@@ -8,8 +8,9 @@
 import { z } from '@kbn/zod/v4';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { estypes } from '@elastic/elasticsearch';
-import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
-import type { DetectionAlert800 } from '../../../common/api/detection_engine/model/alerts';
+import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
+import type { DetectionAlert800 } from '../../../../common/api/detection_engine/model/alerts';
+import { getValuesAtPath } from '../get_related_alerts_step/entity_utils';
 
 const inputSchema = z.object({
   ruleId: z.string().describe('The rule ID'),
@@ -110,10 +111,16 @@ export const getCloseHistoryStepDefinition = createServerStepDefinition({
         });
 
         if (alertResponse.hits.hits.length > 0) {
-          const alertSource = alertResponse.hits.hits[0]._source;
-          hostName = alertSource?.['host.name'] as string | undefined;
-          userName = alertSource?.['user.name'] as string | undefined;
-          serviceName = alertSource?.['service.name'] as string | undefined;
+          const alertSource = alertResponse.hits.hits[0]._source as
+            | Record<string, unknown>
+            | undefined;
+          const firstString = (field: string): string | undefined => {
+            const vals = getValuesAtPath(alertSource, field.split('.'));
+            return vals.find((v): v is string => typeof v === 'string');
+          };
+          hostName = firstString('host.name');
+          userName = firstString('user.name');
+          serviceName = firstString('service.name');
         }
       }
 

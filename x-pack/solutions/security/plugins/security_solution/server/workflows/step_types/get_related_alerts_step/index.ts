@@ -1,0 +1,1 @@
+export { getRelatedAlertsStepDefinition } from './get_related_alerts_step';

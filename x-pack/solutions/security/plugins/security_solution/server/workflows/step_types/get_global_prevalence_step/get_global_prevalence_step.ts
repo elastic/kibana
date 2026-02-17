@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
+import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 
 interface NumericValueAggregation {
   value?: number;
