@@ -12,8 +12,6 @@ import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 import type { UsageRecord } from '../../types';
 import type { UsageApiConfigSchema, TlsConfigSchema } from '../../config';
 
-import { USAGE_REPORTING_ENDPOINT } from '../../constants';
-
 export class UsageReportingService {
   private agent: Agent | undefined;
 
@@ -50,7 +48,7 @@ export class UsageReportingService {
       throw new Error('usage-api url not provided');
     }
 
-    return `${this.config.url}${USAGE_REPORTING_ENDPOINT}`;
+    return this.config.url;
   }
 
   private get httpAgent(): Agent {

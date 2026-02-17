@@ -31,6 +31,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./inspect_monitor'));
     loadTestFile(require.resolve('./suggestions.ts'));
     loadTestFile(require.resolve('./sync_global_params'));
+    loadTestFile(require.resolve('./sync_global_params_for_filtered_monitors'));
     loadTestFile(require.resolve('./synthetics_enablement'));
     loadTestFile(require.resolve('./test_now_monitor'));
     loadTestFile(require.resolve('./edit_private_location'));

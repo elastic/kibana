@@ -522,8 +522,12 @@ export class DiscoverPageObject extends FtrService {
     return this.dataGrid.clickDocViewerTab(id);
   }
 
-  public async expectSourceViewerToExist() {
+  public async isInEsqlMode() {
     return await this.find.byClassName('monaco-editor');
+  }
+
+  public async isInClassicMode() {
+    return await this.testSubjects.existOrFail('discover-dataView-switch-link');
   }
 
   public async expectDocTableToBeLoaded() {
