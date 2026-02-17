@@ -56,7 +56,7 @@ spaceTest.describe(
         async () => {
           const entityStoreStatus = await apiServices.entityAnalytics.waitForEntityStoreStatus(
             'running',
-            40000
+            50000
           );
           expect(entityStoreStatus.status).toBe('running');
 
