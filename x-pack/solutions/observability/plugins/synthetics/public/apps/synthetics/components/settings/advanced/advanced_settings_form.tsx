@@ -93,15 +93,14 @@ export const AdvancedSettingsForm = () => {
           <h4>
             <FormattedMessage
               id="xpack.synthetics.settings.advanced.syncInterval.title"
-              defaultMessage="Private locations sync interval"
+              defaultMessage="Maintenance windows sync interval"
             />
           </h4>
         }
         description={
           <FormattedMessage
             id="xpack.synthetics.settings.advanced.syncInterval.description"
-            defaultMessage="Configure how frequently private location monitors are synced to apply maintenance window changes. A shorter interval means changes take effect sooner, but increases system load. Minimum value is {min} minutes."
-            values={{ min: MIN_SYNC_INTERVAL }}
+            defaultMessage="Configure how frequently private location monitors are synced to apply maintenance window changes."
           />
         }
       >
