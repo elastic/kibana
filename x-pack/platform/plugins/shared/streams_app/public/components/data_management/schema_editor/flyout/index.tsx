@@ -111,8 +111,7 @@ export const SchemaEditorFlyout = ({
   // This applies to:
   // 1. Inherited fields (can only add description override)
   // 2. Doc-only fields (status: 'unmapped' without a type, or type: 'unmapped')
-  const isDocOnlyField =
-    field.status === 'unmapped' && (!field.type || field.type === 'unmapped');
+  const isDocOnlyField = field.status === 'unmapped' && (!field.type || field.type === 'unmapped');
   const isDescriptionOnlyEditing =
     isEditing && streamType === 'wired' && (field.status === 'inherited' || isDocOnlyField);
   const hasDescriptionChanged =

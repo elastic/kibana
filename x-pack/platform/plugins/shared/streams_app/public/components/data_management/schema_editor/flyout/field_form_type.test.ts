@@ -94,8 +94,7 @@ describe('getFieldTypeOptions', () => {
 
       // Classic streams exclude 'unmapped' type since they don't support description-only overrides
       const expectedTypes = Object.keys(FIELD_TYPE_MAP).filter(
-        (key) =>
-          !FIELD_TYPE_MAP[key as keyof typeof FIELD_TYPE_MAP].readonly && key !== 'unmapped'
+        (key) => !FIELD_TYPE_MAP[key as keyof typeof FIELD_TYPE_MAP].readonly && key !== 'unmapped'
       );
 
       expect(options.length).toBe(expectedTypes.length);
