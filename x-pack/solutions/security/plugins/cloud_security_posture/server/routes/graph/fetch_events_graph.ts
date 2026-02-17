@@ -103,7 +103,7 @@ export const fetchEvents = async ({
   logger.trace(`Executing query [${query}]`);
 
   const eventIds = originEventIds.map((originEventId) => originEventId.id);
-  const data = await esClient.asCurrentUser.helpers
+  return await esClient.asCurrentUser.helpers
     .esql({
       columnar: false,
       filter: buildDslFilter(eventIds, showUnknownTarget, start, end, esQuery),
@@ -117,8 +117,6 @@ export const fetchEvents = async ({
       ],
     })
     .toRecords<EventEdge>();
-
-  return data;
 };
 
 const buildDslFilter = (
