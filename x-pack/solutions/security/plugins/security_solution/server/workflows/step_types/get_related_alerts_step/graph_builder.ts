@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  addEntitiesWithLimit,
-  buildIgnoreMap,
-  extractEntityValues,
-} from './entity_utils';
+import { addEntitiesWithLimit, buildIgnoreMap, extractEntityValues } from './entity_utils';
 import { buildEntityShouldClauses } from './query_utils';
 import { clampPositiveInt, computePageSize, toIso } from './number_utils';
 import { symmetrizeAliases, expandEntitiesByAliases } from './alias_utils';
@@ -95,7 +91,15 @@ const sanitizeParams = (params: BuildRelatedAlertsGraphParams) => {
     defaultScorePerField: 1,
   };
 
-  return { maxAlerts, pageSize, maxTermsPerQuery, maxEntitiesPerField, ignoreMap, aliasMap, scoring };
+  return {
+    maxAlerts,
+    pageSize,
+    maxTermsPerQuery,
+    maxEntitiesPerField,
+    ignoreMap,
+    aliasMap,
+    scoring,
+  };
 };
 
 // ── Seed alert fetching ─────────────────────────────────────────────────────
@@ -210,9 +214,25 @@ const formatOutput = (params: {
 export const buildRelatedAlertsGraph = async (
   params: BuildRelatedAlertsGraphParams
 ): Promise<RelatedAlertsGraphOutput> => {
-  const { esClient, seed, searchIndex, entityFields, seedWindowMs, expandWindowMs, maxDepth, includeSeed } = params;
-  const { maxAlerts, pageSize, maxTermsPerQuery, maxEntitiesPerField, ignoreMap, aliasMap, scoring } =
-    sanitizeParams(params);
+  const {
+    esClient,
+    seed,
+    searchIndex,
+    entityFields,
+    seedWindowMs,
+    expandWindowMs,
+    maxDepth,
+    includeSeed,
+  } = params;
+  const {
+    maxAlerts,
+    pageSize,
+    maxTermsPerQuery,
+    maxEntitiesPerField,
+    ignoreMap,
+    aliasMap,
+    scoring,
+  } = sanitizeParams(params);
 
   const sourceFields = Array.from(
     new Set<string>([

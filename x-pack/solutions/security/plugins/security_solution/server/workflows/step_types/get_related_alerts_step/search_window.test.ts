@@ -8,13 +8,12 @@
 import { searchWindow } from './search_window';
 import type { EsHit, EsSearchClient } from './types';
 
-const makeHit = (id: string, ts: string): EsHit =>
-  ({
-    _id: id,
-    _index: 'alerts',
-    _source: { '@timestamp': ts } as EsHit['_source'],
-    sort: [ts, id],
-  });
+const makeHit = (id: string, ts: string): EsHit => ({
+  _id: id,
+  _index: 'alerts',
+  _source: { '@timestamp': ts } as EsHit['_source'],
+  sort: [ts, id],
+});
 
 const makeClient = (pages: EsHit[][]): EsSearchClient => {
   let callIndex = 0;
@@ -30,7 +29,10 @@ const makeClient = (pages: EsHit[][]): EsSearchClient => {
 
 describe('searchWindow', () => {
   it('invokes onHit for each hit', async () => {
-    const hits = [makeHit('a', '2026-01-01T00:00:00.000Z'), makeHit('b', '2026-01-01T00:01:00.000Z')];
+    const hits = [
+      makeHit('a', '2026-01-01T00:00:00.000Z'),
+      makeHit('b', '2026-01-01T00:01:00.000Z'),
+    ];
     const client = makeClient([hits]);
     const collected: string[] = [];
 
@@ -74,7 +76,10 @@ describe('searchWindow', () => {
   });
 
   it('stops when stop() returns true', async () => {
-    const hits = [makeHit('a', '2026-01-01T00:00:00.000Z'), makeHit('b', '2026-01-01T00:01:00.000Z')];
+    const hits = [
+      makeHit('a', '2026-01-01T00:00:00.000Z'),
+      makeHit('b', '2026-01-01T00:01:00.000Z'),
+    ];
     const client = makeClient([hits]);
     const collected: string[] = [];
     let count = 0;
@@ -120,10 +125,7 @@ describe('searchWindow', () => {
   });
 
   it('increments the queries counter', async () => {
-    const client = makeClient([
-      [makeHit('a', '2026-01-01T00:00:00.000Z')],
-      [],
-    ]);
+    const client = makeClient([[makeHit('a', '2026-01-01T00:00:00.000Z')], []]);
     const queriesRef = { queries: 5 };
 
     await searchWindow({

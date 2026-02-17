@@ -28,4 +28,3 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(getRuleFireCountStepDefinition);
   workflowsExtensions.registerStepDefinition(getRuleMetadataStepDefinition);
 };
-

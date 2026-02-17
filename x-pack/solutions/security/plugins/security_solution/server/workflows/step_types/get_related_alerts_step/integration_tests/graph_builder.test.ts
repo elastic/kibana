@@ -397,9 +397,7 @@ describe('buildRelatedAlertsGraph — integration', () => {
 
     expect(result.nodes.map((n) => n.id).sort()).toEqual(['LATERAL', 'S']);
     expect(result.edges).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ from: 'S', to: 'LATERAL', score: 3 }),
-      ])
+      expect.arrayContaining([expect.objectContaining({ from: 'S', to: 'LATERAL', score: 3 })])
     );
   });
 

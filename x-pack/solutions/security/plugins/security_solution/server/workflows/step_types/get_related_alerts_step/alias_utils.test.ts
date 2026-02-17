@@ -86,9 +86,7 @@ describe('alias_utils', () => {
     });
 
     it('copies values to alias fields', () => {
-      const aliasMap: AliasMap = new Map([
-        ['source.ip', [{ field: 'destination.ip' }]],
-      ]);
+      const aliasMap: AliasMap = new Map([['source.ip', [{ field: 'destination.ip' }]]]);
       const entities = new Map([['source.ip', new Set(['10.0.0.1'])]]);
 
       const result = expandEntitiesByAliases(entities, aliasMap);
@@ -98,9 +96,7 @@ describe('alias_utils', () => {
     });
 
     it('merges values when alias field already has values', () => {
-      const aliasMap: AliasMap = new Map([
-        ['source.ip', [{ field: 'destination.ip' }]],
-      ]);
+      const aliasMap: AliasMap = new Map([['source.ip', [{ field: 'destination.ip' }]]]);
       const entities = new Map([
         ['source.ip', new Set(['10.0.0.1'])],
         ['destination.ip', new Set(['10.0.0.2'])],
@@ -112,9 +108,7 @@ describe('alias_utils', () => {
     });
 
     it('skips empty value sets', () => {
-      const aliasMap: AliasMap = new Map([
-        ['source.ip', [{ field: 'destination.ip' }]],
-      ]);
+      const aliasMap: AliasMap = new Map([['source.ip', [{ field: 'destination.ip' }]]]);
       const entities = new Map([['source.ip', new Set<string>()]]);
 
       const result = expandEntitiesByAliases(entities, aliasMap);

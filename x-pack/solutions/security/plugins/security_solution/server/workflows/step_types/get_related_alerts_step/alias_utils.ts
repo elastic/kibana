@@ -19,17 +19,13 @@ export type AliasMap = Map<string, AliasEntry[]>;
  * both `source.ip -> [destination.ip]` and `destination.ip -> [source.ip]`
  * so either side can drive entity expansion and parent-link matching.
  */
-export const symmetrizeAliases = (
-  raw: Record<string, AliasEntry[]> | undefined
-): AliasMap => {
+export const symmetrizeAliases = (raw: Record<string, AliasEntry[]> | undefined): AliasMap => {
   const map: AliasMap = new Map();
 
   for (const [from, aliases] of Object.entries(raw ?? {})) {
     if (from.length > 0 && Array.isArray(aliases) && aliases.length > 0) {
       const cleaned = aliases
-        .filter(
-          (a): a is AliasEntry => typeof a?.field === 'string' && a.field.length > 0
-        )
+        .filter((a): a is AliasEntry => typeof a?.field === 'string' && a.field.length > 0)
         .filter((a) => a.field !== from);
       if (cleaned.length) {
         map.set(from, cleaned);

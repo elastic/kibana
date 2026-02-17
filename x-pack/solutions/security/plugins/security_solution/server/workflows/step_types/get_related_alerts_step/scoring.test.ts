@@ -95,11 +95,7 @@ describe('scoring', () => {
 
     it('uses per-field score overrides', () => {
       const entityToAlertIds = new Map<string, Set<string>>();
-      indexAlert(
-        entityToAlertIds,
-        'parent-1',
-        new Map([['process.entity_id', new Set(['p1'])]])
-      );
+      indexAlert(entityToAlertIds, 'parent-1', new Map([['process.entity_id', new Set(['p1'])]]));
 
       const scoring: ScoringConfig = {
         minEntityScore: 4,
