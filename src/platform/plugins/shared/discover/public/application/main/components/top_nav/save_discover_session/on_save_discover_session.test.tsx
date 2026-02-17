@@ -170,7 +170,7 @@ describe('onSaveDiscoverSession', () => {
           },
         }),
         services,
-        currentDataView: undefined,
+        currentDataView: dataViewMock,
       });
       const dataViewWithTimeFieldTab = fromTabStateToSavedObjectTab({
         tab: getTabStateMock({
@@ -180,7 +180,7 @@ describe('onSaveDiscoverSession', () => {
           },
         }),
         services,
-        currentDataView: undefined,
+        currentDataView: dataViewMockWithTimeField,
       });
       const adHocDataViewNoTimeFieldTab = fromTabStateToSavedObjectTab({
         tab: getTabStateMock({
@@ -252,12 +252,12 @@ describe('onSaveDiscoverSession', () => {
       const noTimeRestoreTab = fromTabStateToSavedObjectTab({
         tab: getTabStateMock({ id: 'noTimeRestoreTab', attributes: { timeRestore: false } }),
         services,
-        currentDataView: undefined,
+        currentDataView: dataViewMock,
       });
       const timeRestoreTab = fromTabStateToSavedObjectTab({
         tab: getTabStateMock({ id: 'timeRestoreTab', attributes: { timeRestore: true } }),
         services,
-        currentDataView: undefined,
+        currentDataView: dataViewMock,
       });
       let { saveModal } = await setup({
         additionalPersistedTabs: [noTimeRestoreTab],
