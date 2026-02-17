@@ -312,6 +312,7 @@ describe('ChangePasswordModal', () => {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/250436
+    // FLAKY: https://github.com/elastic/kibana/issues/250437
     describe.skip('when rendered for current user', () => {
       beforeEach(() => {
         // Mock useCurrentUser to return the current user
