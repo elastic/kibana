@@ -65,6 +65,7 @@ const createLog = (): SomeDevLog => {
     warning: jest.fn(),
     error: jest.fn(),
     debug: jest.fn(),
+    verbose: jest.fn(),
   } as unknown as SomeDevLog;
 };
 
@@ -166,7 +167,7 @@ describe('AbstractFileSystem', () => {
       expect(fs.extractCalls).toHaveLength(0);
       expect(cleanTypeCheckArtifacts).not.toHaveBeenCalled();
       expect((log.info as jest.Mock).mock.calls).toContainEqual([
-        'No cached TypeScript build artifacts available to restore.',
+        'No cached TypeScript build artifacts found after checking 1 commit(s).',
       ]);
     });
 
