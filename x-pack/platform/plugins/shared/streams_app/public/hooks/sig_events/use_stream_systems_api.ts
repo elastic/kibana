@@ -8,8 +8,8 @@
 import { useAbortController } from '@kbn/react-hooks';
 import type { Streams, System } from '@kbn/streams-schema';
 import type { StorageClientBulkResponse } from '@kbn/storage-adapter';
-import type { SystemIdentificationTaskResult } from '@kbn/streams-plugin/server/routes/internal/streams/systems/route';
-import { useKibana } from '../use_kibana';
+import type { SystemIdentificationTaskResult } from '@kbn/streams-plugin/server/routes/internal/sig_events/systems/route';
+import { useKibana } from '../common/use_kibana';
 import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
 
 interface StreamSystemsApi {

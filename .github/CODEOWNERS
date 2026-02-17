@@ -1700,38 +1700,26 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/test/common/utils/server_route_repository @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 /src/platform/test/functional/services/synthtrace/logs_synthtrace_es_client.ts @elastic/obs-presentation-team @elastic/obs-exploration-team
 
-## Streams parts owned by Logs UX
-/x-pack/platform/plugins/shared/streams/server/routes/streams/processing @elastic/obs-onboarding-team
-/x-pack/platform/plugins/shared/streams/server/routes/streams/schema @elastic/obs-onboarding-team
-/x-pack/platform/plugins/shared/streams_app/public/components/data_management @elastic/obs-onboarding-team
+## Streams parts owned by obs-onboarding-team
+x-pack/platform/plugins/shared/streams/server/lib/stream_management @elastic/obs-onboarding-team
+x-pack/platform/plugins/shared/streams/server/routes/internal/stream_management @elastic/obs-onboarding-team
+x-pack/platform/plugins/shared/streams/server/routes/public/stream_management @elastic/obs-onboarding-team
+x-pack/platform/plugins/shared/streams_app/public/hooks/stream_management @elastic/obs-onboarding-team
+x-pack/platform/plugins/shared/streams_app/public/components/stream_management @elastic/obs-onboarding-team
+x-pack/platform/packages/shared/kbn-streams-ai/src/stream_management @elastic/obs-onboarding-team
+x-pack/platform/packages/shared/kbn-streams-schema/src/stream_management @elastic/obs-onboarding-team
+
+# Streams parts owned by obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/lib/sig_events @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/routes/internal/sig_events @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/routes/public/sig_events @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams_app/public/components/sig_events @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-streams-ai/src/sig_events @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-streams-schema/src/sig_events @elastic/obs-sig-events-team
 
 # Streams parts owned by Kibana Management
-x-pack/platform/plugins/shared/streams_app/public/components/data_management/stream_detail_lifecycle/downsampling @elastic/kibana-management
-
-# Streans parts owned by obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/routes/queries @obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/routes/streams/query @obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/routes/streams/significant_events @obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/routes/internal/streams/description_generation @obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/routes/internal/streams/features @obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/routes/internal/streams/insights @obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/routes/internal/streams/onboarding @obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/routes/internal/streams/prompts @obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/routes/internal/streams/queries @obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/routes/internal/streams/significant_events @obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/routes/internal/streams/systems @obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/routes/internal/streams/tasks @obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/lib/rules @obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/lib/saved_objects @obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/lib/significant_events @obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/lib/tasks @obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/lib/streams/feature @obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/lib/streams/assets @obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/lib/streams/system @obs-sig-events-team
-x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events @obs-sig-events-team
-x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_systems @obs-sig-events-team
-x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_significant_events_view @obs-sig-events-team
-x-pack/platform/plugins/shared/streams_app/public/components/significant_events_discovery @obs-sig-events-team
+x-pack/platform/plugins/shared/streams_app/public/components/stream_management/data_management/stream_detail_lifecycle/downsampling @elastic/kibana-management
 
 # Infra Monitoring tests
 /x-pack/solutions/observability/test/functional/apps/infra @elastic/obs-presentation-team

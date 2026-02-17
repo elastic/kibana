@@ -7,7 +7,7 @@
 
 import { useAbortController } from '@kbn/react-hooks';
 import { useMemo } from 'react';
-import { useKibana } from '../use_kibana';
+import { useKibana } from '../common/use_kibana';
 
 export function useInsightsDiscoveryApi(connectorId?: string) {
   const {

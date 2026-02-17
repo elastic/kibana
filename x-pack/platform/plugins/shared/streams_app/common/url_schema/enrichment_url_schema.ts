@@ -6,8 +6,8 @@
  */
 
 import type { Filter, TimeRange } from '@kbn/es-query';
-import type { SampleDocument } from '@kbn/streams-schema/src/shared/record_types';
-import { sampleDocument } from '@kbn/streams-schema/src/shared/record_types';
+import type { SampleDocument } from '@kbn/streams-schema/src/stream_management/shared/record_types';
+import { sampleDocument } from '@kbn/streams-schema/src/stream_management/shared/record_types';
 import { z } from '@kbn/zod';
 
 /**

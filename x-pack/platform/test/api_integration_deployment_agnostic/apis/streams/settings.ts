@@ -11,7 +11,7 @@ import { Streams, emptyAssets } from '@kbn/streams-schema';
 import type {
   IngestStreamSettings,
   WiredIngestStreamEffectiveSettings,
-} from '@kbn/streams-schema/src/models/ingest/settings';
+} from '@kbn/streams-schema/src/stream_management/models/ingest/settings';
 import {
   disableStreams,
   enableStreams,

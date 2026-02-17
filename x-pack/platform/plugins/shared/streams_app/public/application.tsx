@@ -6,7 +6,7 @@
  */
 import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import React from 'react';
-import { AppRoot } from './components/app_root';
+import { AppRoot } from './components/common/app_root';
 import type { StreamsAppServices } from './services/types';
 import type { StreamsAppStartDependencies } from './types';
 

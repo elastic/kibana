@@ -28,11 +28,11 @@ import {
   STREAMS_UI_PRIVILEGES,
 } from '../common/constants';
 import { registerFeatureFlags } from './feature_flags';
-import { ContentService } from './lib/content/content_service';
-import { registerRules } from './lib/rules/register_rules';
-import { AttachmentService } from './lib/streams/attachments/attachment_service';
-import { QueryService } from './lib/streams/assets/query/query_service';
-import { StreamsService } from './lib/streams/service';
+import { ContentService } from './lib/stream_management/content/content_service';
+import { registerRules } from './lib/sig_events/rules/register_rules';
+import { AttachmentService } from './lib/stream_management/attachments/attachment_service';
+import { QueryService } from './lib/sig_events/assets/query/query_service';
+import { StreamsService } from './lib/stream_management/service';
 import { EbtTelemetryService, StatsTelemetryService } from './lib/telemetry';
 import { streamsRouteRepository } from './routes';
 import type { RouteHandlerScopedClients } from './routes/types';
@@ -41,12 +41,12 @@ import type {
   StreamsPluginStartDependencies,
   StreamsServer,
 } from './types';
-import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
-import { FeatureService } from './lib/streams/feature/feature_service';
-import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
-import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
-import { TaskService } from './lib/tasks/task_service';
-import { SystemService } from './lib/streams/system/system_service';
+import { createStreamsGlobalSearchResultProvider } from './lib/stream_management/create_streams_global_search_result_provider';
+import { FeatureService } from './lib/sig_events/feature/feature_service';
+import { ProcessorSuggestionsService } from './lib/stream_management/ingest_pipelines/processor_suggestions_service';
+import { registerStreamsSavedObjects } from './lib/sig_events/saved_objects/register_saved_objects';
+import { TaskService } from './lib/sig_events/tasks/task_service';
+import { SystemService } from './lib/sig_events/system/system_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}

@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { generateArchive, parseArchive } from '@kbn/streams-plugin/server/lib/content';
+import {
+  generateArchive,
+  parseArchive,
+} from '@kbn/streams-plugin/server/lib/stream_management/content';
 import { Readable } from 'stream';
 import type { ContentPack, ContentPackStream } from '@kbn/content-packs-schema';
 import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';

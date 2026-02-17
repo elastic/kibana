@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
+import type { AttachmentType } from '@kbn/streams-plugin/server/lib/stream_management/attachments/types';
 import type { EnrichmentDataSource } from '../../common/url_schema';
 
 type StreamType = 'wired' | 'classic' | 'query' | 'unknown';

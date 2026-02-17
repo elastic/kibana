@@ -6,7 +6,7 @@
  */
 
 import type { RootSchema, SchemaObject } from '@elastic/ebt';
-import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
+import type { AttachmentType } from '@kbn/streams-plugin/server/lib/stream_management/attachments/types';
 import type {
   StreamsAIGrokSuggestionAcceptedProps,
   StreamsAIDissectSuggestionAcceptedProps,
@@ -51,15 +51,15 @@ const attachmentTypeCountFields: Record<
   },
 };
 
-const streamsAttachmentCountSchema: RootSchema<StreamsAttachmentCountProps> = {
+const streamsAttachmentCountSchema = {
   name: {
-    type: 'keyword',
+    type: 'keyword' as const,
     _meta: {
       description: 'The name of the Stream',
     },
   },
   ...attachmentTypeCountFields,
-};
+} as RootSchema<StreamsAttachmentCountProps>;
 
 const streamsAttachmentClickEventSchema: RootSchema<StreamsAttachmentClickEventProps> = {
   name: {

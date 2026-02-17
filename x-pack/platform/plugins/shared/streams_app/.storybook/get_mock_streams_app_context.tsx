@@ -22,7 +22,7 @@ import { merge } from 'lodash';
 import React, { useMemo } from 'react';
 import { Subject } from 'rxjs';
 import type { DeepPartial } from 'utility-types';
-import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
+import type { StreamsAppKibanaContext } from '../public/hooks/common/use_kibana';
 import { StreamsTelemetryService } from '../public/telemetry/service';
 import type { StreamsAppStartDependencies } from '../public/types';
 

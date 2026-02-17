@@ -9,13 +9,13 @@ import type { RouteMap } from '@kbn/typed-react-router-config';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { StreamsAppPageTemplate } from '../components/streams_app_page_template';
-import { StreamsAppRouterBreadcrumb } from '../components/streams_app_router_breadcrumb';
-import { RedirectTo } from '../components/redirect_to';
-import { StreamListView } from '../components/stream_list_view';
-import { StreamDetailRoot } from '../components/stream_root';
-import { StreamDetailManagement } from '../components/data_management/stream_detail_management';
-import { SignificantEventsDiscoveryPage } from '../components/significant_events_discovery/page';
+import { StreamsAppPageTemplate } from '../components/common/streams_app_page_template';
+import { StreamsAppRouterBreadcrumb } from '../components/common/streams_app_router_breadcrumb';
+import { RedirectTo } from '../components/common/redirect_to';
+import { StreamListView } from '../components/stream_management/stream_list_view';
+import { StreamDetailRoot } from '../components/common/stream_root';
+import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
+import { SignificantEventsDiscoveryPage } from '../components/sig_events/significant_events_discovery/page';
 
 /**
  * Optional time range query params.

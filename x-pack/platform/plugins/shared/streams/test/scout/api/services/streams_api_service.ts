@@ -9,7 +9,10 @@ import type { Condition, StreamlangDSL } from '@kbn/streamlang';
 import type { RoutingStatus, Streams } from '@kbn/streams-schema';
 import type { KbnClient, ScoutLogger } from '@kbn/scout/src/common';
 import { measurePerformanceAsync } from '@kbn/scout/src/common';
-import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
+import type {
+  IngestStream,
+  IngestUpsertRequest,
+} from '@kbn/streams-schema/src/stream_management/models/ingest';
 
 export interface StreamsTestApiService {
   enable: () => Promise<void>;

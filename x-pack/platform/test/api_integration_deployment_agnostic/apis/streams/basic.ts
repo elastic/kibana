@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 import type { FieldDefinition, RoutingStatus } from '@kbn/streams-schema';
 import { Streams, emptyAssets } from '@kbn/streams-schema';
-import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
-import type { InheritedFieldDefinition } from '@kbn/streams-schema/src/fields';
+import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/stream_management/index_templates/generate_index_template';
+import type { InheritedFieldDefinition } from '@kbn/streams-schema/src/stream_management/fields';
 import { get, omit } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';

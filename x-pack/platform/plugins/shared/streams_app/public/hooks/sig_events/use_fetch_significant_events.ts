@@ -7,11 +7,11 @@
 
 import { calculateAuto } from '@kbn/calculate-auto';
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
-import type { SignificantEventsResponse, StreamQuery } from '@kbn/streams-schema';
+import type { SignificantEventsResponse, StreamQuery, StreamQueryKql } from '@kbn/streams-schema';
 import moment from 'moment';
-import { useKibana } from '../use_kibana';
-import { useTimefilter } from '../use_timefilter';
-import { useFetchErrorToast } from '../use_fetch_error_toast';
+import { useKibana } from '../common/use_kibana';
+import { useTimefilter } from '../common/use_timefilter';
+import { useFetchErrorToast } from '../common/use_fetch_error_toast';
 
 export interface SignificantEventItem {
   query: StreamQuery;
@@ -90,25 +90,37 @@ export const useFetchSignificantEvents = (
         aggregated_occurrences: aggregatedOccurrences,
       }) => {
         return {
-          significant_events: significantEvents.map((series) => {
-            const { occurrences, change_points, stream_name, rule_backed, ...rest } = series;
-            return {
-              query: rest,
-              stream_name,
-              change_points,
-              occurrences: occurrences.map((occurrence) => ({
-                x: new Date(occurrence.date).getTime(),
-                y: occurrence.count,
-              })),
-              rule_backed,
-            };
-          }),
-          aggregated_occurrences: aggregatedOccurrences.map((occurrence) => ({
-            x: new Date(occurrence.date).getTime(),
-            y: occurrence.count,
-          })),
+          significant_events: significantEvents.map(
+            (
+              series: {
+                occurrences: Array<{ date: string; count: number }>;
+                change_points: SignificantEventsResponse['change_points'];
+                stream_name: string;
+                rule_backed: boolean;
+                query?: StreamQueryKql;
+              } & Partial<Record<keyof StreamQueryKql, unknown>>
+            ) => {
+              const { occurrences, change_points, stream_name, rule_backed, ...rest } = series;
+              return {
+                query: rest as StreamQuery,
+                stream_name,
+                change_points,
+                occurrences: occurrences.map((occurrence: { date: string; count: number }) => ({
+                  x: new Date(occurrence.date).getTime(),
+                  y: occurrence.count,
+                })),
+                rule_backed,
+              };
+            }
+          ),
+          aggregated_occurrences: aggregatedOccurrences.map(
+            (occurrence: { date: string; count: number }) => ({
+              x: new Date(occurrence.date).getTime(),
+              y: occurrence.count,
+            })
+          ),
           total_occurrences: aggregatedOccurrences.reduce(
-            (sum, occurrence) => sum + occurrence.count,
+            (sum: number, occurrence: { date: string; count: number }) => sum + occurrence.count,
             0
           ),
         };

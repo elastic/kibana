@@ -13,7 +13,7 @@ import type { SearchTotalHits, Refresh } from '@elastic/elasticsearch/lib/api/ty
 import type { Streams } from '@kbn/streams-schema';
 import type { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
-import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
+import type { AttachmentType } from '@kbn/streams-plugin/server/lib/stream_management/attachments/types';
 import type { ContentPackIncludedObjects, ContentPackManifest } from '@kbn/content-packs-schema';
 import type { StreamsSupertestRepositoryClient } from './repository_client';
 

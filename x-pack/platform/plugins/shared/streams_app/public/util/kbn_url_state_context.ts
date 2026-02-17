@@ -8,7 +8,7 @@
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import createContainer from 'constate';
 import { useState } from 'react';
-import { useKibana } from '../hooks/use_kibana';
+import { useKibana } from '../hooks/common/use_kibana';
 
 /**
  * Creates a URL state storage for components that need to persist state to URL params
