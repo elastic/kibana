@@ -42,8 +42,29 @@ export default function (providerContext: FtrProviderContext) {
         // Initialize security solution by creating a prerequisite index pattern.
         // Helps avoid "Error initializing entity store: Data view not found 'security-solution-default'"
         await dataView.create('security-solution');
+
+        // Verify the data view is accessible before proceeding
+        // This ensures the data view is fully propagated in CI environments
+        await retry.waitForWithTimeout('Data view to be accessible', 30000, async () => {
+          const response = await supertest
+            .get('/s/default/api/data_views/data_view/security-solution-default')
+            .expect(200);
+          log.info(`Data view verified: ${response.body.data_view?.title}`);
+          return response.body.data_view?.title === 'logs-*';
+        });
+
         // Create a test index matching transform's pattern to store test documents
         await es.indices.createDataStream({ name: COMMON_DATASTREAM_NAME });
+
+        // Verify the datastream is ready
+        await retry.waitForWithTimeout('Datastream to be ready', 30000, async () => {
+          const response = await es.indices.getDataStream({ name: COMMON_DATASTREAM_NAME });
+          const ready = response.data_streams.length === 1;
+          if (ready) {
+            log.info(`Datastream ${COMMON_DATASTREAM_NAME} is ready`);
+          }
+          return ready;
+        });
 
         log.info('before complete');
       });

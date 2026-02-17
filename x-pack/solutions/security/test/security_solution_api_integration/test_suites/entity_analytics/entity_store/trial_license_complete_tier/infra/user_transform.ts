@@ -98,6 +98,11 @@ export async function createDocumentsAndTriggerTransform(
     expect(result).toBe('created');
   }
 
+  // Refresh the index to ensure documents are visible to the transform
+  // This is critical in CI where timing can be tighter
+  await es.indices.refresh({ index: dataStream });
+  log.debug(`Refreshed index ${dataStream} after creating ${docs.length} documents`);
+
   // Trigger the transform manually
   await triggerTransform(providerContext, USER_TRANSFORM_ID);
 
