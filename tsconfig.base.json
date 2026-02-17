@@ -264,6 +264,8 @@
       "@kbn/content-connectors-plugin/*": ["x-pack/platform/plugins/shared/content_connectors/*"],
       "@kbn/content-list-assembly": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly"],
       "@kbn/content-list-assembly/*": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/*"],
+      "@kbn/content-list-footer": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-footer"],
+      "@kbn/content-list-footer/*": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/*"],
       "@kbn/content-list-mock-data": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data"],
       "@kbn/content-list-mock-data/*": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/*"],
       "@kbn/content-list-provider": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-provider"],
