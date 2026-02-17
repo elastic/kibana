@@ -10,7 +10,8 @@ import { AvailabilityReporting } from './availability_reporting';
 import type { StatusTag } from './location_status_tags';
 import { render } from '../../../../lib/helper/rtl_helpers';
 
-describe('AvailabilityReporting component', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/253299
+describe.skip('AvailabilityReporting component', () => {
   let allLocations: StatusTag[];
 
   beforeEach(() => {
