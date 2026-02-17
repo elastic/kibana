@@ -74,7 +74,6 @@ interface QueryRestResponse {
   language: string;
 }
 
-// TODO - duplicate of FilterMeta type - remove this type
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type FilterMetaRestResponse = {
   alias?: string | null;
@@ -90,12 +89,11 @@ type FilterMetaRestResponse = {
   type?: string;
   key?: string;
   params?: FilterMetaParamsRestResponse;
-  value?: string | SerializableRecord;
+  value?: string | RangeFilterParamsRestResponse | PhraseFilterValue[];
 };
 
 type FilterStateStoreRestResponse = 'appState' | 'globalState';
 
-// duplicate of Filter - remove this type
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type FilterRestResponse = {
   $state?: {

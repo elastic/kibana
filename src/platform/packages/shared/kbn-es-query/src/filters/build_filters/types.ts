@@ -8,10 +8,14 @@
  */
 
 import type { FilterStateStore } from '@kbn/es-query-constants';
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { ExistsFilter } from './exists_filter';
 import type { PhrasesFilter, PhrasesFilterMeta } from './phrases_filter';
-import type { PhraseFilter, PhraseFilterMeta, PhraseFilterMetaParams } from './phrase_filter';
+import type {
+  PhraseFilter,
+  PhraseFilterMeta,
+  PhraseFilterMetaParams,
+  PhraseFilterValue,
+} from './phrase_filter';
 import type { RangeFilter, RangeFilterMeta, RangeFilterParams } from './range_filter';
 import type { MatchAllFilter, MatchAllFilterMeta } from './match_all_filter';
 
@@ -74,7 +78,7 @@ export type FilterMeta = {
   type?: string;
   key?: string;
   params?: FilterMetaParams;
-  value?: string | SerializableRecord;
+  value?: string | RangeFilterParams | PhraseFilterValue[];
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
