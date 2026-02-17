@@ -56,6 +56,7 @@ import type {
   UpdateDefaultIngestPipelineAction,
   UnlinkAssetsAction,
   UnlinkSystemsAction,
+  UnlinkRelationshipsAction,
   UpdateIngestSettingsAction,
   UpdateFailureStoreAction,
   UnlinkFeaturesAction,
@@ -96,6 +97,7 @@ export class ExecutionPlan {
       unlink_assets: [],
       unlink_systems: [],
       unlink_features: [],
+      unlink_relationships: [],
       update_ingest_settings: [],
       upsert_esql_view: [],
       delete_esql_view: [],
@@ -190,6 +192,7 @@ export class ExecutionPlan {
         unlink_assets,
         unlink_systems,
         unlink_features,
+        unlink_relationships,
         update_ingest_settings,
         upsert_esql_view,
         delete_esql_view,
@@ -235,6 +238,7 @@ export class ExecutionPlan {
         this.unlinkAssets(unlink_assets),
         this.unlinkSystems(unlink_systems),
         this.unlinkFeatures(unlink_features),
+        this.unlinkRelationships(unlink_relationships),
         this.deleteEsqlViews(delete_esql_view),
       ]);
 
@@ -294,6 +298,18 @@ export class ExecutionPlan {
 
     return Promise.all(
       actions.map((action) => this.dependencies.featureClient.deleteFeatures(action.request.name))
+    );
+  }
+
+  private async unlinkRelationships(actions: UnlinkRelationshipsAction[]) {
+    if (actions.length === 0) {
+      return;
+    }
+
+    return Promise.all(
+      actions.map((action) =>
+        this.dependencies.relationshipClient.deleteRelationshipsForStream(action.request.name)
+      )
     );
   }
 
