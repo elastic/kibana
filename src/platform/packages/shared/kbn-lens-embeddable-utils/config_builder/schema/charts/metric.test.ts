@@ -113,7 +113,7 @@ describe('Metric Schema', () => {
             background_chart: {
               type: 'bar',
               direction: 'horizontal',
-              goal_value: {
+              max_value: {
                 operation: 'static_value',
                 value: 80,
               },
@@ -170,6 +170,7 @@ describe('Metric Schema', () => {
             operation: 'sum',
             field: 'cost',
             prefix: '$',
+            label_position: 'before',
             compare: {
               to: 'primary',
             },
@@ -199,6 +200,7 @@ describe('Metric Schema', () => {
             operation: 'sum',
             field: 'profit',
             prefix: '',
+            label_position: 'before',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
             color: {
               type: 'static',
@@ -434,6 +436,7 @@ describe('Metric Schema', () => {
             operation: 'sum',
             field: 'profit',
             prefix: '$',
+            label_position: 'before',
             compare: {
               to: 'primary',
             },

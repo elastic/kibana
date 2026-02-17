@@ -29,3 +29,4 @@ export const ENTITY_STORE_ROUTES = {
 export const ENTITY_STORE_TAGS = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
 export const UPDATES_INDEX = '.entities.v2.updates.security_default';
+export const LATEST_INDEX = '.entities.v2.latest.security_default';

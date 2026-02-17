@@ -8,8 +8,6 @@
 import {
   apiIsPresentationContainer,
   type PresentationContainer,
-} from '@kbn/presentation-containers';
-import {
   getTitle,
   type PublishesTitle,
   type HasUniqueId,

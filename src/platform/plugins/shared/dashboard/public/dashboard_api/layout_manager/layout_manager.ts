@@ -30,9 +30,9 @@ import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/grid-layout';
 import type { PinnedControlLayoutState as PinnedPanelLayoutState } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
-import { childrenUnsavedChanges$, type PanelPackage } from '@kbn/presentation-containers';
-import type { SerializedTitles } from '@kbn/presentation-publishing';
+import type { SerializedTitles, PanelPackage } from '@kbn/presentation-publishing';
 import {
+  childrenUnsavedChanges$,
   apiHasLibraryTransforms,
   apiHasSerializableState,
   apiPublishesTitle,

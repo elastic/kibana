@@ -320,6 +320,14 @@ export const ALERT_FLYOUT_PAGINATION_ARIA_LABEL = i18n.translate(
   }
 );
 
+export const ACKNOWLEDGE = i18n.translate('xpack.responseOpsAlertsTable.actions.acknowledge', {
+  defaultMessage: 'Acknowledge',
+});
+
+export const UNACKNOWLEDGE = i18n.translate('xpack.responseOpsAlertsTable.actions.unacknowledge', {
+  defaultMessage: 'Unacknowledge',
+});
+
 export const getAlertFlyoutAriaLabel = (alertDescription: string) =>
   i18n.translate('xpack.responseOpsAlertsTable.alertFlyout.ariaLabel', {
     defaultMessage: 'Details for alert "{alertDescription}"',
