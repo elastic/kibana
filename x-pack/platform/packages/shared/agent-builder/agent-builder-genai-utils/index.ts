@@ -11,6 +11,9 @@ export {
   cleanupMapping,
   getIndexMappings,
   executeEsql,
+  isCcsTarget,
+  partitionByCcs,
+  getFieldsFromFieldCaps,
   type MappingField,
 } from './tools/utils';
 export {

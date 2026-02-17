@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { getIndexMappings } from '@kbn/agent-builder-genai-utils';
+import { getIndexMappings, isCcsTarget, getFieldsFromFieldCaps } from '@kbn/agent-builder-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
@@ -22,19 +22,53 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
     description: 'Retrieve mappings for the specified index or indices.',
     schema: getIndexMappingsSchema,
     handler: async ({ indices }, { esClient }) => {
-      const result = await getIndexMappings({ indices, esClient: esClient.asCurrentUser });
+      // Partition indices into local and remote (CCS) groups.
+      // The _mapping API does not support CCS, so remote indices use _field_caps instead.
+      const localIndices = indices.filter((i) => !isCcsTarget(i));
+      const remoteIndices = indices.filter((i) => isCcsTarget(i));
 
-      return {
-        results: [
-          {
-            type: ToolResultType.other,
-            data: {
-              mappings: result,
-              indices,
-            },
+      const results = [];
+
+      // Local indices: use _mapping API for full mapping tree
+      if (localIndices.length > 0) {
+        const mappings = await getIndexMappings({
+          indices: localIndices,
+          esClient: esClient.asCurrentUser,
+        });
+        results.push({
+          type: ToolResultType.other,
+          data: {
+            mappings,
+            indices: localIndices,
           },
-        ],
-      };
+        });
+      }
+
+      // Remote (CCS) indices: use _field_caps API (CCS-compatible fallback)
+      if (remoteIndices.length > 0) {
+        const fieldsByIndex: Record<string, { fields: Array<{ path: string; type: string }> }> =
+          {};
+        await Promise.all(
+          remoteIndices.map(async (idx) => {
+            const fields = await getFieldsFromFieldCaps({
+              resource: idx,
+              esClient: esClient.asCurrentUser,
+            });
+            fieldsByIndex[idx] = {
+              fields: fields.map(({ path, type }) => ({ path, type })),
+            };
+          })
+        );
+        results.push({
+          type: ToolResultType.other,
+          data: {
+            fieldsByIndex,
+            indices: remoteIndices,
+          },
+        });
+      }
+
+      return { results };
     },
     tags: [],
   };
