@@ -43,6 +43,7 @@ const NEW_START_DATE = 'Jan 18, 2023 @ 20:33:29.186';
 const esqlQuery = 'from auditbeat-* | where ecs.version == "8.0.0"';
 
 // FLAKY: https://github.com/elastic/kibana/issues/253121
+// FLAKY: https://github.com/elastic/kibana/issues/253122
 describe.skip(
   'Basic esql search and filter operations',
   {
