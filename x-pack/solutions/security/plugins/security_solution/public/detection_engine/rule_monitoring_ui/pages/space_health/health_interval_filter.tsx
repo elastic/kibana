@@ -21,7 +21,7 @@ import {
   HealthIntervalGranularity,
   HealthIntervalType,
 } from '../../../../../common/api/detection_engine';
-import * as i18n from '../../../rule_monitoring/components/health_overview/translations';
+import * as i18n from '../../components/health_overview/translations';
 
 export interface HealthIntervalFilterProps {
   /** Called whenever the user changes any interval parameter. */

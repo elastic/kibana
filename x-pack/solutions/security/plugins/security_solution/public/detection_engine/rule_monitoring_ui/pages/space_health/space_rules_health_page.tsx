@@ -24,8 +24,8 @@ import { SecuritySolutionPageWrapper } from '../../../../common/components/page_
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
 import { useSpaceRulesHealth } from '../../../rule_monitoring/logic/detection_engine_health/use_space_rules_health';
-import { SectionPanel } from '../../../rule_monitoring/components/section_panel';
-import { DonutChart } from '../../../rule_monitoring/components/donut_chart';
+import { SectionPanel } from '../../components/section_panel';
+import { DonutChart } from '../../components/donut_chart';
 import {
   HealthOverviewCards,
   RulesByTypeBar,
@@ -34,7 +34,7 @@ import {
   GapsAndFrozenSection,
   TopMessagesSection,
   HistoricalTrendsSection,
-} from '../../../rule_monitoring/components/health_overview';
+} from '../../components/health_overview';
 import { HealthIntervalFilter } from './health_interval_filter';
 
 export const DetectionEngineSpaceRulesHealthPage = memo(
