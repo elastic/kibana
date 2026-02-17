@@ -19,6 +19,7 @@ plugins:
     - intercepts
     - lens
     - maps
+    - navigation
     - observability
     - observability_onboarding
     - painless_lab
