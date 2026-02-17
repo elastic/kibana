@@ -91,14 +91,14 @@ describe('utils', () => {
 
     it('falls back to git rev-parse HEAD when BUILDKITE_COMMIT is not set', async () => {
       delete process.env.BUILDKITE_COMMIT;
-      mockedExeca.mockResolvedValueOnce({ stdout: 'def456\n' } as execa.ExecaReturnValue);
+      mockedExeca.mockResolvedValueOnce({ stdout: 'def456\n' } as any);
       expect(await resolveCurrentCommitSha()).toBe('def456');
       expect(mockedExeca).toHaveBeenCalledWith('git', ['rev-parse', 'HEAD'], expect.any(Object));
     });
 
     it('returns undefined when git returns empty output', async () => {
       delete process.env.BUILDKITE_COMMIT;
-      mockedExeca.mockResolvedValueOnce({ stdout: '' } as execa.ExecaReturnValue);
+      mockedExeca.mockResolvedValueOnce({ stdout: '' } as any);
       expect(await resolveCurrentCommitSha()).toBeUndefined();
     });
   });
@@ -142,7 +142,7 @@ describe('utils', () => {
           'upstream\tgit@github.com:elastic/kibana.git (fetch)',
           'upstream\tgit@github.com:elastic/kibana.git (push)',
         ].join('\n'),
-      } as execa.ExecaReturnValue);
+      } as any);
 
       expect(await resolveUpstreamRemote()).toBe('upstream');
     });
@@ -153,7 +153,7 @@ describe('utils', () => {
           'origin\thttps://github.com/myuser/kibana.git (fetch)',
           'elastic\thttps://github.com/elastic/kibana.git (fetch)',
         ].join('\n'),
-      } as execa.ExecaReturnValue);
+      } as any);
 
       expect(await resolveUpstreamRemote()).toBe('elastic');
     });
@@ -161,7 +161,7 @@ describe('utils', () => {
     it('returns "origin" when origin points to elastic/kibana directly', async () => {
       mockedExeca.mockResolvedValueOnce({
         stdout: 'origin\tgit@github.com:elastic/kibana.git (fetch)\n',
-      } as execa.ExecaReturnValue);
+      } as any);
 
       expect(await resolveUpstreamRemote()).toBe('origin');
     });
@@ -169,7 +169,7 @@ describe('utils', () => {
     it('matches URLs without .git suffix', async () => {
       mockedExeca.mockResolvedValueOnce({
         stdout: 'upstream\thttps://github.com/elastic/kibana (fetch)\n',
-      } as execa.ExecaReturnValue);
+      } as any);
 
       expect(await resolveUpstreamRemote()).toBe('upstream');
     });
@@ -180,7 +180,7 @@ describe('utils', () => {
           'origin\tgit@github.com:myuser/kibana.git (fetch)',
           'other\tgit@github.com:otheruser/kibana.git (fetch)',
         ].join('\n'),
-      } as execa.ExecaReturnValue);
+      } as any);
 
       expect(await resolveUpstreamRemote()).toBeUndefined();
     });
@@ -195,7 +195,7 @@ describe('utils', () => {
     it('returns the access token when gcloud succeeds', async () => {
       mockedExeca.mockResolvedValueOnce({
         stdout: 'ya29.some-token\n',
-      } as execa.ExecaReturnValue);
+      } as any);
 
       expect(await getGcloudAccessToken()).toBe('ya29.some-token');
       expect(mockedExeca).toHaveBeenCalledWith(
@@ -206,7 +206,7 @@ describe('utils', () => {
     });
 
     it('returns undefined when gcloud returns empty output', async () => {
-      mockedExeca.mockResolvedValueOnce({ stdout: '' } as execa.ExecaReturnValue);
+      mockedExeca.mockResolvedValueOnce({ stdout: '' } as any);
       expect(await getGcloudAccessToken()).toBeUndefined();
     });
 
@@ -220,7 +220,7 @@ describe('utils', () => {
     it('returns true when getGcloudAccessToken returns a token', async () => {
       mockedExeca.mockResolvedValueOnce({
         stdout: 'ya29.some-token',
-      } as execa.ExecaReturnValue);
+      } as any);
 
       expect(await isGcloudAvailable()).toBe(true);
     });
