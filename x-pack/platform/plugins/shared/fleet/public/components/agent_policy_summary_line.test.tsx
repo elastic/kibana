@@ -49,4 +49,40 @@ describe('AgentPolicySummaryLine', () => {
     );
     expect(results.container.textContent).toBe('testrev. 1Outdated policy');
   });
+
+  test('it should render policy name with ID in title and text when showPolicyId is true', async () => {
+    const results = testRenderer.render(
+      <AgentPolicySummaryLine
+        policy={{ id: 'test-policy-id', name: 'Test Policy', revision: 1 } as AgentPolicy}
+        showPolicyId={true}
+      />
+    );
+    const linkElement = results.getByTestId('agentPolicyNameLink');
+    expect(linkElement.textContent).toBe('Test Policy (test-policy-id)');
+    expect(linkElement.getAttribute('title')).toBe('Test Policy (test-policy-id)');
+  });
+
+  test('it should render only policy name in title and text when showPolicyId is false', async () => {
+    const results = testRenderer.render(
+      <AgentPolicySummaryLine
+        policy={{ id: 'test-policy-id', name: 'Test Policy', revision: 1 } as AgentPolicy}
+        showPolicyId={false}
+      />
+    );
+    const linkElement = results.getByTestId('agentPolicyNameLink');
+    expect(linkElement.textContent).toBe('Test Policy');
+    expect(linkElement.getAttribute('title')).toBe('Test Policy');
+  });
+
+  test('it should render policy ID in title and text when showPolicyId is true but name is not available', async () => {
+    const results = testRenderer.render(
+      <AgentPolicySummaryLine
+        policy={{ id: 'test-policy-id', revision: 1 } as AgentPolicy}
+        showPolicyId={true}
+      />
+    );
+    const linkElement = results.getByTestId('agentPolicyNameLink');
+    expect(linkElement.textContent).toBe('test-policy-id');
+    expect(linkElement.getAttribute('title')).toBe('test-policy-id');
+  });
 });

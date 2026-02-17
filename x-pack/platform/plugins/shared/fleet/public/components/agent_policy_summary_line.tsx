@@ -49,6 +49,9 @@ export const AgentPolicySummaryLine = memo<{
     const revision = agent ? agent.policy_revision : policy.revision;
     const isOutdated = agent?.policy_revision && policy.revision > agent.policy_revision;
 
+    // Compute display value once for both link text and title
+    const displayValue = showPolicyId && name ? `${name} (${id})` : name || id;
+
     return (
       <EuiFlexGroup gutterSize="m" css={MIN_WIDTH} alignItems="center">
         <EuiFlexItem grow={false}>
@@ -89,10 +92,10 @@ export const AgentPolicySummaryLine = memo<{
                       <EuiLink
                         className="eui-textBreakNormal"
                         href={getHref('policy_details', { policyId: id })}
-                        title={name || id}
+                        title={displayValue}
                         data-test-subj="agentPolicyNameLink"
                       >
-                        {showPolicyId && name ? `${name} (${id})` : name || id}
+                        {displayValue}
                       </EuiLink>
                     </EuiFlexItem>
 
