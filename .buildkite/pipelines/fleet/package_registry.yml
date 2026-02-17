@@ -77,7 +77,7 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 105
     timeout_in_minutes: 75
-    parallelism: 20
+    parallelism: 22
     key: defend-workflows-stateful
     depends_on: build
     retry:
