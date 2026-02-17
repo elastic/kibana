@@ -184,3 +184,35 @@ triggers:
 steps:
   - name: hello_world_step
     type:`;
+
+/**
+ * Manual-only workflow with an event variable reference.
+ * Used to verify that event.* autocomplete only shows spaceId (no alert properties).
+ */
+export const getManualTriggerEventAutocompleteYaml = (name: string) => `
+name: ${name}
+description: Manual trigger - event should only have spaceId
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: log_step
+    type: console
+    with:
+      message: "{{ event. }}"`;
+
+/**
+ * Alert trigger workflow with an event variable reference.
+ * Used to verify that event.* autocomplete shows alerts, rule, params, and spaceId.
+ */
+export const getAlertTriggerEventAutocompleteYaml = (name: string) => `
+name: ${name}
+description: Alert trigger - event should have alerts, rule, params, spaceId
+enabled: true
+triggers:
+  - type: alert
+steps:
+  - name: log_step
+    type: console
+    with:
+      message: "{{ event. }}"`;

@@ -587,7 +587,7 @@ export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
 
 // Note: AlertSchema from '@kbn/alerts-as-data-utils' uses io-ts runtime types, not Zod.
 // Once a Zod-compatible version is available, we should import and use it instead.
-const AlertSchema = z.object({
+export const AlertSchema = z.object({
   _id: z.string(),
   _index: z.string(),
   kibana: z.object({
@@ -596,7 +596,7 @@ const AlertSchema = z.object({
   '@timestamp': z.string(),
 });
 
-const RuleSchema = z.object({
+export const RuleSchema = z.object({
   id: z.string(),
   name: z.string(),
   tags: z.array(z.string()),
@@ -605,12 +605,27 @@ const RuleSchema = z.object({
   ruleTypeId: z.string(),
 });
 
-export const EventSchema = z.object({
+/**
+ * Alert-specific event properties. Only present when the workflow has an alert trigger.
+ */
+export const AlertEventPropsSchema = z.object({
   alerts: z.array(z.union([AlertSchema, z.any()])),
   rule: RuleSchema,
-  spaceId: z.string(),
   params: z.any(),
 });
+
+/**
+ * Base event properties that are always present regardless of trigger type.
+ */
+export const BaseEventSchema = z.object({
+  spaceId: z.string(),
+});
+
+/**
+ * Full event schema (used for runtime validation of alert-triggered workflows).
+ * For autocomplete, use getEventSchemaForTriggers() to get a trigger-aware schema.
+ */
+export const EventSchema = BaseEventSchema.merge(AlertEventPropsSchema);
 
 // Recursive type for workflow inputs that supports nested objects from JSON Schema
 const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
@@ -641,6 +656,9 @@ export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
   // extending with actual inputs and consts of different types
   inputs: z.object({}),
   consts: z.object({}),
+  // overriding event with base event schema (spaceId only) so it can be
+  // dynamically extended with trigger-specific properties (e.g., alerts, rule)
+  event: BaseEventSchema.optional(),
 });
 export type DynamicWorkflowContext = z.infer<typeof DynamicWorkflowContextSchema>;
 
