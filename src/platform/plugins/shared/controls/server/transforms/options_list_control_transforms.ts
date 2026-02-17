@@ -9,9 +9,10 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
-import type {
-  LegacyStoredOptionsListExplicitInput,
-  OptionsListDSLControlState,
+import {
+  controlsGroupSchema,
+  type LegacyStoredOptionsListExplicitInput,
+  type OptionsListDSLControlState,
 } from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
@@ -69,7 +70,8 @@ export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup
         } = convertCamelCasedKeysToSnakeCase<LegacyStoredOptionsListExplicitInput>(
           state as LegacyStoredOptionsListExplicitInput
         );
-        return {
+
+        const transformedConfig = {
           ...dataControlState,
           exclude,
           ...{ sort: sort as OptionsListDSLControlState['sort'] },
@@ -80,6 +82,22 @@ export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup
           selected_options,
           single_select,
         };
+
+        try {
+          controlsGroupSchema.validate([transformedConfig]);
+        } catch (e) {
+          // If the control config fails to validate because of unexpected `null` values, try omitting the `null` values
+          const deNulledConfig = Object.entries(transformedConfig).reduce(
+            (result, [key, value]) => {
+              if (value === null) return result;
+              return { ...result, [key]: value };
+            },
+            {} as OptionsListDSLControlState
+          );
+          return deNulledConfig;
+        }
+
+        return transformedConfig;
       },
     }),
   });
