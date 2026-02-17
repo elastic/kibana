@@ -8,7 +8,6 @@ steps:
       - linting
       - linting_with_types
       - check_types
-      - check_oas_snapshot
     steps:
       - label: '🔍 Discover EIS Models'
         command: .buildkite/scripts/steps/test/discover_eis_models.sh
