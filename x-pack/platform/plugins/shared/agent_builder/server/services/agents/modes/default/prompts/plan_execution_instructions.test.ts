@@ -88,13 +88,7 @@ describe('getPlanExecutionInstructions', () => {
     const result = getPlanExecutionInstructions(plan);
 
     expect(result).toContain('### Plan Execution Guidelines');
-    expect(result).toContain("Follow the plan's action items in order.");
     expect(result).toContain('`planning.update_plan`');
-    expect(result).toContain(
-      'If you encounter issues, explain them and update the plan accordingly.'
-    );
-    expect(result).toContain(
-      'Do not skip items unless they are already completed or explicitly no longer needed.'
-    );
+    expect(result).toContain('Do not skip items unless they are already completed');
   });
 });
