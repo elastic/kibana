@@ -322,7 +322,7 @@ export const getPlanningTools = ({
     },
   };
 
-  const allTools: BuiltinToolDefinition[] = [createPlanTool, updatePlanTool];
+  const allTools: Array<BuiltinToolDefinition<any>> = [createPlanTool, updatePlanTool];
 
   // Only include suggest_planning_mode in agent mode (no point suggesting planning in planning mode)
   if (agentMode === 'agent') {

@@ -78,7 +78,6 @@ export const runPlanningAgentMode = async (
 
   const pendingRound = getPendingRound(conversation);
   const startTime = new Date();
-  const conversationTimestamp = pendingRound?.started_at ?? startTime.toISOString();
 
   if (!pendingRound) {
     context.attachmentStateManager.clearAccessTracking();
