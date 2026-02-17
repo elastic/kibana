@@ -46,6 +46,25 @@ findExistingSnapshotSha() {
   return 1
 }
 
+commentOnMissingBaselineSnapshot() {
+  local comment_message
+  comment_message="$(cat <<'EOF'
+The Saved Objects check could not find a baseline snapshot for this PR after checking the merge-base commit and up to 10 ancestors.
+
+Please rebase this PR branch onto a recent `main` commit with a successful `on-merge` pipeline, then rerun CI.
+
+Build for troubleshooting: ${BUILDKITE_BUILD_URL}
+EOF
+)"
+
+  if ! ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+    --message "$comment_message" \
+    --context "check-saved-objects-baseline-missing" \
+    --clear-previous; then
+    echo "⚠️ Failed to post baseline snapshot guidance comment on the PR." >&2
+  fi
+}
+
 echo --- Check changes in Saved Objects
 
 if is_pr; then
@@ -53,6 +72,7 @@ if is_pr; then
   # First, we try to obtain its SHA (or one of its ancestors)
   MERGE_BASE_REV="$(findExistingSnapshotSha "$GITHUB_PR_MERGE_BASE")"
   if [[ $? -ne 0 ]]; then
+    commentOnMissingBaselineSnapshot
     echo "❌ Could not find an existing snapshot to use as a baseline. Aborting Saved Objects checks" >&2
     exit 1
   fi
