@@ -118,6 +118,7 @@ async function fetchLogContext({
       plugins,
       logger,
       esClient,
+      index,
       start: windowStart,
       end: windowEnd,
       kqlFilter: `_id: ${id}`,
