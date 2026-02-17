@@ -21,6 +21,7 @@ import type { ICommandContext } from '../types';
 import { getMessageFromId } from '../../definitions/utils';
 import {
   getPromqlFunctionDefinition,
+  getPromqlOperatorDefinition,
   isPromqlAcrossSeriesFunction,
 } from '../../definitions/utils/promql';
 import { getPromqlExpressionType } from '../../definitions/utils/expressions';
@@ -34,6 +35,7 @@ import {
   getPromqlSignatureMismatch,
 } from '../../definitions/utils/validation/function';
 import type {
+  PromQLBinaryExpression,
   PromQLFunction,
   PromQLLabelName,
   PromQLSelector,
@@ -435,6 +437,11 @@ function validatePromqlQuery(
       visitPromqlSelector: (selector) => {
         selectors.push(selector);
       },
+
+      visitPromqlBinaryExpression: (binary) => {
+        const definition = getPromqlOperatorDefinition(binary.name);
+        messages.push(...getBinaryOperatorTypeErrors(binary, definition));
+      },
     },
   });
 
@@ -521,6 +528,33 @@ function getMatchingSignatureErrors(
       messageId: 'promqlNoMatchingSignature',
       values: { fn: fn.name, required: mismatch.required },
       locations: getPromqlNodeLocation(fn.args[mismatch.mismatchIdx], fn.location),
+    }),
+  ];
+}
+
+/* Returns an error when binary operator operand types don't match any signature. */
+function getBinaryOperatorTypeErrors(
+  binary: PromQLBinaryExpression,
+  definition: PromQLFunctionDefinition | undefined
+): ESQLMessage[] {
+  if (!definition || binary.incomplete) return [];
+
+  const argTypes = [binary.left, binary.right].map(getPromqlExpressionType);
+  if (argTypes.some((argType) => !argType)) return [];
+
+  const matching = getPromqlMatchingSignatures(definition.signatures, argTypes);
+  if (matching.length > 0) return [];
+
+  const mismatch = getPromqlSignatureMismatch(definition.signatures, argTypes, 2);
+  if (!mismatch) return [];
+
+  const mismatchedNode = mismatch.mismatchIdx === 0 ? binary.left : binary.right;
+
+  return [
+    getMessageFromId({
+      messageId: 'promqlNoMatchingSignature',
+      values: { fn: binary.name, required: mismatch.required },
+      locations: getPromqlNodeLocation(mismatchedNode, binary.location),
     }),
   ];
 }
