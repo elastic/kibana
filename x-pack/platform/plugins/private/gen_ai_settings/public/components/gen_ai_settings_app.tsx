@@ -40,6 +40,7 @@ import { AIAssistantVisibility } from './ai_assistant_visibility/ai_assistant_vi
 import { ChatExperience } from './chat_experience/chat_experience';
 import { PrePromptWorkflowSection } from './pre_prompt_workflow_section';
 import { DocumentationSection } from './documentation';
+import { AnonymizationProfilesSection } from './anonymization_profiles_section';
 
 interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -60,6 +61,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     showAiBreadcrumb,
     showAiAssistantsVisibilitySetting,
     showChatExperienceSetting,
+    showAnonymizationProfilesSection,
   } = useEnabledFeatures();
   const { euiTheme } = useEuiTheme();
   const { fields, unsavedChanges, isSaving, cleanUnsavedChanges, saveAll } = useSettingsContext();
@@ -87,12 +89,12 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     const breadcrumbs = [
       ...(showAiBreadcrumb
         ? [
-            {
-              text: i18n.translate('genAiSettings.breadcrumbs.ai', {
-                defaultMessage: 'AI',
-              }),
-            },
-          ]
+          {
+            text: i18n.translate('genAiSettings.breadcrumbs.ai', {
+              defaultMessage: 'AI',
+            }),
+          },
+        ]
         : []),
       {
         text: i18n.translate('genAiSettings.breadcrumbs.genAiSettings', {
@@ -163,11 +165,10 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
       <p>
         <FormattedMessage
           id="genAiSettings.aiConnectorDescriptionWithLink"
-          defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses its {preconfiguredConnectors} ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector.${
-            showSpacesNote
+          defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses its {preconfiguredConnectors} ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector.${showSpacesNote
               ? ' Set up your own connectors or disable the AI Assistant from the {aiFeatureVisibility} setting below.'
               : ''
-          } {manageConnectors}`}
+            } {manageConnectors}`}
           values={{
             link: (
               <EuiLink
@@ -437,6 +438,27 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
               <EuiSpacer size="l" />
 
               <DocumentationSection productDocBase={productDocBase} />
+            </>
+          )}
+
+          {showAnonymizationProfilesSection && (
+            <>
+              <EuiSpacer size="l" />
+              <EuiSplitPanel.Outer hasBorder grow={false}>
+                <EuiSplitPanel.Inner color="subdued">
+                  <EuiTitle size="s">
+                    <h3 data-test-subj="anonymizationSectionTitle">
+                      <FormattedMessage
+                        id="genAiSettings.anonymization.sectionTitle"
+                        defaultMessage="Anonymization"
+                      />
+                    </h3>
+                  </EuiTitle>
+                </EuiSplitPanel.Inner>
+                <EuiSplitPanel.Inner>
+                  <AnonymizationProfilesSection />
+                </EuiSplitPanel.Inner>
+              </EuiSplitPanel.Outer>
             </>
           )}
         </EuiPageSection>
