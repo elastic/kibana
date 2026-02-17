@@ -65,15 +65,6 @@ export const ANONYMIZATION_PROFILES_MAPPINGS = {
     created_by: { type: 'keyword' as const },
     updated_by: { type: 'keyword' as const },
     namespace: { type: 'keyword' as const },
-    migration: {
-      properties: {
-        ai_anonymization_settings: {
-          properties: {
-            applied_at: { type: 'date' as const },
-          },
-        },
-      },
-    },
   },
   _meta: {
     managed: true,

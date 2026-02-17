@@ -37,7 +37,6 @@ import {
   ALERTS_DATA_VIEW_TARGET_TYPE,
   ensureAlertsDataViewProfile,
 } from './initialization';
-import { migrateAnonymizationSettings } from './migration';
 
 interface AnonymizationSetupDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
@@ -150,21 +149,6 @@ export class AnonymizationPlugin
         return [];
       }
     };
-    const runLegacySettingsMigration = async (namespace: string): Promise<void> => {
-      const namespaceScopedClient = core.savedObjects
-        .getUnsafeInternalClient()
-        .asScopedToNamespace(namespace);
-      const namespaceUiSettingsClient =
-        core.uiSettings.globalAsScopedToClient(namespaceScopedClient);
-
-      await migrateAnonymizationSettings({
-        namespace,
-        esClient,
-        uiSettings: namespaceUiSettingsClient,
-        logger: this.logger,
-      });
-    };
-
     // Ensure a default alerts data view profile exists in the default space at startup.
     void (async () => {
       try {
@@ -173,7 +157,6 @@ export class AnonymizationPlugin
           namespace: 'default',
           profilesRepo,
           saltService,
-          migrateLegacySettings: () => runLegacySettingsMigration('default'),
           logger: this.logger,
         });
       } catch (err) {
@@ -195,7 +178,6 @@ export class AnonymizationPlugin
             namespace,
             profilesRepo,
             saltService,
-            migrateLegacySettings: () => runLegacySettingsMigration(namespace),
             logger: this.logger,
           });
         }

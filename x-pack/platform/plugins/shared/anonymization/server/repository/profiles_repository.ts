@@ -49,11 +49,6 @@ interface EsProfileDocument {
   updated_at: string;
   created_by: string;
   updated_by: string;
-  migration?: {
-    ai_anonymization_settings?: {
-      applied_at?: string;
-    };
-  };
 }
 
 interface CreateProfileParams {

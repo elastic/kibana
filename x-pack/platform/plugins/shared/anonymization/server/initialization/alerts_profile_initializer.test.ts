@@ -52,36 +52,17 @@ describe('ensureAlertsDataViewProfile', () => {
     );
   });
 
-  it('runs legacy settings migration when auto-creating profile', async () => {
-    const migrateLegacySettings = jest.fn().mockResolvedValue(undefined);
-    (mockProfilesRepo.findByTarget as jest.Mock).mockResolvedValue(null);
-    (mockProfilesRepo.create as jest.Mock).mockResolvedValue({ id: 'test-id' });
-
-    await ensureAlertsDataViewProfile({
-      namespace: 'default',
-      profilesRepo: mockProfilesRepo,
-      saltService: mockSaltService,
-      migrateLegacySettings,
-      logger,
-    });
-
-    expect(migrateLegacySettings).toHaveBeenCalledTimes(1);
-  });
-
   it('does not create a profile when one already exists', async () => {
     (mockProfilesRepo.findByTarget as jest.Mock).mockResolvedValue({ id: 'existing' });
-    const migrateLegacySettings = jest.fn().mockResolvedValue(undefined);
 
     await ensureAlertsDataViewProfile({
       namespace: 'default',
       profilesRepo: mockProfilesRepo,
       saltService: mockSaltService,
-      migrateLegacySettings,
       logger,
     });
 
     expect(mockProfilesRepo.create).not.toHaveBeenCalled();
-    expect(migrateLegacySettings).toHaveBeenCalledTimes(1);
   });
 
   it('handles concurrent creation gracefully (409 conflict)', async () => {

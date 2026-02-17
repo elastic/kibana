@@ -17,10 +17,6 @@ jest.mock('./system_index', () => ({
   ensureProfilesIndex: jest.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock('./migration', () => ({
-  migrateAnonymizationSettings: jest.fn().mockResolvedValue(undefined),
-}));
-
 jest.mock('./initialization', () => ({
   ALERTS_DATA_VIEW_TARGET_TYPE: 'data_view',
   getAlertsDataViewTargetId: (namespace: string) => `security-solution-${namespace}`,

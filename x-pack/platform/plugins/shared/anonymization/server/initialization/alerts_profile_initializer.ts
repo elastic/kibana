@@ -26,13 +26,11 @@ export const ensureAlertsDataViewProfile = async ({
   namespace,
   profilesRepo,
   saltService,
-  migrateLegacySettings,
   logger,
 }: {
   namespace: string;
   profilesRepo: ProfilesRepository;
   saltService: SaltService;
-  migrateLegacySettings?: () => Promise<void>;
   logger: Logger;
 }): Promise<void> => {
   try {
@@ -71,11 +69,6 @@ export const ensureAlertsDataViewProfile = async ({
       logger.info(`Created alerts data view anonymization profile in space: ${namespace}`);
     }
 
-    // Run the idempotent legacy migration after ensure flow so it applies
-    // both when the profile already exists and immediately after first create.
-    if (migrateLegacySettings) {
-      await migrateLegacySettings();
-    }
   } catch (err) {
     // If another node created it concurrently, that's fine
     if ((err as any).statusCode === 409) {
