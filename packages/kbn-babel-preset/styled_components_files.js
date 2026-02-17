@@ -34,7 +34,6 @@ module.exports = {
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]agent_policy[\/\\]components[\/\\]agent_policy_advanced_fields[\/\\]custom_fields[\/\\]index.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]agent_policy[\/\\]components[\/\\]agent_policy_create_inline.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]agent_policy[\/\\]components[\/\\]agent_policy_form.tsx/,
-    /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]agent_policy[\/\\]components[\/\\]agent_policy_yaml_flyout.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]agent_policy[\/\\]create_package_policy_page[\/\\]components[\/\\]steps[\/\\]components[\/\\]dataset_component.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]agent_policy[\/\\]create_package_policy_page[\/\\]components[\/\\]steps[\/\\]components[\/\\]package_policy_input_panel.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]agent_policy[\/\\]create_package_policy_page[\/\\]components[\/\\]steps[\/\\]components[\/\\]package_policy_input_stream.tsx/,
