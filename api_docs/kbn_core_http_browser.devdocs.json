@@ -267,12 +267,12 @@
             "id": "def-public.HttpFetchQuery.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string]: string | number | boolean | string[] | boolean[] | number[] | null | undefined",
+            "label": "[key: string]: string | number | boolean | string[] | number[] | boolean[] | null | undefined",
             "description": [
               "\nTypeScript note: Technically we should use this interface instead, but @types/node uses the below stricter\ndefinition, so to avoid TypeScript errors, we'll restrict our version.\n\n[key: string]:\n  | string\n  | number\n  | boolean\n  | Array<string | number | boolean>\n  | undefined\n  | null;"
             ],
             "signature": [
-              "[key: string]:  string | number | boolean | string[] | boolean[] | number[] | null | undefined"
+              "[key: string]:  string | number | boolean | string[] | number[] | boolean[] | null | undefined"
             ],
             "path": "src/core/packages/http/browser/src/types.ts",
             "lineNumber": 269,
@@ -472,7 +472,7 @@
                 "tags": [],
                 "label": "controller",
                 "description": [
-                  "{@link IHttpInterceptController }"
+                  "{@link IHttpInterceptController}"
                 ],
                 "signature": [
                   "IHttpInterceptController"
@@ -526,7 +526,7 @@
                 "tags": [],
                 "label": "httpErrorRequest",
                 "description": [
-                  "{@link HttpInterceptorRequestError }"
+                  "{@link HttpInterceptorRequestError}"
                 ],
                 "signature": [
                   "HttpInterceptorRequestError"
@@ -545,7 +545,7 @@
                 "tags": [],
                 "label": "controller",
                 "description": [
-                  "{@link IHttpInterceptController }"
+                  "{@link IHttpInterceptController}"
                 ],
                 "signature": [
                   "IHttpInterceptController"
@@ -595,7 +595,7 @@
                 "tags": [],
                 "label": "next",
                 "description": [
-                  "{@link HttpSetup.fetch }"
+                  "{@link HttpSetup.fetch}"
                 ],
                 "signature": [
                   "(fetchOptions: ",
@@ -618,7 +618,7 @@
                 "tags": [],
                 "label": "fetchOptions",
                 "description": [
-                  "{@link HttpFetchOptionsWithPath }"
+                  "{@link HttpFetchOptionsWithPath}"
                 ],
                 "signature": [
                   "Readonly<",
@@ -639,7 +639,7 @@
                 "tags": [],
                 "label": "controller",
                 "description": [
-                  "{@link IHttpInterceptController }"
+                  "{@link IHttpInterceptController}"
                 ],
                 "signature": [
                   "IHttpInterceptController"
@@ -693,7 +693,7 @@
                 "tags": [],
                 "label": "httpResponse",
                 "description": [
-                  "{@link HttpResponse }"
+                  "{@link HttpResponse}"
                 ],
                 "signature": [
                   "HttpResponse",
@@ -713,7 +713,7 @@
                 "tags": [],
                 "label": "controller",
                 "description": [
-                  "{@link IHttpInterceptController }"
+                  "{@link IHttpInterceptController}"
                 ],
                 "signature": [
                   "IHttpInterceptController"
@@ -767,7 +767,7 @@
                 "tags": [],
                 "label": "httpErrorResponse",
                 "description": [
-                  "{@link HttpInterceptorResponseError }"
+                  "{@link HttpInterceptorResponseError}"
                 ],
                 "signature": [
                   "HttpInterceptorResponseError"
@@ -786,7 +786,7 @@
                 "tags": [],
                 "label": "controller",
                 "description": [
-                  "{@link IHttpInterceptController }"
+                  "{@link IHttpInterceptController}"
                 ],
                 "signature": [
                   "IHttpInterceptController"
@@ -1375,7 +1375,7 @@
                 "tags": [],
                 "label": "interceptor",
                 "description": [
-                  "a {@link HttpInterceptor }"
+                  "a {@link HttpInterceptor}"
                 ],
                 "signature": [
                   "HttpInterceptor"

@@ -1309,7 +1309,7 @@
             "tags": [],
             "label": "item",
             "description": [
-              "exception item entry\nset to add a nested field"
+              "exception item entry"
             ],
             "signature": [
               {
@@ -1518,7 +1518,7 @@
             "tags": [],
             "label": "parentIndex",
             "description": [
-              "corresponds to the entry index, this might seem obvious, but\nwas added to ensure that nested items could be identified with their parent entry"
+              "corresponds to the entry index, this might seem obvious, but"
             ],
             "signature": [
               "number | undefined"
@@ -1668,7 +1668,7 @@
             "tags": [],
             "label": "parentIndex",
             "description": [
-              "corresponds to the entry index, this might seem obvious, but\nwas added to ensure that nested items could be identified with their parent entry"
+              "corresponds to the entry index, this might seem obvious, but"
             ],
             "signature": [
               "number | undefined"
@@ -2380,7 +2380,7 @@
             "tags": [],
             "label": "entryIndex",
             "description": [
-              "index of given entry, for nested entries, this will correspond\nto their parent index"
+              "index of given entry, for nested entries, this will correspond"
             ],
             "signature": [
               "number"
@@ -3416,7 +3416,7 @@
           "[]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-        "lineNumber": 134,
+        "lineNumber": 153,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3440,7 +3440,7 @@
           "[]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-        "lineNumber": 147,
+        "lineNumber": 166,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3554,7 +3554,7 @@
           "[]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-        "lineNumber": 121,
+        "lineNumber": 140,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3580,7 +3580,7 @@
           "[]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-        "lineNumber": 108,
+        "lineNumber": 127,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3604,7 +3604,7 @@
           "[]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-        "lineNumber": 162,
+        "lineNumber": 181,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3628,7 +3628,7 @@
           "[]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-        "lineNumber": 151,
+        "lineNumber": 170,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3768,7 +3768,7 @@
         "label": "doesNotExistOperator",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-        "lineNumber": 60,
+        "lineNumber": 69,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3781,7 +3781,7 @@
             "label": "message",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 61,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3804,7 +3804,7 @@
               ".EXCLUDED"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 64,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3827,7 +3827,7 @@
               ".EXISTS"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 65,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3840,7 +3840,7 @@
             "label": "value",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 66,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3854,9 +3854,11 @@
         "type": "Object",
         "tags": [],
         "label": "doesNotMatchOperator",
-        "description": [],
+        "description": [
+          "\nThe \"does not match\" operator supports wildcard patterns (*, ?) and uses WILDCARD type.\nThis renders AutocompleteFieldWildcardComponent in the UI."
+        ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-        "lineNumber": 96,
+        "lineNumber": 115,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3869,7 +3871,7 @@
             "label": "message",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 97,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3892,7 +3894,7 @@
               ".EXCLUDED"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 100,
+            "lineNumber": 119,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3915,7 +3917,7 @@
               ".WILDCARD"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 101,
+            "lineNumber": 120,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3928,7 +3930,7 @@
             "label": "value",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 102,
+            "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3944,7 +3946,7 @@
         "label": "existsOperator",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-        "lineNumber": 51,
+        "lineNumber": 60,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3957,7 +3959,7 @@
             "label": "message",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 52,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3980,7 +3982,7 @@
               ".INCLUDED"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 55,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4003,7 +4005,7 @@
               ".EXISTS"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 56,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4016,7 +4018,7 @@
             "label": "value",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 57,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4032,7 +4034,7 @@
         "label": "isInListOperator",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-        "lineNumber": 69,
+        "lineNumber": 78,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4045,7 +4047,7 @@
             "label": "message",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 70,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4068,7 +4070,7 @@
               ".INCLUDED"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 73,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4091,7 +4093,7 @@
               ".LIST"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 74,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4104,7 +4106,7 @@
             "label": "value",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 75,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4120,7 +4122,7 @@
         "label": "isNotInListOperator",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-        "lineNumber": 78,
+        "lineNumber": 87,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4133,7 +4135,7 @@
             "label": "message",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 79,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4156,7 +4158,7 @@
               ".EXCLUDED"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 82,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4179,7 +4181,7 @@
               ".LIST"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 83,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4192,7 +4194,7 @@
             "label": "value",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 84,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4208,7 +4210,7 @@
         "label": "isNotOneOfOperator",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-        "lineNumber": 42,
+        "lineNumber": 51,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4221,7 +4223,7 @@
             "label": "message",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 43,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4244,7 +4246,7 @@
               ".EXCLUDED"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 46,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4267,7 +4269,7 @@
               ".MATCH_ANY"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 47,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4280,7 +4282,7 @@
             "label": "value",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 48,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4294,9 +4296,11 @@
         "type": "Object",
         "tags": [],
         "label": "isNotOperator",
-        "description": [],
+        "description": [
+          "\nThe \"is not\" operator (UI label) uses MATCH type in the code.\nThis renders AutocompleteFieldMatchComponent in the UI."
+        ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-        "lineNumber": 24,
+        "lineNumber": 33,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4309,7 +4313,7 @@
             "label": "message",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 25,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4332,7 +4336,7 @@
               ".EXCLUDED"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 28,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4355,7 +4359,7 @@
               ".MATCH"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 29,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4368,7 +4372,7 @@
             "label": "value",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 30,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4384,7 +4388,7 @@
         "label": "isOneOfOperator",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-        "lineNumber": 33,
+        "lineNumber": 42,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4397,7 +4401,7 @@
             "label": "message",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 34,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4420,7 +4424,7 @@
               ".INCLUDED"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 37,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4443,7 +4447,7 @@
               ".MATCH_ANY"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 38,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4456,7 +4460,7 @@
             "label": "value",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 39,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4470,9 +4474,11 @@
         "type": "Object",
         "tags": [],
         "label": "isOperator",
-        "description": [],
+        "description": [
+          "\nThe \"is\" operator (UI label) uses MATCH type in the code.\nThis renders AutocompleteFieldMatchComponent in the UI.\nNote: The \"matches\" operator uses WILDCARD type (not MATCH) despite the similar name."
+        ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-        "lineNumber": 15,
+        "lineNumber": 20,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4485,7 +4491,7 @@
             "label": "message",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 16,
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4508,7 +4514,7 @@
               ".INCLUDED"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 19,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4531,7 +4537,7 @@
               ".MATCH"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 20,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4544,7 +4550,7 @@
             "label": "value",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 21,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4558,9 +4564,11 @@
         "type": "Object",
         "tags": [],
         "label": "matchesOperator",
-        "description": [],
+        "description": [
+          "\nThe \"matches\" operator (UI label) uses WILDCARD type in the code (not MATCH type).\nThis is because \"matches\" supports wildcard patterns (*, ?) and renders\nAutocompleteFieldWildcardComponent in the UI.\nNote: The \"is\" operator uses MATCH type and renders AutocompleteFieldMatchComponent."
+        ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-        "lineNumber": 87,
+        "lineNumber": 102,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4573,7 +4581,7 @@
             "label": "message",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 88,
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4596,7 +4604,7 @@
               ".INCLUDED"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 91,
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4619,7 +4627,7 @@
               ".WILDCARD"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 92,
+            "lineNumber": 107,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4632,7 +4640,7 @@
             "label": "value",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
-            "lineNumber": 93,
+            "lineNumber": 108,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

@@ -106,7 +106,7 @@
             "label": "buttonLabel",
             "description": [],
             "signature": [
-              "string | React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              "string | React.ReactElement<any>"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
             "lineNumber": 36,
@@ -122,7 +122,7 @@
             "label": "popoverContentBelowSearch",
             "description": [],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
+              "React.ReactElement<any> | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
             "lineNumber": 37,

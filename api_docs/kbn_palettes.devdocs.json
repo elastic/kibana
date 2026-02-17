@@ -380,7 +380,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-palettes/palettes/index.ts",
-        "lineNumber": 66,
+        "lineNumber": 68,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -396,7 +396,7 @@
               "boolean"
             ],
             "path": "src/platform/packages/shared/kbn-palettes/palettes/index.ts",
-            "lineNumber": 66,
+            "lineNumber": 68,
             "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
@@ -507,7 +507,7 @@
               "\nType of pallette"
             ],
             "signature": [
-              "\"gradient\" | \"categorical\""
+              "\"categorical\" | \"gradient\""
             ],
             "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
             "lineNumber": 28,
@@ -705,7 +705,7 @@
         "label": "KbnPaletteType",
         "description": [],
         "signature": [
-          "\"gradient\" | \"categorical\""
+          "\"categorical\" | \"gradient\""
         ],
         "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
         "lineNumber": 10,
@@ -745,7 +745,7 @@
           "\nEnum of all kbn palette ids, including by type"
         ],
         "path": "src/platform/packages/shared/kbn-palettes/constants.ts",
-        "lineNumber": 66,
+        "lineNumber": 70,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -763,7 +763,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-palettes/constants.ts",
-            "lineNumber": 68,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -781,7 +781,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-palettes/constants.ts",
-            "lineNumber": 71,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -799,7 +799,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-palettes/constants.ts",
-            "lineNumber": 74,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -817,7 +817,7 @@
               "\"eui_amsterdam_color_blind\""
             ],
             "path": "src/platform/packages/shared/kbn-palettes/constants.ts",
-            "lineNumber": 77,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

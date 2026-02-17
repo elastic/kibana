@@ -336,7 +336,7 @@
           "\nA type that defines the existing serverless project types."
         ],
         "signature": [
-          "\"security\" | \"workplaceai\" | \"oblt\" | \"es\""
+          "\"security\" | \"es\" | \"workplaceai\" | \"oblt\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
         "lineNumber": 37,

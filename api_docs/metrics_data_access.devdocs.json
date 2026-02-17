@@ -1014,7 +1014,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1038,7 +1038,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -1088,7 +1088,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1112,7 +1112,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -1162,7 +1162,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1186,7 +1186,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -1236,7 +1236,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1260,7 +1260,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -1310,7 +1310,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1334,7 +1334,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -1384,7 +1384,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1408,7 +1408,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -1458,7 +1458,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1482,7 +1482,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -1532,7 +1532,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1556,7 +1556,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -1574,7 +1574,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"percent\" | \"bits\" | \"bytes\" | \"duration\" | \"currency\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"h\" | \"d\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1590,7 +1590,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"percent\" | \"bits\" | \"bytes\" | \"duration\" | \"currency\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"h\" | \"d\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1638,7 +1638,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1662,7 +1662,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -1712,7 +1712,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1736,7 +1736,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -1786,7 +1786,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1810,7 +1810,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -1860,7 +1860,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1884,7 +1884,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -1934,7 +1934,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1958,7 +1958,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2008,7 +2008,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2032,7 +2032,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2082,7 +2082,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2106,7 +2106,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2156,7 +2156,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2180,7 +2180,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2198,7 +2198,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"percent\" | \"bits\" | \"bytes\" | \"duration\" | \"currency\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"h\" | \"d\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2246,7 +2246,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2270,7 +2270,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2320,7 +2320,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2344,7 +2344,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2394,7 +2394,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2418,7 +2418,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2436,7 +2436,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"percent\" | \"bits\" | \"bytes\" | \"duration\" | \"currency\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"h\" | \"d\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2484,7 +2484,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2508,7 +2508,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2558,7 +2558,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2582,7 +2582,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2632,7 +2632,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2656,7 +2656,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2706,7 +2706,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2730,7 +2730,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2912,7 +2912,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2936,7 +2936,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2986,7 +2986,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3010,7 +3010,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -3028,7 +3028,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"percent\" | \"bits\" | \"bytes\" | \"duration\" | \"currency\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"h\" | \"d\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3044,7 +3044,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"percent\" | \"bits\" | \"bytes\" | \"duration\" | \"currency\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"h\" | \"d\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3092,7 +3092,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3116,7 +3116,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -3166,7 +3166,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3190,7 +3190,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -3208,7 +3208,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"percent\" | \"bits\" | \"bytes\" | \"duration\" | \"currency\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"h\" | \"d\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3224,7 +3224,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"percent\" | \"bits\" | \"bytes\" | \"duration\" | \"currency\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"h\" | \"d\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3272,7 +3272,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3296,7 +3296,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -3346,7 +3346,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3370,7 +3370,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -3694,6 +3694,45 @@
       },
       {
         "parentPluginId": "metricsDataAccess",
+        "id": "def-common.isFilterWithAggregations",
+        "type": "Function",
+        "tags": [],
+        "label": "isFilterWithAggregations",
+        "description": [],
+        "signature": [
+          "(agg: unknown) => agg is Pick<",
+          "AggregationsAggregationContainer",
+          ", \"filter\" | \"aggs\">"
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
+        "lineNumber": 105,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "metricsDataAccess",
+            "id": "def-common.isFilterWithAggregations.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "agg",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
         "id": "def-common.isSumBucketAgg",
         "type": "Function",
         "tags": [],
@@ -3741,7 +3780,7 @@
         "signature": [
           "(agg: unknown) => agg is Pick<",
           "AggregationsAggregationContainer",
-          ", \"aggregations\" | \"terms\">"
+          ", \"terms\" | \"aggregations\">"
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
         "lineNumber": 98,
@@ -4059,7 +4098,7 @@
         "label": "InventoryFormatterType",
         "description": [],
         "signature": [
-          "\"number\" | \"percent\" | \"bytes\" | \"bits\" | \"abbreviatedNumber\" | \"highPrecision\""
+          "\"number\" | \"percent\" | \"bits\" | \"bytes\" | \"abbreviatedNumber\" | \"highPrecision\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "lineNumber": 51,
@@ -4251,7 +4290,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4275,7 +4314,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -4325,7 +4364,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4349,7 +4388,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -4399,7 +4438,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4423,7 +4462,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -4473,7 +4512,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4497,7 +4536,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -4547,7 +4586,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4571,7 +4610,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -4621,7 +4660,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4645,7 +4684,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -4695,7 +4734,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4719,7 +4758,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -4769,7 +4808,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4793,7 +4832,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -4811,7 +4850,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"percent\" | \"bits\" | \"bytes\" | \"duration\" | \"currency\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"h\" | \"d\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4827,7 +4866,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"percent\" | \"bits\" | \"bytes\" | \"duration\" | \"currency\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"h\" | \"d\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4875,7 +4914,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4899,7 +4938,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -4949,7 +4988,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4973,7 +5012,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -5023,7 +5062,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5047,7 +5086,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -5097,7 +5136,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5121,7 +5160,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -5171,7 +5210,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5195,7 +5234,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -5245,7 +5284,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5269,7 +5308,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -5319,7 +5358,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5343,7 +5382,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -5393,7 +5432,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5417,7 +5456,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -5435,7 +5474,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"percent\" | \"bits\" | \"bytes\" | \"duration\" | \"currency\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"h\" | \"d\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5483,7 +5522,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5507,7 +5546,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -5557,7 +5596,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5581,7 +5620,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -5631,7 +5670,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5655,7 +5694,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -5673,7 +5712,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"percent\" | \"bits\" | \"bytes\" | \"duration\" | \"currency\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"h\" | \"d\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5721,7 +5760,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5745,7 +5784,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -5795,7 +5834,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5819,7 +5858,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -5869,7 +5908,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5893,7 +5932,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -5943,7 +5982,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5967,7 +6006,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -6149,7 +6188,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6173,7 +6212,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -6223,7 +6262,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6247,7 +6286,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -6265,7 +6304,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"percent\" | \"bits\" | \"bytes\" | \"duration\" | \"currency\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"h\" | \"d\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6281,7 +6320,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"percent\" | \"bits\" | \"bytes\" | \"duration\" | \"currency\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"h\" | \"d\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6329,7 +6368,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6353,7 +6392,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -6403,7 +6442,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6427,7 +6466,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -6445,7 +6484,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"percent\" | \"bits\" | \"bytes\" | \"duration\" | \"currency\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"h\" | \"d\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6461,7 +6500,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"percent\" | \"bits\" | \"bytes\" | \"duration\" | \"currency\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"h\" | \"d\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6509,7 +6548,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6533,7 +6572,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -6583,7 +6622,7 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; seriesType: \"line\" | \"area\" | \"bar\"; } | { dataset?: ",
+          " | undefined; seriesType: \"bar\" | \"area\" | \"line\"; } | { dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6607,7 +6646,7 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"left\" | \"right\" | \"top\" | \"bottom\" | undefined; legendStats?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -6819,7 +6858,7 @@
         "label": "InventoryVisType",
         "description": [],
         "signature": [
-          "\"line\" | \"area\" | \"bar\""
+          "\"bar\" | \"area\" | \"line\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "lineNumber": 41,
@@ -6921,7 +6960,7 @@
         "label": "MetricsAPIRequest",
         "description": [],
         "signature": [
-          "Omit<{ timerange: { from: number; to: number; interval: string; }; indexPattern: string; metrics: { id: string; aggregations: { [key: string]: unknown; }; }[]; includeTimeseries: boolean | undefined; } & { groupBy?: (string | null | undefined)[] | undefined; groupInstance?: (string | null | undefined)[] | undefined; modules?: string[] | undefined; afterKey?: { [x: string]: string | null; } | null | undefined; limit?: number | null | undefined; filters?: { [key: string]: unknown; } | undefined; dropPartialBuckets?: boolean | undefined; alignDataToEnd?: boolean | undefined; }, \"filters\" | \"metrics\"> & { metrics: ",
+          "Omit<{ timerange: { from: number; to: number; interval: string; }; indexPattern: string; metrics: { id: string; aggregations: { [key: string]: unknown; }; }[]; includeTimeseries: boolean | undefined; } & { groupBy?: (string | null | undefined)[] | undefined; groupInstance?: (string | null | undefined)[] | undefined; modules?: string[] | undefined; afterKey?: { [x: string]: string | null; } | null | undefined; limit?: number | null | undefined; filters?: { [key: string]: unknown; } | undefined; dropPartialBuckets?: boolean | undefined; alignDataToEnd?: boolean | undefined; }, \"metrics\" | \"filters\"> & { metrics: ",
           {
             "pluginId": "metricsDataAccess",
             "scope": "common",
@@ -7103,7 +7142,7 @@
         "label": "SnapshotMetricType",
         "description": [],
         "signature": [
-          "\"count\" | \"rx\" | \"custom\" | \"memory\" | \"logRate\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"cpuV2\" | \"cpu\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"txV2\" | \"rxV2\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"s3TotalRequests\" | \"s3NumberOfObjects\" | \"s3BucketSize\" | \"s3DownloadBytes\" | \"s3UploadBytes\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"rdsLatency\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesSent\" | \"sqsMessagesEmpty\" | \"sqsOldestMessage\""
+          "\"count\" | \"custom\" | \"rx\" | \"memory\" | \"logRate\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"cpuV2\" | \"cpu\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"txV2\" | \"rxV2\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"s3TotalRequests\" | \"s3NumberOfObjects\" | \"s3BucketSize\" | \"s3DownloadBytes\" | \"s3UploadBytes\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"rdsLatency\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesSent\" | \"sqsMessagesEmpty\" | \"sqsOldestMessage\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "lineNumber": 268,
@@ -7154,7 +7193,7 @@
         "label": "TSVBMetricModel",
         "description": [],
         "signature": [
-          "{ id: \"custom\" | \"podOverview\" | \"podCpuUsage\" | \"podMemoryUsage\" | \"podLogUsage\" | \"podNetworkTraffic\" | \"nginxHits\" | \"nginxRequestRate\" | \"nginxActiveConnections\" | \"nginxRequestsPerConnection\" | \"awsOverview\" | \"awsCpuUtilization\" | \"awsNetworkBytes\" | \"awsNetworkPackets\" | \"awsDiskioBytes\" | \"awsDiskioOps\" | \"awsEC2CpuUtilization\" | \"awsEC2NetworkTraffic\" | \"awsEC2DiskIOBytes\" | \"awsS3TotalRequests\" | \"awsS3NumberOfObjects\" | \"awsS3BucketSize\" | \"awsS3DownloadBytes\" | \"awsS3UploadBytes\" | \"awsRDSCpuTotal\" | \"awsRDSConnections\" | \"awsRDSQueriesExecuted\" | \"awsRDSActiveTransactions\" | \"awsRDSLatency\" | \"awsSQSMessagesVisible\" | \"awsSQSMessagesDelayed\" | \"awsSQSMessagesSent\" | \"awsSQSMessagesEmpty\" | \"awsSQSOldestMessage\"; requires: string[]; index_pattern: string | string[]; interval: string; time_field: string; type: string; series: ({ id: string; metrics: ({ id: string; type: \"count\"; } | ({ id: string; type: \"count\" | \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"cumulative_sum\" | \"derivative\" | \"calculation\" | \"series_agg\" | \"positive_only\"; } & { field?: string | undefined; }) | ({ id: string; script: string; type: \"calculation\"; variables: { field: string; id: string; name: string; }[]; } & { gap_policy?: \"insert_zeros\" | \"skip\" | \"keep_values\" | undefined; }) | { id: string; field: string; unit: string; type: \"derivative\"; } | ({ id: string; type: \"percentile\"; percentiles: { id: string; value: number; }[]; } & { field?: string | undefined; }) | { id: string; function: string; type: \"series_agg\"; })[]; split_mode: string; } & { terms_field?: string | undefined; terms_size?: number | undefined; terms_order_by?: string | undefined; filter?: { query: string; language: \"kuery\" | \"lucene\"; } | undefined; })[]; } & { filter?: string | undefined; map_field_to?: string | undefined; id_type?: \"cloud\" | \"node\" | undefined; drop_last_bucket?: boolean | undefined; }"
+          "{ id: \"custom\" | \"podOverview\" | \"podCpuUsage\" | \"podMemoryUsage\" | \"podLogUsage\" | \"podNetworkTraffic\" | \"nginxHits\" | \"nginxRequestRate\" | \"nginxActiveConnections\" | \"nginxRequestsPerConnection\" | \"awsOverview\" | \"awsCpuUtilization\" | \"awsNetworkBytes\" | \"awsNetworkPackets\" | \"awsDiskioBytes\" | \"awsDiskioOps\" | \"awsEC2CpuUtilization\" | \"awsEC2NetworkTraffic\" | \"awsEC2DiskIOBytes\" | \"awsS3TotalRequests\" | \"awsS3NumberOfObjects\" | \"awsS3BucketSize\" | \"awsS3DownloadBytes\" | \"awsS3UploadBytes\" | \"awsRDSCpuTotal\" | \"awsRDSConnections\" | \"awsRDSQueriesExecuted\" | \"awsRDSActiveTransactions\" | \"awsRDSLatency\" | \"awsSQSMessagesVisible\" | \"awsSQSMessagesDelayed\" | \"awsSQSMessagesSent\" | \"awsSQSMessagesEmpty\" | \"awsSQSOldestMessage\"; requires: string[]; index_pattern: string | string[]; interval: string; time_field: string; type: string; series: ({ id: string; metrics: ({ id: string; type: \"count\"; } | ({ id: string; type: \"count\" | \"min\" | \"max\" | \"sum\" | \"avg\" | \"cumulative_sum\" | \"cardinality\" | \"derivative\" | \"calculation\" | \"series_agg\" | \"positive_only\"; } & { field?: string | undefined; }) | ({ id: string; script: string; type: \"calculation\"; variables: { field: string; id: string; name: string; }[]; } & { gap_policy?: \"insert_zeros\" | \"skip\" | \"keep_values\" | undefined; }) | { id: string; field: string; unit: string; type: \"derivative\"; } | ({ id: string; type: \"percentile\"; percentiles: { id: string; value: number; }[]; } & { field?: string | undefined; }) | { id: string; function: string; type: \"series_agg\"; })[]; split_mode: string; } & { terms_field?: string | undefined; terms_size?: number | undefined; terms_order_by?: string | undefined; filter?: { query: string; language: \"kuery\" | \"lucene\"; } | undefined; })[]; } & { filter?: string | undefined; map_field_to?: string | undefined; id_type?: \"cloud\" | \"node\" | undefined; drop_last_bucket?: boolean | undefined; }"
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "lineNumber": 222,
@@ -7171,7 +7210,7 @@
         "label": "TSVBMetricModelCreator",
         "description": [],
         "signature": [
-          "(timeField: string, indexPattern: string | string[], interval: string) => { id: \"custom\" | \"podOverview\" | \"podCpuUsage\" | \"podMemoryUsage\" | \"podLogUsage\" | \"podNetworkTraffic\" | \"nginxHits\" | \"nginxRequestRate\" | \"nginxActiveConnections\" | \"nginxRequestsPerConnection\" | \"awsOverview\" | \"awsCpuUtilization\" | \"awsNetworkBytes\" | \"awsNetworkPackets\" | \"awsDiskioBytes\" | \"awsDiskioOps\" | \"awsEC2CpuUtilization\" | \"awsEC2NetworkTraffic\" | \"awsEC2DiskIOBytes\" | \"awsS3TotalRequests\" | \"awsS3NumberOfObjects\" | \"awsS3BucketSize\" | \"awsS3DownloadBytes\" | \"awsS3UploadBytes\" | \"awsRDSCpuTotal\" | \"awsRDSConnections\" | \"awsRDSQueriesExecuted\" | \"awsRDSActiveTransactions\" | \"awsRDSLatency\" | \"awsSQSMessagesVisible\" | \"awsSQSMessagesDelayed\" | \"awsSQSMessagesSent\" | \"awsSQSMessagesEmpty\" | \"awsSQSOldestMessage\"; requires: string[]; index_pattern: string | string[]; interval: string; time_field: string; type: string; series: ({ id: string; metrics: ({ id: string; type: \"count\"; } | ({ id: string; type: \"count\" | \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"cumulative_sum\" | \"derivative\" | \"calculation\" | \"series_agg\" | \"positive_only\"; } & { field?: string | undefined; }) | ({ id: string; script: string; type: \"calculation\"; variables: { field: string; id: string; name: string; }[]; } & { gap_policy?: \"insert_zeros\" | \"skip\" | \"keep_values\" | undefined; }) | { id: string; field: string; unit: string; type: \"derivative\"; } | ({ id: string; type: \"percentile\"; percentiles: { id: string; value: number; }[]; } & { field?: string | undefined; }) | { id: string; function: string; type: \"series_agg\"; })[]; split_mode: string; } & { terms_field?: string | undefined; terms_size?: number | undefined; terms_order_by?: string | undefined; filter?: { query: string; language: \"kuery\" | \"lucene\"; } | undefined; })[]; } & { filter?: string | undefined; map_field_to?: string | undefined; id_type?: \"cloud\" | \"node\" | undefined; drop_last_bucket?: boolean | undefined; }"
+          "(timeField: string, indexPattern: string | string[], interval: string) => { id: \"custom\" | \"podOverview\" | \"podCpuUsage\" | \"podMemoryUsage\" | \"podLogUsage\" | \"podNetworkTraffic\" | \"nginxHits\" | \"nginxRequestRate\" | \"nginxActiveConnections\" | \"nginxRequestsPerConnection\" | \"awsOverview\" | \"awsCpuUtilization\" | \"awsNetworkBytes\" | \"awsNetworkPackets\" | \"awsDiskioBytes\" | \"awsDiskioOps\" | \"awsEC2CpuUtilization\" | \"awsEC2NetworkTraffic\" | \"awsEC2DiskIOBytes\" | \"awsS3TotalRequests\" | \"awsS3NumberOfObjects\" | \"awsS3BucketSize\" | \"awsS3DownloadBytes\" | \"awsS3UploadBytes\" | \"awsRDSCpuTotal\" | \"awsRDSConnections\" | \"awsRDSQueriesExecuted\" | \"awsRDSActiveTransactions\" | \"awsRDSLatency\" | \"awsSQSMessagesVisible\" | \"awsSQSMessagesDelayed\" | \"awsSQSMessagesSent\" | \"awsSQSMessagesEmpty\" | \"awsSQSOldestMessage\"; requires: string[]; index_pattern: string | string[]; interval: string; time_field: string; type: string; series: ({ id: string; metrics: ({ id: string; type: \"count\"; } | ({ id: string; type: \"count\" | \"min\" | \"max\" | \"sum\" | \"avg\" | \"cumulative_sum\" | \"cardinality\" | \"derivative\" | \"calculation\" | \"series_agg\" | \"positive_only\"; } & { field?: string | undefined; }) | ({ id: string; script: string; type: \"calculation\"; variables: { field: string; id: string; name: string; }[]; } & { gap_policy?: \"insert_zeros\" | \"skip\" | \"keep_values\" | undefined; }) | { id: string; field: string; unit: string; type: \"derivative\"; } | ({ id: string; type: \"percentile\"; percentiles: { id: string; value: number; }[]; } & { field?: string | undefined; }) | { id: string; function: string; type: \"series_agg\"; })[]; split_mode: string; } & { terms_field?: string | undefined; terms_size?: number | undefined; terms_order_by?: string | undefined; filter?: { query: string; language: \"kuery\" | \"lucene\"; } | undefined; })[]; } & { filter?: string | undefined; map_field_to?: string | undefined; id_type?: \"cloud\" | \"node\" | undefined; drop_last_bucket?: boolean | undefined; }"
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "lineNumber": 224,
