@@ -96,7 +96,7 @@ async function read(readable, output) {
  * */
 
 /**
- * Run a child process and return its stdout
+ * Run a child process and return it's stdout
  * @param {string} cmd
  * @param {string[]} args
  * @param {RunOpts} opts
@@ -111,9 +111,7 @@ export async function run(cmd, args, opts = undefined) {
   });
 
   /** @type {string[]} */
-  const stdout = [];
-  /** @type {string[]} */
-  const stderr = [];
+  const output = [];
 
   if (opts?.pipe) {
     if (opts?.filter) {
@@ -126,20 +124,19 @@ export async function run(cmd, args, opts = undefined) {
   }
 
   const [, , exitCode] = await Promise.all([
-    read(proc.stdout, stdout),
-    read(proc.stderr, stderr),
+    read(proc.stdout, output),
+    read(proc.stderr, output),
     getExit(proc),
   ]);
 
   if (typeof exitCode === 'number' && exitCode > 0) {
-    const output = [...stdout, ...stderr];
     throw createCliError(
       `[${opts?.description ?? cmd}] exitted with ${exitCode}:\n` +
         `  output:\n${indent(4, output.join('\n'))}`
     );
   }
 
-  return stdout.join('\n');
+  return output.join('\n');
 }
 
 /**
