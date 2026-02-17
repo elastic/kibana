@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { createAlertEvent } from './alert_event';
+export { createAlertEvent, indexAlertEvents } from './alert_event';

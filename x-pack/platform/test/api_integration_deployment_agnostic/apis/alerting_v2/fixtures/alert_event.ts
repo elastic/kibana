@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import type { AlertEvent } from '@kbn/alerting-v2-plugin/server/resources/alert_events';
+
+const ALERTS_EVENTS_INDEX = '.alerts-events';
 
 export const createAlertEvent = (overrides?: Partial<AlertEvent>): AlertEvent => ({
   '@timestamp': new Date().toISOString(),
@@ -25,3 +28,11 @@ export const createAlertEvent = (overrides?: Partial<AlertEvent>): AlertEvent =>
   },
   ...overrides,
 });
+
+export const indexAlertEvents = async (esClient: Client, events: AlertEvent[]): Promise<void> => {
+  await Promise.all(
+    events.map((event) =>
+      esClient.index({ index: ALERTS_EVENTS_INDEX, document: event, refresh: true })
+    )
+  );
+};
