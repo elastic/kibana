@@ -11,7 +11,7 @@ servers:
       port:
         default: '5601'
 paths:
-  /api/entity_analytics/watchlists:
+  /api/entity_analytics/watchlists/management:
     post:
       operationId: CreateWatchlist
       requestBody:
@@ -47,7 +47,7 @@ paths:
       summary: Create a new watchlist
       tags:
         - Security Entity Analytics API
-  /api/entity_analytics/watchlists/{id}:
+  /api/entity_analytics/watchlists/management/{id}:
     get:
       operationId: GetWatchlist
       parameters:
@@ -109,7 +109,7 @@ paths:
       summary: Update an existing watchlist
       tags:
         - Security Entity Analytics API
-  /api/entity_analytics/watchlists/list:
+  /api/entity_analytics/watchlists/management/list:
     get:
       operationId: ListWatchlists
       responses:
