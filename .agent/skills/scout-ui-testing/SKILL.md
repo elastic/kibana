@@ -1,5 +1,5 @@
 ---
-name: Scout UI Testing
+name: scout-ui-testing
 description: Use when creating, updating, debugging, or reviewing Scout UI tests in Kibana (Playwright + Scout fixtures), including page objects, browser authentication, parallel UI tests (spaceTest/scoutSpace), a11y checks, and flake control.
 ---
 
@@ -24,7 +24,7 @@ description: Use when creating, updating, debugging, or reviewing Scout UI tests
 
 ## Non-negotiable conventions
 
-- **Tags are required**: Scout validates UI test tags at runtime. Ensure each test has at least one supported tag (typically by tagging the top-level `test.describe(...)` / `spaceTest.describe(...)`, e.g. `tags.DEPLOYMENT_AGNOSTIC`, `tags.ESS_ONLY`, or `tags.PERFORMANCE`).
+- **Tags are required**: Scout validates UI test tags at runtime. Ensure each test has at least one supported tag (typically by tagging the top-level `test.describe(...)` / `spaceTest.describe(...)`, e.g. `tags.deploymentAgnostic`, `tags.stateful.classic`, or `tags.performance`).
 - **Prefer one suite per file**: keep a single top-level `test.describe(...)` (sequential) or `spaceTest.describe(...)` (parallel) and avoid nested `describe` blocks where possible.
 - **UI actions live in page objects**; assertions stay in the spec.
 - **Use APIs for setup/teardown**: prefer `apiServices`/`kbnClient`/`esArchiver` in hooks over clicking through the UI.

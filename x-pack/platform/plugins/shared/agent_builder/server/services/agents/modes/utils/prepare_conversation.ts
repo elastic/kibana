@@ -18,6 +18,7 @@ import {
   getLatestVersion,
   hashContent,
 } from '@kbn/agent-builder-common/attachments';
+import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type {
   AttachmentFormatContext,
   AttachmentStateManager,
@@ -25,29 +26,14 @@ import type {
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server/agents';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
-import type {
-  AttachmentRepresentation,
-  AttachmentBoundedTool,
-} from '@kbn/agent-builder-server/attachments';
 import {
   prepareAttachmentPresentation,
   type AttachmentPresentation,
 } from './attachment_presentation';
 
-export interface ProcessedAttachment {
-  attachment: Attachment;
-  representation: AttachmentRepresentation;
-  tools: AttachmentBoundedTool[];
-}
-
 export interface ProcessedAttachmentType {
   type: string;
   description?: string;
-}
-
-export interface ProcessedRoundInput {
-  message: string;
-  attachments: ProcessedAttachment[];
 }
 
 export type ProcessedConversationRound = Omit<ConversationRound, 'input'> & {
@@ -236,16 +222,6 @@ export const prepareConversation = async ({
     })
   );
 
-  const activeAttachments = attachmentStateManager.getActive();
-  await Promise.all(
-    activeAttachments.map(async (attachment) => {
-      await attachmentStateManager.get(attachment.id, {
-        version: attachment.current_version,
-        context,
-      });
-    })
-  );
-
   const versionedAttachmentPresentation = await prepareAttachmentPresentation(
     attachmentStateManager.getAll(),
     undefined,
@@ -354,10 +330,7 @@ const prepareAttachment = async ({
         tools,
       };
     }
-    const baseRepresentation = await formatted.getRepresentation();
-    const representation = definition.resolve
-      ? withByReferenceNote({ representation: baseRepresentation, attachment })
-      : baseRepresentation;
+    const representation = await formatted.getRepresentation();
 
     return {
       attachment,
@@ -371,43 +344,6 @@ const prepareAttachment = async ({
       tools: [],
     };
   }
-};
-
-const withByReferenceNote = ({
-  representation,
-  attachment,
-}: {
-  representation: AttachmentRepresentation;
-  attachment: Attachment;
-}): AttachmentRepresentation => {
-  if (representation.type !== 'text') {
-    return representation;
-  }
-
-  const parts: string[] = [];
-  const note =
-    'Note: this attachment is by-reference. Use attachment_read to resolve the full content.';
-
-  const trimmedValue = representation.value?.trim();
-  if (trimmedValue) {
-    parts.push(trimmedValue);
-  }
-
-  try {
-    parts.push(`Attachment data:\n${JSON.stringify(attachment.data, null, 2)}`);
-  } catch (e) {
-    // ignore stringify errors; fallback to whatever was already present
-  }
-
-  // Avoid duplicating the note if the formatter already mentioned attachment_read.
-  if (!representation.value?.includes('attachment_read')) {
-    parts.push(note);
-  }
-
-  return {
-    ...representation,
-    value: parts.filter(Boolean).join('\n\n'),
-  };
 };
 
 const inputToFinal = (input: AttachmentInput): Attachment => {
