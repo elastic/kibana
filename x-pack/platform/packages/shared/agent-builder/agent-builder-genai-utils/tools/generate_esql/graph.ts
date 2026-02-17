@@ -70,6 +70,7 @@ export const createNlToEsqlGraph = ({
       resourceName: state.target,
       samplingSize: 100,
       esClient,
+      allowPatterns: true,
     });
 
     return { resource: resolvedResource };

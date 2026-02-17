@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export { resolveResource, type ResolveResourceResponse } from './resolve_resource';
+export {
+  resolveResource,
+  resolveResourceForEsql,
+  type ResolveResourceResponse,
+} from './resolve_resource';
 export {
   resolveResourceWithSamplingStats,
   type ResolvedResourceWithSampling,

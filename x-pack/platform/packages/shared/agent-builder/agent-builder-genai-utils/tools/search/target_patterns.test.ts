@@ -1,0 +1,27 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { containsPatternTargets } from './target_patterns';
+
+describe('containsPatternTargets', () => {
+  it('returns true for wildcard targets', () => {
+    expect(containsPatternTargets('*')).toBe(true);
+    expect(containsPatternTargets('logs-*')).toBe(true);
+  });
+
+  it('returns true for comma-separated index patterns', () => {
+    expect(containsPatternTargets('logs-*,auditbeat-*')).toBe(true);
+  });
+
+  it('returns true for multiple comma-separated indices', () => {
+    expect(containsPatternTargets('logs-test,auditbeat-test')).toBe(true);
+  });
+
+  it('returns false for concrete single targets', () => {
+    expect(containsPatternTargets('kibana_sample_data_logs')).toBe(false);
+  });
+});

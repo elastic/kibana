@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { MappingFieldWithStats } from '../sampling';
 import { getSampleDocs, createStatsFromSamples, combineFieldsWithStats } from '../sampling';
 import type { ResolveResourceResponse } from './resolve_resource';
-import { resolveResource } from './resolve_resource';
+import { resolveResource, resolveResourceForEsql } from './resolve_resource';
 
 export type ResolvedResourceWithSampling = Omit<ResolveResourceResponse, 'fields'> & {
   fields: MappingFieldWithStats[];
@@ -22,13 +22,17 @@ export const resolveResourceWithSamplingStats = async ({
   resourceName,
   esClient,
   samplingSize,
+  allowPatterns = false,
 }: {
   resourceName: string;
   esClient: ElasticsearchClient;
   samplingSize?: number;
+  allowPatterns?: boolean;
 }) => {
+  const resourceResolver = allowPatterns ? resolveResourceForEsql : resolveResource;
+
   const [resource, stats] = await Promise.all([
-    resolveResource({ resourceName, esClient }),
+    resourceResolver({ resourceName, esClient }),
     getSampleDocs({ esClient, index: resourceName, size: samplingSize }).then(({ samples }) => {
       return createStatsFromSamples({ samples });
     }),
