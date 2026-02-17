@@ -36,6 +36,7 @@ import { internalOnboardingRoutes } from './internal/streams/onboarding/route';
 import { internalQueriesRoutes } from './internal/streams/queries/route';
 import { internalDashboardSuggestionRoutes } from './internal/streams/dashboard_suggestions/route';
 import { internalContentPackSuggestionsRoutes } from './internal/streams/content_pack_suggestions/route';
+import { internalIntegrationSuggestionsRoutes } from './internal/streams/integration_suggestions/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -60,6 +61,7 @@ export const streamsRouteRepository = {
   ...internalQueriesRoutes,
   ...internalDashboardSuggestionRoutes,
   ...internalContentPackSuggestionsRoutes,
+  ...internalIntegrationSuggestionsRoutes,
   // public APIs
   ...docCountsRoutes,
   ...crudRoutes,
