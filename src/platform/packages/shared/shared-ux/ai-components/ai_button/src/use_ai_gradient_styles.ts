@@ -17,7 +17,8 @@ import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 const gradientStartPercent = 2.98;
 const gradientEndPercent = 66.24;
 
-const buttonGradientAngle = 150;
+const diagonalButtonGradientAngle = 150;
+const verticalButtonGradientAngle = 90;
 const buttonGradientStartPercent = 3.97;
 const buttonGradientEndPercent = 65.6;
 
@@ -25,7 +26,8 @@ const buttonTextGradientAngle = 170;
 
 const gradients = {
   buttonBackground: {
-    angle: buttonGradientAngle,
+    diagonalAngle: diagonalButtonGradientAngle,
+    verticalAngle: verticalButtonGradientAngle,
     startPercent: buttonGradientStartPercent,
     endPercent: buttonGradientEndPercent,
     lightMode: { startColor: '#D9E8FF', endColor: '#ECE2FE' },
@@ -77,8 +79,8 @@ const makeLinearGradient = ({
   endPercent: number;
 }) => `linear-gradient(${angle}deg, ${startColor} ${startPercent}%, ${endColor} ${endPercent}%)`;
 
-export interface AiButtonGradientStyleOptions {
-  readonly fill?: boolean;
+export interface AiButtonGradientOptions {
+  readonly isFilled?: boolean;
   /**
    * When provided, variant-specific gradient behavior can be applied.
    * This is optional to keep backwards compatibility with existing `fill` callers.
@@ -98,16 +100,22 @@ export interface AiGradientStopsDefinition {
   readonly endOffsetPercent: number;
 }
 
-type AiButtonVariant = NonNullable<AiButtonGradientStyleOptions['variant']>;
+type AiButtonVariant = NonNullable<AiButtonGradientOptions['variant']>;
 
 interface AiGradientColors {
   readonly startColor: string;
   readonly endColor: string;
 }
 
-const makeButtonBackgroundGradient = (colors: AiGradientColors) =>
+const makeButtonBackgroundGradient = ({
+  colors,
+  angle,
+}: {
+  colors: AiGradientColors;
+  angle: number;
+}) =>
   makeLinearGradient({
-    angle: gradients.buttonBackground.angle,
+    angle,
     startColor: colors.startColor,
     startPercent: gradients.buttonBackground.startPercent,
     endColor: colors.endColor,
@@ -161,37 +169,67 @@ const solidTextCss = (color: string) => css`
   -webkit-text-fill-color: currentColor !important;
 `;
 
+const outlinedBorderRingCss = (borderGradient: string) => css`
+  position: relative;
+  border: none;
+  isolation: isolate;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: ${borderGradient};
+    pointer-events: none;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+  }
+`;
+
 export const useAiButtonGradientStyles = ({
-  fill,
+  isFilled,
   variant,
-}: AiButtonGradientStyleOptions = {}): AiButtonGradientStyles => {
+}: AiButtonGradientOptions = {}): AiButtonGradientStyles => {
   const isDarkMode = useKibanaIsDarkMode();
 
   return useMemo(() => {
-    const resolvedVariant = (variant ?? (fill ? 'accent' : 'base')) as AiButtonVariant;
+    const resolvedVariant = (variant ?? (isFilled ? 'accent' : 'base')) as AiButtonVariant;
 
-    const emptyBackground = 'transparent';
+    const accentGradientColors = isDarkMode
+      ? darkModeFilledBackgroundColors
+      : lightModeFilledBackgroundColors;
+    const accentBackgroundAngle = isDarkMode
+      ? gradients.buttonBackground.verticalAngle
+      : gradients.buttonBackground.diagonalAngle;
+    const baseBackgroundAngle = isDarkMode
+      ? gradients.buttonBackground.diagonalAngle
+      : gradients.buttonBackground.verticalAngle;
 
+    let outlinedBorderGradientCss: string | undefined;
     let buttonBackground: string;
     if (resolvedVariant === 'empty') {
-      buttonBackground = emptyBackground;
+      buttonBackground = 'transparent';
     } else if (resolvedVariant === 'outlined') {
-      // Same background as `empty`, but with a gradient border matching the filled/accent background gradient.
-      const borderGradient = makeButtonBackgroundGradient(
-        isDarkMode ? darkModeFilledBackgroundColors : lightModeFilledBackgroundColors
-      );
-      buttonBackground = `linear-gradient(${emptyBackground}, ${emptyBackground}) padding-box, ${borderGradient} border-box`;
+      outlinedBorderGradientCss = makeButtonBackgroundGradient({
+        colors: accentGradientColors,
+        angle: accentBackgroundAngle,
+      });
+      buttonBackground = 'transparent';
     } else if (resolvedVariant === 'accent') {
-      buttonBackground = makeButtonBackgroundGradient(
-        isDarkMode ? darkModeFilledBackgroundColors : lightModeFilledBackgroundColors
-      );
+      buttonBackground = makeButtonBackgroundGradient({
+        colors: accentGradientColors,
+        angle: accentBackgroundAngle,
+      });
     } else {
       // base
-      buttonBackground = makeButtonBackgroundGradient(
-        isDarkMode ? darkModeBaseBackgroundColors : gradients.buttonBackground.lightMode
-      );
+      buttonBackground = makeButtonBackgroundGradient({
+        colors: isDarkMode ? darkModeBaseBackgroundColors : gradients.buttonBackground.lightMode,
+        angle: baseBackgroundAngle,
+      });
     }
-
     let buttonForegroundColor: string | undefined;
     if (!isDarkMode && resolvedVariant === 'accent') {
       buttonForegroundColor = lightModeFilledForegroundColor;
@@ -201,12 +239,12 @@ export const useAiButtonGradientStyles = ({
 
     const buttonCss = css`
       background: ${buttonBackground} !important;
-      ${resolvedVariant === 'outlined' ? 'border: 1px solid transparent;' : ''}
       border-radius: 4px;
       ${buttonForegroundColor ? `color: ${buttonForegroundColor} !important;` : ''}
+      ${outlinedBorderGradientCss ? outlinedBorderRingCss(outlinedBorderGradientCss) : ''}
 
       &:hover:not(:disabled) {
-        background: ${buttonBackground} !important; // update to hover color
+        background: ${buttonBackground} !important;
       }
       &:focus:not(:disabled) {
         background: ${buttonBackground} !important;
@@ -233,7 +271,7 @@ export const useAiButtonGradientStyles = ({
       buttonCss,
       labelCss,
     };
-  }, [fill, isDarkMode, variant]);
+  }, [isFilled, isDarkMode, variant]);
 };
 
 export interface SvgAiGradient {
@@ -242,31 +280,18 @@ export interface SvgAiGradient {
    */
   readonly iconGradientCss?: SerializedStyles;
   /**
-   * The generated gradient id (mainly for debugging).
+   * The generated gradient id used by `SvgAiGradientDefs`.
    */
-  readonly gradientId: string; // not sure if this is needed
+  readonly gradientId: string;
   /**
    * The gradient stops used by the defs component.
    */
   readonly stops: AiGradientStopsDefinition;
 }
-
-export interface SvgAiGradientOptions {
-  /**
-   * When true, icons should inherit the button's foreground color (e.g. `textInverse`)
-   * instead of rendering as a gradient.
-   */
-  readonly isFilled?: boolean;
-  /**
-   * When provided, variant-specific gradient behavior can be applied.
-   */
-  readonly variant?: 'accent' | 'base' | 'empty' | 'outlined';
-}
-
 export const useSvgAiGradient = ({
   isFilled,
   variant,
-}: SvgAiGradientOptions = {}): SvgAiGradient => {
+}: AiButtonGradientOptions = {}): SvgAiGradient => {
   const isDarkMode = useKibanaIsDarkMode();
 
   const gradientId = useGeneratedHtmlId({ prefix: 'kbnAiButtonIconGradient' });

@@ -11,20 +11,38 @@ date: 2026-02-11
 
 Shared AI-related visual components for Kibana.
 
-For now, this package contains the `AiButton` components: `AiButton` (parent), `AiButtonDefault`, `AiButtonAccent`, `AiButtonEmpty`, and `AiButtonIcon` (see `ai_button/`). In the future we plan to add other AI-related visual components.
+For now, this package contains the `AiButton` components (see `ai_button/`).
+
+`AiButton` is the recommended public API. It is a wrapper around the internal `AiButtonBase` primitive and renders the correct underlying EUI button type based on the props you pass (e.g. `variant`, `iconOnly`).
+
+We also expose thin wrapper components for convenience: `AiButtonDefault`, `AiButtonAccent`, `AiButtonEmpty`, and `AiButtonIcon`.
 
 ## Usage
 
 ```tsx
-import { AiButton, AiButtonDefault } from '@kbn/shared-ux-ai-components';
+import {
+  AiButton,
+  AiButtonDefault,
+  AiButtonAccent,
+  AiButtonEmpty,
+  AiButtonIcon,
+} from '@kbn/shared-ux-ai-components';
 
 <AiButton onClick={() => undefined}>AI Button</AiButton>;
+
+<AiButton variant="accent" iconType="aiAssistantLogo" onClick={() => undefined}>
+  AI Button
+</AiButton>;
+
+<AiButton iconOnly iconType="sparkles" appName="AI Assistant" onClick={() => undefined}>
+  AI Assistant
+</AiButton>;
 
 <AiButtonDefault onClick={() => undefined}>AI Button</AiButtonDefault>;
 
 <AiButtonAccent onClick={() => undefined}>AI Button</AiButtonAccent>;
 
-<AiButtonIcon iconType="aiAssistantLogo" onClick={() => undefined} />;
+<AiButtonIcon iconType="aiAssistantLogo" appName="AI Assistant" onClick={() => undefined} />;
 
 <AiButtonEmpty onClick={() => undefined}>AI Button</AiButtonEmpty>;
 ```

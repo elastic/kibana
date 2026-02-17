@@ -8,6 +8,7 @@
  */
 import React from 'react';
 
+// Kibana-only: hardcoded locally so this icon isn't shared/owned by EUI.
 export const AiAssistantLogo = (svgProps: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"

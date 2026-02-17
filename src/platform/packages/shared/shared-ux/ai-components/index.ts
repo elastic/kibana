@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { AiButtonDefault } from './ai_button/src/ai_button_default';
-// Backwards compat: "base" wrapper was renamed to "default".
-export { AiButtonDefault as AiButtonBase } from './ai_button/src/ai_button_default';
-export { AiButton } from './ai_button/src/ai_button';
 export type { AiButtonProps } from './ai_button/src/ai_button';
+export type { AiButtonVariant } from './ai_button/src/ai_button_base';
+export { AiButton } from './ai_button/src/ai_button';
+export { AiButtonDefault } from './ai_button/src/ai_button_default';
 export { AiButtonAccent } from './ai_button/src/ai_button_accent';
 export { AiButtonEmpty } from './ai_button/src/ai_button_empty';
 export { AiButtonIcon } from './ai_button/src/ai_button_icon';
-export type { AiButtonVariant } from './ai_button/src/ai_button_base';

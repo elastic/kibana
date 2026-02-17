@@ -21,7 +21,7 @@ type AiButtonIconType = 'sparkles' | 'productAgent' | 'aiAssistantLogo';
 
 type AiButtonTextProps = DistributiveOmit<
   React.ComponentProps<typeof EuiButton>,
-  'children' | 'fill' | 'iconType' | 'disabled'
+  'fill' | 'iconType' | 'disabled'
 > & {
   /**
    * Controls which underlying button visual is used.
@@ -32,26 +32,23 @@ type AiButtonTextProps = DistributiveOmit<
   fill?: never;
   variant?: 'base' | 'accent';
   iconType?: AiButtonIconType;
-  children: React.ReactNode;
 };
 
 type AiButtonEmptyProps = DistributiveOmit<
   React.ComponentProps<typeof EuiButtonEmpty>,
-  'children' | 'iconType' | 'disabled'
+  'iconType' | 'disabled'
 > & {
   iconOnly?: false;
   variant: 'empty' | 'outlined';
   iconType?: AiButtonIconType;
-  children: React.ReactNode;
 };
 
 type AiButtonIconOnlyProps = DistributiveOmit<
   React.ComponentProps<typeof EuiButtonIcon>,
-  'children' | 'display' | 'iconType' | 'disabled'
+  'display' | 'iconType' | 'disabled'
 > & {
   iconOnly: true;
   display?: never;
-  children?: never;
   variant?: AiButtonVariant;
   appName?: string;
   iconType: AiButtonIconType;
@@ -61,16 +58,16 @@ type AiButtonIconOnlyProps = DistributiveOmit<
 export type AiButtonBaseProps = AiButtonTextProps | AiButtonEmptyProps | AiButtonIconOnlyProps;
 
 export const AiButtonBase = (props: AiButtonBaseProps) => {
-  const resolvedVariant: AiButtonVariant = props.variant ?? 'base';
-  const isFilled = resolvedVariant === 'accent';
+  const variant: AiButtonVariant = props.variant ?? 'base';
+  const isFilled = variant === 'accent';
 
   const { buttonCss, labelCss } = useAiButtonGradientStyles({
-    fill: isFilled,
-    variant: resolvedVariant,
+    isFilled,
+    variant,
   });
   const { gradientId, iconGradientCss, stops } = useSvgAiGradient({
     isFilled,
-    variant: resolvedVariant,
+    variant,
   });
 
   // Render local SVG <defs> so icon paths can reference url(#gradientId).
@@ -89,27 +86,13 @@ export const AiButtonBase = (props: AiButtonBaseProps) => {
     iconType === 'aiAssistantLogo' ? AiAssistantLogo : iconType;
 
   if (props.iconOnly === true) {
-    const {
-      iconType,
-      css: userCss,
-      iconOnly: _iconOnly,
-      display: _display,
-      children: _children,
-      appName,
-      ...rest
-    } = props;
+    const { iconType, css: userCss, display: _display, appName, ...rest } = props;
 
     const buttonIcon = (
       <EuiButtonIcon
         {...rest}
+        aria-label={props['aria-label'] ?? appName}
         css={[buttonCss, iconGradientCss, userCss]}
-        display={
-          resolvedVariant === 'accent'
-            ? 'fill'
-            : resolvedVariant === 'outlined'
-            ? 'empty'
-            : resolvedVariant
-        }
         iconType={
           resolvedIconType(iconType) as React.ComponentProps<typeof EuiButtonIcon>['iconType']
         }
@@ -161,7 +144,7 @@ export const AiButtonBase = (props: AiButtonBaseProps) => {
 
   const euiButtonPropsForEui = euiButtonProps as DistributiveOmit<
     React.ComponentProps<typeof EuiButton>,
-    'children' | 'fill' | 'iconType' | 'disabled'
+    'fill' | 'iconType' | 'disabled'
   >;
 
   return (
@@ -171,7 +154,7 @@ export const AiButtonBase = (props: AiButtonBaseProps) => {
         {...euiButtonPropsForEui}
         iconType={resolvedIconType(iconType) as React.ComponentProps<typeof EuiButton>['iconType']}
         css={[buttonCss, iconGradientCss, buttonUserCss]}
-        fill={resolvedVariant === 'accent'}
+        fill={variant === 'accent'}
       >
         <span css={labelCss}>{children}</span>
       </EuiButton>
