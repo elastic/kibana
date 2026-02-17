@@ -18,7 +18,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { NavigationItemInfo } from '@kbn/core-chrome-browser';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+
+const panelCss = css`
+  padding-left: 0;
+  padding-right: 0;
+`;
 
 interface Props {
   item: NavigationItemInfo;
@@ -36,7 +42,7 @@ export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => (
     usePortal
   >
     {(provided) => (
-      <EuiPanel paddingSize="s" hasShadow={false}>
+      <EuiPanel paddingSize="s" hasShadow={false} css={panelCss}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <div

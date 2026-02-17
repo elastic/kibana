@@ -11,8 +11,6 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiCallOut,
   EuiDragDropContext,
   EuiDroppable,
   EuiFlexGroup,
@@ -23,6 +21,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
+  EuiTitle,
   euiDragDropReorder,
   useGeneratedHtmlId,
   type DropResult,
@@ -33,12 +32,10 @@ import type {
   NavigationCustomization,
 } from '@kbn/core-chrome-browser';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LockedItem } from './locked_item';
 import { DraggableItem } from './draggable_item';
 
-const CALLOUT_DISMISSED_KEY = 'kibana.customizeNavigation.calloutDismissed';
 
 export interface CustomizeNavigationModalProps {
   solutionId: SolutionId;
@@ -60,23 +57,11 @@ export const CustomizeNavigationModal = ({
 }: CustomizeNavigationModalProps) => {
   const [items, setItems] = useState<NavigationItemInfo[]>(() => getNavigationPrimaryItems());
   const [isSaving, setIsSaving] = useState(false);
-  const [isCalloutVisible, setIsCalloutVisible] = useState(
-    () => localStorage.getItem(CALLOUT_DISMISSED_KEY) !== 'true'
-  );
   const modalTitleId = useGeneratedHtmlId();
 
   const modalCss = css`
     width: 576px;
   `;
-
-  const calloutCss = css`
-    position: relative;
-  `;
-
-  const dismissCallout = useCallback(() => {
-    setIsCalloutVisible(false);
-    localStorage.setItem(CALLOUT_DISMISSED_KEY, 'true');
-  }, []);
 
   // Enable editing mode
   useEffect(() => {
@@ -85,7 +70,14 @@ export const CustomizeNavigationModal = ({
   }, [setIsEditingNavigation]);
 
   const lockedItems = useMemo(() => items.filter((item) => item.locked), [items]);
-  const reorderableItems = useMemo(() => items.filter((item) => !item.locked), [items]);
+  const visibleItems = useMemo(
+    () => items.filter((item) => !item.locked && !item.hidden),
+    [items]
+  );
+  const hiddenItems = useMemo(
+    () => items.filter((item) => !item.locked && item.hidden),
+    [items]
+  );
 
   // Send live preview to nav when items change (not persisted while editing)
   useEffect(() => {
@@ -100,21 +92,52 @@ export const CustomizeNavigationModal = ({
     onClose();
   }, [onClose, setIsEditingNavigation]);
 
-  const onDragEnd = useCallback(({ source, destination }: DropResult) => {
+  const onVisibleDragEnd = useCallback(({ source, destination }: DropResult) => {
     if (!destination || source.index === destination.index) return;
 
     setItems((prev) => {
       const locked = prev.filter((item) => item.locked);
-      const reorderable = prev.filter((item) => !item.locked);
-      const reordered = euiDragDropReorder(reorderable, source.index, destination.index);
-      return [...locked, ...reordered];
+      const visible = prev.filter((item) => !item.locked && !item.hidden);
+      const hidden = prev.filter((item) => !item.locked && item.hidden);
+      const reordered = euiDragDropReorder(visible, source.index, destination.index);
+      return [...locked, ...reordered, ...hidden];
+    });
+  }, []);
+
+  const onHiddenDragEnd = useCallback(({ source, destination }: DropResult) => {
+    if (!destination || source.index === destination.index) return;
+
+    setItems((prev) => {
+      const locked = prev.filter((item) => item.locked);
+      const visible = prev.filter((item) => !item.locked && !item.hidden);
+      const hidden = prev.filter((item) => !item.locked && item.hidden);
+      const reordered = euiDragDropReorder(hidden, source.index, destination.index);
+      return [...locked, ...visible, ...reordered];
     });
   }, []);
 
   const toggleItemVisibility = useCallback((itemId: string) => {
-    setItems((prev) =>
-      prev.map((item) => (item.id === itemId ? { ...item, hidden: !item.hidden } : item))
-    );
+    setItems((prev) => {
+      const idx = prev.findIndex((item) => item.id === itemId);
+      if (idx === -1) return prev;
+
+      const item = prev[idx];
+      const nowHidden = !item.hidden;
+      const updatedItem = { ...item, hidden: nowHidden };
+      const rest = [...prev.slice(0, idx), ...prev.slice(idx + 1)];
+
+      const locked = rest.filter((i) => i.locked);
+      const reorderable = rest.filter((i) => !i.locked);
+      const visible = reorderable.filter((i) => !i.hidden);
+      const hidden = reorderable.filter((i) => i.hidden);
+
+      if (nowHidden) {
+        // Turned off → move to the bottom (end of hidden group)
+        return [...locked, ...visible, ...hidden, updatedItem];
+      }
+      // Turned on → move to end of visible group (above hidden items)
+      return [...locked, ...visible, updatedItem, ...hidden];
+    });
   }, []);
 
   const handleSave = useCallback(() => {
@@ -149,37 +172,6 @@ export const CustomizeNavigationModal = ({
       </EuiModalHeader>
       <EuiModalBody>
         <>
-          {isCalloutVisible && (
-            <>
-              <EuiCallOut
-                size="s"
-                color="primary"
-                css={calloutCss}
-                title={
-                  <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-                    <EuiFlexItem>
-                      {i18n.translate(
-                        'core.ui.chrome.sideNavigation.customizeNavigation.calloutText',
-                        { defaultMessage: 'Turned-off items are always accessible under "More."' }
-                      )}
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        iconType="cross"
-                        color="primary"
-                        aria-label={i18n.translate(
-                          'core.ui.chrome.sideNavigation.customizeNavigation.dismissCallout',
-                          { defaultMessage: 'Dismiss' }
-                        )}
-                        onClick={dismissCallout}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                }
-              />
-              <EuiSpacer size="m" />
-            </>
-          )}
           {lockedItems.length > 0 && (
             <>
               {lockedItems.map((item) => (
@@ -187,9 +179,9 @@ export const CustomizeNavigationModal = ({
               ))}
             </>
           )}
-          <EuiDragDropContext onDragEnd={onDragEnd}>
-            <EuiDroppable droppableId="nav-items" spacing="none">
-              {reorderableItems.map((item, index) => (
+          <EuiDragDropContext onDragEnd={onVisibleDragEnd}>
+            <EuiDroppable droppableId="visible-nav-items" spacing="none">
+              {visibleItems.map((item, index) => (
                 <DraggableItem
                   key={item.id}
                   item={item}
@@ -199,6 +191,32 @@ export const CustomizeNavigationModal = ({
               ))}
             </EuiDroppable>
           </EuiDragDropContext>
+          {hiddenItems.length > 0 && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiTitle size="xxs">
+                <h4>
+                  <FormattedMessage
+                    id="core.ui.chrome.sideNavigation.customizeNavigation.moreLabel"
+                    defaultMessage="Always under More"
+                  />
+                </h4>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <EuiDragDropContext onDragEnd={onHiddenDragEnd}>
+                <EuiDroppable droppableId="hidden-nav-items" spacing="none">
+                  {hiddenItems.map((item, index) => (
+                    <DraggableItem
+                      key={item.id}
+                      item={item}
+                      index={index}
+                      toggleItemVisibility={toggleItemVisibility}
+                    />
+                  ))}
+                </EuiDroppable>
+              </EuiDragDropContext>
+            </>
+          )}
         </>
       </EuiModalBody>
       <EuiModalFooter>

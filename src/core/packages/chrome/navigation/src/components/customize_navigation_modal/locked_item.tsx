@@ -17,7 +17,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { NavigationItemInfo } from '@kbn/core-chrome-browser';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+
+const panelCss = css`
+  padding-left: 0;
+  padding-right: 0;
+`;
 
 const CORE_ITEM_IDS = new Set(['discover', 'dashboards']);
 
@@ -43,7 +49,7 @@ export const LockedItem = ({ item }: Props) => {
       });
 
   return (
-    <EuiPanel key={item.id} paddingSize="s" hasShadow={false} disabled>
+    <EuiPanel key={item.id} paddingSize="s" hasShadow={false} disabled css={panelCss}>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiIconTip type="lock" color="subdued" content={tooltipContent} position="left" />
