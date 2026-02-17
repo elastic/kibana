@@ -744,6 +744,7 @@ src/platform/packages/shared/shared-ux/storybook/mock @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/table_persist @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/toolbar_selector @elastic/obs-exploration-team
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
+src/platform/plugins/private/advanced_settings/test/scout/ui @elastic/appex-sharedux
 src/platform/plugins/private/event_annotation @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizations
 src/platform/plugins/private/files_management @elastic/appex-sharedux
@@ -1811,7 +1812,7 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 /x-pack/solutions/observability/test/serverless/functional/test_suites @elastic/observability-ui
 /src/platform/test/functional/apps/discover/observability @elastic/observability-ui
 
-# obs-exploration-team 
+# obs-exploration-team
 /x-pack/solutions/observability/test/serverless/functional/test_suites/discover/logs/ @elastic/obs-exploration-team
 /x-pack/solutions/observability/test/serverless/functional/utils/ @elastic/obs-exploration-team
 /src/platform/test/functional/apps/discover/observability/logs/ @elastic/obs-exploration-team
