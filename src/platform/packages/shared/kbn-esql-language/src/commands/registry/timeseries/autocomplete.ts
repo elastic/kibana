@@ -101,8 +101,8 @@ export async function autocomplete(
   const shouldSuggestIndicesBrowserInAdditionalSlot =
     Boolean(indicesBrowserSuggestion) && shouldSuggestIndicesBrowserAfterComma(innerText);
 
-  if (shouldSuggestIndicesBrowserInAdditionalSlot) {
-    suggestions.unshift(indicesBrowserSuggestion!);
+  if (shouldSuggestIndicesBrowserInAdditionalSlot && indicesBrowserSuggestion) {
+    suggestions.unshift(indicesBrowserSuggestion);
   }
 
   return suggestions;

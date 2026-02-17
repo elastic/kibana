@@ -627,7 +627,8 @@ export function createResourceBrowserSuggestion(options: {
 }
 
 export function createIndicesBrowserSuggestion(
-  commandArgs?: Record<string, string>
+  commandArgs?: Record<string, string>,
+  innerText?: string
 ): ISuggestionItem {
   return createResourceBrowserSuggestion({
     label: i18n.translate('kbn-esql-language.esql.autocomplete.indicesBrowser.suggestionLabel', {
@@ -641,6 +642,13 @@ export function createIndicesBrowserSuggestion(
     ),
     commandId: 'esql.indicesBrowser.open',
     commandArgs,
+    rangeToReplace: innerText
+      ? {
+          start: 0,
+          end: innerText.length + 1,
+        }
+      : undefined,
+    filterText: innerText,
   });
 }
 
