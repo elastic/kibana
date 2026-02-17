@@ -43,6 +43,10 @@ export interface AttackDetailsContext {
    * Field-browser-friendly representation of the event
    */
   dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
+  /**
+   * Refetches the attack document from the server
+   */
+  refetch: () => Promise<void>;
 }
 
 /**
@@ -61,11 +65,17 @@ export const AttackDetailsProvider = memo(
   ({ attackId, indexName, children }: AttackDetailsProviderProps) => {
     const currentSpaceId = useSpaceId();
     // data view side: browserFields + field-browser data
-    const { browserFields, dataFormattedForFieldBrowser, searchHit, getFieldsData, loading } =
-      useAttackDetails({
-        attackId,
-        indexName,
-      });
+    const {
+      browserFields,
+      dataFormattedForFieldBrowser,
+      searchHit,
+      getFieldsData,
+      loading,
+      refetch,
+    } = useAttackDetails({
+      attackId,
+      indexName,
+    });
 
     const scopeId = currentSpaceId ?? 'attack-details-flyout';
 
@@ -80,6 +90,7 @@ export const AttackDetailsProvider = memo(
               searchHit,
               getFieldsData,
               dataFormattedForFieldBrowser,
+              refetch,
             }
           : undefined,
       [
@@ -90,6 +101,7 @@ export const AttackDetailsProvider = memo(
         dataFormattedForFieldBrowser,
         searchHit,
         getFieldsData,
+        refetch,
       ]
     );
 

@@ -391,3 +391,5 @@ export {
   getReferencedColumnIds,
   cleanupFormulaReferenceColumns,
 } from './datasources/form_based/helpers';
+
+export { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from './editor/constants';

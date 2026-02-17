@@ -20,7 +20,12 @@ import {
   type NodeMouseHandler,
   type EdgeMouseHandler,
 } from '@xyflow/react';
-import { useEuiTheme, EuiScreenReaderOnly } from '@elastic/eui';
+import {
+  useEuiTheme,
+  EuiScreenReaderOnly,
+  EuiScreenReaderLive,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import '@xyflow/react/dist/style.css';
 import { css } from '@emotion/react';
@@ -79,6 +84,7 @@ function ReactFlowGraphInner({
   const [selectedEdgeForPopover, setSelectedEdgeForPopover] = useState<ServiceMapEdgeType | null>(
     null
   );
+  const serviceMapId = useGeneratedHtmlId({ prefix: 'serviceMap' });
 
   // Track the current selected node for use in layout effect without triggering re-layout
   const selectedNodeIdRef = useRef<string | null>(null);
@@ -224,6 +230,7 @@ function ReactFlowGraphInner({
     () => ({
       height,
       width: '100%',
+      overflow: 'auto',
       background: `linear-gradient(
         90deg,
         ${euiTheme.colors.backgroundBasePlain}
@@ -248,7 +255,10 @@ function ReactFlowGraphInner({
       background-color: ${euiTheme.colors.backgroundBasePlain};
       border-radius: ${euiTheme.border.radius.medium};
       border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
-      box-shadow: none;
+      box-shadow: 0 ${euiTheme.size.xs} ${euiTheme.size.s} ${euiTheme.colors.shadow};
+      z-index: ${euiTheme.levels.content};
+      position: relative;
+      margin: ${euiTheme.size.s};
 
       button {
         background-color: ${euiTheme.colors.backgroundBasePlain};
@@ -272,6 +282,16 @@ function ReactFlowGraphInner({
 
         svg {
           fill: currentColor;
+        }
+      }
+
+      /* Scale down controls when viewport is constrained (happens at 200% zoom) */
+      @media (max-width: 960px) {
+        margin: ${euiTheme.size.xxs} !important;
+        overflow: auto;
+        button {
+          min-width: 24px;
+          min-height: 24px;
         }
       }
     `,
@@ -300,20 +320,15 @@ function ReactFlowGraphInner({
       role="group"
       tabIndex={0}
       aria-label={i18n.translate('xpack.apm.serviceMap.regionLabel', {
-        defaultMessage:
-          'Service map with {nodeCount} services and dependencies. Use Tab to navigate nodes, Arrow keys to move between adjacent nodes.',
+        defaultMessage: 'Service map with {nodeCount} services and dependencies.',
         values: { nodeCount: nodes.length },
       })}
-      aria-describedby="service-map-instructions"
+      aria-describedby={serviceMapId}
     >
       <EuiScreenReaderOnly>
-        <div>
-          <div id="service-map-instructions">{screenReaderInstructions}</div>
-          <div role="status" aria-live="polite" aria-atomic="true">
-            {screenReaderAnnouncement}
-          </div>
-        </div>
+        <div id={serviceMapId}>{screenReaderInstructions}</div>
       </EuiScreenReaderOnly>
+      <EuiScreenReaderLive>{screenReaderAnnouncement}</EuiScreenReaderLive>
       <ReactFlow
         nodes={nodes}
         edges={edges}
