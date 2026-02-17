@@ -16,7 +16,7 @@ import { parse } from 'yaml';
 import { getConfigDirectory } from '@kbn/utils';
 
 export class EncryptionConfig {
-  #config = parse(readFileSync(join(getConfigDirectory(), 'kibana.yml')));
+  #config = parse(String(readFileSync(join(getConfigDirectory(), 'kibana.yml'))));
   #encryptionKeyPaths = [
     'xpack.encryptedSavedObjects.encryptionKey',
     'xpack.reporting.encryptionKey',

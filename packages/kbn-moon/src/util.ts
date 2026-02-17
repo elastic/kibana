@@ -59,6 +59,7 @@ export function writeYaml(filePath: string, obj: any, preamble: string | null = 
   let fileContent = stringify(obj, {
     lineWidth: 300,
     aliasDuplicateObjects: false,
+    singleQuote: true,
   });
 
   if (preamble) {
