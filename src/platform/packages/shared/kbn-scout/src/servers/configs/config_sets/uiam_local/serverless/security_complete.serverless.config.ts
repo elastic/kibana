@@ -8,6 +8,8 @@
  */
 
 import { MOCK_IDP_UIAM_SERVICE_URL, MOCK_IDP_UIAM_SHARED_SECRET } from '@kbn/mock-idp-utils';
+import { resolve } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { servers as defaultConfig } from '../../default/serverless/security_complete.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
 
@@ -22,6 +24,13 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       ...(isRunOnCI ? [] : ['--mockIdpPlugin.uiam.enabled=true']),
+      // We need to test certain APIs that are only exposed by the plugin contract and not through
+      // any HTTP endpoint, so this test plugin exposes these APIs through test HTTP endpoints that
+      // we can call in our tests.
+      `--plugin-path=${resolve(
+        REPO_ROOT,
+        'x-pack/platform/test/security_functional/plugins/test_endpoints'
+      )}`,
       `--xpack.security.uiam.enabled=true`,
       `--xpack.security.uiam.url=${MOCK_IDP_UIAM_SERVICE_URL}`,
       `--xpack.security.uiam.sharedSecret=${MOCK_IDP_UIAM_SHARED_SECRET}`,

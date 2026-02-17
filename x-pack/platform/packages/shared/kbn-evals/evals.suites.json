@@ -3,35 +3,42 @@
     {
       "id": "agent-builder",
       "name": "Agent Builder",
-      "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts",
+      "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/playwright.config.ts",
       "tags": ["platform", "agent-builder"],
       "ciLabels": ["evals:agent-builder"]
     },
     {
+      "id": "esql-generation",
+      "name": "ES|QL Generation Evaluations",
+      "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/test/scout/ui/esql.playwright.config.ts",
+      "tags": ["platform", "esql"],
+      "ciLabels": ["evals:esql-generation"]
+    },
+    {
       "id": "streams",
       "name": "Streams",
-      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-streams/playwright.config.ts",
+      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-streams/test/scout/ui/playwright.config.ts",
       "tags": ["platform", "streams"],
       "ciLabels": ["evals:streams"]
     },
     {
       "id": "llm-tasks",
       "name": "LLM Tasks",
-      "configPath": "x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks/playwright.config.ts",
+      "configPath": "x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks/test/scout/ui/playwright.config.ts",
       "tags": ["ai-infra"],
       "ciLabels": ["evals:llm-tasks"]
     },
     {
       "id": "obs-ai-assistant",
       "name": "Observability AI Assistant",
-      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts",
+      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/test/scout/ui/playwright.config.ts",
       "tags": ["observability", "ai-assistant"],
       "ciLabels": ["evals:obs-ai-assistant"]
     },
     {
       "id": "obs-ai-assistant/ai_insights",
       "name": "Observability AI Assistant (AI Insights)",
-      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/ai_insights/playwright.config.ts",
+      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/test/scout/ui/ai_insights.playwright.config.ts",
       "tags": ["observability", "ai-assistant"],
       "ciLabels": ["evals:obs-ai-assistant-ai-insights"]
     }

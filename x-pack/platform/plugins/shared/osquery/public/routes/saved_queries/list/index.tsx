@@ -27,7 +27,9 @@ import { Direction } from '../../../../common/search_strategy';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 import { useSavedQueries } from '../../../saved_queries/use_saved_queries';
+import { SavedQueryRowActions } from './saved_query_row_actions';
 
 export interface SavedQuerySO {
   name: string;
@@ -50,11 +52,12 @@ interface PlayButtonProps {
 
 const PlayButtonComponent: React.FC<PlayButtonProps> = ({ disabled = false, savedQuery }) => {
   const { push } = useHistory();
+  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
+  const newQueryPath = isHistoryEnabled ? '/new' : '/live_queries/new';
 
-  // TODO: Add href
   const handlePlayClick = useCallback(
     () =>
-      push('/live_queries/new', {
+      push(newQueryPath, {
         form: {
           savedQueryId: savedQuery.id,
           query: savedQuery.query,
@@ -62,7 +65,7 @@ const PlayButtonComponent: React.FC<PlayButtonProps> = ({ disabled = false, save
           timeout: savedQuery.timeout ?? QUERY_TIMEOUT.DEFAULT,
         },
       }),
-    [push, savedQuery]
+    [push, newQueryPath, savedQuery]
   );
 
   const playText = useMemo(
@@ -132,6 +135,7 @@ const EditButton = React.memo(EditButtonComponent);
 
 const SavedQueriesPageComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
+  const queryHistoryRework = useIsExperimentalFeatureEnabled('queryHistoryRework');
 
   useBreadcrumbs('saved_queries');
   const newQueryLinkProps = useRouterNavigate('saved_queries/new');
@@ -221,8 +225,22 @@ const SavedQueriesPageComponent = () => {
         }),
         actions: [{ render: renderPlayAction }, { render: renderEditAction }],
       },
+      ...(queryHistoryRework
+        ? [
+            {
+              width: '40px',
+              render: (item: SavedQuerySO) => <SavedQueryRowActions item={item} />,
+            },
+          ]
+        : []),
     ],
-    [renderDescriptionColumn, renderEditAction, renderPlayAction, renderUpdatedAt]
+    [
+      renderDescriptionColumn,
+      renderEditAction,
+      renderPlayAction,
+      renderUpdatedAt,
+      queryHistoryRework,
+    ]
   );
 
   const onTableChange = useCallback(({ page = {}, sort = {} }: any) => {
