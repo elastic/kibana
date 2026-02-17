@@ -9,6 +9,23 @@ import type { EntityType, EuidAttribute } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isEuidField, isEuidSeparator } from './commons';
 
+/**
+ * Constructs a Painless evaluation for the provided entity type to generate the entity id.
+ *
+ * To use in a runtime field, you can wrap the generation around a function and emit the value.
+ *
+ * Example usage:
+ * ```ts
+ * import { getEuidPainlessEvaluation } from './painless';
+ *
+ * const evaluation = getEuidPainlessEvaluation('host');
+ * // evaluation may look like:
+ * // 'if (doc.containsKey('host.name') && doc['host.name'].size() > 0 && doc['host.name'].value != null && doc['host.name'].value != "") { return "host:" + doc['host.name'].value; } return null;'
+ * ```
+ *
+ * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
+ * @returns A Painless evaluation string that computes the entity id.
+ */
 export function getEuidPainlessEvaluation(entityType: EntityType): string {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
 
