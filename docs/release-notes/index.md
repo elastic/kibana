@@ -21,6 +21,67 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
+% FEATURES, ENHANCEMENTS, FIXES
+% Paste in index.md
+
+## 9.3.1 [kibana-9.3.1-release-notes]
+
+### Features and enhancements [kibana-9.3.1-features-enhancements]
+
+**Elastic Security solution**:
+For the Elastic Security 9.3.1 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Machine Learning**:
+* Adds dynamic default connector in GenAI settings [#252861]({{kib-pull}}252861).
+* Adds missing ES|QL commands and functions documentation for inference tasks [#249089]({{kib-pull}}249089).
+
+**Management**:
+* Adds a concat processor [#247940]({{kib-pull}}247940).
+
+
+### Fixes [kibana-9.3.1-fixes]
+
+**Alerting and cases**:
+* Adds external refs to checks [#253107]({{kib-pull}}253107).
+* Rule execution fails due to null execution UUIDs [#252618]({{kib-pull}}252618).
+* Better handle 204 responses [#251090]({{kib-pull}}251090).
+
+**Dashboards and Visualizations**:
+* Fixes config panel scrolling in the Lens editor. Previously, when the config panel content exceeded the available height (e.g., with multiple dimensions or small viewport), users could not scroll to access all configuration options. [#253247]({{kib-pull}}253247).
+
+**Discover**:
+* Fixes handling of missing values [#251892]({{kib-pull}}251892).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.3.1 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.3.1 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Machine Learning**:
+* Fixes today and this week filters for Log Rate / Pattern Analysis embeddables [#252925]({{kib-pull}}252925).
+* Anomaly Detection: Fixes word break in page titles [#250058]({{kib-pull}}250058).
+
+**Management**:
+* Fixes autocomplete doesnt work in embeded console [#253306]({{kib-pull}}253306).
+* Fixes problem in 9.3.0 loading the doc count in index management when viewing larger page sizes with long index names [#252422]({{kib-pull}}252422).
+* Fixes too_small zod error for ai pipeline suggestions that have empty string grok patterns [#251113]({{kib-pull}}251113).
+
+**Search**:
+* Homepage doesn't throw errors when license level is less than Enterprise [#251484]({{kib-pull}}251484).
+* Reduces background polling on the Index Details page to avoid unnecessary API requests [#251446]({{kib-pull}}251446).
+* Fixes links being visible on Search Homepage when user doesn't have access [#251437]({{kib-pull}}251437).
+* Fixes AI Connector form fields incorrectly resetting to default values when users clear them using backspace [#251095]({{kib-pull}}251095).
+* Fixes GenAI Settings description to reference "pre-configured AI connectors" instead of the outdated "Elastic Managed LLM connector" terminology [#250649]({{kib-pull}}250649).
+* Adds datemath support to KQL evaluator [#252840]({{kib-pull}}252840).
+* Strips system-managed date fields from ingest pipelines before PUT [#252579]({{kib-pull}}252579).
+* Handle empty results in ES|QL rule execution [#250759]({{kib-pull}}250759).
+* Propagates ES|QL execution errors [#250605]({{kib-pull}}250605).
+* Updates AI Insight UI description [#250137]({{kib-pull}}250137).
+* Fixes query sync on save and add debounce for preview chart [#249833]({{kib-pull}}249833).
+* Fixes monitoring breadcrumbs for solution view [#249751]({{kib-pull}}249751).
+* Prevents editing feature of significant event queries [#249716]({{kib-pull}}249716).
+
 ## 9.3.0 [kibana-9.3.0-release-notes]
 
 % ::::{NOTE}
