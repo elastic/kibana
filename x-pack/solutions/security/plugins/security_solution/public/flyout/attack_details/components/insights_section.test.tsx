@@ -110,7 +110,7 @@ describe('InsightsSection', () => {
     expect(mockOpenLeftPanel).toHaveBeenCalledWith({
       id: 'attack-details-left',
       params: { attackId: 'attack-1', indexName: '.alerts-default' },
-      path: { tab: 'insights' },
+      path: { tab: 'insights', subTab: 'entity' },
     });
   });
 });
