@@ -68,13 +68,14 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     const updatedTabs: DiscoverSessionTab[] = await Promise.all(
       currentTabs.map(async (tab) => {
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
+        const currentDataView = tabRuntimeState?.currentDataView$.getValue();
         const overriddenVisContextAfterInvalidation = tab.overriddenVisContextAfterInvalidation;
 
         const updatedTab = cloneDeep(
           fromTabStateToSavedObjectTab({
             tab,
             overridenTimeRestore: newTimeRestore,
-            tabRuntimeState,
+            currentDataView,
             services,
           })
         );

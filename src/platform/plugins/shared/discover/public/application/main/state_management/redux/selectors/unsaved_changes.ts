@@ -87,15 +87,16 @@ export const selectHasUnsavedChanges = (
       }),
       overridenTimeRestore: Boolean(persistedTab.timeRestore),
       services,
-      tabRuntimeState: undefined,
+      currentDataView: undefined,
     });
 
     const tabState = selectTab(state, tabId);
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+    const currentDataView = tabRuntimeState?.currentDataView$.getValue();
 
     const normalizedTab = fromTabStateToSavedObjectTab({
       tab: tabState,
-      tabRuntimeState,
+      currentDataView,
       services,
     });
 

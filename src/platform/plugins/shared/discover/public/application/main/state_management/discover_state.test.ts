@@ -419,7 +419,7 @@ describe('Discover state', () => {
                 },
               }),
               services,
-              tabRuntimeState: undefined,
+              currentDataView: undefined,
             }),
           ],
         });
@@ -447,7 +447,7 @@ describe('Discover state', () => {
                 },
               }),
               services,
-              tabRuntimeState: undefined,
+              currentDataView: undefined,
             }),
           ],
         });

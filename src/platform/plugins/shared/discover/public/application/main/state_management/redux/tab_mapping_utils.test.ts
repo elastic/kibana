@@ -8,7 +8,6 @@
  */
 
 import { omit } from 'lodash';
-import { BehaviorSubject } from 'rxjs';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { getTabStateMock, getPersistedTabMock } from './__mocks__/internal_state.mocks';
@@ -21,8 +20,6 @@ import {
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
-import type { ReactiveTabRuntimeState } from './runtime_state';
-import type { DiscoverStateContainer } from '../discover_state';
 
 const services = createDiscoverServicesMock();
 const tab1 = getTabStateMock({
@@ -68,7 +65,7 @@ describe('tab mapping utils', () => {
           tab: tab2,
           overridenTimeRestore: false,
           services,
-          tabRuntimeState: undefined,
+          currentDataView: undefined,
         }),
         existingTab: tab1,
       });
@@ -160,7 +157,7 @@ describe('tab mapping utils', () => {
           tab: tab2,
           overridenTimeRestore: true,
           services,
-          tabRuntimeState: undefined,
+          currentDataView: undefined,
         }),
         existingTab: tab1,
       });
@@ -322,6 +319,7 @@ describe('tab mapping utils', () => {
               "search": [MockFunction],
             },
             "fields": Object {
+              "filter": Array [],
               "index": Object {
                 "docvalueFields": Array [],
                 "fields": Array [
@@ -496,7 +494,7 @@ describe('tab mapping utils', () => {
             },
             "getFieldName": [Function],
             "history": Array [],
-            "id": "data_source6",
+            "id": "data_source7",
             "inheritOptions": Object {},
             "overwriteDataViewType": undefined,
             "parent": undefined,
@@ -531,11 +529,11 @@ describe('tab mapping utils', () => {
   });
 
   describe('fromTabStateToSavedObjectTab', () => {
-    it('should map tab state to saved object tab when tabRuntimeState is undefined', () => {
+    it('should map tab state to saved object tab when currentDataView is undefined', () => {
       let savedObjectTab = fromTabStateToSavedObjectTab({
         tab: tab1,
         services,
-        tabRuntimeState: undefined,
+        currentDataView: undefined,
       });
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
@@ -574,7 +572,7 @@ describe('tab mapping utils', () => {
         tab: tab1,
         overridenTimeRestore: true,
         services,
-        tabRuntimeState: undefined,
+        currentDataView: undefined,
       });
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
@@ -617,21 +615,12 @@ describe('tab mapping utils', () => {
       `);
     });
 
-    it('should use dataView from tabRuntimeState when tab is initialized', () => {
-      // Create a mock tabRuntimeState with an initialized tab (stateContainer exists)
-      // and a currentDataView
-      const mockTabRuntimeState = {
-        stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(
-          {} as DiscoverStateContainer // Mock stateContainer to indicate tab is initialized
-        ),
-        currentDataView$: new BehaviorSubject(dataViewMockWithTimeField),
-      } as unknown as ReactiveTabRuntimeState;
-
+    it('should use currentDataView when provided', () => {
       const tabWithAppState = getTabStateMock({
         id: 'initialized-tab',
         label: 'Initialized Tab',
         initialInternalState: {
-          // This should NOT be used when tabRuntimeState has a dataView
+          // This should NOT be used when dataView is provided
           serializedSearchSource: { index: 'stale-data-view-id' },
         },
         appState: {
@@ -647,10 +636,10 @@ describe('tab mapping utils', () => {
       const savedObjectTab = fromTabStateToSavedObjectTab({
         tab: tabWithAppState,
         services,
-        tabRuntimeState: mockTabRuntimeState,
+        currentDataView: dataViewMockWithTimeField,
       });
 
-      // The serializedSearchSource should be created from the dataView in tabRuntimeState,
+      // The serializedSearchSource should be created from the provided dataView,
       // NOT from the stale initialInternalState.serializedSearchSource
       // Note: The index is serialized as the dataView ID, not the full dataView object
       expect(savedObjectTab.serializedSearchSource.index).toBe(dataViewMockWithTimeField.id);
@@ -668,13 +657,7 @@ describe('tab mapping utils', () => {
       expect(savedObjectTab.serializedSearchSource.index).not.toBe('stale-data-view-id');
     });
 
-    it('should fall back to initialInternalState when tabRuntimeState exists but tab is not initialized', () => {
-      // Create a mock tabRuntimeState where stateContainer is undefined (tab not initialized)
-      const mockTabRuntimeState = {
-        stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(undefined),
-        currentDataView$: new BehaviorSubject(dataViewMockWithTimeField),
-      } as unknown as ReactiveTabRuntimeState;
-
+    it('should fall back to initialInternalState when currentDataView is undefined', () => {
       const tabWithAppState = getTabStateMock({
         id: 'uninitialized-tab',
         label: 'Uninitialized Tab',
@@ -686,10 +669,10 @@ describe('tab mapping utils', () => {
       const savedObjectTab = fromTabStateToSavedObjectTab({
         tab: tabWithAppState,
         services,
-        tabRuntimeState: mockTabRuntimeState,
+        currentDataView: undefined,
       });
 
-      // Should use initialInternalState since tab is not initialized (no stateContainer)
+      // Should use initialInternalState since dataView is not provided
       expect(savedObjectTab.serializedSearchSource).toEqual({
         index: 'initial-data-view-id',
         query: { esql: 'FROM test' },

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -18,7 +19,6 @@ import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size'
 import { DEFAULT_TAB_STATE } from './constants';
 import { parseControlGroupJson } from './utils';
 import { createSearchSource } from '../utils/create_search_source';
-import { isTabRuntimeStateInitialized, type ReactiveTabRuntimeState } from './runtime_state';
 
 export const fromSavedObjectTabToTabState = ({
   tab,
@@ -123,19 +123,21 @@ export const fromTabStateToSavedObjectTab = ({
   tab,
   overridenTimeRestore,
   services,
-  tabRuntimeState,
+  currentDataView,
 }: {
   tab: TabState;
   overridenTimeRestore?: boolean;
   services: DiscoverServices;
-  tabRuntimeState: ReactiveTabRuntimeState | undefined;
+  currentDataView: DataView | undefined;
 }): DiscoverSessionTab => {
   const allowedSampleSize = getAllowedSampleSize(tab.appState.sampleSize, services.uiSettings);
   const timeRestore = overridenTimeRestore ?? tab.attributes.timeRestore ?? false;
 
-  const serializedSearchSource = isTabRuntimeStateInitialized(tabRuntimeState)
+  // Only use createSearchSource when we have an actual DataView object (for initialized tabs)
+  // When currentDataView is undefined, fall back to the existing serialized search source
+  const serializedSearchSource = currentDataView
     ? createSearchSource({
-        dataView: tabRuntimeState?.currentDataView$.getValue(),
+        dataView: currentDataView,
         appState: tab.appState,
         globalState: tab.globalState,
         services,

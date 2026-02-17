@@ -75,7 +75,7 @@ describe('getInitialAppState', () => {
         },
       }),
       services,
-      tabRuntimeState: undefined,
+      currentDataView: undefined,
     });
     const appState = getInitialAppState({
       hasGlobalState: false,
@@ -121,7 +121,7 @@ describe('getInitialAppState', () => {
         },
       }),
       services,
-      tabRuntimeState: undefined,
+      currentDataView: undefined,
     });
     const appState = getInitialAppState({
       hasGlobalState: false,
@@ -234,7 +234,7 @@ describe('getInitialAppState', () => {
     fromTabStateToSavedObjectTab({
       tab: getTabStateMock({ id: 'mock-tab' }),
       services,
-      tabRuntimeState: undefined,
+      currentDataView: undefined,
     });
 
   test('should set view mode correctly', () => {

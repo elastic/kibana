@@ -62,7 +62,7 @@ describe('Test discover app state', () => {
         },
       }),
       services,
-      tabRuntimeState: undefined,
+      currentDataView: undefined,
     });
 
     return createDiscoverSessionMock({

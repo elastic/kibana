@@ -30,11 +30,12 @@ export const selectTabSavedSearch = async (
 ): Promise<SavedSearch> => {
   const tabState = selectTab(state, tabId);
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+  const currentDataView = tabRuntimeState?.currentDataView$.getValue();
 
   return fromSavedObjectTabToSavedSearch({
     tab: fromTabStateToSavedObjectTab({
       tab: tabState,
-      tabRuntimeState,
+      currentDataView,
       services,
     }),
     discoverSession: state.persistedDiscoverSession,
