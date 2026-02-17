@@ -67,6 +67,7 @@ describe('useChartLayers', () => {
       metricField: '',
       indices: [],
       filters: [],
+      metadataFields: [],
     });
 
     const { result } = renderHook(() =>
@@ -97,6 +98,7 @@ describe('useChartLayers', () => {
       metricField: '',
       indices: [],
       filters: [],
+      metadataFields: [],
     });
 
     const { result } = renderHook(() =>
@@ -136,6 +138,7 @@ describe('useChartLayers', () => {
       metricField: '',
       indices: [],
       filters: [],
+      metadataFields: [],
     });
 
     const { result } = renderHook(() =>
@@ -174,6 +177,7 @@ describe('useChartLayers', () => {
       metricField: '',
       indices: [],
       filters: [],
+      metadataFields: [],
     });
 
     const { result } = renderHook(() =>
@@ -206,6 +210,7 @@ describe('useChartLayers', () => {
       metricField: '',
       indices: [],
       filters: [],
+      metadataFields: [],
     });
 
     const { result } = renderHook(() =>
@@ -245,6 +250,7 @@ describe('useChartLayers', () => {
       metricField: '',
       indices: [],
       filters: [],
+      metadataFields: [],
     });
 
     const { result } = renderHook(() =>

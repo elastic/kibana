@@ -52,6 +52,7 @@ export interface IntegrationsURLParameters {
   categoryId?: string;
   subCategoryId?: string;
   onlyAgentless?: boolean;
+  showDeprecated?: boolean;
 }
 
 function getAllCategoriesFromIntegrations(pkg: PackageListItem) {

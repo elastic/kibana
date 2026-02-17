@@ -31,6 +31,7 @@ jest.mock('@kbn/repo-info', () => ({
 
 jest.mock('child_process', () => ({
   spawn: jest.fn(),
+  execFile: jest.fn(),
 }));
 
 jest.mock('@kbn/tooling-log', () => ({
@@ -45,6 +46,10 @@ jest.mock('./configs/get_jest_configs', () => ({
   getJestConfigs: jest.fn(),
 }));
 
+jest.mock('./shard_config', () => {
+  return jest.requireActual('./shard_config');
+});
+
 // Mock process.exit to prevent tests from actually exiting
 const mockProcessExit = jest
   .spyOn(process, 'exit')
@@ -58,13 +63,10 @@ import { runJestAll } from './run_all';
 describe('run_all.ts', () => {
   let mockGetopts: jest.Mock;
   let mockSpawn: jest.Mock;
+  let mockExecFile: jest.Mock;
   let mockGetJestConfigs: jest.Mock;
   let mockGetTimeReporter: jest.Mock;
   let mockReporter: jest.Mock;
-  let mockFs: {
-    mkdir: jest.Mock;
-    writeFile: jest.Mock;
-  };
 
   beforeEach(() => {
     // Clear all mocks
@@ -75,16 +77,29 @@ describe('run_all.ts', () => {
 
     // Reset process.env
     delete process.env.JEST_MAX_PARALLEL;
-    delete process.env.JEST_ALL_FAILED_CONFIGS_PATH;
+    delete process.env.BUILDKITE;
+    delete process.env.BUILDKITE_STEP_ID;
+    delete process.env.BUILDKITE_PARALLEL_JOB;
 
     // Set up mocks
     mockGetopts = jest.mocked(jest.requireMock('getopts'));
     mockSpawn = jest.mocked(jest.requireMock('child_process').spawn);
+    mockExecFile = jest.mocked(jest.requireMock('child_process').execFile);
     mockGetJestConfigs = jest.mocked(jest.requireMock('./configs/get_jest_configs').getJestConfigs);
     mockGetTimeReporter = jest.mocked(jest.requireMock('@kbn/ci-stats-reporter').getTimeReporter);
     mockReporter = jest.fn();
     mockGetTimeReporter.mockReturnValue(mockReporter);
-    mockFs = jest.mocked(jest.requireMock('fs').promises);
+
+    // Default: execFile succeeds (used by checkpoint helpers)
+    mockExecFile.mockImplementation(
+      (
+        _cmd: string,
+        _args: string[],
+        cb: (err: Error | null, stdout: string, stderr: string) => void
+      ) => {
+        cb(null, '', '');
+      }
+    );
 
     // Default mock implementations
     mockGetopts.mockReturnValue({
@@ -331,71 +346,10 @@ describe('run_all.ts', () => {
 
       await runPromise;
 
-      // Verify that output was captured and logged
-      expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining('Test output from stdout'));
-    });
-
-    describe('failed configs persistence', () => {
-      it('should write failed configs to file when JEST_ALL_FAILED_CONFIGS_PATH is set', async () => {
-        process.env.JEST_ALL_FAILED_CONFIGS_PATH = '/tmp/failed-configs.json';
-
-        mockGetJestConfigs.mockResolvedValue({
-          configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
-          emptyConfigs: [],
-        });
-
-        // Mock multiple process instances for retry logic - always fail
-        mockSpawn.mockImplementation(() => {
-          const mockProcess = new EventEmitter() as any;
-          mockProcess.stdout = new EventEmitter();
-          mockProcess.stderr = new EventEmitter();
-
-          process.nextTick(() => {
-            mockProcess.emit('exit', 1); // Always fail
-          });
-
-          return mockProcess;
-        });
-
-        try {
-          await runJestAll();
-        } catch (err) {
-          // Expected due to process.exit mock
-          expect((err as Error).message).toContain('process.exit called with code 10');
-        }
-
-        expect(mockFs.mkdir).toHaveBeenCalledWith('/tmp', { recursive: true });
-        expect(mockFs.writeFile).toHaveBeenCalledWith(
-          '/tmp/failed-configs.json',
-          JSON.stringify(['/path/to/config1.js'], null, 2),
-          'utf8'
-        );
-      });
-
-      it('should not write failed configs file when no configs fail', async () => {
-        process.env.JEST_ALL_FAILED_CONFIGS_PATH = '/tmp/failed-configs.json';
-
-        const mockProcess = new EventEmitter() as any;
-        mockProcess.stdout = new EventEmitter();
-        mockProcess.stderr = new EventEmitter();
-        mockSpawn.mockReturnValue(mockProcess);
-
-        const runPromise = runJestAll().catch(() => {
-          // Expected due to process.exit mock
-        });
-
-        process.nextTick(() => {
-          mockProcess.emit('exit', 0);
-        });
-
-        await runPromise;
-
-        expect(mockFs.writeFile).toHaveBeenCalledWith(
-          '/tmp/failed-configs.json',
-          JSON.stringify([], null, 2),
-          'utf8'
-        );
-      });
+      // Verify that output was captured and written (via log.write in Buildkite section)
+      expect(mockLog.write).toHaveBeenCalledWith(
+        expect.stringContaining('Test output from stdout')
+      );
     });
 
     describe('logging and reporting', () => {
@@ -420,7 +374,7 @@ describe('run_all.ts', () => {
         );
       });
 
-      it('should log output for each config with timing', async () => {
+      it('should log output for each config with Buildkite section headers', async () => {
         const mockProcess = new EventEmitter() as any;
         mockProcess.stdout = new EventEmitter();
         mockProcess.stderr = new EventEmitter();
@@ -438,8 +392,9 @@ describe('run_all.ts', () => {
 
         await runPromise;
 
-        expect(mockLog.info).toHaveBeenCalledWith(
-          expect.stringMatching(/Output for .*config.*\.js \(exit 0 - success, \d+s\)/)
+        // Passing configs get collapsed Buildkite sections (---)
+        expect(mockLog.write).toHaveBeenCalledWith(
+          expect.stringMatching(/--- ✅ .*config.*\.js \(\d+s\)\n/)
         );
       });
 
@@ -459,7 +414,7 @@ describe('run_all.ts', () => {
 
         await runPromise;
 
-        expect(mockLog.write).toHaveBeenCalledWith('--- Combined Jest run summary');
+        expect(mockLog.write).toHaveBeenCalledWith('+++ Combined Jest run summary\n');
         expect(mockLog.info).toHaveBeenCalledWith(
           expect.stringMatching(/Total duration \(wall to wall\): \d+s/)
         );
@@ -501,17 +456,13 @@ describe('run_all.ts', () => {
           emptyConfigs: [],
         });
 
-        // Mock multiple process instances for retry logic
-        let processCount = 0;
         mockSpawn.mockImplementation(() => {
           const mockProcess = new EventEmitter() as any;
           mockProcess.stdout = new EventEmitter();
           mockProcess.stderr = new EventEmitter();
 
-          // Always fail both initial and retry attempts
           process.nextTick(() => {
             mockProcess.emit('exit', 1);
-            processCount++;
           });
 
           return mockProcess;
@@ -524,8 +475,8 @@ describe('run_all.ts', () => {
           expect((err as Error).message).toContain('process.exit called with code 10');
         }
 
-        // Should have spawned processes for both initial run and retry
-        expect(mockSpawn).toHaveBeenCalledTimes(2); // 1 initial + 1 retry
+        // No retry — only 1 spawn for the failing config
+        expect(mockSpawn).toHaveBeenCalledTimes(1);
 
         expect(mockReporter).toHaveBeenCalledWith(
           expect.any(Number),
@@ -605,74 +556,416 @@ describe('run_all.ts', () => {
 
         await runPromise;
 
-        // Should log duration in seconds
-        expect(mockLog.info).toHaveBeenCalledWith(
-          expect.stringMatching(/exit 0 - success, \d+s\)/)
+        // Should log duration in Buildkite section header
+        expect(mockLog.write).toHaveBeenCalledWith(
+          expect.stringMatching(/--- ✅ .*\.js \(\d+s\)\n/)
         );
       });
     });
 
-    describe('parallel execution and retry logic', () => {
-      it('should handle retry mechanism for failed configs', async () => {
+    describe('shard annotation handling', () => {
+      it('should strip shard annotations before passing to getJestConfigs (CI path)', async () => {
+        mockGetopts.mockReturnValue({
+          configs: 'config1.js||shard=1/2,config1.js||shard=2/2',
+          maxParallel: undefined,
+        });
+
         mockGetJestConfigs.mockResolvedValue({
           configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
           emptyConfigs: [],
         });
 
-        let callCount = 0;
-        mockSpawn.mockImplementation(() => {
-          const mockProcess = new EventEmitter() as any;
-          mockProcess.stdout = new EventEmitter();
-          mockProcess.stderr = new EventEmitter();
+        const mockProcess = new EventEmitter() as any;
+        mockProcess.stdout = new EventEmitter();
+        mockProcess.stderr = new EventEmitter();
+        mockSpawn.mockReturnValue(mockProcess);
 
-          process.nextTick(() => {
-            // Fail first time, succeed on retry
-            mockProcess.emit('exit', callCount === 0 ? 1 : 0);
-            callCount++;
-          });
+        const runPromise = runJestAll().catch(() => {});
 
-          return mockProcess;
+        process.nextTick(() => {
+          mockProcess.emit('exit', 0);
+          if (mockSpawn.mock.calls.length > 1) {
+            mockProcess.emit('exit', 0);
+          }
         });
+
+        await runPromise;
+
+        // Should pass clean config path (without shard annotation) to getJestConfigs
+        expect(mockGetJestConfigs).toHaveBeenCalledWith(['config1.js']);
+      });
+
+      it('should pass --shard flag to spawned processes for annotated configs', async () => {
+        mockGetopts.mockReturnValue({
+          configs: 'config1.js||shard=1/2,config1.js||shard=2/2',
+          maxParallel: '2',
+        });
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
+          emptyConfigs: [],
+        });
+
+        const processes: any[] = [];
+        mockSpawn.mockImplementation(() => {
+          const proc = new EventEmitter() as any;
+          proc.stdout = new EventEmitter();
+          proc.stderr = new EventEmitter();
+          processes.push(proc);
+          process.nextTick(() => proc.emit('exit', 0));
+          return proc;
+        });
+
+        try {
+          await runJestAll();
+        } catch {
+          // Expected
+        }
+
+        // Should spawn 2 processes (one per shard)
+        expect(mockSpawn).toHaveBeenCalledTimes(2);
+
+        // First process should get --shard=1/2
+        expect(mockSpawn.mock.calls[0][1]).toEqual(expect.arrayContaining(['--shard=1/2']));
+        // Config should be clean (without annotation)
+        expect(mockSpawn.mock.calls[0][1]).toEqual(
+          expect.arrayContaining(['--config', 'config1.js'])
+        );
+
+        // Second process should get --shard=2/2
+        expect(mockSpawn.mock.calls[1][1]).toEqual(expect.arrayContaining(['--shard=2/2']));
+      });
+
+      it('should NOT pass --shard flag for non-annotated configs', async () => {
+        mockGetopts.mockReturnValue({
+          configs: 'config1.js',
+          maxParallel: undefined,
+        });
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
+          emptyConfigs: [],
+        });
+
+        const mockProcess = new EventEmitter() as any;
+        mockProcess.stdout = new EventEmitter();
+        mockProcess.stderr = new EventEmitter();
+        mockSpawn.mockReturnValue(mockProcess);
+
+        const runPromise = runJestAll().catch(() => {});
+
+        process.nextTick(() => {
+          mockProcess.emit('exit', 0);
+        });
+
+        await runPromise;
+
+        const spawnArgs = mockSpawn.mock.calls[0][1] as string[];
+        expect(spawnArgs).not.toEqual(expect.arrayContaining([expect.stringMatching(/--shard/)]));
+      });
+
+      it('should NOT auto-expand sharded configs locally (only CI annotations)', async () => {
+        // A config is in the shard map but no CI annotation — locally it should NOT expand
+        mockGetopts.mockReturnValue({
+          configs: 'fleet/jest.integration.config.js',
+          maxParallel: '2',
+        });
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [
+            {
+              config: '/path/to/fleet/jest.integration.config.js',
+              testFiles: ['test1.js'],
+            },
+          ],
+          emptyConfigs: [],
+        });
+
+        const processes: any[] = [];
+        mockSpawn.mockImplementation(() => {
+          const proc = new EventEmitter() as any;
+          proc.stdout = new EventEmitter();
+          proc.stderr = new EventEmitter();
+          processes.push(proc);
+          process.nextTick(() => proc.emit('exit', 0));
+          return proc;
+        });
+
+        try {
+          await runJestAll();
+        } catch {
+          // Expected
+        }
+
+        // Should spawn only 1 process — no auto-expansion locally
+        expect(mockSpawn).toHaveBeenCalledTimes(1);
+
+        const args = mockSpawn.mock.calls[0][1] as string[];
+        expect(args).not.toEqual(expect.arrayContaining([expect.stringMatching(/--shard/)]));
+      });
+    });
+
+    describe('parallel execution', () => {});
+
+    describe('Buildkite checkpoint resume', () => {
+      beforeEach(() => {
+        process.env.BUILDKITE = 'true';
+        process.env.BUILDKITE_STEP_ID = 'test-step-id';
+        process.env.BUILDKITE_PARALLEL_JOB = '0';
+      });
+
+      it('should skip configs already completed on a previous attempt', async () => {
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [
+            { config: '/path/to/config1.js', testFiles: ['test1.js'] },
+            { config: '/path/to/config2.js', testFiles: ['test2.js'] },
+          ],
+          emptyConfigs: [],
+        });
+
+        // execFile mock: config1 was already completed, config2 was not
+        // Track get call index via closure to distinguish config1 from config2
+        let getCallIndex = 0;
+        mockExecFile.mockImplementation(
+          (
+            cmd: string,
+            args: string[],
+            cb: (err: Error | null, stdout: string, stderr: string) => void
+          ) => {
+            if (cmd === 'buildkite-agent' && args[0] === 'meta-data' && args[1] === 'get') {
+              // Return 'done' for the first get call (config1) and '' for the second (config2)
+              cb(null, getCallIndex++ === 0 ? 'done' : '', '');
+            } else {
+              cb(null, '', '');
+            }
+          }
+        );
+
+        const mockProcess = new EventEmitter() as any;
+        mockProcess.stdout = new EventEmitter();
+        mockProcess.stderr = new EventEmitter();
+        mockSpawn.mockReturnValue(mockProcess);
 
         const runPromise = runJestAll().catch(() => {
           // Expected due to process.exit mock
         });
 
+        // Only config2 should be spawned
+        process.nextTick(() => {
+          mockProcess.emit('exit', 0);
+        });
+
         await runPromise;
 
+        // config1 should be skipped
         expect(mockLog.info).toHaveBeenCalledWith(
-          '--- Detected failing configs, starting retry pass (maxParallel=1)'
+          expect.stringContaining('[jest-checkpoint]   SKIP config1.js')
         );
-        expect(mockLog.info).toHaveBeenCalledWith('Configs fixed after retry:');
+
+        // Should log the resume summary
+        expect(mockLog.info).toHaveBeenCalledWith(
+          expect.stringContaining('[jest-checkpoint] Resumed: skipped 1 already-completed')
+        );
+
+        // Only one process should be spawned (for config2)
+        expect(mockSpawn).toHaveBeenCalledTimes(1);
       });
 
-      it('should handle configs that still fail after retry', async () => {
+      it('should write checkpoint for successful configs', async () => {
         mockGetJestConfigs.mockResolvedValue({
           configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
           emptyConfigs: [],
         });
 
+        // No prior checkpoints exist (all gets return empty)
+        mockExecFile.mockImplementation(
+          (
+            _cmd: string,
+            _args: string[],
+            cb: (err: Error | null, stdout: string, stderr: string) => void
+          ) => {
+            cb(null, '', '');
+          }
+        );
+
+        const mockProcess = new EventEmitter() as any;
+        mockProcess.stdout = new EventEmitter();
+        mockProcess.stderr = new EventEmitter();
+        mockSpawn.mockReturnValue(mockProcess);
+
+        const runPromise = runJestAll().catch(() => {
+          // Expected due to process.exit mock
+        });
+
+        process.nextTick(() => {
+          mockProcess.emit('exit', 0);
+        });
+
+        await runPromise;
+
+        // Should have called execFile to set the checkpoint
+        const setCalls = mockExecFile.mock.calls.filter(
+          (call: string[]) =>
+            call[0] === 'buildkite-agent' && call[1][0] === 'meta-data' && call[1][1] === 'set'
+        );
+        expect(setCalls.length).toBe(1);
+        expect(setCalls[0][1]).toEqual(
+          expect.arrayContaining([
+            'meta-data',
+            'set',
+            expect.stringContaining('jest_ckpt_'),
+            'done',
+          ])
+        );
+      });
+
+      it('should NOT write checkpoint for failed configs', async () => {
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
+          emptyConfigs: [],
+        });
+
+        // No prior checkpoints
+        mockExecFile.mockImplementation(
+          (
+            _cmd: string,
+            _args: string[],
+            cb: (err: Error | null, stdout: string, stderr: string) => void
+          ) => {
+            cb(null, '', '');
+          }
+        );
+
         // Always fail
         mockSpawn.mockImplementation(() => {
-          const mockProcess = new EventEmitter() as any;
-          mockProcess.stdout = new EventEmitter();
-          mockProcess.stderr = new EventEmitter();
-
-          process.nextTick(() => {
-            mockProcess.emit('exit', 1);
-          });
-
-          return mockProcess;
+          const proc = new EventEmitter() as any;
+          proc.stdout = new EventEmitter();
+          proc.stderr = new EventEmitter();
+          process.nextTick(() => proc.emit('exit', 1));
+          return proc;
         });
 
         try {
           await runJestAll();
-        } catch (err) {
-          expect((err as Error).message).toContain('process.exit called with code 10');
+        } catch {
+          // Expected due to process.exit mock
         }
 
-        expect(mockLog.info).toHaveBeenCalledWith('Configs still failing after retry:');
-        expect(mockLog.info).toHaveBeenCalledWith('  - /path/to/config1.js');
+        // Should NOT have called execFile to set any checkpoint
+        const setCalls = mockExecFile.mock.calls.filter(
+          (call: string[]) =>
+            call[0] === 'buildkite-agent' && call[1][0] === 'meta-data' && call[1][1] === 'set'
+        );
+        expect(setCalls.length).toBe(0);
+      });
+
+      it('should not checkpoint outside Buildkite', async () => {
+        delete process.env.BUILDKITE;
+        delete process.env.BUILDKITE_STEP_ID;
+        delete process.env.BUILDKITE_PARALLEL_JOB;
+
+        const mockProcess = new EventEmitter() as any;
+        mockProcess.stdout = new EventEmitter();
+        mockProcess.stderr = new EventEmitter();
+        mockSpawn.mockReturnValue(mockProcess);
+
+        const runPromise = runJestAll().catch(() => {
+          // Expected due to process.exit mock
+        });
+
+        process.nextTick(() => {
+          mockProcess.emit('exit', 0);
+        });
+
+        await runPromise;
+
+        // No buildkite-agent calls should be made
+        const bkCalls = mockExecFile.mock.calls.filter(
+          (call: string[]) => call[0] === 'buildkite-agent'
+        );
+        expect(bkCalls.length).toBe(0);
+      });
+
+      it('should skip all configs and exit cleanly when all are already completed', async () => {
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [
+            { config: '/path/to/config1.js', testFiles: ['test1.js'] },
+            { config: '/path/to/config2.js', testFiles: ['test2.js'] },
+          ],
+          emptyConfigs: [],
+        });
+
+        // All configs already completed
+        mockExecFile.mockImplementation(
+          (
+            cmd: string,
+            args: string[],
+            cb: (err: Error | null, stdout: string, stderr: string) => void
+          ) => {
+            if (cmd === 'buildkite-agent' && args[0] === 'meta-data' && args[1] === 'get') {
+              cb(null, 'done', '');
+            } else {
+              cb(null, '', '');
+            }
+          }
+        );
+
+        const runPromise = runJestAll().catch((err) => {
+          expect((err as Error).message).toContain('process.exit called with code 0');
+        });
+
+        await runPromise;
+
+        // No processes should be spawned
+        expect(mockSpawn).not.toHaveBeenCalled();
+
+        // Both configs should be reported as skipped
+        expect(mockLog.info).toHaveBeenCalledWith(
+          expect.stringContaining('[jest-checkpoint]   SKIP config1.js')
+        );
+        expect(mockLog.info).toHaveBeenCalledWith(
+          expect.stringContaining('[jest-checkpoint]   SKIP config2.js')
+        );
+      });
+
+      it('should handle checkpoint read errors gracefully', async () => {
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
+          emptyConfigs: [],
+        });
+
+        // Checkpoint read fails (buildkite-agent not available, etc.)
+        mockExecFile.mockImplementation(
+          (
+            cmd: string,
+            args: string[],
+            cb: (err: Error | null, stdout: string, stderr: string) => void
+          ) => {
+            if (cmd === 'buildkite-agent' && args[0] === 'meta-data' && args[1] === 'get') {
+              cb(new Error('buildkite-agent not found'), '', '');
+            } else {
+              cb(null, '', '');
+            }
+          }
+        );
+
+        const mockProcess = new EventEmitter() as any;
+        mockProcess.stdout = new EventEmitter();
+        mockProcess.stderr = new EventEmitter();
+        mockSpawn.mockReturnValue(mockProcess);
+
+        const runPromise = runJestAll().catch(() => {
+          // Expected due to process.exit mock
+        });
+
+        process.nextTick(() => {
+          mockProcess.emit('exit', 0);
+        });
+
+        await runPromise;
+
+        // Should still run the config (error treated as "not completed")
+        expect(mockSpawn).toHaveBeenCalledTimes(1);
       });
     });
   });
