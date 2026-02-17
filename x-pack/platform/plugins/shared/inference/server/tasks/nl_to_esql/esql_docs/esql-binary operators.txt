@@ -1,0 +1,90 @@
+# BINARY OPERATORS
+
+Binary operators perform comparisons and arithmetic operations between two fields or values. If either field is multivalued, the result is `null`. For comparison operators, if one side is a constant and the other is a field in the index with both a mapping-index and doc-values, the operation is pushed to the underlying search index. Division between two integer types yields an integer result, rounding towards zero; for floating point division, cast one argument to `DOUBLE`.
+
+## Syntax
+
+`<field_or_value> <operator> <field_or_value>`
+
+### Parameters
+
+#### <field_or_value>
+
+Represents the left or right operand for the binary operation. Can be a field or a constant value.
+
+#### <operator>
+
+The binary operator to apply. Supported operators include:
+- Equality: `==`
+- Inequality: `!=`
+- Less than: `<`
+- Less than or equal to: `<=`
+- Greater than: `>`
+- Greater than or equal to: `>=`
+- Add: `+`
+- Subtract: `-`
+- Multiply: `*`
+- Divide: `/`
+- Modulus: `%`
+
+## Examples
+
+Checks if the values in columns `a` and `b` are equal and stores the result in a new column `is_equal`.
+```esql
+ROW a = 5, b = 5
+| EVAL is_equal = a == b
+```
+
+Checks if the values in columns `a` and `b` are not equal and stores the result in a new column `is_unequal`.
+```esql
+ROW a = 5, b = 3
+| EVAL is_unequal = a != b
+```
+
+Checks if the value in column `a` is less than the value in column `b` and stores the result in a new column `is_less`.
+```esql
+ROW a = 2, b = 5
+| EVAL is_less = a < b
+```
+
+Adds the values in columns `a` and `b` and stores the result in a new column `sum`.
+```esql
+ROW a = 2, b = 3
+| EVAL sum = a + b
+```
+
+Subtracts the value in column `b` from the value in column `a` and stores the result in a new column `difference`.
+```esql
+ROW a = 5, b = 3
+| EVAL difference = a - b
+```
+
+Multiplies the values in columns `a` and `b` and stores the result in a new column `product`.
+```esql
+ROW a = 2, b = 3
+| EVAL product = a * b
+```
+
+Divides the value in column `a` by the value in column `b` and stores the result in a new column `quotient`.
+```esql
+ROW a = 6, b = 2
+| EVAL quotient = a / b
+```
+
+Divides the value in column `a` by the value in column `b` after casting `b` to `DOUBLE` to get a floating point result, and stores it in a new column `float_quotient`.
+```esql
+ROW a = 7, b = 2
+| EVAL float_quotient = a / b::DOUBLE
+```
+
+Calculates the remainder when the value in column `a` is divided by the value in column `b` and stores it in a new column `remainder`.
+```esql
+ROW a = 7, b = 3
+| EVAL remainder = a % b
+```
+
+## Limitations
+
+- If either operand is multivalued, the result is `null`.
+- Division between two integer types yields an integer result, rounding towards zero. For floating point division, cast one argument to `DOUBLE`.
+- For comparison operators, the operation is pushed to the underlying search index only if one side is a constant and the other is a field in the index with both a mapping-index and doc-values.

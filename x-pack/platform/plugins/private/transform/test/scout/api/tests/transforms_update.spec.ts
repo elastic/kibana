@@ -39,7 +39,7 @@ function getTransformUpdateConfig() {
 
 apiTest.describe(
   '/internal/transform/transforms/{transformId}/_update',
-  { tag: tags.ESS_ONLY },
+  { tag: tags.stateful.classic },
   () => {
     apiTest.beforeAll(async ({ apiServices }) => {
       const config = generateTransformConfig(TRANSFORM_ID);
