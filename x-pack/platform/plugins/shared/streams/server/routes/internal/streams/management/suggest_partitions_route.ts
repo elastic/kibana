@@ -70,8 +70,8 @@ export const suggestPartitionsRoute = createServerRoute({
     });
 
     const stream = await streamsClient.getStream(params.path.name);
-    if (!Streams.ingest.all.Definition.is(stream)) {
-      throw new StatusError('Partitioning suggestions are only available for ingest streams', 400);
+    if (!Streams.WiredStream.Definition.is(stream)) {
+      throw new StatusError('Partitioning suggestions are only available for wired streams', 400);
     }
 
     const partitionsPromise = partitionStream({

@@ -19,10 +19,16 @@ import { schema } from './schema';
 const strictConditionSchema = DeepStrict(conditionSchema);
 export type PartitionSuggestionsReason = 'no_clusters' | 'no_samples' | 'all_data_partitioned';
 
-export interface PartitionStreamResponse {
+// Must be a `type` alias, not an `interface`. Interfaces lack implicit index
+// signatures, so `Observable<ServerSentEventBase<..., PartitionStreamResponse>>`
+// would not be assignable to `Observable<ServerSentEvent>` (which requires
+// `Record<string, unknown>`), causing the route handler return type to collapse
+// to `never`.
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type PartitionStreamResponse = {
   partitions: Array<{ name: string; condition: Condition }>;
   reason?: PartitionSuggestionsReason;
-}
+};
 
 export async function partitionStream({
   definition,
@@ -34,7 +40,7 @@ export async function partitionStream({
   maxSteps,
   signal,
 }: {
-  definition: Streams.ingest.all.Definition;
+  definition: Streams.WiredStream.Definition;
   inferenceClient: BoundInferenceClient;
   esClient: ElasticsearchClient;
   logger: Logger;
