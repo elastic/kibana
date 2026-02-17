@@ -30,6 +30,7 @@ export interface GraphEdge {
   actorEntityType?: string | null;
   actorEntitySubType?: string | null;
   actorEntityName?: string | string[] | null;
+  actorHostIps?: string[] | string;
   actorsDocData?: Array<string | null> | string;
   // Target attributes (shared)
   targetNodeId: string | null;
@@ -37,6 +38,7 @@ export interface GraphEdge {
   targetEntityType?: string | null;
   targetEntitySubType?: string | null;
   targetEntityName?: string | string[] | null;
+  targetHostIps?: string[] | string;
   targetsDocData?: Array<string | null> | string;
 }
 
@@ -62,10 +64,6 @@ export interface EventEdge extends GraphEdge {
    * they should share the same label node because they originate from the same document(s).
    */
   labelNodeId: string;
-  // Actor attributes (event-specific)
-  actorHostIps?: string[] | string;
-  // Target attributes (event-specific)
-  targetHostIps?: string[] | string;
 }
 
 /**

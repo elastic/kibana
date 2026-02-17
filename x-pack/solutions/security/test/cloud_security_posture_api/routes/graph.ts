@@ -90,13 +90,30 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('Validation', () => {
-      it('should return 400 when missing `originEventIds` field', async () => {
-        await postGraph(supertest, {
+      it('should return 200 with empty results when neither `originEventIds` nor `entityIds` is provided', async () => {
+        const resp = await postGraph(supertest, {
           query: {
             start: 'now-1d/d',
             end: 'now/d',
           },
-        }).expect(result(400, logger));
+        });
+        expect(resp.status).to.be(200);
+        expect(resp.body.nodes).to.have.length(0);
+        expect(resp.body.edges).to.have.length(0);
+      });
+
+      it('should return 200 with empty results when both `originEventIds` and `entityIds` are empty arrays', async () => {
+        const resp = await postGraph(supertest, {
+          query: {
+            originEventIds: [],
+            entityIds: [],
+            start: 'now-1d/d',
+            end: 'now/d',
+          },
+        });
+        expect(resp.status).to.be(200);
+        expect(resp.body.nodes).to.have.length(0);
+        expect(resp.body.edges).to.have.length(0);
       });
 
       it('should return 400 when missing `esQuery` field is not of type bool', async () => {
@@ -2530,6 +2547,7 @@ export default function (providerContext: FtrProviderContext) {
               expect(hostNode.tag).to.equal('Host');
               expect(hostNode.icon).to.equal('storage');
               expect(hostNode.count).to.be(undefined); // Single entity, no count
+              expectExpect(hostNode.ips).toEqual(['10.0.1.100']);
 
               // Verify intermediate service node
               const serviceNode = response.body.nodes.find(
@@ -2601,6 +2619,9 @@ export default function (providerContext: FtrProviderContext) {
               expect(networkGroupedNode.label).to.equal('AWS VPC');
               expect(networkGroupedNode.shape).to.equal('rectangle');
               expect(networkGroupedNode.icon).to.equal('globe');
+              expectExpect(networkGroupedNode.ips).toEqual(
+                expectExpect.arrayContaining(['172.16.0.1', '172.16.0.2'])
+              );
 
               expect(networkGroupedNode.documentsData!.length).to.equal(2);
 

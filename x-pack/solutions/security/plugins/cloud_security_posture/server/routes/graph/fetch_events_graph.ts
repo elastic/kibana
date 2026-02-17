@@ -28,6 +28,7 @@ import {
   formatJsonProperty,
   buildLookupJoinEsql,
   buildEnrichPolicyEsql,
+  checkIfEntitiesIndexLookupMode,
 } from './utils';
 import type { EsQuery, OriginEventId, EventEdge } from './types';
 
@@ -102,7 +103,7 @@ export const fetchEvents = async ({
   logger.trace(`Executing query [${query}]`);
 
   const eventIds = originEventIds.map((originEventId) => originEventId.id);
-  return await esClient.asCurrentUser.helpers
+  const data = await esClient.asCurrentUser.helpers
     .esql({
       columnar: false,
       filter: buildDslFilter(eventIds, showUnknownTarget, start, end, esQuery),
@@ -116,6 +117,8 @@ export const fetchEvents = async ({
       ],
     })
     .toRecords<EventEdge>();
+
+  return data;
 };
 
 const buildDslFilter = (
@@ -154,11 +157,16 @@ const buildDslFilter = (
             esQuery?.bool.must_not?.length
               ? [esQuery]
               : []),
-            {
-              terms: {
-                'event.id': eventIds,
-              },
-            },
+            // we might have no eventIds when opening from entity flyout
+            ...(eventIds.length > 0
+              ? [
+                  {
+                    terms: {
+                      'event.id': eventIds,
+                    },
+                  },
+                ]
+              : []),
           ],
           minimum_should_match: 1,
         },
@@ -186,46 +194,6 @@ const checkEnrichPolicyExists = async (
   } catch (error) {
     logger.error(`Error fetching enrich policy ${error.message}`);
     logger.error(error);
-    return false;
-  }
-};
-
-/**
- * Checks if the entities latest index exists and is configured in lookup mode.
- * This is the preferred method for entity enrichment (replaces deprecated ENRICH policy).
- * Exported because it is also used by fetchEntityRelationships.
- */
-export const checkIfEntitiesIndexLookupMode = async (
-  esClient: IScopedClusterClient,
-  logger: Logger,
-  spaceId: string
-): Promise<boolean> => {
-  const indexName = getEntitiesLatestIndexName(spaceId);
-  try {
-    const response = await esClient.asInternalUser.indices.getSettings({
-      index: indexName,
-    });
-    const indexSettings = response[indexName];
-    if (!indexSettings) {
-      logger.debug(`Entities index ${indexName} not found`);
-      return false;
-    }
-
-    // Check if index is in lookup mode
-    const mode = indexSettings.settings?.index?.mode;
-    const isLookupMode = mode === 'lookup';
-
-    if (!isLookupMode) {
-      logger.debug(`Entities index ${indexName} exists but is not in lookup mode (mode: ${mode})`);
-    }
-
-    return isLookupMode;
-  } catch (error) {
-    if (error.statusCode === 404) {
-      logger.debug(`Entities index ${indexName} does not exist`);
-      return false;
-    }
-    logger.error(`Error checking entities index ${indexName}: ${error.message}`);
     return false;
   }
 };
@@ -324,9 +292,6 @@ const buildEsqlQuery = ({
     ${actorFieldsCoalesce}
   )
 | WHERE event.action IS NOT NULL AND actorEntityId IS NOT NULL
-| EVAL actorEntityId = COALESCE(
-    ${actorFieldsCoalesce}
-  )
 ${targetEntityIdEvals}
 | MV_EXPAND actorEntityId
 | MV_EXPAND targetEntityId
@@ -441,7 +406,7 @@ ${buildEnrichedEntityFieldsEsql()}
   ),
   actorIdsCount = COUNT_DISTINCT(actorEntityId),
   actorEntityName = VALUES(actorEntityName),
-  actorHostIp = VALUES(actorHostIp),
+  actorHostIps = VALUES(actorHostIp),
   actorsDocData = VALUES(actorDocData),
   // target attributes
   targetNodeId = CASE(
@@ -454,7 +419,7 @@ ${buildEnrichedEntityFieldsEsql()}
   ),
   targetIdsCount = COUNT_DISTINCT(targetEntityId),
   targetEntityName = VALUES(targetEntityName),
-  targetHostIp = VALUES(targetHostIp),
+  targetHostIps = VALUES(targetHostIp),
   targetsDocData = VALUES(targetDocData)
     BY action = event.action,
       actorEntityType,
