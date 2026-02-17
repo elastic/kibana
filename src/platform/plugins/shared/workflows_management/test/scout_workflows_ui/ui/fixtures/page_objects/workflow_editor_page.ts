@@ -191,6 +191,7 @@ export class WorkflowEditorPage {
     }
     await this.page.evaluate(
       ({ modelUri, text }) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- monaco environment is global, but we don't have a type for it
         const monacoEnv = (window as any).MonacoEnvironment;
         if (!monacoEnv?.monaco?.editor) {
           throw new Error('MonacoEnvironment.monaco.editor is not available');
@@ -231,16 +232,9 @@ export class WorkflowEditorPage {
   async getSuggestionLabels(): Promise<string[]> {
     const suggestWidget = this.getYamlEditorSuggestWidget();
     await suggestWidget.waitFor({ state: 'visible', timeout: 5000 });
-    const options = suggestWidget.getByRole('option');
-    const count = await options.count();
-    const labels: string[] = [];
-    for (let i = 0; i < count; i++) {
-      const label = await options.nth(i).getAttribute('aria-label');
-      if (label) {
-        labels.push(label);
-      }
-    }
-    return labels;
+    const options = await suggestWidget.getByRole('option').all();
+    const labels = await Promise.all(options.map((opt) => opt.getAttribute('aria-label')));
+    return labels.filter((label): label is string => label !== null);
   }
 
   /**
