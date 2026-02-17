@@ -10,8 +10,8 @@ import { createMetricByFieldLookup, makeUnpackMetric, metricsToApiOptions } from
 import {
   ECS_CONTAINER_CPU_USAGE_LIMIT_PCT,
   ECS_CONTAINER_MEMORY_USAGE_BYTES,
+  SEMCONV_DOCKER_CONTAINER_MEMORY_PERCENT,
   SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION,
-  SEMCONV_DOCKER_CONTAINER_MEMORY_USAGE_TOTAL,
   SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION,
   SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION,
 } from '../shared/constants';
@@ -39,7 +39,7 @@ const containerMetricsQueryConfigEcs: MetricsQueryOptions<ContainerMetricsFieldE
 // --- SemConv Docker (generic container metrics) ---
 type ContainerMetricsFieldSemconvDocker =
   | typeof SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION
-  | typeof SEMCONV_DOCKER_CONTAINER_MEMORY_USAGE_TOTAL;
+  | typeof SEMCONV_DOCKER_CONTAINER_MEMORY_PERCENT;
 
 const containerMetricsQueryConfigSemconvDocker: MetricsQueryOptions<ContainerMetricsFieldSemconvDocker> =
   {
@@ -50,9 +50,9 @@ const containerMetricsQueryConfigSemconvDocker: MetricsQueryOptions<ContainerMet
         aggregation: 'avg',
         field: SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION,
       },
-      [SEMCONV_DOCKER_CONTAINER_MEMORY_USAGE_TOTAL]: {
+      [SEMCONV_DOCKER_CONTAINER_MEMORY_PERCENT]: {
         aggregation: 'avg',
-        field: SEMCONV_DOCKER_CONTAINER_MEMORY_USAGE_TOTAL,
+        field: SEMCONV_DOCKER_CONTAINER_MEMORY_PERCENT,
       },
     },
   };

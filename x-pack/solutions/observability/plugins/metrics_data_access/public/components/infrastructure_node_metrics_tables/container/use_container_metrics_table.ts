@@ -22,7 +22,7 @@ import {
   ECS_CONTAINER_CPU_USAGE_LIMIT_PCT,
   ECS_CONTAINER_MEMORY_USAGE_BYTES,
   SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION,
-  SEMCONV_DOCKER_CONTAINER_MEMORY_USAGE_TOTAL,
+  SEMCONV_DOCKER_CONTAINER_MEMORY_PERCENT,
   SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION,
   SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION,
 } from '../shared/constants';
@@ -66,13 +66,13 @@ function getUnpackMetricsForSchema(isOtel: boolean, isK8sContainer?: boolean): U
         row,
         SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION
       );
-      const memoryBytes = unpackMetricSemconvDocker(
+      const memoryUtilization = unpackMetricSemconvDocker(
         row,
-        SEMCONV_DOCKER_CONTAINER_MEMORY_USAGE_TOTAL
+        SEMCONV_DOCKER_CONTAINER_MEMORY_PERCENT
       );
       return {
         averageCpuUsage: cpuUtilization !== null ? scaleUpPercentage(cpuUtilization) : null,
-        averageMemoryUsage: memoryBytes !== null ? Math.floor(memoryBytes / 1_000_000) : null,
+        averageMemoryUsage: memoryUtilization !== null ? memoryUtilization : null,
       };
     };
   }
@@ -119,7 +119,6 @@ export function useContainerMetricsTable({
     currentPageIndex,
     metricsClient,
   });
-
   return {
     data,
     isLoading,
@@ -178,7 +177,6 @@ function calculateMetricAverages(rows: MetricsExplorerRow[], unpackMetrics: Unpa
 function collectMetricValues(rows: MetricsExplorerRow[], unpackMetrics: UnpackMetricsFn) {
   const averageCpuUsageValues: number[] = [];
   const averageMemoryUsageValues: number[] = [];
-
   rows.forEach((row) => {
     const { averageCpuUsage, averageMemoryUsage } = unpackMetrics(row);
 

@@ -9,7 +9,7 @@ import {
   ECS_CONTAINER_CPU_USAGE_LIMIT_PCT,
   ECS_CONTAINER_MEMORY_USAGE_BYTES,
   SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION,
-  SEMCONV_DOCKER_CONTAINER_MEMORY_USAGE_TOTAL,
+  SEMCONV_DOCKER_CONTAINER_MEMORY_PERCENT,
   SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION,
   SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION,
 } from '../shared/constants';
@@ -81,7 +81,7 @@ describe('useContainerMetricsTable hook', () => {
           kuery: `(${kuery})`,
           metrics: expect.arrayContaining([
             expect.objectContaining({ field: SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION }),
-            expect.objectContaining({ field: SEMCONV_DOCKER_CONTAINER_MEMORY_USAGE_TOTAL }),
+            expect.objectContaining({ field: SEMCONV_DOCKER_CONTAINER_MEMORY_PERCENT }),
           ]),
         }),
       })

@@ -24,8 +24,8 @@ import {
   StepwisePagination,
 } from '../shared';
 import {
-  SEMCONV_CONTAINER_CPU_LIMIT_UTILIZATION_DISPLAY,
-  SEMCONV_CONTAINER_MEMORY_LIMIT_UTILIZATION_DISPLAY,
+  SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION,
+  SEMCONV_DOCKER_CONTAINER_MEMORY_PERCENT,
 } from '../shared/constants';
 import type { ContainerNodeMetricsRow } from './use_container_metrics_table';
 
@@ -141,7 +141,7 @@ function containerNodeColumns({
   ContainerMetricsTableProps,
   'timerange' | 'isOtel' | 'metricsIndices' | 'isK8sContainer'
 >): Array<EuiBasicTableColumn<ContainerNodeMetricsRow>> {
-  const memoryUnit = isOtel && isK8sContainer ? '%' : ' MB';
+  const memoryUnit = isOtel ? '%' : ' MB';
   return [
     {
       name: i18n.translate('xpack.metricsData.metricsTable.container.idColumnHeader', {
@@ -174,29 +174,11 @@ function containerNodeColumns({
               }
             )}
           </EuiFlexItem>
-          {isOtel ? (
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                content={i18n.translate(
-                  'xpack.metricsData.metricsTable.container.metricsOptionalTooltip',
-                  {
-                    defaultMessage:
-                      '{metricName} is optional and may not appear for all containers. Visibility depends on your container metrics collection setup.',
-                    values: {
-                      metricName: SEMCONV_CONTAINER_CPU_LIMIT_UTILIZATION_DISPLAY,
-                    },
-                  }
-                )}
-              />
-            </EuiFlexItem>
-          ) : null}
         </EuiFlexGroup>
       ),
-      field: 'averageCpuUsagePercent',
+      field: 'averageCpuUsage',
       align: 'right',
-      render: (averageCpuUsagePercent: number) => (
-        <NumberCell value={averageCpuUsagePercent} unit="%" />
-      ),
+      render: (averageCpuUsage: number) => <NumberCell value={averageCpuUsage} unit="%" />,
     },
     {
       name: (
@@ -209,28 +191,12 @@ function containerNodeColumns({
               }
             )}
           </EuiFlexItem>
-          {isOtel ? (
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                content={i18n.translate(
-                  'xpack.metricsData.metricsTable.container.metricsOptionalTooltip',
-                  {
-                    defaultMessage:
-                      '{metricName} is optional and may not appear for all containers. Visibility depends on your container metrics collection setup.',
-                    values: {
-                      metricName: SEMCONV_CONTAINER_MEMORY_LIMIT_UTILIZATION_DISPLAY,
-                    },
-                  }
-                )}
-              />
-            </EuiFlexItem>
-          ) : null}
         </EuiFlexGroup>
       ),
-      field: 'averageMemoryUsageMegabytes',
+      field: 'averageMemoryUsage',
       align: 'right',
-      render: (averageMemoryUsageMegabytes: number) => (
-        <NumberCell value={averageMemoryUsageMegabytes} unit={memoryUnit} />
+      render: (averageMemoryUsage: number) => (
+        <NumberCell value={averageMemoryUsage} unit={memoryUnit} />
       ),
     },
   ];
