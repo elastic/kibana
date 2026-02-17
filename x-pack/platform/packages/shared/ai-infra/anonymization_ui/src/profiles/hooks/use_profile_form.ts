@@ -19,6 +19,7 @@ import { getConflictState } from '../services/profiles/hooks/get_conflict_state'
 import { isProfilesApiError } from '../services/profiles/errors';
 import type { ProfilesApiError } from '../services/profiles/errors';
 import type { ProfilesQueryContext, TargetType } from '../types';
+import { TARGET_TYPE_INDEX } from '../../target_types';
 import { isObjectRecord } from '../utils/is_object_record';
 import type {
   ProfileFormSubmitResult,
@@ -52,7 +53,7 @@ interface ProfileFormController {
 const toInitialValues = (profile?: AnonymizationProfile): ProfileFormValues => ({
   name: profile?.name ?? '',
   description: profile?.description ?? '',
-  targetType: profile?.targetType ?? 'index',
+  targetType: profile?.targetType ?? TARGET_TYPE_INDEX,
   targetId: profile?.targetId ?? '',
   fieldRules: profile?.rules.fieldRules ?? [],
   regexRules: profile?.rules.regexRules ?? [],

@@ -6,6 +6,7 @@
  */
 
 import { profilesQueryKeys } from './cache_keys';
+import { TARGET_TYPE_DATA_VIEW } from '../../../target_types';
 
 describe('profilesQueryKeys', () => {
   const context = { spaceId: 'space-a' };
@@ -41,7 +42,7 @@ describe('profilesQueryKeys', () => {
     expect(
       profilesQueryKeys.list(context, {
         filter: 'email',
-        targetType: 'data_view',
+        targetType: TARGET_TYPE_DATA_VIEW,
         targetId: 'logs-*',
         sortField: 'updatedAt',
         sortOrder: 'asc',
@@ -54,7 +55,7 @@ describe('profilesQueryKeys', () => {
       'list',
       {
         filter: 'email',
-        targetType: 'data_view',
+        targetType: TARGET_TYPE_DATA_VIEW,
         targetId: 'logs-*',
         sortField: 'updatedAt',
         sortOrder: 'asc',

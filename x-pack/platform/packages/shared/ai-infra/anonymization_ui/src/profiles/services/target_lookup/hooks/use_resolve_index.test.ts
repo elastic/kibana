@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import { TARGET_TYPE_INDEX, TARGET_TYPE_INDEX_PATTERN } from '../../../../target_types';
 import { targetLookupQueryKeys } from '../cache_keys';
 import { useResolveIndex } from './use_resolve_index';
 
@@ -29,20 +30,20 @@ describe('useResolveIndex', () => {
     useResolveIndex({
       client,
       query: ' logs-* ',
-      targetType: 'index_pattern',
+      targetType: TARGET_TYPE_INDEX_PATTERN,
       enabled: true,
     });
     useResolveIndex({
       client,
       query: '',
-      targetType: 'index',
+      targetType: TARGET_TYPE_INDEX,
       enabled: true,
     });
 
     expect(useQuery).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        queryKey: targetLookupQueryKeys.resolveIndex(' logs-* ', 'index_pattern'),
+        queryKey: targetLookupQueryKeys.resolveIndex(' logs-* ', TARGET_TYPE_INDEX_PATTERN),
         enabled: true,
         staleTime: 30 * 1000,
         refetchOnWindowFocus: false,

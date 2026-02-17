@@ -6,12 +6,17 @@
  */
 
 import type { ProfileFormValues } from './types';
+import {
+  TARGET_TYPE_DATA_VIEW,
+  TARGET_TYPE_INDEX,
+  TARGET_TYPE_INDEX_PATTERN,
+} from '../../target_types';
 import { validateProfileForm } from './validate_profile_form';
 
 const createValidValues = (): ProfileFormValues => ({
   name: 'Logs profile',
   description: 'Applies anonymization to logs fields',
-  targetType: 'index_pattern',
+  targetType: TARGET_TYPE_INDEX_PATTERN,
   targetId: 'logs-*',
   fieldRules: [{ field: 'host.name', allowed: true, anonymized: true, entityClass: 'HOST_NAME' }],
   regexRules: [
@@ -52,7 +57,7 @@ describe('validateProfileForm', () => {
 
   it('rejects wildcard target id for data_view targets', () => {
     const values = createValidValues();
-    values.targetType = 'data_view';
+    values.targetType = TARGET_TYPE_DATA_VIEW;
     values.targetId = 'logs-*';
 
     expect(validateProfileForm(values)).toEqual({
@@ -62,7 +67,7 @@ describe('validateProfileForm', () => {
 
   it('rejects wildcard target id for index targets', () => {
     const values = createValidValues();
-    values.targetType = 'index';
+    values.targetType = TARGET_TYPE_INDEX;
     values.targetId = 'logs-*';
 
     expect(validateProfileForm(values)).toEqual({

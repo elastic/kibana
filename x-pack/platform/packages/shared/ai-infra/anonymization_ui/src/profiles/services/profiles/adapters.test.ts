@@ -12,13 +12,18 @@ import {
   toProfilesListResult,
   toUpdateProfilePayload,
 } from './adapters';
+import {
+  TARGET_TYPE_DATA_VIEW,
+  TARGET_TYPE_INDEX,
+  TARGET_TYPE_INDEX_PATTERN,
+} from '../../../target_types';
 
 describe('profiles adapters', () => {
   it('maps list query from UI shape to API query conventions', () => {
     expect(
       toFindProfilesQuery({
         filter: 'host',
-        targetType: 'data_view',
+        targetType: TARGET_TYPE_DATA_VIEW,
         targetId: 'dv-1',
         sortField: 'updatedAt',
         sortOrder: 'asc',
@@ -27,7 +32,7 @@ describe('profiles adapters', () => {
       })
     ).toEqual({
       filter: 'host',
-      target_type: 'data_view',
+      target_type: TARGET_TYPE_DATA_VIEW,
       target_id: 'dv-1',
       sort_field: 'updated_at',
       sort_order: 'asc',
@@ -40,7 +45,7 @@ describe('profiles adapters', () => {
     const profile = toProfile({
       id: 'profile-1',
       name: 'Profile 1',
-      targetType: 'data_view',
+      targetType: TARGET_TYPE_DATA_VIEW,
       targetId: 'dv-1',
       rules: {
         fieldRules: [
@@ -59,7 +64,7 @@ describe('profiles adapters', () => {
       id: 'profile-1',
       name: 'Profile 1',
       description: undefined,
-      targetType: 'data_view',
+      targetType: TARGET_TYPE_DATA_VIEW,
       targetId: 'dv-1',
       rules: {
         fieldRules: [
@@ -86,7 +91,7 @@ describe('profiles adapters', () => {
         {
           id: 'profile-1',
           name: 'Profile 1',
-          targetType: 'index',
+          targetType: TARGET_TYPE_INDEX,
           targetId: 'logs-*',
           rules: { fieldRules: [] },
           saltId: 'salt-default',
@@ -102,13 +107,13 @@ describe('profiles adapters', () => {
     expect(result.page).toBe(1);
     expect(result.perPage).toBe(10);
     expect(result.total).toBe(1);
-    expect(result.data[0].targetType).toBe('index');
+    expect(result.data[0].targetType).toBe(TARGET_TYPE_INDEX);
   });
 
   it('maps create/update payloads to API body conventions', () => {
     const createPayload = toCreateProfilePayload({
       name: 'New Profile',
-      targetType: 'index_pattern',
+      targetType: TARGET_TYPE_INDEX_PATTERN,
       targetId: 'logs-*',
       rules: {
         fieldRules: [{ field: 'user.name', allowed: true, anonymized: false }],
@@ -124,7 +129,7 @@ describe('profiles adapters', () => {
       },
     });
 
-    expect(createPayload.targetType).toBe('index_pattern');
+    expect(createPayload.targetType).toBe(TARGET_TYPE_INDEX_PATTERN);
     expect(createPayload.rules.fieldRules[0].field).toBe('user.name');
     expect(updatePayload.name).toBe('Updated Profile');
     expect(updatePayload.rules?.fieldRules[0].entityClass).toBe('IP');

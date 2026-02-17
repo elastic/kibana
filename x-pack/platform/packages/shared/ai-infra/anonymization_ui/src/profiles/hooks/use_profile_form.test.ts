@@ -11,6 +11,7 @@ import { mapProfilesApiError } from '../services/profiles/errors';
 import { getConflictState } from '../services/profiles/hooks/get_conflict_state';
 import { useCreateProfile } from '../services/profiles/hooks/use_create_profile';
 import { useUpdateProfile } from '../services/profiles/hooks/use_update_profile';
+import { TARGET_TYPE_DATA_VIEW, TARGET_TYPE_INDEX } from '../../target_types';
 import { useProfileForm } from './use_profile_form';
 
 jest.mock('../services/profiles/hooks/use_create_profile', () => ({
@@ -56,7 +57,7 @@ const createUseUpdateProfileMutationMock = ({
 const createProfile = (id: string): AnonymizationProfile => ({
   id,
   name: `profile-${id}`,
-  targetType: 'index',
+  targetType: TARGET_TYPE_INDEX,
   targetId: `logs-${id}`,
   rules: { fieldRules: [], regexRules: [], nerRules: [] },
   saltId: 'salt-default',
@@ -120,7 +121,7 @@ describe('useProfileForm', () => {
 
     act(() => {
       result.current.setName('My Profile');
-      result.current.setTargetType('index');
+      result.current.setTargetType(TARGET_TYPE_INDEX);
       result.current.setTargetId('logs-foo');
       result.current.setFieldRules([
         { field: 'host.name', allowed: true, anonymized: true, entityClass: '' },
@@ -153,7 +154,7 @@ describe('useProfileForm', () => {
 
     act(() => {
       result.current.setName('My Profile');
-      result.current.setTargetType('index');
+      result.current.setTargetType(TARGET_TYPE_INDEX);
       result.current.setTargetId('logs-foo');
       result.current.setRegexRules([
         {
@@ -192,7 +193,7 @@ describe('useProfileForm', () => {
 
     act(() => {
       result.current.setName('My Profile');
-      result.current.setTargetType('index');
+      result.current.setTargetType(TARGET_TYPE_INDEX);
       result.current.setTargetId('logs-foo');
       result.current.setNerRules([
         {
@@ -233,7 +234,7 @@ describe('useProfileForm', () => {
     act(() => {
       result.current.setName('My Profile');
       result.current.setDescription('My profile description');
-      result.current.setTargetType('data_view');
+      result.current.setTargetType(TARGET_TYPE_DATA_VIEW);
       result.current.setTargetId('dv-1');
     });
 
@@ -245,7 +246,7 @@ describe('useProfileForm', () => {
     expect(createMutateAsync).toHaveBeenCalledWith({
       name: 'My Profile',
       description: 'My profile description',
-      targetType: 'data_view',
+      targetType: TARGET_TYPE_DATA_VIEW,
       targetId: 'dv-1',
       rules: { fieldRules: [], regexRules: [], nerRules: [] },
     });
@@ -311,7 +312,7 @@ describe('useProfileForm', () => {
 
     act(() => {
       result.current.setName('My Profile');
-      result.current.setTargetType('data_view');
+      result.current.setTargetType(TARGET_TYPE_DATA_VIEW);
       result.current.setTargetId('dv-1');
     });
 
@@ -341,7 +342,7 @@ describe('useProfileForm', () => {
 
     act(() => {
       result.current.setName('My Profile');
-      result.current.setTargetType('data_view');
+      result.current.setTargetType(TARGET_TYPE_DATA_VIEW);
       result.current.setTargetId('dv-1');
     });
 
@@ -378,7 +379,7 @@ describe('useProfileForm', () => {
     await waitFor(() => {
       expect(result.current.isEdit).toBe(true);
       expect(result.current.values.name).toBe('profile-late');
-      expect(result.current.values.targetType).toBe('index');
+      expect(result.current.values.targetType).toBe(TARGET_TYPE_INDEX);
       expect(result.current.values.targetId).toBe('logs-late');
     });
   });
@@ -418,10 +419,10 @@ describe('useProfileForm', () => {
     });
 
     act(() => {
-      result.current.setTargetType('data_view');
+      result.current.setTargetType(TARGET_TYPE_DATA_VIEW);
     });
 
-    expect(result.current.values.targetType).toBe('data_view');
+    expect(result.current.values.targetType).toBe(TARGET_TYPE_DATA_VIEW);
     expect(result.current.values.targetId).toBe('');
     expect(result.current.values.fieldRules).toEqual([]);
     expect(result.current.values.regexRules).toEqual([]);

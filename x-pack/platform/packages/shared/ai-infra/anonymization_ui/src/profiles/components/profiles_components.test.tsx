@@ -8,13 +8,14 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { AnonymizationProfile } from '@kbn/anonymization-common';
+import { TARGET_TYPE_INDEX } from '../../target_types';
 import { ProfilesTable } from './table/profiles_table';
 import { ProfilesToolbar } from './toolbar/profiles_toolbar';
 
 const createProfile = (id: string, name: string): AnonymizationProfile => ({
   id,
   name,
-  targetType: 'index',
+  targetType: TARGET_TYPE_INDEX,
   targetId: `logs-${id}`,
   rules: { fieldRules: [], regexRules: [], nerRules: [] },
   saltId: 'salt-default',

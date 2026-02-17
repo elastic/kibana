@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { TARGET_TYPE_DATA_VIEW, TARGET_TYPE_INDEX } from '../../target_types';
 import type { ProfileFormValidationErrors, ProfileFormValues } from './types';
 
 const NER_ENTITY_CLASS_TOKEN_PATTERN = /^[A-Za-z0-9_]+$/;
@@ -29,14 +30,14 @@ export const validateProfileForm = (values: ProfileFormValues): ProfileFormValid
     errors.targetId = i18n.translate('anonymizationUi.profiles.validation.targetIdRequired', {
       defaultMessage: 'Target identifier is required',
     });
-  } else if (values.targetType === 'data_view' && values.targetId.includes('*')) {
+  } else if (values.targetType === TARGET_TYPE_DATA_VIEW && values.targetId.includes('*')) {
     errors.targetId = i18n.translate(
       'anonymizationUi.profiles.validation.dataViewTargetIdMustBeSavedObjectId',
       {
         defaultMessage: 'Data view target id must be a saved object id, not a wildcard pattern',
       }
     );
-  } else if (values.targetType === 'index' && values.targetId.includes('*')) {
+  } else if (values.targetType === TARGET_TYPE_INDEX && values.targetId.includes('*')) {
     errors.targetId = i18n.translate(
       'anonymizationUi.profiles.validation.indexTargetIdMustBeConcreteName',
       {

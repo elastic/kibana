@@ -11,6 +11,7 @@ import type { AnonymizationProfile } from '@kbn/anonymization-common';
 import type { FindAnonymizationProfilesResponse } from '@kbn/anonymization-common';
 import { mapProfilesApiError } from '../services/profiles/errors';
 import { useFindProfiles } from '../services/profiles/hooks/use_find_profiles';
+import { TARGET_TYPE_INDEX } from '../../target_types';
 import { useProfilesListView } from './use_profiles_list_view';
 
 jest.mock('../services/profiles/hooks/use_find_profiles', () => ({
@@ -20,7 +21,7 @@ jest.mock('../services/profiles/hooks/use_find_profiles', () => ({
 const createProfile = (id: string): AnonymizationProfile => ({
   id,
   name: `profile-${id}`,
-  targetType: 'index',
+  targetType: TARGET_TYPE_INDEX,
   targetId: `logs-${id}`,
   rules: { fieldRules: [], regexRules: [], nerRules: [] },
   saltId: 'salt-default',

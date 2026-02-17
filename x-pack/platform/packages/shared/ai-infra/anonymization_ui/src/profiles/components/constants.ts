@@ -8,6 +8,11 @@
 import type { FieldRule } from '@kbn/anonymization-common';
 import { i18n } from '@kbn/i18n';
 import {
+  TARGET_TYPE_DATA_VIEW,
+  TARGET_TYPE_INDEX,
+  TARGET_TYPE_INDEX_PATTERN,
+} from '../../target_types';
+import {
   FIELD_RULE_ACTION_ALLOW,
   FIELD_RULE_ACTION_ANONYMIZE,
   FIELD_RULE_ACTION_DENY,
@@ -21,19 +26,19 @@ export const TARGET_ID_OPTIONS_LIMIT = 100;
 
 export const TARGET_TYPE_OPTIONS: Array<{ value: TargetType; text: string }> = [
   {
-    value: 'index',
+    value: TARGET_TYPE_INDEX,
     text: i18n.translate('anonymizationUi.profiles.targetTypeOption.index', {
       defaultMessage: 'index',
     }),
   },
   {
-    value: 'index_pattern',
+    value: TARGET_TYPE_INDEX_PATTERN,
     text: i18n.translate('anonymizationUi.profiles.targetTypeOption.indexPattern', {
       defaultMessage: 'index_pattern',
     }),
   },
   {
-    value: 'data_view',
+    value: TARGET_TYPE_DATA_VIEW,
     text: i18n.translate('anonymizationUi.profiles.targetTypeOption.dataView', {
       defaultMessage: 'data_view',
     }),

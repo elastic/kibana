@@ -6,6 +6,7 @@
  */
 
 import { targetLookupQueryKeys } from './cache_keys';
+import { TARGET_TYPE_INDEX_PATTERN } from '../../../target_types';
 
 describe('targetLookupQueryKeys', () => {
   it('builds stable keys for target lookup endpoints', () => {
@@ -21,10 +22,10 @@ describe('targetLookupQueryKeys', () => {
   });
 
   it('normalizes resolve and wildcard dimensions', () => {
-    expect(targetLookupQueryKeys.resolveIndex(' LOGS-* ', 'index_pattern')).toEqual([
+    expect(targetLookupQueryKeys.resolveIndex(' LOGS-* ', TARGET_TYPE_INDEX_PATTERN)).toEqual([
       'anonymizationTargetLookup',
       'resolveIndex',
-      'index_pattern',
+      TARGET_TYPE_INDEX_PATTERN,
       'logs-*',
     ]);
     expect(targetLookupQueryKeys.fieldsForWildcard(' logs-* ')).toEqual([

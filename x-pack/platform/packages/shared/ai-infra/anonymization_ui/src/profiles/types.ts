@@ -11,8 +11,9 @@ import type {
   NerRule,
   RegexRule,
 } from '@kbn/anonymization-common';
+import type { TargetType as SharedTargetType } from '../target_types';
 
-export type TargetType = 'data_view' | 'index_pattern' | 'index';
+export type TargetType = SharedTargetType;
 
 export interface ProfilesListQuery {
   filter?: string;

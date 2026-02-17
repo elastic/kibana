@@ -7,12 +7,13 @@
 
 import { createAnonymizationProfilesClient } from './client';
 import { ANONYMIZATION_API_VERSION, ANONYMIZATION_PROFILES_API_BASE } from '../../constants';
+import { TARGET_TYPE_DATA_VIEW } from '../../../target_types';
 
 describe('createAnonymizationProfilesClient', () => {
   const profileResponse = {
     id: 'profile-1',
     name: 'Logs profile',
-    targetType: 'data_view' as const,
+    targetType: TARGET_TYPE_DATA_VIEW,
     targetId: 'logs-*',
     rules: {
       fieldRules: [{ field: 'message', allowed: false, anonymized: true, entityClass: 'message' }],
@@ -54,7 +55,7 @@ describe('createAnonymizationProfilesClient', () => {
     const client = createAnonymizationProfilesClient({ fetch });
     const result = await client.findProfiles({
       filter: 'logs',
-      targetType: 'data_view',
+      targetType: TARGET_TYPE_DATA_VIEW,
       targetId: 'logs-*',
       sortField: 'updatedAt',
       sortOrder: 'asc',
@@ -67,7 +68,7 @@ describe('createAnonymizationProfilesClient', () => {
       version: ANONYMIZATION_API_VERSION,
       query: {
         filter: 'logs',
-        target_type: 'data_view',
+        target_type: TARGET_TYPE_DATA_VIEW,
         target_id: 'logs-*',
         sort_field: 'updated_at',
         sort_order: 'asc',
@@ -75,7 +76,7 @@ describe('createAnonymizationProfilesClient', () => {
         per_page: 50,
       },
     });
-    expect(result.data[0].targetType).toBe('data_view');
+    expect(result.data[0].targetType).toBe(TARGET_TYPE_DATA_VIEW);
     expect(result.data[0].targetId).toBe('logs-*');
   });
 
@@ -100,7 +101,7 @@ describe('createAnonymizationProfilesClient', () => {
     const result = await client.createProfile({
       name: 'Logs profile',
       description: 'Rules for logs',
-      targetType: 'data_view',
+      targetType: TARGET_TYPE_DATA_VIEW,
       targetId: 'logs-*',
       rules: {
         fieldRules: [
@@ -133,7 +134,7 @@ describe('createAnonymizationProfilesClient', () => {
       body: JSON.stringify({
         name: 'Logs profile',
         description: 'Rules for logs',
-        targetType: 'data_view',
+        targetType: TARGET_TYPE_DATA_VIEW,
         targetId: 'logs-*',
         rules: {
           fieldRules: [
