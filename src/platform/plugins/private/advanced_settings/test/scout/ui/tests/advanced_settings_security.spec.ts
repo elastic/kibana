@@ -8,7 +8,6 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 import {
   getGlobalAdvancedSettingsAllRole,
@@ -16,7 +15,7 @@ import {
   getNoAdvancedSettingsPrivilegesRole,
 } from '../fixtures/services/privileges';
 
-test.describe('security feature controls', { tag: tags.stateful.classic }, () => {
+test.describe('security feature controls', { tag: '@local-stateful-classic' }, () => {
   test('global advanced_settings all privileges - shows management navlink', async ({
     kbnClient,
     kbnUrl,

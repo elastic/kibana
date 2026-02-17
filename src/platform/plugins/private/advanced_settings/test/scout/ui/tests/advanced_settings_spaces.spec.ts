@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-test.describe('spaces feature controls', { tag: tags.stateful.classic }, () => {
+test.describe('spaces feature controls', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.savedObjects.clean({ types: ['config'] });
     await kbnClient.spaces.create({
