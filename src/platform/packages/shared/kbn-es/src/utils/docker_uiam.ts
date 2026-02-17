@@ -34,13 +34,11 @@ import { SERVERLESS_UIAM_ENTRYPOINT_PATH, SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PAT
 const COSMOS_DB_EMULATOR_DOCKER_REGISTRY = 'docker.elastic.co';
 const COSMOS_DB_EMULATOR_DOCKER_REPO = `${COSMOS_DB_EMULATOR_DOCKER_REGISTRY}/kibana-ci/uiam-azure-cosmos-emulator`;
 
-// Use the promoted :latest-verified image in CI, fall back to specific tag for local development
 export const COSMOS_DB_EMULATOR_DEFAULT_IMAGE = `${COSMOS_DB_EMULATOR_DOCKER_REPO}:latest-verified`;
 
 const UIAM_DOCKER_REGISTRY = 'docker.elastic.co';
 const UIAM_DOCKER_PROMOTED_REPO = `${UIAM_DOCKER_REGISTRY}/kibana-ci/uiam`;
 
-// Use the promoted :latest-verified image in CI, fall back to specific tag for local development
 export const UIAM_DEFAULT_IMAGE = `${UIAM_DOCKER_PROMOTED_REPO}:latest-verified`;
 
 const MAX_HEALTHCHECK_RETRIES = 30;
