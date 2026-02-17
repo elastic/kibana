@@ -49,7 +49,7 @@
     "preinstall": "node --no-experimental-require-module ./preinstall_check",
     "kbn": "node --no-experimental-require-module scripts/kbn",
     "lint": "yarn run lint:es && yarn run lint:style",
-    "lint:es": "node --no-experimental-require-module scripts/eslint_all_files",
+    "lint:es": "node --no-experimental-require-module scripts/eslint_all_projects",
     "lint:style": "node --no-experimental-require-module scripts/stylelint",
     "makelogs": "node --no-experimental-require-module scripts/makelogs",
     "moon:regenerate": "node scripts/regenerate_moon_projects.js --update",
