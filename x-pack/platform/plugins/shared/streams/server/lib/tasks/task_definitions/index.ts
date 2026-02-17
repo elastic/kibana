@@ -16,6 +16,7 @@ import type { EbtTelemetryClient } from '../../telemetry';
 import { createStreamsFeaturesIdentificationTask } from './features_identification';
 import { createStreamsPipelineSuggestionTask } from './pipeline_suggestion';
 import { createStreamsOnboardingTask } from './onboarding';
+import { createStreamsDashboardSuggestionTask } from './dashboard_suggestion';
 
 export interface TaskContext {
   logger: Logger;
@@ -32,6 +33,7 @@ export function createTaskDefinitions(taskContext: TaskContext) {
     ...createStreamsInsightsDiscoveryTask(taskContext),
     ...createStreamsPipelineSuggestionTask(taskContext),
     ...createStreamsOnboardingTask(taskContext),
+    ...createStreamsDashboardSuggestionTask(taskContext),
   } satisfies TaskDefinitionRegistry;
 }
 
