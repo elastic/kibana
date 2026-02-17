@@ -8,10 +8,13 @@
  */
 
 import { escape } from 'lodash';
+import { htmlTags } from '@kbn/field-formats-plugin/common/utils/highlight/html_tags';
+
+const HIGHLIGHT_TAGS_REGEX = new RegExp(`${htmlTags.pre}|${htmlTags.post}`, 'g');
 
 export function escapeAndPreserveHighlightTags(value: string): string {
   const markTags: string[] = [];
-  const cleanText = value.replace(/<\/?mark[^>]*>/g, (match) => {
+  const cleanText = value.replace(HIGHLIGHT_TAGS_REGEX, (match) => {
     markTags.push(match);
     return '';
   });
