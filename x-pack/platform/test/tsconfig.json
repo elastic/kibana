@@ -180,6 +180,7 @@
     "@kbn/automatic-import-v2-plugin",
     "@kbn/connector-specs",
     "@kbn/ftr-llm-proxy",
-    "@kbn/dev-cli-runner"
+    "@kbn/dev-cli-runner",
+    "@kbn/ui-actions-plugin"
   ]
 }
