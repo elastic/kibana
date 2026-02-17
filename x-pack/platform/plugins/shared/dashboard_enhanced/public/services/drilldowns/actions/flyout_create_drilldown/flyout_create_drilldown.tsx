@@ -9,7 +9,7 @@ import {
   apiHasDynamicActions,
   type HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { i18n } from '@kbn/i18n';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { openLazyFlyout } from '@kbn/presentation-util';
@@ -75,7 +75,7 @@ export const flyoutCreateDrilldownAction: ActionDefinition<EmbeddableApiContext>
     )
       return false;
 
-    const supportedTriggers = [CONTEXT_MENU_TRIGGER, ...embeddable.supportedTriggers()];
+    const supportedTriggers = [ON_OPEN_PANEL_MENU, ...embeddable.supportedTriggers()];
 
     /**
      * Check if there is an intersection between all registered drilldowns possible triggers that they could be attached to
@@ -100,7 +100,7 @@ export const flyoutCreateDrilldownAction: ActionDefinition<EmbeddableApiContext>
         const templates = createDrilldownTemplatesFromSiblings(embeddable);
         const triggers = [
           ...ensureNestedTriggers(embeddable.supportedTriggers()),
-          CONTEXT_MENU_TRIGGER,
+          ON_OPEN_PANEL_MENU,
         ];
         return (
           <uiActionsEnhancedServices.DrilldownManager

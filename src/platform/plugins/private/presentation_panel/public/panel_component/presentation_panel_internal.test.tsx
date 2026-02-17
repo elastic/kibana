@@ -102,7 +102,7 @@ describe('Presentation panel', () => {
         title$: new BehaviorSubject<string | undefined>('superTest'),
       };
       await renderPresentationPanel({ api });
-      expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith('CONTEXT_MENU_TRIGGER', {
+      expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith('ON_OPEN_PANEL_MENU', {
         embeddable: api,
       });
       expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith('PANEL_BADGE_TRIGGER', {

@@ -24,7 +24,7 @@ const Demo: React.FC = () => {
           description: 'On chart brush.',
         },
         {
-          id: 'VALUE_CLICK_TRIGGER',
+          id: 'ON_CLICK_VALUE',
           title: 'Value click',
           description: 'On point click in chart',
         },
@@ -49,7 +49,7 @@ export const Default = () => {
           description: 'On chart brush.',
         },
         {
-          id: 'VALUE_CLICK_TRIGGER',
+          id: 'ON_CLICK_VALUE',
           title: 'Value click',
           description: 'On point click in chart',
         },
@@ -72,7 +72,7 @@ export const WithDocs = {
             description: 'On chart brush.',
           },
           {
-            id: 'VALUE_CLICK_TRIGGER',
+            id: 'ON_CLICK_VALUE',
             title: 'Value click',
             description: 'On point click in chart',
           },
@@ -98,12 +98,12 @@ export const SelectedTrigger = {
             description: 'On chart brush.',
           },
           {
-            id: 'VALUE_CLICK_TRIGGER',
+            id: 'ON_CLICK_VALUE',
             title: 'Value click',
             description: 'On point click in chart',
           },
         ]}
-        selected={['VALUE_CLICK_TRIGGER']}
+        selected={['ON_CLICK_VALUE']}
         onChange={action('onChange')}
       />
     );

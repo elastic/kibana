@@ -28,7 +28,7 @@ describe('UiActionsService', () => {
       isConfigValid: () => true,
       create: () => ({}),
       supportedTriggers() {
-        return ['VALUE_CLICK_TRIGGER'];
+        return ['ON_CLICK_VALUE'];
       },
     } as unknown as ActionFactoryDefinition;
     const factoryDefinition2: ActionFactoryDefinition = {
@@ -38,7 +38,7 @@ describe('UiActionsService', () => {
       isConfigValid: () => true,
       create: () => ({}),
       supportedTriggers() {
-        return ['VALUE_CLICK_TRIGGER'];
+        return ['ON_CLICK_VALUE'];
       },
     } as unknown as ActionFactoryDefinition;
 

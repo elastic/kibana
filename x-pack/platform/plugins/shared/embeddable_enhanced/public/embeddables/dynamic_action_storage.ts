@@ -10,10 +10,7 @@ import type {
   UiActionsEnhancedSerializedEvent as SerializedEvent,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { UiActionsEnhancedAbstractActionStorage as AbstractActionStorage } from '@kbn/ui-actions-enhanced-plugin/public';
-import {
-  VALUE_CLICK_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_CLICK_VALUE, ON_SELECT_RANGE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { HasDynamicActions } from './interfaces/has_dynamic_actions';
 
 export type DynamicActionStorageApi = Pick<
@@ -120,7 +117,7 @@ export class DynamicActionStorage extends AbstractActionStorage {
       // Initially dashboard drilldown relied on VALUE_CLICK & RANGE_SELECT
       if (event.action.factoryId === 'DASHBOARD_TO_DASHBOARD_DRILLDOWN') {
         const migratedTriggers = event.triggers.filter(
-          (t) => t !== VALUE_CLICK_TRIGGER && t !== SELECT_RANGE_TRIGGER
+          (t) => t !== ON_CLICK_VALUE && t !== ON_SELECT_RANGE
         );
         if (
           migratedTriggers.length !== event.triggers.length &&

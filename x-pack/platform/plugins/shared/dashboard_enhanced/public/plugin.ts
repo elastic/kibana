@@ -8,7 +8,7 @@
 import type { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type {
@@ -57,7 +57,7 @@ export class DashboardEnhancedPlugin
     setKibanaServices(core, plugins);
 
     plugins.uiActionsEnhanced.addTriggerActionAsync(
-      CONTEXT_MENU_TRIGGER,
+      ON_OPEN_PANEL_MENU,
       'OPEN_FLYOUT_ADD_DRILLDOWN',
       async () => {
         const { flyoutCreateDrilldownAction } = await import(
@@ -68,7 +68,7 @@ export class DashboardEnhancedPlugin
     );
 
     plugins.uiActionsEnhanced.addTriggerActionAsync(
-      CONTEXT_MENU_TRIGGER,
+      ON_OPEN_PANEL_MENU,
       'OPEN_FLYOUT_EDIT_DRILLDOWN',
       async () => {
         const { flyoutEditDrilldownAction } = await import(

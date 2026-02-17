@@ -14,10 +14,7 @@ import {
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
-import {
-  APPLY_FILTER_TRIGGER,
-  IMAGE_CLICK_TRIGGER,
-} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_APPLY_FILTER, ON_CLICK_IMAGE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { AbstractDashboardDrilldownParams } from '../abstract_dashboard_drilldown';
 import { AbstractDashboardDrilldown } from '../abstract_dashboard_drilldown';
 import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './constants';
@@ -31,14 +28,14 @@ export type Params = AbstractDashboardDrilldownParams;
 /**
  * This drilldown is the "Go to Dashboard" you can find in Dashboard app panles.
  * This drilldown can be used on any embeddable and it is tied to embeddables
- * in two ways: (1) it works with APPLY_FILTER_TRIGGER, which is usually executed
+ * in two ways: (1) it works with ON_APPLY_FILTER, which is usually executed
  * by embeddables (but not necessarily); (2) its `getURL` method depends on
  * `embeddable` field being present in `context`.
  */
 export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<Context> {
   public readonly id = EMBEDDABLE_TO_DASHBOARD_DRILLDOWN;
 
-  public readonly supportedTriggers = () => [APPLY_FILTER_TRIGGER, IMAGE_CLICK_TRIGGER];
+  public readonly supportedTriggers = () => [ON_APPLY_FILTER, ON_CLICK_IMAGE];
 
   protected async getLocation(
     config: DashboardDrilldownConfig,

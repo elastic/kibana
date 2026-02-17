@@ -20,7 +20,7 @@ import {
   type PresentationContainer,
   apiHasUniqueId,
 } from '@kbn/presentation-publishing';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   apiHasDynamicActions,
   type HasDynamicActions,
@@ -75,10 +75,7 @@ export const flyoutEditDrilldownAction: ActionDefinition<EmbeddableApiContext> =
           <uiActionsEnhancedServices.DrilldownManager
             initialRoute={'/manage'}
             dynamicActionManager={embeddable.enhancements.dynamicActions}
-            triggers={[
-              ...ensureNestedTriggers(embeddable.supportedTriggers()),
-              CONTEXT_MENU_TRIGGER,
-            ]}
+            triggers={[...ensureNestedTriggers(embeddable.supportedTriggers()), ON_OPEN_PANEL_MENU]}
             placeContext={{ embeddable }}
             templates={templates}
             onClose={closeFlyout}

@@ -146,7 +146,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardDrilldownsManage.fillInDashboardToURLDrilldownWizard({
         drilldownName,
         destinationURLTemplate: urlTemplate,
-        trigger: 'CONTEXT_MENU_TRIGGER',
+        trigger: 'ON_OPEN_PANEL_MENU',
       });
       await testSubjects.click('urlDrilldownAdditionalOptions');
       await testSubjects.click('urlDrilldownOpenInNewTab');

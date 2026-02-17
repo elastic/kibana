@@ -21,7 +21,7 @@ import { useLensAttributes } from './use_lens_attributes';
 import type { VisualizationActionsProps } from './types';
 import { MORE_ACTIONS } from './translations';
 import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from './utils';
-import { DEFAULT_ACTIONS, useActions, VISUALIZATION_CONTEXT_MENU_TRIGGER } from './use_actions';
+import { DEFAULT_ACTIONS, useActions, VISUALIZATION_ON_OPEN_PANEL_MENU } from './use_actions';
 
 const Wrapper = styled.div`
   &.viz-actions {
@@ -131,7 +131,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
         actions: contextMenuActions.map((action) => ({
           action,
           context: {},
-          trigger: VISUALIZATION_CONTEXT_MENU_TRIGGER,
+          trigger: VISUALIZATION_ON_OPEN_PANEL_MENU,
         })),
       }),
     [contextMenuActions]

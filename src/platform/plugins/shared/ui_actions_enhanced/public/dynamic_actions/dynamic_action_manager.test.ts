@@ -29,7 +29,7 @@ const actionFactoryDefinition1: ActionFactoryDefinition = {
     getDisplayName: () => name,
   }),
   supportedTriggers() {
-    return ['VALUE_CLICK_TRIGGER'];
+    return ['ON_CLICK_VALUE'];
   },
 } as unknown as ActionFactoryDefinition;
 
@@ -44,13 +44,13 @@ const actionFactoryDefinition2: ActionFactoryDefinition = {
     getDisplayName: () => name,
   }),
   supportedTriggers() {
-    return ['VALUE_CLICK_TRIGGER'];
+    return ['ON_CLICK_VALUE'];
   },
 } as unknown as ActionFactoryDefinition;
 
 const event1: SerializedEvent = {
   eventId: 'EVENT_ID_1',
-  triggers: ['VALUE_CLICK_TRIGGER'],
+  triggers: ['ON_CLICK_VALUE'],
   action: {
     factoryId: actionFactoryDefinition1.id,
     name: 'Action 1',
@@ -60,7 +60,7 @@ const event1: SerializedEvent = {
 
 const event2: SerializedEvent = {
   eventId: 'EVENT_ID_2',
-  triggers: ['VALUE_CLICK_TRIGGER'],
+  triggers: ['ON_CLICK_VALUE'],
   action: {
     factoryId: actionFactoryDefinition1.id,
     name: 'Action 2',
@@ -70,7 +70,7 @@ const event2: SerializedEvent = {
 
 const event3: SerializedEvent = {
   eventId: 'EVENT_ID_3',
-  triggers: ['VALUE_CLICK_TRIGGER'],
+  triggers: ['ON_CLICK_VALUE'],
   action: {
     factoryId: actionFactoryDefinition2.id,
     name: 'Action 3',
@@ -145,7 +145,7 @@ describe('DynamicActionManager', () => {
       );
       expect(uiActions.attachAction).toHaveBeenCalledTimes(1);
       expect(uiActions.attachAction).toHaveBeenCalledWith(
-        'VALUE_CLICK_TRIGGER',
+        'ON_CLICK_VALUE',
         expect.stringContaining('EVENT_ID_1')
       );
     });
@@ -274,7 +274,7 @@ describe('DynamicActionManager', () => {
 
         expect(await storage.count()).toBe(0);
 
-        await manager.createEvent(action, ['VALUE_CLICK_TRIGGER']);
+        await manager.createEvent(action, ['ON_CLICK_VALUE']);
 
         expect(await storage.count()).toBe(1);
 
@@ -282,7 +282,7 @@ describe('DynamicActionManager', () => {
 
         expect(event).toMatchObject({
           eventId: expect.any(String),
-          triggers: ['VALUE_CLICK_TRIGGER'],
+          triggers: ['ON_CLICK_VALUE'],
           action: {
             factoryId: actionFactoryDefinition1.id,
             name: 'foo',
@@ -305,7 +305,7 @@ describe('DynamicActionManager', () => {
 
         expect(manager.state.get().events.length).toBe(0);
 
-        await manager.createEvent(action, ['VALUE_CLICK_TRIGGER']);
+        await manager.createEvent(action, ['ON_CLICK_VALUE']);
 
         expect(manager.state.get().events.length).toBe(1);
       });
@@ -324,7 +324,7 @@ describe('DynamicActionManager', () => {
 
         expect(manager.state.get().events.length).toBe(0);
 
-        await manager.createEvent(action, ['VALUE_CLICK_TRIGGER']);
+        await manager.createEvent(action, ['ON_CLICK_VALUE']);
         expect(uiActions.registerAction).toHaveBeenCalledWith(
           expect.objectContaining({
             grouping: dynamicActionGrouping,
@@ -346,7 +346,7 @@ describe('DynamicActionManager', () => {
 
         expect(manager.state.get().events.length).toBe(0);
 
-        const promise = manager.createEvent(action, ['VALUE_CLICK_TRIGGER']).catch((e) => e);
+        const promise = manager.createEvent(action, ['ON_CLICK_VALUE']).catch((e) => e);
 
         expect(manager.state.get().events.length).toBe(1);
 
@@ -370,7 +370,7 @@ describe('DynamicActionManager', () => {
         expect(uiActions.registerAction).toHaveBeenCalledTimes(0);
         expect(uiActions.attachAction).toHaveBeenCalledTimes(0);
 
-        await manager.createEvent(action, ['VALUE_CLICK_TRIGGER']);
+        await manager.createEvent(action, ['ON_CLICK_VALUE']);
 
         expect(uiActions.registerAction).toHaveBeenCalledTimes(1);
         expect(uiActions.attachAction).toHaveBeenCalledTimes(1);
@@ -394,7 +394,7 @@ describe('DynamicActionManager', () => {
           config: {},
         };
 
-        const [, error] = await of(manager.createEvent(action, ['VALUE_CLICK_TRIGGER']));
+        const [, error] = await of(manager.createEvent(action, ['ON_CLICK_VALUE']));
 
         expect(error).toEqual(new Error('foo'));
       });
@@ -413,7 +413,7 @@ describe('DynamicActionManager', () => {
         uiActions.registerActionFactory(actionFactoryDefinition1);
 
         await manager.start();
-        await of(manager.createEvent(action, ['VALUE_CLICK_TRIGGER']));
+        await of(manager.createEvent(action, ['ON_CLICK_VALUE']));
 
         expect(manager.state.get().events.length).toBe(0);
       });
@@ -435,7 +435,7 @@ describe('DynamicActionManager', () => {
 
         expect(manager.state.get().events.length).toBe(0);
 
-        const promise = manager.createEvent(action, ['VALUE_CLICK_TRIGGER']).catch((e) => e);
+        const promise = manager.createEvent(action, ['ON_CLICK_VALUE']).catch((e) => e);
 
         expect(manager.state.get().events.length).toBe(1);
 
@@ -462,7 +462,7 @@ describe('DynamicActionManager', () => {
         expect(uiActions.registerAction).toHaveBeenCalledTimes(0);
         expect(uiActions.attachAction).toHaveBeenCalledTimes(0);
 
-        await of(manager.createEvent(action, ['VALUE_CLICK_TRIGGER']));
+        await of(manager.createEvent(action, ['ON_CLICK_VALUE']));
 
         expect(uiActions.registerAction).toHaveBeenCalledTimes(0);
         expect(uiActions.attachAction).toHaveBeenCalledTimes(0);
@@ -479,7 +479,7 @@ describe('DynamicActionManager', () => {
           name: 'foo',
           config: {},
         };
-        await expect(manager.createEvent(action, ['SELECT_RANGE_TRIGGER'])).rejects.toThrow();
+        await expect(manager.createEvent(action, ['ON_SELECT_RANGE'])).rejects.toThrow();
       });
     });
   });
@@ -505,10 +505,10 @@ describe('DynamicActionManager', () => {
           config: {},
         };
 
-        await manager.updateEvent(event3.eventId, action, ['VALUE_CLICK_TRIGGER']);
+        await manager.updateEvent(event3.eventId, action, ['ON_CLICK_VALUE']);
 
         expect(uiActions.detachAction).toHaveBeenCalledWith(
-          'VALUE_CLICK_TRIGGER',
+          'ON_CLICK_VALUE',
           expect.stringContaining('EVENT_ID_3')
         );
         expect(uiActions.unregisterAction).toHaveBeenCalledWith(
@@ -535,12 +535,12 @@ describe('DynamicActionManager', () => {
 
         expect(storageUpdateSpy).toHaveBeenCalledTimes(0);
 
-        await manager.updateEvent(event3.eventId, action, ['VALUE_CLICK_TRIGGER']);
+        await manager.updateEvent(event3.eventId, action, ['ON_CLICK_VALUE']);
 
         expect(storageUpdateSpy).toHaveBeenCalledTimes(1);
         expect(storageUpdateSpy.mock.calls[0][0]).toMatchObject({
           eventId: expect.any(String),
-          triggers: ['VALUE_CLICK_TRIGGER'],
+          triggers: ['ON_CLICK_VALUE'],
           action: {
             factoryId: actionFactoryDefinition2.id,
           },
@@ -561,7 +561,7 @@ describe('DynamicActionManager', () => {
 
         expect(manager.state.get().events[0].action.name).toBe('Action 3');
 
-        await manager.updateEvent(event3.eventId, action, ['VALUE_CLICK_TRIGGER']);
+        await manager.updateEvent(event3.eventId, action, ['ON_CLICK_VALUE']);
 
         expect(manager.state.get().events[0].action.name).toBe('foo');
       });
@@ -581,7 +581,7 @@ describe('DynamicActionManager', () => {
         expect(manager.state.get().events[0].action.name).toBe('Action 3');
 
         const promise = manager
-          .updateEvent(event3.eventId, action, ['VALUE_CLICK_TRIGGER'])
+          .updateEvent(event3.eventId, action, ['ON_CLICK_VALUE'])
           .catch((e) => e);
 
         expect(manager.state.get().events[0].action.name).toBe('foo');
@@ -606,9 +606,7 @@ describe('DynamicActionManager', () => {
           config: {},
         };
 
-        const [, error] = await of(
-          manager.updateEvent(event3.eventId, action, ['VALUE_CLICK_TRIGGER'])
-        );
+        const [, error] = await of(manager.updateEvent(event3.eventId, action, ['ON_CLICK_VALUE']));
 
         expect(error).toEqual(new Error('bar'));
       });
@@ -635,10 +633,10 @@ describe('DynamicActionManager', () => {
           config: {},
         };
 
-        await of(manager.updateEvent(event3.eventId, action, ['VALUE_CLICK_TRIGGER']));
+        await of(manager.updateEvent(event3.eventId, action, ['ON_CLICK_VALUE']));
 
         expect(uiActions.detachAction).toHaveBeenCalledWith(
-          'VALUE_CLICK_TRIGGER',
+          'ON_CLICK_VALUE',
           expect.stringContaining('EVENT_ID_3')
         );
         expect(uiActions.unregisterAction).toHaveBeenCalledWith(
@@ -666,7 +664,7 @@ describe('DynamicActionManager', () => {
 
         expect(manager.state.get().events[0].action.name).toBe('Action 3');
 
-        await of(manager.updateEvent(event3.eventId, action, ['VALUE_CLICK_TRIGGER']));
+        await of(manager.updateEvent(event3.eventId, action, ['ON_CLICK_VALUE']));
 
         expect(manager.state.get().events[0].action.name).toBe('Action 3');
       });

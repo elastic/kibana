@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import { apiIsOfType } from '@kbn/presentation-publishing';
 import type { LensApi } from '@kbn/lens-common-2';
-import type { APPLY_FILTER_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { DISCOVER_DRILLDOWN_SUPPORTED_TRIGGERS, DOC_TYPE } from '../../common/constants';
 import type { DiscoverAppLocator } from './open_in_discover_helpers';
 
@@ -40,7 +40,7 @@ export interface Config extends SerializableRecord {
   openInNewTab: boolean;
 }
 
-export type OpenInDiscoverTrigger = typeof APPLY_FILTER_TRIGGER;
+export type OpenInDiscoverTrigger = typeof ON_APPLY_FILTER;
 
 export type ActionFactoryContext = BaseActionFactoryContext & ActionContext;
 export type CollectConfigProps = CollectConfigPropsBase<Config, ActionFactoryContext>;

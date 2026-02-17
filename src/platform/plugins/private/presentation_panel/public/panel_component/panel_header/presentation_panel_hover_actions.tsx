@@ -36,7 +36,7 @@ import type { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_me
 import { Subscription, switchMap } from 'rxjs';
 import { uiActions } from '../../kibana_services';
 import {
-  CONTEXT_MENU_TRIGGER,
+  ON_OPEN_PANEL_MENU,
   contextMenuTrigger,
   PANEL_NOTIFICATION_TRIGGER,
   panelNotificationTrigger,
@@ -173,7 +173,7 @@ export const PresentationPanelHoverActions = ({
     (async () => {
       // subscribe to any frequently changing context menu actions
       const frequentlyChangingActions = await uiActions.getFrequentlyChangingActionsForTrigger(
-        CONTEXT_MENU_TRIGGER,
+        ON_OPEN_PANEL_MENU,
         apiContext
       );
       if (canceled) return;
@@ -249,9 +249,9 @@ export const PresentationPanelHoverActions = ({
 
     (async () => {
       let compatibleActions = (await (async () => {
-        if (getActions) return await getActions(CONTEXT_MENU_TRIGGER, apiContext);
+        if (getActions) return await getActions(ON_OPEN_PANEL_MENU, apiContext);
         return (
-          (await uiActions.getTriggerCompatibleActions(CONTEXT_MENU_TRIGGER, {
+          (await uiActions.getTriggerCompatibleActions(ON_OPEN_PANEL_MENU, {
             embeddable: api,
           })) ?? []
         );

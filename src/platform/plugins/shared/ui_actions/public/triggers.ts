@@ -12,20 +12,20 @@ import {
   ADD_PANEL_TRIGGER,
   ALERT_RULE_TRIGGER,
   EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID,
-  IMAGE_CLICK_TRIGGER,
-  ROW_CLICK_TRIGGER,
+  ON_CLICK_IMAGE,
+  ON_CLICK_ROW,
   VISUALIZE_FIELD_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
   CONTROL_MENU_TRIGGER,
   CONTROL_HOVER_TRIGGER_ID,
-  APPLY_FILTER_TRIGGER,
+  ON_APPLY_FILTER,
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
   DISCOVER_CELL_ACTIONS_TRIGGER_ID,
-  CONTEXT_MENU_TRIGGER,
+  ON_OPEN_PANEL_MENU,
   PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
+  ON_SELECT_RANGE,
+  ON_CLICK_VALUE,
   MULTI_VALUE_CLICK_TRIGGER,
   CELL_VALUE_TRIGGER,
   ESQL_CONTROL_TRIGGER,
@@ -43,7 +43,7 @@ import {
   EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER,
   SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER,
   O11Y_APM_TRANSACTION_CONTEXT_MENU_TRIGGER,
-  O11Y_APM_ERROR_CONTEXT_MENU_TRIGGER,
+  O11Y_APM_ERROR_ON_OPEN_PANEL_MENU,
   SECURITY_ESQL_IN_TIMELINE_HISTOGRAM_TRIGGER,
   SECURITY_CELL_ACTIONS_DEFAULT,
   SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
@@ -62,8 +62,8 @@ export const triggers: { [key: string]: Trigger } = {
       defaultMessage: "A new action will appear to the dashboard's add panel menu",
     }),
   },
-  [ROW_CLICK_TRIGGER]: {
-    id: ROW_CLICK_TRIGGER,
+  [ON_CLICK_ROW]: {
+    id: ON_CLICK_ROW,
     title: i18n.translate('uiActions.triggers.rowClickTitle', {
       defaultMessage: 'Table row click',
     }),
@@ -95,8 +95,8 @@ export const triggers: { [key: string]: Trigger } = {
     title: 'Edit Lookup Index',
     description: 'This trigger is used to edit the lookup index content.',
   },
-  [IMAGE_CLICK_TRIGGER]: {
-    id: IMAGE_CLICK_TRIGGER,
+  [ON_CLICK_IMAGE]: {
+    id: ON_CLICK_IMAGE,
     title: i18n.translate('uiActions.triggers.imageClickTriggerTitle', {
       defaultMessage: 'Image click',
     }),
@@ -122,8 +122,8 @@ export const triggers: { [key: string]: Trigger } = {
       defaultMessage: "Add action to controls's hover menu",
     }),
   },
-  [APPLY_FILTER_TRIGGER]: {
-    id: APPLY_FILTER_TRIGGER,
+  [ON_APPLY_FILTER]: {
+    id: ON_APPLY_FILTER,
     title: i18n.translate('uiActions.triggers.applyFilterTitle', {
       defaultMessage: 'Apply filter',
     }),
@@ -137,13 +137,13 @@ export const triggers: { [key: string]: Trigger } = {
     description:
       'This trigger is used to replace the cell actions for Discover session embeddable grid.',
   },
-  [CONTEXT_MENU_TRIGGER]: {
-    id: CONTEXT_MENU_TRIGGER,
+  [ON_OPEN_PANEL_MENU]: {
+    id: ON_OPEN_PANEL_MENU,
     title: i18n.translate('uiActions.triggers.contextMenuTrigger.title', {
       defaultMessage: 'Context menu',
     }),
     description: i18n.translate('uiActions.triggers.contextMenuTrigger.description', {
-      defaultMessage: "A new action will be added to the panel's context menu",
+      defaultMessage: "A new option will be added to the panel's context menu",
     }),
   },
   [PANEL_BADGE_TRIGGER]: {
@@ -164,8 +164,8 @@ export const triggers: { [key: string]: Trigger } = {
       defaultMessage: 'Actions appear in top-right corner of a panel.',
     }),
   },
-  [SELECT_RANGE_TRIGGER]: {
-    id: SELECT_RANGE_TRIGGER,
+  [ON_SELECT_RANGE]: {
+    id: ON_SELECT_RANGE,
     title: i18n.translate('uiActions.triggers.selectRangeTrigger.title', {
       defaultMessage: 'Range selection',
     }),
@@ -173,8 +173,8 @@ export const triggers: { [key: string]: Trigger } = {
       defaultMessage: 'A range of values on the visualization',
     }),
   },
-  [VALUE_CLICK_TRIGGER]: {
-    id: VALUE_CLICK_TRIGGER,
+  [ON_CLICK_VALUE]: {
+    id: ON_CLICK_VALUE,
     title: i18n.translate('uiActions.triggers.valueClickTrigger.title', {
       defaultMessage: 'Single click',
     }),
@@ -310,7 +310,7 @@ export const triggers: { [key: string]: Trigger } = {
   },
   [DISCOVER_CELL_ACTIONS_TRIGGER_ID]: { id: DISCOVER_CELL_ACTIONS_TRIGGER_ID },
   [O11Y_APM_TRANSACTION_CONTEXT_MENU_TRIGGER]: { id: O11Y_APM_TRANSACTION_CONTEXT_MENU_TRIGGER },
-  [O11Y_APM_ERROR_CONTEXT_MENU_TRIGGER]: { id: O11Y_APM_ERROR_CONTEXT_MENU_TRIGGER },
+  [O11Y_APM_ERROR_ON_OPEN_PANEL_MENU]: { id: O11Y_APM_ERROR_ON_OPEN_PANEL_MENU },
   [SECURITY_ESQL_IN_TIMELINE_HISTOGRAM_TRIGGER]: {
     id: SECURITY_ESQL_IN_TIMELINE_HISTOGRAM_TRIGGER,
   },

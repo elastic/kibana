@@ -30,7 +30,7 @@ jest.mock('../../../kibana_services', () => {
     uiActionsEnhancedServices: {
       getActionFactories: jest.fn(() => [
         {
-          supportedTriggers: () => ['VALUE_CLICK_TRIGGER'],
+          supportedTriggers: () => ['ON_CLICK_VALUE'],
           isCompatibleLicense: () => true,
         } as unknown as UiActionsEnhancedActionFactory,
       ]),
@@ -59,7 +59,7 @@ const compatibleEmbeddableApi = {
     type: 'dashboard',
   },
   supportedTriggers: () => {
-    return ['VALUE_CLICK_TRIGGER'];
+    return ['ON_CLICK_VALUE'];
   },
   viewMode$: new BehaviorSubject<ViewMode>('edit'),
 };
@@ -81,7 +81,7 @@ test('icon exists', () => {
 });
 
 describe('isCompatible', () => {
-  test("compatible if dynamicUiActions enabled, 'VALUE_CLICK_TRIGGER' is supported, in edit mode", async () => {
+  test("compatible if dynamicUiActions enabled, 'ON_CLICK_VALUE' is supported, in edit mode", async () => {
     expect(
       flyoutCreateDrilldownAction.isCompatible &&
         (await flyoutCreateDrilldownAction.isCompatible({ embeddable: compatibleEmbeddableApi }))
@@ -99,7 +99,7 @@ describe('isCompatible', () => {
     ).toBe(false);
   });
 
-  test("not compatible if 'VALUE_CLICK_TRIGGER' is not supported", async () => {
+  test("not compatible if 'ON_CLICK_VALUE' is not supported", async () => {
     const embeddableApi = {
       ...compatibleEmbeddableApi,
       supportedTriggers: () => {
@@ -136,10 +136,10 @@ describe('isCompatible', () => {
     ).toBe(false);
   });
   test('not compatible if no triggers intersect', async () => {
-    // Mock getActionFactories to return a factory that only supports SELECT_RANGE_TRIGGER
+    // Mock getActionFactories to return a factory that only supports ON_SELECT_RANGE
     (uiActionsEnhancedServices.getActionFactories as jest.Mock).mockImplementation(() => [
       {
-        supportedTriggers: () => ['SELECT_RANGE_TRIGGER'],
+        supportedTriggers: () => ['ON_SELECT_RANGE'],
         isCompatibleLicense: () => true,
       } as unknown as UiActionsEnhancedActionFactory,
     ]);

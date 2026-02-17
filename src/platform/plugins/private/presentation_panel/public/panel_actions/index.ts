@@ -9,7 +9,7 @@
 
 export {
   contextMenuTrigger,
-  CONTEXT_MENU_TRIGGER,
+  ON_OPEN_PANEL_MENU,
   panelBadgeTrigger,
   panelNotificationTrigger,
   PANEL_BADGE_TRIGGER,

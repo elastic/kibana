@@ -79,7 +79,7 @@ export const ImageEmbeddable = ({ api, filesClient }: ImageEmbeddableProps) => {
           // note: passing onClick enables the cursor pointer style, so we only pass it if there are compatible actions
           hasTriggerActions
             ? () => {
-                uiActionsService.executeTriggerActions('IMAGE_CLICK_TRIGGER', {
+                uiActionsService.executeTriggerActions('ON_CLICK_IMAGE', {
                   embeddable: api,
                 });
               }

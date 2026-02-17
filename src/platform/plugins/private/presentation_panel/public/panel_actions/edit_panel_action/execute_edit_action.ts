@@ -9,7 +9,7 @@
 
 import type { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { CONTEXT_MENU_TRIGGER } from '../triggers';
+import { ON_OPEN_PANEL_MENU } from '../triggers';
 import { ACTION_EDIT_PANEL } from './constants';
 import { uiActions } from '../../kibana_services';
 
@@ -18,7 +18,7 @@ export async function executeEditPanelAction(api: unknown) {
     const action = await uiActions.getAction(ACTION_EDIT_PANEL);
     action.execute({
       embeddable: api,
-      trigger: { id: CONTEXT_MENU_TRIGGER },
+      trigger: { id: ON_OPEN_PANEL_MENU },
     } as EmbeddableApiContext & ActionExecutionMeta);
   } catch (error) {
     // eslint-disable-next-line no-console

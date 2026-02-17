@@ -49,7 +49,7 @@ const compatibleEmbeddableApi = {
   },
   dynamicActionsState$,
   supportedTriggers: () => {
-    return ['VALUE_CLICK_TRIGGER'];
+    return ['ON_CLICK_VALUE'];
   },
   viewMode$: new BehaviorSubject<ViewMode>('edit'),
 };
@@ -61,7 +61,7 @@ beforeAll(async () => {
       factoryId: 'foo',
       name: '',
     },
-    ['VALUE_CLICK_TRIGGER']
+    ['ON_CLICK_VALUE']
   );
 });
 const context = {} as unknown as ActionDefinitionContext<EmbeddableApiContext>;
@@ -85,7 +85,7 @@ test('MenuItem exists', () => {
 });
 
 describe('isCompatible', () => {
-  test("compatible if dynamicUiActions enabled (with event), 'VALUE_CLICK_TRIGGER' is supported, in edit mode", async () => {
+  test("compatible if dynamicUiActions enabled (with event), 'ON_CLICK_VALUE' is supported, in edit mode", async () => {
     expect(
       flyoutEditDrilldownAction.isCompatible &&
         (await flyoutEditDrilldownAction.isCompatible({ embeddable: compatibleEmbeddableApi }))

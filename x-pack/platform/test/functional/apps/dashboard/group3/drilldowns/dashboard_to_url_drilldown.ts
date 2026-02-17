@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardDrilldownsManage.fillInDashboardToURLDrilldownWizard({
         drilldownName: DRILLDOWN_TO_DISCOVER_URL,
         destinationURLTemplate: urlTemplate,
-        trigger: 'SELECT_RANGE_TRIGGER',
+        trigger: 'ON_SELECT_RANGE',
       });
 
       await testSubjects.click('urlDrilldownAdditionalOptions');

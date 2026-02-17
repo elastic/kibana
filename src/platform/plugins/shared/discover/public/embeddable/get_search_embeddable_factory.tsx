@@ -30,7 +30,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { APPLY_FILTER_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
@@ -297,7 +297,7 @@ export const getSearchEmbeddableFactory = ({
                 $state: { store: FilterStateStore.APP_STATE },
               }));
 
-              await startServices.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+              await startServices.executeTriggerActions(ON_APPLY_FILTER, {
                 embeddable: api,
                 filters: newFilters,
               });

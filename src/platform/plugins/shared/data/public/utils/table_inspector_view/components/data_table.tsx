@@ -106,7 +106,7 @@ class DataTableFormatClass extends Component<
                   onClick={() => {
                     const value = table.rows[rowIndex][column.id];
                     const eventData = { table, column: columnIndex, row: rowIndex, value };
-                    uiActions.executeTriggerActions('VALUE_CLICK_TRIGGER', {
+                    uiActions.executeTriggerActions('ON_CLICK_VALUE', {
                       data: { data: [eventData] },
                     });
                   }}
@@ -139,7 +139,7 @@ class DataTableFormatClass extends Component<
                     onClick={() => {
                       const value = table.rows[rowIndex][column.id];
                       const eventData = { table, column: columnIndex, row: rowIndex, value };
-                      uiActions.executeTriggerActions('VALUE_CLICK_TRIGGER', {
+                      uiActions.executeTriggerActions('ON_CLICK_VALUE', {
                         data: { data: [eventData], negate: true },
                       });
                     }}

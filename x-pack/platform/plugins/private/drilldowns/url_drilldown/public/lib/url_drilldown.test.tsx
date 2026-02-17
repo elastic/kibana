@@ -14,10 +14,10 @@ import type { ValueClickContext } from '@kbn/embeddable-plugin/public';
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { createPoint, rowClickData } from './test/data';
 import {
-  CONTEXT_MENU_TRIGGER,
-  ROW_CLICK_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
+  ON_OPEN_PANEL_MENU,
+  ON_CLICK_ROW,
+  ON_SELECT_RANGE,
+  ON_CLICK_VALUE,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
@@ -400,7 +400,7 @@ describe('UrlDrilldown', () => {
     };
 
     describe('getRuntimeVariables()', () => {
-      test('builds runtime variables for VALUE_CLICK_TRIGGER trigger', () => {
+      test('builds runtime variables for ON_CLICK_VALUE trigger', () => {
         const variables = urlDrilldown.getRuntimeVariables({
           embeddable: embeddable1,
           data,
@@ -438,7 +438,7 @@ describe('UrlDrilldown', () => {
         });
       });
 
-      test('builds runtime variables for ROW_CLICK_TRIGGER trigger', () => {
+      test('builds runtime variables for ON_CLICK_ROW trigger', () => {
         const variables = urlDrilldown.getRuntimeVariables({
           embeddable: embeddable2,
           data: rowClickData as any,
@@ -487,9 +487,9 @@ describe('UrlDrilldown', () => {
     });
 
     describe('getVariableList()', () => {
-      test('builds variable list for VALUE_CLICK_TRIGGER trigger', () => {
+      test('builds variable list for ON_CLICK_VALUE trigger', () => {
         const list = urlDrilldown.getVariableList({
-          triggers: [VALUE_CLICK_TRIGGER],
+          triggers: [ON_CLICK_VALUE],
           embeddable: embeddable1,
         });
 
@@ -512,9 +512,9 @@ describe('UrlDrilldown', () => {
         }
       });
 
-      test('builds variable list for ROW_CLICK_TRIGGER trigger', () => {
+      test('builds variable list for ON_CLICK_ROW trigger', () => {
         const list = urlDrilldown.getVariableList({
-          triggers: [ROW_CLICK_TRIGGER],
+          triggers: [ON_CLICK_ROW],
           embeddable: embeddable2,
         });
 
@@ -554,21 +554,21 @@ describe('UrlDrilldown', () => {
         `"https://www.example.com/?{{event.key}}={{event.value}}"`
       );
 
-      expect(urlDrilldown.getExampleUrl({ triggers: [VALUE_CLICK_TRIGGER] })).toMatchInlineSnapshot(
+      expect(urlDrilldown.getExampleUrl({ triggers: [ON_CLICK_VALUE] })).toMatchInlineSnapshot(
         `"https://www.example.com/?{{event.key}}={{event.value}}"`
       );
 
-      expect(
-        urlDrilldown.getExampleUrl({ triggers: [SELECT_RANGE_TRIGGER] })
-      ).toMatchInlineSnapshot(`"https://www.example.com/?from={{event.from}}&to={{event.to}}"`);
+      expect(urlDrilldown.getExampleUrl({ triggers: [ON_SELECT_RANGE] })).toMatchInlineSnapshot(
+        `"https://www.example.com/?from={{event.from}}&to={{event.to}}"`
+      );
 
-      expect(urlDrilldown.getExampleUrl({ triggers: [ROW_CLICK_TRIGGER] })).toMatchInlineSnapshot(
+      expect(urlDrilldown.getExampleUrl({ triggers: [ON_CLICK_ROW] })).toMatchInlineSnapshot(
         `"https://www.example.com/keys={{event.keys}}&values={{event.values}}"`
       );
 
-      expect(
-        urlDrilldown.getExampleUrl({ triggers: [CONTEXT_MENU_TRIGGER] })
-      ).toMatchInlineSnapshot(`"https://www.example.com/?panel={{context.panel.title}}"`);
+      expect(urlDrilldown.getExampleUrl({ triggers: [ON_OPEN_PANEL_MENU] })).toMatchInlineSnapshot(
+        `"https://www.example.com/?panel={{context.panel.title}}"`
+      );
     });
   });
 });

@@ -14,9 +14,9 @@ import { DynamicActionStorage } from './dynamic_action_storage';
 import type { DynamicActionsSerializedState } from './types';
 import type { SerializedAction } from '@kbn/ui-actions-enhanced-plugin/common/types';
 import {
-  VALUE_CLICK_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  APPLY_FILTER_TRIGGER,
+  ON_CLICK_VALUE,
+  ON_SELECT_RANGE,
+  ON_APPLY_FILTER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 const getApi = (): DynamicActionStorageApi => {
@@ -527,7 +527,7 @@ describe('EmbeddableActionStorage', () => {
           events: [
             {
               eventId: '1',
-              triggers: [OTHER_TRIGGER, VALUE_CLICK_TRIGGER],
+              triggers: [OTHER_TRIGGER, ON_CLICK_VALUE],
               action: {
                 factoryId: 'DASHBOARD_TO_DASHBOARD_DRILLDOWN',
                 name: '',
@@ -536,7 +536,7 @@ describe('EmbeddableActionStorage', () => {
             },
             {
               eventId: '3',
-              triggers: [OTHER_TRIGGER, SELECT_RANGE_TRIGGER],
+              triggers: [OTHER_TRIGGER, ON_SELECT_RANGE],
               action: {
                 factoryId: 'DASHBOARD_TO_DASHBOARD_DRILLDOWN',
                 name: '',
@@ -557,8 +557,8 @@ describe('EmbeddableActionStorage', () => {
       });
 
       const [event1, event2, event3] = await storage.list();
-      expect(event1.triggers).toEqual([OTHER_TRIGGER, APPLY_FILTER_TRIGGER]);
-      expect(event2.triggers).toEqual([OTHER_TRIGGER, APPLY_FILTER_TRIGGER]);
+      expect(event1.triggers).toEqual([OTHER_TRIGGER, ON_APPLY_FILTER]);
+      expect(event2.triggers).toEqual([OTHER_TRIGGER, ON_APPLY_FILTER]);
       expect(event3.triggers).toEqual([OTHER_TRIGGER]);
     });
   });

@@ -20,7 +20,7 @@ const triggers: TriggerPickerProps = {
       description: 'On chart brush.',
     },
     {
-      id: 'VALUE_CLICK_TRIGGER',
+      id: 'ON_CLICK_VALUE',
       title: 'Value click',
       description: 'On point click in chart',
     },

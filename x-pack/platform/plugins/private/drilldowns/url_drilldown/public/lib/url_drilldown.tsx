@@ -15,11 +15,11 @@ import {
 import type { ChartActionContext } from '@kbn/embeddable-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import {
-  CONTEXT_MENU_TRIGGER,
-  IMAGE_CLICK_TRIGGER,
-  ROW_CLICK_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
+  ON_OPEN_PANEL_MENU,
+  ON_CLICK_IMAGE,
+  ON_CLICK_ROW,
+  ON_SELECT_RANGE,
+  ON_CLICK_VALUE,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
@@ -61,11 +61,11 @@ interface UrlDrilldownDeps {
 
 export type Config = UrlDrilldownConfig;
 export type UrlTrigger =
-  | typeof VALUE_CLICK_TRIGGER
-  | typeof SELECT_RANGE_TRIGGER
-  | typeof ROW_CLICK_TRIGGER
-  | typeof CONTEXT_MENU_TRIGGER
-  | typeof IMAGE_CLICK_TRIGGER;
+  | typeof ON_CLICK_VALUE
+  | typeof ON_SELECT_RANGE
+  | typeof ON_CLICK_ROW
+  | typeof ON_OPEN_PANEL_MENU
+  | typeof ON_CLICK_IMAGE;
 
 export type ActionFactoryContext = Partial<EmbeddableApiContext> & BaseActionFactoryContext;
 
@@ -278,14 +278,14 @@ export class UrlDrilldown implements Drilldown<Config, ChartActionContext, Actio
 
   public readonly getExampleUrl = (context: ActionFactoryContext): string => {
     switch (context.triggers[0]) {
-      case SELECT_RANGE_TRIGGER:
+      case ON_SELECT_RANGE:
         return 'https://www.example.com/?from={{event.from}}&to={{event.to}}';
-      case CONTEXT_MENU_TRIGGER:
-      case IMAGE_CLICK_TRIGGER:
+      case ON_OPEN_PANEL_MENU:
+      case ON_CLICK_IMAGE:
         return 'https://www.example.com/?panel={{context.panel.title}}';
-      case ROW_CLICK_TRIGGER:
+      case ON_CLICK_ROW:
         return 'https://www.example.com/keys={{event.keys}}&values={{event.values}}';
-      case VALUE_CLICK_TRIGGER:
+      case ON_CLICK_VALUE:
       default:
         return 'https://www.example.com/?{{event.key}}={{event.value}}';
     }

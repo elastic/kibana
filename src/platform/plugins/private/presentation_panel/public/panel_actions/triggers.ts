@@ -10,9 +10,9 @@
 import { i18n } from '@kbn/i18n';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 
-export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
+export const ON_OPEN_PANEL_MENU = 'ON_OPEN_PANEL_MENU';
 export const contextMenuTrigger: Trigger = {
-  id: CONTEXT_MENU_TRIGGER,
+  id: ON_OPEN_PANEL_MENU,
   title: i18n.translate('presentationPanel.contextMenuTrigger.title', {
     defaultMessage: 'Context menu',
   }),

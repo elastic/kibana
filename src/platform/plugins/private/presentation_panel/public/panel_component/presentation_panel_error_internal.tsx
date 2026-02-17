@@ -31,7 +31,7 @@ import { Markdown } from '@kbn/shared-ux-markdown';
 import type { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
 
 import { uiActions } from '../kibana_services';
-import { CONTEXT_MENU_TRIGGER } from '../panel_actions';
+import { ON_OPEN_PANEL_MENU } from '../panel_actions';
 import { ACTION_EDIT_PANEL } from '../panel_actions/edit_panel_action/constants';
 import { executeEditPanelAction } from '../panel_actions/edit_panel_action/execute_edit_action';
 import type { DefaultPresentationPanelApi } from './types';
@@ -87,7 +87,7 @@ export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanel
         setLabel(
           action?.getDisplayName({
             embeddable: api,
-            trigger: { id: CONTEXT_MENU_TRIGGER },
+            trigger: { id: ON_OPEN_PANEL_MENU },
           } as EmbeddableApiContext & ActionExecutionMeta)
         );
       })
@@ -116,7 +116,7 @@ export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanel
       const editPanelAction = await uiActions.getAction(ACTION_EDIT_PANEL);
       const context = {
         embeddable: api,
-        trigger: { id: CONTEXT_MENU_TRIGGER },
+        trigger: { id: ON_OPEN_PANEL_MENU },
       };
       if (canceled || !editPanelAction?.couldBecomeCompatible?.(context)) return;
 

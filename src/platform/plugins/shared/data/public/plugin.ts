@@ -167,7 +167,7 @@ export class DataPublicPlugin
     });
     setSearchService(search);
 
-    uiActions.addTriggerActionAsync('SELECT_RANGE_TRIGGER', 'ACTION_SELECT_RANGE', async () => {
+    uiActions.addTriggerActionAsync('ON_SELECT_RANGE', 'ACTION_SELECT_RANGE', async () => {
       const { createSelectRangeActionDefinition } = await import('./actions');
       const rangeSelectAction = createSelectRangeActionDefinition(() => ({
         uiActions,
@@ -175,7 +175,7 @@ export class DataPublicPlugin
       return rangeSelectAction;
     });
 
-    uiActions.addTriggerActionAsync('VALUE_CLICK_TRIGGER', 'ACTION_VALUE_CLICK', async () => {
+    uiActions.addTriggerActionAsync('ON_CLICK_VALUE', 'ACTION_VALUE_CLICK', async () => {
       const { createValueClickActionDefinition } = await import('./actions');
       const valueClickAction = createValueClickActionDefinition(() => ({
         uiActions,

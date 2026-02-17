@@ -12,14 +12,14 @@
  * They are generic events which can apply to many interactions in Kibana. Try to use these first when
  * building a new UI action.
  */
-export const VALUE_CLICK_TRIGGER = 'on_click_value';
-export const IMAGE_CLICK_TRIGGER = 'on_click_image';
-export const ROW_CLICK_TRIGGER = 'on_click_row';
-export const SELECT_RANGE_TRIGGER = 'on_select_range';
+export const ON_CLICK_VALUE = 'on_click_value';
+export const ON_CLICK_IMAGE = 'on_click_image';
+export const ON_CLICK_ROW = 'on_click_row';
+export const ON_SELECT_RANGE = 'on_select_range';
 
-export const APPLY_FILTER_TRIGGER = 'on_apply_filter';
+export const ON_APPLY_FILTER = 'on_apply_filter';
 
-export const CONTEXT_MENU_TRIGGER = 'on_click_context_menu_option';
+export const ON_OPEN_PANEL_MENU = 'on_open_panel_menu';
 
 /**
  * These triggers have not yet been updated, and may be removed or consolidated later.
@@ -69,7 +69,7 @@ export const SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER =
   'SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER';
 
 export const O11Y_APM_TRANSACTION_CONTEXT_MENU_TRIGGER = 'apmTransactionContextMenu';
-export const O11Y_APM_ERROR_CONTEXT_MENU_TRIGGER = 'apmErrorContextMenu';
+export const O11Y_APM_ERROR_ON_OPEN_PANEL_MENU = 'apmErrorContextMenu';
 
 export const SECURITY_ESQL_IN_TIMELINE_HISTOGRAM_TRIGGER =
   'security-discoverInTimeline-histogramTrigger';
