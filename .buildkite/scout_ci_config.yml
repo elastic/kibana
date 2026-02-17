@@ -29,6 +29,7 @@ plugins:
     - streams
     - streams_app
     - transform
+    - ux
     - workflows_extensions
     - global_search
     - banners
