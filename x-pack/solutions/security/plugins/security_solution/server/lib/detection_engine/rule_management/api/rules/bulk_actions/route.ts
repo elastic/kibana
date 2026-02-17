@@ -11,6 +11,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { BulkActionSkipResult, GapFillStatus } from '@kbn/alerting-plugin/common';
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
+import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { PerformRulesBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
@@ -203,6 +204,9 @@ export const performBulkActionRoute = (
           const actionsClient = ctx.actions.getActionsClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+          const endpointAuthz = await ctx.securitySolution.getEndpointAuthz();
+          const endpointService = ctx.securitySolution.getEndpointService();
+          const spaceId = ctx.securitySolution.getSpaceId();
 
           const { getExporter, getClient } = ctx.core.savedObjects;
           const client = getClient({ includedHiddenTypes: ['action'] });
@@ -296,6 +300,14 @@ export const performBulkActionRoute = (
                 items: rules,
                 executor: async (rule) => {
                   await validateBulkDuplicateRule({ mlAuthz, rule });
+
+                  await validateRuleResponseActions({
+                    endpointAuthz,
+                    endpointService,
+                    rulePayload: {},
+                    spaceId,
+                    existingRule: rule,
+                  });
 
                   // during dry run only validation is getting performed and rule is not saved in ES, thus return early
                   if (isDryRun) {
