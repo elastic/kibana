@@ -1,7 +1,7 @@
-# https://buildkite.com/elastic/kibana-uiam-verify-and-promote/
+# https://buildkite.com/elastic/kibana-uiam-cosmos-db-emulator-verify-and-promote/
 
 ### Parameters for this job:
-# UIAM_IMAGE: the full image path for the docker image to test
+# UIAM_COSMOSDB_IMAGE: the full image path for the docker image to test
 # FORCE_PROMOTE: if set to true, promotion will happen on non-main branches
 
 agents:
@@ -12,7 +12,7 @@ agents:
 
 steps:
   - label: 'Annotate runtime parameters'
-    command: .buildkite/scripts/steps/uiam/annotate_runtime_parameters.sh
+    command: .buildkite/scripts/steps/uiam/annotate_runtime_parameters_cosmos_db_emulator.sh
 
   - label: 'Pre-Build'
     command: .buildkite/scripts/lifecycle/pre_build.sh
@@ -46,7 +46,7 @@ steps:
     depends_on:
       - build
     env:
-      UIAM_DOCKER_IMAGE: $UIAM_IMAGE
+      UIAM_COSMOSDB_DOCKER_IMAGE: $UIAM_COSMOSDB_IMAGE
       SERVERLESS_TESTS_ONLY: 'true'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
     retry:
@@ -56,8 +56,8 @@ steps:
 
   - wait: ~
 
-  - label: ':arrow_up::key::arrow_up: Promote UIAM docker image'
-    command: .buildkite/scripts/steps/uiam/promote_image.sh $UIAM_IMAGE
+  - label: ':arrow_up::key::arrow_up: Promote UIAM Cosmos DB Emulator docker image'
+    command: .buildkite/scripts/steps/uiam/promote_image_cosmos_db_emulator.sh $UIAM_COSMOSDB_IMAGE
     key: promote-uiam-image
     if: "build.branch == 'main' || build.env('FORCE_PROMOTE') == 'true'"
     retry:
