@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { RelatedAlertsGraphOutput } from './get_related_alerts_step/types';
+import type { RelatedAlertsGraphOutput } from './types';
 
-jest.mock('./get_related_alerts_step/graph_builder', () => ({
+jest.mock('./graph_builder', () => ({
   buildRelatedAlertsGraph: jest.fn(),
 }));
 
-jest.mock('./get_related_alerts_step/time_window', () => ({
+jest.mock('./time_window', () => ({
   parseTimeWindowToMs: jest.fn((v: string) => {
     const match = v.match(/^(\d+)([hmd])$/);
     if (!match) return 3600000;
@@ -25,8 +25,8 @@ import {
   getRelatedAlertsInputSchema,
   getRelatedAlertsStepDefinition,
 } from './get_related_alerts_step';
-import { buildRelatedAlertsGraph } from './get_related_alerts_step/graph_builder';
-import { parseTimeWindowToMs } from './get_related_alerts_step/time_window';
+import { buildRelatedAlertsGraph } from './graph_builder';
+import { parseTimeWindowToMs } from './time_window';
 
 const mockBuildGraph = buildRelatedAlertsGraph as jest.MockedFunction<
   typeof buildRelatedAlertsGraph

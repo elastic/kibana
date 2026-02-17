@@ -7,6 +7,7 @@
 
 import { buildRelatedAlertsGraph } from './graph_builder';
 import type { DetectionAlert800 } from '../../../../common/api/detection_engine/model/alerts';
+import type { EsSearchClient, EsSearchResponse } from './types';
 
 /** Test doc: _source is a partial alert shape; we assert to DetectionAlert800 for type compatibility */
 interface Doc {
@@ -44,7 +45,7 @@ const makeEsClient = (params: { seedIndex: string; seedId: string; docs: Doc[] }
       // Seed fetch
       if (typedReq.index === seedIndex) {
         const hit = docs.find((d) => d._index === seedIndex && d._id === seedId);
-        return { hits: { hits: (hit ? [hit] : []) as unknown as Array<{ _source?: TSource }> } };
+        return { hits: { hits: hit ? [hit] : [] } } as unknown as EsSearchResponse<TSource>;
       }
 
       // Search queries
@@ -167,9 +168,9 @@ const makeEsClient = (params: { seedIndex: string; seedId: string; docs: Doc[] }
         sort: [h._source['@timestamp'], h._id],
       }));
 
-      return { hits: { hits: page as unknown as Array<{ _source?: TSource }> } };
+      return { hits: { hits: page } } as unknown as EsSearchResponse<TSource>;
     }),
-  };
+  } as unknown as EsSearchClient;
 };
 
 describe('buildRelatedAlertsGraph', () => {
