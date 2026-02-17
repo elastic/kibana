@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { Plan, AgentMode } from '@kbn/agent-builder-common';
+import type { Plan } from '@kbn/agent-builder-common';
 import { PlanStatusBadge } from './plan_status_badge';
 
 const createPlan = (overrides: Partial<Plan> = {}): Plan => ({

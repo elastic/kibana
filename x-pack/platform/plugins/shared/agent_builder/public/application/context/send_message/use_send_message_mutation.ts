@@ -112,7 +112,13 @@ const withScreenContextAttachment = async ({
   ];
 };
 
-export const useSendMessageMutation = ({ connectorId, agentMode, plan: activePlan, onPlanUpdate, onModeSuggestion }: UseSendMessageMutationProps = {}) => {
+export const useSendMessageMutation = ({
+  connectorId,
+  agentMode,
+  plan: activePlan,
+  onPlanUpdate,
+  onModeSuggestion,
+}: UseSendMessageMutationProps = {}) => {
   const { chatService } = useAgentBuilderServices();
   const { services } = useKibana();
   const { conversationActions, attachments, resetAttachments, browserApiTools } =

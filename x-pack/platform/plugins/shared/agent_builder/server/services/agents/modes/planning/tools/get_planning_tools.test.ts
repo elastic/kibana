@@ -127,10 +127,7 @@ describe('getPlanningTools', () => {
       const result = await executeTool(createPlanTool, {
         title: 'Test Plan',
         description: 'A test description',
-        action_items: [
-          { description: 'Step 1' },
-          { description: 'Step 2' },
-        ],
+        action_items: [{ description: 'Step 1' }, { description: 'Step 2' }],
       });
 
       expect(result.results).toHaveLength(1);
@@ -348,10 +345,7 @@ describe('getPlanningTools', () => {
 
       await executeTool(createPlanTool, {
         title: 'Test',
-        action_items: [
-          { description: 'Step 1' },
-          { description: 'Step 2' },
-        ],
+        action_items: [{ description: 'Step 1' }, { description: 'Step 2' }],
       });
 
       await executeTool(updatePlanTool, {
@@ -435,9 +429,7 @@ describe('getPlanningTools', () => {
       });
 
       expect(result.results[0].type).toBe(ToolResultType.error);
-      expect((result.results[0] as any).data.message).toContain(
-        'Invalid action item index 5'
-      );
+      expect((result.results[0] as any).data.message).toContain('Invalid action item index 5');
       expect((result.results[0] as any).data.message).toContain('1 items');
     });
 
@@ -455,11 +447,7 @@ describe('getPlanningTools', () => {
 
       await executeTool(createPlanTool, {
         title: 'Test',
-        action_items: [
-          { description: 'A' },
-          { description: 'B' },
-          { description: 'C' },
-        ],
+        action_items: [{ description: 'A' }, { description: 'B' }, { description: 'C' }],
       });
 
       await executeTool(updatePlanTool, {
@@ -522,10 +510,7 @@ describe('getPlanningTools', () => {
       });
 
       await executeTool(updatePlanTool, {
-        new_items: [
-          { description: 'New 1' },
-          { description: 'New 2' },
-        ],
+        new_items: [{ description: 'New 1' }, { description: 'New 2' }],
       });
 
       expect(planState.current!.action_items).toHaveLength(3);
@@ -554,11 +539,7 @@ describe('getPlanningTools', () => {
       });
 
       const result = await executeTool(updatePlanTool, {
-        new_items: [
-          { description: 'New 1' },
-          { description: 'New 2' },
-          { description: 'New 3' },
-        ],
+        new_items: [{ description: 'New 1' }, { description: 'New 2' }, { description: 'New 3' }],
       });
 
       expect(result.results[0].type).toBe(ToolResultType.error);
@@ -603,7 +584,10 @@ describe('getPlanningTools', () => {
       expect(data.tools).toHaveLength(2);
       expect(data.count).toBe(2);
       expect(data.tools[0]).toMatchObject({ id: 'tool.a', description: 'Tool A does things' });
-      expect(data.tools[1]).toMatchObject({ id: 'tool.b', description: 'Tool B does other things' });
+      expect(data.tools[1]).toMatchObject({
+        id: 'tool.b',
+        description: 'Tool B does other things',
+      });
     });
 
     it('applies keyword filter (case-insensitive on id and description)', async () => {

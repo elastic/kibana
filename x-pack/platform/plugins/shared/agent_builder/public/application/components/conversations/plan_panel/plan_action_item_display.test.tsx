@@ -62,9 +62,7 @@ describe('PlanActionItemDisplay', () => {
   it('renders status icon for each status', () => {
     const statuses = ['pending', 'in_progress', 'completed', 'failed'] as const;
     for (const status of statuses) {
-      const { unmount } = render(
-        <PlanActionItemDisplay item={createItem({ status })} index={0} />
-      );
+      const { unmount } = render(<PlanActionItemDisplay item={createItem({ status })} index={0} />);
       // The status icon should be present (wrapped in a tooltip)
       expect(screen.getByTestId('agentBuilderPlanActionItem-0')).toBeInTheDocument();
       unmount();

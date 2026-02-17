@@ -6,7 +6,11 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition, ExecutableTool, ScopedRunner } from '@kbn/agent-builder-server';
+import type {
+  BuiltinToolDefinition,
+  ExecutableTool,
+  ScopedRunner,
+} from '@kbn/agent-builder-server';
 
 /**
  * Converts a builtin tool definition to an executable tool that runs through the runner.

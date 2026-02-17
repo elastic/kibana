@@ -143,9 +143,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const existingPlan = conversation?.state?.plan;
   const planWasPromoted = existingPlan?.status === 'draft';
   const planState: PlanState = {
-    current: planWasPromoted
-      ? { ...existingPlan, status: 'ready' as const }
-      : existingPlan,
+    current: planWasPromoted ? { ...existingPlan, status: 'ready' as const } : existingPlan,
   };
 
   // When planning feature is enabled, add planning tools to agent mode

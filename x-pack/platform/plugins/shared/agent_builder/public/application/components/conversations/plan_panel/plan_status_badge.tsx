@@ -39,8 +39,7 @@ const deriveDisplayStatus = (
   agentMode: AgentMode
 ): { label: string; color: string } => {
   const allCompleted =
-    plan.action_items.length > 0 &&
-    plan.action_items.every((item) => item.status === 'completed');
+    plan.action_items.length > 0 && plan.action_items.every((item) => item.status === 'completed');
 
   // Draft plans are always shown as Draft
   if (plan.status === 'draft') {

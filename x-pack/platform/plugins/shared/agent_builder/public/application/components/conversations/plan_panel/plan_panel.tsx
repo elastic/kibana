@@ -76,8 +76,7 @@ export const PlanPanel: React.FC<PlanPanelProps> = ({
   }, []);
 
   const allCompleted =
-    plan.action_items.length > 0 &&
-    plan.action_items.every((item) => item.status === 'completed');
+    plan.action_items.length > 0 && plan.action_items.every((item) => item.status === 'completed');
 
   const showApproveButton =
     plan.source === 'planning' && plan.status !== 'ready' && !isExecuting && !allCompleted;

@@ -64,14 +64,8 @@ const updatePlanSchema = z.object({
         index: z.number().describe('Zero-based index of the action item to update'),
         description: z.string().optional().describe('New description'),
         status: actionItemStatusSchema.optional().describe('New status'),
-        related_skills: z
-          .array(z.string())
-          .optional()
-          .describe('Updated skill references'),
-        related_tools: z
-          .array(z.string())
-          .optional()
-          .describe('Updated tool references'),
+        related_skills: z.array(z.string()).optional().describe('Updated skill references'),
+        related_tools: z.array(z.string()).optional().describe('Updated tool references'),
       })
     )
     .optional()
@@ -80,10 +74,7 @@ const updatePlanSchema = z.object({
     .array(actionItemSchema)
     .optional()
     .describe('New action items to append to the plan'),
-  status: z
-    .enum(['draft', 'ready'])
-    .optional()
-    .describe('Updated plan status (draft or ready)'),
+  status: z.enum(['draft', 'ready']).optional().describe('Updated plan status (draft or ready)'),
 });
 
 const suggestPlanningModeSchema = z.object({
@@ -178,7 +169,13 @@ export const getPlanningTools = ({
       'Update an existing plan: modify action item status/description, append new items, or change the plan status.',
     tags: ['planning'],
     schema: updatePlanSchema,
-    handler: async ({ title, description, action_items: itemUpdates, new_items: newItems, status }) => {
+    handler: async ({
+      title,
+      description,
+      action_items: itemUpdates,
+      new_items: newItems,
+      status,
+    }) => {
       if (!planState.current) {
         return {
           results: [createErrorResult('No plan exists. Use create_plan first.')],
@@ -217,9 +214,7 @@ export const getPlanningTools = ({
             ...(update.related_skills !== undefined
               ? { related_skills: update.related_skills }
               : {}),
-            ...(update.related_tools !== undefined
-              ? { related_tools: update.related_tools }
-              : {}),
+            ...(update.related_tools !== undefined ? { related_tools: update.related_tools } : {}),
           };
         }
       }

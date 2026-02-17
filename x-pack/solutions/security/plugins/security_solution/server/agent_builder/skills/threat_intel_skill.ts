@@ -69,10 +69,7 @@ an artifact is associated with known malware campaigns or threat actors.
         'Check a file hash against threat intelligence sources for known malware associations',
       schema: z.object({
         hash: z.string().describe('The file hash to check (MD5, SHA1, or SHA256)'),
-        hashType: z
-          .enum(['md5', 'sha1', 'sha256'])
-          .default('sha256')
-          .describe('The type of hash'),
+        hashType: z.enum(['md5', 'sha1', 'sha256']).default('sha256').describe('The type of hash'),
       }),
       handler: async () => {
         return {
@@ -90,11 +87,7 @@ an artifact is associated with known malware campaigns or threat actors.
                     first_seen: '2026-01-15T08:30:00Z',
                     last_seen: '2026-02-16T14:22:00Z',
                     malware_family: 'Emotet',
-                    threat_names: [
-                      'Trojan.Emotet',
-                      'Win32/Emotet.AW',
-                      'Trojan:Win32/Emotet!ml',
-                    ],
+                    threat_names: ['Trojan.Emotet', 'Win32/Emotet.AW', 'Trojan:Win32/Emotet!ml'],
                     tags: ['banking-trojan', 'loader', 'spam-distributor'],
                     threat_actors: ['TA542', 'Mummy Spider'],
                     related_campaigns: ['Emotet Epoch 5 - January 2026'],

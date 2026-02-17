@@ -194,8 +194,7 @@ export const runPlanningAgentMode = async (
   const events$ = merge(graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({
       userInput: processedInput,
-      getConversationState: () =>
-        getConversationState({ promptManager, toolManager, planState }),
+      getConversationState: () => getConversationState({ promptManager, toolManager, planState }),
       pendingRound,
       startTime,
       modelProvider,

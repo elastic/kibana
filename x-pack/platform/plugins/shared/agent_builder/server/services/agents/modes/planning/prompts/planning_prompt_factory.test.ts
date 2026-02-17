@@ -24,9 +24,7 @@ const createMockProcessedConversation = (
 });
 
 const getSystemContent = (
-  messages: Awaited<
-    ReturnType<ReturnType<typeof createPlanningPromptFactory>['getMainPrompt']>
-  >
+  messages: Awaited<ReturnType<ReturnType<typeof createPlanningPromptFactory>['getMainPrompt']>>
 ): string => {
   // System message is now a tuple: ['system', content]
   const systemMsg = messages[0];

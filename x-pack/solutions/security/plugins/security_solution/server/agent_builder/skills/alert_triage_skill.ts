@@ -94,8 +94,7 @@ Structure findings as:
                     'process.hash.sha256':
                       'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
                     'file.path': 'C:\\Users\\jsmith\\Downloads\\update_helper.exe',
-                    message:
-                      'Suspicious executable detected with known malware signature pattern',
+                    message: 'Suspicious executable detected with known malware signature pattern',
                   },
                   null,
                   2

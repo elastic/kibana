@@ -163,7 +163,10 @@ Covers outbound connection analysis, C2 detection, and lateral movement assessme
         'Detect beaconing patterns in network traffic from a host, identifying potential C2 communication',
       schema: z.object({
         hostName: z.string().describe('The hostname to analyze'),
-        destinationIp: z.string().optional().describe('Optional: focus on a specific destination IP'),
+        destinationIp: z
+          .string()
+          .optional()
+          .describe('Optional: focus on a specific destination IP'),
       }),
       handler: async () => {
         return {
@@ -187,7 +190,8 @@ Covers outbound connection analysis, C2 detection, and lateral movement assessme
                         confidence: 'high',
                         pattern: 'regular_interval',
                         process: 'update_helper.exe',
-                        assessment: 'Strong C2 beaconing pattern — regular ~60s interval with low jitter',
+                        assessment:
+                          'Strong C2 beaconing pattern — regular ~60s interval with low jitter',
                       },
                     ],
                   },

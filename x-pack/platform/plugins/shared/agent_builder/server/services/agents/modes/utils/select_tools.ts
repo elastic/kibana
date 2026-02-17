@@ -7,13 +7,8 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolSelection } from '@kbn/agent-builder-common';
-import { ToolType, filterToolsBySelection } from '@kbn/agent-builder-common';
-import type {
-  ToolProvider,
-  ExecutableTool,
-  ScopedRunner,
-  BuiltinToolDefinition,
-} from '@kbn/agent-builder-server';
+import { filterToolsBySelection } from '@kbn/agent-builder-common';
+import type { ToolProvider, ExecutableTool, ScopedRunner } from '@kbn/agent-builder-server';
 import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { AttachmentsService, SkillsService } from '@kbn/agent-builder-server/runner';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
@@ -146,7 +141,6 @@ const createVersionedAttachmentTools = ({
   });
   return builtinTools.map((tool) => builtinToolToExecutable({ tool, runner }));
 };
-
 
 const getVersionedAttachmentBoundTools = async ({
   attachmentStateManager,

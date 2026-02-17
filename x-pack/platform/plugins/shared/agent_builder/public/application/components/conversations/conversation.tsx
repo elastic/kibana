@@ -175,7 +175,8 @@ export const Conversation: React.FC<{}> = () => {
   }, [setModeSuggestion]);
 
   const showPlanPanel = experimentalFeatures.planning && plan && hasActiveConversation;
-  const showModeSuggestion = experimentalFeatures.planning && modeSuggestion && hasActiveConversation;
+  const showModeSuggestion =
+    experimentalFeatures.planning && modeSuggestion && hasActiveConversation;
 
   if (!hasActiveConversation) {
     return <NewConversationPrompt />;

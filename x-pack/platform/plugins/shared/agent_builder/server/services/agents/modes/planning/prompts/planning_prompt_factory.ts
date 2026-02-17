@@ -13,7 +13,10 @@ import type {
   AnswerAgentPromptRuntimeParams,
 } from '../../default/prompts/types';
 import { convertPreviousRounds } from '../../utils/to_langchain_messages';
-import { formatResearcherActionHistory, formatAnswerActionHistory } from '../../default/prompts/utils/actions';
+import {
+  formatResearcherActionHistory,
+  formatAnswerActionHistory,
+} from '../../default/prompts/utils/actions';
 import type { ProcessedConversation } from '../../utils/prepare_conversation';
 
 const PLANNING_SYSTEM_PROMPT = `You are an AI planning assistant for Elastic's Agent Builder. You are in **planning mode**.

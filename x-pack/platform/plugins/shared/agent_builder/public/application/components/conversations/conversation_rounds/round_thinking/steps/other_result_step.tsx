@@ -38,9 +38,7 @@ const formatResultData = (data: unknown): string => {
         return value.map(expandJsonStrings);
       }
       if (typeof value === 'object' && value !== null) {
-        return Object.fromEntries(
-          Object.entries(value).map(([k, v]) => [k, expandJsonStrings(v)])
-        );
+        return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, expandJsonStrings(v)]));
       }
       return value;
     };

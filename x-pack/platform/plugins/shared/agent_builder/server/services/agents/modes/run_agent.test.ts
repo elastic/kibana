@@ -69,9 +69,7 @@ describe('runAgent', () => {
       const context = createAgentHandlerContextMock();
       context.experimentalFeatures.planning = false;
 
-      await expect(
-        runAgent({ ...DEFAULT_PARAMS, agentMode: 'planning' }, context)
-      ).rejects.toThrow(
+      await expect(runAgent({ ...DEFAULT_PARAMS, agentMode: 'planning' }, context)).rejects.toThrow(
         'Planning mode is not available. Enable experimental features in the agent builder settings.'
       );
 
@@ -83,9 +81,9 @@ describe('runAgent', () => {
       const context = createAgentHandlerContextMock();
       context.experimentalFeatures.planning = false;
 
-      await expect(
-        runAgent({ ...DEFAULT_PARAMS, agentMode: 'agent' }, context)
-      ).resolves.toEqual({ round: {} });
+      await expect(runAgent({ ...DEFAULT_PARAMS, agentMode: 'agent' }, context)).resolves.toEqual({
+        round: {},
+      });
 
       expect(runDefaultAgentModeMock).toHaveBeenCalled();
       expect(runPlanningAgentModeMock).not.toHaveBeenCalled();
