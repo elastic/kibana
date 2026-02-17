@@ -24,6 +24,7 @@ import { withAutoSuggest } from './autocomplete/helpers';
 import { isIdentifier, isList, isSource } from '../../../ast/is';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting';
 import { techPreviewLabel } from './shared';
+import { arithmeticOperators } from '../all_operators';
 
 const INDEX_PARAM_REGEX = /\bindex\s*=\s*(\S+)/i;
 
@@ -162,10 +163,18 @@ const buildPromqlSymbolSuggestion = (definition: PromQLFunctionDefinition): ISug
   };
 };
 
-/* Returns all PromQL operator suggestions suitable for autocomplete. */
+// TODO: Temporarily limited to arithmetic operators. Remove filter when comparison and logical operators are fully supported.
 export const getPromqlOperatorSuggestions = (): ISuggestionItem[] => {
   return promqlOperatorDefinitions
-    .filter((op) => !op.ignoreAsSuggestion && op.signatures.some((sig) => sig.params.length >= 2))
+    .filter((op) => {
+      const symbol = op.operator ?? op.name;
+
+      return (
+        !op.ignoreAsSuggestion &&
+        op.signatures.some((sig) => sig.params.length >= 2) &&
+        (arithmeticOperators.some(({ name }) => name === symbol) || symbol === '^')
+      );
+    })
     .map((op) => buildPromqlSymbolSuggestion(op));
 };
 
