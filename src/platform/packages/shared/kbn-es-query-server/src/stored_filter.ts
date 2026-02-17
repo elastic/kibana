@@ -44,7 +44,7 @@ export const storedFilterMetaSchema = schema.object(
     // This would require a more complex schema definition that can handle recursive types.
     // For now, we use `schema.any()` to allow flexibility in the params field.
     params: schema.maybe(schema.any()),
-    value: schema.maybe(schema.string()),
+    value: schema.maybe(schema.oneOf([schema.string(), schema.object({}, { unknowns: 'allow' })])),
   },
   { unknowns: 'allow' }
 );

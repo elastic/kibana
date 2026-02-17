@@ -13,6 +13,7 @@ import type { PhrasesFilter, PhrasesFilterMeta } from './phrases_filter';
 import type { PhraseFilter, PhraseFilterMeta, PhraseFilterMetaParams } from './phrase_filter';
 import type { RangeFilter, RangeFilterMeta, RangeFilterParams } from './range_filter';
 import type { MatchAllFilter, MatchAllFilterMeta } from './match_all_filter';
+import { SerializableRecord } from '@kbn/utility-types';
 
 /**
  * A common type for filters supported by this package
@@ -73,7 +74,7 @@ export type FilterMeta = {
   type?: string;
   key?: string;
   params?: FilterMetaParams;
-  value?: string;
+  value?: string | SerializableRecord;
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
