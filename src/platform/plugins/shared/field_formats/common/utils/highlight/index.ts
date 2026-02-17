@@ -9,3 +9,4 @@
 
 export { getHighlightHtml } from './highlight_html';
 export { getHighlightRequest } from './highlight_request';
+export { htmlTags as highlightHtmlTags } from './html_tags';

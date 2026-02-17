@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { htmlTags } from '@kbn/field-formats-plugin/common/utils/highlight/html_tags';
+import { highlightHtmlTags } from '@kbn/field-formats-plugin/common';
 import { escapeAndPreserveHighlightTags } from './escape_preserve_highlight_tags';
+
+const { pre: PRE, post: POST } = highlightHtmlTags;
 
 describe('escapeAndPreserveHighlightTags', () => {
   it('escapes HTML when there are no highlight tags', () => {
@@ -18,17 +20,15 @@ describe('escapeAndPreserveHighlightTags', () => {
   });
 
   it('preserves highlight wrappers while escaping the content', () => {
-    expect(escapeAndPreserveHighlightTags(`${htmlTags.pre}<hello>${htmlTags.post}`)).toBe(
-      `${htmlTags.pre}&lt;hello&gt;${htmlTags.post}`
+    expect(escapeAndPreserveHighlightTags(`${PRE}<hello>${POST}`)).toBe(
+      `${PRE}&lt;hello&gt;${POST}`
     );
   });
 
   it('returns only escaped text when there are multiple highlight regions', () => {
-    expect(
-      escapeAndPreserveHighlightTags(
-        `${htmlTags.pre}hello${htmlTags.post} + ${htmlTags.pre}world${htmlTags.post}`
-      )
-    ).toBe('hello + world');
+    expect(escapeAndPreserveHighlightTags(`${PRE}hello${POST} + ${PRE}world${POST}`)).toBe(
+      'hello + world'
+    );
   });
 
   it('escapes plain <mark> tags that do not match the highlight format', () => {

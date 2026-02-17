@@ -8,9 +8,9 @@
  */
 
 import { escape } from 'lodash';
-import { htmlTags } from '@kbn/field-formats-plugin/common/utils/highlight/html_tags';
+import { highlightHtmlTags } from '@kbn/field-formats-plugin/common';
 
-const HIGHLIGHT_TAGS_REGEX = new RegExp(`${htmlTags.pre}|${htmlTags.post}`, 'g');
+const HIGHLIGHT_TAGS_REGEX = new RegExp(`${highlightHtmlTags.pre}|${highlightHtmlTags.post}`, 'g');
 
 export function escapeAndPreserveHighlightTags(value: string): string {
   const markTags: string[] = [];
