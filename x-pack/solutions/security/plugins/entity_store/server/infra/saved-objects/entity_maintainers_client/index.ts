@@ -51,7 +51,7 @@ export class EntityMaintainersTasksClient {
         EntityMaintainersTasksTypeName,
         EntityMaintainersTasksId
       );
-      
+
       const tasks = existing.attributes[ENTITY_MAINTAINERS_TASKS_ATTR] ?? [];
       this.logger.debug(`Tasks registered: ${JSON.stringify(tasks)}`);
       const filtered = tasks.filter((t) => t.id !== taskEntry.id);
