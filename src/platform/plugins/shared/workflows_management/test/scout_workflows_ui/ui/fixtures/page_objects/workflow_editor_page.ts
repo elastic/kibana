@@ -102,6 +102,66 @@ export class WorkflowEditorPage {
     );
   }
 
+  /**
+   * Set the Monaco cursor to the Nth occurrence of `searchText` in the YAML
+   * editor and scroll it into view.
+   */
+  async setCursorToText(searchText: string, occurrence: number = 1): Promise<void> {
+    const uri = await this.yamlEditor.locator('.monaco-editor[data-uri]').getAttribute('data-uri');
+    if (!uri) {
+      throw new Error('Editor data-uri not found');
+    }
+
+    await this.page.evaluate(
+      ({ modelUri, text, occ }) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- global Monaco env
+        const monacoEnv = (window as any).MonacoEnvironment;
+        if (!monacoEnv?.monaco?.editor) {
+          throw new Error('MonacoEnvironment.monaco.editor is not available');
+        }
+
+        const model = monacoEnv.monaco.editor.getModel(modelUri);
+        if (!model) {
+          throw new Error('Editor model not found');
+        }
+
+        const fullText = model.getValue();
+        let matchIndex = -1;
+        let found = 0;
+        let searchFrom = 0;
+        while (found < occ) {
+          matchIndex = fullText.indexOf(text, searchFrom);
+          if (matchIndex === -1) {
+            break;
+          }
+          found++;
+          searchFrom = matchIndex + 1;
+        }
+
+        if (matchIndex === -1) {
+          throw new Error(`Text "${text}" not found in editor (occurrence ${occ})`);
+        }
+
+        const position = model.getPositionAt(matchIndex);
+
+        const editors = monacoEnv.monaco.editor.getEditors();
+        const editorInstance = editors.find(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Monaco editor instances are untyped in the browser context
+          (e: any) => e.getModel()?.uri?.toString() === model.uri.toString()
+        );
+
+        if (editorInstance) {
+          editorInstance.setPosition(position);
+          editorInstance.revealLineInCenter(position.lineNumber);
+          editorInstance.focus();
+        } else {
+          throw new Error('No editor instance found for the YAML model');
+        }
+      },
+      { modelUri: uri, text: searchText, occ: occurrence }
+    );
+  }
+
   public getYamlEditorSuggestWidget() {
     return this.page.locator(
       '[data-test-subj="kbnCodeEditorEditorOverflowWidgetsContainer"] .suggest-widget'
