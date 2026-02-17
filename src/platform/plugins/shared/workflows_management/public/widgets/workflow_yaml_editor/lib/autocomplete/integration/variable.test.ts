@@ -54,8 +54,10 @@ steps:
 `.trim();
     const suggestions = await getSuggestions(yamlContent);
     expect(suggestions.map((s) => s.label)).toEqual(
-      expect.arrayContaining(['consts', 'event', 'now', 'workflow', 'steps', 'execution', 'inputs'])
+      expect.arrayContaining(['consts', 'event', 'now', 'workflow', 'steps', 'execution'])
     );
+    // inputs should NOT appear because no inputs are defined in this workflow
+    expect(suggestions.map((s) => s.label)).not.toContain('inputs');
   });
 
   it('should provide completions after @ and quote insertText automatically if cursor is in plain scalar', async () => {
@@ -71,18 +73,9 @@ steps:
       message: @|<-
 `.trim();
     const suggestions = await getSuggestions(yamlContent);
+    // inputs should NOT appear because no inputs are defined in this workflow
     expect(suggestions.map((s) => s.label).sort()).toEqual(
-      [
-        'consts',
-        'event',
-        'kibanaUrl',
-        'now',
-        'workflow',
-        'steps',
-        'execution',
-        'inputs',
-        'variables',
-      ].sort()
+      ['consts', 'event', 'kibanaUrl', 'now', 'workflow', 'steps', 'execution', 'variables'].sort()
     );
     expect(suggestions.map((s) => s.insertText).sort()).toEqual(
       [
@@ -90,7 +83,6 @@ steps:
         '"{{ execution$0 }}"',
         '"{{ kibanaUrl$0 }}"',
         '"{{ workflow$0 }}"',
-        '"{{ inputs$0 }}"',
         '"{{ consts$0 }}"',
         '"{{ now$0 }}"',
         '"{{ steps$0 }}"',
@@ -112,13 +104,13 @@ steps:
       message: hey, this is @|<-
 `.trim();
     const suggestions = await getSuggestions(yamlContent);
+    // inputs should NOT appear because no inputs are defined in this workflow
     expect(suggestions.map((s) => s.insertText).sort()).toEqual(
       [
         '{{ event$0 }}',
         '{{ execution$0 }}',
         '{{ kibanaUrl$0 }}',
         '{{ workflow$0 }}',
-        '{{ inputs$0 }}',
         '{{ consts$0 }}',
         '{{ now$0 }}',
         '{{ steps$0 }}',
@@ -141,9 +133,11 @@ steps:
 `.trim();
 
     const suggestions = await getSuggestions(yamlContent);
+    // inputs should NOT appear because no inputs are defined in this workflow
     expect(suggestions.map((s) => s.label)).toEqual(
-      expect.arrayContaining(['consts', 'event', 'now', 'workflow', 'steps', 'execution', 'inputs'])
+      expect.arrayContaining(['consts', 'event', 'now', 'workflow', 'steps', 'execution'])
     );
+    expect(suggestions.map((s) => s.label)).not.toContain('inputs');
     expect(suggestions.map((s) => s.insertText)).toEqual(
       expect.arrayContaining([expect.not.stringMatching(/^"[^"]*$/)])
     );
@@ -429,17 +423,11 @@ steps:
 `.trim();
       const suggestions = await getSuggestions(yamlContent);
       expect(suggestions.length).toBeGreaterThan(0);
+      // inputs should NOT appear because no inputs are defined in this workflow
       expect(suggestions.map((s) => s.label)).toEqual(
-        expect.arrayContaining([
-          'consts',
-          'event',
-          'now',
-          'workflow',
-          'steps',
-          'execution',
-          'inputs',
-        ])
+        expect.arrayContaining(['consts', 'event', 'now', 'workflow', 'steps', 'execution'])
       );
+      expect(suggestions.map((s) => s.label)).not.toContain('inputs');
       // Verify that suggestions include curly braces when not already inside braces
       const constsSuggestion = suggestions.find((s) => s.label === 'consts');
       expect(constsSuggestion?.insertText).toContain('{{');
@@ -460,17 +448,11 @@ steps:
 `.trim();
       const suggestions = await getSuggestions(yamlContent);
       expect(suggestions.length).toBeGreaterThan(0);
+      // inputs should NOT appear because no inputs are defined in this workflow
       expect(suggestions.map((s) => s.label)).toEqual(
-        expect.arrayContaining([
-          'consts',
-          'event',
-          'now',
-          'workflow',
-          'steps',
-          'execution',
-          'inputs',
-        ])
+        expect.arrayContaining(['consts', 'event', 'now', 'workflow', 'steps', 'execution'])
       );
+      expect(suggestions.map((s) => s.label)).not.toContain('inputs');
     });
   });
 
@@ -604,6 +586,105 @@ steps:
         (s) => s.label === 'threshold' || s.label === 'inputs'
       );
       expect(inputsSuggestions.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('inputs and consts conditional visibility', () => {
+    it('should NOT suggest inputs or consts when neither is defined', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+steps:
+  - name: step1
+    type: console
+    with:
+      message: "{{|<-}}"
+`.trim();
+      const suggestions = await getSuggestions(yamlContent);
+      expect(suggestions.map((s) => s.label)).not.toContain('inputs');
+      expect(suggestions.map((s) => s.label)).not.toContain('consts');
+      // Other context variables should still be present
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining(['event', 'execution', 'workflow', 'steps', 'now'])
+      );
+    });
+
+    it('should suggest inputs when inputs are defined', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+inputs:
+  - name: alertName
+    type: string
+  - name: severity
+    type: string
+steps:
+  - name: step1
+    type: console
+    with:
+      message: "{{|<-}}"
+`.trim();
+      const suggestions = await getSuggestions(yamlContent);
+      expect(suggestions.map((s) => s.label)).toContain('inputs');
+      expect(suggestions.map((s) => s.label)).not.toContain('consts');
+    });
+
+    it('should suggest consts when consts are defined', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  threshold: 100
+  region: us-east-1
+steps:
+  - name: step1
+    type: console
+    with:
+      message: "{{|<-}}"
+`.trim();
+      const suggestions = await getSuggestions(yamlContent);
+      expect(suggestions.map((s) => s.label)).toContain('consts');
+      expect(suggestions.map((s) => s.label)).not.toContain('inputs');
+    });
+
+    it('should suggest both inputs and consts when both are defined', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+inputs:
+  - name: message
+    type: string
+consts:
+  apiUrl: "https://api.example.com"
+steps:
+  - name: step1
+    type: console
+    with:
+      message: "{{|<-}}"
+`.trim();
+      const suggestions = await getSuggestions(yamlContent);
+      expect(suggestions.map((s) => s.label)).toContain('inputs');
+      expect(suggestions.map((s) => s.label)).toContain('consts');
+    });
+
+    it('should suggest specific input properties when navigating into inputs', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+inputs:
+  - name: alertName
+    type: string
+  - name: severity
+    type: string
+steps:
+  - name: step1
+    type: console
+    with:
+      message: "{{inputs.|<-}}"
+`.trim();
+      const suggestions = await getSuggestions(yamlContent);
+      expect(suggestions.map((s) => s.label)).toContain('alertName');
+      expect(suggestions.map((s) => s.label)).toContain('severity');
     });
   });
 });

@@ -78,23 +78,26 @@ export function getWorkflowContextSchema(
     }
   }
 
+  const hasInputs = Object.keys(inputsObject).length > 0;
+  const constsEntries = Object.entries(definition.consts ?? {});
+  const hasConsts = constsEntries.length > 0;
+
   // Use DynamicWorkflowContextSchema instead of WorkflowContextSchema
   // This ensures compatibility with DynamicStepContextSchema.merge() in getContextSchemaForPath
   // The merge() method requires both schemas to have the same base structure
   return DynamicWorkflowContextSchema.extend({
-    // transform inputs properties to an object
-    // with the property name as the key and the Zod schema as the value
-    // Always create an object, even if empty, to ensure proper schema structure
-    inputs: Object.keys(inputsObject).length > 0 ? z.object(inputsObject) : z.object({}),
-    // transform an object of consts to an object
-    // with the const name as the key and inferred type as the value
-    consts: z.object({
-      ...Object.fromEntries(
-        Object.entries(definition.consts ?? {}).map(([key, value]) => [
-          key,
-          inferZodType(value, { isConst: true }),
-        ])
-      ),
-    }),
+    // Only include inputs in the schema when they are actually defined in the workflow.
+    // Using z.never() hides the key from autocomplete suggestions, avoiding confusion
+    // when the workflow doesn't declare any inputs.
+    inputs: hasInputs ? z.object(inputsObject) : z.never(),
+    // Only include consts in the schema when they are actually defined in the workflow.
+    // Same approach as inputs — z.never() prevents empty consts from appearing in autocomplete.
+    consts: hasConsts
+      ? z.object({
+          ...Object.fromEntries(
+            constsEntries.map(([key, value]) => [key, inferZodType(value, { isConst: true })])
+          ),
+        })
+      : z.never(),
   });
 }

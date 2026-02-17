@@ -8,7 +8,8 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows';
-import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod';
+import { getSchemaAtPath, getShape } from '@kbn/workflows/common/utils/zod';
+import { z } from '@kbn/zod/v4';
 import {
   getWorkflowContextSchema,
   type WorkflowDefinitionForContext,
@@ -293,6 +294,98 @@ describe('getWorkflowContextSchema - Nested Objects', () => {
         const contextSchema = getWorkflowContextSchema(workflow);
         expect(contextSchema).toBeDefined();
       }).not.toThrow();
+    });
+  });
+
+  describe('inputs and consts conditional visibility', () => {
+    it('should use z.never() for inputs when no inputs are defined', () => {
+      const workflow: WorkflowYaml = {
+        version: '1',
+        name: 'Test Workflow',
+        description: undefined,
+        settings: undefined,
+        enabled: true,
+        tags: undefined,
+        triggers: [{ type: 'manual' }],
+        inputs: undefined,
+        consts: undefined,
+        steps: [{ name: 'step1', type: 'console' }],
+      };
+
+      const contextSchema = getWorkflowContextSchema(workflow);
+      const shape = getShape(contextSchema);
+      expect(shape.inputs).toBeInstanceOf(z.ZodNever);
+      expect(shape.consts).toBeInstanceOf(z.ZodNever);
+    });
+
+    it('should use z.never() for consts when no consts are defined', () => {
+      const workflow: WorkflowYaml = {
+        version: '1',
+        name: 'Test Workflow',
+        description: undefined,
+        settings: undefined,
+        enabled: true,
+        tags: undefined,
+        triggers: [{ type: 'manual' }],
+        inputs: {
+          properties: {
+            name: { type: 'string' },
+          },
+        },
+        consts: undefined,
+        steps: [{ name: 'step1', type: 'console' }],
+      };
+
+      const contextSchema = getWorkflowContextSchema(workflow);
+      const shape = getShape(contextSchema);
+      expect(shape.inputs).toBeInstanceOf(z.ZodObject);
+      expect(shape.consts).toBeInstanceOf(z.ZodNever);
+    });
+
+    it('should use z.object for both inputs and consts when both are defined', () => {
+      const workflow: WorkflowYaml = {
+        version: '1',
+        name: 'Test Workflow',
+        description: undefined,
+        settings: undefined,
+        enabled: true,
+        tags: undefined,
+        triggers: [{ type: 'manual' }],
+        inputs: {
+          properties: {
+            name: { type: 'string' },
+          },
+        },
+        consts: {
+          threshold: 100,
+        },
+        steps: [{ name: 'step1', type: 'console' }],
+      };
+
+      const contextSchema = getWorkflowContextSchema(workflow);
+      const shape = getShape(contextSchema);
+      expect(shape.inputs).toBeInstanceOf(z.ZodObject);
+      expect(shape.consts).toBeInstanceOf(z.ZodObject);
+    });
+
+    it('should use z.never() for inputs with empty consts object', () => {
+      const workflow: WorkflowYaml = {
+        version: '1',
+        name: 'Test Workflow',
+        description: undefined,
+        settings: undefined,
+        enabled: true,
+        tags: undefined,
+        triggers: [{ type: 'manual' }],
+        inputs: undefined,
+        consts: {},
+        steps: [{ name: 'step1', type: 'console' }],
+      };
+
+      const contextSchema = getWorkflowContextSchema(workflow);
+      const shape = getShape(contextSchema);
+      expect(shape.inputs).toBeInstanceOf(z.ZodNever);
+      expect(shape.consts).toBeInstanceOf(z.ZodNever);
     });
   });
 });

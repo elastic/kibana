@@ -85,7 +85,7 @@ describe('getContextSchemaForPath', () => {
     expectZodSchemaEqual(
       context,
       DynamicStepContextSchema.extend({
-        inputs: z.object({}),
+        inputs: z.never(),
         consts: z.object({
           test: z.literal('test'),
         }),
@@ -105,7 +105,7 @@ describe('getContextSchemaForPath', () => {
     expectZodSchemaEqual(
       context,
       DynamicStepContextSchema.extend({
-        inputs: z.object({}),
+        inputs: z.never(),
         steps: z.object({
           'first-step': z.object({
             output: z.string().optional(),
