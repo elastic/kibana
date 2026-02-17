@@ -24,6 +24,8 @@ export const SvgAiGradientDefs = ({
   startOffsetPercent = 0,
   endOffsetPercent = 100,
 }: SvgAiGradientDefsProps) => {
+  // SVG icons need gradient defs to fill vector paths with multiple colors.
+  // CSS/background gradients style boxes, but defs color the actual icon shape.
   return (
     <svg width="0" height="0" aria-hidden="true" focusable="false" style={{ position: 'absolute' }}>
       <defs>

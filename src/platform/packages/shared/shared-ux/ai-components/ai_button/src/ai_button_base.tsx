@@ -19,10 +19,12 @@ export type AiButtonVariant = 'accent' | 'base' | 'empty' | 'outlined';
 
 type AiButtonIconType = 'sparkles' | 'productAgent' | 'aiAssistantLogo';
 
-type AiButtonTextProps = DistributiveOmit<
+type EuiButtonBaseProps = DistributiveOmit<
   React.ComponentProps<typeof EuiButton>,
   'fill' | 'iconType' | 'disabled'
-> & {
+>;
+
+type AiButtonTextProps = EuiButtonBaseProps & {
   /** Selects text button vs icon-only button rendering. */
   iconOnly?: false;
   fill?: never;
@@ -139,17 +141,12 @@ export const AiButtonBase = (props: AiButtonBaseProps) => {
     ...euiButtonProps
   } = props;
 
-  const euiButtonPropsForEui = euiButtonProps as DistributiveOmit<
-    React.ComponentProps<typeof EuiButton>,
-    'fill' | 'iconType' | 'disabled'
-  >;
-
   return (
     <>
       {svgGradientDefs}
       <EuiButton
-        {...euiButtonPropsForEui}
-        iconSize={euiButtonPropsForEui.iconSize ?? getSyncedIconSize(euiButtonPropsForEui.size)}
+        {...(euiButtonProps as EuiButtonBaseProps)}
+        iconSize={euiButtonProps.iconSize ?? getSyncedIconSize(euiButtonProps.size)}
         iconType={iconType ? resolvedIconType(iconType) : undefined}
         css={[buttonCss, iconGradientCss, buttonUserCss]}
         fill={variant === 'accent'}
