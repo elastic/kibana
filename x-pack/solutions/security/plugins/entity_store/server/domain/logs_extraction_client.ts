@@ -131,7 +131,6 @@ export class LogsExtractionClient {
   }) {
     const { docsLimit } = engineDescriptor.logExtractionState;
     const indexPatterns = await this.getIndexPatterns(
-      engineDescriptor.type,
       engineDescriptor.logExtractionState.additionalIndexPatterns
     );
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
@@ -236,7 +235,7 @@ export class LogsExtractionClient {
     return { success: false, error };
   }
 
-  private async getIndexPatterns(type: EntityType, additionalIndexPatterns: string[]) {
+  public async getIndexPatterns(additionalIndexPatterns: string[] = []): Promise<string[]> {
     const updatesDataStream = getUpdatesEntitiesDataStreamName(this.namespace);
     const indexPatterns: string[] = [updatesDataStream, ...additionalIndexPatterns];
 
