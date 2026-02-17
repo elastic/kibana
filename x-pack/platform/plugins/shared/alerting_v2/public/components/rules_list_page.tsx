@@ -26,6 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { RuleApiResponse } from '../services/rules_api';
 import { RulesApi } from '../services/rules_api';
+import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 
 const getErrorMessage = (error: unknown) => {
   if (error instanceof Error) {
@@ -41,6 +42,8 @@ export const RulesListPage = () => {
   const [rules, setRules] = useState<RuleApiResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useBreadcrumbs('rules_list');
 
   useEffect(() => {
     const loadRules = async () => {

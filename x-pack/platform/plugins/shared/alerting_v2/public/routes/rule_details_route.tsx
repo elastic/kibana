@@ -9,6 +9,7 @@ import React, { lazy, Suspense } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { useExistingRule } from '../hooks/use_existing_rule';
+import { Skeleton } from '../components/rule_details/skeleton';
 
 interface RuleDetailsRouteParams {
   ruleId: string;
@@ -24,12 +25,8 @@ const LazyRuleDetailPage = lazy(async () => {
 export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = ({ match }) => {
   const rule = useExistingRule(match.params.ruleId);
 
-  if (rule.isLoading) {
-    return <EuiLoadingSpinner size="m" />;
-  } else if (rule.error) {
-    return <div>Error loading rule: {rule.error}</div>;
-  } else if (!rule.rule) {
-    return <div>Rule not found</div>;
+  if (!rule?.rule) {
+    return <Skeleton />;
   }
 
   return (

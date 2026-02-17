@@ -7,6 +7,7 @@
 
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiCodeBlock,
   EuiDescriptionList,
   EuiFlexGroup,
@@ -21,7 +22,12 @@ import { formatDuration } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
 import type { RuleApiResponse } from '../../services/rules_api';
+import { RuleDetailsActionsMenu } from './rule_details_actions_menu';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useDeleteRule } from '../../hooks/use_delete_rule';
+import { RulesDeleteModalConfirmation } from '../common/rules_delete_modal_confirmation';
 
 export interface RuleDetailPageProps {
   rule: RuleApiResponse;
@@ -91,6 +97,23 @@ const formatMaybeIsoDateTime = (value: string | undefined) => {
 };
 
 export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ rule }) => {
+  useBreadcrumbs('rule_details', { ruleName: rule.metadata?.name });
+
+  const history = useHistory();
+  const { deleteRule } = useDeleteRule();
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
+
+  const showDeleteConfirmationModal = () => {
+    setShowDeleteConfirmation(true);
+  };
+
+  const handleRuleDelete = async () => {
+    setShowDeleteConfirmation(false);
+    deleteRule(rule.id, () => {
+      history.push(`/`);
+    });
+  };
+
   const configurationListItems = useMemo(
     () => [
       {
@@ -182,6 +205,12 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
 
   return (
     <>
+      {showDeleteConfirmation && (
+        <RulesDeleteModalConfirmation
+          onConfirm={handleRuleDelete}
+          onCancel={() => setShowDeleteConfirmation(false)}
+        />
+      )}
       <EuiPageHeader
         data-test-subj="ruleDetailsTitle"
         bottomBorder
@@ -255,7 +284,7 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  {rule.metadata.labels && (
+                  {rule.metadata.labels ? (
                     <EuiFlexGroup gutterSize="xs" wrap responsive={false} data-test-subj="ruleTags">
                       {rule.metadata.labels.map((label) => (
                         <EuiFlexItem key={label} grow={false}>
@@ -263,12 +292,38 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
                         </EuiFlexItem>
                       ))}
                     </EuiFlexGroup>
+                  ) : (
+                    '-'
                   )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         }
+        rightSideItems={[
+          <RuleDetailsActionsMenu
+            key="actions"
+            rule={rule}
+            showDeleteConfirmation={showDeleteConfirmationModal}
+          />,
+          <EuiButtonEmpty
+            aria-label={i18n.translate(
+              'xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel',
+              { defaultMessage: 'Edit' }
+            )}
+            data-test-subj="openEditRuleFlyoutButton"
+            iconType="pencil"
+            name="edit"
+            onClick={() => {
+              history.push(`/edit/${rule.id}`);
+            }}
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
+              defaultMessage="Edit"
+            />
+          </EuiButtonEmpty>,
+        ]}
       />
 
       <EuiSpacer size="m" />

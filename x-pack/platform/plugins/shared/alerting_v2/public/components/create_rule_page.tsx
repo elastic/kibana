@@ -28,6 +28,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import { createRuleDataSchema, type CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { YamlRuleEditor } from '@kbn/yaml-rule-editor';
 import { RulesApi } from '../services/rules_api';
+import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 
 const DEFAULT_RULE_YAML = `kind: alert
 
@@ -94,6 +95,8 @@ export const CreateRulePage = () => {
   const [errorTitle, setErrorTitle] = useState<React.ReactNode | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingRule, setIsLoadingRule] = useState(false);
+
+  useBreadcrumbs(isEditing ? 'edit' : 'create');
 
   const parsedDoc = useMemo(() => parseYaml(yaml), [yaml]);
 

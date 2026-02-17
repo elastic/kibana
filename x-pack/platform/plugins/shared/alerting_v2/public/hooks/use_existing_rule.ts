@@ -6,32 +6,16 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useService } from '@kbn/core-di-browser';
+import { CoreStart, useService } from '@kbn/core-di-browser';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { i18n } from '@kbn/i18n';
 import { RulesApi } from '../services/rules_api';
-import type { RuleDetails } from '../services/rules_api';
-
-const DEFAULT_RULE_VALUES: RuleDetails = {
-  id: '',
-  name: '',
-  kind: 'alert',
-  tags: [],
-  schedule: { custom: '5m' },
-  enabled: true,
-  query: '',
-  timeField: '',
-  lookbackWindow: '5m',
-  groupingKey: [],
-  createdBy: null,
-  createdAt: undefined,
-  updatedBy: null,
-  updatedAt: undefined,
-};
 
 export function useExistingRule(ruleId: string | undefined) {
   const rulesApi = useService(RulesApi);
+  const notifications = useService(CoreStart('notifications'));
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [rule, setRule] = useState<RuleDetails | null>(null);
+  const [rule, setRule] = useState<RuleResponse | null>(null);
 
   useEffect(() => {
     if (!ruleId) {
@@ -41,41 +25,23 @@ export function useExistingRule(ruleId: string | undefined) {
 
     const loadRule = async () => {
       setIsLoading(true);
-      setError(null);
 
       try {
         const fetchedRule = await rulesApi.getRule(ruleId);
-
-        const transformedRule: RuleDetails = {
-          ...DEFAULT_RULE_VALUES,
-          id: fetchedRule.id,
-          name: fetchedRule.name,
-          kind: fetchedRule.kind ?? DEFAULT_RULE_VALUES.kind,
-          tags: fetchedRule.tags ?? DEFAULT_RULE_VALUES.tags,
-          enabled: fetchedRule.enabled ?? DEFAULT_RULE_VALUES.enabled,
-          query: fetchedRule.query ?? DEFAULT_RULE_VALUES.query,
-          timeField: fetchedRule.timeField ?? DEFAULT_RULE_VALUES.timeField,
-          lookbackWindow: fetchedRule.lookbackWindow ?? DEFAULT_RULE_VALUES.lookbackWindow,
-          groupingKey: fetchedRule.groupingKey ?? DEFAULT_RULE_VALUES.groupingKey,
-          schedule: fetchedRule.schedule?.custom
-            ? { custom: fetchedRule.schedule.custom }
-            : DEFAULT_RULE_VALUES.schedule,
-          createdBy: fetchedRule.createdBy ?? DEFAULT_RULE_VALUES.createdBy,
-          createdAt: fetchedRule.createdAt ?? DEFAULT_RULE_VALUES.createdAt,
-          updatedBy: fetchedRule.updatedBy ?? DEFAULT_RULE_VALUES.updatedBy,
-          updatedAt: fetchedRule.updatedAt ?? DEFAULT_RULE_VALUES.updatedAt,
-        };
-
-        setRule(transformedRule);
+        setRule(fetchedRule);
       } catch (err) {
-        setError(err);
+        notifications?.toasts.addError(err, {
+          title: i18n.translate('xpack.alertingV2.ruleDetails.ruleLoadError', {
+            defaultMessage: 'Unable to load rule',
+          }),
+        });
       } finally {
         setIsLoading(false);
       }
     };
 
     loadRule();
-  }, [ruleId, rulesApi]);
+  }, [ruleId, rulesApi, notifications]);
 
-  return { rule, isLoading, error };
+  return { rule, isLoading };
 }

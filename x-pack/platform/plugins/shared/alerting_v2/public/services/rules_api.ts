@@ -46,4 +46,16 @@ export class RulesApi {
       body: JSON.stringify(payload),
     });
   }
+
+  public async enableRule(id: string) {
+    return this.http.post<RuleResponse>(`${INTERNAL_ALERTING_V2_RULE_API_PATH}/${id}/_enable`);
+  }
+
+  public async disableRule(id: string) {
+    return this.http.post<RuleResponse>(`${INTERNAL_ALERTING_V2_RULE_API_PATH}/${id}/_disable`);
+  }
+
+  public async deleteRule(id: string) {
+    return this.http.delete<RuleResponse>(`${INTERNAL_ALERTING_V2_RULE_API_PATH}/${id}`);
+  }
 }
