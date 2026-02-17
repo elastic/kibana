@@ -249,7 +249,7 @@ export function parseAndVerifyArchive(
     throw new PackageInvalidArchiveError(
       `Could not parse top-level package manifest at top-level directory ${toplevelDir}: ${getErrorMessage(
         error
-      )}`
+      )}.`
     );
   }
 
