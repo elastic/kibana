@@ -109,18 +109,18 @@ export function CellActionsPopover({
             `}
           >
             <strong>{name}</strong>{' '}
-            <span
-              // eslint-disable-next-line react/no-danger
-              dangerouslySetInnerHTML={{
-                __html: escapeAndPreserveHighlightTags(
-                  typeof renderValue === 'function'
-                    ? renderValue(value)
-                    : rawValue != null && typeof rawValue !== 'object'
-                    ? (rawValue as React.ReactNode)
-                    : value
-                ),
-              }}
-            />
+            {typeof renderValue === 'function' ? (
+              <span>{renderValue(escapeAndPreserveHighlightTags(value))}</span>
+            ) : rawValue != null && typeof rawValue !== 'object' ? (
+              <span>{rawValue as React.ReactNode}</span>
+            ) : (
+              <span
+                // eslint-disable-next-line react/no-danger
+                dangerouslySetInnerHTML={{
+                  __html: escapeAndPreserveHighlightTags(value),
+                }}
+              />
+            )}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
