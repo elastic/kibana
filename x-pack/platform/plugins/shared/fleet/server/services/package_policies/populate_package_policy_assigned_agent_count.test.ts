@@ -35,18 +35,10 @@ describe('When using populatePackagePolicyAssignedAgentCount()', () => {
         },
         aggregations: {
           agent_counts: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [
-              {
-                key: 'agent-policy-id-a',
-                doc_count: 100,
-              },
-              {
-                key: 'agent-policy-id-b',
-                doc_count: 50,
-              },
-            ],
+            buckets: {
+              'agent-policy-id-a': { doc_count: 100 },
+              'agent-policy-id-b': { doc_count: 50 },
+            },
           },
         },
       };

@@ -27,13 +27,13 @@ import type { AgentBuilderBuiltinTool } from '../allow_lists';
  */
 export type SkillsDirectoryStructure = Directory<{
   skills: Directory<{
-    platform: FileDirectory;
+    platform: FileDirectory<{}>;
     observability: FileDirectory<{}>;
     security: FileDirectory<{
       alerts: FileDirectory<{
         rules: FileDirectory;
       }>;
-      entities: FileDirectory;
+      entities: FileDirectory<{}>;
     }>;
     search: FileDirectory<{}>;
   }>;
