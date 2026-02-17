@@ -110,6 +110,7 @@ export class ElasticsearchService
       kibanaVersion: this.kibanaVersion,
       ignoreVersionMismatch: config.ignoreVersionMismatch,
       healthCheckInterval: config.healthCheckDelay.asMilliseconds(),
+      healthCheckFailureInterval: config.healthCheckFailureInterval?.asMilliseconds(),
       healthCheckStartupInterval: config.healthCheckStartupDelay.asMilliseconds(),
       healthCheckRetry: config.healthCheckRetry,
       log: this.log,
