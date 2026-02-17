@@ -593,7 +593,7 @@ export const QueryBarTopRow = React.memo(
       return !Boolean(props.showAddFilter) && Boolean(props.prepend);
     }
 
-    function shouldRenderUpdatebutton(): boolean {
+    function shouldRenderUpdateButton(): boolean {
       return (
         Boolean(showSubmitButton) &&
         Boolean(showQueryInput || showDatePicker || showAutoRefreshOnly)
@@ -746,7 +746,7 @@ export const QueryBarTopRow = React.memo(
     }
 
     function renderDatePickerWithUpdateBtn() {
-      if (!shouldRenderUpdatebutton() && !shouldRenderDatePicker()) {
+      if (!shouldRenderUpdateButton() && !shouldRenderDatePicker()) {
         return null;
       }
       const iconDirty = Boolean(isQueryLangSelected) ? 'playFilled' : 'kqlFunction';
@@ -810,7 +810,7 @@ export const QueryBarTopRow = React.memo(
       );
 
       // allows to render the button without the datepicker
-      if (!shouldRenderDatePicker() && shouldRenderUpdatebutton()) {
+      if (!shouldRenderDatePicker() && shouldRenderUpdateButton()) {
         return button;
       }
 
@@ -820,13 +820,13 @@ export const QueryBarTopRow = React.memo(
             <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
               {isQueryLangSelected ? (
                 <>
-                  {shouldRenderUpdatebutton() ? button : null}
+                  {shouldRenderUpdateButton() ? button : null}
                   {shouldRenderDatePicker() ? renderDatePicker() : null}
                 </>
               ) : (
                 <>
                   {shouldRenderDatePicker() ? renderDatePicker() : null}
-                  {shouldRenderUpdatebutton() ? button : null}
+                  {shouldRenderUpdateButton() ? button : null}
                 </>
               )}
             </EuiFlexGroup>
