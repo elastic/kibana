@@ -16,7 +16,7 @@
 
 - UI tests: tags are required and validated at runtime. Ensure each test has at least one supported tag (typically by tagging the top-level `test.describe(...)` / `spaceTest.describe(...)`).
 - API tests: tags aren’t currently validated at runtime, but add `{ tag: ... }` to suites/tests so CI/discovery can select the right deployment target (stateful vs serverless).
-- Prefer using `tags.*` constants (for example `tags.DEPLOYMENT_AGNOSTIC`, `tags.ESS_ONLY`) to avoid typos and to align with Scout’s supported tags.
+- Prefer using `tags.*` constants (for example `tags.deploymentAgnostic`, `tags.stateful.classic`) to avoid typos and to align with Scout’s supported tags.
 
 ## Setup / Teardown (Applies to UI + API)
 
