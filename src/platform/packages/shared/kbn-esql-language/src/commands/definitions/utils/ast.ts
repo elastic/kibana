@@ -277,3 +277,59 @@ export function correctQuerySyntax(_query: string) {
 
   return query;
 }
+
+const PROMQL_TRAILING_COMMA_REGEX = /,\s*$/;
+const PROMQL_TRAILING_COLON_REGEX = /:\s*$/;
+
+/**
+ * Corrects partial PromQL syntax so the PromQL parser can build a stable AST while typing.
+ * It keeps the same marker semantics used in ES|QL correction, but only for trailing
+ * separators relevant to PromQL argument/subquery contexts.
+ */
+export function correctPromqlQuerySyntax(input: string): string {
+  let query = input;
+
+  if (
+    !query.includes(EDITOR_MARKER) &&
+    (PROMQL_TRAILING_COMMA_REGEX.test(query) || PROMQL_TRAILING_COLON_REGEX.test(query))
+  ) {
+    query += ` ${EDITOR_MARKER}`;
+  }
+
+  return query + getPromqlBracketsToClose(query);
+}
+
+function getPromqlBracketsToClose(text: string): string {
+  const esqlBrackets = getBracketsToClose(text).join('');
+  const promqlBraces = getPromqlBracesToClose(text);
+
+  return promqlBraces + esqlBrackets;
+}
+
+function getPromqlBracesToClose(text: string): string {
+  let count = 0;
+  let inString = false;
+  let stringChar = '';
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+
+    if (inString) {
+      if (char === stringChar && text[i - 1] !== '\\') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      inString = true;
+      stringChar = char;
+      continue;
+    }
+
+    if (char === '{') count++;
+    if (char === '}') count--;
+  }
+
+  return '}'.repeat(Math.max(0, count));
+}
