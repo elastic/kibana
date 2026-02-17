@@ -23,29 +23,44 @@ import { DiscoverGrid } from '../../../../components/discover_grid';
 import { internalStateActions, selectTabRuntimeState } from '../../state_management/redux';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import type { DiscoverServices } from '../../../../build_services';
+import { createEsqlDataSource } from '../../../../../common/data_sources';
 
 const setup = async ({ services }: { services?: DiscoverServices } = {}) => {
   const toolkit = getDiscoverInternalStateMock({ services });
 
   await toolkit.initializeTabs();
-  const { customizationService } = await toolkit.initializeSingleTab({
-    tabId: toolkit.getCurrentTab().id,
-  });
+  await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
 
-  return { toolkit, customizationService };
+  return { toolkit };
 };
 
 async function mountComponent({
   fetchStatus,
   hits,
   toolkit,
+  isEsqlMode,
 }: {
   fetchStatus: FetchStatus;
   hits: EsHitRecord[];
   toolkit?: InternalStateMockToolkit;
+  isEsqlMode?: boolean;
 }) {
   if (!toolkit) {
     ({ toolkit } = await setup());
+  }
+
+  if (isEsqlMode) {
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: toolkit.getCurrentTab().id,
+        appState: {
+          dataSource: createEsqlDataSource(),
+          query: { esql: 'from *' },
+        },
+      })
+    );
+
+    await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
   }
 
   const stateContainer = selectTabRuntimeState(
@@ -103,6 +118,26 @@ describe('Discover documents layout', () => {
     expect(findTestSubject(component, 'unifiedDataTableToolbar').exists()).toBe(true);
     expect(findTestSubject(component, 'unifiedDataTableToolbarBottom').exists()).toBe(true);
     expect(findTestSubject(component, 'viewModeToggle').exists()).toBe(true);
+  });
+
+  test('ES|QL: render complete when partial and documents were already fetched', async () => {
+    const component = await mountComponent({
+      fetchStatus: FetchStatus.PARTIAL,
+      hits: esHitsMock,
+      isEsqlMode: true,
+    });
+    expect(component.find('.dscDocuments__loading').exists()).toBeFalsy();
+    expect(component.find('.dscTable').exists()).toBeTruthy();
+  });
+
+  test('ES|QL: render loading when partial and no documents', async () => {
+    const component = await mountComponent({
+      fetchStatus: FetchStatus.PARTIAL,
+      hits: [],
+      isEsqlMode: true,
+    });
+    expect(component.find('.dscDocuments__loading').exists()).toBeTruthy();
+    expect(component.find('.dscTable').exists()).toBeFalsy();
   });
 
   test('should set rounded width to state on resize column', async () => {
