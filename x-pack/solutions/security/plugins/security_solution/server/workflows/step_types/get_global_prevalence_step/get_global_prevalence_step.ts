@@ -30,15 +30,13 @@ const inputSchema = z.object({
   timestamp: z
     .string()
     .optional()
-    .describe(
-      'ISO timestamp used as the end of the lookback window. If omitted, the current time (now) is used.'
-    ),
+    .describe('ISO timestamp used as the anchor time. If omitted, the current time (now) is used.'),
   time_range: z
     .string()
     .optional()
     .default('24h')
     .describe(
-      'Lookback window subtracted from the timestamp (e.g., "24h", "7d"). Prevalence is calculated from [timestamp - time_range] to [timestamp]. Default: "24h".'
+      'Time window around the timestamp (e.g., "24h", "7d"). Prevalence is calculated from [timestamp - time_range] to [timestamp + time_range] (or [now - time_range, now + time_range] if timestamp is omitted). Default: "24h".'
     ),
 });
 
@@ -61,7 +59,7 @@ const outputSchema = z.object({
 export const getGlobalPrevalenceInputSchema = inputSchema;
 
 export const getGlobalPrevalenceStepDefinition = createServerStepDefinition({
-  id: 'security.getGlobalPrevalence',
+  id: 'security.getRuleGlobalPrevalence',
   inputSchema,
   outputSchema,
   handler: async (context) => {
@@ -72,10 +70,10 @@ export const getGlobalPrevalenceStepDefinition = createServerStepDefinition({
       const timeRange = time_range ?? '24h';
       const esClient = context.contextManager.getScopedEsClient();
 
-      // Lookback window ending at timestamp (or now if omitted)
+      // Time window around anchor timestamp (or now if omitted)
       const anchor = timestamp?.trim() || undefined;
       const rangeGte = anchor ? `${anchor}||-${timeRange}` : `now-${timeRange}`;
-      const rangeLte = anchor ?? 'now';
+      const rangeLte = anchor ? `${anchor}||+${timeRange}` : `now+${timeRange}`;
 
       const searchResponse = await esClient.search<unknown, GlobalPrevalenceAggregations>({
         index: alertsIndex,
@@ -153,18 +151,18 @@ export const getGlobalPrevalenceStepDefinition = createServerStepDefinition({
       let prevalenceMessage = '';
       if (uniqueHosts >= 50) {
         prevalenceLevel = 'very_high';
-        prevalenceMessage = `Very high prevalence: Rule is triggering across ${uniqueHosts} unique hosts. This suggests widespread activity.`;
+        prevalenceMessage = `Very high prevalence: Rule is triggering across ${uniqueHosts} unique hosts during +- ${timeRange}. This suggests widespread activity.`;
       } else if (uniqueHosts >= 20) {
         prevalenceLevel = 'high';
-        prevalenceMessage = `High prevalence: Rule is triggering across ${uniqueHosts} unique hosts. This suggests significant spread.`;
+        prevalenceMessage = `High prevalence: Rule is triggering across ${uniqueHosts} unique hosts during +- ${timeRange}. This suggests significant spread.`;
       } else if (uniqueHosts >= 5) {
         prevalenceLevel = 'medium';
-        prevalenceMessage = `Medium prevalence: Rule is triggering across ${uniqueHosts} unique hosts.`;
+        prevalenceMessage = `Medium prevalence: Rule is triggering across ${uniqueHosts} unique hosts during +- ${timeRange}.`;
       } else {
         prevalenceLevel = 'low';
         prevalenceMessage = `Low prevalence: Rule is triggering across ${uniqueHosts} unique host${
           uniqueHosts !== 1 ? 's' : ''
-        }.`;
+        } during +- ${timeRange}.`;
       }
 
       return {

@@ -28,7 +28,7 @@ const createMockContext = (input: Record<string, unknown>, searchMock: jest.Mock
   },
   abortSignal: new AbortController().signal,
   stepId: 'test-step',
-  stepType: 'security.getCloseHistory',
+  stepType: 'security.getRuleAlertCloseHistory',
 });
 
 describe('getCloseHistory step', () => {

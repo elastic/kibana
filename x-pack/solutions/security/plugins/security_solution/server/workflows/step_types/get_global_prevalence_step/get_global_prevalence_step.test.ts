@@ -28,7 +28,7 @@ const createMockContext = (input: Record<string, unknown>, searchMock: jest.Mock
   },
   abortSignal: new AbortController().signal,
   stepId: 'test-step',
-  stepType: 'security.getGlobalPrevalence',
+  stepType: 'security.getRuleGlobalPrevalence',
 });
 
 const createAggResponse = (
@@ -131,7 +131,7 @@ describe('getGlobalPrevalence step', () => {
       const filter = searchMock.mock.calls[0][0].query.bool.filter;
       const rangeFilter = filter.find((f: Record<string, unknown>) => 'range' in f);
       expect(rangeFilter.range['@timestamp'].gte).toBe('2025-06-01T12:00:00Z||-7d');
-      expect(rangeFilter.range['@timestamp'].lte).toBe('2025-06-01T12:00:00Z');
+      expect(rangeFilter.range['@timestamp'].lte).toBe('2025-06-01T12:00:00Z||+7d');
     });
 
     it('handles missing aggregations gracefully', async () => {

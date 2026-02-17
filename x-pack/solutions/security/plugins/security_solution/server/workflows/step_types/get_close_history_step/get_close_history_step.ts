@@ -77,7 +77,7 @@ const outputSchema = z.object({
 export const getCloseHistoryInputSchema = inputSchema;
 
 export const getCloseHistoryStepDefinition = createServerStepDefinition({
-  id: 'security.getCloseHistory',
+  id: 'security.getRuleAlertCloseHistory',
   inputSchema,
   outputSchema,
   handler: async (context) => {

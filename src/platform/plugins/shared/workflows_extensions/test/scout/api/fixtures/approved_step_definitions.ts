@@ -26,7 +26,7 @@
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
   {
     id: 'ai.agent',
-    handlerHash: 'affaf17569853b40868f907f0d6ea4f2a13f55c1f264e29ae59244b45596af28',
+    handlerHash: '800765ba855e1e4a93d5bb7a6fce558ec5e369ed416bfb763047305c5d7f40ca',
   },
   {
     id: 'ai.classify',
@@ -59,5 +59,25 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   {
     id: 'search.rerank',
     handlerHash: '2bdde599ac1b8f38faecbd72a2d17a3d7b2740b874e047e92e9c30ba0ff01a4f',
+  },
+  {
+    id: 'security.getAlertTimelineString',
+    handlerHash: '46234ab4e74122540d4cdb2771778aec0b2f9cc59ef540365d9a66c1af99a13e',
+  },
+  {
+    id: 'security.getRelatedAlerts',
+    handlerHash: '4b26df19ccd25d04a19c40327956cd316266242e41769ee3764e8d76739c6773',
+  },
+  {
+    id: 'security.getRuleAlertCloseHistory',
+    handlerHash: 'b708b268903368797d1a161dc1fb7c3dcec7705a1bacd9d7d1f23367d183b80e',
+  },
+  {
+    id: 'security.getRuleGlobalPrevalence',
+    handlerHash: '672156478936f75077f358121252bdab278811529911a8f98d2f4f2ddc0bacb0',
+  },
+  {
+    id: 'security.getRuleMetadata',
+    handlerHash: '5188bac443ed702d9b0b63432b7ffa6323ec6a5c50cbe0e40bc2ccf6d4377283',
   },
 ];

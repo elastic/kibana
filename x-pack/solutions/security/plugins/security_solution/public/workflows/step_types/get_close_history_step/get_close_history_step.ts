@@ -73,7 +73,7 @@ const outputSchema = z.object({
 });
 
 export const getCloseHistoryStepDefinition: PublicStepDefinition = {
-  id: 'security.getCloseHistory',
+  id: 'security.getRuleAlertCloseHistory',
   inputSchema,
   outputSchema,
   label: i18n.translate('xpack.securitySolution.workflows.steps.getCloseHistory.label', {
@@ -101,7 +101,7 @@ export const getCloseHistoryStepDefinition: PublicStepDefinition = {
       `## Get close history for same rule (last 30d from now)
 \`\`\`yaml
 - name: get_close_history
-  type: security.getCloseHistory
+  type: security.getRuleAlertCloseHistory
   with:
     ruleId: "{{ variables.rule_id }}"
     time_range: "30d"
@@ -109,7 +109,7 @@ export const getCloseHistoryStepDefinition: PublicStepDefinition = {
       `## Get close history looking back 30d from an alert timestamp
 \`\`\`yaml
 - name: get_close_history_at_alert_time
-  type: security.getCloseHistory
+  type: security.getRuleAlertCloseHistory
   with:
     ruleId: "{{ variables.rule_id }}"
     timestamp: "{{ variables.timestamp }}"
@@ -118,7 +118,7 @@ export const getCloseHistoryStepDefinition: PublicStepDefinition = {
       `## Get close history for same rule and entities
 \`\`\`yaml
 - name: get_close_history_entities
-  type: security.getCloseHistory
+  type: security.getRuleAlertCloseHistory
   with:
     ruleId: "{{ variables.rule_id }}"
     time_range: "30d"

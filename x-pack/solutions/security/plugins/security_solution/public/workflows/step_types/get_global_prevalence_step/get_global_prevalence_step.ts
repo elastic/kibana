@@ -15,15 +15,13 @@ const inputSchema = z.object({
   timestamp: z
     .string()
     .optional()
-    .describe(
-      'ISO timestamp used as the end of the lookback window. If omitted, the current time (now) is used.'
-    ),
+    .describe('ISO timestamp used as the anchor time. If omitted, the current time (now) is used.'),
   time_range: z
     .string()
     .optional()
     .default('24h')
     .describe(
-      'Lookback window subtracted from the timestamp (e.g., "24h", "7d"). Prevalence is calculated from [timestamp - time_range] to [timestamp]. Default: "24h".'
+      'Time window around the timestamp (e.g., "24h", "7d"). Prevalence is calculated from [timestamp - time_range] to [timestamp + time_range] (or [now - time_range, now + time_range] if timestamp is omitted). Default: "24h".'
     ),
 });
 
@@ -44,7 +42,7 @@ const outputSchema = z.object({
 });
 
 export const getGlobalPrevalenceStepDefinition: PublicStepDefinition = {
-  id: 'security.getGlobalPrevalence',
+  id: 'security.getRuleGlobalPrevalence',
   inputSchema,
   outputSchema,
   label: i18n.translate('xpack.securitySolution.workflows.steps.getGlobalPrevalence.label', {
@@ -71,14 +69,14 @@ export const getGlobalPrevalenceStepDefinition: PublicStepDefinition = {
       'xpack.securitySolution.workflows.steps.getGlobalPrevalence.documentation.details',
       {
         defaultMessage:
-          'Returns the count of unique hosts and users affected by a rule, along with a prevalence level (low, medium, high, very_high) and top affected hosts. Prevalence is calculated over a lookback window of [timestamp - time_range, timestamp] (or [now - time_range, now] if timestamp is omitted).',
+          'Returns the count of unique hosts and users affected by a rule, along with a prevalence level (low, medium, high, very_high) and top affected hosts. Prevalence is calculated over a time window of [timestamp - time_range, timestamp + time_range] (or [now - time_range, now + time_range] if timestamp is omitted).',
       }
     ),
     examples: [
       `## Get global prevalence (last 24h from now)
 \`\`\`yaml
 - name: get_prevalence
-  type: security.getGlobalPrevalence
+  type: security.getRuleGlobalPrevalence
   with:
     ruleId: "{{ variables.rule_id }}"
     time_range: "24h"
@@ -86,7 +84,7 @@ export const getGlobalPrevalenceStepDefinition: PublicStepDefinition = {
       `## Get global prevalence looking back 1h from a timestamp
 \`\`\`yaml
 - name: get_prevalence_at_time
-  type: security.getGlobalPrevalence
+  type: security.getRuleGlobalPrevalence
   with:
     ruleId: "{{ variables.rule_id }}"
     timestamp: "{{ variables.timestamp }}"

@@ -5,7 +5,7 @@
 # Purpose:
 #   Automatically triages security alerts using an AI agent. For each
 #   triggered alert the workflow gathers contextual enrichment data
-#   (prevalence, related alerts, rule metadata, fire count, close history),
+#   (prevalence, related alerts, rule metadata, alert history, close history),
 #   sends the enriched context to an LLM-based agent for classification
 #   (true_positive / false_positive / inconclusive), records the verdict as
 #   an alert note, applies workflow tags, and optionally auto-closes alerts
@@ -17,7 +17,7 @@
 #     - Skip if already validated (unless override_previous is true).
 #     - Add an "execution started" note to the alert timeline.
 #     - Gather enrichment data (close history, global prevalence,
-#       related alerts graph, rule fire count, rule metadata).
+#       related alerts graph, alert history, rule metadata).
 #     - Build human-readable timeline strings for the seed and related
 #       alerts.
 #     - Invoke the AI agent with the enriched context and a structured
@@ -164,7 +164,7 @@ steps:
           # Looks back from the alert timestamp so results are relative to
           # when the alert actually fired, not when the workflow runs.
           - name: get_close_history
-            type: security.getCloseHistory
+            type: security.getRuleAlertCloseHistory
             with:
               ruleId: "{{event.rule.id}}"
               timestamp: '{{foreach.item["@timestamp"]}}'
@@ -175,21 +175,22 @@ steps:
           # Uses the alert timestamp as the anchor so prevalence reflects
           # the state of the environment at the time the alert was raised.
           - name: get_global_prevalence
-            type: security.getGlobalPrevalence
+            type: security.getRuleGlobalPrevalence
             with:
               ruleId: "{{event.rule.id}}"
               timestamp: '{{foreach.item["@timestamp"]}}'
               time_range: "24h"
 
-          # Rule fire count: how many times the rule fired in a symmetric
-          # window around the alert timestamp (past and future from that time).
-          - name: get_rule_fire_count
-            type: security.getRuleFireCount
+          - name: get_noise_signal
+            type: security.getRuleGlobalPrevalence
             with:
               ruleId: "{{event.rule.id}}"
               timestamp: '{{foreach.item["@timestamp"]}}'
-              time_window: "1h"
+              time_range: "7d"
 
+          # Alert history: how many times the rule fired in a symmetric
+          # window around the alert timestamp (past and future from that time),
+          # with a date histogram of alerts over time.
           # Rule metadata: name, description, severity, MITRE ATT&CK mapping.
           - name: get_rule_metadata
             type: security.getRuleMetadata
@@ -301,7 +302,7 @@ steps:
           # Invoke the AI agent for classification
           # -------------------------------------------------------------------
           # Sends the enriched context (prevalence, related alerts, rule info,
-          # fire count) and the raw alert as an attachment to the AI agent.
+          # alert history) and the raw alert as an attachment to the AI agent.
           # The agent returns a structured JSON object conforming to the schema
           # defined below.
           - name: onechat_runAgent_step
@@ -373,6 +374,13 @@ steps:
                 {%- endfor %}
                 {%- endif %}
 
+                ### Noise Signal
+                {{steps.get_noise_signal.output.message}}
+
+                Total alerts: {{steps.get_noise_signal.output.total_alerts}}
+                Unique hosts: {{steps.get_noise_signal.output.unique_hosts}}
+                Unique users: {{steps.get_noise_signal.output.unique_users}}
+
                 ### Related Alerts
                 Graph nodes: {{steps.get_related_alerts.output.stats.nodes}}
 
@@ -411,8 +419,18 @@ steps:
                 {% endcapture %}
                 {{ metadata | strip }}
 
-                ### Rule Fire Count
-                {{steps.get_rule_fire_count.output.message}}
+                ### Alert Close History
+                {{steps.get_close_history.output.message}}
+
+                Total closed alerts: {{steps.get_close_history.output.total_closed_alerts}}
+                False positive count: {{steps.get_close_history.output.false_positive_count}}
+
+                {% if steps.get_close_history.output.close_reasons_summary and steps.get_close_history.output.total_closed_alerts > 0 -%}
+                ##### Close Reasons
+                {% for reason in steps.get_close_history.output.close_reasons_summary -%}
+                - {{ reason[0] }}: {{ reason[1] }}
+                {% endfor %}
+                {%- endif %}
 
               attachments:
                 - type: "security.alert"
