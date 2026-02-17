@@ -151,6 +151,7 @@ export function buildAutocompleteContext({
       workflows: {},
       totalWorkflows: 0,
     },
+    // workflow definition (for JSON Schema autocompletion)
     workflowDefinition: workflowDefinition ?? null,
   };
 }

@@ -45,7 +45,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     useAsyncThunkState(loadWorkflowThunk);
   const telemetry = useTelemetry();
 
-  const isReady = !isLoadingWorkflow && !isLoadingConnectors && !isLoadingWorkflows;
+  const isReady = !isLoadingWorkflow && !isLoadingConnectors;
 
   const activeTabInStore = useSelector(selectActiveTab);
   const workflowId = useSelector(selectWorkflowId);

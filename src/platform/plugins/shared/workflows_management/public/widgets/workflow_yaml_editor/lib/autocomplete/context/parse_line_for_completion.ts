@@ -16,13 +16,26 @@ import {
 } from '../../../../../../common/lib/regex';
 import { parsePath } from '../../../../../../common/lib/zod';
 
-/** Reserved keys in workflow step YAML that are not workflow inputs (handled by other parsers). */
+/**
+ * Keys that are not workflow inputs. Used to avoid emitting 'workflow-inputs' for
+ * step-level or other parsers' keys. getWorkflowInputsSuggestions returns null when
+ * not in a workflow.execute step, so other suggestion providers still run.
+ */
 const WORKFLOW_STEP_KNOWN_KEYS = [
   'foreach',
   'type',
   'connector-id',
   'workflow-id',
   'inputs',
+  'name',
+  'with',
+  'on-failure',
+  'condition',
+  'url',
+  'method',
+  'duration',
+  'sources',
+  'branches',
 ] as const;
 
 interface BaseLineParseResult {
@@ -105,6 +118,7 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
     const groups = timezoneFieldMatch.groups;
     const prefix = groups.prefix;
     const timezonePrefix = groups.value.trim();
+    // Explicit prefix length for TypeScript strictness (groups.prefix may be undefined)
     return {
       matchType: 'timezone',
       fullKey: timezonePrefix,

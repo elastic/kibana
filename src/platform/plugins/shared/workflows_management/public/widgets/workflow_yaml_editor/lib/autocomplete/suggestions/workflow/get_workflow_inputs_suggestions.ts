@@ -98,10 +98,11 @@ function createInputSuggestion(
 /**
  * Gets workflow inputs suggestions for autocomplete
  * Used when typing in the inputs: section of a workflow.execute or workflow.executeAsync step
+ * Returns null when not in a workflow step context so other suggestion providers (e.g. JSON Schema) can run.
  */
 export async function getWorkflowInputsSuggestions(
   autocompleteContext: AutocompleteContext
-): Promise<monaco.languages.CompletionItem[]> {
+): Promise<monaco.languages.CompletionItem[] | null> {
   const { focusedStepInfo, lineParseResult, range, workflows } = autocompleteContext;
 
   if (
@@ -109,11 +110,11 @@ export async function getWorkflowInputsSuggestions(
     (focusedStepInfo.stepType !== 'workflow.execute' &&
       focusedStepInfo.stepType !== 'workflow.executeAsync')
   ) {
-    return [];
+    return null;
   }
 
   if (lineParseResult?.matchType !== 'workflow-inputs') {
-    return [];
+    return null;
   }
 
   const workflowIdProp = focusedStepInfo.propInfos['workflow-id'];
