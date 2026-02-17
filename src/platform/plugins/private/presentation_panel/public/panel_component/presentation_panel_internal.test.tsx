@@ -105,9 +105,6 @@ describe('Presentation panel', () => {
       expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith('CONTEXT_MENU_TRIGGER', {
         embeddable: api,
       });
-      expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith('PANEL_BADGE_TRIGGER', {
-        embeddable: api,
-      });
       expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith(
         'PANEL_NOTIFICATION_TRIGGER',
         { embeddable: api }

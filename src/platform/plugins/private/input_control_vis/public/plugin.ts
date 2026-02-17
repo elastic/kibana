@@ -18,7 +18,6 @@ import type { KqlPluginSetup, KqlPluginStart } from '@kbn/kql/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { PANEL_BADGE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { createInputControlVisFn } from './input_control_fn';
 import { getInputControlVisRenderer } from './input_control_vis_renderer';
 import { createInputControlVisTypeDefinition } from './input_control_vis_type';
@@ -92,11 +91,6 @@ export class InputControlVisPlugin implements Plugin<void, void> {
   }
 
   public start(core: CoreStart, { uiActions }: InputControlVisPluginStartDependencies) {
-    uiActions.addTriggerActionAsync(PANEL_BADGE_TRIGGER, 'ACTION_DEPRECATION_BADGE', async () => {
-      const { inputControlDeprecationBadge } = await import('./deprecation_badge');
-      return inputControlDeprecationBadge;
-    });
-
     return {};
   }
 }

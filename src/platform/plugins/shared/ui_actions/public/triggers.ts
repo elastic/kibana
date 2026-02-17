@@ -22,7 +22,6 @@ import {
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
   DISCOVER_CELL_ACTIONS_TRIGGER_ID,
   CONTEXT_MENU_TRIGGER,
-  PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
@@ -144,15 +143,6 @@ export const triggers: { [key: string]: Trigger } = {
     }),
     description: i18n.translate('uiActions.triggers.contextMenuTrigger.description', {
       defaultMessage: "A new action will be added to the panel's context menu",
-    }),
-  },
-  [PANEL_BADGE_TRIGGER]: {
-    id: PANEL_BADGE_TRIGGER,
-    title: i18n.translate('uiActions.triggers.panelBadgeTrigger.title', {
-      defaultMessage: 'Panel badges',
-    }),
-    description: i18n.translate('uiActions.triggers.panelBadgeTrigger.description', {
-      defaultMessage: 'Actions appear in title bar when an embeddable loads in a panel.',
     }),
   },
   [PANEL_NOTIFICATION_TRIGGER]: {

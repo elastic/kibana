@@ -21,17 +21,6 @@ export const contextMenuTrigger: Trigger = {
   }),
 };
 
-export const PANEL_BADGE_TRIGGER = 'PANEL_BADGE_TRIGGER';
-export const panelBadgeTrigger: Trigger = {
-  id: PANEL_BADGE_TRIGGER,
-  title: i18n.translate('presentationPanel.badgeTrigger.title', {
-    defaultMessage: 'Panel badges',
-  }),
-  description: i18n.translate('presentationPanel.badgeTrigger.description', {
-    defaultMessage: 'Badge actions appear in title bar when an embeddable loads in a panel.',
-  }),
-};
-
 export const PANEL_NOTIFICATION_TRIGGER = 'PANEL_NOTIFICATION_TRIGGER';
 export const panelNotificationTrigger: Trigger = {
   id: PANEL_NOTIFICATION_TRIGGER,
