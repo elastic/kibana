@@ -7,17 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { transparentize, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { css as cssClassName } from '@emotion/css';
 import { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { monaco } from '@kbn/monaco';
 import { selectEditorFocusedStepInfo } from '../../../../entities/workflows/store';
+import { FOCUSED_STEP_DECORATION_INSET_PX } from '../../styles/constants';
 
 export const useFocusedStepDecoration = (editor: monaco.editor.IStandaloneCodeEditor | null) => {
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
+  const { euiTheme } = useEuiTheme();
+
+  const borderColor = euiTheme.colors.vis.euiColorVis2;
+  const shadowSmall = useEuiShadow('s');
 
   const blockClassName = useMemo(
     () =>
+      // we use the pseudo-element to control the size of the decoration
+      // setting width with calc won't work, since decorations parent has a size 0x0
       cssClassName`
         position: relative;
 
@@ -27,14 +35,14 @@ export const useFocusedStepDecoration = (editor: monaco.editor.IStandaloneCodeEd
           top: 0;
           bottom: 0;
           left: 0;
-          right: 4px;
-          border: 1px solid #0078d4;
+          right: ${FOCUSED_STEP_DECORATION_INSET_PX}px;
+          border: 1px solid ${borderColor};
           border-radius: 4px;
-          box-shadow: 0 1px 3px rgba(0, 120, 212, 0.1);
-          background-color: rgba(0, 120, 212, 0.02);
-          pointer-events: none; /* Ensures the pseudo-element doesn't block interactions */
+          ${shadowSmall}
+          background-color: ${transparentize(borderColor, 0.02)};
+          pointer-events: none;
       }`,
-    []
+    [borderColor, shadowSmall]
   );
 
   const decorationsCollection = useMemo(() => {
