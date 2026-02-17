@@ -14,13 +14,20 @@ import type { Index } from '../../../../../../common';
 import type { IndexDetailsTab, IndexDetailsTabId } from '../../../../../../common/constants';
 import { useAppContext } from '../../../../app_context';
 import { DetailsPageOverview } from './details_page_overview';
+import { DetailsPageOverviewV2 } from './details_page_overview/details_page_overview_v2';
 
 interface Props {
   tabs: IndexDetailsTab[];
   tab: IndexDetailsTabId;
   index: Index;
+  isNewDesignEnabled?: boolean;
 }
-export const DetailsPageTab: FunctionComponent<Props> = ({ tabs, tab, index }) => {
+export const DetailsPageTab: FunctionComponent<Props> = ({
+  tabs,
+  tab,
+  index,
+  isNewDesignEnabled = false,
+}) => {
   const selectedTab = tabs.find((tabConfig) => tabConfig.id === tab);
   const {
     core: { getUrlForApp },
@@ -35,6 +42,8 @@ export const DetailsPageTab: FunctionComponent<Props> = ({ tabs, tab, index }) =
 
   return selectedTab ? (
     selectedTab.renderTabContent({ index, getUrlForApp, euiTheme })
+  ) : isNewDesignEnabled ? (
+    <DetailsPageOverviewV2 indexDetails={index} />
   ) : (
     <DetailsPageOverview indexDetails={index} />
   );

@@ -121,6 +121,7 @@ export const DetailsPage: FunctionComponent<
         history={history}
         search={search}
         navigateToIndicesList={navigateToIndicesList}
+        isNewDesignEnabled={isNewDesignEnabled}
       />
     );
   }
