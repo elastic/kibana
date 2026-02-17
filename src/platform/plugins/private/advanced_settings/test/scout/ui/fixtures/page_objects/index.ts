@@ -7,16 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
-import type { PresentationContainer } from './interfaces/presentation_container';
+import type { PageObjects, ScoutPage } from '@kbn/scout';
+import { createLazyPageObject } from '@kbn/scout';
+import { AdvancedSettingsPage } from './advanced_settings_page';
 
-export const getMockPresentationContainer = (): PresentationContainer => {
+export interface AdvancedSettingsPageObjects extends PageObjects {
+  settings: AdvancedSettingsPage;
+}
+
+export function extendPageObjects(
+  pageObjects: PageObjects,
+  page: ScoutPage
+): AdvancedSettingsPageObjects {
   return {
-    removePanel: jest.fn(),
-    addNewPanel: jest.fn(),
-    replacePanel: jest.fn(),
-    getChildApi: jest.fn(),
-    getPanelCount: jest.fn(),
-    children$: new BehaviorSubject<{ [key: string]: unknown }>({}),
+    ...pageObjects,
+    settings: createLazyPageObject(AdvancedSettingsPage, page),
   };
-};
+}
