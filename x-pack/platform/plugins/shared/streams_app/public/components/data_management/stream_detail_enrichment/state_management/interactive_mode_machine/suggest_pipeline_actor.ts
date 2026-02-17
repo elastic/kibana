@@ -207,7 +207,7 @@ export const createGetPipelineSuggestionStatusActor = ({
 
 export const createNotifySuggestionFailureNotifier =
   ({ toasts }: { toasts: IToasts }) =>
-  (params: { event: unknown }) => {
+  (_: unknown, params: { event: unknown }) => {
     const event = params.event as { error: Error };
 
     // Don't show toast for NoSuggestionsError - UI will handle it inline
