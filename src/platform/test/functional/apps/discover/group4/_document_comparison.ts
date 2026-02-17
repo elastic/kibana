@@ -188,8 +188,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow changing diff modes', async () => {
       await testDiffMode({
         diffMode: 'basic',
-        expectedExtensionValues: ['jpg', 'jpg'],
-        expectedBytesValues: ['7,124', '5,453'],
+        expectedExtensionValues: ['<span>jpg</span>', '<span>jpg</span>'],
+        expectedBytesValues: ['<span>7,124</span>', '<span>5,453</span>'],
       });
       await testDiffMode({
         diffMode: 'chars',
@@ -234,8 +234,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow toggling show diff switch', async () => {
       await dataGrid.toggleShowDiffSwitch();
       await testDiffMode({
-        expectedExtensionValues: ['jpg', 'jpg'],
-        expectedBytesValues: ['7,124', '5,453'],
+        expectedExtensionValues: ['<span>jpg</span>', '<span>jpg</span>'],
+        expectedBytesValues: ['<span>7,124</span>', '<span>5,453</span>'],
       });
       await dataGrid.toggleShowDiffSwitch();
     });
