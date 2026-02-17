@@ -160,6 +160,28 @@ export const CustomizeNavigationModal = ({
     setItems(getNavigationPrimaryItems());
   }, [solutionId, setNavigationCustomization, getNavigationPrimaryItems]);
 
+  useEffect(() => {
+    const originals: Array<{ el: HTMLElement; bg: string }> = [];
+
+    const applyStyle = () => {
+      const masks = document.querySelectorAll<HTMLElement>('.euiOverlayMask');
+      masks.forEach((mask) => {
+        originals.push({ el: mask, bg: mask.style.background });
+        mask.style.setProperty('background', 'rgba(0, 20, 60, 0.1)', 'important');
+      });
+    };
+
+    // Delay to ensure the EuiModal portal has mounted the overlay mask
+    const rafId = requestAnimationFrame(applyStyle);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      originals.forEach(({ el, bg }) => {
+        el.style.background = bg;
+      });
+    };
+  }, []);
+
   return (
     <EuiModal onClose={handleClose} aria-labelledby={modalTitleId} css={modalCss}>
       <EuiModalHeader>
