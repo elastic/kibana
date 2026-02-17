@@ -37,9 +37,11 @@ Search messages
     - **before** (optional): Adds `before:<date>` to the query (for example, `2026-02-10`).
     - **sort** (optional): Sort order, `score` or `timestamp`.
     - **sortDir** (optional): Sort direction, `asc` or `desc`.
-    - **count** (optional): Results per page (1-100).
-    - **page** (optional): Page number (1-indexed).
-    - **highlight** (optional): Include highlight markers in returned message text.
+    - **count** (optional): Results to return (1-20). Slack returns up to 20 results per page.
+    - **cursor** (optional): Pagination cursor (use `response_metadata.next_cursor` from a previous call).
+    - **includeContextMessages** (optional): Include contextual messages. Defaults to `true`.
+    - **includeBots** (optional): Include bot messages. Defaults to `false`.
+    - **includeMessageBlocks** (optional): Include Block Kit blocks. Defaults to `true`.
     - **raw** (optional): If `true`, return the full raw Slack response (verbose).
 
 Resolve channel ID
@@ -72,6 +74,6 @@ To use the Slack (v2) connector, you need a Slack app and a Slack **user token**
 2. Add **User Token Scopes** for the actions you intend to use:
    - **resolve channel ID**: `channels:read`
    - **send message (public channels)**: `chat:write`
-   - **search messages**: `search:read`
+   - **search messages**: `search:read.public`, `search:read.private`, `search:read.im`, `search:read.mpim`, `search:read.files`
 3. Copy the **User OAuth Token** (for example, `xoxp-...`) and paste it into the connector configuration.
 

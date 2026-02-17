@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.slack.search_messages'
-description: 'Search Slack messages and return compact results suitable for LLM summaries and follow-up navigation. Actions and inputs: searchMessages (required query, optional in_channel, optional from_user, optional after, optional before, optional sort, optional sort_dir, optional count, optional page, optional highlight, optional raw). Output (compact default): matches with text, channel {id,name}, sender, mentions, and permalink. Requires a user token with search:read.'
+description: 'Search Slack messages and return compact results suitable for LLM summaries and follow-up navigation. Uses Slack Real-time Search API (assistant.search.context). Actions and inputs: searchMessages (required query, optional in_channel, optional from_user, optional after, optional before, optional sort, optional sort_dir, optional count, optional cursor, optional raw). Output (compact default): matches with text, channel {id,name}, sender, mentions, and permalink.
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -40,17 +40,11 @@ inputs:
     type: number
     required: false
     default: 20
-    description: 'Results per page (1-100).'
-  - name: page
-    type: number
+    description: 'Number of results to return (1-20). Slack returns up to 20 results per page.'
+  - name: cursor
+    type: string
     required: false
-    default: 1
-    description: 'Page number (1-indexed).'
-  - name: highlight
-    type: boolean
-    required: false
-    default: false
-    description: 'Include highlight markers in returned message text.'
+    description: 'Pagination cursor from a previous response (response_metadata.next_cursor).'
   - name: raw
     type: boolean
     required: false
@@ -69,7 +63,6 @@ steps:
       sort: "${{inputs.sort}}"
       sortDir: "${{inputs.sort_dir}}"
       count: ${{inputs.count}}
-      page: ${{inputs.page}}
-      highlight: ${{inputs.highlight}}
+      cursor: "${{inputs.cursor}}"
       raw: ${{inputs.raw}}
 

@@ -101,36 +101,62 @@ const SlackSearchMessagesInputSchema = z.object({
     .number()
     .int()
     .min(1)
-    .max(100)
+    .max(20)
     .optional()
     .describe(
       i18n.translate(
         'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.count.description',
         {
-          defaultMessage: 'Number of results to return (1-100)',
+          defaultMessage:
+            'Number of results to return (1-20). Slack returns up to 20 results per page.',
         }
       )
     ),
-  page: z
-    .number()
-    .int()
-    .min(1)
+  cursor: z
+    .string()
     .optional()
     .describe(
       i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.page.description',
+        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.cursor.description',
         {
-          defaultMessage: 'Page number for pagination',
+          defaultMessage:
+            'Pagination cursor to fetch the next page of results (use response_metadata.next_cursor from a previous call).',
         }
       )
     ),
-  highlight: z
+  includeContextMessages: z
     .boolean()
     .optional()
     .describe(
       i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.highlight.description',
-        { defaultMessage: 'Whether to include highlight markers in results' }
+        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.includeContextMessages.description',
+        {
+          defaultMessage:
+            'Include contextual messages (messages before/after the matched message, or thread context). Defaults to true.',
+        }
+      )
+    ),
+  includeBots: z
+    .boolean()
+    .optional()
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.includeBots.description',
+        {
+          defaultMessage: 'Include bot-authored messages. Defaults to false.',
+        }
+      )
+    ),
+  includeMessageBlocks: z
+    .boolean()
+    .optional()
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.includeMessageBlocks.description',
+        {
+          defaultMessage:
+            'Include Block Kit blocks in message results (useful for extracting mentions/links). Defaults to true.',
+        }
       )
     ),
   raw: z
@@ -147,6 +173,33 @@ const SlackSearchMessagesInputSchema = z.object({
     ),
 });
 type SlackSearchMessagesInput = z.infer<typeof SlackSearchMessagesInputSchema>;
+
+interface SlackAssistantSearchContextMessage {
+  author_name?: string;
+  author_user_id?: string;
+  team_id?: string;
+  channel_id?: string;
+  channel_name?: string;
+  message_ts?: string;
+  content?: string;
+  is_author_bot?: boolean;
+  permalink?: string;
+  blocks?: unknown;
+  context_messages?: unknown;
+}
+
+interface SlackAssistantSearchContextResponse {
+  ok: boolean;
+  error?: string;
+  needed?: string;
+  provided?: string;
+  results?: {
+    messages?: SlackAssistantSearchContextMessage[];
+    files?: unknown[];
+    channels?: unknown[];
+  };
+  response_metadata?: { next_cursor?: string };
+}
 
 const SlackResolveChannelIdInputSchema = z.object({
   name: z
@@ -371,15 +424,14 @@ function getSlackRetryDelayMs(params: {
 }
 
 interface SlackSearchMatch {
-  score?: number;
-  iid?: string;
-  team?: string;
+  /**
+   * Minimal shape we use for mention extraction.
+   *
+   * Historically this interface mirrored Slack `search.messages` matches (which included many more
+   * fields like `iid`, `score`, etc.). Now that we use `assistant.search.context`, we only need the
+   * rendered text content and (optionally) Block Kit blocks.
+   */
   text?: string;
-  permalink?: string;
-  user?: string;
-  username?: string;
-  ts?: string;
-  channel?: { id?: string; name?: string };
   blocks?: unknown;
 }
 
@@ -463,13 +515,14 @@ async function slackRequestWithRateLimitRetry<TData>(params: {
 }
 
 /**
- * Slack connector using a user-provided bearer token (temporary MVP path).
+ * Slack connector using OAuth2 Authorization Code flow (Slack OAuth v2),
+ * with an additional temporary bearer token option for local testing.
  *
  * Required Slack App scopes:
  * MVP:
  * - channels:read - to list channels/conversations (public/private/DMs depending on workspace + membership)
  * - chat:write - for sending messages to public channels
- * - search:read - for searching messages (requires a user token)
+  * - search:read.public (and related granular scopes) - for searching messages (requires a user token)
  *
  * Optional (possible future usage):
  * - groups:read - to list private channels (future)
@@ -492,50 +545,52 @@ export const Slack: ConnectorSpec = {
   },
 
   auth: {
-    // MVP: bearer token only (OAuth auth-code flow not required for merge into main)
-    types: ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH
-      ? ([
-          {
-            type: 'bearer',
-            defaults: {
-              token: '',
-            },
-            overrides: {
-              meta: {
-                token: {
-                  sensitive: true,
-                  label: i18n.translate(
-                    'core.kibanaConnectorSpecs.slack.auth.temporaryManualToken.label',
-                    {
-                      defaultMessage: 'Temporary Slack user token',
-                    }
-                  ),
-                  helpText: i18n.translate(
-                    'core.kibanaConnectorSpecs.slack.auth.temporaryManualToken.helpText',
-                    {
-                      defaultMessage:
-                        'Temporary option for testing only. Paste a Slack user token (e.g. xoxp-...) here.',
-                    }
-                  ),
+    types: [
+      ...(ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH
+        ? ([
+            {
+              type: 'bearer',
+              defaults: {
+                token: '',
+              },
+              overrides: {
+                meta: {
+                  token: {
+                    sensitive: true,
+                    label: i18n.translate(
+                      'core.kibanaConnectorSpecs.slack.auth.temporaryManualToken.label',
+                      {
+                        defaultMessage: 'Temporary Slack user token',
+                      }
+                    ),
+                    helpText: i18n.translate(
+                      'core.kibanaConnectorSpecs.slack.auth.temporaryManualToken.helpText',
+                      {
+                        defaultMessage:
+                          'Temporary option for testing only. Paste a Slack user token (e.g. xoxp-...) here.',
+                      }
+                    ),
+                  },
                 },
               },
             },
-          },
-        ] as const)
-      : [],
+          ] as const)
+        : []),
+    ],
   },
 
   // No additional configuration needed beyond OAuth credentials
   schema: z.object({}),
 
   actions: {
-    // https://api.slack.com/methods/search.messages
+    // https://api.slack.com/methods/assistant.search.context
     searchMessages: {
       isTool: true,
       description: i18n.translate(
         'core.kibanaConnectorSpecs.slack.actions.searchMessages.description',
         {
-          defaultMessage: 'Search for messages in Slack (uses the authorized user token)',
+          defaultMessage:
+            'Search Slack messages using the Real-time Search API (assistant.search.context)',
         }
       ),
       input: SlackSearchMessagesInputSchema,
@@ -549,22 +604,31 @@ export const Slack: ConnectorSpec = {
         if (typedInput.before) queryParts.push(`before:${typedInput.before}`);
         const finalQuery = queryParts.filter(Boolean).join(' ');
 
-        const params = new URLSearchParams({ query: finalQuery });
-        if (typedInput.sort) params.append('sort', typedInput.sort);
-        if (typedInput.sortDir) params.append('sort_dir', typedInput.sortDir);
-        if (typedInput.count) params.append('count', typedInput.count.toString());
-        if (typedInput.page) params.append('page', typedInput.page.toString());
-        if (typedInput.highlight !== undefined) {
-          params.append('highlight', typedInput.highlight ? 'true' : 'false');
-        }
+        const count = typedInput.count ?? 20;
+        const requestBody: Record<string, unknown> = {
+          query: finalQuery,
+          channel_types: ['public_channel', 'private_channel', 'mpim', 'im'],
+          content_types: ['messages'],
+          include_context_messages: typedInput.includeContextMessages ?? true,
+          include_bots: typedInput.includeBots ?? false,
+          include_message_blocks: typedInput.includeMessageBlocks ?? true,
+        };
+        if (typedInput.sort) requestBody.sort = typedInput.sort;
+        if (typedInput.sortDir) requestBody.sort_dir = typedInput.sortDir;
+        if (typedInput.cursor) requestBody.cursor = typedInput.cursor;
 
         try {
           ctx.log.debug(`Slack searchMessages request`);
-          const response = await slackRequestWithRateLimitRetry({
+          const response = await slackRequestWithRateLimitRetry<SlackAssistantSearchContextResponse>({
             ctx,
             action: 'searchMessages',
             maxRetries: 5,
-            request: () => ctx.client.get(`${SLACK_API_BASE}/search.messages?${params.toString()}`),
+            request: () =>
+              ctx.client.post(`${SLACK_API_BASE}/assistant.search.context`, requestBody, {
+                headers: {
+                  'Content-Type': 'application/json; charset=utf-8',
+                },
+              }),
           });
 
           if (!response.data.ok) {
@@ -581,24 +645,29 @@ export const Slack: ConnectorSpec = {
             return response.data;
           }
 
-          const matches: SlackSearchMatch[] =
-            (response.data?.messages?.matches as SlackSearchMatch[]) ?? [];
+          const messages = response.data.results?.messages ?? [];
+          const limitedMessages = messages.slice(0, Math.min(count, messages.length));
 
           return {
             ok: true,
-            query: response.data?.query ?? finalQuery,
-            total: response.data?.messages?.total,
-            pagination: response.data?.messages?.pagination,
-            matches: matches.map((m) => ({
-              score: m.score,
-              ts: m.ts,
-              team: m.team,
-              text: m.text,
-              permalink: m.permalink,
-              channel: { id: m.channel?.id, name: m.channel?.name },
-              sender: { userId: m.user, username: m.username },
-              mentionedUserIds: extractMentionedUserIds(m),
-            })),
+            query: finalQuery,
+            total: messages.length,
+            response_metadata: response.data.response_metadata,
+            matches: limitedMessages.map((m) => {
+              const matchForMentionExtraction: SlackSearchMatch = {
+                text: m.content,
+                blocks: m.blocks,
+              };
+              return {
+                ts: m.message_ts,
+                team: m.team_id,
+                text: m.content,
+                permalink: m.permalink,
+                channel: { id: m.channel_id, name: m.channel_name },
+                sender: { userId: m.author_user_id, username: m.author_name },
+                mentionedUserIds: extractMentionedUserIds(matchForMentionExtraction),
+              };
+            }),
           };
         } catch (error) {
           const err = error as AxiosError<unknown>;

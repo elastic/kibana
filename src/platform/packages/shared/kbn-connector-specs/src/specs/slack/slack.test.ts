@@ -50,22 +50,27 @@ describe('Slack', () => {
       const mockResponse = {
         data: {
           ok: true,
-          query: 'hello',
-          messages: { matches: [], total: 0 },
+          results: { messages: [] },
+          response_metadata: { next_cursor: '' },
         },
       };
-      mockClient.get.mockResolvedValue(mockResponse);
+      mockClient.post.mockResolvedValue(mockResponse);
 
       const result = await Slack.actions.searchMessages.handler(mockContext, { query: 'hello' });
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://slack.com/api/search.messages?query=hello'
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://slack.com/api/assistant.search.context',
+        expect.objectContaining({
+          query: 'hello',
+          content_types: ['messages'],
+        }),
+        expect.any(Object)
       );
       expect(result).toEqual({
         ok: true,
         query: 'hello',
         total: 0,
-        pagination: undefined,
+        response_metadata: { next_cursor: '' },
         matches: [],
       });
     });
@@ -74,27 +79,39 @@ describe('Slack', () => {
       const mockResponse = {
         data: {
           ok: true,
-          query: 'test',
-          messages: { matches: [], total: 0 },
+          results: { messages: [] },
+          response_metadata: { next_cursor: '' },
         },
       };
-      mockClient.get.mockResolvedValue(mockResponse);
+      mockClient.post.mockResolvedValue(mockResponse);
 
       await Slack.actions.searchMessages.handler(mockContext, {
         query: 'test',
         sort: 'timestamp',
         sortDir: 'desc',
-        count: 50,
-        page: 2,
-        highlight: true,
+        count: 20,
+        cursor: 'abc',
+        includeContextMessages: true,
+        includeBots: false,
+        includeMessageBlocks: true,
         inChannel: 'general',
         fromUser: '@U123',
         after: '2026-01-01',
         before: '2026-02-01',
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://slack.com/api/search.messages?query=test+in%3Ageneral+from%3A%40U123+after%3A2026-01-01+before%3A2026-02-01&sort=timestamp&sort_dir=desc&count=50&page=2&highlight=true'
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://slack.com/api/assistant.search.context',
+        expect.objectContaining({
+          query: 'test in:general from:@U123 after:2026-01-01 before:2026-02-01',
+          sort: 'timestamp',
+          sort_dir: 'desc',
+          cursor: 'abc',
+          include_context_messages: true,
+          include_bots: false,
+          include_message_blocks: true,
+        }),
+        expect.any(Object)
       );
     });
 
@@ -102,11 +119,10 @@ describe('Slack', () => {
       const mockResponse = {
         data: {
           ok: true,
-          query: 'hello',
-          messages: { matches: [{ text: 'hi' }], total: 1 },
+          results: { messages: [{ content: 'hi' }] },
         },
       };
-      mockClient.get.mockResolvedValue(mockResponse);
+      mockClient.post.mockResolvedValue(mockResponse);
 
       const result = await Slack.actions.searchMessages.handler(mockContext, {
         query: 'hello',
@@ -118,7 +134,7 @@ describe('Slack', () => {
 
     it('should throw error when Slack API returns error', async () => {
       const mockResponse = { data: { ok: false, error: 'invalid_auth' } };
-      mockClient.get.mockResolvedValue(mockResponse);
+      mockClient.post.mockResolvedValue(mockResponse);
 
       await expect(
         Slack.actions.searchMessages.handler(mockContext, { query: 'test' })
