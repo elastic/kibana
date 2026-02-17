@@ -8,12 +8,12 @@
  */
 
 import type { ContentListClientState, ContentListAction } from './types';
-import { CONTENT_LIST_ACTIONS } from './types';
+import { CONTENT_LIST_ACTIONS, DEFAULT_FILTERS } from './types';
 
 /**
  * State reducer for client-controlled state.
  *
- * Handles user-driven state mutations (filters, sort, pagination).
+ * Handles user-driven state mutations (search, filters, sort, pagination).
  * Query data (items, loading, error) is managed by React Query directly.
  *
  * @param state - Current client state.
@@ -25,6 +25,29 @@ export const reducer = (
   action: ContentListAction
 ): ContentListClientState => {
   switch (action.type) {
+    case CONTENT_LIST_ACTIONS.SET_SEARCH_QUERY:
+      return {
+        ...state,
+        search: { queryText: action.payload },
+      };
+
+    case CONTENT_LIST_ACTIONS.SET_FILTERS:
+      return {
+        ...state,
+        filters: action.payload,
+        // Reset to first page when filters change to avoid stale page offsets.
+        page: { ...state.page, index: 0 },
+      };
+
+    case CONTENT_LIST_ACTIONS.CLEAR_FILTERS:
+      return {
+        ...state,
+        filters: { ...DEFAULT_FILTERS },
+        search: { queryText: '' },
+        // Reset to first page when filters are cleared to avoid stale page offsets.
+        page: { ...state.page, index: 0 },
+      };
+
     case CONTENT_LIST_ACTIONS.SET_SORT:
       return {
         ...state,
