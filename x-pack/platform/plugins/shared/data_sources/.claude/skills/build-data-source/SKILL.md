@@ -288,7 +288,7 @@ Mark task 11 as `completed`.
 
 Mark task 12 as `completed`.
 
-Tell the user:
+Tell the user something like the below template, listing the actual file paths that were created or modified during the process:
 
 > The **$ARGUMENTS** data source is ready for manual inspection. Here's what was created:
 >
