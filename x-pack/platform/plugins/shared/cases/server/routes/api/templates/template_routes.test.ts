@@ -84,7 +84,14 @@ const createMockCasesClient = () => ({
           }
         });
 
-      return Array.from(latestById.values()).map((template) => toSavedObject(template));
+      const templates = Array.from(latestById.values());
+
+      return {
+        templates,
+        page: 1,
+        perPage: 10,
+        total: templates.length,
+      };
     }),
     getTemplate: jest.fn(async (templateId: string, version?: string) => {
       const candidates = mockTemplates.filter(
@@ -117,6 +124,7 @@ const createMockCasesClient = () => ({
         definition: input.definition,
         templateVersion: 1,
         deletedAt: null,
+        author: 'unknown',
       };
 
       mockTemplates.push(newTemplate);
@@ -144,6 +152,7 @@ const createMockCasesClient = () => ({
           definition: input.definition,
           templateVersion: latestVersion + 1,
           deletedAt: null,
+          author: 'unknown',
         };
 
         mockTemplates.push(updatedTemplate);
@@ -159,6 +168,16 @@ const createMockCasesClient = () => ({
           template.deletedAt = deletedAt;
         }
       });
+    }),
+    getTags: jest.fn(async () => {
+      const nonDeleted = mockTemplates.filter((t) => t.deletedAt === null);
+      const tags = nonDeleted.flatMap((t) => t.tags ?? []);
+      return [...new Set(tags)].sort();
+    }),
+    getAuthors: jest.fn(async () => {
+      const nonDeleted = mockTemplates.filter((t) => t.deletedAt === null);
+      const authors = nonDeleted.map((t) => t.author).filter(Boolean);
+      return [...new Set(authors)].sort();
     }),
   },
 });
@@ -186,15 +205,20 @@ describe('Template Routes', () => {
   describe('GET /internal/cases/templates', () => {
     it('returns non-deleted templates by default', async () => {
       const context = createMockContext();
-      const request = { query: { includeDeleted: false } };
+      const request = {
+        query: { page: 1, perPage: 10, isDeleted: false },
+      };
       const response = createMockResponse();
 
       // @ts-expect-error: mocking necessary properties for handler logic only
       await getTemplatesRoute.handler({ context, request, response });
 
       const body = response.ok.mock.calls[0][0].body;
-      expect(body).toHaveLength(2);
-      expect(body).toEqual(
+      expect(body.templates).toHaveLength(2);
+      expect(body.page).toBe(1);
+      expect(body.perPage).toBe(10);
+      expect(body.total).toBe(2);
+      expect(body.templates).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ templateId: 'template-1', name: 'Template One' }),
           expect.objectContaining({ templateId: 'template-2', name: 'Template Two' }),
@@ -202,18 +226,133 @@ describe('Template Routes', () => {
       );
     });
 
-    it('still excludes deleted templates when includeDeleted is true', async () => {
+    it('still excludes deleted templates when isDeleted is false', async () => {
       const context = createMockContext();
-      const request = { query: { includeDeleted: true } };
+      const request = {
+        query: { page: 1, perPage: 10, isDeleted: false },
+      };
       const response = createMockResponse();
 
       // @ts-expect-error: mocking necessary properties for handler logic only
       await getTemplatesRoute.handler({ context, request, response });
 
       const body = response.ok.mock.calls[0][0].body;
-      expect(body).toHaveLength(2);
-      expect(body).toEqual(
+      expect(body.templates).toHaveLength(2);
+      expect(body.templates).toEqual(
         expect.not.arrayContaining([expect.objectContaining({ templateId: 'template-3' })])
+      );
+    });
+
+    it('passes all query params to the cases client', async () => {
+      const context = createMockContext();
+      const casesClient = await (await context.cases).getCasesClient();
+      const request = {
+        query: {
+          page: 2,
+          perPage: 5,
+          sortField: 'name',
+          sortOrder: 'desc',
+          search: 'test-query',
+          tags: 'security',
+          author: 'alice',
+          isDeleted: true,
+        },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await getTemplatesRoute.handler({ context, request, response });
+
+      expect(casesClient.templates.getAllTemplates).toHaveBeenCalledWith({
+        page: 2,
+        perPage: 5,
+        sortField: 'name',
+        sortOrder: 'desc',
+        search: 'test-query',
+        tags: ['security'],
+        author: ['alice'],
+        isDeleted: true,
+      });
+    });
+
+    it('coerces tags and author from comma-separated strings to arrays', async () => {
+      const context = createMockContext();
+      const casesClient = await (await context.cases).getCasesClient();
+      const request = {
+        query: {
+          page: 1,
+          perPage: 10,
+          isDeleted: false,
+          tags: ['security', 'network'],
+          author: ['alice', 'bob'],
+        },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await getTemplatesRoute.handler({ context, request, response });
+
+      expect(casesClient.templates.getAllTemplates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tags: ['security', 'network'],
+          author: ['alice', 'bob'],
+        })
+      );
+    });
+
+    it('sends empty arrays for tags and author when they are not provided', async () => {
+      const context = createMockContext();
+      const casesClient = await (await context.cases).getCasesClient();
+      const request = {
+        query: { page: 1, perPage: 10, isDeleted: false },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await getTemplatesRoute.handler({ context, request, response });
+
+      expect(casesClient.templates.getAllTemplates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tags: [],
+          author: [],
+        })
+      );
+    });
+
+    it('coerces string isDeleted "true" to boolean true', async () => {
+      const context = createMockContext();
+      const casesClient = await (await context.cases).getCasesClient();
+      const request = {
+        query: { page: 1, perPage: 10, isDeleted: 'true' },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await getTemplatesRoute.handler({ context, request, response });
+
+      expect(casesClient.templates.getAllTemplates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isDeleted: true,
+        })
+      );
+    });
+
+    it('coerces page and perPage from string to number', async () => {
+      const context = createMockContext();
+      const casesClient = await (await context.cases).getCasesClient();
+      const request = {
+        query: { page: '2', perPage: '25', isDeleted: false },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await getTemplatesRoute.handler({ context, request, response });
+
+      expect(casesClient.templates.getAllTemplates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          page: 2,
+          perPage: 25,
+        })
       );
     });
   });
@@ -303,6 +442,7 @@ describe('Template Routes', () => {
         definition: validDefinition,
         templateVersion: 2,
         deletedAt: null,
+        author: 'alice',
       });
 
       const context = createMockContext();
