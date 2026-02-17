@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const getAlertTitle = (ruleCategory: string) => {
+export const getAlertSubtitle = (ruleCategory: string) => {
   return i18n.translate('xpack.observability.alertDetails.title', {
     defaultMessage:
       '{ruleCategory} {ruleCategory, select, Anomaly {detected} Inventory {threshold breached} other {breached}}',
