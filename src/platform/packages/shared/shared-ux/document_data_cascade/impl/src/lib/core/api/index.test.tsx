@@ -8,7 +8,7 @@
  */
 
 import React, { useSyncExternalStore } from 'react';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useExposePublicApi, type DataCascadeImplRef } from '.';
 import { DataCascadeProvider, type GroupNode, type LeafNode } from '../../../store_provider';
 import type { UseVirtualizerReturnType } from '../virtualizer';
@@ -62,10 +62,11 @@ describe('useExposePublicApi', () => {
         totalSize: 0,
         expanded: {},
         rowSelection: {},
+        scrollRect: { width: 0, height: 0 },
       });
     });
 
-    it('changes on the virtualizer instance should notify subscribers, and reflect changes in the store snapshot', () => {
+    it('changes on the virtualizer instance should notify subscribers, and reflect changes in the store snapshot', async () => {
       const mockRefObject: React.RefObject<DataCascadeImplRef<GroupNode, LeafNode>> = {
         current: null,
       };
@@ -101,7 +102,10 @@ describe('useExposePublicApi', () => {
         result.current.collectVirtualizerStateChanges(virtualizerInstance);
       });
 
-      expect(subscriptionSpy).toHaveBeenCalled();
+      await waitFor(() => {
+        // wait for the debounce to complete
+        expect(subscriptionSpy).toHaveBeenCalled();
+      });
 
       const updatedUISnapshot = uiSnapshotStore!.getSnapshot();
 
@@ -115,6 +119,7 @@ describe('useExposePublicApi', () => {
       expect(updatedUISnapshot).toHaveProperty('totalSize', 0);
       expect(updatedUISnapshot).toHaveProperty('expanded', {});
       expect(updatedUISnapshot).toHaveProperty('rowSelection', {});
+      expect(updatedUISnapshot).toHaveProperty('scrollRect', { width: 0, height: 0 });
 
       unsubscribe();
     });
@@ -155,6 +160,7 @@ describe('useExposePublicApi', () => {
         totalSize: 0,
         expanded: {},
         rowSelection: {},
+        scrollRect: { width: 0, height: 0 },
       });
     });
   });
