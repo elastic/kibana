@@ -17,6 +17,7 @@ import type { SignificantEventType } from './types';
 import { sumTokens } from '../helpers/sum_tokens';
 import { getComputedFeatureInstructions } from '../features/computed';
 import {
+  SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES,
   getFeatureTypesFromToolArgs,
   resolveFeatureTypeFilters,
   toFeatureForLlmContext,
@@ -107,6 +108,7 @@ export async function generateSignificantEvents({
       input: {
         name: system?.name || stream.name,
         description: system?.description || stream.description,
+        available_feature_types: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES.join(', '),
         computed_feature_instructions: getComputedFeatureInstructions(),
       },
       maxSteps: 4,
