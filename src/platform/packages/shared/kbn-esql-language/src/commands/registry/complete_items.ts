@@ -211,10 +211,11 @@ export const promqlLabelSelectorItem: ISuggestionItem = withAutoSuggest({
   }),
   text: '{$0}',
   asSnippet: true,
-  kind: 'Operator',
+  kind: 'Reference',
   detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.labelSelectorDoc', {
     defaultMessage: 'Filter by labels',
   }),
+  category: SuggestionCategory.PROMQL_METRIC_QUALIFIER,
 });
 
 export const promqlRangeSelectorItem: ISuggestionItem = withAutoSuggest({
@@ -223,10 +224,11 @@ export const promqlRangeSelectorItem: ISuggestionItem = withAutoSuggest({
   }),
   text: '[${0:5m}]',
   asSnippet: true,
-  kind: 'Operator',
+  kind: 'Reference',
   detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.rangeSelectorDoc', {
     defaultMessage: 'Range selector (duration)',
   }),
+  category: SuggestionCategory.PROMQL_METRIC_QUALIFIER,
 });
 
 export const byCompleteItem: ISuggestionItem = withAutoSuggest({
