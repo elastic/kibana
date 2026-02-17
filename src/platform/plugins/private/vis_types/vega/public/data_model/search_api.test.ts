@@ -53,7 +53,7 @@ describe('extendSearchParamsWithRuntimeFields', () => {
     `);
   });
 
-  test('should use runtime mappings from spec if it is specified', async () => {
+  test('should use runtime mappings from spec if specified', async () => {
     const requestParams = {
       runtime_mappings: {
         test: {},
@@ -66,6 +66,34 @@ describe('extendSearchParamsWithRuntimeFields', () => {
     expect(await extendSearchParamsWithRuntimeFields(dataViewsStart, requestParams, 'index'))
       .toMatchInlineSnapshot(`
       Object {
+        "runtime_mappings": Object {
+          "test": Object {},
+        },
+      }
+    `);
+  });
+
+  // See https://github.com/elastic/kibana/issues/253545
+  test('should use runtime mappings from spec body if specified', async () => {
+    const requestParams = {
+      body: {
+        runtime_mappings: {
+          test: {},
+        },
+      },
+    } as unknown as ReturnType<typeof getSearchParamsFromRequest>;
+    const runtimeFields = { foo: {} };
+
+    mockComputedFields(dataViewsStart, 'index', runtimeFields);
+
+    expect(await extendSearchParamsWithRuntimeFields(dataViewsStart, requestParams, 'index'))
+      .toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "runtime_mappings": Object {
+            "test": Object {},
+          },
+        },
         "runtime_mappings": Object {
           "test": Object {},
         },
