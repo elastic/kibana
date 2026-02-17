@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 
 export const watchlistConfigTypeName = 'watchlist-config';
 
@@ -28,11 +30,28 @@ export const watchlistConfigTypeNameMappings: SavedObjectsType['mappings'] = {
   },
 };
 
+const watchlistConfigSchemaV1 = schema.object({
+  name: schema.string(),
+  description: schema.maybe(schema.string()),
+  riskModifier: schema.number(),
+  managed: schema.boolean(),
+});
+
+const version1: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    forwardCompatibility: watchlistConfigSchemaV1.extends({}, { unknowns: 'ignore' }),
+    create: watchlistConfigSchemaV1,
+  },
+};
+
 export const watchlistConfigType: SavedObjectsType = {
   name: watchlistConfigTypeName,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: watchlistConfigTypeNameMappings,
-  modelVersions: {},
+  modelVersions: {
+    1: version1,
+  },
 };
