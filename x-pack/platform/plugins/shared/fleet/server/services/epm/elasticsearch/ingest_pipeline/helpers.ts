@@ -136,7 +136,7 @@ export function addCustomPipelineAndLocalRoutingRulesProcessor(
     );
     return {
       ...pipeline,
-      contentForInstallation: `---\n${stringify(parsedPipelineContent)}`,
+      contentForInstallation: `---\n${stringify(parsedPipelineContent, { singleQuote: true })}`,
     };
   }
 
