@@ -15,7 +15,7 @@ import type {
 const createSetupMock: () => jest.Mocked<WorkflowsExtensionsServerPluginSetup> = () => {
   return {
     registerStepDefinition: jest.fn(),
-    registerTrigger: jest.fn(),
+    registerTriggerDefinition: jest.fn(),
   };
 };
 

@@ -53,7 +53,7 @@ export class WorkflowsExtensionsServerPlugin
       registerStepDefinition: (definition) => {
         this.stepRegistry.register(definition);
       },
-      registerTrigger: (definition) => {
+      registerTriggerDefinition: (definition) => {
         this.triggerRegistry.register(definition);
       },
     };
