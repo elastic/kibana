@@ -28,7 +28,7 @@ export const FILTER_IN_ANNOUNCEMENT = (field: string, value: string) =>
   });
 
 export const ADD_TO_TIMELINE_ANNOUNCEMENT = (value: string) =>
-  i18n.translate('xpack.securitySolution.threatIntelligence.queryBar.addToTimelineAnnouncement', {
+  i18n.translate('xpack.threatIntelligence.queryBar.addToTimelineAnnouncement', {
     defaultMessage: 'Added {value} to timeline',
     values: { value },
   });
