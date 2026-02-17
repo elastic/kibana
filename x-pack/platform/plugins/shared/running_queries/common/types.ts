@@ -12,4 +12,7 @@ export interface RunningQuery {
   queryType: QueryType;
   source: string;
   startTime: number;
+  indices: number;
+  remoteSearch: string;
+  query: string;
 }

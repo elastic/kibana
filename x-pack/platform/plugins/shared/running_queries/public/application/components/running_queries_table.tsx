@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiInMemoryTable, type EuiBasicTableColumn, type SearchFilterConfig } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  EuiInMemoryTable,
+  EuiLink,
+  type EuiBasicTableColumn,
+  type SearchFilterConfig,
+} from '@elastic/eui';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import type { RunningQuery } from '../../../common/types';
+import { QueryDetailFlyout } from './query_detail_flyout';
 
 interface RunningQueriesTableProps {
   queries: RunningQuery[];
@@ -20,6 +26,17 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
   queries,
   onCancelQuery,
 }) => {
+  const [selectedQuery, setSelectedQuery] = useState<RunningQuery | null>(null);
+
+  const closeFlyout = useCallback(() => setSelectedQuery(null), []);
+
+  const handleStopQuery = useCallback(
+    (taskId: string) => {
+      onCancelQuery(taskId);
+      setSelectedQuery(null);
+    },
+    [onCancelQuery]
+  );
   const columns: Array<EuiBasicTableColumn<RunningQuery>> = useMemo(
     () => [
       {
@@ -28,6 +45,9 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
           defaultMessage: 'Task ID',
         }),
         sortable: true,
+        render: (taskId: string, query: RunningQuery) => (
+          <EuiLink onClick={() => setSelectedQuery(query)}>{taskId}</EuiLink>
+        ),
       },
       {
         field: 'queryType',
@@ -63,8 +83,9 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
             description: i18n.translate('xpack.runningQueries.table.cancelActionDescription', {
               defaultMessage: 'Cancel this query',
             }),
-            icon: 'cross',
+            icon: 'crossCircle',
             type: 'icon',
+            color: 'danger',
             onClick: (query: RunningQuery) => onCancelQuery(query.taskId),
           },
         ],
@@ -104,22 +125,34 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
   );
 
   return (
-    <EuiInMemoryTable
-      items={queries}
-      columns={columns}
-      search={{
-        box: {
-          incremental: true,
-        },
-        filters: searchFilters,
-      }}
-      pagination={true}
-      sorting={{
-        sort: {
-          field: 'startTime',
-          direction: 'desc',
-        },
-      }}
-    />
+    <>
+      <EuiInMemoryTable
+        items={queries}
+        columns={columns}
+        search={{
+          box: {
+            incremental: true,
+          },
+          filters: searchFilters,
+        }}
+        noItemsMessage={i18n.translate('xpack.runningQueries.table.noItemsMessage', {
+          defaultMessage: 'No long running queries detected',
+        })}
+        pagination={true}
+        sorting={{
+          sort: {
+            field: 'startTime',
+            direction: 'desc',
+          },
+        }}
+      />
+      {selectedQuery && (
+        <QueryDetailFlyout
+          query={selectedQuery}
+          onClose={closeFlyout}
+          onStopQuery={handleStopQuery}
+        />
+      )}
+    </>
   );
 };
