@@ -18,6 +18,8 @@ import type { ActiveFilters } from '../datasource';
  */
 export const CONTENT_LIST_ACTIONS = {
   SET_SORT: 'SET_SORT',
+  SET_PAGE_INDEX: 'SET_PAGE_INDEX',
+  SET_PAGE_SIZE: 'SET_PAGE_SIZE',
 } as const;
 
 /**
@@ -42,6 +44,13 @@ export interface ContentListClientState {
     field: string;
     /** Sort direction. */
     direction: 'asc' | 'desc';
+  };
+  /** Pagination state. */
+  page: {
+    /** Current page index (0-based). */
+    index: number;
+    /** Current number of items per page. */
+    size: number;
   };
 }
 
@@ -73,10 +82,13 @@ export type ContentListState = ContentListClientState & ContentListQueryData;
  *
  * @internal Used by the state reducer and dispatch function.
  */
-export interface ContentListAction {
-  type: typeof CONTENT_LIST_ACTIONS.SET_SORT;
-  payload: { field: string; direction: 'asc' | 'desc' };
-}
+export type ContentListAction =
+  | {
+      type: typeof CONTENT_LIST_ACTIONS.SET_SORT;
+      payload: { field: string; direction: 'asc' | 'desc' };
+    }
+  | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_INDEX; payload: { index: number } }
+  | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_SIZE; payload: { size: number } };
 
 /**
  * Context value provided by `ContentListStateProvider`.
