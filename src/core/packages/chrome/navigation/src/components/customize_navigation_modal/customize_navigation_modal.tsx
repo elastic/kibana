@@ -236,7 +236,7 @@ export const CustomizeNavigationModal = ({
                       'core.ui.chrome.sideNavigation.customizeNavigation.moreTooltip',
                       {
                         defaultMessage:
-                          'When there is not enough space on the screen, some items that are visible, might also go under More',
+                          'With limited screen space, visible items may appear under More too',
                       }
                     )}
                     position="right"
