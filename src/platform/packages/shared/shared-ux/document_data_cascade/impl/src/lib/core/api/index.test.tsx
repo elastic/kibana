@@ -11,7 +11,7 @@ import React, { useSyncExternalStore } from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { useExposePublicApi, type DataCascadeImplRef } from '.';
 import { DataCascadeProvider, type GroupNode, type LeafNode } from '../../../store_provider';
-import type { CascadeVirtualizerReturnValue } from '../virtualizer';
+import type { UseVirtualizerReturnType } from '../virtualizer';
 
 describe('useExposePublicApi', () => {
   it('should return the correct value', () => {
@@ -94,7 +94,7 @@ describe('useExposePublicApi', () => {
         isScrolling: false,
         // it's fine to cast to unknown
         // because we only need a minimal implementation of the virtualizer instance for the test
-      } as unknown as CascadeVirtualizerReturnValue;
+      } as unknown as UseVirtualizerReturnType;
 
       // simulate changes in the virtualizer instance
       act(() => {

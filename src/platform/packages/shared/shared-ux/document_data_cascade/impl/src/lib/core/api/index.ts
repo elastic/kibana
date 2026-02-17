@@ -8,6 +8,7 @@
  */
 
 import type { Row } from '@tanstack/react-table';
+import { debounce } from 'lodash';
 import { useCallback, useLayoutEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import {
   useDataCascadeState,
@@ -15,11 +16,7 @@ import {
   type LeafNode,
   type IStoreState,
 } from '../../../store_provider';
-import {
-  calculateActiveStickyIndex,
-  type CascadeVirtualizerReturnValue,
-  type UseVirtualizerReturnType,
-} from '../virtualizer';
+import { calculateActiveStickyIndex, type UseVirtualizerReturnType } from '../virtualizer';
 
 /**
  * Snapshot of data cascade ui state for use with useSyncExternalStore.
@@ -29,6 +26,7 @@ export interface DataCascadeUISnapshot<
   G extends GroupNode = GroupNode,
   L extends LeafNode = LeafNode
 > extends Pick<IStoreState<G, L>['table'], 'expanded' | 'rowSelection'> {
+  scrollRect: { width: number; height: number };
   scrollOffset: number;
   range: { startIndex: number; endIndex: number } | null;
   isScrolling: boolean;
@@ -59,9 +57,7 @@ export interface UseExposePublicApiOptions<G extends GroupNode> {
  */
 export interface UseExposePublicApiReturnValue {
   /** Updates the store snapshot from virtualizer instance changes */
-  collectVirtualizerStateChanges: (
-    instance: UseVirtualizerReturnType | CascadeVirtualizerReturnValue | undefined
-  ) => void;
+  collectVirtualizerStateChanges: (instance: UseVirtualizerReturnType | undefined) => void;
 }
 
 const createDefaultUISnapshot = <G extends GroupNode, L extends LeafNode>(): DataCascadeUISnapshot<
@@ -69,6 +65,7 @@ const createDefaultUISnapshot = <G extends GroupNode, L extends LeafNode>(): Dat
   L
 > => ({
   scrollOffset: 0,
+  scrollRect: { width: 0, height: 0 },
   range: null,
   isScrolling: false,
   activeStickyIndex: null,
@@ -176,7 +173,7 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
 
   /** scans updates from virtualizer instance and updates the store snapshot. */
   const collectVirtualizerStateChanges = useCallback(
-    (instance: UseVirtualizerReturnType | CascadeVirtualizerReturnValue | undefined) => {
+    (instance: UseVirtualizerReturnType | undefined) => {
       const opts = optionsRef.current;
       const snap = storeRef.current.snapshot;
       // if the virtualizer instance is not null, update the store snapshot
@@ -194,6 +191,7 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
         snap.range = range;
         snap.isScrolling = instance.isScrolling ?? false;
         snap.activeStickyIndex = activeStickyIndex;
+        snap.scrollRect = instance.scrollRect ?? { width: 0, height: 0 };
         snap.totalSize = instance.getTotalSize ? instance.getTotalSize() : 0;
 
         notifyListeners();

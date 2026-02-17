@@ -44,6 +44,7 @@ export const DataCascade = forwardRef(function DataCascadeWithProvider<
     tableTitleSlot,
     initialTableState,
     initialScrollOffset,
+    initialRect,
     ...restProps
   }: Omit<DataCascadeImplProps<G, L>, 'cascadeRef'> & DataCascadeProviderProps,
   ref: ForwardedRef<DataCascadeImplRef<G, L>>
@@ -51,6 +52,7 @@ export const DataCascade = forwardRef(function DataCascadeWithProvider<
   // create a stable reference for the component initializer props
   const initialTableStateRef = useRef(initialTableState);
   const initialScrollOffsetRef = useRef(initialScrollOffset);
+  const initialRectRef = useRef(initialRect);
 
   const cascadeImplProps = useMemo<DataCascadeImplProps<G, L>>(
     () =>
@@ -70,6 +72,7 @@ export const DataCascade = forwardRef(function DataCascadeWithProvider<
         <DataCascadeImpl<G, L>
           {...cascadeImplProps}
           initialScrollOffset={initialScrollOffsetRef.current}
+          initialRect={initialRectRef.current}
         />
       </DataCascadeProvider>
     ),
