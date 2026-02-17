@@ -71,12 +71,16 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string().describe('The name of the stream') }),
     body: taskActionSchema({
-      from: dateFromString.describe(
-        'Start of the time range. Used for task metadata/compatibility; generation relies on extracted features.'
-      ).optional(),
-      to: dateFromString.describe(
-        'End of the time range. Used for task metadata/compatibility; generation relies on extracted features.'
-      ).optional(),
+      from: dateFromString
+        .describe(
+          'Start of the time range. Used for task metadata/compatibility; generation relies on extracted features.'
+        )
+        .optional(),
+      to: dateFromString
+        .describe(
+          'End of the time range. Used for task metadata/compatibility; generation relies on extracted features.'
+        )
+        .optional(),
       connectorId: z
         .string()
         .optional()
