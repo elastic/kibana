@@ -22,6 +22,7 @@ import {
   EuiButton,
   EuiCallOut,
   EuiIconTip,
+  EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
@@ -53,6 +54,9 @@ export const AgentPolicyYamlFlyout = memo<{
     error,
   } = useGetOneAgentPolicyFull(policyId, revision ? { revision } : undefined);
   const { data: agentPolicyData } = useGetOneAgentPolicy(policyId);
+  const packagePoliciesContainSecrets = agentPolicyData?.item?.package_policies?.some(
+    (packagePolicy) => packagePolicy?.secret_references?.length
+  );
 
   const body = isLoadingYaml ? (
     <Loading />
@@ -122,6 +126,31 @@ export const AgentPolicyYamlFlyout = memo<{
             )}
           </h2>
         </EuiTitle>
+        {packagePoliciesContainSecrets && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              announceOnMount
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.policyDetails.secretsTitle"
+                  defaultMessage="This policy contains secret values"
+                />
+              }
+              size="m"
+              color="primary"
+              iconType="info"
+            >
+              <FormattedMessage
+                id="xpack.fleet.policyDetails.secretsDescription"
+                defaultMessage="Kibana does not have access to secret values. You will need to set these values manually after deploying the agent policy. Look out for environment variables in the format {envVarPrefix} in the agent configuration."
+                values={{
+                  envVarPrefix: <code>{'${SECRET_0}'}</code>,
+                }}
+              />
+            </EuiCallOut>
+          </>
+        )}
       </EuiFlyoutHeader>
       <FlyoutBody>{body}</FlyoutBody>
       <EuiFlyoutFooter>
