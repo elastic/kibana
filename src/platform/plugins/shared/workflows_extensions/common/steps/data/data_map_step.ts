@@ -23,10 +23,14 @@ const PickNodeSchema: z.ZodType<PickNode> = z.lazy(() =>
 );
 const PickSchema = z.union([z.record(z.string(), z.unknown()), z.array(PickNodeSchema)]);
 
-export const InputSchema = z.object({
-  fields: z.record(z.string(), z.unknown()).optional(),
-  transform: z.object({ pick: PickSchema.optional() }).optional(),
-});
+export const InputSchema = z
+  .object({
+    fields: z.record(z.string(), z.unknown()).optional(),
+    pick: PickSchema.optional(),
+  })
+  .refine((data) => (data.fields !== undefined) !== (data.pick !== undefined), {
+    message: 'Exactly one of "fields" or "pick" must be specified',
+  });
 
 export const OutputSchema = z.union([
   z.array(z.record(z.string(), z.unknown())),

@@ -14,7 +14,7 @@ import type { StepHandlerContext } from '../../step_registry/types';
 
 const createMockContext = (
   config: { items: unknown },
-  input: { fields?: Record<string, unknown>; transform?: { pick?: unknown } }
+  input: { fields?: Record<string, unknown>; pick?: unknown }
 ): StepHandlerContext<any, any> => ({
   config,
   input,
@@ -394,14 +394,12 @@ describe('dataMapStepDefinition', () => {
         ],
       };
       const input = {
-        transform: {
-          pick: parseYaml(`
+        pick: parseYaml(`
           - id
           - name
           - meta.source
           - meta.version
         `),
-        },
       };
 
       const context = createMockContext(config, input);
@@ -410,31 +408,6 @@ describe('dataMapStepDefinition', () => {
       expect(result.output).toEqual([
         { id: 1, name: 'Item One', meta: { source: 'api', version: 2 } },
         { id: 2, name: 'Item Two', meta: { source: 'ui', version: 1 } },
-      ]);
-    });
-
-    it('should apply pick after mapping when both fields and pick are supplied', async () => {
-      const config = {
-        items: [
-          { id: 1, name: 'Alice', age: 30, secret: 'x' },
-          { id: 2, name: 'Bob', age: 25, secret: 'y' },
-        ],
-      };
-      const input = {
-        fields: {
-          userId: '{{ item.id }}',
-          userName: '{{ item.name }}',
-          age: '{{ item.age }}',
-        },
-        transform: { pick: ['userId', 'userName'] },
-      };
-
-      const context = createMockContext(config, input);
-      const result = await dataMapStepDefinition.handler(context);
-
-      expect(result.output).toEqual([
-        { userId: 1, userName: 'Alice' },
-        { userId: 2, userName: 'Bob' },
       ]);
     });
 
@@ -464,27 +437,25 @@ describe('dataMapStepDefinition', () => {
       };
       // Same structure as parseYaml of the YAML block (dot paths + nested list under items)
       const input = {
-        transform: {
-          pick: [
-            'total_count',
-            {
-              items: [
-                'comments',
-                'created_at',
-                'assignees.login',
-                'title',
-                'type.name',
-                'url',
-                'labels.name',
-                'updated_at',
-                'state',
-                'assignee.login',
-                'repository_url',
-                { user: ['login', 'html_url', 'avatar_url'] },
-              ],
-            },
-          ],
-        },
+        pick: [
+          'total_count',
+          {
+            items: [
+              'comments',
+              'created_at',
+              'assignees.login',
+              'title',
+              'type.name',
+              'url',
+              'labels.name',
+              'updated_at',
+              'state',
+              'assignee.login',
+              'repository_url',
+              { user: ['login', 'html_url', 'avatar_url'] },
+            ],
+          },
+        ],
       };
 
       const context = createMockContext(config, input);
@@ -518,13 +489,11 @@ describe('dataMapStepDefinition', () => {
         items: [{ id: 1, name: 'A', meta: { a: 1, b: 2 } }],
       };
       const input = {
-        transform: {
-          pick: parseYaml(`
+        pick: parseYaml(`
           - id
           - name
           - meta.a
         `),
-        },
       };
 
       const context = createMockContext(config, input);
@@ -557,13 +526,26 @@ describe('dataMapStepDefinition', () => {
       expect(parseResult.success).toBe(true);
     });
 
-    it('should validate input with only transform.pick', () => {
+    it('should validate input with only pick', () => {
       const validInput = {
-        transform: { pick: ['id', 'name', 'meta.source'] },
+        pick: ['id', 'name', 'meta.source'],
       };
 
       const parseResult = dataMapStepDefinition.inputSchema.safeParse(validInput);
       expect(parseResult.success).toBe(true);
+    });
+
+    it('should reject input when both fields and pick are specified', () => {
+      const parseResult = dataMapStepDefinition.inputSchema.safeParse({
+        fields: { userId: '{{ item.id }}' },
+        pick: ['id'],
+      });
+      expect(parseResult.success).toBe(false);
+    });
+
+    it('should reject input when neither fields nor pick is specified', () => {
+      const parseResult = dataMapStepDefinition.inputSchema.safeParse({});
+      expect(parseResult.success).toBe(false);
     });
 
     it('should validate output schema as array', () => {
