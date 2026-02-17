@@ -11,7 +11,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
   describe('Observability Agent', function () {
     // tools
     loadTestFile(require.resolve('./tools/get_alerts.spec.ts'));
-    loadTestFile(require.resolve('./tools/get_downstream_dependencies.spec.ts'));
     loadTestFile(require.resolve('./tools/get_services.spec.ts'));
     loadTestFile(require.resolve('./tools/get_anomaly_detection_jobs.spec.ts'));
     loadTestFile(require.resolve('./tools/get_runtime_metrics.spec.ts'));

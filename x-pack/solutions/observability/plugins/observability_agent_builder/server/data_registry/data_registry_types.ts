@@ -44,13 +44,6 @@ interface ConnectionMetricValues {
   throughputPerMin?: number;
 }
 
-export interface APMDownstreamDependency extends ConnectionMetricValues {
-  'service.name'?: string;
-  'span.destination.service.resource': string;
-  'span.type'?: string;
-  'span.subtype'?: string;
-}
-
 interface APMErrorSample {
   processor?: {
     event?: string;
@@ -175,14 +168,6 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     transactionType?: string;
   }) => Promise<ServiceSummary>;
 
-  apmDownstreamDependencies: (params: {
-    request: KibanaRequest;
-    serviceName: string;
-    serviceEnvironment: string;
-    start: string;
-    end: string;
-  }) => Promise<APMDownstreamDependency[]>;
-
   apmExitSpanChangePoints: (params: {
     request: KibanaRequest;
     serviceName: string;
@@ -223,6 +208,7 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     request: KibanaRequest;
     serviceName: string;
     direction?: 'downstream' | 'upstream' | 'both';
+    depth?: number;
     start: string;
     end: string;
   }) => Promise<ServiceTopologyResponse>;

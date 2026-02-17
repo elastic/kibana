@@ -20,7 +20,8 @@ import type { ConnectionWithKey } from './types';
  */
 export function filterDownstreamConnections(
   connections: ConnectionWithKey[],
-  rootServiceName: string
+  rootServiceName: string,
+  maxDepth?: number
 ): ConnectionWithKey[] {
   // Build adjacency list: source -> list of connections from that source
   const adjacencyMap = new Map<string, ConnectionWithKey[]>();
@@ -33,10 +34,12 @@ export function filterDownstreamConnections(
   // BFS traversal starting from rootServiceName
   const visitedServices = new Set<string>();
   const results: ConnectionWithKey[] = [];
-  const queue: string[] = [rootServiceName];
+  const queue: Array<{ serviceName: string; depth: number }> = [
+    { serviceName: rootServiceName, depth: 0 },
+  ];
 
   while (queue.length > 0) {
-    const currentService = queue.pop()!; // dequeue last element from queue
+    const { serviceName: currentService, depth: currentDepth } = queue.pop()!;
 
     // Skip already-visited nodes to avoid cycles
     if (!visitedServices.has(currentService)) {
@@ -52,8 +55,11 @@ export function filterDownstreamConnections(
         const target = conn.target;
         if ('service.name' in target) {
           const targetServiceName = target['service.name'];
-          if (!visitedServices.has(targetServiceName)) {
-            queue.push(targetServiceName);
+          if (
+            !visitedServices.has(targetServiceName) &&
+            (maxDepth === undefined || currentDepth + 1 < maxDepth)
+          ) {
+            queue.push({ serviceName: targetServiceName, depth: currentDepth + 1 });
           }
         }
       }
@@ -81,7 +87,8 @@ export function filterDownstreamConnections(
  */
 export function filterUpstreamConnections(
   connections: ConnectionWithKey[],
-  rootServiceName: string
+  rootServiceName: string,
+  maxDepth?: number
 ): ConnectionWithKey[] {
   // Build reverse adjacency lists:
   // 1. By resolved service name (target['service.name']) - reliable for graph traversal
@@ -109,10 +116,12 @@ export function filterUpstreamConnections(
   const visitedServices = new Set<string>();
   const visitedEdges = new Set<string>();
   const results: ConnectionWithKey[] = [];
-  const queue: string[] = [rootServiceName];
+  const queue: Array<{ serviceName: string; depth: number }> = [
+    { serviceName: rootServiceName, depth: 0 },
+  ];
 
   while (queue.length > 0) {
-    const currentService = queue.pop()!; // dequeue last element from queue
+    const { serviceName: currentService, depth: currentDepth } = queue.pop()!;
 
     if (!visitedServices.has(currentService)) {
       visitedServices.add(currentService);
@@ -133,8 +142,11 @@ export function filterUpstreamConnections(
           results.push(conn);
 
           const sourceName = conn._sourceName;
-          if (!visitedServices.has(sourceName)) {
-            queue.push(sourceName);
+          if (
+            !visitedServices.has(sourceName) &&
+            (maxDepth === undefined || currentDepth + 1 < maxDepth)
+          ) {
+            queue.push({ serviceName: sourceName, depth: currentDepth + 1 });
           }
         }
       }

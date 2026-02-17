@@ -15,6 +15,7 @@ export async function getToolHandler({
   dataRegistry,
   serviceName,
   direction,
+  depth,
   start,
   end,
 }: {
@@ -22,6 +23,7 @@ export async function getToolHandler({
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   serviceName: string;
   direction: TopologyDirection;
+  depth?: number;
   start: string;
   end: string;
 }): Promise<ServiceTopologyResponse> {
@@ -29,6 +31,7 @@ export async function getToolHandler({
     request,
     serviceName,
     direction,
+    depth,
     start,
     end,
   });

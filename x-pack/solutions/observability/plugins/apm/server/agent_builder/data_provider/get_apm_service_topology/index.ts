@@ -37,6 +37,7 @@ async function buildTopologyFromTraceIds({
   serviceName,
   startMs,
   endMs,
+  maxDepth,
   filterFn,
 }: {
   apmEventClient: APMEventClient;
@@ -44,7 +45,12 @@ async function buildTopologyFromTraceIds({
   serviceName: string;
   startMs: number;
   endMs: number;
-  filterFn: (connections: ConnectionWithKey[], rootService: string) => ConnectionWithKey[];
+  maxDepth?: number;
+  filterFn: (
+    connections: ConnectionWithKey[],
+    rootService: string,
+    maxDepth?: number
+  ) => ConnectionWithKey[];
 }): Promise<ServiceTopologyResponse> {
   if (traceIds.length === 0) {
     return { connections: [] };
@@ -57,7 +63,7 @@ async function buildTopologyFromTraceIds({
     end: endMs,
   });
 
-  const filtered = filterFn(buildConnectionsFromSpans(spans), serviceName);
+  const filtered = filterFn(buildConnectionsFromSpans(spans), serviceName, maxDepth);
 
   const serviceNames = uniq(filtered.map((c) => c._sourceName));
   const metricsMap = await getConnectionMetrics({
@@ -77,6 +83,7 @@ async function getDownstreamTopology({
   serviceName,
   startMs,
   endMs,
+  maxDepth,
 }: {
   apmEventClient: APMEventClient;
   config: APMConfig;
@@ -84,6 +91,7 @@ async function getDownstreamTopology({
   serviceName: string;
   startMs: number;
   endMs: number;
+  maxDepth?: number;
 }): Promise<ServiceTopologyResponse> {
   const { traceIds } = await getTraceSampleIds({
     config,
@@ -102,6 +110,7 @@ async function getDownstreamTopology({
     serviceName,
     startMs,
     endMs,
+    maxDepth,
     filterFn: filterDownstreamConnections,
   });
 }
@@ -113,6 +122,7 @@ async function getUpstreamTopology({
   serviceName,
   startMs,
   endMs,
+  maxDepth,
 }: {
   apmEventClient: APMEventClient;
   config: APMConfig;
@@ -120,6 +130,7 @@ async function getUpstreamTopology({
   serviceName: string;
   startMs: number;
   endMs: number;
+  maxDepth?: number;
 }): Promise<ServiceTopologyResponse> {
   // Strategy: First try to find traces via the service's own transactions.
   // If the service has transactions (it's an instrumented service like "checkout-service"),
@@ -143,6 +154,7 @@ async function getUpstreamTopology({
       serviceName,
       startMs,
       endMs,
+      maxDepth,
       filterFn: filterUpstreamConnections,
     });
   }
@@ -168,6 +180,7 @@ async function getUpstreamTopology({
     serviceName,
     startMs,
     endMs,
+    maxDepth,
     filterFn: filterUpstreamConnections,
   });
 }
@@ -186,6 +199,7 @@ async function getBothTopology({
   serviceName,
   startMs,
   endMs,
+  maxDepth,
 }: {
   apmEventClient: APMEventClient;
   config: APMConfig;
@@ -193,6 +207,7 @@ async function getBothTopology({
   serviceName: string;
   startMs: number;
   endMs: number;
+  maxDepth?: number;
 }): Promise<ServiceTopologyResponse> {
   const { traceIds } = await getTraceSampleIds({
     config,
@@ -225,6 +240,7 @@ async function getBothTopology({
       serviceName,
       startMs,
       endMs,
+      maxDepth,
       filterFn: filterUpstreamConnections,
     });
   }
@@ -240,8 +256,8 @@ async function getBothTopology({
   });
 
   const allConnections = buildConnectionsFromSpans(spans);
-  const downFiltered = filterDownstreamConnections(allConnections, serviceName);
-  const upFiltered = filterUpstreamConnections(allConnections, serviceName);
+  const downFiltered = filterDownstreamConnections(allConnections, serviceName, maxDepth);
+  const upFiltered = filterUpstreamConnections(allConnections, serviceName, maxDepth);
 
   // Single metrics query with union of service names from both directions
   const serviceNames = uniq([
@@ -270,6 +286,7 @@ export async function getApmServiceTopology({
   logger,
   serviceName,
   direction = 'downstream',
+  depth,
   start,
   end,
 }: {
@@ -278,13 +295,14 @@ export async function getApmServiceTopology({
   logger: Logger;
   serviceName: string;
   direction?: TopologyDirection;
+  depth?: number;
   start: string;
   end: string;
 }): Promise<ServiceTopologyResponse> {
   const startMs = parseDatemath(start);
   const endMs = parseDatemath(end);
 
-  const params = { apmEventClient, config, logger, serviceName, startMs, endMs };
+  const params = { apmEventClient, config, logger, serviceName, startMs, endMs, maxDepth: depth };
 
   if (direction === 'downstream') {
     return getDownstreamTopology(params);

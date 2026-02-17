@@ -127,9 +127,9 @@ async function fetchAlertContext({
       params: { serviceName, serviceEnvironment, transactionType },
     },
     {
-      key: 'apmDownstreamDependencies' as const,
+      key: 'apmServiceTopology' as const,
       startOffset: START_TIME_OFFSETS.downstream,
-      params: { serviceName, serviceEnvironment },
+      params: { serviceName, direction: 'downstream' as const, depth: 1 },
     },
     {
       key: 'apmServiceChangePoints' as const,

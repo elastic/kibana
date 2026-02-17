@@ -14,6 +14,14 @@ Core logic: `x-pack/solutions/observability/plugins/apm/server/agent_builder/dat
 - **upstream**: Services that _call_ the queried service (and their ancestors).
 - **both**: Union of upstream and downstream.
 
+## Depth Parameter
+
+The `depth` parameter limits BFS traversal to a maximum number of hops:
+
+- `depth=1`: Immediate (single-hop) dependencies only. Replaces the former `get_downstream_dependencies` tool.
+- `depth=2`: Up to two hops from the root service.
+- Omitted: Unlimited traversal (full multi-hop topology).
+
 ## Graph Traversal Rules
 
 Given this topology:

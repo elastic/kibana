@@ -34,6 +34,16 @@ const getServiceTopologyToolSchema = z.object({
         '"upstream" shows what calls this service (callers). ' +
         '"both" shows both directions. Defaults to "downstream".'
     ),
+  depth: z
+    .number()
+    .int()
+    .min(1)
+    .optional()
+    .describe(
+      'Maximum number of hops to traverse. ' +
+        'depth=1 returns only immediate (single-hop) dependencies. ' +
+        'Omit for unlimited traversal (full multi-hop topology).'
+    ),
 });
 
 export function createGetServiceTopologyTool({
@@ -48,17 +58,17 @@ export function createGetServiceTopologyTool({
   const toolDefinition: BuiltinToolDefinition<typeof getServiceTopologyToolSchema> = {
     id: OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves the multi-hop service topology (dependency graph) for a service, with RED metrics (latency, throughput, error rate) per connection.
+    description: `Retrieves the service topology (dependency graph) for a service, with RED metrics (latency, throughput, error rate) per connection.
 
 Returns connections with source/target nodes and RED metrics. Supports downstream, upstream, or both directions.
 
 When to use:
+- Checking which direct dependencies are failing or slow (depth: 1)
 - Tracing cascading failures through multi-hop dependency chains
 - Understanding blast radius of a failing service (direction: "upstream")
 - Visualizing the full architecture around a service (direction: "both")
 
 When NOT to use:
-- For immediate (single-hop) dependencies only, prefer \`observability.get_downstream_dependencies\` — it is faster and returns the same metrics
 - For service-level metrics without topology, use \`observability.get_trace_metrics\`
 
 After reviewing topology results, consider:
@@ -73,7 +83,7 @@ After reviewing topology results, consider:
       },
     },
     handler: async (toolParams, context) => {
-      const { serviceName, direction, start, end } = toolParams;
+      const { serviceName, direction, depth, start, end } = toolParams;
       const { request } = context;
 
       try {
@@ -82,6 +92,7 @@ After reviewing topology results, consider:
           dataRegistry,
           serviceName,
           direction,
+          depth,
           start,
           end,
         });

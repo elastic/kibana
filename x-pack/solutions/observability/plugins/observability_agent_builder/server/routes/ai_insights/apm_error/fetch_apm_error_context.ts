@@ -84,10 +84,11 @@ export async function fetchApmErrorContext({
       start,
       end,
       handler: () =>
-        dataRegistry.getData('apmDownstreamDependencies', {
+        dataRegistry.getData('apmServiceTopology', {
           request,
           serviceName,
-          serviceEnvironment: environment ?? '',
+          direction: 'downstream',
+          depth: 1,
           start,
           end,
         }),

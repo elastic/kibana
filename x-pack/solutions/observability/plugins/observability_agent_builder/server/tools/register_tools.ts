@@ -32,7 +32,6 @@ import {
 } from './get_correlated_logs/tool';
 import { OBSERVABILITY_GET_HOSTS_TOOL_ID, createGetHostsTool } from './get_hosts/tool';
 import { createGetServicesTool, OBSERVABILITY_GET_SERVICES_TOOL_ID } from './get_services/tool';
-import { createDownstreamDependenciesTool } from './get_downstream_dependencies/tool';
 import {
   createGetTraceMetricsTool,
   OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
@@ -104,7 +103,6 @@ export async function registerTools({
     createGetAlertsTool({ core, logger }),
     createGetLogGroupsTool({ core, plugins, logger }),
     createGetServicesTool({ core, plugins, dataRegistry, logger }),
-    createDownstreamDependenciesTool({ core, dataRegistry, logger }),
     createGetCorrelatedLogsTool({ core, logger }),
     createGetHostsTool({ core, logger, dataRegistry }),
     createGetTraceMetricsTool({ core, plugins, logger }),

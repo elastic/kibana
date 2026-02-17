@@ -12,7 +12,10 @@ import {
   API_GATEWAY_SERVICE,
   BATCH_WORKER_SERVICE,
   CHECKOUT_SERVICE,
+  CYCLE_SERVICE_A,
+  CYCLE_SERVICE_B,
   FRONTEND_SERVICE,
+  generateCycleTopologyData,
   generateTopologyData,
   generateTraceIsolationData,
   KAFKA_CONSUMER_SERVICE,
@@ -50,7 +53,11 @@ interface ServiceTopologyConnection {
   source: { 'service.name': string };
   target:
     | { 'service.name': string }
-    | { 'span.destination.service.resource': string; 'span.type': string };
+    | {
+        'span.destination.service.resource': string;
+        'span.type': string;
+        'span.subtype': string;
+      };
   metrics: {
     errorRate: number | null;
     latencyMs: number | null;
@@ -102,6 +109,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const executeTopology = async (params: {
       serviceName: string;
       direction?: 'downstream' | 'upstream' | 'both';
+      depth?: number;
     }) => {
       const results = await agentBuilderApiClient.executeTool<GetServiceTopologyToolResult>({
         id: OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
@@ -211,6 +219,100 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    describe('depth=1 downstream from frontend (immediate deps only)', () => {
+      it('returns direct dependencies but not their children', async () => {
+        const connections = await executeTopology({
+          serviceName: FRONTEND_SERVICE.serviceName,
+          direction: 'downstream',
+          depth: 1,
+        });
+        const sources = connections.map(getSourceName);
+        const targets = connections.map(getTargetName);
+
+        // Direct deps of frontend
+        expect(targets).to.contain(CHECKOUT_SERVICE.serviceName);
+        expect(targets).to.contain(RECOMMENDATION_SERVICE.serviceName);
+
+        // All sources should be the root service only
+        const uniqueSources = [...new Set(sources)];
+        expect(uniqueSources).to.eql([FRONTEND_SERVICE.serviceName]);
+
+        // No grandchild deps (postgres, redis, kafka belong to checkout-service)
+        expect(targets).not.to.contain(POSTGRES_DEPENDENCY.resource);
+        expect(targets).not.to.contain(REDIS_DEPENDENCY.resource);
+        expect(targets).not.to.contain(KAFKA_DEPENDENCY.resource);
+      });
+    });
+
+    describe('depth=1 upstream from checkout-service (immediate callers only)', () => {
+      it('returns direct callers but not their ancestors', async () => {
+        const connections = await executeTopology({
+          serviceName: CHECKOUT_SERVICE.serviceName,
+          direction: 'upstream',
+          depth: 1,
+        });
+        const sources = connections.map(getSourceName);
+
+        // frontend is a direct caller
+        expect(sources).to.contain(FRONTEND_SERVICE.serviceName);
+
+        // Only one hop back — no ancestors beyond frontend
+        expect(connections.length).to.be(1);
+      });
+    });
+
+    describe('non-existent service', () => {
+      it('returns empty connections', async () => {
+        const connections = await executeTopology({
+          serviceName: 'non-existent-service',
+          direction: 'downstream',
+        });
+
+        expect(connections.length).to.be(0);
+      });
+    });
+
+    describe('external dependency target fields', () => {
+      it('includes span.type and span.subtype for external dependencies', async () => {
+        const connections = await executeTopology({
+          serviceName: CHECKOUT_SERVICE.serviceName,
+          direction: 'downstream',
+        });
+        const toPostgres = connections.find(
+          (c) =>
+            'span.destination.service.resource' in c.target &&
+            c.target['span.destination.service.resource'] === POSTGRES_DEPENDENCY.resource
+        );
+
+        expect(toPostgres).to.be.ok();
+        // External nodes must include span.type and span.subtype for the LLM
+        // to understand the dependency type (db, cache, messaging, etc.)
+        expect(toPostgres!.target).to.have.property('span.type', POSTGRES_DEPENDENCY.spanType);
+        expect(toPostgres!.target).to.have.property(
+          'span.subtype',
+          POSTGRES_DEPENDENCY.spanSubtype
+        );
+      });
+    });
+
+    describe('depth=1 upstream from postgres (immediate callers only)', () => {
+      it('returns direct callers but not their ancestors', async () => {
+        const connections = await executeTopology({
+          serviceName: POSTGRES_DEPENDENCY.resource,
+          direction: 'upstream',
+          depth: 1,
+        });
+        const sources = connections.map(getSourceName);
+
+        // Direct callers of postgres
+        expect(sources).to.contain(CHECKOUT_SERVICE.serviceName);
+        expect(sources).to.contain(RECOMMENDATION_SERVICE.serviceName);
+
+        // frontend is 2 hops away — should NOT appear with depth=1
+        expect(sources).not.to.contain(FRONTEND_SERVICE.serviceName);
+      });
+    });
+
     /**
      * Trace isolation: shared intermediate services across traces
      *
@@ -264,6 +366,52 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(targets).to.contain(KAFKA_CONSUMER_SERVICE.serviceName);
         expect(targets).to.contain(REDIS_DB.resource);
         expect(targets).not.to.contain(POSTGRES_DB.resource);
+      });
+    });
+
+    /**
+     * Cycle detection: A → B → A (callback pattern)
+     *
+     * When a service graph contains a cycle (service-b calls back to service-a),
+     * the BFS traversal must terminate without infinite looping.
+     *
+     * Topology:
+     *   cycle-service-a → cycle-service-b → cycle-service-a (callback)
+     */
+    describe('cycle: service-a → service-b → service-a (callback pattern)', () => {
+      before(async () => {
+        await apmSynthtraceEsClient.clean();
+
+        const { client, generator } = generateCycleTopologyData({
+          range: timerange(START, END),
+          apmEsClient: apmSynthtraceEsClient,
+        });
+
+        await client.index(generator);
+      });
+
+      after(async () => {
+        await apmSynthtraceEsClient.clean();
+      });
+
+      it('downstream traversal terminates and returns both directions', async () => {
+        const connections = await executeTopology({
+          serviceName: CYCLE_SERVICE_A.serviceName,
+          direction: 'downstream',
+        });
+        const sources = connections.map(getSourceName);
+        const targets = connections.map(getTargetName);
+
+        // A→B edge
+        expect(sources).to.contain(CYCLE_SERVICE_A.serviceName);
+        expect(targets).to.contain(CYCLE_SERVICE_B.serviceName);
+
+        // B→A callback edge
+        expect(sources).to.contain(CYCLE_SERVICE_B.serviceName);
+        expect(targets).to.contain(CYCLE_SERVICE_A.serviceName);
+
+        // Exactly 2 connections — no duplicates from infinite traversal
+        expect(connections.length).to.be(2);
       });
     });
   });
