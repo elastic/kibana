@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.slack.search_messages'
-description: 'Search Slack messages and return compact results suitable for LLM summaries and follow-up navigation. Uses Slack Real-time Search API (assistant.search.context). Actions and inputs: searchMessages (required query, optional in_channel, optional from_user, optional after, optional before, optional sort, optional sort_dir, optional count, optional cursor, optional raw). Output (compact default): matches with text, channel {id,name}, sender, mentions, and permalink.
+description: 'Search Slack messages and return compact results suitable for LLM summaries and follow-up navigation. Uses Slack Real-time Search API (assistant.search.context). Actions and inputs: searchMessages (required query, optional in_channel, optional from_user, optional after, optional before, optional sort, optional sort_dir, optional count, optional cursor, optional raw). Output (compact default): matches with text, channel {id,name}, sender, mentions, and permalink.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
