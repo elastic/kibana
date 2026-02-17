@@ -11,7 +11,7 @@ echo '--- Update Scout Test Config Manifests'
 node scripts/scout.js update-test-config-manifests
 
 echo '--- Discover Playwright Configs and upload to Buildkite artifacts'
-if [[ "${BUILDKITE_BRANCH:-}" == "main" ]]; then
+if [[ "${BUILDKITE_BRANCH:-}" == "main" || "${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-}" == "main" ]]; then
   SCOUT_DISCOVERY_TARGET="local"
 else
   SCOUT_DISCOVERY_TARGET="local-stateful-only"
