@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type {
   GrantAPIKeyResult,
   GrantUiamAPIKeyParams,
@@ -17,15 +18,12 @@ import type {
 import type { SecurityLicense } from '../../../../common';
 import { getDetailedErrorMessage } from '../../../errors';
 import type { UiamServicePublic } from '../../../uiam';
-import { isUiamCredential } from '../../../uiam';
-import { HTTPAuthorizationHeader } from '../../http_authentication';
 
 /**
  * Options required to construct a UiamAPIKeys instance.
  */
 export interface UiamAPIKeysOptions {
   logger: Logger;
-  clusterClient: IClusterClient;
   license: SecurityLicense;
   uiam: UiamServicePublic;
 }
@@ -36,13 +34,11 @@ export interface UiamAPIKeysOptions {
  */
 export class UiamAPIKeys implements UiamAPIKeysType {
   private readonly logger: Logger;
-  private readonly clusterClient: IClusterClient;
   private readonly license: SecurityLicense;
   private readonly uiam: UiamServicePublic;
 
-  constructor({ logger, clusterClient, license, uiam }: UiamAPIKeysOptions) {
+  constructor({ logger, license, uiam }: UiamAPIKeysOptions) {
     this.logger = logger;
-    this.clusterClient = clusterClient;
     this.license = license;
     this.uiam = uiam;
   }
@@ -76,21 +72,21 @@ export class UiamAPIKeys implements UiamAPIKeysType {
         'Cannot grant API key: provided credential is not compatible with UIAM';
       this.logger.error(nonUiamCredentialError);
       throw new Error(nonUiamCredentialError);
-    } else {
-      try {
-        const { id, key, description } = await this.uiam?.grantApiKey(authorization, params);
+    }
 
-        result = {
-          id,
-          name: description,
-          api_key: key,
-        };
+    try {
+      const { id, key, description } = await this.uiam?.grantApiKey(authorization, params);
 
-        this.logger.debug('API key was granted successfully');
-      } catch (e) {
-        this.logger.error(`Failed to grant API key: ${getDetailedErrorMessage(e)}`);
-        throw e;
-      }
+      result = {
+        id,
+        name: description,
+        api_key: key,
+      };
+
+      this.logger.debug('API key was granted successfully');
+    } catch (e) {
+      this.logger.error(`Failed to grant API key: ${getDetailedErrorMessage(e)}`);
+      throw e;
     }
 
     return result;
@@ -149,26 +145,6 @@ export class UiamAPIKeys implements UiamAPIKeysType {
         ],
       };
     }
-  }
-
-  /**
-   * Creates a scoped Elasticsearch client authenticated with an API key.
-   *
-   * This method creates a scoped cluster client that authenticates using the provided API key.
-   * If the API key is a UIAM credential (starts with 'essu_'), it adds the appropriate UIAM
-   * authentication headers.
-   *
-   * @param apiKey The API key secret.
-   * @returns A scoped cluster client configured with API key authentication
-   */
-  getScopedClusterClientWithApiKey(apiKey: string) {
-    const authorization = new HTTPAuthorizationHeader('ApiKey', apiKey);
-    return this.clusterClient.asScoped({
-      headers: {
-        authorization: authorization.toString(),
-        ...(isUiamCredential(authorization) ? this.uiam.getEsClientAuthenticationHeader() : {}),
-      },
-    });
   }
 
   /**

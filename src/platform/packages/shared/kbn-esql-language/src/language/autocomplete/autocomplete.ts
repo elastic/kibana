@@ -260,20 +260,32 @@ async function getSuggestionsWithinCommandExpression(
     callbacks
   );
 
+  const isInsideSubquery = astContext.isCursorInSubquery; // We only show resource browser suggestions in the main query
+  const isResourceBrowserEnabled = (await callbacks?.isResourceBrowserEnabled?.()) ?? false;
+
   const context = {
     ...references,
     ...additionalCommandContext,
     activeProduct: callbacks?.getActiveProduct?.(),
     isCursorInSubquery: astContext.isCursorInSubquery,
+    isFieldsBrowserEnabled: isResourceBrowserEnabled && !isInsideSubquery,
     unmappedFieldsStrategy,
   };
+
+  // Wrap getColumnsByType so the fields browser option is injected from context;
+  // command autocompletes and getFieldsSuggestions stay agnostic.
+  const getByTypeWithContext: GetColumnsByTypeFn = (type, ignored, options) =>
+    getColumnsByType(type, ignored, {
+      ...options,
+      isFieldsBrowserEnabled: context.isFieldsBrowserEnabled,
+    });
 
   // does it make sense to have a different context per command?
   const suggestions = await commandDefinition.methods.autocomplete(
     fullText,
     astContext.command,
     {
-      getByType: getColumnsByType,
+      getByType: getByTypeWithContext,
       getSuggestedUserDefinedColumnName,
       getColumnsForQuery: callbacks?.getColumnsFor
         ? async (query: string) => {
@@ -291,8 +303,7 @@ async function getSuggestionsWithinCommandExpression(
 
   const commandName = astContext.command.name.toLowerCase();
   const isTSorFROMCommand = commandName === 'from' || commandName === 'ts';
-  const isInsideSubquery = astContext.isCursorInSubquery; // We only show the resource browser in the main query
-  const isResourceBrowserEnabled = (await callbacks?.isResourceBrowserEnabled?.()) ?? false;
+
   if (isTSorFROMCommand && isResourceBrowserEnabled && !isInsideSubquery) {
     const { rangeToReplace, filterText } =
       suggestions.find((s) => s.rangeToReplace && s.filterText) ?? {};
