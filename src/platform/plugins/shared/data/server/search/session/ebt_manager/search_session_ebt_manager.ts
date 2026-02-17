@@ -8,10 +8,14 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
+import { type AggregateQuery, type Query } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import moment from 'moment';
 import {
+  getQueryLanguage,
+  getQueryString,
+  getQueryStringCharCount,
+  getQueryStringLineCount,
   type SearchSessionRequestInfo,
   type SearchSessionSavedObjectAttributes,
 } from '../../../../common';
@@ -44,12 +48,15 @@ export class SearchSessionEBTManager {
     session: SavedObject<SearchSessionSavedObjectAttributes>;
     searchStatuses: SearchSessionRequestInfo[];
   }) {
+    const query = session.attributes.restoreState?.query as Query | AggregateQuery | undefined;
+    const queryString = getQueryString(query);
+
     this.reportEvent(BG_SEARCH_COMPLETE, {
       app_id: session.attributes.appId ?? '',
-      query_lang: this.getQueryLanguage(
-        session.attributes.restoreState?.query as Query | AggregateQuery | undefined
-      ),
       session_id: session.attributes.sessionId,
+      query_lang: getQueryLanguage(query),
+      query_chars_bucket: getQueryStringCharCount(queryString),
+      query_lines_bucket: getQueryStringLineCount(queryString),
       runtime_ms: this.getSessionRuntimeMs(session.attributes, searchStatuses),
     });
   }
@@ -61,17 +68,24 @@ export class SearchSessionEBTManager {
     session: SavedObject<SearchSessionSavedObjectAttributes>;
     searchStatuses: SearchSessionRequestInfo[];
   }) {
-    const { errorMessages, errorCodes } = this.getErrorDetails(searchStatuses);
+    const query = session.attributes.restoreState?.query as Query | AggregateQuery | undefined;
+    const queryString = getQueryString(query);
+    const queryLanguage = getQueryLanguage(query);
+    const queryCharsBucket = getQueryStringCharCount(queryString);
+    const queryLinesBucket = getQueryStringLineCount(queryString);
 
-    this.reportEvent(BG_SEARCH_ERROR, {
-      app_id: session.attributes.appId ?? '',
-      query_lang: this.getQueryLanguage(
-        session.attributes.restoreState?.query as Query | AggregateQuery | undefined
-      ),
-      session_id: session.attributes.sessionId,
-      error_type: errorMessages,
-      http_status: errorCodes,
-    });
+    for (const searchStatus of searchStatuses) {
+      if (!searchStatus.error) continue;
+      this.reportEvent(BG_SEARCH_ERROR, {
+        app_id: session.attributes.appId ?? '',
+        session_id: session.attributes.sessionId,
+        query_lang: queryLanguage,
+        query_chars_bucket: queryCharsBucket,
+        query_lines_bucket: queryLinesBucket,
+        error_type: searchStatus.error.message ?? '',
+        http_status: searchStatus.error.code,
+      });
+    }
   }
 
   private reportEvent(eventType: string, eventData: Record<string, string | number>) {
@@ -101,21 +115,5 @@ export class SearchSessionEBTManager {
 
     if (!latestCompletedTime) return 0;
     return latestCompletedTime.diff(sessionCreatedAt);
-  }
-
-  private getErrorDetails(searchStatuses: SearchSessionRequestInfo[]) {
-    const errorCodes = searchStatuses.map((status) => status.error?.code).filter(Boolean);
-    const errorMessages = searchStatuses.map((status) => status.error?.message).filter(Boolean);
-
-    return {
-      errorCodes: errorCodes.join(','),
-      errorMessages: errorMessages.join(','),
-    };
-  }
-
-  private getQueryLanguage(query: Query | AggregateQuery | undefined) {
-    if (!query) return '';
-    if (isOfAggregateQueryType(query)) return 'ESQL';
-    return query.language;
   }
 }

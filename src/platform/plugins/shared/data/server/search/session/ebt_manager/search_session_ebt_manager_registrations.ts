@@ -10,22 +10,36 @@
 import type { CoreSetup } from '@kbn/core/server';
 import { BG_SEARCH_COMPLETE, BG_SEARCH_ERROR } from './constants';
 
-export const registerSearchSessionEBTManagerAnalytics = (core: CoreSetup) => {
-  const commonSchema = {
-    app_id: {
-      type: 'keyword',
-      _meta: { description: 'The app ID where the search session was created.' },
+const commonSchema = {
+  app_id: {
+    type: 'keyword',
+    _meta: { description: 'The app ID where the search session was created.' },
+  },
+  session_id: {
+    type: 'keyword',
+    _meta: { description: 'The unique identifier for the background search session.' },
+  },
+  query_lang: {
+    type: 'keyword',
+    _meta: { description: 'The query language used in the background search.' },
+  },
+  query_chars_bucket: {
+    type: 'integer',
+    _meta: {
+      description:
+        'A bucketed representation of the number of characters in the search query (e.g., 0-50, 51-100).',
     },
-    query_lang: {
-      type: 'keyword',
-      _meta: { description: 'The query language used in the background search.' },
+  },
+  query_lines_bucket: {
+    type: 'integer',
+    _meta: {
+      description:
+        'A bucketed representation of the number of lines in the search query (e.g., 1, 2-5, 6-10).',
     },
-    session_id: {
-      type: 'keyword',
-      _meta: { description: 'The unique identifier for the background search session.' },
-    },
-  } as const;
+  },
+} as const;
 
+export const registerSearchSessionEBTManagerAnalytics = (core: CoreSetup) => {
   core.analytics.registerEventType({
     eventType: BG_SEARCH_COMPLETE,
     schema: {

@@ -8,8 +8,6 @@
  */
 
 export const BG_SEARCH_START = 'bg_search_start';
-export const BG_SEARCH_COMPLETE = 'bg_search_complete';
-export const BG_SEARCH_ERROR = 'bg_search_error';
 export const BG_SEARCH_CANCEL = 'bg_search_cancel';
 export const BG_SEARCH_OPEN = 'bg_search_open';
 export const BG_SEARCH_LIST_VIEW = 'bg_search_list_view';
