@@ -8,7 +8,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import type { EsWorkflowStepExecution, ExecutionStatus } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
 import { useKibana } from '../../../hooks/use_kibana';
 
@@ -21,7 +21,7 @@ const REFETCH_INTERVAL_MS = 2000;
 export function useStepExecution(
   workflowExecutionId: string,
   stepExecutionId: string | undefined,
-  stepStatus: string | undefined
+  stepStatus: ExecutionStatus | undefined
 ) {
   const { http } = useKibana().services;
   const isStepFinished = stepStatus ? isTerminalStatus(stepStatus) : false;
@@ -35,7 +35,7 @@ export function useStepExecution(
       return response;
     },
     enabled: !!workflowExecutionId && !!stepExecutionId,
-    staleTime: isStepFinished ? Infinity : 0,
+    staleTime: isStepFinished ? Infinity : 0, // will be cleared when switching to a different execution
     refetchInterval: isStepFinished ? false : REFETCH_INTERVAL_MS,
   });
 }
