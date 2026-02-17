@@ -65,7 +65,10 @@ description: This is a new workflow
 triggers:
   - type: manual
 
-inputs:
+consts:
+  loop_items: [{"@timestamp": "now"}, {"@timestamp": "yesterday"}, {"@timestamp": "tomorrow"}, {"@timestamp": "next week"}]
+
+  inputs:
   - name: message
     type: string
     default: "hello world"
@@ -78,12 +81,12 @@ steps:
 
   - name: loop
     type: foreach
-    foreach: '[1,2,3,4]'
+    foreach: '{{consts.loop_items}}'
     steps:
       - name: hello_world_step
         type: console
         with:
-          message: "Test run: {{ execution.isTestRun }}"
+          message: "Test run: {{ execution.isTestRun }}, timestamp: {{foreach.item['@timestamp']}}"
 `;
 
 /**
