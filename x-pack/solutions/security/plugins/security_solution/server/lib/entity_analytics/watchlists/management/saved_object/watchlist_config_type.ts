@@ -37,7 +37,7 @@ const watchlistConfigSchemaV1 = schema.object({
   managed: schema.boolean(),
 });
 
-const version1: SavedObjectsFullModelVersion = {
+const watchlistModelVersion1: SavedObjectsFullModelVersion = {
   changes: [],
   schemas: {
     forwardCompatibility: watchlistConfigSchemaV1.extends({}, { unknowns: 'ignore' }),
@@ -52,6 +52,6 @@ export const watchlistConfigType: SavedObjectsType = {
   namespaceType: 'multiple-isolated',
   mappings: watchlistConfigTypeNameMappings,
   modelVersions: {
-    1: version1,
+    1: watchlistModelVersion1,
   },
 };
