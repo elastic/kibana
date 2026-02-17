@@ -160,4 +160,20 @@ describe('caseSavedObjectType model version transformations', () => {
       expect(migrated.attributes).toHaveProperty('total_observables');
     });
   });
+
+  describe('Model version 8 to 9', () => {
+    const version9Fields = ['template.id', 'template.version', 'extended_fields'];
+
+    it('by default does not add the new fields to the object', () => {
+      const migrated = migrator.migrate({
+        document: createCaseSavedObjectResponse(),
+        fromVersion: 8,
+        toVersion: 9,
+      });
+
+      version9Fields.forEach((field) => {
+        expect(migrated.attributes).not.toHaveProperty(field);
+      });
+    });
+  });
 });
