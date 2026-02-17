@@ -380,7 +380,7 @@ export class AssetManager {
    * Runs an async operation. Returns true if the promise resolves (no failure),
    * or false if it throws.
    */
-  
+
   private async tryAsBoolean(promise: Promise<unknown>): Promise<boolean> {
     try {
       await promise;
