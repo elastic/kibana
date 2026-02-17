@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import Path from 'path';
-import { createPlaywrightEvalsConfig } from '@kbn/evals';
-
-export default createPlaywrightEvalsConfig({
-  testDir: Path.join(__dirname, './evals'),
-  timeout: 30 * 60_000,
-});
+export interface EsqlEquivalenceAnalysis {
+  equivalent: 'Yes' | 'No';
+  reason: string;
+}
