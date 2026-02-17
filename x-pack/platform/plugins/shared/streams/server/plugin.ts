@@ -271,6 +271,7 @@ export class StreamsPlugin
       this.server.actions = plugins.actions;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
       this.server.taskManager = plugins.taskManager;
+      this.server.fleet = plugins.fleet;
     }
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
