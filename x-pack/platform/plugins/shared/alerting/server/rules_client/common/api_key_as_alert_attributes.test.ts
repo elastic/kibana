@@ -96,7 +96,7 @@ describe('apiKeyAsAlertAttributes', () => {
     });
   });
 
-  test('returns only UIAM APIKeys when ES API Key is not provided', () => {
+  test('returns only UIAM API Key when ES API Key is not provided', () => {
     expect(
       apiKeyAsRuleDomainProperties(
         {
