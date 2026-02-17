@@ -39,6 +39,7 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   enableDocumentViewer: boolean;
   expandedDoc: DataTableRecord | undefined;
   initialDocViewerTabId: string | undefined;
+  onUpdateSelectedTabId?: (tabId: string | undefined) => void;
   docViewerRef: React.RefObject<DocViewerApi>;
   setExpandedDoc?: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
 }
@@ -68,6 +69,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         onClose={() => expandedDocSetter(undefined)}
         setExpandedDoc={expandedDocSetter}
         initialTabId={props.initialDocViewerTabId}
+        onUpdateSelectedTabId={props.onUpdateSelectedTabId}
         query={props.query}
         filters={props.filters}
         docViewerRef={props.docViewerRef}
@@ -83,6 +85,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       props.query,
       props.filters,
       props.initialDocViewerTabId,
+      props.onUpdateSelectedTabId,
       props.docViewerRef,
     ]
   );

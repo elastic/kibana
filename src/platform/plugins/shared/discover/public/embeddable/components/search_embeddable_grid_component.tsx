@@ -55,6 +55,7 @@ interface SavedSearchEmbeddableComponentProps {
   docViewerRef: React.RefObject<DocViewerApi>;
   expandedDoc: DataTableRecord | undefined;
   initialDocViewerTabId: string | undefined;
+  onUpdateSelectedTabId?: (tabId: string | undefined) => void;
   setExpandedDoc?: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
   stateManager: SearchEmbeddableStateManager;
 }
@@ -69,6 +70,7 @@ export function SearchEmbeddableGridComponent({
   docViewerRef,
   expandedDoc,
   initialDocViewerTabId,
+  onUpdateSelectedTabId,
   setExpandedDoc,
   stateManager,
 }: SavedSearchEmbeddableComponentProps) {
@@ -273,6 +275,7 @@ export function SearchEmbeddableGridComponent({
       enableDocumentViewer={enableDocumentViewer}
       expandedDoc={expandedDoc}
       initialDocViewerTabId={initialDocViewerTabId}
+      onUpdateSelectedTabId={onUpdateSelectedTabId}
       docViewerRef={docViewerRef}
       setExpandedDoc={setExpandedDoc}
     />

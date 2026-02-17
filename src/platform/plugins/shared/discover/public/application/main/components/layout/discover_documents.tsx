@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -213,6 +213,13 @@ function DiscoverDocumentsComponent({
   );
 
   const docViewerRef = useRef<DocViewerApi>(null);
+
+  useEffect(() => {
+    if (initialDocViewerTabId) {
+      docViewerRef.current?.setSelectedTabId(initialDocViewerTabId);
+    }
+  }, [initialDocViewerTabId]);
+
   const setExpandedDocAction = useCurrentTabAction(internalStateActions.setExpandedDoc);
   const setExpandedDoc = useCallback(
     (
