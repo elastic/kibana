@@ -75,7 +75,7 @@ export const GroupedEndpointsTables = ({
             buttonProps={{
               paddingSize: 'm',
             }}
-            buttonContent={<GroupByHeaderButton groupBy={groupBy} data={groupedData} />}
+            buttonContent={<GroupByHeaderButton data={groupedData} />}
             data-test-subj={`${groupedData.groupId}-accordion`}
             initialIsOpen
             paddingSize="none"
