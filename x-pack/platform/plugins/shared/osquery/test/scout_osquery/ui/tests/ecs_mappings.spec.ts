@@ -120,10 +120,7 @@ test.describe(
           .catch(() => {});
         await searchInput.fill('');
         await searchInput.pressSequentially('users_elastic');
-        const option = page
-          .locator('[role="option"]')
-          .filter({ hasText: 'users_elastic' })
-          .first();
+        const option = page.locator('[role="option"]').filter({ hasText: 'users_elastic' }).first();
         try {
           await option.waitFor({ state: 'visible', timeout: 10_000 });
           await option.click();

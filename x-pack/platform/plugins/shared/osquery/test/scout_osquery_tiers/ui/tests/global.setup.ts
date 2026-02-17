@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-// Re-export the global setup from scout_osquery — the Fleet/Docker infrastructure
-// setup is identical for tier tests. The `globalSetupHook` calls in the original
-// file are side-effectful and register when imported.
-import '../../../scout_osquery/ui/tests/global.setup';
+import { globalSetupHook } from '@kbn/scout';
+
+// Tier tests do not need the heavy Fleet/Docker provisioning that the main
+// osquery tests use — they only verify that the osquery UI is hidden or shown
+// based on the product tier. A simple globalSetupHook is sufficient.
+globalSetupHook();

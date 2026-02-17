@@ -85,7 +85,10 @@ test.describe(
 
           // Navigate to pack and verify policy is set
           await pageObjects.packs.ensureAllPacksVisible();
-          await page.getByRole('link', { name: removingPack }).first().waitFor({ state: 'visible', timeout: 15_000 });
+          await page
+            .getByRole('link', { name: removingPack })
+            .first()
+            .waitFor({ state: 'visible', timeout: 15_000 });
           await page.getByRole('link', { name: removingPack }).first().click();
           await expect(page.getByText(`${removingPack} details`).first()).toBeVisible();
           await page.getByText('Edit').first().click();
@@ -103,7 +106,10 @@ test.describe(
             .first()
             .waitFor({ state: 'hidden', timeout: 60_000 })
             .catch(() => {});
-          await page.getByText(agentPolicyName).first().waitFor({ state: 'visible', timeout: 30_000 });
+          await page
+            .getByText(agentPolicyName)
+            .first()
+            .waitFor({ state: 'visible', timeout: 30_000 });
           await page.getByText(agentPolicyName).first().click();
           await waitForPageReady(page);
 
@@ -130,7 +136,10 @@ test.describe(
           await page.gotoApp('osquery/packs');
           await waitForPageReady(page);
           await pageObjects.packs.ensureAllPacksVisible();
-          await page.getByRole('link', { name: removingPack }).first().waitFor({ state: 'visible', timeout: 15_000 });
+          await page
+            .getByRole('link', { name: removingPack })
+            .first()
+            .waitFor({ state: 'visible', timeout: 15_000 });
           await page.getByRole('link', { name: removingPack }).first().click();
           await expect(page.getByText(`${removingPack} details`).first()).toBeVisible();
           await page.getByText('Edit').first().waitFor({ state: 'visible' });
@@ -145,7 +154,7 @@ test.describe(
       }
     );
 
-    // eslint-disable-next-line playwright/max-nested-describe, @kbn/eslint/scout_max_one_describe
+    // eslint-disable-next-line playwright/max-nested-describe
     test.describe(
       'Load prebuilt packs',
       { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
@@ -160,8 +169,11 @@ test.describe(
 
           // Load prebuilt packs if the button is present (it may already be loaded)
           const loadBtn = page.getByText('Load Elastic prebuilt packs').first();
-          if (await loadBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
+          const isLoadVisible = await loadBtn.isVisible({ timeout: 5_000 }).catch(() => false);
+
+          if (isLoadVisible) {
             await loadBtn.click();
+            // eslint-disable-next-line playwright/no-conditional-expect
             await expect(loadBtn).not.toBeVisible({ timeout: 30_000 });
           }
 
@@ -213,7 +225,7 @@ test.describe(
       }
     );
 
-    // eslint-disable-next-line playwright/max-nested-describe, @kbn/eslint/scout_max_one_describe
+    // eslint-disable-next-line playwright/max-nested-describe
     test.describe(
       'Global packs',
       { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
@@ -268,6 +280,7 @@ test.describe(
                 break;
               }
             }
+
             expect(packFound).toBe(true);
           } finally {
             if (globalPackId) {

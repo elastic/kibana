@@ -108,6 +108,7 @@ async function findOrCreateAgentPolicy(
       const existing = listData.items.find((p) => p.name === name);
       if (existing) return existing.id;
     }
+
     throw e;
   }
 }
@@ -489,12 +490,12 @@ globalSetupHook(
               is_default: true,
             },
           });
-          log.info('[osquery-setup] Updated existing Fleet Server host to use Docker-reachable URL');
+          log.info(
+            '[osquery-setup] Updated existing Fleet Server host to use Docker-reachable URL'
+          );
         }
       } catch (updateErr: any) {
-        log.info(
-          `[osquery-setup] Fleet Server host update: ${updateErr.message?.slice(0, 100)}`
-        );
+        log.info(`[osquery-setup] Fleet Server host update: ${updateErr.message?.slice(0, 100)}`);
       }
     }
 

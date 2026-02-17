@@ -129,6 +129,7 @@ export class PacksPage {
       } else {
         await this.page.keyboard.press('Escape');
       }
+
       await waitForPageReady(this.page);
     }
   }
@@ -145,6 +146,7 @@ export class PacksPage {
     if (await confirmBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
       await confirmBtn.click();
     }
+
     // Wait for the toggle state change to settle
     await waitForPageReady(this.page);
   }
@@ -166,6 +168,7 @@ export class PacksPage {
       if (await target.isVisible({ timeout: 2_000 }).catch(() => false)) {
         return;
       }
+
       if (p < totalPages) {
         const pageLink = this.page.getByRole('link', {
           name: `Page ${p + 1} of ${totalPages}`,
@@ -198,8 +201,10 @@ export class PacksPage {
     for (let p = 1; p <= totalPages; p++) {
       if (await link.isVisible({ timeout: 2_000 }).catch(() => false)) {
         await link.click();
+
         return;
       }
+
       if (p < totalPages) {
         // Click the specific page number link for in-memory table pagination.
         const pageLink = this.page.getByRole('link', {

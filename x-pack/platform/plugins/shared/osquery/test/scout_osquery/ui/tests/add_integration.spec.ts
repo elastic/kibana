@@ -173,12 +173,14 @@ test.describe(
         for (const toast of await page.locator('[data-test-subj="dismissToast"]').all()) {
           await toast.click().catch(() => {});
         }
+
         await page.testSubj.locator('createAgentPolicyButton').click();
         await page.testSubj.locator('createAgentPolicyNameField').fill(policyName);
         // Dismiss any toast errors that could block the create button
         for (const toast of await page.locator('[data-test-subj="dismissToast"]').all()) {
           await toast.click().catch(() => {});
         }
+
         await page.testSubj.locator('createAgentPolicyFlyoutBtn').click();
 
         await expect(page.getByText(`Agent policy '${policyName}' created`).first()).toBeVisible({
@@ -220,7 +222,7 @@ test.describe(
       });
     });
 
-    // eslint-disable-next-line playwright/max-nested-describe, @kbn/eslint/scout_max_one_describe
+    // eslint-disable-next-line playwright/max-nested-describe
     test.describe('Upgrade policy with existing packs', () => {
       const oldVersion = '1.2.0';
       let policyId: string | undefined;

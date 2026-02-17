@@ -287,7 +287,6 @@ test.describe(
     // eslint-disable-next-line playwright/max-nested-describe
     test.describe('should trigger validation when saved query is being chosen', () => {
       let packId: string;
-      let packName: string;
 
       test.beforeAll(async ({ kbnClient }) => {
         const policyIds = await getFirstPackagePolicyIds(kbnClient);
@@ -303,7 +302,6 @@ test.describe(
           },
         });
         packId = pack.saved_object_id;
-        packName = pack.name;
       });
 
       test.afterAll(async ({ kbnClient }) => {
@@ -419,81 +417,79 @@ test.describe(
     });
 
     // eslint-disable-next-line playwright/max-nested-describe
-    test.describe(
-      'should open discover in new tab',
-      { tag: [...tags.stateful.classic] },
-      () => {
-        let packId: string;
-        let packName: string;
+    test.describe('should open discover in new tab', { tag: [...tags.stateful.classic] }, () => {
+      let packId: string;
+      let packName: string;
 
-        test.beforeAll(async ({ kbnClient }) => {
-          const policyIds = await getFirstPackagePolicyIds(kbnClient);
+      test.beforeAll(async ({ kbnClient }) => {
+        const policyIds = await getFirstPackagePolicyIds(kbnClient);
 
-          const pack = await loadPack(kbnClient, {
-            policy_ids: policyIds,
-            queries: {
-              [savedQueryName]: {
-                ecs_mapping: {},
-                interval: 3600,
-                query: 'select * from uptime;',
-              },
+        const pack = await loadPack(kbnClient, {
+          policy_ids: policyIds,
+          queries: {
+            [savedQueryName]: {
+              ecs_mapping: {},
+              interval: 3600,
+              query: 'select * from uptime;',
             },
-          });
-          packId = pack.saved_object_id;
-          packName = pack.name;
+          },
+        });
+        packId = pack.saved_object_id;
+        packName = pack.name;
+      });
+
+      test.afterAll(async ({ kbnClient }) => {
+        if (packId) {
+          await cleanupPack(kbnClient, packId);
+        }
+      });
+
+      test('should open discover in new tab', async ({ page, pageObjects }) => {
+        test.setTimeout(120_000);
+
+        let discoverHref: string | null = null;
+
+        await test.step('Navigate to pack details and get Discover link', async () => {
+          await pageObjects.packs.navigateToPackDetail(packId);
+
+          const discoverLink = page.getByRole('link', { name: 'View in Discover' }).first();
+          await discoverLink.waitFor({ state: 'visible', timeout: 30_000 });
+
+          // Verify the href contains the pack action_id filter
+          await expect(discoverLink).toHaveAttribute(
+            'href',
+            expect.stringContaining(`pack_${packName}_${savedQueryName}`)
+          );
+
+          discoverHref = await discoverLink.evaluate((el) => el.getAttribute('href'));
         });
 
-        test.afterAll(async ({ kbnClient }) => {
-          if (packId) {
-            await cleanupPack(kbnClient, packId);
+        await test.step('Navigate to Discover and verify filter is applied', async () => {
+          if (discoverHref) {
+            const baseUrl = new URL(page.url()).origin;
+            await page.goto(`${baseUrl}${discoverHref}`);
+
+            await expect(page.testSubj.locator('breadcrumbs')).toContainText('Discover', {
+              timeout: 30_000,
+            });
+
+            // Verify the correct action_id filter is applied
+            await expect(
+              page.getByText(`action_id: pack_${packName}_${savedQueryName}`).first()
+            ).toBeVisible({ timeout: 30_000 });
+
+            // Verify the data view is osquery results
+            await expect(page.getByText('logs-osquery_manager.result').first()).toBeVisible({
+              timeout: 10_000,
+            });
           }
         });
-
-        test('should open discover in new tab', async ({ page, pageObjects }) => {
-          test.setTimeout(120_000);
-
-          let discoverHref: string | null = null;
-
-          await test.step('Navigate to pack details and get Discover link', async () => {
-            await pageObjects.packs.navigateToPackDetail(packId);
-
-            const discoverLink = page.getByRole('link', { name: 'View in Discover' }).first();
-            await discoverLink.waitFor({ state: 'visible', timeout: 30_000 });
-            discoverHref = await discoverLink.getAttribute('href');
-
-            expect(discoverHref).toBeTruthy();
-            // Verify the href contains the pack action_id filter
-            expect(discoverHref).toContain(`pack_${packName}_${savedQueryName}`);
-          });
-
-          await test.step('Navigate to Discover and verify filter is applied', async () => {
-            if (discoverHref) {
-              const baseUrl = new URL(page.url()).origin;
-              await page.goto(`${baseUrl}${discoverHref}`);
-
-              await expect(page.testSubj.locator('breadcrumbs')).toContainText('Discover', {
-                timeout: 30_000,
-              });
-
-              // Verify the correct action_id filter is applied
-              await expect(
-                page.getByText(`action_id: pack_${packName}_${savedQueryName}`).first()
-              ).toBeVisible({ timeout: 30_000 });
-
-              // Verify the data view is osquery results
-              await expect(page.getByText('logs-osquery_manager.result').first()).toBeVisible({
-                timeout: 10_000,
-              });
-            }
-          });
-        });
-      }
-    );
+      });
+    });
 
     // eslint-disable-next-line playwright/max-nested-describe
     test.describe('deactivate and activate pack', () => {
       let packId: string;
-      let packName: string;
 
       test.beforeEach(async ({ kbnClient }) => {
         const policyIds = await getFirstPackagePolicyIds(kbnClient);
@@ -509,7 +505,6 @@ test.describe(
           },
         });
         packId = pack.saved_object_id;
-        packName = pack.name;
       });
 
       test.afterEach(async ({ kbnClient }) => {
@@ -675,7 +670,6 @@ test.describe(
     // eslint-disable-next-line playwright/max-nested-describe
     test.describe('enable changing saved queries and ecs_mappings', () => {
       let packId: string;
-      let packName: string;
 
       test.beforeEach(async ({ kbnClient }) => {
         const policyIds = await getFirstPackagePolicyIds(kbnClient);
@@ -691,7 +685,6 @@ test.describe(
           },
         });
         packId = pack.saved_object_id;
-        packName = pack.name;
       });
 
       test.afterEach(async ({ kbnClient }) => {
@@ -756,7 +749,6 @@ test.describe(
 
     // eslint-disable-next-line playwright/max-nested-describe
     test.describe('to click delete button', () => {
-      let packName: string;
       let packId: string;
 
       test.beforeEach(async ({ kbnClient }) => {
@@ -772,7 +764,6 @@ test.describe(
             },
           },
         });
-        packName = pack.name;
         packId = pack.saved_object_id;
       });
 
