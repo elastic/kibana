@@ -25,7 +25,7 @@ import { ActionsMenuButton } from './actions_menu_button';
 import {
   useAlertTriggerDecorations,
   useConnectorTypeDecorations,
-  useFocusedStepOutline,
+  useFocusedStepDecoration,
   useLineDifferencesDecorations,
   useStepDecorationsInExecution,
   useTriggerTypeDecorations,
@@ -41,6 +41,7 @@ import {
   selectEditorYamlDocument,
   selectSchema,
   setCursorPosition,
+  setIsYamlSynced,
   setYamlString,
 } from '../../../entities/workflows/store';
 import {
@@ -157,6 +158,13 @@ export const WorkflowYAMLEditor = ({
     [dispatch]
   );
 
+  const onSyncStateChange = useCallback(
+    (isSynced: boolean) => {
+      dispatch(setIsYamlSynced(isSynced));
+    },
+    [dispatch]
+  );
+
   const workflowYaml = useSelector(selectEditorYaml) ?? '';
   const isExecutionYaml = useSelector(selectIsExecutionsTab);
   const hasChanges = useSelector(selectHasChanges);
@@ -206,7 +214,6 @@ export const WorkflowYAMLEditor = ({
   // Styles
   const styles = useWorkflowEditorStyles();
   const [positionStyles, setPositionStyles] = useState<{ top: string; right: string } | null>(null);
-  const { styles: stepOutlineStyles } = useFocusedStepOutline(editorRef.current);
   const { styles: stepExecutionStyles } = useStepDecorationsInExecution(editorRef.current);
 
   useWorkflowsMonacoTheme();
@@ -389,6 +396,8 @@ export const WorkflowYAMLEditor = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useFocusedStepDecoration(editorRef.current);
+
   // Decorations
   useTriggerTypeDecorations({
     editor: editorRef.current,
@@ -444,7 +453,12 @@ export const WorkflowYAMLEditor = ({
     }
 
     const disposable = editorRef.current!.onDidChangeCursorPosition((event) => {
-      dispatch(setCursorPosition({ lineNumber: event.position.lineNumber }));
+      dispatch(
+        setCursorPosition({
+          lineNumber: event.position.lineNumber,
+          column: event.position.column,
+        })
+      );
     });
 
     return () => disposable.dispose();
@@ -528,7 +542,7 @@ export const WorkflowYAMLEditor = ({
   }, [workflowJsonSchemaStrict, notifications]);
 
   return (
-    <div css={css([styles.container, stepOutlineStyles, stepExecutionStyles])} ref={containerRef}>
+    <div css={css([styles.container, stepExecutionStyles])} ref={containerRef}>
       <GlobalWorkflowEditorStyles />
       <ActionsMenuPopover
         anchorPosition="upCenter"
@@ -583,10 +597,12 @@ export const WorkflowYAMLEditor = ({
           editorDidMount={handleEditorDidMount}
           editorWillUnmount={handleEditorWillUnmount}
           onChange={onChange}
+          onSyncStateChange={onSyncStateChange}
           options={options}
           schemas={schemas}
           value={workflowYaml}
           enableFindAction={true}
+          dataTestSubj="workflowYamlEditor"
         />
       </div>
       <div css={styles.validationErrorsContainer}>
