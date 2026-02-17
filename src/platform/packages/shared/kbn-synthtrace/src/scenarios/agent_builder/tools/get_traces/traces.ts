@@ -68,10 +68,7 @@ import { createCliScenario } from '../../../../lib/utils/create_scenario';
 import { withClient, type ScenarioReturnType } from '../../../../lib/utils/with_client';
 import type { ApmSynthtraceEsClient } from '../../../../lib/apm/client/apm_synthtrace_es_client';
 import type { LogsSynthtraceEsClient } from '../../../../lib/logs/logs_synthtrace_es_client';
-import {
-  createLogSequence,
-  generateCorrelatedLogsData,
-} from '../get_correlated_logs/correlated_logs';
+import { createLogSequence, generateCorrelatedLogsData } from './correlated_logs';
 
 interface SpanConfig {
   spanName: string;

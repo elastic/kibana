@@ -7,42 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * SCENARIO: Correlated Logs for get_correlated_logs tool
- *
- * Generates log sequences linked by correlation identifiers.
- * Each sequence contains logs with a shared correlation ID and at least one anchor log (error/warning).
- *
- * CLI Usage:
- * ```
- * node scripts/synthtrace src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts \
- *   --from "now-1h" --to "now" --clean
- * ```
- *
- * API Test Usage:
- * ```typescript
- * await indexCorrelatedLogs({
- *   logsEsClient,
- *   logs: [
- *     { 'log.level': 'info', message: 'Request started', 'service.name': 'my-service', 'trace.id': 'abc123' },
- *     { 'log.level': 'error', message: 'Request failed', 'service.name': 'my-service', 'trace.id': 'abc123' },
- *   ],
- * });
- * ```
- */
-
 import type { LogDocument, Timerange } from '@kbn/synthtrace-client';
 import { log } from '@kbn/synthtrace-client';
-import type { Scenario } from '../../../../cli/scenario';
 import { withClient, type ScenarioReturnType } from '../../../../lib/utils/with_client';
-import { IndexTemplateName } from '../../../../lib/logs/custom_logsdb_index_templates';
 import type { LogsSynthtraceEsClient } from '../../../../lib/logs/logs_synthtrace_es_client';
 
 /**
  * A log event with any fields. Minimal required field is `message`.
  * All other fields (severity, correlation IDs, service info) are optional.
  */
-export interface CorrelatedLogEvent {
+interface CorrelatedLogEvent {
   message: string;
   '@timestamp'?: number;
   [key: string]: unknown;
@@ -52,7 +26,7 @@ export interface CorrelatedLogEvent {
  * A minimal log entry for use with createLogSequence.
  * Only requires message; all other fields are optional.
  */
-export interface LogEntry {
+interface LogEntry {
   message: string;
   [key: string]: unknown;
 }
@@ -320,13 +294,3 @@ export function createLogSequence({
     ...entry,
   }));
 }
-
-const scenario: Scenario<LogDocument> = async () => ({
-  bootstrap: async ({ logsEsClient }) => {
-    await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
-  },
-  generate: ({ range, clients: { logsEsClient } }) =>
-    generateCorrelatedLogsData({ range, logsEsClient }),
-});
-
-export default scenario;
