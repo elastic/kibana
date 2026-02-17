@@ -71,7 +71,7 @@ export function createGetTracesTool({
   Do NOT use for:
   - Finding traces by a broad query (use observability.get_trace_metrics or observability.get_trace_change_points to scope first)`,
     schema: getTracesSchema,
-    tags: ['observability', 'trace', 'apm', 'logs'],
+    tags: ['observability', 'trace', 'apm', 'logs', 'errors'],
     availability: {
       cacheMode: 'space',
       handler: async ({ request }) => {
