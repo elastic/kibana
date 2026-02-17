@@ -166,11 +166,11 @@ describe('BedrockConnector', () => {
         mockSigner.mockClear();
         const customConnector = new BedrockConnector({
           configurationUtilities: actionsConfigMock.create(),
-          connector: { id: '1', type: CONNECTOR_ID },
+          connector: { id: '1', type: BEDROCK_CONNECTOR_ID },
           config: {
             apiUrl: 'https://custom.endpoint.example',
             region: 'us-west-1',
-            defaultModel: DEFAULT_MODEL,
+            defaultModel: DEFAULT_BEDROCK_MODEL,
           },
           secrets: { accessKey: '123', secret: 'secret' },
           logger,
