@@ -31,7 +31,7 @@ const entityMaintainerTaskEntrySchema = schema.object({
 });
 
 const entityMaintainersTasksAttributesSchema = {
-  'entity-maintainers-tasks': schema.arrayOf(entityMaintainerTaskEntrySchema),
+  'entity-maintainers-tasks': schema.arrayOf(entityMaintainerTaskEntrySchema, { maxSize: 10000 }),
 };
 
 const version1: SavedObjectsFullModelVersion = {
