@@ -13,6 +13,7 @@ import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 
 import { ConnectorExecutor } from '../connector_executor';
+import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import { UrlValidator } from '../lib/url_validator';
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
@@ -93,6 +94,9 @@ export async function setupDependencies(
     stepExecutionRepository
   );
 
+  // Create telemetry client
+  const telemetryClient = new WorkflowExecutionTelemetryClient(coreStart.analytics, logger);
+
   // Create workflow runtime first (simpler, fewer dependencies)
   const workflowRuntime = new WorkflowExecutionRuntimeManager({
     workflowExecution: workflowExecution as EsWorkflowExecution,
@@ -101,6 +105,7 @@ export async function setupDependencies(
     workflowExecutionState,
     coreStart,
     dependencies,
+    telemetryClient,
   });
 
   const esClient: ElasticsearchClient =
