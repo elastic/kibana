@@ -12,13 +12,19 @@ import SimpleGit from 'simple-git';
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getPackages } from '@kbn/repo-packages';
 import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
+import { readFileSync } from 'fs';
+import { extname, join } from 'path';
+
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';
 import { checkSemverRanges } from './no_pkg_semver_ranges';
 import { load as yamlLoad } from 'js-yaml';
 import { readFile } from 'fs/promises';
-import { extname } from 'path';
+import { getExpectedCasing } from './precommit_hook/casing_check_config';
+
+const EXCEPTIONS_JSON_PATH = join(REPO_ROOT, 'src/dev/precommit_hook/exceptions.json');
 
 class CheckResult {
   constructor(checkName) {
@@ -71,7 +77,22 @@ class FileCasingCheck extends PrecommitCheck {
   }
 
   async execute(log, files) {
-    await checkFileCasing(log, files);
+    const packages = getPackages(REPO_ROOT);
+    const packageRootDirs = new Set(
+      packages
+        .filter((pkg) => !pkg.isPlugin())
+        .map((pkg) => pkg.normalizedRepoRelativeDir.replace(/\\/g, '/'))
+    );
+
+    const rawExceptions = JSON.parse(readFileSync(EXCEPTIONS_JSON_PATH, 'utf8'));
+    const exceptions = Object.values(rawExceptions).flatMap((teamObject) =>
+      Object.keys(teamObject)
+    );
+
+    await checkFileCasing(log, files, getExpectedCasing, {
+      packageRootDirs,
+      exceptions,
+    });
   }
 }
 

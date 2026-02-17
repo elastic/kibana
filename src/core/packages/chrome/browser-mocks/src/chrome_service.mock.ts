@@ -41,8 +41,6 @@ const createStartContractMock = () => {
       has: jest.fn(),
       get: jest.fn(),
       getAll: jest.fn().mockReturnValue([]),
-      enableForcedAppSwitcherNavigation: jest.fn(),
-      getForceAppSwitcherNavigation$: jest.fn(),
     }),
     recentlyAccessed: lazyObject({
       add: jest.fn(),
@@ -90,7 +88,6 @@ const createStartContractMock = () => {
     setCustomNavLink: jest.fn(),
     setHeaderBanner: jest.fn(),
     hasHeaderBanner$: jest.fn().mockReturnValue(new BehaviorSubject(false)),
-    getBodyClasses$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     getChromeStyle$: jest.fn().mockReturnValue(new BehaviorSubject('classic')),
     setChromeStyle: jest.fn(),
     getActiveSolutionNavId$: jest.fn(),
