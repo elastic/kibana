@@ -36,7 +36,6 @@ import { useHasEntityHighlightsLicense } from '../../../../common/hooks/use_has_
 import { useFetchEntityDetailsHighlights } from '../hooks/use_fetch_entity_details_highlights';
 import { EntityHighlightsSettings } from './entity_highlights_settings';
 import { EntityHighlightsResult } from './entity_highlights_result';
-import { useLoadInferenceConnectors } from '../hooks/use_inference_connectors';
 
 export const EntityHighlightsAccordion: React.FC<{
   entityIdentifier: string;
@@ -60,7 +59,6 @@ export const EntityHighlightsAccordion: React.FC<{
   const { hasAssistantPrivilege, isAssistantEnabled, isAssistantVisible } =
     useAssistantAvailability();
   const hasEntityHighlightsLicense = useHasEntityHighlightsLicense();
-  const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
 
   const [showAnonymizedValues, setShowAnonymizedValues] = useState(false);
   const onChangeShowAnonymizedValues = useCallback(
@@ -242,30 +240,6 @@ export const EntityHighlightsAccordion: React.FC<{
                     />
                   </EuiButton>
                 </EuiFlexItem>
-              ) : (
-                <EuiFlexItem grow={1}>
-                  <EuiButton onClick={onAddConnectorClick} color="primary" size="s">
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.highlights.addConnectorButton"
-                      defaultMessage="Add connector"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              )}
-
-              {isConnectorModalVisible && (
-                <Suspense fallback>
-                  <AddConnectorModal
-                    actionTypeRegistry={actionTypeRegistry}
-                    actionTypes={actionTypes}
-                    onClose={closeModal}
-                    onSaveConnector={onSaveConnector}
-                    onSelectActionType={(actionType: ActionType) =>
-                      setSelectedActionType(actionType)
-                    }
-                    selectedActionType={selectedActionType}
-                  />
-                </Suspense>
               )}
             </EuiFlexGroup>
           </EuiPanel>
