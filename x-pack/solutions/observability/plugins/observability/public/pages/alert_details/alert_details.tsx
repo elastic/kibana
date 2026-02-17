@@ -469,6 +469,7 @@ export function AlertDetails() {
             <>
               <EuiToolTip content={ruleName}>
                 <span
+                  tabIndex={0}
                   data-test-subj="alertDetailsPageTitle"
                   css={css`
                     display: -webkit-box;
