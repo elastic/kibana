@@ -274,6 +274,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       onResponse: (request, response, options) => {
         if (!options.disableWarningToasts) {
           const { rawResponse } = response;
+          const req = request as { id: string; body: estypes.SearchRequest };
 
           const requestName = options.inspector?.title
             ? options.inspector.title
@@ -285,16 +286,16 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             : new RequestAdapter();
           if (!options.inspector?.adapter) {
             const requestResponder = requestAdapter.start(requestName, {
-              id: request.id,
+              id: req.id,
             });
-            requestResponder.json(request.body);
+            requestResponder.json(req.body);
             requestResponder.ok({ json: response });
           }
 
           handleWarnings({
-            request: request.body as estypes.SearchRequest,
+            request: req.body as estypes.SearchRequest,
             requestAdapter,
-            requestId: request.id,
+            requestId: req.id,
             requestName,
             response: rawResponse,
             services: warningsServices,

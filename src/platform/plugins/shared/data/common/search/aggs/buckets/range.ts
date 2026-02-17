@@ -101,7 +101,7 @@ export const getRangeBucketAgg = ({ getFieldFormatsStart }: RangeBucketAggDepend
 
           output.params.keyed = true;
         },
-        toExpressionAst: (ranges) => ranges?.map(numericalRangeToAst),
+        toExpressionAst: (value: unknown) => (value as NumericalRange[])?.map(numericalRangeToAst),
       },
     ],
   });

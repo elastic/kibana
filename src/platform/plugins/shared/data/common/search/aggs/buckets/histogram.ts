@@ -222,7 +222,7 @@ export const getHistogramBucketAgg = ({
           }
         },
         shouldShow: (aggConfig: IBucketAggConfig) => aggConfig.params.has_extended_bounds,
-        toExpressionAst: extendedBoundsToAst,
+        toExpressionAst: (value: unknown) => extendedBoundsToAst(value as ExtendedBounds),
       },
     ],
   });

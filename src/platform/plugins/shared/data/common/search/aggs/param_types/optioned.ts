@@ -9,6 +9,7 @@
 
 import type { IAggConfig } from '../agg_config';
 import { BaseParamType } from './base';
+import type { AggParamOutput } from './base';
 
 export interface OptionedValueProp {
   value: string;
@@ -20,24 +21,24 @@ export interface OptionedValueProp {
 export class OptionedParamType extends BaseParamType {
   options: OptionedValueProp[];
 
-  constructor(config: Record<string, any>) {
+  constructor(config: Record<string, unknown>) {
     super(config);
 
     if (!config.write) {
-      this.write = (aggConfig: IAggConfig, output: Record<string, any>) => {
+      this.write = (aggConfig: IAggConfig, output: AggParamOutput) => {
         output.params[this.name] = aggConfig.params[this.name].value;
       };
     }
     if (!config.serialize) {
-      this.serialize = (selected: OptionedValueProp) => {
-        return selected.value;
+      this.serialize = (value: unknown) => {
+        return (value as OptionedValueProp).value;
       };
     }
     if (!config.deserialize) {
-      this.deserialize = (value: any) => {
+      this.deserialize = (value: unknown) => {
         return this.options.find((option: OptionedValueProp) => option.value === value);
       };
     }
-    this.options = config.options || [];
+    this.options = (config.options as OptionedValueProp[]) || [];
   }
 }

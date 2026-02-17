@@ -81,7 +81,7 @@ export function TopAggregateParamEditor({
     }
 
     if (value) {
-      if (aggParam.options.find((opt) => opt.value === value.value)) {
+      if ((aggParam.options as AggregateValueProp[]).find((opt) => opt.value === value.value)) {
         return;
       }
 
@@ -89,7 +89,11 @@ export function TopAggregateParamEditor({
     }
 
     if (filteredOptions.length === 1) {
-      setValue(aggParam.options.find((opt) => opt.value === filteredOptions[0].value));
+      setValue(
+        (aggParam.options as AggregateValueProp[]).find(
+          (opt) => opt.value === filteredOptions[0].value
+        )
+      );
     }
   }, [aggParam.options, fieldType, filteredOptions, setValue, value]);
 
@@ -97,7 +101,9 @@ export function TopAggregateParamEditor({
     if (event.target.value === emptyValue.value) {
       setValue();
     } else {
-      setValue(aggParam.options.find((opt) => opt.value === event.target.value));
+      setValue(
+        (aggParam.options as AggregateValueProp[]).find((opt) => opt.value === event.target.value)
+      );
     }
   };
 

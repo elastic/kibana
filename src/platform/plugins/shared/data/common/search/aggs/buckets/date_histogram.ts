@@ -27,6 +27,7 @@ import { TimeBuckets } from './lib/time_buckets';
 
 import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
+import type { AggParamOutput } from '../param_types/base';
 import type { BaseAggParams } from '../types';
 import { dateHistogramInterval } from '../utils';
 import { inferTimeZone } from '../utils';
@@ -87,7 +88,7 @@ export const getDateHistogramBucketAgg = ({
       date: true,
     },
     makeLabel(agg) {
-      let output: Record<string, any> = {};
+      let output: AggParamOutput = { params: {} };
 
       if (this.params) {
         output = writeParams(this.params, agg);
@@ -99,7 +100,9 @@ export const getDateHistogramBucketAgg = ({
         defaultMessage: '{fieldName} per {intervalDescription}',
         values: {
           fieldName: field,
-          intervalDescription: output.metricScaleText || output.bucketInterval.description,
+          intervalDescription:
+            output.metricScaleText ||
+            (output.bucketInterval as { description: string }).description,
         },
       });
     },
@@ -178,7 +181,7 @@ export const getDateHistogramBucketAgg = ({
         name: 'timeRange',
         default: null,
         write: noop,
-        toExpressionAst: timerangeToAst,
+        toExpressionAst: (value: unknown) => timerangeToAst(value as TimeRange),
       },
       {
         name: 'useNormalizedEsInterval',
@@ -363,7 +366,7 @@ export const getDateHistogramBucketAgg = ({
             );
           }
         },
-        toExpressionAst: extendedBoundsToAst,
+        toExpressionAst: (value: unknown) => extendedBoundsToAst(value as ExtendedBounds),
       },
     ],
   });
