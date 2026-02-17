@@ -67,6 +67,7 @@ describe('SuggestionStatusColumn', () => {
             pipelineCount: 0,
             featuresCount: 0,
             significantEventsCount: 0,
+            dashboardCount: 0,
           }}
           isLoading={false}
         />
@@ -85,6 +86,7 @@ describe('SuggestionStatusColumn', () => {
             pipelineCount: 0,
             featuresCount: 0,
             significantEventsCount: 2,
+            dashboardCount: 0,
           }}
           isLoading={false}
         />
@@ -107,6 +109,7 @@ describe('SuggestionStatusColumn', () => {
             pipelineCount: 2,
             featuresCount: 1,
             significantEventsCount: 0,
+            dashboardCount: 0,
           }}
           isLoading={false}
         />
@@ -114,6 +117,48 @@ describe('SuggestionStatusColumn', () => {
 
       expect(screen.getByTestId('suggestionStatusBadge-test-stream')).toBeInTheDocument();
       // Badge shows only pipelineCount = 2
+      expect(screen.getByText('2')).toBeInTheDocument();
+    });
+
+    it('should show badge with combined pipeline and dashboard count', () => {
+      renderWithProviders(
+        <SuggestionStatusColumn
+          streamName="test-stream"
+          status={{
+            stream: 'test-stream',
+            suggestionCount: 5,
+            pipelineCount: 2,
+            featuresCount: 1,
+            significantEventsCount: 0,
+            dashboardCount: 3,
+          }}
+          isLoading={false}
+        />
+      );
+
+      expect(screen.getByTestId('suggestionStatusBadge-test-stream')).toBeInTheDocument();
+      // Badge shows pipelineCount + dashboardCount = 5
+      expect(screen.getByText('5')).toBeInTheDocument();
+    });
+
+    it('should show badge with dashboard count only when no pipeline suggestions', () => {
+      renderWithProviders(
+        <SuggestionStatusColumn
+          streamName="test-stream"
+          status={{
+            stream: 'test-stream',
+            suggestionCount: 2,
+            pipelineCount: 0,
+            featuresCount: 0,
+            significantEventsCount: 0,
+            dashboardCount: 2,
+          }}
+          isLoading={false}
+        />
+      );
+
+      expect(screen.getByTestId('suggestionStatusBadge-test-stream')).toBeInTheDocument();
+      // Badge shows dashboardCount = 2
       expect(screen.getByText('2')).toBeInTheDocument();
     });
 
@@ -127,16 +172,37 @@ describe('SuggestionStatusColumn', () => {
             pipelineCount: 3,
             featuresCount: 2,
             significantEventsCount: 0,
+            dashboardCount: 0,
           }}
           isLoading={false}
         />
       );
 
-      // Aria label shows only pipelineCount = 3
+      // Aria label shows pipelineCount = 3
       expect(screen.getByLabelText('3 suggestions available')).toBeInTheDocument();
     });
 
-    it('should show dash when only features exist (pipelines are excluded)', () => {
+    it('should have correct aria label for combined pipeline and dashboard count', () => {
+      renderWithProviders(
+        <SuggestionStatusColumn
+          streamName="test-stream"
+          status={{
+            stream: 'test-stream',
+            suggestionCount: 6,
+            pipelineCount: 3,
+            featuresCount: 0,
+            significantEventsCount: 0,
+            dashboardCount: 2,
+          }}
+          isLoading={false}
+        />
+      );
+
+      // Aria label shows pipelineCount + dashboardCount = 5
+      expect(screen.getByLabelText('5 suggestions available')).toBeInTheDocument();
+    });
+
+    it('should show dash when only features exist (pipelines and dashboards are counted but features are excluded)', () => {
       renderWithProviders(
         <SuggestionStatusColumn
           streamName="test-stream"
@@ -146,12 +212,13 @@ describe('SuggestionStatusColumn', () => {
             pipelineCount: 0,
             featuresCount: 2,
             significantEventsCount: 0,
+            dashboardCount: 0,
           }}
           isLoading={false}
         />
       );
 
-      // Even though featuresCount is 2, badge shows dash because only pipelines are shown
+      // Even though featuresCount is 2, badge shows dash because only pipelines and dashboards are shown
       expect(screen.getByText('-')).toBeInTheDocument();
       expect(screen.queryByTestId('suggestionStatusBadge-test-stream')).not.toBeInTheDocument();
     });
@@ -170,6 +237,7 @@ describe('SuggestionStatusColumn', () => {
             pipelineCount: 2,
             featuresCount: 1,
             significantEventsCount: 0,
+            dashboardCount: 0,
           }}
           isLoading={false}
         />
@@ -191,6 +259,37 @@ describe('SuggestionStatusColumn', () => {
       ).not.toBeInTheDocument();
     });
 
+    it('should show dashboard suggestions in popover', async () => {
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <SuggestionStatusColumn
+          streamName="test-stream"
+          status={{
+            stream: 'test-stream',
+            suggestionCount: 5,
+            pipelineCount: 2,
+            featuresCount: 0,
+            significantEventsCount: 0,
+            dashboardCount: 3,
+          }}
+          isLoading={false}
+        />
+      );
+
+      await user.click(screen.getByTestId('suggestionStatusBadge-test-stream'));
+
+      // Both processing and dashboard suggestions are shown
+      await waitFor(() => {
+        expect(screen.getByTestId('suggestionLink-test-stream-processing')).toBeInTheDocument();
+        expect(screen.getByTestId('suggestionLink-test-stream-content')).toBeInTheDocument();
+      });
+
+      // Check labels
+      expect(screen.getByText('2 processing suggestions')).toBeInTheDocument();
+      expect(screen.getByText('3 dashboard suggestions')).toBeInTheDocument();
+    });
+
     it('should show correct labels for pipeline suggestions', async () => {
       const user = userEvent.setup();
 
@@ -203,6 +302,7 @@ describe('SuggestionStatusColumn', () => {
             pipelineCount: 2,
             featuresCount: 3,
             significantEventsCount: 1,
+            dashboardCount: 0,
           }}
           isLoading={false}
         />
@@ -231,6 +331,7 @@ describe('SuggestionStatusColumn', () => {
             pipelineCount: 1,
             featuresCount: 1,
             significantEventsCount: 1,
+            dashboardCount: 0,
           }}
           isLoading={false}
         />
@@ -245,6 +346,31 @@ describe('SuggestionStatusColumn', () => {
       // Partitioning and significant events are excluded from the popover
       expect(screen.queryByText('1 partitioning suggestion')).not.toBeInTheDocument();
       expect(screen.queryByText('1 significant events suggestion')).not.toBeInTheDocument();
+    });
+
+    it('should show singular form for dashboard count of 1', async () => {
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <SuggestionStatusColumn
+          streamName="test-stream"
+          status={{
+            stream: 'test-stream',
+            suggestionCount: 2,
+            pipelineCount: 0,
+            featuresCount: 0,
+            significantEventsCount: 0,
+            dashboardCount: 1,
+          }}
+          isLoading={false}
+        />
+      );
+
+      await user.click(screen.getByTestId('suggestionStatusBadge-test-stream'));
+
+      await waitFor(() => {
+        expect(screen.getByText('1 dashboard suggestion')).toBeInTheDocument();
+      });
     });
   });
 
@@ -261,6 +387,7 @@ describe('SuggestionStatusColumn', () => {
             pipelineCount: 1,
             featuresCount: 1,
             significantEventsCount: 1,
+            dashboardCount: 0,
           }}
           isLoading={false}
         />
@@ -284,6 +411,34 @@ describe('SuggestionStatusColumn', () => {
       });
     });
 
+    it('should generate correct link for dashboard suggestions to content tab', async () => {
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <SuggestionStatusColumn
+          streamName="logs"
+          status={{
+            stream: 'logs',
+            suggestionCount: 2,
+            pipelineCount: 0,
+            featuresCount: 0,
+            significantEventsCount: 0,
+            dashboardCount: 2,
+          }}
+          isLoading={false}
+        />
+      );
+
+      await user.click(screen.getByTestId('suggestionStatusBadge-logs'));
+
+      await waitFor(() => {
+        // Dashboard suggestions link to content tab
+        expect(mockRouterLink).toHaveBeenCalledWith('/{key}/management/{tab}', {
+          path: { key: 'logs', tab: 'content' },
+        });
+      });
+    });
+
     it('should set correct href on links', async () => {
       const user = userEvent.setup();
 
@@ -296,6 +451,7 @@ describe('SuggestionStatusColumn', () => {
             pipelineCount: 1,
             featuresCount: 0,
             significantEventsCount: 0,
+            dashboardCount: 0,
           }}
           isLoading={false}
         />
@@ -306,6 +462,32 @@ describe('SuggestionStatusColumn', () => {
       await waitFor(() => {
         const link = screen.getByTestId('suggestionLink-my-stream-processing');
         expect(link).toHaveAttribute('href', '/app/streams/my-stream/management/processing');
+      });
+    });
+
+    it('should set correct href on dashboard suggestion link', async () => {
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <SuggestionStatusColumn
+          streamName="my-stream"
+          status={{
+            stream: 'my-stream',
+            suggestionCount: 1,
+            pipelineCount: 0,
+            featuresCount: 0,
+            significantEventsCount: 0,
+            dashboardCount: 1,
+          }}
+          isLoading={false}
+        />
+      );
+
+      await user.click(screen.getByTestId('suggestionStatusBadge-my-stream'));
+
+      await waitFor(() => {
+        const link = screen.getByTestId('suggestionLink-my-stream-content');
+        expect(link).toHaveAttribute('href', '/app/streams/my-stream/management/content');
       });
     });
   });
@@ -321,6 +503,7 @@ describe('SuggestionStatusColumn', () => {
             pipelineCount: 1,
             featuresCount: 0,
             significantEventsCount: 0,
+            dashboardCount: 0,
           }}
           isLoading={false}
         />
@@ -341,6 +524,7 @@ describe('SuggestionStatusColumn', () => {
             pipelineCount: 1,
             featuresCount: 0,
             significantEventsCount: 0,
+            dashboardCount: 0,
           }}
           isLoading={false}
           onDismiss={mockOnDismiss}
@@ -363,6 +547,7 @@ describe('SuggestionStatusColumn', () => {
             pipelineCount: 1,
             featuresCount: 0,
             significantEventsCount: 0,
+            dashboardCount: 0,
           }}
           isLoading={false}
           onDismiss={mockOnDismiss}
@@ -388,6 +573,7 @@ describe('SuggestionStatusColumn', () => {
             pipelineCount: 1,
             featuresCount: 0,
             significantEventsCount: 0,
+            dashboardCount: 0,
           }}
           isLoading={false}
           onDismiss={mockOnDismiss}
