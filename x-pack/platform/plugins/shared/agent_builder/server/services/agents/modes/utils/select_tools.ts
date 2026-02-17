@@ -103,9 +103,7 @@ export const selectTools = async ({
   const skillDynamicToolIds = (
     await Promise.all(skills.list().map((skill) => skill.getDynamicToolIds?.() ?? []))
   ).flat();
-  const allDynamicToolIds = [
-    ...new Set([...previousDynamicToolIds, ...skillDynamicToolIds]),
-  ];
+  const allDynamicToolIds = [...new Set([...previousDynamicToolIds, ...skillDynamicToolIds])];
 
   const dynamicRegistryTools = await pickTools({
     toolProvider,
