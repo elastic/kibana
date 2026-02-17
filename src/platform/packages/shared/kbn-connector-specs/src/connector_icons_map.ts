@@ -90,7 +90,7 @@ export const ConnectorIconsMap: Map<
     '.microsoft-teams',
     lazy(
       () =>
-        import(/* webpackChunkName: "connectorIconmicrosoftteams" */ './specs/microsoft_teams/icon')
+        import(/* webpackChunkName: "connectorIconMicrosoftTeams" */ './specs/microsoft_teams/icon')
     ),
   ],
 ]);

@@ -7,9 +7,9 @@ applies_to:
   serverless: preview
 ---
 
-# Microsoft Teams connector [microsoft-teams-action-type]
+# Microsoft Teams connector [microsoft-teams-connector]
 
-The Microsoft teams connector communicates with the Microsoft Teams API.
+The Microsoft Teams connector communicates with the Microsoft Teams API.
 
 ## Create connectors in {{kib}} [define-microsoft-teams-ui]
 
