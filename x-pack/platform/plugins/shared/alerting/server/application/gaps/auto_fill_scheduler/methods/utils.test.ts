@@ -67,16 +67,12 @@ describe('getGapAutoFillSchedulerSO', () => {
       'gap-1'
     );
 
-    expect(context.authorization.ensureAuthorized).toHaveBeenCalledTimes(2);
-    expect(context.authorization.ensureAuthorized).toHaveBeenNthCalledWith(1, {
-      ruleTypeId: 'test-rule-type1',
-      consumer: 'test-consumer',
-      operation: ReadOperations.GetGapAutoFillScheduler,
-      entity: AlertingAuthorizationEntity.Rule,
-    });
-    expect(context.authorization.ensureAuthorized).toHaveBeenNthCalledWith(2, {
-      ruleTypeId: 'test-rule-type2',
-      consumer: 'test-consumer',
+    expect(context.authorization.bulkEnsureAuthorized).toHaveBeenCalledTimes(1);
+    expect(context.authorization.bulkEnsureAuthorized).toHaveBeenCalledWith({
+      ruleTypeIdConsumersPairs: [
+        { ruleTypeId: 'test-rule-type1', consumers: ['test-consumer'] },
+        { ruleTypeId: 'test-rule-type2', consumers: ['test-consumer'] },
+      ],
       operation: ReadOperations.GetGapAutoFillScheduler,
       entity: AlertingAuthorizationEntity.Rule,
     });
@@ -106,7 +102,7 @@ describe('getGapAutoFillSchedulerSO', () => {
       })
     ).rejects.toThrowError('Unable to get');
 
-    expect(context.authorization.ensureAuthorized).not.toHaveBeenCalled();
+    expect(context.authorization.bulkEnsureAuthorized).not.toHaveBeenCalled();
 
     expect(context.auditLogger?.log).toHaveBeenCalledWith(
       expect.objectContaining({
