@@ -13,6 +13,16 @@ export const PLUGIN_NAME = 'Workflows Execution Engine';
 
 export const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
+export const WORKFLOWS_EXECUTION_STATE_INDEX = '.workflows-execution-state';
+
+export const WORKFLOWS_EXECUTION_STATE_INDEX_MAPPINGS: MappingTypeMapping = {
+  dynamic: false,
+  properties: {
+    status: {
+      type: 'keyword',
+    },
+  },
+};
 
 export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
   dynamic: false,

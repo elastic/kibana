@@ -83,12 +83,24 @@ export interface QueueMetrics {
   scheduleDelayMs: number | null;
 }
 
-export interface EsWorkflowExecution {
-  spaceId: string;
+export interface EsBaseExecution {
   id: string;
+  type: unknown;
+  spaceId: string;
+  status: ExecutionStatus;
+  createdBy?: string;
+  createdAt: string;
+  startedAt: string;
+  finishedAt?: string;
+  duration?: number;
+  error?: SerializedError;
+  output?: JsonValue;
+}
+
+export interface EsWorkflowExecution extends EsBaseExecution {
+  type: 'workflow';
   workflowId: string;
   isTestRun: boolean;
-  status: ExecutionStatus;
   context: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   workflowDefinition: WorkflowYaml;
   yaml: string;
@@ -96,17 +108,11 @@ export interface EsWorkflowExecution {
   /** If specified, the only this step and its children will be executed */
   stepId?: string;
   scopeStack: StackFrame[];
-  createdAt: string;
-  error: SerializedError | null;
-  createdBy?: string; // Keep for backwards compatibility with existing documents
   executedBy?: string; // User who executed the workflow
-  startedAt: string;
-  finishedAt: string;
   cancelRequested: boolean;
   cancellationReason?: string;
   cancelledAt?: string;
   cancelledBy?: string;
-  duration: number;
   triggeredBy?: string; // 'manual' or 'scheduled'
   taskRunAt?: string | null; // Task's runAt timestamp to link execution to specific scheduled run
   traceId?: string; // APM trace ID for observability
@@ -117,21 +123,10 @@ export interface EsWorkflowExecution {
   stepExecutionIds?: string[];
 }
 
-export interface ProviderInput {
-  type: 'string' | 'number' | 'boolean';
-  required: boolean;
-  defaultValue?: string | number | boolean;
-}
+export type EsExecution = EsWorkflowExecution | EsWorkflowStepExecution;
 
-export interface Provider {
-  type: string;
-  action: (stepInputs?: Record<string, unknown>) => Promise<Record<string, unknown> | void>;
-  inputsDefinition: Record<string, ProviderInput>;
-}
-
-export interface EsWorkflowStepExecution {
-  spaceId: string;
-  id: string;
+export interface EsWorkflowStepExecution extends EsBaseExecution {
+  type: 'step';
   stepId: string;
   stepType?: string;
 
@@ -139,9 +134,7 @@ export interface EsWorkflowStepExecution {
   scopeStack: StackFrame[];
   workflowRunId: string;
   workflowId: string;
-  status: ExecutionStatus;
-  startedAt: string;
-  finishedAt?: string;
+  duration?: number; // TODO: remove executionTimeMs
   executionTimeMs?: number;
 
   /** Topological index of step in workflow graph. */
@@ -155,12 +148,22 @@ export interface EsWorkflowStepExecution {
    * There might be several instances of the same stepId if it's inside loops, retries, etc.
    */
   stepExecutionIndex: number;
-  error?: SerializedError;
-  output?: JsonValue;
   input?: JsonValue;
 
   /** Specific step execution instance state. Used by loops, retries, etc to track execution context. */
   state?: Record<string, unknown>;
+}
+
+export interface ProviderInput {
+  type: 'string' | 'number' | 'boolean';
+  required: boolean;
+  defaultValue?: string | number | boolean;
+}
+
+export interface Provider {
+  type: string;
+  action: (stepInputs?: Record<string, unknown>) => Promise<Record<string, unknown> | void>;
+  inputsDefinition: Record<string, ProviderInput>;
 }
 
 export type WorkflowStepExecutionDto = Omit<EsWorkflowStepExecution, 'spaceId'>;

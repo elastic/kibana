@@ -10,6 +10,8 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createIndexWithMappings, createOrUpdateIndex } from './create_index';
 import {
+  WORKFLOWS_EXECUTION_STATE_INDEX,
+  WORKFLOWS_EXECUTION_STATE_INDEX_MAPPINGS,
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
@@ -34,6 +36,12 @@ export async function createIndexes(options: CreateIndexesOptions): Promise<void
       esClient,
       indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
+      logger,
+    }),
+    createIndexWithMappings({
+      esClient,
+      indexName: WORKFLOWS_EXECUTION_STATE_INDEX,
+      mappings: WORKFLOWS_EXECUTION_STATE_INDEX_MAPPINGS,
       logger,
     }),
   ]);
