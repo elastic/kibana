@@ -229,7 +229,7 @@ steps:
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 5
+        parallelism: 7
         retry:
           automatic:
             - exit_status: '-1'
