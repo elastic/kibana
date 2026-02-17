@@ -4897,6 +4897,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/api-contracts@link:packages/kbn-api-contracts":
+  version "0.0.0"
+  uid ""
+
 "@kbn/apm-config-loader@link:src/platform/packages/private/kbn-apm-config-loader":
   version "0.0.0"
   uid ""
@@ -5202,6 +5206,10 @@
   uid ""
 
 "@kbn/content-list-assembly@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-list-footer@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-footer":
   version "0.0.0"
   uid ""
 
