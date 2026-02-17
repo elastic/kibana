@@ -841,6 +841,10 @@ describe('Perform bulk action route, experimental feature bulkEditAlertSuppressi
     performBulkActionRoute(server.router, ml, {
       experimentalFeatures,
     } as ConfigType);
+
+    context.securitySolution.getEndpointService.mockReturnValue(
+      createMockEndpointAppContextService()
+    );
   });
 
   it('returns error if experimental feature bulkEditAlertSuppressionEnabled is not enabled for alert suppression bulk action', async () => {

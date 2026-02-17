@@ -767,18 +767,26 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('with endpoint response actions', () => {
+      // v9.3:
+      // Skipping test in serverless since it is not needed for backports (Serverless runs off of Main)
+      // and due because these tests use a custom role.
+      describe('@skipInServerless with endpoint response actions', () => {
         let superTestResponseActionsNoAuthz: TestAgent;
         let ruleToUpdate: RuleResponse;
         let updatePayload: RuleUpdateProps;
 
         before(async () => {
-          superTestResponseActionsNoAuthz = await utils.createSuperTestWithCustomRole({
-            name: ROLE.endpoint_response_actions_no_access,
-            privileges: rolesUsersProvider.loader.getPreDefinedRole(
-              ROLE.endpoint_response_actions_no_access
-            ),
+          await rolesUsersProvider.createRole({
+            predefinedRole: ROLE.endpoint_response_actions_no_access,
           });
+          await rolesUsersProvider.createUser({
+            name: ROLE.endpoint_response_actions_no_access,
+            roles: [ROLE.endpoint_response_actions_no_access],
+          });
+
+          superTestResponseActionsNoAuthz = await utils.createSuperTest(
+            ROLE.endpoint_response_actions_no_access
+          );
         });
 
         beforeEach(async () => {
