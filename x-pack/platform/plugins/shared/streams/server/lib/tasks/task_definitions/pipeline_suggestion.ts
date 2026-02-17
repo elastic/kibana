@@ -201,7 +201,7 @@ export function createStreamsPipelineSuggestionTask(taskContext: TaskContext) {
                 await taskClient.complete<
                   PipelineSuggestionTaskParams,
                   PipelineSuggestionTaskPayload
-                >(_task, { connectorId, streamName, documents, extractedPatterns }, { pipeline });
+                >(_task, { connectorId, streamName, documents, extractedPatterns }, { pipeline: pipeline.pipeline });
               } catch (error) {
                 // Handle NoLLMSuggestionsError gracefully - complete with null pipeline
                 if (isNoLLMSuggestionsError(error)) {
