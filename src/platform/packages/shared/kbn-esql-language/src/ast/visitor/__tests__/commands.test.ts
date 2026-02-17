@@ -264,19 +264,7 @@ test('can visit MMR command', () => {
       return ctx.node.name;
     })
     .on('visitCommandOption', (ctx) => {
-      if (ctx.node.name === 'on') {
-        return [...ctx.visitArguments(null)].flat();
-      }
-
-      if (ctx.node.name === 'limit') {
-        return [...ctx.visitArguments(null)].flat();
-      }
-
-      if (ctx.node.name === 'with') {
-        return [...ctx.visitArguments(null)].flat();
-      }
-
-      return null;
+      return [...ctx.visitArguments(null)].flat();
     })
     .on('visitMmrCommand', (ctx) => {
       return [...ctx.visitArgs(null), ...ctx.visitOptions()].flat();
