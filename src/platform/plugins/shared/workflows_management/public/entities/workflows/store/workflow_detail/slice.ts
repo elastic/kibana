@@ -25,6 +25,7 @@ const initialState: WorkflowDetailState = {
   activeTab: undefined,
   connectors: undefined,
   schema: getWorkflowZodSchema({}),
+  cursorPosition: undefined,
   focusedStepId: undefined,
   highlightedStepId: undefined,
   isTestModalOpen: false,
@@ -56,7 +57,8 @@ const workflowDetailSlice = createSlice({
     setIsYamlSynced: (state, action: { payload: boolean }) => {
       state.isYamlSynced = action.payload;
     },
-    setCursorPosition: (state, action: { payload: { lineNumber: number } }) => {
+    setCursorPosition: (state, action: { payload: LineColumnPosition }) => {
+      state.cursorPosition = action.payload;
       if (!state.computed?.workflowLookup) {
         state.focusedStepId = undefined;
         return;
@@ -106,9 +108,19 @@ const workflowDetailSlice = createSlice({
     // Internal actions - these are not for components usage
     _setComputedDataInternal: (state, action: { payload: ComputedData }) => {
       state.computed = action.payload;
+      // Recalculate the focused step now that workflowLookup may have changed.
+      // This handles the case where the cursor was positioned before the
+      // debounced YAML computation completed.
+      if (state.cursorPosition && action.payload.workflowLookup) {
+        state.focusedStepId = findStepByLine(
+          state.cursorPosition.lineNumber,
+          action.payload.workflowLookup
+        );
+      }
     },
     _clearComputedData: (state) => {
       state.computed = {};
+      state.focusedStepId = undefined;
     },
     _setGeneratedSchemaInternal: (state, action: { payload: WorkflowDetailState['schema'] }) => {
       state.schema = action.payload;

@@ -37600,6 +37600,21 @@ paths:
                           additionalProperties: true
                           type: object
                           properties:
+                            deprecated:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                description:
+                                  type: string
+                                replaced_by:
+                                  additionalProperties:
+                                    type: string
+                                  type: object
+                                since:
+                                  type: string
+                              required:
+                                - description
+                                - since
                             elastic:
                               additionalProperties: true
                               type: object
@@ -37623,6 +37638,21 @@ paths:
                             type: object
                           maxItems: 1000
                           type: array
+                        deprecated:
+                          additionalProperties: true
+                          type: object
+                          properties:
+                            description:
+                              type: string
+                            replaced_by:
+                              additionalProperties:
+                                type: string
+                              type: object
+                            since:
+                              type: string
+                          required:
+                            - description
+                            - since
                         description:
                           type: string
                         discovery:
@@ -39162,6 +39192,21 @@ paths:
                         additionalProperties: true
                         type: object
                         properties:
+                          deprecated:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              description:
+                                type: string
+                              replaced_by:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              since:
+                                type: string
+                            required:
+                              - description
+                              - since
                           elastic:
                             additionalProperties: true
                             type: object
@@ -39185,6 +39230,21 @@ paths:
                           type: object
                         maxItems: 1000
                         type: array
+                      deprecated:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          description:
+                            type: string
+                          replaced_by:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          since:
+                            type: string
+                        required:
+                          - description
+                          - since
                       description:
                         type: string
                       discovery:
@@ -39919,6 +39979,21 @@ paths:
                         additionalProperties: true
                         type: object
                         properties:
+                          deprecated:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              description:
+                                type: string
+                              replaced_by:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              since:
+                                type: string
+                            required:
+                              - description
+                              - since
                           elastic:
                             additionalProperties: true
                             type: object
@@ -39942,6 +40017,21 @@ paths:
                           type: object
                         maxItems: 1000
                         type: array
+                      deprecated:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          description:
+                            type: string
+                          replaced_by:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          since:
+                            type: string
+                        required:
+                          - description
+                          - since
                       description:
                         type: string
                       discovery:
