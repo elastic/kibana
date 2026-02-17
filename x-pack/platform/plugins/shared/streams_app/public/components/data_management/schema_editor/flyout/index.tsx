@@ -39,6 +39,13 @@ export interface SchemaEditorFlyoutProps {
   withFieldSimulation?: boolean;
   fields?: SchemaField[];
   enableGeoPointSuggestions?: boolean;
+  /**
+   * When true, the flyout is in description-only editing mode.
+   * In this mode, the type selector is hidden and only description can be edited.
+   * This is used for inherited fields and unmapped fields where the user explicitly
+   * chose to edit description only.
+   */
+  isDescriptionOnlyMode?: boolean;
 }
 
 export const SchemaEditorFlyout = ({
@@ -51,6 +58,7 @@ export const SchemaEditorFlyout = ({
   withFieldSimulation = false,
   fields,
   enableGeoPointSuggestions = true,
+  isDescriptionOnlyMode = false,
 }: SchemaEditorFlyoutProps) => {
   const [isEditing, toggleEditMode] = useToggle(isEditingByDefault);
   const [isValidAdvancedFieldMappings, setValidAdvancedFieldMappings] = useState(true);
@@ -110,10 +118,10 @@ export const SchemaEditorFlyout = ({
   // Classic streams require a type to be specified to add a description.
   // This applies to:
   // 1. Inherited fields (can only add description override)
-  // 2. Doc-only fields (status: 'unmapped' without a type, or type: 'unmapped')
-  const isDocOnlyField = field.status === 'unmapped' && (!field.type || field.type === 'unmapped');
+  // 2. When explicitly requested via isDescriptionOnlyMode prop
   const isDescriptionOnlyEditing =
-    isEditing && streamType === 'wired' && (field.status === 'inherited' || isDocOnlyField);
+    isEditing && streamType === 'wired' && (field.status === 'inherited' || isDescriptionOnlyMode);
+  const isDocOnlyField = field.status === 'unmapped' && (!field.type || field.type === 'unmapped');
   const hasDescriptionChanged =
     (nextField.description ?? undefined) !== (field.description ?? undefined);
   const isInheritedDescriptionOnlyEditing =

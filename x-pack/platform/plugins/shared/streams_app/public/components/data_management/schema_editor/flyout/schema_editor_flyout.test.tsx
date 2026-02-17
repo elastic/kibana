@@ -94,11 +94,13 @@ const renderFlyout = ({
   streamName = 'logs.test',
   onStage = jest.fn(),
   streamType = 'wired' as 'wired' | 'classic',
+  isDescriptionOnlyMode = false,
 }: {
   field: SchemaField;
   streamName?: string;
   onStage?: jest.Mock;
   streamType?: 'wired' | 'classic';
+  isDescriptionOnlyMode?: boolean;
 }) => {
   const stream =
     streamType === 'classic'
@@ -116,6 +118,7 @@ const renderFlyout = ({
         field={field}
         stream={stream}
         isEditingByDefault
+        isDescriptionOnlyMode={isDescriptionOnlyMode}
         onClose={onClose}
         onStage={onStage}
       />
@@ -167,8 +170,9 @@ describe('SchemaEditorFlyout (description-only restrictions)', () => {
       });
     });
 
-    it('allows only editing description for documentation-only fields (status: unmapped) and stages a minimal payload', async () => {
+    it('allows only editing description for documentation-only fields (status: unmapped) when isDescriptionOnlyMode is true', async () => {
       // Doc-only fields from getDefinitionFields have status: 'unmapped' without a type property
+      // When opened with isDescriptionOnlyMode, only description editing is allowed
       const documentationOnlyField: SchemaField = {
         name: 'attributes.documented_only',
         parent: 'logs.test',
@@ -176,7 +180,10 @@ describe('SchemaEditorFlyout (description-only restrictions)', () => {
         description: 'original description',
       };
 
-      const { onStage, stream } = renderFlyout({ field: documentationOnlyField });
+      const { onStage, stream } = renderFlyout({
+        field: documentationOnlyField,
+        isDescriptionOnlyMode: true,
+      });
 
       // Mapping controls should be read-only/hidden (no type selector)
       expect(screen.queryByTestId('streamsAppFieldFormTypeSelect')).not.toBeInTheDocument();
@@ -202,11 +209,12 @@ describe('SchemaEditorFlyout (description-only restrictions)', () => {
       expect(stagedField).not.toHaveProperty('additionalParameters');
     });
 
-    it('hides type selector for doc-only fields (status: unmapped without type)', async () => {
+    it('hides type selector for doc-only fields when isDescriptionOnlyMode is true', async () => {
       // This tests the scenario where:
       // 1. User previously edited a field, set it as a doc-only override with just a description
       // 2. The field is stored as { status: 'unmapped', description: '...' } without a type
-      // 3. When re-editing, the type selector should be hidden (description-only mode)
+      // 3. When re-editing via "Edit description" action (isDescriptionOnlyMode: true),
+      //    the type selector should be hidden
       const docOnlyFieldWithoutType: SchemaField = {
         name: 'attributes.documented_field',
         parent: 'logs.test',
@@ -215,7 +223,10 @@ describe('SchemaEditorFlyout (description-only restrictions)', () => {
         // No type property - this is how doc-only overrides are stored
       };
 
-      const { onStage, stream } = renderFlyout({ field: docOnlyFieldWithoutType });
+      const { onStage, stream } = renderFlyout({
+        field: docOnlyFieldWithoutType,
+        isDescriptionOnlyMode: true,
+      });
 
       // The type selector should NOT be shown (description-only mode)
       expect(screen.queryByTestId('streamsAppFieldFormTypeSelect')).not.toBeInTheDocument();
@@ -242,6 +253,22 @@ describe('SchemaEditorFlyout (description-only restrictions)', () => {
         status: 'unmapped',
         description: 'Updated description',
       });
+    });
+
+    it('shows type selector for unmapped fields when isDescriptionOnlyMode is false (default)', async () => {
+      // When opening via "Map field" action (isDescriptionOnlyMode defaults to false),
+      // the type selector should be visible so users can map the field
+      const unmappedField: SchemaField = {
+        name: 'attributes.unmapped_field',
+        parent: 'logs.test',
+        status: 'unmapped',
+        // No description - this is a detected field from ES
+      };
+
+      renderFlyout({ field: unmappedField }); // isDescriptionOnlyMode defaults to false
+
+      // Type selector should be visible for wired streams when mapping a field
+      expect(screen.getByTestId('streamsAppFieldFormTypeSelect')).toBeInTheDocument();
     });
   });
 
