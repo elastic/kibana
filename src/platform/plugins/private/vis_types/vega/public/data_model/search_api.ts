@@ -39,18 +39,17 @@ export const extendSearchParamsWithRuntimeFields = async (
   indexPatternString?: string
 ) => {
   if (indexPatternString) {
-    let runtimeMappings = requestParams.runtime_mappings ?? requestParams.body?.runtime_mappings;
-
-    if (!runtimeMappings) {
-      const indexPattern = (await indexPatterns.find(indexPatternString, 1)).find(
-        (index) => index.title === indexPatternString
-      );
-      runtimeMappings = indexPattern?.getRuntimeMappings();
+    if (requestParams.runtime_mappings ?? requestParams.body?.runtime_mappings) {
+      return requestParams;
     }
+
+    const indexPattern = (await indexPatterns.find(indexPatternString, 1)).find(
+      (index) => index.title === indexPatternString
+    );
 
     return {
       ...requestParams,
-      runtime_mappings: runtimeMappings,
+      runtime_mappings: indexPattern?.getRuntimeMappings(),
     };
   }
 

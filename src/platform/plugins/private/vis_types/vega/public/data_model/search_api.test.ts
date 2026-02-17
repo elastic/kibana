@@ -94,9 +94,6 @@ describe('extendSearchParamsWithRuntimeFields', () => {
             "test": Object {},
           },
         },
-        "runtime_mappings": Object {
-          "test": Object {},
-        },
       }
     `);
   });
