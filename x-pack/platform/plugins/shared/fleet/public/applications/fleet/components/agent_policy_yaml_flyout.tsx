@@ -28,7 +28,7 @@ import {
 
 import { MAX_FLYOUT_WIDTH } from '../constants';
 import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useStartServices } from '../hooks';
-import { Loading } from '../components';
+import { Loading } from '.';
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../services';
 import { API_VERSIONS } from '../../../../common/constants';
 import { splitVersionSuffixFromPolicyId } from '../../../../common/services/version_specific_policies_utils';
