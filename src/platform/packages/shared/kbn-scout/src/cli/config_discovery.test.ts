@@ -398,7 +398,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     ).toBe(true);
   });
 
-    it('excludes configs listed in scout_ci_config.yml when running in CI', () => {
+  it('excludes configs listed in scout_ci_config.yml when running in CI', () => {
     const originalCi = process.env.CI;
     process.env.CI = 'true';
 
