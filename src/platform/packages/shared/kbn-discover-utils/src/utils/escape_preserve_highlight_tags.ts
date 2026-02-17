@@ -8,9 +8,14 @@
  */
 
 import { escape } from 'lodash';
-import { highlightHtmlTags } from '@kbn/field-formats-plugin/common';
 
-const HIGHLIGHT_TAGS_REGEX = new RegExp(`${highlightHtmlTags.pre}|${highlightHtmlTags.post}`, 'g');
+// TODO: These constants are duplicated from @kbn/field-formats-plugin (html_tags.ts).
+// They are kept locally because packages cannot depend on plugins. This is a temporary
+// workaround until we reach an agreement on how to handle formatted/highlighted content
+// across packages and plugins.
+const HIGHLIGHT_PRE_TAG = '<mark class="ffSearch__highlight">';
+const HIGHLIGHT_POST_TAG = '</mark>';
+const HIGHLIGHT_TAGS_REGEX = new RegExp(`${HIGHLIGHT_PRE_TAG}|${HIGHLIGHT_POST_TAG}`, 'g');
 
 export function escapeAndPreserveHighlightTags(value: string): string {
   const markTags: string[] = [];

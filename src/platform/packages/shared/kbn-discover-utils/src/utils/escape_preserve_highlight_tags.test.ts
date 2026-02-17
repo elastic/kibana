@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { highlightHtmlTags } from '@kbn/field-formats-plugin/common';
 import { escapeAndPreserveHighlightTags } from './escape_preserve_highlight_tags';
 
-const { pre: PRE, post: POST } = highlightHtmlTags;
+// Must match the html tags defined in @kbn/field-formats-plugin (html_tags.ts)
+const PRE = '<mark class="ffSearch__highlight">';
+const POST = '</mark>';
 
 describe('escapeAndPreserveHighlightTags', () => {
   it('escapes HTML when there are no highlight tags', () => {
