@@ -78,21 +78,14 @@ export function SloDefinitionSelector({
     if (initialSloDetails && initialSloId) {
       const alreadyInList = fromDefinitions.some((opt) => opt.value === initialSloDetails.id);
       if (!alreadyInList) {
-        return [
-          { label: initialSloDetails.name, value: initialSloDetails.id },
-          ...fromDefinitions,
-        ];
+        return [{ label: initialSloDetails.name, value: initialSloDetails.id }, ...fromDefinitions];
       }
     }
     return fromDefinitions;
   }, [definitionsData, initialSloDetails, initialSloId]);
 
   useEffect(() => {
-    if (
-      initialSloId &&
-      initialSloDetails &&
-      !initialSelectionApplied.current
-    ) {
+    if (initialSloId && initialSloDetails && !initialSelectionApplied.current) {
       initialSelectionApplied.current = true;
       const definitionItem = sloDetailsToDefinitionItem(initialSloDetails);
       setSelectedOptions([{ label: initialSloDetails.name, value: initialSloDetails.id }]);

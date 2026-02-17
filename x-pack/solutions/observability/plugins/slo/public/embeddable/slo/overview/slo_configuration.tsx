@@ -55,7 +55,12 @@ interface GroupConfigurationProps {
   initialInput?: GroupSloCustomInput;
 }
 
-function SingleSloConfiguration({ initialInput, overviewMode, onCreate, onCancel }: SingleConfigurationProps) {
+function SingleSloConfiguration({
+  initialInput,
+  overviewMode,
+  onCreate,
+  onCancel,
+}: SingleConfigurationProps) {
   const [selectedSloDefinition, setSelectedSloDefinition] = useState<
     SearchSLODefinitionItem | undefined
   >();

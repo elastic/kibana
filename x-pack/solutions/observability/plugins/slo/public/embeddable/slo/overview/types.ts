@@ -65,9 +65,7 @@ export interface HasSloGroupOverviewConfig {
   updateSloGroupOverviewConfig: (next: GroupSloCustomInput) => void;
 }
 
-export const apiHasSingleOverviewConfig = (
-  api: unknown | null
-): api is HasSingleOverviewConfig => {
+export const apiHasSingleOverviewConfig = (api: unknown | null): api is HasSingleOverviewConfig => {
   return Boolean(
     api &&
       typeof (api as HasSingleOverviewConfig).getSingleOverviewConfig === 'function' &&

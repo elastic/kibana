@@ -42,9 +42,9 @@ export function SloInstanceSelector({
   hasError,
   initialInstanceId,
 }: Props) {
-  const [selectedOptions, setSelectedOptions] = useState<
-    Array<EuiComboBoxOptionOption<string>>
-  >(() => (initialInstanceId ? [getInstanceOption(initialInstanceId)] : []));
+  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
+    () => (initialInstanceId ? [getInstanceOption(initialInstanceId)] : [])
+  );
   const [search, setSearch] = useState<string>();
   const [debouncedSearch, setDebouncedSearch] = useState(search);
   useDebounce(() => setDebouncedSearch(search), 500, [search]);
