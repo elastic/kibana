@@ -8,12 +8,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 
 export const CUSTOM_TRIGGER_ID = 'example.custom_trigger' as const;
 
 export const customTriggerEventSchema = z.object({
-  message: z.string(),
-  source: z.string().optional(),
+  message: z.string().describe('The message text for the event.'),
+  source: z.string().optional().describe('The source that emitted the event.'),
 });
 
 export type CustomTriggerEvent = z.infer<typeof customTriggerEventSchema>;
+
+/** Shared trigger definition (id + eventSchema) for use by public and server. */
+export const commonCustomTriggerDefinition: CommonTriggerDefinition<
+  typeof customTriggerEventSchema
+> = {
+  id: CUSTOM_TRIGGER_ID,
+  eventSchema: customTriggerEventSchema,
+};

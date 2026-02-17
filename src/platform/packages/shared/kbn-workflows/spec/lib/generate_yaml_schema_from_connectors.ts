@@ -59,7 +59,7 @@ export function generateYamlSchemaFromConnectors(
   }
 
   const triggerSchema = getTriggerSchema(triggers);
-  const workflowBaseWithTriggers = WorkflowSchemaBase.omit({ triggers: true }).extend({
+  const workflowBaseWithTriggers = WorkflowSchemaBase.extend({
     triggers: z.array(triggerSchema).min(1),
   });
 

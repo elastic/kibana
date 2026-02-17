@@ -8,6 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 
 export const ENTITY_UPDATED_TRIGGER_ID = 'entity.updated' as const;
 
@@ -17,3 +18,11 @@ export const entityUpdatedTriggerEventSchema = z.object({
 });
 
 export type EntityUpdatedTriggerEvent = z.infer<typeof entityUpdatedTriggerEventSchema>;
+
+/** Shared trigger definition (id + eventSchema) for use by public and server. */
+export const commonEntityUpdatedTriggerDefinition: CommonTriggerDefinition<
+  typeof entityUpdatedTriggerEventSchema
+> = {
+  id: ENTITY_UPDATED_TRIGGER_ID,
+  eventSchema: entityUpdatedTriggerEventSchema,
+};

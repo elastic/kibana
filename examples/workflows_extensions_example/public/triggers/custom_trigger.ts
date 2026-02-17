@@ -10,12 +10,12 @@
 import { i18n } from '@kbn/i18n';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import React from 'react';
-import { CUSTOM_TRIGGER_ID, customTriggerEventSchema } from '../../common/triggers/custom_trigger';
+import { commonCustomTriggerDefinition } from '../../common/triggers/custom_trigger';
 
 export const customTriggerPublicDefinition: PublicTriggerDefinition<
-  typeof customTriggerEventSchema
+  typeof commonCustomTriggerDefinition.eventSchema
 > = {
-  id: CUSTOM_TRIGGER_ID,
+  ...commonCustomTriggerDefinition,
   title: i18n.translate('workflowsExtensionsExample.customTrigger.title', {
     defaultMessage: 'Custom trigger',
   }),
@@ -26,5 +26,4 @@ export const customTriggerPublicDefinition: PublicTriggerDefinition<
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/star').then(({ icon }) => ({ default: icon }))
   ),
-  eventSchema: customTriggerEventSchema,
 };

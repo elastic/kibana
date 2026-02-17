@@ -517,7 +517,6 @@ const WorkflowSchemaBase = z.object({
   settings: WorkflowSettingsSchema.optional(),
   enabled: z.boolean().default(true),
   tags: z.array(z.string()).optional(),
-  triggers: z.array(TriggerSchema).min(1),
   inputs: z
     .union([
       // New JSON Schema format
@@ -530,7 +529,9 @@ const WorkflowSchemaBase = z.object({
   steps: z.array(StepSchema).min(1),
 });
 
-export const WorkflowSchema = WorkflowSchemaBase.transform((data) => {
+export const WorkflowSchema = WorkflowSchemaBase.extend({
+  triggers: z.array(TriggerSchema).min(1),
+}).transform((data) => {
   // Transform inputs from legacy array format to JSON Schema format
   let normalizedInputs: z.infer<typeof JsonModelSchema> | undefined;
   if (data.inputs) {

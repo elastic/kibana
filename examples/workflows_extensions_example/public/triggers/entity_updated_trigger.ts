@@ -9,20 +9,16 @@
 
 import { i18n } from '@kbn/i18n';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
-import {
-  ENTITY_UPDATED_TRIGGER_ID,
-  entityUpdatedTriggerEventSchema,
-} from '../../common/triggers/entity_updated_trigger';
+import { commonEntityUpdatedTriggerDefinition } from '../../common/triggers/entity_updated_trigger';
 
 export const entityUpdatedTriggerPublicDefinition: PublicTriggerDefinition<
-  typeof entityUpdatedTriggerEventSchema
+  typeof commonEntityUpdatedTriggerDefinition.eventSchema
 > = {
-  id: ENTITY_UPDATED_TRIGGER_ID,
+  ...commonEntityUpdatedTriggerDefinition,
   title: i18n.translate('workflowsExtensionsExample.entityUpdated.title', {
     defaultMessage: 'Entity updated',
   }),
   description: i18n.translate('workflowsExtensionsExample.entityUpdated.description', {
     defaultMessage: 'Emitted when an entity is updated.',
   }),
-  eventSchema: entityUpdatedTriggerEventSchema,
 };
