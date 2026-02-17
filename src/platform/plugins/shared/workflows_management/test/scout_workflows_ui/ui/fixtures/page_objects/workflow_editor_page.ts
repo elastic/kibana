@@ -227,17 +227,6 @@ export class WorkflowEditorPage {
   }
 
   /**
-   * Get all visible suggestion labels from the suggest widget.
-   */
-  async getSuggestionLabels(): Promise<string[]> {
-    const suggestWidget = this.getYamlEditorSuggestWidget();
-    await suggestWidget.waitFor({ state: 'visible', timeout: 5000 });
-    const options = await suggestWidget.getByRole('option').all();
-    const labels = await Promise.all(options.map((opt) => opt.getAttribute('aria-label')));
-    return labels.filter((label): label is string => label !== null);
-  }
-
-  /**
    * Returns a locator for the current Monaco error markers inside the given
    * editor container.
    *
