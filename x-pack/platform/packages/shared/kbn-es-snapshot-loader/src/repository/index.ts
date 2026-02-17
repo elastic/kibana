@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './types';
+export type * from './types';
 export * from './gcs_repository';
 export * from './url_repository';
