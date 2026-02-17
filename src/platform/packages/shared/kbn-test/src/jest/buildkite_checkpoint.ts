@@ -15,7 +15,7 @@
 //
 // Used by both run.ts (single config) and run_all.ts (multi-config).
 
-import { execFile as _execFile } from 'child_process';
+import { execFile as _execFile, execFileSync } from 'child_process';
 import { createHash } from 'crypto';
 
 function execBuildkiteAgent(args: string[]): Promise<{ stdout: string }> {
@@ -53,6 +53,21 @@ export function getCheckpointKey(config: string): string {
 export async function markConfigCompleted(config: string): Promise<void> {
   try {
     await execBuildkiteAgent(['meta-data', 'set', getCheckpointKey(config), 'done']);
+  } catch {
+    // Best-effort: ignore errors writing checkpoint
+  }
+}
+
+/**
+ * Synchronous version of markConfigCompleted.
+ * Intended for use inside process.on('exit') handlers where async is not supported.
+ * Best-effort: errors are silently ignored.
+ */
+export function markConfigCompletedSync(config: string): void {
+  try {
+    execFileSync('buildkite-agent', ['meta-data', 'set', getCheckpointKey(config), 'done'], {
+      stdio: 'pipe',
+    });
   } catch {
     // Best-effort: ignore errors writing checkpoint
   }
