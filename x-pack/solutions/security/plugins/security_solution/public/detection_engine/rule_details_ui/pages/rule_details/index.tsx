@@ -707,10 +707,7 @@ export const RuleDetailsPage = connector(
                         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                           <EuiFlexItem grow={false}>
                             {rule != null && (
-                              <AddRuleAttachmentToChatButton
-                                rule={rule}
-                                pathway="rule_details"
-                              />
+                              <AddRuleAttachmentToChatButton rule={rule} pathway="rule_details" />
                             )}
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
