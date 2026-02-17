@@ -174,6 +174,8 @@ export class AutomaticImportService {
           title: integration.metadata.title,
           logo: integration.metadata.logo,
           description: integration.metadata.description,
+          version: integration.metadata.version,
+          createdBy: integration.created_by,
           status: integration.status as TaskStatus,
           dataStreams: dataStreamsResponses,
         };

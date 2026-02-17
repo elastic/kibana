@@ -17,10 +17,12 @@ import {
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { AllIntegrationsResponseIntegration, TaskStatus } from '../../../common';
 import { useGetAllIntegrations } from '../../common';
-import { AllIntegrationsResponseIntegration, TaskStatus } from '@kbn/automatic-import-v2-plugin/common';
 
-function getStatusColor(status: TaskStatus): 'default' | 'success' | 'danger' | 'warning' | 'hollow' {
+function getStatusColor(
+  status: TaskStatus
+): 'default' | 'success' | 'danger' | 'warning' | 'hollow' {
   switch (status) {
     case 'approved':
     case 'completed':
@@ -71,7 +73,9 @@ export const ManageIntegrations = React.memo(() => {
             defaultMessage="Status"
           />
         ),
-        render: (status: TaskStatus) => <EuiBadge color={getStatusColor(status)}>{status}</EuiBadge>,
+        render: (status: TaskStatus) => (
+          <EuiBadge color={getStatusColor(status)}>{status}</EuiBadge>
+        ),
       },
     ],
     []
@@ -92,6 +96,7 @@ export const ManageIntegrations = React.memo(() => {
           <EuiEmptyPrompt icon={<EuiLoadingSpinner size="xl" />} />
         ) : isError ? (
           <EuiCallOut
+            announceOnMount
             color="danger"
             iconType="error"
             title={
@@ -116,4 +121,3 @@ export const ManageIntegrations = React.memo(() => {
   );
 });
 ManageIntegrations.displayName = 'ManageIntegrations';
-

@@ -91,7 +91,6 @@ const StickySidebar = styled(EuiFlexItem)`
 export interface SidebarProps extends Props {
   CreateIntegrationCardButton?: React.ComponentType<{ compressed?: boolean }>;
   hasCreatedIntegrations?: boolean;
-  manageIntegrationsHref?: string;
   onManageIntegrationsClick?: (ev: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
@@ -102,7 +101,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCategoryChange,
   CreateIntegrationCardButton,
   hasCreatedIntegrations,
-  manageIntegrationsHref,
   onManageIntegrationsClick,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -128,7 +126,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {hasCreatedIntegrations ? (
               <EuiLink
                 color="text"
-                href={manageIntegrationsHref}
                 onClick={onManageIntegrationsClick}
                 data-test-subj="manageCreatedIntegrationsLink"
                 css={{

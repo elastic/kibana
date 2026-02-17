@@ -6,12 +6,7 @@
  */
 import React, { useState } from 'react';
 
-import {
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
 import useDebounce from 'react-use/lib/useDebounce';

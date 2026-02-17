@@ -17,6 +17,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiPopover,
@@ -41,10 +42,9 @@ import { NoDataPrompt } from './components/no_data_prompt';
 
 const CreateNewIntegrationButton: React.FC = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { getHref, getAbsolutePath } = useLink();
+  const { getAbsolutePath } = useLink();
   const history = useHistory();
 
-  const createHref = getHref('integration_create');
   const uploadHref = getAbsolutePath('/app/integrations/upload');
 
   const onCreateClick = useCallback(() => {
@@ -63,11 +63,7 @@ const CreateNewIntegrationButton: React.FC = () => {
           fill
           size="s"
           iconType="plusInCircle"
-          href={createHref}
-          onClick={(ev: React.MouseEvent<HTMLAnchorElement>) => {
-            ev.preventDefault();
-            onCreateClick();
-          }}
+          onClick={() => onCreateClick()}
           style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
           data-test-subj="createNewIntegrationBtn"
         >
@@ -140,22 +136,22 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
 
   const useGetAllIntegrationsHook =
     automaticImportVTwo?.hooks.useGetAllIntegrations ?? useEmptyAllIntegrations;
-  const { integrations, isLoading: isLoadingCreatedIntegrations, isError: isCreatedIntegrationsError } =
-    useGetAllIntegrationsHook();
+  const {
+    integrations,
+    isLoading: isLoadingCreatedIntegrations,
+    isError: isCreatedIntegrationsError,
+  } = useGetAllIntegrationsHook();
   const hasCreatedIntegrations = integrations.length > 0;
   const isManageIntegrationsView = useMemo(() => {
     const params = new URLSearchParams(search);
     return params.get('view') === 'manage';
   }, [search]);
 
-  const manageIntegrationsHref = useMemo(
-    () => {
-      const params = new URLSearchParams(search);
-      params.set('view', 'manage');
-      return `${pathname}?${params.toString()}`;
-    },
-    [pathname, search]
-  );
+  const manageIntegrationsHref = useMemo(() => {
+    const params = new URLSearchParams(search);
+    params.set('view', 'manage');
+    return `${pathname}?${params.toString()}`;
+  }, [pathname, search]);
   const onManageIntegrationsClick = useCallback(
     (ev: React.MouseEvent<HTMLAnchorElement>) => {
       ev.preventDefault();
@@ -218,7 +214,6 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
           automaticImportVTwo?.components.CreateIntegrationSideCardButton
         }
         hasCreatedIntegrations={hasCreatedIntegrations}
-        manageIntegrationsHref={manageIntegrationsHref}
         onManageIntegrationsClick={onManageIntegrationsClick}
       />
       <EuiFlexItem grow={5}>
@@ -271,8 +266,11 @@ function useEmptyAllIntegrations() {
 interface CreatedIntegrationRow {
   integrationId: string;
   title: string;
+  logo?: string;
   totalDataStreamCount: number;
   successfulDataStreamCount: number;
+  version?: string;
+  createdBy: string;
   status: string;
 }
 
@@ -308,19 +306,30 @@ const ManageIntegrationsTable: React.FC<{
             defaultMessage="Integration name"
           />
         ),
-        render: (title: string, item: CreatedIntegrationRow) => {
-          return (
-            <EuiLink
-              onClick={() => {
-                application.navigateToApp('automaticImportVTwo', {
-                  path: `/integrations/${item.integrationId}`,
-                });
-              }}
-            >
-              {title}
-            </EuiLink>
-          );
-        },
+        render: (title: string, item: CreatedIntegrationRow) => (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            {item.logo ? (
+              <EuiFlexItem grow={false}>
+                <img src={`data:image/svg+xml;base64,${item.logo}`} alt="" width={24} height={24} />
+              </EuiFlexItem>
+            ) : (
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="package" size="m" aria-hidden={true} />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                onClick={() => {
+                  application.navigateToApp('automaticImportVTwo', {
+                    path: `/integrations/${item.integrationId}`,
+                  });
+                }}
+              >
+                {title}
+              </EuiLink>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
       },
       {
         name: (
@@ -336,6 +345,25 @@ const ManageIntegrationsTable: React.FC<{
         ),
       },
       {
+        field: 'version',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epmList.manageIntegrations.table.version"
+            defaultMessage="Version"
+          />
+        ),
+        render: (version: string | undefined) => version ?? '-',
+      },
+      {
+        field: 'createdBy',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epmList.manageIntegrations.table.createdBy"
+            defaultMessage="Created by"
+          />
+        ),
+      },
+      {
         field: 'status',
         name: (
           <FormattedMessage
@@ -346,7 +374,7 @@ const ManageIntegrationsTable: React.FC<{
         render: (status: string) => <EuiBadge color={getStatusColor(status)}>{status}</EuiBadge>,
       },
     ],
-    []
+    [application]
   );
 
   if (isLoading) {
@@ -356,6 +384,7 @@ const ManageIntegrationsTable: React.FC<{
   if (isError) {
     return (
       <EuiCallOut
+        announceOnMount
         color="danger"
         iconType="error"
         title={

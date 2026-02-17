@@ -32,6 +32,35 @@ export const DeleteDataStreamRequestParams = z.object({
 });
 export type DeleteDataStreamRequestParamsInput = z.input<typeof DeleteDataStreamRequestParams>;
 
+export type GetDataStreamResultsRequestParams = z.infer<typeof GetDataStreamResultsRequestParams>;
+export const GetDataStreamResultsRequestParams = z.object({
+  /**
+   * The integration identifier
+   */
+  integration_id: NonEmptyString,
+  /**
+   * The data stream identifier
+   */
+  data_stream_id: NonEmptyString,
+});
+export type GetDataStreamResultsRequestParamsInput = z.input<
+  typeof GetDataStreamResultsRequestParams
+>;
+
+export type GetDataStreamResultsResponse = z.infer<typeof GetDataStreamResultsResponse>;
+export const GetDataStreamResultsResponse = z
+  .object({
+    /**
+     * The ingest pipeline as a JSON string.
+     */
+    ingest_pipeline: NonEmptyString,
+    /**
+     * Results array as JSON objects.
+     */
+    results: z.array(z.object({}).catchall(z.unknown())),
+  })
+  .strict();
+
 export type StopAutoImportDataStreamRequestParams = z.infer<
   typeof StopAutoImportDataStreamRequestParams
 >;
