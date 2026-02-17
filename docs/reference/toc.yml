@@ -81,6 +81,7 @@ toc:
           - file: connectors-kibana/notion-action-type.md
           - file: connectors-kibana/sharepoint-online-action-type.md
           - file: connectors-kibana/shodan-action-type.md
+          - file: connectors-kibana/slack-v2-action-type.md
           - file: connectors-kibana/urlvoid-action-type.md
           - file: connectors-kibana/virustotal-action-type.md
       - file: connectors-kibana/pre-configured-connectors.md
