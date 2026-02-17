@@ -17,7 +17,7 @@ import type {
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { getMetricsIndices } from '../../utils/get_metrics_indices';
 import { getTypedSearch } from '../../utils/get_typed_search';
-import { parseDatemath } from '../../utils/time';
+import { parseDatemath, toMilliseconds } from '../../utils/time';
 
 interface ServiceFromIndex {
   serviceName: string;
@@ -183,7 +183,7 @@ export async function getToolHandler({
     return [
       {
         ...service,
-        latency: service.latency ? service.latency / 1000 : undefined,
+        latency: toMilliseconds(service.latency ?? null),
       },
     ];
   });
