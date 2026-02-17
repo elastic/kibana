@@ -7,17 +7,14 @@
 
 import { useCallback, useMemo } from 'react';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
-import { uniq } from 'lodash';
 import { useAddToExistingCase } from '../../../../../attack_discovery/pages/results/take_action/use_add_to_existing_case';
 import { useAddToNewCase } from '../../../../../attack_discovery/pages/results/take_action/use_add_to_case';
 import { APP_ID } from '../../../../../../common';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
-import {
-  ALERT_ATTACK_DISCOVERY_ALERT_IDS,
-  ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT,
-} from '../constants';
+import { ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT } from '../constants';
 import type { BulkAttackActionItems } from '../types';
+import { extractRelatedDetectionAlertIds } from '../utils/extract_related_detection_alert_ids';
 
 export interface UseBulkAttackCaseItemsProps {
   /** Title used to initialize "create case" flyout */
@@ -59,16 +56,7 @@ export const useBulkAttackCaseItems = ({
 
   const onAddToNewCaseClick = useCallback<Required<BulkActionsConfig>['onClick']>(
     async (alertItems) => {
-      const alertIds = uniq(
-        alertItems.flatMap((item) => {
-          const value = item.data.find(
-            (data) => data.field === ALERT_ATTACK_DISCOVERY_ALERT_IDS
-          )?.value;
-          return Array.isArray(value)
-            ? value.filter((id): id is string => typeof id === 'string')
-            : [];
-        })
-      );
+      const alertIds = extractRelatedDetectionAlertIds(alertItems);
       const markdownComments = alertItems
         .map((item) => {
           const value = item.data.find(
@@ -89,16 +77,7 @@ export const useBulkAttackCaseItems = ({
 
   const onAddToExistingCaseClick = useCallback<Required<BulkActionsConfig>['onClick']>(
     async (alertItems) => {
-      const alertIds = uniq(
-        alertItems.flatMap((item) => {
-          const value = item.data.find(
-            (data) => data.field === ALERT_ATTACK_DISCOVERY_ALERT_IDS
-          )?.value;
-          return Array.isArray(value)
-            ? value.filter((id): id is string => typeof id === 'string')
-            : [];
-        })
-      );
+      const alertIds = extractRelatedDetectionAlertIds(alertItems);
       const markdownComments = alertItems
         .map((item) => {
           const value = item.data.find(
