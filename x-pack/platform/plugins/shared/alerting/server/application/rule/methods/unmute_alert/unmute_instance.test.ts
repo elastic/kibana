@@ -40,6 +40,7 @@ const kibanaVersion = 'v7.10.0';
 const alertsService = {
   muteAlertInstance: jest.fn(),
   unmuteAlertInstance: jest.fn(),
+  clearSnoozeAlertInstance: jest.fn(),
 };
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
@@ -74,6 +75,7 @@ beforeEach(() => {
   (auditLogger.log as jest.Mock).mockClear();
   alertsService.muteAlertInstance.mockClear();
   alertsService.unmuteAlertInstance.mockClear();
+  alertsService.clearSnoozeAlertInstance.mockClear();
   (rulesClientParams.getAlertIndicesAlias as jest.Mock).mockReturnValue(['.alerts-default']);
 });
 

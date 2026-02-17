@@ -54,6 +54,7 @@ describe('muteAlertRoute', () => {
     expect(rulesClient.muteInstance.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "body": Object {},
           "params": Object {
             "alertId": "1",
             "alertInstanceId": "2",
