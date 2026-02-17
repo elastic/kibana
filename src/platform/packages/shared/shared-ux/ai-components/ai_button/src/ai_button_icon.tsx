@@ -8,10 +8,9 @@
  */
 
 import React from 'react';
+import type { DistributiveOmit } from '@elastic/eui';
 
 import { AiButtonBase, type AiButtonBaseProps } from './ai_button_base';
-
-type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 
 export type AiButtonIconProps = DistributiveOmit<
   Extract<AiButtonBaseProps, { iconOnly: true }>,

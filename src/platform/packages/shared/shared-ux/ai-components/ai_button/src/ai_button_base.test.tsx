@@ -37,12 +37,12 @@ beforeEach(() => {
 });
 
 describe('<AiButtonBase />', () => {
-  it('base variant renders label text', () => {
+  it('renders', () => {
     render(<AiButtonBase variant="base">AI Assistant</AiButtonBase>);
 
     expect(screen.getByText('AI Assistant')).toBeInTheDocument();
     expect(mockUseAiButtonGradientStyles).toHaveBeenCalledWith(
-      expect.objectContaining({ fill: false, variant: 'base' })
+      expect.objectContaining({ isFilled: false, variant: 'base' })
     );
     expect(mockUseSvgAiGradient).toHaveBeenCalledWith(
       expect.objectContaining({ isFilled: false, variant: 'base' })
@@ -53,7 +53,7 @@ describe('<AiButtonBase />', () => {
     render(<AiButtonBase variant="accent">AI Assistant</AiButtonBase>);
 
     expect(mockUseAiButtonGradientStyles).toHaveBeenCalledWith(
-      expect.objectContaining({ fill: true, variant: 'accent' })
+      expect.objectContaining({ isFilled: true, variant: 'accent' })
     );
     expect(mockUseSvgAiGradient).toHaveBeenCalledWith(
       expect.objectContaining({ isFilled: true, variant: 'accent' })
@@ -65,7 +65,7 @@ describe('<AiButtonBase />', () => {
 
     expect(container.querySelector('.euiButtonEmpty')).toBeTruthy();
     expect(mockUseAiButtonGradientStyles).toHaveBeenCalledWith(
-      expect.objectContaining({ fill: false, variant: 'empty' })
+      expect.objectContaining({ isFilled: false, variant: 'empty' })
     );
     expect(mockUseSvgAiGradient).toHaveBeenCalledWith(
       expect.objectContaining({ isFilled: false, variant: 'empty' })

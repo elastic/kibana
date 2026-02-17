@@ -87,7 +87,14 @@ export const AiButtonBase = (props: AiButtonBaseProps) => {
     iconType === 'aiAssistantLogo' ? AiAssistantLogo : iconType;
 
   if (props.iconOnly === true) {
-    const { iconType, css: userCss, display: _display, ...rest } = props;
+    const {
+      iconType,
+      css: userCss,
+      display: _display,
+      iconOnly: _iconOnly,
+      variant: _variant,
+      ...rest
+    } = props;
 
     return (
       <>
