@@ -68,7 +68,6 @@ export const ensureAlertsDataViewProfile = async ({
 
       logger.info(`Created alerts data view anonymization profile in space: ${namespace}`);
     }
-
   } catch (err) {
     // If another node created it concurrently, that's fine
     if ((err as any).statusCode === 409) {
