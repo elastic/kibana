@@ -29,7 +29,7 @@ export interface ProfileFlyoutContextValue {
   regexRulesError?: string;
   nerRulesError?: string;
   submitError?: ProfilesApiError;
-  conflictProfileId?: string;
+  hasConflict?: boolean;
   onNameChange: (name: string) => void;
   onDescriptionChange: (description: string) => void;
   onTargetTypeChange: (targetType: TargetType) => void;
@@ -37,7 +37,6 @@ export interface ProfileFlyoutContextValue {
   onFieldRulesChange: (rules: FieldRule[]) => void;
   onRegexRulesChange: (rules: RegexRule[]) => void;
   onNerRulesChange: (rules: NerRule[]) => void;
-  onNavigateToConflictProfile: (profileId: string) => void;
   listTrustedNerModels?: () => Promise<TrustedNerModelOption[]>;
   fetchPreviewDocument?: FetchPreviewDocument;
   onCancel: () => void;

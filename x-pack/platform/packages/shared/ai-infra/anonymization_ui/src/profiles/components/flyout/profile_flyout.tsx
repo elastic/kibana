@@ -52,7 +52,7 @@ export interface ProfileFlyoutProps {
   regexRulesError?: string;
   nerRulesError?: string;
   submitError?: ProfilesApiError;
-  conflictProfileId?: string;
+  hasConflict?: boolean;
   isSubmitting: boolean;
   onNameChange: (name: string) => void;
   onDescriptionChange: (description: string) => void;
@@ -61,7 +61,6 @@ export interface ProfileFlyoutProps {
   onFieldRulesChange: (rules: FieldRule[]) => void;
   onRegexRulesChange: (rules: RegexRule[]) => void;
   onNerRulesChange: (rules: NerRule[]) => void;
-  onNavigateToConflictProfile: (profileId: string) => void;
   listTrustedNerModels?: () => Promise<TrustedNerModelOption[]>;
   fetchPreviewDocument?: FetchPreviewDocument;
   fetch: AnonymizationUiServices['http']['fetch'];

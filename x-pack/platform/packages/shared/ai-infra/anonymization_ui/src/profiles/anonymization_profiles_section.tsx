@@ -74,7 +74,6 @@ export const AnonymizationProfilesSection = ({
     closeFlyout,
     closeDeleteModal,
     confirmDelete,
-    openProfileById,
     submitFlyout,
     onCreateProfile,
     onEditProfile,
@@ -179,7 +178,7 @@ export const AnonymizationProfilesSection = ({
           regexRulesError={form.validationErrors.regexRules}
           nerRulesError={form.validationErrors.nerRules}
           submitError={form.submitError}
-          conflictProfileId={flyoutState.mode === 'create' ? createConflictProfileId : undefined}
+          hasConflict={flyoutState.mode === 'create' && Boolean(createConflictProfileId)}
           isSubmitting={form.isSubmitting}
           onNameChange={form.setName}
           onDescriptionChange={form.setDescription}
@@ -188,7 +187,6 @@ export const AnonymizationProfilesSection = ({
           onFieldRulesChange={form.setFieldRules}
           onRegexRulesChange={form.setRegexRules}
           onNerRulesChange={form.setNerRules}
-          onNavigateToConflictProfile={openProfileById}
           listTrustedNerModels={listTrustedNerModels}
           fetchPreviewDocument={fetchPreviewDocument}
           fetch={fetch}

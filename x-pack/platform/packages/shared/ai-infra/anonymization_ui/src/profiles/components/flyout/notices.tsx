@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useProfileFlyoutContext } from './context';
 
 export const ProfileFlyoutNotices = () => {
-  const { submitError, conflictProfileId, onNavigateToConflictProfile } = useProfileFlyoutContext();
+  const { submitError, hasConflict } = useProfileFlyoutContext();
 
   return (
     <>
@@ -27,7 +27,7 @@ export const ProfileFlyoutNotices = () => {
           <EuiSpacer size="m" />
         </>
       )}
-      {conflictProfileId && (
+      {hasConflict && (
         <>
           <EuiCallOut
             announceOnMount
@@ -36,17 +36,7 @@ export const ProfileFlyoutNotices = () => {
             title={i18n.translate('anonymizationUi.profiles.flyout.conflict.title', {
               defaultMessage: 'A profile already exists for this target',
             })}
-          >
-            <EuiButtonEmpty
-              size="s"
-              onClick={() => onNavigateToConflictProfile(conflictProfileId)}
-              data-test-subj="anonymizationProfilesViewConflictingProfile"
-            >
-              {i18n.translate('anonymizationUi.profiles.flyout.conflict.openExisting', {
-                defaultMessage: 'Open existing profile',
-              })}
-            </EuiButtonEmpty>
-          </EuiCallOut>
+          />
           <EuiSpacer size="m" />
         </>
       )}

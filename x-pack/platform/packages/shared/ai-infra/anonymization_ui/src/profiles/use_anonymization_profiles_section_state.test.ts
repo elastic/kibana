@@ -59,7 +59,8 @@ const createDeleteFlowMock = (
 
 const createProfileFormMock = (
   submit: jest.Mock = jest.fn().mockResolvedValue(undefined),
-  submitError?: unknown
+  submitError?: unknown,
+  reset: jest.Mock = jest.fn()
 ): ReturnType<typeof useProfileForm> =>
   ({
     values: {
@@ -75,6 +76,7 @@ const createProfileFormMock = (
     submitError,
     isSubmitting: false,
     isEdit: false,
+    reset,
     setName: jest.fn(),
     setDescription: jest.fn(),
     setTargetType: jest.fn(),
@@ -132,10 +134,15 @@ describe('useAnonymizationProfilesSectionState', () => {
 
   it('handles create submit success and calls onCreateSuccess', async () => {
     const onCreateSuccess = jest.fn();
+    const reset = jest.fn();
     jest
       .mocked(useProfileForm)
       .mockReturnValue(
-        createProfileFormMock(jest.fn().mockResolvedValue({ profile: { id: 'p1' } }))
+        createProfileFormMock(
+          jest.fn().mockResolvedValue({ profile: { id: 'p1' } }),
+          undefined,
+          reset
+        )
       );
 
     const { result } = renderHook(() =>
@@ -158,7 +165,8 @@ describe('useAnonymizationProfilesSectionState', () => {
     });
 
     expect(onCreateSuccess).toHaveBeenCalledTimes(1);
-    expect(result.current.flyoutState).toBeNull();
+    expect(reset).toHaveBeenCalledTimes(1);
+    expect(result.current.flyoutState).toEqual({ mode: 'create' });
   });
 
   it('stores conflict profile id and calls onCreateConflict', async () => {
@@ -166,7 +174,7 @@ describe('useAnonymizationProfilesSectionState', () => {
     jest.mocked(useProfileForm).mockReturnValue(
       createProfileFormMock(
         jest.fn().mockResolvedValue({
-          conflictProfileId: 'existing-profile-id',
+          isConflict: true,
         })
       )
     );
@@ -189,7 +197,7 @@ describe('useAnonymizationProfilesSectionState', () => {
       await result.current.submitFlyout();
     });
 
-    expect(result.current.createConflictProfileId).toBe('existing-profile-id');
+    expect(result.current.createConflictProfileId).toBe('conflict');
     expect(onCreateConflict).toHaveBeenCalledTimes(1);
   });
 

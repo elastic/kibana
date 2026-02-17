@@ -285,10 +285,10 @@ describe('useProfileForm', () => {
     });
   });
 
-  it('returns conflictProfileId when submit fails with conflict', async () => {
+  it('returns conflict state when submit fails with conflict', async () => {
     const createError = mapProfilesApiError({
       statusCode: 409,
-      body: { conflict_profile_id: 'existing-profile-id' },
+      body: { message: 'profile already exists' },
     });
     const createMutateAsync = jest.fn().mockRejectedValue(createError);
     jest.mocked(useCreateProfile).mockReturnValue(
@@ -319,7 +319,7 @@ describe('useProfileForm', () => {
     await act(async () => {
       const submitResult = await result.current.submit();
       expect(submitResult?.profile).toBeUndefined();
-      expect(submitResult?.conflictProfileId).toBe('existing-profile-id');
+      expect(submitResult?.isConflict).toBe(true);
     });
   });
 
@@ -349,6 +349,40 @@ describe('useProfileForm', () => {
     await act(async () => {
       const submitResult = await result.current.submit();
       expect(submitResult).toBeUndefined();
+    });
+  });
+
+  it('falls back to normalized conflict detection when conflict state helper does not classify error', async () => {
+    const createError = mapProfilesApiError({
+      statusCode: 409,
+      body: { message: 'profile already exists' },
+    });
+    const createMutateAsync = jest.fn().mockRejectedValue(createError);
+    jest.mocked(useCreateProfile).mockReturnValue(
+      createUseCreateProfileMutationMock({
+        mutateAsync: createMutateAsync,
+        error: createError,
+      })
+    );
+    jest.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
+    jest.mocked(getConflictState).mockReturnValue({ isConflict: false, error: undefined });
+
+    const { result } = renderHook(() =>
+      useProfileForm({
+        client,
+        context: { spaceId: 'default' },
+      })
+    );
+
+    act(() => {
+      result.current.setName('My Profile');
+      result.current.setTargetType(TARGET_TYPE_DATA_VIEW);
+      result.current.setTargetId('dv-1');
+    });
+
+    await act(async () => {
+      const submitResult = await result.current.submit();
+      expect(submitResult?.isConflict).toBe(true);
     });
   });
 

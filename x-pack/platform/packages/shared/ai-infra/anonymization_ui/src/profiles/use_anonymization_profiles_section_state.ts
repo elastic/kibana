@@ -114,17 +114,19 @@ export const useAnonymizationProfilesSectionState = ({
 
     const result = await form.submit();
     if (result?.profile) {
-      closeFlyout();
       if (flyoutState.mode === 'create') {
+        setCreateConflictProfileId(undefined);
+        form.reset();
         onCreateSuccess?.();
       } else {
+        closeFlyout();
         onUpdateSuccess?.();
       }
       return;
     }
 
-    if (flyoutState.mode === 'create' && result?.conflictProfileId) {
-      setCreateConflictProfileId(result.conflictProfileId);
+    if (flyoutState.mode === 'create' && result?.isConflict) {
+      setCreateConflictProfileId('conflict');
       onCreateConflict?.();
     }
   }, [closeFlyout, flyoutState, form, onCreateConflict, onCreateSuccess, onUpdateSuccess]);

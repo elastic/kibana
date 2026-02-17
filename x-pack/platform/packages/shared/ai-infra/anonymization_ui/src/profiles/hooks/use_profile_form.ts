@@ -20,7 +20,6 @@ import { ensureProfilesApiError } from '../services/profiles/errors';
 import type { ProfilesApiError } from '../services/profiles/errors';
 import type { ProfilesQueryContext, TargetType } from '../types';
 import { TARGET_TYPE_INDEX } from '../../target_types';
-import { isObjectRecord } from '../utils/is_object_record';
 import type {
   ProfileFormSubmitResult,
   ProfileFormValidationErrors,
@@ -40,6 +39,7 @@ interface ProfileFormController {
   submitError?: ProfilesApiError;
   isSubmitting: boolean;
   isEdit: boolean;
+  reset: () => void;
   setName: (name: string) => void;
   setDescription: (description: string) => void;
   setTargetType: (targetType: TargetType) => void;
@@ -132,14 +132,20 @@ export const useProfileForm = ({
       return { profile };
     } catch (error) {
       const conflict = getConflictState(error);
-      if (!conflict.error || !isObjectRecord(conflict.error.body)) {
-        return undefined;
+      if (conflict.isConflict) {
+        return {
+          isConflict: true,
+        };
       }
 
-      const conflictProfileId = conflict.error.body.conflict_profile_id;
-      return {
-        conflictProfileId: typeof conflictProfileId === 'string' ? conflictProfileId : undefined,
-      };
+      const normalizedError = ensureProfilesApiError(error);
+      if (normalizedError.kind === 'conflict') {
+        return {
+          isConflict: true,
+        };
+      }
+
+      return undefined;
     }
   }, [values, isEdit, initialProfile, updateProfile, createProfile]);
 
@@ -188,6 +194,10 @@ export const useProfileForm = ({
     (nerRules: NerRule[]) => setValues((prev) => ({ ...prev, nerRules })),
     []
   );
+  const reset = useCallback(() => {
+    setValues(initialValues);
+    setValidationErrors({});
+  }, [initialValues]);
 
   return useMemo(
     () => ({
@@ -196,6 +206,7 @@ export const useProfileForm = ({
       submitError,
       isSubmitting,
       isEdit,
+      reset,
       setName,
       setDescription,
       setTargetType,
@@ -211,6 +222,7 @@ export const useProfileForm = ({
       submitError,
       isSubmitting,
       isEdit,
+      reset,
       setName,
       setDescription,
       setTargetType,

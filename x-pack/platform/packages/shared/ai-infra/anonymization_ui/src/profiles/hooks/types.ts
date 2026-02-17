@@ -51,5 +51,5 @@ export interface ProfileFormValidationErrors {
 
 export interface ProfileFormSubmitResult {
   profile?: AnonymizationProfile;
-  conflictProfileId?: string;
+  isConflict?: boolean;
 }
