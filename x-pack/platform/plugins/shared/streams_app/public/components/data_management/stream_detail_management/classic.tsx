@@ -19,7 +19,7 @@ import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
-import { StreamDetailAttachments } from '../../stream_detail_attachments';
+import { StreamDetailContent } from '../../stream_detail_content';
 import { ClassicAdvancedView } from './advanced_view/classic_advanced_view';
 
 const classicStreamManagementSubTabs = [
@@ -30,7 +30,7 @@ const classicStreamManagementSubTabs = [
   'significantEvents',
   'schemaEditor',
   'schema',
-  'attachments',
+  'content',
 ] as const;
 
 type ClassicStreamManagementSubTab = (typeof classicStreamManagementSubTabs)[number];
@@ -160,10 +160,10 @@ export function ClassicStreamDetailManagement({
   };
 
   if (attachments.enabled) {
-    tabs.attachments = {
-      content: <StreamDetailAttachments definition={definition} />,
-      label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
-        defaultMessage: 'Attachments',
+    tabs.content = {
+      content: <StreamDetailContent definition={definition} />,
+      label: i18n.translate('xpack.streams.streamDetailView.contentTab', {
+        defaultMessage: 'Content',
       }),
     };
   }
