@@ -1,6 +1,6 @@
 ---
 name: kibana-api
-description: Shared utilities for interacting with a local Kibana instance. Provides auto-detection of Kibana URL and auth, and a kibana_curl wrapper. Not invoked directly — sourced by other skills' scripts.
+description: Shared utilities for interacting with a local Kibana instance. Provides auto-detection of Kibana URL and auth, and a kibana_curl wrapper.
 user-invocable: false
 ---
 
