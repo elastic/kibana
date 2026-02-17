@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-import { createFieldTestingConfig } from '../base.jest.integration.config';
-
-export default createFieldTestingConfig({
-  testsDirectory: 'common',
-  groupNumber: 1,
-  totalGroups: 2,
-});
+export { DetectionEngineRuleHealthPage } from './rule_health/rule_health_page';
+export { DetectionEngineSpaceRulesHealthPage } from './space_health/space_rules_health_page';
