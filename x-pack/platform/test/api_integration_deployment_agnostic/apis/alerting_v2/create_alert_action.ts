@@ -55,7 +55,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     async function getLatestAction(ruleIds: string[]) {
       const result = await esClient.search({
         index: ALERTS_ACTIONS_INDEX,
-        query: { terms: { rule_id: ruleIds } },
+        query: {
+          bool: {
+            must_not: [{ terms: { action_type: ['fire', 'suppress'] } }],
+            filter: [{ terms: { rule_id: ruleIds } }],
+          },
+        },
         sort: [{ '@timestamp': 'desc' }],
         size: 1,
       });
