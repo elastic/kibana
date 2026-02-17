@@ -7,14 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo, type ComponentType } from 'react';
+
+import type { IconType } from '@elastic/eui';
 
 import type { TimeRangeBounds } from './types';
 import type { TimeWindowButtonsConfig } from './date_range_picker_time_window_buttons';
 import { DateRangePickerProvider } from './date_range_picker_context';
 import { DateRangePickerDialog } from './date_range_picker_dialog';
+import {
+  DateRangePickerPanelNavigationProvider,
+  DateRangePickerPanel,
+  type DateRangePickerPanelDescriptor,
+} from './date_range_picker_panel_navigation';
+import { MainPanel } from './panels/main_panel';
 
 export type { TimeWindowButtonsConfig } from './date_range_picker_time_window_buttons';
+
+/** Configuration for a consumer-provided panel inside the date range picker dialog. */
+export interface DateRangePickerPanelConfig {
+  /** Unique panel identifier */
+  id: string;
+  /** Title shown in panel header or breadcrumb */
+  title: string;
+  /** Icon type passed to `EuiIcon` for the panel navigation item */
+  icon: IconType;
+  /**
+   * Panel component to render. Must be a component reference (not an element).
+   * Rendered inside the provider tree so it can use
+   * `useDateRangePickerContext()` and `useDateRangePickerPanelNavigation()`.
+   */
+  component: ComponentType;
+}
 
 export interface DateRangePickerProps {
   /** Text representation of the time range */
@@ -41,6 +65,12 @@ export interface DateRangePickerProps {
    * @default false
    */
   showTimeWindowButtons?: boolean | TimeWindowButtonsConfig;
+
+  /**
+   * Additional panels rendered inside the dialog popover.
+   * Each panel is navigatable via `useDateRangePickerPanelNavigation().navigateTo(id)`.
+   */
+  panels?: DateRangePickerPanelConfig[];
 }
 
 export interface DateRangePickerOnChangeProps extends TimeRangeBounds {
@@ -57,10 +87,31 @@ export interface DateRangePickerOnChangeProps extends TimeRangeBounds {
 /**
  * A date range picker component that accepts natural language and date math input.
  */
-export function DateRangePicker(props: DateRangePickerProps) {
+export function DateRangePicker({ panels = [], ...props }: DateRangePickerProps) {
+  const defaultPanelId = 'main';
+  const panelDescriptors: DateRangePickerPanelDescriptor[] = useMemo(
+    () => panels.map(({ id, title, icon }) => ({ id, title, icon })),
+    [panels]
+  );
+
   return (
     <DateRangePickerProvider {...props}>
-      <DateRangePickerDialog />
+      <DateRangePickerDialog>
+        <DateRangePickerPanelNavigationProvider
+          defaultPanelId={defaultPanelId}
+          panelDescriptors={panelDescriptors}
+        >
+          <DateRangePickerPanel id="main">
+            <MainPanel />
+          </DateRangePickerPanel>
+          {/* TODO Calendar and Custom time range panels go here */}
+          {panels.map(({ id, component: Component }) => (
+            <DateRangePickerPanel key={id} id={id}>
+              <Component />
+            </DateRangePickerPanel>
+          ))}
+        </DateRangePickerPanelNavigationProvider>
+      </DateRangePickerDialog>
     </DateRangePickerProvider>
   );
 }
