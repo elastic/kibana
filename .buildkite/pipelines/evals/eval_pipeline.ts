@@ -138,21 +138,22 @@ function buildEvalsYaml({
  * for the matching eval suites.
  */
 export function getEvalPipeline(githubPrLabels: string): string | null {
+  const parsedLabels = parseGithubPrLabels(githubPrLabels);
+
   // Run eval suite(s) when their GH label(s) are present (see `evals.suites.json`).
   const evalSuites = readEvalsSuiteMetadata();
-  const runAllEvals = githubPrLabels.includes('evals:all');
+  const runAllEvals = parsedLabels.includes('evals:all');
   const selectedEvalSuites = runAllEvals
     ? evalSuites
     : evalSuites.filter((suite) => {
         const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
-        return labels.some((label) => githubPrLabels.includes(label));
+        return labels.some((label) => parsedLabels.includes(label));
       });
   // Optional model filtering for eval fanout (models:* labels).
   // - No `models:*` labels => run all models returned by LiteLLM (current behavior).
   // - One or more `models:<model-group>` labels => only run connectors whose `defaultModel`
   //   matches one of those model groups.
   // - `models:all` can be used to explicitly opt into all models (ignored if combined with specifics).
-  const parsedLabels = parseGithubPrLabels(githubPrLabels);
   const evaluationConnectorId = parsedLabels
     .find((label) => label.startsWith('models:judge:'))
     ?.slice('models:judge:'.length)
