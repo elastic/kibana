@@ -751,7 +751,6 @@ export const RuleDetailsPage = connector(
                           <StyledEuiFlexItem
                             data-test-subj="aboutRule"
                             component="section"
-                            grow={2}
                             flexBasis={60}
                           >
                             {rule !== null && (
