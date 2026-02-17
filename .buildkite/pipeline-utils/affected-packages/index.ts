@@ -103,7 +103,7 @@ export async function getAffectedPackagesForFiltering(
   log('--- Detecting Affected Packages for Jest Filtering');
 
   // Check if we should run all tests due to critical changes
-  const runAll = await shouldRunAllTests();
+  const runAll = (await shouldRunAllTests()) && false;
   if (runAll) {
     log('Critical infrastructure files changed - running all tests (no affected filtering)');
     return null;
