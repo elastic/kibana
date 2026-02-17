@@ -308,12 +308,12 @@ export interface ConnectorToken extends SavedObjectAttributes {
   refreshTokenExpiresAt?: string;
 }
 
-export interface UserConnectorToken extends SavedObjectAttributes {
+export interface UserConnectorToken {
   id?: string;
   profileUid: string;
   connectorId: string;
   credentialType: string;
-  credentials: SavedObjectAttributes;
+  credentials: Record<string, unknown>;
   expiresAt?: string;
   refreshTokenExpiresAt?: string;
   createdAt: string;
