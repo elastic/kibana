@@ -11,7 +11,7 @@ pageLoadAssetSize:
   automaticImport: 12162
   automaticImportVTwo: 13752
   banners: 4087
-  canvas: 15142
+  canvas: 14881
   cases: 225900
   charts: 40269
   cloud: 10648
@@ -25,12 +25,13 @@ pageLoadAssetSize:
   console: 31191
   contentConnectors: 33014
   contentManagement: 8350
-  controls: 10786
+  controls: 10300
   core: 556473
   cps: 5930
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 20000
+  dashboardAgent: 5135
   dashboardEnhanced: 11961
   dashboardMarkdown: 4994
   data: 494561
@@ -45,17 +46,17 @@ pageLoadAssetSize:
   dataVisualizer: 32778
   developerToolbar: 4467
   devTools: 8109
-  discover: 28484
-  discoverEnhanced: 5660
+  discover: 28284
+  discoverEnhanced: 5517
   discoverShared: 2322
   elasticAssistant: 338870
   elasticAssistantSharedState: 4881
   embeddable: 14545
   embeddableAlertsTable: 6524
   embeddableEnhanced: 4488
-  enterpriseSearch: 40239
+  enterpriseSearch: 37566
   entityStore: 71717
-  esql: 18224
+  esql: 19247
   esqlDataGrid: 10209
   esUiShared: 101220
   eventAnnotation: 22361
@@ -84,7 +85,7 @@ pageLoadAssetSize:
   graph: 9924
   grokdebugger: 5484
   home: 13091
-  imageEmbeddable: 6727
+  imageEmbeddable: 6325
   indexLifecycleManagement: 29818
   indexManagement: 35522
   inference: 10368
@@ -109,7 +110,7 @@ pageLoadAssetSize:
   logsDataAccess: 7900
   logsShared: 101273
   logstash: 15882
-  maintenanceWindows: 8783
+  maintenanceWindows: 8775
   management: 12951
   maps: 45917
   mapsEms: 6734
@@ -165,9 +166,9 @@ pageLoadAssetSize:
   securitySolutionEss: 38689
   securitySolutionServerless: 52082
   serverless: 7451
-  serverlessObservability: 19472
+  serverlessObservability: 18343
   serverlessSearch: 26287
-  serverlessWorkplaceAI: 7718
+  serverlessWorkplaceAI: 5078
   sessionView: 47912
   share: 58677
   slo: 36645
@@ -189,7 +190,7 @@ pageLoadAssetSize:
   unifiedSearch: 19500
   upgradeAssistant: 6898
   uptime: 48171
-  urlDrilldown: 18939
+  urlDrilldown: 18801
   urlForwarding: 7349
   usageCollection: 5655
   ux: 8376
@@ -209,6 +210,6 @@ pageLoadAssetSize:
   visualizationListing: 5148
   visualizations: 52268
   watcher: 10485
-  workflowsExtensions: 90040
+  workflowsExtensions: 89952
   workflowsManagement: 21318
   workplaceAIApp: 65547

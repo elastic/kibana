@@ -1,12 +1,14 @@
 # Define which plugins and packages should be run or skipped in Kibana CI pipeline
 plugins:
   enabled:
+    - advanced_settings
     - apm
     - banners
     - cloud_security_posture
     - console
+    - custom_branding
     - dashboard
-    - dashboard
+    - data_views
     - discover_enhanced
     - entity_store
     - fleet
@@ -14,6 +16,7 @@ plugins:
     - global_search
     - index_management
     - infra
+    - intercepts
     - lens
     - maps
     - observability
@@ -24,16 +27,14 @@ plugins:
     - search_homepage
     - security
     - security_solution
+    - share
     - slo
     - spaces
     - streams
     - streams_app
     - transform
     - workflows_extensions
-    - global_search
-    - banners
     - workflows_management
-    - intercepts
   disabled:
 
 packages:
