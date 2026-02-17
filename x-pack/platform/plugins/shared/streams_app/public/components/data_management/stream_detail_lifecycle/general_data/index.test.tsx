@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
-import { StreamDetailGeneralData } from './index';
+import { StreamDetailGeneralData } from '.';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import type { Streams } from '@kbn/streams-schema';
 
@@ -117,7 +117,9 @@ describe('StreamDetailGeneralData unsaved changes prompt', () => {
     mockFlyoutOpen = true;
     mockFlyoutHasUnsavedChanges = false;
 
-    render(<StreamDetailGeneralData definition={definition} refreshDefinition={jest.fn()} data={data} />);
+    render(
+      <StreamDetailGeneralData definition={definition} refreshDefinition={jest.fn()} data={data} />
+    );
 
     await waitFor(() => {
       expect(getPromptHasUnsavedChanges()).toBe(false);
@@ -128,11 +130,12 @@ describe('StreamDetailGeneralData unsaved changes prompt', () => {
     mockFlyoutOpen = true;
     mockFlyoutHasUnsavedChanges = true;
 
-    render(<StreamDetailGeneralData definition={definition} refreshDefinition={jest.fn()} data={data} />);
+    render(
+      <StreamDetailGeneralData definition={definition} refreshDefinition={jest.fn()} data={data} />
+    );
 
     await waitFor(() => {
       expect(getPromptHasUnsavedChanges()).toBe(true);
     });
   });
 });
-

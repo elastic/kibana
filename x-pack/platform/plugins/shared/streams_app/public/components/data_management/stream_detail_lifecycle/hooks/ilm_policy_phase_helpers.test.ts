@@ -64,4 +64,3 @@ describe('buildModifiedPhasesFromEdit', () => {
     expect((out.delete?.actions?.delete as any)?.delete_searchable_snapshot).toBeUndefined();
   });
 });
-

@@ -72,7 +72,13 @@ describe('ilm_lifecycle_summary_helpers', () => {
 
     it('marks the last remaining non-delete phase as not removable', () => {
       const ilmStatsPhases: IlmPolicyPhases = {
-        hot: { name: 'hot', min_age: '0d', size_in_bytes: 1000, rollover: {}, readonly: true } as any,
+        hot: {
+          name: 'hot',
+          min_age: '0d',
+          size_in_bytes: 1000,
+          rollover: {},
+          readonly: true,
+        } as any,
         delete: { name: 'delete', min_age: '30d' } as any,
       } as any;
 
@@ -91,4 +97,3 @@ describe('ilm_lifecycle_summary_helpers', () => {
     });
   });
 });
-

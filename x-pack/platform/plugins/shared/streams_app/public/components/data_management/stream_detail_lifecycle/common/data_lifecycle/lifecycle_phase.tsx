@@ -8,17 +8,17 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-    EuiButtonIcon,
-    EuiFlexGroup,
-    EuiFlexItem,
-    EuiIconTip,
-    EuiPopover,
-    EuiPopoverFooter,
-    EuiPopoverTitle,
-    EuiSpacer,
-    EuiText,
-    EuiToolTip,
-    useEuiTheme,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiPopover,
+  EuiPopoverFooter,
+  EuiPopoverTitle,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import { formatBytes } from '../../helpers/format_bytes';
