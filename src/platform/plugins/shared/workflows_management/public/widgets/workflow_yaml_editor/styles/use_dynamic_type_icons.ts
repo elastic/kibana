@@ -10,7 +10,6 @@
 import type React from 'react';
 import { useEffect, useRef } from 'react';
 import { type TriggerType, TriggerTypes } from '@kbn/workflows';
-import { triggerSchemas } from '../../../trigger_schemas';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
@@ -23,6 +22,7 @@ import {
 } from '../../../shared/ui/step_icons/get_trigger_icon_base64';
 import { HardcodedIcons } from '../../../shared/ui/step_icons/hardcoded_icons';
 import { MonochromeIcons } from '../../../shared/ui/step_icons/monochrome_icons';
+import { triggerSchemas } from '../../../trigger_schemas';
 import {
   CUSTOM_TRIGGER_INLINE_CLASS,
   triggerTypeToCssClass,

@@ -21,6 +21,7 @@ import {
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 import { TelemetryService } from './common/lib/telemetry/telemetry_service';
+import { triggerSchemas } from './trigger_schemas';
 import type {
   WorkflowsPublicPluginSetup,
   WorkflowsPublicPluginSetupDependencies,
@@ -31,7 +32,6 @@ import type {
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { stepSchemas } from '../common/step_schemas';
-import { triggerSchemas } from './trigger_schemas';
 
 const VisibleIn: AppDeepLinkLocations[] = ['globalSearch', 'home', 'kibanaOverview', 'sideNav'];
 
