@@ -43,7 +43,7 @@ const updatedDashboard = {
   ],
 };
 
-apiTest.describe('dashboards - update', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('dashboards - update', { tag: tags.stateful.classic }, () => {
   let editorCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
