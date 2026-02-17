@@ -47,6 +47,7 @@ examples/unified_tabs_examples @elastic/kibana-data-discovery
 examples/user_profile_examples @elastic/kibana-security
 examples/v8_profiler_examples @elastic/response-ops
 examples/workflows_extensions_example @elastic/workflows-eng
+packages/kbn-api-contracts @elastic/kibana-core
 packages/kbn-babel-preset @elastic/kibana-operations
 packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
 packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
@@ -420,6 +421,7 @@ src/platform/packages/shared/content-management/content_editor @elastic/appex-sh
 src/platform/packages/shared/content-management/content_insights/content_insights_public @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_insights/content_insights_server @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly @elastic/appex-sharedux
+src/platform/packages/shared/content-management/content_list/kbn-content-list-footer @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-provider @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client @elastic/appex-sharedux
