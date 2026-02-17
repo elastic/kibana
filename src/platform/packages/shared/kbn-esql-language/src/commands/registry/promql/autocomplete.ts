@@ -14,8 +14,8 @@ import { getFragmentData, withAutoSuggest } from '../../definitions/utils/autoco
 import { getDateLiterals } from '../../definitions/utils/literals';
 import {
   getPromqlFunctionSuggestions,
-  getPromqlFunctionSuggestionsForReturnTypes,
   getPromqlLabelMatcherSuggestions,
+  getPromqlOperatorSuggestions,
   getMetricTypesForSignature,
 } from '../../definitions/utils/promql';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
@@ -130,23 +130,71 @@ export async function autocomplete(
     case 'after_label_operator':
       return [valuePlaceholderConstant];
 
+    case 'after_operator': {
+      const signatureTypes = position.signatureTypes ?? [];
+      const metricTypes = getMetricTypesForSignature(signatureTypes);
+      const canSuggestScalar = signatureTypes.length === 0 || signatureTypes.includes('scalar');
+      const functionSuggestions = getPromqlFunctionSuggestions(signatureTypes);
+
+      return [
+        ...buildFieldSuggestions(context, metricTypes, needsWrappedQuery ? 'wrap' : 'plain'),
+        ...wrapFunctionSuggestions(needsWrappedQuery, functionSuggestions),
+        ...(canSuggestScalar ? [buildAddValuePlaceholder('number')] : []),
+      ];
+    }
+
     case 'after_metric': {
-      return position.signatureTypes?.includes('range_vector') && !position.selector?.duration
-        ? [promqlLabelSelectorItem, promqlRangeSelectorItem]
-        : [promqlLabelSelectorItem];
+      const metricSuggestions: ISuggestionItem[] = [promqlLabelSelectorItem];
+
+      const expectsRangeVector = position.signatureTypes?.includes('range_vector');
+      const hasDuration = position.selector?.duration;
+
+      if (expectsRangeVector && !hasDuration) {
+        metricSuggestions.push(promqlRangeSelectorItem);
+      } else {
+        metricSuggestions.push(...getPromqlOperatorSuggestions());
+      }
+
+      return metricSuggestions;
     }
 
     case 'after_label_selector': {
-      return position.signatureTypes?.includes('range_vector') && position.canSuggestRangeSelector
-        ? [promqlRangeSelectorItem]
-        : [];
+      const labelSelectorSuggestions: ISuggestionItem[] = [];
+
+      const expectsRangeVector = position.signatureTypes?.includes('range_vector');
+      const canSuggestRange = position.canSuggestRangeSelector;
+
+      if (expectsRangeVector && canSuggestRange) {
+        labelSelectorSuggestions.push(promqlRangeSelectorItem);
+      } else {
+        labelSelectorSuggestions.push(...getPromqlOperatorSuggestions());
+      }
+
+      return labelSelectorSuggestions;
     }
 
-    case 'inside_query':
-      return position.canAddGrouping ? [promqlByCompleteItem] : [];
+    case 'inside_query': {
+      const insideQuerySuggestions: ISuggestionItem[] = [...getPromqlOperatorSuggestions()];
 
-    case 'after_complete_arg':
-      return position.canSuggestCommaInFunctionArgs ? [getCommaWithAutoSuggest()] : [];
+      if (position.canAddGrouping) {
+        insideQuerySuggestions.push(promqlByCompleteItem);
+      }
+
+      return insideQuerySuggestions;
+    }
+
+    case 'after_complete_arg': {
+      const expectsRangeVector = position.signatureTypes?.includes('range_vector');
+      const completeArgSuggestions: ISuggestionItem[] = expectsRangeVector
+        ? []
+        : [...getPromqlOperatorSuggestions()];
+
+      if (position.canSuggestCommaInFunctionArgs) {
+        completeArgSuggestions.push(getCommaWithAutoSuggest());
+      }
+
+      return completeArgSuggestions;
+    }
 
     case 'after_open_paren':
     case 'inside_function_args': {
@@ -166,16 +214,13 @@ export async function autocomplete(
 
       const functions = expectsOnlyScalar
         ? []
-        : wrapFunctionSuggestions(
-            needsWrappedQuery,
-            getPromqlFunctionSuggestionsForReturnTypes(signatureTypes)
-          );
+        : wrapFunctionSuggestions(needsWrappedQuery, getPromqlFunctionSuggestions(signatureTypes));
 
       return [...scalarValues, ...metrics, ...functions];
     }
 
     case 'after_query': {
-      const suggestions: ISuggestionItem[] = [pipeCompleteItem];
+      const suggestions: ISuggestionItem[] = [...getPromqlOperatorSuggestions(), pipeCompleteItem];
 
       if (position.canAddGrouping) {
         suggestions.unshift(promqlByCompleteItem);
