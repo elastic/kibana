@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiCallOut, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,10 +18,13 @@ import { DeleteProfileModal } from './components/delete_modal/delete_profile_mod
 import { ProfileFlyout } from './components/flyout/profile_flyout';
 import { ProfilesTable } from './components/table/profiles_table';
 import { ProfilesToolbar } from './components/toolbar/profiles_toolbar';
+import { createTargetLookupClient } from './services/target_lookup/client';
+import { useDataViewsList } from './services/target_lookup/hooks/use_data_views_list';
 import {
   useAnonymizationProfilesSectionState,
   type AnonymizationMode,
 } from './use_anonymization_profiles_section_state';
+import { TARGET_TYPE_DATA_VIEW } from '../target_types';
 
 export interface AnonymizationProfilesSectionProps {
   fetch: AnonymizationUiServices['http']['fetch'];
@@ -89,6 +92,25 @@ export const AnonymizationProfilesSection = ({
     onCreateConflict,
     onOpenConflictError,
   });
+  const targetLookupClient = useMemo(() => createTargetLookupClient({ fetch }), [fetch]);
+  const hasDataViewProfiles = listView.profiles.some(
+    (profile) => profile.targetType === TARGET_TYPE_DATA_VIEW
+  );
+  const dataViewsQuery = useDataViewsList({
+    client: targetLookupClient,
+    enabled: effectiveMode !== 'hidden' && hasDataViewProfiles,
+  });
+  const dataViewTitlesById = useMemo(
+    () =>
+      Object.fromEntries(
+        (dataViewsQuery.data?.data_view ?? [])
+          .filter(
+            (dataView) => typeof dataView.id === 'string' && typeof dataView.title === 'string'
+          )
+          .map((dataView) => [dataView.id, dataView.title])
+      ),
+    [dataViewsQuery.data]
+  );
 
   if (effectiveMode === 'hidden') {
     return null;
@@ -142,6 +164,7 @@ export const AnonymizationProfilesSection = ({
         page={listView.pagination.page}
         perPage={listView.pagination.perPage}
         isManageMode={isManageMode}
+        dataViewTitlesById={dataViewTitlesById}
         onPageChange={onTablePageChange}
         onEditProfile={onEditProfile}
         onDeleteProfile={deleteFlow.openConfirmation}

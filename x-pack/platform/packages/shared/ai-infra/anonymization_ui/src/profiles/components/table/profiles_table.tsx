@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiBasicTable, type Criteria, type EuiBasicTableColumn } from '@elastic/eui';
 import type { AnonymizationProfile } from '@kbn/anonymization-common';
 import { i18n } from '@kbn/i18n';
+import { TARGET_TYPE_DATA_VIEW } from '../../../target_types';
 
 interface ProfilesTableProps {
   profiles: AnonymizationProfile[];
@@ -17,6 +18,7 @@ interface ProfilesTableProps {
   page: number;
   perPage: number;
   isManageMode: boolean;
+  dataViewTitlesById?: Record<string, string>;
   onPageChange: (page: number, size: number) => void;
   onEditProfile: (profile: AnonymizationProfile) => void;
   onDeleteProfile: (profileId: string) => void;
@@ -29,6 +31,7 @@ export const ProfilesTable = ({
   page,
   perPage,
   isManageMode,
+  dataViewTitlesById = {},
   onPageChange,
   onEditProfile,
   onDeleteProfile,
@@ -49,10 +52,19 @@ export const ProfilesTable = ({
         }),
       },
       {
-        field: 'targetId',
         name: i18n.translate('anonymizationUi.profiles.table.column.targetId', {
           defaultMessage: 'Target id',
         }),
+        render: (profile: AnonymizationProfile) => {
+          if (profile.targetType !== TARGET_TYPE_DATA_VIEW) {
+            return profile.targetId;
+          }
+          const dataViewTitle = dataViewTitlesById[profile.targetId];
+          if (!dataViewTitle) {
+            return profile.targetId;
+          }
+          return dataViewTitle;
+        },
       },
       {
         name: i18n.translate('anonymizationUi.profiles.table.column.rules', {
@@ -110,7 +122,7 @@ export const ProfilesTable = ({
         ],
       },
     ],
-    [isManageMode, onDeleteProfile, onEditProfile]
+    [dataViewTitlesById, isManageMode, onDeleteProfile, onEditProfile]
   );
 
   const onTableChange = ({ page: nextPage }: Criteria<AnonymizationProfile>) => {
