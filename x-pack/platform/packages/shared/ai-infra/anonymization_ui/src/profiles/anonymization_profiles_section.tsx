@@ -1,0 +1,210 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { EuiCallOut, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type {
+  AnonymizationUiServices,
+  FetchPreviewDocument,
+  TrustedNerModelOption,
+} from '../contracts';
+import { DeleteProfileModal } from './components/delete_modal/delete_profile_modal';
+import { ProfileFlyout } from './components/flyout/profile_flyout';
+import { ProfilesTable } from './components/table/profiles_table';
+import { ProfilesToolbar } from './components/toolbar/profiles_toolbar';
+import {
+  useAnonymizationProfilesSectionState,
+  type AnonymizationMode,
+} from './use_anonymization_profiles_section_state';
+
+export interface AnonymizationProfilesSectionProps {
+  fetch: AnonymizationUiServices['http']['fetch'];
+  spaceId: string;
+  canShow: boolean;
+  canManage: boolean;
+  listTrustedNerModels?: () => Promise<TrustedNerModelOption[]>;
+  fetchPreviewDocument?: FetchPreviewDocument;
+  onCreateSuccess?: () => void;
+  onUpdateSuccess?: () => void;
+  onDeleteSuccess?: () => void;
+  onCreateConflict?: () => void;
+  onOpenConflictError?: (error: unknown) => void;
+}
+
+const toModeLabel = (mode: AnonymizationMode): string => {
+  if (mode === 'manage') {
+    return i18n.translate('anonymizationUi.profiles.section.mode.manage', {
+      defaultMessage: 'Manage',
+    });
+  }
+
+  return i18n.translate('anonymizationUi.profiles.section.mode.readOnly', {
+    defaultMessage: 'Read only',
+  });
+};
+
+export const AnonymizationProfilesSection = ({
+  fetch,
+  spaceId,
+  canShow,
+  canManage,
+  onCreateSuccess,
+  onUpdateSuccess,
+  onDeleteSuccess,
+  listTrustedNerModels,
+  fetchPreviewDocument,
+  onCreateConflict,
+  onOpenConflictError,
+}: AnonymizationProfilesSectionProps) => {
+  const {
+    listView,
+    deleteFlow,
+    form,
+    flyoutState,
+    createConflictProfileId,
+    effectiveMode,
+    hasReadOnlyApiError,
+    isManageMode,
+    closeFlyout,
+    closeDeleteModal,
+    confirmDelete,
+    openProfileById,
+    submitFlyout,
+    onCreateProfile,
+    onEditProfile,
+    onTablePageChange,
+  } = useAnonymizationProfilesSectionState({
+    fetch,
+    spaceId,
+    canShow,
+    canManage,
+    onCreateSuccess,
+    onUpdateSuccess,
+    onDeleteSuccess,
+    onCreateConflict,
+    onOpenConflictError,
+  });
+
+  if (effectiveMode === 'hidden') {
+    return null;
+  }
+
+  return (
+    <div data-test-subj="anonymizationProfilesSection">
+      <EuiText size="s">
+        <p data-test-subj="anonymizationProfilesTitle">
+          <FormattedMessage
+            id="anonymizationUi.profiles.section.description"
+            defaultMessage="Configure reusable anonymization profiles once per target and space for AI feature portability."
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer size="m" />
+
+      <ProfilesToolbar
+        modeLabel={toModeLabel(effectiveMode)}
+        isManageMode={isManageMode}
+        activeSpaceId={spaceId}
+        targetType={listView.filters.targetType}
+        onTargetTypeChange={listView.setTargetType}
+        targetIdFilter={listView.filters.targetId}
+        onTargetIdFilterChange={listView.setTargetId}
+        onCreateProfile={onCreateProfile}
+      />
+
+      <EuiSpacer size="m" />
+      {listView.error && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            color={hasReadOnlyApiError ? 'warning' : 'danger'}
+            iconType="info"
+            title={i18n.translate('anonymizationUi.profiles.section.errorTitle', {
+              defaultMessage: 'Anonymization profiles are partially unavailable',
+            })}
+            data-test-subj="anonymizationProfilesError"
+          >
+            <p>{listView.error.message}</p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
+
+      <ProfilesTable
+        profiles={listView.profiles}
+        loading={listView.loading}
+        total={listView.total}
+        page={listView.pagination.page}
+        perPage={listView.pagination.perPage}
+        isManageMode={isManageMode}
+        onPageChange={onTablePageChange}
+        onEditProfile={onEditProfile}
+        onDeleteProfile={deleteFlow.openConfirmation}
+      />
+
+      {!isManageMode && (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <EuiText size="s" color="subdued">
+            <p>
+              <FormattedMessage
+                id="anonymizationUi.profiles.section.readOnlyHint"
+                defaultMessage="Your role has read-only access. Create, edit, and delete actions are disabled."
+              />
+            </p>
+          </EuiText>
+        </>
+      )}
+
+      {flyoutState && (
+        <ProfileFlyout
+          isEdit={flyoutState.mode === 'edit'}
+          isManageMode={isManageMode}
+          name={form.values.name}
+          description={form.values.description}
+          targetType={form.values.targetType}
+          targetId={form.values.targetId}
+          fieldRules={form.values.fieldRules}
+          regexRules={form.values.regexRules}
+          nerRules={form.values.nerRules}
+          nameError={form.validationErrors.name}
+          targetIdError={form.validationErrors.targetId}
+          fieldRulesError={form.validationErrors.fieldRules}
+          regexRulesError={form.validationErrors.regexRules}
+          nerRulesError={form.validationErrors.nerRules}
+          submitError={form.submitError}
+          conflictProfileId={flyoutState.mode === 'create' ? createConflictProfileId : undefined}
+          isSubmitting={form.isSubmitting}
+          onNameChange={form.setName}
+          onDescriptionChange={form.setDescription}
+          onTargetTypeChange={form.setTargetType}
+          onTargetIdChange={form.setTargetId}
+          onFieldRulesChange={form.setFieldRules}
+          onRegexRulesChange={form.setRegexRules}
+          onNerRulesChange={form.setNerRules}
+          onNavigateToConflictProfile={openProfileById}
+          listTrustedNerModels={listTrustedNerModels}
+          fetchPreviewDocument={fetchPreviewDocument}
+          fetch={fetch}
+          onCancel={closeFlyout}
+          onSubmit={submitFlyout}
+        />
+      )}
+
+      {deleteFlow.pendingProfileId && (
+        <DeleteProfileModal
+          isDeleting={deleteFlow.isDeleting}
+          errorMessage={deleteFlow.error?.message}
+          onCancel={closeDeleteModal}
+          onConfirm={confirmDelete}
+        />
+      )}
+    </div>
+  );
+};
