@@ -314,6 +314,7 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
         tableLayout={args.tableLayout}
       >
         <Column.Name showDescription={args.showDescription} />
+        <Column.UpdatedAt />
         {args.showTypeColumn && (
           <Column
             id="type"
