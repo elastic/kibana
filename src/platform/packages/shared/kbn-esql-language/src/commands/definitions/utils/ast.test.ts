@@ -8,7 +8,7 @@
  */
 
 import { EDITOR_MARKER } from '../constants';
-import { correctQuerySyntax, getBracketsToClose } from './ast';
+import { correctPromqlQuerySyntax, correctQuerySyntax, getBracketsToClose } from './ast';
 
 describe('getBracketsToClose', () => {
   it('returns the number of brackets to close', () => {
@@ -75,5 +75,38 @@ describe('correctQuerySyntax', () => {
     const query = 'FROM foo | EVAL foo(bar, ';
     const result = correctQuerySyntax(query);
     expect(result.endsWith(`${EDITOR_MARKER})`)).toBe(true);
+  });
+});
+
+describe('correctPromqlQuerySyntax', () => {
+  it('appends marker after trailing comma', () => {
+    const query = 'rate(http_requests_total, ';
+    const result = correctPromqlQuerySyntax(query);
+    expect(result.endsWith(`${EDITOR_MARKER})`)).toBe(true);
+  });
+
+  it('appends marker after trailing colon', () => {
+    const query = 'metric[5m:';
+    const result = correctPromqlQuerySyntax(query);
+    expect(result.endsWith(`${EDITOR_MARKER}]`)).toBe(true);
+  });
+
+  it('closes braces and brackets for incomplete selector/function', () => {
+    const query = 'sum(rate(http_requests_total{job="api"';
+    const result = correctPromqlQuerySyntax(query);
+    expect(result.endsWith('}))')).toBe(true);
+  });
+
+  it('does not inject marker for trailing operator', () => {
+    const query = 'up + ';
+    const result = correctPromqlQuerySyntax(query);
+    expect(result).toBe(query);
+  });
+
+  it('does not add duplicate marker', () => {
+    const query = `rate(http_requests_total, ${EDITOR_MARKER}`;
+    const result = correctPromqlQuerySyntax(query);
+    const markerMatches = result.match(new RegExp(EDITOR_MARKER, 'g')) ?? [];
+    expect(markerMatches).toHaveLength(1);
   });
 });

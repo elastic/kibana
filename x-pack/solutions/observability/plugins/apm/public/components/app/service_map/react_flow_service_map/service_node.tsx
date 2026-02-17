@@ -87,22 +87,8 @@ export const ServiceNode = memo(
         );
       }
 
-      if (selected) {
-        parts.push(
-          i18n.translate('xpack.apm.serviceMap.serviceNode.selected', {
-            defaultMessage: 'Selected',
-          })
-        );
-      }
-
-      parts.push(
-        i18n.translate('xpack.apm.serviceMap.serviceNode.instructions', {
-          defaultMessage: 'Press Enter or Space to view details',
-        })
-      );
-
       return parts.join('. ');
-    }, [data.label, data.agentName, data.serviceAnomalyStats?.healthStatus, selected]);
+    }, [data.label, data.agentName, data.serviceAnomalyStats?.healthStatus]);
 
     const containerStyles = css`
       position: relative;
