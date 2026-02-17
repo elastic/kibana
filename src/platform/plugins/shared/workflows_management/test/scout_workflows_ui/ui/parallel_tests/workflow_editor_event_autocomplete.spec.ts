@@ -19,11 +19,7 @@ import {
 test.describe(
   'Event autocomplete should be dynamic based on triggers',
   {
-    tag: [
-      ...tags.stateful.classic,
-      ...tags.serverless.observability.complete,
-      ...tags.serverless.security.complete,
-    ],
+    tag: [...tags.stateful.classic],
   },
   () => {
     test.beforeEach(async ({ browserAuth }) => {
