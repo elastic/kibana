@@ -249,6 +249,7 @@ export interface LoadExistingSuggestionInput extends LoadExistingSuggestionInput
 export type LoadExistingSuggestionResult =
   | { type: 'completed'; pipeline: StreamlangDSL }
   | { type: 'in_progress' }
+  | { type: 'being_canceled' }
   | { type: 'failed'; error: string }
   | { type: 'none' };
 
@@ -286,11 +287,14 @@ export async function loadExistingSuggestionLogic(
     throw error;
   }
 
-  if (
-    taskResult.status === TaskStatus.InProgress ||
-    taskResult.status === TaskStatus.BeingCanceled
-  ) {
+  if (taskResult.status === TaskStatus.InProgress) {
     return { type: 'in_progress' };
+  }
+
+  // BeingCanceled is a transitional state - the task is being canceled but not yet fully canceled.
+  // We return a distinct type so the UI can handle this appropriately (e.g., not show loading screen).
+  if (taskResult.status === TaskStatus.BeingCanceled) {
+    return { type: 'being_canceled' };
   }
 
   // Handle terminal states

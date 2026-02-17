@@ -9,7 +9,7 @@ import { and, assertEvent, assign, sendTo, setup } from 'xstate5';
 import type { SampleDocument } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { isEqual, omit } from 'lodash';
-import { useSelector } from '@xstate5/react';
+import { useSelector } from '@xstate/react';
 import type {
   DataSourceInput,
   DataSourceContext,
