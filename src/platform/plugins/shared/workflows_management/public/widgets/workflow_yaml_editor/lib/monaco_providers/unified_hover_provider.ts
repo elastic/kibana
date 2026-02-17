@@ -74,10 +74,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       // decorations and markers, so we check this before anything else.
       const templateInfo = parseTemplateAtPosition(model, position);
       if (templateInfo && templateInfo.isInsideTemplate) {
-        const result = await this.handleTemplateExpressionHover(model, position, templateInfo);
-        // eslint-disable-next-line no-console
-        console.log('[hover-debug] template hover result:', result ? 'has content' : 'null');
-        return result;
+        return await this.handleTemplateExpressionHover(model, position, templateInfo);
       }
 
       // Check if there are validation errors at this position OR nearby
@@ -404,19 +401,13 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     templateInfo: ReturnType<typeof parseTemplateAtPosition>
   ): Promise<monaco.languages.Hover | null> {
     if (!templateInfo || !this.getExecutionContext) {
-      // eslint-disable-next-line no-console
-      console.log('[hover-debug] early exit: templateInfo=', !!templateInfo, 'getExecutionContext=', !!this.getExecutionContext);
       return null;
     }
 
     const executionContext = this.getExecutionContext();
     if (!executionContext) {
-      // eslint-disable-next-line no-console
-      console.log('[hover-debug] executionContext is null');
       return null;
     }
-    // eslint-disable-next-line no-console
-    console.log('[hover-debug] context keys:', Object.keys(executionContext), 'inputs:', executionContext.inputs);
 
     // Clear fetched step cache when execution context changes (new execution selected)
     if (executionContext !== this.lastExecutionContext) {
@@ -481,8 +472,6 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         contents: [hoverContent],
       };
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log('[hover-debug] error in handleTemplateExpressionHover:', error);
       return null;
     }
   }

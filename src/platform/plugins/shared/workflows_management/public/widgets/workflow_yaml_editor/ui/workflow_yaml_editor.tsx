@@ -194,12 +194,8 @@ export const WorkflowYAMLEditor = ({
   // Build execution context when step executions are available
   // Steps will have status/error/state but no I/O - those are lazy-loaded on hover
   useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log('[ctx-debug] useEffect:', { isExecutionYaml, stepExecutions: stepExecutions?.length, context: !!execution?.context });
     if (isExecutionYaml && stepExecutions) {
       executionContextRef.current = buildExecutionContext(stepExecutions, execution?.context);
-      // eslint-disable-next-line no-console
-      console.log('[ctx-debug] built context:', executionContextRef.current ? Object.keys(executionContextRef.current) : 'null');
     } else {
       executionContextRef.current = null;
     }
@@ -247,6 +243,8 @@ export const WorkflowYAMLEditor = ({
       if (!stepExecution) {
         return null;
       }
+      // Store in React Query cache so useStepExecution won't re-fetch
+      queryClient.setQueryData(['stepExecution', executionId, stepDocId], stepExecution);
       return {
         output: stepExecution.output,
         error: stepExecution.error,
