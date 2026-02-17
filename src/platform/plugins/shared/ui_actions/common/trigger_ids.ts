@@ -69,7 +69,7 @@ export const SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER =
   'SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER';
 
 export const O11Y_APM_TRANSACTION_CONTEXT_MENU_TRIGGER = 'apmTransactionContextMenu';
-export const O11Y_APM_ERROR_ON_OPEN_PANEL_MENU = 'apmErrorContextMenu';
+export const O11Y_APM_ERROR_CONTEXT_MENU_TRIGGER = 'apmErrorContextMenu';
 
 export const SECURITY_ESQL_IN_TIMELINE_HISTOGRAM_TRIGGER =
   'security-discoverInTimeline-histogramTrigger';

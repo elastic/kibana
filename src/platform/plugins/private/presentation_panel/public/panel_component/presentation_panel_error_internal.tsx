@@ -30,8 +30,8 @@ import { renderSearchError } from '@kbn/search-errors';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import type { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
 
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { uiActions } from '../kibana_services';
-import { ON_OPEN_PANEL_MENU } from '../panel_actions';
 import { ACTION_EDIT_PANEL } from '../panel_actions/edit_panel_action/constants';
 import { executeEditPanelAction } from '../panel_actions/edit_panel_action/execute_edit_action';
 import type { DefaultPresentationPanelApi } from './types';
@@ -180,7 +180,7 @@ export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanel
               direction={isLandscape ? 'row' : 'column'}
             >
               <EuiFlexItem grow={false}>
-                <EuiIcon size="xl" type="error" color="danger" />
+                <EuiIcon size="xl" type="error" color="danger" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 {searchErrorDisplay?.body ?? (
