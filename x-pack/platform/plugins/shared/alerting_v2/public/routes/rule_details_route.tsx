@@ -23,15 +23,15 @@ const LazyRuleDetailPage = lazy(async () => {
 });
 
 export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = ({ match }) => {
-  const rule = useExistingRule(match.params.ruleId);
+  const { rule } = useExistingRule(match.params.ruleId);
 
-  if (!rule?.rule) {
+  if (!rule) {
     return <Skeleton />;
   }
 
   return (
     <Suspense fallback={<EuiLoadingSpinner size="m" />}>
-      <LazyRuleDetailPage rule={rule.rule} />
+      <LazyRuleDetailPage rule={rule} />
     </Suspense>
   );
 };

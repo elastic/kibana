@@ -7,11 +7,13 @@
 
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
+import { useQueryClient } from '@kbn/react-query';
 import { RulesApi } from '../services/rules_api';
 
 export function useDisableRule() {
   const rulesApi = useService(RulesApi);
   const notifications = useService(CoreStart('notifications'));
+  const queryClient = useQueryClient();
 
   const disableRule = async (id: string) => {
     try {
@@ -21,6 +23,7 @@ export function useDisableRule() {
           defaultMessage: 'Rule disabled',
         }),
       });
+      queryClient.invalidateQueries({ queryKey: ['rule', id], exact: false });
     } catch (err) {
       notifications?.toasts.addError(err, {
         title: i18n.translate('xpack.alertingV2.ruleDetails.ruleDisableError', {
