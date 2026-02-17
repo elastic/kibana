@@ -8,6 +8,8 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { getEntityDefinition } from '../../common/domain/definitions/registry';
 import type {
@@ -17,14 +19,21 @@ import type {
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
 import { scheduleEntityMaintainerTasks } from '../tasks/entity_maintainer';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
-import type {
-  EngineDescriptor,
-  EngineDescriptorClient,
-  LogExtractionState,
+import {
+  EngineDescriptorTypeName,
+  type EngineDescriptor,
+  type EngineDescriptorClient,
+  type LogExtractionState,
 } from './definitions/saved_objects';
 import type { EntityMaintainersTasksClient } from '../infra/saved-objects/entity_maintainers_client';
 import type { LogExtractionBodyParams } from '../routes/constants';
-import { ENGINE_STATUS, ENTITY_STORE_STATUS } from './constants';
+import {
+  ENGINE_STATUS,
+  ENTITY_STORE_CLUSTER_PRIVILEGES,
+  ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
+  ENTITY_STORE_STATUS,
+  ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+} from './constants';
 import type {
   EntityStoreStatus,
   EngineComponentStatus,
@@ -51,6 +60,7 @@ interface AssetManagerDependencies {
   isServerless: boolean;
   logsExtractionClient: LogsExtractionClient;
   entityMaintainersTasksClient: EntityMaintainersTasksClient;
+  security: SecurityPluginStart;
 }
 
 export class AssetManager {
@@ -62,6 +72,7 @@ export class AssetManager {
   private readonly isServerless: boolean;
   private readonly logsExtractionClient: LogsExtractionClient;
   private readonly entityMaintainersTasksClient: EntityMaintainersTasksClient;
+  private readonly security: SecurityPluginStart;
 
   constructor(deps: AssetManagerDependencies) {
     this.logger = deps.logger;
@@ -72,6 +83,7 @@ export class AssetManager {
     this.isServerless = deps.isServerless;
     this.logsExtractionClient = deps.logsExtractionClient;
     this.entityMaintainersTasksClient = deps.entityMaintainersTasksClient;
+    this.security = deps.security;
   }
 
   public async init(
@@ -211,6 +223,37 @@ export class AssetManager {
       this.logger.error(`Error installing assets for entity type ${type}`, { error });
       throw error;
     }
+  }
+
+  public async getPrivileges(
+    request: KibanaRequest,
+    additionalIndexPattern: string = ''
+  ): Promise<CheckPrivilegesResponse> {
+    const checkPrivileges = this.security.authz.checkPrivilegesDynamicallyWithRequest(request);
+
+    const sourceIndexPatterns = await this.logsExtractionClient.getIndexPatterns(
+      additionalIndexPattern
+    );
+    const kibanaPrivileges = this.security.authz.actions.savedObject.get(
+      EngineDescriptorTypeName,
+      'create'
+    );
+
+    const sourceIndexPrivileges = Object.fromEntries(
+      sourceIndexPatterns.map((idx) => [idx, ENTITY_STORE_SOURCE_INDICES_PRIVILEGES])
+    );
+
+    const targetIndexPrivileges = {
+      [getLatestEntitiesIndexName(this.namespace)]: ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+    };
+
+    return checkPrivileges({
+      kibana: [kibanaPrivileges],
+      elasticsearch: {
+        cluster: ENTITY_STORE_CLUSTER_PRIVILEGES,
+        index: { ...targetIndexPrivileges, ...sourceIndexPrivileges },
+      },
+    });
   }
 
   private async getEngineWithComponents(

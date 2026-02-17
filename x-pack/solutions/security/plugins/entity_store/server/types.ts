@@ -48,6 +48,7 @@ export interface EntityStoreApiRequestHandlerContext {
   assetManager: AssetManager;
   featureFlags: FeatureFlags;
   logsExtractionClient: LogsExtractionClient;
+  security: SecurityPluginStart;
 }
 
 export type EntityStoreRequestHandlerContext = CustomRequestHandlerContext<{

@@ -88,7 +88,11 @@ describe('runDiscoverPlaywrightConfigs', () => {
         {
           path: 'pluginA/config1.playwright.config.ts',
           hasTests: true,
-          tags: ['@local-stateful-classic', '@cloud-serverless-observability_complete'],
+          tags: [
+            '@local-stateful-classic',
+            '@cloud-stateful-classic',
+            '@cloud-serverless-observability_complete',
+          ],
           serverRunFlags: [
             '--arch stateful --domain classic',
             '--arch serverless --domain observability_complete',
@@ -162,7 +166,11 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   title: 'Test 1',
                   expectedStatus: 'passed',
                   location: { file: 'test1.spec.ts', line: 1, column: 1 },
-                  tags: ['@local-stateful-classic', '@cloud-serverless-observability_complete'],
+                  tags: [
+                    '@local-stateful-classic',
+                    '@cloud-stateful-classic',
+                    '@cloud-serverless-observability_complete',
+                  ],
                 },
                 {
                   id: 'test2',
@@ -247,7 +255,11 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   title: 'Test 5',
                   expectedStatus: 'passed',
                   location: { file: 'test5.spec.ts', line: 1, column: 1 },
-                  tags: ['@local-stateful-classic', '@cloud-serverless-observability_complete'],
+                  tags: [
+                    '@local-stateful-classic',
+                    '@cloud-stateful-classic',
+                    '@cloud-serverless-observability_complete',
+                  ],
                 },
               ],
             },
@@ -279,9 +291,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
-    // pluginA has stateful-classic, serverless-observability_complete, serverless-security_complete, serverless-search which are in tags.deploymentAgnostic
+    // pluginA has local/cloud-stateful-classic, serverless-observability_complete, serverless-security_complete, serverless-search which are in tags.deploymentAgnostic
     // pluginB has serverless-workplaceai which is NOT in tags.deploymentAgnostic, it should be excluded
-    // packageA has stateful-classic and serverless-observability_complete which are in tags.deploymentAgnostic
+    // packageA has local/cloud-stateful-classic and serverless-observability_complete which are in tags.deploymentAgnostic
 
     const infoCalls = log.info.mock.calls;
     const foundMessage = infoCalls.find((call) =>
@@ -292,15 +304,15 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(foundMessage![0]).toContain('1 package(s)'); // packageA
   });
 
-  it('filters configs based on target tags for "mki" target (SERVERLESS_ONLY)', () => {
+  it('filters configs based on target tags for "mki" target (@cloud-serverless-*)', () => {
     flagsReader.enum.mockReturnValue('mki');
     flagsReader.boolean.mockReturnValue(false);
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
-    // pluginA has serverless-observability_complete, serverless-security_complete, serverless-search which are in SERVERLESS_ONLY
-    // pluginB has serverless-workplaceai which is in SERVERLESS_ONLY
-    // packageA has serverless-observability_complete which is in SERVERLESS_ONLY
+    // pluginA has @cloud-serverless-observability_complete, @cloud-serverless-security_complete, @cloud-serverless-search
+    // pluginB has @cloud-serverless-workplaceai
+    // packageA has @cloud-serverless-observability_complete
 
     const infoCalls = log.info.mock.calls;
     const foundMessage = infoCalls.find((call) =>
@@ -312,15 +324,15 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(foundMessage![0]).toContain('1 package(s)');
   });
 
-  it('filters configs based on target tags for "ech" target (ESS_ONLY)', () => {
+  it('filters configs based on target tags for "ech" target (@cloud-stateful-*)', () => {
     flagsReader.enum.mockReturnValue('ech');
     flagsReader.boolean.mockReturnValue(false);
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
-    // pluginA has stateful-classic which is in ESS_ONLY
-    // pluginB has no stateful-classic, it should be excluded
-    // packageA has stateful-classic which is in ESS_ONLY
+    // pluginA has @cloud-stateful-classic which matches ech target
+    // pluginB has no cloud-stateful tags, it should be excluded
+    // packageA has @cloud-stateful-classic which matches ech target
 
     const infoCalls = log.info.mock.calls;
     const foundMessage = infoCalls.find((call) =>
@@ -329,6 +341,101 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(foundMessage).toBeDefined();
     expect(foundMessage![0]).toContain('1 plugin(s)'); // pluginA only
     expect(foundMessage![0]).toContain('1 package(s)'); // packageA
+  });
+
+  it('filters configs based on target tags for "local" target (@local-*)', () => {
+    flagsReader.enum.mockReturnValue('local');
+    flagsReader.boolean.mockReturnValue(false);
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    // pluginA config1 has @local-stateful-classic which matches @local-*
+    // pluginA parallel has @cloud-serverless-search which does NOT match @local-*
+    // pluginB has @cloud-serverless-workplaceai which does NOT match @local-*
+    // packageA has @local-stateful-classic which matches @local-*
+
+    const infoCalls = log.info.mock.calls;
+    const foundMessage = infoCalls.find((call) =>
+      call[0].includes('Found Playwright config files')
+    );
+    expect(foundMessage).toBeDefined();
+    expect(foundMessage![0]).toContain('1 plugin(s)'); // pluginA only (config1 matches, parallel does not)
+    expect(foundMessage![0]).toContain('1 package(s)'); // packageA
+
+    // Verify only @local-* tags are kept
+    const configLogCall = infoCalls.find((call) =>
+      call[0].includes('config1.playwright.config.ts')
+    );
+    expect(configLogCall).toBeDefined();
+    expect(configLogCall![0]).toContain('@local-stateful-classic');
+    expect(configLogCall![0]).not.toContain('@cloud-stateful-classic');
+    expect(configLogCall![0]).not.toContain('@cloud-serverless-observability_complete');
+  });
+
+  it('filters configs based on target tags for "local-stateful-only" target (@local-stateful-*)', () => {
+    flagsReader.enum.mockReturnValue('local-stateful-only');
+    flagsReader.boolean.mockReturnValue(false);
+
+    // Add a module with @local-serverless-search to verify it gets excluded
+    mockTestableModules.modules.push({
+      name: 'pluginLocalServerless',
+      group: 'groupD',
+      type: 'plugin' as const,
+      visibility: 'private' as const,
+      root: 'x-pack/platform/plugins/private/pluginLocalServerless',
+      configs: [
+        {
+          path: 'pluginLocalServerless/config.playwright.config.ts',
+          category: 'ui',
+          type: 'playwright',
+          manifest: {
+            path: 'pluginLocalServerless/config.playwright.config.ts',
+            exists: true,
+            lastModified: '2024-01-01T00:00:00Z',
+            sha1: 'local789',
+            tests: [
+              {
+                id: 'localServerlessTest',
+                title: 'Local Serverless Test',
+                expectedStatus: 'passed',
+                location: { file: 'test.spec.ts', line: 1, column: 1 },
+                tags: ['@local-serverless-search'],
+              },
+            ],
+          },
+        },
+      ],
+    });
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    // pluginA config1 has @local-stateful-classic which matches @local-stateful-*
+    // pluginA parallel has @cloud-serverless-search which does NOT match
+    // pluginB has @cloud-serverless-workplaceai which does NOT match
+    // pluginLocalServerless has @local-serverless-search which does NOT match @local-stateful-*
+    // packageA has @local-stateful-classic which matches @local-stateful-*
+
+    const infoCalls = log.info.mock.calls;
+    const foundMessage = infoCalls.find((call) =>
+      call[0].includes('Found Playwright config files')
+    );
+    expect(foundMessage).toBeDefined();
+    expect(foundMessage![0]).toContain('1 plugin(s)'); // pluginA only
+    expect(foundMessage![0]).toContain('1 package(s)'); // packageA
+
+    // Verify only @local-stateful-* tags are kept
+    const configLogCall = infoCalls.find((call) =>
+      call[0].includes('config1.playwright.config.ts')
+    );
+    expect(configLogCall).toBeDefined();
+    expect(configLogCall![0]).toContain('@local-stateful-classic');
+    expect(configLogCall![0]).not.toContain('@cloud-stateful-classic');
+    expect(configLogCall![0]).not.toContain('@cloud-serverless');
+    expect(configLogCall![0]).not.toContain('@local-serverless');
+
+    // pluginLocalServerless should be excluded
+    const localServerlessLog = infoCalls.find((call) => call[0].includes('pluginLocalServerless'));
+    expect(localServerlessLog).toBeUndefined();
   });
 
   it('includes custom-server configs alongside defaults when "include-custom-servers" is true', () => {
@@ -475,7 +582,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
   });
 
   it('filters config tags to only include cross tags', () => {
-    flagsReader.enum.mockReturnValue('ech'); // ESS_ONLY = ['@local-stateful-classic']
+    flagsReader.enum.mockReturnValue('ech'); // @cloud-stateful-* tags only
     flagsReader.boolean.mockReturnValue(false);
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
@@ -487,8 +594,10 @@ describe('runDiscoverPlaywrightConfigs', () => {
     );
 
     expect(configLogCall).toBeDefined();
-    // pluginA config1 has tags ['@local-stateful-classic', '@cloud-serverless-observability_complete', '@cloud-serverless-security_complete'], but after filtering for ESS_ONLY, only [@local-stateful-classic] should remain
-    expect(configLogCall![0]).toContain('tags: [@local-stateful-classic]');
+    // pluginA config1 has tags ['@local-stateful-classic', '@cloud-stateful-classic', '@cloud-serverless-observability_complete', '@cloud-serverless-security_complete'],
+    // but after filtering for ech (@cloud-stateful-*), only [@cloud-stateful-classic] should remain
+    expect(configLogCall![0]).toContain('tags: [@cloud-stateful-classic]');
+    expect(configLogCall![0]).not.toContain('@local-stateful-classic');
     expect(configLogCall![0]).not.toContain('@cloud-serverless-observability_complete');
     expect(configLogCall![0]).not.toContain('@cloud-serverless-security_complete');
   });
@@ -512,7 +621,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
   });
 
   it('logs "No Playwright config files found" when no configs match target tags', () => {
-    flagsReader.enum.mockReturnValue('ech'); // ESS_ONLY
+    flagsReader.enum.mockReturnValue('ech'); // @cloud-stateful-* tags only
     flagsReader.boolean.mockReturnValue(false);
 
     // Set up modules with no matching tags
@@ -578,12 +687,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
   });
 
   it('filters out modules with no matching configs after tag filtering', () => {
-    flagsReader.enum.mockReturnValue('ech'); // ESS_ONLY = ['@local-stateful-classic']
+    flagsReader.enum.mockReturnValue('ech'); // @cloud-stateful-* tags only
     flagsReader.boolean.mockReturnValue(false);
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
-    // pluginB has serverless-workplaceai which is not in ESS_ONLY, it should be filtered out
+    // pluginB has @cloud-serverless-workplaceai which doesn't match @cloud-stateful-*, it should be filtered out
     const infoCalls = log.info.mock.calls;
     const moduleLogs = infoCalls.filter(
       (call) => call[0].includes('] plugin:') || call[0].includes('] package:')
