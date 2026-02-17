@@ -6,9 +6,10 @@
  */
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
+import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { ENTITY_RELATIONSHIP_FIELDS } from '@kbn/cloud-security-posture-common/constants';
-import { checkIfEntitiesIndexLookupMode } from './fetch_events_graph';
+import { checkIfEntitiesIndexLookupMode, formatJsonProperty } from './utils';
 import type { EntityId, RelationshipEdge } from './types';
 
 interface BuildRelationshipsEsqlQueryParams {
@@ -49,17 +50,20 @@ const buildRelationshipsEsqlQuery = ({
 | RENAME _source_name = entity.name
 | RENAME _source_type = entity.type
 | RENAME _source_sub_type = entity.sub_type
+| RENAME _source_host_ip = host.ip
 // Lookup target entity metadata
 | EVAL entity.id = _target_id
 | LOOKUP JOIN ${indexName} ON entity.id
 | RENAME _target_name = entity.name
 | RENAME _target_type = entity.type
 | RENAME _target_sub_type = entity.sub_type
+| RENAME _target_host_ip = host.ip
 // Restore source entity fields
 | RENAME entity.id = _source_id
 | RENAME entity.name = _source_name
 | RENAME entity.type = _source_type
-| RENAME entity.sub_type = _source_sub_type`;
+| RENAME entity.sub_type = _source_sub_type
+| RENAME host.ip = _source_host_ip`;
 
   // The ecsParentField hint is needed to later query actions done TO this entity
   // (e.g., to find events where this entity is the target).
@@ -83,19 +87,29 @@ ${forkBranches}
 ${enrichmentSection}
 // Build enriched actors doc data with entity metadata (from the queried entity)
 | EVAL actorDocData = CONCAT("{\\"id\\":\\"", entity.id, "\\",\\"type\\":\\"entity\\",\\"entity\\":{",
-    CASE(entity.name IS NOT NULL, CONCAT("\\"name\\":\\"", entity.name, "\\","), ""),
-    CASE(entity.type IS NOT NULL, CONCAT("\\"type\\":\\"", entity.type, "\\","), ""),
-    CASE(entity.sub_type IS NOT NULL, CONCAT("\\"sub_type\\":\\"", entity.sub_type, "\\","), ""),
     "\\"availableInEntityStore\\":true",
     ",\\"ecsParentField\\":\\"${ecsParentFieldValue}\\"",
+    ${formatJsonProperty('name', 'entity.name')},
+    ${formatJsonProperty('type', 'entity.type')},
+    ${formatJsonProperty('sub_type', 'entity.sub_type')},
+    CASE(
+      host.ip IS NOT NULL,
+      CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(host.ip), "\\"", "}"),
+      ""
+    ),
   "}}")
 // Build enriched targets doc data with entity metadata
 | EVAL targetDocData = CONCAT("{\\"id\\":\\"", _target_id, "\\",\\"type\\":\\"entity\\",\\"entity\\":{",
-    CASE(_target_name IS NOT NULL, CONCAT("\\"name\\":\\"", _target_name, "\\","), ""),
-    CASE(_target_type IS NOT NULL, CONCAT("\\"type\\":\\"", _target_type, "\\","), ""),
-    CASE(_target_sub_type IS NOT NULL, CONCAT("\\"sub_type\\":\\"", _target_sub_type, "\\","), ""),
     "\\"availableInEntityStore\\":", CASE(_target_name IS NOT NULL OR _target_type IS NOT NULL, "true", "false"),
     ",\\"ecsParentField\\":\\"${ecsParentFieldValue}\\"",
+    ${formatJsonProperty('name', '_target_name')},
+    ${formatJsonProperty('type', '_target_type')},
+    ${formatJsonProperty('sub_type', '_target_sub_type')},
+    CASE(
+      _target_host_ip IS NOT NULL,
+      CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(_target_host_ip), "\\"", "}"),
+      ""
+    ),
   "}}")
 // Group by actor entity, relationship, and target type/subtype (for target grouping)
 // This ensures targets with the same type are grouped together
@@ -111,6 +125,7 @@ ${enrichmentSection}
   actorEntityType = VALUES(entity.type),
   actorEntitySubType = VALUES(entity.sub_type),
   actorEntityName = VALUES(entity.name),
+  actorHostIps = VALUES(host.ip),
   // Target entity grouping - targets with same type/subtype are grouped
   targetIds = VALUES(_target_id),
   targetNodeId = CASE(
@@ -119,7 +134,8 @@ ${enrichmentSection}
   ),
   targetIdsCount = COUNT_DISTINCT(_target_id),
   targetsDocData = VALUES(targetDocData),
-  targetEntityName = VALUES(_target_name)
+  targetEntityName = VALUES(_target_name),
+  targetHostIps = VALUES(_target_host_ip)
     BY entity.id, relationship, targetEntityType = _target_type, targetEntitySubType = _target_sub_type
 // Compute relationshipNodeId for deduplication (similar to labelNodeId for events)
 // Multiple records with different target types share the same relationshipNodeId
@@ -182,7 +198,7 @@ export const fetchEntityRelationships = async ({
   logger: Logger;
   entityIds: EntityId[];
   spaceId: string;
-}): Promise<RelationshipEdge[]> => {
+}): Promise<EsqlToRecords<RelationshipEdge>> => {
   const indexName = getEntitiesLatestIndexName(spaceId);
 
   // Relationships require v2 entity store with lookup mode for LOOKUP JOIN enrichment
@@ -191,7 +207,7 @@ export const fetchEntityRelationships = async ({
     logger.debug(
       `Entities index [${indexName}] is not in lookup mode, skipping relationship fetch`
     );
-    return [];
+    return { columns: [], records: [] };
   }
 
   logger.trace(`Fetching relationships from index [${indexName}] for ${entityIds.length} entities`);
@@ -206,7 +222,7 @@ export const fetchEntityRelationships = async ({
   logger.trace(`Relationships filter: ${JSON.stringify(filter)}`);
 
   try {
-    const response = await esClient.asInternalUser.helpers
+    const response = await esClient.asCurrentUser.helpers
       .esql({
         columnar: false,
         filter,
@@ -216,14 +232,13 @@ export const fetchEntityRelationships = async ({
 
     logger.trace(`Fetched [${response.records.length}] relationship records`);
 
-    return response.records;
+    return response;
   } catch (error) {
-    // If the index doesn't exist, return empty array
+    // If the index doesn't exist, return empty result
     if (error.statusCode === 404) {
       logger.debug(`Entities index ${indexName} does not exist, skipping relationship fetch`);
-      return [];
+      return { columns: [], records: [] };
     }
-    logger.error(`Error fetching relationships: ${error.message}`);
-    return [];
+    throw error;
   }
 };

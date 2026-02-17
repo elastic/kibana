@@ -11,6 +11,7 @@ import { castArray } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type {
+  ConnectorNodeType,
   EdgeColor,
   EdgeDataModel,
   EntityNodeDataModel,
@@ -60,7 +61,7 @@ interface NodeVisualProps {
 
 export const parseRecords = (
   logger: Logger,
-  records: EventEdge[] = [],
+  eventRecords: EventEdge[] = [],
   relationshipRecords: RelationshipEdge[] = [],
   nodesLimit?: number
 ): Pick<GraphResponse, 'nodes' | 'edges' | 'messages'> => {
@@ -74,13 +75,13 @@ export const parseRecords = (
   };
 
   logger.trace(
-    `Parsing records [events: ${records.length}] [relationships: ${
+    `Parsing records [events: ${eventRecords.length}] [relationships: ${
       relationshipRecords.length
     }] [nodesLimit: ${nodesLimit ?? 'none'}]`
   );
 
   // Process event records
-  for (const record of records) {
+  for (const record of eventRecords) {
     if (isAboveAPINodesLimit(ctx)) {
       emitAPINodesLimitMessage(ctx);
       break;
@@ -404,6 +405,7 @@ const processRelationshipRecord = (record: RelationshipEdge, context: ParseConte
     entitySubType: record.actorEntitySubType,
     entityName: record.actorEntityName,
     docData: record.actorsDocData,
+    hostIps: record.actorHostIps ? castArray(record.actorHostIps) : [],
   });
 
   createEntityNode(context.nodesMap, {
@@ -413,6 +415,7 @@ const processRelationshipRecord = (record: RelationshipEdge, context: ParseConte
     entitySubType: record.targetEntitySubType,
     entityName: record.targetEntityName,
     docData: record.targetsDocData,
+    hostIps: record.targetHostIps ? castArray(record.targetHostIps) : [],
   });
 
   // Create relationship node - ID is based on actor + relationship (relationshipNodeId)
@@ -428,7 +431,7 @@ const processRelationshipRecord = (record: RelationshipEdge, context: ParseConte
 
 const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {
   const groupNodes: NodeDataModel[] = [];
-  const connectorNodes: NodeDataModel[] = [];
+  const connectorNodes: (LabelNodeDataModel | RelationshipNodeDataModel)[] = [];
   const otherNodes: NodeDataModel[] = [];
 
   for (const node of Object.values(nodesMap)) {
@@ -503,7 +506,7 @@ const processConnectorGroup = (
   connectorEdgesMap: Record<string, ConnectorEdges[]>,
   edgesMap: Record<string, EdgeDataModel>,
   nodesMap: Record<string, NodeDataModel>,
-  connectorType: 'label' | 'relationship'
+  connectorType: ConnectorNodeType
 ) => {
   if (connectorIds.length === 1) {
     const connectorId = connectorIds[0];

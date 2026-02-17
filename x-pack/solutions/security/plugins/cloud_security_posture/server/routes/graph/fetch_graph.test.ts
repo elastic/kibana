@@ -71,7 +71,10 @@ describe('fetchGraph', () => {
     mockedFetchEvents.mockResolvedValue({
       records: mockEventRecords,
     } as any);
-    mockedFetchEntityRelationships.mockResolvedValue(mockRelationshipRecords);
+    mockedFetchEntityRelationships.mockResolvedValue({
+      columns: [],
+      records: mockRelationshipRecords,
+    } as any);
   });
 
   afterEach(() => {
@@ -119,6 +122,37 @@ describe('fetchGraph', () => {
     expect(result.relationships).toEqual([]);
   });
 
+  it('should not call fetchEvents when originEventIds is empty and no esQuery', async () => {
+    const entityIds = [{ id: 'entity-1', isOrigin: true }];
+
+    await fetchGraph({ ...baseParams, originEventIds: [], entityIds });
+
+    expect(mockedFetchEvents).not.toHaveBeenCalled();
+  });
+
+  it('should return empty events when originEventIds is empty and no esQuery', async () => {
+    const entityIds = [{ id: 'entity-1', isOrigin: true }];
+
+    const result = await fetchGraph({ ...baseParams, originEventIds: [], entityIds });
+
+    expect(result.events).toEqual([]);
+  });
+
+  it('should call fetchEvents when originEventIds is empty but esQuery is provided', async () => {
+    const esQuery = {
+      bool: {
+        filter: [{ term: { 'cloud.provider': 'gcp' } }],
+        must: [],
+        should: [],
+        must_not: [],
+      },
+    };
+
+    await fetchGraph({ ...baseParams, originEventIds: [], esQuery });
+
+    expect(mockedFetchEvents).toHaveBeenCalledTimes(1);
+  });
+
   it('should call fetchEntityRelationships when entityIds are provided', async () => {
     const entityIds = [
       { id: 'entity-1', isOrigin: true },
@@ -157,5 +191,24 @@ describe('fetchGraph', () => {
     await fetchGraph({ ...baseParams, esQuery });
 
     expect(mockedFetchEvents).toHaveBeenCalledWith(expect.objectContaining({ esQuery }));
+  });
+
+  it('should log and re-throw when fetchEvents fails', async () => {
+    const error = new Error('ESQL query failed');
+    mockedFetchEvents.mockRejectedValue(error);
+
+    await expect(fetchGraph(baseParams)).rejects.toThrow('ESQL query failed');
+    expect(logger.error).toHaveBeenCalledWith('Failed to fetch events: ESQL query failed');
+  });
+
+  it('should log and re-throw when fetchEntityRelationships fails', async () => {
+    const entityIds = [{ id: 'entity-1', isOrigin: true }];
+    const error = new Error('Connection refused');
+    mockedFetchEntityRelationships.mockRejectedValue(error);
+
+    await expect(fetchGraph({ ...baseParams, entityIds })).rejects.toThrow('Connection refused');
+    expect(logger.error).toHaveBeenCalledWith(
+      'Failed to fetch entity relationships: Connection refused'
+    );
   });
 });

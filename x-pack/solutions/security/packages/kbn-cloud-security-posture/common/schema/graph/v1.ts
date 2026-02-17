@@ -53,8 +53,7 @@ export const graphRequestSchema = schema.object({
         }),
       })
     ),
-    // Entity IDs for fetching relationships from entity store
-    // Not shown in KQL search bar, passed directly to the API
+    // Entity IDs for fetching relationships from entity store (optional, may be empty when opening from events flyout)
     entityIds: schema.maybe(schema.arrayOf(entityIdSchema)),
   }),
 });

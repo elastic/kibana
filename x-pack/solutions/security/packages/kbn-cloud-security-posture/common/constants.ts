@@ -120,6 +120,10 @@ export const ENTITIES_LATEST_INDEX = '.entities.v2.latest.security_<space>';
 /**
  * Relationship fields available in the generic entities index.
  * These represent static/configuration-based relationships between entities.
+ *
+ * WARNING: ES|QL FORK supports a maximum of 8 branches. If more than 8 fields are added here,
+ * the relationship fetching logic in fetch_entity_relationships_graph.ts will need to be updated
+ * to batch the FORK queries.
  */
 export const ENTITY_RELATIONSHIP_FIELDS = [
   'Accesses_frequently',
