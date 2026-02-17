@@ -1,0 +1,150 @@
+env:
+  KBN_EVALS: '1'
+steps:
+  - label: '👨‍🔧 Pre-Build'
+    command: .buildkite/scripts/lifecycle/pre_build.sh
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+
+  - wait
+
+  - label: '🧑‍🏭 Build Kibana Distribution'
+    command: .buildkite/scripts/steps/build_kibana.sh
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-8
+    key: build
+    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+
+  - wait
+
+  - group: 'LLM Evals (weekly)'
+    key: llm-evals-weekly
+    steps:
+      - label: 'Evals: Agent Builder'
+        key: kbn-evals-weekly-agent-builder
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          EVAL_SUITE_ID: 'agent-builder'
+          EVAL_FANOUT: '1'
+          EVAL_MODEL_GROUPS: 'all'
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - label: 'Evals: ES|QL Generation Evaluations'
+        key: kbn-evals-weekly-esql-generation
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          EVAL_SUITE_ID: 'esql-generation'
+          EVAL_FANOUT: '1'
+          EVAL_MODEL_GROUPS: 'all'
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - label: 'Evals: Streams'
+        key: kbn-evals-weekly-streams
+        skip: 'Temporarily disabled (requires prerequisite data; will be re-enabled in follow-up PR)'
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          EVAL_SUITE_ID: 'streams'
+          EVAL_FANOUT: '1'
+          EVAL_MODEL_GROUPS: 'all'
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - label: 'Evals: LLM Tasks'
+        key: kbn-evals-weekly-llm-tasks
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          EVAL_SUITE_ID: 'llm-tasks'
+          EVAL_FANOUT: '1'
+          EVAL_MODEL_GROUPS: 'all'
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - label: 'Evals: Observability AI Assistant'
+        key: kbn-evals-weekly-obs-ai-assistant
+        skip: 'Temporarily disabled (for the sake of cost reduction and low maturity of this eval suite; will be re-enabled in follow-up PR)'
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          EVAL_SUITE_ID: 'obs-ai-assistant'
+          EVAL_FANOUT: '1'
+          EVAL_MODEL_GROUPS: 'all'
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - label: 'Evals: Observability AI Assistant (AI Insights)'
+        key: kbn-evals-weekly-obs-ai-assistant-ai-insights
+        skip: 'Temporarily disabled (requires prerequisite data; will be re-enabled in follow-up PR)'
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          EVAL_SUITE_ID: 'obs-ai-assistant/ai_insights'
+          EVAL_FANOUT: '1'
+          EVAL_MODEL_GROUPS: 'all'
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3

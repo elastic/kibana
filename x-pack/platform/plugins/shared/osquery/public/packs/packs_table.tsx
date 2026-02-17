@@ -84,7 +84,7 @@ export const AgentPoliciesPopover = ({ agentPolicyIds = [] }: { agentPolicyIds?:
 
 const PacksTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
-  const queryHistoryRework = useIsExperimentalFeatureEnabled('queryHistoryRework');
+  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { push } = useHistory();
   const { data, isLoading } = usePacks({});
 
@@ -114,14 +114,15 @@ const PacksTableComponent = () => {
     );
   }, []);
 
+  const newQueryPath = isHistoryEnabled ? '/new' : '/live_queries/new';
   const handlePlayClick = useCallback<(item: PackSavedObject) => () => void>(
     (item) => () =>
-      push('/live_queries/new', {
+      push(newQueryPath, {
         form: {
           packId: item.saved_object_id,
         },
       }),
-    [push]
+    [push, newQueryPath]
   );
 
   const renderPlayAction = useCallback(
@@ -211,7 +212,7 @@ const PacksTableComponent = () => {
           },
         ],
       } as EuiTableActionsColumnType<PackSavedObject>,
-      ...(queryHistoryRework
+      ...(isHistoryEnabled
         ? [
             {
               width: '40px',
@@ -228,7 +229,7 @@ const PacksTableComponent = () => {
       renderPlayAction,
       renderQueries,
       renderUpdatedAt,
-      queryHistoryRework,
+      isHistoryEnabled,
     ]
   );
 
