@@ -16,9 +16,9 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import { getTimeUnitLabel } from '../../../../helpers/format_size_units';
 import type { PreservedTimeUnit, TimeUnit } from '../types';
-import { formatMillisecondsInUnit, getStepIndexFromArrayItemPath, toMilliseconds } from '../utils';
+import { getBoundsHelpTextValues, getUnitSelectOptions } from '../../../shared';
+import { getStepIndexFromArrayItemPath, toMilliseconds } from '../utils';
 import { MAX_DOWNSAMPLE_STEPS } from '../constants';
 import {
   fixedIntervalMultipleOfPreviousStep,
@@ -134,19 +134,24 @@ export const FixedIntervalField = ({
               stepIndex < MAX_DOWNSAMPLE_STEPS - 1
                 ? getFixedIntervalMsAt(stepIndex + 1)
                 : undefined;
+            const { min, max } = getBoundsHelpTextValues({
+              lowerBoundMs,
+              upperBoundMs,
+              unit: currentUnit,
+            });
 
             const helpText =
               upperBoundMs === undefined
                 ? i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalHelpLowerBound', {
                     defaultMessage: 'Must be larger than {min} based on current configuration.',
-                    values: { min: formatMillisecondsInUnit(lowerBoundMs, currentUnit) },
+                    values: { min },
                   })
                 : i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalHelpRange', {
                     defaultMessage:
                       'Must be larger than {min} and smaller than {max} based on current configuration.',
                     values: {
-                      min: formatMillisecondsInUnit(lowerBoundMs, currentUnit),
-                      max: formatMillisecondsInUnit(upperBoundMs, currentUnit),
+                      min,
+                      max,
                     },
                   });
 
@@ -179,24 +184,7 @@ export const FixedIntervalField = ({
                         'xpack.streams.editDslStepsFlyout.fixedIntervalUnitAriaLabel',
                         { defaultMessage: 'Fixed interval unit' }
                       )}
-                      options={(() => {
-                        let unitOptions: Array<{ value: PreservedTimeUnit; text: string }> =
-                          timeUnitOptions.map((o) => ({ value: o.value, text: o.text }));
-                        const canShowNonDefaultUnit =
-                          currentUnit === 'ms' ||
-                          currentUnit === 'micros' ||
-                          currentUnit === 'nanos';
-                        if (
-                          canShowNonDefaultUnit &&
-                          !unitOptions.some((o) => o.value === currentUnit)
-                        ) {
-                          unitOptions = [
-                            ...unitOptions,
-                            { value: currentUnit, text: getTimeUnitLabel(currentUnit) },
-                          ];
-                        }
-                        return unitOptions;
-                      })()}
+                      options={getUnitSelectOptions(timeUnitOptions, currentUnit)}
                       value={currentUnit}
                       data-test-subj={`${dataTestSubj}FixedIntervalUnit`}
                       onChange={(e) => unitField.setValue(e.target.value as PreservedTimeUnit)}

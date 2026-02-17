@@ -6,11 +6,9 @@
  */
 
 import type { IngestStreamLifecycleDSL } from '@kbn/streams-schema';
-import type { StreamsTimeUnit } from '../../../helpers/format_size_units';
+import type { PreservedTimeUnit, TimeUnit } from '../../shared';
 
-export type TimeUnit = Extract<StreamsTimeUnit, 'd' | 'h' | 'm' | 's'>;
-
-export type PreservedTimeUnit = StreamsTimeUnit;
+export type { PreservedTimeUnit, TimeUnit };
 
 export interface DslStepMetaFields {
   afterValue: string;

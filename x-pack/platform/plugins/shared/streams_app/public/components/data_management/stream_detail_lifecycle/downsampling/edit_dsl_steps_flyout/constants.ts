@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-import type { TimeUnit } from './form';
-import { getTimeUnitLabel } from '../../helpers/format_size_units';
-
-export const TIME_UNIT_OPTIONS: ReadonlyArray<{ value: TimeUnit; text: string }> = [
-  { value: 'd', text: getTimeUnitLabel('d') },
-  { value: 'h', text: getTimeUnitLabel('h') },
-  { value: 'm', text: getTimeUnitLabel('m') },
-  { value: 's', text: getTimeUnitLabel('s') },
-];
+export { TIME_UNIT_OPTIONS } from '../shared';
