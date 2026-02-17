@@ -12,6 +12,7 @@ import { isStreamEvent, type ToolIdMapping } from '@kbn/agent-builder-genai-util
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
+import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
@@ -104,6 +105,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const eventEmitter: AgentEventEmitterFn = (event) => {
     manualEvents$.next(event);
   };
+  toolManager.setEventEmitter(eventEmitter);
+
   // Pass action so regenerate uses the last round's original input instead of request input
   const processedConversation = await prepareConversation({
     nextInput,
@@ -111,6 +114,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     context,
     action,
   });
+
+  const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
+    request,
+    abortSignal,
+    nextInput: processedConversation.nextInput,
+  });
+  processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
 
   const { staticTools, dynamicTools } = await selectTools({
     conversation: processedConversation,
@@ -126,29 +136,30 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     runner: context.runner,
   });
 
+  // First add static tools
   await Promise.all([
     toolManager.addTools({
       type: ToolManagerToolType.executable,
       tools: staticTools,
       logger,
-      eventEmitter,
     }),
     toolManager.addTools({
       type: ToolManagerToolType.browser,
       tools: browserApiTools ?? [],
     }),
-    toolManager.addTools(
-      {
-        type: ToolManagerToolType.executable,
-        tools: dynamicTools,
-        logger,
-        eventEmitter,
-      },
-      {
-        dynamic: true,
-      }
-    ),
   ]);
+
+  // Then add dynamic tools
+  await toolManager.addTools(
+    {
+      type: ToolManagerToolType.executable,
+      tools: dynamicTools,
+      logger,
+    },
+    {
+      dynamic: true,
+    }
+  );
 
   const cycleLimit = 10;
   const graphRecursionLimit = getRecursionLimit(cycleLimit);
@@ -248,7 +259,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   const round = await extractRound(events$);
-
   return {
     round,
   };
