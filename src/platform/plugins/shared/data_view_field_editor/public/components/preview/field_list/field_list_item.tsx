@@ -63,7 +63,8 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
 
   const showPinIcon = isPinHovered || isPinFocused || isPinned;
 
-  const doesContainImage = typeof formattedValue === 'string' && formattedValue.includes('<img');
+  const doesContainImage =
+    React.isValidElement(formattedValue) && formattedValue.type === 'img';
 
   const renderName = () => {
     if (isFromScript && !Boolean(key)) {

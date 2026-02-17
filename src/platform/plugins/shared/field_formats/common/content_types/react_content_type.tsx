@@ -97,7 +97,12 @@ export const setup = (
       return convertedValue;
     }
 
-    const hasNewlines = typeof convertedValue === 'string' && convertedValue.includes('\n');
+    // Check individual array items for newlines to decide formatting,
+    // since recurse() returns a JSX fragment (not a string) for arrays.
+    const hasNewlines = value.some((v: unknown) => {
+      const converted = convert.call(format, v, options);
+      return typeof converted === 'string' && converted.includes('\n');
+    });
 
     if (hasNewlines) {
       return (
