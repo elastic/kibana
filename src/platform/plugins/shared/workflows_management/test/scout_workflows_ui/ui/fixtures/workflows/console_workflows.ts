@@ -65,7 +65,10 @@ description: This is a new workflow
 triggers:
   - type: manual
 
-inputs:
+consts:
+  loop_items: [{"@timestamp": "now"}, {"@timestamp": "yesterday"}, {"@timestamp": "tomorrow"}, {"@timestamp": "next week"}]
+
+  inputs:
   - name: message
     type: string
     default: "hello world"
@@ -78,12 +81,12 @@ steps:
 
   - name: loop
     type: foreach
-    foreach: '[1,2,3,4]'
+    foreach: '{{consts.loop_items}}'
     steps:
       - name: hello_world_step
         type: console
         with:
-          message: "Test run: {{ execution.isTestRun }}"
+          message: "Test run: {{ execution.isTestRun }}, timestamp: {{foreach.item['@timestamp']}}"
 `;
 
 /**
@@ -181,3 +184,35 @@ triggers:
 steps:
   - name: hello_world_step
     type:`;
+
+/**
+ * Manual-only workflow with an event variable reference.
+ * Used to verify that event.* autocomplete only shows spaceId (no alert properties).
+ */
+export const getManualTriggerEventAutocompleteYaml = (name: string) => `
+name: ${name}
+description: Manual trigger - event should only have spaceId
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: log_step
+    type: console
+    with:
+      message: "{{ event. }}"`;
+
+/**
+ * Alert trigger workflow with an event variable reference.
+ * Used to verify that event.* autocomplete shows alerts, rule, params, and spaceId.
+ */
+export const getAlertTriggerEventAutocompleteYaml = (name: string) => `
+name: ${name}
+description: Alert trigger - event should have alerts, rule, params, spaceId
+enabled: true
+triggers:
+  - type: alert
+steps:
+  - name: log_step
+    type: console
+    with:
+      message: "{{ event. }}"`;
