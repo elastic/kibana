@@ -31,6 +31,8 @@ import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
 import type { Config } from '@jest/types';
 
 import jestFlags from './jest_flags.json';
+import { isInBuildkite, isConfigCompleted, markConfigCompletedSync } from './buildkite_checkpoint';
+import { parseShardAnnotation } from './shard_config';
 
 const JEST_CACHE_DIR = 'data/jest-cache';
 
@@ -63,9 +65,56 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
     process.env.NODE_ENV = 'test';
   }
 
+  // CI shard annotation support: if --config contains a shard annotation
+  // (e.g., "config.js||shard=1/2"), strip it and inject --shard into the args.
+  // This allows run.ts to be a drop-in replacement for run_all.ts on CI,
+  // where pick_test_group_run_order.ts embeds shard info into config names.
+  if (parsedArguments.config) {
+    const { config: cleanConfig, shard } = parseShardAnnotation(parsedArguments.config);
+    if (shard) {
+      parsedArguments.config = cleanConfig;
+      parsedArguments.shard = shard;
+      // Update process.argv so Jest and downstream code see clean values
+      for (let i = 0; i < process.argv.length; i++) {
+        if (process.argv[i] === '--config' && i + 1 < process.argv.length) {
+          process.argv[i + 1] = cleanConfig;
+          break;
+        }
+        // Handle --config=value form
+        if (process.argv[i].startsWith('--config=')) {
+          process.argv[i] = `--config=${cleanConfig}`;
+          break;
+        }
+      }
+      process.argv.push('--shard', shard);
+      log.info(`Parsed shard annotation: config=${cleanConfig}, shard=${shard}`);
+    }
+  }
+
   const currentWorkingDirectory: string = process.env.INIT_CWD || process.cwd();
   let testFiles: string[] = [];
   let resolvedConfigPath: string = parsedArguments.config ?? '';
+
+  // Buildkite checkpoint resume: skip this config if it already passed on a previous attempt.
+  // Use relative path for checkpoint key so it's stable across different CI agents.
+  if (isInBuildkite() && resolvedConfigPath) {
+    const relConfigForCheckpoint = relative(REPO_ROOT, resolvedConfigPath);
+    log.info(
+      `[jest-checkpoint] Checking prior completion for ${relConfigForCheckpoint} (step=${
+        process.env.BUILDKITE_STEP_ID || ''
+      }, job=${process.env.BUILDKITE_PARALLEL_JOB || '0'}, retry=${
+        process.env.BUILDKITE_RETRY_COUNT || '0'
+      })`
+    );
+    const alreadyCompleted = await isConfigCompleted(relConfigForCheckpoint);
+    if (alreadyCompleted) {
+      log.info(
+        `[jest-checkpoint] Skipping ${relConfigForCheckpoint} (already completed on previous attempt)`
+      );
+      process.exit(0);
+    }
+    log.info(`[jest-checkpoint] No prior checkpoint found, running config`);
+  }
 
   // Handle config discovery if no config was explicitly provided
   if (!parsedArguments.config) {
@@ -113,13 +162,35 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
   log.debug('Setting up Jest with shared cache directory:', jestArgv.join(' '));
 
   // Run Jest and report timing
-  return run(jestArgv).then(() => {
+  return run(jestArgv).then(async () => {
     // Success means that tests finished, doesn't mean they passed.
     reportTime(runStartTime, 'total', {
       success: true,
       isXpack: currentWorkingDirectory.includes('x-pack'),
       testFiles: testFiles.map((testFile) => relative(currentWorkingDirectory, testFile)),
     });
+
+    // Buildkite checkpoint: register exit handler AFTER run() resolves.
+    //
+    // Jest sets process.exitCode inside a process.on('exit') handler that was registered
+    // during run(). By registering our handler here (after run() resolved), it fires
+    // AFTER Jest's handler in the listener queue, so process.exitCode is already correct.
+    //
+    // We check process.exitCode directly (not the code argument) because the argument
+    // reflects the value at emit time, before any handler has run.
+    //
+    // Uses synchronous markConfigCompletedSync because async is not supported in 'exit' handlers.
+    if (isInBuildkite() && resolvedConfigPath) {
+      const relConfig = relative(REPO_ROOT, resolvedConfigPath);
+      process.on('exit', () => {
+        // process.exitCode is 0 or undefined for success (Jest only sets it for failures).
+        // Both are falsy, while failure codes (1, etc.) are truthy.
+        if (!process.exitCode) {
+          log.info(`[jest-checkpoint] Marking ${relConfig} as completed`);
+          markConfigCompletedSync(relConfig);
+        }
+      });
+    }
   });
 }
 

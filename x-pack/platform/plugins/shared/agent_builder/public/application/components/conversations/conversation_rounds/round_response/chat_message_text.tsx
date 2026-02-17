@@ -22,19 +22,14 @@ import {
 } from '@elastic/eui';
 import { type PluggableList } from 'unified';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
-import {
-  visualizationElement,
-  dashboardElement,
-} from '@kbn/agent-builder-common/tools/custom_rendering';
+import { visualizationElement } from '@kbn/agent-builder-common/tools/custom_rendering';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import {
   Cursor,
   esqlLanguagePlugin,
   createVisualizationRenderer,
-  createDashboardRenderer,
   loadingCursorPlugin,
   visualizationTagParser,
-  dashboardTagParser,
 } from './markdown_plugins';
 import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
 
@@ -130,10 +125,6 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
         stepsFromCurrentRound,
         stepsFromPrevRounds,
       }),
-      [dashboardElement.tagName]: createDashboardRenderer({
-        stepsFromCurrentRound,
-        stepsFromPrevRounds,
-      }),
     };
 
     return {
@@ -141,7 +132,6 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
         loadingCursorPlugin,
         esqlLanguagePlugin,
         visualizationTagParser,
-        dashboardTagParser,
         ...parsingPlugins,
       ],
       processingPluginList: processingPlugins,
