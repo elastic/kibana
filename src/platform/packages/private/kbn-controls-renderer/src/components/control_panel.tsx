@@ -29,6 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { useBatchedPublishingSubjects, type PublishingSubject } from '@kbn/presentation-publishing';
 
 import type { ControlsRendererParentApi } from '../types';
+import { apiPublishesLabel } from '../utils';
 import { controlWidthStyles } from './control_panel.styles';
 import { DragHandle } from './drag_handle';
 import { FloatingActions } from './floating_actions';
@@ -55,8 +56,7 @@ export const ControlPanel = ({
     parentApi.disabledActionIds$ ?? (of([] as string[]) as PublishingSubject<string[]>)
   );
 
-  const [panelTitle, setPanelTitle] = useState<string | undefined>();
-  const [defaultPanelTitle, setDefaultPanelTitle] = useState<string | undefined>();
+  const [panelLabel, setPanelLabel] = useState<string | undefined>();
 
   const prependWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -65,20 +65,13 @@ export const ControlPanel = ({
 
     /** Setup subscriptions for necessary state once API is available */
     const subscriptions = new Subscription();
-    // if (apiPublishesTitle(api)) {
-    subscriptions.add(
-      api.label$.subscribe((result) => {
-        setPanelTitle(result);
-      })
-    );
-    if (api.defaultTitle$) {
+    if (apiPublishesLabel(api)) {
       subscriptions.add(
-        api.defaultTitle$.subscribe((result) => {
-          setDefaultPanelTitle(result);
+        api.label$.subscribe((result) => {
+          setPanelLabel(result);
         })
       );
     }
-    // }
     return () => {
       subscriptions.unsubscribe();
     };
@@ -128,7 +121,7 @@ export const ControlPanel = ({
           id={`control-title-${uid}`}
           aria-label={i18n.translate('controls.controlGroup.controlFrameAriaLabel', {
             defaultMessage: 'Control for ${controlTitle}',
-            values: { controlTitle: panelTitle },
+            values: { controlTitle: panelLabel },
           })}
         >
           <EuiFormControlLayout
@@ -142,7 +135,7 @@ export const ControlPanel = ({
               <>
                 <DragHandle
                   isEditable={isEditable}
-                  controlTitle={panelTitle || defaultPanelTitle}
+                  controlTitle={panelLabel}
                   {...attributes}
                   {...listeners}
                 />
@@ -151,12 +144,12 @@ export const ControlPanel = ({
                   <api.CustomPrependComponent />
                 ) : (
                   <EuiToolTip
-                    content={panelTitle || defaultPanelTitle}
+                    content={panelLabel}
                     anchorProps={{ className: 'eui-textTruncate', css: styles.tooltipStyles }}
                   >
                     <EuiFormLabel className="controlPanel--label">
                       <span css={styles.prependWrapperStyles} ref={prependWrapperRef}>
-                        {panelTitle || defaultPanelTitle}
+                        {panelLabel}
                       </span>
                     </EuiFormLabel>
                   </EuiToolTip>
