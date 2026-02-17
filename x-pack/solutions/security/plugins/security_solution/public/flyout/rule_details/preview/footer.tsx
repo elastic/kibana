@@ -35,10 +35,7 @@ export const PreviewFooter = memo(({ ruleId, rule }: PreviewFooterProps) => {
     <FlyoutFooter data-test-subj={RULE_PREVIEW_FOOTER_TEST_ID}>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
-          <AddRuleAttachmentToChatButton
-            rule={rule}
-            pathway="alerts_flyout_rule_summary"
-          />
+          <AddRuleAttachmentToChatButton rule={rule} pathway="alerts_flyout_rule_summary" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {href ? (

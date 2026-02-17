@@ -818,15 +818,16 @@ const CreateRulePageComponent: React.FC<{
   );
 
   const addToChatButton = useMemo(
-    () =>
+    () => (
       <AddRuleAttachmentToChatButton
-          defineStepData={defineStepData}
-          aboutStepData={aboutStepData}
-          scheduleStepData={scheduleStepData}
-          actionsStepData={actionsStepData}
-          actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
-          pathway="rule_creation"
-        />,
+        defineStepData={defineStepData}
+        aboutStepData={aboutStepData}
+        scheduleStepData={scheduleStepData}
+        actionsStepData={actionsStepData}
+        actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
+        pathway="rule_creation"
+      />
+    ),
     [
       defineStepData,
       aboutStepData,

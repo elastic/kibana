@@ -55,7 +55,7 @@ export const createRuleAttachmentType = (): AttachmentTypeDefinition => {
       platformCoreTools.generateEsql,
       platformCoreTools.productDocumentation,
       SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
-      SECURITY_LABS_SEARCH_TOOL_ID
+      SECURITY_LABS_SEARCH_TOOL_ID,
     ],
     getAgentDescription: () => {
       const description = `You have access to a rule, query, or migration rule.
