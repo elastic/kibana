@@ -60,7 +60,7 @@ type HostMetricsFieldsOtel =
   | typeof SEMCONV_SYSTEM_MEMORY_UTILIZATION;
 
 const hostsMetricsQueryConfigOtel: MetricsQueryOptions<HostMetricsFieldsOtel> = {
-  sourceFilter: '', // todo: does this make sense?
+  sourceFilter: 'hostmetricsreceiver.otel',
   groupByField: 'host.name',
   metricsMap: {
     [SEMCONV_SYSTEM_CPU_LOGICAL_COUNT]: {
