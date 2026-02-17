@@ -24,7 +24,7 @@ interface LocationState {
 
 const NewLiveQueryPageComponent = () => {
   const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
-  useBreadcrumbs(isHistoryEnabled ? 'history' : 'live_query_new');
+  useBreadcrumbs(isHistoryEnabled ? 'new_query' : 'live_query_new');
   const { replace } = useHistory();
   const location = useLocation<LocationState>();
   const backNavigationTarget = isHistoryEnabled ? 'history' : 'live_queries';

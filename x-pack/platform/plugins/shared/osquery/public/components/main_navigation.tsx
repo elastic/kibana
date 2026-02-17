@@ -45,7 +45,11 @@ export const MainNavigation = () => {
   const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const isFeedbackEnabled = notifications?.feedback?.isEnabled() ?? true;
   const location = useLocation();
-  const section = useMemo(() => location.pathname.split('/')[1] ?? 'overview', [location.pathname]);
+  const section = useMemo(() => {
+    const firstSegment = location.pathname.split('/')[1] ?? 'overview';
+
+    return isHistoryEnabled && firstSegment === 'new' ? Section.History : firstSegment;
+  }, [location.pathname, isHistoryEnabled]);
   const feedbackButtonLabel = i18n.translate('xpack.osquery.appNavigation.giveFeedbackButton', {
     defaultMessage: 'Give feedback',
   });

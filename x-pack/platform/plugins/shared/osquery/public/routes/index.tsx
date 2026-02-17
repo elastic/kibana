@@ -21,10 +21,11 @@ import { MissingPrivileges, NotFoundPage } from './components';
 
 const LiveQueriesToHistoryRedirect = () => {
   const location = useLocation();
+  const suffix = location.search + location.hash;
   const newPath =
     location.pathname === '/live_queries/new'
-      ? '/new' + location.search
-      : location.pathname.replace('/live_queries', '/history') + location.search;
+      ? '/new' + suffix
+      : location.pathname.replace('/live_queries', '/history') + suffix;
 
   return <Redirect to={newPath} />;
 };

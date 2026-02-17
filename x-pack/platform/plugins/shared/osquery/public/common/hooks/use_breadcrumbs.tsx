@@ -70,8 +70,23 @@ const breadcrumbGetters: {
   history: () => [
     BASE_BREADCRUMB,
     {
+      href: pagePathGetters.history(),
       text: i18n.translate('xpack.osquery.breadcrumbs.historyPageTitle', {
         defaultMessage: 'History',
+      }),
+    },
+  ],
+  new_query: () => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.history(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.historyPageTitle', {
+        defaultMessage: 'History',
+      }),
+    },
+    {
+      text: i18n.translate('xpack.osquery.breadcrumbs.newQueryPageTitle', {
+        defaultMessage: 'New',
       }),
     },
   ],
