@@ -130,7 +130,7 @@ async function fetchLogContext({
       <TracesDocuments>
       Time window: ${windowStart} to ${windowEnd}
       \`\`\`json
-      ${JSON.stringify(traces[0], null, 2)}
+      ${JSON.stringify(trace, null, 2)}
       \`\`\`
       </TracesDocuments>
     `);
