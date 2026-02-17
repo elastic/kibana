@@ -123,7 +123,7 @@ export function compileTemplate(
 function handleYamlError(err: any, yaml: string): string {
   // Handle duplicated key errors from yaml package
   // The yaml package error message format: "Map keys must be unique at line X, column Y:..."
-  if (err?.message && err.message.includes('Map keys must be unique')) {
+  if (err?.code === 'DUPLICATE_KEY') {
     let key = 'unknown';
     // Try to extract the key from the error message or position
     if (err.linePos && err.linePos[0]) {
