@@ -10,12 +10,7 @@ import type { ESQLCallbacks } from '@kbn/esql-types';
 import { Walker, within } from '../../ast';
 import { Parser } from '../../parser';
 
-import type {
-  ESQLAstPromqlCommand,
-  ESQLFunction,
-  ESQLSingleAstItem,
-  ESQLSource,
-} from '../../types';
+import type { ESQLFunction, ESQLSingleAstItem, ESQLSource } from '../../types';
 
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getPromqlHoverItem, getVariablesHoverContent } from './helpers';
@@ -35,11 +30,9 @@ export async function getHoverItem(fullText: string, offset: number, callbacks?:
   const correctedQuery = correctQuerySyntax(fullText, offset);
   const { root } = Parser.parse(correctedQuery);
 
-  const promqlCommand = root.commands.find(
-    (cmd): cmd is ESQLAstPromqlCommand => cmd.name === 'promql' && offset >= cmd.location.min
-  );
+  const commandAtOffset = [...root.commands].reverse().find((cmd) => offset >= cmd.location.min);
 
-  if (promqlCommand) {
+  if (commandAtOffset?.name === 'promql') {
     return getPromqlHoverItem(root, offset);
   }
 
