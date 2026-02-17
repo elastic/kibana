@@ -108,7 +108,7 @@ test.describe('Reader - only READ', { tag: [...tags.stateful.classic] }, () => {
     await toggle.waitFor({ state: 'visible', timeout: 10_000 });
     await expect(toggle).toBeDisabled();
 
-    await pageObjects.packs.clickPackByName(packName);
+    await pageObjects.packs.navigateToPackDetail(packId);
     await expect(page.getByText(`${packName} details`).first()).toBeVisible();
     await expect(page.getByText('Edit').first()).toBeDisabled();
     await expect(page.locator(`[aria-label="Run ${savedQueryId}"]`)).not.toBeVisible();

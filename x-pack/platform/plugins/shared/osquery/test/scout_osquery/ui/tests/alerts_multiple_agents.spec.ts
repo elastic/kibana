@@ -71,8 +71,7 @@ test.describe(
       await expect(flyoutBody.locator('input[value="host.os.platform"]')).toBeVisible();
     });
 
-    // response-actions-notification doesn't exist in expandable flyout
-    test.skip('should substitute parameters in live query and increase number of ran queries', async ({
+    test('should substitute parameters in live query and increase number of ran queries', async ({
       page,
       pageObjects,
     }) => {
@@ -111,7 +110,7 @@ test.describe(
       ).toHaveCount(updatedNotificationCount);
     });
 
-    test.skip('should be able to run take action query against all enrolled agents', async ({
+    test('should be able to run take action query against all enrolled agents', async ({
       page,
       pageObjects,
     }) => {
@@ -149,7 +148,7 @@ test.describe(
       expect(rowCount).toBeGreaterThanOrEqual(2);
     });
 
-    test.skip('should substitute params in osquery ran from timelines alerts', async ({
+    test('should substitute params in osquery ran from timelines alerts', async ({
       page,
       pageObjects,
     }) => {

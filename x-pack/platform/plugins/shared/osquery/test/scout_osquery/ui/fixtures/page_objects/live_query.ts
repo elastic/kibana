@@ -40,14 +40,20 @@ export class LiveQueryPage {
   }
 
   async selectAllAgents() {
-    await this.page.testSubj.locator('globalLoadingIndicator').waitFor({ state: 'hidden' });
+    await this.page.testSubj
+      .locator('globalLoadingIndicator')
+      .waitFor({ state: 'hidden', timeout: 30_000 })
+      .catch(() => {});
 
-    const agentInput = this.agentSelection.locator('[data-test-subj="comboBoxInput"]');
+    const agentInput = this.agentSelection.locator('[data-test-subj="comboBoxSearchInput"]');
     await agentInput.waitFor({ state: 'visible', timeout: 15_000 });
     await agentInput.click();
 
     // Wait for the "All agents" option to appear in the dropdown
-    const allAgentsOption = this.page.getByRole('option', { name: /All agents/ });
+    const allAgentsOption = this.page
+      .locator('[role="option"]')
+      .filter({ hasText: 'All agents' })
+      .first();
     await allAgentsOption.waitFor({ state: 'visible', timeout: 15_000 });
     await allAgentsOption.click();
 
@@ -65,53 +71,103 @@ export class LiveQueryPage {
   async clearAndInputQuery(query: string) {
     // Click the editor to focus it
     await this.queryEditor.click();
-    // Select all content and delete it (repeat to ensure empty)
+    // Small delay to let Monaco fully activate and register focus
+    await new Promise((r) => setTimeout(r, 500));
+
+    // Select all content and delete it (repeat to ensure clean state)
     await this.page.keyboard.press('ControlOrMeta+a');
+    await new Promise((r) => setTimeout(r, 200));
     await this.page.keyboard.press('Backspace');
+    await new Promise((r) => setTimeout(r, 200));
     await this.page.keyboard.press('ControlOrMeta+a');
+    await new Promise((r) => setTimeout(r, 200));
     await this.page.keyboard.press('Backspace');
-    await this.queryEditor.pressSequentially(query);
+    await new Promise((r) => setTimeout(r, 300));
+
+    // Type the new query character by character via keyboard (avoids element interception)
+    await this.page.keyboard.type(query);
   }
 
-  async submitQuery() {
+  /**
+   * Click the Submit button without waiting for API response.
+   * Use for validation tests where the form may not submit successfully.
+   */
+  async clickSubmit() {
     const submitButton = this.page.getByText('Submit').first();
     await submitButton.waitFor({ state: 'visible' });
     await submitButton.click();
   }
 
+  async submitQuery() {
+    // Small delay to let React form state settle (ECS mapping sync, validation, etc.)
+    await new Promise((r) => setTimeout(r, 1_000));
+
+    const submitButton = this.page.getByText('Submit').first();
+    await submitButton.waitFor({ state: 'visible' });
+
+    // Click Submit and simultaneously wait for the live query API response
+    const [response] = await Promise.all([
+      this.page.waitForResponse(
+        (resp) =>
+          resp.url().includes('/api/osquery/live_queries') && resp.request().method() === 'POST',
+        { timeout: 30_000 }
+      ),
+      submitButton.click(),
+    ]);
+
+    const status = response.status();
+    if (status !== 200) {
+      const body = await response.text().catch(() => 'Unable to read body');
+      throw new Error(`Live query submission failed with status ${status}: ${body}`);
+    }
+
+    // Wait for either the single-query results tab or pack-query results to appear
+    const resultsTab = this.page.testSubj.locator('osquery-results-tab');
+    const packResultsHeading = this.page.getByText('Results').first();
+    await Promise.race([
+      resultsTab.waitFor({ state: 'visible', timeout: 30_000 }),
+      packResultsHeading.waitFor({ state: 'visible', timeout: 30_000 }),
+    ]).catch(() => {
+      // Allow the caller to handle missing results
+    });
+  }
+
   /**
-   * Wait for query results to appear. Periodically switches tabs and reloads
-   * the page to trigger a refresh. Throws if results never appear within
-   * the configured RESULTS_TIMEOUT.
+   * Wait for query results to appear. Checks for the results table or the
+   * results tab to become visible. Periodically reloads to trigger refresh.
+   * Throws if results never appear within the configured RESULTS_TIMEOUT.
    */
   async waitForResults() {
     const start = Date.now();
     const maxWaitMs = RESULTS_TIMEOUT;
-    let reloadCount = 0;
+
+    // Click the results tab to ensure we're viewing results
+    const resultsTab = this.page.testSubj.locator('osquery-results-tab');
+    if (await resultsTab.isVisible()) {
+      await resultsTab.click();
+      await waitForPageReady(this.page);
+    }
 
     while (Date.now() - start < maxWaitMs) {
-      // Try switching tabs to force a results refresh
-      const statusTab = this.page.testSubj.locator('osquery-status-tab');
-      const resultsTab = this.page.testSubj.locator('osquery-results-tab');
-
-      if (await statusTab.isVisible()) {
-        await statusTab.click();
-        await waitForPageReady(this.page);
-        await resultsTab.click();
-        await waitForPageReady(this.page);
-      }
-
-      // Check if the results table has data rows
+      // Check for the results data grid or row cells
+      const resultsTable = this.page.testSubj.locator('osqueryResultsTable');
       const dataCell = this.page.testSubj.locator('dataGridRowCell').first();
+
       try {
-        await dataCell.waitFor({ state: 'visible', timeout: 15_000 });
+        // Wait for either the data grid or a cell to appear
+        await Promise.race([
+          resultsTable.waitFor({ state: 'visible', timeout: 20_000 }),
+          dataCell.waitFor({ state: 'visible', timeout: 20_000 }),
+        ]);
 
         return; // Results found
       } catch {
-        // Every 3rd retry, reload the page to force a full refresh
-        reloadCount++;
-        if (reloadCount % 3 === 0) {
-          await this.page.reload();
+        // Switch to status tab and back to force a refresh
+        const statusTab = this.page.testSubj.locator('osquery-status-tab');
+        if (await statusTab.isVisible()) {
+          await statusTab.click();
+          await waitForPageReady(this.page);
+          await resultsTab.click();
           await waitForPageReady(this.page);
         } else {
           await new Promise((r) => setTimeout(r, 5_000));
@@ -121,8 +177,7 @@ export class LiveQueryPage {
 
     // Final check — let it throw with a clear error if results never appeared
     await this.page.testSubj
-      .locator('dataGridRowCell')
-      .first()
+      .locator('osqueryResultsTable')
       .waitFor({ state: 'visible', timeout: 60_000 });
   }
 
@@ -145,17 +200,19 @@ export class LiveQueryPage {
 
   async typeInOsqueryFieldInput(text: string, index = 0) {
     const fieldSelect = this.page.testSubj.locator('osqueryColumnValueSelect').nth(index);
-    const comboBox = fieldSelect.locator('[data-test-subj="comboBoxInput"]');
+    const searchInput = fieldSelect.locator('[data-test-subj="comboBoxSearchInput"]');
     const option = this.page.getByRole('option').first();
+    const cleanText = text.replace('{downArrow}{enter}', '');
 
     // Retry: osquery schema may still be loading from agents
     for (let attempt = 0; attempt < 5; attempt++) {
-      await comboBox.click();
-      await this.page.testSubj.locator('globalLoadingIndicator').waitFor({ state: 'hidden' });
-      // Clear any previous text using keyboard (combobox is a div, not input)
-      await this.page.keyboard.press('ControlOrMeta+a');
-      await this.page.keyboard.press('Backspace');
-      await comboBox.pressSequentially(text.replace('{downArrow}{enter}', ''));
+      await searchInput.click();
+      await this.page.testSubj
+        .locator('globalLoadingIndicator')
+        .waitFor({ state: 'hidden', timeout: 15_000 })
+        .catch(() => {});
+      await searchInput.fill('');
+      await searchInput.pressSequentially(cleanText);
 
       try {
         await option.waitFor({ state: 'visible', timeout: 10_000 });
@@ -164,32 +221,59 @@ export class LiveQueryPage {
         return;
       } catch {
         // Dropdown didn't show options — schema may not be loaded yet
-        await comboBox.press('Escape');
+        await searchInput.press('Escape');
         await new Promise((r) => setTimeout(r, 5_000));
       }
     }
 
     // Final attempt — fail with a clear error
-    await comboBox.click();
-    await this.page.keyboard.press('ControlOrMeta+a');
-    await this.page.keyboard.press('Backspace');
-    await comboBox.pressSequentially(text);
+    await searchInput.click();
+    await searchInput.fill('');
+    await searchInput.pressSequentially(cleanText);
     await option.waitFor({ state: 'visible', timeout: 15_000 });
     await option.click();
   }
 
   async typeInECSFieldInput(text: string, index = 0) {
     const ecsWrapper = this.page.testSubj.locator('ECS-field-input').nth(index);
-    const comboBox = ecsWrapper.locator('[data-test-subj="comboBoxInput"]');
+    const searchInput = ecsWrapper.locator('[data-test-subj="comboBoxSearchInput"]');
     const cleanText = text.replace('{downArrow}{enter}', '');
 
-    // Click the combobox input to focus it, then type
-    await comboBox.click();
-    await comboBox.pressSequentially(cleanText);
+    // Retry: ECS fields may still be loading
+    for (let attempt = 0; attempt < 5; attempt++) {
+      await searchInput.click();
+      await this.page.testSubj
+        .locator('globalLoadingIndicator')
+        .waitFor({ state: 'hidden', timeout: 15_000 })
+        .catch(() => {});
+      await searchInput.fill('');
+      await searchInput.pressSequentially(cleanText);
 
-    // Wait for an option matching the typed text to appear in the dropdown
+      // EUI option accessible name uses the description text, so match by inner text content
+      const matchingOption = this.page
+        .locator('[role="option"]')
+        .filter({ hasText: new RegExp(`^.*${cleanText}.*$`, 'i') })
+        .first();
+
+      try {
+        await matchingOption.waitFor({ state: 'visible', timeout: 10_000 });
+        await matchingOption.click();
+
+        return;
+      } catch {
+        await searchInput.press('Escape');
+        // eslint-disable-next-line playwright/no-wait-for-timeout
+        await this.page.waitForTimeout(3_000);
+      }
+    }
+
+    // Final attempt — fail with a clear error
+    await searchInput.click();
+    await searchInput.fill('');
+    await searchInput.pressSequentially(cleanText);
     const matchingOption = this.page
-      .getByRole('option', { name: new RegExp(cleanText, 'i') })
+      .locator('[role="option"]')
+      .filter({ hasText: new RegExp(`^.*${cleanText}.*$`, 'i') })
       .first();
     await matchingOption.waitFor({ state: 'visible', timeout: 15_000 });
     await matchingOption.click();

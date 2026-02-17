@@ -1,0 +1,38 @@
+{
+  "lastModified": "2026-02-16T22:16:08.349Z",
+  "sha1": "",
+  "tests": [
+    {
+      "id": "502120a0e5a578f-c815631c126bff9",
+      "title": "Set up Fleet Server and Elastic Agents for Osquery tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/global.setup.ts",
+        "line": 292,
+        "column": 16
+      }
+    },
+    {
+      "id": "13d3c2ff9e90cf6-566a6b480c563af",
+      "title": "App Features for Security Complete PLI response actions should not be available",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery_tiers/ui/tests/security_complete.spec.ts",
+        "line": 38,
+        "column": 9
+      }
+    }
+  ]
+}

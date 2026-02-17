@@ -12,8 +12,7 @@ import { test } from '../fixtures';
 import { socManagerRole } from '../common/roles';
 import { waitForPageReady } from '../common/constants';
 
-// FLAKY: https://github.com/elastic/kibana/issues/229432
-test.describe.skip('ALL - Timelines', { tag: [...tags.stateful.classic] }, () => {
+test.describe('ALL - Timelines', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginWithCustomRole(socManagerRole);
   });

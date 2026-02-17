@@ -13,8 +13,7 @@ import { socManagerRole } from '../common/roles';
 import { loadPack, cleanupPack, loadCase, cleanupCase } from '../common/api_helpers';
 import { waitForPageReady } from '../common/constants';
 
-// FLAKY: https://github.com/elastic/kibana/issues/169888
-test.describe.skip(
+test.describe(
   'ALL - Live Query Packs',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
@@ -79,15 +78,18 @@ test.describe.skip(
 
       // Select the pack
       const packSelect = page.testSubj.locator('select-live-pack');
-      await packSelect.click();
-      await packSelect.pressSequentially(packName);
+      const packInput = packSelect.locator('[data-test-subj="comboBoxSearchInput"]');
+      await packInput.click();
+      await packInput.pressSequentially(packName);
       const option = page.getByRole('option', { name: new RegExp(packName, 'i') }).first();
       await option.waitFor({ state: 'visible', timeout: 15_000 });
       await option.click();
 
-      // Verify the pack contains 3 queries
-      await expect(page.getByText('This table contains 3 rows.').first()).toBeVisible();
-      await expect(page.getByText('system_memory_linux_elastic').first()).toBeVisible();
+      // Verify the pack contains 3 queries (check individual rows directly since
+      // EUI table caption "This table contains N rows" is screen-reader only)
+      await expect(page.getByText('system_memory_linux_elastic').first()).toBeVisible({
+        timeout: 15_000,
+      });
       await expect(page.getByText('system_info_elastic').first()).toBeVisible();
       await expect(page.getByText('failingQuery').first()).toBeVisible();
 

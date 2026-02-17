@@ -77,7 +77,14 @@ export interface PackPayload {
   enabled?: boolean;
   queries?: Record<
     string,
-    { ecs_mapping?: Record<string, unknown>; interval: number; query: string; platform?: string }
+    {
+      ecs_mapping?: Record<string, unknown>;
+      interval: number;
+      query: string;
+      platform?: string;
+      snapshot?: boolean;
+      removed?: boolean;
+    }
   >;
   policy_ids?: string[];
   shards?: Record<string, unknown>;

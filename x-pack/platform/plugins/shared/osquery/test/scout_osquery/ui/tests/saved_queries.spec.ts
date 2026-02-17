@@ -23,8 +23,7 @@ import { waitForPageReady } from '../common/constants';
 const BIG_QUERY =
   'select u.username, p.pid, p.name, pos.local_address, pos.local_port, p.path, p.cmdline, pos.remote_address, pos.remote_port from processes as p join users as u on u.uid=p.uid join process_open_sockets as pos on pos.pid=p.pid where pos.remote_port !="0" limit 1000;';
 
-// FLAKY: https://github.com/elastic/kibana/issues/249946
-test.describe.skip(
+test.describe(
   'ALL - Saved queries',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
@@ -84,7 +83,7 @@ test.describe.skip(
       await columnsButton.click();
       await expect(page.locator('[data-popover-open="true"]')).toBeVisible();
       await page.testSubj.locator('dataGridColumnSelectorColumnItem-osquery.cmdline').click();
-      await page.testSubj.locator('dataGridColumnSelectorColumnItem-osquery.cwd').click();
+      await page.testSubj.locator('dataGridColumnSelectorColumnItem-osquery.path').click();
       await columnsButton.click();
       await expect(page.locator('[data-popover-open="true"]')).not.toBeVisible();
 
@@ -171,8 +170,7 @@ test.describe.skip(
       await expect(page.getByText(savedQueryId).first()).not.toBeVisible({ timeout: 15_000 });
     });
 
-    // Failing: See https://github.com/elastic/kibana/issues/187388
-    test.skip('checks that user cant add a saved query with an ID that already exists', async ({
+    test('checks that user cant add a saved query with an ID that already exists', async ({
       page,
       pageObjects,
     }) => {
@@ -192,9 +190,8 @@ test.describe.skip(
       await expect(page.testSubj.locator('resultsTypeField').getByText('Snapshot')).toBeVisible();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/169787
     // eslint-disable-next-line playwright/max-nested-describe
-    test.describe.skip('prebuilt', () => {
+    test.describe('prebuilt', () => {
       let packName: string;
       let packId: string;
       let savedQueryId: string;
@@ -216,16 +213,12 @@ test.describe.skip(
         savedQueryId = sq.saved_object_id;
       });
 
-      test.beforeEach(async ({ browserAuth, page }) => {
+      test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
         await browserAuth.loginWithCustomRole(socManagerRole);
         await page.gotoApp('osquery/saved_queries');
         await waitForPageReady(page);
         // Increase table page size to see all queries
-        const paginationButton = page.testSubj.locator('tablePaginationPopoverButton');
-        if (await paginationButton.isVisible({ timeout: 3_000 }).catch(() => false)) {
-          await paginationButton.click();
-          await page.testSubj.locator('tablePagination-50-rows').click();
-        }
+        await pageObjects.packs.ensureAllPacksVisible();
       });
 
       test.afterAll(async ({ kbnClient }) => {
@@ -275,16 +268,8 @@ test.describe.skip(
       });
 
       test('user can edit prebuilt saved query under pack', async ({ page, pageObjects }) => {
-        // Navigate to the pack
-        await page.gotoApp(`osquery/packs`);
-        await waitForPageReady(page);
-        const paginationButton = page.testSubj.locator('tablePaginationPopoverButton');
-        if (await paginationButton.isVisible({ timeout: 3_000 }).catch(() => false)) {
-          await paginationButton.click();
-          await page.testSubj.locator('tablePagination-50-rows').click();
-        }
-
-        await pageObjects.packs.clickPackByName(packName);
+        // Navigate to the pack detail page
+        await pageObjects.packs.navigateToPackDetail(packId);
         await pageObjects.packs.clickEditPack();
 
         await expect(page.getByText(`Edit ${packName}`).first()).toBeVisible();

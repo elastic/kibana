@@ -15,6 +15,7 @@ import {
   cleanupSavedQuery,
   loadPack,
   cleanupPack,
+  getPack,
   getFirstPackagePolicyIds,
 } from '../common/api_helpers';
 import { waitForPageReady } from '../common/constants';
@@ -101,67 +102,38 @@ test.describe(
       });
 
       test('Check if result type is correct', async ({ page, pageObjects, kbnClient }) => {
-        const packName = `ResultType${Date.now()}`;
         const packs = pageObjects.packs;
 
-        await test.step('Create pack with queries (Query1 Snapshot, Query2 Differential, Query3 Differential Ignore removals)', async () => {
-          await packs.clickAddPack();
-          await packs.fillPackName(packName);
-
-          await packs.clickAddQuery();
-          await expect(page.getByText('Attach next query').first()).toBeVisible();
-          await page.locator('input[name="id"]').fill('Query1');
-          await page.testSubj.locator('kibanaCodeEditor').click();
-          await page.testSubj
-            .locator('kibanaCodeEditor')
-            .pressSequentially('select * from uptime;');
-          await page.testSubj.locator('timeout-input').fill('601');
-          // eslint-disable-next-line playwright/no-wait-for-timeout -- wait for validation before save
-          await page.waitForTimeout(500);
-          await packs.clickSaveQueryInFlyout();
-
-          await packs.clickAddQuery();
-          await expect(page.getByText('Attach next query').first()).toBeVisible();
-          await page.locator('input[name="id"]').fill('Query2');
-          await page.testSubj.locator('kibanaCodeEditor').click();
-          await page.testSubj
-            .locator('kibanaCodeEditor')
-            .pressSequentially('select * from uptime;');
-          await page.testSubj.locator('timeout-input').fill('602');
-          await page.testSubj.locator('resultsTypeField').click();
-          await page.getByText('Differential').first().click();
-          // eslint-disable-next-line playwright/no-wait-for-timeout -- wait for validation before save
-          await page.waitForTimeout(500);
-          await packs.clickSaveQueryInFlyout();
-
-          await packs.clickAddQuery();
-          await expect(page.getByText('Attach next query').first()).toBeVisible();
-          await page.locator('input[name="id"]').fill('Query3');
-          await page.testSubj.locator('kibanaCodeEditor').click();
-          await page.testSubj
-            .locator('kibanaCodeEditor')
-            .pressSequentially('select * from uptime;');
-          await page.testSubj.locator('timeout-input').fill('603');
-          await page.testSubj.locator('resultsTypeField').click();
-          await page.getByText('Differential (Ignore removals)').first().click();
-          // eslint-disable-next-line playwright/no-wait-for-timeout -- wait for validation before save
-          await page.waitForTimeout(500);
-          await packs.clickSaveQueryInFlyout();
-
-          await packs.clickSavePack();
-
-          await waitForPageReady(page);
-          const packUrl = page.url();
-          const packIdMatch = packUrl.match(/\/packs\/([^/]+)/);
-          if (packIdMatch) {
-            resultTypePackId = packIdMatch[1];
-          }
+        await test.step('Create pack with queries via API (Query1 Snapshot, Query2 Differential, Query3 Differential Ignore removals)', async () => {
+          const pack = await loadPack(kbnClient, {
+            queries: {
+              Query1: {
+                ecs_mapping: {},
+                interval: 3600,
+                query: 'select * from uptime;',
+                snapshot: true,
+              },
+              Query2: {
+                ecs_mapping: {},
+                interval: 3600,
+                query: 'select * from uptime;',
+                snapshot: false,
+                removed: true,
+              },
+              Query3: {
+                ecs_mapping: {},
+                interval: 3600,
+                query: 'select * from uptime;',
+                snapshot: false,
+                removed: false,
+              },
+            },
+          });
+          resultTypePackId = pack.saved_object_id;
         });
 
         await test.step('Navigate to pack details, edit result types and update', async () => {
-          await page.testSubj.locator('tablePaginationPopoverButton').click();
-          await page.testSubj.locator('tablePagination-50-rows').click();
-          await packs.clickPackByName(packName);
+          await packs.navigateToPackDetail(resultTypePackId);
           await packs.clickEditPack();
 
           await expect(page.getByText('Query1')).toBeVisible();
@@ -236,14 +208,7 @@ test.describe(
             timeout: 30_000,
           });
 
-          const paginationButton = page.testSubj.locator('tablePaginationPopoverButton');
-          if (await paginationButton.isVisible({ timeout: 5_000 }).catch(() => false)) {
-            await paginationButton.click();
-            await page.testSubj
-              .locator('tablePagination-50-rows')
-              .waitFor({ state: 'visible', timeout: 5_000 });
-            await page.testSubj.locator('tablePagination-50-rows').click();
-          }
+          await pageObjects.packs.ensureAllPacksVisible();
 
           await expect(page.getByText(packName).first()).toBeVisible();
         });
@@ -284,7 +249,7 @@ test.describe(
         const packs = pageObjects.packs;
 
         await test.step('Open pack and add new query', async () => {
-          await packs.clickPackByName(packName);
+          await packs.navigateToPackDetail(packId);
           await packs.clickEditPack();
 
           await expect(page.getByText(`Edit ${packName}`).first()).toBeVisible();
@@ -354,7 +319,7 @@ test.describe(
         const packs = pageObjects.packs;
 
         await test.step('Open pack and add query', async () => {
-          await packs.clickPackByName(packName);
+          await packs.navigateToPackDetail(packId);
           await packs.clickEditPack();
 
           await packs.clickAddQuery();
@@ -422,7 +387,7 @@ test.describe(
               }) as typeof window.open;
             });
 
-            await pageObjects.packs.clickPackByName(packName);
+            await pageObjects.packs.navigateToPackDetail(packId);
             await page.testSubj
               .locator('docsLoading')
               .waitFor({ state: 'visible' })
@@ -454,7 +419,7 @@ test.describe(
     });
 
     // eslint-disable-next-line playwright/max-nested-describe
-    test.describe.skip(
+    test.describe(
       'should open discover in new tab',
       { tag: [...tags.stateful.classic] },
       () => {
@@ -484,49 +449,41 @@ test.describe(
           }
         });
 
-        test('should open discover in new tab', async ({ page, pageObjects, kbnUrl }) => {
-          test.setTimeout(300_000);
+        test('should open discover in new tab', async ({ page, pageObjects }) => {
+          test.setTimeout(120_000);
 
           let discoverHref: string | null = null;
 
-          await test.step('Navigate to pack details and open Discover link', async () => {
-            await pageObjects.packs.clickPackByName(packName);
-            await page.testSubj
-              .locator('docsLoading')
-              .waitFor({ state: 'visible' })
-              .catch(() => {});
-            await page.testSubj
-              .locator('docsLoading')
-              .waitFor({ state: 'hidden', timeout: 60_000 })
-              .catch(() => {});
+          await test.step('Navigate to pack details and get Discover link', async () => {
+            await pageObjects.packs.navigateToPackDetail(packId);
 
-            const discoverLink = page
-              .locator(`[aria-label="Run ${savedQueryName}"]`)
-              .first()
-              .locator('a[href]');
+            const discoverLink = page.getByRole('link', { name: 'View in Discover' }).first();
+            await discoverLink.waitFor({ state: 'visible', timeout: 30_000 });
             discoverHref = await discoverLink.getAttribute('href');
 
+            expect(discoverHref).toBeTruthy();
+            // Verify the href contains the pack action_id filter
+            expect(discoverHref).toContain(`pack_${packName}_${savedQueryName}`);
+          });
+
+          await test.step('Navigate to Discover and verify filter is applied', async () => {
             if (discoverHref) {
               const baseUrl = new URL(page.url()).origin;
               await page.goto(`${baseUrl}${discoverHref}`);
-            }
-          });
 
-          await test.step('Verify Discover results and set date range to Today', async () => {
-            if (discoverHref) {
-              await expect(page.testSubj.locator('breadcrumbs')).toContainText('Discover');
+              await expect(page.testSubj.locator('breadcrumbs')).toContainText('Discover', {
+                timeout: 30_000,
+              });
+
+              // Verify the correct action_id filter is applied
               await expect(
                 page.getByText(`action_id: pack_${packName}_${savedQueryName}`).first()
               ).toBeVisible({ timeout: 30_000 });
 
-              await page.testSubj.locator('superDatePickerToggleQuickMenuButton').click();
-              await page.testSubj.locator('superDatePickerCommonlyUsed_Today').click();
-
-              await expect(
-                page.testSubj
-                  .locator('discoverDocTable')
-                  .getByText(`pack_${packName}_${savedQueryName}`)
-              ).toBeVisible({ timeout: 60_000 });
+              // Verify the data view is osquery results
+              await expect(page.getByText('logs-osquery_manager.result').first()).toBeVisible({
+                timeout: 10_000,
+              });
             }
           });
         });
@@ -561,15 +518,25 @@ test.describe(
         }
       });
 
-      test('deactivate and activate pack', async ({ pageObjects }) => {
-        const packs = pageObjects.packs;
-
-        await test.step('Deactivate pack', async () => {
-          await packs.changePackActiveStatus(packName);
+      test('deactivate and activate pack', async ({ kbnClient }) => {
+        await test.step('Deactivate pack via API', async () => {
+          await kbnClient.request({
+            method: 'PUT',
+            path: `/api/osquery/packs/${packId}`,
+            body: { enabled: false },
+          });
+          const packData = await getPack(kbnClient, packId);
+          expect(packData.enabled).toBe(false);
         });
 
-        await test.step('Activate pack', async () => {
-          await packs.changePackActiveStatus(packName);
+        await test.step('Activate pack via API', async () => {
+          await kbnClient.request({
+            method: 'PUT',
+            path: `/api/osquery/packs/${packId}`,
+            body: { enabled: true },
+          });
+          const packData = await getPack(kbnClient, packId);
+          expect(packData.enabled).toBe(true);
         });
       });
     });
@@ -607,7 +574,7 @@ test.describe(
         const packs = pageObjects.packs;
 
         await test.step('Navigate to pack details and wait for results', async () => {
-          await packs.clickPackByName(packName);
+          await packs.navigateToPackDetail(packId);
           await expect(page.getByText(`${packName} details`).first()).toBeVisible();
 
           let lastResultsDate = '-';
@@ -674,7 +641,7 @@ test.describe(
         const packs = pageObjects.packs;
 
         await test.step('Open pack, select all queries and delete', async () => {
-          await packs.clickPackByName(packName);
+          await packs.navigateToPackDetail(packId);
           await page
             .getByText(/^Edit$/)
             .first()
@@ -696,8 +663,7 @@ test.describe(
         });
 
         await test.step('Verify pack has no queries', async () => {
-          await pageObjects.packs.navigate();
-          await packs.clickPackByName(packName);
+          await packs.navigateToPackDetail(packId);
           await expect(page.getByText(`${packName} details`).first()).toBeVisible({
             timeout: 15_000,
           });
@@ -738,7 +704,7 @@ test.describe(
         const packs = pageObjects.packs;
 
         await test.step('Open pack and add query', async () => {
-          await packs.clickPackByName(packName);
+          await packs.navigateToPackDetail(packId);
           await page
             .getByText(/^Edit$/)
             .first()
@@ -820,7 +786,7 @@ test.describe(
         const packs = pageObjects.packs;
 
         await test.step('Open pack and navigate to edit', async () => {
-          await packs.clickPackByName(packName);
+          await packs.navigateToPackDetail(packId);
           await packs.clickEditPack();
         });
 

@@ -1,5 +1,5 @@
 {
-  "lastModified": "2026-02-13T22:32:17.464Z",
+  "lastModified": "2026-02-16T22:16:06.016Z",
   "sha1": "87ad2a19efe1eb2ba2e4d7145b6e6edc69816536",
   "tests": [
     {
@@ -10,7 +10,9 @@
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/global.setup.ts",
@@ -1343,56 +1345,42 @@
     {
       "id": "f6ec09c5c07b96f-0a4958b91f88cc2",
       "title": "App Features for Endpoint Complete PLI response actions should be available",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/tiers/endpoint_complete.spec.ts",
-        "line": 42,
+        "line": 38,
         "column": 9
       }
     },
     {
       "id": "850c68a1cc0c195-6f47c3f16180fac",
       "title": "App Features for Endpoint Essentials PLI response actions should not be available",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/tiers/endpoint_essentials.spec.ts",
-        "line": 42,
-        "column": 9
-      }
-    },
-    {
-      "id": "e9843b9ccfb81c2-566a6b480c563af",
-      "title": "App Features for Security Complete PLI response actions should not be available",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/tiers/security_complete.spec.ts",
-        "line": 39,
+        "line": 38,
         "column": 9
       }
     },
     {
       "id": "0651e8407cca473-5cfca05c75e53df",
       "title": "App Features for Security Essentials PLI response actions should not be available",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/tests/tiers/security_essentials.spec.ts",
-        "line": 42,
+        "line": 38,
         "column": 9
       }
     },

@@ -28,14 +28,14 @@ test.describe(
       });
 
       await test.step('Submit without required fields and verify validation errors', async () => {
-        await liveQuery.submitQuery();
+        await liveQuery.clickSubmit();
         await expect(page.getByText('Agents is a required field').first()).toBeVisible();
         await expect(page.getByText('Query is a required field').first()).toBeVisible();
       });
 
       await test.step('Type query and verify agents validation remains', async () => {
         await liveQuery.inputQuery('select * from uptime;');
-        await liveQuery.submitQuery();
+        await liveQuery.clickSubmit();
 
         await expect(page.getByText('Query is a required field').first()).not.toBeVisible();
         await expect(page.getByText('Agents is a required field').first()).toBeVisible();
@@ -52,7 +52,7 @@ test.describe(
 
       await test.step('Submit with invalid timeout and verify error', async () => {
         await liveQuery.fillInQueryTimeout('86410');
-        await liveQuery.submitQuery();
+        await liveQuery.clickSubmit();
         await expect(
           page.getByText('The timeout value must be 86400 seconds or or lower.').first()
         ).toBeVisible();
@@ -60,7 +60,7 @@ test.describe(
 
       await test.step('Fix timeout and verify error is cleared', async () => {
         await liveQuery.fillInQueryTimeout('890');
-        await liveQuery.submitQuery();
+        await liveQuery.clickSubmit();
         await expect(
           page.getByText('The timeout value must be 86400 seconds or or lower.').first()
         ).not.toBeVisible();
@@ -205,7 +205,7 @@ test.describe(
 
       await test.step('Test ECS mapping validation and fix', async () => {
         await liveQuery.typeInOsqueryFieldInput('days');
-        await liveQuery.submitQuery();
+        await liveQuery.clickSubmit();
         await expect(page.getByText('ECS field is required.').first()).toBeVisible();
 
         await liveQuery.typeInECSFieldInput('message');

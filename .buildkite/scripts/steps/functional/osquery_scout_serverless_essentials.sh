@@ -5,9 +5,9 @@ set -euo pipefail
 source .buildkite/scripts/steps/functional/common.sh
 
 export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
-export JOB=kibana-osquery-scout-serverless
+export JOB=kibana-osquery-scout-serverless-essentials
 
-echo "--- Osquery Scout (Playwright) Serverless Security Complete tests"
+echo "--- Osquery Scout (Playwright) Serverless Security Essentials tests"
 
 # Verify Docker is available (required for Fleet Server and Elastic Agent)
 if ! docker info > /dev/null 2>&1; then
@@ -23,12 +23,12 @@ docker rm -f scout-fleet-server scout-osquery-agent-0 scout-osquery-agent-1 2>/d
 
 SCOUT_CONFIG="x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel.playwright.config.ts"
 
-echo "--- Running Scout tests (serverless security_complete): $SCOUT_CONFIG"
+echo "--- Running Scout tests (serverless security_essentials): $SCOUT_CONFIG"
 
 set +e
 node scripts/scout.js run-tests \
   --arch serverless \
-  --domain security_complete \
+  --domain security_essentials \
   --config "$SCOUT_CONFIG" \
   --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
 status=$?
@@ -41,7 +41,7 @@ docker rm -f scout-fleet-server scout-osquery-agent-0 scout-osquery-agent-1 2>/d
 # Upload Scout reporter events
 if [[ "${SCOUT_REPORTER_ENABLED:-}" =~ ^(1|true)$ ]]; then
   if [ -d ".scout/reports" ] && [ "$(ls -A .scout/reports 2>/dev/null)" ]; then
-    echo "--- Upload Scout reporter events for Osquery Scout Serverless tests"
+    echo "--- Upload Scout reporter events for Osquery Scout Serverless Essentials tests"
     node scripts/scout upload-events --dontFailOnError || true
   fi
 fi

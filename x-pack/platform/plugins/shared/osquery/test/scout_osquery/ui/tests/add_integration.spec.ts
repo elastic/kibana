@@ -19,8 +19,7 @@ import {
 } from '../common/api_helpers';
 import { waitForPageReady } from '../common/constants';
 
-// Failing: See https://github.com/elastic/kibana/issues/170593
-test.describe.skip(
+test.describe(
   'ALL - Add Integration',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
@@ -118,13 +117,13 @@ test.describe.skip(
             await nameInput.clear();
             await nameInput.fill(integrationName);
 
-            // Create new agent policy
-            await page.testSubj.locator('createAgentPolicyButton').click();
-            await page.testSubj.locator('createAgentPolicyNameField').fill(policyName);
-            await page.testSubj.locator('createAgentPolicyFlyoutBtn').click();
+            // Fill in agent policy name (embedded in the new Fleet UI)
+            const policyNameInput = page.getByRole('textbox', { name: 'New agent policy name' });
+            await policyNameInput.clear();
+            await policyNameInput.fill(policyName);
 
             // Save the integration policy
-            await page.testSubj.locator('createPackagePolicySaveButton').click();
+            await page.getByRole('button', { name: 'Save and continue' }).click();
 
             // Handle "Add Elastic Agent later" if shown
             const addAgentLater = page.getByText('Add Elastic Agent later');
@@ -152,9 +151,8 @@ test.describe.skip(
       }
     );
 
-    // FLAKY: https://github.com/elastic/kibana/issues/170593
     // eslint-disable-next-line playwright/max-nested-describe
-    test.describe.skip('Add integration to policy', () => {
+    test.describe('Add integration to policy', () => {
       let policyId: string | undefined;
 
       test.afterEach(async ({ kbnClient }) => {
@@ -171,8 +169,16 @@ test.describe.skip(
         // Create agent policy
         await page.goto(kbnUrl.get('/app/fleet/policies'));
         await waitForPageReady(page);
+        // Dismiss any toast errors that could block clicks
+        for (const toast of await page.locator('[data-test-subj="dismissToast"]').all()) {
+          await toast.click().catch(() => {});
+        }
         await page.testSubj.locator('createAgentPolicyButton').click();
         await page.testSubj.locator('createAgentPolicyNameField').fill(policyName);
+        // Dismiss any toast errors that could block the create button
+        for (const toast of await page.locator('[data-test-subj="dismissToast"]').all()) {
+          await toast.click().catch(() => {});
+        }
         await page.testSubj.locator('createAgentPolicyFlyoutBtn').click();
 
         await expect(page.getByText(`Agent policy '${policyName}' created`).first()).toBeVisible({
@@ -254,11 +260,13 @@ test.describe.skip(
         await nameInput.clear();
         await nameInput.fill(integrationName);
 
-        await page.testSubj.locator('createAgentPolicyButton').click();
-        await page.testSubj.locator('createAgentPolicyNameField').fill(policyName);
-        await page.testSubj.locator('createAgentPolicyFlyoutBtn').click();
+        // Fill in agent policy name (embedded in the new Fleet UI)
+        const policyNameInput = page.getByRole('textbox', { name: 'New agent policy name' });
+        await policyNameInput.clear();
+        await policyNameInput.fill(policyName);
 
-        await page.testSubj.locator('createPackagePolicySaveButton').click();
+        // Save the integration policy
+        await page.getByRole('button', { name: 'Save and continue' }).click();
 
         const addAgentLater = page.getByText('Add Elastic Agent later');
         if (await addAgentLater.isVisible({ timeout: 10_000 }).catch(() => false)) {

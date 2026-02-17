@@ -7,6 +7,7 @@
 /* eslint-disable playwright/no-nth-methods */
 
 import type { ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { waitForPageReady } from '../../common/constants';
 
 export class PacksPage {
@@ -14,6 +15,11 @@ export class PacksPage {
 
   async navigate() {
     await this.page.gotoApp('osquery/packs');
+    await waitForPageReady(this.page);
+  }
+
+  async navigateToPackDetail(packId: string) {
+    await this.page.gotoApp(`osquery/packs/${packId}`);
     await waitForPageReady(this.page);
   }
 
@@ -87,47 +93,127 @@ export class PacksPage {
 
   async selectSavedQuery(queryName: string) {
     const select = this.page.testSubj.locator('savedQuerySelect');
-    await select.click();
+    const input = select.locator('[data-test-subj="comboBoxSearchInput"]');
+    await input.click();
+    await input.pressSequentially(queryName);
     const option = this.page.getByRole('option', { name: new RegExp(queryName, 'i') }).first();
     await option.waitFor({ state: 'visible', timeout: 15_000 });
     await option.click();
   }
 
   /**
-   * Ensures all packs are visible by increasing the table page size to 50 rows.
+   * Ensures all packs are visible by increasing the table page size.
    * This is needed because accumulated packs from previous test runs may cause pagination.
    */
-  private async ensureAllPacksVisible() {
-    const paginationButton = this.page.testSubj.locator('tablePaginationPopoverButton');
-    if (await paginationButton.isVisible({ timeout: 3_000 }).catch(() => false)) {
-      await paginationButton.click();
-      const fiftyRowsOption = this.page.testSubj.locator('tablePagination-50-rows');
-      await fiftyRowsOption.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
-      if (await fiftyRowsOption.isVisible()) {
-        await fiftyRowsOption.click({ force: true });
-      }
+  async ensureAllPacksVisible() {
+    // Wait for the table to load first
+    await this.page
+      .locator('table caption')
+      .first()
+      .waitFor({ state: 'visible', timeout: 10_000 })
+      .catch(() => {});
 
-      // Close the popover if it's still open (press Escape)
-      await this.page.keyboard.press('Escape');
+    // Use EUI data-test-subj for the pagination popover button
+    const rowsPerPageBtn = this.page.testSubj.locator('tablePaginationPopoverButton');
+    if (await rowsPerPageBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
+      await rowsPerPageBtn.click();
+
+      // Use EUI data-test-subj selectors for page size options
+      const hundredRows = this.page.testSubj.locator('tablePagination-100-rows');
+      const fiftyRows = this.page.testSubj.locator('tablePagination-50-rows');
+
+      if (await hundredRows.isVisible({ timeout: 3_000 }).catch(() => false)) {
+        await hundredRows.click();
+      } else if (await fiftyRows.isVisible({ timeout: 3_000 }).catch(() => false)) {
+        await fiftyRows.click();
+      } else {
+        await this.page.keyboard.press('Escape');
+      }
+      await waitForPageReady(this.page);
     }
   }
 
   async changePackActiveStatus(packName: string) {
-    await this.ensureAllPacksVisible();
+    await this.findItemOnPage(packName);
     const toggle = this.page.locator(`[aria-label="${packName}"]`);
-    await toggle.waitFor({ state: 'visible', timeout: 10_000 });
+    await toggle.waitFor({ state: 'visible', timeout: 30_000 });
+    // Wait for the toggle to become enabled (may be disabled during API transitions)
+    await expect(toggle).toBeEnabled({ timeout: 30_000 });
     await toggle.click();
     // Wait for confirmation modal if present
     const confirmBtn = this.page.testSubj.locator('confirmModalConfirmButton');
-    if (await confirmBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
+    if (await confirmBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
       await confirmBtn.click();
+    }
+    // Wait for the toggle state change to settle
+    await waitForPageReady(this.page);
+  }
+
+  /**
+   * Navigate through table pages until an item with the given name is visible.
+   */
+  private async findItemOnPage(name: string) {
+    const target = this.page.locator(`[aria-label="${name}"]`).first();
+    const caption = await this.page
+      .locator('table caption')
+      .first()
+      .textContent()
+      .catch(() => '');
+    const pageMatch = caption?.match(/Page \d+ of (\d+)/);
+    const totalPages = pageMatch ? parseInt(pageMatch[1], 10) : 1;
+
+    for (let p = 1; p <= totalPages; p++) {
+      if (await target.isVisible({ timeout: 2_000 }).catch(() => false)) {
+        return;
+      }
+      if (p < totalPages) {
+        const pageLink = this.page.getByRole('link', {
+          name: `Page ${p + 1} of ${totalPages}`,
+        });
+        if (await pageLink.isVisible({ timeout: 2_000 }).catch(() => false)) {
+          await pageLink.dispatchEvent('click');
+          // eslint-disable-next-line playwright/no-wait-for-timeout
+          await this.page.waitForTimeout(500);
+        }
+      }
     }
   }
 
   async clickPackByName(packName: string) {
-    await this.ensureAllPacksVisible();
-    // Use a table cell link to be specific and avoid strict mode violations
+    // Always navigate to the packs list to ensure we're on the right page
+    await this.navigate();
+
     const link = this.page.locator('tbody').getByRole('link', { name: packName }).first();
+
+    // Determine total pages from table caption (e.g., "Page 1 of 5.")
+    const caption = await this.page
+      .locator('table caption')
+      .first()
+      .textContent()
+      .catch(() => '');
+    const pageMatch = caption?.match(/Page \d+ of (\d+)/);
+    const totalPages = pageMatch ? parseInt(pageMatch[1], 10) : 1;
+
+    // Iterate through each page to find the pack
+    for (let p = 1; p <= totalPages; p++) {
+      if (await link.isVisible({ timeout: 2_000 }).catch(() => false)) {
+        await link.click();
+        return;
+      }
+      if (p < totalPages) {
+        // Click the specific page number link for in-memory table pagination.
+        const pageLink = this.page.getByRole('link', {
+          name: `Page ${p + 1} of ${totalPages}`,
+        });
+        if (await pageLink.isVisible({ timeout: 2_000 }).catch(() => false)) {
+          await pageLink.dispatchEvent('click');
+          // eslint-disable-next-line playwright/no-wait-for-timeout
+          await this.page.waitForTimeout(500);
+        }
+      }
+    }
+
+    // Final attempt — let it throw with a clear message
     await link.waitFor({ state: 'visible', timeout: 10_000 });
     await link.click();
   }

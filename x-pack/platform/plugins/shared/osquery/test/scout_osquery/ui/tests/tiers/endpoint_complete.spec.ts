@@ -12,14 +12,10 @@ import { loadRule, cleanupRule } from '../../common/api_helpers';
 import { checkOsqueryResponseActionsPermissions } from '../../common/response_actions';
 import { waitForPageReady } from '../../common/constants';
 
-// NOTE: This test requires serverless mode with specific product tier configuration:
-//   productTypes: [
-//     { product_line: 'endpoint', product_tier: 'complete' },
-//     { product_line: 'security', product_tier: 'complete' },
-//   ]
-// Scout does not yet support product tier configuration.
-// TODO: Enable when serverless Scout tier configuration is available.
-test.describe.skip(
+// This test runs against the security_complete domain (osquery config set),
+// which uses the default full complete tier — including endpoint complete.
+// With endpoint complete active, response actions should be available.
+test.describe(
   'App Features for Endpoint Complete PLI',
   { tag: [...tags.serverless.security.complete] },
   () => {

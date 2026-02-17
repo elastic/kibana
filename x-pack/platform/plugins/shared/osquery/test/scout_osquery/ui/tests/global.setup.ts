@@ -79,6 +79,39 @@ async function getOnlineAgentCount(kbnClient: KbnClient): Promise<number> {
   }
 }
 
+/**
+ * Create an agent policy or find an existing one by name (handles 409 Conflict).
+ */
+async function findOrCreateAgentPolicy(
+  kbnClient: KbnClient,
+  name: string,
+  body: Record<string, unknown>
+): Promise<string> {
+  try {
+    const { data } = await kbnClient.request<{ item: { id: string } }>({
+      method: 'POST',
+      path: '/api/fleet/agent_policies?sys_monitoring=true',
+      body,
+    });
+
+    return data.item.id;
+  } catch (e: any) {
+    if (e?.response?.status === 409) {
+      // Policy already exists — find it by name
+      const { data: listData } = await kbnClient.request<{
+        items: Array<{ id: string; name: string }>;
+      }>({
+        method: 'GET',
+        path: '/api/fleet/agent_policies',
+        query: { kuery: `name:"${name}"`, perPage: 1 },
+      });
+      const existing = listData.items.find((p) => p.name === name);
+      if (existing) return existing.id;
+    }
+    throw e;
+  }
+}
+
 async function getAgentVersion(kbnClient: KbnClient): Promise<string> {
   try {
     const status = await kbnClient.status.get();
@@ -291,7 +324,13 @@ globalSetupHook.setTimeout(10 * 60 * 1000);
 
 globalSetupHook(
   'Set up Fleet Server and Elastic Agents for Osquery tests',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  {
+    tag: [
+      ...tags.stateful.classic,
+      ...tags.serverless.security.complete,
+      ...tags.serverless.security.essentials,
+    ],
+  },
   async ({ kbnClient, log, config }) => {
     const isServerless = config.serverless;
 
@@ -385,20 +424,13 @@ globalSetupHook(
       log.info('[osquery-setup] Service token generated');
 
       log.info('[osquery-setup] Creating Fleet Server agent policy...');
-      const { data: fleetServerPolicyResponse } = await kbnClient.request<{
-        item: { id: string };
-      }>({
-        method: 'POST',
-        path: '/api/fleet/agent_policies',
-        body: {
-          name: 'Fleet Server policy',
-          description: '',
-          namespace: 'default',
-          monitoring_enabled: [],
-          has_fleet_server: true,
-        },
+      fleetServerPolicyId = await findOrCreateAgentPolicy(kbnClient, 'Fleet Server policy', {
+        name: 'Fleet Server policy',
+        description: '',
+        namespace: 'default',
+        monitoring_enabled: [],
+        has_fleet_server: true,
       });
-      fleetServerPolicyId = fleetServerPolicyResponse.item.id;
       log.info(`[osquery-setup] Fleet Server policy created: ${fleetServerPolicyId}`);
 
       log.info('[osquery-setup] Starting Fleet Server Docker container (managed)...');
@@ -421,24 +453,48 @@ globalSetupHook(
     await new Promise((r) => setTimeout(r, 20_000));
 
     // ── 7. Update Fleet Server host URL in Fleet settings ──────────────
-    if (isServerless) {
-      // For serverless, we need to register the Fleet Server host URL explicitly
-      // since there's no Fleet Server policy auto-registration
-      log.info('[osquery-setup] Registering Fleet Server host in Fleet settings...');
+    // Both stateful and serverless agents run inside Docker containers where
+    // `localhost` refers to the container itself. Register the host URL using
+    // `host.docker.internal` so that agents can reach Fleet Server on the host.
+    log.info('[osquery-setup] Registering Fleet Server host in Fleet settings...');
+    try {
+      await kbnClient.request<any>({
+        method: 'POST',
+        path: '/api/fleet/fleet_server_hosts',
+        body: {
+          name: 'Scout Fleet Server',
+          host_urls: [`https://${host}:8220`],
+          is_default: true,
+        },
+      });
+      log.info('[osquery-setup] Fleet Server host registered');
+    } catch (e: any) {
+      // May already exist — try updating the default host instead
+      log.info(`[osquery-setup] Fleet Server host registration: ${e.message?.slice(0, 100)}`);
       try {
-        await kbnClient.request<any>({
-          method: 'POST',
+        const { data: hostsResponse } = await kbnClient.request<{
+          items: Array<{ id: string; is_default: boolean }>;
+        }>({
+          method: 'GET',
           path: '/api/fleet/fleet_server_hosts',
-          body: {
-            name: 'Scout Fleet Server',
-            host_urls: [`https://${host}:8220`],
-            is_default: true,
-          },
         });
-        log.info('[osquery-setup] Fleet Server host registered');
-      } catch (e: any) {
-        // May already exist or fleet may auto-configure it
-        log.info(`[osquery-setup] Fleet Server host registration: ${e.message?.slice(0, 100)}`);
+        const defaultHost = hostsResponse.items.find((h) => h.is_default);
+        if (defaultHost) {
+          await kbnClient.request<any>({
+            method: 'PUT',
+            path: `/api/fleet/fleet_server_hosts/${defaultHost.id}`,
+            body: {
+              name: 'Scout Fleet Server',
+              host_urls: [`https://${host}:8220`],
+              is_default: true,
+            },
+          });
+          log.info('[osquery-setup] Updated existing Fleet Server host to use Docker-reachable URL');
+        }
+      } catch (updateErr: any) {
+        log.info(
+          `[osquery-setup] Fleet Server host update: ${updateErr.message?.slice(0, 100)}`
+        );
       }
     }
 
@@ -469,38 +525,39 @@ globalSetupHook(
 
     for (const policyName of policyNames) {
       log.info(`[osquery-setup] Creating "${policyName}" agent policy...`);
-      const { data: policyResponse } = await kbnClient.request<{
-        item: { id: string };
-      }>({
-        method: 'POST',
-        path: '/api/fleet/agent_policies?sys_monitoring=true',
-        body: {
-          name: policyName,
-          description: '',
-          namespace: 'default',
-          monitoring_enabled: ['logs', 'metrics'],
-          inactivity_timeout: 1209600,
-        },
+      const policyId = await findOrCreateAgentPolicy(kbnClient, policyName, {
+        name: policyName,
+        description: '',
+        namespace: 'default',
+        monitoring_enabled: ['logs', 'metrics'],
+        inactivity_timeout: 1209600,
       });
-      const policyId = policyResponse.item.id;
       log.info(`[osquery-setup] Created "${policyName}" policy: ${policyId}`);
 
-      // Add osquery_manager integration
-      await kbnClient.request<any>({
-        method: 'POST',
-        path: '/api/fleet/package_policies',
-        body: {
-          policy_id: policyId,
-          package: { name: 'osquery_manager', version: osqueryVersion! },
-          name: `Policy for ${policyName}`,
-          description: '',
-          namespace: 'default',
-          inputs: {
-            'osquery_manager-osquery': { enabled: true, streams: {} },
+      // Add osquery_manager integration (ignore 409 if already added)
+      try {
+        await kbnClient.request<any>({
+          method: 'POST',
+          path: '/api/fleet/package_policies',
+          body: {
+            policy_id: policyId,
+            package: { name: 'osquery_manager', version: osqueryVersion! },
+            name: `Policy for ${policyName}`,
+            description: '',
+            namespace: 'default',
+            inputs: {
+              'osquery_manager-osquery': { enabled: true, streams: {} },
+            },
           },
-        },
-      });
-      log.info(`[osquery-setup] osquery_manager added to "${policyName}"`);
+        });
+        log.info(`[osquery-setup] osquery_manager added to "${policyName}"`);
+      } catch (e: any) {
+        if (e?.response?.status === 409) {
+          log.info(`[osquery-setup] osquery_manager already exists on "${policyName}"`);
+        } else {
+          throw e;
+        }
+      }
 
       // Get enrollment key
       const { data: keysResponse } = await kbnClient.request<{
