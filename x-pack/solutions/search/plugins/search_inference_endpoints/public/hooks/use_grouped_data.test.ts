@@ -9,7 +9,8 @@ import { renderHook } from '@testing-library/react';
 
 import { InferenceEndpoints } from '../__mocks__/inference_endpoints';
 
-import { useGroupedData, UNKNOWN_MODEL_ID_FALLBACK } from './use_grouped_data';
+import { UNKNOWN_MODEL_ID_FALLBACK } from '../utils/group_by';
+import { useGroupedData } from './use_grouped_data';
 import { GroupByOptions } from '../types';
 
 describe('useGroupedData', () => {
@@ -34,7 +35,15 @@ describe('useGroupedData', () => {
       useGroupedData([], GroupByOptions.Model, { provider: [], type: [] }, '')
     );
 
-    expect(result.current.data).toEqual({});
+    expect(result.current).toEqual([]);
+  });
+
+  it('should sort elastic endpoints first when grouping by model', () => {
+    const { result } = renderHook(() =>
+      useGroupedData(InferenceEndpoints, GroupByOptions.Model, { provider: [], type: [] }, '')
+    );
+
+    expect(result.current[0].groupId).toBe('elastic');
   });
 
   it('should group endpoints with unknown model_id under unknown model group', () => {
@@ -42,9 +51,11 @@ describe('useGroupedData', () => {
       useGroupedData(InferenceEndpoints, GroupByOptions.Model, { provider: [], type: [] }, '')
     );
 
-    const unknownModelGroup = result.current.data[UNKNOWN_MODEL_ID_FALLBACK];
+    const unknownModelGroup = result.current.find(
+      (group) => group.groupId === UNKNOWN_MODEL_ID_FALLBACK
+    );
     expect(unknownModelGroup).toBeDefined();
-    expect(unknownModelGroup.groupLabel).toBe('Unknown Model');
-    expect(unknownModelGroup.endpoints).toHaveLength(2);
+    expect(unknownModelGroup!.groupLabel).toBe('Unknown Model');
+    expect(unknownModelGroup!.endpoints).toHaveLength(2);
   });
 });

@@ -39,9 +39,9 @@ export const GroupedEndpointsTables = ({
   searchKey,
   columns,
 }: GroupedEndpointsTablesProps) => {
-  const { data } = useGroupedData(inferenceEndpoints, groupBy, filterOptions, searchKey);
+  const groupedEndpoints = useGroupedData(inferenceEndpoints, groupBy, filterOptions, searchKey);
 
-  if (inferenceEndpoints.length === 0 || Object.keys(data).length === 0) {
+  if (inferenceEndpoints.length === 0 || groupedEndpoints.length === 0) {
     // No data after filters / search key
     return (
       <EuiEmptyPrompt
@@ -58,9 +58,9 @@ export const GroupedEndpointsTables = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="group-by-tables-container">
-      {Object.entries(data).map(([groupId, groupedData]) => (
+      {groupedEndpoints.map((groupedData) => (
         <EuiPanel
-          key={groupId}
+          key={groupedData.groupId}
           element="div"
           hasShadow={false}
           hasBorder
@@ -68,7 +68,7 @@ export const GroupedEndpointsTables = ({
           css={GroupPanelStyle}
         >
           <EuiAccordion
-            id={`${groupId}-group-accordion`}
+            id={`${groupedData.groupId}-group-accordion`}
             arrowProps={{
               size: 's',
             }}
@@ -76,13 +76,13 @@ export const GroupedEndpointsTables = ({
               paddingSize: 'm',
             }}
             buttonContent={<GroupByHeaderButton groupBy={groupBy} data={groupedData} />}
-            data-test-subj={`${groupId}-accordion`}
+            data-test-subj={`${groupedData.groupId}-accordion`}
             initialIsOpen
             paddingSize="none"
           >
             <EuiSpacer size="s" />
             <EuiInMemoryTable
-              data-test-subj={`${groupId}-table`}
+              data-test-subj={`${groupedData.groupId}-table`}
               itemId="inference_id"
               items={groupedData.endpoints}
               columns={columns}
@@ -105,7 +105,7 @@ export const GroupedEndpointsTables = ({
                   defaultMessage: 'Inference endpoints list grouped by {groupBy}: {groupId}',
                   values: {
                     groupBy,
-                    groupId,
+                    groupId: groupedData.groupId,
                   },
                 }
               )}

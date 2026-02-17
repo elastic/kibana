@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ELASTIC_GROUP_ID = 'elastic';
+
 export interface KnownModelGroup {
   groupId: string;
   groupLabel: string;
@@ -15,7 +17,7 @@ export interface KnownModelGroup {
 
 export const KNOWN_MODEL_GROUPS: KnownModelGroup[] = [
   {
-    groupId: 'elastic',
+    groupId: ELASTIC_GROUP_ID,
     groupLabel: i18n.translate('xpack.searchInferenceEndpoints.knownModelGroups.elastic.label', {
       defaultMessage: 'Elastic',
     }),
