@@ -9,12 +9,12 @@
 
 import React from 'react';
 import {
-  EuiCheckbox,
   EuiDraggable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
+  EuiSwitch,
   EuiText,
 } from '@elastic/eui';
 import type { NavigationItemInfo } from '@kbn/core-chrome-browser';
@@ -53,17 +53,18 @@ export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => (
             </div>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiCheckbox
-              id={`visibility-${item.id}`}
-              checked={!item.hidden}
-              onChange={() => toggleItemVisibility(item.id)}
-              aria-label={i18n.translate(
+            <EuiSwitch
+              compressed
+              label={i18n.translate(
                 'core.ui.chrome.sideNavigation.customizeNavigation.draggableItemAriaLabel',
                 {
                   defaultMessage: 'Show {itemTitle}',
                   values: { itemTitle: item.title },
                 }
               )}
+              showLabel={false}
+              checked={!item.hidden}
+              onChange={() => toggleItemVisibility(item.id)}
             />
           </EuiFlexItem>
           <EuiFlexItem>

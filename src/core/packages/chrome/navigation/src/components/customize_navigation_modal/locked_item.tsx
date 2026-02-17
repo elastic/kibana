@@ -9,11 +9,11 @@
 
 import React from 'react';
 import {
-  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
   EuiPanel,
+  EuiSwitch,
   EuiText,
 } from '@elastic/eui';
 import type { NavigationItemInfo } from '@kbn/core-chrome-browser';
@@ -49,17 +49,18 @@ export const LockedItem = ({ item }: Props) => {
           <EuiIconTip type="lock" color="subdued" content={tooltipContent} position="left" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiCheckbox
-            id={`visibility-${item.id}`}
-            checked={!item.hidden}
-            onChange={() => {}}
-            aria-label={i18n.translate(
+          <EuiSwitch
+            compressed
+            label={i18n.translate(
               'core.ui.chrome.sideNavigation.customizeNavigation.lockedItemAriaLabel',
               {
                 defaultMessage: '{itemTitle} cannot be reordered or hidden',
                 values: { itemTitle: item.title },
               }
             )}
+            showLabel={false}
+            checked={!item.hidden}
+            onChange={() => {}}
             disabled
           />
         </EuiFlexItem>
