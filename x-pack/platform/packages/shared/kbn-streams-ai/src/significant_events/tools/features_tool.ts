@@ -5,23 +5,14 @@
  * 2.0.
  */
 
-import {
-  DATASET_ANALYSIS_FEATURE_TYPE,
-  ERROR_LOGS_FEATURE_TYPE,
-  LOG_PATTERNS_FEATURE_TYPE,
-  LOG_SAMPLES_FEATURE_TYPE,
-  type Feature,
-} from '@kbn/streams-schema';
+import { COMPUTED_FEATURE_TYPES, type Feature } from '@kbn/streams-schema';
 import { pick } from 'lodash';
 
 export const SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES = [
   'infrastructure',
   'technology',
   'dependency',
-  DATASET_ANALYSIS_FEATURE_TYPE,
-  LOG_SAMPLES_FEATURE_TYPE,
-  LOG_PATTERNS_FEATURE_TYPE,
-  ERROR_LOGS_FEATURE_TYPE,
+  ...COMPUTED_FEATURE_TYPES,
 ] as const;
 
 export type SignificantEventsFeatureToolType =
@@ -69,7 +60,7 @@ export function getFeatureTypesFromToolArgs(
   return validTypes.length > 0 ? validTypes : undefined;
 }
 
-export function toLlmFeature(feature: Feature): LlmFeature {
+export function toFeatureForLlmContext(feature: Feature): LlmFeature {
   return pick(feature, [
     'id',
     'type',

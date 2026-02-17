@@ -19,7 +19,7 @@ import { getComputedFeatureInstructions } from '../features/computed';
 import {
   getFeatureTypesFromToolArgs,
   resolveFeatureTypeFilters,
-  toLlmFeature,
+  toFeatureForLlmContext,
 } from './tools/features_tool';
 import {
   createDefaultSignificantEventsToolUsage,
@@ -123,7 +123,7 @@ export async function generateSignificantEvents({
             const features = await withSpan('get_stream_features_for_significant_events', () =>
               getFeatures(typeFilters ? { type: typeFilters } : undefined)
             );
-            const llmFeatures = features.map(toLlmFeature);
+            const llmFeatures = features.map(toFeatureForLlmContext);
 
             return {
               response: {
@@ -184,10 +184,10 @@ export async function generateSignificantEvents({
                 status: 'Failed to add',
                 error: getErrorMessage(error),
               };
-            } finally {
-              toolUsage.add_queries.latency_ms += Date.now() - startTime;
             }
           });
+
+          toolUsage.add_queries.latency_ms += Date.now() - startTime;
 
           return {
             response: {
