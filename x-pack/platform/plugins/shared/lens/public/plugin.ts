@@ -14,7 +14,6 @@ import type {
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type {
   ExpressionsServiceSetup,
@@ -25,7 +24,6 @@ import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizatio
 import {
   ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
   ACTION_CONVERT_TO_LENS,
-  DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
   ACTION_CONVERT_AGG_BASED_TO_LENS,
 } from '@kbn/visualizations-plugin/public';
 import type { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
@@ -33,16 +31,7 @@ import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import {
-  ACTION_VISUALIZE_FIELD,
-  VISUALIZE_FIELD_TRIGGER,
-  ADD_PANEL_TRIGGER,
-  ACTION_VISUALIZE_LENS_FIELD,
-} from '@kbn/ui-actions-plugin/public';
-import {
-  VISUALIZE_EDITOR_TRIGGER,
-  AGG_BASED_VISUALIZATION_TRIGGER,
-} from '@kbn/visualizations-plugin/public';
+import { ACTION_VISUALIZE_FIELD, ACTION_VISUALIZE_LENS_FIELD } from '@kbn/ui-actions-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import type { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { SharePluginSetup, ExportShare, SharePluginStart } from '@kbn/share-plugin/public';
@@ -84,6 +73,16 @@ import {
   LENS_CONTENT_TYPE,
   LENS_ITEM_LATEST_VERSION,
 } from '@kbn/lens-common/content_management/constants';
+import {
+  ADD_CANVAS_ELEMENT_TRIGGER,
+  ADD_PANEL_TRIGGER,
+  AGG_BASED_VISUALIZATION_TRIGGER,
+  CONTEXT_MENU_TRIGGER,
+  DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
+  IN_APP_EMBEDDABLE_EDIT_TRIGGER,
+  VISUALIZE_EDITOR_TRIGGER,
+  VISUALIZE_FIELD_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
@@ -122,7 +121,6 @@ import {
 } from '../common/constants';
 import type { FormatFactory } from '../common/types';
 import { lensVisTypeAlias } from './vis_type_alias';
-import { inAppEmbeddableEditTrigger } from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_trigger';
 
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
@@ -138,7 +136,6 @@ import { LensRenderer } from './react_embeddable/renderer/lens_custom_renderer_c
 import {
   ACTION_CREATE_ESQL_CHART,
   ACTION_EDIT_LENS_EMBEDDABLE,
-  IN_APP_EMBEDDABLE_EDIT_TRIGGER,
 } from './trigger_actions/open_lens_config/constants';
 import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 import { setLensFeatureFlags } from './get_feature_flags';
@@ -654,9 +651,6 @@ export class LensPlugin {
       startDependencies.uiActions.unregisterAction(ACTION_VISUALIZE_FIELD);
     }
 
-    // this trigger enables external consumers to use the inline editing flyout
-    startDependencies.uiActions.registerTrigger(inAppEmbeddableEditTrigger);
-
     startDependencies.uiActions.addTriggerActionAsync(
       VISUALIZE_FIELD_TRIGGER,
       ACTION_VISUALIZE_LENS_FIELD,
@@ -740,11 +734,7 @@ export class LensPlugin {
     });
     startDependencies.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addLensPanelAction');
 
-    if (startDependencies.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
-      // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
-      // the create action if the Canvas-specific trigger does indeed exist.
-      startDependencies.uiActions.attachAction('ADD_CANVAS_ELEMENT_TRIGGER', 'addLensPanelAction');
-    }
+    startDependencies.uiActions.attachAction(ADD_CANVAS_ELEMENT_TRIGGER, 'addLensPanelAction');
 
     const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
     if (discoverLocator) {
