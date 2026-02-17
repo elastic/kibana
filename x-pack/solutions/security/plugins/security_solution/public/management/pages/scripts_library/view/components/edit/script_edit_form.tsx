@@ -26,6 +26,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { FormattedError } from '../../../../../components/formatted_error';
 import type {
   usePatchEndpointScript,
@@ -95,6 +96,7 @@ export interface EndpointScriptEditFormProps {
 }
 export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
   ({ error: submitError, onChange, scriptItem, 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
     const { euiTheme } = useEuiTheme();
 
     const [draftScript, setDraftScript] = useState<
@@ -171,7 +173,7 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
             direction="column"
             responsive={false}
             css={fakeFilePickerStyle}
-            data-test-subj={`${dataTestSubj}-fakeFilePicker`}
+            data-test-subj={getTestId('fake-file-picker')}
           >
             <EuiFlexItem grow={false}>
               <EuiIcon type="download" size="l" aria-hidden={true} />
@@ -182,7 +184,12 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty type="button" size="xs" onClick={onRemoveFile}>
+              <EuiButtonEmpty
+                type="button"
+                size="xs"
+                onClick={onRemoveFile}
+                data-test-subj={getTestId('remove-file-button')}
+              >
                 {SCRIPT_LIBRARY_LABELS.flyout.body.edit.removeFileButtonLabel}
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -190,7 +197,7 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
           <EuiSpacer size="m" />
         </>
       );
-    }, [dataTestSubj, fakeFilePickerStyle, scriptItem?.fileName, onRemoveFile]);
+    }, [fakeFilePickerStyle, getTestId, scriptItem?.fileName, onRemoveFile]);
 
     // real file picker
     const filePickerUUID = useMemo(() => {
@@ -355,12 +362,12 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
         component="div"
         error={
           submitError && !isSubmitFileError ? (
-            <FormattedError error={submitError} data-test-subj={`${dataTestSubj}-submitError`} />
+            <FormattedError error={submitError} data-test-subj={getTestId('submit-error')} />
           ) : undefined
         }
         fullWidth
         isInvalid={!!submitError && !isSubmitFileError}
-        data-test-subj={`${dataTestSubj}-form`}
+        data-test-subj={getTestId()}
       >
         {/* file picker */}
         {showFakeFilePicker && !isSubmitFileError ? (
@@ -375,8 +382,10 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
                   )
                 : SCRIPT_LIBRARY_LABELS.flyout.body.edit.filePickerPrompt.validationErrorMessage
             }
+            data-test-subj={getTestId('file-picker-row')}
           >
             <EuiFilePicker
+              data-test-subj={getTestId('file-picker')}
               isInvalid={hasFileBeenChanged && (hasFileError || isSubmitFileError)}
               id={filePickerUUID}
               initialPromptText={SCRIPT_LIBRARY_LABELS.flyout.body.edit.filePickerPrompt.label}
@@ -393,8 +402,10 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
           label={
             <EndpointScriptEditItem label={SCRIPT_LIBRARY_LABELS.flyout.body.edit.name.label} />
           }
+          data-test-subj={getTestId('name-row')}
         >
           <EuiFieldText
+            data-test-subj={getTestId('name-input')}
             isInvalid={hasNameError && hasNameBeenChanged}
             defaultValue={scriptItem?.name}
             onChange={onChangeName}
@@ -411,8 +422,10 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
               label={SCRIPT_LIBRARY_LABELS.flyout.body.edit.platforms.label}
             />
           }
+          data-test-subj={getTestId('platforms-row')}
         >
           <EuiComboBox
+            data-test-subj={getTestId('platforms-input')}
             isInvalid={hasPlatformError && hasPlatformBeenChanged}
             fullWidth
             options={SUPPORTED_HOST_OS_TYPE.map((platform) => ({
@@ -446,6 +459,7 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
             <EndpointScriptEditItem label={SCRIPT_LIBRARY_LABELS.flyout.body.details.tags.label} />
           }
           labelAppend={labelAppend}
+          data-test-subj={getTestId('tags-row')}
         >
           <EuiComboBox
             fullWidth
@@ -467,6 +481,7 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
             />
           }
           labelAppend={labelAppend}
+          data-test-subj={getTestId('path-to-executable-row')}
         >
           <EuiFieldText
             defaultValue={scriptItem?.pathToExecutable}
@@ -487,8 +502,13 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
               ? SCRIPT_LIBRARY_LABELS.flyout.body.edit.description.helpText
               : undefined
           }
+          data-test-subj={getTestId('description-row')}
         >
-          <EuiFieldText defaultValue={scriptItem?.description} onChange={onChangeDescription} />
+          <EuiFieldText
+            defaultValue={scriptItem?.description}
+            onChange={onChangeDescription}
+            data-test-subj={getTestId('description-input')}
+          />
         </EuiFormRow>
 
         {/* instructions */}
@@ -504,11 +524,13 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
               : undefined
           }
           labelAppend={labelAppend}
+          data-test-subj={getTestId('instructions-row')}
         >
           <EuiTextArea
             defaultValue={scriptItem?.instructions}
             rows={5}
             onChange={onChangeInstructions}
+            data-test-subj={getTestId('instructions-input')}
           />
         </EuiFormRow>
 
@@ -523,8 +545,14 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
             hasEmptyExample ? SCRIPT_LIBRARY_LABELS.flyout.body.edit.example.helpText : undefined
           }
           labelAppend={labelAppend}
+          data-test-subj={getTestId('example-row')}
         >
-          <EuiTextArea defaultValue={scriptItem?.example} rows={5} onChange={onChangeExample} />
+          <EuiTextArea
+            defaultValue={scriptItem?.example}
+            rows={5}
+            onChange={onChangeExample}
+            data-test-subj={getTestId('example-input')}
+          />
         </EuiFormRow>
       </EuiForm>
     );

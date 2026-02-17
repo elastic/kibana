@@ -12,6 +12,7 @@ import {
   EuiFlyoutFooter,
 } from '@elastic/eui';
 import React, { memo, useCallback } from 'react';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { ScriptsLibraryUrlParams } from '../scripts_library_url_params';
 import { SCRIPT_LIBRARY_LABELS as flyoutHeaderLabels } from '../../../translations';
 
@@ -29,6 +30,7 @@ interface EndpointScriptEditFlyoutFooterProps {
 }
 export const EndpointScriptEditFlyoutFooter = memo<EndpointScriptEditFlyoutFooterProps>(
   ({ isDisabled = false, isLoading, show, onClose, onSubmit, 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
     const isEditFlow = show === 'edit';
 
     const onClickSubmit = useCallback(() => {
@@ -36,11 +38,11 @@ export const EndpointScriptEditFlyoutFooter = memo<EndpointScriptEditFlyoutFoote
     }, [isEditFlow, onSubmit]);
 
     return (
-      <EuiFlyoutFooter className="eui-textRight" data-test-subj={dataTestSubj}>
+      <EuiFlyoutFooter className="eui-textRight" data-test-subj={getTestId()}>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj={`${dataTestSubj}-cancelButton`}
+              data-test-subj={getTestId('cancel-button')}
               onClick={onClose}
               disabled={isLoading}
             >
@@ -49,7 +51,7 @@ export const EndpointScriptEditFlyoutFooter = memo<EndpointScriptEditFlyoutFoote
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              data-test-subj={`${dataTestSubj}-saveButton`}
+              data-test-subj={getTestId('save-button')}
               fill
               disabled={isDisabled || isLoading}
               onClick={onClickSubmit}

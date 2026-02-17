@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiTitle, EuiFlexItem, EuiFlexGroup, EuiFlyoutHeader } from '@elastic/eui';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { SCRIPT_LIBRARY_LABELS as flyoutHeaderLabels } from '../../../translations';
 import type { ScriptsLibraryUrlParams } from '../scripts_library_url_params';
 
@@ -18,14 +19,15 @@ export const EndpointScriptEditFlyoutHeader = memo(
     show: Extract<ScriptsLibraryUrlParams['show'], 'edit' | 'create'>;
     'data-test-subj'?: string;
   }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
     return (
-      <EuiFlyoutHeader hasBorder data-test-subj={dataTestSubj}>
+      <EuiFlyoutHeader hasBorder data-test-subj={getTestId()}>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
             <EuiTitle size="s">
               <h2
                 css={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
-                data-test-subj={`${dataTestSubj}-title`}
+                data-test-subj={getTestId('title')}
               >
                 {show === 'edit'
                   ? flyoutHeaderLabels.flyout.editHeader

@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { usePatchEndpointScript } from '../../../../../hooks/script_library';
 import type { EndpointScript } from '../../../../../../../common/endpoint/types';
 
@@ -42,15 +43,15 @@ export const EndpointScriptEditFlyout = memo<EndpointScriptEditFlyoutProps>(
     onSubmit,
     'data-test-subj': dataTestSubj,
   }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
     return (
       <>
-        <EndpointScriptEditFlyoutHeader show={show} data-test-subj={`${dataTestSubj}-header`} />
-        <EuiFlyoutBody data-test-subj={`${dataTestSubj}-body`}>
+        <EndpointScriptEditFlyoutHeader show={show} data-test-subj={getTestId('header')} />
+        <EuiFlyoutBody data-test-subj={getTestId('body')}>
           <EndpointScriptEditForm
             scriptItem={scriptItem}
-            show={show}
             onChange={onChange}
-            data-test-subj={`${dataTestSubj}`}
+            data-test-subj={getTestId('form')}
             error={error ?? undefined}
           />
         </EuiFlyoutBody>
@@ -60,7 +61,7 @@ export const EndpointScriptEditFlyout = memo<EndpointScriptEditFlyoutProps>(
           show={show}
           isDisabled={isDisabled}
           isLoading={isSubmittingData}
-          data-test-subj={`${dataTestSubj}-footer`}
+          data-test-subj={getTestId('footer')}
         />
       </>
     );
