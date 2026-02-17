@@ -470,7 +470,7 @@ describe('inside query', () => {
   });
 
   test('suggests operators after complete expression inside aggregation', async () => {
-    const query = 'PROMQL step="5m" sum(rate(bytes_counter[5m]) ';
+    const query = 'PROMQL step="5m" sum(rate(doubleField[5m]) ';
 
     await expectPromqlSuggestions(query, {
       labelsContain: promqlOperatorLabels,
@@ -478,7 +478,7 @@ describe('inside query', () => {
   });
 
   test('suggests operands (not operators) after binary operator inside aggregation', async () => {
-    const query = 'PROMQL step="5m" sum(rate(bytes_counter[5m]) * ';
+    const query = 'PROMQL step="5m" sum(rate(doubleField[5m]) * ';
 
     await expectPromqlSuggestions(query, {
       labelsContain: ['rate', 'sum', 'avg'],
@@ -746,7 +746,7 @@ describe('after query (pipe suggestions)', () => {
 
   test('suggests RHS operand items after arithmetic operator at query boundary', async () => {
     const numericFields = getFieldNamesByType(ESQL_NUMBER_TYPES, true);
-    const query = 'PROMQL step="5m" (sum(rate(metric_name[5m]))) + ';
+    const query = 'PROMQL step="5m" (sum(rate(doubleField[5m]))) + ';
 
     await expectPromqlSuggestions(
       query,
@@ -761,7 +761,7 @@ describe('after query (pipe suggestions)', () => {
 
   test('suggests RHS operand items after operator following selector with labels', async () => {
     const numericFields = getFieldNamesByType(ESQL_NUMBER_TYPES, true);
-    const query = 'PROMQL step="5m" quantile(0, double_field{label!~"value"} * ';
+    const query = 'PROMQL step="5m" quantile(0, doubleField{label!~"value"} * ';
 
     await expectPromqlSuggestions(
       query,
@@ -775,7 +775,7 @@ describe('after query (pipe suggestions)', () => {
 
   test('suggests RHS operand items after minus operator', async () => {
     const numericFields = getFieldNamesByType(ESQL_NUMBER_TYPES, true);
-    const query = 'PROMQL step="5m" quantile(0, metric_name - ';
+    const query = 'PROMQL step="5m" quantile(0, doubleField - ';
 
     await expectPromqlSuggestions(
       query,
@@ -789,7 +789,7 @@ describe('after query (pipe suggestions)', () => {
 
   test('suggests label selector after metric name in RHS of operator', async () => {
     const query =
-      'PROMQL index=tsdb_index step="5m" sum(quantile(0.9, double_field{label!~"value"} * metric_name ';
+      'PROMQL index=tsdb_index step="5m" sum(quantile(0.9, doubleField{label!~"value"} * doubleField ';
 
     await expectPromqlSuggestions(
       query,

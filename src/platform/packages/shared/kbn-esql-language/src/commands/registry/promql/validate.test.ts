@@ -175,7 +175,7 @@ describe('PROMQL Validation', () => {
 
     test('type mismatch: range_vector arithmetic not supported', () => {
       promqlExpectErrors(
-        'PROMQL step=5m start=?_tstart end=?_tend (counterIntegerField[5m] + counterIntegerField[5m])',
+        'PROMQL step=5m start=?_tstart end=?_tend (doubleField[5m] + doubleField[5m])',
         [
           '[PROMQL] Argument types require (lhs=instant_vector, rhs=instant_vector) for function "+"',
         ]
@@ -184,7 +184,7 @@ describe('PROMQL Validation', () => {
 
     test('type mismatch: instant_vector with range_vector operand', () => {
       promqlExpectErrors(
-        'PROMQL step=5m start=?_tstart end=?_tend (counterIntegerField + counterIntegerField[5m])',
+        'PROMQL step=5m start=?_tstart end=?_tend (doubleField + doubleField[5m])',
         [
           '[PROMQL] Argument types require (lhs=instant_vector, rhs=instant_vector) for function "+"',
         ]
