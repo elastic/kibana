@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ON_CLICK_VALUE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { transformEnhancementsOut } from './transform_enhancements_out';
 
 describe('transformEnhancementsOut', () => {
@@ -101,7 +102,7 @@ describe('transformEnhancementsOut', () => {
                 name: 'Go to URL',
               },
               eventId: 'c29b72e0-8a32-4214-abe0-6c54c6f804b7',
-              triggers: ['ON_CLICK_VALUE'],
+              triggers: [ON_CLICK_VALUE],
             },
           ],
         },
@@ -114,7 +115,7 @@ describe('transformEnhancementsOut', () => {
             "encode_url": true,
             "label": "Go to URL",
             "open_in_new_tab": true,
-            "trigger": "ON_CLICK_VALUE",
+            "trigger": "on_click_value",
             "type": "url_drilldown",
             "url": "https://localhost/?{{event.key}}",
           },

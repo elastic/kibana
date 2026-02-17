@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ON_OPEN_PANEL_MENU, PANEL_BADGE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { uiActions } from '../kibana_services';
 import { ACTION_EDIT_PANEL } from './edit_panel_action/constants';
 import { ACTION_INSPECT_PANEL } from './inspect_panel_action/constants';
@@ -16,7 +17,6 @@ import {
   CUSTOM_TIME_RANGE_BADGE,
   CPS_USAGE_OVERRIDES_BADGE,
 } from './customize_panel_action/constants';
-import { ON_OPEN_PANEL_MENU, PANEL_BADGE_TRIGGER } from './triggers';
 import { ACTION_SHOW_CONFIG_PANEL } from './show_config_panel_action/constants';
 
 export const registerActions = () => {

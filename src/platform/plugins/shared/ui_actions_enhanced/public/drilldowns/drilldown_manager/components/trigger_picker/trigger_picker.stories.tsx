@@ -9,6 +9,7 @@
 
 import * as React from 'react';
 import { action } from '@storybook/addon-actions';
+import { ON_CLICK_VALUE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { TriggerPicker } from '.';
 
 const Demo: React.FC = () => {
@@ -24,7 +25,7 @@ const Demo: React.FC = () => {
           description: 'On chart brush.',
         },
         {
-          id: 'ON_CLICK_VALUE',
+          id: ON_CLICK_VALUE,
           title: 'Value click',
           description: 'On point click in chart',
         },
@@ -49,7 +50,7 @@ export const Default = () => {
           description: 'On chart brush.',
         },
         {
-          id: 'ON_CLICK_VALUE',
+          id: ON_CLICK_VALUE,
           title: 'Value click',
           description: 'On point click in chart',
         },
@@ -72,7 +73,7 @@ export const WithDocs = {
             description: 'On chart brush.',
           },
           {
-            id: 'ON_CLICK_VALUE',
+            id: ON_CLICK_VALUE,
             title: 'Value click',
             description: 'On point click in chart',
           },
@@ -98,12 +99,12 @@ export const SelectedTrigger = {
             description: 'On chart brush.',
           },
           {
-            id: 'ON_CLICK_VALUE',
+            id: ON_CLICK_VALUE,
             title: 'Value click',
             description: 'On point click in chart',
           },
         ]}
-        selected={['ON_CLICK_VALUE']}
+        selected={[ON_CLICK_VALUE]}
         onChange={action('onChange')}
       />
     );

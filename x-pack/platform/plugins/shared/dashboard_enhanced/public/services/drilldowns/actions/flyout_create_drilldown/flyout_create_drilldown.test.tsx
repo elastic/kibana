@@ -16,6 +16,8 @@ import { flyoutCreateDrilldownAction } from './flyout_create_drilldown';
 import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
 import type { UiActionsEnhancedActionFactory } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import { ON_CLICK_VALUE, ON_SELECT_RANGE } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { coreServices, uiActionsEnhancedServices } from '../../../kibana_services';
 
 jest.mock('../../../kibana_services', () => {
   return {
@@ -30,14 +32,13 @@ jest.mock('../../../kibana_services', () => {
     uiActionsEnhancedServices: {
       getActionFactories: jest.fn(() => [
         {
-          supportedTriggers: () => ['ON_CLICK_VALUE'],
+          supportedTriggers: () => [ON_CLICK_VALUE],
           isCompatibleLicense: () => true,
         } as unknown as UiActionsEnhancedActionFactory,
       ]),
     },
   };
 });
-import { coreServices, uiActionsEnhancedServices } from '../../../kibana_services';
 
 const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>({
   dynamicActions: { events: [] },
@@ -59,7 +60,7 @@ const compatibleEmbeddableApi = {
     type: 'dashboard',
   },
   supportedTriggers: () => {
-    return ['ON_CLICK_VALUE'];
+    return [ON_CLICK_VALUE];
   },
   viewMode$: new BehaviorSubject<ViewMode>('edit'),
 };
@@ -81,7 +82,7 @@ test('icon exists', () => {
 });
 
 describe('isCompatible', () => {
-  test("compatible if dynamicUiActions enabled, 'ON_CLICK_VALUE' is supported, in edit mode", async () => {
+  test('compatible if dynamicUiActions enabled, ON_CLICK_VALUE is supported, in edit mode', async () => {
     expect(
       flyoutCreateDrilldownAction.isCompatible &&
         (await flyoutCreateDrilldownAction.isCompatible({ embeddable: compatibleEmbeddableApi }))
@@ -99,7 +100,7 @@ describe('isCompatible', () => {
     ).toBe(false);
   });
 
-  test("not compatible if 'ON_CLICK_VALUE' is not supported", async () => {
+  test('not compatible if ON_CLICK_VALUE is not supported', async () => {
     const embeddableApi = {
       ...compatibleEmbeddableApi,
       supportedTriggers: () => {
@@ -139,7 +140,7 @@ describe('isCompatible', () => {
     // Mock getActionFactories to return a factory that only supports ON_SELECT_RANGE
     (uiActionsEnhancedServices.getActionFactories as jest.Mock).mockImplementation(() => [
       {
-        supportedTriggers: () => ['ON_SELECT_RANGE'],
+        supportedTriggers: () => [ON_SELECT_RANGE],
         isCompatibleLicense: () => true,
       } as unknown as UiActionsEnhancedActionFactory,
     ]);

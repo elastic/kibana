@@ -11,7 +11,7 @@ import type { RowClickContext } from '@kbn/ui-actions-plugin/public';
 import { ON_CLICK_ROW } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { createPoint, rowClickData } from '../test/data';
 
-describe('ON_CLICK_VALUE', () => {
+describe('on_click_value', () => {
   describe('supports `points[]`', () => {
     test('getEventScopeValues()', () => {
       const mockDataPoints = [
@@ -71,7 +71,7 @@ describe('ON_CLICK_VALUE', () => {
   });
 });
 
-describe('ON_CLICK_ROW', () => {
+describe('on_click_row', () => {
   test('getEventVariableList() returns correct list of runtime variables', () => {
     const vars = getEventVariableList({
       triggers: [ON_CLICK_ROW],

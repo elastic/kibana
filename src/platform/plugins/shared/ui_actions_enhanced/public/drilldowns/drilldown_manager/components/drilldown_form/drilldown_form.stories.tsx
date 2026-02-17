@@ -9,6 +9,7 @@
 
 import * as React from 'react';
 import { action } from '@storybook/addon-actions';
+import { ON_CLICK_VALUE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { DrilldownForm } from '.';
 import type { TriggerPickerProps } from '../trigger_picker';
 
@@ -20,7 +21,7 @@ const triggers: TriggerPickerProps = {
       description: 'On chart brush.',
     },
     {
-      id: 'ON_CLICK_VALUE',
+      id: ON_CLICK_VALUE,
       title: 'Value click',
       description: 'On point click in chart',
     },

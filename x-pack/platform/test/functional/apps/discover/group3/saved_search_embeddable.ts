@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -146,7 +147,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardDrilldownsManage.fillInDashboardToURLDrilldownWizard({
         drilldownName,
         destinationURLTemplate: urlTemplate,
-        trigger: 'ON_OPEN_PANEL_MENU',
+        trigger: ON_OPEN_PANEL_MENU,
       });
       await testSubjects.click('urlDrilldownAdditionalOptions');
       await testSubjects.click('urlDrilldownOpenInNewTab');

@@ -31,6 +31,7 @@ jest.mock('../../../kibana_services', () => {
   };
 });
 import { coreServices } from '../../../kibana_services';
+import { ON_CLICK_VALUE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>({
   dynamicActions: { events: [{} as SerializedEvent] },
@@ -49,7 +50,7 @@ const compatibleEmbeddableApi = {
   },
   dynamicActionsState$,
   supportedTriggers: () => {
-    return ['ON_CLICK_VALUE'];
+    return [ON_CLICK_VALUE];
   },
   viewMode$: new BehaviorSubject<ViewMode>('edit'),
 };
@@ -61,7 +62,7 @@ beforeAll(async () => {
       factoryId: 'foo',
       name: '',
     },
-    ['ON_CLICK_VALUE']
+    [ON_CLICK_VALUE]
   );
 });
 const context = {} as unknown as ActionDefinitionContext<EmbeddableApiContext>;
@@ -85,7 +86,7 @@ test('MenuItem exists', () => {
 });
 
 describe('isCompatible', () => {
-  test("compatible if dynamicUiActions enabled (with event), 'ON_CLICK_VALUE' is supported, in edit mode", async () => {
+  test('compatible if dynamicUiActions enabled (with event), on_click_value is supported, in edit mode', async () => {
     expect(
       flyoutEditDrilldownAction.isCompatible &&
         (await flyoutEditDrilldownAction.isCompatible({ embeddable: compatibleEmbeddableApi }))

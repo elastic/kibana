@@ -34,7 +34,7 @@ Now, when user clicks on a UI element you need to "trigger" your trigger and pro
 
 [source,typescript jsx]
 ----
-plugins.uiActions.executeTriggerActions('ON_CLICK_VALUE', {
+plugins.uiActions.executeTriggerActions('on_click_value', {
   /* Custom context data. */
 });
 ----
@@ -51,7 +51,7 @@ plugins.uiActions.registerAction({
     // Do something.
   },
 });
-plugins.uiActions.attachAction('ON_CLICK_VALUE', 'DO_SOMETHING');
+plugins.uiActions.attachAction('on_click_value', 'DO_SOMETHING');
 ----
 
 Now your `DO_SOMETHING` action will automatically execute when `ON_CLICK_VALUE`
