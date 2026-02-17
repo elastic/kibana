@@ -45,6 +45,10 @@ if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
   if [[ -n "${EVAL_PROJECT:-}" ]] && [[ "${EVAL_PROJECT}" == eis-* ]]; then
     NEED_EIS_CONNECTORS="true"
   fi
+  # If the judge connector is EIS-backed, we still need EIS connectors even when running a LiteLLM project.
+  if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]] && [[ "${EVALUATION_CONNECTOR_ID}" == eis-* ]]; then
+    NEED_EIS_CONNECTORS="true"
+  fi
 
   if [[ "${NEED_EIS_CONNECTORS}" == "true" ]]; then
     if [[ -z "${KIBANA_EIS_CCM_API_KEY:-}" ]]; then

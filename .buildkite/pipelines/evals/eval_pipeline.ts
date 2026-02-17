@@ -66,6 +66,21 @@ function parseGithubPrLabels(raw: string): string[] {
     .filter(Boolean);
 }
 
+function normalizeEvaluationConnectorId(raw: string): string {
+  // Support `models:judge:eis/<modelId>` where the judge value is a model id, not a connector id.
+  if (raw.startsWith('eis/')) {
+    return `eis-${normalizeBuildkiteKey(raw.slice('eis/'.length))}`;
+  }
+
+  // Support `models:judge:<modelGroup>` (e.g. `llm-gateway/gpt-5.2`) where the judge value is a model group.
+  if (raw.includes('/')) {
+    return `litellm-${normalizeBuildkiteKey(raw)}`;
+  }
+
+  // Already a connector id (e.g. `litellm-*` / `eis-*`) or some other explicit id.
+  return raw;
+}
+
 function buildEvalsYaml({
   selectedSuites,
   modelGroups,
@@ -156,13 +171,18 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
   // - One or more `models:<model-group>` labels => only run connectors whose `defaultModel`
   //   matches one of those model groups.
   // - `models:all` can be used to explicitly opt into all models (ignored if combined with specifics).
-  const evaluationConnectorId = parsedLabels
+  const rawEvaluationConnectorId = parsedLabels
     .find((label) => label.startsWith('models:judge:'))
     ?.slice('models:judge:'.length)
     ?.trim();
+  const evaluationConnectorId =
+    typeof rawEvaluationConnectorId === 'string' && rawEvaluationConnectorId.length > 0
+      ? normalizeEvaluationConnectorId(rawEvaluationConnectorId)
+      : undefined;
   const includeEisModels =
     parsedLabels.includes('models:all') ||
     parsedLabels.some((label) => label.startsWith('models:eis/')) ||
+    (typeof rawEvaluationConnectorId === 'string' && rawEvaluationConnectorId.startsWith('eis/')) ||
     (typeof evaluationConnectorId === 'string' && evaluationConnectorId.startsWith('eis-'));
   const selectedModelGroups = parsedLabels
     .filter((label) => label.startsWith('models:') && !label.startsWith('models:judge:'))
