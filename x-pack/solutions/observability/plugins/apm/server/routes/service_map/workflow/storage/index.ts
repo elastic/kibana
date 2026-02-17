@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-export { getExistingEdges, indexEdges } from './indexing';
-export {
-  getLastProcessedTimestamp,
-  updateLastProcessedTimestamp,
-  getMinMaxSpanTimestamp,
-} from './metadata';
+export { indexEdges } from './indexing';
+export { getLastProcessedTimestamp, updateLastProcessedTimestamp } from './metadata';
 export {
   cleanupServiceMapEdges,
   type CleanupServiceMapEdgesResponse,

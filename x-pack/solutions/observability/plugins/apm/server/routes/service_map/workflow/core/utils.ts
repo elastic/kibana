@@ -19,7 +19,6 @@ export const METADATA_DOC_ID = '_workflow-metadata';
 export const RESOLUTION_BATCH_SIZE = 2000;
 export const MAX_TERMS_PER_QUERY = 10000;
 export const MAX_CONCURRENT_BATCHES = 3;
-export const MAX_RESOLUTION_ATTEMPTS = 10;
 
 /**
  * Builds a deterministic document ID for service map edges using SHA-256 hashing.

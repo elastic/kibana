@@ -20,7 +20,7 @@ import {
   isPrecomputedServiceMapAvailable,
   getPrecomputedServiceMap,
   convertEdgesToServiceMapSpans,
-} from './transforms';
+} from './workflow/graph';
 
 export interface IEnvOptions {
   mlClient?: MlClient;
@@ -28,6 +28,7 @@ export interface IEnvOptions {
   apmEventClient: APMEventClient;
   esClient: ElasticsearchClient;
   serviceName?: string;
+  targetServiceName?: string;
   environment: string;
   searchAggregatedTransactions: boolean;
   logger: Logger;
@@ -43,6 +44,7 @@ async function getConnectionData({
   apmEventClient,
   esClient,
   serviceName,
+  targetServiceName,
   environment,
   start,
   end,
@@ -50,24 +52,31 @@ async function getConnectionData({
   kuery,
   logger,
   usePrecomputedServiceMap,
-}: IEnvOptions): Promise<{ tracesCount: number; spans: ServiceMapSpan[] }> {
+}: IEnvOptions): Promise<{
+  tracesCount: number;
+  spans: ServiceMapSpan[];
+  staleServices?: string[];
+}> {
   return withApmSpan('get_service_map_connections', async () => {
-    // Try pre-computed service map from OneWorkflow if enabled
+    // Try materialized dependency graph if enabled
     if (usePrecomputedServiceMap) {
       const available = await isPrecomputedServiceMapAvailable(esClient);
       if (available) {
-        logger.debug('Using OneWorkflow pre-computed service map');
-        const { edges } = await getPrecomputedServiceMap({
+        logger.debug('Using materialized dependency graph');
+        const { edges, services } = await getPrecomputedServiceMap({
           esClient,
-          start,
-          end,
           environment,
           serviceName,
+          targetServiceName,
+          logger,
         });
         const spans = convertEdgesToServiceMapSpans(edges);
-        return { spans, tracesCount: 0 }; // tracesCount not applicable for pre-computed
+        const staleServices = Array.from(services.entries())
+          .filter(([, info]) => info.stale)
+          .map(([name]) => name);
+        return { spans, tracesCount: 0, staleServices };
       }
-      logger.debug('Pre-computed service map not available, falling back to sampling');
+      logger.debug('Materialized dependency graph not available, falling back to sampling');
     }
 
     // Fall back to trace sampling approach
@@ -132,6 +141,9 @@ export function getServiceMap(
       tracesCount: connectionData.tracesCount,
       servicesData,
       anomalies,
+      ...(connectionData.staleServices?.length
+        ? { staleServices: connectionData.staleServices }
+        : {}),
     };
   });
 }

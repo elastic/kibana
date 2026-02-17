@@ -56,6 +56,8 @@ export interface ServiceMapRawResponse {
   spans: ServiceMapSpan[];
   servicesData: ServicesResponse[];
   anomalies: ServiceAnomaliesResponse;
+  /** Service names that are stale (not seen recently). Populated by the precomputed service map. */
+  staleServices?: string[];
 }
 
 export type ServiceMapResponse = Pick<ServiceMapTelemetry, 'tracesCount'> & ServiceMapRawResponse;

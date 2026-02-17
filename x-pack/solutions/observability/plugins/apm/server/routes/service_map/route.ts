@@ -27,7 +27,6 @@ import { offsetRt } from '../../../common/comparison_rt';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import {
   getLastProcessedTimestamp,
-  getMinMaxSpanTimestamp,
   updateLastProcessedTimestamp,
   calculateTimeWindows,
   processChunksWithConcurrencyLimit,
@@ -42,6 +41,7 @@ import { cleanupServiceMapEdges, type CleanupServiceMapEdgesResponse } from './w
 import { discoverServices, type DiscoverServicesResponse } from './workflow/discovery';
 import { getEnvironments, type GetEnvironmentsResponse } from './workflow/discovery';
 import { aggregateByService, type AggregateByServiceResponse } from './workflow/aggregation';
+import { materializeGraph, type MaterializeGraphResponse } from './workflow/graph';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',
@@ -49,6 +49,7 @@ const serviceMapRoute = createApmServerRoute({
     query: t.intersection([
       t.partial({
         serviceName: t.string,
+        targetServiceName: t.string,
         serviceGroup: t.string,
         kuery: kueryRt.props.kuery,
       }),
@@ -74,7 +75,15 @@ const serviceMapRoute = createApmServerRoute({
     });
 
     const {
-      query: { serviceName, serviceGroup: serviceGroupId, environment, start, end, kuery },
+      query: {
+        serviceName,
+        targetServiceName,
+        serviceGroup: serviceGroupId,
+        environment,
+        start,
+        end,
+        kuery,
+      },
     } = params;
 
     const coreContext = await context.core;
@@ -110,6 +119,7 @@ const serviceMapRoute = createApmServerRoute({
       apmEventClient,
       esClient: scopedClusterClient.asCurrentUser,
       serviceName,
+      targetServiceName,
       environment,
       searchAggregatedTransactions,
       logger: logger.get('serviceMap'),
@@ -298,7 +308,6 @@ const serviceMapWorkflowGetMetadataRoute = createApmServerRoute({
     resources
   ): Promise<{
     lastProcessedTimestamp: number | null;
-    minMaxSpanTimestamp: number | null;
     effectiveStart: number;
     end: number;
   }> => {
@@ -320,10 +329,10 @@ const serviceMapWorkflowGetMetadataRoute = createApmServerRoute({
     const now = Date.now();
     const end = now;
 
-    const [lastProcessedTimestamp, minMaxSpanTimestamp] = await Promise.all([
-      getLastProcessedTimestamp({ esClient, logger: workflowLogger }),
-      getMinMaxSpanTimestamp({ esClient, logger: workflowLogger }),
-    ]);
+    const lastProcessedTimestamp = await getLastProcessedTimestamp({
+      esClient,
+      logger: workflowLogger,
+    });
 
     let start: number;
     if (lastProcessedTimestamp === null) {
@@ -341,21 +350,9 @@ const serviceMapWorkflowGetMetadataRoute = createApmServerRoute({
       );
     }
 
-    const effectiveStart =
-      minMaxSpanTimestamp != null && minMaxSpanTimestamp > start ? minMaxSpanTimestamp : start;
-
-    if (effectiveStart > start) {
-      workflowLogger.debug(
-        `Using optimized start time ${new Date(effectiveStart).toISOString()} (was ${new Date(
-          start
-        ).toISOString()}) to avoid re-processing spans`
-      );
-    }
-
     return {
       lastProcessedTimestamp,
-      minMaxSpanTimestamp,
-      effectiveStart,
+      effectiveStart: start,
       end,
     };
   },
@@ -402,6 +399,11 @@ const serviceMapWorkflowAggregateExitSpansRoute = createApmServerRoute({
 
     const start = params.body.start;
     const end = params.body.end;
+
+    if (start >= end) {
+      throw Boom.badRequest('start must be before end');
+    }
+
     const chunkSizeMinutes = params.body.chunkSizeMinutes ?? 15;
     const maxConcurrency = params.body.maxConcurrency ?? 2;
 
@@ -476,6 +478,11 @@ const serviceMapWorkflowAggregateSpanLinksRoute = createApmServerRoute({
 
     const start = params.body.start;
     const end = params.body.end;
+
+    if (start >= end) {
+      throw Boom.badRequest('start must be before end');
+    }
+
     const chunkSizeMinutes = params.body.chunkSizeMinutes ?? 15;
     const maxConcurrency = params.body.maxConcurrency ?? 2;
 
@@ -695,6 +702,41 @@ const serviceMapWorkflowAggregateSpanLinksByServiceRoute = createApmServerRoute(
   },
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Dependency Graph Materialization Workflow Routes
+// ─────────────────────────────────────────────────────────────────────────────
+
+const dependencyGraphMaterializeRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/dependency-graph/materialize',
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  params: t.type({
+    body: t.type({
+      environment: t.union([t.string, t.undefined]),
+    }),
+  }),
+  handler: async (resources): Promise<MaterializeGraphResponse> => {
+    const { config, context, logger, params } = resources;
+
+    if (!config.serviceMapEnabled) {
+      throw Boom.notFound();
+    }
+
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
+      throw Boom.forbidden(invalidLicenseMessage);
+    }
+
+    const coreContext = await context.core;
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    return materializeGraph({
+      esClient,
+      environment: params.body.environment,
+      logger: logger.get('dependencyGraph'),
+    });
+  },
+});
+
 export const serviceMapRouteRepository = {
   ...serviceMapRoute,
   ...serviceMapServiceNodeRoute,
@@ -709,4 +751,5 @@ export const serviceMapRouteRepository = {
   ...serviceMapWorkflowGetEnvironmentsRoute,
   ...serviceMapWorkflowAggregateExitSpansByServiceRoute,
   ...serviceMapWorkflowAggregateSpanLinksByServiceRoute,
+  ...dependencyGraphMaterializeRoute,
 };

@@ -34,7 +34,6 @@ import {
   RESOLUTION_BATCH_SIZE,
   MAX_TERMS_PER_QUERY,
   MAX_CONCURRENT_BATCHES,
-  MAX_RESOLUTION_ATTEMPTS,
 } from '../core/utils';
 
 interface ServiceMapEdge {
@@ -48,14 +47,12 @@ interface ServiceMapEdge {
   span_type: string;
   span_subtype: string | null;
   span_count: number;
-  edge_type: 'exit_span' | 'span_link';
-  sample_spans: string[]; // Array of span IDs
+  edge_type: 'exit_span' | 'span_link' | 'span_link_incoming';
+  sample_spans: string[]; // Array of span IDs (linked span IDs for span_link edges)
   computed_at: string;
   last_seen_at?: string;
   max_span_timestamp?: number; // Maximum @timestamp of spans processed for this edge
   consecutive_misses?: number; // Number of consecutive workflow runs where edge was not seen
-  resolution_attempts?: number; // Number of times we've tried to resolve this edge
-  last_resolution_attempt?: string; // Last time we attempted resolution
 }
 
 export interface ResolveServiceMapDestinationsResponse {
@@ -64,7 +61,6 @@ export interface ResolveServiceMapDestinationsResponse {
   resolved: number;
   environment?: string;
   failedBatches?: number;
-  skippedDueToRetries?: number; // Edges skipped because they've been tried too many times
 }
 
 function extractDestinationInfo(fields: Record<string, unknown[]>) {
@@ -87,7 +83,7 @@ async function getAllUnresolvedEdges({
   logger,
 }: {
   esClient: ElasticsearchClient;
-  edgeType: 'exit_span' | 'span_link';
+  edgeType: 'exit_span' | 'span_link' | 'span_link_incoming';
   environment?: string;
   logger: Logger;
 }): Promise<Array<{ _id: string; _source: ServiceMapEdge }>> {
@@ -162,27 +158,15 @@ export async function resolveServiceMapDestinations({
 }): Promise<ResolveServiceMapDestinationsResponse> {
   const now = new Date().toISOString();
 
-  const [allExitEdgeHits, allLinkEdgeHits] = await Promise.all([
+  const [exitEdgeHits, linkEdgeHits, incomingLinkEdgeHits] = await Promise.all([
     getAllUnresolvedEdges({ esClient, edgeType: 'exit_span', environment, logger }),
     getAllUnresolvedEdges({ esClient, edgeType: 'span_link', environment, logger }),
+    getAllUnresolvedEdges({ esClient, edgeType: 'span_link_incoming', environment, logger }),
   ]);
 
-  const filterByAttempts = (hits: typeof allExitEdgeHits) =>
-    hits.filter((hit) => (hit._source?.resolution_attempts ?? 0) < MAX_RESOLUTION_ATTEMPTS);
-
-  const exitEdgeHits = filterByAttempts(allExitEdgeHits);
-  const linkEdgeHits = filterByAttempts(allLinkEdgeHits);
-
-  const totalSkipped =
-    allExitEdgeHits.length - exitEdgeHits.length + (allLinkEdgeHits.length - linkEdgeHits.length);
-
-  if (totalSkipped > 0) {
-    logger.info(
-      `Skipped ${totalSkipped} edges that exceeded ${MAX_RESOLUTION_ATTEMPTS} resolution attempts`
-    );
-  }
-
-  logger.debug(`Processing ${exitEdgeHits.length} exit edges, ${linkEdgeHits.length} link edges`);
+  logger.debug(
+    `Processing ${exitEdgeHits.length} exit edges, ${linkEdgeHits.length} outgoing link edges, ${incomingLinkEdgeHits.length} incoming link edges`
+  );
 
   /**
    * Process a batch of exit span edges and resolve their destinations
@@ -313,26 +297,13 @@ export async function resolveServiceMapDestinations({
               destination_environment: destination.environment,
               destination_agent: destination.agent,
               computed_at: now,
-              // Reset resolution attempts on successful resolution
-              resolution_attempts: 0,
-              last_resolution_attempt: now,
             },
           }
         );
         batchResolved++;
-      } else {
-        // Track failed resolution attempt
-        const currentAttempts = source.resolution_attempts ?? 0;
-        bulkOperations.push(
-          { update: { _index: EDGES_INDEX, _id: hit._id } },
-          {
-            doc: {
-              resolution_attempts: currentAttempts + 1,
-              last_resolution_attempt: now,
-            },
-          }
-        );
       }
+      // Unresolved edges are left as-is — they'll be retried on the next run
+      // with fresh sample spans from the latest aggregation window.
     }
 
     logger.debug(
@@ -470,30 +441,141 @@ export async function resolveServiceMapDestinations({
               destination_environment: destination.environment,
               destination_agent: destination.agent,
               computed_at: now,
-              // Reset resolution attempts on successful resolution
-              resolution_attempts: 0,
-              last_resolution_attempt: now,
             },
           }
         );
         batchResolved++;
-      } else {
-        // Track failed resolution attempt
-        const currentAttempts = source.resolution_attempts ?? 0;
-        bulkOperations.push(
-          { update: { _index: EDGES_INDEX, _id: hit._id } },
-          {
-            doc: {
-              resolution_attempts: currentAttempts + 1,
-              last_resolution_attempt: now,
-            },
-          }
-        );
       }
     }
 
     logger.debug(
       `Span link batch ${batchNum}/${totalBatches}: resolved ${batchResolved}/${batch.length} edges`
+    );
+    return batchResolved;
+  }
+
+  /**
+   * Process a batch of incoming span link edges and resolve their source (producer) service.
+   *
+   * For incoming span links, the edge's source_service is the consumer (transaction's service)
+   * and we need to find the producer. After resolution, we swap the direction:
+   * - resolved service → source_service (producer)
+   * - original source_service → destination_service (consumer)
+   */
+  async function processIncomingSpanLinkBatch(
+    bulkOperations: object[],
+    batch: Array<{ _id: string; _source: ServiceMapEdge }>,
+    batchNum: number,
+    totalBatches: number
+  ): Promise<number> {
+    const allLinkedSpanIds = new Set<string>();
+    for (const hit of batch) {
+      const source = hit._source;
+      if (source?.sample_spans && Array.isArray(source.sample_spans)) {
+        for (const spanId of source.sample_spans) {
+          if (spanId) {
+            allLinkedSpanIds.add(spanId);
+          }
+        }
+      }
+    }
+
+    const linkedSpanIds = Array.from(allLinkedSpanIds);
+    if (linkedSpanIds.length === 0) {
+      return 0;
+    }
+
+    logger.debug(
+      `Processing incoming span link batch ${batchNum}/${totalBatches}: ${batch.length} edges, ${linkedSpanIds.length} linked span IDs`
+    );
+
+    const spanIdChunks: string[][] = [];
+    for (let i = 0; i < linkedSpanIds.length; i += MAX_TERMS_PER_QUERY) {
+      spanIdChunks.push(linkedSpanIds.slice(i, i + MAX_TERMS_PER_QUERY));
+    }
+
+    const linkDestinationLookup = new Map<
+      string,
+      { serviceName: string | null; environment: string | null; agent: string | null }
+    >();
+
+    const optionalFields = asMutableArray([SERVICE_ENVIRONMENT] as const);
+    const requiredFields = asMutableArray([SERVICE_NAME, AGENT_NAME, SPAN_ID] as const);
+
+    const queryPromises = spanIdChunks.map((chunk) => {
+      return apmEventClient.search('resolve_incoming_span_link_sources', {
+        apm: {
+          events: [ProcessorEvent.span],
+        },
+        track_total_hits: false,
+        size: Math.min(chunk.length, 5000),
+        query: {
+          bool: {
+            filter: [...rangeQuery(start, end), ...termsQuery(SPAN_ID, ...chunk)],
+          },
+        },
+        fields: [...requiredFields, ...optionalFields],
+      });
+    });
+
+    const results = await Promise.all(queryPromises);
+
+    for (const spanResponse of results) {
+      for (const hit of spanResponse.hits.hits) {
+        const fields = hit.fields as Record<string, unknown[]>;
+        const spanId = fields?.[SPAN_ID]?.[0] as string | undefined;
+        if (spanId) {
+          const destinationInfo = extractDestinationInfo(fields);
+          linkDestinationLookup.set(spanId, destinationInfo);
+        }
+      }
+    }
+
+    let batchResolved = 0;
+    for (const hit of batch) {
+      const source = hit._source;
+      if (!source) continue;
+
+      const sampleSpans = source.sample_spans || [];
+
+      let producer:
+        | { serviceName: string | null; environment: string | null; agent: string | null }
+        | undefined;
+      for (const spanId of sampleSpans) {
+        if (!spanId) continue;
+        const found = linkDestinationLookup.get(spanId);
+        if (found) {
+          producer = found as {
+            serviceName: string | null;
+            environment: string | null;
+            agent: string | null;
+          };
+          break;
+        }
+      }
+
+      if (producer && producer.serviceName != null) {
+        // Swap direction: producer becomes source, consumer (original source) becomes destination
+        bulkOperations.push(
+          { update: { _index: EDGES_INDEX, _id: hit._id } },
+          {
+            doc: {
+              source_service: producer.serviceName,
+              source_environment: producer.environment,
+              source_agent: producer.agent,
+              destination_service: source.source_service,
+              destination_environment: source.source_environment,
+              destination_agent: source.source_agent,
+              computed_at: now,
+            },
+          }
+        );
+        batchResolved++;
+      }
+    }
+
+    logger.debug(
+      `Incoming span link batch ${batchNum}/${totalBatches}: resolved ${batchResolved}/${batch.length} edges`
     );
     return batchResolved;
   }
@@ -586,7 +668,7 @@ export async function resolveServiceMapDestinations({
   if (linkEdgeHits.length > 0) {
     const totalBatches = Math.ceil(linkEdgeHits.length / RESOLUTION_BATCH_SIZE);
     logger.debug(
-      `Processing ${linkEdgeHits.length} unresolved span link edges in ${totalBatches} batches of up to ${RESOLUTION_BATCH_SIZE} edges (max ${MAX_CONCURRENT_BATCHES} concurrent)`
+      `Processing ${linkEdgeHits.length} unresolved outgoing span link edges in ${totalBatches} batches of up to ${RESOLUTION_BATCH_SIZE} edges (max ${MAX_CONCURRENT_BATCHES} concurrent)`
     );
 
     const linkBulkOperations: object[] = [];
@@ -602,7 +684,26 @@ export async function resolveServiceMapDestinations({
     );
   }
 
-  // Wait for both exit and link edge processing to complete
+  if (incomingLinkEdgeHits.length > 0) {
+    const totalBatches = Math.ceil(incomingLinkEdgeHits.length / RESOLUTION_BATCH_SIZE);
+    logger.debug(
+      `Processing ${incomingLinkEdgeHits.length} unresolved incoming span link edges in ${totalBatches} batches of up to ${RESOLUTION_BATCH_SIZE} edges (max ${MAX_CONCURRENT_BATCHES} concurrent)`
+    );
+
+    const incomingLinkBulkOperations: object[] = [];
+    processingPromises.push(
+      processBatchesWithConcurrency(
+        incomingLinkBulkOperations,
+        incomingLinkEdgeHits,
+        RESOLUTION_BATCH_SIZE,
+        processIncomingSpanLinkBatch,
+        MAX_CONCURRENT_BATCHES,
+        'span_link_incoming'
+      ).then((result) => ({ ...result, operations: incomingLinkBulkOperations }))
+    );
+  }
+
+  // Wait for exit, outgoing link, and incoming link edge processing to complete
   const results = await Promise.all(processingPromises);
   let resolvedCount = 0;
   let totalFailedBatches = 0;
@@ -622,19 +723,19 @@ export async function resolveServiceMapDestinations({
     });
   }
 
+  const totalUnresolved = exitEdgeHits.length + linkEdgeHits.length + incomingLinkEdgeHits.length;
+
   logger.debug(
-    `Resolution complete: ${resolvedCount} edges resolved out of ${
-      exitEdgeHits.length + linkEdgeHits.length
-    } unresolved (${exitEdgeHits.length} exit, ${linkEdgeHits.length} link)` +
+    `Resolution complete: ${resolvedCount} edges resolved out of ${totalUnresolved} unresolved ` +
+      `(${exitEdgeHits.length} exit, ${linkEdgeHits.length} outgoing link, ${incomingLinkEdgeHits.length} incoming link)` +
       (totalFailedBatches > 0 ? `, ${totalFailedBatches} batches failed` : '')
   );
 
   return {
     unresolvedExitEdges: exitEdgeHits.length,
-    unresolvedLinkEdges: linkEdgeHits.length,
+    unresolvedLinkEdges: linkEdgeHits.length + incomingLinkEdgeHits.length,
     resolved: resolvedCount,
     ...(environment && { environment }),
     ...(totalFailedBatches > 0 && { failedBatches: totalFailedBatches }),
-    ...(totalSkipped > 0 && { skippedDueToRetries: totalSkipped }),
   };
 }

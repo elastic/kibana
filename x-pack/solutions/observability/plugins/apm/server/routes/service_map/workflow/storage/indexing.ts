@@ -25,139 +25,11 @@ const BULK_BATCH_SIZE = 10000;
 const YIELD_FREQUENCY = 50;
 const YIELD_FREQUENCY_LARGE_BATCH = 200;
 const SAMPLES_PER_EDGE = 5;
-const MAX_CONCURRENT_SEARCHES = 5;
-const EXISTING_EDGE_CHUNK_SIZE = 1000;
 
 interface ExistingEdgeInfo {
   isResolved: boolean;
-  currentSamples: string[]; // Array of span IDs
+  currentSamples: string[];
   currentMaxSpanTimestamp?: number;
-}
-
-/**
- * Get existing edges from the index
- */
-export async function getExistingEdges({
-  esClient,
-  docIds,
-  logger,
-}: {
-  esClient: ElasticsearchClient;
-  docIds: string[];
-  logger: Logger;
-}): Promise<{
-  resolvedEdgeIds: Set<string>;
-  existingEdgesMap: Map<string, ExistingEdgeInfo>;
-}> {
-  const resolvedEdgeIds = new Set<string>();
-  const existingEdgesMap = new Map<string, ExistingEdgeInfo>();
-
-  if (docIds.length === 0) {
-    return { resolvedEdgeIds, existingEdgesMap };
-  }
-
-  const searches: Array<Record<string, unknown>> = [];
-
-  // First search: Find all resolved edges
-  searches.push(
-    { index: EDGES_INDEX },
-    {
-      size: docIds.length,
-      _source: false,
-      query: {
-        bool: {
-          filter: [{ ids: { values: docIds } }, { exists: { field: 'destination_service' } }],
-        },
-      },
-    }
-  );
-
-  // Additional searches: Get unresolved edges in chunks
-  for (let i = 0; i < docIds.length; i += EXISTING_EDGE_CHUNK_SIZE) {
-    const chunk = docIds.slice(i, i + EXISTING_EDGE_CHUNK_SIZE);
-    searches.push(
-      { index: EDGES_INDEX },
-      {
-        size: chunk.length,
-        _source: ['destination_service', 'sample_span_ids', 'max_span_timestamp'],
-        query: { ids: { values: chunk } },
-      }
-    );
-  }
-
-  // Execute searches in parallel batches
-  const searchPromises: Array<Promise<any>> = [];
-  for (let i = 0; i < searches.length; i += MAX_CONCURRENT_SEARCHES * 2) {
-    const batchSearches = searches.slice(i, i + MAX_CONCURRENT_SEARCHES * 2);
-    if (batchSearches.length > 0) {
-      searchPromises.push(esClient.msearch({ searches: batchSearches }));
-    }
-  }
-
-  const msearchResponses = await Promise.all(searchPromises);
-  const msearchResponse = {
-    responses: msearchResponses.flatMap((response) => response.responses),
-  };
-
-  // Process resolved edges
-  if (msearchResponse.responses[0] && 'hits' in msearchResponse.responses[0]) {
-    const resolvedResponse = msearchResponse.responses[0];
-    for (const hit of resolvedResponse.hits.hits) {
-      if (hit._id) {
-        resolvedEdgeIds.add(hit._id);
-      }
-    }
-  }
-
-  logger.debug(
-    `Found ${resolvedEdgeIds.size} already-resolved edges out of ${docIds.length} total`
-  );
-
-  // Process unresolved edges
-  for (let i = 1; i < msearchResponse.responses.length; i++) {
-    const response = msearchResponse.responses[i];
-    if (!response || !('hits' in response)) continue;
-
-    const yieldFrequency =
-      response.hits.hits.length > 10000 ? YIELD_FREQUENCY_LARGE_BATCH : YIELD_FREQUENCY;
-
-    for (let j = 0; j < response.hits.hits.length; j++) {
-      if (j > 0 && j % yieldFrequency === 0) {
-        await new Promise(setImmediate);
-      }
-
-      const hit = response.hits.hits[j];
-      if (!hit._id || resolvedEdgeIds.has(hit._id)) continue;
-
-      const source = hit._source as ServiceMapEdge | undefined;
-      if (source) {
-        const hasResolvedDestination =
-          source?.destination_service != null && source.destination_service !== '';
-        const currentSamples: string[] = [];
-        if (source?.sample_spans && Array.isArray(source.sample_spans)) {
-          currentSamples.push(
-            ...source.sample_spans.filter((spanId) => typeof spanId === 'string' && !!spanId)
-          );
-        }
-
-        existingEdgesMap.set(hit._id, {
-          isResolved: hasResolvedDestination,
-          currentSamples,
-          currentMaxSpanTimestamp: source?.max_span_timestamp,
-        });
-      }
-    }
-  }
-
-  // Mark resolved edges in map
-  for (const resolvedId of resolvedEdgeIds) {
-    existingEdgesMap.set(resolvedId, {
-      isResolved: true,
-      currentSamples: [],
-    });
-  }
-
-  return { resolvedEdgeIds, existingEdgesMap };
 }
 
 /**
@@ -193,8 +65,10 @@ export async function indexEdges({
 
   // Categorize edges
   for (const edge of edges) {
+    const prefix =
+      edge.edge_type === 'exit_span' ? 'exit' : edge.edge_type === 'span_link' ? 'link' : 'ilink';
     const docId = buildDocId(
-      edge.edge_type === 'exit_span' ? 'exit' : 'link',
+      prefix,
       edge.source_service,
       edge.source_environment ?? '',
       edge.source_agent ?? '',
@@ -288,7 +162,7 @@ export async function indexEdges({
     }
 
     const { edge, docId } = newEdges[i];
-    const edgeWithTimestamp: ServiceMapEdge = {
+    const fullEdge: ServiceMapEdge = {
       ...edge,
       source_agent: normalizeEmptyToNull(edge.source_agent),
       source_environment: normalizeEmptyToNull(edge.source_environment),
@@ -296,13 +170,24 @@ export async function indexEdges({
       destination_agent: normalizeEmptyToNull(edge.destination_agent),
       destination_environment: normalizeEmptyToNull(edge.destination_environment),
       max_span_timestamp: edge.max_span_timestamp ?? endTimestamp ?? undefined,
-      last_seen_at: edge.computed_at, // Track when edge was first/last seen
-      consecutive_misses: 0, // Initialize to 0 for new edges
+      last_seen_at: edge.computed_at,
+      consecutive_misses: 0,
     };
+
+    // For updates: exclude destination_* fields so we don't overwrite resolved values.
+    // Aggregation always sets destination_service: null — if we include it in the doc,
+    // it wipes previously resolved destinations. Resolution is the only step that should
+    // set destination_* fields.
+    const {
+      destination_service: _ds,
+      destination_agent: _da,
+      destination_environment: _de,
+      ...updateFields
+    } = fullEdge;
 
     operations.push(
       { update: { _index: EDGES_INDEX, _id: docId } },
-      { doc: edgeWithTimestamp, upsert: edgeWithTimestamp }
+      { doc: updateFields, upsert: fullEdge }
     );
   }
 

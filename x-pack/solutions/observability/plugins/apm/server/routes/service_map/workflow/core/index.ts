@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-export {
-  getLastProcessedTimestamp,
-  updateLastProcessedTimestamp,
-  getMinMaxSpanTimestamp,
-} from '../storage/metadata';
-export { getExistingEdges, indexEdges } from '../storage/indexing';
+export { getLastProcessedTimestamp, updateLastProcessedTimestamp } from '../storage/metadata';
+export { indexEdges } from '../storage/indexing';
 export {
   calculateTimeWindows,
   processChunksWithConcurrencyLimit,
   aggregateChunkResults,
   filterUnprocessedWindows,
 } from './chunk_processing';
-export { quickExistenceCheck } from './quick_existence_check';
 export {
   buildDocId,
   normalizeEmptyToNull,
@@ -27,6 +22,5 @@ export {
   RESOLUTION_BATCH_SIZE,
   MAX_TERMS_PER_QUERY,
   MAX_CONCURRENT_BATCHES,
-  MAX_RESOLUTION_ATTEMPTS,
 } from './utils';
-export type { ServiceMapEdge, ComputeServiceMapEdgesResponse } from './types';
+export type { ServiceMapEdge } from './types';

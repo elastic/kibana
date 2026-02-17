@@ -22,19 +22,10 @@ export interface ServiceMapEdge {
   span_type: string;
   span_subtype: string | null;
   span_count: number;
-  edge_type: 'exit_span' | 'span_link';
+  edge_type: 'exit_span' | 'span_link' | 'span_link_incoming';
   sample_spans: string[]; // Array of span IDs for resolution
   computed_at: string;
   last_seen_at?: string;
   max_span_timestamp?: number;
   consecutive_misses?: number;
-}
-
-export interface ComputeServiceMapEdgesResponse {
-  exitSpanEdges: number;
-  spanLinkEdges: number;
-  indexed: number;
-  updated: number;
-  created: number;
-  skipped: number;
 }

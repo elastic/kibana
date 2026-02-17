@@ -30,6 +30,10 @@ export interface ServiceNodeData extends BaseNodeData {
   isService: true;
   agentName?: AgentName;
   serviceAnomalyStats?: ServiceAnomalyStats;
+  /** Whether this service is stale (not seen recently in the precomputed graph) */
+  stale?: boolean;
+  /** Role in path-finding mode: origin (start) or target (end) of path */
+  pathRole?: 'origin' | 'target';
 }
 
 /**

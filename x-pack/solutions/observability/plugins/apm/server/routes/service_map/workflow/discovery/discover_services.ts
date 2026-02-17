@@ -65,17 +65,15 @@ export async function discoverServices({
     `Discovering services from ${new Date(start).toISOString()} to ${new Date(end).toISOString()}`
   );
 
-  // Delete old services from previous discovery
-  await esClient.deleteByQuery({
-    index: SERVICES_INDEX,
-    refresh: true,
-    query: { match_all: {} },
-  });
+  // Incremental: upsert services found in the current window.
+  // Deterministic doc IDs (service_name|env|agent) ensure uniqueness.
+  // Each upsert refreshes last_seen_at so the cleanup step can remove
+  // services not seen in the last 15 minutes.
 
   // Flatten service → environment combinations using composite aggregation (no 10k limit)
   const serviceEnvCombinations: Array<{
     service_name: string;
-    service_environment: string;
+    service_environment: string | null;
     service_agent: string;
     doc_count: number;
   }> = [];
@@ -133,15 +131,17 @@ export async function discoverServices({
     const buckets = response.aggregations?.services.buckets ?? [];
     totalBuckets += buckets.length;
 
-    buckets.forEach((bucket: any) => {
-      const agentName = (bucket.latest.top[0]?.metrics[AGENT_NAME] as string) || '';
+    for (const bucket of buckets) {
+      const agentName = String(bucket.latest.top[0]?.metrics[AGENT_NAME] ?? '');
+      // missing_bucket: true returns null for services without deployment.environment
+      const rawEnv = bucket.key.service_environment;
       serviceEnvCombinations.push({
-        service_name: bucket.key.service_name as string,
-        service_environment: bucket.key.service_environment as string,
+        service_name: String(bucket.key.service_name),
+        service_environment: rawEnv != null ? String(rawEnv) : null,
         service_agent: agentName,
         doc_count: bucket.doc_count,
       });
-    });
+    }
 
     after = response.aggregations?.services.after_key;
   } while (after);
@@ -173,6 +173,7 @@ export async function discoverServices({
           service_agent: item.service_agent,
           doc_count: item.doc_count,
           discovered_at: timestamp,
+          last_seen_at: new Date(timestamp).toISOString(),
         },
       ];
     });
@@ -183,7 +184,7 @@ export async function discoverServices({
     });
 
     if (result.errors) {
-      const errorCount = result.items.filter((item: any) => item.index?.error).length;
+      const errorCount = result.items.filter((item) => item.index?.error).length;
       logger.error(`Failed to index ${errorCount} services`);
     }
 
@@ -197,9 +198,10 @@ export async function discoverServices({
     `Discovered and stored ${serviceEnvCombinations.length} service-environment combinations in ${SERVICES_INDEX} (no 10k limit - used composite agg with ${pageCount} pages)`
   );
 
-  // Extract unique environments for environment-scoped processing
+  // Extract unique environments for environment-scoped processing.
+  // Normalize null → "" so downstream steps receive valid strings.
   const uniqueEnvironments = [
-    ...new Set(serviceEnvCombinations.map((item) => item.service_environment)),
+    ...new Set(serviceEnvCombinations.map((item) => item.service_environment ?? '')),
   ].sort();
 
   return {

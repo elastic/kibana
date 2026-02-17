@@ -6,23 +6,25 @@
  */
 
 /**
- * 💾 STORAGE
+ * Unified cleanup for all service map workflow indices.
  *
- * Cleanup - removes stale edges and old service discovery documents.
- * Keeps indices size manageable and data fresh.
+ * Runs as a single step in the workflow, cleaning:
+ *   - Stale edges (not seen in 24h)
+ *   - Stale services (not seen in 24h)
+ *   - Old graph snapshots (older than 24h)
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EDGES_INDEX, SERVICES_INDEX } from '../core/utils';
+import { GRAPH_INDEX } from '../graph/utils';
 
-const EDGE_RETENTION = 'now-24h'; // Maximum edge age based on computed_at
-const EDGE_STALE_THRESHOLD = 'now-2h'; // Edges not seen in 2h are considered stale
-const SERVICE_RETENTION = 'now-1h'; // Clean services discovered more than 1h ago
+/** Retention window for all indices */
+const RETENTION = 'now-24h';
 
 export interface CleanupServiceMapEdgesResponse {
-  deleted: number;
-  staleDeleted: number;
+  edgesDeleted: number;
   servicesDeleted: number;
+  graphSnapshotsDeleted: number;
 }
 
 export async function cleanupServiceMapEdges({
@@ -32,35 +34,36 @@ export async function cleanupServiceMapEdges({
   esClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<CleanupServiceMapEdgesResponse> {
-  // Clean up old edges (based on computed_at)
+  // Clean up stale edges (not seen in 24h)
   const edgesResponse = await esClient.deleteByQuery({
     index: EDGES_INDEX,
-    query: { range: { computed_at: { lt: EDGE_RETENTION } } },
+    query: { range: { last_seen_at: { lt: RETENTION } } },
   });
 
-  // Clean up stale edges (not seen recently, based on last_seen_at)
-  const staleEdgesResponse = await esClient.deleteByQuery({
-    index: EDGES_INDEX,
-    query: {
-      bool: {
-        must: [{ range: { last_seen_at: { lt: EDGE_STALE_THRESHOLD } } }],
-      },
-    },
-  });
-
-  // Clean up old service discovery documents
+  // Clean up stale services (not seen in 24h)
   const servicesResponse = await esClient.deleteByQuery({
     index: SERVICES_INDEX,
-    query: { range: { discovered_at: { lt: SERVICE_RETENTION } } },
+    query: { range: { last_seen_at: { lt: RETENTION } } },
   });
 
-  const deleted = edgesResponse.deleted ?? 0;
-  const staleDeleted = staleEdgesResponse.deleted ?? 0;
+  // Clean up old graph snapshots (older than 24h)
+  let graphSnapshotsDeleted = 0;
+  try {
+    const graphResponse = await esClient.deleteByQuery({
+      index: GRAPH_INDEX,
+      query: { range: { computed_at: { lt: RETENTION } } },
+    });
+    graphSnapshotsDeleted = graphResponse.deleted ?? 0;
+  } catch (e: unknown) {
+    logger.warn('Failed to clean up graph snapshots (index may not exist yet)');
+  }
+
+  const edgesDeleted = edgesResponse.deleted ?? 0;
   const servicesDeleted = servicesResponse.deleted ?? 0;
 
   logger.debug(
-    `Cleaned up ${deleted} old edges, ${staleDeleted} stale edges, and ${servicesDeleted} old service discovery docs`
+    `Cleanup: ${edgesDeleted} stale edges, ${servicesDeleted} stale services, ${graphSnapshotsDeleted} old graph snapshots`
   );
 
-  return { deleted, staleDeleted, servicesDeleted };
+  return { edgesDeleted, servicesDeleted, graphSnapshotsDeleted };
 }

@@ -8,7 +8,7 @@
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
@@ -103,7 +103,38 @@ export function ServiceMap({
 }) {
   const { euiTheme } = useEuiTheme();
   const license = useLicenseContext();
-  const serviceName = useServiceName();
+  const urlServiceName = useServiceName();
+
+  const [pathMode, setPathMode] = useState(false);
+  const [pathOrigin, setPathOrigin] = useState<string | undefined>(undefined);
+  const [pathTarget, setPathTarget] = useState<string | undefined>(undefined);
+
+  const serviceName = urlServiceName;
+
+  const handlePathModeToggle = useCallback(() => {
+    setPathMode((prev) => !prev);
+    // Always clear selections on toggle: restores full map when turning off,
+    // and is a no-op when turning on (already undefined)
+    setPathOrigin(undefined);
+    setPathTarget(undefined);
+  }, []);
+
+  const handlePathNodeClick = useCallback(
+    (serviceNodeId: string) => {
+      if (!pathOrigin) {
+        // First click: set origin
+        setPathOrigin(serviceNodeId);
+      } else if (!pathTarget && serviceNodeId !== pathOrigin) {
+        // Second click on a different node: set target
+        setPathTarget(serviceNodeId);
+      } else {
+        // Both set or same node: reset and start new origin
+        setPathOrigin(serviceNodeId);
+        setPathTarget(undefined);
+      }
+    },
+    [pathOrigin, pathTarget]
+  );
 
   const {
     config,
@@ -214,6 +245,11 @@ export function ServiceMap({
               kuery={kuery}
               start={start}
               end={end}
+              pathMode={pathMode}
+              pathOrigin={pathOrigin}
+              pathTarget={pathTarget}
+              onPathNodeClick={handlePathNodeClick}
+              onPathModeToggle={handlePathModeToggle}
             />
           </div>
         </EuiPanel>

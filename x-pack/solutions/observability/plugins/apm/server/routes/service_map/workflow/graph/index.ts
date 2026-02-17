@@ -5,6 +5,15 @@
  * 2.0.
  */
 
+export { materializeGraph } from './materialize_graph';
+export type {
+  DependencyGraphDocument,
+  GraphNode,
+  GraphConnection,
+  GraphData,
+  MaterializeGraphResponse,
+} from './types';
+export { GRAPH_INDEX, buildExternalNodeId } from './utils';
 export {
   getPrecomputedServiceMap,
   isPrecomputedServiceMapAvailable,

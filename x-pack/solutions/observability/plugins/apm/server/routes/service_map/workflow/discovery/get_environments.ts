@@ -50,7 +50,7 @@ export async function getEnvironments({
       unique_environments: {
         terms: {
           field: 'service_environment',
-          size: 100, // Should cover all environments
+          size: 100, // Upper bound on unique environments; typical deployments have <10
           missing: '', // Include services without environment
         },
       },

@@ -22,7 +22,7 @@ export interface TimeWindow {
   end: number;
 }
 
-export interface ProcessedWindow {
+interface ProcessedWindow {
   window_start: number;
   window_end: number;
   processed_at: string;
@@ -48,7 +48,7 @@ export interface ChunkProcessingResult {
 /**
  * ES index for tracking processed windows
  */
-export const WORKFLOW_WINDOWS_INDEX = '.apm-service-map-workflow-windows';
+const WORKFLOW_WINDOWS_INDEX = '.apm-service-map-workflow-windows';
 
 /**
  * Reprocess windows within this time buffer (handles late spans)
