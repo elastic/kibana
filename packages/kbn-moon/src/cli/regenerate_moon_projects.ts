@@ -232,15 +232,18 @@ function applyJestTaskConfig(projectConfig: MoonProjectConfig) {
       `Could not find jest config for ${projectConfig.id} @ ${projectConfig.project.metadata.sourceRoot}`
     );
   } else {
+    const hasSrcFileGroup = MOON_CONST.FILE_GROUP_SRC in (projectConfig.fileGroups ?? {});
+    const jestTaskInputs = hasSrcFileGroup ? ['@group(src)'] : undefined;
+
     projectConfig.tags = (projectConfig.tags || []).concat([MOON_CONST.TAG_JEST_UNIT]);
     projectConfig.tasks = projectConfig.tasks || {};
     projectConfig.tasks[MOON_CONST.TASK_NAME_JEST] = {
       args: ['--config', `$projectRoot/${jestConfigName}`],
-      inputs: ['@group(src)'],
+      ...(jestTaskInputs ? { inputs: jestTaskInputs } : {}),
     };
     projectConfig.tasks[MOON_CONST.TASK_NAME_JEST_CI] = {
       args: ['--config', `$projectRoot/${jestConfigName}`],
-      inputs: ['@group(src)'],
+      ...(jestTaskInputs ? { inputs: jestTaskInputs } : {}),
     };
   }
 }
