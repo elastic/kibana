@@ -9,7 +9,8 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiPopover, EuiScreenReaderLive, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { TriggerMatchResult, AnchorPosition, InlineActionKind } from './types';
+import type { TriggerMatchResult, AnchorPosition } from './types';
+import { TriggerId } from './types';
 
 interface InlineActionPopoverProps {
   triggerMatch: TriggerMatchResult;
@@ -23,25 +24,25 @@ const placeholderLabel = i18n.translate(
   { defaultMessage: 'Inline actions' }
 );
 
-const announcementsByKind: Record<InlineActionKind, string> = {
-  mention: i18n.translate(
-    'xpack.agentBuilder.conversationInput.inlineActionPopover.mentionAnnouncement',
-    { defaultMessage: 'Mention suggestions opened. Press Escape to close.' }
+const announcementsById: Record<TriggerId, string> = {
+  [TriggerId.Attachment]: i18n.translate(
+    'xpack.agentBuilder.conversationInput.inlineActionPopover.attachmentAnnouncement',
+    { defaultMessage: 'Attachment suggestions opened. Press Escape to close.' }
   ),
-  command: i18n.translate(
-    'xpack.agentBuilder.conversationInput.inlineActionPopover.commandAnnouncement',
-    { defaultMessage: 'Command suggestions opened. Press Escape to close.' }
+  [TriggerId.Prompt]: i18n.translate(
+    'xpack.agentBuilder.conversationInput.inlineActionPopover.promptAnnouncement',
+    { defaultMessage: 'Prompt suggestions opened. Press Escape to close.' }
   ),
 };
 
-const panelLabelsByKind: Record<InlineActionKind, string> = {
-  mention: i18n.translate(
-    'xpack.agentBuilder.conversationInput.inlineActionPopover.mentionPanelLabel',
-    { defaultMessage: 'Mention suggestions' }
+const panelLabelsById: Record<TriggerId, string> = {
+  [TriggerId.Attachment]: i18n.translate(
+    'xpack.agentBuilder.conversationInput.inlineActionPopover.attachmentPanelLabel',
+    { defaultMessage: 'Attachment suggestions' }
   ),
-  command: i18n.translate(
-    'xpack.agentBuilder.conversationInput.inlineActionPopover.commandPanelLabel',
-    { defaultMessage: 'Command suggestions' }
+  [TriggerId.Prompt]: i18n.translate(
+    'xpack.agentBuilder.conversationInput.inlineActionPopover.promptPanelLabel',
+    { defaultMessage: 'Prompt suggestions' }
   ),
 };
 
@@ -66,9 +67,13 @@ export const InlineActionPopover: React.FC<InlineActionPopoverProps> = ({
 }) => {
   const { activeTrigger } = triggerMatch;
   const isOpen = activeTrigger !== null && anchorPosition !== null;
-  const kind = activeTrigger?.trigger.kind;
-  const announcementText = kind ? announcementsByKind[kind] : '';
-  const panelAriaLabel = kind ? panelLabelsByKind[kind] : '';
+  const triggerId = activeTrigger?.trigger.id;
+  let announcementText = '';
+  let panelAriaLabel = '';
+  if (triggerId) {
+    announcementText = announcementsById[triggerId];
+    panelAriaLabel = panelLabelsById[triggerId];
+  }
 
   return (
     <div
@@ -89,7 +94,7 @@ export const InlineActionPopover: React.FC<InlineActionPopoverProps> = ({
         display="block"
       >
         <EuiText size="s" data-test-subj={`${dataTestSubj}-content`}>
-          {placeholderLabel}: {activeTrigger?.trigger.kind} &quot;{activeTrigger?.query}&quot;
+          {placeholderLabel}: {activeTrigger?.trigger.id} &quot;{activeTrigger?.query}&quot;
         </EuiText>
       </EuiPopover>
     </div>

@@ -6,10 +6,11 @@
  */
 
 import type { TriggerDefinition, TriggerMatchResult, ActiveTrigger } from './types';
+import { TriggerId } from './types';
 
 const TRIGGER_DEFINITIONS: readonly TriggerDefinition[] = [
-  { id: 'mention', kind: 'mention', sequence: '@' },
-  { id: 'command-prompt', kind: 'command', sequence: '/p', params: { subCommand: 'prompt' } },
+  { id: TriggerId.Attachment, sequence: '@' },
+  { id: TriggerId.Prompt, sequence: '/p' },
 ];
 
 // Sorted once at module load — longest sequence first for greedy matching

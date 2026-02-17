@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { InlineActionPopover } from './inline_action_popover';
 import type { TriggerMatchResult } from './types';
+import { TriggerId } from './types';
 
 const inactiveMatch: TriggerMatchResult = {
   isActive: false,
@@ -18,7 +19,7 @@ const inactiveMatch: TriggerMatchResult = {
 const activeMatch: TriggerMatchResult = {
   isActive: true,
   activeTrigger: {
-    trigger: { id: 'mention', kind: 'mention', sequence: '@' },
+    trigger: { id: TriggerId.Attachment, sequence: '@' },
     triggerStartOffset: 0,
     query: 'joh',
   },
@@ -76,7 +77,7 @@ describe('InlineActionPopover', () => {
       />
     );
 
-    expect(screen.getByText(/mention suggestions opened/i)).toBeInTheDocument();
+    expect(screen.getByText(/attachment suggestions opened/i)).toBeInTheDocument();
   });
 
   it('does not render screen reader announcement when trigger is inactive', () => {
@@ -92,7 +93,7 @@ describe('InlineActionPopover', () => {
     expect(screen.queryByText(/suggestions opened/i)).not.toBeInTheDocument();
   });
 
-  it('displays trigger kind and query', () => {
+  it('displays trigger id and query', () => {
     render(
       <InlineActionPopover
         triggerMatch={activeMatch}
@@ -103,7 +104,7 @@ describe('InlineActionPopover', () => {
     );
 
     const content = screen.getByTestId('testPopover-content');
-    expect(content).toHaveTextContent('mention');
+    expect(content).toHaveTextContent('attachment');
     expect(content).toHaveTextContent('joh');
   });
 });

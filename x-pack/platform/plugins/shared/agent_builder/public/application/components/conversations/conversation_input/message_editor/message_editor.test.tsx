@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MessageEditor } from './message_editor';
 import type { MessageEditorInstance } from './use_message_editor';
+import { TriggerId } from './inline_actions';
 
 jest.mock('./inline_actions/cursor_rect', () => ({
   getRectAtOffset: () => ({
@@ -225,7 +226,7 @@ describe('MessageEditor', () => {
     messageEditor._internal.triggerMatch = {
       isActive: true,
       activeTrigger: {
-        trigger: { id: 'mention', kind: 'mention', sequence: '@' },
+        trigger: { id: TriggerId.Attachment, sequence: '@' },
         triggerStartOffset: 0,
         query: 'test',
       },

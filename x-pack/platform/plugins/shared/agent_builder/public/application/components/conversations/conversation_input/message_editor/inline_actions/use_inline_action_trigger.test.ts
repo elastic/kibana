@@ -42,7 +42,7 @@ describe('useInlineActionTrigger', () => {
     });
 
     expect(result.current.match.isActive).toBe(true);
-    expect(result.current.match.activeTrigger?.trigger.id).toBe('mention');
+    expect(result.current.match.activeTrigger?.trigger.id).toBe('attachment');
     expect(result.current.match.activeTrigger?.query).toBe('');
   });
 

@@ -12,7 +12,7 @@ describe('matchTrigger', () => {
     it('matches "@" at start of input', () => {
       const result = matchTrigger('@');
       expect(result.isActive).toBe(true);
-      expect(result.activeTrigger?.trigger.id).toBe('mention');
+      expect(result.activeTrigger?.trigger.id).toBe('attachment');
       expect(result.activeTrigger?.query).toBe('');
       expect(result.activeTrigger?.triggerStartOffset).toBe(0);
     });
@@ -20,7 +20,7 @@ describe('matchTrigger', () => {
     it('matches "@" after whitespace', () => {
       const result = matchTrigger('hello @');
       expect(result.isActive).toBe(true);
-      expect(result.activeTrigger?.trigger.id).toBe('mention');
+      expect(result.activeTrigger?.trigger.id).toBe('attachment');
       expect(result.activeTrigger?.query).toBe('');
     });
 
@@ -52,14 +52,14 @@ describe('matchTrigger', () => {
     it('matches "/p" at start of input', () => {
       const result = matchTrigger('/p');
       expect(result.isActive).toBe(true);
-      expect(result.activeTrigger?.trigger.id).toBe('command-prompt');
+      expect(result.activeTrigger?.trigger.id).toBe('prompt');
       expect(result.activeTrigger?.query).toBe('');
     });
 
     it('matches "/p" after whitespace', () => {
       const result = matchTrigger('hello /p');
       expect(result.isActive).toBe(true);
-      expect(result.activeTrigger?.trigger.id).toBe('command-prompt');
+      expect(result.activeTrigger?.trigger.id).toBe('prompt');
     });
 
     it('does not match "/p" mid-word', () => {
@@ -73,9 +73,9 @@ describe('matchTrigger', () => {
       expect(result.activeTrigger?.query).toBe('prompt');
     });
 
-    it('preserves trigger params', () => {
+    it('matches the correct trigger id', () => {
       const result = matchTrigger('/p');
-      expect(result.activeTrigger?.trigger.params).toEqual({ subCommand: 'prompt' });
+      expect(result.activeTrigger?.trigger.id).toBe('prompt');
     });
   });
 
@@ -83,13 +83,13 @@ describe('matchTrigger', () => {
     it('longer trigger "/p" takes precedence over shorter "@"', () => {
       // "/p" is longer than "@", so it should match first when both could match
       const result = matchTrigger('/p');
-      expect(result.activeTrigger?.trigger.id).toBe('command-prompt');
+      expect(result.activeTrigger?.trigger.id).toBe('prompt');
     });
 
     it('shorter trigger matches when longer does not apply', () => {
       // "@" matches because "/p" is not present
       const result = matchTrigger('@hello');
-      expect(result.activeTrigger?.trigger.id).toBe('mention');
+      expect(result.activeTrigger?.trigger.id).toBe('attachment');
     });
   });
 

@@ -5,27 +5,19 @@
  * 2.0.
  */
 
-/**
- * Identifies the kind of inline action. Each kind maps to
- * a different dialog/panel that opens when the trigger fires.
- */
-export type InlineActionKind = 'mention' | 'command';
+export enum TriggerId {
+  Attachment = 'attachment',
+  Prompt = 'prompt',
+}
 
 /**
  * Defines a trigger that activates an inline action.
  */
 export interface TriggerDefinition {
   /** Unique identifier for this trigger */
-  readonly id: string;
-  /** The kind of inline action this trigger opens */
-  readonly kind: InlineActionKind;
+  readonly id: TriggerId;
   /** The character sequence that activates the trigger (e.g. '@', '/p') */
   readonly sequence: string;
-  /**
-   * Optional parameters to pass to the dialog when this trigger fires.
-   * Enables differentiating behavior for triggers of the same kind.
-   */
-  readonly params?: Record<string, unknown>;
 }
 
 /**
