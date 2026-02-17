@@ -20,7 +20,7 @@ import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { orderBy, sortBy } from 'lodash';
+import { orderBy } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
 import { SearchGettingStartedSectionHeading } from '../section_heading';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
@@ -50,6 +50,9 @@ export const ConsoleTutorialsGroup = () => {
    *
    * @param publishedAt - The date the tutorial was published
    * @returns true if the tutorial is new (less than 30 days old)
+   * This means the "New" badges will largely be timely for serverless customers only.
+   * https://docs.elastic.dev/kibana-dev-docs/serverless/release-overview#standard-release-cadence
+   * publishedAt should be set to around the date the tutorial is expected to land in production.
    */
   const isNew = (publishedAt: Date) => {
     const thirtyDaysAgo = new Date(Date.now() - 1000 * 60 * 60 * 24 * 30);
