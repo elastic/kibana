@@ -9,7 +9,7 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { useGetIntegrationById } from './common';
+import type { useGetAllIntegrations, useGetIntegrationById } from './common';
 import type { CreateIntegrationComponent } from './components/create_integration/types';
 import type { CreateIntegrationSideCardButtonComponent } from './components/create_integration_card_button/types';
 
@@ -19,6 +19,7 @@ export interface AutomaticImportV2PluginSetup {}
 export interface AutomaticImportV2PluginStart {
   hooks: {
     useGetIntegrationById: typeof useGetIntegrationById;
+    useGetAllIntegrations: typeof useGetAllIntegrations;
   };
   components: {
     /**

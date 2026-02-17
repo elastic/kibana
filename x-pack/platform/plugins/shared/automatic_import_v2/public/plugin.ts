@@ -19,7 +19,7 @@ import type {
   AutomaticImportV2PluginStart,
   AutomaticImportPluginStartDependencies,
 } from './types';
-import { useGetIntegrationById } from './common';
+import { useGetAllIntegrations, useGetIntegrationById } from './common';
 import { getCreateIntegrationLazy } from './components/create_integration';
 import { getCreateIntegrationSideCardButtonLazy } from './components/create_integration_card_button';
 
@@ -57,6 +57,7 @@ export class AutomaticImportV2Plugin
     return {
       hooks: {
         useGetIntegrationById,
+        useGetAllIntegrations,
       },
       components: {
         CreateIntegration: getCreateIntegrationLazy(services),

@@ -9,6 +9,7 @@ import type { HttpSetup } from '@kbn/core/public';
 import type {
   CreateAutoImportIntegrationResponse,
   GetAutoImportIntegrationResponse,
+  GetAllAutoImportIntegrationsResponse,
 } from '../../../common/model/api/integrations/integration.gen';
 
 import type { UploadSamplesToDataStreamResponse } from '../../../common/model/api/data_streams/data_stream.gen';
@@ -96,6 +97,15 @@ export const getIntegrationById = async ({
       signal: abortSignal,
     }
   );
+
+export const getAllIntegrations = async ({
+  http,
+  abortSignal,
+}: RequestDeps): Promise<GetAllAutoImportIntegrationsResponse> =>
+  http.get<GetAllAutoImportIntegrationsResponse>(AUTOMATIC_IMPORT_INTEGRATIONS_PATH, {
+    version: '1',
+    signal: abortSignal,
+  });
 
 export interface UploadSamplesRequest {
   integrationId: string;

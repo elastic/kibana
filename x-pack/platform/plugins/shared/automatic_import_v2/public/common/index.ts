@@ -8,6 +8,7 @@
 export { useKibana } from './hooks/use_kibana';
 export { useFetchIndices } from './hooks/use_fetch_indices';
 export { useGetIntegrationById } from './hooks/use_get_integration_by_id';
+export { useGetAllIntegrations } from './hooks/use_get_all_integrations';
 export { useCreateUpdateIntegration } from './hooks/use_create_update_integration';
 export { useLoadConnectors } from './hooks/use_load_connectors';
 export { useValidateIndex } from './hooks/use_validate_index';
@@ -31,6 +32,7 @@ export {
   runInstallPackage,
   getInstalledPackages,
   createIntegration,
+  getAllIntegrations,
   getIntegrationById,
 } from './lib/api';
 export { getIntegrationNameFromResponse } from './lib/api_parsers';

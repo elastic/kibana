@@ -10,6 +10,8 @@ import {
   EuiFacetButton,
   EuiFacetGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiLink,
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
@@ -88,6 +90,9 @@ const StickySidebar = styled(EuiFlexItem)`
 
 export interface SidebarProps extends Props {
   CreateIntegrationCardButton?: React.ComponentType<{ compressed?: boolean }>;
+  hasCreatedIntegrations?: boolean;
+  manageIntegrationsHref?: string;
+  onManageIntegrationsClick?: (ev: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -96,6 +101,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   selectedCategory,
   onCategoryChange,
   CreateIntegrationCardButton,
+  hasCreatedIntegrations,
+  manageIntegrationsHref,
+  onManageIntegrationsClick,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -117,7 +125,36 @@ export const Sidebar: React.FC<SidebarProps> = ({
             paddingSize="none"
           >
             <EuiSpacer size="s" />
-            <CreateIntegrationCardButton compressed />
+            {hasCreatedIntegrations ? (
+              <EuiLink
+                color="text"
+                href={manageIntegrationsHref}
+                onClick={onManageIntegrationsClick}
+                data-test-subj="manageCreatedIntegrationsLink"
+                css={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: euiTheme.size.s,
+                  textDecoration: 'none',
+                }}
+              >
+                <EuiIcon type="gear" aria-hidden={true} />
+                <span
+                  style={{
+                    color: euiTheme.colors.text,
+                    fontSize: euiTheme.size.m,
+                    fontWeight: euiTheme.font.weight.bold,
+                    textDecoration: 'underline',
+                  }}
+                >
+                  {i18n.translate('xpack.fleet.epmList.manageCreatedIntegrationsLinkLabel', {
+                    defaultMessage: 'Manage my integrations',
+                  })}
+                </span>
+              </EuiLink>
+            ) : (
+              <CreateIntegrationCardButton compressed />
+            )}
           </EuiAccordion>
           <EuiSpacer size="m" />
         </>
