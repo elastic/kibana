@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/utility-types'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/utility-types'
+id: "@kbn/utility-types"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: "@elastic/kibana-core"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/utility-types'
+  name: "@kbn/utility-types"
   description: Moon project for @kbn/utility-types
-  channel: ''
-  owner: '@elastic/kibana-core'
+  channel: ""
+  owner: "@elastic/kibana-core"
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-utility-types
 tags:
@@ -25,6 +25,6 @@ tags:
   - shared
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks: {}

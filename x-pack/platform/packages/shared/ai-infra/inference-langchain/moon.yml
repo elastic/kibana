@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/inference-langchain'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/inference-langchain'
+id: "@kbn/inference-langchain"
 type: unknown
 owners:
-  defaultOwner: '@elastic/appex-ai-infra'
+  defaultOwner: "@elastic/appex-ai-infra"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/inference-langchain'
+  name: "@kbn/inference-langchain"
   description: Moon project for @kbn/inference-langchain
-  channel: ''
-  owner: '@elastic/appex-ai-infra'
+  channel: ""
+  owner: "@elastic/appex-ai-infra"
   metadata:
     sourceRoot: x-pack/platform/packages/shared/ai-infra/inference-langchain
 dependsOn:
-  - '@kbn/inference-common'
-  - '@kbn/zod'
+  - "@kbn/inference-common"
+  - "@kbn/zod"
 tags:
   - shared-common
   - package
@@ -29,18 +29,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

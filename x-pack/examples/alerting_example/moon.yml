@@ -3,39 +3,39 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/alerting-example-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/alerting-example-plugin'
+id: "@kbn/alerting-example-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/response-ops'
+  defaultOwner: "@elastic/response-ops"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/alerting-example-plugin'
+  name: "@kbn/alerting-example-plugin"
   description: Moon project for @kbn/alerting-example-plugin
-  channel: ''
-  owner: '@elastic/response-ops'
+  channel: ""
+  owner: "@elastic/response-ops"
   metadata:
     sourceRoot: x-pack/examples/alerting_example
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/kibana-react-plugin'
-  - '@kbn/charts-plugin'
-  - '@kbn/data-plugin'
-  - '@kbn/alerting-plugin'
-  - '@kbn/triggers-actions-ui-plugin'
-  - '@kbn/features-plugin'
-  - '@kbn/developer-examples-plugin'
-  - '@kbn/i18n'
-  - '@kbn/core-application-common'
-  - '@kbn/shared-ux-router'
-  - '@kbn/config-schema'
-  - '@kbn/alerts-as-data-utils'
-  - '@kbn/data-views-plugin'
-  - '@kbn/unified-search-plugin'
-  - '@kbn/response-ops-rule-form'
-  - '@kbn/fields-metadata-plugin'
-  - '@kbn/i18n-react'
+  - "@kbn/core"
+  - "@kbn/kibana-react-plugin"
+  - "@kbn/charts-plugin"
+  - "@kbn/data-plugin"
+  - "@kbn/alerting-plugin"
+  - "@kbn/triggers-actions-ui-plugin"
+  - "@kbn/features-plugin"
+  - "@kbn/developer-examples-plugin"
+  - "@kbn/i18n"
+  - "@kbn/core-application-common"
+  - "@kbn/shared-ux-router"
+  - "@kbn/config-schema"
+  - "@kbn/alerts-as-data-utils"
+  - "@kbn/data-views-plugin"
+  - "@kbn/unified-search-plugin"
+  - "@kbn/response-ops-rule-form"
+  - "@kbn/fields-metadata-plugin"
+  - "@kbn/i18n-react"
 tags:
   - plugin
   - prod
@@ -49,17 +49,17 @@ fileGroups:
     - public/**/*.tsx
     - server/**/*.ts
     - common/**/*.ts
-    - '!target/**/*'
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

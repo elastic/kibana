@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/observability-nav-icons'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/observability-nav-icons'
+id: "@kbn/observability-nav-icons"
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-presentation-team'
+  defaultOwner: "@elastic/obs-presentation-team"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/observability-nav-icons'
+  name: "@kbn/observability-nav-icons"
   description: Moon project for @kbn/observability-nav-icons
-  channel: ''
-  owner: '@elastic/obs-presentation-team'
+  channel: ""
+  owner: "@elastic/obs-presentation-team"
   metadata:
     sourceRoot: x-pack/solutions/observability/packages/nav-icons
 tags:
@@ -25,7 +25,7 @@ tags:
   - private
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks: {}

@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/babel-transform'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/babel-transform'
+id: "@kbn/babel-transform"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-operations'
+  defaultOwner: "@elastic/kibana-operations"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/babel-transform'
+  name: "@kbn/babel-transform"
   description: Moon project for @kbn/babel-transform
-  channel: ''
-  owner: '@elastic/kibana-operations'
+  channel: ""
+  owner: "@elastic/kibana-operations"
   metadata:
     sourceRoot: src/platform/packages/private/kbn-babel-transform
 tags:
@@ -26,19 +26,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.js'
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.js"
+    - "**/*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

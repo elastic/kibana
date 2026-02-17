@@ -3,27 +3,27 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/securitysolution-lists-common'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/securitysolution-lists-common'
+id: "@kbn/securitysolution-lists-common"
 type: unknown
 owners:
-  defaultOwner: '@elastic/security-detection-engine'
+  defaultOwner: "@elastic/security-detection-engine"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/securitysolution-lists-common'
+  name: "@kbn/securitysolution-lists-common"
   description: Moon project for @kbn/securitysolution-lists-common
-  channel: ''
-  owner: '@elastic/security-detection-engine'
+  channel: ""
+  owner: "@elastic/security-detection-engine"
   metadata:
     sourceRoot: x-pack/solutions/security/packages/kbn-securitysolution-lists-common
 dependsOn:
-  - '@kbn/zod-helpers'
-  - '@kbn/test'
-  - '@kbn/tooling-log'
-  - '@kbn/core-http-common'
-  - '@kbn/securitysolution-utils'
-  - '@kbn/zod'
+  - "@kbn/zod-helpers"
+  - "@kbn/test"
+  - "@kbn/tooling-log"
+  - "@kbn/core-http-common"
+  - "@kbn/securitysolution-utils"
+  - "@kbn/zod"
 tags:
   - shared-common
   - package
@@ -32,6 +32,6 @@ tags:
   - private
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks: {}

@@ -3,24 +3,24 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/synthtrace-client'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/synthtrace-client'
+id: "@kbn/synthtrace-client"
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-presentation-team'
+  defaultOwner: "@elastic/obs-presentation-team"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/synthtrace-client'
+  name: "@kbn/synthtrace-client"
   description: Moon project for @kbn/synthtrace-client
-  channel: ''
-  owner: '@elastic/obs-presentation-team'
+  channel: ""
+  owner: "@elastic/obs-presentation-team"
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-synthtrace-client
 dependsOn:
-  - '@kbn/datemath'
-  - '@kbn/safer-lodash-set'
-  - '@kbn/tooling-log'
+  - "@kbn/datemath"
+  - "@kbn/safer-lodash-set"
+  - "@kbn/tooling-log"
 tags:
   - shared-common
   - package
@@ -30,18 +30,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

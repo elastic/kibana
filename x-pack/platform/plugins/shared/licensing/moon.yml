@@ -3,31 +3,31 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/licensing-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/licensing-plugin'
+id: "@kbn/licensing-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: "@elastic/kibana-core"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/licensing-plugin'
+  name: "@kbn/licensing-plugin"
   description: Moon project for @kbn/licensing-plugin
-  channel: ''
-  owner: '@elastic/kibana-core'
+  channel: ""
+  owner: "@elastic/kibana-core"
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/licensing
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/i18n-react'
-  - '@kbn/utility-types'
-  - '@kbn/config-schema'
-  - '@kbn/std'
-  - '@kbn/i18n'
-  - '@kbn/logging-mocks'
-  - '@kbn/react-kibana-mount'
-  - '@kbn/licensing-types'
-  - '@kbn/lazy-object'
+  - "@kbn/core"
+  - "@kbn/i18n-react"
+  - "@kbn/utility-types"
+  - "@kbn/config-schema"
+  - "@kbn/std"
+  - "@kbn/i18n"
+  - "@kbn/logging-mocks"
+  - "@kbn/react-kibana-mount"
+  - "@kbn/licensing-types"
+  - "@kbn/lazy-object"
 tags:
   - plugin
   - prod
@@ -39,17 +39,17 @@ fileGroups:
     - public/**/*
     - server/**/*
     - common/**/*
-    - '!target/**/*'
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

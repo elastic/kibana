@@ -3,27 +3,27 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/data-view-field-editor-example-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/data-view-field-editor-example-plugin'
+id: "@kbn/data-view-field-editor-example-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-data-discovery'
+  defaultOwner: "@elastic/kibana-data-discovery"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/data-view-field-editor-example-plugin'
+  name: "@kbn/data-view-field-editor-example-plugin"
   description: Moon project for @kbn/data-view-field-editor-example-plugin
-  channel: ''
-  owner: '@elastic/kibana-data-discovery'
+  channel: ""
+  owner: "@elastic/kibana-data-discovery"
   metadata:
     sourceRoot: examples/data_view_field_editor_example
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/data-plugin'
-  - '@kbn/data-views-plugin'
-  - '@kbn/data-view-field-editor-plugin'
-  - '@kbn/developer-examples-plugin'
-  - '@kbn/i18n'
+  - "@kbn/core"
+  - "@kbn/data-plugin"
+  - "@kbn/data-views-plugin"
+  - "@kbn/data-view-field-editor-plugin"
+  - "@kbn/developer-examples-plugin"
+  - "@kbn/i18n"
 tags:
   - plugin
   - prod
@@ -34,5 +34,5 @@ fileGroups:
     - index.ts
     - public/**/*.ts
     - public/**/*.tsx
-    - '!target/**/*'
+    - "!target/**/*"
 tasks: {}

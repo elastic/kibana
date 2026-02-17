@@ -3,34 +3,34 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/core-test-helpers-test-utils'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/core-test-helpers-test-utils'
+id: "@kbn/core-test-helpers-test-utils"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: "@elastic/kibana-core"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-test-helpers-test-utils'
+  name: "@kbn/core-test-helpers-test-utils"
   description: Moon project for @kbn/core-test-helpers-test-utils
-  channel: ''
-  owner: '@elastic/kibana-core'
+  channel: ""
+  owner: "@elastic/kibana-core"
   metadata:
     sourceRoot: src/core/packages/test-helpers/test-utils
 dependsOn:
-  - '@kbn/core-deprecations-server-mocks'
-  - '@kbn/core-execution-context-server-mocks'
-  - '@kbn/core-elasticsearch-server-mocks'
-  - '@kbn/core-http-context-server-internal'
-  - '@kbn/core-http-context-server-mocks'
-  - '@kbn/core-http-server-mocks'
-  - '@kbn/core-saved-objects-api-server-mocks'
-  - '@kbn/core-saved-objects-base-server-mocks'
-  - '@kbn/core-saved-objects-server'
-  - '@kbn/core-saved-objects-server-mocks'
-  - '@kbn/core-ui-settings-server-mocks'
-  - '@kbn/core-http-server-internal'
-  - '@kbn/core-doc-links-server-mocks'
+  - "@kbn/core-deprecations-server-mocks"
+  - "@kbn/core-execution-context-server-mocks"
+  - "@kbn/core-elasticsearch-server-mocks"
+  - "@kbn/core-http-context-server-internal"
+  - "@kbn/core-http-context-server-mocks"
+  - "@kbn/core-http-server-mocks"
+  - "@kbn/core-saved-objects-api-server-mocks"
+  - "@kbn/core-saved-objects-base-server-mocks"
+  - "@kbn/core-saved-objects-server"
+  - "@kbn/core-saved-objects-server-mocks"
+  - "@kbn/core-ui-settings-server-mocks"
+  - "@kbn/core-http-server-internal"
+  - "@kbn/core-doc-links-server-mocks"
 tags:
   - shared-common
   - package
@@ -40,18 +40,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

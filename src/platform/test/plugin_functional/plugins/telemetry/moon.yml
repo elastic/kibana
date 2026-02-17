@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/telemetry-test-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/telemetry-test-plugin'
+id: "@kbn/telemetry-test-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: "@elastic/kibana-core"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/telemetry-test-plugin'
+  name: "@kbn/telemetry-test-plugin"
   description: Moon project for @kbn/telemetry-test-plugin
-  channel: ''
-  owner: '@elastic/kibana-core'
+  channel: ""
+  owner: "@elastic/kibana-core"
   metadata:
     sourceRoot: src/platform/test/plugin_functional/plugins/telemetry
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/telemetry-plugin'
+  - "@kbn/core"
+  - "@kbn/telemetry-plugin"
 tags:
   - plugin
   - prod
@@ -29,5 +29,5 @@ fileGroups:
   src:
     - public/**/*.ts
     - types.ts
-    - '!target/**/*'
+    - "!target/**/*"
 tasks: {}

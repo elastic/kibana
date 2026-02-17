@@ -3,28 +3,28 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/dependency-injection-example-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/dependency-injection-example-plugin'
+id: "@kbn/dependency-injection-example-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: "@elastic/kibana-core"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/dependency-injection-example-plugin'
+  name: "@kbn/dependency-injection-example-plugin"
   description: Moon project for @kbn/dependency-injection-example-plugin
-  channel: ''
-  owner: '@elastic/kibana-core'
+  channel: ""
+  owner: "@elastic/kibana-core"
   metadata:
     sourceRoot: examples/dependency_injection
 dependsOn:
-  - '@kbn/config-schema'
-  - '@kbn/core-application-browser'
-  - '@kbn/core-di'
-  - '@kbn/core-di-browser'
-  - '@kbn/core-di-server'
-  - '@kbn/core-http-browser'
-  - '@kbn/core-http-server'
+  - "@kbn/config-schema"
+  - "@kbn/core-application-browser"
+  - "@kbn/core-di"
+  - "@kbn/core-di-browser"
+  - "@kbn/core-di-server"
+  - "@kbn/core-http-browser"
+  - "@kbn/core-http-server"
 tags:
   - plugin
   - prod
@@ -34,5 +34,5 @@ fileGroups:
   src:
     - public/**/*
     - server/**/*
-    - '!target/**/*'
+    - "!target/**/*"
 tasks: {}

@@ -3,31 +3,31 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/event-log-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/event-log-plugin'
+id: "@kbn/event-log-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/response-ops'
+  defaultOwner: "@elastic/response-ops"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/event-log-plugin'
+  name: "@kbn/event-log-plugin"
   description: Moon project for @kbn/event-log-plugin
-  channel: ''
-  owner: '@elastic/response-ops'
+  channel: ""
+  owner: "@elastic/response-ops"
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/event_log
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/spaces-plugin'
-  - '@kbn/es-query'
-  - '@kbn/config-schema'
-  - '@kbn/i18n'
-  - '@kbn/utility-types'
-  - '@kbn/std'
-  - '@kbn/safer-lodash-set'
-  - '@kbn/serverless'
-  - '@kbn/core-test-helpers-kbn-server'
+  - "@kbn/core"
+  - "@kbn/spaces-plugin"
+  - "@kbn/es-query"
+  - "@kbn/config-schema"
+  - "@kbn/i18n"
+  - "@kbn/utility-types"
+  - "@kbn/std"
+  - "@kbn/safer-lodash-set"
+  - "@kbn/serverless"
+  - "@kbn/core-test-helpers-kbn-server"
 tags:
   - plugin
   - prod
@@ -41,17 +41,17 @@ fileGroups:
     - generated/*
     - generated/*.json
     - common/**/*
-    - '!target/**/*'
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/core-plugin-route-timeouts-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/core-plugin-route-timeouts-plugin'
+id: "@kbn/core-plugin-route-timeouts-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: "@elastic/kibana-core"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-plugin-route-timeouts-plugin'
+  name: "@kbn/core-plugin-route-timeouts-plugin"
   description: Moon project for @kbn/core-plugin-route-timeouts-plugin
-  channel: ''
-  owner: '@elastic/kibana-core'
+  channel: ""
+  owner: "@elastic/kibana-core"
   metadata:
     sourceRoot: src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/config-schema'
+  - "@kbn/core"
+  - "@kbn/config-schema"
 tags:
   - plugin
   - prod
@@ -28,5 +28,5 @@ tags:
 fileGroups:
   src:
     - server/**/*.ts
-    - '!target/**/*'
+    - "!target/**/*"
 tasks: {}

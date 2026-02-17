@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/observability-ai-common'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/observability-ai-common'
+id: "@kbn/observability-ai-common"
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-ai-team'
+  defaultOwner: "@elastic/obs-ai-team"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/observability-ai-common'
+  name: "@kbn/observability-ai-common"
   description: Moon project for @kbn/observability-ai-common
-  channel: ''
-  owner: '@elastic/obs-ai-team'
+  channel: ""
+  owner: "@elastic/obs-ai-team"
   metadata:
     sourceRoot: x-pack/solutions/observability/packages/observability-ai/observability-ai-common
 dependsOn: []
@@ -27,19 +27,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

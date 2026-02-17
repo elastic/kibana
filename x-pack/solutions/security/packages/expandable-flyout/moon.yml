@@ -3,24 +3,24 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/expandable-flyout'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/expandable-flyout'
+id: "@kbn/expandable-flyout"
 type: unknown
 owners:
-  defaultOwner: '@elastic/security-threat-hunting-investigations'
+  defaultOwner: "@elastic/security-threat-hunting-investigations"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/expandable-flyout'
+  name: "@kbn/expandable-flyout"
   description: Moon project for @kbn/expandable-flyout
-  channel: ''
-  owner: '@elastic/security-threat-hunting-investigations'
+  channel: ""
+  owner: "@elastic/security-threat-hunting-investigations"
   metadata:
     sourceRoot: x-pack/solutions/security/packages/expandable-flyout
 dependsOn:
-  - '@kbn/i18n'
-  - '@kbn/kibana-utils-plugin'
-  - '@kbn/i18n-react'
+  - "@kbn/i18n"
+  - "@kbn/kibana-utils-plugin"
+  - "@kbn/i18n-react"
 tags:
   - shared-browser
   - package
@@ -30,19 +30,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

@@ -3,29 +3,29 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/response-ops-alerts-apis'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/response-ops-alerts-apis'
+id: "@kbn/response-ops-alerts-apis"
 type: unknown
 owners:
-  defaultOwner: '@elastic/response-ops'
+  defaultOwner: "@elastic/response-ops"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/response-ops-alerts-apis'
+  name: "@kbn/response-ops-alerts-apis"
   description: Moon project for @kbn/response-ops-alerts-apis
-  channel: ''
-  owner: '@elastic/response-ops'
+  channel: ""
+  owner: "@elastic/response-ops"
   metadata:
     sourceRoot: x-pack/platform/packages/shared/response-ops/alerts-apis
 dependsOn:
-  - '@kbn/core-http-browser'
-  - '@kbn/i18n'
-  - '@kbn/alerts-ui-shared'
-  - '@kbn/core-notifications-browser'
-  - '@kbn/core-http-browser-mocks'
-  - '@kbn/core-notifications-browser-mocks'
-  - '@kbn/es-query'
-  - '@kbn/react-query'
+  - "@kbn/core-http-browser"
+  - "@kbn/i18n"
+  - "@kbn/alerts-ui-shared"
+  - "@kbn/core-notifications-browser"
+  - "@kbn/core-http-browser-mocks"
+  - "@kbn/core-notifications-browser-mocks"
+  - "@kbn/es-query"
+  - "@kbn/react-query"
 tags:
   - shared-browser
   - package
@@ -35,19 +35,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

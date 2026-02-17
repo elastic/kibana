@@ -3,49 +3,49 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/index-editor'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/index-editor'
+id: "@kbn/index-editor"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-esql'
+  defaultOwner: "@elastic/kibana-esql"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/index-editor'
+  name: "@kbn/index-editor"
   description: Moon project for @kbn/index-editor
-  channel: ''
-  owner: '@elastic/kibana-esql'
+  channel: ""
+  owner: "@elastic/kibana-esql"
   metadata:
     sourceRoot: src/platform/packages/private/kbn-index-editor
 dependsOn:
-  - '@kbn/i18n-react'
-  - '@kbn/react-kibana-mount'
-  - '@kbn/data-views-plugin'
-  - '@kbn/discover-utils'
-  - '@kbn/expressions-plugin'
-  - '@kbn/i18n'
-  - '@kbn/kibana-react-plugin'
-  - '@kbn/kibana-utils-plugin'
-  - '@kbn/unified-data-table'
-  - '@kbn/cell-actions'
-  - '@kbn/shared-ux-utility'
-  - '@kbn/core'
-  - '@kbn/data-plugin'
-  - '@kbn/share-plugin'
-  - '@kbn/ui-actions-plugin'
-  - '@kbn/field-formats-plugin'
-  - '@kbn/data-view-field-editor-plugin'
-  - '@kbn/file-upload'
-  - '@kbn/file-upload-plugin'
-  - '@kbn/react-kibana-context-common'
-  - '@kbn/restorable-state'
-  - '@kbn/esql-language'
-  - '@kbn/es-types'
-  - '@kbn/esql-utils'
-  - '@kbn/test-jest-helpers'
-  - '@kbn/esql-types'
-  - '@kbn/field-types'
-  - '@kbn/field-utils'
+  - "@kbn/i18n-react"
+  - "@kbn/react-kibana-mount"
+  - "@kbn/data-views-plugin"
+  - "@kbn/discover-utils"
+  - "@kbn/expressions-plugin"
+  - "@kbn/i18n"
+  - "@kbn/kibana-react-plugin"
+  - "@kbn/kibana-utils-plugin"
+  - "@kbn/unified-data-table"
+  - "@kbn/cell-actions"
+  - "@kbn/shared-ux-utility"
+  - "@kbn/core"
+  - "@kbn/data-plugin"
+  - "@kbn/share-plugin"
+  - "@kbn/ui-actions-plugin"
+  - "@kbn/field-formats-plugin"
+  - "@kbn/data-view-field-editor-plugin"
+  - "@kbn/file-upload"
+  - "@kbn/file-upload-plugin"
+  - "@kbn/react-kibana-context-common"
+  - "@kbn/restorable-state"
+  - "@kbn/esql-language"
+  - "@kbn/es-types"
+  - "@kbn/esql-utils"
+  - "@kbn/test-jest-helpers"
+  - "@kbn/esql-types"
+  - "@kbn/field-types"
+  - "@kbn/field-utils"
 tags:
   - shared-browser
   - package
@@ -55,19 +55,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

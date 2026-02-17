@@ -3,39 +3,39 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/alerting-api-integration-test-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/alerting-api-integration-test-plugin'
+id: "@kbn/alerting-api-integration-test-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/response-ops'
+  defaultOwner: "@elastic/response-ops"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/alerting-api-integration-test-plugin'
+  name: "@kbn/alerting-api-integration-test-plugin"
   description: Moon project for @kbn/alerting-api-integration-test-plugin
-  channel: ''
-  owner: '@elastic/response-ops'
+  channel: ""
+  owner: "@elastic/response-ops"
   metadata:
     sourceRoot: x-pack/platform/test/alerting_api_integration/common/plugins/alerts
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/config-schema'
-  - '@kbn/actions-plugin'
-  - '@kbn/alerting-plugin'
-  - '@kbn/task-manager-plugin'
-  - '@kbn/encrypted-saved-objects-plugin'
-  - '@kbn/features-plugin'
-  - '@kbn/spaces-plugin'
-  - '@kbn/security-plugin'
-  - '@kbn/rule-registry-plugin'
-  - '@kbn/event-log-plugin'
-  - '@kbn/notifications-plugin'
-  - '@kbn/core-saved-objects-server'
-  - '@kbn/logging'
-  - '@kbn/alerting-api-integration-helpers'
-  - '@kbn/alerts-as-data-utils'
-  - '@kbn/data-plugin'
-  - '@kbn/zod'
+  - "@kbn/core"
+  - "@kbn/config-schema"
+  - "@kbn/actions-plugin"
+  - "@kbn/alerting-plugin"
+  - "@kbn/task-manager-plugin"
+  - "@kbn/encrypted-saved-objects-plugin"
+  - "@kbn/features-plugin"
+  - "@kbn/spaces-plugin"
+  - "@kbn/security-plugin"
+  - "@kbn/rule-registry-plugin"
+  - "@kbn/event-log-plugin"
+  - "@kbn/notifications-plugin"
+  - "@kbn/core-saved-objects-server"
+  - "@kbn/logging"
+  - "@kbn/alerting-api-integration-helpers"
+  - "@kbn/alerts-as-data-utils"
+  - "@kbn/data-plugin"
+  - "@kbn/zod"
 tags:
   - plugin
   - prod
@@ -46,5 +46,5 @@ fileGroups:
     - public/**/*
     - server/**/*
     - common/**/*
-    - '!target/**/*'
+    - "!target/**/*"
 tasks: {}

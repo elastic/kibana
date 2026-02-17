@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/optimizer-webpack-helpers'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/optimizer-webpack-helpers'
+id: "@kbn/optimizer-webpack-helpers"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-operations'
+  defaultOwner: "@elastic/kibana-operations"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/optimizer-webpack-helpers'
+  name: "@kbn/optimizer-webpack-helpers"
   description: Moon project for @kbn/optimizer-webpack-helpers
-  channel: ''
-  owner: '@elastic/kibana-operations'
+  channel: ""
+  owner: "@elastic/kibana-operations"
   metadata:
     sourceRoot: src/platform/packages/private/kbn-optimizer-webpack-helpers
 tags:
@@ -26,18 +26,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

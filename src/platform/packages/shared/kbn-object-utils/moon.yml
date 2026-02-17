@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/object-utils'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/object-utils'
+id: "@kbn/object-utils"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: "@elastic/kibana-core"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/object-utils'
+  name: "@kbn/object-utils"
   description: Moon project for @kbn/object-utils
-  channel: ''
-  owner: '@elastic/kibana-core'
+  channel: ""
+  owner: "@elastic/kibana-core"
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-object-utils
 dependsOn:
-  - '@kbn/safer-lodash-set'
-  - '@kbn/utility-types'
+  - "@kbn/safer-lodash-set"
+  - "@kbn/utility-types"
 tags:
   - shared-common
   - package
@@ -29,18 +29,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

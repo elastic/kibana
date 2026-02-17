@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/scout-release-testing'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/scout-release-testing'
+id: "@kbn/scout-release-testing"
 type: unknown
 owners:
-  defaultOwner: '@elastic/appex-qa'
+  defaultOwner: "@elastic/appex-qa"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/scout-release-testing'
+  name: "@kbn/scout-release-testing"
   description: Moon project for @kbn/scout-release-testing
-  channel: ''
-  owner: '@elastic/appex-qa'
+  channel: ""
+  owner: "@elastic/appex-qa"
   metadata:
     sourceRoot: x-pack/platform/packages/private/kbn-scout-release-testing
 dependsOn:
-  - '@kbn/scout'
+  - "@kbn/scout"
 tags:
   - functional-tests
   - package
@@ -27,6 +27,6 @@ tags:
   - private
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks: {}

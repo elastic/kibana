@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/content-list-provider'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/content-list-provider'
+id: "@kbn/content-list-provider"
 type: unknown
 owners:
-  defaultOwner: '@elastic/appex-sharedux'
+  defaultOwner: "@elastic/appex-sharedux"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/content-list-provider'
+  name: "@kbn/content-list-provider"
   description: Moon project for @kbn/content-list-provider
-  channel: ''
-  owner: '@elastic/appex-sharedux'
+  channel: ""
+  owner: "@elastic/appex-sharedux"
   metadata:
     sourceRoot: src/platform/packages/shared/content-management/content_list/kbn-content-list-provider
 dependsOn:
-  - '@kbn/react-query'
-  - '@kbn/content-list-mock-data'
+  - "@kbn/react-query"
+  - "@kbn/content-list-mock-data"
 tags:
   - shared-browser
   - package
@@ -29,19 +29,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

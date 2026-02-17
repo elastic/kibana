@@ -3,26 +3,26 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/inference-endpoint-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/inference-endpoint-plugin'
+id: "@kbn/inference-endpoint-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/ml-ui'
+  defaultOwner: "@elastic/ml-ui"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/inference-endpoint-plugin'
+  name: "@kbn/inference-endpoint-plugin"
   description: Moon project for @kbn/inference-endpoint-plugin
-  channel: ''
-  owner: '@elastic/ml-ui'
+  channel: ""
+  owner: "@elastic/ml-ui"
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/inference_endpoint
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/logging'
-  - '@kbn/inference-endpoint-ui-common'
-  - '@kbn/config-schema'
-  - '@kbn/safer-lodash-set'
+  - "@kbn/core"
+  - "@kbn/logging"
+  - "@kbn/inference-endpoint-ui-common"
+  - "@kbn/config-schema"
+  - "@kbn/safer-lodash-set"
 tags:
   - plugin
   - prod
@@ -35,18 +35,18 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - '!target/**/*'
-    - '!.storybook/**/*.js'
+    - "!target/**/*"
+    - "!.storybook/**/*.js"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

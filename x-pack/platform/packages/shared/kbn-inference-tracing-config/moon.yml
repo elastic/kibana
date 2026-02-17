@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/inference-tracing-config'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/inference-tracing-config'
+id: "@kbn/inference-tracing-config"
 type: unknown
 owners:
-  defaultOwner: '@elastic/appex-ai-infra'
+  defaultOwner: "@elastic/appex-ai-infra"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/inference-tracing-config'
+  name: "@kbn/inference-tracing-config"
   description: Moon project for @kbn/inference-tracing-config
-  channel: ''
-  owner: '@elastic/appex-ai-infra'
+  channel: ""
+  owner: "@elastic/appex-ai-infra"
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-inference-tracing-config
 dependsOn:
-  - '@kbn/config-schema'
+  - "@kbn/config-schema"
 tags:
   - shared-common
   - package
@@ -28,18 +28,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

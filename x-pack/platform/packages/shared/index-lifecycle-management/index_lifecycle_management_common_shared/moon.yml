@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/index-lifecycle-management-common-shared'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/index-lifecycle-management-common-shared'
+id: "@kbn/index-lifecycle-management-common-shared"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-management'
+  defaultOwner: "@elastic/kibana-management"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/index-lifecycle-management-common-shared'
+  name: "@kbn/index-lifecycle-management-common-shared"
   description: Moon project for @kbn/index-lifecycle-management-common-shared
-  channel: ''
-  owner: '@elastic/kibana-management'
+  channel: ""
+  owner: "@elastic/kibana-management"
   metadata:
     sourceRoot: x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared
 dependsOn:
-  - '@kbn/utility-types'
+  - "@kbn/utility-types"
 tags:
   - shared-common
   - package
@@ -27,7 +27,7 @@ tags:
   - shared
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks: {}

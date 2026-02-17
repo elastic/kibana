@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/eui-provider-dev-warning'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/eui-provider-dev-warning'
+id: "@kbn/eui-provider-dev-warning"
 type: unknown
 owners:
-  defaultOwner: '@elastic/appex-sharedux'
+  defaultOwner: "@elastic/appex-sharedux"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/eui-provider-dev-warning'
+  name: "@kbn/eui-provider-dev-warning"
   description: Moon project for @kbn/eui-provider-dev-warning
-  channel: ''
-  owner: '@elastic/appex-sharedux'
+  channel: ""
+  owner: "@elastic/appex-sharedux"
   metadata:
     sourceRoot: src/platform/test/plugin_functional/plugins/eui_provider_dev_warning
 dependsOn:
-  - '@kbn/core'
+  - "@kbn/core"
 tags:
   - plugin
   - prod
@@ -29,5 +29,5 @@ fileGroups:
     - index.ts
     - public/**/*.ts
     - public/**/*.tsx
-    - '!target/**/*'
+    - "!target/**/*"
 tasks: {}

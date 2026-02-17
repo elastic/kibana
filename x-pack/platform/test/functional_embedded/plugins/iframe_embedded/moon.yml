@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/iframe-embedded-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/iframe-embedded-plugin'
+id: "@kbn/iframe-embedded-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: "@elastic/kibana-core"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/iframe-embedded-plugin'
+  name: "@kbn/iframe-embedded-plugin"
   description: Moon project for @kbn/iframe-embedded-plugin
-  channel: ''
-  owner: '@elastic/kibana-core'
+  channel: ""
+  owner: "@elastic/kibana-core"
   metadata:
     sourceRoot: x-pack/platform/test/functional_embedded/plugins/iframe_embedded
 dependsOn:
-  - '@kbn/core'
+  - "@kbn/core"
 tags:
   - plugin
   - prod
@@ -26,7 +26,7 @@ tags:
   - private
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks: {}

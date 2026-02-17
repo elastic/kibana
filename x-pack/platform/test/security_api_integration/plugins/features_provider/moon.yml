@@ -3,25 +3,25 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/features-provider-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/features-provider-plugin'
+id: "@kbn/features-provider-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-security'
+  defaultOwner: "@elastic/kibana-security"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/features-provider-plugin'
+  name: "@kbn/features-provider-plugin"
   description: Moon project for @kbn/features-provider-plugin
-  channel: ''
-  owner: '@elastic/kibana-security'
+  channel: ""
+  owner: "@elastic/kibana-security"
   metadata:
     sourceRoot: x-pack/platform/test/security_api_integration/plugins/features_provider
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/features-plugin'
-  - '@kbn/alerting-plugin'
-  - '@kbn/config-schema'
+  - "@kbn/core"
+  - "@kbn/features-plugin"
+  - "@kbn/alerting-plugin"
+  - "@kbn/config-schema"
 tags:
   - plugin
   - prod
@@ -29,7 +29,7 @@ tags:
   - private
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks: {}

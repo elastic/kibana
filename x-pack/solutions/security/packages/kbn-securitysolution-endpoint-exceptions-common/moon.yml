@@ -3,24 +3,24 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/securitysolution-endpoint-exceptions-common'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/securitysolution-endpoint-exceptions-common'
+id: "@kbn/securitysolution-endpoint-exceptions-common"
 type: unknown
 owners:
-  defaultOwner: '@elastic/security-detection-engine'
+  defaultOwner: "@elastic/security-detection-engine"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/securitysolution-endpoint-exceptions-common'
+  name: "@kbn/securitysolution-endpoint-exceptions-common"
   description: Moon project for @kbn/securitysolution-endpoint-exceptions-common
-  channel: ''
-  owner: '@elastic/security-detection-engine'
+  channel: ""
+  owner: "@elastic/security-detection-engine"
   metadata:
     sourceRoot: x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common
 dependsOn:
-  - '@kbn/securitysolution-exceptions-common'
-  - '@kbn/openapi-common'
-  - '@kbn/zod'
+  - "@kbn/securitysolution-exceptions-common"
+  - "@kbn/openapi-common"
+  - "@kbn/zod"
 tags:
   - shared-common
   - package
@@ -29,6 +29,6 @@ tags:
   - private
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks: {}

@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/ftr-apis-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/ftr-apis-plugin'
+id: "@kbn/ftr-apis-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: "@elastic/kibana-core"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/ftr-apis-plugin'
+  name: "@kbn/ftr-apis-plugin"
   description: Moon project for @kbn/ftr-apis-plugin
-  channel: ''
-  owner: '@elastic/kibana-core'
+  channel: ""
+  owner: "@elastic/kibana-core"
   metadata:
     sourceRoot: src/platform/plugins/private/ftr_apis
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/config-schema'
+  - "@kbn/core"
+  - "@kbn/config-schema"
 tags:
   - plugin
   - prod
@@ -31,17 +31,17 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - '!target/**/*'
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/delete-managed-asset-callout'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/delete-managed-asset-callout'
+id: "@kbn/delete-managed-asset-callout"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-management'
+  defaultOwner: "@elastic/kibana-management"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/delete-managed-asset-callout'
+  name: "@kbn/delete-managed-asset-callout"
   description: Moon project for @kbn/delete-managed-asset-callout
-  channel: ''
-  owner: '@elastic/kibana-management'
+  channel: ""
+  owner: "@elastic/kibana-management"
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-management/delete_managed_assets_callout
 dependsOn:
-  - '@kbn/i18n'
+  - "@kbn/i18n"
 tags:
   - shared-common
   - package
@@ -27,7 +27,7 @@ tags:
   - shared
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks: {}

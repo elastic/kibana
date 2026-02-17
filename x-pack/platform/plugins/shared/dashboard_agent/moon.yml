@@ -3,34 +3,34 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/dashboard-agent-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/dashboard-agent-plugin'
+id: "@kbn/dashboard-agent-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/appex-ai-infra'
+  defaultOwner: "@elastic/appex-ai-infra"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/dashboard-agent-plugin'
+  name: "@kbn/dashboard-agent-plugin"
   description: Moon project for @kbn/dashboard-agent-plugin
-  channel: ''
-  owner: '@elastic/appex-ai-infra'
+  channel: ""
+  owner: "@elastic/appex-ai-infra"
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/dashboard_agent
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/logging'
-  - '@kbn/agent-builder-plugin'
-  - '@kbn/agent-builder-common'
-  - '@kbn/agent-builder-server'
-  - '@kbn/dashboard-plugin'
-  - '@kbn/zod'
-  - '@kbn/spaces-plugin'
-  - '@kbn/management-settings-ids'
-  - '@kbn/lens-embeddable-utils'
-  - '@kbn/lens-common-2'
-  - '@kbn/share-plugin'
-  - '@kbn/dashboard-markdown'
+  - "@kbn/core"
+  - "@kbn/logging"
+  - "@kbn/agent-builder-plugin"
+  - "@kbn/agent-builder-common"
+  - "@kbn/agent-builder-server"
+  - "@kbn/dashboard-plugin"
+  - "@kbn/zod"
+  - "@kbn/spaces-plugin"
+  - "@kbn/management-settings-ids"
+  - "@kbn/lens-embeddable-utils"
+  - "@kbn/lens-common-2"
+  - "@kbn/share-plugin"
+  - "@kbn/dashboard-markdown"
 tags:
   - plugin
   - prod
@@ -41,17 +41,17 @@ fileGroups:
   src:
     - common/**/*
     - server/**/*
-    - '!target/**/*'
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

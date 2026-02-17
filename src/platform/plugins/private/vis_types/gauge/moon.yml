@@ -3,36 +3,36 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/vis-type-gauge-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/vis-type-gauge-plugin'
+id: "@kbn/vis-type-gauge-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-visualizations'
+  defaultOwner: "@elastic/kibana-visualizations"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/vis-type-gauge-plugin'
+  name: "@kbn/vis-type-gauge-plugin"
   description: Moon project for @kbn/vis-type-gauge-plugin
-  channel: ''
-  owner: '@elastic/kibana-visualizations'
+  channel: ""
+  owner: "@elastic/kibana-visualizations"
   metadata:
     sourceRoot: src/platform/plugins/private/vis_types/gauge
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/charts-plugin'
-  - '@kbn/data-plugin'
-  - '@kbn/expressions-plugin'
-  - '@kbn/expression-gauge-plugin'
-  - '@kbn/visualizations-plugin'
-  - '@kbn/vis-default-editor-plugin'
-  - '@kbn/kibana-utils-plugin'
-  - '@kbn/data-views-plugin'
-  - '@kbn/utility-types'
-  - '@kbn/i18n'
-  - '@kbn/i18n-react'
-  - '@kbn/coloring'
-  - '@kbn/config-schema'
-  - '@kbn/lens-common'
+  - "@kbn/core"
+  - "@kbn/charts-plugin"
+  - "@kbn/data-plugin"
+  - "@kbn/expressions-plugin"
+  - "@kbn/expression-gauge-plugin"
+  - "@kbn/visualizations-plugin"
+  - "@kbn/vis-default-editor-plugin"
+  - "@kbn/kibana-utils-plugin"
+  - "@kbn/data-views-plugin"
+  - "@kbn/utility-types"
+  - "@kbn/i18n"
+  - "@kbn/i18n-react"
+  - "@kbn/coloring"
+  - "@kbn/config-schema"
+  - "@kbn/lens-common"
 tags:
   - plugin
   - prod
@@ -44,18 +44,18 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - '*.ts'
-    - '!target/**/*'
+    - "*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

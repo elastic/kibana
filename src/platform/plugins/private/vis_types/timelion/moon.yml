@@ -3,47 +3,47 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/vis-type-timelion-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/vis-type-timelion-plugin'
+id: "@kbn/vis-type-timelion-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-visualizations'
+  defaultOwner: "@elastic/kibana-visualizations"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/vis-type-timelion-plugin'
+  name: "@kbn/vis-type-timelion-plugin"
   description: Moon project for @kbn/vis-type-timelion-plugin
-  channel: ''
-  owner: '@elastic/kibana-visualizations'
+  channel: ""
+  owner: "@elastic/kibana-visualizations"
   metadata:
     sourceRoot: src/platform/plugins/private/vis_types/timelion
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/visualizations-plugin'
-  - '@kbn/data-plugin'
-  - '@kbn/field-formats-plugin'
-  - '@kbn/data-views-plugin'
-  - '@kbn/expressions-plugin'
-  - '@kbn/kibana-utils-plugin'
-  - '@kbn/kibana-react-plugin'
-  - '@kbn/vis-default-editor-plugin'
-  - '@kbn/charts-plugin'
-  - '@kbn/usage-collection-plugin'
-  - '@kbn/i18n'
-  - '@kbn/es-query'
-  - '@kbn/analytics'
-  - '@kbn/i18n-react'
-  - '@kbn/monaco'
-  - '@kbn/config-schema'
-  - '@kbn/expect'
-  - '@kbn/std'
-  - '@kbn/timelion-grammar'
-  - '@kbn/visualization-utils'
-  - '@kbn/code-editor'
-  - '@kbn/react-kibana-context-render'
-  - '@kbn/css-utils'
-  - '@kbn/visualizations-common'
-  - '@kbn/vis-type-timeseries-plugin'
+  - "@kbn/core"
+  - "@kbn/visualizations-plugin"
+  - "@kbn/data-plugin"
+  - "@kbn/field-formats-plugin"
+  - "@kbn/data-views-plugin"
+  - "@kbn/expressions-plugin"
+  - "@kbn/kibana-utils-plugin"
+  - "@kbn/kibana-react-plugin"
+  - "@kbn/vis-default-editor-plugin"
+  - "@kbn/charts-plugin"
+  - "@kbn/usage-collection-plugin"
+  - "@kbn/i18n"
+  - "@kbn/es-query"
+  - "@kbn/analytics"
+  - "@kbn/i18n-react"
+  - "@kbn/monaco"
+  - "@kbn/config-schema"
+  - "@kbn/expect"
+  - "@kbn/std"
+  - "@kbn/timelion-grammar"
+  - "@kbn/visualization-utils"
+  - "@kbn/code-editor"
+  - "@kbn/react-kibana-context-render"
+  - "@kbn/css-utils"
+  - "@kbn/visualizations-common"
+  - "@kbn/vis-type-timeseries-plugin"
 tags:
   - plugin
   - prod
@@ -56,18 +56,18 @@ fileGroups:
     - public/**/*
     - server/**/*
     - server/timelion.json
-    - '*.ts'
-    - '!target/**/*'
+    - "*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

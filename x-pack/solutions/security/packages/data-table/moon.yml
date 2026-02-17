@@ -3,37 +3,37 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/securitysolution-data-table'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/securitysolution-data-table'
+id: "@kbn/securitysolution-data-table"
 type: unknown
 owners:
-  defaultOwner: '@elastic/security-threat-hunting-investigations'
+  defaultOwner: "@elastic/security-threat-hunting-investigations"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/securitysolution-data-table'
+  name: "@kbn/securitysolution-data-table"
   description: Moon project for @kbn/securitysolution-data-table
-  channel: ''
-  owner: '@elastic/security-threat-hunting-investigations'
+  channel: ""
+  owner: "@elastic/security-threat-hunting-investigations"
   metadata:
     sourceRoot: x-pack/solutions/security/packages/data-table
 dependsOn:
-  - '@kbn/cell-actions'
-  - '@kbn/timelines-plugin'
-  - '@kbn/es-query'
-  - '@kbn/securitysolution-ecs'
-  - '@kbn/safer-lodash-set'
-  - '@kbn/i18n'
-  - '@kbn/ui-theme'
-  - '@kbn/kibana-react-plugin'
-  - '@kbn/kibana-utils-plugin'
-  - '@kbn/i18n-react'
-  - '@kbn/ui-actions-plugin'
-  - '@kbn/data-views-plugin'
-  - '@kbn/field-formats-plugin'
-  - '@kbn/data-plugin'
-  - '@kbn/response-ops-alerts-fields-browser'
-  - '@kbn/react-query'
+  - "@kbn/cell-actions"
+  - "@kbn/timelines-plugin"
+  - "@kbn/es-query"
+  - "@kbn/securitysolution-ecs"
+  - "@kbn/safer-lodash-set"
+  - "@kbn/i18n"
+  - "@kbn/ui-theme"
+  - "@kbn/kibana-react-plugin"
+  - "@kbn/kibana-utils-plugin"
+  - "@kbn/i18n-react"
+  - "@kbn/ui-actions-plugin"
+  - "@kbn/data-views-plugin"
+  - "@kbn/field-formats-plugin"
+  - "@kbn/data-plugin"
+  - "@kbn/response-ops-alerts-fields-browser"
+  - "@kbn/react-query"
 tags:
   - shared-browser
   - package
@@ -43,19 +43,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

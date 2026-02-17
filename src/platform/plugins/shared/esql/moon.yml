@@ -3,52 +3,52 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/esql'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/esql'
+id: "@kbn/esql"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-esql'
+  defaultOwner: "@elastic/kibana-esql"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/esql'
+  name: "@kbn/esql"
   description: Moon project for @kbn/esql
-  channel: ''
-  owner: '@elastic/kibana-esql'
+  channel: ""
+  owner: "@elastic/kibana-esql"
   metadata:
     sourceRoot: src/platform/plugins/shared/esql
 dependsOn:
-  - '@kbn/esql-editor'
-  - '@kbn/kibana-react-plugin'
-  - '@kbn/core'
-  - '@kbn/i18n'
-  - '@kbn/config-schema'
-  - '@kbn/esql-utils'
-  - '@kbn/ui-actions-plugin'
-  - '@kbn/data-plugin'
-  - '@kbn/es-query'
-  - '@kbn/fields-metadata-plugin'
-  - '@kbn/usage-collection-plugin'
-  - '@kbn/kibana-utils-plugin'
-  - '@kbn/monaco'
-  - '@kbn/search-types'
-  - '@kbn/react-kibana-context-render'
-  - '@kbn/core-test-helpers-kbn-server'
-  - '@kbn/i18n-react'
-  - '@kbn/visualization-utils'
-  - '@kbn/esql-types'
-  - '@kbn/licensing-plugin'
-  - '@kbn/projects-solutions-groups'
-  - '@kbn/esql-language'
-  - '@kbn/presentation-util'
-  - '@kbn/content-management-plugin'
-  - '@kbn/index-editor'
-  - '@kbn/share-plugin'
-  - '@kbn/field-formats-plugin'
-  - '@kbn/file-upload-plugin'
-  - '@kbn/discover-utils'
-  - '@kbn/kql'
-  - '@kbn/inspector-plugin'
+  - "@kbn/esql-editor"
+  - "@kbn/kibana-react-plugin"
+  - "@kbn/core"
+  - "@kbn/i18n"
+  - "@kbn/config-schema"
+  - "@kbn/esql-utils"
+  - "@kbn/ui-actions-plugin"
+  - "@kbn/data-plugin"
+  - "@kbn/es-query"
+  - "@kbn/fields-metadata-plugin"
+  - "@kbn/usage-collection-plugin"
+  - "@kbn/kibana-utils-plugin"
+  - "@kbn/monaco"
+  - "@kbn/search-types"
+  - "@kbn/react-kibana-context-render"
+  - "@kbn/core-test-helpers-kbn-server"
+  - "@kbn/i18n-react"
+  - "@kbn/visualization-utils"
+  - "@kbn/esql-types"
+  - "@kbn/licensing-plugin"
+  - "@kbn/projects-solutions-groups"
+  - "@kbn/esql-language"
+  - "@kbn/presentation-util"
+  - "@kbn/content-management-plugin"
+  - "@kbn/index-editor"
+  - "@kbn/share-plugin"
+  - "@kbn/field-formats-plugin"
+  - "@kbn/file-upload-plugin"
+  - "@kbn/discover-utils"
+  - "@kbn/kql"
+  - "@kbn/inspector-plugin"
 tags:
   - plugin
   - prod
@@ -59,17 +59,17 @@ fileGroups:
   src:
     - public/**/*
     - server/**/*
-    - '!target/**/*'
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

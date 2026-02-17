@@ -3,37 +3,37 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/discover-enhanced-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/discover-enhanced-plugin'
+id: "@kbn/discover-enhanced-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-data-discovery'
+  defaultOwner: "@elastic/kibana-data-discovery"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/discover-enhanced-plugin'
+  name: "@kbn/discover-enhanced-plugin"
   description: Moon project for @kbn/discover-enhanced-plugin
-  channel: ''
-  owner: '@elastic/kibana-data-discovery'
+  channel: ""
+  owner: "@elastic/kibana-data-discovery"
   metadata:
     sourceRoot: x-pack/platform/plugins/private/discover_enhanced
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/data-plugin'
-  - '@kbn/discover-plugin'
-  - '@kbn/share-plugin'
-  - '@kbn/kibana-utils-plugin'
-  - '@kbn/lens-plugin'
-  - '@kbn/usage-collection-plugin'
-  - '@kbn/embeddable-plugin'
-  - '@kbn/ui-actions-plugin'
-  - '@kbn/i18n'
-  - '@kbn/es-query'
-  - '@kbn/config-schema'
-  - '@kbn/presentation-publishing'
-  - '@kbn/data-views-plugin'
-  - '@kbn/unified-search-plugin'
-  - '@kbn/scout'
+  - "@kbn/core"
+  - "@kbn/data-plugin"
+  - "@kbn/discover-plugin"
+  - "@kbn/share-plugin"
+  - "@kbn/kibana-utils-plugin"
+  - "@kbn/lens-plugin"
+  - "@kbn/usage-collection-plugin"
+  - "@kbn/embeddable-plugin"
+  - "@kbn/ui-actions-plugin"
+  - "@kbn/i18n"
+  - "@kbn/es-query"
+  - "@kbn/config-schema"
+  - "@kbn/presentation-publishing"
+  - "@kbn/data-views-plugin"
+  - "@kbn/unified-search-plugin"
+  - "@kbn/scout"
 tags:
   - plugin
   - prod
@@ -42,22 +42,22 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '*.ts'
+    - "*.ts"
     - common/**/*
     - public/**/*
     - server/**/*
     - test/**/*
-    - '!target/**/*'
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

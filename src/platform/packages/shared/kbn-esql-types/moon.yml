@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/esql-types'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/esql-types'
+id: "@kbn/esql-types"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-esql'
+  defaultOwner: "@elastic/kibana-esql"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/esql-types'
+  name: "@kbn/esql-types"
   description: Moon project for @kbn/esql-types
-  channel: ''
-  owner: '@elastic/kibana-esql'
+  channel: ""
+  owner: "@elastic/kibana-esql"
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-esql-types
 dependsOn:
-  - '@kbn/licensing-types'
-  - '@kbn/core-pricing-common'
+  - "@kbn/licensing-types"
+  - "@kbn/core-pricing-common"
 tags:
   - shared-common
   - package
@@ -29,20 +29,20 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '*.ts'
+    - "*.ts"
     - src/**/*
     - __mocks__/**/*.ts
-    - '!target/**/*'
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

@@ -3,25 +3,25 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/data-forge'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/data-forge'
+id: "@kbn/data-forge"
 type: unknown
 owners:
-  defaultOwner: '@elastic/actionable-obs-team'
+  defaultOwner: "@elastic/actionable-obs-team"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/data-forge'
+  name: "@kbn/data-forge"
   description: Moon project for @kbn/data-forge
-  channel: ''
-  owner: '@elastic/actionable-obs-team'
+  channel: ""
+  owner: "@elastic/actionable-obs-team"
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-data-forge
 dependsOn:
-  - '@kbn/tooling-log'
-  - '@kbn/datemath'
-  - '@kbn/safer-lodash-set'
-  - '@kbn/dev-utils'
+  - "@kbn/tooling-log"
+  - "@kbn/datemath"
+  - "@kbn/safer-lodash-set"
+  - "@kbn/dev-utils"
 tags:
   - shared-common
   - package
@@ -31,19 +31,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
+    - "**/*.ts"
     - ./src/**/*.json
-    - '!target/**/*'
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

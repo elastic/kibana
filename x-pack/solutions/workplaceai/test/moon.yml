@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/test-suites-xpack-workplace-ai'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/test-suites-xpack-workplace-ai'
+id: "@kbn/test-suites-xpack-workplace-ai"
 type: unknown
 owners:
-  defaultOwner: '@elastic/workchat-eng'
+  defaultOwner: "@elastic/workchat-eng"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/test-suites-xpack-workplace-ai'
+  name: "@kbn/test-suites-xpack-workplace-ai"
   description: Moon project for @kbn/test-suites-xpack-workplace-ai
-  channel: ''
-  owner: '@elastic/workchat-eng'
+  channel: ""
+  owner: "@elastic/workchat-eng"
   metadata:
     sourceRoot: x-pack/solutions/workplaceai/test
 dependsOn:
-  - '@kbn/test'
-  - '@kbn/test-suites-xpack-platform'
+  - "@kbn/test"
+  - "@kbn/test-suites-xpack-platform"
 tags:
   - test-helper
   - package
@@ -28,8 +28,8 @@ tags:
   - private
 fileGroups:
   src:
-    - '**/*'
-    - '!target/**/*'
-    - '!*/plugins/**/*'
-    - '!plugins/**/*'
+    - "**/*"
+    - "!target/**/*"
+    - "!*/plugins/**/*"
+    - "!plugins/**/*"
 tasks: {}

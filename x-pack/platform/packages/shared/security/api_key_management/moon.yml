@@ -3,31 +3,31 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/security-api-key-management'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/security-api-key-management'
+id: "@kbn/security-api-key-management"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-security'
+  defaultOwner: "@elastic/kibana-security"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/security-api-key-management'
+  name: "@kbn/security-api-key-management"
   description: Moon project for @kbn/security-api-key-management
-  channel: ''
-  owner: '@elastic/kibana-security'
+  channel: ""
+  owner: "@elastic/kibana-security"
   metadata:
     sourceRoot: x-pack/platform/packages/shared/security/api_key_management
 dependsOn:
-  - '@kbn/i18n-react'
-  - '@kbn/i18n'
-  - '@kbn/security-form-components'
-  - '@kbn/code-editor'
-  - '@kbn/core'
-  - '@kbn/kibana-react-plugin'
-  - '@kbn/kibana-utils-plugin'
-  - '@kbn/security-plugin-types-common'
-  - '@kbn/security-plugin-types-server'
-  - '@kbn/ui-theme'
+  - "@kbn/i18n-react"
+  - "@kbn/i18n"
+  - "@kbn/security-form-components"
+  - "@kbn/code-editor"
+  - "@kbn/core"
+  - "@kbn/kibana-react-plugin"
+  - "@kbn/kibana-utils-plugin"
+  - "@kbn/security-plugin-types-common"
+  - "@kbn/security-plugin-types-server"
+  - "@kbn/ui-theme"
 tags:
   - shared-browser
   - package
@@ -37,19 +37,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

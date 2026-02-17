@@ -3,25 +3,25 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/security-solution-upselling'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/security-solution-upselling'
+id: "@kbn/security-solution-upselling"
 type: unknown
 owners:
-  defaultOwner: '@elastic/security-threat-hunting-investigations'
+  defaultOwner: "@elastic/security-threat-hunting-investigations"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/security-solution-upselling'
+  name: "@kbn/security-solution-upselling"
   description: Moon project for @kbn/security-solution-upselling
-  channel: ''
-  owner: '@elastic/security-threat-hunting-investigations'
+  channel: ""
+  owner: "@elastic/security-threat-hunting-investigations"
   metadata:
     sourceRoot: x-pack/solutions/security/packages/upselling
 dependsOn:
-  - '@kbn/i18n'
-  - '@kbn/security-solution-navigation'
-  - '@kbn/shared-ux-page-kibana-template'
-  - '@kbn/ai-assistant-icon'
+  - "@kbn/i18n"
+  - "@kbn/security-solution-navigation"
+  - "@kbn/shared-ux-page-kibana-template"
+  - "@kbn/ai-assistant-icon"
 tags:
   - shared-browser
   - package
@@ -31,19 +31,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

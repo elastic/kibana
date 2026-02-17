@@ -3,24 +3,24 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/search-types'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/search-types'
+id: "@kbn/search-types"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-data-discovery'
+  defaultOwner: "@elastic/kibana-data-discovery"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/search-types'
+  name: "@kbn/search-types"
   description: Moon project for @kbn/search-types
-  channel: ''
-  owner: '@elastic/kibana-data-discovery'
+  channel: ""
+  owner: "@elastic/kibana-data-discovery"
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-search-types
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/data-views-plugin'
-  - '@kbn/es-query'
+  - "@kbn/core"
+  - "@kbn/data-views-plugin"
+  - "@kbn/es-query"
 tags:
   - shared-common
   - package
@@ -30,20 +30,20 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '*.ts'
+    - "*.ts"
     - src/**/*
     - __mocks__/**/*.ts
-    - '!target/**/*'
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

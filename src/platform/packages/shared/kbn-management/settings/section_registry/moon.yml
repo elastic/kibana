@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/management-settings-section-registry'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/management-settings-section-registry'
+id: "@kbn/management-settings-section-registry"
 type: unknown
 owners:
-  defaultOwner: '@elastic/appex-sharedux'
+  defaultOwner: "@elastic/appex-sharedux"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/management-settings-section-registry'
+  name: "@kbn/management-settings-section-registry"
   description: Moon project for @kbn/management-settings-section-registry
-  channel: ''
-  owner: '@elastic/appex-sharedux'
+  channel: ""
+  owner: "@elastic/appex-sharedux"
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-management/settings/section_registry
 dependsOn:
-  - '@kbn/core-notifications-browser'
-  - '@kbn/core-ui-settings-common'
+  - "@kbn/core-notifications-browser"
+  - "@kbn/core-ui-settings-common"
 tags:
   - shared-browser
   - package
@@ -28,7 +28,7 @@ tags:
   - shared
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks: {}

@@ -3,26 +3,26 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/core-test-helpers-so-type-serializer'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/core-test-helpers-so-type-serializer'
+id: "@kbn/core-test-helpers-so-type-serializer"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: "@elastic/kibana-core"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-test-helpers-so-type-serializer'
+  name: "@kbn/core-test-helpers-so-type-serializer"
   description: Moon project for @kbn/core-test-helpers-so-type-serializer
-  channel: ''
-  owner: '@elastic/kibana-core'
+  channel: ""
+  owner: "@elastic/kibana-core"
   metadata:
     sourceRoot: src/core/packages/test-helpers/so-type-serializer
 dependsOn:
-  - '@kbn/std'
-  - '@kbn/core-saved-objects-common'
-  - '@kbn/core-saved-objects-server'
-  - '@kbn/config-schema'
-  - '@kbn/core-saved-objects-base-server-internal'
+  - "@kbn/std"
+  - "@kbn/core-saved-objects-common"
+  - "@kbn/core-saved-objects-server"
+  - "@kbn/config-schema"
+  - "@kbn/core-saved-objects-base-server-internal"
 tags:
   - shared-common
   - package
@@ -32,18 +32,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

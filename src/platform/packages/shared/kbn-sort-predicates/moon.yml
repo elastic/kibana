@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/sort-predicates'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/sort-predicates'
+id: "@kbn/sort-predicates"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-visualizations'
+  defaultOwner: "@elastic/kibana-visualizations"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/sort-predicates'
+  name: "@kbn/sort-predicates"
   description: Moon project for @kbn/sort-predicates
-  channel: ''
-  owner: '@elastic/kibana-visualizations'
+  channel: ""
+  owner: "@elastic/kibana-visualizations"
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-sort-predicates
 dependsOn:
-  - '@kbn/field-formats-plugin'
-  - '@kbn/expressions-plugin'
+  - "@kbn/field-formats-plugin"
+  - "@kbn/expressions-plugin"
 tags:
   - shared-common
   - package
@@ -29,18 +29,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

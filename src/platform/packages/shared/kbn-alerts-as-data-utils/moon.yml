@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/alerts-as-data-utils'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/alerts-as-data-utils'
+id: "@kbn/alerts-as-data-utils"
 type: unknown
 owners:
-  defaultOwner: '@elastic/response-ops'
+  defaultOwner: "@elastic/response-ops"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/alerts-as-data-utils'
+  name: "@kbn/alerts-as-data-utils"
   description: Moon project for @kbn/alerts-as-data-utils
-  channel: ''
-  owner: '@elastic/response-ops'
+  channel: ""
+  owner: "@elastic/response-ops"
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-alerts-as-data-utils
 dependsOn:
-  - '@kbn/rule-data-utils'
-  - '@kbn/safer-lodash-set'
+  - "@kbn/rule-data-utils"
+  - "@kbn/safer-lodash-set"
 tags:
   - shared-common
   - package
@@ -29,18 +29,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

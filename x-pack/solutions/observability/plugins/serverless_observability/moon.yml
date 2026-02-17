@@ -3,40 +3,40 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/serverless-observability'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/serverless-observability'
+id: "@kbn/serverless-observability"
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-presentation-team'
+  defaultOwner: "@elastic/obs-presentation-team"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/serverless-observability'
+  name: "@kbn/serverless-observability"
   description: Moon project for @kbn/serverless-observability
-  channel: ''
-  owner: '@elastic/obs-presentation-team'
+  channel: ""
+  owner: "@elastic/obs-presentation-team"
   metadata:
     sourceRoot: x-pack/solutions/observability/plugins/serverless_observability
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/config-schema'
-  - '@kbn/management-plugin'
-  - '@kbn/serverless'
-  - '@kbn/observability-shared-plugin'
-  - '@kbn/i18n'
-  - '@kbn/management-cards-navigation'
-  - '@kbn/observability-plugin'
-  - '@kbn/serverless-observability-settings'
-  - '@kbn/core-chrome-browser'
-  - '@kbn/discover-plugin'
-  - '@kbn/security-plugin'
-  - '@kbn/streams-plugin'
-  - '@kbn/observability-ai-assistant-plugin'
-  - '@kbn/cases-plugin'
-  - '@kbn/observability-nav-icons'
-  - '@kbn/deeplinks-management'
-  - '@kbn/ai-assistant-common'
-  - '@kbn/management-settings-ids'
+  - "@kbn/core"
+  - "@kbn/config-schema"
+  - "@kbn/management-plugin"
+  - "@kbn/serverless"
+  - "@kbn/observability-shared-plugin"
+  - "@kbn/i18n"
+  - "@kbn/management-cards-navigation"
+  - "@kbn/observability-plugin"
+  - "@kbn/serverless-observability-settings"
+  - "@kbn/core-chrome-browser"
+  - "@kbn/discover-plugin"
+  - "@kbn/security-plugin"
+  - "@kbn/streams-plugin"
+  - "@kbn/observability-ai-assistant-plugin"
+  - "@kbn/cases-plugin"
+  - "@kbn/observability-nav-icons"
+  - "@kbn/deeplinks-management"
+  - "@kbn/ai-assistant-common"
+  - "@kbn/management-settings-ids"
 tags:
   - plugin
   - prod
@@ -50,17 +50,17 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
-    - '!target/**/*'
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/es-query-constants'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/es-query-constants'
+id: "@kbn/es-query-constants"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-data-discovery'
+  defaultOwner: "@elastic/kibana-data-discovery"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/es-query-constants'
+  name: "@kbn/es-query-constants"
   description: Moon project for @kbn/es-query-constants
-  channel: ''
-  owner: '@elastic/kibana-data-discovery'
+  channel: ""
+  owner: "@elastic/kibana-data-discovery"
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-es-query-constants
 dependsOn: []
@@ -27,18 +27,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

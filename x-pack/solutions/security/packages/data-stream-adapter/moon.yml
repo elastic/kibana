@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/data-stream-adapter'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/data-stream-adapter'
+id: "@kbn/data-stream-adapter"
 type: unknown
 owners:
-  defaultOwner: '@elastic/security-threat-hunting'
+  defaultOwner: "@elastic/security-threat-hunting"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/data-stream-adapter'
+  name: "@kbn/data-stream-adapter"
   description: Moon project for @kbn/data-stream-adapter
-  channel: ''
-  owner: '@elastic/security-threat-hunting'
+  channel: ""
+  owner: "@elastic/security-threat-hunting"
   metadata:
     sourceRoot: x-pack/solutions/security/packages/data-stream-adapter
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/index-adapter'
+  - "@kbn/core"
+  - "@kbn/index-adapter"
 tags:
   - shared-server
   - package
@@ -29,18 +29,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

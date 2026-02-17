@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/securitysolution-rules'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/securitysolution-rules'
+id: "@kbn/securitysolution-rules"
 type: unknown
 owners:
-  defaultOwner: '@elastic/security-detection-engine'
+  defaultOwner: "@elastic/security-detection-engine"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/securitysolution-rules'
+  name: "@kbn/securitysolution-rules"
   description: Moon project for @kbn/securitysolution-rules
-  channel: ''
-  owner: '@elastic/security-detection-engine'
+  channel: ""
+  owner: "@elastic/security-detection-engine"
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-securitysolution-rules
 tags:
@@ -25,6 +25,6 @@ tags:
   - shared
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks: {}

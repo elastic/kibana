@@ -3,40 +3,40 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/embeddable-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/embeddable-plugin'
+id: "@kbn/embeddable-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-presentation'
+  defaultOwner: "@elastic/kibana-presentation"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/embeddable-plugin'
+  name: "@kbn/embeddable-plugin"
   description: Moon project for @kbn/embeddable-plugin
-  channel: ''
-  owner: '@elastic/kibana-presentation'
+  channel: ""
+  owner: "@elastic/kibana-presentation"
   metadata:
     sourceRoot: src/platform/plugins/shared/embeddable
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/inspector-plugin'
-  - '@kbn/kibana-utils-plugin'
-  - '@kbn/ui-actions-plugin'
-  - '@kbn/utility-types'
-  - '@kbn/es-query'
-  - '@kbn/i18n'
-  - '@kbn/expressions-plugin'
-  - '@kbn/saved-objects-management-plugin'
-  - '@kbn/saved-objects-tagging-oss-plugin'
-  - '@kbn/saved-objects-finder-plugin'
-  - '@kbn/usage-collection-plugin'
-  - '@kbn/content-management-plugin'
-  - '@kbn/presentation-panel-plugin'
-  - '@kbn/presentation-publishing'
-  - '@kbn/presentation-containers'
-  - '@kbn/analytics'
-  - '@kbn/content-management-utils'
-  - '@kbn/config-schema'
+  - "@kbn/core"
+  - "@kbn/inspector-plugin"
+  - "@kbn/kibana-utils-plugin"
+  - "@kbn/ui-actions-plugin"
+  - "@kbn/utility-types"
+  - "@kbn/es-query"
+  - "@kbn/i18n"
+  - "@kbn/expressions-plugin"
+  - "@kbn/saved-objects-management-plugin"
+  - "@kbn/saved-objects-tagging-oss-plugin"
+  - "@kbn/saved-objects-finder-plugin"
+  - "@kbn/usage-collection-plugin"
+  - "@kbn/content-management-plugin"
+  - "@kbn/presentation-panel-plugin"
+  - "@kbn/presentation-publishing"
+  - "@kbn/presentation-containers"
+  - "@kbn/analytics"
+  - "@kbn/content-management-utils"
+  - "@kbn/config-schema"
 tags:
   - plugin
   - prod
@@ -45,21 +45,21 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '*.ts'
+    - "*.ts"
     - common/**/*
     - public/**/*
     - server/**/*
-    - '!target/**/*'
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

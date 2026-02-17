@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/kbn-top-nav-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/kbn-top-nav-plugin'
+id: "@kbn/kbn-top-nav-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: "@elastic/kibana-core"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/kbn-top-nav-plugin'
+  name: "@kbn/kbn-top-nav-plugin"
   description: Moon project for @kbn/kbn-top-nav-plugin
-  channel: ''
-  owner: '@elastic/kibana-core'
+  channel: ""
+  owner: "@elastic/kibana-core"
   metadata:
     sourceRoot: src/platform/test/plugin_functional/plugins/kbn_top_nav
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/navigation-plugin'
+  - "@kbn/core"
+  - "@kbn/navigation-plugin"
 tags:
   - plugin
   - prod
@@ -31,5 +31,5 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
-    - '!target/**/*'
+    - "!target/**/*"
 tasks: {}

@@ -3,33 +3,33 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/expressions-explorer-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/expressions-explorer-plugin'
+id: "@kbn/expressions-explorer-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-visualizations'
+  defaultOwner: "@elastic/kibana-visualizations"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/expressions-explorer-plugin'
+  name: "@kbn/expressions-explorer-plugin"
   description: Moon project for @kbn/expressions-explorer-plugin
-  channel: ''
-  owner: '@elastic/kibana-visualizations'
+  channel: ""
+  owner: "@elastic/kibana-visualizations"
   metadata:
     sourceRoot: examples/expressions_explorer
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/kibana-react-plugin'
-  - '@kbn/expressions-plugin'
-  - '@kbn/ui-actions-plugin'
-  - '@kbn/inspector-plugin'
-  - '@kbn/developer-examples-plugin'
-  - '@kbn/i18n'
-  - '@kbn/i18n-react'
-  - '@kbn/core-ui-settings-browser'
-  - '@kbn/code-editor'
-  - '@kbn/react-kibana-context-render'
-  - '@kbn/core-lifecycle-browser'
+  - "@kbn/core"
+  - "@kbn/kibana-react-plugin"
+  - "@kbn/expressions-plugin"
+  - "@kbn/ui-actions-plugin"
+  - "@kbn/inspector-plugin"
+  - "@kbn/developer-examples-plugin"
+  - "@kbn/i18n"
+  - "@kbn/i18n-react"
+  - "@kbn/core-ui-settings-browser"
+  - "@kbn/code-editor"
+  - "@kbn/react-kibana-context-render"
+  - "@kbn/core-lifecycle-browser"
 tags:
   - plugin
   - prod
@@ -40,5 +40,5 @@ fileGroups:
     - index.ts
     - public/**/*.ts
     - public/**/*.tsx
-    - '!target/**/*'
+    - "!target/**/*"
 tasks: {}

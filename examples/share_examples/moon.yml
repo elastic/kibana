@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/share-examples-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/share-examples-plugin'
+id: "@kbn/share-examples-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/appex-sharedux'
+  defaultOwner: "@elastic/appex-sharedux"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/share-examples-plugin'
+  name: "@kbn/share-examples-plugin"
   description: Moon project for @kbn/share-examples-plugin
-  channel: ''
-  owner: '@elastic/appex-sharedux'
+  channel: ""
+  owner: "@elastic/appex-sharedux"
   metadata:
     sourceRoot: examples/share_examples
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/share-plugin'
+  - "@kbn/core"
+  - "@kbn/share-plugin"
 tags:
   - plugin
   - prod
@@ -31,5 +31,5 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
-    - '!target/**/*'
+    - "!target/**/*"
 tasks: {}

@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/safer-lodash-set'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/safer-lodash-set'
+id: "@kbn/safer-lodash-set"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-security'
+  defaultOwner: "@elastic/kibana-security"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/safer-lodash-set'
+  name: "@kbn/safer-lodash-set"
   description: Moon project for @kbn/safer-lodash-set
-  channel: ''
-  owner: '@elastic/kibana-security'
+  channel: ""
+  owner: "@elastic/kibana-security"
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-safer-lodash-set
 tags:
@@ -25,6 +25,6 @@ tags:
   - shared
 fileGroups:
   src:
-    - '**/*'
-    - '!target/**/*'
+    - "**/*"
+    - "!target/**/*"
 tasks: {}

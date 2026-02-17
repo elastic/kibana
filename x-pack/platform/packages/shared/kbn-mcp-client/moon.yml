@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/mcp-client'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/mcp-client'
+id: "@kbn/mcp-client"
 type: unknown
 owners:
-  defaultOwner: '@elastic/workchat-eng'
+  defaultOwner: "@elastic/workchat-eng"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/mcp-client'
+  name: "@kbn/mcp-client"
   description: Moon project for @kbn/mcp-client
-  channel: ''
-  owner: '@elastic/workchat-eng'
+  channel: ""
+  owner: "@elastic/workchat-eng"
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-mcp-client
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/logging-mocks'
+  - "@kbn/core"
+  - "@kbn/logging-mocks"
 tags:
   - shared-common
   - package
@@ -29,18 +29,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

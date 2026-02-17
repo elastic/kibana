@@ -3,32 +3,32 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/sample-data-ingest'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/sample-data-ingest'
+id: "@kbn/sample-data-ingest"
 type: unknown
 owners:
-  defaultOwner: '@elastic/search-kibana'
+  defaultOwner: "@elastic/search-kibana"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/sample-data-ingest'
+  name: "@kbn/sample-data-ingest"
   description: Moon project for @kbn/sample-data-ingest
-  channel: ''
-  owner: '@elastic/search-kibana'
+  channel: ""
+  owner: "@elastic/search-kibana"
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/sample_data_ingest
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/logging'
-  - '@kbn/config-schema'
-  - '@kbn/product-doc-common'
-  - '@kbn/core-http-browser'
-  - '@kbn/logging-mocks'
-  - '@kbn/inference-common'
-  - '@kbn/i18n'
-  - '@kbn/licensing-types'
-  - '@kbn/task-manager-plugin'
-  - '@kbn/fs'
+  - "@kbn/core"
+  - "@kbn/logging"
+  - "@kbn/config-schema"
+  - "@kbn/product-doc-common"
+  - "@kbn/core-http-browser"
+  - "@kbn/logging-mocks"
+  - "@kbn/inference-common"
+  - "@kbn/i18n"
+  - "@kbn/licensing-types"
+  - "@kbn/task-manager-plugin"
+  - "@kbn/fs"
 tags:
   - plugin
   - prod
@@ -40,17 +40,17 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - '!target/**/*'
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

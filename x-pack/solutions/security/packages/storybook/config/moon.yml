@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/security-solution-storybook-config'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/security-solution-storybook-config'
+id: "@kbn/security-solution-storybook-config"
 type: unknown
 owners:
-  defaultOwner: '@elastic/security-threat-hunting-investigations'
+  defaultOwner: "@elastic/security-threat-hunting-investigations"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/security-solution-storybook-config'
+  name: "@kbn/security-solution-storybook-config"
   description: Moon project for @kbn/security-solution-storybook-config
-  channel: ''
-  owner: '@elastic/security-threat-hunting-investigations'
+  channel: ""
+  owner: "@elastic/security-threat-hunting-investigations"
   metadata:
     sourceRoot: x-pack/solutions/security/packages/storybook/config
 dependsOn:
-  - '@kbn/storybook'
+  - "@kbn/storybook"
 tags:
   - shared-common
   - package
@@ -27,6 +27,6 @@ tags:
   - private
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks: {}

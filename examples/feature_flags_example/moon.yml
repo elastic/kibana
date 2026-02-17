@@ -3,28 +3,28 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/feature-flags-example-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/feature-flags-example-plugin'
+id: "@kbn/feature-flags-example-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: "@elastic/kibana-core"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/feature-flags-example-plugin'
+  name: "@kbn/feature-flags-example-plugin"
   description: Moon project for @kbn/feature-flags-example-plugin
-  channel: ''
-  owner: '@elastic/kibana-core'
+  channel: ""
+  owner: "@elastic/kibana-core"
   metadata:
     sourceRoot: examples/feature_flags_example
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/core-feature-flags-server'
-  - '@kbn/core-plugins-server'
-  - '@kbn/config-schema'
-  - '@kbn/developer-examples-plugin'
-  - '@kbn/core-feature-flags-browser'
-  - '@kbn/react-kibana-context-render'
+  - "@kbn/core"
+  - "@kbn/core-feature-flags-server"
+  - "@kbn/core-plugins-server"
+  - "@kbn/config-schema"
+  - "@kbn/developer-examples-plugin"
+  - "@kbn/core-feature-flags-browser"
+  - "@kbn/react-kibana-context-render"
 tags:
   - plugin
   - prod
@@ -37,5 +37,5 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
-    - '!target/**/*'
+    - "!target/**/*"
 tasks: {}

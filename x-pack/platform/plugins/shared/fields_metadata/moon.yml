@@ -3,28 +3,28 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/fields-metadata-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/fields-metadata-plugin'
+id: "@kbn/fields-metadata-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-onboarding-team'
+  defaultOwner: "@elastic/obs-onboarding-team"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/fields-metadata-plugin'
+  name: "@kbn/fields-metadata-plugin"
   description: Moon project for @kbn/fields-metadata-plugin
-  channel: ''
-  owner: '@elastic/obs-onboarding-team'
+  channel: ""
+  owner: "@elastic/obs-onboarding-team"
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/fields_metadata
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/io-ts-utils'
-  - '@kbn/logging'
-  - '@kbn/core-http-request-handler-context-server'
-  - '@kbn/core-http-server'
-  - '@kbn/logging-mocks'
-  - '@kbn/otel-semantic-conventions'
+  - "@kbn/core"
+  - "@kbn/io-ts-utils"
+  - "@kbn/logging"
+  - "@kbn/core-http-request-handler-context-server"
+  - "@kbn/core-http-server"
+  - "@kbn/logging-mocks"
+  - "@kbn/otel-semantic-conventions"
 tags:
   - plugin
   - prod
@@ -37,17 +37,17 @@ fileGroups:
     - public/**/*
     - server/**/*
     - types/**/*
-    - '!target/**/*'
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

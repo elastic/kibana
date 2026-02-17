@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/global-redirect-app-links'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/global-redirect-app-links'
+id: "@kbn/global-redirect-app-links"
 type: unknown
 owners:
-  defaultOwner: '@elastic/appex-sharedux'
+  defaultOwner: "@elastic/appex-sharedux"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/global-redirect-app-links'
+  name: "@kbn/global-redirect-app-links"
   description: Moon project for @kbn/global-redirect-app-links
-  channel: ''
-  owner: '@elastic/appex-sharedux'
+  channel: ""
+  owner: "@elastic/appex-sharedux"
   metadata:
     sourceRoot: src/platform/packages/private/kbn-global-redirect-app-links
 dependsOn:
-  - '@kbn/shared-ux-utility'
+  - "@kbn/shared-ux-utility"
 tags:
   - shared-common
   - package
@@ -28,19 +28,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

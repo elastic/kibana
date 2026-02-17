@@ -3,27 +3,27 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/eso-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/eso-plugin'
+id: "@kbn/eso-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-security'
+  defaultOwner: "@elastic/kibana-security"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/eso-plugin'
+  name: "@kbn/eso-plugin"
   description: Moon project for @kbn/eso-plugin
-  channel: ''
-  owner: '@elastic/kibana-security'
+  channel: ""
+  owner: "@elastic/kibana-security"
   metadata:
     sourceRoot: x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/config-schema'
-  - '@kbn/std'
-  - '@kbn/encrypted-saved-objects-plugin'
-  - '@kbn/spaces-plugin'
-  - '@kbn/core-saved-objects-server'
+  - "@kbn/core"
+  - "@kbn/config-schema"
+  - "@kbn/std"
+  - "@kbn/encrypted-saved-objects-plugin"
+  - "@kbn/spaces-plugin"
+  - "@kbn/core-saved-objects-server"
 tags:
   - plugin
   - prod
@@ -31,7 +31,7 @@ tags:
   - private
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks: {}

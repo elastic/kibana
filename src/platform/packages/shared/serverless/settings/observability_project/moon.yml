@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/serverless-observability-settings'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/serverless-observability-settings'
+id: "@kbn/serverless-observability-settings"
 type: unknown
 owners:
-  defaultOwner: '@elastic/appex-sharedux'
+  defaultOwner: "@elastic/appex-sharedux"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/serverless-observability-settings'
+  name: "@kbn/serverless-observability-settings"
   description: Moon project for @kbn/serverless-observability-settings
-  channel: ''
-  owner: '@elastic/appex-sharedux'
+  channel: ""
+  owner: "@elastic/appex-sharedux"
   metadata:
     sourceRoot: src/platform/packages/shared/serverless/settings/observability_project
 dependsOn:
-  - '@kbn/management-settings-ids'
-  - '@kbn/workflows'
+  - "@kbn/management-settings-ids"
+  - "@kbn/workflows"
 tags:
   - shared-common
   - package
@@ -28,6 +28,6 @@ tags:
   - shared
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks: {}

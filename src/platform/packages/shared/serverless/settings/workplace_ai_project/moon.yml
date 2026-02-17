@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/serverless-workplace-ai-settings'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/serverless-workplace-ai-settings'
+id: "@kbn/serverless-workplace-ai-settings"
 type: unknown
 owners:
-  defaultOwner: '@elastic/search-kibana'
+  defaultOwner: "@elastic/search-kibana"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/serverless-workplace-ai-settings'
+  name: "@kbn/serverless-workplace-ai-settings"
   description: Moon project for @kbn/serverless-workplace-ai-settings
-  channel: ''
-  owner: '@elastic/search-kibana'
+  channel: ""
+  owner: "@elastic/search-kibana"
   metadata:
     sourceRoot: src/platform/packages/shared/serverless/settings/workplace_ai_project
 dependsOn: []
@@ -26,6 +26,6 @@ tags:
   - shared
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks: {}

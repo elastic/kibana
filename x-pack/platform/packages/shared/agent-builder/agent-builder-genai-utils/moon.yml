@@ -3,38 +3,38 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/agent-builder-genai-utils'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/agent-builder-genai-utils'
+id: "@kbn/agent-builder-genai-utils"
 type: unknown
 owners:
-  defaultOwner: '@elastic/workchat-eng'
+  defaultOwner: "@elastic/workchat-eng"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/agent-builder-genai-utils'
+  name: "@kbn/agent-builder-genai-utils"
   description: Moon project for @kbn/agent-builder-genai-utils
-  channel: ''
-  owner: '@elastic/workchat-eng'
+  channel: ""
+  owner: "@elastic/workchat-eng"
   metadata:
     sourceRoot: x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils
 dependsOn:
-  - '@kbn/core-http-server'
-  - '@kbn/agent-builder-common'
-  - '@kbn/agent-builder-server'
-  - '@kbn/core-elasticsearch-server'
-  - '@kbn/inference-plugin'
-  - '@kbn/zod'
-  - '@kbn/logging'
-  - '@kbn/logging-mocks'
-  - '@kbn/core'
-  - '@kbn/inference-tracing'
-  - '@kbn/es-errors'
-  - '@kbn/i18n'
-  - '@kbn/std'
-  - '@kbn/esql-language'
-  - '@kbn/utility-types'
-  - '@kbn/workflows-management-plugin'
-  - '@kbn/workflows'
+  - "@kbn/core-http-server"
+  - "@kbn/agent-builder-common"
+  - "@kbn/agent-builder-server"
+  - "@kbn/core-elasticsearch-server"
+  - "@kbn/inference-plugin"
+  - "@kbn/zod"
+  - "@kbn/logging"
+  - "@kbn/logging-mocks"
+  - "@kbn/core"
+  - "@kbn/inference-tracing"
+  - "@kbn/es-errors"
+  - "@kbn/i18n"
+  - "@kbn/std"
+  - "@kbn/esql-language"
+  - "@kbn/utility-types"
+  - "@kbn/workflows-management-plugin"
+  - "@kbn/workflows"
 tags:
   - shared-server
   - package
@@ -44,18 +44,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

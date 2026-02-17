@@ -3,35 +3,35 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/vis-type-metric-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/vis-type-metric-plugin'
+id: "@kbn/vis-type-metric-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-visualizations'
+  defaultOwner: "@elastic/kibana-visualizations"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/vis-type-metric-plugin'
+  name: "@kbn/vis-type-metric-plugin"
   description: Moon project for @kbn/vis-type-metric-plugin
-  channel: ''
-  owner: '@elastic/kibana-visualizations'
+  channel: ""
+  owner: "@elastic/kibana-visualizations"
   metadata:
     sourceRoot: src/platform/plugins/private/vis_types/metric
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/data-plugin'
-  - '@kbn/visualizations-plugin'
-  - '@kbn/charts-plugin'
-  - '@kbn/expressions-plugin'
-  - '@kbn/vis-default-editor-plugin'
-  - '@kbn/i18n'
-  - '@kbn/data-views-plugin'
-  - '@kbn/kibana-utils-plugin'
-  - '@kbn/coloring'
-  - '@kbn/i18n-react'
-  - '@kbn/config-schema'
-  - '@kbn/chart-expressions-common'
-  - '@kbn/lens-common'
+  - "@kbn/core"
+  - "@kbn/data-plugin"
+  - "@kbn/visualizations-plugin"
+  - "@kbn/charts-plugin"
+  - "@kbn/expressions-plugin"
+  - "@kbn/vis-default-editor-plugin"
+  - "@kbn/i18n"
+  - "@kbn/data-views-plugin"
+  - "@kbn/kibana-utils-plugin"
+  - "@kbn/coloring"
+  - "@kbn/i18n-react"
+  - "@kbn/config-schema"
+  - "@kbn/chart-expressions-common"
+  - "@kbn/lens-common"
 tags:
   - plugin
   - prod
@@ -42,18 +42,18 @@ fileGroups:
   src:
     - public/**/*
     - server/**/*
-    - '*.ts'
-    - '!target/**/*'
+    - "*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

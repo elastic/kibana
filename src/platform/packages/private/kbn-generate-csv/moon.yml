@@ -3,37 +3,37 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/generate-csv'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/generate-csv'
+id: "@kbn/generate-csv"
 type: unknown
 owners:
-  defaultOwner: '@elastic/response-ops'
+  defaultOwner: "@elastic/response-ops"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/generate-csv'
+  name: "@kbn/generate-csv"
   description: Moon project for @kbn/generate-csv
-  channel: ''
-  owner: '@elastic/response-ops'
+  channel: ""
+  owner: "@elastic/response-ops"
   metadata:
     sourceRoot: src/platform/packages/private/kbn-generate-csv
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/data-plugin'
-  - '@kbn/expressions-plugin'
-  - '@kbn/field-formats-plugin'
-  - '@kbn/config-schema'
-  - '@kbn/i18n'
-  - '@kbn/reporting-common'
-  - '@kbn/reporting-server'
-  - '@kbn/reporting-export-types-csv-common'
-  - '@kbn/es-query'
-  - '@kbn/es-types'
-  - '@kbn/data-views-plugin'
-  - '@kbn/search-types'
-  - '@kbn/task-manager-plugin'
-  - '@kbn/esql-utils'
-  - '@kbn/safer-lodash-set'
+  - "@kbn/core"
+  - "@kbn/data-plugin"
+  - "@kbn/expressions-plugin"
+  - "@kbn/field-formats-plugin"
+  - "@kbn/config-schema"
+  - "@kbn/i18n"
+  - "@kbn/reporting-common"
+  - "@kbn/reporting-server"
+  - "@kbn/reporting-export-types-csv-common"
+  - "@kbn/es-query"
+  - "@kbn/es-types"
+  - "@kbn/data-views-plugin"
+  - "@kbn/search-types"
+  - "@kbn/task-manager-plugin"
+  - "@kbn/esql-utils"
+  - "@kbn/safer-lodash-set"
 tags:
   - shared-server
   - package
@@ -43,20 +43,20 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '**/*.d.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "**/*.d.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

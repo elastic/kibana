@@ -3,27 +3,27 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/cypress-config'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/cypress-config'
+id: "@kbn/cypress-config"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-operations'
+  defaultOwner: "@elastic/kibana-operations"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/cypress-config'
+  name: "@kbn/cypress-config"
   description: Moon project for @kbn/cypress-config
-  channel: ''
-  owner: '@elastic/kibana-operations'
+  channel: ""
+  owner: "@elastic/kibana-operations"
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-cypress-config
 dependsOn:
-  - '@kbn/node-libs-browser-webpack-plugin'
-  - '@kbn/scout-info'
-  - '@kbn/repo-info'
-  - '@kbn/tooling-log'
-  - '@kbn/scout-reporting'
-  - '@kbn/code-owners'
+  - "@kbn/node-libs-browser-webpack-plugin"
+  - "@kbn/scout-info"
+  - "@kbn/repo-info"
+  - "@kbn/tooling-log"
+  - "@kbn/scout-reporting"
+  - "@kbn/code-owners"
 tags:
   - shared-common
   - package
@@ -33,18 +33,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

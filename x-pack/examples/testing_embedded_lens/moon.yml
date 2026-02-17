@@ -3,31 +3,31 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/testing-embedded-lens-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/testing-embedded-lens-plugin'
+id: "@kbn/testing-embedded-lens-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-visualizations'
+  defaultOwner: "@elastic/kibana-visualizations"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/testing-embedded-lens-plugin'
+  name: "@kbn/testing-embedded-lens-plugin"
   description: Moon project for @kbn/testing-embedded-lens-plugin
-  channel: ''
-  owner: '@elastic/kibana-visualizations'
+  channel: ""
+  owner: "@elastic/kibana-visualizations"
   metadata:
     sourceRoot: x-pack/examples/testing_embedded_lens
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/data-plugin'
-  - '@kbn/lens-plugin'
-  - '@kbn/developer-examples-plugin'
-  - '@kbn/data-views-plugin'
-  - '@kbn/ui-actions-plugin'
-  - '@kbn/core-ui-settings-browser'
-  - '@kbn/code-editor'
-  - '@kbn/react-kibana-context-render'
-  - '@kbn/lens-common'
+  - "@kbn/core"
+  - "@kbn/data-plugin"
+  - "@kbn/lens-plugin"
+  - "@kbn/developer-examples-plugin"
+  - "@kbn/data-views-plugin"
+  - "@kbn/ui-actions-plugin"
+  - "@kbn/core-ui-settings-browser"
+  - "@kbn/code-editor"
+  - "@kbn/react-kibana-context-render"
+  - "@kbn/lens-common"
 tags:
   - plugin
   - prod
@@ -39,5 +39,5 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
-    - '!target/**/*'
+    - "!target/**/*"
 tasks: {}

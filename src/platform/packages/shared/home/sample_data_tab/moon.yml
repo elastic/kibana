@@ -3,24 +3,24 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/home-sample-data-tab'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/home-sample-data-tab'
+id: "@kbn/home-sample-data-tab"
 type: unknown
 owners:
-  defaultOwner: '@elastic/appex-sharedux'
+  defaultOwner: "@elastic/appex-sharedux"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/home-sample-data-tab'
+  name: "@kbn/home-sample-data-tab"
   description: Moon project for @kbn/home-sample-data-tab
-  channel: ''
-  owner: '@elastic/appex-sharedux'
+  channel: ""
+  owner: "@elastic/appex-sharedux"
   metadata:
     sourceRoot: src/platform/packages/shared/home/sample_data_tab
 dependsOn:
-  - '@kbn/i18n'
-  - '@kbn/home-sample-data-card'
-  - '@kbn/home-sample-data-types'
+  - "@kbn/i18n"
+  - "@kbn/home-sample-data-card"
+  - "@kbn/home-sample-data-types"
 tags:
   - shared-common
   - package
@@ -30,19 +30,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

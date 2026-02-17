@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/saved-object-import-warnings-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/saved-object-import-warnings-plugin'
+id: "@kbn/saved-object-import-warnings-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: "@elastic/kibana-core"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/saved-object-import-warnings-plugin'
+  name: "@kbn/saved-object-import-warnings-plugin"
   description: Moon project for @kbn/saved-object-import-warnings-plugin
-  channel: ''
-  owner: '@elastic/kibana-core'
+  channel: ""
+  owner: "@elastic/kibana-core"
   metadata:
     sourceRoot: src/platform/test/plugin_functional/plugins/saved_object_import_warnings
 dependsOn:
-  - '@kbn/core'
+  - "@kbn/core"
 tags:
   - plugin
   - prod
@@ -30,5 +30,5 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
-    - '!target/**/*'
+    - "!target/**/*"
 tasks: {}

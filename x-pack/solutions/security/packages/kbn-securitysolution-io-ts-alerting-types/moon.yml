@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/securitysolution-io-ts-alerting-types'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/securitysolution-io-ts-alerting-types'
+id: "@kbn/securitysolution-io-ts-alerting-types"
 type: unknown
 owners:
-  defaultOwner: '@elastic/security-detection-engine'
+  defaultOwner: "@elastic/security-detection-engine"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/securitysolution-io-ts-alerting-types'
+  name: "@kbn/securitysolution-io-ts-alerting-types"
   description: Moon project for @kbn/securitysolution-io-ts-alerting-types
-  channel: ''
-  owner: '@elastic/security-detection-engine'
+  channel: ""
+  owner: "@elastic/security-detection-engine"
   metadata:
     sourceRoot: x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types
 dependsOn:
-  - '@kbn/securitysolution-io-ts-types'
-  - '@kbn/securitysolution-io-ts-utils'
+  - "@kbn/securitysolution-io-ts-types"
+  - "@kbn/securitysolution-io-ts-utils"
 tags:
   - shared-common
   - package
@@ -29,18 +29,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

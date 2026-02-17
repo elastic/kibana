@@ -3,36 +3,36 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/optimizer'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/optimizer'
+id: "@kbn/optimizer"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-operations'
+  defaultOwner: "@elastic/kibana-operations"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/optimizer'
+  name: "@kbn/optimizer"
   description: Moon project for @kbn/optimizer
-  channel: ''
-  owner: '@elastic/kibana-operations'
+  channel: ""
+  owner: "@elastic/kibana-operations"
   metadata:
     sourceRoot: packages/kbn-optimizer
 dependsOn:
-  - '@kbn/config-schema'
-  - '@kbn/dev-utils'
-  - '@kbn/core-ui-settings-common'
-  - '@kbn/optimizer-webpack-helpers'
-  - '@kbn/std'
-  - '@kbn/ui-shared-deps-npm'
-  - '@kbn/ui-shared-deps-src'
-  - '@kbn/tooling-log'
-  - '@kbn/ci-stats-reporter'
-  - '@kbn/dev-cli-errors'
-  - '@kbn/repo-info'
-  - '@kbn/dev-cli-runner'
-  - '@kbn/jest-serializers'
-  - '@kbn/repo-packages'
-  - '@kbn/node-libs-browser-webpack-plugin'
+  - "@kbn/config-schema"
+  - "@kbn/dev-utils"
+  - "@kbn/core-ui-settings-common"
+  - "@kbn/optimizer-webpack-helpers"
+  - "@kbn/std"
+  - "@kbn/ui-shared-deps-npm"
+  - "@kbn/ui-shared-deps-src"
+  - "@kbn/tooling-log"
+  - "@kbn/ci-stats-reporter"
+  - "@kbn/dev-cli-errors"
+  - "@kbn/repo-info"
+  - "@kbn/dev-cli-runner"
+  - "@kbn/jest-serializers"
+  - "@kbn/repo-packages"
+  - "@kbn/node-libs-browser-webpack-plugin"
 tags:
   - shared-server
   - package
@@ -42,19 +42,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!**/__fixtures__/**/*'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!**/__fixtures__/**/*"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

@@ -3,29 +3,29 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/es'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/es'
+id: "@kbn/es"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-operations'
+  defaultOwner: "@elastic/kibana-operations"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/es'
+  name: "@kbn/es"
   description: Moon project for @kbn/es
-  channel: ''
-  owner: '@elastic/kibana-operations'
+  channel: ""
+  owner: "@elastic/kibana-operations"
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-es
 dependsOn:
-  - '@kbn/tooling-log'
-  - '@kbn/dev-utils'
-  - '@kbn/dev-proc-runner'
-  - '@kbn/ci-stats-reporter'
-  - '@kbn/mock-idp-utils'
-  - '@kbn/jest-serializers'
-  - '@kbn/repo-info'
-  - '@kbn/utility-types'
+  - "@kbn/tooling-log"
+  - "@kbn/dev-utils"
+  - "@kbn/dev-proc-runner"
+  - "@kbn/ci-stats-reporter"
+  - "@kbn/mock-idp-utils"
+  - "@kbn/jest-serializers"
+  - "@kbn/repo-info"
+  - "@kbn/utility-types"
 tags:
   - shared-common
   - package
@@ -35,20 +35,20 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.js'
-    - '**/*.json'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.js"
+    - "**/*.json"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

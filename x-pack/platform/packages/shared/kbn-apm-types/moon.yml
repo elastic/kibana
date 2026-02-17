@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/apm-types'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/apm-types'
+id: "@kbn/apm-types"
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-presentation-team'
+  defaultOwner: "@elastic/obs-presentation-team"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/apm-types'
+  name: "@kbn/apm-types"
   description: Moon project for @kbn/apm-types
-  channel: ''
-  owner: '@elastic/obs-presentation-team'
+  channel: ""
+  owner: "@elastic/obs-presentation-team"
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-apm-types
 dependsOn:
-  - '@kbn/elastic-agent-utils'
+  - "@kbn/elastic-agent-utils"
 tags:
   - shared-common
   - package
@@ -27,6 +27,6 @@ tags:
   - shared
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks: {}

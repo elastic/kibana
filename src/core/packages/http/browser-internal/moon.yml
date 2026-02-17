@@ -3,34 +3,34 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/core-http-browser-internal'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/core-http-browser-internal'
+id: "@kbn/core-http-browser-internal"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: "@elastic/kibana-core"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-http-browser-internal'
+  name: "@kbn/core-http-browser-internal"
   description: Moon project for @kbn/core-http-browser-internal
-  channel: ''
-  owner: '@elastic/kibana-core'
+  channel: ""
+  owner: "@elastic/kibana-core"
   metadata:
     sourceRoot: src/core/packages/http/browser-internal
 dependsOn:
-  - '@kbn/core-base-browser-internal'
-  - '@kbn/core-http-browser'
-  - '@kbn/core-http-common'
-  - '@kbn/core-execution-context-browser-internal'
-  - '@kbn/core-execution-context-browser'
-  - '@kbn/core-fatal-errors-browser'
-  - '@kbn/core-injected-metadata-browser-internal'
-  - '@kbn/crypto-browser'
-  - '@kbn/std'
-  - '@kbn/core-injected-metadata-browser-mocks'
-  - '@kbn/core-execution-context-browser-mocks'
-  - '@kbn/core-fatal-errors-browser-mocks'
-  - '@kbn/utility-types'
+  - "@kbn/core-base-browser-internal"
+  - "@kbn/core-http-browser"
+  - "@kbn/core-http-common"
+  - "@kbn/core-execution-context-browser-internal"
+  - "@kbn/core-execution-context-browser"
+  - "@kbn/core-fatal-errors-browser"
+  - "@kbn/core-injected-metadata-browser-internal"
+  - "@kbn/crypto-browser"
+  - "@kbn/std"
+  - "@kbn/core-injected-metadata-browser-mocks"
+  - "@kbn/core-execution-context-browser-mocks"
+  - "@kbn/core-fatal-errors-browser-mocks"
+  - "@kbn/utility-types"
 tags:
   - shared-browser
   - package
@@ -40,18 +40,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

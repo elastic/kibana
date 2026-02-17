@@ -3,29 +3,29 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/securitysolution-exceptions-common'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/securitysolution-exceptions-common'
+id: "@kbn/securitysolution-exceptions-common"
 type: unknown
 owners:
-  defaultOwner: '@elastic/security-detection-engine'
+  defaultOwner: "@elastic/security-detection-engine"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/securitysolution-exceptions-common'
+  name: "@kbn/securitysolution-exceptions-common"
   description: Moon project for @kbn/securitysolution-exceptions-common
-  channel: ''
-  owner: '@elastic/security-detection-engine'
+  channel: ""
+  owner: "@elastic/security-detection-engine"
   metadata:
     sourceRoot: x-pack/solutions/security/packages/kbn-securitysolution-exceptions-common
 dependsOn:
-  - '@kbn/openapi-common'
-  - '@kbn/zod-helpers'
-  - '@kbn/securitysolution-lists-common'
-  - '@kbn/test'
-  - '@kbn/tooling-log'
-  - '@kbn/core-http-common'
-  - '@kbn/securitysolution-utils'
-  - '@kbn/zod'
+  - "@kbn/openapi-common"
+  - "@kbn/zod-helpers"
+  - "@kbn/securitysolution-lists-common"
+  - "@kbn/test"
+  - "@kbn/tooling-log"
+  - "@kbn/core-http-common"
+  - "@kbn/securitysolution-utils"
+  - "@kbn/zod"
 tags:
   - shared-common
   - package
@@ -34,6 +34,6 @@ tags:
   - private
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks: {}

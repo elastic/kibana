@@ -3,29 +3,29 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/elastic-assistant-common'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/elastic-assistant-common'
+id: "@kbn/elastic-assistant-common"
 type: unknown
 owners:
-  defaultOwner: '@elastic/security-generative-ai'
+  defaultOwner: "@elastic/security-generative-ai"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/elastic-assistant-common'
+  name: "@kbn/elastic-assistant-common"
   description: Moon project for @kbn/elastic-assistant-common
-  channel: ''
-  owner: '@elastic/security-generative-ai'
+  channel: ""
+  owner: "@elastic/security-generative-ai"
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-elastic-assistant-common
 dependsOn:
-  - '@kbn/zod-helpers'
-  - '@kbn/securitysolution-io-ts-utils'
-  - '@kbn/core'
-  - '@kbn/logging'
-  - '@kbn/zod'
-  - '@kbn/i18n'
-  - '@kbn/management-settings-ids'
-  - '@kbn/core-ui-settings-browser'
+  - "@kbn/zod-helpers"
+  - "@kbn/securitysolution-io-ts-utils"
+  - "@kbn/core"
+  - "@kbn/logging"
+  - "@kbn/zod"
+  - "@kbn/i18n"
+  - "@kbn/management-settings-ids"
+  - "@kbn/core-ui-settings-browser"
 tags:
   - shared-common
   - package
@@ -35,19 +35,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

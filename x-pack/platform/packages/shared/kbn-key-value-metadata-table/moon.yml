@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/key-value-metadata-table'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/key-value-metadata-table'
+id: "@kbn/key-value-metadata-table"
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-presentation-team'
+  defaultOwner: "@elastic/obs-presentation-team"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/key-value-metadata-table'
+  name: "@kbn/key-value-metadata-table"
   description: Moon project for @kbn/key-value-metadata-table
-  channel: ''
-  owner: '@elastic/obs-presentation-team'
+  channel: ""
+  owner: "@elastic/obs-presentation-team"
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-key-value-metadata-table
 dependsOn:
-  - '@kbn/i18n'
+  - "@kbn/i18n"
 tags:
   - shared-common
   - package
@@ -28,19 +28,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

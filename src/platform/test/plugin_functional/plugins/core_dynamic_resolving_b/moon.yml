@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/core-plugin-dynamic-resolving-b'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/core-plugin-dynamic-resolving-b'
+id: "@kbn/core-plugin-dynamic-resolving-b"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: "@elastic/kibana-core"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-plugin-dynamic-resolving-b'
+  name: "@kbn/core-plugin-dynamic-resolving-b"
   description: Moon project for @kbn/core-plugin-dynamic-resolving-b
-  channel: ''
-  owner: '@elastic/kibana-core'
+  channel: ""
+  owner: "@elastic/kibana-core"
   metadata:
     sourceRoot: src/platform/test/plugin_functional/plugins/core_dynamic_resolving_b
 dependsOn:
-  - '@kbn/core'
+  - "@kbn/core"
 tags:
   - plugin
   - prod
@@ -30,5 +30,5 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
-    - '!target/**/*'
+    - "!target/**/*"
 tasks: {}

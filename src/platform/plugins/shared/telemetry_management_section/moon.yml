@@ -3,34 +3,34 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/telemetry-management-section-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/telemetry-management-section-plugin'
+id: "@kbn/telemetry-management-section-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: "@elastic/kibana-core"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/telemetry-management-section-plugin'
+  name: "@kbn/telemetry-management-section-plugin"
   description: Moon project for @kbn/telemetry-management-section-plugin
-  channel: ''
-  owner: '@elastic/kibana-core'
+  channel: ""
+  owner: "@elastic/kibana-core"
   metadata:
     sourceRoot: src/platform/plugins/shared/telemetry_management_section
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/usage-collection-plugin'
-  - '@kbn/telemetry-plugin'
-  - '@kbn/advanced-settings-plugin'
-  - '@kbn/test-jest-helpers'
-  - '@kbn/i18n-react'
-  - '@kbn/i18n'
-  - '@kbn/management-settings-section-registry'
-  - '@kbn/shared-ux-utility'
-  - '@kbn/management-settings-field-definition'
-  - '@kbn/management-settings-types'
-  - '@kbn/management-settings-components-field-row'
-  - '@kbn/core-ui-settings-browser'
+  - "@kbn/core"
+  - "@kbn/usage-collection-plugin"
+  - "@kbn/telemetry-plugin"
+  - "@kbn/advanced-settings-plugin"
+  - "@kbn/test-jest-helpers"
+  - "@kbn/i18n-react"
+  - "@kbn/i18n"
+  - "@kbn/management-settings-section-registry"
+  - "@kbn/shared-ux-utility"
+  - "@kbn/management-settings-field-definition"
+  - "@kbn/management-settings-types"
+  - "@kbn/management-settings-components-field-row"
+  - "@kbn/core-ui-settings-browser"
 tags:
   - plugin
   - prod
@@ -41,17 +41,17 @@ fileGroups:
   src:
     - common/**/*
     - public/**/*
-    - '!target/**/*'
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

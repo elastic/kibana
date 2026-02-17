@@ -3,31 +3,31 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/alerting-types'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/alerting-types'
+id: "@kbn/alerting-types"
 type: unknown
 owners:
-  defaultOwner: '@elastic/response-ops'
+  defaultOwner: "@elastic/response-ops"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/alerting-types'
+  name: "@kbn/alerting-types"
   description: Moon project for @kbn/alerting-types
-  channel: ''
-  owner: '@elastic/response-ops'
+  channel: ""
+  owner: "@elastic/response-ops"
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-alerting-types
 dependsOn:
-  - '@kbn/i18n'
-  - '@kbn/rule-data-utils'
-  - '@kbn/rrule'
-  - '@kbn/core'
-  - '@kbn/es-query'
-  - '@kbn/field-formats-plugin'
-  - '@kbn/data-views-plugin'
-  - '@kbn/search-types'
-  - '@kbn/utility-types'
-  - '@kbn/licensing-types'
+  - "@kbn/i18n"
+  - "@kbn/rule-data-utils"
+  - "@kbn/rrule"
+  - "@kbn/core"
+  - "@kbn/es-query"
+  - "@kbn/field-formats-plugin"
+  - "@kbn/data-views-plugin"
+  - "@kbn/search-types"
+  - "@kbn/utility-types"
+  - "@kbn/licensing-types"
 tags:
   - shared-common
   - package
@@ -37,19 +37,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

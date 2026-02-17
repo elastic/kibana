@@ -3,30 +3,30 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/test-suites-xpack-performance'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/test-suites-xpack-performance'
+id: "@kbn/test-suites-xpack-performance"
 type: unknown
 owners:
-  defaultOwner: '@elastic/appex-qa'
+  defaultOwner: "@elastic/appex-qa"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/test-suites-xpack-performance'
+  name: "@kbn/test-suites-xpack-performance"
   description: Moon project for @kbn/test-suites-xpack-performance
-  channel: ''
-  owner: '@elastic/appex-qa'
+  channel: ""
+  owner: "@elastic/appex-qa"
   metadata:
     sourceRoot: x-pack/performance
 dependsOn:
-  - '@kbn/journeys'
-  - '@kbn/test-subj-selector'
-  - '@kbn/tooling-log'
-  - '@kbn/test'
-  - '@kbn/expect'
-  - '@kbn/dev-utils'
-  - '@kbn/synthtrace-client'
-  - '@kbn/test-suites-src'
-  - '@kbn/ftr-common-functional-services'
+  - "@kbn/journeys"
+  - "@kbn/test-subj-selector"
+  - "@kbn/tooling-log"
+  - "@kbn/test"
+  - "@kbn/expect"
+  - "@kbn/dev-utils"
+  - "@kbn/synthtrace-client"
+  - "@kbn/test-suites-src"
+  - "@kbn/ftr-common-functional-services"
 tags:
   - test-helper
   - package
@@ -36,19 +36,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
+    - "**/*.ts"
     - kbn_archives/large_arrays_data_view.json
-    - '!target/**/*'
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

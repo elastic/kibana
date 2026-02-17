@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/core-saved-objects-utils-server'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/core-saved-objects-utils-server'
+id: "@kbn/core-saved-objects-utils-server"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: "@elastic/kibana-core"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-saved-objects-utils-server'
+  name: "@kbn/core-saved-objects-utils-server"
   description: Moon project for @kbn/core-saved-objects-utils-server
-  channel: ''
-  owner: '@elastic/kibana-core'
+  channel: ""
+  owner: "@elastic/kibana-core"
   metadata:
     sourceRoot: src/core/packages/saved-objects/utils-server
 dependsOn:
-  - '@kbn/core-saved-objects-server'
-  - '@kbn/core-saved-objects-api-server'
+  - "@kbn/core-saved-objects-server"
+  - "@kbn/core-saved-objects-api-server"
 tags:
   - shared-server
   - package
@@ -29,18 +29,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

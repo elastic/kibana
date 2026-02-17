@@ -3,35 +3,35 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/reindex-service-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/reindex-service-plugin'
+id: "@kbn/reindex-service-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-management'
+  defaultOwner: "@elastic/kibana-management"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/reindex-service-plugin'
+  name: "@kbn/reindex-service-plugin"
   description: Moon project for @kbn/reindex-service-plugin
-  channel: ''
-  owner: '@elastic/kibana-management'
+  channel: ""
+  owner: "@elastic/kibana-management"
   metadata:
     sourceRoot: x-pack/platform/plugins/private/reindex_service
 dependsOn:
-  - '@kbn/security-plugin'
-  - '@kbn/es-ui-shared-plugin'
-  - '@kbn/licensing-plugin'
-  - '@kbn/core'
-  - '@kbn/upgrade-assistant-pkg-server'
-  - '@kbn/utility-types'
-  - '@kbn/config-schema'
-  - '@kbn/core-http-server-utils'
-  - '@kbn/core-logging-server-mocks'
-  - '@kbn/core-http-server-mocks'
-  - '@kbn/core-elasticsearch-client-server-mocks'
-  - '@kbn/i18n'
-  - '@kbn/upgrade-assistant-pkg-common'
-  - '@kbn/std'
+  - "@kbn/security-plugin"
+  - "@kbn/es-ui-shared-plugin"
+  - "@kbn/licensing-plugin"
+  - "@kbn/core"
+  - "@kbn/upgrade-assistant-pkg-server"
+  - "@kbn/utility-types"
+  - "@kbn/config-schema"
+  - "@kbn/core-http-server-utils"
+  - "@kbn/core-logging-server-mocks"
+  - "@kbn/core-http-server-mocks"
+  - "@kbn/core-elasticsearch-client-server-mocks"
+  - "@kbn/i18n"
+  - "@kbn/upgrade-assistant-pkg-common"
+  - "@kbn/std"
 tags:
   - plugin
   - prod
@@ -46,17 +46,17 @@ fileGroups:
     - server/**/*
     - public/**/*.json
     - server/**/*.json
-    - '!target/**/*'
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

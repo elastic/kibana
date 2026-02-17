@@ -3,25 +3,25 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/paertial-results-example-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/paertial-results-example-plugin'
+id: "@kbn/paertial-results-example-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-data-discovery'
+  defaultOwner: "@elastic/kibana-data-discovery"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/paertial-results-example-plugin'
+  name: "@kbn/paertial-results-example-plugin"
   description: Moon project for @kbn/paertial-results-example-plugin
-  channel: ''
-  owner: '@elastic/kibana-data-discovery'
+  channel: ""
+  owner: "@elastic/kibana-data-discovery"
   metadata:
     sourceRoot: examples/partial_results_example
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/developer-examples-plugin'
-  - '@kbn/expressions-plugin'
-  - '@kbn/i18n'
+  - "@kbn/core"
+  - "@kbn/developer-examples-plugin"
+  - "@kbn/expressions-plugin"
+  - "@kbn/i18n"
 tags:
   - plugin
   - prod
@@ -32,5 +32,5 @@ fileGroups:
     - index.ts
     - public/**/*.ts
     - public/**/*.tsx
-    - '!target/**/*'
+    - "!target/**/*"
 tasks: {}

@@ -3,28 +3,28 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/esql-ux-example-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/esql-ux-example-plugin'
+id: "@kbn/esql-ux-example-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-esql'
+  defaultOwner: "@elastic/kibana-esql"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/esql-ux-example-plugin'
+  name: "@kbn/esql-ux-example-plugin"
   description: Moon project for @kbn/esql-ux-example-plugin
-  channel: ''
-  owner: '@elastic/kibana-esql'
+  channel: ""
+  owner: "@elastic/kibana-esql"
   metadata:
     sourceRoot: examples/esql_ux_example
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/data-plugin'
-  - '@kbn/data-views-plugin'
-  - '@kbn/developer-examples-plugin'
-  - '@kbn/es-query'
-  - '@kbn/ui-actions-plugin'
-  - '@kbn/esql'
+  - "@kbn/core"
+  - "@kbn/data-plugin"
+  - "@kbn/data-views-plugin"
+  - "@kbn/developer-examples-plugin"
+  - "@kbn/es-query"
+  - "@kbn/ui-actions-plugin"
+  - "@kbn/esql"
 tags:
   - plugin
   - prod
@@ -34,5 +34,5 @@ fileGroups:
   src:
     - public/**/*.ts
     - public/**/*.tsx
-    - '!target/**/*'
+    - "!target/**/*"
 tasks: {}

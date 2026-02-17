@@ -3,32 +3,32 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/ui-actions-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/ui-actions-plugin'
+id: "@kbn/ui-actions-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/appex-sharedux'
+  defaultOwner: "@elastic/appex-sharedux"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/ui-actions-plugin'
+  name: "@kbn/ui-actions-plugin"
   description: Moon project for @kbn/ui-actions-plugin
-  channel: ''
-  owner: '@elastic/appex-sharedux'
+  channel: ""
+  owner: "@elastic/appex-sharedux"
   metadata:
     sourceRoot: src/platform/plugins/shared/ui_actions
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/kibana-utils-plugin'
-  - '@kbn/data-views-plugin'
-  - '@kbn/utility-types'
-  - '@kbn/i18n'
-  - '@kbn/es-query'
-  - '@kbn/ui-actions-browser'
-  - '@kbn/expressions-plugin'
-  - '@kbn/react-kibana-context-render'
-  - '@kbn/react-kibana-mount'
-  - '@kbn/std'
+  - "@kbn/core"
+  - "@kbn/kibana-utils-plugin"
+  - "@kbn/data-views-plugin"
+  - "@kbn/utility-types"
+  - "@kbn/i18n"
+  - "@kbn/es-query"
+  - "@kbn/ui-actions-browser"
+  - "@kbn/expressions-plugin"
+  - "@kbn/react-kibana-context-render"
+  - "@kbn/react-kibana-mount"
+  - "@kbn/std"
 tags:
   - plugin
   - prod
@@ -38,17 +38,17 @@ tags:
 fileGroups:
   src:
     - public/**/*
-    - '!target/**/*'
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

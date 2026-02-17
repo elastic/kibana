@@ -3,33 +3,33 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/observability-ai-server'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/observability-ai-server'
+id: "@kbn/observability-ai-server"
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-ai-team'
+  defaultOwner: "@elastic/obs-ai-team"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/observability-ai-server'
+  name: "@kbn/observability-ai-server"
   description: Moon project for @kbn/observability-ai-server
-  channel: ''
-  owner: '@elastic/obs-ai-team'
+  channel: ""
+  owner: "@elastic/obs-ai-team"
   metadata:
     sourceRoot: x-pack/solutions/observability/packages/observability-ai/observability-ai-server
 dependsOn:
-  - '@kbn/observability-utils-common'
-  - '@kbn/alerting-plugin'
-  - '@kbn/rule-registry-plugin'
-  - '@kbn/logging'
-  - '@kbn/calculate-auto'
-  - '@kbn/observability-ai-assistant-plugin'
-  - '@kbn/inference-common'
-  - '@kbn/observability-ai-common'
-  - '@kbn/observability-utils-server'
-  - '@kbn/traced-es-client'
-  - '@kbn/es-query'
-  - '@kbn/ai-tools'
+  - "@kbn/observability-utils-common"
+  - "@kbn/alerting-plugin"
+  - "@kbn/rule-registry-plugin"
+  - "@kbn/logging"
+  - "@kbn/calculate-auto"
+  - "@kbn/observability-ai-assistant-plugin"
+  - "@kbn/inference-common"
+  - "@kbn/observability-ai-common"
+  - "@kbn/observability-utils-server"
+  - "@kbn/traced-es-client"
+  - "@kbn/es-query"
+  - "@kbn/ai-tools"
 tags:
   - shared-server
   - package
@@ -39,18 +39,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

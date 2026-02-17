@@ -3,36 +3,36 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/portable-dashboards-example'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/portable-dashboards-example'
+id: "@kbn/portable-dashboards-example"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-presentation'
+  defaultOwner: "@elastic/kibana-presentation"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/portable-dashboards-example'
+  name: "@kbn/portable-dashboards-example"
   description: Moon project for @kbn/portable-dashboards-example
-  channel: ''
-  owner: '@elastic/kibana-presentation'
+  channel: ""
+  owner: "@elastic/kibana-presentation"
   metadata:
     sourceRoot: examples/portable_dashboards_example
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/es-query'
-  - '@kbn/data-plugin'
-  - '@kbn/dashboard-plugin'
-  - '@kbn/navigation-plugin'
-  - '@kbn/embeddable-plugin'
-  - '@kbn/data-views-plugin'
-  - '@kbn/developer-examples-plugin'
-  - '@kbn/shared-ux-page-kibana-template'
-  - '@kbn/shared-ux-router'
-  - '@kbn/presentation-publishing'
-  - '@kbn/react-kibana-context-render'
-  - '@kbn/control-group-renderer'
-  - '@kbn/ui-actions-plugin'
-  - '@kbn/presentation-util-plugin'
+  - "@kbn/core"
+  - "@kbn/es-query"
+  - "@kbn/data-plugin"
+  - "@kbn/dashboard-plugin"
+  - "@kbn/navigation-plugin"
+  - "@kbn/embeddable-plugin"
+  - "@kbn/data-views-plugin"
+  - "@kbn/developer-examples-plugin"
+  - "@kbn/shared-ux-page-kibana-template"
+  - "@kbn/shared-ux-router"
+  - "@kbn/presentation-publishing"
+  - "@kbn/react-kibana-context-render"
+  - "@kbn/control-group-renderer"
+  - "@kbn/ui-actions-plugin"
+  - "@kbn/presentation-util-plugin"
 tags:
   - plugin
   - prod
@@ -44,5 +44,5 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - public/**/*.json
-    - '!target/**/*'
+    - "!target/**/*"
 tasks: {}

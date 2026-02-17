@@ -3,27 +3,27 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/resolver-test-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/resolver-test-plugin'
+id: "@kbn/resolver-test-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/security-solution'
+  defaultOwner: "@elastic/security-solution"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/resolver-test-plugin'
+  name: "@kbn/resolver-test-plugin"
   description: Moon project for @kbn/resolver-test-plugin
-  channel: ''
-  owner: '@elastic/security-solution'
+  channel: ""
+  owner: "@elastic/security-solution"
   metadata:
     sourceRoot: x-pack/solutions/security/test/plugin_functional/plugins/resolver_test
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/kibana-react-plugin'
-  - '@kbn/security-solution-plugin'
-  - '@kbn/i18n'
-  - '@kbn/i18n-react'
-  - '@kbn/shared-ux-router'
+  - "@kbn/core"
+  - "@kbn/kibana-react-plugin"
+  - "@kbn/security-solution-plugin"
+  - "@kbn/i18n"
+  - "@kbn/i18n-react"
+  - "@kbn/shared-ux-router"
 tags:
   - plugin
   - prod
@@ -31,7 +31,7 @@ tags:
   - private
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks: {}

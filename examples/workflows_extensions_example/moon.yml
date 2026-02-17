@@ -3,25 +3,25 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/workflows-extensions-example'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/workflows-extensions-example'
+id: "@kbn/workflows-extensions-example"
 type: unknown
 owners:
-  defaultOwner: '@elastic/workflows-eng'
+  defaultOwner: "@elastic/workflows-eng"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/workflows-extensions-example'
+  name: "@kbn/workflows-extensions-example"
   description: Moon project for @kbn/workflows-extensions-example
-  channel: ''
-  owner: '@elastic/workflows-eng'
+  channel: ""
+  owner: "@elastic/workflows-eng"
   metadata:
     sourceRoot: examples/workflows_extensions_example
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/workflows-extensions'
-  - '@kbn/zod'
-  - '@kbn/i18n'
+  - "@kbn/core"
+  - "@kbn/workflows-extensions"
+  - "@kbn/zod"
+  - "@kbn/i18n"
 tags:
   - plugin
   - prod
@@ -34,5 +34,5 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
-    - '!target/**/*'
+    - "!target/**/*"
 tasks: {}

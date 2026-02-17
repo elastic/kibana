@@ -3,34 +3,34 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/expressions-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/expressions-plugin'
+id: "@kbn/expressions-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-visualizations'
+  defaultOwner: "@elastic/kibana-visualizations"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/expressions-plugin'
+  name: "@kbn/expressions-plugin"
   description: Moon project for @kbn/expressions-plugin
-  channel: ''
-  owner: '@elastic/kibana-visualizations'
+  channel: ""
+  owner: "@elastic/kibana-visualizations"
   metadata:
     sourceRoot: src/platform/plugins/shared/expressions
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/kibana-utils-plugin'
-  - '@kbn/inspector-plugin'
-  - '@kbn/field-formats-plugin'
-  - '@kbn/logging'
-  - '@kbn/utility-types'
-  - '@kbn/interpreter'
-  - '@kbn/i18n'
-  - '@kbn/std'
-  - '@kbn/core-execution-context-common'
-  - '@kbn/tinymath'
-  - '@kbn/panel-loader'
-  - '@kbn/es-query'
+  - "@kbn/core"
+  - "@kbn/kibana-utils-plugin"
+  - "@kbn/inspector-plugin"
+  - "@kbn/field-formats-plugin"
+  - "@kbn/logging"
+  - "@kbn/utility-types"
+  - "@kbn/interpreter"
+  - "@kbn/i18n"
+  - "@kbn/std"
+  - "@kbn/core-execution-context-common"
+  - "@kbn/tinymath"
+  - "@kbn/panel-loader"
+  - "@kbn/es-query"
 tags:
   - plugin
   - prod
@@ -43,17 +43,17 @@ fileGroups:
     - public/**/*
     - server/**/*
     - ./index.ts
-    - '!target/**/*'
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

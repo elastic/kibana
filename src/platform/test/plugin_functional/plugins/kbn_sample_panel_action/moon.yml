@@ -3,25 +3,25 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/kbn-sample-panel-action-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/kbn-sample-panel-action-plugin'
+id: "@kbn/kbn-sample-panel-action-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/appex-sharedux'
+  defaultOwner: "@elastic/appex-sharedux"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/kbn-sample-panel-action-plugin'
+  name: "@kbn/kbn-sample-panel-action-plugin"
   description: Moon project for @kbn/kbn-sample-panel-action-plugin
-  channel: ''
-  owner: '@elastic/appex-sharedux'
+  channel: ""
+  owner: "@elastic/appex-sharedux"
   metadata:
     sourceRoot: src/platform/test/plugin_functional/plugins/kbn_sample_panel_action
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/ui-actions-plugin'
-  - '@kbn/embeddable-plugin'
-  - '@kbn/react-kibana-mount'
+  - "@kbn/core"
+  - "@kbn/ui-actions-plugin"
+  - "@kbn/embeddable-plugin"
+  - "@kbn/react-kibana-mount"
 tags:
   - plugin
   - prod
@@ -32,5 +32,5 @@ fileGroups:
     - index.ts
     - public/**/*.ts
     - public/**/*.tsx
-    - '!target/**/*'
+    - "!target/**/*"
 tasks: {}

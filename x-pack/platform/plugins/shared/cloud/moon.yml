@@ -3,31 +3,31 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/cloud-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/cloud-plugin'
+id: "@kbn/cloud-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: "@elastic/kibana-core"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/cloud-plugin'
+  name: "@kbn/cloud-plugin"
   description: Moon project for @kbn/cloud-plugin
-  channel: ''
-  owner: '@elastic/kibana-core'
+  channel: ""
+  owner: "@elastic/kibana-core"
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/cloud
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/core-chrome-browser'
-  - '@kbn/usage-collection-plugin'
-  - '@kbn/config-schema'
-  - '@kbn/logging-mocks'
-  - '@kbn/logging'
-  - '@kbn/core-saved-objects-server'
-  - '@kbn/std'
-  - '@kbn/projects-solutions-groups'
-  - '@kbn/core-chrome-browser-internal'
+  - "@kbn/core"
+  - "@kbn/core-chrome-browser"
+  - "@kbn/usage-collection-plugin"
+  - "@kbn/config-schema"
+  - "@kbn/logging-mocks"
+  - "@kbn/logging"
+  - "@kbn/core-saved-objects-server"
+  - "@kbn/std"
+  - "@kbn/projects-solutions-groups"
+  - "@kbn/core-chrome-browser-internal"
 tags:
   - plugin
   - prod
@@ -40,17 +40,17 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - '!target/**/*'
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

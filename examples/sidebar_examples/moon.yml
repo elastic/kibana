@@ -3,26 +3,26 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/sidebar-examples-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/sidebar-examples-plugin'
+id: "@kbn/sidebar-examples-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/appex-sharedux'
+  defaultOwner: "@elastic/appex-sharedux"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/sidebar-examples-plugin'
+  name: "@kbn/sidebar-examples-plugin"
   description: Moon project for @kbn/sidebar-examples-plugin
-  channel: ''
-  owner: '@elastic/appex-sharedux'
+  channel: ""
+  owner: "@elastic/appex-sharedux"
   metadata:
     sourceRoot: examples/sidebar_examples
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/developer-examples-plugin'
-  - '@kbn/core-chrome-sidebar'
-  - '@kbn/core-chrome-sidebar-components'
-  - '@kbn/zod'
+  - "@kbn/core"
+  - "@kbn/developer-examples-plugin"
+  - "@kbn/core-chrome-sidebar"
+  - "@kbn/core-chrome-sidebar-components"
+  - "@kbn/zod"
 tags:
   - plugin
   - prod
@@ -35,5 +35,5 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
-    - '!target/**/*'
+    - "!target/**/*"
 tasks: {}

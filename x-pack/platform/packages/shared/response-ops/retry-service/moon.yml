@@ -3,23 +3,23 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/response-ops-retry-service'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/response-ops-retry-service'
+id: "@kbn/response-ops-retry-service"
 type: unknown
 owners:
-  defaultOwner: '@elastic/response-ops'
+  defaultOwner: "@elastic/response-ops"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/response-ops-retry-service'
+  name: "@kbn/response-ops-retry-service"
   description: Moon project for @kbn/response-ops-retry-service
-  channel: ''
-  owner: '@elastic/response-ops'
+  channel: ""
+  owner: "@elastic/response-ops"
   metadata:
     sourceRoot: x-pack/platform/packages/shared/response-ops/retry-service
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/core-logging-server-mocks'
+  - "@kbn/core"
+  - "@kbn/core-logging-server-mocks"
 tags:
   - shared-server
   - package
@@ -29,18 +29,18 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

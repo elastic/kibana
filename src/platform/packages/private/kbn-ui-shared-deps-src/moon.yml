@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/ui-shared-deps-src'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/ui-shared-deps-src'
+id: "@kbn/ui-shared-deps-src"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-operations'
+  defaultOwner: "@elastic/kibana-operations"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/ui-shared-deps-src'
+  name: "@kbn/ui-shared-deps-src"
   description: Moon project for @kbn/ui-shared-deps-src
-  channel: ''
-  owner: '@elastic/kibana-operations'
+  channel: ""
+  owner: "@elastic/kibana-operations"
   metadata:
     sourceRoot: src/platform/packages/private/kbn-ui-shared-deps-src
 dependsOn:
-  - '@kbn/ui-shared-deps-npm'
+  - "@kbn/ui-shared-deps-npm"
 tags:
   - is-webpack-built
   - package
@@ -27,11 +27,11 @@ tags:
   - private
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.js'
-    - '!src/entry.js'
-    - '!**/*.config.js'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.js"
+    - "!src/entry.js"
+    - "!**/*.config.js"
+    - "!target/**/*"
 tasks:
   build-webpack:
     command: yarn
@@ -40,7 +40,7 @@ tasks:
     deps:
       - ^:build-webpack
     inputs:
-      - '@group(src)'
+      - "@group(src)"
       - webpack.config.js
       - /src/platform/packages/shared/kbn-repo-info/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/kbn-ui-theme/**/*.{js,ts,tsx}
@@ -68,7 +68,7 @@ tasks:
       - /src/platform/packages/private/kbn-ui-shared-deps-npm/**/*.{js,ts,tsx}
       - /src/platform/packages/shared/react/kibana_mount/**/*.{js,ts,tsx}
       - /src/core/packages/chrome/sidebar/sidebar-context/**/*.{js,ts,tsx}
-      - '!/src/**/*.test.{js,ts,tsx}'
+      - "!/src/**/*.test.{js,ts,tsx}"
     outputs:
       - /target/build/src/platform/packages/private/kbn-ui-shared-deps-src
   watch-webpack:
@@ -78,11 +78,11 @@ tasks:
     command: yarn
     args:
       - build
-      - '--watch'
+      - --watch
     deps:
       - ^:build-webpack
     inputs:
-      - '@group(src)'
+      - "@group(src)"
       - webpack.config.js
     outputs:
       - /target/build/src/platform/packages/private/kbn-ui-shared-deps-src

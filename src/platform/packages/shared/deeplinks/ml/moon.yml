@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/deeplinks-ml'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/deeplinks-ml'
+id: "@kbn/deeplinks-ml"
 type: unknown
 owners:
-  defaultOwner: '@elastic/ml-ui'
+  defaultOwner: "@elastic/ml-ui"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/deeplinks-ml'
+  name: "@kbn/deeplinks-ml"
   description: Moon project for @kbn/deeplinks-ml
-  channel: ''
-  owner: '@elastic/ml-ui'
+  channel: ""
+  owner: "@elastic/ml-ui"
   metadata:
     sourceRoot: src/platform/packages/shared/deeplinks/ml
 dependsOn: []
@@ -27,19 +27,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"

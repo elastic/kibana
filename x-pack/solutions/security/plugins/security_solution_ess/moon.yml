@@ -3,40 +3,40 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/security-solution-ess'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/security-solution-ess'
+id: "@kbn/security-solution-ess"
 type: unknown
 owners:
-  defaultOwner: '@elastic/security-solution'
+  defaultOwner: "@elastic/security-solution"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/security-solution-ess'
+  name: "@kbn/security-solution-ess"
   description: Moon project for @kbn/security-solution-ess
-  channel: ''
-  owner: '@elastic/security-solution'
+  channel: ""
+  owner: "@elastic/security-solution"
   metadata:
     sourceRoot: x-pack/solutions/security/plugins/security_solution_ess
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/config-schema'
-  - '@kbn/security-solution-plugin'
-  - '@kbn/kibana-react-plugin'
-  - '@kbn/security-solution-features'
-  - '@kbn/security-solution-navigation'
-  - '@kbn/licensing-plugin'
-  - '@kbn/security-solution-upselling'
-  - '@kbn/i18n'
-  - '@kbn/navigation-plugin'
-  - '@kbn/management-plugin'
-  - '@kbn/core-chrome-browser'
-  - '@kbn/cloud-plugin'
-  - '@kbn/licensing-types'
-  - '@kbn/deeplinks-management'
-  - '@kbn/management-settings-ids'
-  - '@kbn/ai-assistant-common'
-  - '@kbn/ai-assistant-icon'
-  - '@kbn/shared-ux-page-kibana-template'
+  - "@kbn/core"
+  - "@kbn/config-schema"
+  - "@kbn/security-solution-plugin"
+  - "@kbn/kibana-react-plugin"
+  - "@kbn/security-solution-features"
+  - "@kbn/security-solution-navigation"
+  - "@kbn/licensing-plugin"
+  - "@kbn/security-solution-upselling"
+  - "@kbn/i18n"
+  - "@kbn/navigation-plugin"
+  - "@kbn/management-plugin"
+  - "@kbn/core-chrome-browser"
+  - "@kbn/cloud-plugin"
+  - "@kbn/licensing-types"
+  - "@kbn/deeplinks-management"
+  - "@kbn/management-settings-ids"
+  - "@kbn/ai-assistant-common"
+  - "@kbn/ai-assistant-icon"
+  - "@kbn/shared-ux-page-kibana-template"
 tags:
   - plugin
   - prod
@@ -49,5 +49,5 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
-    - '!target/**/*'
+    - "!target/**/*"
 tasks: {}

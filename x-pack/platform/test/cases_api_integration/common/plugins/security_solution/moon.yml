@@ -3,26 +3,26 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/security-solution-fixtures-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/security-solution-fixtures-plugin'
+id: "@kbn/security-solution-fixtures-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-cases'
+  defaultOwner: "@elastic/kibana-cases"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/security-solution-fixtures-plugin'
+  name: "@kbn/security-solution-fixtures-plugin"
   description: Moon project for @kbn/security-solution-fixtures-plugin
-  channel: ''
-  owner: '@elastic/kibana-cases'
+  channel: ""
+  owner: "@elastic/kibana-cases"
   metadata:
     sourceRoot: x-pack/platform/test/cases_api_integration/common/plugins/security_solution
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/files-plugin'
-  - '@kbn/features-plugin'
-  - '@kbn/spaces-plugin'
-  - '@kbn/security-plugin'
+  - "@kbn/core"
+  - "@kbn/files-plugin"
+  - "@kbn/features-plugin"
+  - "@kbn/spaces-plugin"
+  - "@kbn/security-plugin"
 tags:
   - plugin
   - prod
@@ -33,5 +33,5 @@ fileGroups:
     - public/**/*
     - server/**/*
     - common/**/*
-    - '!target/**/*'
+    - "!target/**/*"
 tasks: {}

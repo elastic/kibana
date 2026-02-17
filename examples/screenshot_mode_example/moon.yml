@@ -3,29 +3,29 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/screenshot-mode-example-plugin'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/screenshot-mode-example-plugin'
+id: "@kbn/screenshot-mode-example-plugin"
 type: unknown
 owners:
-  defaultOwner: '@elastic/response-ops'
+  defaultOwner: "@elastic/response-ops"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/screenshot-mode-example-plugin'
+  name: "@kbn/screenshot-mode-example-plugin"
   description: Moon project for @kbn/screenshot-mode-example-plugin
-  channel: ''
-  owner: '@elastic/response-ops'
+  channel: ""
+  owner: "@elastic/response-ops"
   metadata:
     sourceRoot: examples/screenshot_mode_example
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/navigation-plugin'
-  - '@kbn/screenshot-mode-plugin'
-  - '@kbn/usage-collection-plugin'
-  - '@kbn/developer-examples-plugin'
-  - '@kbn/analytics'
-  - '@kbn/i18n-react'
-  - '@kbn/shared-ux-router'
+  - "@kbn/core"
+  - "@kbn/navigation-plugin"
+  - "@kbn/screenshot-mode-plugin"
+  - "@kbn/usage-collection-plugin"
+  - "@kbn/developer-examples-plugin"
+  - "@kbn/analytics"
+  - "@kbn/i18n-react"
+  - "@kbn/shared-ux-router"
 tags:
   - plugin
   - prod
@@ -38,5 +38,5 @@ fileGroups:
     - public/**/*.tsx
     - common/**/*.ts
     - server/**/*.ts
-    - '!target/**/*'
+    - "!target/**/*"
 tasks: {}

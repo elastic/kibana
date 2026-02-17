@@ -3,18 +3,18 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/shared-ux-file-types'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/shared-ux-file-types'
+id: "@kbn/shared-ux-file-types"
 type: unknown
 owners:
-  defaultOwner: '@elastic/appex-sharedux'
+  defaultOwner: "@elastic/appex-sharedux"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/shared-ux-file-types'
+  name: "@kbn/shared-ux-file-types"
   description: Moon project for @kbn/shared-ux-file-types
-  channel: ''
-  owner: '@elastic/appex-sharedux'
+  channel: ""
+  owner: "@elastic/appex-sharedux"
   metadata:
     sourceRoot: src/platform/packages/shared/shared-ux/file/types
 tags:
@@ -25,6 +25,6 @@ tags:
   - shared
 fileGroups:
   src:
-    - '*.ts'
-    - '!target/**/*'
+    - "*.ts"
+    - "!target/**/*"
 tasks: {}

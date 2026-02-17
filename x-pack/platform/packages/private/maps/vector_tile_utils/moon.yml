@@ -3,22 +3,22 @@
 #  then regenerate this file with: 'node scripts/regenerate_moon_projects.js --update --filter @kbn/maps-vector-tile-utils'
 
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/maps-vector-tile-utils'
+id: "@kbn/maps-vector-tile-utils"
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-presentation'
+  defaultOwner: "@elastic/kibana-presentation"
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/maps-vector-tile-utils'
+  name: "@kbn/maps-vector-tile-utils"
   description: Moon project for @kbn/maps-vector-tile-utils
-  channel: ''
-  owner: '@elastic/kibana-presentation'
+  channel: ""
+  owner: "@elastic/kibana-presentation"
   metadata:
     sourceRoot: x-pack/platform/packages/private/maps/vector_tile_utils
 dependsOn:
-  - '@kbn/rison'
+  - "@kbn/rison"
 tags:
   - shared-common
   - package
@@ -28,19 +28,19 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
-    - '!target/**/*'
+    - "**/*.ts"
+    - "**/*.tsx"
+    - "!target/**/*"
 tasks:
   jest:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
   jestCI:
     args:
-      - '--config'
+      - --config
       - $projectRoot/jest.config.js
     inputs:
-      - '@group(src)'
+      - "@group(src)"
