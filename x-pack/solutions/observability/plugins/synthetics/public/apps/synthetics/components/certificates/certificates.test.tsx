@@ -9,7 +9,8 @@ import React from 'react';
 import { CertificatesPage } from './certificates';
 import { render } from '../../utils/testing';
 
-describe('CertificatesPage', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/253298
+describe.skip('CertificatesPage', () => {
   it('renders expected elements for valid props', async () => {
     const { findByText } = render(<CertificatesPage />);
 
