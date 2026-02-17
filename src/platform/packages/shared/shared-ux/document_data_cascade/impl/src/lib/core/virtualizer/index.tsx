@@ -16,7 +16,10 @@ type UseVirtualizerOptions = Parameters<typeof useVirtualizer>[0];
 export type UseVirtualizerReturnType = ReturnType<typeof useVirtualizer>;
 
 export interface CascadeVirtualizerProps<G extends GroupNode>
-  extends Pick<UseVirtualizerOptions, 'getScrollElement' | 'overscan' | 'initialOffset'> {
+  extends Pick<
+    UseVirtualizerOptions,
+    'getScrollElement' | 'overscan' | 'initialOffset' | 'initialRect'
+  > {
   rows: Row<G>[];
   /**
    * setting a value of true causes the active group root row
@@ -175,6 +178,7 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
   getScrollElement,
   onStateChange,
   initialOffset,
+  initialRect,
 }: CascadeVirtualizerProps<G>): CascadeVirtualizerReturnValue => {
   const virtualizedRowsSizeCacheRef = useRef<Map<number, number>>(new Map());
 
@@ -205,6 +209,7 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
       overscan,
       rangeExtractor,
       initialOffset,
+      initialRect,
       onChange: (rowVirtualizerInstance) => {
         // @ts-expect-error -- the itemsSizeCache property does exist,
         // but it not included in the type definition because it is marked as a private property,
@@ -218,6 +223,7 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
       estimatedRowHeight,
       getScrollElement,
       initialOffset,
+      initialRect,
       overscan,
       rangeExtractor,
       rows.length,

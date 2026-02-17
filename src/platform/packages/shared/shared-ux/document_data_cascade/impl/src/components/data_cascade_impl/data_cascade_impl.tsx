@@ -65,6 +65,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   enableStickyGroupHeader = true,
   allowMultipleRowToggle = false,
   initialScrollOffset,
+  initialRect,
   cascadeRef,
 }: DataCascadeImplProps<G, L>) {
   const rowElement = Children.only(children);
@@ -149,6 +150,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     estimatedRowHeight: size === 's' ? 32 : size === 'm' ? 40 : 48,
     onStateChange: collectVirtualizerStateChanges,
     initialOffset: initialScrollOffset,
+    initialRect,
   });
 
   const {

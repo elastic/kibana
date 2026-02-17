@@ -261,6 +261,10 @@ interface DataCascadeImplBaseProps<G extends GroupNode, L extends LeafNode>
    * Initial vertical scroll position in pixels. When set, the list and scroll container start at this offset.
    */
   initialScrollOffset?: number;
+  /**
+   * Initial scroll rectangle dimensions. When set, the list and scroll container start at this size.
+   */
+  initialRect?: { width: number; height: number };
   children: React.ReactElement<DataCascadeRowProps<G, L>>;
   cascadeRef: React.ForwardedRef<DataCascadeImplRef<G, L>>;
 }

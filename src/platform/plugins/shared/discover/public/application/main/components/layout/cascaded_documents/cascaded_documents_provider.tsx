@@ -10,7 +10,7 @@
 import { isOfAggregateQueryType, type AggregateQuery, type TimeRange } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ReactElement } from 'react';
-import { createContext, useContext, useRef } from 'react';
+import { createContext, useContext } from 'react';
 import type {
   CascadedDocumentsState,
   DataCascadeUiState,
@@ -63,16 +63,4 @@ export const useCascadedDocumentsContext = () => {
   }
 
   return context;
-};
-
-export const useCascadedInitialUiStateRef = () => {
-  const context = useCascadedDocumentsContext();
-
-  const initialUiStateRef = useRef(context.dataCascadeUiState);
-
-  if (initialUiStateRef.current === undefined && context.dataCascadeUiState !== undefined) {
-    initialUiStateRef.current = structuredClone(context.dataCascadeUiState);
-  }
-
-  return initialUiStateRef;
 };
