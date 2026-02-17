@@ -8,6 +8,3 @@
 export * from './engine_descriptor/constants';
 export * from './engine_descriptor/types';
 export * from './engine_descriptor';
-export * from './entity_maintainers_client/constants';
-export * from './entity_maintainers_client/types';
-export * from './entity_maintainers_client';

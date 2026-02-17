@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+export * from './constants';
+export * from './types';
+
 import type { ISavedObjectsRepository } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
 import type { EntityMaintainerTaskEntry } from './constants';
@@ -12,6 +15,11 @@ import { EntityMaintainerTaskEntry as EntityMaintainerTaskEntrySchema } from './
 import { EntityMaintainersTasksTypeName, EntityMaintainersTasksId } from './types';
 
 const ENTITY_MAINTAINERS_TASKS_ATTR = 'entity-maintainers-tasks' as const;
+
+type EntityMaintainersTasksAttributes = Record<
+  typeof ENTITY_MAINTAINERS_TASKS_ATTR,
+  EntityMaintainerTaskEntry[]
+>;
 
 export class EntityMaintainersTasksClient {
   constructor(
@@ -21,9 +29,10 @@ export class EntityMaintainersTasksClient {
 
   async getAll(): Promise<EntityMaintainerTaskEntry[]> {
     try {
-      const doc = await this.repository.get<
-        Record<typeof ENTITY_MAINTAINERS_TASKS_ATTR, unknown[]>
-      >(EntityMaintainersTasksTypeName, EntityMaintainersTasksId);
+      const doc = await this.repository.get<EntityMaintainersTasksAttributes>(
+        EntityMaintainersTasksTypeName,
+        EntityMaintainersTasksId
+      );
       const raw = doc.attributes[ENTITY_MAINTAINERS_TASKS_ATTR] ?? [];
       return raw.map((entry) => EntityMaintainerTaskEntrySchema.parse(entry));
     } catch (err) {
@@ -38,9 +47,11 @@ export class EntityMaintainersTasksClient {
   async addOrUpdate(entry: EntityMaintainerTaskEntry): Promise<void> {
     const taskEntry = EntityMaintainerTaskEntrySchema.parse(entry);
     try {
-      const existing = await this.repository.get<
-        Record<typeof ENTITY_MAINTAINERS_TASKS_ATTR, EntityMaintainerTaskEntry[]>
-      >(EntityMaintainersTasksTypeName, EntityMaintainersTasksId);
+      const existing = await this.repository.get<EntityMaintainersTasksAttributes>(
+        EntityMaintainersTasksTypeName,
+        EntityMaintainersTasksId
+      );
+      
       const tasks = existing.attributes[ENTITY_MAINTAINERS_TASKS_ATTR] ?? [];
       this.logger.debug(`Tasks registered: ${JSON.stringify(tasks)}`);
       const filtered = tasks.filter((t) => t.id !== taskEntry.id);
@@ -49,12 +60,7 @@ export class EntityMaintainersTasksClient {
       });
     } catch (err) {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        this.logger.debug(`Creating entity maintainers tasks document with first entry`);
-        await this.repository.create(
-          EntityMaintainersTasksTypeName,
-          { [ENTITY_MAINTAINERS_TASKS_ATTR]: [taskEntry] },
-          { id: EntityMaintainersTasksId }
-        );
+        await this.create(taskEntry);
         return;
       }
       this.logger.error(
@@ -62,5 +68,14 @@ export class EntityMaintainersTasksClient {
       );
       throw err;
     }
+  }
+
+  private async create(entry: EntityMaintainerTaskEntry): Promise<void> {
+    this.logger.debug(`Creating entity maintainers tasks document with first entry`);
+    await this.repository.create(
+      EntityMaintainersTasksTypeName,
+      { [ENTITY_MAINTAINERS_TASKS_ATTR]: [entry] },
+      { id: EntityMaintainersTasksId }
+    );
   }
 }

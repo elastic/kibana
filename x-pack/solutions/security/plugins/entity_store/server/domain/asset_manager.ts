@@ -20,9 +20,9 @@ import { installElasticsearchAssets, uninstallElasticsearchAssets } from './asse
 import type {
   EngineDescriptor,
   EngineDescriptorClient,
-  EntityMaintainersTasksClient,
   LogExtractionState,
 } from './definitions/saved_objects';
+import type { EntityMaintainersTasksClient } from '../infra/saved-objects/entity_maintainers_client';
 import type { LogExtractionBodyParams } from '../routes/constants';
 import { ENGINE_STATUS, ENTITY_STORE_STATUS } from './constants';
 import type {
