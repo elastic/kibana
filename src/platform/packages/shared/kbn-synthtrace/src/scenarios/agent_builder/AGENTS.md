@@ -1,10 +1,16 @@
-# Developer & Agent Instructions
+# Synthtrace Scenarios for Observability Agent Builder
 
-## Context: File Locations & Paths
+**Audience**: LLM coding agents working on Synthtrace scenarios for Agent Builder tools and AI Insights.
 
-- **Tools Source:** `@x-pack/solutions/observability/plugins/observability_agent_builder/server/tools/`
-- **Tests:** `@x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/observability_agent_builder/tools/`
-- **Synthtrace Scenarios:** `@src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/`
+Every tool and AI Insight must have a Synthtrace scenario that generates realistic synthetic data for testing. Scenarios live under `tools/` and `ai_insights/` subdirectories respectively.
+
+> **See also**: [Tool Development Guidelines](../../../../../../../../x-pack/solutions/observability/plugins/observability_agent_builder/server/tools/AGENTS.md) for tool design principles and APM data types.
+
+## File Locations
+
+- **Tools Source:** `x-pack/solutions/observability/plugins/observability_agent_builder/server/tools/`
+- **Tests:** `x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/observability_agent_builder/tools/`
+- **Synthtrace Scenarios:** `src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/`
 
 ## How to Validate Tools
 
@@ -34,6 +40,7 @@ To execute a tool via the Kibana API, use the following `curl` command.
 curl -X POST http://localhost:5601/api/agent_builder/tools/_execute \
   -u elastic:changeme \
   -H 'kbn-xsrf: true' \
+  -H 'x-elastic-internal-origin: kibana' \
   -H 'Content-Type: application/json' \
   -d '{
         "tool_id": "observability.<tool_name>",
@@ -62,6 +69,7 @@ node scripts/synthtrace src/platform/packages/shared/kbn-synthtrace/src/scenario
 curl -X POST http://localhost:5601/internal/observability_agent_builder/ai_insights/alert \
   -u elastic:changeme \
   -H 'kbn-xsrf: true' \
+  -H 'x-elastic-internal-origin: kibana' \
   -H 'Content-Type: application/json' \
   -d '{
         "alert_id": "my_alert_id"
