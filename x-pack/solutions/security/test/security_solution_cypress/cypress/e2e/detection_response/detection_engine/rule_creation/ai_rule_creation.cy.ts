@@ -178,7 +178,7 @@ describe(
       // Verify the agent builder conversation flyout opens
       assertAgentBuilderConversationFlyoutVisible();
       assertAgentBuilderConversationInputEditorContains(
-        'Review the detection rule provided and help improve it'
+        'Analyze the attached Security detection rule and provide actionable insights.'
       );
     });
 
