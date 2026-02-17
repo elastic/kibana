@@ -23,6 +23,7 @@ import type {
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { DRAG_DROP_EXTRA_TARGETS_PADDING } from '@kbn/lens-common';
 import { getAbsoluteDateRange } from '../../utils';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { useAddLayerButton } from '../../app_plugin/shared/edit_on_the_fly/use_add_layer_button';
@@ -274,10 +275,9 @@ const componentStyles = {
       overflowX: 'hidden',
       // Extend the scroll container to the left to accommodate drag-drop extra targets
       // (e.g., "Alt/Option to duplicate" tooltip) that are positioned to the left of drop zones.
-      // Extra targets are 280px wide with 8px gap, so 296px provides enough space.
       // Use transparent background here - the EuiForm inside has its own background.
-      paddingLeft: 296,
-      marginLeft: -296,
+      paddingLeft: DRAG_DROP_EXTRA_TARGETS_PADDING,
+      marginLeft: -DRAG_DROP_EXTRA_TARGETS_PADDING,
     }),
   visualizationToolbar: ({ euiTheme }: UseEuiTheme) =>
     css({

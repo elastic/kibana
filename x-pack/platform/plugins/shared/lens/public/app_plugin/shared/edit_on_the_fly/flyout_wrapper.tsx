@@ -26,6 +26,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from '@kbn/lens-common';
 import type { FlyoutWrapperProps } from './types';
 
 const applyAndCloseLabel = i18n.translate('xpack.lens.config.applyFlyoutLabel', {
@@ -159,15 +160,14 @@ export const FlyoutWrapper = ({
         className="lnsEditFlyoutBody"
         css={css`
           // styles needed to display extra drop targets that are outside of the config panel main area
-          // Extra targets are 280px wide with 8px gap, so 296px provides enough space.
           overflow-y: auto;
-          padding-left: 296px;
-          margin-left: -296px;
+          padding-left: ${DRAG_DROP_EXTRA_TARGETS_PADDING}px;
+          margin-left: -${DRAG_DROP_EXTRA_TARGETS_PADDING}px;
           pointer-events: none;
           // Override the default max-width of drag-drop extra targets to reduce
           // horizontal overflow space requirements
           .domDroppable__extraTargets {
-            width: 280px;
+            width: ${DRAG_DROP_EXTRA_TARGETS_WIDTH}px;
           }
           .euiFlyoutBody__overflow {
             transform: initial;
