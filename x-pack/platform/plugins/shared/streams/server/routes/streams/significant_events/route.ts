@@ -211,8 +211,15 @@ const generateSignificantEventsRoute = createServerRoute({
     logger,
     telemetry,
   }): Promise<SignificantEventsGenerateResponse> => {
-    const { streamsClient, licensing, inferenceClient, uiSettingsClient, soClient, featureClient } =
-      await getScopedClients({ request });
+    const {
+      streamsClient,
+      licensing,
+      inferenceClient,
+      uiSettingsClient,
+      soClient,
+      featureClient,
+      scopedClusterClient,
+    } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
@@ -243,6 +250,7 @@ const generateSignificantEventsRoute = createServerRoute({
           featureClient,
           logger: logger.get('significant_events'),
           signal: getRequestAbortSignal(request),
+          esClient: scopedClusterClient.asCurrentUser,
         }
       )
     ).pipe(
@@ -254,9 +262,7 @@ const generateSignificantEventsRoute = createServerRoute({
           stream_type: getStreamTypeFromDefinition(definition),
           input_tokens_used: tokensUsed.prompt,
           output_tokens_used: tokensUsed.completion,
-          tool_calls: toolUsage.get_stream_features.calls,
-          tool_failures: toolUsage.get_stream_features.failures,
-          tool_latency_ms: toolUsage.get_stream_features.latency_ms,
+          tool_usage: toolUsage,
         });
 
         return {
