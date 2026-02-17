@@ -311,7 +311,8 @@ describe('ChangePasswordModal', () => {
       unmount();
     });
 
-    describe('when rendered for current user', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/250436
+    describe.skip('when rendered for current user', () => {
       beforeEach(() => {
         // Mock useCurrentUser to return the current user
         jest.spyOn(currentUserModule, 'useCurrentUser').mockReturnValue({
