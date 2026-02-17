@@ -74,7 +74,7 @@ function usingWorkerProc<T>(config: OptimizerConfig, fn: (proc: ChildProcess) =>
           // If that fails in other mac machines with lower defaults for maxfiles and maxfilesperproc
           // or just low powerful ones we need to default to polling instead of relying in the OS events watcher system.
           // That can be done in the worker/run_compilers file.
-          WATCHPACK_WATCHER_LIMIT: '4000',
+          WATCHPACK_WATCHER_LIMIT: undefined,
           ...process.env,
         },
       });
