@@ -13,7 +13,7 @@ import { CONTENT_LIST_ACTIONS } from './types';
 /**
  * State reducer for client-controlled state.
  *
- * Handles only user-driven state mutations (filters, sort).
+ * Handles user-driven state mutations (filters, sort, pagination).
  * Query data (items, loading, error) is managed by React Query directly.
  *
  * @param state - Current client state.
@@ -32,6 +32,20 @@ export const reducer = (
           field: action.payload.field,
           direction: action.payload.direction,
         },
+        // Reset to first page when sort changes to avoid stale page offsets.
+        page: { ...state.page, index: 0 },
+      };
+
+    case CONTENT_LIST_ACTIONS.SET_PAGE_INDEX:
+      return {
+        ...state,
+        page: { ...state.page, index: action.payload.index },
+      };
+
+    case CONTENT_LIST_ACTIONS.SET_PAGE_SIZE:
+      return {
+        ...state,
+        page: { index: 0, size: action.payload.size },
       };
 
     default:

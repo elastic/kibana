@@ -116,7 +116,7 @@ function mergedFieldStats(idFieldName: string, fields: EntityField[]) {
   return fields
     .map((field) => {
       const { retention, destination: dest } = field;
-      const recentDest = castDestType(recentData(dest), field);
+      const recentDest = recentData(dest);
       if (dest === idFieldName) {
         return null; // id field should not be merged
       }
@@ -164,7 +164,7 @@ function castSrcType(field: EntityField) {
     case 'keyword':
       return `TO_STRING(${field.source})`;
     case 'date':
-      return `TO_STRING(${field.source})`;
+      return `TO_DATETIME(${field.source})`;
     case 'boolean':
       return `TO_BOOLEAN(${field.source})`;
     case 'long':
@@ -179,16 +179,5 @@ function castSrcType(field: EntityField) {
       return `${field.source}`;
     default:
       return field.source;
-  }
-}
-
-function castDestType(fieldName: string, field: EntityField) {
-  // We only to cast date to string and back to the original type
-  // because of a limitation in ESQL.
-  switch (field.mapping?.type) {
-    case 'date':
-      return `TO_DATETIME(${fieldName})`;
-    default:
-      return fieldName;
   }
 }
