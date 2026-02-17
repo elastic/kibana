@@ -303,6 +303,10 @@ const CustomChartSectionWrapper = ({
   const isComponentVisible = !!layoutProps.chart && !layoutProps.chart.hidden;
 
   if (!isComponentVisible && renderCustomChartToggleActions) {
+    if (!layoutProps.chart) {
+      return null;
+    }
+
     const collapsedTitle = chartSectionConfig.renderCollapsedTitle?.(fetchParams);
     return (
       <ChartSectionTemplate

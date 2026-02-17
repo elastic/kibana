@@ -285,6 +285,10 @@ export function UnifiedHistogramChart({
   };
 
   if (Boolean(renderCustomChartToggleActions) && !chartVisible) {
+    if (!isChartAvailable) {
+      return null;
+    }
+
     return (
       <ChartSectionTemplate
         {...a11yCommonProps}
