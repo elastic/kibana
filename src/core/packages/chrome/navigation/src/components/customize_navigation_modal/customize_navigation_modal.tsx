@@ -11,6 +11,8 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCallOut,
   EuiDragDropContext,
   EuiDroppable,
   EuiFlexGroup,
@@ -20,6 +22,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSpacer,
   euiDragDropReorder,
   useGeneratedHtmlId,
   type DropResult,
@@ -30,9 +33,12 @@ import type {
   NavigationCustomization,
 } from '@kbn/core-chrome-browser';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LockedItem } from './locked_item';
 import { DraggableItem } from './draggable_item';
+
+const CALLOUT_DISMISSED_KEY = 'kibana.customizeNavigation.calloutDismissed';
 
 export interface CustomizeNavigationModalProps {
   solutionId: SolutionId;
@@ -54,11 +60,23 @@ export const CustomizeNavigationModal = ({
 }: CustomizeNavigationModalProps) => {
   const [items, setItems] = useState<NavigationItemInfo[]>(() => getNavigationPrimaryItems());
   const [isSaving, setIsSaving] = useState(false);
+  const [isCalloutVisible, setIsCalloutVisible] = useState(
+    () => localStorage.getItem(CALLOUT_DISMISSED_KEY) !== 'true'
+  );
   const modalTitleId = useGeneratedHtmlId();
 
   const modalCss = css`
     width: 576px;
   `;
+
+  const calloutCss = css`
+    position: relative;
+  `;
+
+  const dismissCallout = useCallback(() => {
+    setIsCalloutVisible(false);
+    localStorage.setItem(CALLOUT_DISMISSED_KEY, 'true');
+  }, []);
 
   // Enable editing mode
   useEffect(() => {
@@ -131,6 +149,37 @@ export const CustomizeNavigationModal = ({
       </EuiModalHeader>
       <EuiModalBody>
         <>
+          {isCalloutVisible && (
+            <>
+              <EuiCallOut
+                size="s"
+                color="primary"
+                css={calloutCss}
+                title={
+                  <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+                    <EuiFlexItem>
+                      {i18n.translate(
+                        'core.ui.chrome.sideNavigation.customizeNavigation.calloutText',
+                        { defaultMessage: 'Turned-off items are always accessible under "More."' }
+                      )}
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonIcon
+                        iconType="cross"
+                        color="primary"
+                        aria-label={i18n.translate(
+                          'core.ui.chrome.sideNavigation.customizeNavigation.dismissCallout',
+                          { defaultMessage: 'Dismiss' }
+                        )}
+                        onClick={dismissCallout}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                }
+              />
+              <EuiSpacer size="m" />
+            </>
+          )}
           {lockedItems.length > 0 && (
             <>
               {lockedItems.map((item) => (
