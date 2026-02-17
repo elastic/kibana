@@ -2,8 +2,11 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: bk-kibana-evals-esql
+  name: bk-kibana-evals-weekly-llm-evals
   description: 'Runs weekly LLM eval suites (fanout across all LiteLLM models)'
+  links:
+    - url: 'https://buildkite.com/elastic/kibana-evals-weekly-llm-evals'
+      title: Pipeline link
 spec:
   type: buildkite-pipeline
   owner: 'group:obs-ai-team'
