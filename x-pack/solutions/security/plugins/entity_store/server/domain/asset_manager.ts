@@ -213,13 +213,14 @@ export class AssetManager {
 
   public async getPrivileges(
     request: KibanaRequest,
-    additionalIndexPattern: string = ''
+    additionalIndexPatterns: string[] = []
   ): Promise<CheckPrivilegesResponse> {
     const checkPrivileges = this.security.authz.checkPrivilegesDynamicallyWithRequest(request);
 
     const sourceIndexPatterns = await this.logsExtractionClient.getIndexPatterns(
-      additionalIndexPattern
+      additionalIndexPatterns
     );
+    
     const kibanaPrivileges = this.security.authz.actions.savedObject.get(
       EngineDescriptorTypeName,
       'create'
