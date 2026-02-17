@@ -59,6 +59,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
   const [isIntegrationPopoverOpen, setIsIntegrationPopoverOpen] = useState(false);
 
+  // Reset state when popover opens and pre-select initial sources
   useEffect(() => {
     if (isOpen) {
       // Clear filters when popover opens
@@ -66,6 +67,8 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
       setSelectedIntegrations([]);
       setSearchValue('');
       setIsIntegrationPopoverOpen(false);
+      // Pre-select sources that are already in the query
+      setSelectedItems(selectedSources);
     }
   }, [isOpen]);
 
