@@ -2,14 +2,20 @@
 plugins:
   enabled:
     - apm
-    - console
-    - dashboard
+    - banners
     - cloud_security_posture
+    - console
+    - custom_branding
+    - dashboard
+    - data_views
     - discover_enhanced
     - entity_store
     - fleet
+    - gen_ai_settings
+    - global_search
     - index_management
     - infra
+    - intercepts
     - lens
     - maps
     - observability
@@ -20,14 +26,14 @@ plugins:
     - search_homepage
     - security
     - security_solution
+    - share
     - slo
     - spaces
     - streams
     - streams_app
     - transform
-    - dashboard
     - workflows_extensions
-    - global_search
+    - workflows_management
   disabled:
 
 packages:

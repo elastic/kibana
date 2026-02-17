@@ -30,7 +30,11 @@ import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
-import { horizontalAlignmentSchema, leftRightAlignmentSchema } from '../alignments';
+import {
+  horizontalAlignmentSchema,
+  leftRightAlignmentSchema,
+  beforeAfterAlignmentSchema,
+} from '../alignments';
 
 const compareToSchemaShared = schema.object(
   {
@@ -56,32 +60,25 @@ const barBackgroundChartSchema = schema.object({
 export const complementaryVizSchemaNoESQL = schema.oneOf([
   barBackgroundChartSchema.extends({
     /**
-     * Goal value
+     * Max value
      */
-    goal_value: metricOperationDefinitionSchema,
+    max_value: metricOperationDefinitionSchema,
   }),
   schema.object({
     type: schema.literal('trend'),
   }),
 ]);
 
-export const complementaryVizSchemaESQL = schema.oneOf([
-  barBackgroundChartSchema.extends(
-    {
-      /**
-       * Goal value
-       */
-      goal_value: esqlColumnSchema,
-    },
-    { meta: { id: 'metricComplementaryBar' } }
-  ),
-  schema.object(
-    {
-      type: schema.literal('trend'),
-    },
-    { meta: { id: 'metricComplementaryTrend', description: 'Trend complementary viz' } }
-  ),
-]);
+// Note: 'trend' type is not supported for ES|QL yet
+export const complementaryVizSchemaESQL = barBackgroundChartSchema.extends(
+  {
+    /**
+     * Max value
+     */
+    max_value: esqlColumnSchema,
+  },
+  { meta: { id: 'metricComplementaryBar' } }
+);
 
 const metricStateBackgroundChartSchemaNoESQL = {
   /**
@@ -130,13 +127,13 @@ const metricStatePrimaryMetricOptionsSchema = {
        */
       value: horizontalAlignmentSchema({
         meta: { description: 'Alignments for value' },
-        defaultValue: LENS_METRIC_STATE_DEFAULTS.valuesTextAlign,
+        defaultValue: LENS_METRIC_STATE_DEFAULTS.primaryAlign,
       }),
     },
     {
       defaultValue: {
         labels: LENS_METRIC_STATE_DEFAULTS.titlesTextAlign,
-        value: LENS_METRIC_STATE_DEFAULTS.valuesTextAlign,
+        value: LENS_METRIC_STATE_DEFAULTS.primaryAlign,
       },
       meta: { id: 'metricPrimaryMetricAlignments' },
     }
@@ -187,6 +184,15 @@ const metricStateSecondaryMetricOptionsSchema = {
    * Prefix
    */
   prefix: schema.maybe(schema.string({ meta: { description: 'Prefix' } })),
+  /**
+   * Label position relative to the secondary metric value. Possible values:
+   * - 'before': Label appears before the value
+   * - 'after': Label appears after the value
+   */
+  label_position: beforeAfterAlignmentSchema({
+    meta: { description: 'Label position relative to the secondary metric value' },
+    defaultValue: LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition,
+  }),
   /**
    * Compare to
    */
