@@ -13,6 +13,12 @@ import { UserConnectorTokenClient } from './user_connector_token_client';
 
 export const MAX_TOKENS_RETURNED = 1;
 
+const PER_USER_TOKEN_PREFIX = 'per-user:';
+const SHARED_TOKEN_PREFIX = 'shared:';
+
+const PER_USER_TOKEN_SCOPE = 'per-user' as const;
+const SHARED_TOKEN_SCOPE = 'shared' as const;
+
 interface ConstructorOptions {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -59,15 +65,22 @@ export class ConnectorTokenClient {
     this.userClient = new UserConnectorTokenClient(options);
   }
 
-  private parseTokenId(id: string): { scope: 'per-user' | 'shared'; actualId: string } {
-    if (id.startsWith('per-user:')) {
-      return { scope: 'per-user', actualId: id.substring(9) };
+  private getScope(profileUid?: string): typeof PER_USER_TOKEN_SCOPE | typeof SHARED_TOKEN_SCOPE {
+    return profileUid ? PER_USER_TOKEN_SCOPE : SHARED_TOKEN_SCOPE;
+  }
+
+  private parseTokenId(id: string): {
+    scope: typeof PER_USER_TOKEN_SCOPE | typeof SHARED_TOKEN_SCOPE;
+    actualId: string;
+  } {
+    if (id.startsWith(PER_USER_TOKEN_PREFIX)) {
+      return { scope: PER_USER_TOKEN_SCOPE, actualId: id.substring(PER_USER_TOKEN_PREFIX.length) };
     }
-    if (id.startsWith('shared:')) {
-      return { scope: 'shared', actualId: id.substring(7) };
+    if (id.startsWith(SHARED_TOKEN_PREFIX)) {
+      return { scope: SHARED_TOKEN_SCOPE, actualId: id.substring(SHARED_TOKEN_PREFIX.length) };
     }
     // Default unprefixed IDs to shared for backward compatibility
-    return { scope: 'shared', actualId: id };
+    return { scope: SHARED_TOKEN_SCOPE, actualId: id };
   }
 
   private log({
@@ -76,7 +89,7 @@ export class ConnectorTokenClient {
     fields,
   }: {
     method: string;
-    scope: 'per-user' | 'shared';
+    scope: typeof PER_USER_TOKEN_SCOPE | typeof SHARED_TOKEN_SCOPE;
     fields: Record<string, string | boolean>;
   }): void {
     const parts = Object.entries(fields).map(([key, value]) =>
@@ -104,9 +117,9 @@ export class ConnectorTokenClient {
     credentialType?: string;
   }): Promise<UserConnectorToken>;
   public async create(options: CreateOptions): Promise<ConnectorToken | UserConnectorToken> {
-    const scope = options.profileUid ? 'per-user' : 'shared';
+    const scope = this.getScope(options.profileUid);
     this.log({ method: 'create', scope, fields: { connectorId: options.connectorId } });
-    if (options.profileUid) {
+    if (scope === PER_USER_TOKEN_SCOPE) {
       return this.userClient.create(options as Parameters<typeof this.userClient.create>[0]);
     }
     return this.sharedClient.create(options as Parameters<typeof this.sharedClient.create>[0]);
@@ -118,7 +131,7 @@ export class ConnectorTokenClient {
   public async update(options: UpdateOptions): Promise<ConnectorToken | UserConnectorToken | null> {
     const { scope, actualId } = this.parseTokenId(options.id);
     this.log({ method: 'update', scope, fields: { id: actualId } });
-    if (scope === 'per-user') {
+    if (scope === PER_USER_TOKEN_SCOPE) {
       return this.userClient.update(options);
     }
     if (options.token) {
@@ -164,9 +177,9 @@ export class ConnectorTokenClient {
     hasErrors: boolean;
     connectorToken: ConnectorToken | UserConnectorToken | null;
   }> {
-    const scope = options.profileUid ? 'per-user' : 'shared';
+    const scope = this.getScope(options.profileUid);
     this.log({ method: 'get', scope, fields: { connectorId: options.connectorId } });
-    if (options.profileUid) {
+    if (scope === PER_USER_TOKEN_SCOPE) {
       return this.userClient.get(options as Parameters<typeof this.userClient.get>[0]);
     }
     return this.sharedClient.get(options as Parameters<typeof this.sharedClient.get>[0]);
@@ -181,13 +194,13 @@ export class ConnectorTokenClient {
     tokenType?: string;
     credentialType?: string;
   }): Promise<void> {
-    const scope = options.profileUid ? 'per-user' : 'shared';
+    const scope = this.getScope(options.profileUid);
     this.log({
       method: 'deleteConnectorTokens',
       scope,
       fields: { connectorId: options.connectorId },
     });
-    if (options.profileUid) {
+    if (scope === PER_USER_TOKEN_SCOPE) {
       return this.userClient.deleteConnectorTokens(
         options as Parameters<typeof this.userClient.deleteConnectorTokens>[0]
       );
@@ -198,9 +211,9 @@ export class ConnectorTokenClient {
   }
 
   public async updateOrReplace(options: UpdateOrReplaceOptions) {
-    const scope = options.profileUid ? 'per-user' : 'shared';
+    const scope = this.getScope(options.profileUid);
     this.log({ method: 'updateOrReplace', scope, fields: { connectorId: options.connectorId } });
-    if (options.profileUid) {
+    if (scope === PER_USER_TOKEN_SCOPE) {
       return this.userClient.updateOrReplace(
         options as Parameters<typeof this.userClient.updateOrReplace>[0]
       );
@@ -223,13 +236,13 @@ export class ConnectorTokenClient {
     tokenType?: string;
     credentialType?: string;
   }): Promise<ConnectorToken | UserConnectorToken> {
-    const scope = options.profileUid ? 'per-user' : 'shared';
+    const scope = this.getScope(options.profileUid);
     this.log({
       method: 'createWithRefreshToken',
       scope,
       fields: { connectorId: options.connectorId },
     });
-    if (options.profileUid) {
+    if (scope === PER_USER_TOKEN_SCOPE) {
       return this.userClient.createWithRefreshToken(
         options as Parameters<typeof this.userClient.createWithRefreshToken>[0]
       );
@@ -253,7 +266,7 @@ export class ConnectorTokenClient {
   }): Promise<ConnectorToken | UserConnectorToken | null> {
     const { scope, actualId } = this.parseTokenId(options.id);
     this.log({ method: 'updateWithRefreshToken', scope, fields: { id: actualId } });
-    if (scope === 'per-user') {
+    if (scope === PER_USER_TOKEN_SCOPE) {
       return this.userClient.updateWithRefreshToken(options);
     }
     return this.sharedClient.updateWithRefreshToken(options);
