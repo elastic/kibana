@@ -8,6 +8,7 @@
  */
 
 import type { Document } from 'yaml';
+import type { monaco } from '@kbn/monaco';
 import type { DynamicStepContextSchema, WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { validateVariable } from './validate_variable';
@@ -18,7 +19,8 @@ export function validateVariables(
   variableItems: VariableItem[],
   workflowGraph: WorkflowGraph,
   workflowDefinition: WorkflowYaml,
-  yamlDocument?: Document | null
+  yamlDocument?: Document | null,
+  model?: monaco.editor.ITextModel
 ): YamlValidationResult[] {
   const errors: YamlValidationResult[] = [];
 
@@ -27,7 +29,21 @@ export function validateVariables(
 
     let context: typeof DynamicStepContextSchema;
     try {
-      context = getContextSchemaForPath(workflowDefinition, workflowGraph, path, yamlDocument);
+      const offset =
+        yamlDocument && model
+          ? model.getOffsetAt({
+              lineNumber: variableItem.startLineNumber,
+              column: variableItem.startColumn,
+            })
+          : undefined;
+      context = getContextSchemaForPath(
+        workflowDefinition,
+        workflowGraph,
+        path,
+        yamlDocument,
+        offset
+      );
+
       const error = validateVariable(variableItem, context);
       if (error) {
         errors.push(error);

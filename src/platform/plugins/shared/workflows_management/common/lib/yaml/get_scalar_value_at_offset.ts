@@ -11,40 +11,72 @@ import type { Document, Scalar } from 'yaml';
 import { isPair, visit } from 'yaml';
 
 /**
- * Gets the scalar value node at a specific position in the YAML document
- * Returns the node if found, null otherwise
- * This finds the scalar VALUE node (not the key) at the given position
+ * Cache of scalar value nodes per Document. Uses WeakMap so entries are
+ * garbage-collected when the Document is no longer referenced.
+ * Nodes are sorted by range start for O(log n) offset lookups.
  */
-export function getScalarValueAtOffset(document: Document, offset: number): Scalar | null {
-  let scalarNode: Scalar | null = null;
+const scalarValueCache = new WeakMap<Document, Scalar[]>();
+
+function collectScalarValues(document: Document): Scalar[] {
+  const cached = scalarValueCache.get(document);
+  if (cached) {
+    return cached;
+  }
+
+  const scalars: Scalar[] = [];
 
   if (!document.contents) {
-    return null;
+    scalarValueCache.set(document, scalars);
+    return scalars;
   }
 
   visit(document, {
-    Scalar(key, node, ancestors) {
+    Scalar(_key, node, ancestors) {
       if (!node.range) {
         return;
       }
-      if (offset >= node.range[0] && offset <= node.range[2]) {
-        // Check if this is a value (not a key)
-        // The value will be the value of a Pair
-        const lastAncestor = ancestors?.[ancestors.length - 1];
-        if (isPair(lastAncestor) && lastAncestor.value === node) {
-          scalarNode = node;
-          return visit.BREAK;
-        }
-        // Also handle cases where the scalar might be a top-level value or in a sequence
-        // If it's not a key, treat it as a value
-        if (lastAncestor && !isPair(lastAncestor)) {
-          // This is a top-level value or sequence item
-          scalarNode = node;
-          return visit.BREAK;
-        }
+      const lastAncestor = ancestors?.[ancestors.length - 1];
+      const isValue = isPair(lastAncestor) ? lastAncestor.value === node : lastAncestor != null;
+      if (isValue) {
+        scalars.push(node);
       }
     },
   });
 
-  return scalarNode;
+  scalars.sort((a, b) => (a.range?.[0] ?? 0) - (b.range?.[0] ?? 0));
+  scalarValueCache.set(document, scalars);
+  return scalars;
+}
+
+/**
+ * Gets the scalar value node at a specific position in the YAML document
+ * Returns the node if found, null otherwise
+ * This finds the scalar VALUE node (not the key) at the given position
+ *
+ * Caches all scalar value nodes per Document (via WeakMap) so that repeated
+ * lookups for different offsets in the same document avoid re-traversing
+ * the AST -- O(log n) binary search instead of O(n) per call.
+ */
+export function getScalarValueAtOffset(document: Document, offset: number): Scalar | null {
+  const scalars = collectScalarValues(document);
+  // Binary search for the scalar whose range contains the offset
+  let lo = 0;
+  let hi = scalars.length - 1;
+  while (lo <= hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    const node = scalars[mid];
+    const { range } = node;
+    if (!range) {
+      break;
+    }
+    const [start, , end] = range;
+    if (offset < start) {
+      hi = mid - 1;
+    } else if (offset > end) {
+      lo = mid + 1;
+    } else {
+      return node;
+    }
+  }
+  return null;
 }
