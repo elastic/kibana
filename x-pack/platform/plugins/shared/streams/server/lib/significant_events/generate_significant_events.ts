@@ -15,7 +15,10 @@ import type { FeatureClient } from '../streams/feature/feature_client';
 interface Params {
   definition: Streams.all.Definition;
   connectorId: string;
+  start: number;
+  end: number;
   system?: System;
+  sampleDocsSize?: number;
   systemPrompt: string;
 }
 
@@ -35,7 +38,7 @@ export async function generateSignificantEventDefinitions(
   tokensUsed: ChatCompletionTokenCount;
   toolUsage: SignificantEventsToolUsage;
 }> {
-  const { definition, connectorId, system, systemPrompt } = params;
+  const { definition, connectorId, start, end, system, sampleDocsSize, systemPrompt } = params;
   const { inferenceClient, featureClient, logger, signal, esClient } = dependencies;
 
   const boundInferenceClient = inferenceClient.bindTo({
@@ -45,10 +48,13 @@ export async function generateSignificantEventDefinitions(
   const { queries, tokensUsed, toolUsage } = await generateSignificantEvents({
     stream: definition,
     esClient,
+    start,
+    end,
     inferenceClient: boundInferenceClient,
     logger,
     system,
     signal,
+    sampleDocsSize,
     systemPrompt,
     // Server owns data access; AI layer only requests context via this callback.
     getFeatures: async (filters) => {

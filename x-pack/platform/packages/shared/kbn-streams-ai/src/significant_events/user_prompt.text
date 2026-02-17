@@ -4,4 +4,7 @@
 `description`:
 {{{description}}}
 
+`dataset_analysis`:
+{{{dataset_analysis}}}
+
 Use the `get_stream_features` tool to retrieve feature context before generating queries.

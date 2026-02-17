@@ -15,7 +15,7 @@ These queries will use KQL and an additional filter will be added to only includ
 
 ## Context
 
-You will be provided with a name (`name`) and a written description (`description`). You must retrieve stream context through tools (especially `get_stream_features`) rather than relying on raw sampled logs. The returned features can include computed summaries such as dataset analysis and patterns.
+You will be provided with a name (`name`), a written description (`description`), and sampled dataset context in `dataset_analysis` when available. Use this sampled context as grounding signal, and use tools (especially `get_stream_features`) to enrich/validate your understanding with extracted features.
 
 ### 1. **System Runtime and Execution Context**
 

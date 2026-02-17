@@ -215,9 +215,12 @@ evaluate.describe(
                     const { queries } = await generateSignificantEvents({
                       stream,
                       esClient,
+                      start: Date.now() - 24 * 60 * 60 * 1000,
+                      end: Date.now(),
                       inferenceClient,
                       logger,
                       signal: new AbortController().signal,
+                      sampleDocsSize: 20,
                       systemPrompt: significantEventsPrompt,
                       getFeatures: async () => example.input.features,
                     });
@@ -282,9 +285,12 @@ evaluate.describe(
               const { queries } = await generateSignificantEvents({
                 stream,
                 esClient,
+                start: Date.now() - 24 * 60 * 60 * 1000,
+                end: Date.now(),
                 inferenceClient,
                 logger,
                 signal: new AbortController().signal,
+                sampleDocsSize: 20,
                 systemPrompt: significantEventsPrompt,
                 getFeatures: async () => [],
               });

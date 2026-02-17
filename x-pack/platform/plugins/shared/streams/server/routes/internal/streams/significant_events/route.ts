@@ -71,16 +71,8 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string().describe('The name of the stream') }),
     body: taskActionSchema({
-      from: dateFromString
-        .describe(
-          'Start of the time range. Used for task metadata/compatibility; generation relies on extracted features.'
-        )
-        .optional(),
-      to: dateFromString
-        .describe(
-          'End of the time range. Used for task metadata/compatibility; generation relies on extracted features.'
-        )
-        .optional(),
+      from: dateFromString.describe('Start of the time range'),
+      to: dateFromString.describe('End of the time range'),
       connectorId: z
         .string()
         .optional()
@@ -91,7 +83,7 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
         .number()
         .optional()
         .describe(
-          'Deprecated and currently ignored. Significant events generation now uses extracted stream features.'
+          'Number of sample documents to use for generation from the current data of stream'
         ),
       systems: z.array(systemSchema).optional().describe('Optional array of systems'),
     }),
@@ -100,7 +92,7 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
     access: 'internal',
     summary: 'Manage significant events query generation task',
     description:
-      'Manage the lifecycle of the background task that generates significant events queries based on stream context and extracted features.',
+      'Manage the lifecycle of the background task that generates significant events queries based on the stream data.',
   },
   security: {
     authz: {
@@ -140,8 +132,8 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
                 });
                 return {
                   connectorId,
-                  start: body.from?.getTime() ?? Date.now() - 24 * 60 * 60 * 1000,
-                  end: body.to?.getTime() ?? Date.now(),
+                  start: body.from.getTime(),
+                  end: body.to.getTime(),
                   systems: body.systems,
                   sampleDocsSize: body.sampleDocsSize,
                   streamName: name,

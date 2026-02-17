@@ -167,21 +167,13 @@ const generateSignificantEventsRoute = createServerRoute({
         .describe(
           'Optional connector ID. If not provided, the default AI connector from settings will be used.'
         ),
-      from: dateFromString
-        .describe(
-          'Time range start. Kept for API compatibility; feature-based generation does not sample raw logs.'
-        )
-        .optional(),
-      to: dateFromString
-        .describe(
-          'Time range end. Kept for API compatibility; feature-based generation does not sample raw logs.'
-        )
-        .optional(),
+      from: dateFromString,
+      to: dateFromString,
       sampleDocsSize: z
         .number()
         .optional()
         .describe(
-          'Deprecated and currently ignored. Significant events generation now uses extracted stream features.'
+          'Number of sample documents to use for generation from the current data of stream'
         ),
     }),
     body: z.object({
@@ -191,8 +183,7 @@ const generateSignificantEventsRoute = createServerRoute({
   options: {
     access: 'public',
     summary: 'Generate significant events',
-    description:
-      'Generate significant events queries based on stream context and extracted features',
+    description: 'Generate significant events queries based on the stream data',
     availability: {
       since: '9.2.0',
       stability: 'experimental',
@@ -243,6 +234,9 @@ const generateSignificantEventsRoute = createServerRoute({
           definition,
           system: params.body?.system,
           connectorId,
+          start: params.query.from.valueOf(),
+          end: params.query.to.valueOf(),
+          sampleDocsSize: params.query.sampleDocsSize,
           systemPrompt: significantEventsPromptOverride,
         },
         {
