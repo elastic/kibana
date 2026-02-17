@@ -93,21 +93,25 @@ export const getUpdateSignalStatusScript = (
   reason?: string
 ) => ({
   source: `
-    if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null && ctx._source['${ALERT_WORKFLOW_STATUS}'] != '${status}') {
-      ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}';
-      ctx._source['${ALERT_WORKFLOW_USER}'] = ${
-    user?.profile_uid ? `'${user.profile_uid}'` : 'null'
-  };
-      ctx._source['${ALERT_WORKFLOW_STATUS_UPDATED_AT}'] = '${new Date().toISOString()}';
+    if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null && ctx._source['${ALERT_WORKFLOW_STATUS}'] != params.status) {
+      ctx._source['${ALERT_WORKFLOW_STATUS}'] = params.status;
+      ctx._source['${ALERT_WORKFLOW_USER}'] = params.workflowUser;
+      ctx._source['${ALERT_WORKFLOW_STATUS_UPDATED_AT}'] = params.updatedAt;
 
-      ${
-        reason
-          ? `ctx._source['${ALERT_WORKFLOW_REASON}'] = '${reason}';`
-          : `ctx._source.remove('${ALERT_WORKFLOW_REASON}')`
+      if (params.reason != null) {
+        ctx._source['${ALERT_WORKFLOW_REASON}'] = params.reason;
+      } else {
+        ctx._source.remove('${ALERT_WORKFLOW_REASON}');
       }
     }
     if (ctx._source.signal != null && ctx._source.signal.status != null) {
-      ctx._source.signal.status = '${status}'
+      ctx._source.signal.status = params.status
     }`,
   lang: 'painless',
+  params: {
+    status,
+    workflowUser: user?.profile_uid ?? null,
+    updatedAt: new Date().toISOString(),
+    reason: reason ?? null,
+  },
 });
