@@ -81,6 +81,7 @@ dependsOn:
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/config'
   - '@kbn/expect'
+  - '@kbn/es-query-server'
 tags:
   - plugin
   - prod
