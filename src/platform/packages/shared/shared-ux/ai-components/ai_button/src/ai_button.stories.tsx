@@ -32,12 +32,6 @@ interface StoryArgs extends CommonStoryArgs {
 }
 
 interface ButtonComponentStoryArgs extends CommonStoryArgs {
-  size: EuiButtonSize;
-  iconSize?: EuiButtonSize;
-  withIcon: boolean;
-}
-
-interface EmptyComponentStoryArgs extends CommonStoryArgs {
   size: EuiButtonEmptySizes;
   iconSize?: EuiButtonSize;
   withIcon: boolean;
@@ -120,15 +114,18 @@ export const Default: StoryObj<StoryArgs> = {
 };
 
 export const Base: StoryObj<ButtonComponentStoryArgs> = {
-  render: ({ label, size, iconSize, isDisabled, withIcon, icon }) => (
-    <AiButtonDefault
-      size={size}
-      isDisabled={isDisabled}
-      {...(withIcon ? { iconType: icon, iconSize } : {})}
-    >
-      {label}
-    </AiButtonDefault>
-  ),
+  render: ({ label, size, iconSize, isDisabled, withIcon, icon }) => {
+    const buttonSize: EuiButtonSize = size === 'm' ? 'm' : 's';
+    return (
+      <AiButtonDefault
+        size={buttonSize}
+        isDisabled={isDisabled}
+        {...(withIcon ? { iconType: icon, iconSize } : {})}
+      >
+        {label}
+      </AiButtonDefault>
+    );
+  },
   args: {
     label: 'AI Assistant',
     size: 's',
@@ -139,16 +136,19 @@ export const Base: StoryObj<ButtonComponentStoryArgs> = {
 };
 
 export const Accent: StoryObj<ButtonComponentStoryArgs> = {
-  render: ({ label, size, iconSize, isDisabled, withIcon, icon }) => (
-    <AiButtonDefault
-      variant="accent"
-      size={size}
-      isDisabled={isDisabled}
-      {...(withIcon ? { iconType: icon, iconSize } : {})}
-    >
-      {label}
-    </AiButtonDefault>
-  ),
+  render: ({ label, size, iconSize, isDisabled, withIcon, icon }) => {
+    const buttonSize: EuiButtonSize = size === 'm' ? 'm' : 's';
+    return (
+      <AiButtonDefault
+        variant="accent"
+        size={buttonSize}
+        isDisabled={isDisabled}
+        {...(withIcon ? { iconType: icon, iconSize } : {})}
+      >
+        {label}
+      </AiButtonDefault>
+    );
+  },
   args: {
     label: 'AI Assistant',
     size: 's',
@@ -158,7 +158,7 @@ export const Accent: StoryObj<ButtonComponentStoryArgs> = {
   },
 };
 
-export const Empty: StoryObj<EmptyComponentStoryArgs> = {
+export const Empty: StoryObj<ButtonComponentStoryArgs> = {
   render: ({ label, size, iconSize, isDisabled, withIcon, icon }) => (
     <AiButtonEmpty
       size={size}
