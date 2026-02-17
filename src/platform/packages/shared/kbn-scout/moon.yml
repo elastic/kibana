@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/streams-schema'
   - '@kbn/streamlang'
   - '@kbn/axe-config'
+  - '@kbn/peggy'
   - '@kbn/apm-synthtrace'
   - '@kbn/apm-synthtrace-client'
 tags:

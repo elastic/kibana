@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
+import { tags } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
 
-test.describe('Annotations List', { tag: ['@ess'] }, () => {
+test.describe('Annotations List', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ sloData }) => {
     await sloData.generateSloData();
     await sloData.addSLO();

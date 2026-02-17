@@ -15,6 +15,7 @@ plugins:
     - spaces
     - streams_app
     - transform
+    - dashboard
   disabled:
 
 packages:
