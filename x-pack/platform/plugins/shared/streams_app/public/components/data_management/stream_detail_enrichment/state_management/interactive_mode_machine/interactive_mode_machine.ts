@@ -17,7 +17,7 @@ import {
 import type { StreamlangConditionBlock, StreamlangDSL } from '@kbn/streamlang/types/streamlang';
 import { TaskStatus } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import type { MachineImplementationsFrom } from 'xstate5';
+import type { MachineImplementationsFrom } from 'xstate';
 import {
   assertEvent,
   assign,
@@ -26,7 +26,7 @@ import {
   stopChild,
   type ActorRefFrom,
   type SnapshotFrom,
-} from 'xstate5';
+} from 'xstate';
 import { getDefaultGrokProcessor, stepConverter } from '../../utils';
 import { selectPreviewRecords } from '../simulation_state_machine/selectors';
 import { stepMachine } from '../steps_state_machine';
