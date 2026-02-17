@@ -252,7 +252,9 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                         draft,
                         `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                         {
-                          queries: updatedPackSO.attributes.queries,
+                          schedule_id: updatedPackSO.id,
+                          start_date: updatedPackSO.attributes.created_at,
+                          queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
                         }
                       );
 
@@ -343,6 +345,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                       {
                         shard: policyShards[agentPolicyId] ?? 100,
+                        schedule_id: updatedPackSO.id,
+                        start_date: updatedPackSO.attributes.created_at,
                         queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
                       }
                     );
@@ -376,6 +380,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                       {
                         shard: policyShards[agentPolicyId] ?? 100,
+                        schedule_id: updatedPackSO.id,
+                        start_date: updatedPackSO.attributes.created_at,
                         queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
                       }
                     );
@@ -390,15 +396,19 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         // Create scheduled action document once for an enabled pack with policy_ids (idempotent)
         const isPackEnabled = enabled ?? currentPackSO.attributes.enabled;
-        const hasPolicies = policiesList.length > 0;
-        const hasQueries = queries && Object.keys(queries).length > 0;
+        const effectivePolicies = policiesList.length > 0 ? policiesList : currentAgentPolicyIds;
+        const hasPolicies = effectivePolicies.length > 0;
+        // Fall back to the saved object's queries when the request body doesn't include queries
+        // (e.g. when re-enabling a pack without modifying its queries)
+        const effectiveQueries = queries ?? updatedPackSO.attributes.queries;
+        const hasQueries = effectiveQueries && Object.keys(effectiveQueries).length > 0;
 
         if (isPackEnabled && hasPolicies && hasQueries) {
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
 
-          const scheduledQueries = convertPackQueriesToSO(queries).map((q: { id: string; action_id?: string; query: string; interval?: number; version?: string; platform?: string; timeout?: number }) => ({
+          const scheduledQueries = convertPackQueriesToSO(effectiveQueries).map((q: { id: string; action_id?: string; query: string; interval?: number; version?: string; platform?: string; timeout?: number }) => ({
             action_id: q.action_id ?? '',
             id: q.id,
             query: q.query,
