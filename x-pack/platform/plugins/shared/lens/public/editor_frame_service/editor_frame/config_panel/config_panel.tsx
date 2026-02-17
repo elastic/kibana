@@ -337,6 +337,11 @@ export function ConfigPanel(
             transparent 296px,
             ${euiTheme.colors.emptyShade} 296px
           );
+          /* Override the default max-width of drag-drop extra targets to reduce
+             horizontal overflow space requirements */
+          .domDroppable__extraTargets {
+            width: 280px;
+          }
           /* Note: overflow scrolling is handled by the parent lnsConfigPanelScrollContainer */
           ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
             padding-left: ${euiTheme.size.base};

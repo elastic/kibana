@@ -164,6 +164,11 @@ export const FlyoutWrapper = ({
           padding-left: 296px;
           margin-left: -296px;
           pointer-events: none;
+          // Override the default max-width of drag-drop extra targets to reduce
+          // horizontal overflow space requirements
+          .domDroppable__extraTargets {
+            width: 280px;
+          }
           .euiFlyoutBody__overflow {
             transform: initial;
             -webkit-mask-image: none;
