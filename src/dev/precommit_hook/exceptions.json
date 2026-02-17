@@ -183,6 +183,7 @@
   "@elastic/kibana-cases": {
     "x-pack/platform/plugins/shared/cases/docs/openapi/bundled-types.json": "'bundled-types.json' should be snake_case",
     "x-pack/platform/plugins/shared/cases/docs/openapi/bundled-types.schema.yaml": "'bundled-types.schema.yaml' should be snake_case",
+    "x-pack/platform/plugins/shared/cases/docs/openapi/bundled-types.gen.ts": "'bundled-types.gen.ts' should be snake_case",
     "x-pack/platform/plugins/shared/cases/docs/openapi/components/parameters/defaultSearchOperator.yaml": "'defaultSearchOperator.yaml' should be snake_case",
     "x-pack/platform/plugins/shared/cases/docs/openapi/components/parameters/includeComments.yaml": "'includeComments.yaml' should be snake_case",
     "x-pack/platform/plugins/shared/cases/docs/openapi/components/parameters/searchFields.yaml": "'searchFields.yaml' should be snake_case",

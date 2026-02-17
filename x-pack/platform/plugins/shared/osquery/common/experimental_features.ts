@@ -13,8 +13,9 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * This feature flag hides all 9.4 UI changes:
    *   - Enables the copy/duplicate functionality for packs and saved queries,
-   *   and the kebab row-action menus in list tables.
-   *   - others...
+   *     and the kebab row-action menus in list tables.
+   *   - Renames "Live queries" tab to "History" and "Saved queries" to "Queries"
+   *   - Introduces /history and /new routes, redirects legacy /live_queries paths
    */
   queryHistoryRework: false,
 });

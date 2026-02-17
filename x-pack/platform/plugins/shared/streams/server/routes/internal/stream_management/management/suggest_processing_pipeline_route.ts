@@ -397,6 +397,19 @@ async function processGrokPatterns({
   // Merge all grok processors into one
   const combinedGrokProcessor = mergeGrokProcessors(grokProcessors);
 
+  // Filter out empty patterns that may come from the heuristics library
+  const filteredPatterns = combinedGrokProcessor.patterns.filter(
+    (pattern) => pattern.trim().length > 0
+  );
+
+  // If all patterns were empty, return null
+  if (filteredPatterns.length === 0) {
+    logger.debug(
+      '[suggest_pipeline][grok] All patterns were empty after filtering out empty string patterns'
+    );
+    return null;
+  }
+
   // Run simulation to verify grok patterns work
   const simulationResult = await simulateProcessing({
     params: {
@@ -409,7 +422,7 @@ async function processGrokPatterns({
               action: 'grok',
               customIdentifier: SUGGESTED_GROK_PROCESSOR_ID,
               from: fieldName,
-              patterns: combinedGrokProcessor.patterns,
+              patterns: filteredPatterns,
             },
           ],
         },
@@ -428,7 +441,7 @@ async function processGrokPatterns({
     processor: {
       action: 'grok',
       from: fieldName,
-      patterns: combinedGrokProcessor.patterns as [string, ...string[]],
+      patterns: filteredPatterns as [string, ...string[]],
     },
     parsedRate,
   };
