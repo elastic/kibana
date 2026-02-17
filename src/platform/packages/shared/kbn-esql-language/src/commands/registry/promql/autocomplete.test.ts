@@ -18,7 +18,10 @@ import {
   promqlLabelSelectorItem,
   promqlRangeSelectorItem,
 } from '../complete_items';
-import { getPromqlFunctionSuggestions } from '../../definitions/utils/promql';
+import {
+  getPromqlFunctionSuggestions,
+  getPromqlOperatorSuggestions,
+} from '../../definitions/utils/promql';
 import { ESQL_NUMBER_TYPES, ESQL_STRING_TYPES } from '../../definitions/types';
 import { getPromqlParam, PROMQL_PARAM_NAMES } from './utils';
 import { TIME_SYSTEM_PARAMS } from '../../definitions/utils/literals';
@@ -28,6 +31,7 @@ import type { ICommandCallbacks, ICommandContext } from '../types';
 const promqlParamItems = getPromqlParamKeySuggestions();
 const promqlParamTexts = promqlParamItems.map(({ text }) => text);
 const promqlFunctionSuggestions = getPromqlFunctionSuggestions();
+const promqlOperatorLabels = getPromqlOperatorSuggestions().map(({ label }) => label);
 const promqlFunctionLabels = promqlFunctionSuggestions.map(({ label }) => label);
 const promqlFunctionWrappedTexts = promqlFunctionSuggestions
   .slice(0, 1)
@@ -465,6 +469,23 @@ describe('inside query', () => {
     });
   });
 
+  test('suggests operators after complete expression inside aggregation', async () => {
+    const query = 'PROMQL step="5m" sum(rate(doubleField[5m]) ';
+
+    await expectPromqlSuggestions(query, {
+      labelsContain: promqlOperatorLabels,
+    });
+  });
+
+  test('suggests operands (not operators) after binary operator inside aggregation', async () => {
+    const query = 'PROMQL step="5m" sum(rate(doubleField[5m]) * ';
+
+    await expectPromqlSuggestions(query, {
+      labelsContain: ['rate', 'sum', 'avg'],
+      labelsNotContain: promqlOperatorLabels,
+    });
+  });
+
   test('excludes user-defined columns from field suggestions', async () => {
     await expectPromqlSuggestions('PROMQL sum( ', {
       labelsNotContain: ['var0', 'col0'],
@@ -721,6 +742,62 @@ describe('after query (pipe suggestions)', () => {
     await expectPromqlSuggestions('PROMQL index=metrics step=5m start=?_tstart end=?_tend ', {
       textsNotContain: [pipeCompleteItem.text],
     });
+  });
+
+  test('suggests RHS operand items after arithmetic operator at query boundary', async () => {
+    const numericFields = getFieldNamesByType(ESQL_NUMBER_TYPES, true);
+    const query = 'PROMQL step="5m" (sum(rate(doubleField[5m]))) + ';
+
+    await expectPromqlSuggestions(
+      query,
+      {
+        labelsContain: ['abs', ...numericFields],
+        textsContain: ['${0:0}'],
+        textsNotContain: [pipeCompleteItem.text, promqlByCompleteItem.text],
+      },
+      mockCallbacks
+    );
+  });
+
+  test('suggests RHS operand items after operator following selector with labels', async () => {
+    const numericFields = getFieldNamesByType(ESQL_NUMBER_TYPES, true);
+    const query = 'PROMQL step="5m" quantile(0, doubleField{label!~"value"} * ';
+
+    await expectPromqlSuggestions(
+      query,
+      {
+        labelsContain: numericFields,
+        textsContain: ['${0:0}'],
+      },
+      mockCallbacks
+    );
+  });
+
+  test('suggests RHS operand items after minus operator', async () => {
+    const numericFields = getFieldNamesByType(ESQL_NUMBER_TYPES, true);
+    const query = 'PROMQL step="5m" quantile(0, doubleField - ';
+
+    await expectPromqlSuggestions(
+      query,
+      {
+        labelsContain: numericFields,
+        textsContain: ['${0:0}'],
+      },
+      mockCallbacks
+    );
+  });
+
+  test('suggests label selector after metric name in RHS of operator', async () => {
+    const query =
+      'PROMQL index=tsdb_index step="5m" sum(quantile(0.9, doubleField{label!~"value"} * doubleField ';
+
+    await expectPromqlSuggestions(
+      query,
+      {
+        textsContain: [promqlLabelSelectorItem.text],
+      },
+      mockCallbacks
+    );
   });
 });
 
