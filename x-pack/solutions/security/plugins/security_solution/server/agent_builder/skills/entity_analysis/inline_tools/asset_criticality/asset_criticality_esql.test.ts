@@ -6,19 +6,27 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
-import type { EntityType } from '../../../../../common/entity_analytics/types';
-import { createToolHandlerContext, createToolTestMocks } from '../../../__mocks__/test_helpers';
-import { riskScoreInlineToolHandler } from './risk_score';
+import { euid } from '@kbn/entity-store/common';
+import type { EntityType } from '../../../../../../common/entity_analytics/types';
+import { createToolHandlerContext, createToolTestMocks } from '../../../../__mocks__/test_helpers';
+import { riskScoreDynamicInlineToolHandler } from './risk_score_esql';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
-import type { EntityAnalysisSkillsContext } from '../entity_analysis_skill';
+import type { EntityAnalysisSkillsContext } from '../../entity_analysis_skill';
 
-jest.mock('./common', () => ({
+jest.mock('../common', () => ({
   bootstrapCommonServices: jest.fn(),
   entityAnalyticsInlineToolSchema: {},
 }));
 
-const mockBootstrapCommonServices = jest.requireMock('./common')
+jest.mock('@kbn/agent-builder-genai-utils', () => ({
+  generateEsql: jest.fn(),
+}));
+
+const mockBootstrapCommonServices = jest.requireMock('../common')
   .bootstrapCommonServices as jest.Mock;
+
+const mockGenerateEsql = jest.requireMock('@kbn/agent-builder-genai-utils')
+  .generateEsql as jest.Mock;
 
 const defaultToolArgs = {
   entityType: 'host' as EntityType,
@@ -38,7 +46,6 @@ describe('riskScoreInlineToolHandler', () => {
     return {
       ...baseContext,
       getStartServices: mockCore.getStartServices,
-      toolProvider: { has: jest.fn(), get: jest.fn() },
     } as unknown as ToolHandlerContext & EntityAnalysisSkillsContext;
   };
 
@@ -46,7 +53,6 @@ describe('riskScoreInlineToolHandler', () => {
     jest.clearAllMocks();
     mockBootstrapCommonServices.mockResolvedValue({
       defaultMessage: 'General security solution message.',
-      generateESQLTool: null,
       isEntityStoreV2Enabled: false,
     });
   });
@@ -54,7 +60,7 @@ describe('riskScoreInlineToolHandler', () => {
   it('should return generic security solution message when risk score index does not exist', async () => {
     mockEsClient.asInternalUser.indices.exists.mockResolvedValueOnce(false);
 
-    const result = await riskScoreInlineToolHandler(defaultToolArgs, createContext());
+    const result = await riskScoreDynamicInlineToolHandler(defaultToolArgs, createContext());
 
     expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
       index: RISK_SCORE_LATEST_INDEX,
@@ -72,81 +78,20 @@ describe('riskScoreInlineToolHandler', () => {
     );
   });
 
-  it('should return risk score message when risk score index exists but generate ESQL tool is null', async () => {
-    mockEsClient.asInternalUser.indices.exists.mockResolvedValueOnce(true);
-    mockBootstrapCommonServices.mockResolvedValue({
-      defaultMessage: 'General security solution message.',
-      generateESQLTool: null,
-      isEntityStoreV2Enabled: false,
-    });
-
-    const result = await riskScoreInlineToolHandler(defaultToolArgs, createContext());
-
-    expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
-      index: RISK_SCORE_LATEST_INDEX,
-    });
-    expect(result.results).toHaveLength(2);
-
-    const firstMessage = result.results[0];
-    expect(firstMessage.type).toBe(ToolResultType.other);
-    expect((firstMessage.data as { message: string }).message).toMatchSnapshot();
-
-    const secondMessage = result.results[1];
-    expect(secondMessage.type).toBe(ToolResultType.other);
-    expect((secondMessage.data as { message: string }).message).toBe(
-      'General security solution message.'
-    );
-  });
-
-  it('should return risk score message with EUID filter when risk score index exists but generate ESQL tool is null and isEntityStoreV2Enabled: true', async () => {
-    mockEsClient.asInternalUser.indices.exists.mockResolvedValueOnce(true);
-    mockBootstrapCommonServices.mockResolvedValue({
-      defaultMessage: 'General security solution message.',
-      generateESQLTool: null,
-      isEntityStoreV2Enabled: true,
-    });
-
-    const result = await riskScoreInlineToolHandler(defaultToolArgs, createContext());
-
-    expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
-      index: RISK_SCORE_LATEST_INDEX,
-    });
-    expect(result.results).toHaveLength(2);
-
-    const firstMessage = result.results[0];
-    expect(firstMessage.type).toBe(ToolResultType.other);
-    expect((firstMessage.data as { message: string }).message).toMatchSnapshot();
-
-    const secondMessage = result.results[1];
-    expect(secondMessage.type).toBe(ToolResultType.other);
-    expect((secondMessage.data as { message: string }).message).toBe(
-      'General security solution message.'
-    );
-  });
-
-  it('should return risk score message with ESQL query when risk score index exists and generate ESQL tool is available', async () => {
-    const mockEsqlResults = [
-      { type: ToolResultType.query, data: { query: 'FROM risk-score.risk-score-latest-default' } },
-    ];
-    const mockExecute = jest.fn().mockResolvedValue({ results: mockEsqlResults });
+  it('should return risk score message with ESQL query when risk score index exists', async () => {
+    const mockEsqlResults = { query: 'FROM risk-score.risk-score-latest-default' };
     mockEsClient.asInternalUser.indices.exists.mockResolvedValue(true);
-    mockBootstrapCommonServices.mockResolvedValue({
-      defaultMessage: 'General security solution message.',
-      generateESQLTool: { execute: mockExecute },
-      isEntityStoreV2Enabled: false,
-    });
+    mockGenerateEsql.mockResolvedValue(mockEsqlResults);
 
-    const result = await riskScoreInlineToolHandler(defaultToolArgs, createContext());
+    const result = await riskScoreDynamicInlineToolHandler(defaultToolArgs, createContext());
 
     expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
       index: RISK_SCORE_LATEST_INDEX,
     });
-    expect(mockExecute).toHaveBeenCalledWith(
+    expect(mockGenerateEsql).toHaveBeenCalledWith(
       expect.objectContaining({
-        toolParams: expect.objectContaining({
-          index: RISK_SCORE_LATEST_INDEX,
-          query: 'What is the risk score?',
-        }),
+        index: RISK_SCORE_LATEST_INDEX,
+        nlQuery: 'What is the risk score?',
       })
     );
     expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
@@ -155,7 +100,10 @@ describe('riskScoreInlineToolHandler', () => {
     expect(result.results).toHaveLength(3);
 
     const firstMessage = result.results[0];
-    expect(firstMessage).toEqual(mockEsqlResults[0]);
+    expect(firstMessage).toEqual({
+      type: 'query',
+      data: { esql: mockEsqlResults.query },
+    });
 
     const secondMessage = result.results[1];
     expect(secondMessage.type).toBe(ToolResultType.other);
@@ -168,10 +116,83 @@ describe('riskScoreInlineToolHandler', () => {
     );
   });
 
+  it('should modify additional context when entity store v2 is enabled', async () => {
+    const mockEsqlResults = { query: 'FROM risk-score.risk-score-latest-default' };
+    mockEsClient.asInternalUser.indices.exists.mockResolvedValue(true);
+    mockGenerateEsql.mockResolvedValue(mockEsqlResults);
+    mockBootstrapCommonServices.mockResolvedValueOnce({
+      defaultMessage: 'General security solution message.',
+      isEntityStoreV2Enabled: true,
+    });
+
+    const result = await riskScoreDynamicInlineToolHandler(defaultToolArgs, createContext());
+
+    expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
+      index: RISK_SCORE_LATEST_INDEX,
+    });
+    expect(mockGenerateEsql).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: RISK_SCORE_LATEST_INDEX,
+        nlQuery: 'What is the risk score?',
+        additionalContext: expect.stringContaining(
+          `${euid.getEuidEsqlDocumentsContainsIdFilter('host')}`
+        ),
+      })
+    );
+    expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
+      index: RISK_SCORE_LATEST_INDEX,
+    });
+    expect(result.results).toHaveLength(3);
+
+    const firstMessage = result.results[0];
+    expect(firstMessage).toEqual({
+      type: 'query',
+      data: { esql: mockEsqlResults.query },
+    });
+
+    const secondMessage = result.results[1];
+    expect(secondMessage.type).toBe(ToolResultType.other);
+    expect((secondMessage.data as { message: string }).message).toMatchSnapshot();
+
+    const thirdMessage = result.results[2];
+    expect(thirdMessage.type).toBe(ToolResultType.other);
+    expect((thirdMessage.data as { message: string }).message).toBe(
+      'General security solution message.'
+    );
+  });
+
+  it('should handle errors from the generateEsql function', async () => {
+    const mockEsqlResults = { error: 'couldn not generate query' };
+    mockEsClient.asInternalUser.indices.exists.mockResolvedValue(true);
+    mockGenerateEsql.mockResolvedValue(mockEsqlResults);
+
+    const result = await riskScoreDynamicInlineToolHandler(defaultToolArgs, createContext());
+
+    expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
+      index: RISK_SCORE_LATEST_INDEX,
+    });
+    expect(mockGenerateEsql).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: RISK_SCORE_LATEST_INDEX,
+        nlQuery: 'What is the risk score?',
+      })
+    );
+    expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
+      index: RISK_SCORE_LATEST_INDEX,
+    });
+    expect(result.results).toHaveLength(1);
+
+    const firstMessage = result.results[0];
+    expect(firstMessage).toEqual({
+      type: 'error',
+      data: { message: mockEsqlResults.error },
+    });
+  });
+
   it('should return error result when error throws', async () => {
     mockEsClient.asInternalUser.indices.exists.mockRejectedValue(new Error('ES connection failed'));
 
-    const result = await riskScoreInlineToolHandler(defaultToolArgs, createContext());
+    const result = await riskScoreDynamicInlineToolHandler(defaultToolArgs, createContext());
 
     expect(result.results).toHaveLength(1);
     expect(result.results[0].type).toBe(ToolResultType.other);

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { getEntityAnalysisSkill } from './entity_analysis';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
@@ -13,6 +14,7 @@ interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   kibanaVersion: string;
+  logger: Logger;
 }
 
 /**
@@ -22,9 +24,10 @@ export const registerSkills = async ({
   agentBuilder,
   getStartServices,
   kibanaVersion,
+  logger,
 }: RegisterSkillsOpts): Promise<void> => {
   await agentBuilder.skill.registerSkill(
-    getEntityAnalysisSkill({ getStartServices, kibanaVersion })
+    getEntityAnalysisSkill({ getStartServices, kibanaVersion, logger })
   );
   // await agentBuilder.skill.registerSkill(alertAnalysisSampleSkill);
 };

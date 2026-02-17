@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod';
 import type { IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
-import type { ToolProvider } from '@kbn/agent-builder-server';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/common';
 import { DEFAULT_DATA_VIEW_ID, DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
 import { IdentifierType } from '../../../../../common/api/entity_analytics/common/common.gen';
@@ -15,15 +14,16 @@ import type { EntityAnalyticsRoutesDeps } from '../../../../lib/entity_analytics
 import type { EntityType } from '../../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../../common/entity_analytics/types';
 
-export const entityAnalyticsInlineToolSchema = z.object({
+export const entityAnalyticsCommonSchema = z.object({
   entityType: IdentifierType.describe('The type of entity: host, user, service, or generic'),
   prompt: z.string().describe('The prompt or question that calling this tool will help to answer.'),
   queryExtraContext: z
     .string()
     .describe('Information from previous chat messages like an ESQL filter that should be used.'),
 });
-export type EntityAnalyticsInlineToolType = Omit<
-  z.infer<typeof entityAnalyticsInlineToolSchema>,
+
+export type EntityAnalyticsCommonType = Omit<
+  z.infer<typeof entityAnalyticsCommonSchema>,
   'entityType'
 > & {
   entityType: EntityType;
@@ -35,7 +35,6 @@ interface BootstrapCommonServicesOpts {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   request: KibanaRequest;
   spaceId: string;
-  toolProvider: ToolProvider;
 }
 
 export const bootstrapCommonServices = async ({
@@ -44,7 +43,6 @@ export const bootstrapCommonServices = async ({
   getStartServices,
   request,
   spaceId,
-  toolProvider,
 }: BootstrapCommonServicesOpts) => {
   const [core, startPlugins] = await getStartServices();
   const soClient = core.savedObjects.getScopedClient(request);
@@ -52,16 +50,6 @@ export const bootstrapCommonServices = async ({
     soClient,
     esClient.asCurrentUser
   );
-  const hasGenerateESQLQuery = await toolProvider.has({
-    toolId: 'platform.core.generate_esql',
-    request,
-  });
-  const generateESQLTool = hasGenerateESQLQuery
-    ? await toolProvider.get({
-        toolId: 'platform.core.generate_esql',
-        request,
-      })
-    : null;
   const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
   const securityDataViewId = `${DEFAULT_DATA_VIEW_ID}-${spaceId}`;
   const dataView = await dataViewsService.get(securityDataViewId);
@@ -76,7 +64,6 @@ export const bootstrapCommonServices = async ({
 
   return {
     defaultMessage: getGeneralSecuritySolutionMessage(entityType, indexPatterns),
-    generateESQLTool,
     isEntityStoreV2Enabled,
   };
 };
@@ -89,3 +76,6 @@ When it isn't enough, you can query security solution events and logs.
 For that, you must generate an ES|QL, and you **MUST ALWAYS** use the following FROM clause (ONLY FOR LOGS AND NOT FOR OTHER INDICES): "FROM ${indexPatterns}"
 When searching for logs of a ${entityType} you **MUST ALWAYS** use the following WHERE clause "WHERE ${EntityTypeToIdentifierField[entityType]} == {identifier}"`;
 };
+
+export const escapeEsqlString = (value: string) =>
+  value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');

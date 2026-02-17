@@ -6,44 +6,43 @@
  */
 
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
-import type { ToolHandlerContext, ToolHandlerResult } from '@kbn/agent-builder-server';
+import { type ToolHandlerContext, type ToolHandlerResult } from '@kbn/agent-builder-server';
 import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { euid } from '@kbn/entity-store/common';
-import { EntityTypeToIdentifierField } from '../../../../../common/entity_analytics/types';
+import { generateEsql } from '@kbn/agent-builder-genai-utils';
+import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import {
   EntityTypeToLevelField,
   EntityTypeToScoreField,
-} from '../../../../../common/search_strategy';
+} from '../../../../../../common/search_strategy';
 import {
   getRiskScoreLatestIndex,
   getRiskScoreTimeSeriesIndex,
-} from '../../../../../common/entity_analytics/risk_engine';
-import type { EntityType } from '../../../../../common/api/entity_analytics';
-import type { EntityAnalysisSkillsContext } from '../entity_analysis_skill';
-import type { EntityAnalyticsInlineToolType } from './common';
-import { entityAnalyticsInlineToolSchema, bootstrapCommonServices } from './common';
+} from '../../../../../../common/entity_analytics/risk_engine';
+import type { EntityType } from '../../../../../../common/api/entity_analytics';
+import type { EntityAnalysisSkillsContext } from '../../entity_analysis_skill';
+import type { EntityAnalyticsCommonType } from '../common';
+import { bootstrapCommonServices, entityAnalyticsCommonSchema } from '../common';
+import { ENTITY_ANALYSIS_RISK_SCORE_INLINE_TOOL_ID } from '.';
 
-export const ENTITY_ANALYSIS_RISK_SCORE_INLINE_TOOL_ID = 'security.entity_analysis.risk_score';
-
-export const riskScoreInlineToolHandler = async (
-  toolArgs: EntityAnalyticsInlineToolType,
+export const riskScoreDynamicInlineToolHandler = async (
+  toolArgs: EntityAnalyticsCommonType,
   toolContext: ToolHandlerContext & EntityAnalysisSkillsContext
 ) => {
   try {
     const { entityType, prompt, queryExtraContext } = toolArgs;
-    const { esClient, getStartServices, request, spaceId, toolProvider } = toolContext;
+    const { esClient, events, getStartServices, modelProvider, logger, request, spaceId } =
+      toolContext;
     const results: ToolHandlerResult[] = [];
     let message: string = ``;
 
-    const { defaultMessage, generateESQLTool, isEntityStoreV2Enabled } =
-      await bootstrapCommonServices({
-        entityType,
-        esClient,
-        getStartServices,
-        request,
-        spaceId,
-        toolProvider,
-      });
+    const { defaultMessage, isEntityStoreV2Enabled } = await bootstrapCommonServices({
+      entityType,
+      esClient,
+      getStartServices,
+      request,
+      spaceId,
+    });
 
     const riskScoreIndexPattern = getRiskScoreLatestIndex(spaceId);
     const riskScoreTimeSeriesIndexPattern = getRiskScoreTimeSeriesIndex(spaceId);
@@ -70,16 +69,44 @@ export const riskScoreInlineToolHandler = async (
         * The inputs field inside the risk score document contains the 10 highest-risk documents (sorted by 'kibana.alert.risk_score') that contributed to the risk score of an entity.
         * When searching the risk score of an entity of type '${entityType}', you must **ALWAYS** use exact and entire filter: "${identifierFilter}"`;
 
-      if (generateESQLTool) {
-        const { results: generateESQLResult } = await generateESQLTool.execute({
-          toolParams: {
-            index: riskScoreIndexPattern,
-            query: prompt,
-            context: `${message}\n${defaultMessage}\n${queryExtraContext ?? ''}`,
-          },
-        });
-        if (generateESQLResult) {
-          results.push(...generateESQLResult);
+      const model = await modelProvider.getDefaultModel();
+      const esqlResponse = await generateEsql({
+        model,
+        logger,
+        events,
+        nlQuery: prompt,
+        esClient: esClient.asCurrentUser,
+        index: riskScoreIndexPattern,
+        additionalContext: `${message}\n${defaultMessage}\n${queryExtraContext ?? ''}`,
+      });
+
+      if (esqlResponse.error) {
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message: esqlResponse.error,
+              },
+            },
+          ],
+        };
+      } else {
+        if (esqlResponse.query) {
+          results.push({
+            type: ToolResultType.query,
+            data: {
+              esql: esqlResponse.query,
+            },
+          });
+        }
+        if (esqlResponse.answer) {
+          results.push({
+            type: ToolResultType.other,
+            data: {
+              answer: esqlResponse.answer,
+            },
+          });
         }
       }
     } else {
@@ -109,11 +136,11 @@ export const riskScoreInlineToolHandler = async (
   }
 };
 
-export const getRiskScoreInlineTool = (ctx: EntityAnalysisSkillsContext): SkillBoundedTool => ({
+export const getRiskScoreEsqlTool = (ctx: EntityAnalysisSkillsContext): SkillBoundedTool => ({
   id: ENTITY_ANALYSIS_RISK_SCORE_INLINE_TOOL_ID,
   type: ToolType.builtin,
-  schema: entityAnalyticsInlineToolSchema,
-  description: `Entity risk scoring is an advanced Elastic Security analytics feature that helps security analysts detect changes in an entity's risk posture, hunt for new threats, and prioritise incident response`,
-  handler: (args, context) =>
-    riskScoreInlineToolHandler(args as EntityAnalyticsInlineToolType, { ...context, ...ctx }),
+  schema: entityAnalyticsCommonSchema,
+  description: `Call this tool to get the latest entity risk score and the inputs that contributed to the calculation for a specific entity (host, user, service, or generic). IMPORTANT: Always use 'calculated_score_norm' (0-100) when reporting risk scores, NOT 'calculated_score' which is a raw value. The 'calculated_score_norm' field is the normalized score suitable for comparison between entities. The 'modifiers' array contains risk adjustments such as asset criticality and privileged user monitoring (watchlist/privmon type).`,
+  handler: async (args, context) =>
+    riskScoreDynamicInlineToolHandler(args as EntityAnalyticsCommonType, { ...context, ...ctx }),
 });

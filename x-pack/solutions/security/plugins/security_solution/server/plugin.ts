@@ -262,6 +262,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       agentBuilder,
       getStartServices: core.getStartServices,
       kibanaVersion: this.pluginContext.env.packageInfo.version,
+      logger,
     }).catch((error) => {
       this.logger.error(`Error registering security skills: ${error}`);
     });
