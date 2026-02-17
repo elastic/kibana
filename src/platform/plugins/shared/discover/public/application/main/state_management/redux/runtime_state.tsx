@@ -133,15 +133,16 @@ export const selectTabRuntimeInternalState = (
 ): TabState['initialInternalState'] | undefined => {
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
   const stateContainer = tabRuntimeState?.stateContainer$.getValue();
+  const dataView = tabRuntimeState?.currentDataView$.getValue();
 
-  if (!stateContainer) {
+  if (!stateContainer || !dataView) {
     return undefined;
   }
 
   const tabState = selectTab(stateContainer.internalState.getState(), tabId);
   const { dataRequestParams, appState, globalState } = tabState;
   const searchSource = createSearchSource({
-    dataView: tabRuntimeState.currentDataView$.getValue(),
+    dataView,
     appState,
     globalState,
     services,
