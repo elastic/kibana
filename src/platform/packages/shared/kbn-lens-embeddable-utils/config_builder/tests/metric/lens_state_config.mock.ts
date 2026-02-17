@@ -186,6 +186,9 @@ export const complexMetricAttributes: LensAttributes = {
       maxAccessor: 'f041d9d0-db1d-4648-8320-a58449159841',
       color: '#FFf',
       showBar: true,
+      primaryPosition: 'top',
+      titleWeight: 'normal',
+      secondaryAlign: 'left',
       secondaryTrend: {
         type: 'none',
       },
