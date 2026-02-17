@@ -136,48 +136,10 @@ export async function runJestAll() {
     process.exit(1);
   }
 
-  // First pass
-  const firstPass = configs.length ? await runConfigs(configs, maxParallel, log) : [];
+  const results = configs.length ? await runConfigs(configs, maxParallel, log) : [];
 
-  let failing = firstPass.filter((r) => r.code !== 0).map((r) => r.config);
-
-  let retryResults: JestConfigResult[] = [];
-
-  if (failing.length > 0) {
-    log.info('--- Detected failing configs, starting retry pass (maxParallel=1)');
-    retryResults = await runConfigs(failing, 1, log);
-
-    const fixed = retryResults.filter((r) => r.code === 0).map((r) => r.config);
-
-    const stillFailing = retryResults.filter((r) => r.code !== 0).map((r) => r.config);
-
-    if (fixed.length) {
-      log.info('Configs fixed after retry:');
-
-      for (const f of fixed) {
-        log.info(`  - ${f}`);
-      }
-    }
-
-    if (stillFailing.length) {
-      log.info('Configs still failing after retry:');
-      for (const f of stillFailing) {
-        log.info(`  - ${f}`);
-      }
-    }
-
-    failing = stillFailing; // update failing list to post-retry
-  }
-
-  const results = retryResults.length
-    ? // merge: prefer retry result for retried configs
-      firstPass.map((r) => {
-        const retried = retryResults.find((rr) => rr.config === r.config);
-        return retried ? retried : r;
-      })
-    : firstPass;
-
-  const globalExit = failing.length > 0 ? 10 : 0; // maintain previous non-zero code
+  const hasFailures = results.some((r) => r.code !== 0);
+  const globalExit = hasFailures ? 10 : 0;
 
   const totalMs = Date.now() - startAll;
 
@@ -186,9 +148,15 @@ export async function runJestAll() {
     testFiles: results.map((r) => relative(process.cwd(), r.config)),
   });
 
-  log.write('--- Combined Jest run summary');
+  log.write('+++ Combined Jest run summary\n');
 
   await writeSummary(results, log, totalMs);
+
+  // Dedicated failure summary as the very last thing in the log — easy to spot
+  const failedResults = results.filter((r) => r.code !== 0);
+  if (failedResults.length > 0) {
+    writeFailureSummary(failedResults, log);
+  }
 
   process.exit(globalExit);
 }
@@ -279,6 +247,9 @@ async function runConfigs(
         const shardSuffix = shard ? `_shard_${shard.replace('/', '_')}` : '';
         const slowTestsFile = `${slowTestsDir}/slow-tests-${configHash}${shardSuffix}-${Date.now()}.json`;
 
+        const relConfig = relative(REPO_ROOT, config);
+        log.info(`Starting ${relConfig}`);
+
         const args = [
           'scripts/jest',
           '--config',
@@ -312,22 +283,25 @@ async function runConfigs(
           const code = c == null ? 1 : c;
           const durationMs = Date.now() - start;
 
-          // Parse failed tests from output if the run failed
-          const failedTests = code !== 0 ? parseFailedTests(buffer) : [];
+          // Parse failed tests from output if the run failed.
+          // Strip ANSI color codes first so regexes match on CI where Jest colorizes output.
+          const cleanBuffer = buffer.replace(/\x1b\[[0-9;]*m/g, '');
+          const failedTests = code !== 0 ? parseFailedTests(cleanBuffer) : [];
 
           results.push({ config, code, durationMs, slowTestsFile, failedTests });
 
-          // Print buffered output after completion to keep logs grouped per config
           const sec = Math.round(durationMs / 1000);
-
           const relConfigPath = relative(REPO_ROOT, config);
-          log.info(
-            `Output for ${relConfigPath} (exit ${code} - ${
-              code === 0 ? 'success' : 'failure'
-            }, ${sec}s)\n` +
-              buffer +
-              '\n'
-          );
+
+          // Buildkite collapsible sections:
+          //   --- (collapsed) for passing configs — full output preserved but hidden
+          //   +++ (expanded) for failing configs — immediately visible
+          if (code === 0) {
+            log.write(`--- ✅ ${relConfigPath} (${sec}s)\n`);
+          } else {
+            log.write(`+++ ❌ ${relConfigPath} (${sec}s) - FAILED\n`);
+          }
+          log.write(buffer + '\n');
 
           const proceed = () => {
             // Log how many configs are left to complete (after checkpoint is written)
@@ -407,6 +381,45 @@ function parseFailedTests(output: string): FailedTest[] {
   return failedTests;
 }
 
+function writeFailureSummary(failedResults: JestConfigResult[], log: ToolingLog) {
+  const cwd = process.cwd();
+
+  log.write(
+    `+++ ❌ Failed Tests Summary (${failedResults.length} config${
+      failedResults.length > 1 ? 's' : ''
+    } failed)\n`
+  );
+
+  for (const r of failedResults) {
+    const relativePath = relative(cwd, r.config);
+    const sec = Math.round(r.durationMs / 1000);
+    log.info(`\n  ${relativePath} (${sec}s)`);
+
+    if (r.failedTests && r.failedTests.length > 0) {
+      // Group failed tests by file path
+      const failedTestsByFile = new Map<string, FailedTest[]>();
+      for (const test of r.failedTests) {
+        const testRelativePath = relative(cwd, test.filePath);
+        if (!failedTestsByFile.has(testRelativePath)) {
+          failedTestsByFile.set(testRelativePath, []);
+        }
+        failedTestsByFile.get(testRelativePath)!.push(test);
+      }
+
+      for (const [filePath, tests] of failedTestsByFile) {
+        log.info(`    ${filePath}`);
+        for (const test of tests) {
+          log.info(`      ● ${test.fullName}`);
+        }
+      }
+    } else {
+      log.info('    (no individual test failures parsed — check the full output above)');
+    }
+  }
+
+  log.info('');
+}
+
 async function writeSummary(results: JestConfigResult[], log: ToolingLog, totalMs: number) {
   const cwd = process.cwd();
 
@@ -426,8 +439,6 @@ async function writeSummary(results: JestConfigResult[], log: ToolingLog, totalM
     const statusIcon = r.code === 0 ? '✅' : '❌';
 
     let slowTestCount = '0';
-    let topSlowTests: SlowTest[] = [];
-    let slowTests: SlowTest[] = [];
 
     if (r.slowTestsFile) {
       try {
@@ -438,85 +449,17 @@ async function writeSummary(results: JestConfigResult[], log: ToolingLog, totalM
 
         if (fileExists) {
           const content = await fs.readFile(r.slowTestsFile, 'utf8');
-          slowTests = JSON.parse(content);
+          const slowTests: SlowTest[] = JSON.parse(content);
           if (slowTests.length > 0) {
             slowTestCount = slowTests.length.toString();
-            // Get top 5 slowest tests for this config
-            topSlowTests = slowTests.sort((a, b) => b.duration - a.duration).slice(0, 5);
           }
         }
-      } catch (error) {
+      } catch {
         // Skip files that can't be read
       }
     }
 
-    // Add main config row
-    // i.e.: | src/plugins/core/core.test.ts | ✅ | 3 | 30s |
-    table.push([chalk.bold(relativePath), statusIcon, slowTestCount, `${sec}s`]);
-
-    // Add failed tests if any
-    if (r.failedTests && r.failedTests.length > 0) {
-      table.push([{ colSpan: 4, content: `${chalk.bold.red('  Failed tests:')}` }]);
-
-      // Group failed tests by file path
-      const failedTestsByFile = new Map<string, FailedTest[]>();
-      for (const test of r.failedTests) {
-        const testRelativePath = relative(cwd, test.filePath);
-        if (!failedTestsByFile.has(testRelativePath)) {
-          failedTestsByFile.set(testRelativePath, []);
-        }
-        failedTestsByFile.get(testRelativePath)!.push(test);
-      }
-
-      // Display grouped failed tests
-      for (const [filePath, tests] of failedTestsByFile) {
-        table.push([`  ${filePath}`]);
-
-        for (const test of tests) {
-          table.push([`    ${test.fullName}`, '❌', '', '']);
-        }
-      }
-    }
-
-    // Add top 5 slow tests as indented rows
-    // i.e.: | src/plugins/core/core.test.ts | ⚠️ | 0.1s |
-    if (topSlowTests.length > 0) {
-      // Add header row for slow tests
-      table.push([
-        {
-          colSpan: 4,
-          content: `${chalk.bold.yellow(
-            `${topSlowTests.length > 4 ? 'Top' : ''} Slow tests (> 300ms): (Showing ${
-              topSlowTests.length
-            } of ${slowTests.length})`
-          )}`,
-        },
-      ]);
-
-      // Group tests by file path
-      const testsByFile = new Map<string, SlowTest[]>();
-      for (const test of topSlowTests) {
-        const testRelativePath = relative(cwd, test.filePath);
-
-        if (!testsByFile.has(testRelativePath)) {
-          testsByFile.set(testRelativePath, []);
-        }
-
-        testsByFile.get(testRelativePath)!.push(test);
-      }
-
-      // Display grouped tests
-      for (const [filePath, tests] of testsByFile) {
-        table.push([`  ${filePath}`]);
-
-        for (const test of tests) {
-          const durationFormatted =
-            test.duration >= 1000 ? `${(test.duration / 1000).toFixed(1)}s` : `${test.duration}ms`;
-
-          table.push([`    ${test.fullName}`, '⚠️', '', durationFormatted]);
-        }
-      }
-    }
+    table.push([relativePath, statusIcon, slowTestCount, `${sec}s`]);
   }
 
   log.info(table.toString());
