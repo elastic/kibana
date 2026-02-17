@@ -24,10 +24,12 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSelect,
+  EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -39,6 +41,28 @@ import type { Relationship, RelationshipDirection } from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useKibana } from '../../hooks/use_kibana';
+
+interface SharedField {
+  name: string;
+  type: string;
+  otherType: string;
+  isCorrelationField: boolean;
+  correlationWeight: number;
+  metadata?: {
+    description?: string;
+    flat_name?: string;
+    name?: string;
+    type?: string;
+  };
+}
+
+interface RelationshipSuggestion {
+  from_stream: string;
+  to_stream: string;
+  confidence: number;
+  shared_fields: SharedField[];
+  description: string;
+}
 
 interface RelatedStreamsSectionProps {
   relationships: Relationship[];
@@ -78,6 +102,35 @@ export function RelatedStreamsSection({
   const [isLinking, setIsLinking] = useState(false);
   const [availableStreams, setAvailableStreams] = useState<EuiComboBoxOptionOption[]>([]);
   const [isLoadingStreams, setIsLoadingStreams] = useState(false);
+  const [suggestions, setSuggestions] = useState<RelationshipSuggestion[]>([]);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+
+  const loadRelationshipSuggestions = useCallback(async () => {
+    setIsLoadingSuggestions(true);
+    try {
+      const result = await streamsRepositoryClient.fetch(
+        'GET /internal/streams/{name}/relationships/_suggestions',
+        {
+          signal: null,
+          params: {
+            path: {
+              name: streamName,
+            },
+            query: {
+              min_confidence: 0.1,
+              max_suggestions: 10,
+            },
+          },
+        }
+      );
+      setSuggestions(result.suggestions);
+    } catch (error) {
+      // Silently handle error - suggestions are optional
+      setSuggestions([]);
+    } finally {
+      setIsLoadingSuggestions(false);
+    }
+  }, [streamsRepositoryClient, streamName]);
 
   const loadAvailableStreams = useCallback(async () => {
     setIsLoadingStreams(true);
@@ -89,10 +142,17 @@ export function RelatedStreamsSection({
         relationships.flatMap((r) => [r.from_stream, r.to_stream])
       );
       const options = result.streams
-        .filter((s) => s.name !== streamName && !existingRelatedStreams.has(s.name))
+        .filter(
+          (s) =>
+            s.stream.name !== streamName && !existingRelatedStreams.has(s.stream.name)
+        )
         // Filter out parent/child relationships
-        .filter((s) => !s.name.startsWith(streamName + '.') && !streamName.startsWith(s.name + '.'))
-        .map((s) => ({ label: s.name, value: s.name }));
+        .filter(
+          (s) =>
+            !s.stream.name.startsWith(streamName + '.') &&
+            !streamName.startsWith(s.stream.name + '.')
+        )
+        .map((s) => ({ label: s.stream.name, value: s.stream.name }));
       setAvailableStreams(options);
     } catch (error) {
       notifications.toasts.addDanger({
@@ -110,11 +170,19 @@ export function RelatedStreamsSection({
     setSelectedStream([]);
     setDirection('bidirectional');
     setDescription('');
+    setSuggestions([]);
     loadAvailableStreams();
-  }, [loadAvailableStreams]);
+    loadRelationshipSuggestions();
+  }, [loadAvailableStreams, loadRelationshipSuggestions]);
 
   const handleCloseAddFlyout = useCallback(() => {
     setIsAddFlyoutOpen(false);
+  }, []);
+
+  const handleSelectSuggestion = useCallback((suggestion: RelationshipSuggestion) => {
+    setSelectedStream([{ label: suggestion.to_stream, value: suggestion.to_stream }]);
+    setDescription(suggestion.description);
+    setDirection('bidirectional');
   }, []);
 
   const handleAddRelationship = useCallback(async () => {
@@ -127,7 +195,7 @@ export function RelatedStreamsSection({
         to_stream: selectedStream[0].value as string,
         direction,
         source: 'manual',
-        description: description || undefined,
+        description: description || '',
       };
       await onLink(relationship);
       handleCloseAddFlyout();
@@ -277,6 +345,9 @@ export function RelatedStreamsSection({
             isLinking={isLinking}
             onClose={handleCloseAddFlyout}
             onAdd={handleAddRelationship}
+            suggestions={suggestions}
+            isLoadingSuggestions={isLoadingSuggestions}
+            onSelectSuggestion={handleSelectSuggestion}
           />
         )}
       </>
@@ -336,6 +407,9 @@ export function RelatedStreamsSection({
           isLinking={isLinking}
           onClose={handleCloseAddFlyout}
           onAdd={handleAddRelationship}
+          suggestions={suggestions}
+          isLoadingSuggestions={isLoadingSuggestions}
+          onSelectSuggestion={handleSelectSuggestion}
         />
       )}
     </>
@@ -451,6 +525,49 @@ const ADD_BUTTON = i18n.translate(
   }
 );
 
+const SUGGESTED_RELATIONSHIPS_TITLE = i18n.translate(
+  'xpack.streams.content.relatedStreams.addFlyout.suggestedTitle',
+  {
+    defaultMessage: 'Suggested relationships',
+  }
+);
+
+const SUGGESTED_RELATIONSHIPS_DESCRIPTION = i18n.translate(
+  'xpack.streams.content.relatedStreams.addFlyout.suggestedDescription',
+  {
+    defaultMessage:
+      'These streams share fields with this stream and may be related. Click to select.',
+  }
+);
+
+const LOADING_SUGGESTIONS_TEXT = i18n.translate(
+  'xpack.streams.content.relatedStreams.addFlyout.loadingSuggestions',
+  {
+    defaultMessage: 'Loading suggestions...',
+  }
+);
+
+const MANUAL_SELECTION_TITLE = i18n.translate(
+  'xpack.streams.content.relatedStreams.addFlyout.manualSelectionTitle',
+  {
+    defaultMessage: 'Or select manually',
+  }
+);
+
+const MORE_FIELDS_TEXT = i18n.translate(
+  'xpack.streams.content.relatedStreams.addFlyout.moreFields',
+  {
+    defaultMessage: 'more',
+  }
+);
+
+const SELECTED_TEXT = i18n.translate(
+  'xpack.streams.content.relatedStreams.addFlyout.selected',
+  {
+    defaultMessage: 'Selected',
+  }
+);
+
 // Add Relationship Flyout component
 
 interface AddRelationshipFlyoutProps {
@@ -465,6 +582,9 @@ interface AddRelationshipFlyoutProps {
   isLinking: boolean;
   onClose: () => void;
   onAdd: () => void;
+  suggestions: RelationshipSuggestion[];
+  isLoadingSuggestions: boolean;
+  onSelectSuggestion: (suggestion: RelationshipSuggestion) => void;
 }
 
 function AddRelationshipFlyout({
@@ -479,6 +599,9 @@ function AddRelationshipFlyout({
   isLinking,
   onClose,
   onAdd,
+  suggestions,
+  isLoadingSuggestions,
+  onSelectSuggestion,
 }: AddRelationshipFlyoutProps) {
   return (
     <EuiFlyout
@@ -495,6 +618,49 @@ function AddRelationshipFlyout({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
+        {/* Suggestions section */}
+        {(isLoadingSuggestions || suggestions.length > 0) && (
+          <>
+            <EuiTitle size="xs">
+              <h3>{SUGGESTED_RELATIONSHIPS_TITLE}</h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="xs" color="subdued">
+              {SUGGESTED_RELATIONSHIPS_DESCRIPTION}
+            </EuiText>
+            <EuiSpacer size="m" />
+
+            {isLoadingSuggestions ? (
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="s" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s">{LOADING_SUGGESTIONS_TEXT}</EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : (
+              <EuiFlexGroup direction="column" gutterSize="s">
+                {suggestions.map((suggestion) => (
+                  <EuiFlexItem key={suggestion.to_stream}>
+                    <SuggestionCard
+                      suggestion={suggestion}
+                      isSelected={selectedStream[0]?.value === suggestion.to_stream}
+                      onSelect={() => onSelectSuggestion(suggestion)}
+                    />
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            )}
+
+            <EuiHorizontalRule margin="l" />
+            <EuiTitle size="xs">
+              <h3>{MANUAL_SELECTION_TITLE}</h3>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+          </>
+        )}
+
         <EuiFormRow label={TARGET_STREAM_LABEL} fullWidth>
           <EuiComboBox
             placeholder={TARGET_STREAM_PLACEHOLDER}
@@ -552,4 +718,112 @@ function AddRelationshipFlyout({
       </EuiFlyoutFooter>
     </EuiFlyout>
   );
+}
+
+// Suggestion Card component for displaying relationship suggestions
+
+interface SuggestionCardProps {
+  suggestion: RelationshipSuggestion;
+  isSelected: boolean;
+  onSelect: () => void;
+}
+
+function SuggestionCard({ suggestion, isSelected, onSelect }: SuggestionCardProps) {
+  const { euiTheme } = useEuiTheme();
+  const confidencePercent = Math.round(suggestion.confidence * 100);
+
+  // Get top correlation fields (max 3)
+  const topFields = suggestion.shared_fields
+    .filter((f) => f.isCorrelationField)
+    .slice(0, 3);
+
+  return (
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      paddingSize="s"
+      css={css`
+        cursor: pointer;
+        border-color: ${isSelected ? euiTheme.colors.primary : euiTheme.colors.lightShade};
+        background-color: ${isSelected ? euiTheme.colors.lightestShade : 'transparent'};
+        &:hover {
+          border-color: ${euiTheme.colors.primary};
+        }
+      `}
+      onClick={onSelect}
+      data-test-subj={`streamsAppRelationshipSuggestion-${suggestion.to_stream}`}
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow>
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <strong>{suggestion.to_stream}</strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={CONFIDENCE_TOOLTIP}>
+                    <EuiBadge color={getConfidenceColor(confidencePercent)}>
+                      {confidencePercent}%
+                    </EuiBadge>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            {suggestion.description && (
+              <EuiFlexItem>
+                <EuiText size="xs" color="subdued">
+                  {suggestion.description}
+                </EuiText>
+              </EuiFlexItem>
+            )}
+            {topFields.length > 0 && (
+              <EuiFlexItem>
+                <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+                  {topFields.map((field) => (
+                    <EuiFlexItem grow={false} key={field.name}>
+                      <EuiToolTip
+                        content={
+                          field.metadata?.description ||
+                          i18n.translate(
+                            'xpack.streams.content.relatedStreams.sharedFieldTooltip',
+                            {
+                              defaultMessage: 'Shared field: {fieldName} ({fieldType})',
+                              values: { fieldName: field.name, fieldType: field.type },
+                            }
+                          )
+                        }
+                      >
+                        <EuiBadge color="hollow">{field.name}</EuiBadge>
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  ))}
+                  {suggestion.shared_fields.length > 3 && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="hollow">
+                        +{suggestion.shared_fields.length - 3} {MORE_FIELDS_TEXT}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        {isSelected && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="primary">{SELECTED_TEXT}</EuiBadge>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+}
+
+function getConfidenceColor(percent: number): 'success' | 'warning' | 'hollow' {
+  if (percent >= 70) return 'success';
+  if (percent >= 40) return 'warning';
+  return 'hollow';
 }
