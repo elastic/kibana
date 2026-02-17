@@ -88,7 +88,7 @@ export interface AgentConfiguration {
   tools: ToolSelection[];
 
   /**
-   * Optional list of workflow ids. When set, these workflows run before the agent is executed.
+   * Optional list of workflow IDs. When set, these workflows run before the agent is executed.
    */
   workflow_ids?: string[];
 

@@ -22,7 +22,6 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
 
   const configuration: AgentConfigurationProperties =
     document._source.configuration ?? document._source.config;
-  const workflowIds = configuration.workflow_ids as string[] | undefined;
 
   return {
     // backward compatibility with M1 - we check the document id.
@@ -36,7 +35,7 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
     configuration: {
       instructions: configuration.instructions,
       tools: configuration.tools,
-      workflow_ids: workflowIds,
+      workflow_ids: configuration.workflow_ids,
     },
   };
 };

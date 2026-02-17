@@ -193,7 +193,7 @@ export function registerAgentRoutes({
                       schema.string({
                         meta: {
                           description:
-                            'Optional list of workflow ids. When set, these workflows run before every agent execution, in order.',
+                            'Optional list of workflow IDs. When set, these workflows run before every agent execution, in order.',
                         },
                       }),
                       { maxSize: 100 }
@@ -313,7 +313,7 @@ export function registerAgentRoutes({
                         schema.string({
                           meta: {
                             description:
-                              'Updated list of workflow ids. When set, these workflows run every agent execution, in order.',
+                              'Updated list of workflow IDs. When set, these workflows run every agent execution, in order.',
                           },
                         }),
                         { maxSize: 100 }

@@ -491,14 +491,15 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                   <EuiTitle size="xs">
                     <h2 id="workflow-section-title">
                       {i18n.translate('xpack.agentBuilder.agents.form.settings.workflowTitle', {
-                        defaultMessage: 'Pre-execution workflow ',
+                        defaultMessage: 'Pre-execution workflow',
                       })}
                     </h2>
                   </EuiTitle>
                 </EuiFlexGroup>
                 <EuiText size="s" color="subdued">
                   {i18n.translate('xpack.agentBuilder.agents.form.settings.workflowDescription', {
-                    defaultMessage: 'Runs as soon as the agent is invoked, before the LLM call.',
+                    defaultMessage:
+                      'Runs immediately when the agent is invoked, before the first LLM call.',
                   })}
                 </EuiText>
               </EuiFlexGroup>
