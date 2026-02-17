@@ -10,10 +10,6 @@
 import { escapeAndPreserveHighlightTags } from './escape_preserve_highlight_tags';
 
 describe('escapeAndPreserveHighlightTags', () => {
-  it('returns the value as-is when it is empty', () => {
-    expect(escapeAndPreserveHighlightTags('')).toBe('');
-  });
-
   it('escapes HTML when there are no <mark> tags', () => {
     expect(escapeAndPreserveHighlightTags('<hello>world</hello>')).toBe(
       '&lt;hello&gt;world&lt;/hello&gt;'

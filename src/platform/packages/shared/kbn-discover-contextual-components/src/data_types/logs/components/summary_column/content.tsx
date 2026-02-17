@@ -107,7 +107,7 @@ export const Content = ({
     () =>
       value
         ? getHighlightedMessage(escapeAndPreserveHighlightTags(value), row, euiTheme, isDarkTheme)
-        : escapeAndPreserveHighlightTags(value),
+        : value,
     [value, row, euiTheme, isDarkTheme]
   );
 

@@ -10,8 +10,6 @@
 import { escape } from 'lodash';
 
 export function escapeAndPreserveHighlightTags(value: string): string {
-  if (!value) return value;
-
   const markTags: string[] = [];
   const cleanText = value.replace(/<\/?mark[^>]*>/g, (match) => {
     markTags.push(match);
