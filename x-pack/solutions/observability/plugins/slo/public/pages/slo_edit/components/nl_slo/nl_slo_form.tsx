@@ -182,10 +182,7 @@ export function NlSloForm({ onApply }: NlSloFormProps) {
             </EuiFlexItem>
 
             <EuiFlexItem>
-              <SloSuggestions
-                suggestions={suggestions}
-                isLoading={suggestMutation.isLoading}
-              />
+              <SloSuggestions suggestions={suggestions} isLoading={suggestMutation.isLoading} />
             </EuiFlexItem>
 
             <EuiFlexItem>

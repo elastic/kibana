@@ -146,8 +146,7 @@ export function useBulkCreateSlos() {
       if (totalFailure === 0) {
         toasts.addSuccess({
           title: i18n.translate('xpack.slo.bulkCreateSlos.successNotification', {
-            defaultMessage:
-              'Successfully created {count} {count, plural, one {SLO} other {SLOs}}',
+            defaultMessage: 'Successfully created {count} {count, plural, one {SLO} other {SLOs}}',
             values: { count: totalSuccess },
           }),
         });

@@ -110,7 +110,9 @@ async function buildClusterDataSummary(
 
   if (syntheticsMonitors.length > 0) {
     sections.push(
-      `## Synthetics Monitors (${syntheticsMonitors.length} found)\n${syntheticsMonitors.join('\n')}`
+      `## Synthetics Monitors (${syntheticsMonitors.length} found)\n${syntheticsMonitors.join(
+        '\n'
+      )}`
     );
   }
 
@@ -350,4 +352,3 @@ async function discoverMetricDataStreams(
     return [];
   }
 }
-

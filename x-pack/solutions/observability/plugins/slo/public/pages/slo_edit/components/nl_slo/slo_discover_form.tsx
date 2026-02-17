@@ -22,12 +22,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { useDiscoverSlos } from '../../../../hooks/use_discover_slos';
 import type { ProposedSlo } from '../../../../hooks/use_discover_slos';
 import { useBulkCreateSlos } from '../../../../hooks/use_bulk_create_slos';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { normalizeForCreate } from '../../../../utils/normalize_slo_for_create';
-import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { DiscoveredSloCard } from './discovered_slo_card';
 
 export function SloDiscoverForm() {
@@ -42,8 +42,12 @@ export function SloDiscoverForm() {
   const [hasDiscovered, setHasDiscovered] = useState(false);
 
   const discoverMutation = useDiscoverSlos();
-  const { mutate: bulkCreate, isLoading: isCreating, batchProgress, abort: abortBulkCreate } =
-    useBulkCreateSlos();
+  const {
+    mutate: bulkCreate,
+    isLoading: isCreating,
+    batchProgress,
+    abort: abortBulkCreate,
+  } = useBulkCreateSlos();
 
   const handleDiscover = useCallback(() => {
     discoverMutation.mutate(
@@ -192,6 +196,7 @@ export function SloDiscoverForm() {
           </p>
           <EuiSpacer size="s" />
           <EuiButton
+            data-test-subj="sloSloDiscoverFormRetryScanButton"
             onClick={handleDiscover}
             isLoading={isDiscovering}
             iconType="refresh"
@@ -351,8 +356,7 @@ export function SloDiscoverForm() {
                 data-test-subj="sloDiscoverCreateButton"
               >
                 {i18n.translate('xpack.slo.discover.createButton', {
-                  defaultMessage:
-                    'Create {count} {count, plural, one {SLO} other {SLOs}}',
+                  defaultMessage: 'Create {count} {count, plural, one {SLO} other {SLOs}}',
                   values: { count: selectedIndices.size },
                 })}
               </EuiButton>
@@ -374,8 +378,7 @@ export function SloDiscoverForm() {
                       <EuiText size="s">
                         <strong>
                           {i18n.translate('xpack.slo.discover.batchProgress', {
-                            defaultMessage:
-                              'Creating batch {current} of {total}...',
+                            defaultMessage: 'Creating batch {current} of {total}...',
                             values: {
                               current: batchProgress.currentBatch,
                               total: batchProgress.totalBatches,
@@ -399,8 +402,7 @@ export function SloDiscoverForm() {
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs" color="subdued">
                         {i18n.translate('xpack.slo.discover.batchCompleted', {
-                          defaultMessage:
-                            '{completed} of {total} SLOs processed',
+                          defaultMessage: '{completed} of {total} SLOs processed',
                           values: {
                             completed: batchProgress.completedSlos,
                             total: batchProgress.totalSlos,

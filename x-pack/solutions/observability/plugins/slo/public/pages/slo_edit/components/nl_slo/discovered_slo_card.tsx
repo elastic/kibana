@@ -101,11 +101,13 @@ export function DiscoveredSloCard({
   const indicatorType = indicatorObj?.type ?? 'unknown';
   const indicatorParams = indicatorObj?.params;
 
-  const objectiveObj = objective as {
-    target?: number;
-    timesliceTarget?: number;
-    timesliceWindow?: string;
-  } | undefined;
+  const objectiveObj = objective as
+    | {
+        target?: number;
+        timesliceTarget?: number;
+        timesliceWindow?: string;
+      }
+    | undefined;
 
   const timeWindowObj = timeWindow as { duration?: string; type?: string } | undefined;
 
@@ -130,7 +132,9 @@ export function DiscoveredSloCard({
       title: i18n.translate('xpack.slo.discover.card.timeWindow', {
         defaultMessage: 'Window',
       }),
-      description: `${timeWindowObj?.duration ?? '30d'} (${timeWindowObj?.type === 'calendarAligned' ? 'Calendar' : 'Rolling'})`,
+      description: `${timeWindowObj?.duration ?? '30d'} (${
+        timeWindowObj?.type === 'calendarAligned' ? 'Calendar' : 'Rolling'
+      })`,
     },
     {
       title: i18n.translate('xpack.slo.discover.card.budgeting', {

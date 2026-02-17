@@ -9,7 +9,6 @@ import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { render } from '../../../../utils/test_helper';
 import { CreationModeToggle } from './creation_mode_toggle';
-import type { CreationMode } from './creation_mode_toggle';
 
 describe('CreationModeToggle', () => {
   const mockOnChange = jest.fn();

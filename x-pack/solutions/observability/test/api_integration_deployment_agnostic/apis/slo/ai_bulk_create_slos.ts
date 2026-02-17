@@ -96,9 +96,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.summary.total).to.be(2);
       expect(response.results).to.have.length(2);
 
-      const validResult = response.results.find(
-        (r: { name: string }) => r.name === 'Valid SLO'
-      );
+      const validResult = response.results.find((r: { name: string }) => r.name === 'Valid SLO');
       expect(validResult?.success).to.be(true);
     });
 

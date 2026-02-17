@@ -65,9 +65,12 @@ export const aiGenerateSloRoute = createSloServerRoute({
     const inferenceClient = inference.getClient({ request });
 
     const messages = previousMessages ?? [];
-    const input = messages.length > 0
-      ? `Previous context:\n${messages.map((m) => `${m.role}: ${m.content}`).join('\n')}\n\nNew instruction: ${prompt}`
-      : prompt;
+    const input =
+      messages.length > 0
+        ? `Previous context:\n${messages
+            .map((m) => `${m.role}: ${m.content}`)
+            .join('\n')}\n\nNew instruction: ${prompt}`
+        : prompt;
 
     const response = await inferenceClient.output({
       id: 'slo-ai-generate',

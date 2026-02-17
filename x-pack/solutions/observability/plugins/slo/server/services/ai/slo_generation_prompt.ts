@@ -191,14 +191,7 @@ export const SLO_GENERATION_OUTPUT_SCHEMA = {
           },
         },
       },
-      required: [
-        'name',
-        'description',
-        'indicator',
-        'timeWindow',
-        'budgetingMethod',
-        'objective',
-      ],
+      required: ['name', 'description', 'indicator', 'timeWindow', 'budgetingMethod', 'objective'],
     },
     explanation: {
       type: 'string',

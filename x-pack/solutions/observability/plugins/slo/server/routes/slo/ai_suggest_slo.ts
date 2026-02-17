@@ -58,7 +58,11 @@ export const aiSuggestSloRoute = createSloServerRoute({
 
     const inferenceClient = inference.getClient({ request });
 
-    const input = `Analyze the following SLO definition and suggest improvements:\n\n${JSON.stringify(sloDefinition, null, 2)}`;
+    const input = `Analyze the following SLO definition and suggest improvements:\n\n${JSON.stringify(
+      sloDefinition,
+      null,
+      2
+    )}`;
 
     const response = await inferenceClient.output({
       id: 'slo-ai-suggest',

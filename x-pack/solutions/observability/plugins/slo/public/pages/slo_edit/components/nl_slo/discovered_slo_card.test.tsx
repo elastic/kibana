@@ -48,9 +48,7 @@ describe('DiscoveredSloCard', () => {
     );
 
     expect(screen.getByText('API Availability')).toBeTruthy();
-    expect(
-      screen.getByText('Tracks availability for the API gateway service')
-    ).toBeTruthy();
+    expect(screen.getByText('Tracks availability for the API gateway service')).toBeTruthy();
   });
 
   it('renders priority badge with correct color', () => {
@@ -77,9 +75,7 @@ describe('DiscoveredSloCard', () => {
       <DiscoveredSloCard proposal={proposal} index={0} isSelected={false} onToggle={mockOnToggle} />
     );
 
-    expect(
-      screen.getByText('This service handles critical user-facing traffic')
-    ).toBeTruthy();
+    expect(screen.getByText('This service handles critical user-facing traffic')).toBeTruthy();
   });
 
   it('renders the checkbox', () => {

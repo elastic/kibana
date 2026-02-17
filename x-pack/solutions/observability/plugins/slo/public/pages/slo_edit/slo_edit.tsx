@@ -17,10 +17,7 @@ import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { SloEditForm } from './components/slo_edit_form';
-import {
-  CreationModeToggle,
-  type CreationMode,
-} from './components/nl_slo/creation_mode_toggle';
+import { CreationModeToggle, type CreationMode } from './components/nl_slo/creation_mode_toggle';
 import { NlSloForm } from './components/nl_slo/nl_slo_form';
 import { SloDiscoverForm } from './components/nl_slo/slo_discover_form';
 import { useSloFormValues } from './hooks/use_slo_form_values';
@@ -114,9 +111,7 @@ export function SloEditPage() {
               <EuiSpacer size="l" />
             </>
           )}
-          {creationMode === 'auto_discover' && !isEditMode && (
-            <SloDiscoverForm />
-          )}
+          {creationMode === 'auto_discover' && !isEditMode && <SloDiscoverForm />}
           <div
             style={
               (creationMode === 'ai_assisted' || creationMode === 'auto_discover') && !isEditMode
@@ -124,11 +119,7 @@ export function SloEditPage() {
                 : {}
             }
           >
-            <SloEditForm
-              slo={slo}
-              formSettings={{ isEditMode }}
-              initialValues={initialValues}
-            />
+            <SloEditForm slo={slo} formSettings={{ isEditMode }} initialValues={initialValues} />
           </div>
         </>
       )}

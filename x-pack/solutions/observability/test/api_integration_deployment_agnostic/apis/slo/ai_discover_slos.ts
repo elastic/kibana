@@ -45,10 +45,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('rejects unauthenticated requests', async () => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-      await supertestWithoutAuth
-        .post(`/internal/slo/ai/discover`)
-        .send()
-        .expect(401);
+      await supertestWithoutAuth.post(`/internal/slo/ai/discover`).send().expect(401);
     });
   });
 }

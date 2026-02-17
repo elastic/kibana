@@ -52,7 +52,12 @@ export function SloPreview({ sloDefinition, explanation }: SloPreviewProps) {
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h3>{name || i18n.translate('xpack.slo.nlSlo.preview.untitled', { defaultMessage: 'Untitled SLO' })}</h3>
+            <h3>
+              {name ||
+                i18n.translate('xpack.slo.nlSlo.preview.untitled', {
+                  defaultMessage: 'Untitled SLO',
+                })}
+            </h3>
           </EuiTitle>
           {description && (
             <>
@@ -262,7 +267,9 @@ function buildObjectiveDetails(
     title: i18n.translate('xpack.slo.nlSlo.preview.timeWindow', {
       defaultMessage: 'Time window',
     }),
-    description: `${timeWindow?.duration ?? '30d'} (${timeWindow?.type === 'calendarAligned' ? 'Calendar' : 'Rolling'})`,
+    description: `${timeWindow?.duration ?? '30d'} (${
+      timeWindow?.type === 'calendarAligned' ? 'Calendar' : 'Rolling'
+    })`,
   });
 
   return details;

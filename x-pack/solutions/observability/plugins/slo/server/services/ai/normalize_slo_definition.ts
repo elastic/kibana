@@ -93,10 +93,7 @@ export function normalizeSloDefinition(
 
   if (!normalized.tags) {
     normalized.tags = ['auto-discovered'];
-  } else if (
-    Array.isArray(normalized.tags) &&
-    !normalized.tags.includes('auto-discovered')
-  ) {
+  } else if (Array.isArray(normalized.tags) && !normalized.tags.includes('auto-discovered')) {
     (normalized.tags as string[]).push('auto-discovered');
   }
 

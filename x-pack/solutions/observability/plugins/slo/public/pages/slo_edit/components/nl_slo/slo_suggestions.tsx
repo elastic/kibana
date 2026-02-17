@@ -66,12 +66,7 @@ export function SloSuggestions({ suggestions, isLoading }: SloSuggestionsProps) 
       <EuiFlexGroup direction="column" gutterSize="s">
         {suggestions.map((suggestion, index) => (
           <EuiFlexItem key={index}>
-            <EuiCallOut
-              title={suggestion.title}
-              color="primary"
-              iconType="iInCircle"
-              size="s"
-            >
+            <EuiCallOut title={suggestion.title} color="primary" iconType="iInCircle" size="s">
               <EuiText size="xs">
                 <p>{suggestion.description}</p>
               </EuiText>

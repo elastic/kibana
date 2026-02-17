@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { render } from '../../../../utils/test_helper';
 import { SloDiscoverForm } from './slo_discover_form';
 import { useDiscoverSlos } from '../../../../hooks/use_discover_slos';
@@ -281,10 +281,7 @@ describe('SloDiscoverForm', () => {
     fireEvent.click(screen.getByTestId('sloDiscoverSelectAll'));
     fireEvent.click(screen.getByTestId('sloDiscoverCreateButton'));
 
-    expect(mockBulkCreate).toHaveBeenCalledWith(
-      { slos: expect.any(Array) },
-      expect.any(Object)
-    );
+    expect(mockBulkCreate).toHaveBeenCalledWith({ slos: expect.any(Array) }, expect.any(Object));
 
     const { slos } = mockBulkCreate.mock.calls[0][0];
     expect(slos).toHaveLength(3);

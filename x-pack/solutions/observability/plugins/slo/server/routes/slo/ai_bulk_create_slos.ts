@@ -67,9 +67,7 @@ export const aiBulkCreateSlosRoute = createSloServerRoute({
 
     for (const sloParams of slos) {
       try {
-        const response: CreateSLOResponse = await createSLO.execute(
-          sloParams as CreateSLOParams
-        );
+        const response: CreateSLOResponse = await createSLO.execute(sloParams as CreateSLOParams);
         results.push({
           success: true,
           id: response.id,
