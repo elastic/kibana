@@ -377,7 +377,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: START,
             end: END,
-            environment: PRODUCTION_ENVIRONMENT,
+            kqlFilter: `service.environment: "${PRODUCTION_ENVIRONMENT}"`,
           },
         });
 
@@ -396,7 +396,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: START,
             end: END,
-            environment: STAGING_ENVIRONMENT,
+            kqlFilter: `service.environment: "${STAGING_ENVIRONMENT}"`,
           },
         });
 

@@ -25,11 +25,6 @@ const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
 
 const getServicesSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
-  environment: z
-    .string()
-    .min(1)
-    .optional()
-    .describe('Filter services by environment. Examples: "production", "staging".'),
   healthStatus: z
     .array(z.enum(['unknown', 'healthy', 'warning', 'critical']))
     .optional()
@@ -75,7 +70,7 @@ When to use:
       },
     },
     handler: async (toolParams, context) => {
-      const { start, end, environment, healthStatus, kqlFilter } = toolParams;
+      const { start, end, healthStatus, kqlFilter } = toolParams;
       const { request, esClient } = context;
 
       try {
@@ -88,7 +83,6 @@ When to use:
           logger,
           start,
           end,
-          environment,
           healthStatus,
           kqlFilter,
         });

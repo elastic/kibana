@@ -32,7 +32,6 @@ async function getServicesFromLogsAndMetricsIndices({
   metricsIndices,
   start,
   end,
-  environment,
   kqlFilter,
   logger,
 }: {
@@ -41,7 +40,6 @@ async function getServicesFromLogsAndMetricsIndices({
   metricsIndices: string[];
   start: number;
   end: number;
-  environment?: string;
   kqlFilter?: string;
   logger: Logger;
 }): Promise<ServiceFromIndex[]> {
@@ -62,7 +60,6 @@ async function getServicesFromLogsAndMetricsIndices({
           filter: [
             { range: { '@timestamp': { gte: start, lte: end } } },
             { exists: { field: 'service.name' } },
-            ...(environment ? [{ term: { 'service.environment': environment } }] : []),
             ...kqlQuery(kqlFilter),
           ],
         },
@@ -131,7 +128,6 @@ export async function getToolHandler({
   logger,
   start,
   end,
-  environment,
   healthStatus,
   kqlFilter,
 }: {
@@ -143,7 +139,6 @@ export async function getToolHandler({
   logger: Logger;
   start: string;
   end: string;
-  environment?: string;
   healthStatus?: string[];
   kqlFilter?: string;
 }): Promise<{
@@ -162,7 +157,6 @@ export async function getToolHandler({
   const [apmResponse, logsAndMetricsServices] = await Promise.all([
     dataRegistry.getData('servicesItems', {
       request,
-      environment,
       kuery: kqlFilter,
       start,
       end,
@@ -173,7 +167,6 @@ export async function getToolHandler({
       metricsIndices,
       start: startMs,
       end: endMs,
-      environment,
       kqlFilter,
       logger,
     }),
