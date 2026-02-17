@@ -45,6 +45,7 @@ export const find = async (
       caseId,
       ...queryParams,
       filter: authorizationFilter,
+      attachmentsFeatureEnabled: clientArgs.config?.attachments?.enabled ?? false,
     });
 
     ensureSavedObjectsAreAuthorized(

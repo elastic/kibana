@@ -10,6 +10,7 @@ import type { PersistableStateAttachmentTypeRegistry } from '../../client/attach
 import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 import { getFileType } from './file/file_type';
 import { getVisualizationAttachmentType } from './lens/attachment';
+import { getCommentAttachmentType } from './comment/comment_type';
 
 export const registerInternalAttachments = (
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry,
@@ -18,4 +19,6 @@ export const registerInternalAttachments = (
 ) => {
   externalRefRegistry.register(getFileType());
   persistableStateRegistry.register(getVisualizationAttachmentType());
+
+  unifiedRegistry.register(getCommentAttachmentType());
 };

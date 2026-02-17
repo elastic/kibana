@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import type { AttachmentRequest } from '../../../common/types/api';
 
 export interface Limiter {
   readonly limit: number;
   readonly errorMessage: string;
   countOfItemsWithinCase(caseId: string): Promise<number>;
-  countOfItemsInRequest: (requests: AttachmentRequest[]) => number;
+  countOfItemsInRequest: (requests: Array<AttachmentRequest | UnifiedAttachmentPayload>) => number;
 }

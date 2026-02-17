@@ -6,6 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
+import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
 import type { AlertAttachmentPayload } from '../../../common/types/domain';
 import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
@@ -31,11 +33,14 @@ export async function deleteAll(
     services: { caseService, attachmentService, userActionService, alertsService },
     logger,
     authorization,
+    spaceId,
   } = clientArgs;
 
   try {
+    const namespaces = [spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING];
     const comments = await caseService.getAllCaseComments({
       id: caseID,
+      namespaces,
     });
 
     if (comments.total <= 0) {

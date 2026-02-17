@@ -10,30 +10,25 @@ import type { UnifiedAttachmentPayload } from '../../../common/types/domain/atta
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
+  isLegacyCommentRequest,
   isUnifiedAttachmentRequest,
+  isUnifiedReferenceAttachmentRequest,
+  isUnifiedValueAttachmentRequest,
 } from '../../../common/utils/attachments';
 import type { AttachmentRequest } from '../../../common/types/api';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 
-export const validateRegisteredAttachments = ({
+export const validateLegacyRegisteredAttachments = ({
   query,
   persistableStateAttachmentTypeRegistry,
   externalReferenceAttachmentTypeRegistry,
-  unifiedAttachmentTypeRegistry,
 }: {
-  query: AttachmentRequest | UnifiedAttachmentPayload;
+  query: AttachmentRequest;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
-  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
 }) => {
-  if (isUnifiedAttachmentRequest(query) && !unifiedAttachmentTypeRegistry.has(query.type)) {
-    throw Boom.badRequest(
-      `Attachment type ${query.type} is not registered in unified attachment type registry.`
-    );
-  }
-
   if (
     isCommentRequestTypeExternalReference(query) &&
     !externalReferenceAttachmentTypeRegistry.has(query.externalReferenceAttachmentTypeId)
@@ -50,5 +45,57 @@ export const validateRegisteredAttachments = ({
     throw Boom.badRequest(
       `Attachment type ${query.persistableStateAttachmentTypeId} is not registered.`
     );
+  }
+};
+
+export const validateUnifiedRegisteredAttachments = ({
+  query,
+  unifiedAttachmentTypeRegistry,
+}: {
+  query: UnifiedAttachmentPayload;
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
+}) => {
+  if (isUnifiedAttachmentRequest(query)) {
+    if (!unifiedAttachmentTypeRegistry.has(query.type)) {
+      throw Boom.badRequest(
+        `Attachment type ${query.type} is not registered in unified attachment type registry.`
+      );
+    }
+
+    const attachmentType = unifiedAttachmentTypeRegistry.get(query.type);
+    if (attachmentType.schemaValidator) {
+      if (isUnifiedValueAttachmentRequest(query)) {
+        attachmentType.schemaValidator(query.data);
+      } else if (isUnifiedReferenceAttachmentRequest(query)) {
+        attachmentType.schemaValidator(query.metadata ?? null);
+      }
+    }
+  }
+};
+
+export const validateRegisteredAttachments = ({
+  query,
+  persistableStateAttachmentTypeRegistry,
+  externalReferenceAttachmentTypeRegistry,
+  unifiedAttachmentTypeRegistry,
+}: {
+  query: AttachmentRequest | UnifiedAttachmentPayload;
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
+}) => {
+  if (isLegacyCommentRequest(query)) {
+    validateLegacyRegisteredAttachments({
+      query,
+      persistableStateAttachmentTypeRegistry,
+      externalReferenceAttachmentTypeRegistry,
+    });
+  } else if (isUnifiedAttachmentRequest(query)) {
+    validateUnifiedRegisteredAttachments({
+      query,
+      unifiedAttachmentTypeRegistry,
+    });
+  } else {
+    throw Boom.badRequest(`Invalid attachment request type: ${typeof query}`);
   }
 };

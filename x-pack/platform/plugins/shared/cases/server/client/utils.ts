@@ -13,7 +13,7 @@ import { validate as uuidValidate } from 'uuid';
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import type { KueryNode } from '@kbn/es-query';
 
-import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
+import { nodeBuilder, fromKueryExpression, escapeKuery, toElasticsearchQuery } from '@kbn/es-query';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 
 import { escapeQuotes } from '@kbn/es-query/src/kuery/utils/escape_kuery';
@@ -45,6 +45,8 @@ import type { CasesSearchParams } from './types';
 
 import { decodeWithExcessOrThrow } from '../common/runtime_types';
 import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   FILE_ATTACHMENT_TYPE,
   NO_ASSIGNEES_FILTERING_KEYWORD,
@@ -53,6 +55,10 @@ import {
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
+  isUnifiedAttachmentRequest,
+  isUnifiedReferenceAttachmentRequest,
+  isUnifiedValueAttachmentRequest,
+  isLegacyCommentRequest,
 } from '../../common/utils/attachments';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import { SEVERITY_EXTERNAL_TO_ESMODEL, STATUS_EXTERNAL_TO_ESMODEL } from '../common/constants';
@@ -65,6 +71,8 @@ import {
   isCommentRequestTypeEvent,
 } from '../common/utils';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
+import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
+import type { UnifiedAttachmentPayload } from '../../common/types/domain/attachment/v2';
 import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
 import type { ICasesCustomField } from '../custom_fields';
 import { casesCustomFields } from '../custom_fields';
@@ -154,6 +162,73 @@ const decodeExternalReferenceAttachment = (
     const attachmentType = externalRefRegistry.get(attachment.externalReferenceAttachmentTypeId);
 
     attachmentType.schemaValidator?.(metadata);
+  }
+};
+
+/**
+ * Decodes and validates a unified value attachment payload.
+ * Validates the data structure using the schema validator from the registry.
+ */
+const decodeUnifiedValueAttachment = (
+  attachment: UnifiedAttachmentPayload,
+  unifiedRegistry: UnifiedAttachmentTypeRegistry
+) => {
+  if (!unifiedRegistry.has(attachment.type)) {
+    throw badRequest(
+      `Attachment type ${attachment.type} is not registered in unified attachment type registry.`
+    );
+  }
+
+  const attachmentType = unifiedRegistry.get(attachment.type);
+  if (attachmentType.schemaValidator) {
+    attachmentType.schemaValidator(attachment.data);
+  }
+};
+
+/**
+ * Decodes and validates a unified reference attachment payload.
+ * Validates the metadata using the schema validator from the registry.
+ */
+const decodeUnifiedReferenceAttachment = (
+  attachment: UnifiedAttachmentPayload,
+  unifiedRegistry: UnifiedAttachmentTypeRegistry
+) => {
+  if (!unifiedRegistry.has(attachment.type)) {
+    throw badRequest(
+      `Attachment type ${attachment.type} is not registered in unified attachment type registry.`
+    );
+  }
+
+  const attachmentType = unifiedRegistry.get(attachment.type);
+  if (attachmentType.schemaValidator) {
+    attachmentType.schemaValidator(attachment.metadata ?? null);
+  }
+};
+
+export const decodeUnifiedCommentRequest = (
+  comment: UnifiedAttachmentPayload,
+  unifiedRegistry: UnifiedAttachmentTypeRegistry
+) => {
+  if (isUnifiedValueAttachmentRequest(comment)) {
+    decodeUnifiedValueAttachment(comment, unifiedRegistry);
+  } else if (isUnifiedReferenceAttachmentRequest(comment)) {
+    decodeUnifiedReferenceAttachment(comment, unifiedRegistry);
+  } else {
+    assertUnreachable(comment);
+  }
+};
+
+export const decodeCombinedCommentRequest = (
+  comment: AttachmentRequest | UnifiedAttachmentPayload,
+  externalRefRegistry: ExternalReferenceAttachmentTypeRegistry,
+  unifiedRegistry: UnifiedAttachmentTypeRegistry
+) => {
+  if (isLegacyCommentRequest(comment)) {
+    decodeCommentRequest(comment, externalRefRegistry);
+  } else if (isUnifiedAttachmentRequest(comment)) {
+    decodeUnifiedCommentRequest(comment, unifiedRegistry);
+  } else {
+    assertUnreachable(comment);
   }
 };
 
@@ -449,6 +524,144 @@ export const removeAttributesFromFilter = (node: KueryNode): KueryNode => {
 
   traverse(modifiedNode);
   return modifiedNode;
+};
+
+/**
+ * Clones a KueryNode and replaces a prefix in all literal field paths.
+ * Used to expand attachment filters to match both cases-comments and cases-attachments SO types.
+ */
+const cloneWithReplacedPrefix = (
+  node: KueryNode,
+  oldPrefix: string,
+  newPrefix: string
+): KueryNode => {
+  const modifiedNode = structuredClone(node);
+  const traverse = (ast: KueryNode): void => {
+    if (ast.type === 'literal' && typeof ast.value === 'string' && ast.value.startsWith(oldPrefix)) {
+      ast.value = newPrefix + ast.value.slice(oldPrefix.length);
+    }
+    if (ast.arguments && Array.isArray(ast.arguments)) {
+      ast.arguments.forEach((arg) => {
+        if (arg) traverse(arg);
+      });
+    }
+  };
+  traverse(modifiedNode);
+  return modifiedNode;
+};
+
+/**
+ * Expands a filter that references CASE_COMMENT_SAVED_OBJECT so it also matches
+ * CASE_ATTACHMENT_SAVED_OBJECT. Used when searching both attachment SO types.
+ */
+export const expandFilterForAttachmentTypes = (filter: KueryNode): KueryNode => {
+  return nodeBuilder.or([
+    filter,
+    cloneWithReplacedPrefix(filter, CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT),
+  ]);
+};
+
+export interface AttachmentFindOptionsToSearchParamsInput {
+  filter?: KueryNode;
+  hasReference?: { type: string; id: string } | Array<{ type: string; id: string }>;
+  hasReferenceOperator?: 'AND' | 'OR';
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  perPage?: number;
+}
+
+const DEFAULT_ATTACHMENT_PER_PAGE = 20;
+
+const buildReferencesFilter = (
+  refs: Array<{ type: string; id: string }>,
+  operator: 'AND' | 'OR'
+): ReturnType<typeof toElasticsearchQuery> => {
+  const nestedClauses = refs.map((ref) => ({
+    nested: {
+      path: 'references',
+      query: {
+        bool: {
+          must: [
+            { term: { 'references.type': ref.type } },
+            { term: { 'references.id': ref.id } },
+          ],
+        },
+      },
+    },
+  }));
+  if (operator === 'OR') {
+    return { bool: { should: nestedClauses, minimum_should_match: 1 } };
+  }
+  return { bool: { must: nestedClauses } };
+};
+
+/**
+ * Converts attachment find-style options (filter, hasReference, sort, pagination) into
+ * search API params (query, from, size, sort). Use when calling attachmentService.search().
+ */
+export const attachmentFindOptionsToSearchParams = (
+  options: AttachmentFindOptionsToSearchParamsInput
+): {
+  query: ReturnType<typeof toElasticsearchQuery>;
+  from: number;
+  size: number;
+  sort?: Array<Record<string, { order: 'asc' | 'desc'; unmapped_type?: string }>>;
+} => {
+  const {
+    filter,
+    hasReference,
+    hasReferenceOperator = 'OR',
+    sortField = 'created_at',
+    sortOrder = 'desc',
+    page = 1,
+    perPage = DEFAULT_ATTACHMENT_PER_PAGE,
+  } = options;
+
+  const must: ReturnType<typeof toElasticsearchQuery>[] = [];
+
+  if (hasReference) {
+    const refs = Array.isArray(hasReference) ? hasReference : [hasReference];
+    if (refs.length > 0) {
+      must.push(buildReferencesFilter(refs, hasReferenceOperator));
+    }
+  }
+
+  if (filter) {
+    const searchFilter = removeAttributesFromFilter(filter);
+    const expandedFilter = expandFilterForAttachmentTypes(searchFilter);
+    must.push(toElasticsearchQuery(expandedFilter));
+  }
+
+  const query = must.length > 0 ? { bool: { must } } : { match_all: {} };
+
+  const from = (page - 1) * perPage;
+  const size = perPage;
+
+  const sort =
+    sortField && sortOrder
+      ? [
+          {
+            [`${CASE_COMMENT_SAVED_OBJECT}.${sortField}`]: {
+              order: sortOrder,
+              unmapped_type: 'date',
+            },
+          },
+          {
+            [`${CASE_ATTACHMENT_SAVED_OBJECT}.${sortField}`]: {
+              order: sortOrder,
+              unmapped_type: 'date',
+            },
+          },
+        ]
+      : undefined;
+
+  return {
+    query,
+    from,
+    size,
+    sort,
+  };
 };
 
 export const constructQueryOptions = ({

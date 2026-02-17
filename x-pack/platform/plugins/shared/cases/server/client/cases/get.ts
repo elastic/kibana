@@ -6,6 +6,8 @@
  */
 
 import type { SavedObject, SavedObjectsResolveResponse } from '@kbn/core/server';
+import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { AttachmentTotals, Case, CaseAttributes, User } from '../../../common/types/domain';
 import type {
   AllCategoriesFindRequest,
@@ -189,6 +191,7 @@ export const get = async (
     services: { caseService, attachmentService },
     logger,
     authorization,
+    spaceId,
   } = clientArgs;
 
   try {
@@ -219,8 +222,10 @@ export const get = async (
       );
     }
 
+    const namespaces = [spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING];
     const theComments = await caseService.getAllCaseComments({
       id,
+      namespaces,
       options: {
         sortField: 'created_at',
         sortOrder: 'asc',
@@ -283,8 +288,10 @@ export const resolve = async (
       });
     }
 
+    const namespaces = [spaceIdToNamespace(clientArgs.spaceId) ?? DEFAULT_NAMESPACE_STRING];
     const theComments = await caseService.getAllCaseComments({
       id: resolvedSavedObject.id,
+      namespaces,
       options: {
         sortField: 'created_at',
         sortOrder: 'asc',

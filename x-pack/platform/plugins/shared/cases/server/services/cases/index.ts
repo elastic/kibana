@@ -80,7 +80,7 @@ import type {
   GetCategoryArgs,
   BulkCreateCasesArgs,
 } from './types';
-import type { AttachmentTransformedAttributes } from '../../common/types/attachments';
+import type { AttachmentAttributesV2 } from '../../common/types/attachments_v2';
 import { bulkDecodeSOAttributes } from '../utils';
 import {
   DEFAULT_ATTACHMENT_SEARCH_FIELDS,
@@ -549,27 +549,30 @@ export class CasesService {
   // occurred within the attachment service
   private async getAllComments({
     id,
+    namespaces,
     options,
-  }: FindCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentTransformedAttributes>> {
+  }: FindCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
     try {
       this.log.debug(`Attempting to GET all comments internal for id ${JSON.stringify(id)}`);
       if (options?.page !== undefined || options?.perPage !== undefined) {
-        return this.attachmentService.find({
-          options: {
+        return this.attachmentService.findViaSearch(
+          {
             sortField: defaultSortField,
             ...options,
           },
-        });
+          namespaces
+        );
       }
 
-      return this.attachmentService.find({
-        options: {
+      return this.attachmentService.findViaSearch(
+        {
           page: 1,
           perPage: MAX_DOCS_PER_PAGE,
           sortField: defaultSortField,
           ...options,
         },
-      });
+        namespaces
+      );
     } catch (error) {
       this.log.error(`Error on GET all comments internal for ${JSON.stringify(id)}: ${error}`);
       throw error;
@@ -584,8 +587,9 @@ export class CasesService {
    */
   public async getAllCaseComments({
     id,
+    namespaces,
     options,
-  }: FindCaseCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentTransformedAttributes>> {
+  }: FindCaseCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
     try {
       const refs = this.asArray(id).map((caseID) => ({ type: CASE_SAVED_OBJECT, id: caseID }));
       if (refs.length <= 0) {
@@ -600,6 +604,7 @@ export class CasesService {
       this.log.debug(`Attempting to GET all comments for case caseID ${JSON.stringify(id)}`);
       return await this.getAllComments({
         id,
+        namespaces,
         options: {
           hasReferenceOperator: 'OR',
           hasReference: refs,

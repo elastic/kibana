@@ -10,9 +10,9 @@ import type { Readable } from 'stream';
 import type { ReplaySubject } from 'rxjs';
 import type { AttachmentType } from '../../../common';
 import type {
-  BulkCreateAttachmentsRequest,
+  AttachmentRequestV2,
+  BulkCreateAttachmentsRequestV2,
   AttachmentPatchRequest,
-  AttachmentRequest,
   FindAttachmentsQueryParams,
 } from '../../../common/types/api';
 
@@ -25,14 +25,14 @@ export interface AddArgs {
    */
   caseId: string;
   /**
-   * The attachment values.
+   * The attachment values (legacy or unified format).
    */
-  comment: AttachmentRequest;
+  comment: AttachmentRequestV2;
 }
 
 export interface BulkCreateArgs {
   caseId: string;
-  attachments: BulkCreateAttachmentsRequest;
+  attachments: BulkCreateAttachmentsRequestV2;
 }
 
 /**

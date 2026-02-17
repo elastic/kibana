@@ -45,11 +45,15 @@ export class UserActionFinder {
     page,
     perPage,
     filter,
+    attachmentsFeatureEnabled = false,
   }: FindOptions): Promise<SavedObjectsFindResponse<UserActionTransformedAttributes>> {
     try {
       this.context.log.debug(`Attempting to find user actions for case id: ${caseId}`);
 
-      const finalFilter = combineFilters([filter, UserActionFinder.buildFilter(types)]);
+      const finalFilter = combineFilters([
+        filter,
+        UserActionFinder.buildFilter(types, attachmentsFeatureEnabled),
+      ]);
 
       const userActions =
         await this.context.unsecuredSavedObjectsClient.find<UserActionPersistedAttributes>({
@@ -85,17 +89,25 @@ export class UserActionFinder {
     }
   }
 
-  private static buildFilter(types: FindOptions['types'] = []) {
-    const filters = types.map((type) => UserActionFinder.buildFilterType(type));
+  private static buildFilter(
+    types: FindOptions['types'] = [],
+    attachmentsFeatureEnabled = false
+  ): KueryNode | undefined {
+    const filters = types.map((type) =>
+      UserActionFinder.buildFilterType(type, attachmentsFeatureEnabled)
+    );
     return combineFilters(filters, NodeBuilderOperators.or);
   }
 
-  private static buildFilterType(type: UserActionFindRequestTypes): KueryNode | undefined {
+  private static buildFilterType(
+    type: UserActionFindRequestTypes,
+    attachmentsFeatureEnabled = false
+  ): KueryNode | undefined {
     switch (type) {
       case 'action':
         return UserActionFinder.buildActionFilter();
       case 'user':
-        return UserActionFinder.buildCommentTypeFilter();
+        return UserActionFinder.buildCommentTypeFilter(attachmentsFeatureEnabled);
       case 'alert':
         return UserActionFinder.buildAlertCommentTypeFilter();
       case 'attachment':
@@ -113,7 +125,14 @@ export class UserActionFinder {
     return filterForUserActionsExcludingComment;
   }
 
-  private static buildCommentTypeFilter(): KueryNode | undefined {
+  /**
+   * When attachmentsFeatureEnabled is true, Comments tab shows user actions for both
+   * attachment type "user" (legacy) and "comment" (unified). When false, only "user".
+   */
+  private static buildCommentTypeFilter(attachmentsFeatureEnabled = false): KueryNode | undefined {
+    const commentPayloadTypes = attachmentsFeatureEnabled
+      ? [AttachmentType.user, 'comment']
+      : [AttachmentType.user, 'comment'];
     return combineFilters(
       [
         buildFilter({
@@ -123,7 +142,7 @@ export class UserActionFinder {
           type: CASE_USER_ACTION_SAVED_OBJECT,
         }),
         buildFilter({
-          filters: [AttachmentType.user],
+          filters: commentPayloadTypes,
           field: 'payload.comment.type',
           operator: 'or',
           type: CASE_USER_ACTION_SAVED_OBJECT,
