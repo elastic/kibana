@@ -159,28 +159,27 @@ export const FlyoutWrapper = ({
         className="lnsEditFlyoutBody"
         css={css`
           // styles needed to display extra drop targets that are outside of the config panel main area
-          /* Use 'clip' for y-axis to constrain layout, 'visible' for x-axis to allow
-             drag-drop extra targets to overflow horizontally. */
-          overflow-y: clip !important;
-          overflow-x: visible !important;
+          // Extra targets are 280px wide with 8px gap, so 296px provides enough space.
+          overflow-y: auto;
+          padding-left: 296px;
+          margin-left: -296px;
           pointer-events: none;
           .euiFlyoutBody__overflow {
             transform: initial;
             -webkit-mask-image: none;
-            /* Don't scroll here - scrolling happens in accordion content.
-               Use clip/visible to allow drag-drop extra targets to overflow. */
-            overflow-y: clip !important;
-            overflow-x: visible !important;
+            padding-left: inherit;
+            margin-left: inherit;
+            ${!isScrollable &&
+            `
+                overflow-y: hidden;
+              `}
             > * {
               pointer-events: auto;
             }
           }
           .euiFlyoutBody__overflowContent {
-            padding: 0;
             background-color: ${euiTheme.colors.emptyShade};
-            /* Also allow overflow here */
-            overflow-y: clip !important;
-            overflow-x: visible !important;
+            padding: 0;
           }
         `}
       >

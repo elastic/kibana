@@ -101,8 +101,9 @@ $reorderItemMargin: $euiSizeS;
   right: calc(100% + #{$euiSizeS});
   top: 0;
   transition: opacity $euiAnimSpeedFast ease-in-out;
-  width: 100%;
-  max-width: $euiFormMaxWidth;
+  // Use a fixed width that's enough to fit the content (Duplicate/Swap labels)
+  // rather than matching the form width, to reduce horizontal overflow requirements.
+  width: 280px;
 }
 
 .domDroppable__extraTargets-visible {
