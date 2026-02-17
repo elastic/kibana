@@ -51,7 +51,7 @@ describe(
     });
 
     it('should show backfill groups', function () {
-      visit(ruleDetailsUrl(this.ruleId));
+      visit(ruleDetailsUrl(this.ruleId, 'alerts'));
       waitForAlertsToPopulate();
       interceptFindBackfills();
       goToExecutionLogTab();
