@@ -16,7 +16,7 @@ import type { AnonymizationProfilesClient } from '../services/profiles/client';
 import { useCreateProfile } from '../services/profiles/hooks/use_create_profile';
 import { useUpdateProfile } from '../services/profiles/hooks/use_update_profile';
 import { getConflictState } from '../services/profiles/hooks/get_conflict_state';
-import { isProfilesApiError } from '../services/profiles/errors';
+import { ensureProfilesApiError } from '../services/profiles/errors';
 import type { ProfilesApiError } from '../services/profiles/errors';
 import type { ProfilesQueryContext, TargetType } from '../types';
 import { TARGET_TYPE_INDEX } from '../../target_types';
@@ -84,7 +84,9 @@ export const useProfileForm = ({
 
   const submitError = useMemo(() => {
     const mutationError = isEdit ? updateError : createError;
-    return isProfilesApiError(mutationError) ? mutationError : undefined;
+    return mutationError
+      ? ensureProfilesApiError(mutationError, 'Unable to save anonymization profile')
+      : undefined;
   }, [isEdit, createError, updateError]);
 
   const isSubmitting = isEdit ? isUpdateLoading : isCreateLoading;
@@ -131,7 +133,7 @@ export const useProfileForm = ({
     } catch (error) {
       const conflict = getConflictState(error);
       if (!conflict.error || !isObjectRecord(conflict.error.body)) {
-        return {};
+        return undefined;
       }
 
       const conflictProfileId = conflict.error.body.conflict_profile_id;

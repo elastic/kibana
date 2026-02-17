@@ -6,6 +6,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
+import { mapProfilesApiError } from '../services/profiles/errors';
 import { useDeleteProfile } from '../services/profiles/hooks/use_delete_profile';
 import { useDeleteProfileFlow } from './use_delete_profile_flow';
 
@@ -120,5 +121,40 @@ describe('useDeleteProfileFlow', () => {
     });
 
     expect(result.current.pendingProfileId).toBe('profile-3');
+  });
+
+  it('normalizes non-API mutation errors for display', () => {
+    jest.mocked(useDeleteProfile).mockReturnValue(
+      createDeleteProfileMutationMock({
+        error: new Error('adapter failure'),
+      })
+    );
+
+    const { result } = renderHook(() =>
+      useDeleteProfileFlow({
+        client,
+        context: { spaceId: 'default' },
+      })
+    );
+
+    expect(result.current.error?.kind).toBe('unknown');
+    expect(result.current.error?.message).toBe('adapter failure');
+  });
+
+  it('preserves mapped API errors from delete mutation', () => {
+    jest.mocked(useDeleteProfile).mockReturnValue(
+      createDeleteProfileMutationMock({
+        error: mapProfilesApiError({ statusCode: 403 }),
+      })
+    );
+
+    const { result } = renderHook(() =>
+      useDeleteProfileFlow({
+        client,
+        context: { spaceId: 'default' },
+      })
+    );
+
+    expect(result.current.error?.kind).toBe('forbidden');
   });
 });

@@ -45,19 +45,21 @@ const createListViewMock = (error?: unknown): ReturnType<typeof useProfilesListV
   } as unknown as ReturnType<typeof useProfilesListView>);
 
 const createDeleteFlowMock = (
-  confirmDelete: jest.Mock = jest.fn().mockResolvedValue(false)
+  confirmDelete: jest.Mock = jest.fn().mockResolvedValue(false),
+  error?: unknown
 ): ReturnType<typeof useDeleteProfileFlow> =>
   ({
     pendingProfileId: undefined,
     isDeleting: false,
-    error: undefined,
+    error,
     openConfirmation: jest.fn(),
     cancel: jest.fn(),
     confirmDelete,
   } as unknown as ReturnType<typeof useDeleteProfileFlow>);
 
 const createProfileFormMock = (
-  submit: jest.Mock = jest.fn().mockResolvedValue(undefined)
+  submit: jest.Mock = jest.fn().mockResolvedValue(undefined),
+  submitError?: unknown
 ): ReturnType<typeof useProfileForm> =>
   ({
     values: {
@@ -70,7 +72,7 @@ const createProfileFormMock = (
       nerRules: [],
     },
     validationErrors: {},
-    submitError: undefined,
+    submitError,
     isSubmitting: false,
     isEdit: false,
     setName: jest.fn(),

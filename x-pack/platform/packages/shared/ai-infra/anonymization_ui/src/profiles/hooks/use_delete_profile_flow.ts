@@ -8,7 +8,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { AnonymizationProfilesClient } from '../services/profiles/client';
 import { useDeleteProfile } from '../services/profiles/hooks/use_delete_profile';
-import { isProfilesApiError } from '../services/profiles/errors';
+import { ensureProfilesApiError } from '../services/profiles/errors';
 import type { ProfilesApiError } from '../services/profiles/errors';
 import type { ProfilesQueryContext } from '../types';
 
@@ -39,9 +39,13 @@ export const useDeleteProfileFlow = ({
     reset,
   } = useDeleteProfile({ client, context });
 
-  const error: ProfilesApiError | undefined = isProfilesApiError(mutationError)
-    ? mutationError
-    : undefined;
+  const error: ProfilesApiError | undefined = useMemo(
+    () =>
+      mutationError
+        ? ensureProfilesApiError(mutationError, 'Unable to delete anonymization profile')
+        : undefined,
+    [mutationError]
+  );
 
   const openConfirmation = useCallback(
     (profileId: string) => {

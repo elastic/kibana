@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isProfilesApiError, mapProfilesApiError } from './errors';
+import { ensureProfilesApiError, isProfilesApiError, mapProfilesApiError } from './errors';
 
 describe('mapProfilesApiError', () => {
   it('maps known HTTP status codes to expected kinds', () => {
@@ -36,5 +36,29 @@ describe('isProfilesApiError', () => {
     expect(isProfilesApiError(mapProfilesApiError({ statusCode: 403 }))).toBe(true);
     expect(isProfilesApiError({ kind: 'random' })).toBe(false);
     expect(isProfilesApiError(new Error('plain'))).toBe(false);
+  });
+});
+
+describe('ensureProfilesApiError', () => {
+  it('returns provided ProfilesApiError unchanged', () => {
+    const mapped = mapProfilesApiError({ statusCode: 403 });
+    expect(ensureProfilesApiError(mapped)).toBe(mapped);
+  });
+
+  it('maps statusCode-like errors through mapProfilesApiError', () => {
+    const mapped = ensureProfilesApiError({ statusCode: 401 });
+    expect(mapped.kind).toBe('unauthorized');
+  });
+
+  it('converts plain errors to unknown kind and preserves message', () => {
+    const normalized = ensureProfilesApiError(new Error('invalid payload'));
+    expect(normalized.kind).toBe('unknown');
+    expect(normalized.message).toBe('invalid payload');
+  });
+
+  it('uses fallback message when unknown error has no message', () => {
+    const normalized = ensureProfilesApiError('boom', 'Unexpected profiles failure');
+    expect(normalized.kind).toBe('unknown');
+    expect(normalized.message).toBe('Unexpected profiles failure');
   });
 });

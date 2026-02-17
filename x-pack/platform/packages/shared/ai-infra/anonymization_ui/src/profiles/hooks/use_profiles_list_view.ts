@@ -8,7 +8,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { AnonymizationProfilesClient } from '../services/profiles/client';
 import { useFindProfiles } from '../services/profiles/hooks/use_find_profiles';
-import { isProfilesApiError } from '../services/profiles/errors';
+import { ensureProfilesApiError } from '../services/profiles/errors';
 import type { ProfilesApiError } from '../services/profiles/errors';
 import type { ProfilesQueryContext, TargetType } from '../types';
 import type { ProfileListViewState } from './types';
@@ -57,9 +57,13 @@ export const useProfilesListView = ({
     refetch: refetchProfiles,
   } = useFindProfiles({ client, context, query });
 
-  const error: ProfilesApiError | undefined = isProfilesApiError(queryError)
-    ? queryError
-    : undefined;
+  const error: ProfilesApiError | undefined = useMemo(
+    () =>
+      queryError
+        ? ensureProfilesApiError(queryError, 'Unable to load anonymization profiles')
+        : undefined,
+    [queryError]
+  );
 
   const filters = useMemo(() => ({ targetType, targetId }), [targetType, targetId]);
 

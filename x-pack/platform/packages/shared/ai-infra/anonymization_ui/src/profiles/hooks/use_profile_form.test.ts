@@ -323,7 +323,7 @@ describe('useProfileForm', () => {
     });
   });
 
-  it('returns empty result when submit fails without conflict details', async () => {
+  it('returns undefined when submit fails without conflict details', async () => {
     const createMutateAsync = jest.fn().mockRejectedValue(new Error('boom'));
     jest.mocked(useCreateProfile).mockReturnValue(
       createUseCreateProfileMutationMock({
@@ -348,8 +348,27 @@ describe('useProfileForm', () => {
 
     await act(async () => {
       const submitResult = await result.current.submit();
-      expect(submitResult).toEqual({});
+      expect(submitResult).toBeUndefined();
     });
+  });
+
+  it('normalizes non-API submit errors for display', () => {
+    jest.mocked(useCreateProfile).mockReturnValue(
+      createUseCreateProfileMutationMock({
+        error: new Error('invalid profile response payload'),
+      })
+    );
+    jest.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
+
+    const { result } = renderHook(() =>
+      useProfileForm({
+        client,
+        context: { spaceId: 'default' },
+      })
+    );
+
+    expect(result.current.submitError?.kind).toBe('unknown');
+    expect(result.current.submitError?.message).toBe('invalid profile response payload');
   });
 
   it('hydrates form values when initialProfile arrives after mount', async () => {

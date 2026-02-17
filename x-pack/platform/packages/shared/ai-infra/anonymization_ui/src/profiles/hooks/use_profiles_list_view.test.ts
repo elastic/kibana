@@ -127,7 +127,7 @@ describe('useProfilesListView', () => {
     expect(refetch).toHaveBeenCalledTimes(1);
   });
 
-  it('sets error only for ProfilesApiError shapes', () => {
+  it('normalizes unknown errors and preserves mapped API errors', () => {
     jest.mocked(useFindProfiles).mockReturnValue({
       data: undefined,
       isLoading: false,
@@ -141,7 +141,8 @@ describe('useProfilesListView', () => {
         context: { spaceId: 'default' },
       })
     );
-    expect(result.current.error).toBeUndefined();
+    expect(result.current.error?.kind).toBe('unknown');
+    expect(result.current.error?.message).toBe('plain');
 
     jest.mocked(useFindProfiles).mockReturnValue({
       data: undefined,

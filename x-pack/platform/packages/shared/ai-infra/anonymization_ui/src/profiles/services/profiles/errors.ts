@@ -67,6 +67,18 @@ const toMessage = (statusCode?: number, body?: unknown) => {
   return 'Profiles API request failed';
 };
 
+const toUnknownErrorMessage = (error: unknown, fallbackMessage?: string): string => {
+  if (
+    isObjectRecord(error) &&
+    typeof error.message === 'string' &&
+    error.message.trim().length > 0
+  ) {
+    return error.message;
+  }
+
+  return fallbackMessage ?? 'Profiles API request failed';
+};
+
 class ProfilesApiErrorImpl extends Error implements ProfilesApiError {
   constructor(
     public kind: ProfilesApiErrorKind,
@@ -84,6 +96,18 @@ export const isProfilesApiError = (error: unknown): error is ProfilesApiError =>
   }
 
   return isProfilesApiErrorKind(error.kind);
+};
+
+const createUnknownProfilesApiError = (
+  error: unknown,
+  fallbackMessage?: string
+): ProfilesApiError => {
+  const unknownError = new Error(toUnknownErrorMessage(error, fallbackMessage)) as ProfilesApiError;
+  unknownError.name = 'ProfilesApiError';
+  unknownError.kind = 'unknown';
+  unknownError.statusCode = undefined;
+  unknownError.body = undefined;
+  return unknownError;
 };
 
 export const mapProfilesApiError = (error: unknown): ProfilesApiError => {
@@ -111,4 +135,20 @@ export const mapProfilesApiError = (error: unknown): ProfilesApiError => {
   }
 
   return new ProfilesApiErrorImpl('unknown', statusCode, body);
+};
+
+export const ensureProfilesApiError = (
+  error: unknown,
+  fallbackMessage?: string
+): ProfilesApiError => {
+  if (isProfilesApiError(error)) {
+    return error;
+  }
+
+  const statusCode = getStatusCode(error);
+  if (typeof statusCode === 'number') {
+    return mapProfilesApiError(error);
+  }
+
+  return createUnknownProfilesApiError(error, fallbackMessage);
 };
