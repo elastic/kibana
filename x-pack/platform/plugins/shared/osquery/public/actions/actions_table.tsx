@@ -28,6 +28,7 @@ import type { SearchHit } from '../../common/search_strategy';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import { usePacks } from '../packs/use_packs';
+import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../common/use_persisted_page_size';
 
 const EMPTY_ARRAY: SearchHit[] = [];
 
@@ -65,7 +66,7 @@ const ActionsTableComponent = () => {
   const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { push } = useHistory();
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = usePersistedPageSize();
 
   const { data: packsData } = usePacks({});
 
@@ -91,7 +92,7 @@ const ActionsTableComponent = () => {
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="package" />
+            <EuiIcon type="package" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>{item._source.pack_name}</EuiFlexItem>
         </EuiFlexGroup>
@@ -282,7 +283,7 @@ const ActionsTableComponent = () => {
       pageIndex,
       pageSize,
       totalItemCount: actionsData?.data?.total ?? 0,
-      pageSizeOptions: [20, 50, 100],
+      pageSizeOptions: [...PAGE_SIZE_OPTIONS],
     }),
     [actionsData, pageIndex, pageSize]
   );
