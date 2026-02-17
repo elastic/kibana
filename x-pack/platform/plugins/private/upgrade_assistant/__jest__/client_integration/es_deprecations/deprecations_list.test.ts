@@ -207,7 +207,8 @@ describe('ES deprecations table', () => {
     });
   });
 
-  describe('pagination', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/248431
+  describe.skip('pagination', () => {
     const esDeprecationsMockResponseWithManyDeprecations = createEsDeprecationsMockResponse(20);
     const { migrationsDeprecations } = esDeprecationsMockResponseWithManyDeprecations;
 

@@ -15,11 +15,17 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
+import { PREFERRED_DEFAULT_CONNECTOR_ID } from '../../../../common/constants';
 
 // TODO: Import from gen-ai-settings-plugin (package) once available
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
 const selectDefaultConnector = ({ connectors }: { connectors: InferenceConnector[] }) => {
+  const preferredConnector = connectors.find(
+    (connector) => connector.connectorId === PREFERRED_DEFAULT_CONNECTOR_ID
+  );
+  if (preferredConnector) return preferredConnector;
+
   const inferenceConnector = connectors.find(
     (connector) => connector.type === InferenceConnectorType.Inference
   );

@@ -15,6 +15,8 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { escape } from 'lodash';
+
 import {
   getMessageFieldWithFallbacks,
   type DataTableRecord,
@@ -44,7 +46,7 @@ export const ContentBreakdown = ({
 
   const messageCodeBlockProps = formattedValue
     ? { language: 'json', children: formattedValue }
-    : { language: 'txt', dangerouslySetInnerHTML: { __html: value ?? '' } };
+    : { language: 'txt', dangerouslySetInnerHTML: { __html: escape(value ?? '') } };
   const hasMessageField = field && value;
 
   return (
