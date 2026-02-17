@@ -69,7 +69,7 @@ describe('apiKeyAsAlertAttributes', () => {
     });
   });
 
-  test('returns UIAM APIKeys as well', () => {
+  test('returns UIAM API Key as well', () => {
     expect(
       apiKeyAsRuleDomainProperties(
         {
