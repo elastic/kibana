@@ -121,7 +121,6 @@ const MaybeWrapper = ({
   return (
     <EuiFlyout
       data-test-subj="lnsEditOnFlyFlyout"
-      className="lnsApp"
       type="push"
       ownFocus
       paddingSize="m"
