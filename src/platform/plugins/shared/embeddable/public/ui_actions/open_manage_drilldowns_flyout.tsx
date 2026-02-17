@@ -9,8 +9,8 @@
 
 import React, { useMemo } from 'react';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { type PresentationContainer } from '@kbn/presentation-containers';
 import { openLazyFlyout } from '@kbn/presentation-util';
+import type { PresentationContainer } from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
   apiHasSupportedTriggers,

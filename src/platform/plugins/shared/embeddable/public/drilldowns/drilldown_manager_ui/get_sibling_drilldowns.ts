@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import type { HasUniqueId, PublishesTitle } from '@kbn/presentation-publishing';
-import { apiHasParentApi, apiHasUniqueId, getTitle } from '@kbn/presentation-publishing';
+import {
+  apiHasParentApi,
+  apiHasUniqueId,
+  apiIsPresentationContainer,
+  getTitle,
+} from '@kbn/presentation-publishing';
 import { v4 } from 'uuid';
 import type { DrilldownTemplate } from './types';
 import type { HasDrilldowns } from '../types';

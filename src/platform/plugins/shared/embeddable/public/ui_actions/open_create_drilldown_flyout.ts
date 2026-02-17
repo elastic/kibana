@@ -8,8 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type PresentationContainer } from '@kbn/presentation-containers';
 import { openLazyFlyout } from '@kbn/presentation-util';
+import type { PresentationContainer } from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
   apiHasParentApi,
