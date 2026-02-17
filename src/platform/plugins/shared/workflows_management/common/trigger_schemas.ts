@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
+import type {
+  PublicTriggerDefinition,
+  WorkflowsExtensionsPublicPluginStart,
+} from '@kbn/workflows-extensions/public';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
 export interface TriggerDefinitionSummary {
@@ -21,6 +24,7 @@ export interface TriggerDefinitionSummary {
 /** Minimal contract used internally so the same code works on public and server. */
 interface TriggerDefinitionsProvider {
   getTriggerDefinitions(): TriggerDefinitionSummary[];
+  getTriggerDefinition(triggerId: string): PublicTriggerDefinition | undefined;
 }
 
 function hasGetAllTriggerDefinitions(
@@ -54,6 +58,7 @@ function createTriggerDefinitionsProvider(
           icon: t.icon,
         }));
       },
+      getTriggerDefinition: (triggerId: string) => ext.getTriggerDefinition(triggerId),
     };
   }
   if (hasListTriggers(ext)) {
@@ -63,14 +68,18 @@ function createTriggerDefinitionsProvider(
         if (!list?.length) return [];
         return list.map((t) => ({ id: t.id }));
       },
+      getTriggerDefinition: () => undefined,
     };
   }
-  return { getTriggerDefinitions: () => [] };
+  return {
+    getTriggerDefinitions: () => [],
+    getTriggerDefinition: () => undefined,
+  };
 }
 
 /**
  * Singleton that holds the workflows_extensions start contract and exposes
- * registered trigger definitions for the workflows_management UI (e.g. YAML editor suggestions).
+ * registered trigger definitions for the workflows_management UI (e.g. YAML editor suggestions, trigger hover).
  * Initialized during plugin start with workflowsExtensions (public or server).
  */
 class TriggerSchemas {
@@ -96,6 +105,14 @@ class TriggerSchemas {
    */
   public isRegisteredTriggerId(id: string): boolean {
     return this.getTriggerDefinitions().some((t) => t.id === id);
+  }
+
+  /**
+   * Returns the full trigger definition for hover/documentation (public side only).
+   * When initialized with the server contract, always returns undefined.
+   */
+  public getTriggerDefinition(triggerId: string): PublicTriggerDefinition | undefined {
+    return this.provider?.getTriggerDefinition(triggerId) ?? undefined;
   }
 }
 

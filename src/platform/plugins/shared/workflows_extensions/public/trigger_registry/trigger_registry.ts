@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createConditionExamplesSchema } from './condition_examples_schema';
 import type { PublicTriggerDefinition } from './types';
 
 /**
@@ -18,8 +19,9 @@ export class PublicTriggerRegistry {
 
   /**
    * Register a trigger definition.
+   * Validates conditionExamples with createConditionExamplesSchema (valid KQL, only event schema properties).
    * @param definition - The public trigger definition to register
-   * @throws Error if a trigger with the same ID is already registered
+   * @throws Error if a trigger with the same ID is already registered, or if any conditionExample.condition is invalid
    */
   public register(definition: PublicTriggerDefinition): void {
     const id = String(definition.id);
@@ -28,6 +30,17 @@ export class PublicTriggerRegistry {
         `Trigger definition for "${id}" is already registered. Each trigger must have a unique identifier.`
       );
     }
+
+    if (definition.conditionExamples?.length) {
+      const schema = createConditionExamplesSchema(definition.eventSchema);
+      const parsed = schema.safeParse(definition.conditionExamples);
+      if (!parsed.success) {
+        const first = parsed.error.issues[0];
+        const path = first.path?.length ? `[${first.path.join('.')}] ` : '';
+        throw new Error(`Trigger "${id}": conditionExamples ${path}${first.message}`);
+      }
+    }
+
     this.registry.set(id, definition);
   }
 

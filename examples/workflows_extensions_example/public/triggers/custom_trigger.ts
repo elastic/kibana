@@ -26,4 +26,33 @@ export const customTriggerPublicDefinition: PublicTriggerDefinition<
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/star').then(({ icon }) => ({ default: icon }))
   ),
+  conditionExamples: [
+    {
+      title: i18n.translate(
+        'workflowsExtensionsExample.customTrigger.conditionExample.matchMessage',
+        {
+          defaultMessage: 'Match any message',
+        }
+      ),
+      condition: 'event.message: *',
+    },
+    {
+      title: i18n.translate(
+        'workflowsExtensionsExample.customTrigger.conditionExample.matchSource',
+        {
+          defaultMessage: 'Match events from a specific source',
+        }
+      ),
+      condition: 'event.source: "api"',
+    },
+    {
+      title: i18n.translate(
+        'workflowsExtensionsExample.customTrigger.conditionExample.matchMessageText',
+        {
+          defaultMessage: 'Match message containing "error"',
+        }
+      ),
+      condition: 'event.message: *error*',
+    },
+  ],
 };

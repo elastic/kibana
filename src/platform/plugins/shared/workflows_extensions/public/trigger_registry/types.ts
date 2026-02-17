@@ -8,12 +8,28 @@
  */
 
 import type { z } from '@kbn/zod/v4';
+import type { ConditionExample } from './condition_examples_schema';
 import type { CommonTriggerDefinition } from '../../common';
 
 /**
  * User-facing definition for a workflow trigger.
  * Used by the UI to display trigger information (title, description, icon, event schema, examples).
  * Extends the server contract (id + eventSchema) with UI-only fields.
+ *
+ * @example Valid definition with conditionExamples (event schema has severity and message)
+ * {
+ *   id: 'example.my_trigger',
+ *   title: 'My Trigger',
+ *   description: 'Fired when something happens.',
+ *   eventSchema: z.object({ severity: z.string(), message: z.string() }),
+ *   conditionExamples: [
+ *     { title: 'High severity only', condition: 'event.severity: "high"' },
+ *     { title: 'Any message', condition: 'event.message: *' },
+ *   ],
+ * }
+ *
+ * @example Invalid conditionExample (field not in event schema – will throw at registration)
+ * conditionExamples: [{ title: 'Bad', condition: 'event.unknown: "x"' }]
  */
 export interface PublicTriggerDefinition<EventSchema extends z.ZodType = z.ZodType>
   extends CommonTriggerDefinition<EventSchema> {
@@ -33,4 +49,11 @@ export interface PublicTriggerDefinition<EventSchema extends z.ZodType = z.ZodTy
    * Used to visually represent this trigger in the UI.
    */
   icon?: React.ComponentType;
+
+  /**
+   * Example conditions for the `with` block.
+   * Each condition must be valid KQL and only reference properties from the event schema (see validateKqlAgainstSchema).
+   * Shown in the YAML editor hover to help users filter when the workflow runs.
+   */
+  conditionExamples?: ConditionExample[];
 }
