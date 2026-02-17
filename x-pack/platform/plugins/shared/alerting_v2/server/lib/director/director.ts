@@ -21,7 +21,7 @@ import type { ExecutionContext } from '../execution_context';
 
 interface RunDirectorParams {
   rule: RuleResponse;
-  alertEvents: AsyncIterable<AlertEvent[]>;
+  alertEvents: readonly AlertEvent[];
   executionContext: ExecutionContext;
 }
 
@@ -46,27 +46,19 @@ export class DirectorService {
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  async *run({
-    rule,
-    alertEvents,
-    executionContext,
-  }: RunDirectorParams): AsyncIterable<AlertEvent[]> {
-    const strategy = this.strategyFactory.getStrategy(rule);
-
-    for await (const batch of alertEvents) {
-      executionContext.throwIfAborted();
-
-      const processedBatch = await this.processBatch(rule, batch, strategy, executionContext);
-
-      if (processedBatch.length > 0) {
-        yield processedBatch;
-      }
+  async run({ rule, alertEvents, executionContext }: RunDirectorParams): Promise<AlertEvent[]> {
+    if (alertEvents.length === 0) {
+      return [];
     }
+
+    const strategy = this.strategyFactory.getStrategy(rule);
+    executionContext.throwIfAborted();
+    return this.processAlertEvents(rule, alertEvents, strategy, executionContext);
   }
 
-  private async processBatch(
+  private async processAlertEvents(
     rule: RuleResponse,
-    alertEvents: AlertEvent[],
+    alertEvents: readonly AlertEvent[],
     strategy: ITransitionStrategy,
     executionContext: ExecutionContext
   ): Promise<AlertEvent[]> {
@@ -102,7 +94,7 @@ export class DirectorService {
     context: ExecutionContext
   ): Promise<Map<string, LatestAlertEventState>> {
     const request = getLatestAlertEventStateQuery({ ruleId: rule.id, groupHashes }).toRequest();
-    const rowBatchStream = this.queryService.executeQueryStream<LatestAlertEventState>({
+    const records = await this.queryService.executeQueryRows<LatestAlertEventState>({
       query: request.query,
       // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
       params: request.params,
@@ -110,16 +102,6 @@ export class DirectorService {
       filter: request.filter,
       abortSignal: context.signal,
     });
-
-    // Collect all rows from the batch stream (small result set for state lookup)
-    const records: LatestAlertEventState[] = [];
-    for await (const batch of rowBatchStream) {
-      context.throwIfAborted();
-
-      for (const row of batch) {
-        records.push(row);
-      }
-    }
 
     return new Map(records.map((record) => [record.group_hash, record]));
   }

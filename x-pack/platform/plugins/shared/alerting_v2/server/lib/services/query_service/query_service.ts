@@ -13,6 +13,8 @@ import { inject, injectable } from 'inversify';
 import { AsyncRecordBatchStreamReader } from 'apache-arrow/Arrow.node';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
+import type { ExecutionContext } from '../../execution_context';
+import type { CancellationScope } from '../../execution_context/cancellation_scope';
 import { createExecutionContext, isRuleExecutionCancellationError } from '../../execution_context';
 
 export interface ExecuteQueryParams {
@@ -24,6 +26,7 @@ export interface ExecuteQueryParams {
 
 export interface QueryServiceContract {
   executeQuery(params: ExecuteQueryParams): Promise<EsqlQueryResponse>;
+  executeQueryRows<T = Record<string, unknown>>(params: ExecuteQueryParams): Promise<T[]>;
   executeQueryStream<T = Record<string, unknown>>(params: ExecuteQueryParams): AsyncIterable<T[]>;
 }
 
@@ -69,6 +72,11 @@ export class QueryService implements QueryServiceContract {
 
       throw error;
     }
+  }
+
+  async executeQueryRows<T = Record<string, unknown>>(params: ExecuteQueryParams): Promise<T[]> {
+    const response = await this.executeQuery(params);
+    return this.toRows<T>(response);
   }
 
   async *executeQueryStream<T = Record<string, unknown>>({
@@ -127,13 +135,13 @@ export class QueryService implements QueryServiceContract {
 
   private async *parseArrowStream<T>(
     response: Readable,
-    context: ReturnType<typeof createExecutionContext>
+    context: ExecutionContext
   ): AsyncIterable<T[]> {
     let reader: AsyncRecordBatchStreamReader;
     const scope = context.createScope();
     const passthrough = new PassThrough();
     const streamPipeline = pipeline(response, passthrough, { signal: context.signal });
-    let pipelineError: unknown;
+
     scope.add(() => {
       passthrough.destroy();
     });
@@ -169,20 +177,39 @@ export class QueryService implements QueryServiceContract {
       // which causes parsing errors during iteration
       throw this.buildParseError(error);
     } finally {
-      try {
-        await scope.disposeAll();
-        await streamPipeline;
-      } catch (error) {
-        // Swallow pipeline cancellation errors: the primary error/abort reason
-        // is already propagated through the stream iteration above.
-        if (!context.signal.aborted) {
-          pipelineError = error;
-        }
-      }
+      await this.cleanupStream({ scope, streamPipeline, context });
     }
+  }
 
-    if (pipelineError) {
-      throw pipelineError;
+  /**
+   * Disposes scoped resources and awaits the stream pipeline to ensure
+   * the underlying HTTP response is fully closed and no unhandled
+   * promise rejections are left behind.
+   */
+  private async cleanupStream({
+    scope,
+    streamPipeline,
+    context,
+  }: {
+    scope: CancellationScope;
+    streamPipeline: Promise<void>;
+    context: ExecutionContext;
+  }): Promise<void> {
+    try {
+      await scope.disposeAll();
+      /*
+       * Await the pipeline promise to prevent unhandled rejections and
+       * ensure the underlying HTTP response stream is fully closed.
+       */
+      await streamPipeline;
+    } catch (error) {
+      /*
+       * Swallow pipeline cancellation errors: the primary error/abort reason
+       * is already propagated through the stream iteration above.
+       */
+      if (!context.signal.aborted) {
+        throw error;
+      }
     }
   }
 

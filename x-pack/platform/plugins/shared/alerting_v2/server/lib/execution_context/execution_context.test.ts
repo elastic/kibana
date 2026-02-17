@@ -53,7 +53,7 @@ describe('AbortSignalExecutionContext', () => {
       controller.abort();
       const context = new AbortSignalExecutionContext(controller.signal);
 
-      // Default abort reason is a DOMException (an Error) so it gets thrown directly
+      // Default abort reason is an Error so it gets thrown directly
       expect(() => context.throwIfAborted()).toThrow();
     });
   });
@@ -108,16 +108,6 @@ describe('AbortSignalExecutionContext', () => {
   });
 
   describe('createScope', () => {
-    it('returns a CancellationScope', () => {
-      const controller = new AbortController();
-      const context = new AbortSignalExecutionContext(controller.signal);
-      const scope = context.createScope();
-
-      expect(scope).toBeDefined();
-      expect(typeof scope.add).toBe('function');
-      expect(typeof scope.disposeAll).toBe('function');
-    });
-
     it('disposes scope resources when signal is aborted', async () => {
       const controller = new AbortController();
       const context = new AbortSignalExecutionContext(controller.signal);
@@ -127,7 +117,6 @@ describe('AbortSignalExecutionContext', () => {
       scope.add(disposer);
       controller.abort();
 
-      // Allow microtask to process
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       expect(disposer).toHaveBeenCalledTimes(1);
@@ -149,15 +138,21 @@ describe('AbortSignalExecutionContext', () => {
       const controller = new AbortController();
       const context = new AbortSignalExecutionContext(controller.signal);
       const scope = context.createScope();
+      const unhandledRejectionHandler = jest.fn();
+
+      process.on('unhandledRejection', unhandledRejectionHandler);
 
       scope.add(() => {
         throw new Error('disposer failed');
       });
 
-      // Should not cause unhandled rejection
       controller.abort();
 
       await new Promise((resolve) => setTimeout(resolve, 10));
+
+      process.off('unhandledRejection', unhandledRejectionHandler);
+
+      expect(unhandledRejectionHandler).not.toHaveBeenCalled();
     });
 
     it('unsubscribes abort listener when scope is disposed manually', async () => {

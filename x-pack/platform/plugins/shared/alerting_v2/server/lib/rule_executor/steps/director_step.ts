@@ -64,22 +64,17 @@ export class DirectorStep implements RuleExecutionStep {
         return;
       }
 
-      const alertsWithEpisodesStream = step.director.run({
+      const processedBatch = await step.director.run({
         rule,
         executionContext: input.executionContext,
-        alertEvents: (async function* () {
-          yield [...alertEventsBatch];
-        })(),
+        alertEvents: alertEventsBatch,
       });
 
-      step.logger.debug({
-        message: `[${step.name}] Director stream created for rule ${input.ruleId}`,
-      });
-
-      for await (const batch of alertsWithEpisodesStream) {
-        if (batch.length > 0) {
-          yield { type: 'continue', state: { ...requiredState.state, alertEventsBatch: batch } };
-        }
+      if (processedBatch.length > 0) {
+        yield {
+          type: 'continue',
+          state: { ...requiredState.state, alertEventsBatch: processedBatch },
+        };
       }
     });
   }

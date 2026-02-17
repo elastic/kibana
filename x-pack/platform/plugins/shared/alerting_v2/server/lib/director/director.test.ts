@@ -11,29 +11,13 @@ import { DirectorService } from './director';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { createTransitionStrategyFactory } from './strategies/strategy_resolver.mock';
-import { alertEpisodeStatus, type AlertEvent } from '../../resources/alert_events';
+import { alertEpisodeStatus } from '../../resources/alert_events';
 import { createAlertEvent, createEsqlResponse } from '../rule_executor/test_utils';
 import { createRuleResponse } from '../test_utils';
 import type { LatestAlertEventState } from './queries';
 import { createExecutionContext } from '../execution_context';
 
 const testExecutionContext = createExecutionContext(new AbortController().signal);
-
-function toAlertEventStream(events: AlertEvent[]): AsyncIterable<AlertEvent[]> {
-  return (async function* () {
-    if (events.length > 0) {
-      yield events;
-    }
-  })();
-}
-
-async function collectAlertEvents(stream: AsyncIterable<AlertEvent[]>): Promise<AlertEvent[]> {
-  const results: AlertEvent[] = [];
-  for await (const batch of stream) {
-    results.push(...batch);
-  }
-  return results;
-}
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mocked-uuid'),
@@ -81,13 +65,11 @@ describe('DirectorService', () => {
 
   describe('run', () => {
     it('returns empty array when no alert events provided', async () => {
-      const result = await collectAlertEvents(
-        directorService.run({
-          rule,
-          executionContext: testExecutionContext,
-          alertEvents: toAlertEventStream([]),
-        })
-      );
+      const result = await directorService.run({
+        rule,
+        executionContext: testExecutionContext,
+        alertEvents: [],
+      });
 
       expect(result).toEqual([]);
       expect(mockEsClient.esql.query).not.toHaveBeenCalled();
@@ -102,13 +84,11 @@ describe('DirectorService', () => {
 
       mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
 
-      const result = await collectAlertEvents(
-        directorService.run({
-          rule,
-          executionContext: testExecutionContext,
-          alertEvents: toAlertEventStream([alertEvent]),
-        })
-      );
+      const result = await directorService.run({
+        rule,
+        executionContext: testExecutionContext,
+        alertEvents: [alertEvent],
+      });
 
       expect(result).toHaveLength(1);
 
@@ -138,13 +118,11 @@ describe('DirectorService', () => {
         ])
       );
 
-      const result = await collectAlertEvents(
-        directorService.run({
-          rule,
-          executionContext: testExecutionContext,
-          alertEvents: toAlertEventStream([alertEvent]),
-        })
-      );
+      const result = await directorService.run({
+        rule,
+        executionContext: testExecutionContext,
+        alertEvents: [alertEvent],
+      });
 
       expect(result).toHaveLength(1);
 
@@ -174,13 +152,11 @@ describe('DirectorService', () => {
         ])
       );
 
-      const result = await collectAlertEvents(
-        directorService.run({
-          rule,
-          executionContext: testExecutionContext,
-          alertEvents: toAlertEventStream([alertEvent]),
-        })
-      );
+      const result = await directorService.run({
+        rule,
+        executionContext: testExecutionContext,
+        alertEvents: [alertEvent],
+      });
 
       expect(result[0].episode).toEqual({
         id: 'mocked-uuid',
@@ -208,13 +184,11 @@ describe('DirectorService', () => {
         ])
       );
 
-      const result = await collectAlertEvents(
-        directorService.run({
-          rule,
-          executionContext: testExecutionContext,
-          alertEvents: toAlertEventStream([alertEvent]),
-        })
-      );
+      const result = await directorService.run({
+        rule,
+        executionContext: testExecutionContext,
+        alertEvents: [alertEvent],
+      });
 
       expect(result[0].episode).toEqual({
         id: 'existing-episode',
@@ -242,13 +216,11 @@ describe('DirectorService', () => {
         ])
       );
 
-      const result = await collectAlertEvents(
-        directorService.run({
-          rule,
-          executionContext: testExecutionContext,
-          alertEvents: toAlertEventStream([alertEvent]),
-        })
-      );
+      const result = await directorService.run({
+        rule,
+        executionContext: testExecutionContext,
+        alertEvents: [alertEvent],
+      });
 
       expect(result[0].episode).toEqual({
         id: 'existing-episode',
@@ -276,13 +248,11 @@ describe('DirectorService', () => {
         ])
       );
 
-      const result = await collectAlertEvents(
-        directorService.run({
-          rule,
-          executionContext: testExecutionContext,
-          alertEvents: toAlertEventStream([alertEvent]),
-        })
-      );
+      const result = await directorService.run({
+        rule,
+        executionContext: testExecutionContext,
+        alertEvents: [alertEvent],
+      });
 
       expect(result[0].episode).toEqual({
         id: 'existing-episode',
@@ -317,13 +287,11 @@ describe('DirectorService', () => {
         ])
       );
 
-      const result = await collectAlertEvents(
-        directorService.run({
-          rule,
-          executionContext: testExecutionContext,
-          alertEvents: toAlertEventStream(alertEvents),
-        })
-      );
+      const result = await directorService.run({
+        rule,
+        executionContext: testExecutionContext,
+        alertEvents,
+      });
 
       expect(result).toHaveLength(2);
 
@@ -358,13 +326,11 @@ describe('DirectorService', () => {
         ])
       );
 
-      const result = await collectAlertEvents(
-        directorService.run({
-          rule,
-          executionContext: testExecutionContext,
-          alertEvents: toAlertEventStream([alertEvent]),
-        })
-      );
+      const result = await directorService.run({
+        rule,
+        executionContext: testExecutionContext,
+        alertEvents: [alertEvent],
+      });
 
       // Should generate new UUID, not use old episode
       expect(result[0].episode?.id).toBe('mocked-uuid');
@@ -390,13 +356,11 @@ describe('DirectorService', () => {
         ])
       );
 
-      const result = await collectAlertEvents(
-        directorService.run({
-          rule,
-          executionContext: testExecutionContext,
-          alertEvents: toAlertEventStream([alertEvent]),
-        })
-      );
+      const result = await directorService.run({
+        rule,
+        executionContext: testExecutionContext,
+        alertEvents: [alertEvent],
+      });
 
       expect(result[0].episode?.id).toBe('existing-episode');
     });
@@ -409,37 +373,14 @@ describe('DirectorService', () => {
       const alertEvent = createAlertEvent();
 
       await expect(
-        collectAlertEvents(
-          directorService.run({
-            rule,
-            executionContext: abortedContext,
-            alertEvents: toAlertEventStream([alertEvent]),
-          })
-        )
+        directorService.run({
+          rule,
+          executionContext: abortedContext,
+          alertEvents: [alertEvent],
+        })
       ).rejects.toThrow(/aborted/i);
 
       expect(mockEsClient.esql.query).not.toHaveBeenCalled();
-    });
-
-    it('passes abort signal to query service for state lookups', async () => {
-      const abortController = new AbortController();
-      const context = createExecutionContext(abortController.signal);
-      const alertEvent = createAlertEvent({ group_hash: 'hash-1' });
-
-      mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
-
-      await collectAlertEvents(
-        directorService.run({
-          rule,
-          executionContext: context,
-          alertEvents: toAlertEventStream([alertEvent]),
-        })
-      );
-
-      expect(mockEsClient.esql.query).toHaveBeenCalledWith(
-        expect.any(Object),
-        expect.objectContaining({ signal: abortController.signal })
-      );
     });
 
     it('propagates query service errors', async () => {
@@ -447,13 +388,11 @@ describe('DirectorService', () => {
       mockEsClient.esql.query.mockRejectedValue(new Error('Query failed'));
 
       await expect(
-        collectAlertEvents(
-          directorService.run({
-            rule,
-            executionContext: testExecutionContext,
-            alertEvents: toAlertEventStream([alertEvent]),
-          })
-        )
+        directorService.run({
+          rule,
+          executionContext: testExecutionContext,
+          alertEvents: [alertEvent],
+        })
       ).rejects.toThrow('Query failed');
     });
 
@@ -481,13 +420,11 @@ describe('DirectorService', () => {
         ])
       );
 
-      const result = await collectAlertEvents(
-        directorService.run({
-          rule: ruleWithTransition,
-          executionContext: testExecutionContext,
-          alertEvents: toAlertEventStream([alertEvent]),
-        })
-      );
+      const result = await directorService.run({
+        rule: ruleWithTransition,
+        executionContext: testExecutionContext,
+        alertEvents: [alertEvent],
+      });
 
       expect(result[0].episode).toEqual({
         id: 'episode-1',
@@ -520,13 +457,11 @@ describe('DirectorService', () => {
         ])
       );
 
-      const result = await collectAlertEvents(
-        directorService.run({
-          rule: ruleWithTransition,
-          executionContext: testExecutionContext,
-          alertEvents: toAlertEventStream([alertEvent]),
-        })
-      );
+      const result = await directorService.run({
+        rule: ruleWithTransition,
+        executionContext: testExecutionContext,
+        alertEvents: [alertEvent],
+      });
 
       expect(result[0].episode).toEqual({
         id: 'episode-1',

@@ -27,4 +27,4 @@ export const isRuleExecutionCancellationError = (
   (typeof error === 'object' &&
     error !== null &&
     'code' in error &&
-    (error as { code?: unknown }).code === CANCELLATION_ERROR_CODE);
+    error.code === CANCELLATION_ERROR_CODE);

@@ -104,6 +104,92 @@ describe('QueryService', () => {
     });
   });
 
+  describe('executeQueryRows', () => {
+    const mockQuery = 'FROM .alerts-* | LIMIT 10';
+
+    const mockResponse: EsqlQueryResponse = {
+      columns: [
+        { name: 'host', type: 'keyword' },
+        { name: 'count', type: 'integer' },
+      ],
+      values: [
+        ['host-a', 1],
+        ['host-b', 2],
+      ],
+    };
+
+    it('should return typed rows from ES|QL response', async () => {
+      mockEsClient.esql.query.mockResolvedValue(mockResponse);
+
+      const result = await queryService.executeQueryRows<{ host: string; count: number }>({
+        query: mockQuery,
+      });
+
+      expect(result).toEqual([
+        { host: 'host-a', count: 1 },
+        { host: 'host-b', count: 2 },
+      ]);
+    });
+
+    it('should coerce BigInt values to Number', async () => {
+      mockEsClient.esql.query.mockResolvedValue({
+        columns: [
+          { name: 'host', type: 'keyword' },
+          { name: 'cpu', type: 'long' },
+        ],
+        values: [['host-a', BigInt(80)]],
+      } as unknown as EsqlQueryResponse);
+
+      const result = await queryService.executeQueryRows<{ host: string; cpu: number }>({
+        query: mockQuery,
+      });
+
+      expect(result).toEqual([{ host: 'host-a', cpu: 80 }]);
+      expect(typeof result[0].cpu).toBe('number');
+    });
+
+    it('should return empty array when no rows exist', async () => {
+      mockEsClient.esql.query.mockResolvedValue({
+        columns: [{ name: 'host', type: 'keyword' }],
+        values: [],
+      });
+
+      const result = await queryService.executeQueryRows({ query: mockQuery });
+
+      expect(result).toEqual([]);
+    });
+
+    it('should pass query parameters to ES client', async () => {
+      mockEsClient.esql.query.mockResolvedValue(mockResponse);
+      const abortController = new AbortController();
+      const filter = { bool: { filter: [] } };
+
+      await queryService.executeQueryRows({
+        query: mockQuery,
+        filter,
+        abortSignal: abortController.signal,
+      });
+
+      expect(mockEsClient.esql.query).toHaveBeenCalledWith(
+        {
+          query: mockQuery,
+          drop_null_columns: false,
+          filter,
+          params: undefined,
+        },
+        { signal: abortController.signal }
+      );
+    });
+
+    it('should throw an error when query fails', async () => {
+      mockEsClient.esql.query.mockRejectedValue(new Error('Query failed'));
+
+      await expect(queryService.executeQueryRows({ query: mockQuery })).rejects.toThrow(
+        'Query failed'
+      );
+    });
+  });
+
   describe('executeQueryStream', () => {
     const mockQuery = 'FROM .alerts-* | LIMIT 10';
 

@@ -16,8 +16,6 @@ import type { PipelineStateStream } from '../types';
  * - Cancellation is detected before a step receives data.
  * - Cancellation is detected after a step yields data.
  *
- * Steps and stream helpers (pipeStream, etc.) do NOT need to check
- * cancellation themselves — this middleware handles it centrally.
  */
 @injectable()
 export class CancellationBoundaryMiddleware implements RuleExecutionMiddleware {
