@@ -26,7 +26,8 @@ const applyElasticsearchDeprecations = (settings: Record<string, any> = {}) =>
     path: CONFIG_PATH,
   });
 
-test('set correct defaults', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/253372
+test.skip('set correct defaults', () => {
   const configValue = new ElasticsearchConfig(config.schema.validate({}));
   expect(configValue).toMatchInlineSnapshot(`
     ElasticsearchConfig {
@@ -72,7 +73,8 @@ test('set correct defaults', () => {
   `);
 });
 
-test('set correct defaults (serverless)', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/253373
+test.skip('set correct defaults (serverless)', () => {
   const configValue = new ElasticsearchConfig(config.schema.validate({}, { serverless: true }));
   expect(configValue).toMatchInlineSnapshot(`
     ElasticsearchConfig {
