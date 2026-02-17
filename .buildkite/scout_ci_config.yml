@@ -46,4 +46,3 @@ excluded_configs:
   # which are not available on standard Scout CI agents. These tests run via
   # the dedicated .buildkite/pipelines/pull_request/security_solution/osquery_scout.yml pipeline.
   - x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel.playwright.config.ts
-  - x-pack/platform/plugins/shared/osquery/test/scout_osquery_tiers/ui/playwright.config.ts

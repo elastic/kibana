@@ -59,22 +59,3 @@ steps:
         - exit_status: '-1'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/osquery_scout_serverless_tiers.sh
-    label: 'Osquery Scout Serverless Tier Tests'
-    agents:
-      machineType: n2-standard-4
-      preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
-    depends_on:
-      - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1

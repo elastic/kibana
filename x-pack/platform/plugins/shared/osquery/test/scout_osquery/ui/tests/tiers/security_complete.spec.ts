@@ -6,11 +6,11 @@
  */
 
 import { tags } from '@kbn/scout';
-import { test } from '../fixtures';
-import { socManagerRole } from '../../../scout_osquery/ui/common/roles';
-import { loadRule, cleanupRule } from '../../../scout_osquery/ui/common/api_helpers';
-import { checkOsqueryResponseActionsPermissions } from '../../../scout_osquery/ui/common/response_actions';
-import { waitForPageReady } from '../../../scout_osquery/ui/common/constants';
+import { test } from '../../fixtures';
+import { socManagerRole } from '../../common/roles';
+import { loadRule, cleanupRule } from '../../common/api_helpers';
+import { checkOsqueryResponseActionsPermissions } from '../../common/response_actions';
+import { waitForPageReady } from '../../common/constants';
 
 // This test runs against the osquery_tiers config set, which configures the
 // security_complete domain with ONLY the security complete PLI (no endpoint).
