@@ -32,6 +32,7 @@ export const apiCanExpandPanels = (unknownApi: unknown | null): unknownApi is Ca
 export interface HasPinnedPanels {
   panelIsPinned: (panelId: string) => boolean;
 }
+
 export interface CanPinPanels extends HasPinnedPanels {
   pinPanel: (panelId: string) => void;
   unpinPanel: (panelId: string) => void;

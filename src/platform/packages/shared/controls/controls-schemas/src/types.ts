@@ -10,7 +10,6 @@
 import type React from 'react';
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { PublishingSubject } from '@kbn/presentation-publishing';
 
 import type { controlSchema, dataControlSchema } from './control_schema';
 import type {
