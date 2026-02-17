@@ -17,7 +17,6 @@ import { SavedObjectsClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { schema } from '@kbn/config-schema';
-import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { SyncGlobalParamsPrivateLocationsTask } from './tasks/sync_global_params_task';
 import type {
@@ -36,11 +35,9 @@ import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
 import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
 import { SyncPrivateLocationMonitorsTask } from './tasks/sync_private_locations_monitors_task';
-import { getTransformIn as getStatsTransformIn } from '../common/embeddables/stats_overview/get_transform_in';
-import { getTransformOut as getStatsTransformOut } from '../common/embeddables/stats_overview/get_transform_out';
+import { getTransforms as getStatsTransforms } from '../common/embeddables/stats_overview/get_transforms';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../common/embeddables/stats_overview/constants';
-import { getTransformIn as getMonitorsTransformIn } from '../common/embeddables/monitors_overview/get_transform_in';
-import { getTransformOut as getMonitorsTransformOut } from '../common/embeddables/monitors_overview/get_transform_out';
+import { getTransforms as getMonitorsTransforms } from '../common/embeddables/monitors_overview/get_transforms';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../common/embeddables/monitors_overview/constants';
 import { statsOverviewCustomStateSchema, syntheticsMonitorsEmbeddableSchema } from './schemas';
 
@@ -120,13 +117,9 @@ export class Plugin implements PluginType {
 
     // Register transforms and schema for SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE
     plugins.embeddable.registerTransforms(SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE, {
-      getTransforms: (drilldownTransforms: DrilldownTransforms) => ({
-        transformIn: getStatsTransformIn(drilldownTransforms.transformIn),
-        transformOut: getStatsTransformOut(drilldownTransforms.transformOut),
-      }),
+      getTransforms: getStatsTransforms,
       getSchema: (getDrilldownsSchema) => {
         const drilldownsSchema = getDrilldownsSchema(['CONTEXT_MENU_TRIGGER']);
-        // Combine custom state, titles, and drilldowns schemas
         return schema.allOf(
           [statsOverviewCustomStateSchema, serializedTitlesSchema, drilldownsSchema],
           { meta: { description: 'Synthetics stats overview embeddable schema' } }
@@ -136,10 +129,7 @@ export class Plugin implements PluginType {
 
     // Register transforms and schema for SYNTHETICS_MONITORS_EMBEDDABLE
     plugins.embeddable.registerTransforms(SYNTHETICS_MONITORS_EMBEDDABLE, {
-      getTransforms: () => ({
-        transformIn: getMonitorsTransformIn(),
-        transformOut: getMonitorsTransformOut(),
-      }),
+      getTransforms: getMonitorsTransforms,
       getSchema: () => syntheticsMonitorsEmbeddableSchema,
     });
 

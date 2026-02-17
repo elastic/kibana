@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import React, { useEffect } from 'react';
 import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type {
   PublishesWritableTitle,
   PublishesTitle,
