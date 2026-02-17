@@ -29,6 +29,7 @@ import { useAttachmentsApi } from '../../hooks/use_attachments_api';
 import { useRelationshipsFetch } from '../../hooks/use_relationships_fetch';
 import { useRelationshipsApi } from '../../hooks/use_relationships_api';
 import { useContentPackSuggestionsFetch } from '../../hooks/use_content_pack_suggestions_fetch';
+import { useIntegrationSuggestionsFetch } from '../../hooks/use_integration_suggestions_fetch';
 import { useAIFeatures } from '../../hooks/use_ai_features';
 import { useKibana } from '../../hooks/use_kibana';
 import { AttachmentsTable } from '../stream_detail_attachments/attachment_table';
@@ -38,6 +39,7 @@ import { ConfirmAttachmentModal } from '../stream_detail_attachments/confirm_att
 import { DashboardSuggestionControl } from '../stream_detail_dashboard_suggestion/dashboard_suggestion_control';
 import { RelatedStreamsSection } from './related_streams_section';
 import { ContentPackSuggestionsSection } from './content_pack_suggestions_section';
+import { IntegrationSuggestionsSection } from './integration_suggestions_section';
 
 interface StreamDetailContentProps {
   definition: Streams.all.GetResponse;
@@ -62,7 +64,12 @@ export function StreamDetailContent({ definition }: StreamDetailContentProps) {
   // Accordion IDs
   const attachedAssetsAccordionId = useGeneratedHtmlId({ prefix: 'attachedAssets' });
   const dashboardSuggestionsAccordionId = useGeneratedHtmlId({ prefix: 'dashboardSuggestions' });
-  const contentPackSuggestionsAccordionId = useGeneratedHtmlId({ prefix: 'contentPackSuggestions' });
+  const contentPackSuggestionsAccordionId = useGeneratedHtmlId({
+    prefix: 'contentPackSuggestions',
+  });
+  const integrationSuggestionsAccordionId = useGeneratedHtmlId({
+    prefix: 'integrationSuggestions',
+  });
   const relatedStreamsAccordionId = useGeneratedHtmlId({ prefix: 'relatedStreams' });
 
   // Attachments state
@@ -76,6 +83,7 @@ export function StreamDetailContent({ definition }: StreamDetailContentProps) {
   const attachmentsFetch = useAttachmentsFetch({ streamName });
   const relationshipsFetch = useRelationshipsFetch({ streamName });
   const contentPackSuggestionsFetch = useContentPackSuggestionsFetch({ streamName });
+  const integrationSuggestionsFetch = useIntegrationSuggestionsFetch({ streamName });
 
   // APIs
   const { addAttachments, removeAttachments } = useAttachmentsApi({ name: streamName });
@@ -92,6 +100,10 @@ export function StreamDetailContent({ definition }: StreamDetailContentProps) {
   const contentPackSuggestions = useMemo(() => {
     return contentPackSuggestionsFetch.value?.dashboards ?? [];
   }, [contentPackSuggestionsFetch.value?.dashboards]);
+
+  const integrationSuggestions = useMemo(() => {
+    return integrationSuggestionsFetch.value?.suggestions ?? [];
+  }, [integrationSuggestionsFetch.value?.suggestions]);
 
   // Handlers
   const handleViewDetails = useCallback((attachment: Attachment) => {
@@ -288,11 +300,7 @@ export function StreamDetailContent({ definition }: StreamDetailContentProps) {
                   }}
                 />
               ) : (
-                <EuiCallOut
-                  title={AI_NOT_AVAILABLE_TITLE}
-                  color="primary"
-                  iconType="iInCircle"
-                >
+                <EuiCallOut title={AI_NOT_AVAILABLE_TITLE} color="primary" iconType="iInCircle">
                   {AI_NOT_AVAILABLE_DESCRIPTION}
                 </EuiCallOut>
               )}
@@ -340,6 +348,37 @@ export function StreamDetailContent({ definition }: StreamDetailContentProps) {
                   },
                 ]);
               }}
+            />
+          </EuiAccordion>
+        </EuiFlexItem>
+      )}
+
+      {/* Integration Suggestions Section (for ingest streams with feature detection) */}
+      {Streams.ingest.all.GetResponse.is(definition) && (
+        <EuiFlexItem>
+          <EuiAccordion
+            id={integrationSuggestionsAccordionId}
+            buttonContent={
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="m">
+                    <strong>{INTEGRATION_SUGGESTIONS_TITLE}</strong>
+                  </EuiText>
+                </EuiFlexItem>
+                {integrationSuggestions.length > 0 && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow">{integrationSuggestions.length}</EuiBadge>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            }
+            initialIsOpen={integrationSuggestions.length > 0}
+            paddingSize="m"
+          >
+            <IntegrationSuggestionsSection
+              suggestions={integrationSuggestions}
+              loading={integrationSuggestionsFetch.loading}
+              streamName={streamName}
             />
           </EuiAccordion>
         </EuiFlexItem>
@@ -462,6 +501,13 @@ const CONTENT_PACK_SUGGESTIONS_TITLE = i18n.translate(
   'xpack.streams.content.contentPackSuggestions.title',
   {
     defaultMessage: 'Content pack suggestions',
+  }
+);
+
+const INTEGRATION_SUGGESTIONS_TITLE = i18n.translate(
+  'xpack.streams.content.integrationSuggestions.title',
+  {
+    defaultMessage: 'Integration suggestions',
   }
 );
 
