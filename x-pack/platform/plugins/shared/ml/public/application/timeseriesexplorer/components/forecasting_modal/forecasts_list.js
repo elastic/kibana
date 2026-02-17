@@ -116,6 +116,12 @@ export function ForecastsList({ forecasts, viewForecast, selectedForecastId }) {
         pagination={false}
         data-test-subj="mlModalForecastTable"
         rowProps={getRowProps}
+        tableCaption={i18n.translate(
+          'xpack.ml.timeSeriesExplorer.forecastsList.previousForecastsTableCaption',
+          {
+            defaultMessage: 'Previously run forecasts',
+          }
+        )}
       />
     </EuiText>
   );

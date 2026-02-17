@@ -135,26 +135,35 @@ while read -r config_path; do
     continue
   fi
 
-  # Get server run flags for this config from the module data
-  if [[ -z "${module_data:-}" ]]; then
-    echo "⚠️ Warning: No module_data available for config: $config_path"
-    echo "   Skipping config (serverRunFlags cannot be determined)"
-    continue
+  # Get server run flags for this config
+  config_run_modes=""
+
+  if [[ -n "${module_data:-}" ]]; then
+    # Extract serverRunFlags array for this config from module data
+    config_run_modes=$(echo "$module_data" | jq -r ".configs[] | select(.path == \"$config_path\") | .serverRunFlags[]?")
+  elif [[ -n "${SCOUT_SERVER_RUN_FLAGS:-}" ]]; then
+    # Use serverRunFlags from environment variable (Flaky-test-runner pipeline when JSON is not available)
+    config_run_modes="$SCOUT_SERVER_RUN_FLAGS"
   fi
 
-  # Extract serverRunFlags array for this config
-  config_run_modes=$(echo "$module_data" | jq -r ".configs[] | select(.path == \"$config_path\") | .serverRunFlags[]?")
+  if [[ -z "$config_run_modes" ]]; then
+    if [[ -z "${module_data:-}" && -z "${SCOUT_SERVER_RUN_FLAGS:-}" ]]; then
+      echo "⚠️ Warning: No module_data or SCOUT_SERVER_RUN_FLAGS available for config: $config_path"
+      echo "   Skipping config (serverRunFlags cannot be determined)"
+      continue
+    fi
+  fi
 
   if [[ -z "$config_run_modes" ]]; then
     echo "⚠️ No serverRunFlags found for config: $config_path"
     continue
   fi
 
-  # If SERVERLESS_TESTS_ONLY is set, filter out --stateful and keep only serverless modes
+  # If SERVERLESS_TESTS_ONLY is set, filter out stateful and keep only serverless modes
   if [[ -n "${SERVERLESS_TESTS_ONLY:-}" ]]; then
     echo "--- Using serverless-only test modes (SERVERLESS_TESTS_ONLY is set)"
-    # Filter out --stateful and keep only serverless modes
-    config_run_modes=$(echo "$config_run_modes" | grep -E "^--serverless=" || true)
+    # Filter out stateful and keep only serverless modes
+    config_run_modes=$(echo "$config_run_modes" | grep -E -- "--arch serverless" || true)
   fi
 
   if [[ -z "$config_run_modes" ]]; then
@@ -163,7 +172,9 @@ while read -r config_path; do
   fi
 
   echo "--- Config: $config_path"
-  echo "   Tags: $(echo "$module_data" | jq -r ".configs[] | select(.path == \"$config_path\") | .tags | join(\", \")")"
+  if [[ -n "${module_data:-}" ]]; then
+    echo "   Tags: $(echo "$module_data" | jq -r ".configs[] | select(.path == \"$config_path\") | .tags | join(\", \")")"
+  fi
   echo "   Modes: $(echo "$config_run_modes" | tr '\n' ' ')"
 
   # Run config for each mode
@@ -195,7 +206,7 @@ while read -r config_path; do
 
     # prevent non-zero exit code from breaking the loop
     set +e;
-    node scripts/scout run-tests "$mode" --config "$config_path" --kibana-install-dir "$KIBANA_BUILD_LOCATION"
+    node scripts/scout run-tests --location local $mode --config "$config_path" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
     EXIT_CODE=$?
     set -e;
 

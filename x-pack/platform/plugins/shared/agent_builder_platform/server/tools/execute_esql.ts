@@ -6,11 +6,11 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/onechat-common';
-import { executeEsql } from '@kbn/onechat-genai-utils/tools/utils/esql';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { getToolResultId } from '@kbn/onechat-server/tools';
+import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { executeEsql } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
 const executeEsqlToolSchema = z.object({
   query: z.string().describe('The ES|QL query to execute'),
@@ -45,7 +45,7 @@ If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.`,
           },
           {
             tool_result_id: getToolResultId(),
-            type: ToolResultType.tabularData,
+            type: ToolResultType.esqlResults,
             data: {
               source: 'esql',
               query: esqlQuery,

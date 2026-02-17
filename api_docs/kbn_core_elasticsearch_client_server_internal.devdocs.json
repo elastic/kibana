@@ -35,6 +35,8 @@
           "default"
         ],
         "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -49,6 +51,8 @@
               "ElasticsearchClientConfig"
             ],
             "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -61,6 +65,8 @@
             "label": "{\n    logger,\n    type,\n    scoped = false,\n    getExecutionContext = noop,\n    agentFactoryProvider,\n    kibanaVersion,\n  }",
             "description": [],
             "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
+            "lineNumber": 33,
+            "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -81,6 +87,8 @@
                   }
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
+                "lineNumber": 34,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -92,6 +100,8 @@
                 "label": "type",
                 "description": [],
                 "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
+                "lineNumber": 35,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -106,6 +116,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
+                "lineNumber": 36,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -120,6 +132,8 @@
                   "(() => string | undefined) | undefined"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
+                "lineNumber": 37,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -136,6 +150,8 @@
                   "AgentFactoryProvider"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
+                "lineNumber": 38,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -147,6 +163,8 @@
                 "label": "kibanaVersion",
                 "description": [],
                 "path": "src/core/packages/elasticsearch/client-server-internal/src/configure_client.ts",
+                "lineNumber": 39,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -171,6 +189,8 @@
           ") => string"
         ],
         "path": "src/core/packages/elasticsearch/client-server-internal/src/log_query_and_deprecation.ts",
+        "lineNumber": 89,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -185,6 +205,8 @@
               "ElasticsearchClientError"
             ],
             "path": "src/core/packages/elasticsearch/client-server-internal/src/log_query_and_deprecation.ts",
+            "lineNumber": 93,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -211,6 +233,8 @@
           "RequestDebugMeta"
         ],
         "path": "src/core/packages/elasticsearch/client-server-internal/src/log_query_and_deprecation.ts",
+        "lineNumber": 128,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -226,6 +250,8 @@
               "<unknown, unknown>"
             ],
             "path": "src/core/packages/elasticsearch/client-server-internal/src/log_query_and_deprecation.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -242,6 +268,8 @@
               "[] | undefined"
             ],
             "path": "src/core/packages/elasticsearch/client-server-internal/src/log_query_and_deprecation.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -262,6 +290,8 @@
           "\nExposes the APIs to fetch stats of the existing agents."
         ],
         "path": "src/core/packages/elasticsearch/client-server-internal/src/agent_manager.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -279,6 +309,8 @@
               "ElasticsearchClientsMetrics"
             ],
             "path": "src/core/packages/elasticsearch/client-server-internal/src/agent_manager.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -297,6 +329,8 @@
           "\nThe logger-relevant request meta of an ES request"
         ],
         "path": "src/core/packages/elasticsearch/client-server-internal/src/log_query_and_deprecation.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -310,6 +344,8 @@
               "\nThe requested method"
             ],
             "path": "src/core/packages/elasticsearch/client-server-internal/src/log_query_and_deprecation.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -323,6 +359,8 @@
               "\nThe requested endpoint + querystring"
             ],
             "path": "src/core/packages/elasticsearch/client-server-internal/src/log_query_and_deprecation.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -336,6 +374,8 @@
               "\nThe request body (it may be redacted)"
             ],
             "path": "src/core/packages/elasticsearch/client-server-internal/src/log_query_and_deprecation.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -352,6 +392,8 @@
               "number | null"
             ],
             "path": "src/core/packages/elasticsearch/client-server-internal/src/log_query_and_deprecation.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -374,6 +416,8 @@
           "Agent"
         ],
         "path": "src/core/packages/elasticsearch/client-server-internal/src/agent_manager.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

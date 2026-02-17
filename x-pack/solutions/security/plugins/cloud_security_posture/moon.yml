@@ -18,6 +18,7 @@ project:
   metadata:
     sourceRoot: x-pack/solutions/security/plugins/cloud_security_posture
 dependsOn:
+  - '@kbn/scout-security'
   - '@kbn/core'
   - '@kbn/data-plugin'
   - '@kbn/fleet-plugin'
@@ -77,6 +78,7 @@ dependsOn:
   - '@kbn/shared-ux-card-no-data'
   - '@kbn/react-kibana-context-theme'
   - '@kbn/react-query'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod
@@ -89,6 +91,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - scripts/**/*
+    - test/scout_cspm_agentless/**/*
     - server/**/*.json
     - public/**/*.json
     - '!target/**/*'

@@ -35,10 +35,13 @@
       "aiAssistantManagementSelection",
       "discover"
     ],
+    "optionalPlugins": [
+      "cloud"
+    ],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
-      "onechat"
+      "agentBuilder"
     ]
   },
   "build": {

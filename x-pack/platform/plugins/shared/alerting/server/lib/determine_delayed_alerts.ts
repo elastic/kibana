@@ -6,6 +6,7 @@
  */
 
 import { keys } from 'lodash';
+import { ALERT_STATUS_DELAYED } from '@kbn/rule-data-utils';
 import type { Alert } from '../alert';
 import type { AlertInstanceState, AlertInstanceContext } from '../types';
 import type { RuleRunMetricsStore } from './rule_run_metrics_store';
@@ -21,6 +22,7 @@ interface DetermineDelayedAlertsOpts<
   trackedActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   trackedRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+  delayedAlerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
   alertDelay: number;
   startedAt?: string | null;
   ruleRunMetricsStore: RuleRunMetricsStore;
@@ -37,6 +39,7 @@ export function determineDelayedAlerts<
   trackedActiveAlerts,
   recoveredAlerts,
   trackedRecoveredAlerts,
+  delayedAlerts,
   alertDelay,
   startedAt,
   ruleRunMetricsStore,
@@ -49,11 +52,12 @@ export function determineDelayedAlerts<
     // do not trigger an action notification if the number of consecutive
     // active alerts is less than the rule alertDelay threshold
     if (alert.getActiveCount() < alertDelay) {
+      alert.setStatus(ALERT_STATUS_DELAYED);
+      delayedAlerts[id] = alert;
+      delayedAlertsCount += 1;
       // remove from new alerts and active alerts
       delete newAlerts[id];
       delete activeAlerts[id];
-
-      delayedAlertsCount += 1;
     } else {
       // if the active count is equal to the alertDelay it is considered a new alert
       if (alert.getActiveCount() === alertDelay) {
@@ -72,6 +76,8 @@ export function determineDelayedAlerts<
     const activeCount = alert.getActiveCount();
     if (activeCount > 0 && activeCount < alertDelay) {
       // remove from recovered alerts
+      alert.setStatus(ALERT_STATUS_DELAYED);
+      delayedAlerts[id] = alert;
       delete recoveredAlerts[id];
       delete trackedRecoveredAlerts[id];
     }
@@ -86,5 +92,6 @@ export function determineDelayedAlerts<
     trackedActiveAlerts,
     recoveredAlerts,
     trackedRecoveredAlerts,
+    delayedAlerts,
   };
 }

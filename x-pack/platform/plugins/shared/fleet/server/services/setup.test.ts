@@ -38,6 +38,7 @@ jest.mock('./download_source');
 jest.mock('./epm/packages');
 jest.mock('./setup/managed_package_policies');
 jest.mock('./setup/upgrade_package_install_version');
+jest.mock('./setup/ensure_fleet_global_es_assets');
 jest.mock('./setup/update_deprecated_component_templates');
 jest.mock('./epm/elasticsearch/template/install', () => {
   return {

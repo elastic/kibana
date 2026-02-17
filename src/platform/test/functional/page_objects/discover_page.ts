@@ -11,6 +11,8 @@ import expect from '@kbn/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
+const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
+
 export class DiscoverPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -30,13 +32,29 @@ export class DiscoverPageObject extends FtrService {
   private readonly toasts = this.ctx.getService('toasts');
   private readonly log = this.ctx.getService('log');
   private readonly timeToVisualize = this.ctx.getPageObject('timeToVisualize');
+  private readonly common = this.ctx.getPageObject('common');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
+
+  public readonly APP_ID = 'discover';
+
+  public async navigateToApp() {
+    await this.common.navigateToApp(this.APP_ID);
+  }
 
   /** Ensures that navigation to discover has completed */
   public async expectOnDiscover() {
     await this.testSubjects.existOrFail('discoverNewButton');
     await this.testSubjects.existOrFail('discoverOpenButton');
+  }
+
+  public async isOnDashboardsEditMode() {
+    const [newButton, openButton] = await Promise.all([
+      this.testSubjects.exists('discoverNewButton', { timeout: 1000 }),
+      this.testSubjects.exists('discoverOpenButton', { timeout: 1000 }),
+    ]);
+
+    return !newButton && !openButton;
   }
 
   public async getChartTimespan() {
@@ -48,6 +66,7 @@ export class DiscoverPageObject extends FtrService {
     saveAsNew?: boolean,
     { tags = [], storeTimeRange }: { tags?: string[]; storeTimeRange?: boolean } = {}
   ) {
+    const mode = await this.globalNav.getFirstBreadcrumb();
     await this.clickSaveSearchButton();
     // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
     await this.retry.waitFor(
@@ -93,9 +112,14 @@ export class DiscoverPageObject extends FtrService {
     // that the next action wouldn't have to retry.  But it doesn't really solve
     // that issue.  But it does typically take about 3 retries to
     // complete with the expected searchName.
-    await this.retry.waitFor(`saved search was persisted with name ${searchName}`, async () => {
-      return (await this.getCurrentQueryName()) === searchName;
-    });
+
+    if (mode === 'Discover') {
+      await this.retry.waitFor(`saved search was persisted with name ${searchName}`, async () => {
+        const last = await this.getCurrentQueryName();
+
+        return last === searchName;
+      });
+    }
   }
 
   public async inputSavedSearchTitle(searchName: string) {
@@ -184,20 +208,30 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.click('discoverSaveButton');
   }
 
+  public async clickCancelButton() {
+    await this.testSubjects.moveMouseTo('discoverSaveButton-secondary-button');
+    await this.testSubjects.click('discoverSaveButton-secondary-button');
+    await this.retry.waitFor('popover is open', async () => {
+      return Boolean(await this.testSubjects.find('discoverSaveButtonPopover'));
+    });
+    await this.testSubjects.moveMouseTo('discoverCancelButton');
+    await this.testSubjects.click('discoverCancelButton');
+  }
+
   public async clickLoadSavedSearchButton() {
     await this.testSubjects.moveMouseTo('discoverOpenButton');
     await this.testSubjects.click('discoverOpenButton');
   }
 
-  public async hasUnsavedChangesBadge() {
-    return await this.testSubjects.exists('unsavedChangesBadge');
+  public async hasUnsavedChangesIndicator() {
+    return await this.testSubjects.exists('split-button-notification-indicator');
   }
 
   public async revertUnsavedChanges() {
-    await this.testSubjects.moveMouseTo('unsavedChangesBadge');
-    await this.testSubjects.click('unsavedChangesBadge');
+    await this.testSubjects.moveMouseTo('discoverSaveButton-secondary-button');
+    await this.testSubjects.click('discoverSaveButton-secondary-button');
     await this.retry.waitFor('popover is open', async () => {
-      return Boolean(await this.testSubjects.find('unsavedChangesBadgeMenuPanel'));
+      return Boolean(await this.testSubjects.find('discoverSaveButtonPopover'));
     });
     await this.testSubjects.click('revertUnsavedChangesButton');
     await this.header.waitUntilLoadingHasFinished();
@@ -205,12 +239,8 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async saveUnsavedChanges() {
-    await this.testSubjects.moveMouseTo('unsavedChangesBadge');
-    await this.testSubjects.click('unsavedChangesBadge');
-    await this.retry.waitFor('popover is open', async () => {
-      return Boolean(await this.testSubjects.find('unsavedChangesBadgeMenuPanel'));
-    });
-    await this.testSubjects.click('saveUnsavedChangesButton');
+    await this.testSubjects.moveMouseTo('discoverSaveButton');
+    await this.testSubjects.click('discoverSaveButton');
     await this.retry.waitFor('modal is open', async () => {
       return Boolean(await this.testSubjects.find('confirmSaveSavedObjectButton'));
     });
@@ -252,9 +282,19 @@ export class DiscoverPageObject extends FtrService {
       await this.testSubjects.existOrFail('unifiedHistogramBreakdownSelectorSelectable');
     });
 
-    await (
-      await this.testSubjects.find('unifiedHistogramBreakdownSelectorSelectorSearch')
-    ).type(field, { charByChar: true });
+    const searchInput = await this.testSubjects.find(
+      'unifiedHistogramBreakdownSelectorSelectorSearch'
+    );
+
+    await searchInput.type(field, { charByChar: true });
+
+    await this.retry.waitFor('options to be filtered', async () => {
+      const isSearching = await this.testSubjects.getAttribute(
+        'unifiedHistogramBreakdownSelectorSelectable',
+        'data-is-searching'
+      );
+      return isSearching === 'false';
+    });
 
     const optionValue = value ?? field;
 
@@ -262,9 +302,7 @@ export class DiscoverPageObject extends FtrService {
       `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${optionValue}"]`
     );
 
-    await this.retry.waitFor('the dropdown to close', async () => {
-      return !(await this.testSubjects.exists('unifiedHistogramBreakdownSelectorSelectable'));
-    });
+    await this.testSubjects.missingOrFail('unifiedHistogramBreakdownSelectorSelectable');
 
     await this.retry.waitFor('the value to be selected', async () => {
       const breakdownButton = await this.testSubjects.find(
@@ -435,6 +473,10 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.getVisibleText('savedSearchTotalDocuments');
   }
 
+  public async getAllSavedSearchDocumentCount() {
+    return await this.testSubjects.getVisibleTextAll('savedSearchTotalDocuments');
+  }
+
   public async getDocHeader() {
     const docHeader = await this.dataGrid.getHeaders();
     return docHeader.join();
@@ -480,8 +522,12 @@ export class DiscoverPageObject extends FtrService {
     return this.dataGrid.clickDocViewerTab(id);
   }
 
-  public async expectSourceViewerToExist() {
+  public async isInEsqlMode() {
     return await this.find.byClassName('monaco-editor');
+  }
+
+  public async isInClassicMode() {
+    return await this.testSubjects.existOrFail('discover-dataView-switch-link');
   }
 
   public async expectDocTableToBeLoaded() {
@@ -644,10 +690,49 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async selectTextBaseLang() {
+    // First check if the button is directly visible
     if (await this.testSubjects.exists('select-text-based-language-btn')) {
       await this.testSubjects.click('select-text-based-language-btn');
       await this.header.waitUntilLoadingHasFinished();
       await this.waitUntilSearchingHasFinished();
+      return;
+    }
+
+    // If not visible, try the overflow menu
+    if (await this.testSubjects.exists('app-menu-overflow-button')) {
+      await this.testSubjects.click('app-menu-overflow-button');
+
+      if (await this.testSubjects.exists('select-text-based-language-btn')) {
+        await this.testSubjects.click('select-text-based-language-btn');
+        await this.header.waitUntilLoadingHasFinished();
+        await this.waitUntilSearchingHasFinished();
+      }
+
+      // Close the popover if open
+      if (await this.testSubjects.exists('app-menu-popover')) {
+        await this.testSubjects.click('app-menu-overflow-button');
+      }
+    }
+  }
+
+  public async selectDataViewMode() {
+    // Find the selected tab and open its menu
+    const tabElements = await this.find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+    for (const tabElement of tabElements) {
+      const tabRoleElement = await tabElement.findByCssSelector('[role="tab"]');
+      if ((await tabRoleElement.getAttribute('aria-selected')) === 'true') {
+        const menuButton = await tabElement.findByCssSelector(
+          '[data-test-subj^="unifiedTabs_tabMenuBtn_"]'
+        );
+        await menuButton.click();
+        await this.retry.waitFor('tab menu to open', async () => {
+          return await this.testSubjects.exists('unifiedTabs_tabMenuItem_switchToClassic');
+        });
+        await this.testSubjects.click('unifiedTabs_tabMenuItem_switchToClassic');
+        await this.header.waitUntilLoadingHasFinished();
+        await this.waitUntilSearchingHasFinished();
+        return;
+      }
     }
   }
 
@@ -884,6 +969,16 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.missingOrFail('confirmSaveSavedObjectButton');
   }
 
+  public async isShowingCascadeLayout() {
+    return await this.retry.try(async () => {
+      const [exists1, exists2] = await Promise.all([
+        this.testSubjects.exists('data-cascade'),
+        this.testSubjects.exists('discoverEnableCascadeLayoutSwitch'),
+      ]);
+      return exists1 && exists2;
+    });
+  }
+
   private resetRequestCount = -1;
 
   public async expectRequestCount(endpointRegexp: RegExp, requestCount: number) {
@@ -937,5 +1032,25 @@ export class DiscoverPageObject extends FtrService {
       await cb();
     }
     await this.expectRequestCount(endpointRegExp, expectedCount);
+  }
+
+  public async ensureHasUnsavedChangesIndicator() {
+    await this.testSubjects.existOrFail('split-button-notification-indicator');
+  }
+
+  public async ensureNoUnsavedChangesIndicator() {
+    await this.testSubjects.missingOrFail('split-button-notification-indicator');
+  }
+
+  public resetQueryMode() {
+    return this.browser.removeLocalStorageItem(DISCOVER_QUERY_MODE_KEY);
+  }
+
+  public getQueryMode() {
+    return this.browser.getLocalStorageItem(DISCOVER_QUERY_MODE_KEY);
+  }
+
+  public setQueryMode(mode: string) {
+    return this.browser.setLocalStorageItem(DISCOVER_QUERY_MODE_KEY, JSON.stringify(mode));
   }
 }

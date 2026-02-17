@@ -12,7 +12,7 @@ import { euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
-import type { MapCache } from 'lodash';
+import { uniqBy, type MapCache } from 'lodash';
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
@@ -32,7 +32,7 @@ export const useDebounceWithOptions = (
   deps?: React.DependencyList | undefined
 ) => {
   const isFirstRender = useRef(true);
-  const newDeps = [...(deps || []), isFirstRender];
+  const newDeps = deps || [];
 
   return useDebounce(
     () => {
@@ -62,50 +62,45 @@ const maxWarningLength = 1000;
 export const parseWarning = (warning: string): MonacoMessage[] => {
   // we limit the length to reduce ReDoS risks
   const truncatedWarning = warning.substring(0, maxWarningLength);
-  if (quotedWarningMessageRegexp.test(truncatedWarning)) {
-    const matches = truncatedWarning.match(quotedWarningMessageRegexp);
-    if (matches) {
-      return matches.map((message) => {
-        // replaces the quotes only if they are not escaped,
-        let warningMessage = message.replace(/(?<!\\)"|\\/g, '');
-        let startColumn = 1;
-        let startLineNumber = 1;
-        // initialize the length to 10 in case no error word found
-        let errorLength = 10;
-        // if there's line number encoded in the message use it as new positioning
-        // and replace the actual message without it
-        if (/Line (\d+):(\d+):/.test(warningMessage)) {
-          const [encodedLine, encodedColumn, innerMessage, additionalInfoMessage] =
-            warningMessage.split(':');
-          // sometimes the warning comes to the format java.lang.IllegalArgumentException: warning message
-          warningMessage = additionalInfoMessage ?? innerMessage;
-          if (!Number.isNaN(Number(encodedColumn))) {
-            startColumn = Number(encodedColumn);
-            startLineNumber = Number(encodedLine.replace('Line ', ''));
-          }
-          const openingSquareBracketIndex = warningMessage.indexOf('[');
-          if (openingSquareBracketIndex !== -1) {
-            const closingSquareBracketIndex = warningMessage.indexOf(
-              ']',
-              openingSquareBracketIndex
-            );
-            if (closingSquareBracketIndex !== -1) {
-              errorLength = warningMessage.length - openingSquareBracketIndex - 1;
-            }
+  const matches = truncatedWarning.match(quotedWarningMessageRegexp);
+  if (matches) {
+    return matches.map((message) => {
+      // replaces the quotes only if they are not escaped,
+      let warningMessage = message.replace(/(?<!\\)"|\\/g, '');
+      let startColumn = 1;
+      let startLineNumber = 1;
+      // initialize the length to 10 in case no error word found
+      let errorLength = 10;
+      // if there's line number encoded in the message use it as new positioning
+      // and replace the actual message without it
+      if (/Line (\d+):(\d+):/.test(warningMessage)) {
+        const [encodedLine, encodedColumn, innerMessage, additionalInfoMessage] =
+          warningMessage.split(':');
+        // sometimes the warning comes to the format java.lang.IllegalArgumentException: warning message
+        warningMessage = additionalInfoMessage ?? innerMessage;
+        if (!Number.isNaN(Number(encodedColumn))) {
+          startColumn = Number(encodedColumn);
+          startLineNumber = Number(encodedLine.replace('Line ', ''));
+        }
+        const openingSquareBracketIndex = warningMessage.indexOf('[');
+        if (openingSquareBracketIndex !== -1) {
+          const closingSquareBracketIndex = warningMessage.indexOf(']', openingSquareBracketIndex);
+          if (closingSquareBracketIndex !== -1) {
+            errorLength = warningMessage.length - openingSquareBracketIndex - 1;
           }
         }
+      }
 
-        return {
-          message: warningMessage.trimStart(),
-          startColumn,
-          startLineNumber,
-          endColumn: startColumn + errorLength - 1,
-          endLineNumber: startLineNumber,
-          severity: monaco.MarkerSeverity.Warning,
-          code: 'warningFromES',
-        };
-      });
-    }
+      return {
+        message: warningMessage.trimStart(),
+        startColumn,
+        startLineNumber,
+        endColumn: startColumn + errorLength - 1,
+        endLineNumber: startLineNumber,
+        severity: monaco.MarkerSeverity.Warning,
+        code: 'warningFromES',
+      };
+    });
   }
   // unknown warning message
   return [
@@ -259,12 +254,16 @@ export const onKeyDownResizeHandler = (
 
 export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
   return css`
+    .monaco-editor .suggest-details .scrollbar {
+      display: none !important;
+    }
+
     .monaco-hover {
-      display: block !important;
       background-color: ${theme.euiTheme.colors.backgroundBasePlain} !important;
       line-height: 1.5rem;
       border-radius: ${theme.euiTheme.border.radius.medium} !important;
       box-shadow: ${theme.euiTheme.shadows.l.down} !important;
+      z-index: ${theme.euiTheme.levels.flyout};
     }
 
     // Fixes inline suggestions hover styles and only
@@ -317,15 +316,21 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
     .suggest-details-container {
       border-radius: ${theme.euiTheme.border.radius.medium};
       ${euiShadow(theme, 'l')}
+      // Suggestions must be rendered above flyouts
+      z-index: ${theme.euiTheme.levels.toast} !important;
     }
 
     .suggest-details-container {
       background-color: ${theme.euiTheme.colors.backgroundBasePlain};
       line-height: 1.5rem;
     }
+
     .suggest-details {
-      padding-left: ${theme.euiTheme.size.s};
+      padding-left: ${theme.euiTheme.size.m};
+      padding-right: ${theme.euiTheme.size.m};
+      text-align: justify;
     }
+
     .monaco-list .monaco-scrollable-element .monaco-list-row.focused {
       border-radius: ${theme.euiTheme.border.radius.medium};
     }
@@ -334,18 +339,51 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
       white-space: normal !important;
     }
 
-    // Modifies the height of the signature popup to make it fit under the page header.
-    // This is temprary until https://github.com/elastic/kibana/issues/245694 is resolved.
-    // This solution is succeptible to errors if the editor height or the page header height changes.
-    .parameter-hints-widget > .phwrapper {
-      max-height: 90px !important;
-      overflow: auto;
+    .suggest-details .rendered-markdown h1 {
+      display: block;
+      margin-top: ${theme.euiTheme.size.m};
+      font-size: ${theme.euiTheme.size.base};
+      font-weight: ${theme.euiTheme.font.weight.bold};
+    }
+
+    .suggest-details [data-code] {
+      overflow-x: auto !important;
     }
   `;
 };
 
 export const filterDataErrors = (errors: (MonacoMessage & { code: string })[]): MonacoMessage[] => {
   return errors.filter((error) => {
-    return !['unknownIndex', 'unknownColumn'].includes(error.code);
+    return !['unknownIndex', 'unknownColumn', 'unmappedColumnWarning'].includes(error.code);
+  });
+};
+
+/**
+ * Filters warning messages that overlap with error messages ranges.
+ */
+export const filterOutWarningsOverlappingWithErrors = (
+  errors: MonacoMessage[],
+  warnings: MonacoMessage[]
+): MonacoMessage[] => {
+  const hasOverlap = (warning: MonacoMessage) => {
+    return errors.some((error) => {
+      const isOverlappingLine =
+        warning.startLineNumber <= error.endLineNumber &&
+        warning.endLineNumber >= error.startLineNumber;
+      const isOverlappingColumn =
+        warning.startColumn <= error.endColumn && warning.endColumn >= error.startColumn;
+
+      return isOverlappingLine && isOverlappingColumn;
+    });
+  };
+
+  return warnings.filter((warning) => !hasOverlap(warning));
+};
+
+export const filterDuplicatedWarnings = (
+  warnings: (MonacoMessage & { code: string })[]
+): MonacoMessage[] => {
+  return uniqBy(warnings, (warning) => {
+    return warning.message;
   });
 };

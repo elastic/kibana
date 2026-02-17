@@ -9,12 +9,10 @@
 
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
-import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type {
   SearchEmbeddableByReferenceState,
   SearchEmbeddableState,
-  StoredSearchEmbeddableByReferenceState,
-  StoredSearchEmbeddableByValueState,
   StoredSearchEmbeddableState,
 } from './types';
 import { extract } from './search_inject_extract';
@@ -25,34 +23,25 @@ function isByRefState(state: SearchEmbeddableState): state is SearchEmbeddableBy
   return 'savedObjectId' in state;
 }
 
-export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['transformIn']) {
+export function getTransformIn(transformDrilldownsIn: DrilldownTransforms['transformIn']) {
   function transformIn(state: SearchEmbeddableState): {
     state: StoredSearchEmbeddableState;
     references: SavedObjectReference[];
   } {
-    const { enhancementsState, enhancementsReferences } = state.enhancements
-      ? transformEnhancementsIn(state.enhancements)
-      : { enhancementsState: undefined, enhancementsReferences: [] };
+    const { state: storedState, references: drilldownReferences } =
+      transformDrilldownsIn<SearchEmbeddableState>(state);
 
-    if (isByRefState(state)) {
-      const { savedObjectId, ...rest } = state;
+    if (isByRefState(storedState)) {
+      const { savedObjectId, ...rest } = storedState;
       return {
-        state: {
-          ...rest,
-          ...(enhancementsState
-            ? {
-                enhancements:
-                  enhancementsState as StoredSearchEmbeddableByReferenceState['enhancements'],
-              }
-            : {}),
-        },
+        state: rest,
         references: [
           {
             name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME,
             type: SavedSearchType,
             id: savedObjectId,
           },
-          ...enhancementsReferences,
+          ...drilldownReferences,
         ],
       };
     }
@@ -60,25 +49,20 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
     // by value
     const { state: extractedState, references } = extract({
       type: SavedSearchType,
-      attributes: state.attributes,
+      attributes: storedState.attributes,
     });
 
     return {
       state: {
-        ...state,
-        ...(enhancementsState
-          ? {
-              enhancements: enhancementsState as StoredSearchEmbeddableByValueState['enhancements'],
-            }
-          : {}),
+        ...storedState,
         attributes: {
-          ...state.attributes,
+          ...storedState.attributes,
           ...extractedState.attributes,
           // discover session stores references as part of attributes
           references,
         },
       },
-      references: [...references, ...enhancementsReferences],
+      references: [...references, ...drilldownReferences],
     };
   }
   return transformIn;

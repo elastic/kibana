@@ -33,12 +33,10 @@ export const createMarkdownAction = (): ActionDefinition<EmbeddableApiContext> =
       {
         panelType: MARKDOWN_EMBEDDABLE_TYPE,
         serializedState: {
-          rawState: {
-            content: '',
-          },
+          content: '',
         },
       },
-      true
+      { displaySuccessMessage: true }
     );
     return newMarkdownEmbeddable?.onEdit({ isNewPanel: true });
   },

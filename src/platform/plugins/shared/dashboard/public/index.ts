@@ -10,21 +10,29 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 
 import { DashboardPlugin } from './plugin';
-export { PanelPlacementStrategy } from './plugin_constants';
 export { DASHBOARD_GRID_COLUMN_COUNT } from '../common/page_bundle_constants';
-export type { DashboardApi, DashboardCreationOptions } from './dashboard_api/types';
+export type {
+  DashboardApi,
+  DashboardInternalApi,
+  DashboardCreationOptions,
+} from './dashboard_api/types';
 export { DASHBOARD_API_TYPE } from './dashboard_api/types';
 export type { DashboardRendererProps } from './dashboard_renderer/dashboard_renderer';
 export { LazyDashboardRenderer as DashboardRenderer } from './dashboard_renderer/lazy_dashboard_renderer';
-export type { DashboardStart } from './plugin';
+export type { DashboardStart, DashboardSetup } from './plugin';
+export type { DashboardListingTab } from './dashboard_listing/types';
 
 export { DashboardListingTable } from './dashboard_listing';
 export { DashboardTopNav } from './dashboard_top_nav';
+export { DashboardNavigationOptionsEditor } from './dashboard_navigation';
 export type { RedirectToProps } from './dashboard_app/types';
 
 export type { FindDashboardsByIdResponse } from './dashboard_client';
 
-export { DASHBOARD_APP_ID } from '../common/page_bundle_constants';
+export {
+  DASHBOARD_APP_ID,
+  DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
+} from '../common/page_bundle_constants';
 export { cleanEmptyKeys, DashboardAppLocatorDefinition } from '../common/locator/locator';
 export { getDashboardLocatorParamsFromEmbeddable } from '../common/locator/get_dashboard_locator_params';
 

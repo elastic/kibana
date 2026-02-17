@@ -19,6 +19,7 @@ import {
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_REDIRECT_ALLOWED_LOCATOR_TYPES,
 } from '@kbn/reporting-common';
+import { AI_VALUE_REPORT_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { LocatorParams, BaseParamsV2 } from '@kbn/reporting-common/types';
 import type { ReportingAPIClient } from '@kbn/reporting-public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
@@ -51,10 +52,12 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
     (async () => {
       try {
         let locatorParams: undefined | LocatorParams;
+        let isUserRedirect = false;
 
         const { jobId, scheduledReportId, page, perPage } = parse(window.location.search);
 
         if (scheduledReportId) {
+          isUserRedirect = true;
           const scheduledReport = await apiClient.getScheduledReportInfo(
             scheduledReportId as string,
             parseInt(page as string, 10),
@@ -63,6 +66,7 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
 
           locatorParams = (scheduledReport?.payload as BaseParamsV2)?.locatorParams?.[0];
         } else if (jobId) {
+          isUserRedirect = true;
           const result = await apiClient.getInfo(jobId as string);
           locatorParams = result?.locatorParams?.[0];
         } else {
@@ -81,6 +85,18 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
           throw new Error(
             'Report job execution can only redirect using a locator for an expected analytical app'
           );
+        }
+
+        // When a user clicks "Open ..." from the Reporting management UI, we want to navigate to a
+        // *normal* in-app experience. For the AI Value report, the job locator params include
+        // export-only fields (insight + reportDataHash) that would otherwise force the destination
+        // page into an "export mode" UI. Strip these for user navigation.
+        if (isUserRedirect && locatorParams.id === AI_VALUE_REPORT_LOCATOR) {
+          const timeRange = locatorParams.params?.timeRange;
+          locatorParams = {
+            ...locatorParams,
+            params: timeRange ? { timeRange } : {},
+          };
         }
 
         share.navigate(locatorParams);

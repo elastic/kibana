@@ -8,9 +8,9 @@
 import type {
   ChatRequestBodyPayload,
   ChatResponse,
-} from '@kbn/onechat-plugin/common/http_api/chat';
-import type { Conversation } from '@kbn/onechat-common';
-import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+} from '@kbn/agent-builder-plugin/common/http_api/chat';
+import type { Conversation } from '@kbn/agent-builder-common';
+import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { SupertestWithRoleScopeType } from '../../../services';
 
 export function createAgentBuilderApiClient(supertest: SupertestWithRoleScopeType) {

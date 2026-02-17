@@ -64,6 +64,8 @@ import type {
 } from '@kbn/search-types';
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import { AbortReason, defaultFreeze } from '@kbn/kibana-utils-plugin/common';
+import type { ICPSManager } from '@kbn/cps-utils';
+import { getProjectRouting } from './project_routing';
 import {
   EVENT_TYPE_DATA_SEARCH_TIMEOUT,
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
@@ -77,6 +79,7 @@ import {
   isRunningResponse,
   pollSearch,
   shimHitsTotal,
+  strategyToString,
   UI_SETTINGS,
 } from '../../../common';
 import type { SearchUsageCollector } from '../collectors';
@@ -103,6 +106,7 @@ export interface SearchInterceptorDeps {
   usageCollector?: SearchUsageCollector;
   session: ISessionService;
   searchConfig: SearchConfigSchema;
+  getCPSManager?: () => ICPSManager | undefined;
 }
 
 const MAX_CACHE_ITEMS = 50;
@@ -181,10 +185,11 @@ export class SearchInterceptor {
     request: IKibanaSearchRequest,
     options: IAsyncSearchOptions
   ): Observable<string | undefined> {
-    const { sessionId } = options;
+    const { sessionId, projectRouting } = options;
     const hashOptions = {
       ...request.params,
       sessionId,
+      projectRouting,
     };
 
     if (!sessionId) return of(undefined); // don't use cache if doesn't belong to a session
@@ -281,6 +286,9 @@ export class SearchInterceptor {
     if (combined.executionContext !== undefined) {
       serializableOptions.executionContext = combined.executionContext;
     }
+    if (combined.projectRouting !== undefined) {
+      serializableOptions.projectRouting = combined.projectRouting;
+    }
 
     return serializableOptions;
   }
@@ -303,10 +311,12 @@ export class SearchInterceptor {
         { isSearchStored: false },
         () => {},
       ];
+      const projectRouting = getProjectRouting(options.projectRouting, this.deps.getCPSManager?.());
       return this.runSearch(
         { id, ...request },
         {
           ...options,
+          projectRouting,
           ...this.deps.session.getSearchOptions(sessionId),
           abortSignal,
           isSearchStored,
@@ -358,7 +368,9 @@ export class SearchInterceptor {
         });
 
     const sendCancelRequest = once(() =>
-      this.deps.http.delete(`/internal/search/${strategy}/${id}`, { version: '1' })
+      this.deps.http.delete(`/internal/search/${strategyToString(strategy)}/${id}`, {
+        version: '1',
+      })
     );
 
     const cancel = async () => {
@@ -478,10 +490,9 @@ export class SearchInterceptor {
     // once https://github.com/elastic/elasticsearch/issues/138439 is resolved
     // at that point, exclude all params when request.id is defined (polling phase)
     const paramsToUse = request.id ? { dropNullColumns: params?.dropNullColumns } : params || {};
-
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
-        `/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`,
+        `/internal/search/${strategyToString(strategy)}${request.id ? `/${request.id}` : ''}`,
         {
           version: '1',
           signal: abortSignal,

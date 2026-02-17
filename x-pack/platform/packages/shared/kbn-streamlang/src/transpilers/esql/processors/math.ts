@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Builder } from '@kbn/esql-ast';
-import type { ESQLAstCommand, ESQLAstItem, ESQLSingleAstItem } from '@kbn/esql-ast';
+import { Builder } from '@kbn/esql-language';
+import type { ESQLAstCommand, ESQLAstItem, ESQLSingleAstItem } from '@kbn/esql-language';
 import type {
   BinaryExpressionArithmeticOperator,
   BinaryExpressionComparisonOperator,
-} from '@kbn/esql-ast/src/types';
+} from '@kbn/esql-language/src/types';
 import type { MathProcessor } from '../../../../types/processors';
 import { conditionToESQLAst } from '../condition_to_esql';
 import {

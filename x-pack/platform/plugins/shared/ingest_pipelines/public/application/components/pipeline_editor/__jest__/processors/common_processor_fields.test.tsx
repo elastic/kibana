@@ -5,84 +5,69 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { SetupResult } from './processor.helpers';
-import { setup, getProcessorValue, setupEnvironment } from './processor.helpers';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { getProcessorValue, renderProcessorEditor, setupEnvironment } from './processor.helpers';
 
 const BYTES_TYPE = 'bytes';
 
 describe('Processor: Common Fields For All Processors', () => {
   let onUpdate: jest.Mock;
-  let testBed: SetupResult;
-  const { httpSetup } = setupEnvironment();
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    ({ httpSetup } = setupEnvironment());
     onUpdate = jest.fn();
 
-    await act(async () => {
-      testBed = await setup(httpSetup, {
-        value: {
-          processors: [],
-        },
-        onFlyoutOpen: jest.fn(),
-        onUpdate,
-      });
+    renderProcessorEditor(httpSetup, {
+      value: {
+        processors: [],
+      },
+      onFlyoutOpen: jest.fn(),
+      onUpdate,
     });
-    testBed.component.update();
   });
 
   test('prevents form submission if required type field is not provided', async () => {
-    const {
-      actions: { addProcessor, saveNewProcessor },
-      form,
-    } = testBed;
-
     // Open flyout to add new processor
-    addProcessor();
+    fireEvent.click(screen.getByTestId('addProcessorButton'));
+    const form = await screen.findByTestId('addProcessorForm');
     // Click submit button without entering any fields
-    await saveNewProcessor();
+    fireEvent.click(within(form).getByTestId('submitButton'));
 
     // Expect form error as a processor type is required
-    expect(form.getErrorsMessages()).toEqual(['A type is required.']);
+    expect(await screen.findByText('A type is required.')).toBeInTheDocument();
   });
 
   test('saves with common fields set', async () => {
-    const {
-      actions: { addProcessor, saveNewProcessor, addProcessorType },
-      form,
-      find,
-    } = testBed;
-
     // This test ensures that the common fields that are used across all processors
     // works and removes the need for those fields to be in every processors' test.
 
     // Open flyout to add new processor
-    addProcessor();
-    // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType(BYTES_TYPE);
+    fireEvent.click(screen.getByTestId('addProcessorButton'));
+    fireEvent.change(within(screen.getByTestId('processorTypeSelector')).getByTestId('input'), {
+      target: { value: BYTES_TYPE },
+    });
+
+    const addProcessorForm = await screen.findByTestId('addProcessorForm');
     // Add "field" value (required)
-    form.setInputValue('fieldNameField.input', 'field_1');
-
-    form.toggleEuiSwitch('ignoreFailureSwitch.input');
-
-    form.setInputValue('tagField.input', 'some_tag');
+    fireEvent.change(within(screen.getByTestId('fieldNameField')).getByTestId('input'), {
+      target: { value: 'field_1' },
+    });
+    fireEvent.click(within(screen.getByTestId('ignoreFailureSwitch')).getByTestId('input'));
+    fireEvent.change(within(screen.getByTestId('tagField')).getByTestId('input'), {
+      target: { value: 'some_tag' },
+    });
 
     // Edit the Code Editor
     const jsonContent = JSON.stringify({ content: "ctx?.network?.name == 'Guest'" });
-    await find('mockCodeEditor').simulate('change', { jsonContent });
+    fireEvent.change(screen.getByTestId('mockedCodeEditor'), { target: { value: jsonContent } });
 
     // Save the field
-    await saveNewProcessor();
+    fireEvent.click(within(addProcessorForm).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, BYTES_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].bytes).toEqual({
       field: 'field_1',
       ignore_failure: true,

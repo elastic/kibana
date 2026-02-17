@@ -10,6 +10,7 @@
     "server/**/*",
     "public/**/*",
     "types/**/*",
+    "test/**/*",
   ],
   "exclude": [
     "target/**/*"
@@ -39,7 +40,6 @@
     "@kbn/es-errors",
     "@kbn/lock-manager",
     "@kbn/core-elasticsearch-server",
-    "@kbn/core-http-server-utils",
     "@kbn/core-analytics-server",
     "@kbn/features-plugin",
     "@kbn/server-route-repository-utils",
@@ -74,5 +74,8 @@
     "@kbn/actions-plugin",
     "@kbn/apm-utils",
     "@kbn/alerting-types",
+    "@kbn/core-http-common",
+    "@kbn/scout",
+    "@kbn/esql-language",
   ]
 }

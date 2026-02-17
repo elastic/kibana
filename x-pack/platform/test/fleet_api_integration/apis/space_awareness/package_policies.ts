@@ -102,6 +102,9 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(packagePolicyRes.item).to.have.property('id');
         packagePolicyId = packagePolicyRes.item.id;
+
+        const updatedPolicy = await apiClient.getPackagePolicy(packagePolicyId);
+        expect(updatedPolicy.item.spaceIds).to.eql('*');
       });
 
       it('should allow to add a package policy to an all agent policy in the test space', async () => {

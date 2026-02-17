@@ -33,6 +33,8 @@
           "\".bedrock\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/bedrock/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -48,6 +50,8 @@
           "\".cases-webhook\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/cases_webhook/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -63,6 +67,8 @@
           "\".crowdstrike\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/crowdstrike/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -78,6 +84,8 @@
           "\".d3security\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/d3security/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -93,6 +101,8 @@
           "\".email\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/email/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -108,6 +118,8 @@
           "\".index\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/es_index/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -123,6 +135,8 @@
           "\".gemini\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/gemini/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -138,6 +152,8 @@
           "\".inference\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/inference/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -153,6 +169,8 @@
           "\".jira\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/jira/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -168,6 +186,8 @@
           "\".jira-service-management\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/jira-service-management/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -183,6 +203,8 @@
           "\".mcp\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/mcp/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -198,6 +220,8 @@
           "\".microsoft_defender_endpoint\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/microsoft_defender_endpoint/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -213,6 +237,8 @@
           "\".gen-ai\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/openai/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -228,6 +254,8 @@
           "\".opsgenie\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/opsgenie/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -243,6 +271,8 @@
           "\".pagerduty\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/pagerduty/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -258,6 +288,8 @@
           "\".resilient\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/resilient/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -273,6 +305,8 @@
           "\".sentinelone\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/sentinelone/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -288,6 +322,8 @@
           "\".server-log\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/server_log/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -303,6 +339,8 @@
           "\".servicenow-itom\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/servicenow_itom/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -318,6 +356,8 @@
           "\".servicenow\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/servicenow_itsm/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -333,6 +373,8 @@
           "\".servicenow-sir\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/servicenow_sir/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -348,6 +390,8 @@
           "\".slack\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/slack/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -363,6 +407,8 @@
           "\".slack_api\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/slack_api/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -378,6 +424,8 @@
           "\".swimlane\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/swimlane/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -393,6 +441,8 @@
           "\".teams\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/teams/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -408,6 +458,8 @@
           "\".thehive\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/thehive/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -423,6 +475,8 @@
           "\".tines\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/tines/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -438,6 +492,8 @@
           "\".torq\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/torq/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -453,6 +509,8 @@
           "\".webhook\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/webhook/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -468,6 +526,8 @@
           "\".xmatters\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/xmatters/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -483,6 +543,8 @@
           "\".xsoar\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/xsoar/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

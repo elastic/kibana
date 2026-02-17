@@ -54,6 +54,10 @@ export const predefinedStepTypes = [
     displayName: 'Wait',
   },
   {
+    actionTypeId: 'data.set',
+    displayName: 'Set Variables',
+  },
+  {
     actionTypeId: 'http',
     displayName: 'HTTP',
   },
@@ -133,21 +137,20 @@ async function injectDynamicConnectorIcons(connectorTypes: ConnectorTypeInfoMini
     // Generate CSS rule for this connector
     const iconBase64 = await getStepIconBase64(connector);
 
-    let selector = `.monaco-list .monaco-list-row[aria-label^="${connectorType},"] .suggest-icon .codicon:before,
-      .monaco-list .monaco-list-row[aria-label$=", ${connectorType}"] .suggest-icon .codicon:before,
-      .monaco-list .monaco-list-row[aria-label*=", ${connectorType},"] .suggest-icon .codicon:before,
-      .monaco-list .monaco-list-row[aria-label="${connectorType}"] .suggest-icon .codicon:before,
-      .monaco-list .monaco-list-row[aria-label*="${displayName}"] .suggest-icon .codicon:before`;
+    let selector = '';
     if (connectorType === 'elasticsearch') {
       // Target the codicon class for elasticsearch connectors AND any suggestion with "elasticsearch." in aria-label
       selector = `.codicon-symbol-struct:before,
-        .monaco-list .monaco-list-row[aria-label*="elasticsearch."] .suggest-icon .codicon:before`;
+        .monaco-list .monaco-list-row[aria-label^="elasticsearch."] .suggest-icon:before`;
     } else if (connectorType === 'kibana') {
       // Target the codicon class for kibana connectors AND any suggestion with "kibana." in aria-label
       selector = `.codicon-symbol-module:before,
-        .monaco-list .monaco-list-row[aria-label*="kibana."] .suggest-icon .codicon:before`;
+        .monaco-list .monaco-list-row[aria-label^="kibana."] .suggest-icon:before`;
     } else if (connectorType === 'console') {
       selector = '.codicon-symbol-variable:before';
+    } else {
+      selector = `.monaco-list .monaco-list-row[aria-label^="${connectorType}"] .suggest-icon:before,
+      .monaco-list .monaco-list-row[aria-label^="${displayName}"] .suggest-icon:before`;
     }
 
     let cssProperties = '';
@@ -217,17 +220,7 @@ async function injectDynamicShadowIcons(connectorTypes: ConnectorTypeInfoMinimal
     } else if (connectorType.startsWith('kibana.')) {
       className = 'kibana';
     } else {
-      // Handle connectors with dot notation properly
-      if (connectorType.startsWith('.')) {
-        // For connectors like ".jira", remove the leading dot
-        className = connectorType.substring(1);
-      } else if (connectorType.includes('.')) {
-        // For connectors like "thehive.createAlert", use base name
-        className = connectorType.split('.')[0];
-      } else {
-        // For simple connectors like "slack", use as-is
-        className = connectorType;
-      }
+      className = connectorType;
     }
 
     let cssProperties = '';

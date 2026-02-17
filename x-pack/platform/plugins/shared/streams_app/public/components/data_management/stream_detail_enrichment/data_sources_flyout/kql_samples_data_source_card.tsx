@@ -68,6 +68,7 @@ export const KqlSamplesDataSourceCard = ({ dataSourceRef }: KqlSamplesDataSource
       title={DATA_SOURCES_I18N.kqlDataSource.defaultName}
       subtitle={DATA_SOURCES_I18N.kqlDataSource.subtitle}
       isPreviewVisible
+      data-test-subj="streamsAppKqlSamplesDataSourceCard"
     >
       <NameField
         onChange={(event) => handleChange({ name: event.target.value })}
@@ -87,6 +88,7 @@ export const KqlSamplesDataSourceCard = ({ dataSourceRef }: KqlSamplesDataSource
             query={dataSource.query}
             showFilterBar
             showQueryInput
+            dataTestSubj="streamsAppKqlSamplesSearchBar"
             {...dateFilterProps}
           />
           <EuiSpacer size="s" />

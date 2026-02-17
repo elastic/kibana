@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import nodemailerGetService from 'nodemailer/lib/well-known';
 import type SMTPConnection from 'nodemailer/lib/smtp-connection';
 import type {
-  ActionType as ConnectorType,
+  ClassicActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
@@ -43,6 +43,7 @@ import {
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { emailSchema } from '@kbn/connector-schemas/email/schemas/latest';
 import { AdditionalEmailServices } from '../../../common';
 import type { SendEmailOptions, Transport } from './send_email';
 import { sendEmail, JSON_TRANSPORT_SERVICE } from './send_email';
@@ -53,6 +54,7 @@ export type EmailConnectorType = ConnectorType<
   ActionParamsType,
   unknown
 >;
+
 export type EmailConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
@@ -173,23 +175,37 @@ function validateConfig(
 
 function validateParams(paramsObject: unknown, validatorServices: ValidatorServices) {
   const { configurationUtilities } = validatorServices;
-
   // avoids circular reference ...
   const params = paramsObject as ActionParamsType;
 
-  const { to, cc, bcc } = params;
+  const { to, cc, bcc, replyTo } = params;
   const addrs = to.length + cc.length + bcc.length;
 
   if (addrs === 0) {
     throw new Error('no [to], [cc], or [bcc] entries');
   }
 
-  const emails = withoutMustacheTemplate(to.concat(cc).concat(bcc));
+  try {
+    emailSchema.parse(to);
+    emailSchema.parse(cc);
+    emailSchema.parse(bcc);
+
+    if (replyTo) {
+      emailSchema.parse(replyTo);
+    }
+  } catch (error) {
+    throw new Error(`Invalid email addresses: ${error}`);
+  }
+
+  const emails = withoutMustacheTemplate(to.concat(cc).concat(bcc)).concat(replyTo ?? []);
+
   const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails, {
     treatMustacheTemplatesAsValid: true,
   });
   if (invalidEmailsMessage) {
-    throw new Error(`[to/cc/bcc]: ${invalidEmailsMessage}`);
+    const labels = ['to', 'cc', 'bcc'];
+    if (params.replyTo && params.replyTo.length) labels.push('replyTo');
+    throw new Error(`[${labels.join('/')}]: ${invalidEmailsMessage}`);
   }
 }
 
@@ -391,6 +407,7 @@ async function executor(
       to: params.to,
       cc: params.cc,
       bcc: params.bcc,
+      ...(params.replyTo ? { replyTo: params.replyTo } : {}),
     },
     content: {
       subject: params.subject,

@@ -48,10 +48,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await lens.waitForDatatableVisualization();
         });
         it('filters, time and query reflect the visualization state', async () => {
-          expect(await lens.getDatatableHeaderText(1)).to.equal('404 › Median of bytes');
-          expect(await lens.getDatatableHeaderText(2)).to.equal('503 › Median of bytes');
-          expect(await lens.getDatatableCellText(0, 0)).to.eql('TG');
-          expect(await lens.getDatatableCellText(0, 1)).to.eql('9,931');
+          expect(await lens.getDatatableHeaderText(1, false)).to.equal('404 › Median of bytes');
+          expect(await lens.getDatatableHeaderText(2, false)).to.equal('503 › Median of bytes');
+          expect(await lens.getDatatableCellText(0, 0, false)).to.eql('TG');
+          expect(await lens.getDatatableCellText(0, 1, false)).to.eql('9,931');
         });
         it('preserves time range', async () => {
           const timePickerValues = await timePicker.getTimeConfigAsAbsoluteTimes();
@@ -133,10 +133,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await listingTable.searchForItemWithName('lnsTableVis');
         await lens.clickVisualizeListItemTitle('lnsTableVis');
 
-        expect(await lens.getDatatableHeaderText(1)).to.equal('404 › Median of bytes');
-        expect(await lens.getDatatableHeaderText(2)).to.equal('503 › Median of bytes');
-        expect(await lens.getDatatableCellText(0, 0)).to.eql('TG');
-        expect(await lens.getDatatableCellText(0, 1)).to.eql('9,931');
+        expect(await lens.getDatatableHeaderText(1, false)).to.equal('404 › Median of bytes');
+        expect(await lens.getDatatableHeaderText(2, false)).to.equal('503 › Median of bytes');
+        expect(await lens.getDatatableCellText(0, 0, false)).to.eql('TG');
+        expect(await lens.getDatatableCellText(0, 1, false)).to.eql('9,931');
 
         const timePickerValues = await timePicker.getTimeConfigAsAbsoluteTimes();
         expect(timePickerValues.start).to.eql(timePicker.defaultStartTime);

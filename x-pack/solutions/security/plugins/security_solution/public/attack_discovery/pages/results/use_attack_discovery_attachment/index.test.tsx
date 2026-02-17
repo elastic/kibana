@@ -67,7 +67,7 @@ describe('useAttackDiscoveryAttachment', () => {
       attachmentType: SecurityAgentBuilderAttachments.alert,
       attachmentData: {
         alert: '',
-        attachmentLabel: undefined,
+        attachmentLabel: 'Attack discovery',
       },
       attachmentPrompt: expect.any(String),
     });

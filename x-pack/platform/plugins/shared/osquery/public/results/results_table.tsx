@@ -9,6 +9,8 @@ import { isEqual, keys, map, reduce } from 'lodash/fp';
 import type { EuiDataGridColumn, EuiDataGridSorting } from '@elastic/eui';
 import {
   EuiCallOut,
+  EuiCode,
+  EuiDataGrid,
   EuiPanel,
   EuiSkeletonText,
   EuiProgress,
@@ -22,6 +24,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
@@ -33,12 +37,14 @@ import type { UnifiedDataTableSettings } from '@kbn/unified-data-table/src/types
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 
 import { AddToTimelineButton } from '../timelines/add_to_timeline_button';
+import type { AddToTimelineHandler } from '../types';
 import { useAllResults } from './use_all_results';
 import type { ResultEdges } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
 import { useKibana } from '../common/lib/kibana';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../common/constants';
 import { useActionResults } from '../action_results/use_action_results';
-import { generateEmptyDataMessage } from './translations';
+import { generateEmptyDataMessage, PAGINATION_LIMIT_TITLE } from './translations';
 import {
   ViewResultsInDiscoverAction,
   ViewResultsInLensAction,
@@ -51,6 +57,42 @@ import { transformEdgesToRecords } from './transform_results';
 import { getOsqueryCellRenderers } from './cell_renderers';
 import { useOsqueryRowActions } from './row_actions';
 import { OsqueryResultsFlyout } from './results_flyout';
+
+const DataContext = createContext<ResultEdges>([]);
+
+const PaginationLimitToastContent = () => (
+  <>
+    <p>
+      <FormattedMessage
+        id="xpack.osquery.results.paginationLimitDescription"
+        defaultMessage="Results limited to first 10,000 documents. To see all results, please use the {viewInDiscoverButton} button."
+        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+        values={{
+          viewInDiscoverButton: <strong>&quot;View in Discover&quot;</strong>,
+        }}
+      />
+    </p>
+    <p>
+      <FormattedMessage
+        id="xpack.osquery.results.paginationLimitIndexAccess"
+        defaultMessage="Read access to {indexName} index is required."
+        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+        values={{
+          indexName: <EuiCode>logs-osquery_manager.results</EuiCode>,
+        }}
+      />
+    </p>
+  </>
+);
+
+const euiDataGridCss = {
+  ':not(.euiDataGrid--fullScreen)': {
+    '.euiDataGrid__virtualized': {
+      height: '100% !important',
+      maxHeight: '500px',
+    },
+  },
+};
 
 const euiProgressCss = {
   marginTop: '-2px',
@@ -77,6 +119,7 @@ export interface ResultsTableComponentProps {
   startDate?: string;
   liveQueryActionId?: string;
   error?: string;
+  addToTimeline?: AddToTimelineHandler;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -87,6 +130,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   endDate,
   liveQueryActionId,
   error,
+  addToTimeline,
 }) => {
   const [isLive, setIsLive] = useState(true);
 
@@ -111,7 +155,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     notifications: { toasts },
     data: dataService,
     analytics,
-    i18n: i18nService,
+    i18n: i18nStart,
     uiActions,
   } = useKibana().services;
 
@@ -142,17 +186,25 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [getUrlForApp]
   );
 
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 500 });
-  const onChangeItemsPerPage = useCallback(
-    (pageSize: number) =>
-      setPagination((currentPagination) => ({
-        ...currentPagination,
-        pageSize,
-        pageIndex: 0,
-      })),
-    []
-  );
+  const showPaginationLimitToast = useCallback(() => {
+    toasts.addWarning({
+      title: PAGINATION_LIMIT_TITLE,
+      text: toMountPoint(<PaginationLimitToastContent />, { i18n: i18nStart, theme }),
+    });
+  }, [i18nStart, theme, toasts]);
 
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
+  const onChangeItemsPerPage = useCallback(
+    (pageSize: any) => {
+      (pageSize: number) =>
+        setPagination((currentPagination) => ({
+          ...currentPagination,
+          pageSize,
+          pageIndex: 0,
+        }));
+    },
+    [setPagination]
+  );
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([
     {
       id: 'agent.name',

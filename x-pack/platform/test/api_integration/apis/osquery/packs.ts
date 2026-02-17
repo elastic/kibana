@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import type { Test } from 'supertest';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const getDefaultPack = ({ policyIds = [] }: { policyIds?: string[] }) => ({
@@ -44,77 +46,117 @@ limit 1000;`;
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const fleetAndAgents = getService('fleetAndAgents');
+  const fleetApiVersion = '2023-10-31';
+  const osqueryPublicApiVersion = '2023-10-31';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/133259
-  describe.skip('Packs', () => {
+  const withFleetHeaders = (request: Test) =>
+    request.set('kbn-xsrf', 'true').set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion);
+
+  const withOsqueryHeaders = (request: Test) =>
+    request.set('kbn-xsrf', 'true').set('elastic-api-version', osqueryPublicApiVersion);
+
+  describe('Packs', () => {
     let packId: string = '';
     let hostedPolicy: Record<string, any>;
     let packagePolicyId: string;
+    let osqueryPackageVersion: string | undefined;
     before(async () => {
       await getService('kibanaServer').savedObjects.cleanStandardList();
       await getService('esArchiver').load(
         'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
       );
+
+      await fleetAndAgents.setup();
+
+      const { body: osqueryPackageResponse } = await supertest
+        .get('/api/fleet/epm/packages/osquery_manager')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion)
+        .set('x-elastic-internal-product', 'security-solution');
+
+      osqueryPackageVersion = osqueryPackageResponse.item?.version;
+
+      if (osqueryPackageVersion) {
+        await withFleetHeaders(
+          supertest.post(`/api/fleet/epm/packages/osquery_manager/${osqueryPackageVersion}`)
+        )
+          .send({ force: true })
+          .expect(200);
+      }
     });
     after(async () => {
       await getService('kibanaServer').savedObjects.cleanStandardList();
       await getService('esArchiver').unload(
         'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
       );
+      if (packagePolicyId) {
+        await withFleetHeaders(supertest.post('/api/fleet/package_policies/delete')).send({
+          packagePolicyIds: [packagePolicyId],
+        });
+      }
       await supertest
-        .post(`/api/fleet/agent_policies/delete`)
-        .set('kbn-xsrf', 'xxxx')
+        .post('/api/fleet/agent_policies/delete')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion)
         .send({ agentPolicyId: hostedPolicy.id });
+
+      if (osqueryPackageVersion) {
+        await withFleetHeaders(
+          supertest.delete(`/api/fleet/epm/packages/osquery_manager/${osqueryPackageVersion}`)
+        );
+      }
     });
 
     it('create route should return 200 and multi line query, but single line query in packs config', async () => {
       const {
         body: { item: agentPolicy },
       } = await supertest
-        .post(`/api/fleet/agent_policies`)
-        .set('kbn-xsrf', 'xxxx')
+        .post('/api/fleet/agent_policies')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion)
         .send({
           name: `Hosted policy from ${Date.now()}`,
           namespace: 'default',
-        });
+        })
+        .expect(200);
+
       hostedPolicy = agentPolicy;
 
-      const packagePolicyResponse = await supertest
+      const {
+        body: { item: packagePolicy },
+      } = await supertest
         .post('/api/fleet/package_policies')
         .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion)
         .send({
-          enabled: true,
           package: {
             name: 'osquery_manager',
-            version: '1.2.1',
-            title: 'test',
+            version: osqueryPackageVersion,
           },
-          inputs: [],
+          inputs: {
+            'osquery_manager-osquery': {
+              enabled: true,
+              streams: {},
+            },
+          },
           namespace: 'default',
-          policy_id: hostedPolicy.id,
+          policy_ids: [hostedPolicy.id],
           name: 'TEST',
           description: '123',
-          id: '123',
-        });
+        })
+        .expect(200);
 
-      if (!packagePolicyResponse.body.item) {
-        // eslint-disable-next-line no-console
-        console.error({ MISSING: packagePolicyResponse });
-      }
+      packagePolicyId = packagePolicy.id;
 
-      expect(packagePolicyResponse.status).to.be(200);
+      const createPackResponse = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+        .send(getDefaultPack({ policyIds: [hostedPolicy.id] }))
+        .expect(200);
 
-      packagePolicyId = packagePolicyResponse.body.item.id;
+      packId = createPackResponse.body.data.saved_object_id;
+      expect(packId).to.be.ok();
 
-      const createPackResponse = await supertest
-        .post('/api/osquery/packs')
-        .set('kbn-xsrf', 'true')
-        .send(getDefaultPack({ policyIds: [hostedPolicy.id] }));
-
-      packId = createPackResponse.body.data.id;
-      expect(createPackResponse.status).to.be(200);
-
-      const pack = await supertest.get('/api/osquery/packs/' + packId).set('kbn-xsrf', 'true');
+      const pack = await withOsqueryHeaders(supertest.get('/api/osquery/packs/' + packId));
 
       expect(pack.status).to.be(200);
       expect(pack.body.data.queries.testQuery.query).to.be(multiLineQuery);
@@ -123,7 +165,10 @@ export default function ({ getService }: FtrProviderContext) {
         body: {
           item: { inputs },
         },
-      } = await supertest.get(`/api/fleet/package_policies/${packagePolicyId}`);
+      } = await supertest
+        .get(`/api/fleet/package_policies/${packagePolicyId}`)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion);
 
       expect(inputs[0].config.osquery.value.packs.TestPack.queries.testQuery.query).to.be(
         singleLineQuery
@@ -131,21 +176,24 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('update route should return 200 and multi line query, but single line query in packs config', async () => {
-      const updatePackResponse = await supertest
-        .put('/api/osquery/packs/' + packId)
-        .set('kbn-xsrf', 'true')
-        .send(getDefaultPack({ policyIds: [hostedPolicy.id] }));
+      expect(packId).to.be.ok();
+      const updatePackResponse = await withOsqueryHeaders(
+        supertest.put('/api/osquery/packs/' + packId)
+      ).send(getDefaultPack({ policyIds: [hostedPolicy.id] }));
 
       expect(updatePackResponse.status).to.be(200);
-      expect(updatePackResponse.body.data.id).to.be(packId);
-      const pack = await supertest.get('/api/osquery/packs/' + packId).set('kbn-xsrf', 'true');
+      expect(updatePackResponse.body.data.saved_object_id).to.be(packId);
+      const pack = await withOsqueryHeaders(supertest.get('/api/osquery/packs/' + packId));
 
       expect(pack.body.data.queries.testQuery.query).to.be(multiLineQuery);
       const {
         body: {
           item: { inputs },
         },
-      } = await supertest.get(`/api/fleet/package_policies/${packagePolicyId}`);
+      } = await supertest
+        .get(`/api/fleet/package_policies/${packagePolicyId}`)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion);
 
       expect(inputs[0].config.osquery.value.packs.TestPack.queries.testQuery.query).to.be(
         singleLineQuery

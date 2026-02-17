@@ -14,7 +14,7 @@ import type {
 } from '@kbn/streams-schema/src/shared/record_types';
 import { LazySummaryColumn } from '@kbn/discover-contextual-components';
 import { DataGridDensity, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
-import React, { useContext, memo } from 'react';
+import React, { useContext, memo, useEffect } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -162,18 +162,21 @@ export function PreviewTableCell({
 }: PreviewTableCellProps) {
   const { euiTheme: theme } = useEuiTheme();
   const { selectedRowIndex } = useContext(RowSelectionContext);
+  const isSelected = selectedRowIndex === rowIndex;
 
-  if (selectedRowIndex === rowIndex) {
-    setCellProps({
-      style: {
-        backgroundColor: theme.colors.highlight,
-      },
-    });
-  } else {
-    setCellProps({
-      style: {},
-    });
-  }
+  useEffect(() => {
+    if (isSelected) {
+      setCellProps({
+        style: {
+          backgroundColor: theme.colors.highlight,
+        },
+      });
+    } else {
+      setCellProps({
+        style: {},
+      });
+    }
+  }, [isSelected, setCellProps, theme.colors.highlight]);
 
   const doc = documents[rowIndex];
   const document = isDocumentWithIgnoredFields(doc) ? doc.values : doc;

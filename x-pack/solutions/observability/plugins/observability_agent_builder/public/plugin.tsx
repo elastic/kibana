@@ -18,6 +18,7 @@ import {
   createLogAIInsight,
   createLogsAIInsightRenderer,
 } from './components/insights';
+import { registerAttachmentUiDefinitions } from './attachment_types';
 
 export class ObservabilityAgentBuilderPlugin
   implements
@@ -49,6 +50,10 @@ export class ObservabilityAgentBuilderPlugin
     plugins.discoverShared.features.registry.register({
       id: 'observability-logs-ai-insight',
       render: createLogsAIInsightRenderer(LogAIInsight),
+    });
+
+    registerAttachmentUiDefinitions({
+      attachments: plugins.agentBuilder.attachments,
     });
 
     return {

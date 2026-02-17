@@ -3,86 +3,49 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [
-      {
-        "parentPluginId": "indexLifecycleManagement",
-        "id": "def-public.IlmLocatorParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "IlmLocatorParams",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "indexLifecycleManagement",
-            "scope": "public",
-            "docId": "kibIndexLifecycleManagementPluginApi",
-            "section": "def-public.IlmLocatorParams",
-            "text": "IlmLocatorParams"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          }
-        ],
-        "path": "x-pack/platform/plugins/private/index_lifecycle_management/public/locator.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "indexLifecycleManagement",
-            "id": "def-public.IlmLocatorParams.page",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "page",
-            "description": [],
-            "signature": [
-              "\"policies_list\" | \"policy_edit\" | \"policy_create\""
-            ],
-            "path": "x-pack/platform/plugins/private/index_lifecycle_management/public/locator.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "indexLifecycleManagement",
-            "id": "def-public.IlmLocatorParams.policyName",
-            "type": "string",
-            "tags": [],
-            "label": "policyName",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/private/index_lifecycle_management/public/locator.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "indexLifecycleManagement",
-        "id": "def-public.ILM_LOCATOR_ID",
-        "type": "string",
-        "tags": [],
-        "label": "ILM_LOCATOR_ID",
-        "description": [],
-        "signature": [
-          "\"ILM_LOCATOR_ID\""
-        ],
-        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
-    "objects": []
+    "misc": [],
+    "objects": [],
+    "start": {
+      "parentPluginId": "indexLifecycleManagement",
+      "id": "def-public.IndexLifecycleManagementPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "IndexLifecycleManagementPluginStart",
+      "description": [],
+      "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/types.ts",
+      "lineNumber": 10,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "indexLifecycleManagement",
+          "id": "def-public.IndexLifecycleManagementPluginStart.apiService",
+          "type": "Object",
+          "tags": [],
+          "label": "apiService",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "@kbn/index-lifecycle-management-common-shared",
+              "scope": "common",
+              "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+              "section": "def-common.PublicApiServiceSetup",
+              "text": "PublicApiServiceSetup"
+            }
+          ],
+          "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/types.ts",
+          "lineNumber": 11,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "server": {
     "classes": [],

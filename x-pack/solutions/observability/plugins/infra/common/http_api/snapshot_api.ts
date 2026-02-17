@@ -75,7 +75,7 @@ export const SnapshotNamedMetricInputRT = rt.type({
   type: SnapshotMetricTypeRT,
 });
 
-export const SNAPSHOT_CUSTOM_AGGREGATIONS = ['avg', 'max', 'min', 'rate'] as const;
+export const SNAPSHOT_CUSTOM_AGGREGATIONS = ['avg', 'max', 'min', 'rate', 'last_value'] as const;
 
 export type SnapshotCustomAggregation = (typeof SNAPSHOT_CUSTOM_AGGREGATIONS)[number];
 
@@ -109,9 +109,9 @@ export const SnapshotRequestRT = rt.intersection([
     groupBy: rt.union([SnapshotGroupByRT, rt.null]),
     nodeType: ItemTypeRT,
     sourceId: rt.string,
-    includeTimeseries: rt.union([rt.boolean, createLiteralValueFromUndefinedRT(true)]),
   }),
   rt.partial({
+    includeTimeseries: rt.union([rt.boolean, createLiteralValueFromUndefinedRT(false)]),
     accountId: rt.string,
     region: rt.string,
     kuery: rt.string,

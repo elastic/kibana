@@ -20,6 +20,8 @@
           "\nTop-level entry point to kick off the app and start the Kibana server."
         ],
         "path": "src/core/packages/root/server-internal/src/root/index.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               }
             ],
             "path": "src/core/packages/root/server-internal/src/root/index.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -54,6 +58,8 @@
               "any"
             ],
             "path": "src/core/packages/root/server-internal/src/root/index.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -74,6 +80,8 @@
                   }
                 ],
                 "path": "src/core/packages/root/server-internal/src/root/index.ts",
+                "lineNumber": 36,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -95,6 +103,8 @@
                   }
                 ],
                 "path": "src/core/packages/root/server-internal/src/root/index.ts",
+                "lineNumber": 37,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -110,6 +120,8 @@
                   "((reason?: string | Error | undefined) => void) | undefined"
                 ],
                 "path": "src/core/packages/root/server-internal/src/root/index.ts",
+                "lineNumber": 38,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -130,6 +142,8 @@
               " | undefined>"
             ],
             "path": "src/core/packages/root/server-internal/src/root/index.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -148,6 +162,8 @@
               ">"
             ],
             "path": "src/core/packages/root/server-internal/src/root/index.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -166,6 +182,8 @@
               ">"
             ],
             "path": "src/core/packages/root/server-internal/src/root/index.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -182,6 +200,8 @@
               "(reason?: any) => Promise<void>"
             ],
             "path": "src/core/packages/root/server-internal/src/root/index.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -196,6 +216,8 @@
                   "any"
                 ],
                 "path": "src/core/packages/root/server-internal/src/root/index.ts",
+                "lineNumber": 81,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -221,6 +243,8 @@
           ") => void"
         ],
         "path": "src/core/packages/root/server-internal/src/register_service_config.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -235,6 +259,8 @@
               "ConfigService"
             ],
             "path": "src/core/packages/root/server-internal/src/register_service_config.ts",
+            "lineNumber": 46,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

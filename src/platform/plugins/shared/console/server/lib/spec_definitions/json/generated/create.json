@@ -14,7 +14,7 @@
       ],
       "require_alias": "__flag__",
       "require_data_stream": "__flag__",
-      "routing": "",
+      "routing": [],
       "timeout": [
         "1m",
         "-1",

@@ -6,7 +6,8 @@
   "include": [
     "common/**/*",
     "public/**/*",
-    "server/**/*"
+    "server/**/*",
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -34,6 +35,7 @@
     "@kbn/doc-links",
     "@kbn/cloud",
     "@kbn/deeplinks-search",
+    "@kbn/scout-search"
   ],
   "exclude": [
     "target/**/*"

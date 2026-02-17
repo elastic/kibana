@@ -7,12 +7,12 @@
 
 import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import path from 'path';
-import { paths } from '../../../../common/locators/paths';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useSpace } from '../../../hooks/use_space';
 import type { BurnRateRuleParams } from '../../../typings';
-import { useKibana } from '../../../hooks/use_kibana';
 import {
   createRemoteSloDeleteUrl,
   createRemoteSloDisableUrl,

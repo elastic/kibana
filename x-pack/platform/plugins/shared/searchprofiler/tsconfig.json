@@ -1,13 +1,9 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-  ],
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/es-ui-shared-plugin",
@@ -18,16 +14,14 @@
     "@kbn/share-plugin",
     "@kbn/utility-types",
     "@kbn/expect",
-    "@kbn/test-jest-helpers",
     "@kbn/i18n-react",
     "@kbn/config-schema",
     "@kbn/react-kibana-context-render",
     "@kbn/code-editor",
+    "@kbn/code-editor-mock",
     "@kbn/monaco",
     "@kbn/css-utils",
-    "@kbn/licensing-types",
+    "@kbn/licensing-types"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

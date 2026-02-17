@@ -22,16 +22,19 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
-import capitalize from 'lodash/capitalize';
+import { capitalize } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { parseDocument } from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
 import { useExecutionInput } from './use_execution_input/use_execution_input';
 import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
 import { MANUAL_TRIGGERS_DESCRIPTIONS } from '../../../../common/translations';
+import type { WorkflowTriggerTab } from '../../../common/lib/telemetry/events/workflows/execution/types';
 
 type TriggerType = 'manual' | 'index' | 'alert';
 
@@ -41,7 +44,10 @@ function getDefaultTrigger(definition: WorkflowYaml | null): TriggerType {
   }
 
   const hasManualTrigger = definition.triggers?.some((trigger) => trigger.type === 'manual');
-  const hasInputs = definition.inputs && definition.inputs.length > 0;
+  // Check if inputs exist and have properties (handles both new and legacy formats)
+  const normalizedInputs = normalizeInputsToJsonSchema(definition.inputs);
+  const hasInputs =
+    normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0;
 
   if (hasManualTrigger && hasInputs) {
     return 'manual';
@@ -54,10 +60,11 @@ interface WorkflowExecuteModalProps {
   workflowId?: string;
   isTestRun: boolean;
   onClose: () => void;
-  onSubmit: (data: Record<string, unknown>) => void;
+  onSubmit: (data: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => void;
+  yamlString?: string;
 }
 export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
-  ({ definition, workflowId, onClose, onSubmit, isTestRun }) => {
+  ({ definition, workflowId, onClose, onSubmit, isTestRun, yamlString }) => {
     const modalTitleId = useGeneratedHtmlId();
     const enabledTriggers = ['alert', 'index', 'manual'];
     const defaultTrigger = useMemo(() => getDefaultTrigger(definition), [definition]);
@@ -73,9 +80,9 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
     const { euiTheme } = useEuiTheme();
 
     const handleSubmit = useCallback(() => {
-      onSubmit(JSON.parse(executionInput));
+      onSubmit(JSON.parse(executionInput), selectedTrigger);
       onClose();
-    }, [onSubmit, onClose, executionInput]);
+    }, [onSubmit, onClose, executionInput, selectedTrigger]);
 
     const handleChangeTrigger = useCallback(
       (trigger: TriggerType): void => {
@@ -85,20 +92,43 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       [setExecutionInput, setSelectedTrigger]
     );
 
+    // Extract inputs from yamlString if definition.inputs is undefined
+    const inputs = useMemo(() => {
+      if (definition?.inputs) {
+        return definition.inputs;
+      }
+      if (yamlString) {
+        try {
+          const yamlDoc = parseDocument(yamlString);
+          const yamlJson = yamlDoc.toJSON();
+          if (yamlJson && typeof yamlJson === 'object' && 'inputs' in yamlJson) {
+            return (yamlJson as Record<string, unknown>).inputs;
+          }
+        } catch (e) {
+          // Ignore errors when extracting from YAML
+        }
+      }
+      return undefined;
+    }, [definition?.inputs, yamlString]);
+
     const shouldAutoRun = useMemo(() => {
-      if (
-        definition &&
-        !definition.triggers?.some((trigger) => trigger.type === 'alert') &&
-        !definition.inputs
-      ) {
+      if (!definition) {
+        return false;
+      }
+      const hasAlertTrigger = definition.triggers?.some((trigger) => trigger.type === 'alert');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const normalizedInputs = normalizeInputsToJsonSchema(inputs as any);
+      const hasInputs =
+        normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0;
+      if (!hasAlertTrigger && !hasInputs) {
         return true;
       }
       return false;
-    }, [definition]);
+    }, [definition, inputs]);
 
     useEffect(() => {
       if (shouldAutoRun) {
-        onSubmit({});
+        onSubmit({}, 'manual'); // Auto-run defaults to manual trigger
         onClose();
         return;
       }
@@ -107,10 +137,14 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         setSelectedTrigger('alert');
         return;
       }
-      if (definition?.inputs) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const normalizedInputs = normalizeInputsToJsonSchema(inputs as any);
+      const hasInputs =
+        normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0;
+      if (hasInputs) {
         setSelectedTrigger('manual');
       }
-    }, [shouldAutoRun, onSubmit, onClose, definition]);
+    }, [shouldAutoRun, onSubmit, onClose, definition, inputs]);
 
     if (shouldAutoRun) {
       // Not rendered if the workflow should auto run, will close the modal automatically
@@ -160,6 +194,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
           onClose={onClose}
           maxWidth={1400}
           style={{ width: '1200px', height: '100vh' }}
+          data-test-subj="workflowExecuteModal"
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle id={modalTitleId}>
@@ -224,7 +259,15 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
             )}
             {selectedTrigger === 'manual' && (
               <WorkflowExecuteManualForm
-                definition={definition}
+                definition={
+                  definition
+                    ? {
+                        ...definition,
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        inputs: inputs as any,
+                      }
+                    : null
+                }
                 value={executionInput}
                 errors={executionInputErrors}
                 setErrors={setExecutionInputErrors}

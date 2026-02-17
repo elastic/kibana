@@ -26,12 +26,13 @@ import type {
   Attachment,
   AttachmentType,
 } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
-import type { Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useAttachmentsApi } from '../../hooks/use_attachments_api';
 import { useAttachmentsFetch } from '../../hooks/use_attachments_fetch';
 import { useKibana } from '../../hooks/use_kibana';
+import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
 import { AddAttachmentFlyout } from './add_attachment_flyout';
 import { AttachmentDetailsFlyout } from './attachment_details_flyout';
 import {
@@ -53,11 +54,7 @@ const getCountByType = (attachments: Attachment[]): Record<AttachmentType, numbe
   );
 };
 
-export function StreamDetailAttachments({
-  definition,
-}: {
-  definition: Streams.ingest.all.GetResponse;
-}) {
+export function StreamDetailAttachments({ definition }: { definition: Streams.all.GetResponse }) {
   const [filters, setFilters] = useState<AttachmentFiltersState>(DEFAULT_ATTACHMENT_FILTERS);
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
 
@@ -99,9 +96,23 @@ export function StreamDetailAttachments({
   // Telemetry for TTFMP (time to first meaningful paint)
   useEffect(() => {
     if (definition && !attachmentsFetch.loading) {
-      onPageReady();
+      const streamType = getStreamTypeFromDefinition(definition.stream);
+      const processingStepsCount = Streams.ingest.all.Definition.is(definition.stream)
+        ? definition.stream.ingest.processing.steps.length
+        : 0;
+      onPageReady({
+        meta: {
+          description: `[ttfmp_streams_detail_attachments] streamType: ${streamType}`,
+        },
+        customMetrics: {
+          key1: 'attachment_count',
+          value1: attachmentsFetch.value?.attachments?.length ?? 0,
+          key2: 'processing_steps_count',
+          value2: processingStepsCount,
+        },
+      });
     }
-  }, [definition, attachmentsFetch.loading, onPageReady]);
+  }, [definition, attachmentsFetch.loading, attachmentsFetch.value, onPageReady]);
 
   const [attachmentsToUnlink, setAttachmentsToUnlink] = useState<Attachment[]>([]);
   const linkedAttachments = useMemo(() => {

@@ -64,13 +64,18 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
 import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
-import { TABS_ENABLED_FEATURE_FLAG_KEY } from './constants';
+import {
+  CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
+  IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
+} from './constants';
+import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
 
 /**
  * Location state of internal Discover history instance
@@ -86,7 +91,8 @@ export interface UrlTracker {
 }
 
 export interface DiscoverFeatureFlags {
-  getTabsEnabled: () => boolean;
+  getCascadeLayoutEnabled: () => boolean;
+  getIsEsqlDefault: () => boolean;
 }
 
 export interface DiscoverServices {
@@ -150,6 +156,8 @@ export interface DiscoverServices {
   fieldsMetadata?: FieldsMetadataPublicStart;
   logsDataAccess?: LogsDataAccessPluginStart;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
+  cps?: CPSPluginStart;
+  embeddableEditor: EmbeddableEditorService;
 }
 
 export const buildServices = ({
@@ -195,7 +203,10 @@ export const buildServices = ({
     dataVisualizer: plugins.dataVisualizer,
     discoverShared: plugins.discoverShared,
     discoverFeatureFlags: {
-      getTabsEnabled: () => core.featureFlags.getBooleanValue(TABS_ENABLED_FEATURE_FLAG_KEY, true),
+      getCascadeLayoutEnabled: () =>
+        core.featureFlags.getBooleanValue(CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, false),
+      getIsEsqlDefault: () =>
+        core.featureFlags.getBooleanValue(IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false),
     },
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,
@@ -247,5 +258,10 @@ export const buildServices = ({
     fieldsMetadata: plugins.fieldsMetadata,
     logsDataAccess: plugins.logsDataAccess,
     embeddableEnhanced: plugins.embeddableEnhanced,
+    cps: plugins.cps,
+    embeddableEditor: new EmbeddableEditorService(
+      core.application,
+      plugins.embeddable.getStateTransfer()
+    ),
   };
 };

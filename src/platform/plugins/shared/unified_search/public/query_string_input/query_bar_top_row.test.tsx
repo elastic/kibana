@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mockPersistedLogFactory } from './query_string_input.test.mocks';
+import { mockPersistedLogFactory } from '@kbn/kql/public/components/query_string_input/query_string_input.test.mocks';
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
@@ -20,6 +20,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { unifiedSearchPluginMock } from '../mocks';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -109,6 +110,7 @@ function wrapQueryBarTopRowInContext(
   const services = {
     ...startMock,
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+    kql: kqlPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
     appName: 'discover',
     storage: createMockStorage(),
@@ -712,6 +714,26 @@ describe('QueryBarTopRowTopRow', () => {
         expect(getByText(kqlQuery.query)).toBeInTheDocument();
         expect(onDraftChange).toHaveBeenCalledWith(undefined);
       });
+    });
+
+    it('should call onDraftChange only once even if unmounted', async () => {
+      const onDraftChange = jest.fn();
+      const state = {
+        query: kqlQuery,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+      };
+      const { unmount } = render(
+        wrapQueryBarTopRowInContext({
+          isDirty: false,
+          onDraftChange,
+          ...state,
+        })
+      );
+
+      unmount();
+
+      expect(onDraftChange).toHaveBeenCalledTimes(1);
     });
   });
 });

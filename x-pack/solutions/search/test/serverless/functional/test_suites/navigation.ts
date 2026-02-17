@@ -75,11 +75,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           pageTestSubject: 'dashboardLandingPage',
         },
         {
-          link: { deepLinkId: 'searchPlayground' },
-          breadcrumbs: ['Playground'],
-          pageTestSubject: 'playgroundsListPage',
-        },
-        {
           link: { deepLinkId: 'searchGettingStarted' },
           breadcrumbs: ['Getting started'],
           pageTestSubject: 'gettingStartedHeader',
@@ -161,7 +156,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           'agent_builder',
           'discover',
           'dashboards',
-          'searchPlayground',
           'machine_learning',
           // footer:
           'search_getting_started',

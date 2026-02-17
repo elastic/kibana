@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
@@ -19,9 +20,24 @@ import type {
   ChromeBreadcrumbsAppendExtension,
   ChromeSetBreadcrumbsParams,
 } from './breadcrumb';
-import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
+import type { ChromeBadge, ChromeBreadcrumbsBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 import type { SolutionId } from './project_navigation';
+import type { SidebarStart, SidebarSetup } from './sidebar';
+
+export interface ChromeSetup {
+  /**
+   * {@link SidebarSetup}
+   */
+  sidebar: SidebarSetup;
+}
+
+/**
+ * ChromeSetup exposes APIs available during the setup phase.
+ * @public
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ChromeSetup {}
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and
@@ -97,6 +113,37 @@ export interface ChromeStart {
   setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[], params?: ChromeSetBreadcrumbsParams): void;
 
   /**
+   * Get an observable of the current app menu configuration
+   */
+  getAppMenu$(): Observable<AppMenuConfig | undefined>;
+
+  /**
+   * Set the app menu configuration for the current application.
+   *
+   * @example
+   *```tsx
+   * import React, { useEffect } from 'react';
+   * import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+   * import type { CoreStart } from '@kbn/core/public';
+   *
+   * interface Props {
+   *  config: AppMenuConfig;
+   *  core: CoreStart;
+   *}
+   *
+   * const Example = ({ config, core }: Props) => {
+   *  const { chrome } = core;
+   *
+   *  useEffect(() => {
+   *    chrome.setAppMenu(config);
+   *  }, [chrome.setAppMenu, config]);
+   *
+   *  return <div>Hello world!</div>;
+   * };
+   */
+  setAppMenu(config?: AppMenuConfig): void;
+
+  /**
    * Get an observable of the current extensions appended to breadcrumbs
    */
   getBreadcrumbsAppendExtensions$(): Observable<ChromeBreadcrumbsAppendExtension[]>;
@@ -107,6 +154,32 @@ export interface ChromeStart {
   setBreadcrumbsAppendExtension(
     breadcrumbsAppendExtension: ChromeBreadcrumbsAppendExtension
   ): () => void;
+
+  /**
+   * Set badges to be displayed in the breadcrumbs area.
+   * The badges will always be displayed as the last {@link ChromeBreadcrumbsAppendExtension} in the breadcrumbs.
+   * By default, when navigating within the same application, badges are not cleared automatically, you need to handle
+   * their removal manually.
+   *
+   * @param badges - Array of {@link ChromeBreadcrumbsBadge} to display in the breadcrumbs area.
+   *
+   * @example
+   * ```tsx
+   * useEffect(() => {
+   *  const badges: ChromeBreadcrumbsBadge[] = [
+   *   { badgeText: 'Example', color: '#F6E58D' },
+   *  ];
+   *
+   *  core.chrome.setBreadcrumbsBadges(badges);
+   *
+   *  return () => {
+   *    // Clear badges when component unmounts
+   *    core.chrome.setBreadcrumbsBadges([]);
+   *  };
+   * }, [core.chrome]);
+   * ```
+   */
+  setBreadcrumbsBadges(badges: ChromeBreadcrumbsBadge[]): void;
 
   /**
    * Get an observable of the current custom nav link
@@ -204,7 +277,17 @@ export interface ChromeStart {
   };
 
   /**
+   * {@link SidebarStart}
+   */
+  sidebar: SidebarStart;
+
+  /**
    * Get the id of the currently active project navigation or `null` otherwise.
    */
   getActiveSolutionNavId$(): Observable<SolutionId | null>;
+
+  /**
+   * Used only by the rendering service and KibanaRenderingContextProvider to wrap the rendering tree in the Chrome context providers
+   */
+  withProvider(component: ReactNode): ReactNode;
 }

@@ -13,10 +13,10 @@ import {
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
 } from '@kbn/slo-schema';
+import { SLOS_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import type { MouseEvent } from 'react';
 import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { SLOS_PATH } from '../../../../../common/locators/paths';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { toIndicatorTypeLabel } from '../../../../utils/slo/labels';

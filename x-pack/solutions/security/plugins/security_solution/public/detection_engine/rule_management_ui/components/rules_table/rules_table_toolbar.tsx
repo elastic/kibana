@@ -32,7 +32,7 @@ export const RulesTableToolbar = React.memo(() => {
   const { data: ruleManagementFilters } = useRuleManagementFilters();
   const { data: prebuiltRulesStatus } = usePrebuiltRulesStatus();
 
-  const canReadRules = useUserPrivileges().rulesPrivileges.read;
+  const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
 
   const installedTotal =
     (ruleManagementFilters?.rules_summary.custom_count ?? 0) +
@@ -124,7 +124,13 @@ export const RulesTableToolbar = React.memo(() => {
         {hasAssistantPrivilege && selectedRules.length > 0 && isAssistantEnabled && (
           <>
             {isAgentChatExperienceEnabled ? (
-              <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
+              <NewAgentBuilderAttachment
+                onClick={openAgentBuilderFlyout}
+                telemetry={{
+                  pathway: 'rules_table',
+                  attachments: ['rule'],
+                }}
+              />
             ) : (
               <NewChat
                 category="detection-rules"

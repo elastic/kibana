@@ -5,28 +5,40 @@
  * 2.0.
  */
 
+import React from 'react';
+import type { ComponentProps } from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { AppDependencies } from '../../../..';
-import type { TestBed } from '@kbn/test-jest-helpers';
-import { registerTestBed } from '@kbn/test-jest-helpers';
 import { ConfigurationForm } from '../../components/configuration_form';
 import { WithAppDependencies } from './helpers/setup_environment';
-import type { TestSubjects } from './helpers/mappings_editor.helpers';
-import { act } from 'react-dom/test-utils';
 
-const setup = (props: any = { onUpdate() {} }, appDependencies?: any) => {
-  const setupTestBed = registerTestBed<TestSubjects>(
-    WithAppDependencies(ConfigurationForm, appDependencies),
-    {
-      memoryRouter: {
-        wrapComponent: false,
-      },
-      defaultProps: props,
-    }
+jest.mock('@kbn/es-ui-shared-plugin/static/forms/components', () => {
+  const original = jest.requireActual('@kbn/es-ui-shared-plugin/static/forms/components');
+  return {
+    ...original,
+    // JsonEditorField pulls in the shared-ux code editor (Monaco) which requires Canvas/Suspense.
+    // For this suite we only care about configuration options, not editor rendering.
+    JsonEditorField: ({ codeEditorProps }: { codeEditorProps?: Record<string, unknown> }) => (
+      <div
+        data-test-subj={(codeEditorProps?.['data-test-subj'] as string) ?? 'mockJsonEditorField'}
+      />
+    ),
+  };
+});
+
+type ConfigurationFormProps = ComponentProps<typeof ConfigurationForm>;
+
+const setup = (
+  props: Partial<ConfigurationFormProps> = { esNodesPlugins: [] },
+  appDependencies?: Partial<AppDependencies>
+) => {
+  const Component = WithAppDependencies(ConfigurationForm, appDependencies, {});
+  return render(
+    <I18nProvider>
+      <Component {...props} />
+    </I18nProvider>
   );
-
-  const testBed = setupTestBed();
-
-  return testBed;
 };
 
 const getContext = (sourceFieldEnabled: boolean = true, canUseSyntheticSource: boolean = true) =>
@@ -38,67 +50,48 @@ const getContext = (sourceFieldEnabled: boolean = true, canUseSyntheticSource: b
   } as unknown as AppDependencies);
 
 describe('Mappings editor: configuration form', () => {
-  let testBed: TestBed<TestSubjects>;
-
-  it('renders the form', async () => {
+  it('renders the form', () => {
     const ctx = {
       config: {
         enableMappingsSourceFieldSection: true,
       },
     } as unknown as AppDependencies;
 
-    await act(async () => {
-      testBed = setup({ esNodesPlugins: [] }, ctx);
-    });
-    testBed.component.update();
-    const { exists } = testBed;
+    setup({ esNodesPlugins: [] }, ctx);
 
-    expect(exists('advancedConfiguration')).toBe(true);
+    expect(screen.getByTestId('advancedConfiguration')).toBeInTheDocument();
   });
 
   describe('_source field', () => {
-    it('renders the _source field when it is enabled', async () => {
-      await act(async () => {
-        testBed = setup({ esNodesPlugins: [] }, getContext());
-      });
-      testBed.component.update();
-      const { exists } = testBed;
+    it('renders the _source field when it is enabled', () => {
+      setup({ esNodesPlugins: [] }, getContext());
 
-      expect(exists('sourceField')).toBe(true);
+      expect(screen.getByTestId('sourceField')).toBeInTheDocument();
     });
 
-    it("doesn't render the _source field when it is disabled", async () => {
-      await act(async () => {
-        testBed = setup({ esNodesPlugins: [] }, getContext(false));
-      });
-      testBed.component.update();
-      const { exists } = testBed;
+    it("doesn't render the _source field when it is disabled", () => {
+      setup({ esNodesPlugins: [] }, getContext(false));
 
-      expect(exists('sourceField')).toBe(false);
+      expect(screen.queryByTestId('sourceField')).not.toBeInTheDocument();
     });
 
     it('has synthetic option if `canUseSyntheticSource` is set to true', async () => {
-      await act(async () => {
-        testBed = setup({ esNodesPlugins: [] }, getContext(true, true));
-      });
-      testBed.component.update();
-      const { exists, find } = testBed;
+      setup({ esNodesPlugins: [] }, getContext(true, true));
 
-      // Clicking on the field to open the options dropdown
-      find('sourceValueField').simulate('click');
-      expect(exists('syntheticSourceFieldOption')).toBe(true);
+      const sourceValueField = screen.getByTestId('sourceValueField');
+      fireEvent.click(sourceValueField);
+
+      expect(await screen.findByTestId('syntheticSourceFieldOption')).toBeInTheDocument();
     });
 
     it("doesn't have synthetic option if `canUseSyntheticSource` is set to false", async () => {
-      await act(async () => {
-        testBed = setup({ esNodesPlugins: [] }, getContext(true, false));
-      });
-      testBed.component.update();
-      const { exists, find } = testBed;
+      setup({ esNodesPlugins: [] }, getContext(true, false));
 
-      // Clicking on the field to open the options dropdown
-      find('sourceValueField').simulate('click');
-      expect(exists('syntheticSourceFieldOption')).toBe(false);
+      const sourceValueField = screen.getByTestId('sourceValueField');
+      fireEvent.click(sourceValueField);
+
+      await screen.findByTestId('storedSourceFieldOption');
+      expect(screen.queryByTestId('syntheticSourceFieldOption')).not.toBeInTheDocument();
     });
   });
 });

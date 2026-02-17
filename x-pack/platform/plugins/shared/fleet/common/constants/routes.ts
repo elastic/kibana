@@ -193,6 +193,9 @@ export const AGENT_API_ROUTES = {
   DELETE_UPLOAD_FILE_PATTERN: `${API_ROOT}/agents/files/{fileId}`,
   PRIVILEGE_LEVEL_CHANGE_PATTERN: `${API_ROOT}/agents/{agentId}/privilege_level_change`,
   BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN: `${API_ROOT}/agents/bulk_privilege_level_change`,
+  ROLLBACK_PATTERN: `${API_ROOT}/agents/{agentId}/rollback`,
+  BULK_ROLLBACK_PATTERN: `${API_ROOT}/agents/bulk_rollback`,
+  GENERATE_REPORT_PATTERN: `${INTERNAL_ROOT}/agents/reporting/generate`,
 };
 
 export const AGENTLESS_POLICIES_ROUTES = {

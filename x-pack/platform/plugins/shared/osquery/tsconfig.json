@@ -43,7 +43,6 @@
     "@kbn/lens-plugin",
     "@kbn/security-plugin",
     "@kbn/triggers-actions-ui-plugin",
-    "@kbn/timelines-plugin",
     "@kbn/spaces-plugin",
     "@kbn/i18n",
     "@kbn/rison",
@@ -89,6 +88,9 @@
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/discover-utils",
     "@kbn/cell-actions",
-    "@kbn/ui-actions-plugin"
+    "@kbn/ui-actions-plugin",
+    "@kbn/react-query",
+    "@kbn/react-kibana-mount",
+    "@kbn/tooling-log"
   ]
 }

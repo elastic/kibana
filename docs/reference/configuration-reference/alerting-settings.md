@@ -511,13 +511,13 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
 
     * For an [{{bedrock}} connector](/reference/connectors-kibana/bedrock-action-type.md), current support is for the Anthropic Claude models.
        * {applies_to}`serverless: ga` Defaults to `us.anthropic.claude-sonnet-4-5-20250929-v1:0`.
-       * {applies_to}`stack: ga 9.2` Defaults to `us.anthropic.claude-sonnet-4-5-20250929-v1:0`.
-       * {applies_to}`stack: ga 9.1` Defaults to `us.anthropic.claude-3-7-sonnet-20250219-v1:0`.
-       * {applies_to}`stack: ga 9.0` Defaults to `anthropic.claude-3-5-sonnet-20240620-v1:0`.
+       * {applies_to}`stack: ga 9.2+` Defaults to `us.anthropic.claude-sonnet-4-5-20250929-v1:0`.
+       * {applies_to}`stack: ga =9.1` Defaults to `us.anthropic.claude-3-7-sonnet-20250219-v1:0`.
+       * {applies_to}`stack: ga =9.0` Defaults to `anthropic.claude-3-5-sonnet-20240620-v1:0`.
     * For a [{{gemini}} connector](/reference/connectors-kibana/gemini-action-type.md), current support is for the Gemini models. 
        * {applies_to}`serverless: ga` Defaults to `gemini-2.5-pro`.
-       * {applies_to}`stack: ga 9.1` Defaults to `gemini-2.5-pro`.
-       * {applies_to}`stack: ga 9.0` Defaults to `gemini-1.5-pro-002`.
+       * {applies_to}`stack: ga 9.1+` Defaults to `gemini-2.5-pro`.
+       * {applies_to}`stack: ga =9.0` Defaults to `gemini-1.5-pro-002`.
     * For a [OpenAI connector](/reference/connectors-kibana/openai-action-type.md), it is optional and applicable only when `xpack.actions.preconfigured.<connector-id>.config.apiProvider` is `OpenAI`.
 
     Data type: `string`
@@ -889,7 +889,12 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
 :   Specifies the maximum number of rules to run per minute.
 
     Data type: `int`
-    Default: `10000`
+    Default: `32000`
+    
+    :::{note}
+    :applies_to: serverless:
+    In Serverless, the maximum number of rules to run per minute is set to `400` and can't be configured.
+    :::
 
 `xpack.alerting.rules.minimumScheduleInterval.value` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Specifies the minimum schedule interval for rules. This minimum is applied to all rules created or updated after you set this value. The time is formatted as a number and a time unit (`s`, `m`, `h`, or `d`). For example, `20m`, `24h`, `7d`. This duration cannot exceed `1d`.
@@ -952,4 +957,19 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
             connectorTypeOverrides:
                 - id: '.server-log'
                   max: 5
+    ```
+
+`xpack.alerting.rules.apiKeyType` {applies_to}`serverless:` {applies_to}`stack: unavailable`
+:   The API key type to use for executing alerting rules. The default value, corresponding to the existing behavior, is `es`, which uses an Elasticsearch API key. Set this to `uiam` to use UIAM API keys instead.
+    :::{note}
+    :applies_to: serverless:
+    In Serverless, you can't edit this setting.
+    :::
+
+    Data type: `string`
+
+    For example:
+
+    ```yaml
+    xpack.alerting.rules.apiKeyType: uiam
     ```

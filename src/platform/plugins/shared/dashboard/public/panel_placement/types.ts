@@ -7,17 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MaybePromise } from '@kbn/utility-types';
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import type { GridData } from '../../server';
-import type { PanelPlacementStrategy } from '../plugin_constants';
 import type { DashboardLayout } from '../dashboard_api/layout_manager';
-
-export interface PanelPlacementSettings {
-  strategy?: PanelPlacementStrategy;
-  height?: number;
-  width?: number;
-}
 
 export interface PanelPlacementReturn {
   newPanelPlacement: GridData;
@@ -29,20 +20,5 @@ export interface PanelPlacementProps {
   height: number;
   currentPanels: DashboardLayout['panels'];
   sectionId?: string; // section where panel is being placed
+  beside?: string; // the ID of the panel to place the new panel relative to
 }
-
-export interface PanelResizeSettings {
-  minWidth?: number;
-  maxWidth?: number;
-  minHeight?: number;
-  maxHeight?: number;
-}
-
-export type PanelSettings = Partial<{
-  placementSettings: PanelPlacementSettings;
-  resizeSettings: PanelResizeSettings;
-}>;
-
-export type GetPanelSettings<SerializedState extends object = object> = (
-  serializedState?: SerializedPanelState<SerializedState>
-) => MaybePromise<PanelSettings>;

@@ -27,6 +27,11 @@ import type {
   ChangeAgentPrivilegeLevelResponse,
   BulkChangeAgentPrivilegeLevelRequest,
   BulkChangeAgentPrivilegeLevelResponse,
+  PostAgentRollbackResponse,
+  PostBulkAgentRollbackRequest,
+  PostBulkAgentRollbackResponse,
+  PostGenerateAgentsReportRequest,
+  PostGenerateAgentsReportResponse,
 } from '../../../common/types';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -442,5 +447,31 @@ export function sendBulkChangeAgentPrivilegeLevel(request: BulkChangeAgentPrivil
     method: 'post',
     version: API_VERSIONS.public.v1,
     body: request.body,
+  });
+}
+
+export function sendPostAgentRollback(agentId: string) {
+  return sendRequestForRq<PostAgentRollbackResponse>({
+    path: agentRouteService.postAgentRollback(agentId),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+  });
+}
+
+export function sendPostBulkAgentRollback(body: PostBulkAgentRollbackRequest['body']) {
+  return sendRequestForRq<PostBulkAgentRollbackResponse>({
+    path: agentRouteService.postBulkAgentRollback(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body,
+  });
+}
+
+export function sendPostGenerateAgentsReport(body: PostGenerateAgentsReportRequest['body']) {
+  return sendRequestForRq<PostGenerateAgentsReportResponse>({
+    path: agentRouteService.postGenerateAgentsReport(),
+    method: 'post',
+    version: API_VERSIONS.internal.v1,
+    body,
   });
 }

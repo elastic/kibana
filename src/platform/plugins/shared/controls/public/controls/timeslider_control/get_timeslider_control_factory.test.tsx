@@ -16,22 +16,29 @@ import type { TimeRange } from '@kbn/es-query';
 import { fireEvent, render as rtlRender } from '@testing-library/react';
 
 import { dataService } from '../../services/kibana_services';
-import { getMockedControlGroupApi, getMockedFinalizeApi } from '../mocks/control_mocks';
+import { getMockedFinalizeApi } from '../mocks/control_mocks';
 import { getTimesliderControlFactory } from './get_timeslider_control_factory';
+import type { TimeSliderControlState } from '@kbn/controls-schemas';
+import type { TimeSliderControlApi } from './types';
 
 const render = (ui: React.ReactElement) => {
   return rtlRender(ui, { wrapper: EuiThemeProvider });
 };
 
-describe('TimesliderControlApi', () => {
+describe('TimeSliderControlApi', () => {
   const uuid = 'myControl1';
 
   const dashboardApi = {
     timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
+    lastSavedStateForChild$: jest.fn(),
+    getLastSavedStateForChild: jest.fn(),
   };
-  const controlGroupApi = getMockedControlGroupApi(dashboardApi);
   const factory = getTimesliderControlFactory();
-  const finalizeApi = getMockedFinalizeApi(uuid, factory, controlGroupApi);
+  const finalizeApi = getMockedFinalizeApi<TimeSliderControlState, TimeSliderControlApi>(
+    uuid,
+    factory,
+    dashboardApi
+  );
 
   dataService.query.timefilter.timefilter.calculateBounds = (timeRange: TimeRange) => {
     const now = new Date();
@@ -49,39 +56,44 @@ describe('TimesliderControlApi', () => {
   });
 
   test('Should set timeslice to undefined when state does not provide percentage of timeRange', async () => {
-    const { api } = await factory.buildControl({
+    const { api } = await factory.buildEmbeddable({
       initialState: {},
       finalizeApi,
       uuid,
-      controlGroupApi,
+      parentApi: dashboardApi,
     });
-    expect(api.timeslice$.value).toBe(undefined);
+    expect(api.appliedTimeslice$.value).toBe(undefined);
   });
 
   test('Should set timeslice to values within time range when state provides percentage of timeRange', async () => {
-    const { api } = await factory.buildControl({
+    const { api } = await factory.buildEmbeddable({
       initialState: {
         timesliceStartAsPercentageOfTimeRange: 0.25,
         timesliceEndAsPercentageOfTimeRange: 0.5,
       },
       finalizeApi,
       uuid,
-      controlGroupApi,
+      parentApi: dashboardApi,
     });
 
-    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T06:00:00.000Z');
-    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-09T12:00:00.000Z');
+    expect(api.appliedTimeslice$.value).toBeDefined();
+    expect(new Date(api.appliedTimeslice$.value![0]).toISOString()).toEqual(
+      '2024-06-09T06:00:00.000Z'
+    );
+    expect(new Date(api.appliedTimeslice$.value![1]).toISOString()).toEqual(
+      '2024-06-09T12:00:00.000Z'
+    );
   });
 
   test('Should update timeslice when time range changes', async () => {
-    const { api } = await factory.buildControl({
+    const { api } = await factory.buildEmbeddable({
       initialState: {
         timesliceStartAsPercentageOfTimeRange: 0.25,
         timesliceEndAsPercentageOfTimeRange: 0.5,
       },
       finalizeApi,
       uuid,
-      controlGroupApi,
+      parentApi: dashboardApi,
     });
 
     // change time range to single hour
@@ -93,19 +105,23 @@ describe('TimesliderControlApi', () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // update time slice to same percentage in new hour interval
-    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-08T00:15:00.000Z');
-    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-08T00:30:00.000Z');
+    expect(new Date(api.appliedTimeslice$.value![0]).toISOString()).toEqual(
+      '2024-06-08T00:15:00.000Z'
+    );
+    expect(new Date(api.appliedTimeslice$.value![1]).toISOString()).toEqual(
+      '2024-06-08T00:30:00.000Z'
+    );
   });
 
   test('Clicking previous button should advance timeslice backward', async () => {
-    const { api } = await factory.buildControl({
+    const { api } = await factory.buildEmbeddable({
       initialState: {
         timesliceStartAsPercentageOfTimeRange: 0.25,
         timesliceEndAsPercentageOfTimeRange: 0.5,
       },
       finalizeApi,
       uuid,
-      controlGroupApi,
+      parentApi: dashboardApi,
     });
     if (!api.CustomPrependComponent) {
       throw new Error('API does not return CustomPrependComponent');
@@ -115,19 +131,23 @@ describe('TimesliderControlApi', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T00:00:00.000Z');
-    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-09T06:00:00.000Z');
+    expect(new Date(api.appliedTimeslice$.value![0]).toISOString()).toEqual(
+      '2024-06-09T00:00:00.000Z'
+    );
+    expect(new Date(api.appliedTimeslice$.value![1]).toISOString()).toEqual(
+      '2024-06-09T06:00:00.000Z'
+    );
   });
 
   test('Clicking previous button should wrap when time range start is reached', async () => {
-    const { api } = await factory.buildControl({
+    const { api } = await factory.buildEmbeddable({
       initialState: {
         timesliceStartAsPercentageOfTimeRange: 0.25,
         timesliceEndAsPercentageOfTimeRange: 0.5,
       },
       finalizeApi,
       uuid,
-      controlGroupApi,
+      parentApi: dashboardApi,
     });
     if (!api.CustomPrependComponent) {
       throw new Error('API does not return CustomPrependComponent');
@@ -138,19 +158,23 @@ describe('TimesliderControlApi', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T18:00:00.000Z');
-    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-10T00:00:00.000Z');
+    expect(new Date(api.appliedTimeslice$.value![0]).toISOString()).toEqual(
+      '2024-06-09T18:00:00.000Z'
+    );
+    expect(new Date(api.appliedTimeslice$.value![1]).toISOString()).toEqual(
+      '2024-06-10T00:00:00.000Z'
+    );
   });
 
   test('Clicking next button should advance timeslice forward', async () => {
-    const { api } = await factory.buildControl({
+    const { api } = await factory.buildEmbeddable({
       initialState: {
         timesliceStartAsPercentageOfTimeRange: 0.25,
         timesliceEndAsPercentageOfTimeRange: 0.5,
       },
       finalizeApi,
       uuid,
-      controlGroupApi,
+      parentApi: dashboardApi,
     });
     if (!api.CustomPrependComponent) {
       throw new Error('API does not return CustomPrependComponent');
@@ -160,19 +184,23 @@ describe('TimesliderControlApi', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T12:00:00.000Z');
-    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-09T18:00:00.000Z');
+    expect(new Date(api.appliedTimeslice$.value![0]).toISOString()).toEqual(
+      '2024-06-09T12:00:00.000Z'
+    );
+    expect(new Date(api.appliedTimeslice$.value![1]).toISOString()).toEqual(
+      '2024-06-09T18:00:00.000Z'
+    );
   });
 
   test('Clicking next button should wrap when time range end is reached', async () => {
-    const { api } = await factory.buildControl({
+    const { api } = await factory.buildEmbeddable({
       initialState: {
         timesliceStartAsPercentageOfTimeRange: 0.25,
         timesliceEndAsPercentageOfTimeRange: 0.5,
       },
       finalizeApi,
       uuid,
-      controlGroupApi,
+      parentApi: dashboardApi,
     });
     if (!api.CustomPrependComponent) {
       throw new Error('API does not return CustomPrependComponent');
@@ -184,23 +212,25 @@ describe('TimesliderControlApi', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T00:00:00.000Z');
-    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-09T06:00:00.000Z');
+    expect(new Date(api.appliedTimeslice$.value![0]).toISOString()).toEqual(
+      '2024-06-09T00:00:00.000Z'
+    );
+    expect(new Date(api.appliedTimeslice$.value![1]).toISOString()).toEqual(
+      '2024-06-09T06:00:00.000Z'
+    );
   });
 
   test('Resetting state should reset timeslice', async () => {
-    const rawState = {
+    const controlState = {
       timesliceStartAsPercentageOfTimeRange: 0.25,
       timesliceEndAsPercentageOfTimeRange: 0.5,
     };
-    controlGroupApi.setLastSavedStateForChild(uuid, {
-      rawState,
-    });
-    const { api } = await factory.buildControl({
-      initialState: rawState,
+    dashboardApi.getLastSavedStateForChild.mockReturnValueOnce(controlState);
+    const { api } = await factory.buildEmbeddable({
+      initialState: controlState,
       finalizeApi,
       uuid,
-      controlGroupApi,
+      parentApi: dashboardApi,
     });
     if (!api.CustomPrependComponent) {
       throw new Error('API does not return CustomPrependComponent');
@@ -211,13 +241,20 @@ describe('TimesliderControlApi', () => {
     fireEvent.click(await findByTestId('timeSlider-nextTimeWindow'));
     await new Promise((resolve) => setTimeout(resolve, 0));
     // ensure time advanced
-    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T12:00:00.000Z');
-    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-09T18:00:00.000Z');
-
-    api.resetUnsavedChanges();
+    expect(new Date(api.appliedTimeslice$.value![0]).toISOString()).toEqual(
+      '2024-06-09T12:00:00.000Z'
+    );
+    expect(new Date(api.appliedTimeslice$.value![1]).toISOString()).toEqual(
+      '2024-06-09T18:00:00.000Z'
+    );
+    await api.resetUnsavedChanges();
 
     await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(new Date(api.timeslice$.value![0]).toISOString()).toEqual('2024-06-09T06:00:00.000Z');
-    expect(new Date(api.timeslice$.value![1]).toISOString()).toEqual('2024-06-09T12:00:00.000Z');
+    expect(new Date(api.appliedTimeslice$.value![0]).toISOString()).toEqual(
+      '2024-06-09T06:00:00.000Z'
+    );
+    expect(new Date(api.appliedTimeslice$.value![1]).toISOString()).toEqual(
+      '2024-06-09T12:00:00.000Z'
+    );
   });
 });

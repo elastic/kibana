@@ -201,7 +201,7 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-      it('should fail when at least one package policy does not have a previous revision', async () => {
+      it('should fail when at least one package policy was not upgraded to the current package version', async () => {
         await upgradePackage(pkgName, oldPkgVersion, newPkgVersion, policyIds, false);
         const res = await supertest
           .post(`/api/fleet/epm/packages/${pkgName}/rollback`)
@@ -209,7 +209,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
         // Cannot predict order of SO creation.
         const re = new RegExp(
-          `Failed to roll back package ${pkgName}: No previous version found for package policies: ${pkgName}(-all-spaces)?-[1-2-3], ${pkgName}(-all-spaces)?-[1-2-3], ${pkgName}(-all-spaces)?-[1-2-3]`,
+          `Failed to roll back package ${pkgName}: Rollback not available because some integration policies are not upgraded to version ${newPkgVersion}`,
           'g'
         );
         expect(res.body.message).to.match(re);
@@ -223,9 +223,8 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(400);
         // Cannot predict order of SO creation.
-        const errorMsg = String.raw`${pkgName}(-all-spaces)?-[1-2-3] \(version: ${oldPkgVersion}, expected: ${newPkgVersion}\)`;
         const re = new RegExp(
-          `Failed to roll back package ${pkgName}: Wrong previous version for package policies: ${errorMsg}, ${errorMsg}`,
+          `Failed to roll back package ${pkgName}: Rollback not available because not all integration policies were upgraded from the same previous version ${newPkgVersion}`,
           'g'
         );
         expect(res.body.message).to.match(re);

@@ -9,6 +9,7 @@ import Path from 'path';
 import { node } from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import kbnDatemath from '@kbn/datemath';
+import { tags } from '@kbn/scout';
 import type { ScoutTestConfig } from '@kbn/scout';
 import type { KbnClient } from '@kbn/scout';
 import type { StreamlangDSL } from '@kbn/streamlang';
@@ -31,7 +32,7 @@ import {
  * Tests the quality of complete pipeline generation (parsing + normalization)
  * using real LogHub log samples.
  *
- * @tags @ess
+ * @tags @local-stateful-classic @cloud-stateful-classic
  */
 
 evaluate.describe.configure({ timeout: 600_000 });
@@ -255,30 +256,46 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
     const { input, output: expected, metadata } = example;
 
     try {
-      // Fetch sample documents
-      const documents = await fetchSampleDocuments(
-        esClient,
-        input.stream_name,
-        input.sample_document_count
-      );
-
-      if (!documents || documents.length === 0) {
-        // Check if parent stream has documents
-        const parentDocs = await fetchSampleDocuments(esClient, 'logs', 10);
-        const parentCount = parentDocs.length;
-
-        // Get some sample filepaths from parent to help debug routing
-        const sampleFilepaths = parentDocs
-          .slice(0, 5)
-          .map((doc) => doc['attributes.filepath'])
-          .filter(Boolean);
-
-        throw new Error(
-          `No documents found in stream ${input.stream_name}. ` +
-            `Parent stream 'logs' has ${parentCount} documents. ` +
-            `Sample filepaths: ${sampleFilepaths.join(', ')}. ` +
-            `Expected filepath: ${input.system}.log`
+      // Get documents - either from inline or by fetching
+      let documents: FlattenRecord[];
+      if (input.sample_documents && input.sample_documents.length > 0) {
+        // Inline mode: use provided documents and clean up stream metadata
+        documents = input.sample_documents.map((doc) => {
+          const flattened = flattenObject(doc);
+          // Replace stream.name with the target stream name to avoid constant_keyword conflicts
+          if (flattened['stream.name']) {
+            flattened['stream.name'] = input.stream_name;
+          }
+          return flattened;
+        });
+      } else if (input.sample_document_count) {
+        // Index mode: fetch from existing stream
+        documents = await fetchSampleDocuments(
+          esClient,
+          input.stream_name,
+          input.sample_document_count
         );
+
+        if (!documents || documents.length === 0) {
+          // Check if parent stream has documents
+          const parentDocs = await fetchSampleDocuments(esClient, 'logs', 10);
+          const parentCount = parentDocs.length;
+
+          // Get some sample filepaths from parent to help debug routing
+          const sampleFilepaths = parentDocs
+            .slice(0, 5)
+            .map((doc) => doc['attributes.filepath'])
+            .filter(Boolean);
+
+          throw new Error(
+            `No documents found in stream ${input.stream_name}. ` +
+              `Parent stream 'logs' has ${parentCount} documents. ` +
+              `Sample filepaths: ${sampleFilepaths.join(', ')}. ` +
+              `Expected filepath: ${input.system}.log`
+          );
+        }
+      } else {
+        throw new Error(`Example must provide either sample_documents or sample_document_count`);
       }
 
       // Extract patterns
@@ -490,7 +507,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
    * Run tests for each dataset.
    */
   PIPELINE_SUGGESTION_DATASETS.forEach((dataset) => {
-    evaluate.describe(dataset.name, { tag: '@ess' }, () => {
+    evaluate.describe(dataset.name, { tag: tags.stateful.classic }, () => {
       evaluate.beforeAll(async ({ apiServices }) => {
         await apiServices.streams.enable();
       });
@@ -514,21 +531,31 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
             apiServices,
             config,
           }) => {
-            // Create system-specific stream BEFORE indexing data
-            // Route based on attributes.filepath which is set to "{System}.log" by synthtrace
-            await apiServices.streams.forkStream('logs', example.input.stream_name, {
-              field: 'attributes.filepath',
-              eq: `${example.input.system}.log`,
-            });
+            const isInlineMode =
+              example.input.sample_documents && example.input.sample_documents.length > 0;
 
-            // Index logs for this system - this will route to the child stream
-            await indexSystemLogs({
-              config,
-              system: example.input.system,
-            });
+            if (isInlineMode) {
+              // INLINE MODE: Use parent 'logs' stream directly, pass documents in API call
+              // No need to fork or index - documents are passed directly
+              example.input.stream_name = 'logs';
+            } else {
+              // INDEX MODE: Create system-specific stream AND index data
+              // Route based on attributes.filepath which is set to "{System}.log" by synthtrace
+              await apiServices.streams.forkStream('logs', example.input.stream_name, {
+                field: 'attributes.filepath',
+                eq: `${example.input.system}.log`,
+              });
 
-            // Wait for documents to be indexed and routed
-            await new Promise((resolve) => setTimeout(resolve, 3000));
+              // Index logs for this system - this will route to the child stream
+              await indexSystemLogs({
+                config,
+                system: example.input.system,
+              });
+
+              // Wait for documents to be indexed and routed
+              await new Promise((resolve) => setTimeout(resolve, 3000));
+            }
+            // Both modes: stream now exists, documents ready (inline in example, indexed for system)
 
             await phoenixClient.runExperiment(
               {

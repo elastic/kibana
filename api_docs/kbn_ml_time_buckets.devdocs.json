@@ -28,6 +28,8 @@
           "\nRepresents a configurable utility class for working with time buckets."
         ],
         "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -66,6 +70,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+                "lineNumber": 72,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -86,6 +92,8 @@
               "(barTarget: number) => void"
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -102,6 +110,8 @@
                   "number"
                 ],
                 "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+                "lineNumber": 78,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -122,6 +132,8 @@
               "(maxBars: number) => void"
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -138,6 +150,8 @@
                   "number"
                 ],
                 "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+                "lineNumber": 84,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -158,6 +172,8 @@
               "(interval: string) => void"
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -174,6 +190,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+                "lineNumber": 90,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -202,6 +220,8 @@
               ") => void"
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -224,6 +244,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+                "lineNumber": 96,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -244,6 +266,8 @@
               "() => { min: moment.Moment; max: moment.Moment; }"
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -271,6 +295,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -298,6 +324,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -314,6 +342,8 @@
                   "number"
                 ],
                 "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+                "lineNumber": 115,
+                "columnNumber": 39,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -336,6 +366,8 @@
               "() => string"
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -385,6 +417,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+        "lineNumber": 124,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -407,6 +441,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -430,6 +466,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -447,6 +485,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -479,6 +519,8 @@
           }
         ],
         "path": "x-pack/platform/packages/private/ml/time_buckets/use_time_buckets.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -495,6 +537,8 @@
               "IUiSettingsClient"
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/use_time_buckets.ts",
+            "lineNumber": 20,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -517,6 +561,8 @@
           "\nConfiguration options for initializing TimeBuckets."
         ],
         "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -530,6 +576,8 @@
               "\nThe maximum number of bars to display on the histogram."
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -543,6 +591,8 @@
               "\nThe targeted number of bars for the histogram."
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -556,6 +606,8 @@
               "\nThe date format string."
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -572,6 +624,8 @@
               "string[][]"
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -588,6 +642,8 @@
           "\nDefines the structure for time intervals used within TimeBuckets."
         ],
         "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -604,6 +660,8 @@
               "() => number"
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -622,6 +680,8 @@
               "() => number"
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -637,6 +697,8 @@
               "\nThe string expression representing the interval."
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -653,6 +715,8 @@
           "\nRepresents the minimum and maximum time bounds for a time range."
         ],
         "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -669,6 +733,8 @@
               "moment.Moment | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -685,6 +751,8 @@
               "moment.Moment | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/time_buckets/time_buckets.d.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

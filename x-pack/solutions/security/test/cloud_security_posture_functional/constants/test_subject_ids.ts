@@ -49,5 +49,7 @@ export const testSubjectIds = {
   GRAPH_NODE_ENTITY_TAG_TEXT_ID: 'cloudSecurityGraphGraphInvestigationTagText',
   GROUPED_ITEM_TITLE_TEST_ID_LINK: 'GraphGroupedNodePreviewPanelGroupedItemTitleLink',
   GROUPED_ITEM_TITLE_TEST_ID_TEXT: 'GraphGroupedNodePreviewPanelGroupedItemTitleText',
+  GROUPED_ITEM_ACTOR_TEST_ID: 'GraphGroupedNodePreviewPanelGroupedItemActor',
+  GROUPED_ITEM_TARGET_TEST_ID: 'GraphGroupedNodePreviewPanelGroupedItemTarget',
   PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID: 'previewSectionCloseButton',
 };

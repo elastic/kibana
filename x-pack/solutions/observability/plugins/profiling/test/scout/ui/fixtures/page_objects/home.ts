@@ -6,20 +6,28 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import { EXTENDED_TIMEOUT } from '..';
 
 export class ProfilingHomePage {
   constructor(public readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('profiling')}`);
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.waitForThreadsTab();
   }
 
   async gotoWithTimeRange(rangeFrom: string, rangeTo: string) {
     await this.page.goto(
       `${this.kbnUrl.app('profiling')}?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`
     );
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.waitForThreadsTab();
+  }
+
+  /*
+   * Waits for the Threads tab to be visible
+   */
+  private async waitForThreadsTab() {
+    await this.page.getByRole('tab', { name: 'Threads' }).waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   // Tab navigation methods

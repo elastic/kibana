@@ -12,6 +12,7 @@ import { DatePicker } from '../date_picker/date_picker';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import {
   Anomalies,
+  Dashboards,
   Logs,
   Metadata,
   Metrics,
@@ -40,6 +41,7 @@ export const Content = () => {
                 ContentTabIds.METRICS,
                 ContentTabIds.PROCESSES,
                 ContentTabIds.ANOMALIES,
+                ContentTabIds.DASHBOARDS,
               ]}
             />
           </EuiFlexItem>
@@ -69,6 +71,9 @@ export const Content = () => {
         </TabPanel>
         <TabPanel activeWhen={ContentTabIds.PROFILING}>
           <Profiling />
+        </TabPanel>
+        <TabPanel activeWhen={ContentTabIds.DASHBOARDS}>
+          <Dashboards />
         </TabPanel>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -23,7 +23,6 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/product-doc-common'
   - '@kbn/core-saved-objects-server'
-  - '@kbn/utils'
   - '@kbn/core-http-browser'
   - '@kbn/logging-mocks'
   - '@kbn/licensing-plugin'
@@ -33,6 +32,7 @@ dependsOn:
   - '@kbn/ml-is-populated-object'
   - '@kbn/i18n'
   - '@kbn/licensing-types'
+  - '@kbn/fs'
   - '@kbn/react-query'
 tags:
   - plugin

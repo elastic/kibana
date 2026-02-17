@@ -37,12 +37,14 @@ describe('StreamsSettingsFlyout', () => {
   const mockRefreshStreams = jest.fn();
   const mockAddError = jest.fn();
   const mockTrackWiredStreamsStatusChanged = jest.fn();
+  const mockGetClassicStatus = jest.fn();
 
   const defaultKibanaMock = {
     dependencies: {
       start: {
         streams: {
           getWiredStatus: mockGetWiredStatus,
+          getClassicStatus: mockGetClassicStatus,
           enableWiredMode: mockEnableWiredMode,
           disableWiredMode: mockDisableWiredMode,
         },

@@ -7,41 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState, useEffect } from 'react';
-import useMountedState from 'react-use/lib/useMountedState';
-import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import {
-  EuiComboBox,
-  EuiFormRow,
-  EuiCallOut,
-  type EuiSwitchEvent,
-  EuiPanel,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiCallOut, EuiComboBox, EuiFormRow, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { TimeRange } from '@kbn/es-query';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { ISearchGeneric } from '@kbn/search-types';
 import {
   ESQLVariableType,
   EsqlControlType,
-  type ESQLControlState,
-  type ControlWidthOptions,
-  type ESQLControlVariable,
   TIMEFIELD_ROUTE,
+  type ESQLControlState,
+  type ESQLControlVariable,
 } from '@kbn/esql-types';
 import {
-  getIndexPatternFromESQLQuery,
-  getESQLResults,
   appendStatsByToQuery,
+  getESQLResults,
+  getIndexPatternFromESQLQuery,
 } from '@kbn/esql-utils';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ServiceDeps } from '../../../kibana_services';
+import type { ISearchGeneric } from '@kbn/search-types';
+import { isEqual } from 'lodash';
+import React, { useCallback, useEffect, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { ESQLLangEditor } from '../../../create_editor';
-import { ControlWidth, ControlLabel, ControlSelectionType } from './shared_form_components';
+import type { ServiceDeps } from '../../../kibana_services';
 import { ChooseColumnPopover } from './choose_column_popover';
+import { ControlLabel, ControlSelectionType } from './shared_form_components';
 
 interface ValueControlFormProps {
   search: ISearchGeneric;
@@ -53,7 +46,6 @@ interface ValueControlFormProps {
   initialState?: ESQLControlState;
   valuesRetrieval?: string;
   timeRange?: TimeRange;
-  currentApp?: string;
   esqlVariables: ESQLControlVariable[];
 }
 
@@ -75,7 +67,6 @@ export function ValueControlForm({
   setControlState,
   valuesRetrieval,
   timeRange,
-  currentApp,
   esqlVariables,
 }: ValueControlFormProps) {
   const isMounted = useMountedState();
@@ -118,13 +109,11 @@ export function ValueControlForm({
   );
   const [showValuesPreview, setShowValuesPreview] = useState<boolean>(false);
   const [label, setLabel] = useState(initialState?.title ?? '');
-  const [minimumWidth, setMinimumWidth] = useState(initialState?.width ?? 'medium');
+
   const shouldDefaultToMultiSelect = variableType === ESQLVariableType.MULTI_VALUES;
   const [singleSelect, setSingleSelect] = useState<boolean>(
     initialState?.singleSelect ?? !shouldDefaultToMultiSelect
   );
-
-  const [grow, setGrow] = useState(initialState?.grow ?? false);
 
   const onValuesChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
     setSelectedValues(selectedOptions);
@@ -161,23 +150,14 @@ export function ValueControlForm({
     setLabel(e.target.value);
   }, []);
 
-  const onMinimumSizeChange = useCallback((optionId: string) => {
-    if (optionId) {
-      setMinimumWidth(optionId as ControlWidthOptions);
-    }
-  }, []);
-
   const onSelectionTypeChange = useCallback((isSingleSelect: boolean) => {
     setSingleSelect(isSingleSelect);
-  }, []);
-
-  const onGrowChange = useCallback((e: EuiSwitchEvent) => {
-    setGrow(e.target.checked);
   }, []);
 
   const onValuesQuerySubmit = useCallback(
     async (query: string) => {
       try {
+        const timezone = core.uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
         getESQLResults({
           esqlQuery: query,
           search,
@@ -185,6 +165,7 @@ export function ValueControlForm({
           filter: undefined,
           dropNullColumns: true,
           timeRange,
+          timezone,
           variables: esqlVariables,
         }).then((results) => {
           if (!isMounted()) {
@@ -215,7 +196,7 @@ export function ValueControlForm({
         setEsqlQueryErrors([e]);
       }
     },
-    [isMounted, search, timeRange, esqlVariables]
+    [isMounted, search, timeRange, esqlVariables, core.uiSettings]
   );
 
   const setSuggestedQuery = useCallback(async () => {
@@ -260,14 +241,12 @@ export function ValueControlForm({
     const state = {
       availableOptions,
       selectedOptions: [availableOptions[0]],
-      width: minimumWidth,
       singleSelect,
       title: label || variableNameWithoutQuestionmark,
       variableName: variableNameWithoutQuestionmark,
       variableType: singleSelect ? variableType : ESQLVariableType.MULTI_VALUES,
       esqlQuery: valuesQuery || queryString,
       controlType: controlFlyoutType,
-      grow,
     };
     if (!isEqual(state, initialState)) {
       setControlState(state);
@@ -275,10 +254,8 @@ export function ValueControlForm({
   }, [
     singleSelect,
     controlFlyoutType,
-    grow,
     initialState,
     label,
-    minimumWidth,
     queryString,
     selectedValues,
     setControlState,
@@ -304,7 +281,6 @@ export function ValueControlForm({
             onTextLangQueryChange={(q) => {
               setValuesQuery(q.esql);
             }}
-            hideTimeFilterInfo={true}
             disableAutoFocus={true}
             errors={esqlQueryErrors}
             editorIsInline
@@ -425,16 +401,6 @@ export function ValueControlForm({
         </EuiFormRow>
       )}
       <ControlLabel label={label} onLabelChange={onLabelChange} />
-
-      <ControlWidth
-        minimumWidth={minimumWidth}
-        grow={grow}
-        onMinimumSizeChange={onMinimumSizeChange}
-        onGrowChange={onGrowChange}
-        // This property is not compatible with the unified search yet
-        // we will hide this possibility for now
-        hideFitToSpace={currentApp === 'discover'}
-      />
 
       <ControlSelectionType
         singleSelect={singleSelect}

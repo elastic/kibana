@@ -9,7 +9,7 @@
     "browser": true,
     "server": true,
     "requiredPlugins": [
-      "onechat",
+      "agentBuilder",
       "apmDataAccess",
       "logsDataAccess",
       "inference",
@@ -22,7 +22,7 @@
       "licensing"
     ],
     "optionalPlugins": ["ml", "spaces"],
-    "requiredBundles": ["kibanaReact"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils"],
     "extraPublicDirs": []
   }
 }

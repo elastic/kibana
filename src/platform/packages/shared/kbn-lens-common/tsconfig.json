@@ -2,19 +2,10 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node",
-      "react"
-    ]
+    "types": ["jest", "node", "react"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/lens-formula-docs",
     "@kbn/navigation-plugin",
@@ -63,7 +54,8 @@
     "@kbn/i18n",
     "@kbn/chart-icons",
     "@kbn/alerts-ui-shared",
-    "@kbn/controls-plugin",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/kql",
+    "@kbn/control-group-renderer"
   ]
 }

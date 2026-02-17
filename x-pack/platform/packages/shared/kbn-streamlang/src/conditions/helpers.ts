@@ -13,14 +13,18 @@ import type {
   ShorthandUnaryFilterCondition,
   FilterCondition,
   Condition,
+  BinaryOperatorKeys,
 } from '../../types/conditions';
 import {
   BINARY_OPERATORS,
   UNARY_OPERATORS,
+  ARRAY_OPERATORS,
   isAndCondition,
   isFilterCondition,
   isOrCondition,
   isNotCondition,
+  isAlwaysCondition,
+  isNeverCondition,
 } from '../../types/conditions';
 
 export function getBinaryFilterOperator(
@@ -98,7 +102,9 @@ export function getDefaultFormValueForOperator(
     case 'exists':
       return true;
     case 'range':
-      return { gte: 0, lt: 0 };
+      return {};
+    case 'includes':
+      return '';
     default:
       return '';
   }
@@ -176,8 +182,91 @@ function getFieldTypeForFilterCondition(
     case 'contains':
     case 'startsWith':
     case 'endsWith':
+    case 'includes':
       return 'string';
     default:
       return 'string';
   }
 }
+
+/**
+ * Checks if a condition is complete and ready to be used.
+ * A condition is complete if:
+ * - It's undefined (optional conditions)
+ * - It has a non-empty field
+ * - Its value is complete based on operator type:
+ *   - Range: both lower and upper bounds are filled
+ *   - Boolean (exists): any boolean is valid
+ *   - String/Number: value is not empty
+ */
+export function isConditionComplete(condition: Condition | undefined): boolean {
+  // undefined means no condition specified, which is valid (optional condition)
+  if (condition === undefined) {
+    return true;
+  }
+
+  if (isAlwaysCondition(condition)) {
+    return true;
+  }
+  if (isNeverCondition(condition)) {
+    return true;
+  }
+
+  // Handle logical conditions (and, or, not) by checking all nested conditions
+  if (isAndCondition(condition)) {
+    return condition.and.every(isConditionComplete);
+  }
+  if (isOrCondition(condition)) {
+    return condition.or.every(isConditionComplete);
+  }
+  if (isNotCondition(condition)) {
+    return isConditionComplete(condition.not);
+  }
+
+  // Handle filter conditions
+  if (isFilterCondition(condition)) {
+    // Field must be non-empty
+    if (!condition.field || condition.field.trim() === '') {
+      return false;
+    }
+
+    const operator = getFilterOperator(condition);
+    const value = getFilterValue(condition);
+
+    // For range conditions, check that both boundaries are filled
+    if (operator === 'range' && typeof value === 'object' && value !== null) {
+      const rangeValue = value as RangeCondition;
+      const hasFrom =
+        (rangeValue.gte !== undefined && rangeValue.gte !== '') ||
+        (rangeValue.gt !== undefined && rangeValue.gt !== '');
+      const hasTo =
+        (rangeValue.lte !== undefined && rangeValue.lte !== '') ||
+        (rangeValue.lt !== undefined && rangeValue.lt !== '');
+      return hasFrom && hasTo;
+    }
+
+    // For boolean values (exists operator), any boolean is valid
+    if (typeof value === 'boolean') {
+      return true;
+    }
+
+    // For number values, any number is valid (including 0)
+    if (typeof value === 'number') {
+      return true;
+    }
+
+    // For string values, must be non-empty
+    if (typeof value === 'string') {
+      return value.trim() !== '';
+    }
+
+    // If we reach here, the value is missing or invalid type
+    return false;
+  }
+
+  return false;
+}
+
+export const isArrayOperator = (operator: OperatorKeys | undefined): boolean => {
+  return operator !== undefined && ARRAY_OPERATORS.includes(operator as BinaryOperatorKeys);
+};

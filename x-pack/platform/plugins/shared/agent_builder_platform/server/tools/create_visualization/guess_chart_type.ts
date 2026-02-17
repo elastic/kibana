@@ -6,8 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import type { ModelProvider } from '@kbn/onechat-server';
-import { SupportedChartType } from '@kbn/onechat-common/tools/tool_result';
+import type { ModelProvider } from '@kbn/agent-builder-server';
+import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 
 const chartTypeSchema = z
   .object({
@@ -30,8 +30,8 @@ const chartTypeSchema = z
 
 export async function guessChartType(
   modelProvider: ModelProvider,
-  existingType: string,
-  nlQuery: string
+  nlQuery: string,
+  existingType?: string
 ) {
   const model = await modelProvider.getDefaultModel();
 

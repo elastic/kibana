@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Subject } from 'rxjs';
 import {
+  type AppDeepLinkLocations,
   type AppMountParameters,
+  AppStatus,
+  type AppUpdater,
   type CoreSetup,
   type CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -16,6 +20,7 @@ import {
 } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import { TelemetryService } from './common/lib/telemetry/telemetry_service';
 import type {
   WorkflowsPublicPluginSetup,
   WorkflowsPublicPluginSetupDependencies,
@@ -27,6 +32,8 @@ import type {
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { stepSchemas } from '../common/step_schemas';
 
+const VisibleIn: AppDeepLinkLocations[] = ['globalSearch', 'home', 'kibanaOverview', 'sideNav'];
+
 export class WorkflowsPlugin
   implements
     Plugin<
@@ -36,10 +43,21 @@ export class WorkflowsPlugin
       WorkflowsPublicPluginStartDependencies
     >
 {
+  private appUpdater$: Subject<AppUpdater>;
+  private telemetryService: TelemetryService;
+
+  constructor() {
+    this.appUpdater$ = new Subject<AppUpdater>();
+    this.telemetryService = new TelemetryService();
+  }
+
   public setup(
     core: CoreSetup<WorkflowsPublicPluginStartDependencies, WorkflowsPublicPluginStart>,
     plugins: WorkflowsPublicPluginSetupDependencies
   ): WorkflowsPublicPluginSetup {
+    // Initialize telemetry service
+    this.telemetryService.setup({ analytics: core.analytics });
+
     // Check if workflows UI is enabled
     const isWorkflowsUiEnabled = core.uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID, false);
 
@@ -64,22 +82,14 @@ export class WorkflowsPlugin
       title: PLUGIN_NAME,
       appRoute: '/app/workflows',
       euiIconType: 'workflowsApp',
-      visibleIn: ['globalSearch', 'home', 'kibanaOverview', 'sideNav'],
+      visibleIn: VisibleIn,
       category: DEFAULT_APP_CATEGORIES.management,
       order: 9015,
+      updater$: this.appUpdater$,
       mount: async (params: AppMountParameters) => {
         // Load application bundle
         const { renderApp } = await import('./application');
         const services = await this.createWorkflowsStartServices(core);
-
-        // Set badge for classic navbar
-        services.chrome.setBadge({
-          text: 'Technical preview',
-          tooltip:
-            'This functionality is in technical preview. It may change or be removed in a future release.',
-          iconType: 'beaker',
-        });
-
         return renderApp(services, params);
       },
     });
@@ -93,6 +103,15 @@ export class WorkflowsPlugin
   ): WorkflowsPublicPluginStart {
     // Initialize StepSchemas singleton with workflowExtensions
     stepSchemas.initialize(plugins.workflowsExtensions);
+
+    // License check to set app status
+    plugins.licensing.license$.subscribe((license) => {
+      if (license.isActive && license.hasAtLeast('enterprise')) {
+        this.appUpdater$.next(() => ({ status: AppStatus.accessible, visibleIn: VisibleIn }));
+      } else {
+        this.appUpdater$.next(() => ({ status: AppStatus.inaccessible, visibleIn: [] }));
+      }
+    });
 
     return {};
   }
@@ -108,8 +127,13 @@ export class WorkflowsPlugin
 
     const additionalServices: WorkflowsPublicPluginStartAdditionalServices = {
       storage: new Storage(localStorage),
+      workflowsManagement: { telemetry: this.telemetryService.getClient() },
     };
 
-    return { ...coreStart, ...depsStart, ...additionalServices };
+    return {
+      ...coreStart,
+      ...depsStart,
+      ...additionalServices,
+    };
   }
 }

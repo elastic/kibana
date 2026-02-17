@@ -40,6 +40,14 @@ export function transformDashboardOut(
     ? references.filter(({ type }) => type === tagSavedObjectTypeName).map(({ id }) => id)
     : [];
 
+  let pinnedControlsOut;
+  if (controlGroupInput) {
+    pinnedControlsOut = transformControlGroupOut(
+      controlGroupInput,
+      references ?? [],
+      controlGroupInput?.ignoreParentSettingsJSON // legacy for controls prior to v9.2.0
+    );
+  }
   const timeRange =
     timeRestore && timeFrom && timeTo
       ? {
@@ -48,11 +56,10 @@ export function transformDashboardOut(
         }
       : undefined;
 
-  const options = transformOptionsOut(optionsJSON ?? '{}');
+  const options = transformOptionsOut(optionsJSON ?? '{}', controlGroupInput?.showApplySelections);
 
   // try to maintain a consistent (alphabetical) order of keys
   return {
-    ...(controlGroupInput && { controlGroupInput: transformControlGroupOut(controlGroupInput) }),
     ...(description && { description }),
     ...transformSearchSourceOut(kibanaSavedObjectMeta, references),
     ...(Object.keys(options).length && { options }),
@@ -60,6 +67,7 @@ export function transformDashboardOut(
       panels: transformPanelsOut(panelsJSON, sections, references),
     }),
 
+    ...(pinnedControlsOut && { pinned_panels: pinnedControlsOut }),
     ...(projectRouting !== undefined && { project_routing: projectRouting }),
     ...(refreshInterval && {
       refresh_interval: { pause: refreshInterval.pause, value: refreshInterval.value },

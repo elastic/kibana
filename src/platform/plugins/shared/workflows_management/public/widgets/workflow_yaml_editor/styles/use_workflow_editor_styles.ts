@@ -32,7 +32,7 @@ export const useWorkflowEditorStyles = () => {
         minHeight: 0,
 
         // Template variables decorations
-        '.template-variable-valid': {
+        '.template-variable-info, .template-variable-valid': {
           backgroundColor: transparentize(euiTheme.colors.primary, 0.12),
           borderRadius: '2px',
         },
@@ -53,6 +53,19 @@ export const useWorkflowEditorStyles = () => {
         },
         '.after-text + .after-text': {
           marginLeft: '0', // Remove padding for consecutive after-text spans
+        },
+
+        // Connector name badge (before decoration)
+        '.connector-name-badge': {
+          display: 'inline-block',
+          backgroundColor: transparentize(euiTheme.colors.success, 0.1),
+          color: euiTheme.colors.successText,
+          padding: '2px 6px',
+          borderRadius: '4px',
+          marginRight: '8px',
+          fontSize: '12px',
+          fontWeight: 500,
+          lineHeight: '1.4',
         },
 
         // Step highlighting decorations

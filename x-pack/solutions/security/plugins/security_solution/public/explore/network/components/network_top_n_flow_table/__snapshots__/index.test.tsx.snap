@@ -625,7 +625,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
       </table>
     </div>
     <div
-      class="euiFlexGroup c4 emotion-euiFlexGroup-l-spaceBetween-center-row"
+      class="euiFlexGroup c4 emotion-euiFlexGroup-m-spaceBetween-center-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -1489,7 +1489,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
       </table>
     </div>
     <div
-      class="euiFlexGroup c4 emotion-euiFlexGroup-l-spaceBetween-center-row"
+      class="euiFlexGroup c4 emotion-euiFlexGroup-m-spaceBetween-center-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"

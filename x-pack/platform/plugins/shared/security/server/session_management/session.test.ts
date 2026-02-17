@@ -409,12 +409,16 @@ describe('Session', () => {
 
       // Properly creates session cookie value.
       expect(mockSessionCookie.set).toHaveBeenCalledTimes(1);
-      expect(mockSessionCookie.set).toHaveBeenCalledWith(mockRequest, {
-        sid: mockSID,
-        aad: mockAAD,
-        idleTimeoutExpiration: now + 123,
-        lifespanExpiration: now + 456,
-      });
+      expect(mockSessionCookie.set).toHaveBeenCalledWith(
+        mockRequest,
+        {
+          sid: mockSID,
+          aad: mockAAD,
+          idleTimeoutExpiration: now + 123,
+          lifespanExpiration: now + 456,
+        },
+        undefined
+      );
     });
 
     it('creates session value if optional fields are missing', async () => {
@@ -459,12 +463,139 @@ describe('Session', () => {
 
       // Properly creates session cookie value.
       expect(mockSessionCookie.set).toHaveBeenCalledTimes(1);
-      expect(mockSessionCookie.set).toHaveBeenCalledWith(mockRequest, {
+      expect(mockSessionCookie.set).toHaveBeenCalledWith(
+        mockRequest,
+        {
+          sid: mockSID,
+          aad: mockAAD,
+          idleTimeoutExpiration: now + 123,
+          lifespanExpiration: now + 456,
+        },
+        undefined
+      );
+    });
+
+    it('creates intermediate session with custom cookie options when stateCookieOptions is provided', async () => {
+      const mockSID = Buffer.from([1, ...Array(31).keys()]).toString('base64');
+      const mockAAD = Buffer.from([2, ...Array(31).keys()]).toString('base64');
+
+      const mockSessionIndexValue = sessionIndexMock.createValue({
         sid: mockSID,
-        aad: mockAAD,
+        provider: { type: 'saml', name: 'saml1' },
         idleTimeoutExpiration: now + 123,
         lifespanExpiration: now + 456,
+        createdAt: 123456,
       });
+      mockSessionIndex.create.mockResolvedValue(mockSessionIndexValue);
+
+      const mockRequest = httpServerMock.createKibanaRequest();
+      await expect(
+        session.create(
+          mockRequest,
+          {
+            username: mockAuthenticatedUser().username,
+            userProfileId: 'uid',
+            provider: { type: 'saml', name: 'saml1' },
+            state: 'some-state',
+          },
+          { isSecure: true, sameSite: 'None' }
+        )
+      ).resolves.toEqual({
+        sid: mockSID,
+        username: 'user',
+        userProfileId: 'uid',
+        state: 'some-state',
+        provider: { name: 'saml1', type: 'saml' },
+        idleTimeoutExpiration: now + 123,
+        lifespanExpiration: now + 456,
+        createdAt: 123456,
+        metadata: { index: mockSessionIndexValue },
+      });
+
+      // Properly creates session index value.
+      expect(mockSessionIndex.create).toHaveBeenCalledTimes(1);
+      expect(mockSessionIndex.create).toHaveBeenCalledWith({
+        sid: mockSID,
+        content:
+          'AwABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9PgQAAQIDBAUGBwgJChvXfqiKj6k6TtyXr4HA5s2UpJsdgbWevIEfo6mN827f0lGcKDNPzN+vDMUIEe17v19POcGbFTfn094k4vjPVvo4sKPZMbNZmsQnCuqRNKIx4DZwVTlsKNizEUKP',
+        provider: { name: 'saml1', type: 'saml' },
+        usernameHash: '8ac76453d769d4fd14b3f41ad4933f9bd64321972cd002de9b847e117435b08b',
+        idleTimeoutExpiration: now + 123,
+        lifespanExpiration: now + 456,
+        createdAt: 123456,
+      });
+
+      // Properly creates session cookie value with custom options for intermediate session.
+      expect(mockSessionCookie.set).toHaveBeenCalledTimes(1);
+      expect(mockSessionCookie.set).toHaveBeenCalledWith(
+        mockRequest,
+        {
+          sid: mockSID,
+          aad: mockAAD,
+          idleTimeoutExpiration: now + 123,
+          lifespanExpiration: now + 456,
+        },
+        { isSecure: true, sameSite: 'None' }
+      );
+    });
+
+    it('creates regular session with default cookie options when stateCookieOptions is not provided', async () => {
+      const mockSID = Buffer.from([1, ...Array(31).keys()]).toString('base64');
+      const mockAAD = Buffer.from([2, ...Array(31).keys()]).toString('base64');
+
+      const mockSessionIndexValue = sessionIndexMock.createValue({
+        sid: mockSID,
+        idleTimeoutExpiration: now + 123,
+        lifespanExpiration: now + 456,
+        createdAt: 123456,
+      });
+      mockSessionIndex.create.mockResolvedValue(mockSessionIndexValue);
+
+      const mockRequest = httpServerMock.createKibanaRequest();
+      await expect(
+        session.create(mockRequest, {
+          username: mockAuthenticatedUser().username,
+          userProfileId: 'uid',
+          provider: { type: 'basic', name: 'basic1' },
+          state: 'some-state',
+        })
+      ).resolves.toEqual({
+        sid: mockSID,
+        username: 'user',
+        userProfileId: 'uid',
+        state: 'some-state',
+        provider: { name: 'basic1', type: 'basic' },
+        idleTimeoutExpiration: now + 123,
+        lifespanExpiration: now + 456,
+        createdAt: 123456,
+        metadata: { index: mockSessionIndexValue },
+      });
+
+      // Properly creates session index value.
+      expect(mockSessionIndex.create).toHaveBeenCalledTimes(1);
+      expect(mockSessionIndex.create).toHaveBeenCalledWith({
+        sid: mockSID,
+        content:
+          'AwABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9PgQAAQIDBAUGBwgJChvXfqiKj6k6TtyXr4HA5s2UpJsdgbWevIEfo6mN827f0lGcKDNPzN+vDMUIEe17v19POcGbFTfn094k4vjPVvo4sKPZMbNZmsQnCuqRNKIx4DZwVTlsKNizEUKP',
+        provider: { name: 'basic1', type: 'basic' },
+        usernameHash: '8ac76453d769d4fd14b3f41ad4933f9bd64321972cd002de9b847e117435b08b',
+        idleTimeoutExpiration: now + 123,
+        lifespanExpiration: now + 456,
+        createdAt: 123456,
+      });
+
+      // Properly creates session cookie value without custom options.
+      expect(mockSessionCookie.set).toHaveBeenCalledTimes(1);
+      expect(mockSessionCookie.set).toHaveBeenCalledWith(
+        mockRequest,
+        {
+          sid: mockSID,
+          aad: mockAAD,
+          idleTimeoutExpiration: now + 123,
+          lifespanExpiration: now + 456,
+        },
+        undefined
+      );
     });
   });
 

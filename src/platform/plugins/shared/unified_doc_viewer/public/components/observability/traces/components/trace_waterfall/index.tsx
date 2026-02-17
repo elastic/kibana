@@ -7,15 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EuiDelayRender } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useCallback, useState } from 'react';
-import { EuiDelayRender } from '@elastic/eui';
+import React, { useState, useMemo } from 'react';
+import { TRACE_ID_FIELD } from '@kbn/discover-utils';
+import { where } from '@kbn/esql-composer';
+import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { FullScreenWaterfall } from '../full_screen_waterfall';
 import { TraceWaterfallTourStep } from './full_screen_waterfall_tour_step';
+import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
+import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
 
 interface Props {
   traceId: string;
@@ -38,25 +42,44 @@ const sectionTitle = i18n.translate('unifiedDocViewer.observability.traces.trace
 });
 
 export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props) {
-  const { data } = getUnifiedDocViewerServices();
+  const { data, discoverShared } = getUnifiedDocViewerServices();
+  const { indexes } = useDataSourcesContext();
   const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useState(false);
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
-  const getParentApi = useCallback(
-    () => ({
-      getSerializedStateForChild: () => ({
-        rawState: {
-          traceId,
-          rangeFrom,
-          rangeTo,
-          docId,
-          mode: 'summary',
-        },
-      }),
-    }),
-    [docId, rangeFrom, rangeTo, traceId]
+
+  const FocusedTraceWaterfall = discoverShared.features.registry.getById(
+    'observability-focused-trace-waterfall'
+  )?.render;
+
+  const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
+    indexPattern: indexes.apm.traces,
+    whereClause: where(`${TRACE_ID_FIELD} == ?traceId`, { traceId }),
+  });
+
+  const openInDiscoverSectionAction = useOpenInDiscoverSectionAction({
+    href: discoverUrl,
+    esql: esqlQueryString,
+    tabLabel: sectionTitle,
+    dataTestSubj: 'unifiedDocViewerObservabilityTracesOpenInDiscoverButton',
+  });
+  const actionId = 'traceWaterfallFullScreenAction';
+
+  const actions = useMemo(
+    () => [
+      {
+        icon: 'fullScreen',
+        onClick: () => setShowFullScreenWaterfall(true),
+        label: fullScreenButtonLabel,
+        ariaLabel: fullScreenButtonLabel,
+        id: actionId,
+        dataTestSubj: 'unifiedDocViewerObservabilityTracesTraceFullScreenButton',
+      },
+      ...(openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
+    ],
+    [openInDiscoverSectionAction]
   );
 
-  const actionId = 'traceWaterfallFullScreenAction';
+  if (!FocusedTraceWaterfall) return null;
 
   return (
     <>
@@ -76,22 +99,16 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
         id="trace-waterfall"
         title={sectionTitle}
         description={sectionTip}
-        actions={[
-          {
-            icon: 'fullScreen',
-            onClick: () => setShowFullScreenWaterfall(true),
-            label: fullScreenButtonLabel,
-            ariaLabel: fullScreenButtonLabel,
-            id: actionId,
-            dataTestSubj: 'unifiedDocViewerObservabilityTracesTraceFullScreenButton',
-          },
-        ]}
+        actions={actions}
       >
-        <EmbeddableRenderer
-          type="APM_TRACE_WATERFALL_EMBEDDABLE"
-          getParentApi={getParentApi}
-          hidePanelChrome
-        />
+        {docId ? (
+          <FocusedTraceWaterfall
+            traceId={traceId}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            docId={docId}
+          />
+        ) : null}
         <EuiDelayRender delay={500}>
           <TraceWaterfallTourStep
             actionId={actionId}

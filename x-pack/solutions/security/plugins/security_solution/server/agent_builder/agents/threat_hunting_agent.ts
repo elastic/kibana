@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
-import { platformCoreTools } from '@kbn/onechat-common';
+import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
 import { THREAT_HUNTING_AGENT_ID } from '../../../common/constants';
 import {
@@ -25,6 +25,8 @@ const PLATFORM_TOOL_IDS = [
   platformCoreTools.getDocumentById,
   platformCoreTools.cases,
   platformCoreTools.productDocumentation,
+  platformCoreTools.generateEsql,
+  platformCoreTools.executeEsql,
 ];
 
 const SECURITY_TOOL_IDS = [

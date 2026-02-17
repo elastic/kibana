@@ -21,6 +21,9 @@ import {
 export function migrateOnRead(definition: Record<string, unknown>): Streams.all.Definition {
   let migratedDefinition = definition;
   let hasBeenMigrated = false;
+  if ('group' in migratedDefinition) {
+    return migratedDefinition as unknown as Streams.all.Definition;
+  }
   // Add required description
   if (typeof migratedDefinition.description !== 'string') {
     migratedDefinition = {
@@ -109,30 +112,6 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     hasBeenMigrated = true;
   }
 
-  // Add metadata to Group stream if missing
-  if (isObject(migratedDefinition.group) && !('metadata' in migratedDefinition.group)) {
-    migratedDefinition = {
-      ...migratedDefinition,
-      group: {
-        ...migratedDefinition.group,
-        metadata: {},
-      },
-    };
-    hasBeenMigrated = true;
-  }
-
-  // Add tags to Group stream if missing
-  if (isObject(migratedDefinition.group) && !('tags' in migratedDefinition.group)) {
-    migratedDefinition = {
-      ...migratedDefinition,
-      group: {
-        ...migratedDefinition.group,
-        tags: [],
-      },
-    };
-    hasBeenMigrated = true;
-  }
-
   // Add failure_store to ingest streams if missing
   if (isObject(migratedDefinition.ingest) && !('failure_store' in migratedDefinition.ingest)) {
     const streamName = migratedDefinition.name;
@@ -190,6 +169,16 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
           updated_at: new Date(0).toISOString(),
         },
       },
+    };
+    hasBeenMigrated = true;
+  }
+
+  // Initialize query_streams as empty array for ingest streams (WiredStream and ClassicStream)
+  // that don't have this field yet
+  if (isObject(migratedDefinition.ingest) && !('query_streams' in migratedDefinition)) {
+    migratedDefinition = {
+      ...migratedDefinition,
+      query_streams: [],
     };
     hasBeenMigrated = true;
   }

@@ -17,6 +17,19 @@ import * as i18n from '../translations';
 
 jest.mock('../hooks/use_show_eis_promotional_content');
 
+const mockToursIsEnabled = jest.fn(() => true);
+jest.mock('../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      notifications: {
+        tours: {
+          isEnabled: mockToursIsEnabled,
+        },
+      },
+    },
+  }),
+}));
+
 describe('EisTokenCostTour', () => {
   const promoId = 'tokenPromo';
   const dataId = `${promoId}-eis-costs-tour`;
@@ -31,12 +44,13 @@ describe('EisTokenCostTour', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockToursIsEnabled.mockReturnValue(true);
   });
 
   it('renders children only when promo is not visible', () => {
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: false,
-      onDismissTour: jest.fn(),
+      onDismissPromo: jest.fn(),
     });
 
     renderComponent();
@@ -51,7 +65,7 @@ describe('EisTokenCostTour', () => {
   it('renders children and does not render the tour when isReady is false', () => {
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: true, // would normally show the tour
-      onDismissTour: jest.fn(),
+      onDismissPromo: jest.fn(),
     });
 
     renderComponent({ isReady: false });
@@ -63,10 +77,26 @@ describe('EisTokenCostTour', () => {
     expect(screen.queryByTestId(dataId)).not.toBeInTheDocument();
   });
 
+  it('renders children and does not render the tour when tours is disabled', () => {
+    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+      isPromoVisible: true, // would normally show the tour
+      onDismissPromo: jest.fn(),
+    });
+    mockToursIsEnabled.mockReturnValue(false);
+
+    renderComponent();
+
+    // Child should be rendered
+    expect(screen.getByTestId(childTestId)).toBeInTheDocument();
+
+    // Tour should NOT be rendered
+    expect(screen.queryByTestId(dataId)).not.toBeInTheDocument();
+  });
+
   it('renders the tour when promo is visible', () => {
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissTour: jest.fn(),
+      onDismissPromo: jest.fn(),
     });
 
     renderComponent();
@@ -83,7 +113,7 @@ describe('EisTokenCostTour', () => {
 
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissTour: jest.fn(),
+      onDismissPromo: jest.fn(),
     });
 
     renderComponent({ ctaLink });
@@ -92,13 +122,13 @@ describe('EisTokenCostTour', () => {
 
     expect(ctaBtn).toBeInTheDocument();
     expect(ctaBtn).toHaveAttribute('href', ctaLink);
-    expect(ctaBtn).toHaveTextContent(i18n.EIS_TOUR_CTA);
+    expect(ctaBtn).toHaveTextContent(i18n.TOUR_CTA);
   });
 
   it('does not render CTA button when ctaLink is undefined', () => {
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissTour: jest.fn(),
+      onDismissPromo: jest.fn(),
     });
 
     renderComponent({ ctaLink: undefined });
@@ -109,7 +139,7 @@ describe('EisTokenCostTour', () => {
 
   it('removes the tour from DOM after clicking close, children remain', () => {
     let visible = true;
-    const mockOnDismissTour = jest.fn(() => {
+    const mockOnDismissPromo = jest.fn(() => {
       visible = false;
     });
 
@@ -117,7 +147,7 @@ describe('EisTokenCostTour', () => {
       get isPromoVisible() {
         return visible;
       },
-      onDismissTour: mockOnDismissTour,
+      onDismissPromo: mockOnDismissPromo,
     }));
 
     const { rerender } = renderComponent();
@@ -125,7 +155,7 @@ describe('EisTokenCostTour', () => {
     expect(screen.getByTestId(dataId)).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('tokenConsumptionCostTourCloseBtn'));
-    expect(mockOnDismissTour).toHaveBeenCalledTimes(1);
+    expect(mockOnDismissPromo).toHaveBeenCalledTimes(1);
 
     rerender(
       <EisTokenCostTour promoId={promoId} isCloudEnabled={true}>

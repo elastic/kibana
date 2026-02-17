@@ -18,11 +18,12 @@ import { FIELD_TYPES, getUseField } from '@kbn/es-ui-shared-plugin/static/forms/
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { i18n } from '@kbn/i18n';
 
-type Validations<T = string> = Array<ValidationConfig<FormData, string, T>>;
+type Validations<T = any> = Array<ValidationConfig<FormData, string, T>>;
 
-export interface CommonFieldSchema<T = string> {
+export interface CommonFieldSchema<T = any> {
   id: string;
   label: string;
+  labelAppend?: ReactNode;
   helpText?: string | ReactNode;
   isRequired?: boolean;
   type?: keyof typeof FIELD_TYPES;
@@ -30,7 +31,7 @@ export interface CommonFieldSchema<T = string> {
   validations?: Validations<T>;
 }
 
-export interface ConfigFieldSchema<T = string> extends CommonFieldSchema<T> {
+export interface ConfigFieldSchema<T = any> extends CommonFieldSchema<T> {
   isUrlField?: boolean;
   requireTld?: boolean;
   defaultValue?: T;
@@ -53,8 +54,9 @@ const UseTextField = getUseField({ component: Field });
 const UseComboBoxField = getUseField({ component: ComboBoxField });
 const { emptyField, urlField } = fieldValidators;
 
-const getFieldConfig = <T extends string | string[] = string>({
+const getFieldConfig = <T,>({
   label,
+  labelAppend,
   isRequired = true,
   isUrlField = false,
   requireTld = true,
@@ -63,6 +65,7 @@ const getFieldConfig = <T extends string | string[] = string>({
   validations = [],
 }: {
   label: string;
+  labelAppend?: ReactNode;
   isRequired?: boolean;
   isUrlField?: boolean;
   requireTld?: boolean;
@@ -71,6 +74,7 @@ const getFieldConfig = <T extends string | string[] = string>({
   validations?: Validations<T>;
 }) => ({
   label,
+  labelAppend,
   validations: [
     ...(isRequired
       ? [
@@ -125,6 +129,7 @@ const FormRow: React.FC<FormRowProps> = ({
   isPasswordField,
   isRequired = true,
   isUrlField,
+  labelAppend,
   helpText,
   defaultValue,
   euiFieldProps = {},
@@ -149,6 +154,7 @@ const FormRow: React.FC<FormRowProps> = ({
                 isRequired,
                 requireTld,
                 validations,
+                labelAppend,
               })}
               helpText={helpText}
               componentProps={{
@@ -163,7 +169,7 @@ const FormRow: React.FC<FormRowProps> = ({
           ) : (
             <UseField
               path={id}
-              config={getFieldConfig({ label, type, isRequired, validations })}
+              config={getFieldConfig({ label, type, isRequired, validations, labelAppend })}
               helpText={helpText}
               component={PasswordField}
               componentProps={{

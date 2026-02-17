@@ -15,6 +15,7 @@ import { css } from '@emotion/react';
 
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
+import { NewItemIndicator } from '../new_item_indicator';
 
 interface MenuItemBaseProps {
   children: ReactNode;
@@ -24,6 +25,7 @@ interface MenuItemBaseProps {
   isHighlighted: boolean;
   isHorizontal?: boolean;
   isLabelVisible?: boolean;
+  isNew?: boolean;
   isTruncated?: boolean;
 }
 
@@ -56,6 +58,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       isCurrent = false,
       isHighlighted,
       isLabelVisible = true,
+      isNew = false,
       isTruncated = true,
       ...props
     },
@@ -99,7 +102,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         border-radius: ${euiTheme.border.radius.medium};
         background-color: ${isHighlighted
           ? euiTheme.components.buttons.backgroundPrimary
-          : euiTheme.components.buttons.backgroundText};
+          : euiTheme.colors.backgroundTransparent};
         z-index: 1;
       }
 
@@ -147,7 +150,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
           `);
 
     const textStyles = css`
-      ${euiFontSize(euiThemeContext, 'xxs', { unit: 'px' }).fontSize};
+      ${euiFontSize(euiThemeContext, 'xxs', { unit: 'px' })};
       font-weight: ${euiTheme.font.weight.semiBold};
     `;
 
@@ -165,9 +168,10 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
           <Suspense fallback={<EuiIcon aria-hidden color="currentColor" type="empty" />}>
             <EuiIcon aria-hidden color="currentColor" type={iconType || 'empty'} />
           </Suspense>
+          {isNew && <NewItemIndicator isHighlighted={isHighlighted} />}
         </div>
         {isLabelVisible ? (
-          <EuiText size="xs" textAlign="center" css={labelStyles}>
+          <EuiText textAlign="center" css={labelStyles}>
             {children}
           </EuiText>
         ) : (

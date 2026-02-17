@@ -20,6 +20,7 @@ project:
 dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/dev-tools-plugin'
+  - '@kbn/workflows'
 tags:
   - shared-common
   - package

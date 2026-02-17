@@ -38,6 +38,7 @@ interface TabRuntimeState {
   scopedProfilesManager: ScopedProfilesManager;
   scopedEbtManager: ScopedDiscoverEBTManager;
   currentDataView: DataView;
+  unsubscribeFn: (() => void) | undefined;
 }
 
 type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
@@ -52,10 +53,12 @@ export type RuntimeStateManager = ReactiveRuntimeState<DiscoverRuntimeState> & {
   tabs: { byId: Record<string, ReactiveTabRuntimeState> };
 };
 
-export const createRuntimeStateManager = (): RuntimeStateManager => ({
-  adHocDataViews$: new BehaviorSubject<DataView[]>([]),
-  tabs: { byId: {} },
-});
+export const createRuntimeStateManager = (): RuntimeStateManager => {
+  return {
+    adHocDataViews$: new BehaviorSubject<DataView[]>([]),
+    tabs: { byId: {} },
+  };
+};
 
 export type InitialUnifiedHistogramLayoutProps = Pick<
   UnifiedHistogramPartialLayoutProps,
@@ -94,6 +97,7 @@ export const createTabRuntimeState = ({
     ),
     scopedEbtManager$: new BehaviorSubject(scopedEbtManager),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
+    unsubscribeFn$: new BehaviorSubject<TabRuntimeState['unsubscribeFn']>(undefined),
   };
 };
 
@@ -127,8 +131,6 @@ export const selectTabRuntimeInternalState = (
 
   return {
     serializedSearchSource: savedSearch.searchSource.getSerializedFields(),
-    visContext: savedSearch.visContext,
-    controlGroupJson: savedSearch.controlGroupJson,
     ...(dataRequestParams.isSearchSessionRestored
       ? { searchSessionId: dataRequestParams.searchSessionId }
       : {}),

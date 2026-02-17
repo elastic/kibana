@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { MaintenanceWindow } from '../server/application/types';
+
 export type {
   MaintenanceWindowModificationMetadata,
   DateRange,
@@ -33,6 +35,8 @@ export {
   MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE,
 } from './constants';
 
+export type MaintenanceWindowUI = Omit<MaintenanceWindow, 'schedule' | 'scope'>;
+
 export {
   getScopedQueryErrorMessage,
   isScopedQueryError,
@@ -55,6 +59,7 @@ export const INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH =
   `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/_active` as const;
 
 // External
+export const BASE_ALERTING_API_PATH = '/api/alerting';
 export const BASE_MAINTENANCE_WINDOW_API_PATH = '/api/maintenance_window';
 export const ARCHIVE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}/_archive`;
 export const UNARCHIVE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}/_unarchive`;

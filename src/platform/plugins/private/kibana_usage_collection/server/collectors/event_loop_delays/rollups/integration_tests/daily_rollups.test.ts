@@ -111,8 +111,8 @@ describe.skip(`daily rollups integration test`, () => {
   });
 
   afterAll(async () => {
-    await esServer.stop();
-    await root.shutdown();
+    await root?.shutdown();
+    await esServer?.stop();
   });
 
   it('deletes documents older that 3 days from the saved objects repository', async () => {

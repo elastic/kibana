@@ -12,10 +12,11 @@ import { useBreadcrumbs } from '../../../../hooks';
 import { NoEprCallout } from '../../components/no_epr_callout';
 import { categoryExists } from '../home';
 
-import { PackageGrid } from './components/package_grid';
+import { ResponsivePackageGrid } from './components/responsive_package_grid';
 import { SearchAndFiltersBar } from './components/search_and_filters_bar';
 import { Sidebar } from './components/side_bar';
 import { useBrowseIntegrationHook } from './hooks';
+import { NoDataPrompt } from './components/no_data_prompt';
 
 export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: boolean }> = ({
   prereleaseIntegrationsEnabled,
@@ -36,8 +37,6 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    searchTerm,
-    setSearchTerm,
     setUrlandReplaceHistory,
     filteredCards,
     onCategoryChange,
@@ -45,7 +44,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
 
   if (!isLoading && !categoryExists(initialSelectedCategory, allCategories)) {
     setUrlandReplaceHistory({
-      searchString: searchTerm,
+      searchString: '',
       categoryId: '',
       subCategoryId: '',
       onlyAgentless: onlyAgentlessFilter,
@@ -79,7 +78,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
       />
       <EuiFlexItem grow={5}>
         <EuiFlexGroup direction="column" gutterSize="none">
-          <SearchAndFiltersBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+          <SearchAndFiltersBar />
           {noEprCallout ? noEprCallout : null}
           <EuiFlexItem
             grow={1}
@@ -89,12 +88,16 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
               backgroundColor: euiTheme.euiTheme.colors.backgroundBasePlain,
             }}
           >
-            <PackageGrid
-              items={filteredCards}
-              isLoading={
-                isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations
-              }
-            />
+            {filteredCards.length === 0 && !isLoading ? (
+              <NoDataPrompt />
+            ) : (
+              <ResponsivePackageGrid
+                items={filteredCards}
+                isLoading={
+                  isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations
+                }
+              />
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

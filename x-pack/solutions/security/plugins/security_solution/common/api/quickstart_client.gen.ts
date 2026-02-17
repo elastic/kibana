@@ -113,6 +113,18 @@ import type {
   SearchUnifiedAlertsRequestBodyInput,
   SearchUnifiedAlertsResponse,
 } from './detection_engine/unified_alerts/search/search_route.gen';
+import type {
+  SetUnifiedAlertsAssigneesRequestBodyInput,
+  SetUnifiedAlertsAssigneesResponse,
+} from './detection_engine/unified_alerts/set_alert_assignees/set_alert_assignees_route.gen';
+import type {
+  SetUnifiedAlertsTagsRequestBodyInput,
+  SetUnifiedAlertsTagsResponse,
+} from './detection_engine/unified_alerts/set_alert_tags/set_alert_tags_route.gen';
+import type {
+  SetUnifiedAlertsWorkflowStatusRequestBodyInput,
+  SetUnifiedAlertsWorkflowStatusResponse,
+} from './detection_engine/unified_alerts/set_workflow_status/set_workflow_status_route.gen';
 import type { SuggestUserProfilesRequestQueryInput } from './detection_engine/users/suggest_user_profiles_route.gen';
 import type { EndpointFileDownloadRequestParamsInput } from './endpoint/actions/file_download/file_download.gen';
 import type {
@@ -2896,6 +2908,60 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Assign users to detection and attack alerts, and unassign them from alerts.
+> info
+> You cannot add and remove the same assignee in the same request.
+
+    */
+  async setUnifiedAlertsAssignees(props: SetUnifiedAlertsAssigneesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SetUnifiedAlertsAssignees`);
+    return this.kbnClient
+      .request<SetUnifiedAlertsAssigneesResponse>({
+        path: '/internal/detection_engine/unified_alerts/assignees',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Add tags to detection and attack alerts, and remove them from alerts.
+> info
+> You cannot add and remove the same alert tag in the same request.
+
+    */
+  async setUnifiedAlertsTags(props: SetUnifiedAlertsTagsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SetUnifiedAlertsTags`);
+    return this.kbnClient
+      .request<SetUnifiedAlertsTagsResponse>({
+        path: '/internal/detection_engine/unified_alerts/tags',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Set the workflow status of one or more detection and attack alerts by IDs.
+   */
+  async setUnifiedAlertsWorkflowStatus(props: SetUnifiedAlertsWorkflowStatusProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SetUnifiedAlertsWorkflowStatus`);
+    return this.kbnClient
+      .request<SetUnifiedAlertsWorkflowStatusResponse>({
+        path: '/internal/detection_engine/unified_alerts/workflow_status',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Starts a SIEM dashboards migration using the migration id provided
    */
   async startDashboardsMigration(props: StartDashboardsMigrationProps) {
@@ -3594,6 +3660,15 @@ export interface SetAlertsStatusProps {
 }
 export interface SetAlertTagsProps {
   body: SetAlertTagsRequestBodyInput;
+}
+export interface SetUnifiedAlertsAssigneesProps {
+  body: SetUnifiedAlertsAssigneesRequestBodyInput;
+}
+export interface SetUnifiedAlertsTagsProps {
+  body: SetUnifiedAlertsTagsRequestBodyInput;
+}
+export interface SetUnifiedAlertsWorkflowStatusProps {
+  body: SetUnifiedAlertsWorkflowStatusRequestBodyInput;
 }
 export interface StartDashboardsMigrationProps {
   params: StartDashboardsMigrationRequestParamsInput;

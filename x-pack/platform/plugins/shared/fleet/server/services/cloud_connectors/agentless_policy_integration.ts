@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
+import type { PackageInfo } from '../../../common/types';
 import type { AgentPolicy, NewPackagePolicy } from '../../types';
 import { CloudConnectorCreateError } from '../../errors';
 import { cloudConnectorService } from '../cloud_connector';
@@ -17,7 +18,6 @@ import {
   getCloudConnectorNameFromPackagePolicy,
   extractAccountType,
 } from './integration_helpers';
-import { incrementCloudConnectorPackageCount } from './lifecycle';
 
 /**
  * Result of cloud connector integration with a package policy
@@ -50,6 +50,7 @@ export async function createAndIntegrateCloudConnector(params: {
   packagePolicy: NewPackagePolicy;
   agentPolicy: AgentPolicy;
   policyName: string;
+  packageInfo: PackageInfo;
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -59,6 +60,7 @@ export async function createAndIntegrateCloudConnector(params: {
     packagePolicy,
     agentPolicy,
     policyName,
+    packageInfo,
     soClient,
     esClient,
     logger,
@@ -101,9 +103,6 @@ export async function createAndIntegrateCloudConnector(params: {
         );
       }
 
-      // Increment the usage count
-      await incrementCloudConnectorPackageCount(soClient, existingCloudConnectorId, logger);
-
       logger.info(`Successfully reused cloud connector: ${existingCloudConnectorId}`);
 
       return {
@@ -125,6 +124,7 @@ export async function createAndIntegrateCloudConnector(params: {
   const cloudConnectorVars = await extractAndCreateCloudConnectorSecrets(
     cloudProvider,
     updatedPackagePolicy,
+    packageInfo,
     esClient,
     logger
   );
@@ -140,10 +140,15 @@ export async function createAndIntegrateCloudConnector(params: {
   // otherwise extract from package policy or generate default
   const cloudConnectorName =
     providedCloudConnectorName ||
-    getCloudConnectorNameFromPackagePolicy(updatedPackagePolicy, cloudProvider, policyName);
+    getCloudConnectorNameFromPackagePolicy(
+      updatedPackagePolicy,
+      cloudProvider,
+      policyName,
+      packageInfo
+    );
 
   // Extract account type from package policy vars
-  const accountType = extractAccountType(cloudProvider, updatedPackagePolicy);
+  const accountType = extractAccountType(cloudProvider, updatedPackagePolicy, packageInfo);
 
   try {
     const cloudConnector = await cloudConnectorService.create(soClient, {
@@ -160,7 +165,8 @@ export async function createAndIntegrateCloudConnector(params: {
     updatedPackagePolicy = updatePackagePolicyWithCloudConnectorSecrets(
       updatedPackagePolicy,
       cloudConnectorVars,
-      cloudProvider
+      cloudProvider,
+      packageInfo
     );
 
     // Set cloud connector ID on package policy

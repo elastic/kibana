@@ -1,0 +1,16 @@
+{
+  "10.2.0": [
+    {
+      "featurePromptOverride": "string?",
+      "significantEventsPromptOverride": "string?",
+      "descriptionPromptOverride": "string?"
+    }
+  ],
+  "10.3.0": [
+    {
+      "featurePromptOverride": "string?",
+      "significantEventsPromptOverride": "string?",
+      "descriptionPromptOverride": "string?"
+    }
+  ]
+}

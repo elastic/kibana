@@ -34,7 +34,7 @@ import {
 import { fromMetricAPItoLensState } from '../../columns/metric';
 import { fromBucketLensApiToLensState } from '../../columns/buckets';
 import { fromColorMappingAPIToLensState } from '../../coloring';
-import type { AnyMetricLensStateColumn } from '../../columns/types';
+import { processMetricColumnsWithReferences } from '../utils';
 
 const X_ACCESSOR = 'x';
 const BREAKDOWN_ACCESSOR = 'breakdown';
@@ -84,7 +84,7 @@ function buildDataLayer(layer: DataLayerType, i: number): XYDataLayerConfig {
     ...(layer.x ? { xAccessor: getAccessorNameForXY(layer, X_ACCESSOR) } : {}),
     ...(meaningFulYConfig.length ? { yConfig: meaningFulYConfig } : {}),
     ...(layer.breakdown_by
-      ? { splitAccessor: getAccessorNameForXY(layer, BREAKDOWN_ACCESSOR) }
+      ? { splitAccessors: [getAccessorNameForXY(layer, BREAKDOWN_ACCESSOR)] }
       : {}),
     ...(layer.breakdown_by && 'collapse_by' in layer.breakdown_by
       ? { collapseFn: layer.breakdown_by.collapse_by }
@@ -118,7 +118,7 @@ function buildAnnotationLayer(
           outside: annotation.fill === 'outside',
           color: annotation.color?.color,
           label: annotation.label ?? 'Event',
-          ...(annotation.hidden != null ? { hidden: annotation.hidden } : {}),
+          ...(annotation.hidden != null ? { isHidden: annotation.hidden } : {}),
         };
       }
       if (annotation.type === 'point') {
@@ -131,8 +131,13 @@ function buildAnnotationLayer(
           },
           color: annotation.color?.color,
           label: annotation.label ?? 'Event',
-          ...(annotation.hidden != null ? { hidden: annotation.hidden } : {}),
+          ...(annotation.hidden != null ? { isHidden: annotation.hidden } : {}),
           ...(annotation.text != null ? { textVisibility: annotation.text === 'label' } : {}),
+          ...(annotation.icon ? { icon: annotation.icon } : {}),
+          ...(annotation.line?.stroke_width != null
+            ? { lineWidth: annotation.line.stroke_width }
+            : {}),
+          ...(annotation.line?.stroke_dash ? { lineStyle: annotation.line.stroke_dash } : {}),
         };
       }
       return {
@@ -141,13 +146,18 @@ function buildAnnotationLayer(
         filter: { type: 'kibana_query', ...annotation.query },
         label: annotation.label ?? 'Event',
         color: annotation.color?.color,
-        ...(annotation.hidden != null ? { hidden: annotation.hidden } : {}),
+        ...(annotation.hidden != null ? { isHidden: annotation.hidden } : {}),
         timeField: annotation.time_field,
         ...(annotation.extra_fields ? { extraFields: annotation.extra_fields } : {}),
         ...(annotation.text != null ? { textVisibility: annotation.text === 'label' } : {}),
         ...(typeof annotation.text !== 'string' && annotation.text?.type === 'field'
           ? { textField: annotation.text.field }
           : {}),
+        ...(annotation.icon ? { icon: annotation.icon } : {}),
+        ...(annotation.line?.stroke_width != null
+          ? { lineWidth: annotation.line.stroke_width }
+          : {}),
+        ...(annotation.line?.stroke_dash ? { lineStyle: annotation.line.stroke_dash } : {}),
         key: {
           type: 'point_in_time',
         },
@@ -221,23 +231,11 @@ export function buildFormBasedXYLayer(layer: unknown, i: number) {
   if (isAPIDataLayer(layer)) {
     // convert metrics in buckets, do not flat yet
     const yColumnsConverted = layer.y.map(fromMetricAPItoLensState);
-    const yColumnsWithIds: Array<{ column: AnyMetricLensStateColumn; id: string }> = [];
-    // now fix the ids of referenced columns
-    for (const [index, convertedColumns] of Object.entries(yColumnsConverted)) {
-      const [mainMetric, refMetric] = convertedColumns;
-      const id = getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, Number(index));
-      yColumnsWithIds.push({ column: mainMetric, id });
-      if (refMetric) {
-        // Use a different format for reference column ids
-        // as visualization doesn't know about them, so wrong id could be generated on that side
-        const refId = getAccessorNameForXY(layer, `${METRIC_ACCESSOR_PREFIX}_ref`, Number(index));
-        // rewrite the mainMetric reference id to match the newly generated one
-        if ('references' in mainMetric && Array.isArray(mainMetric.references)) {
-          mainMetric.references = [refId];
-        }
-        yColumnsWithIds.push({ column: refMetric, id: refId });
-      }
-    }
+    const yColumnsWithIds = processMetricColumnsWithReferences(
+      yColumnsConverted,
+      (index) => getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index),
+      (index) => getAccessorNameForXY(layer, `${METRIC_ACCESSOR_PREFIX}_ref`, index)
+    );
     const xColumns = layer.x ? fromBucketLensApiToLensState(layer.x, yColumnsWithIds) : undefined;
     const breakdownColumns = layer.breakdown_by
       ? fromBucketLensApiToLensState(layer.breakdown_by, yColumnsWithIds)

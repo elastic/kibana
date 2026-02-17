@@ -12,5 +12,7 @@ export type {
   GridData,
   SavedDashboardPanel,
   SavedDashboardSection,
+  StoredControlState,
+  StoredControlGroupInput,
 } from './latest';
 export { dashboardSavedObjectSchema } from './latest';

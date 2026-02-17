@@ -48,6 +48,8 @@ dependsOn:
   - '@kbn/ai-agent-confirmation-modal'
   - '@kbn/product-doc-common'
   - '@kbn/react-kibana-mount'
+  - '@kbn/agent-builder-common'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -59,6 +61,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
 tasks:
   jest:

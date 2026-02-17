@@ -8,9 +8,10 @@
 import React, { useEffect } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleForm, useRuleTemplate } from '@kbn/response-ops-rule-form';
-import { AlertConsumers, getRuleDetailsRoute } from '@kbn/rule-data-utils';
-import { useLocation, useParams } from 'react-router-dom';
+import { AlertConsumers, getRuleDetailsRoute, getRulesAppDetailsRoute } from '@kbn/rule-data-utils';
+import { useLocation, useParams, useHistory } from 'react-router-dom';
 import { useKibana } from '../../../common/lib/kibana';
+import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
 import { RuleTemplateError } from './components/rule_template_error';
@@ -35,8 +36,11 @@ export const RuleFormRoute = () => {
     setBreadcrumbs,
     ...startServices
   } = useKibana().services;
+  const { navigateToApp, getUrlForApp } = application;
+  const useUnifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
 
   const location = useLocation<{ returnApp?: string; returnPath?: string }>();
+  const history = useHistory();
   const {
     id,
     ruleTypeId: ruleTypeIdParams,
@@ -64,22 +68,26 @@ export const RuleFormRoute = () => {
 
   // Set breadcrumb and page title
   useEffect(() => {
+    const rulesBreadcrumb = getAlertingSectionBreadcrumb('rules', true);
+    const breadcrumbHref = useUnifiedRulesPage
+      ? getUrlForApp('rules', { path: '/' })
+      : getUrlForApp('management', { path: 'insightsAndAlerting/triggersActions/rules' });
+
+    const rulesBreadcrumbWithAppPath = {
+      ...rulesBreadcrumb,
+      href: breadcrumbHref,
+    };
+
     if (id) {
-      setBreadcrumbs([
-        getAlertingSectionBreadcrumb('rules', true),
-        getAlertingSectionBreadcrumb('editRule'),
-      ]);
+      setBreadcrumbs([rulesBreadcrumbWithAppPath, getAlertingSectionBreadcrumb('editRule')]);
       chrome.docTitle.change(getCurrentDocTitle('editRule'));
     }
     if (ruleTypeId || templateId) {
-      setBreadcrumbs([
-        getAlertingSectionBreadcrumb('rules', true),
-        getAlertingSectionBreadcrumb('createRule'),
-      ]);
+      setBreadcrumbs([rulesBreadcrumbWithAppPath, getAlertingSectionBreadcrumb('createRule')]);
       chrome.docTitle.change(getCurrentDocTitle('createRule'));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ruleTypeId, templateId]);
+  }, [ruleTypeId, templateId, id, getUrlForApp, useUnifiedRulesPage]);
 
   if (isLoadingRuleTemplate) {
     return <CenterJustifiedSpinner />;
@@ -112,18 +120,30 @@ export const RuleFormRoute = () => {
         id={id}
         ruleTypeId={ruleTypeId}
         onCancel={() => {
-          if (returnApp && returnPath) {
-            application.navigateToApp(returnApp, { path: returnPath });
+          if (useUnifiedRulesPage) {
+            history.push(returnPath || '/');
+          } else if (returnApp && returnPath) {
+            navigateToApp(returnApp, { path: returnPath });
           } else {
-            application.navigateToApp('management', {
+            navigateToApp('management', {
               path: `insightsAndAlerting/triggersActions/rules`,
             });
           }
         }}
         onSubmit={(ruleId) => {
-          application.navigateToApp('management', {
-            path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(ruleId)}`,
-          });
+          if (useUnifiedRulesPage) {
+            if (id && returnPath) {
+              history.push(returnPath);
+            } else {
+              history.push(getRulesAppDetailsRoute(ruleId));
+            }
+          } else if (returnApp && returnPath) {
+            navigateToApp(returnApp, { path: returnPath });
+          } else {
+            navigateToApp('management', {
+              path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(ruleId)}`,
+            });
+          }
         }}
         multiConsumerSelection={AlertConsumers.ALERTS}
       />

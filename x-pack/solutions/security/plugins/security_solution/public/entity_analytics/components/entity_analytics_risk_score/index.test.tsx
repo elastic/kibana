@@ -111,6 +111,62 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
       expect(queryByTestId(`enable_risk_score`)).not.toBeInTheDocument();
     });
 
+    it('renders no data detected component when engine is installed, no severity filter, and data is empty', () => {
+      mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+      mockUseRiskScore.mockReturnValue({
+        ...defaultProps,
+        hasEngineBeenInstalled: true,
+        data: [],
+      });
+      mockUseRiskScoreKpi.mockReturnValue({
+        severityCount: mockSeverityCount,
+        loading: false,
+      });
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <EntityAnalyticsRiskScores riskEntity={riskEntity} />
+        </TestProviders>
+      );
+
+      expect(getByTestId(`${riskEntity}-risk-score-no-data-detected`)).toBeInTheDocument();
+    });
+
+    it('does not render no data detected when data exists', () => {
+      mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+      const data = [
+        {
+          '@timestamp': '1234567899',
+          [riskEntity]: {
+            name: 'testName',
+            risk: {
+              rule_risks: [],
+              calculated_level: RiskSeverity.High,
+              calculated_score_norm: 75,
+              multipliers: [],
+            },
+          },
+        },
+      ];
+      mockUseRiskScore.mockReturnValue({
+        ...defaultProps,
+        hasEngineBeenInstalled: true,
+        data,
+      });
+      mockUseRiskScoreKpi.mockReturnValue({
+        severityCount: mockSeverityCount,
+        loading: false,
+      });
+
+      const { queryByTestId } = render(
+        <TestProviders>
+          <EntityAnalyticsRiskScores riskEntity={riskEntity} />
+        </TestProviders>
+      );
+
+      expect(queryByTestId(`${riskEntity}-risk-score-no-data-detected`)).not.toBeInTheDocument();
+    });
+
     it('queries when toggleStatus is true', () => {
       mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
       render(

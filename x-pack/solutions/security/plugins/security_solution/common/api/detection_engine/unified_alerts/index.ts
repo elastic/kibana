@@ -6,3 +6,6 @@
  */
 
 export * from './search/search_route.gen';
+export * from './set_workflow_status/set_workflow_status_route.gen';
+export * from './set_alert_tags/set_alert_tags_route.gen';
+export * from './set_alert_assignees/set_alert_assignees_route.gen';

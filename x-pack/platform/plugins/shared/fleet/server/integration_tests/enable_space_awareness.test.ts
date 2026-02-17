@@ -7,7 +7,7 @@
 
 import Path from 'path';
 
-import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { type MockedLogger, loggerMock } from '@kbn/logging-mocks';
 
 import {
@@ -16,7 +16,6 @@ import {
   createRootWithCorePlugins,
   createTestServers,
 } from '@kbn/core-test-helpers-kbn-server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -37,21 +36,6 @@ import {
 import { useDockerRegistry, waitForFleetSetup } from './helpers';
 
 const logFilePath = Path.join(__dirname, 'logs.log');
-
-const fakeRequest = {
-  headers: {},
-  getBasePath: () => '',
-  path: '/',
-  route: { settings: {} },
-  url: {
-    href: '/',
-  },
-  raw: {
-    req: {
-      url: '/',
-    },
-  },
-} as unknown as KibanaRequest;
 
 describe('enableSpaceAwareness', () => {
   let esServer: TestElasticsearchUtils;
@@ -152,9 +136,7 @@ describe('enableSpaceAwareness', () => {
   let logger: MockedLogger;
 
   beforeAll(async () => {
-    soClient = kbnServer.coreStart.savedObjects.getScopedClient(fakeRequest, {
-      excludedExtensions: [SECURITY_EXTENSION_ID],
-    });
+    soClient = kbnServer.coreStart.savedObjects.getUnsafeInternalClient();
     logger = loggerMock.create();
     appContextService.getLogger = () => logger;
 
@@ -169,6 +151,7 @@ describe('enableSpaceAwareness', () => {
           schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
           revision: 1,
           updated_at: new Date().toISOString(),
+          namespace: 'default',
         },
       })),
       {

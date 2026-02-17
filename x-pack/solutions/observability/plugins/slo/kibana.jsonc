@@ -30,6 +30,7 @@
       "presentationUtil",
       "ruleRegistry",
       "share",
+      "sloShared",
       "taskManager",
       "triggersActionsUi",
       "uiActions",
@@ -49,7 +50,6 @@
       "spaces"
     ],
     "requiredBundles": [
-      "controls",
       "embeddable",
       "ingestPipelines",
       "kibanaReact",

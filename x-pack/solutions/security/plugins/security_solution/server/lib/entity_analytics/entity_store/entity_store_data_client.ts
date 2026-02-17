@@ -84,6 +84,7 @@ import {
   startEntityStoreSnapshotTask,
   removeEntityStoreSnapshotTask,
   getEntityStoreSnapshotTaskState,
+  getDataViewRefreshTaskId,
 } from './tasks';
 import {
   createEntityIndex,
@@ -555,6 +556,21 @@ export class EntityStoreDataClient {
         logger,
         taskManager,
       });
+
+      try {
+        await taskManager.runSoon(getDataViewRefreshTaskId(namespace));
+      } catch (e) {
+        if (e.message?.includes('as it is currently running')) {
+          this.log(
+            `debug`,
+            entityType,
+            `Data view refresh task already running for namespace ${namespace}, skipping runSoon`
+          );
+        } else {
+          throw e;
+        }
+      }
+
       this.log(`debug`, entityType, `Started entity store data view refresh task`);
 
       // this task will create daily snapshots for the historical view

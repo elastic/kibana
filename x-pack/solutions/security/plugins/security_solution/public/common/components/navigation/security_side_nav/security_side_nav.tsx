@@ -13,7 +13,7 @@ import {
   type SolutionSideNavItem,
 } from '@kbn/security-solution-side-nav';
 import useObservable from 'react-use/lib/useObservable';
-import { ATTACKS_ALERTS_ALIGNMENT_ENABLED } from '../../../../../common/constants';
+import { ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING } from '../../../../../common/constants';
 import { SecurityPageName } from '../../../../app/types';
 import type { NavigationLink } from '../../../links';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
@@ -135,19 +135,19 @@ const usePanelBottomOffset = (): string | undefined => {
  * It takes the links to render from the generic application `links` configs.
  */
 export const SecuritySideNav: React.FC = () => {
-  const { featureFlags } = useKibana().services;
+  const { uiSettings } = useKibana().services;
   const items = useSolutionSideNavItems();
   const selectedId = useSelectedId();
   const panelTopOffset = usePanelTopOffset();
   const panelBottomOffset = usePanelBottomOffset();
 
   const categories = useMemo(() => {
-    const attacksAlertsAlignmentEnabled = featureFlags.getBooleanValue(
-      ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+    const enableAlertsAndAttacksAlignment = uiSettings.get(
+      ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
       false
     );
-    return getNavCategories(attacksAlertsAlignmentEnabled);
-  }, [featureFlags]);
+    return getNavCategories(enableAlertsAndAttacksAlignment);
+  }, [uiSettings]);
 
   if (!items) {
     return <EuiLoadingSpinner size="m" data-test-subj="sideNavLoader" />;

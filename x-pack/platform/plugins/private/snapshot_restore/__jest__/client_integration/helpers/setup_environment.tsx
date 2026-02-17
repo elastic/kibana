@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import './mocks';
+
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { merge } from 'lodash';
 import type { LocationDescriptorObject } from 'history';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { HttpSetup } from '@kbn/core/public';
@@ -21,6 +24,7 @@ import {
 import type { Authorization, Privileges } from '../../../public/shared_imports';
 import { AuthorizationContext, GlobalFlyout } from '../../../public/shared_imports';
 import { AppContextProvider } from '../../../public/application/app_context';
+import type { AppDependencies } from '../../../public/application/app_context';
 import { textService } from '../../../public/application/services/text';
 import { init as initHttpRequests } from './http_requests';
 import { UiMetricService } from '../../../public/application/services';
@@ -31,6 +35,13 @@ history.createHref.mockImplementation((location: LocationDescriptorObject) => {
   return `${location.pathname}?${location.search}`;
 });
 
+interface WorkerStub {
+  postMessage: (...args: unknown[]) => void;
+  terminate: () => void;
+}
+
+type WorkerConstructor = new (...args: unknown[]) => WorkerStub;
+
 const createAuthorizationContextValue = (privileges: Privileges) => {
   return {
     isLoading: false,
@@ -38,24 +49,26 @@ const createAuthorizationContextValue = (privileges: Privileges) => {
   } as Authorization;
 };
 
+const core = coreMock.createStart();
+
 export const services = {
   uiMetricService: new UiMetricService('snapshot_restore'),
   httpService,
   i18n,
   history,
+  uiSettings: core.uiSettings,
+  settings: core.settings,
 };
 
 setUiMetricService(services.uiMetricService);
 
-const core = coreMock.createStart();
-
-const appDependencies = {
+const baseAppContextDependencies: AppDependencies = {
   core,
   services,
   config: {
     slm_ui: { enabled: true },
+    ui: { enabled: true },
   },
-  plugins: {},
 };
 
 const kibanaContextDependencies = {
@@ -75,31 +88,45 @@ export const setupEnvironment = () => {
 /**
  * Suppress error messages about Worker not being available in JS DOM.
  */
-(window as any).Worker = function Worker() {
-  this.postMessage = () => {};
-  this.terminate = () => {};
-};
+const WorkerMock = function Worker(this: WorkerStub) {
+  this.postMessage = () => undefined;
+  this.terminate = () => undefined;
+} as unknown as WorkerConstructor;
+
+(window as unknown as { Worker: WorkerConstructor }).Worker = WorkerMock;
 
 export const WithAppDependencies =
-  (Comp: any, httpSetup?: HttpSetup, { privileges, ...overrides }: Record<string, unknown> = {}) =>
-  (props: any) => {
-    // We need to optionally setup the httpService since some cit helpers (such as snapshot_list.helpers)
-    // use jest mocks to stub the fetch hooks instead of mocking api responses.
+  <P extends object>(
+    Comp: React.ComponentType<P>,
+    httpSetup?: HttpSetup,
+    { privileges, ...overrides }: Record<string, unknown> = {}
+  ) =>
+  (props: P) => {
+    // We need to optionally setup the httpService since some tests use jest mocks
+    // to stub the fetch hooks instead of mocking API responses.
     if (httpSetup) {
       httpService.setup(httpSetup);
     }
 
+    const appContextValue = merge(
+      {},
+      baseAppContextDependencies,
+      overrides
+    ) as unknown as AppDependencies;
+
     return (
-      <AuthorizationContext.Provider
-        value={createAuthorizationContextValue(privileges as Privileges)}
-      >
-        <KibanaContextProvider services={kibanaContextDependencies}>
-          <AppContextProvider value={merge(appDependencies, overrides) as any}>
-            <GlobalFlyoutProvider>
-              <Comp {...props} />
-            </GlobalFlyoutProvider>
-          </AppContextProvider>
-        </KibanaContextProvider>
-      </AuthorizationContext.Provider>
+      <I18nProvider>
+        <AuthorizationContext.Provider
+          value={createAuthorizationContextValue(privileges as Privileges)}
+        >
+          <KibanaContextProvider services={kibanaContextDependencies}>
+            <AppContextProvider value={appContextValue}>
+              <GlobalFlyoutProvider>
+                <Comp {...props} />
+              </GlobalFlyoutProvider>
+            </AppContextProvider>
+          </KibanaContextProvider>
+        </AuthorizationContext.Provider>
+      </I18nProvider>
     );
   };

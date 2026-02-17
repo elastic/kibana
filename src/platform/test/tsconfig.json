@@ -41,7 +41,6 @@
     "@kbn/std",
     "@kbn/test-subj-selector",
     "@kbn/rison",
-    "@kbn/controls-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/axe-config",
     "@kbn/data-view-field-editor-plugin",
@@ -77,6 +76,7 @@
     "@kbn/ai-assistant-management-plugin",
     "@kbn/setup-node-env",
     "@kbn/visualizations-common",
-    "@kbn/unified-data-table"
+    "@kbn/unified-data-table",
+    "@kbn/session-notifications-plugin"
   ]
 }

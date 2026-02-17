@@ -12,7 +12,7 @@ import React, { useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { SLI_OPTIONS } from '../constants';
 import { useUnregisterFields } from '../hooks/use_unregister_fields';
-import type { CreateSLOForm } from '../types';
+import type { CreateSLOForm, FormSettings } from '../types';
 import { MAX_WIDTH } from '../constants';
 import { ApmAvailabilityIndicatorTypeForm } from './indicator_section/apm_availability/apm_availability_indicator_type_form';
 import { ApmLatencyIndicatorTypeForm } from './indicator_section/apm_latency/apm_latency_indicator_type_form';
@@ -23,14 +23,22 @@ import { SyntheticsAvailabilityIndicatorTypeForm } from './indicator_section/syn
 import { TimesliceMetricIndicatorTypeForm } from './indicator_section/timeslice_metric/timeslice_metric_indicator';
 
 interface SloEditFormIndicatorSectionProps {
-  isEditMode: boolean;
+  formSettings: FormSettings;
 }
 
-export function SloEditFormIndicatorSection({ isEditMode }: SloEditFormIndicatorSectionProps) {
+export function SloEditFormIndicatorSection({ formSettings }: SloEditFormIndicatorSectionProps) {
+  const { isEditMode = false, allowedIndicatorTypes = [] } = formSettings;
   const { control, watch } = useFormContext<CreateSLOForm>();
   useUnregisterFields({ isEditMode });
 
   const indicatorType = watch('indicator.type');
+
+  const filteredSliOptions = useMemo(() => {
+    if (allowedIndicatorTypes.length === 0) {
+      return SLI_OPTIONS;
+    }
+    return SLI_OPTIONS.filter((option) => allowedIndicatorTypes.includes(option.value));
+  }, [allowedIndicatorTypes]);
 
   const indicatorTypeForm = useMemo(() => {
     switch (indicatorType) {
@@ -73,7 +81,7 @@ export function SloEditFormIndicatorSection({ isEditMode }: SloEditFormIndicator
                   {...field}
                   required
                   data-test-subj="sloFormIndicatorTypeSelect"
-                  options={SLI_OPTIONS}
+                  options={filteredSliOptions}
                   aria-label={indicatorLabel}
                 />
               )}

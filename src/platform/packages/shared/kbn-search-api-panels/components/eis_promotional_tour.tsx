@@ -17,12 +17,13 @@ import {
   type EuiTourStepProps,
 } from '@elastic/eui';
 import {
-  EIS_TOUR_DISMISS,
-  EIS_TOUR_CTA,
+  TOUR_DISMISS,
+  TOUR_CTA,
   EIS_PROMO_TOUR_DESCRIPTION,
   EIS_PROMO_TOUR_TITLE,
 } from '../translations';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
+import { useKibana } from '../hooks/use_kibana';
 
 export interface EisPromotionalTourProps {
   anchorPosition?: EuiTourStepProps['anchorPosition'];
@@ -40,18 +41,21 @@ export const EisPromotionalTour = ({
   children,
 }: EisPromotionalTourProps) => {
   const { euiTheme } = useEuiTheme();
-  const { isPromoVisible, onDismissTour } = useShowEisPromotionalContent({
-    promoId: `${promoId}Tour`,
+  const { isPromoVisible, onDismissPromo } = useShowEisPromotionalContent({
+    promoId: `${promoId}EisPromoTour`,
   });
   const dataId = `${promoId}-eis-promo-tour`;
+  const {
+    services: { notifications },
+  } = useKibana();
+  const isTourEnabled = notifications?.tours?.isEnabled() ?? true;
 
-  if (!isPromoVisible || !isCloudEnabled) {
+  if (!isPromoVisible || !isCloudEnabled || !isTourEnabled) {
     return children;
   }
 
   return (
     <EuiTourStep
-      data-telemetry-id={dataId}
       data-test-subj={dataId}
       title={EIS_PROMO_TOUR_TITLE}
       maxWidth={`${euiTheme.base * 25}px`}
@@ -64,21 +68,26 @@ export const EisPromotionalTour = ({
       anchorPosition={anchorPosition}
       step={1}
       stepsTotal={1}
-      onFinish={onDismissTour}
+      onFinish={onDismissPromo}
       footerAction={[
-        <EuiButtonEmpty data-test-subj="eisPromoTourCloseBtn" onClick={onDismissTour}>
-          {EIS_TOUR_DISMISS}
+        <EuiButtonEmpty
+          data-test-subj="eisPromoTourCloseBtn"
+          data-telemetry-id={`${dataId}-dismiss-btn`}
+          onClick={onDismissPromo}
+        >
+          {TOUR_DISMISS}
         </EuiButtonEmpty>,
         ...(ctaLink
           ? [
               <EuiButton
                 href={ctaLink}
                 data-test-subj="eisPromoTourCtaBtn"
+                data-telemetry-id={`${dataId}-learnMore-btn`}
                 target="_blank"
                 iconSide="right"
                 iconType="popout"
               >
-                {EIS_TOUR_CTA}
+                {TOUR_CTA}
               </EuiButton>,
             ]
           : []),

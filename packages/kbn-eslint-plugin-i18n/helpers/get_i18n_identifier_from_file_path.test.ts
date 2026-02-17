@@ -35,8 +35,13 @@ const testMap = [
     'alertsUIShared',
   ],
   [
-    'src/platform/packages/shared/kbn-unified-metrics-grid/src/components/metric_flyout/metrics_insights_flyout.tsx',
+    'src/platform/packages/shared/kbn-unified-chart-section-viewer/src/components/flyout/metrics_insights_flyout.tsx',
     'metricsExperience',
+  ],
+  // Package in x-pack with src/ directory (entry in root .i18nrc.json with x-pack/ prefix)
+  [
+    'x-pack/solutions/observability/packages/alert-details/src/components/alert_active_time_range_annotation.tsx',
+    'observabilityAlertDetails',
   ],
 ];
 

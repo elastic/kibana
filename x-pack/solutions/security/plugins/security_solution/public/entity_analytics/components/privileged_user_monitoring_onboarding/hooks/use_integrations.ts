@@ -54,7 +54,7 @@ export const useEntityAnalyticsIntegrations = () => {
     AD_PACKAGE_NAME,
     undefined, // When package version is undefined it gets the latest version
     {
-      prerelease: true, // This is a technical preview package, delete this line when it is GA
+      prerelease: true, // This is a technical preview package, delete this line when it is GA:  https://github.com/elastic/security-team/issues/15167
     },
     {
       suspense: true,
@@ -85,7 +85,7 @@ export const usePrivilegedAccessDetectionIntegration = () => {
     'pad',
     undefined, // When package version is undefined it gets the latest version
     {
-      prerelease: true, // This is a technical preview package, delete this line when it is GA
+      prerelease: true, // This is a technical preview package, delete this line when it is GA:  https://github.com/elastic/security-team/issues/15167
     },
     {
       suspense: false,

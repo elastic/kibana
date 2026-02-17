@@ -10,6 +10,7 @@
 import React from 'react';
 import type { EuiTourStepProps } from '@elastic/eui';
 import { EuiButton, EuiButtonEmpty, EuiText, EuiTourStep, useEuiTheme } from '@elastic/eui';
+import { useKibana } from '../hooks/use_kibana';
 import * as i18n from '../translations';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
 
@@ -55,18 +56,21 @@ export const EisTokenCostTour = ({
   children,
 }: EisTokenCostTourProps) => {
   const { euiTheme } = useEuiTheme();
-  const { isPromoVisible, onDismissTour } = useShowEisPromotionalContent({
-    promoId: `${promoId}Tour`,
+  const { isPromoVisible, onDismissPromo } = useShowEisPromotionalContent({
+    promoId: `${promoId}EisCostsTour`,
   });
   const dataId = `${promoId}-eis-costs-tour`;
+  const {
+    services: { notifications },
+  } = useKibana();
+  const isTourEnabled = notifications?.tours?.isEnabled() ?? true;
 
-  if (!isPromoVisible || !isReady || !isCloudEnabled) {
+  if (!isPromoVisible || !isReady || !isCloudEnabled || !isTourEnabled) {
     return children;
   }
 
   return (
     <EuiTourStep
-      data-telemetry-id={dataId}
       data-test-subj={dataId}
       title={i18n.EIS_COSTS_TOUR_TITLE}
       maxWidth={`${euiTheme.base * 25}px`}
@@ -75,18 +79,20 @@ export const EisTokenCostTour = ({
           <p>{i18n.EIS_COSTS_TOUR_DESCRIPTION}</p>
         </EuiText>
       }
+      display="block"
       isStepOpen={isPromoVisible}
       anchorPosition={anchorPosition}
       step={1}
       stepsTotal={1}
-      onFinish={onDismissTour}
+      onFinish={onDismissPromo}
       footerAction={[
         <EuiButtonEmpty
           data-test-subj="tokenConsumptionCostTourCloseBtn"
-          onClick={onDismissTour}
+          data-telemetry-id={`${dataId}-dismiss-btn`}
+          onClick={onDismissPromo}
           aria-label={i18n.EIS_COSTS_TOUR_DISMISS_ARIA}
         >
-          {i18n.EIS_TOUR_DISMISS}
+          {i18n.TOUR_DISMISS}
         </EuiButtonEmpty>,
         ...(ctaLink
           ? [
@@ -96,11 +102,12 @@ export const EisTokenCostTour = ({
                 size="s"
                 href={ctaLink}
                 data-test-subj="eisCostsTourCtaBtn"
+                data-telemetry-id={`${dataId}-learnMore-btn`}
                 target="_blank"
                 iconSide="right"
                 iconType="popout"
               >
-                {i18n.EIS_TOUR_CTA}
+                {i18n.TOUR_CTA}
               </EuiButton>,
             ]
           : []),

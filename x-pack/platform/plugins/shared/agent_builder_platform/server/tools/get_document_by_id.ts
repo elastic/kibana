@@ -6,11 +6,11 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/onechat-common';
-import { getDocumentById } from '@kbn/onechat-genai-utils';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { createErrorResult } from '@kbn/onechat-server';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { getDocumentById } from '@kbn/agent-builder-genai-utils';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { createErrorResult } from '@kbn/agent-builder-server';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
 const getDocumentByIdSchema = z.object({
   id: z.string().describe('ID of the document to retrieve'),

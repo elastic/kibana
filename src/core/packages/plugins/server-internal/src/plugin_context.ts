@@ -14,7 +14,12 @@ import type { NodeInfo } from '@kbn/core-node-server';
 import type { IContextProvider, IRouter } from '@kbn/core-http-server';
 import type { PluginInitializerContext, PluginManifest } from '@kbn/core-plugins-server';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
-import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type {
+  CoreRequestHandlerContext,
+  RequestHandlerContext,
+} from '@kbn/core-http-request-handler-context-server';
+import { CoreRouteHandlerContext } from '@kbn/core-http-request-handler-context-server-internal';
+import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import type { PluginWrapper } from './plugin';
 import type {
   PluginsServicePrebootSetupDeps,
@@ -27,6 +32,7 @@ import type { IRuntimePluginContractResolver } from './plugin_contract_resolver'
 /** @internal */
 export interface InstanceInfo {
   uuid: string;
+  airgapped: boolean;
 }
 
 /**
@@ -70,6 +76,7 @@ export function createPluginInitializerContext({
       packageInfo: coreContext.env.packageInfo,
       instanceUuid: instanceInfo.uuid,
       configs: coreContext.env.configs,
+      airgapped: instanceInfo.airgapped,
     },
 
     /**
@@ -286,6 +293,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     },
     userSettings: {},
     getStartServices: () => plugin.startDependencies,
+    createRequestHandlerContext: async (request): Promise<CoreRequestHandlerContext> => {
+      const [coreStart] = await plugin.startDependencies;
+      return new CoreRouteHandlerContext(coreStart as unknown as InternalCoreStart, request);
+    },
     deprecations: deps.deprecations.getRegistry(plugin.name),
     coreUsageData: {
       registerUsageCounter: deps.coreUsageData.registerUsageCounter,

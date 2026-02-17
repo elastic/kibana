@@ -17,6 +17,7 @@ import {
   type MonacoCommandDependencies,
 } from './custom_editor_commands';
 import type { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
+import { ESQL_CONTROL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 const mockEditor = {
   addCommand: jest.fn(),
@@ -24,14 +25,8 @@ const mockEditor = {
   getValue: jest.fn(),
 } as unknown as monaco.editor.IStandaloneCodeEditor;
 
-const mockTriggerExec = jest.fn();
-const mockTrigger = {
-  exec: mockTriggerExec,
-};
-
 const mockUiActions = {
   ...uiActionsPluginMock.createStartContract(),
-  getTrigger: jest.fn(() => mockTrigger),
 };
 
 const mockTelemetryService = {
@@ -42,7 +37,6 @@ const mockTelemetryService = {
 describe('Custom Editor Commands', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockTriggerExec.mockClear();
     // Mock monaco.editor.registerCommand to return a disposable
     jest.spyOn(monaco.editor, 'registerCommand').mockReturnValue({
       dispose: jest.fn(),
@@ -101,7 +95,8 @@ describe('Custom Editor Commands', () => {
 
       await commandHandler(null, { triggerSource: ControlTriggerSource.ADD_CONTROL_BTN });
 
-      expect(mockTriggerExec).toHaveBeenCalledWith(
+      expect(mockUiActions.executeTriggerActions).toHaveBeenCalledWith(
+        ESQL_CONTROL_TRIGGER,
         expect.objectContaining({
           esqlVariables: updatedVariables,
           onSaveControl: updatedContext.onSaveControl,
@@ -151,10 +146,11 @@ describe('Custom Editor Commands', () => {
     it('should call toggleVisor function when command is executed', () => {
       const mockOnQuerySubmit = jest.fn();
       const mockToggleVisor = jest.fn();
+      const mockOnPrettifyQuery = jest.fn();
 
-      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, mockToggleVisor);
+      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, mockToggleVisor, mockOnPrettifyQuery);
 
-      expect(mockEditor.addCommand).toHaveBeenCalledTimes(2);
+      expect(mockEditor.addCommand).toHaveBeenCalledTimes(3);
 
       const cmdKCall = (mockEditor.addCommand as jest.Mock).mock.calls.find(
         // eslint-disable-next-line no-bitwise
@@ -172,8 +168,9 @@ describe('Custom Editor Commands', () => {
     it('should call onQuerySubmit when CMD+Enter is pressed', () => {
       const mockOnQuerySubmit = jest.fn();
       const mockToggleVisor = jest.fn();
+      const mockOnPrettifyQuery = jest.fn();
 
-      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, mockToggleVisor);
+      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, mockToggleVisor, mockOnPrettifyQuery);
 
       const cmdEnterCall = (mockEditor.addCommand as jest.Mock).mock.calls.find(
         // eslint-disable-next-line no-bitwise
@@ -186,6 +183,26 @@ describe('Custom Editor Commands', () => {
       cmdEnterHandler();
 
       expect(mockOnQuerySubmit).toHaveBeenCalledWith('manual');
+    });
+
+    it('should call onPrettifyQuery when CMD+I is pressed', () => {
+      const mockOnQuerySubmit = jest.fn();
+      const mockToggleVisor = jest.fn();
+      const mockOnPrettifyQuery = jest.fn();
+
+      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, mockToggleVisor, mockOnPrettifyQuery);
+
+      const cmdICall = (mockEditor.addCommand as jest.Mock).mock.calls.find(
+        // eslint-disable-next-line no-bitwise
+        ([keyMod]) => keyMod === (monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI)
+      );
+      expect(cmdICall).toBeDefined();
+
+      const cmdIHandler = cmdICall[1];
+
+      cmdIHandler();
+
+      expect(mockOnPrettifyQuery).toHaveBeenCalledTimes(1);
     });
   });
 });

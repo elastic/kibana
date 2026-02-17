@@ -19,7 +19,7 @@ export function MachineLearningDataFrameAnalyticsMapProvider({ getService }: Ftr
       await testSubjects.existOrFail('mlPageDataFrameAnalyticsMapCytoscape');
     },
     async assertJobMapTitle(id: string) {
-      const expected = `Map for job ID ${id}`;
+      const expected = 'Analytics map';
       const titleElement = await find.byCssSelector('.euiPageHeader .euiTitle');
       const actualTitle = await titleElement.getVisibleText();
       expect(actualTitle).to.eql(

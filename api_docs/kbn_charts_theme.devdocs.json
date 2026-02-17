@@ -33,6 +33,8 @@
           "Theme"
         ],
         "path": "src/platform/packages/shared/kbn-charts-theme/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { ToolResultType, type ErrorResult } from '@kbn/onechat-common';
-import type { ToolHandlerContext } from '@kbn/onechat-server/tools';
+import { ToolResultType, type ErrorResult } from '@kbn/agent-builder-common';
+import type {
+  ToolHandlerContext,
+  ToolHandlerStandardReturn,
+} from '@kbn/agent-builder-server/tools';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import {
@@ -35,6 +38,7 @@ describe('securityLabsSearchTool', () => {
   };
   const mockEvents = {
     reportProgress: jest.fn(),
+    sendUiEvent: jest.fn(),
   };
   const tool = securityLabsSearchTool(mockCore);
 
@@ -157,13 +161,13 @@ describe('securityLabsSearchTool', () => {
       retrieveDocumentationAvailable.mockResolvedValue(true);
       retrieveDocumentation.mockRejectedValue(error);
 
-      const result = await tool.handler(
+      const result = (await tool.handler(
         { query: 'test query' },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
           modelProvider: mockModelProvider as ToolHandlerContext['modelProvider'],
           events: mockEvents as ToolHandlerContext['events'],
         })
-      );
+      )) as ToolHandlerStandardReturn;
 
       expect(result.results).toHaveLength(1);
       const errorResult = result.results[0] as ErrorResult;

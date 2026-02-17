@@ -182,23 +182,25 @@ export interface PostDeleteConnectorHookParams<
   services: HookServices;
 }
 
-export interface ActionType<
+export type ActionType<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
   ExecutorResultData = void
+> =
+  | ClassicActionType<Config, Secrets, Params, ExecutorResultData>
+  | WorkflowActionType<Config, Secrets, Params, ExecutorResultData>;
+
+export interface ActionTypeCoreFields<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams
 > {
   id: string;
   name: string;
   maxAttempts?: number;
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
-  validate: {
-    params: ValidatorType<Params>;
-    config: ValidatorType<Config>;
-    secrets: ValidatorType<Secrets>;
-    connector?: (config: Config, secrets: Secrets) => string | null;
-  };
   isSystemActionType?: boolean;
   source?: ActionTypeSource;
   subFeature?: SubFeature;
@@ -228,12 +230,41 @@ export interface ActionType<
   // Headers that should be added to every Axios request made by this action type
   globalAuthHeaders?: Record<string, AxiosHeaderValue>;
   renderParameterTemplates?: RenderParameterTemplates<Params>;
-  executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
   getService?: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
   preSaveHook?: (params: PreSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
   postSaveHook?: (params: PostSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
   postDeleteHook?: (params: PostDeleteConnectorHookParams<Config, Secrets>) => Promise<void>;
 }
+
+export type WorkflowActionType<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams,
+  ExecutorResultData = void
+> = ActionTypeCoreFields<Config, Secrets, Params> & {
+  executor?: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
+  validate: {
+    params?: ValidatorType<Params>;
+    config: ValidatorType<Config>;
+    secrets: ValidatorType<Secrets>;
+    connector?: (config: Config, secrets: Secrets) => string | null;
+  };
+};
+
+export type ClassicActionType<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams,
+  ExecutorResultData = void
+> = ActionTypeCoreFields<Config, Secrets, Params> & {
+  executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
+  validate: {
+    params: ValidatorType<Params>;
+    config: ValidatorType<Config>;
+    secrets: ValidatorType<Secrets>;
+    connector?: (config: Config, secrets: Secrets) => string | null;
+  };
+};
 
 export interface RawAction extends Record<string, unknown> {
   actionTypeId: string;

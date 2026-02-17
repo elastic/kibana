@@ -10,7 +10,7 @@
 export { observer } from './src/lib/agent_config';
 export type { AgentConfigFields } from './src/lib/agent_config/agent_config_fields';
 export { apm, apmOtel } from './src/lib/apm';
-export type { ApmFields } from './src/lib/apm/apm_fields';
+export type { ApmFields, APMStacktrace } from './src/lib/apm/apm_fields';
 export type {
   ApmOtelFields,
   ApmOtelAttributes,

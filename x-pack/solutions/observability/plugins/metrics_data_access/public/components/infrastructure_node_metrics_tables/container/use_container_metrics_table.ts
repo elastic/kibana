@@ -25,11 +25,7 @@ type ContainerMetricsField =
   | 'kubernetes.container.memory.usage.bytes';
 
 const containerMetricsQueryConfig: MetricsQueryOptions<ContainerMetricsField> = {
-  sourceFilter: {
-    term: {
-      'event.dataset': 'kubernetes.container',
-    },
-  },
+  sourceFilter: `event.dataset: "kubernetes.container"`,
   groupByField: 'container.id',
   metricsMap: {
     'kubernetes.container.cpu.usage.limit.pct': {
@@ -54,7 +50,7 @@ export interface ContainerNodeMetricsRow {
 
 export function useContainerMetricsTable({
   timerange,
-  filterClauseDsl,
+  kuery,
   metricsClient,
 }: UseNodeMetricsTableOptions) {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
@@ -64,8 +60,8 @@ export function useContainerMetricsTable({
   });
 
   const { options: containerMetricsOptions } = useMemo(
-    () => metricsToApiOptions(containerMetricsQueryConfig, filterClauseDsl),
-    [filterClauseDsl]
+    () => metricsToApiOptions(containerMetricsQueryConfig, kuery),
+    [kuery]
   );
 
   const { data, isLoading } = useInfrastructureNodeMetrics<ContainerNodeMetricsRow>({

@@ -27,7 +27,19 @@ export function getRelevantDocs(
   groundTruth: GroundTruth,
   threshold: number
 ): RetrievedDoc[] {
-  return retrievedDocs.filter((doc) => isRelevant(doc, groundTruth, threshold));
+  const seen = new Set<string>();
+  return retrievedDocs.filter((doc) => {
+    if (!isRelevant(doc, groundTruth, threshold)) {
+      return false;
+    }
+    // Deduplicate by index:id to avoid counting the same relevant doc multiple times
+    const key = `${doc.index}:${doc.id}`;
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
 }
 
 export function countRelevantInGroundTruth(groundTruth: GroundTruth, threshold: number): number {

@@ -244,7 +244,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <nav
-            aria-label="Pagination for table: "
+            aria-label="Pagination for table: Calendar events"
             class="euiPagination emotion-euiPagination"
           >
             <span
@@ -325,7 +325,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
   />
   <div>
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"
     >
       <div
         class="euiFlexItem euiSearchBar__searchHolder emotion-euiFlexItem-grow-1-euiSearchBar__searchHolder"
@@ -648,7 +648,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <nav
-              aria-label="Pagination for table: "
+              aria-label="Pagination for table: Calendar events"
               class="euiPagination emotion-euiPagination"
             >
               <span

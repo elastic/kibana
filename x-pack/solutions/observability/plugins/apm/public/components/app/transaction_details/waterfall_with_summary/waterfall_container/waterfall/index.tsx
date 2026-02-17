@@ -41,6 +41,7 @@ interface Props {
   isEmbeddable?: boolean;
   scrollElement?: Element;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+  serviceBadgesHeight?: number;
 }
 
 function getWaterfallMaxLevel(waterfall: IWaterfall) {
@@ -82,13 +83,14 @@ export function Waterfall({
   isEmbeddable,
   scrollElement,
   getRelatedErrorsHref,
+  serviceBadgesHeight = 0,
 }: Props) {
   const { euiTheme } = useEuiTheme();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
 
   const { duration } = waterfall;
 
-  const agentMarks = getAgentMarks(waterfall.entryTransaction);
+  const agentMarks = getAgentMarks(waterfall.entryTransaction?.transaction.marks?.agent);
   const errorMarks = getErrorMarks(waterfall.errorItems);
 
   const timelineMargins = useMemo(() => {
@@ -124,13 +126,16 @@ export function Waterfall({
       )}
 
       <div
+        data-test-subj="apmWaterfallTimelineContainer"
+        data-is-embeddable={String(isEmbeddable ?? false)}
+        data-service-badges-height={String(serviceBadgesHeight)}
         css={css`
           display: flex;
           ${isEmbeddable
             ? 'position: relative;'
             : `
             position: sticky;
-            top: var(--euiFixedHeadersOffset, 0);`}
+            top: calc(var(--euiFixedHeadersOffset, 0) + ${serviceBadgesHeight}px);`}
           z-index: ${euiTheme.levels.menu};
           background-color: ${euiTheme.colors.emptyShade};
           border-bottom: 1px solid ${euiTheme.colors.mediumShade};

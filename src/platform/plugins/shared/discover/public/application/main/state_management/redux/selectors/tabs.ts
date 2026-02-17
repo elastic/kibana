@@ -13,6 +13,9 @@ import { TabsBarVisibility } from '../types';
 
 export const selectTab = (state: DiscoverInternalState, tabId: string) => state.tabs.byId[tabId];
 
+export const selectTabAppState = (state: DiscoverInternalState, tabId: string) =>
+  selectTab(state, tabId).appState;
+
 export const selectAllTabs = createSelector(
   [
     (state: DiscoverInternalState) => state.tabs.allIds,

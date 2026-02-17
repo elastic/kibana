@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { Logger, LogMeta } from '@kbn/core/server';
 import type {
-  ActionType as ConnectorType,
+  ClassicActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';

@@ -33,11 +33,15 @@ export const messageEvent = (
   toolCalls,
 });
 
-export const tokensEvent = (tokens?: ChatCompletionTokenCount): ChatCompletionTokenCountEvent => ({
+export const tokensEvent = (
+  tokens?: ChatCompletionTokenCount,
+  { model }: { model?: string } = {}
+): ChatCompletionTokenCountEvent => ({
   type: ChatCompletionEventType.ChatCompletionTokenCount,
   tokens: {
     prompt: tokens?.prompt ?? 10,
     completion: tokens?.completion ?? 20,
     total: tokens?.total ?? 30,
   },
+  model,
 });

@@ -154,10 +154,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListPopoverSelectOption('CN');
 
       await discover.waitUntilTabIsLoaded();
-      await testSubjects.existOrFail('unsavedChangesBadge');
+      await discover.ensureHasUnsavedChangesIndicator();
 
       await discover.revertUnsavedChanges();
-      await testSubjects.missingOrFail('unsavedChangesBadge');
+      await discover.ensureNoUnsavedChangesIndicator();
     });
 
     it('should open the histogram in a dashboard', async () => {
@@ -172,8 +172,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Check control is present
       await retry.try(async () => {
-        const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
-        expect(controlGroupVisible).to.be(true);
+        const controlCount = await dashboardControls.getControlsCount();
+        expect(controlCount).to.be(1);
       });
     });
 
@@ -190,8 +190,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Check control is present
       await retry.try(async () => {
-        const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
-        expect(controlGroupVisible).to.be(true);
+        const controlCount = await dashboardControls.getControlsCount();
+        expect(controlCount).to.be(1);
       });
     });
   });

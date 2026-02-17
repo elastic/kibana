@@ -38,23 +38,14 @@ interface ServiceSummary {
   deployments: Array<{ '@timestamp': string }>;
 }
 
-interface APMDownstreamDependency {
-  'service.name'?: string | undefined;
+export interface APMDownstreamDependency {
+  'service.name'?: string;
   'span.destination.service.resource': string;
-  'span.type'?: string | undefined;
-  'span.subtype'?: string | undefined;
-}
-
-interface APMError {
-  downstreamServiceResource: string | undefined;
-  groupId: string;
-  name: string;
-  lastSeen: number;
-  occurrences: number;
-  culprit: string | undefined;
-  handled: boolean | undefined;
-  type: string | undefined;
-  traceId: string | undefined;
+  'span.type'?: string;
+  'span.subtype'?: string;
+  errorRate?: number;
+  latencyMs?: number;
+  throughputPerMin?: number;
 }
 
 interface APMErrorSample {
@@ -86,7 +77,7 @@ interface APMTransaction {
   };
 }
 
-interface ServicesItemsItem {
+export interface ServicesItemsItem {
   serviceName: string;
   transactionType?: string;
   environments?: string[];
@@ -129,7 +120,7 @@ interface InfraEntityMetadata {
   value: string | number | null;
 }
 
-interface InfraEntityMetricsItem {
+export interface InfraEntityMetricsItem {
   name: string;
   metrics: InfraEntityMetrics[];
   metadata: InfraEntityMetadata[];
@@ -142,14 +133,6 @@ interface InfraHostsResponse {
 }
 
 export interface ObservabilityAgentBuilderDataRegistryTypes {
-  apmErrors: (params: {
-    request: KibanaRequest;
-    serviceName: string;
-    serviceEnvironment: string;
-    start: string;
-    end: string;
-  }) => Promise<APMError[]>;
-
   apmErrorDetails: (params: {
     request: KibanaRequest;
     errorId: string;
@@ -209,7 +192,7 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     from: string;
     to: string;
     limit: number;
-    kqlFilter?: string;
+    query: Record<string, unknown> | undefined;
     hostNames?: string[];
   }) => Promise<InfraHostsResponse>;
 }

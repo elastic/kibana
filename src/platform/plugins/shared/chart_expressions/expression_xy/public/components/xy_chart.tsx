@@ -42,7 +42,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { useKbnPalettes } from '@kbn/palettes';
-import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import { ESQL_TABLE_TYPE, MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
@@ -753,11 +753,8 @@ export function XYChart({
     formatFactory
   );
 
-  // ES|QL charts are allowed to create filters only when the unified search bar query is ES|QL (e.g. in Discover)
-  const applicationQuery = data.query.queryString.getQuery();
-  const canCreateFilters =
-    !isEsqlMode || (isEsqlMode && applicationQuery && isOfAggregateQueryType(applicationQuery));
   // ES|QL charts are allowed to create alert rules only in dashboards
+  const applicationQuery = data.query.queryString.getQuery();
   const canCreateAlerts =
     isEsqlMode && applicationQuery && !isOfAggregateQueryType(applicationQuery);
 
@@ -890,7 +887,7 @@ export function XYChart({
               onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
               onElementClick={interactive ? clickHandler : undefined}
               legendAction={
-                interactive && canCreateFilters
+                interactive
                   ? getLegendAction(
                       dataLayers,
                       onClickValue,
@@ -1079,8 +1076,18 @@ function getLegendTitle(
   if (typeof title === 'string' && title.length > 0) {
     return title;
   }
-  return layer?.splitAccessors?.[0]
-    ? getColumnByAccessor(layer.splitAccessors?.[0], layer?.table.columns)?.name
+
+  const splitAccessorNames =
+    layer?.splitAccessors?.reduce<string[]>((acc, accessor) => {
+      const column = layer?.table.columns.find((c) => c.id === accessor);
+      if (column?.name) {
+        acc.push(column.name);
+      }
+      return acc;
+    }, []) ?? [];
+
+  return splitAccessorNames.length > 0
+    ? splitAccessorNames.join(MULTI_FIELD_KEY_SEPARATOR)
     : defaultLegendTitle;
 }
 

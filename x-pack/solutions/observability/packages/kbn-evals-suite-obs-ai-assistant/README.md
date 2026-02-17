@@ -14,7 +14,7 @@ For general information about writing evaluation tests, configuration, and usage
 Start Scout server:
 
 ```bash
-node scripts/scout.js start-server --stateful
+node scripts/scout.js start-server --arch stateful --domain classic
 ```
 
 > The Scout server Kibana instance is accessible at <http://localhost:5620>. This may be useful if you want to query evaluation results for further analysis.
@@ -217,15 +217,6 @@ FROM .kibana-evaluations
 }
 ```
 
-## Snapshot Replay
+## AI Insights Evaluations
 
-For loading historical observability data (logs, metrics, traces) into Elasticsearch with timestamp transformation, use the [`@kbn/es-snapshot-loader`](../../../../platform/packages/shared/kbn-es-snapshot-loader/README.md) package:
-
-```bash
-node scripts/es_snapshot_loader replay \
-  --snapshot-url file:///path/to/snapshot \
-  --es-url http://elastic:changeme@localhost:9200 \
-  --patterns "logs-*,metrics-*,traces-*"
-```
-
-See the [@kbn/es-snapshot-loader documentation](../../../../platform/packages/shared/kbn-es-snapshot-loader/README.md) for full usage details.
+For setup, prerequisites, and instructions on running AI Insights evaluations, see the [AI Insights README](./ai_insights/README.md).

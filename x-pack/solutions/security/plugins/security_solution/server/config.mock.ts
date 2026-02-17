@@ -32,6 +32,7 @@ export const createMockConfig = (): ConfigType => {
     alertIgnoreFields: [],
     maxUploadResponseActionFileBytes: 26214400,
     maxEndpointScriptFileSize: 26214400,
+    disableEndpointRuleAutoInstall: false,
     settings: getDefaultConfigSettings(),
     experimentalFeatures: parseExperimentalConfigValue(enableExperimental).features,
     enabled: true,

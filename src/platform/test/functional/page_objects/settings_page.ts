@@ -867,7 +867,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async closeIndexPatternFieldEditor() {
-    await this.testSubjects.click('closeFlyoutButton');
+    await this.flyout.closeFlyout();
 
     // We might have unsaved changes and we need to confirm inside the modal
     if (await this.testSubjects.exists('runtimeFieldModifiedFieldConfirmModal')) {

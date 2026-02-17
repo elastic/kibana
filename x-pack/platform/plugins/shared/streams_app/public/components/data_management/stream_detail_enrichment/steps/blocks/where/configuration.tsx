@@ -15,13 +15,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Condition, StreamlangConditionBlockWithUIAttributes } from '@kbn/streamlang';
-import { isCondition } from '@kbn/streamlang';
+import { isConditionComplete } from '@kbn/streamlang';
 import { isEqual } from 'lodash';
 import React, { useState, useEffect, forwardRef } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { useForm, FormProvider, useController } from 'react-hook-form';
 import type { DeepPartial } from 'utility-types';
-import { useSelector } from '@xstate5/react';
+import { useSelector } from '@xstate/react';
 import { useDiscardConfirm } from '../../../../../../hooks/use_discard_confirm';
 import type { StepActorRef } from '../../../state_management/steps_state_machine';
 import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
@@ -169,7 +169,7 @@ export const WhereBlockConditionEditor = () => {
   const { field } = useController<ConditionBlockFormState, 'condition'>({
     name: 'condition',
     rules: {
-      validate: (value) => isCondition(value),
+      validate: (value) => isConditionComplete(value as Condition | undefined),
     },
   });
 

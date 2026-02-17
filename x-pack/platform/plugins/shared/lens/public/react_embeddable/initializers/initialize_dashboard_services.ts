@@ -133,17 +133,13 @@ export function initializeDashboardServices(
       getSerializedStateByReference: (newId: string) => {
         const currentState = getLatestState();
         return {
-          rawState: {
-            ...currentState,
-            savedObjectId: newId,
-          },
+          ...currentState,
+          savedObjectId: newId,
         };
       },
       getSerializedStateByValue: () => {
         const { savedObjectId, ...byValueRuntimeState } = getLatestState();
-        return {
-          rawState: transformToApiConfig(byValueRuntimeState),
-        };
+        return transformToApiConfig(byValueRuntimeState);
       },
     },
     anyStateChange$: merge(
