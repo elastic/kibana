@@ -2,22 +2,17 @@
 plugins:
   enabled:
     - apm
-    - cloud_security_posture
     - console
     - dashboard
     - discover_enhanced
-    - entity_store
-    - fleet
     - index_management
     - infra
-    - lens
     - maps
     - observability
     - observability_onboarding
     - painless_lab
     - profiling
     - search_homepage
-    - security
     - security_solution
     - slo
     - spaces
