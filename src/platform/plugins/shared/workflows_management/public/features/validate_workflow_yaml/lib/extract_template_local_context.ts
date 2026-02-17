@@ -17,16 +17,10 @@
  * nested tags and invalid-looking strings inside tags.
  */
 
-import type { Template, Token } from 'liquidjs';
 import { parseTemplateString } from '../../../shared/lib/liquid_parse_cache';
 import {
-  type EnrichedTemplate,
+  extractTemplateLocalContextFromTemplates,
   type ForLoopScope,
-  getMaxTokenEnd,
-  parseAssignVariableName,
-  parseCaptureVariableName,
-  parseForCollectionPath,
-  visitChildren,
 } from '../../../shared/lib/template_local_context_shared';
 
 export interface TemplateLocalContext {
@@ -55,75 +49,12 @@ export function getTemplateLocalContext(
   }
   try {
     const templates = parseTemplateString(templateString);
-    return extractFromTemplates(templates, templateString, offsetInTemplate);
+    const full = extractTemplateLocalContextFromTemplates(templates, offsetInTemplate);
+    return {
+      assignCaptureNames: full.assignCaptureNames,
+      forLoopScopes: full.forLoopScopes,
+    };
   } catch {
     return { assignCaptureNames: [], forLoopScopes: [] };
   }
-}
-
-function processTag(
-  tag: EnrichedTemplate,
-  token: Token & { args?: string },
-  beforeOffset: number,
-  assignCaptureNames: Set<string>,
-  forLoopScopes: ForLoopScope[]
-): void {
-  if (tag.name === 'assign') {
-    const args = tag.token?.args ?? '';
-    const varName = parseAssignVariableName(args);
-    if (varName && token.end <= beforeOffset) {
-      assignCaptureNames.add(varName);
-    }
-  } else if (tag.name === 'capture') {
-    const args = tag.token?.args ?? '';
-    const varName = parseCaptureVariableName(args);
-    const captureBodyEnd = getMaxTokenEnd(tag.templates ?? []);
-    if (varName && captureBodyEnd <= beforeOffset) {
-      assignCaptureNames.add(varName);
-    }
-  } else if (tag.name === 'for') {
-    const variableName = tag.variable ?? '';
-    const args = tag.token?.args ?? '';
-    const collectionPath = parseForCollectionPath(args);
-    const bodyTemplates = tag.templates ?? [];
-    const bodyStart = token.end;
-    const bodyEnd = getMaxTokenEnd(bodyTemplates);
-    if (variableName && bodyEnd >= bodyStart) {
-      forLoopScopes.push({
-        variableName,
-        bodyStart,
-        bodyEnd,
-        collectionPath: collectionPath ?? undefined,
-      });
-    }
-  }
-}
-
-function extractFromTemplates(
-  templates: Template[],
-  _input: string,
-  beforeOffset: number
-): TemplateLocalContext {
-  const assignCaptureNames = new Set<string>();
-  const forLoopScopes: ForLoopScope[] = [];
-
-  function visit(tpl: EnrichedTemplate) {
-    const token = tpl.token;
-    if (!token || typeof token.begin !== 'number' || typeof token.end !== 'number') {
-      return;
-    }
-    if (typeof tpl.name === 'string') {
-      processTag(tpl, token, beforeOffset, assignCaptureNames, forLoopScopes);
-    }
-    visitChildren(tpl, visit);
-  }
-
-  for (const tpl of templates) {
-    visit(tpl satisfies EnrichedTemplate);
-  }
-
-  return {
-    assignCaptureNames: Array.from(assignCaptureNames),
-    forLoopScopes,
-  };
 }

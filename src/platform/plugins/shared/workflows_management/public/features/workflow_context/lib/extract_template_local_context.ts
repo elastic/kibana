@@ -17,34 +17,18 @@
  * nested tags and invalid-looking strings inside tags.
  */
 
-import type { Template, Token } from 'liquidjs';
 import { parseTemplateString } from '../../../shared/lib/liquid_parse_cache';
 import {
-  type EnrichedTemplate,
-  type ForLoopScope,
-  getMaxTokenEnd,
-  parseAssignRhs,
-  parseAssignVariableName,
-  parseCaptureVariableName,
-  parseForCollectionPath,
-  visitChildren,
+  extractTemplateLocalContextFromTemplates,
+  type TemplateLocalContext,
 } from '../../../shared/lib/template_local_context_shared';
 
-export interface AssignVariable {
-  name: string;
-  /** Right-hand side of the assign (e.g. "steps.x.outputs.value" or "42"). Used to infer type. */
-  rhs: string;
-}
-
-export interface TemplateLocalContext {
-  /** Names from both assign and capture (for backward compatibility). */
-  assignCaptureNames: string[];
-  /** Assign variables with RHS for type inference. */
-  assignVars: AssignVariable[];
-  /** Capture variable names; capture output is always string. */
-  captureNames: string[];
-  forLoopScopes: ForLoopScope[];
-}
+const EMPTY_CONTEXT: TemplateLocalContext = {
+  assignCaptureNames: [],
+  assignVars: [],
+  captureNames: [],
+  forLoopScopes: [],
+};
 
 /**
  * Extracts template-local variable definitions and for-loop scopes from a Liquid
@@ -70,97 +54,12 @@ export function getTemplateLocalContext(
   offsetInTemplate: number
 ): TemplateLocalContext {
   if (!templateString.includes('{%')) {
-    return {
-      assignCaptureNames: [],
-      assignVars: [],
-      captureNames: [],
-      forLoopScopes: [],
-    };
+    return EMPTY_CONTEXT;
   }
   try {
     const templates = parseTemplateString(templateString);
-    return extractFromTemplates(templates, templateString, offsetInTemplate);
+    return extractTemplateLocalContextFromTemplates(templates, offsetInTemplate);
   } catch {
-    return {
-      assignCaptureNames: [],
-      assignVars: [],
-      captureNames: [],
-      forLoopScopes: [],
-    };
+    return EMPTY_CONTEXT;
   }
-}
-
-function processTag(
-  tag: EnrichedTemplate,
-  token: Token & { args?: string },
-  beforeOffset: number,
-  assignVars: AssignVariable[],
-  captureNames: Set<string>,
-  forLoopScopes: ForLoopScope[]
-): void {
-  if (tag.name === 'assign') {
-    const args = tag.token?.args ?? '';
-    const varName = parseAssignVariableName(args);
-    const rhs = parseAssignRhs(args);
-    if (varName && token.end <= beforeOffset) {
-      assignVars.push({ name: varName, rhs: rhs ?? '' });
-    }
-  } else if (tag.name === 'capture') {
-    const args = tag.token?.args ?? '';
-    const varName = parseCaptureVariableName(args);
-    const captureBodyEnd = getMaxTokenEnd(tag.templates ?? []);
-    if (varName && captureBodyEnd <= beforeOffset) {
-      captureNames.add(varName);
-    }
-  } else if (tag.name === 'for') {
-    const variableName = tag.variable ?? '';
-    const args = tag.token?.args ?? '';
-    const collectionPath = parseForCollectionPath(args);
-    const bodyTemplates = tag.templates ?? [];
-    const bodyStart = token.end;
-    const bodyEnd = getMaxTokenEnd(bodyTemplates);
-    if (variableName && bodyEnd >= bodyStart) {
-      forLoopScopes.push({
-        variableName,
-        bodyStart,
-        bodyEnd,
-        collectionPath: collectionPath ?? undefined,
-      });
-    }
-  }
-}
-
-function extractFromTemplates(
-  templates: Template[],
-  _input: string,
-  beforeOffset: number
-): TemplateLocalContext {
-  const assignVars: AssignVariable[] = [];
-  const captureNames = new Set<string>();
-  const forLoopScopes: ForLoopScope[] = [];
-
-  function visit(tpl: EnrichedTemplate) {
-    const token = tpl.token;
-    if (!token || typeof token.begin !== 'number' || typeof token.end !== 'number') {
-      return;
-    }
-    if (typeof tpl.name === 'string') {
-      processTag(tpl, token, beforeOffset, assignVars, captureNames, forLoopScopes);
-    }
-    visitChildren(tpl, visit);
-  }
-
-  for (const tpl of templates) {
-    visit(tpl satisfies EnrichedTemplate);
-  }
-
-  const captureNamesList = Array.from(captureNames);
-  const assignCaptureNames = [...assignVars.map((a) => a.name), ...captureNamesList];
-
-  return {
-    assignCaptureNames,
-    assignVars,
-    captureNames: captureNamesList,
-    forLoopScopes,
-  };
 }

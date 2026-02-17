@@ -15,6 +15,12 @@
 
 import type { Template, Token } from 'liquidjs';
 
+export interface AssignVariable {
+  name: string;
+  /** Right-hand side of the assign (e.g. "steps.x.outputs.value" or "42"). Used to infer type. */
+  rhs: string;
+}
+
 export interface ForLoopScope {
   variableName: string;
   bodyStart: number;
@@ -114,4 +120,94 @@ export function forLoopScopesContainingOffset(
   return forLoopScopes.filter(
     (scope) => offsetInTemplate >= scope.bodyStart && offsetInTemplate < scope.bodyEnd
   );
+}
+
+/** Full template-local context: assign/capture names, assign RHS for type inference, for-loop scopes. */
+export interface TemplateLocalContext {
+  /** Names from both assign and capture (for backward compatibility). */
+  assignCaptureNames: string[];
+  /** Assign variables with RHS for type inference. */
+  assignVars: AssignVariable[];
+  /** Capture variable names; capture output is always string. */
+  captureNames: string[];
+  forLoopScopes: ForLoopScope[];
+}
+
+function processTag(
+  tag: EnrichedTemplate,
+  token: Token & { args?: string },
+  beforeOffset: number,
+  assignVars: AssignVariable[],
+  captureNames: Set<string>,
+  forLoopScopes: ForLoopScope[]
+): void {
+  if (tag.name === 'assign') {
+    const args = tag.token?.args ?? '';
+    const varName = parseAssignVariableName(args);
+    const rhs = parseAssignRhs(args);
+    if (varName && token.end <= beforeOffset) {
+      assignVars.push({ name: varName, rhs: rhs ?? '' });
+    }
+  } else if (tag.name === 'capture') {
+    const args = tag.token?.args ?? '';
+    const varName = parseCaptureVariableName(args);
+    const captureBodyEnd = getMaxTokenEnd(tag.templates ?? []);
+    if (varName && captureBodyEnd <= beforeOffset) {
+      captureNames.add(varName);
+    }
+  } else if (tag.name === 'for') {
+    const variableName = tag.variable ?? '';
+    const args = tag.token?.args ?? '';
+    const collectionPath = parseForCollectionPath(args);
+    const bodyTemplates = tag.templates ?? [];
+    const bodyStart = token.end;
+    const bodyEnd = getMaxTokenEnd(bodyTemplates);
+    if (variableName && bodyEnd >= bodyStart) {
+      forLoopScopes.push({
+        variableName,
+        bodyStart,
+        bodyEnd,
+        collectionPath: collectionPath ?? undefined,
+      });
+    }
+  }
+}
+
+/**
+ * Extracts template-local variable definitions and for-loop scopes from already-parsed
+ * Liquid templates. Callers should parse the template string (e.g. via parseTemplateString)
+ * and pass the result here. Used by workflow_context and validate_workflow_yaml.
+ */
+export function extractTemplateLocalContextFromTemplates(
+  templates: Template[],
+  beforeOffset: number
+): TemplateLocalContext {
+  const assignVars: AssignVariable[] = [];
+  const captureNames = new Set<string>();
+  const forLoopScopes: ForLoopScope[] = [];
+
+  const visit = (tpl: EnrichedTemplate) => {
+    const token = tpl.token;
+    if (!token || typeof token.begin !== 'number' || typeof token.end !== 'number') {
+      return;
+    }
+    if (typeof tpl.name === 'string') {
+      processTag(tpl, token, beforeOffset, assignVars, captureNames, forLoopScopes);
+    }
+    visitChildren(tpl, visit);
+  };
+
+  for (const tpl of templates) {
+    visit(tpl as EnrichedTemplate);
+  }
+
+  const captureNamesList = Array.from(captureNames);
+  const assignCaptureNames = [...assignVars.map((a) => a.name), ...captureNamesList];
+
+  return {
+    assignCaptureNames,
+    assignVars,
+    captureNames: captureNamesList,
+    forLoopScopes,
+  };
 }
