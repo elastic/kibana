@@ -68,14 +68,14 @@ export class RulesClient {
       );
     }
 
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const username = await this.userService.getCurrentUsername();
     const nowIso = new Date().toISOString();
 
     const ruleAttributes = transformCreateRuleBodyToRuleSoAttributes(parsed.data, {
       enabled: true,
-      createdBy: userProfileUid,
+      createdBy: username,
       createdAt: nowIso,
-      updatedBy: userProfileUid,
+      updatedBy: username,
       updatedAt: nowIso,
     });
 
