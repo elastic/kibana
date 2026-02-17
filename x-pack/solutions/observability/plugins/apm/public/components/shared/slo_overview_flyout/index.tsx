@@ -42,19 +42,19 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { AgentIcon } from '@kbn/custom-icons';
-import type { SloTabId, SloListLocatorParams } from '@kbn/deeplinks-observability';
-import { ALERTS_TAB_ID, sloListLocatorID } from '@kbn/deeplinks-observability';
+import type { SloTabId } from '@kbn/deeplinks-observability';
+import { ALERTS_TAB_ID } from '@kbn/deeplinks-observability';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { ApmPluginStartDeps } from '../../../plugin';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
+import { useManageSlosUrl } from '../../../hooks/use_manage_slos_url';
 import {
   APM_SLO_INDICATOR_TYPES,
   type ApmIndicatorType,
 } from '../../../../common/slo_indicator_types';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 
 type SloStatusFilter = 'VIOLATED' | 'DEGRADING' | 'HEALTHY' | 'NO_DATA';
 
@@ -111,7 +111,7 @@ const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50];
 export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'sloOverviewFlyout' });
   const { euiTheme } = useEuiTheme();
-  const { uiSettings, slo: sloPlugin, share } = useKibana<ApmPluginStartDeps>().services;
+  const { uiSettings, slo: sloPlugin } = useKibana<ApmPluginStartDeps>().services;
   const { link } = useApmRouter();
   const { query } = useAnyOfApmParams('/services', '/services/{serviceName}');
   const [searchQuery, setSearchQuery] = useState('');
@@ -225,41 +225,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     });
   }, [sloData, activeAlerts]);
 
-  const sloAppUrl = useMemo(() => {
-    const sloListLocator = share?.url.locators.get<SloListLocatorParams>(sloListLocatorID);
-    if (!sloListLocator) return undefined;
-
-    return sloListLocator.getRedirectUrl({
-      filters: [
-        {
-          meta: {
-            alias: null,
-            disabled: false,
-            key: SERVICE_NAME,
-            negate: false,
-            params: { query: serviceName },
-            type: 'phrase',
-          },
-          query: {
-            match_phrase: { [SERVICE_NAME]: serviceName },
-          },
-        },
-        {
-          meta: {
-            alias: null,
-            disabled: false,
-            key: 'slo.indicator.type',
-            negate: false,
-            params: [...APM_SLO_INDICATOR_TYPES],
-            type: 'phrases',
-          },
-          query: {
-            terms: { 'slo.indicator.type': [...APM_SLO_INDICATOR_TYPES] },
-          },
-        },
-      ],
-    });
-  }, [share?.url.locators, serviceName]);
+  const sloAppUrl = useManageSlosUrl({ serviceName });
 
   const serviceOverviewUrl = useMemo(() => {
     return link('/services/{serviceName}/overview', {
