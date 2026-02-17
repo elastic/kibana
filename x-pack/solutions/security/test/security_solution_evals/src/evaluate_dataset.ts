@@ -12,12 +12,7 @@ import type {
   EvaluationResult,
   Example,
 } from '@kbn/evals';
-import type {
-  SiemEntityAnalyticsEvaluationChatClient,
-  ErrorResponse,
-  Step,
-  Messages,
-} from './chat_client';
+import type { EvaluationChatClient, ErrorResponse, Step, Messages } from './chat_client';
 
 interface ToolCallAssertion {
   id: string;
@@ -54,7 +49,6 @@ export type EvaluateDataset = ({
   dataset: {
     name: string;
     description: string;
-    agentId: string;
     examples: DatasetExample[];
   };
 }) => Promise<void>;
@@ -195,25 +189,24 @@ function combineEvaluationResults(results: EvaluationResult[]): EvaluationResult
   };
 }
 
+interface EvaluateDatasetOpts {
+  dataset: { name: string; description: string; examples: DatasetExample[] };
+}
+
+interface CreateEvaluateDatasetOpts {
+  evaluators: DefaultEvaluators;
+  executorClient: EvalsExecutorClient;
+  chatClient: EvaluationChatClient;
+}
+
 export function createEvaluateDataset({
   evaluators,
   executorClient,
   chatClient,
-}: {
-  evaluators: DefaultEvaluators;
-  executorClient: EvalsExecutorClient;
-  chatClient: SiemEntityAnalyticsEvaluationChatClient;
-}): EvaluateDataset {
+}: CreateEvaluateDatasetOpts): EvaluateDataset {
   return async function evaluateDataset({
-    dataset: { name, description, examples, agentId },
-  }: {
-    dataset: {
-      name: string;
-      description: string;
-      examples: DatasetExample[];
-      agentId: string;
-    };
-  }) {
+    dataset: { name, description, examples },
+  }: EvaluateDatasetOpts) {
     const dataset = {
       name,
       description,
@@ -226,7 +219,6 @@ export function createEvaluateDataset({
         task: async ({ input }) => {
           const response = await chatClient.converse({
             messages: [{ message: input.question }],
-            options: { agentId },
           });
 
           return {
@@ -236,14 +228,7 @@ export function createEvaluateDataset({
           };
         },
       },
-      [
-        createCriteriaEvaluator({
-          evaluators,
-        }),
-        createToolCallsEvaluator({
-          evaluators,
-        }),
-      ]
+      [createCriteriaEvaluator({ evaluators }), createToolCallsEvaluator({ evaluators })]
     );
   };
 }

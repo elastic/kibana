@@ -23,14 +23,9 @@ export interface Step {
   [key: string]: unknown;
 }
 
-interface Options {
-  agentId: string;
-}
-
 interface ConverseFunctionParams {
   messages: Messages;
   conversationId?: string;
-  options: Options;
 }
 
 type ConverseFunction = (params: ConverseFunctionParams) => Promise<{
@@ -40,31 +35,43 @@ type ConverseFunction = (params: ConverseFunctionParams) => Promise<{
   steps?: Step[];
 }>;
 
-export class SiemEntityAnalyticsEvaluationChatClient {
+interface ModelUsageStats {
+  input_tokens?: number;
+  output_tokens?: number;
+  llm_calls?: number;
+  model?: string;
+  connector_id?: string;
+}
+
+interface CallConverseApiResults {
+  conversationId?: string;
+  errors: ErrorResponse[];
+  messages: { message: string }[];
+  modelUsage?: ModelUsageStats;
+  steps?: Step[];
+  traceId?: string;
+}
+
+export class EvaluationChatClient {
   constructor(
     private readonly fetch: HttpHandler,
     private readonly log: ToolingLog,
     private readonly connectorId: string
   ) {}
 
-  converse: ConverseFunction = async ({ messages, conversationId, options: { agentId } }) => {
-    const callConverseApi = async (): Promise<{
-      conversationId?: string;
-      messages: { message: string }[];
-      errors: ErrorResponse[];
-      steps?: Step[];
-    }> => {
+  converse: ConverseFunction = async ({ messages, conversationId }) => {
+    const callConverseApi = async (): Promise<CallConverseApiResults> => {
       // Use the Agent Builder API endpoint
       const response: {
         conversation_id: string;
         trace_id?: string;
         steps: Step[];
         response: { message: string };
+        model_usage?: ModelUsageStats;
       } = await this.fetch('/api/agent_builder/converse', {
         method: 'POST',
         version: '2023-10-31',
         body: JSON.stringify({
-          agent_id: agentId,
           connector_id: this.connectorId,
           conversation_id: conversationId,
           input: messages[messages.length - 1].message,
@@ -75,12 +82,16 @@ export class SiemEntityAnalyticsEvaluationChatClient {
         conversation_id: conversationIdFromResponse,
         response: latestResponse,
         steps,
+        trace_id: traceId,
+        model_usage: modelUsage,
       } = response;
 
       return {
         conversationId: conversationIdFromResponse,
         messages: [...messages, latestResponse],
         steps,
+        traceId,
+        modelUsage,
         errors: [],
       };
     };

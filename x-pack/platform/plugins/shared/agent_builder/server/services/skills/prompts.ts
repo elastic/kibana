@@ -28,9 +28,10 @@ export const getSkillsInstructions = async ({
       : [
           '## SKILLS',
           [
-            'Load a skill using filestore tools to get detailed instructions for a specific task.',
-            'Skills provide specialized knowledge and best practices for specific tasks.',
-            "Use them when a task matches a skill's description or the skill is useful for the task.",
+            'Before using any general-purpose tool or model knowledge, you MUST first check the available skills below.',
+            'If ANY skill description matches or is relevant to the user query, you MUST load it by calling `filestore.read` with the skill path BEFORE calling any other tool.',
+            'Skills provide specialized knowledge, domain-specific instructions, and access to inline tools that produce more accurate results than general-purpose alternatives.',
+            'Skipping a relevant skill and going directly to general tools (e.g., search, execute_esql) is a protocol violation.',
             'Only the skills listed here are available:',
           ].join(' '),
           generateXmlTree({

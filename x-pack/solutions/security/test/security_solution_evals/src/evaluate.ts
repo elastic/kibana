@@ -7,69 +7,30 @@
 
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
-import { evaluate as base, createDefaultTerminalReporter } from '@kbn/evals';
+import { evaluate as base } from '@kbn/evals';
 import { EsArchiver } from '@kbn/es-archiver';
 import { Client as QuickstartClient } from '@kbn/security-solution-plugin/common/api/quickstart_client.gen';
-import { SiemEntityAnalyticsEvaluationChatClient } from './chat_client';
+import { EvaluationChatClient } from './chat_client';
 import type { EvaluateDataset } from './evaluate_dataset';
 import { createEvaluateDataset } from './evaluate_dataset';
 
 export const evaluate = base.extend<
+  { evaluateDataset: EvaluateDataset },
   {
-    evaluateDataset: EvaluateDataset;
-  },
-  {
-    chatClient: SiemEntityAnalyticsEvaluationChatClient;
-    siemSetup: void;
+    chatClient: EvaluationChatClient;
     esArchiverLoad: (archive: string) => Promise<void>;
     supertest: supertest.Agent;
     quickApiClient: QuickstartClient;
   }
 >({
-  siemSetup: [
-    async ({ fetch, log }, use) => {
-      // Ensure Agent Builder API is enabled before running the evaluation
-      const currentSettings = (await fetch('/internal/kibana/settings')) as {
-        settings: Record<string, { userValue?: unknown }>;
-      };
-      const isAgentBuilderEnabled =
-        currentSettings?.settings?.['agentBuilder:enabled']?.userValue === true;
-
-      if (isAgentBuilderEnabled) {
-        log.debug('Agent Builder is already enabled');
-      } else {
-        await fetch('/internal/kibana/settings', {
-          method: 'POST',
-          body: JSON.stringify({
-            changes: {
-              'agentBuilder:enabled': true,
-            },
-          }),
-        });
-        log.debug('Agent Builder enabled for the evaluation');
-      }
-
-      await use();
-    },
-    {
-      scope: 'worker',
-      auto: true, // This ensures it runs automatically
-    },
-  ],
   chatClient: [
     async ({ fetch, log, connector }, use) => {
-      const chatClient = new SiemEntityAnalyticsEvaluationChatClient(fetch, log, connector.id);
+      const chatClient = new EvaluationChatClient(fetch, log, connector.id);
       await use(chatClient);
     },
     {
       scope: 'worker',
     },
-  ],
-  reportModelScore: [
-    async ({}, use) => {
-      await use(createDefaultTerminalReporter());
-    },
-    { scope: 'worker' },
   ],
   evaluateDataset: [
     ({ chatClient, evaluators, executorClient }, use) => {
@@ -78,6 +39,73 @@ export const evaluate = base.extend<
           chatClient,
           evaluators,
           executorClient,
+          onExperimentComplete: async (experiment) => {
+            // Build a lookup: experimentRunId -> evaluation results
+            const evaluationsByRunId = new Map<
+              string,
+              Array<{
+                evaluator: string;
+                score?: number | null;
+                label?: string | null;
+                explanation?: string;
+                metadata?: Record<string, unknown> | null;
+              }>
+            >();
+            for (const evalRun of experiment.evaluationRuns) {
+              const key = evalRun.experimentRunId;
+              if (!evaluationsByRunId.has(key)) {
+                evaluationsByRunId.set(key, []);
+              }
+              evaluationsByRunId.get(key)!.push({
+                evaluator: evalRun.name,
+                score: evalRun.result?.score,
+                label: evalRun.result?.label,
+                explanation: evalRun.result?.explanation ?? undefined,
+                metadata: evalRun.result?.metadata ?? null,
+              });
+            }
+
+            // Attach one file per example for easy per-case review in the HTML report
+            const sanitizedDataset = experiment.datasetName.replace(/[^a-zA-Z0-9-_ ]/g, '');
+            for (const [runId, run] of Object.entries(experiment.runs)) {
+              const output = run.output as {
+                messages?: Array<{ message: string }>;
+                steps?: Array<Record<string, unknown>>;
+                errors?: unknown[];
+              };
+
+              const question =
+                (run.input as { question?: string })?.question ?? `example-${run.exampleIndex}`;
+              // Short label for the attachment name (truncate long questions)
+              const shortQuestion = question.length > 60 ? `${question.slice(0, 57)}...` : question;
+
+              const conversation = {
+                input: run.input,
+                expected: run.expected,
+                metadata: run.metadata,
+                response: output?.messages?.slice(-1)?.[0]?.message ?? null,
+                steps: output?.steps ?? [],
+                errors: output?.errors ?? [],
+                evaluations: evaluationsByRunId.get(runId) ?? [],
+              };
+
+              try {
+                await testInfo.attach(
+                  `[${sanitizedDataset}] #${run.exampleIndex} "${shortQuestion}"`,
+                  {
+                    body: JSON.stringify(conversation, null, 2),
+                    contentType: 'application/json',
+                  }
+                );
+              } catch (err) {
+                log.warning(
+                  `Failed to attach example data: ${
+                    err instanceof Error ? err.message : String(err)
+                  }`
+                );
+              }
+            }
+          },
         })
       );
     },

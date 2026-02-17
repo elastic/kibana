@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { servers as defaultSecurityConfig } from '../../../default/stateful/stateful.config';
+import { servers as defaultSecurityConfig } from '../../default/stateful/classic.stateful.config';
 import type { ScoutServerConfig } from '../../../../../types';
 
 /**
