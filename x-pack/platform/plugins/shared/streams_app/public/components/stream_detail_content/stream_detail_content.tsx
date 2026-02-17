@@ -79,7 +79,7 @@ export function StreamDetailContent({ definition }: StreamDetailContentProps) {
 
   // APIs
   const { addAttachments, removeAttachments } = useAttachmentsApi({ name: streamName });
-  const { unlinkRelationship } = useRelationshipsApi({ streamName });
+  const { unlinkRelationship, linkRelationship } = useRelationshipsApi({ streamName });
 
   const linkedAttachments = useMemo(() => {
     return attachmentsFetch.value?.attachments ?? [];
@@ -156,6 +156,28 @@ export function StreamDetailContent({ definition }: StreamDetailContentProps) {
       }
     },
     [unlinkRelationship, relationshipsFetch, notifications.toasts]
+  );
+
+  const handleLinkRelationship = useCallback(
+    async (relationship: Parameters<typeof linkRelationship>[0]) => {
+      try {
+        await linkRelationship(relationship);
+        relationshipsFetch.refresh();
+        notifications.toasts.addSuccess({
+          title: i18n.translate('xpack.streams.content.relationships.linkSuccess.title', {
+            defaultMessage: 'Relationship added',
+          }),
+        });
+      } catch (error) {
+        notifications.toasts.addDanger({
+          title: i18n.translate('xpack.streams.content.relationships.linkError.title', {
+            defaultMessage: 'Failed to add relationship',
+          }),
+        });
+        throw error;
+      }
+    },
+    [linkRelationship, relationshipsFetch, notifications.toasts]
   );
 
   return (
@@ -252,6 +274,18 @@ export function StreamDetailContent({ definition }: StreamDetailContentProps) {
                 <DashboardSuggestionControl
                   definition={definition.stream}
                   aiFeatures={aiFeatures}
+                  onSaveAndAttach={async (dashboardId: string) => {
+                    await handleLinkAttachments([
+                      {
+                        id: dashboardId,
+                        type: 'dashboard',
+                        title: '',
+                        tags: [],
+                        redirectId: dashboardId,
+                        streamNames: [],
+                      },
+                    ]);
+                  }}
                 />
               ) : (
                 <EuiCallOut
@@ -338,6 +372,7 @@ export function StreamDetailContent({ definition }: StreamDetailContentProps) {
             streamName={streamName}
             canManage={Boolean(canManage)}
             onUnlink={handleUnlinkRelationship}
+            onLink={handleLinkRelationship}
             onRefresh={relationshipsFetch.refresh}
           />
         </EuiAccordion>

@@ -29,11 +29,13 @@ import { DashboardSuggestionPreview } from './dashboard_suggestion_preview';
 interface DashboardSuggestionControlProps {
   definition: Streams.all.Definition;
   aiFeatures: AIFeatures | null;
+  onSaveAndAttach?: (dashboardId: string) => Promise<void>;
 }
 
 export function DashboardSuggestionControl({
   definition,
   aiFeatures,
+  onSaveAndAttach,
 }: DashboardSuggestionControlProps) {
   const {
     getDashboardSuggestionStatus,
@@ -120,8 +122,10 @@ export function DashboardSuggestionControl({
       {showPreview && dashboardResult?.dashboardSuggestion && (
         <DashboardSuggestionPreview
           result={dashboardResult}
+          streamName={definition.name}
           onClose={closePreview}
           onRegenerate={handleStartGeneration}
+          onSaveAndAttach={onSaveAndAttach}
         />
       )}
     </>

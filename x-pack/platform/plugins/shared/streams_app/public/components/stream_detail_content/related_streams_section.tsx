@@ -5,27 +5,40 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiBadge,
+  EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiEmptyPrompt,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiFormRow,
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiSelect,
   EuiText,
+  EuiTitle,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { Relationship } from '@kbn/streams-schema';
+import type { Relationship, RelationshipDirection } from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useTimeRange } from '../../hooks/use_time_range';
+import { useKibana } from '../../hooks/use_kibana';
 
 interface RelatedStreamsSectionProps {
   relationships: Relationship[];
@@ -33,6 +46,7 @@ interface RelatedStreamsSectionProps {
   streamName: string;
   canManage: boolean;
   onUnlink: (targetStream: string) => Promise<void>;
+  onLink: (relationship: Relationship) => Promise<void>;
   onRefresh: () => void;
 }
 
@@ -42,11 +56,85 @@ export function RelatedStreamsSection({
   streamName,
   canManage,
   onUnlink,
+  onLink,
   onRefresh,
 }: RelatedStreamsSectionProps) {
   const router = useStreamsAppRouter();
   const { euiTheme } = useEuiTheme();
   const { rangeFrom, rangeTo } = useTimeRange();
+  const {
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+    core: { notifications },
+  } = useKibana();
+
+  const [isAddFlyoutOpen, setIsAddFlyoutOpen] = useState(false);
+  const [selectedStream, setSelectedStream] = useState<EuiComboBoxOptionOption[]>([]);
+  const [direction, setDirection] = useState<RelationshipDirection>('bidirectional');
+  const [description, setDescription] = useState('');
+  const [isLinking, setIsLinking] = useState(false);
+  const [availableStreams, setAvailableStreams] = useState<EuiComboBoxOptionOption[]>([]);
+  const [isLoadingStreams, setIsLoadingStreams] = useState(false);
+
+  const loadAvailableStreams = useCallback(async () => {
+    setIsLoadingStreams(true);
+    try {
+      const result = await streamsRepositoryClient.fetch('GET /internal/streams', {
+        signal: null,
+      });
+      const existingRelatedStreams = new Set(
+        relationships.flatMap((r) => [r.from_stream, r.to_stream])
+      );
+      const options = result.streams
+        .filter((s) => s.name !== streamName && !existingRelatedStreams.has(s.name))
+        // Filter out parent/child relationships
+        .filter((s) => !s.name.startsWith(streamName + '.') && !streamName.startsWith(s.name + '.'))
+        .map((s) => ({ label: s.name, value: s.name }));
+      setAvailableStreams(options);
+    } catch (error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.streams.content.relatedStreams.loadStreamsError', {
+          defaultMessage: 'Failed to load streams',
+        }),
+      });
+    } finally {
+      setIsLoadingStreams(false);
+    }
+  }, [streamsRepositoryClient, streamName, relationships, notifications]);
+
+  const handleOpenAddFlyout = useCallback(() => {
+    setIsAddFlyoutOpen(true);
+    setSelectedStream([]);
+    setDirection('bidirectional');
+    setDescription('');
+    loadAvailableStreams();
+  }, [loadAvailableStreams]);
+
+  const handleCloseAddFlyout = useCallback(() => {
+    setIsAddFlyoutOpen(false);
+  }, []);
+
+  const handleAddRelationship = useCallback(async () => {
+    if (selectedStream.length === 0) return;
+
+    setIsLinking(true);
+    try {
+      const relationship: Relationship = {
+        from_stream: streamName,
+        to_stream: selectedStream[0].value as string,
+        direction,
+        source: 'manual',
+        description: description || undefined,
+      };
+      await onLink(relationship);
+      handleCloseAddFlyout();
+    } finally {
+      setIsLinking(false);
+    }
+  }, [selectedStream, streamName, direction, description, onLink, handleCloseAddFlyout]);
 
   const columns: Array<EuiBasicTableColumn<Relationship>> = [
     {
@@ -158,44 +246,99 @@ export function RelatedStreamsSection({
 
   if (relationships.length === 0) {
     return (
-      <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
-        <EuiEmptyPrompt
-          iconType="link"
-          title={<h3>{NO_RELATIONSHIPS_TITLE}</h3>}
-          body={<p>{NO_RELATIONSHIPS_DESCRIPTION}</p>}
-        />
-      </EuiPanel>
+      <>
+        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
+          <EuiEmptyPrompt
+            iconType="link"
+            title={<h3>{NO_RELATIONSHIPS_TITLE}</h3>}
+            body={<p>{NO_RELATIONSHIPS_DESCRIPTION}</p>}
+            actions={
+              canManage ? (
+                <EuiButton
+                  onClick={handleOpenAddFlyout}
+                  data-test-subj="streamsAppAddRelationshipButton"
+                >
+                  {ADD_RELATIONSHIP_BUTTON}
+                </EuiButton>
+              ) : undefined
+            }
+          />
+        </EuiPanel>
+        {isAddFlyoutOpen && (
+          <AddRelationshipFlyout
+            availableStreams={availableStreams}
+            isLoadingStreams={isLoadingStreams}
+            selectedStream={selectedStream}
+            onSelectedStreamChange={setSelectedStream}
+            direction={direction}
+            onDirectionChange={setDirection}
+            description={description}
+            onDescriptionChange={setDescription}
+            isLinking={isLinking}
+            onClose={handleCloseAddFlyout}
+            onAdd={handleAddRelationship}
+          />
+        )}
+      </>
     );
   }
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="refresh"
-            aria-label={i18n.translate('xpack.streams.content.relatedStreams.refreshButton', {
-              defaultMessage: 'Refresh relationships',
-            })}
-            onClick={onRefresh}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiBasicTable
-        css={css`
-          & thead tr {
-            background-color: ${euiTheme.colors.backgroundBaseSubdued};
-          }
-        `}
-        tableCaption={i18n.translate('xpack.streams.content.relatedStreams.tableCaption', {
-          defaultMessage: 'List of related streams',
-        })}
-        data-test-subj="streamsAppRelatedStreamsTable"
-        columns={columns}
-        itemId={(item) => `${item.from_stream}-${item.to_stream}`}
-        items={relationships}
-      />
-    </EuiPanel>
+    <>
+      <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+          {canManage && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                onClick={handleOpenAddFlyout}
+                data-test-subj="streamsAppAddRelationshipButton"
+              >
+                {ADD_RELATIONSHIP_BUTTON}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="refresh"
+              aria-label={i18n.translate('xpack.streams.content.relatedStreams.refreshButton', {
+                defaultMessage: 'Refresh relationships',
+              })}
+              onClick={onRefresh}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiBasicTable
+          css={css`
+            & thead tr {
+              background-color: ${euiTheme.colors.backgroundBaseSubdued};
+            }
+          `}
+          tableCaption={i18n.translate('xpack.streams.content.relatedStreams.tableCaption', {
+            defaultMessage: 'List of related streams',
+          })}
+          data-test-subj="streamsAppRelatedStreamsTable"
+          columns={columns}
+          itemId={(item) => `${item.from_stream}-${item.to_stream}`}
+          items={relationships}
+        />
+      </EuiPanel>
+      {isAddFlyoutOpen && (
+        <AddRelationshipFlyout
+          availableStreams={availableStreams}
+          isLoadingStreams={isLoadingStreams}
+          selectedStream={selectedStream}
+          onSelectedStreamChange={setSelectedStream}
+          direction={direction}
+          onDirectionChange={setDirection}
+          description={description}
+          onDescriptionChange={setDescription}
+          isLinking={isLinking}
+          onClose={handleCloseAddFlyout}
+          onAdd={handleAddRelationship}
+        />
+      )}
+    </>
   );
 }
 
@@ -244,3 +387,169 @@ const NO_RELATIONSHIPS_DESCRIPTION = i18n.translate(
       'Relationships connect streams that share data across different hierarchies, like application logs and proxy logs for the same service.',
   }
 );
+
+const ADD_RELATIONSHIP_BUTTON = i18n.translate(
+  'xpack.streams.content.relatedStreams.addButton',
+  {
+    defaultMessage: 'Add relationship',
+  }
+);
+
+const ADD_RELATIONSHIP_FLYOUT_TITLE = i18n.translate(
+  'xpack.streams.content.relatedStreams.addFlyout.title',
+  {
+    defaultMessage: 'Add stream relationship',
+  }
+);
+
+const TARGET_STREAM_LABEL = i18n.translate(
+  'xpack.streams.content.relatedStreams.addFlyout.targetStreamLabel',
+  {
+    defaultMessage: 'Target stream',
+  }
+);
+
+const TARGET_STREAM_PLACEHOLDER = i18n.translate(
+  'xpack.streams.content.relatedStreams.addFlyout.targetStreamPlaceholder',
+  {
+    defaultMessage: 'Select a stream',
+  }
+);
+
+const DIRECTION_LABEL = i18n.translate(
+  'xpack.streams.content.relatedStreams.addFlyout.directionLabel',
+  {
+    defaultMessage: 'Direction',
+  }
+);
+
+const DESCRIPTION_LABEL = i18n.translate(
+  'xpack.streams.content.relatedStreams.addFlyout.descriptionLabel',
+  {
+    defaultMessage: 'Description (optional)',
+  }
+);
+
+const DESCRIPTION_PLACEHOLDER = i18n.translate(
+  'xpack.streams.content.relatedStreams.addFlyout.descriptionPlaceholder',
+  {
+    defaultMessage: 'e.g., Same service, different log types',
+  }
+);
+
+const CANCEL_BUTTON = i18n.translate(
+  'xpack.streams.content.relatedStreams.addFlyout.cancelButton',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+const ADD_BUTTON = i18n.translate(
+  'xpack.streams.content.relatedStreams.addFlyout.addButton',
+  {
+    defaultMessage: 'Add',
+  }
+);
+
+// Add Relationship Flyout component
+
+interface AddRelationshipFlyoutProps {
+  availableStreams: EuiComboBoxOptionOption[];
+  isLoadingStreams: boolean;
+  selectedStream: EuiComboBoxOptionOption[];
+  onSelectedStreamChange: (selected: EuiComboBoxOptionOption[]) => void;
+  direction: RelationshipDirection;
+  onDirectionChange: (direction: RelationshipDirection) => void;
+  description: string;
+  onDescriptionChange: (description: string) => void;
+  isLinking: boolean;
+  onClose: () => void;
+  onAdd: () => void;
+}
+
+function AddRelationshipFlyout({
+  availableStreams,
+  isLoadingStreams,
+  selectedStream,
+  onSelectedStreamChange,
+  direction,
+  onDirectionChange,
+  description,
+  onDescriptionChange,
+  isLinking,
+  onClose,
+  onAdd,
+}: AddRelationshipFlyoutProps) {
+  return (
+    <EuiFlyout
+      ownFocus
+      onClose={onClose}
+      size="s"
+      aria-labelledby="addRelationshipFlyoutTitle"
+      data-test-subj="streamsAppAddRelationshipFlyout"
+    >
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id="addRelationshipFlyoutTitle">{ADD_RELATIONSHIP_FLYOUT_TITLE}</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+
+      <EuiFlyoutBody>
+        <EuiFormRow label={TARGET_STREAM_LABEL} fullWidth>
+          <EuiComboBox
+            placeholder={TARGET_STREAM_PLACEHOLDER}
+            singleSelection={{ asPlainText: true }}
+            options={availableStreams}
+            selectedOptions={selectedStream}
+            onChange={onSelectedStreamChange}
+            isLoading={isLoadingStreams}
+            fullWidth
+            data-test-subj="streamsAppAddRelationshipStreamSelect"
+          />
+        </EuiFormRow>
+
+        <EuiFormRow label={DIRECTION_LABEL} fullWidth>
+          <EuiSelect
+            options={[
+              { value: 'bidirectional', text: BIDIRECTIONAL_LABEL },
+              { value: 'directional', text: DIRECTIONAL_LABEL },
+            ]}
+            value={direction}
+            onChange={(e) => onDirectionChange(e.target.value as RelationshipDirection)}
+            fullWidth
+            data-test-subj="streamsAppAddRelationshipDirectionSelect"
+          />
+        </EuiFormRow>
+
+        <EuiFormRow label={DESCRIPTION_LABEL} fullWidth>
+          <EuiFieldText
+            placeholder={DESCRIPTION_PLACEHOLDER}
+            value={description}
+            onChange={(e) => onDescriptionChange(e.target.value)}
+            fullWidth
+            data-test-subj="streamsAppAddRelationshipDescriptionInput"
+          />
+        </EuiFormRow>
+      </EuiFlyoutBody>
+
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={onClose}>{CANCEL_BUTTON}</EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              onClick={onAdd}
+              isLoading={isLinking}
+              disabled={selectedStream.length === 0 || isLinking}
+              data-test-subj="streamsAppAddRelationshipConfirmButton"
+            >
+              {ADD_BUTTON}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+  );
+}

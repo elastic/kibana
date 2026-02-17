@@ -8,7 +8,7 @@
 /**
  * Bulk status response item for suggestions.
  * Used by the streams listing page to show suggestion counts.
- * Includes pipeline suggestions, feature identification, and significant events queries.
+ * Includes pipeline suggestions, feature identification, significant events queries, and dashboard suggestions.
  */
 export interface SuggestionBulkStatusItem {
   stream: string;
@@ -19,4 +19,6 @@ export interface SuggestionBulkStatusItem {
   featuresCount: number;
   /** Count of significant events suggestions */
   significantEventsCount: number;
+  /** Count of dashboard suggestions */
+  dashboardCount: number;
 }

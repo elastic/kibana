@@ -31,20 +31,29 @@ import {
   convertRawDashboardToKibanaInput,
   getDefaultTimeRange,
 } from '../../util/dashboard_suggestion_converter';
+import { useKibana } from '../../hooks/use_kibana';
 
 interface DashboardSuggestionPreviewProps {
   result: DashboardSuggestionResult;
+  streamName: string;
   onClose: () => void;
   onRegenerate?: () => void;
+  onSaveAndAttach?: (dashboardId: string) => Promise<void>;
 }
 
 export function DashboardSuggestionPreview({
   result,
+  streamName,
   onClose,
   onRegenerate,
+  onSaveAndAttach,
 }: DashboardSuggestionPreviewProps) {
   const { euiTheme } = useEuiTheme();
+  const {
+    core: { http, notifications },
+  } = useKibana();
   const [conversionError, setConversionError] = useState<string | undefined>();
+  const [isSaving, setIsSaving] = useState(false);
 
   // Convert raw dashboard to Kibana format
   const dashboardInput = useMemo(() => {
@@ -59,6 +68,52 @@ export function DashboardSuggestionPreview({
       return undefined;
     }
   }, [result.dashboardSuggestion?.rawDashboard]);
+
+  const handleSaveAndAttach = useCallback(async () => {
+    if (!dashboardInput || !onSaveAndAttach) {
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      // Create the dashboard via the dashboard API
+      const dashboardState: DashboardState = {
+        title: dashboardInput.title || `Dashboard for ${streamName}`,
+        description: dashboardInput.description,
+        panels: dashboardInput.panels,
+        time_range: dashboardInput.timeRange,
+      };
+
+      const response = await http.post<{ id: string }>('/api/dashboards', {
+        version: '1',
+        query: {
+          allowUnmappedKeys: true,
+        },
+        body: JSON.stringify({
+          data: dashboardState,
+        }),
+      });
+
+      const dashboardId = response.id;
+
+      // Attach the dashboard to the stream
+      await onSaveAndAttach(dashboardId);
+
+      notifications.toasts.addSuccess({
+        title: SAVE_SUCCESS_TITLE,
+        text: SAVE_SUCCESS_TEXT,
+      });
+
+      onClose();
+    } catch (error) {
+      notifications.toasts.addDanger({
+        title: SAVE_ERROR_TITLE,
+        text: error instanceof Error ? error.message : SAVE_ERROR_TEXT,
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [dashboardInput, streamName, http, notifications, onSaveAndAttach, onClose]);
 
   const getCreationOptions = useCallback(async () => {
     if (!dashboardInput) {
@@ -206,6 +261,20 @@ export function DashboardSuggestionPreview({
                   </EuiButton>
                 </EuiFlexItem>
               )}
+              {onSaveAndAttach && dashboardInput && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={handleSaveAndAttach}
+                    fill
+                    iconType="save"
+                    isLoading={isSaving}
+                    disabled={isSaving}
+                    data-test-subj="dashboard_suggestion_preview_save_button"
+                  >
+                    {SAVE_AND_ATTACH_BUTTON_LABEL}
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -249,4 +318,29 @@ const CLOSE_BUTTON_LABEL = i18n.translate(
 const REGENERATE_BUTTON_LABEL = i18n.translate(
   'xpack.streams.dashboardSuggestionPreview.regenerateButtonLabel',
   { defaultMessage: 'Regenerate' }
+);
+
+const SAVE_AND_ATTACH_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.dashboardSuggestionPreview.saveAndAttachButtonLabel',
+  { defaultMessage: 'Save & Attach' }
+);
+
+const SAVE_SUCCESS_TITLE = i18n.translate(
+  'xpack.streams.dashboardSuggestionPreview.saveSuccessTitle',
+  { defaultMessage: 'Dashboard saved' }
+);
+
+const SAVE_SUCCESS_TEXT = i18n.translate(
+  'xpack.streams.dashboardSuggestionPreview.saveSuccessText',
+  { defaultMessage: 'The dashboard has been saved and attached to the stream.' }
+);
+
+const SAVE_ERROR_TITLE = i18n.translate(
+  'xpack.streams.dashboardSuggestionPreview.saveErrorTitle',
+  { defaultMessage: 'Failed to save dashboard' }
+);
+
+const SAVE_ERROR_TEXT = i18n.translate(
+  'xpack.streams.dashboardSuggestionPreview.saveErrorText',
+  { defaultMessage: 'An unexpected error occurred while saving the dashboard.' }
 );

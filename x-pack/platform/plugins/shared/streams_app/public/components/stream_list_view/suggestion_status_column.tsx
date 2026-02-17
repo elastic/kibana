@@ -48,8 +48,10 @@ export function SuggestionStatusColumn({
     );
   }
 
-  // Calculate badge count - only show pipeline suggestions for now
-  const badgeCount = status ? status.pipelineCount : 0;
+  // Calculate badge count - include all suggestion types
+  const badgeCount = status
+    ? status.pipelineCount + (status.dashboardCount ?? 0)
+    : 0;
 
   // No suggestions available for this stream
   if (!status || badgeCount === 0) {
@@ -75,7 +77,7 @@ export function SuggestionStatusColumn({
     }
   };
 
-  // Build suggestion items for the popover - only show pipeline suggestions for now
+  // Build suggestion items for the popover - include all suggestion types
   const suggestionItems: Array<{ count: number; label: string; tab: string }> = [];
 
   if (status.pipelineCount > 0) {
@@ -83,6 +85,14 @@ export function SuggestionStatusColumn({
       count: status.pipelineCount,
       label: getProcessingSuggestionLabel(status.pipelineCount),
       tab: 'processing',
+    });
+  }
+
+  if (status.dashboardCount && status.dashboardCount > 0) {
+    suggestionItems.push({
+      count: status.dashboardCount,
+      label: getDashboardSuggestionLabel(status.dashboardCount),
+      tab: 'content',
     });
   }
 
@@ -186,6 +196,14 @@ function getProcessingSuggestionLabel(count: number): string {
   return i18n.translate('xpack.streams.suggestionStatusColumn.processingSuggestionLabel', {
     defaultMessage:
       '{count, plural, one {# processing suggestion} other {# processing suggestions}}',
+    values: { count },
+  });
+}
+
+function getDashboardSuggestionLabel(count: number): string {
+  return i18n.translate('xpack.streams.suggestionStatusColumn.dashboardSuggestionLabel', {
+    defaultMessage:
+      '{count, plural, one {# dashboard suggestion} other {# dashboard suggestions}}',
     values: { count },
   });
 }

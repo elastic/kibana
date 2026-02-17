@@ -18,6 +18,10 @@ import {
   getFeaturesIdentificationTaskId,
 } from '../../../../lib/tasks/task_definitions/features_identification';
 import { SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE } from '../../../../lib/tasks/task_definitions/significant_events_queries_generation';
+import {
+  STREAMS_DASHBOARD_SUGGESTION_TASK_TYPE,
+  getDashboardSuggestionTaskId,
+} from '../../../../lib/tasks/task_definitions/dashboard_suggestion';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type { SuggestionBulkStatusItem } from '../../../../../common';
 import { createServerRoute } from '../../../create_server_route';
@@ -209,12 +213,13 @@ const SUGGESTION_TASK_TYPES = [
   STREAMS_PIPELINE_SUGGESTION_TASK_TYPE,
   FEATURES_IDENTIFICATION_TASK_TYPE,
   SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
+  STREAMS_DASHBOARD_SUGGESTION_TASK_TYPE,
 ] as const;
 
 /**
  * Bulk status endpoint for suggestions.
  * Used by the streams listing page to show suggestion counts for multiple streams.
- * Includes pipeline suggestions, feature identification, and significant events queries.
+ * Includes pipeline suggestions, feature identification, significant events queries, and dashboard suggestions.
  */
 const pipelineSuggestionBulkStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_pipeline_suggestion/_bulk_status',
@@ -222,7 +227,7 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
     access: 'internal',
     summary: 'Get bulk suggestion status',
     description:
-      'Get suggestion status for multiple streams. Returns counts of available suggestions across all suggestion types (pipeline, features, significant events).',
+      'Get suggestion status for multiple streams. Returns counts of available suggestions across all suggestion types (pipeline, features, significant events, dashboard).',
   },
   security: {
     authz: {
@@ -248,13 +253,14 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
       pipelineCount: number;
       featuresCount: number;
       significantEventsCount: number;
+      dashboardCount: number;
     }
     const streamSuggestionCounts = new Map<string, StreamCounts>();
 
     const getOrCreateCounts = (stream: string): StreamCounts => {
       let counts = streamSuggestionCounts.get(stream);
       if (!counts) {
-        counts = { pipelineCount: 0, featuresCount: 0, significantEventsCount: 0 };
+        counts = { pipelineCount: 0, featuresCount: 0, significantEventsCount: 0, dashboardCount: 0 };
         streamSuggestionCounts.set(stream, counts);
       }
       return counts;
@@ -271,6 +277,8 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
           taskIds = [getFeaturesIdentificationTaskId(streamName)];
         } else if (taskType === SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE) {
           taskIds = [getSignificantEventsQueriesGenerationTaskId(streamName)];
+        } else if (taskType === STREAMS_DASHBOARD_SUGGESTION_TASK_TYPE) {
+          taskIds = [getDashboardSuggestionTaskId(streamName)];
         }
       }
 
@@ -291,6 +299,8 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
             counts.featuresCount += 1;
           } else if (taskType === SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE) {
             counts.significantEventsCount += 1;
+          } else if (taskType === STREAMS_DASHBOARD_SUGGESTION_TASK_TYPE) {
+            counts.dashboardCount += 1;
           }
         }
       }
@@ -300,13 +310,14 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
     const results: SuggestionBulkStatusItem[] = [];
     for (const [stream, counts] of streamSuggestionCounts.entries()) {
       const suggestionCount =
-        counts.pipelineCount + counts.featuresCount + counts.significantEventsCount;
+        counts.pipelineCount + counts.featuresCount + counts.significantEventsCount + counts.dashboardCount;
       results.push({
         stream,
         suggestionCount,
         pipelineCount: counts.pipelineCount,
         featuresCount: counts.featuresCount,
         significantEventsCount: counts.significantEventsCount,
+        dashboardCount: counts.dashboardCount,
       });
     }
 
