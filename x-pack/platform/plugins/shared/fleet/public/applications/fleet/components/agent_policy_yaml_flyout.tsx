@@ -26,12 +26,12 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { MAX_FLYOUT_WIDTH } from '../../../constants';
-import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useStartServices } from '../../../hooks';
-import { Loading } from '../../../components';
-import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
-import { API_VERSIONS } from '../../../../../../common/constants';
-import { splitVersionSuffixFromPolicyId } from '../../../../../../common/services/version_specific_policies_utils';
+import { MAX_FLYOUT_WIDTH } from '../constants';
+import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useStartServices } from '../hooks';
+import { Loading } from '../components';
+import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../services';
+import { API_VERSIONS } from '../../../../common/constants';
+import { splitVersionSuffixFromPolicyId } from '../../../../common/services/version_specific_policies_utils';
 
 const FlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflowContent {
@@ -65,7 +65,7 @@ export const AgentPolicyYamlFlyout = memo<{
       announceOnMount
       title={
         <FormattedMessage
-          id="xpack.fleet.agentPolicyYamlFlyout.errorTitle"
+          id="xpack.fleet.policyDetails.ErrorGettingFullAgentPolicy"
           defaultMessage="Error loading agent policy"
         />
       }
@@ -93,7 +93,7 @@ export const AgentPolicyYamlFlyout = memo<{
             {agentPolicyData?.item ? (
               <>
                 <FormattedMessage
-                  id="xpack.fleet.agentPolicyYamlFlyout.titleWithName"
+                  id="xpack.fleet.policyDetails.yamlflyoutTitleWithName"
                   defaultMessage="''{name}'' agent policy{revisionLabel}{versionLabel}"
                   values={{
                     name: agentPolicyData.item.name,
@@ -120,7 +120,7 @@ export const AgentPolicyYamlFlyout = memo<{
               </>
             ) : (
               <FormattedMessage
-                id="xpack.fleet.agentPolicyYamlFlyout.titleWithoutName"
+                id="xpack.fleet.policyDetails.yamlflyoutTitleWithoutName"
                 defaultMessage="Agent policy"
               />
             )}
@@ -158,7 +158,7 @@ export const AgentPolicyYamlFlyout = memo<{
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={onClose} flush="left">
               <FormattedMessage
-                id="xpack.fleet.agentPolicyYamlFlyout.closeButtonLabel"
+                id="xpack.fleet.policyDetails.yamlFlyoutCloseButtonLabel"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
@@ -170,7 +170,7 @@ export const AgentPolicyYamlFlyout = memo<{
               isDisabled={Boolean(isLoadingYaml && !yamlData)}
             >
               <FormattedMessage
-                id="xpack.fleet.agentPolicyYamlFlyout.downloadButtonLabel"
+                id="xpack.fleet.policyDetails.yamlDownloadButtonLabel"
                 defaultMessage="Download policy"
               />
             </EuiButton>

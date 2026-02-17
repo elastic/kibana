@@ -27,7 +27,7 @@ import {
 } from '../../agent_list_page/components';
 import { UninstallCommandFlyout } from '../../../../components';
 import { AgentRollbackModal } from '../../components/agent_rollback_modal';
-import { AgentPolicyYamlFlyout } from '../../components/agent_policy_yaml_flyout';
+import { AgentPolicyYamlFlyout } from '../../../../components';
 
 import { AgentDetailsJsonFlyout } from './agent_details_json_flyout';
 
