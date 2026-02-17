@@ -14,7 +14,7 @@ import {
   modelVersion6,
   modelVersion7,
   modelVersion8,
-  modelVersion9,
+  modelVersion9
 } from '.';
 
 describe('Model versions', () => {
