@@ -277,19 +277,23 @@ interface CreatedIntegrationRow {
   status: string;
 }
 
-function getStatusColor(status: string): 'default' | 'success' | 'danger' | 'warning' | 'hollow' {
+function getStatusDisplay(status: string): {
+  color: 'success' | 'danger' | 'default' | 'hollow';
+  iconType?: string;
+  label: string;
+  isInProgress?: boolean;
+} {
   switch (status) {
     case 'approved':
     case 'completed':
-      return 'success';
+      return { color: 'success', iconType: 'check', label: 'Success' };
     case 'failed':
     case 'cancelled':
-      return 'danger';
+      return { color: 'danger', iconType: 'cross', label: 'Fail' };
     case 'processing':
-      return 'warning';
     case 'pending':
     default:
-      return 'default';
+      return { color: 'hollow', label: 'In progress', isInProgress: true };
   }
 }
 
@@ -421,7 +425,26 @@ const ManageIntegrationsTable: React.FC<{
             defaultMessage="Status"
           />
         ),
-        render: (status: string) => <EuiBadge color={getStatusColor(status)}>{status}</EuiBadge>,
+        render: (status: string) => {
+          const { color, iconType, label, isInProgress } = getStatusDisplay(status);
+          if (isInProgress) {
+            return (
+              <EuiBadge color={color}>
+                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="s" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiBadge>
+            );
+          }
+          return (
+            <EuiBadge color={color} iconType={iconType}>
+              {label}
+            </EuiBadge>
+          );
+        },
       },
     ],
     [application, userProfiles]
