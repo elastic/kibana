@@ -56,6 +56,8 @@ export const MainNavigation = () => {
 
   const historySection = isHistoryEnabled ? Section.History : Section.LiveQueries;
   const historyNavProps = useRouterNavigate(historySection);
+  const packsNavProps = useRouterNavigate(Section.Packs);
+  const savedQueriesNavProps = useRouterNavigate(Section.SavedQueries);
   const newQueryNavProps = useRouterNavigate('/new');
 
   const canRunQuery =
@@ -126,16 +128,13 @@ export const MainNavigation = () => {
                 defaultMessage="History"
               />
             </EuiTab>
-            <EuiTab isSelected={section === Section.Packs} {...useRouterNavigate(Section.Packs)}>
+            <EuiTab isSelected={section === Section.Packs} {...packsNavProps}>
               <FormattedMessage
                 id="xpack.osquery.appNavigation.packsLinkText"
                 defaultMessage="Packs"
               />
             </EuiTab>
-            <EuiTab
-              isSelected={section === Section.SavedQueries}
-              {...useRouterNavigate(Section.SavedQueries)}
-            >
+            <EuiTab isSelected={section === Section.SavedQueries} {...savedQueriesNavProps}>
               <FormattedMessage
                 id="xpack.osquery.appNavigation.queriesLinkText"
                 defaultMessage="Queries"
@@ -158,16 +157,13 @@ export const MainNavigation = () => {
                 defaultMessage="Live queries"
               />
             </EuiTab>
-            <EuiTab isSelected={section === Section.Packs} {...useRouterNavigate(Section.Packs)}>
+            <EuiTab isSelected={section === Section.Packs} {...packsNavProps}>
               <FormattedMessage
                 id="xpack.osquery.appNavigation.packsLinkText"
                 defaultMessage="Packs"
               />
             </EuiTab>
-            <EuiTab
-              isSelected={section === Section.SavedQueries}
-              {...useRouterNavigate(Section.SavedQueries)}
-            >
+            <EuiTab isSelected={section === Section.SavedQueries} {...savedQueriesNavProps}>
               <FormattedMessage
                 id="xpack.osquery.appNavigation.savedQueriesLinkText"
                 defaultMessage="Saved queries"
