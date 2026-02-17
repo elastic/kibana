@@ -17,6 +17,7 @@ import {
   EuiContextMenuItem,
   EuiPopover,
   useGeneratedHtmlId,
+  useEuiTheme,
   EuiPopoverTitle,
   EuiHorizontalRule,
   EuiToolTip,
@@ -63,6 +64,15 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
     const [previewTabId, setPreviewTabId] = useState<string | null>(null);
     const [menuOpenedAt, setMenuOpenedAt] = useState<number | null>(null);
     const contextMenuPopoverId = useGeneratedHtmlId();
+    const { euiTheme } = useEuiTheme();
+
+    const recentlyClosedContextMenuCss = useMemo(() => {
+      return css`
+        && .euiContextMenuPanel__title.euiContextMenuItem {
+          padding: ${euiTheme.size.s};
+        }
+      `;
+    }, [euiTheme.size.s]);
 
     const menuButtonLabel = i18n.translate('unifiedTabs.tabsBarMenu.tabsBarMenuButton', {
       defaultMessage: 'Tabs menu',
@@ -131,7 +141,6 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
           onClick,
           'data-test-subj': `unifiedTabs_tabsMenu_openedTab_${tab.id}`,
           'aria-label': ariaLabel,
-          size: 's',
         };
       });
 
@@ -139,7 +148,6 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
         {
           id: OPENED_TABS_ROOT_PANEL_ID,
           items: openedTabItems,
-          size: 's',
         },
       ];
     }, [
@@ -244,7 +252,6 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
             rootItems.push({
               name,
               onClick,
-              size: 's',
               // Preserve existing test id for single items.
               'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedTab_${tab.id}`,
             });
@@ -273,26 +280,19 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
           ),
           panel: groupPanelId,
           'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedGroup_${closedAt}`,
-          size: 's',
         });
 
         const groupPanelItems: EuiContextMenuPanelItemDescriptor[] = [
           {
+            name: i18n.translate('unifiedTabs.tabsBarMenu.restoreAllTabs', {
+              defaultMessage: 'Restore all tabs',
+            }),
             key: 'restoreAllTabs',
-            renderItem: () => (
-              <EuiContextMenuItem
-                size="s"
-                onClick={() => {
-                  onRestoreRecentlyClosedGroup(groupItems);
-                  closePopover();
-                }}
-                data-test-subj="unifiedTabs_tabsMenu_restoreAllTabs"
-              >
-                {i18n.translate('unifiedTabs.tabsBarMenu.restoreAllTabs', {
-                  defaultMessage: 'Restore all tabs',
-                })}
-              </EuiContextMenuItem>
-            ),
+            onClick: () => {
+              onRestoreRecentlyClosedGroup(groupItems);
+              closePopover();
+            },
+            'data-test-subj': 'unifiedTabs_tabsMenu_restoreAllTabs',
           },
           {
             key: 'restoreAllTabsSeparator',
@@ -336,7 +336,6 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
             return {
               name,
               onClick,
-              size: 's',
               'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedGroupTab_${tab.id}`,
             };
           }),
@@ -349,14 +348,12 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
             values: { count: groupItems.length },
           }),
           items: groupPanelItems,
-          size: 's',
         });
       }
 
       panels.unshift({
         id: RECENTLY_CLOSED_ROOT_PANEL_ID,
         items: rootItems,
-        size: 's',
       });
 
       return panels;
@@ -454,6 +451,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
               </EuiPopoverTitle>
               <div css={sectionListCss}>
                 <EuiContextMenu
+                  css={recentlyClosedContextMenuCss}
                   size="s"
                   initialPanelId={RECENTLY_CLOSED_ROOT_PANEL_ID}
                   panels={recentlyClosedPanels}
