@@ -103,7 +103,10 @@ export const validateRuleResponseActions = async <
 
   for (const actionData of responseActionsToValidate) {
     if (isEndpointResponseAction(actionData)) {
-      validateEndpointResponseActionAuthz(endpointAuthz, actionData.params.command);
+      validateEndpointResponseActionAuthz(
+        endpointAuthz,
+        actionData.params.command as EnabledAutomatedResponseActionsCommands
+      );
 
       // Individual response action payload validations
       switch (actionData.params.command) {
