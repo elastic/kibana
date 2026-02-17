@@ -173,6 +173,7 @@ export class TutorialsRegistry {
     return {
       kibanaBranch: this.initContext.env.packageInfo.branch,
       staticAssets: this.staticAssets,
+      isServerless: this.isServerless,
     };
   }
 }

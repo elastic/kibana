@@ -9,6 +9,7 @@
 
 export enum SuggestionCategory {
   CUSTOM_ACTION = 'custom_action',
+  PROMQL_METRIC_QUALIFIER = 'promql_metric_qualifier', // PromQL label selector {}, range selector [5m]
   LANGUAGE_KEYWORD = 'language_keyword', // BY, WHERE, ON, WITH, AS
   CONSTANT_VALUE = 'constant_value', // Prompt text, query text constants
   USER_DEFINED_COLUMN = 'user_defined_column',
