@@ -9,6 +9,7 @@
 
 import { combineLatest, from } from 'rxjs';
 import { map, tap, switchMap } from 'rxjs';
+import type { estypes } from '@elastic/elasticsearch';
 import type { IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import type { SearchRequest, DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -19,14 +20,26 @@ import type { RequestResponder } from '@kbn/inspector-plugin/public';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { VegaInspectorAdapters } from '../vega_inspector';
 
+interface DeprecatedBodyParams {
+  /**
+   * The `body` parameter is no longer supported in the ES client.
+   * The `body.runtime_mappings` will be overridden by the `runtime_mappings` parameter.
+   *
+   * see https://github.com/elastic/kibana/issues/253545
+   *
+   * @deprecated
+   */
+  body?: estypes.SearchRequest['body'] & Pick<estypes.SearchRequest, 'runtime_mappings'>;
+}
+
 /** @internal **/
 export const extendSearchParamsWithRuntimeFields = async (
   indexPatterns: SearchAPIDependencies['indexPatterns'],
-  requestParams: ReturnType<typeof getSearchParamsFromRequest>,
+  requestParams: Omit<ReturnType<typeof getSearchParamsFromRequest>, 'body'> & DeprecatedBodyParams,
   indexPatternString?: string
 ) => {
   if (indexPatternString) {
-    let runtimeMappings = requestParams.runtime_mappings;
+    let runtimeMappings = requestParams.runtime_mappings ?? requestParams.body?.runtime_mappings;
 
     if (!runtimeMappings) {
       const indexPattern = (await indexPatterns.find(indexPatternString, 1)).find(
