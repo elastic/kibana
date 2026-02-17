@@ -1812,7 +1812,7 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 /x-pack/solutions/observability/test/serverless/functional/test_suites @elastic/observability-ui
 /src/platform/test/functional/apps/discover/observability @elastic/observability-ui
 
-# obs-exploration-team 
+# obs-exploration-team
 /x-pack/solutions/observability/test/serverless/functional/test_suites/discover/logs/ @elastic/obs-exploration-team
 /x-pack/solutions/observability/test/serverless/functional/utils/ @elastic/obs-exploration-team
 /src/platform/test/functional/apps/discover/observability/logs/ @elastic/obs-exploration-team
@@ -1970,6 +1970,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /.buildkite/scripts/steps/esql_generate_function_metadata.sh @elastic/kibana-esql
 /.buildkite/pipelines/esql_grammar_sync.yml @elastic/kibana-esql
 /.buildkite/scripts/steps/code_generation/security_solution_codegen.sh @elastic/security-detection-rule-management
+/.buildkite/scripts/steps/code_generation/cases_codegen.sh @elastic/kibana-cases
 /.buildkite/scripts/steps/security @elastic/kibana-security
 /.buildkite/scripts/steps/entity_store_performance @elastic/contextual-security
 /kbn_pm/ @elastic/kibana-operations
@@ -2663,13 +2664,14 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 ## Security Solution sub teams - security-engineering-productivity
 ## NOTE: It's important to keep this above other teams' sections because test automation doesn't process
 ## the CODEOWNERS file correctly. See https://github.com/elastic/kibana/issues/173307#issuecomment-1855858929
+/x-pack/solutions/security/.cursor/bug_validator.mdc @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/.cursor/rules/flaky_test_doctor.mdc @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/api_calls/common.ts @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
-/x-pack/solutions/security/plugins/security_solution/scripts/run_cypress @patrykkopycinski @maximpn @banderror
+/x-pack/solutions/security/plugins/security_solution/scripts/run_cypress @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/test/scout @elastic/security-engineering-productivity
 
 ## Security Solution sub teams - Cloud Security Posture
@@ -3187,6 +3189,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/platform/test/accessibility/apps/kibana_overview_* @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files/cab99bce5ac2082fa77222beebe3b61ff836b94b#r1846659920
 /x-pack/platform/test/functional/services/sample_data @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200142#discussion_r1846512756
 /src/platform/test/functional/page_objects/files_management.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200017#discussion_r1840477291
+/src/platform/plugins/private/advanced_settings/test/scout/ui @elastic/appex-sharedux
 /src/platform/test/accessibility/apps/home.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840077237
 /src/platform/test/api_integration/apis/home/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840077065
 /src/platform/test/functional/apps/home @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840075278
@@ -3196,7 +3199,6 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/platform/test/functional/services/user_menu.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/179270
 /x-pack/platform/test/accessibility/apps/**/config.ts @elastic/appex-sharedux
 /x-pack/platform/test/accessibility/apps/**/index.ts @elastic/appex-sharedux
-/x-pack/platform/test/functional/apps/advanced_settings @elastic/appex-sharedux
 /src/platform/test/functional/services/monaco_editor.ts @elastic/appex-sharedux
 /x-pack/platform/test/functional/fixtures/kbn_archives/global_search @elastic/appex-sharedux
 /src/platform/test/api_integration/fixtures/unused_urls_task @elastic/appex-sharedux

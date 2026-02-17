@@ -11,13 +11,12 @@ import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { ruleDetailsUrl } from '../../../../urls/rule_details';
 import { createRule } from '../../../../tasks/api_calls/rules';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import { TOASTER } from '../../../../screens/alerts_detection_rules';
 import {
   filterGapsByStatus,
   getGapsTableRows,
-  goToExecutionLogTab,
   refreshGapsTable,
+  waitForPageToBeLoaded,
 } from '../../../../tasks/rule_details';
 import { getNewRule } from '../../../../objects/rule';
 import {
@@ -43,6 +42,7 @@ describe('Rule gaps', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
     deleteAlertsAndRules();
     createRule(getNewRule()).then((rule) => {
       cy.wrap(rule.body.id).as('ruleId');
+      cy.wrap(rule.body.name).as('ruleName');
     });
   });
 
@@ -52,9 +52,8 @@ describe('Rule gaps', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
     interceptFillGap();
 
     // Visit rule details and go to execution log tab
-    visit(ruleDetailsUrl(this.ruleId));
-    waitForAlertsToPopulate();
-    goToExecutionLogTab();
+    visit(ruleDetailsUrl(this.ruleId, 'execution_results'));
+    waitForPageToBeLoaded(this.ruleName);
     cy.wait('@getRuleGaps');
 
     // Check gaps table is displayed with metrics
