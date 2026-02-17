@@ -20,6 +20,7 @@ import { timeRangeFilter, termFilter } from '../../utils/dsl_filters';
 import { unwrapEsFields } from '../../utils/unwrap_es_fields';
 import { getTotalHits } from '../../utils/get_total_hits';
 import { getTraceIds } from './get_trace_ids';
+import { DEFAULT_TRACE_FIELDS } from './constants';
 
 export async function fetchTraceDocuments({
   esClient,
@@ -91,7 +92,7 @@ export async function getToolHandler({
   end,
   index,
   kqlFilter,
-  fields,
+  fields = DEFAULT_TRACE_FIELDS,
   maxTraces,
   maxDocsPerTrace,
 }: {
@@ -103,7 +104,7 @@ export async function getToolHandler({
   end: string;
   index?: string;
   kqlFilter: string;
-  fields: string[];
+  fields?: string[];
   maxTraces: number;
   maxDocsPerTrace: number;
 }) {

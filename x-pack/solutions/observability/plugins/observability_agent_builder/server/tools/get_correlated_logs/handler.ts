@@ -62,39 +62,6 @@ export function getNoResultsMessage({
     .join(', ')}.`;
 }
 
-export async function getCorrelatedLogsForLogEntry({
-  core,
-  logger,
-  esClient,
-  index,
-  start,
-  end,
-  logId,
-}: {
-  core: ObservabilityAgentBuilderCoreSetup;
-  logger: Logger;
-  esClient: IScopedClusterClient;
-  index: string;
-  start: string;
-  end: string;
-  logId: string;
-}) {
-  return getToolHandler({
-    core,
-    logger,
-    esClient,
-    index,
-    start,
-    end,
-    logId,
-    errorLogsOnly: false,
-    correlationFields: DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
-    logSourceFields: DEFAULT_LOG_SOURCE_FIELDS,
-    maxSequences: DEFAULT_MAX_SEQUENCES,
-    maxLogsPerSequence: DEFAULT_MAX_LOGS_PER_SEQUENCE,
-  });
-}
-
 export async function getToolHandler({
   core,
   logger,
