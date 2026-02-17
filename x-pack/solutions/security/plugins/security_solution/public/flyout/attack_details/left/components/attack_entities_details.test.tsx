@@ -12,7 +12,9 @@ import { AttackDetailsContext } from '../../context';
 import { AttackEntitiesDetails } from './attack_entities_details';
 
 jest.mock('@kbn/i18n-react', () => ({
-  FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => <span>{defaultMessage}</span>,
+  FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => (
+    <span>{defaultMessage}</span>
+  ),
 }));
 
 jest.mock('../../hooks/use_header_data', () => ({
@@ -33,7 +35,12 @@ jest.mock('../../../document_details/left/components/user_details', () => ({
     timestamp: string;
     scopeId: string;
   }) => (
-    <div data-test-subj="user-details" data-user-name={userName} data-timestamp={timestamp} data-scope-id={scopeId}>
+    <div
+      data-test-subj="user-details"
+      data-user-name={userName}
+      data-timestamp={timestamp}
+      data-scope-id={scopeId}
+    >
       UserDetails: {userName}
     </div>
   ),
@@ -49,7 +56,12 @@ jest.mock('../../../document_details/left/components/host_details', () => ({
     timestamp: string;
     scopeId: string;
   }) => (
-    <div data-test-subj="host-details" data-host-name={hostName} data-timestamp={timestamp} data-scope-id={scopeId}>
+    <div
+      data-test-subj="host-details"
+      data-host-name={hostName}
+      data-timestamp={timestamp}
+      data-scope-id={scopeId}
+    >
       HostDetails: {hostName}
     </div>
   ),
@@ -74,7 +86,11 @@ const renderWithProvider = (ui: React.ReactElement) =>
   render(
     <EuiProvider>
       <AttackDetailsContext.Provider
-        value={mockContextValue as unknown as React.ComponentProps<typeof AttackDetailsContext.Provider>['value']}
+        value={
+          mockContextValue as unknown as React.ComponentProps<
+            typeof AttackDetailsContext.Provider
+          >['value']
+        }
       >
         {ui}
       </AttackDetailsContext.Provider>
