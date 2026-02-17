@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fromPromise } from 'xstate5';
+import { fromPromise } from 'xstate';
 import type { IToasts, NotificationsStart } from '@kbn/core/public';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { streamlangDSLSchema, type StreamlangDSL } from '@kbn/streamlang';

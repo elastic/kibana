@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createActor, fromPromise, type AnyActorRef } from 'xstate5';
+import { createActor, fromPromise, type AnyActorRef } from 'xstate';
 import { TaskStatus } from '@kbn/streams-schema';
 import type { GrokCollection } from '@kbn/grok-ui';
 import type { StreamlangDSL } from '@kbn/streamlang/types/streamlang';

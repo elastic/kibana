@@ -19,7 +19,7 @@ import type {
 } from '@kbn/streamlang';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { Streams } from '@kbn/streams-schema';
-import type { StateValue } from 'xstate5';
+import type { StateValue } from 'xstate';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import type { MappedSchemaField } from '../../../schema_editor/types';
