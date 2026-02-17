@@ -45,10 +45,6 @@ export interface BuildAlertEventsBaseOpts {
   scheduledTimestamp: string;
 }
 
-export interface BuildAlertEventsStreamOpts extends BuildAlertEventsBaseOpts {
-  rowBatchStream: AsyncIterable<Array<Record<string, unknown>>>;
-}
-
 export type AlertEventsBatchBuilder = (batch: Array<Record<string, unknown>>) => AlertEvent[];
 
 export function createAlertEventsBatchBuilder({
@@ -99,29 +95,4 @@ export function createAlertEventsBatchBuilder({
 
     return alertEventsBatch;
   };
-}
-
-export async function* buildAlertEventsFromRowBatchStream({
-  ruleId,
-  ruleVersion,
-  spaceId,
-  ruleAttributes,
-  rowBatchStream,
-  scheduledTimestamp,
-}: BuildAlertEventsStreamOpts): AsyncIterable<AlertEvent[]> {
-  const buildBatch = createAlertEventsBatchBuilder({
-    ruleId,
-    ruleVersion,
-    spaceId,
-    ruleAttributes,
-    scheduledTimestamp,
-  });
-
-  for await (const batch of rowBatchStream) {
-    const alertEventsBatch = buildBatch(batch);
-
-    if (alertEventsBatch.length > 0) {
-      yield alertEventsBatch;
-    }
-  }
 }
