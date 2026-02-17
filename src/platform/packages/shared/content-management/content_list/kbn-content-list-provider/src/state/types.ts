@@ -15,10 +15,8 @@ import type { ActiveFilters } from '../datasource';
  * Action type constants for state reducer.
  */
 export const CONTENT_LIST_ACTIONS = {
-  /** Update the search query text (the serialized `EuiSearchBar` `Query`). */
-  SET_SEARCH_QUERY: 'SET_SEARCH_QUERY',
-  /** Update the active filters (parsed from query text by the toolbar). */
-  SET_FILTERS: 'SET_FILTERS',
+  /** Atomically update the search query text and parsed filters. */
+  SET_SEARCH: 'SET_SEARCH',
   /** Clear all filters and reset query text. */
   CLEAR_FILTERS: 'CLEAR_FILTERS',
   /** Set sort field and direction. */
@@ -54,7 +52,7 @@ export interface ContentListClientState {
   /**
    * Parsed filter state used to drive data fetching.
    *
-   * Updated via `SET_FILTERS`; derived from `search.queryText` by the toolbar.
+   * Updated atomically with `search.queryText` via `SET_SEARCH`.
    * When no tag service is configured, `filters.search` equals `search.queryText`.
    * When tag parsing is available, `filters.search` contains only the free-text
    * portion and `filters.tags` holds the structured tag filters.
@@ -116,16 +114,10 @@ export interface ContentListQueryData {
  */
 export type ContentListState = ContentListClientState & ContentListQueryData;
 
-/** Update the search query text. */
-interface SetSearchQueryAction {
-  type: typeof CONTENT_LIST_ACTIONS.SET_SEARCH_QUERY;
-  payload: string;
-}
-
-/** Update the active filters. */
-interface SetFiltersAction {
-  type: typeof CONTENT_LIST_ACTIONS.SET_FILTERS;
-  payload: ActiveFilters;
+/** Atomically update both the query text and the parsed filters. */
+interface SetSearchAction {
+  type: typeof CONTENT_LIST_ACTIONS.SET_SEARCH;
+  payload: { queryText: string; filters: ActiveFilters };
 }
 
 /** Clear all filters and search text. */
@@ -145,8 +137,7 @@ interface SetSortAction {
  * @internal Used by the state reducer and dispatch function.
  */
 export type ContentListAction =
-  | SetSearchQueryAction
-  | SetFiltersAction
+  | SetSearchAction
   | ClearFiltersAction
   | SetSortAction
   | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_INDEX; payload: { index: number } }

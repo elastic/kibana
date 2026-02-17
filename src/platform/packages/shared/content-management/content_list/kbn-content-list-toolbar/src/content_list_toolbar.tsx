@@ -11,12 +11,7 @@ import React, { useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { EuiSearchBar } from '@elastic/eui';
 import type { EuiSearchBarOnChangeArgs } from '@elastic/eui';
-import {
-  useContentListConfig,
-  useContentListSearch,
-  useContentListState,
-  CONTENT_LIST_ACTIONS,
-} from '@kbn/content-list-provider';
+import { useContentListConfig, useContentListSearch } from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
 import { Filters } from './filters';
 import { useFilters } from './hooks';
@@ -72,7 +67,6 @@ const ContentListToolbarComponent = ({
 }: ContentListToolbarProps) => {
   const { labels } = useContentListConfig();
   const { search, setSearch, isSupported: searchIsSupported } = useContentListSearch();
-  const { dispatch } = useContentListState();
   const filters = useFilters(children);
 
   const handleSearchChange = useCallback(
@@ -80,13 +74,11 @@ const ContentListToolbarComponent = ({
       if (error) {
         return;
       }
-      setSearch(queryText);
-      dispatch({
-        type: CONTENT_LIST_ACTIONS.SET_FILTERS,
-        payload: { search: queryText.trim() || undefined },
-      });
+      // `queryText` preserves the raw input (including whitespace) for display fidelity.
+      // `filters.search` is trimmed so data fetching ignores leading/trailing spaces.
+      setSearch(queryText, { search: queryText.trim() || undefined });
     },
-    [setSearch, dispatch]
+    [setSearch]
   );
 
   return (

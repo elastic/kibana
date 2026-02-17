@@ -11,6 +11,7 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { ContentListProvider } from '../../context';
 import type { FindItemsResult, FindItemsParams } from '../../datasource';
+import { useContentListState } from '../../state';
 import { useContentListSearch } from './use_content_list_search';
 
 describe('useContentListSearch', () => {
@@ -21,17 +22,27 @@ describe('useContentListSearch', () => {
     })
   );
 
-  const createWrapper = (options?: { initialSearch?: string; searchDisabled?: boolean }) => {
-    const { initialSearch, searchDisabled } = options ?? {};
+  const createWrapper = (options?: {
+    initialSearch?: string;
+    searchDisabled?: boolean;
+    pagination?: { initialPageSize: number };
+  }) => {
+    const { initialSearch, searchDisabled, pagination } = options ?? {};
 
     const resolveFeatures = () => {
+      const base: Record<string, unknown> = {};
+
       if (searchDisabled) {
-        return { search: false as const };
+        base.search = false as const;
+      } else if (initialSearch) {
+        base.search = { initialSearch };
       }
-      if (initialSearch) {
-        return { search: { initialSearch } };
+
+      if (pagination) {
+        base.pagination = pagination;
       }
-      return undefined;
+
+      return Object.keys(base).length > 0 ? base : undefined;
     };
 
     const features = resolveFeatures();
@@ -93,7 +104,7 @@ describe('useContentListSearch', () => {
       });
 
       act(() => {
-        result.current.setSearch('dashboard');
+        result.current.setSearch('dashboard', { search: 'dashboard' });
       });
 
       expect(result.current.search).toBe('dashboard');
@@ -105,7 +116,7 @@ describe('useContentListSearch', () => {
       });
 
       act(() => {
-        result.current.setSearch('');
+        result.current.setSearch('', { search: undefined });
       });
 
       expect(result.current.search).toBe('');
@@ -119,7 +130,7 @@ describe('useContentListSearch', () => {
       const initialSearch = result.current.search;
 
       act(() => {
-        result.current.setSearch('should not update');
+        result.current.setSearch('should not update', { search: 'should not update' });
       });
 
       // Search should not change when disabled.
@@ -132,15 +143,15 @@ describe('useContentListSearch', () => {
       });
 
       act(() => {
-        result.current.setSearch('first');
+        result.current.setSearch('first', { search: 'first' });
       });
 
       act(() => {
-        result.current.setSearch('second');
+        result.current.setSearch('second', { search: 'second' });
       });
 
       act(() => {
-        result.current.setSearch('third');
+        result.current.setSearch('third', { search: 'third' });
       });
 
       expect(result.current.search).toBe('third');
@@ -173,6 +184,39 @@ describe('useContentListSearch', () => {
       );
 
       consoleSpy.mockRestore();
+    });
+  });
+
+  describe('state integration', () => {
+    it('updates filters and resets page index when setSearch is called', () => {
+      const { result } = renderHook(
+        () => ({
+          searchHook: useContentListSearch(),
+          stateHook: useContentListState(),
+        }),
+        {
+          wrapper: createWrapper({ pagination: { initialPageSize: 10 } }),
+        }
+      );
+
+      // Advance to page 2 first so we can verify the reset.
+      act(() => {
+        result.current.stateHook.dispatch({
+          type: 'SET_PAGE_INDEX',
+          payload: { index: 2 },
+        });
+      });
+
+      expect(result.current.stateHook.state.page.index).toBe(2);
+
+      // Calling `setSearch` should update filters and reset page index to 0.
+      act(() => {
+        result.current.searchHook.setSearch('dashboard', { search: 'dashboard' });
+      });
+
+      expect(result.current.stateHook.state.filters).toEqual({ search: 'dashboard' });
+      expect(result.current.stateHook.state.page.index).toBe(0);
+      expect(result.current.stateHook.state.page.size).toBe(10);
     });
   });
 });

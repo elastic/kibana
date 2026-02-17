@@ -112,98 +112,74 @@ describe('state_reducer', () => {
     });
   });
 
-  describe('SET_SEARCH_QUERY', () => {
-    it('sets search query text', () => {
+  describe('SET_SEARCH', () => {
+    it('sets search query text and filters atomically', () => {
       const initialState = createInitialState();
       const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_SEARCH_QUERY,
-        payload: 'dashboard',
+        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
+        payload: { queryText: 'dashboard', filters: { search: 'dashboard' } },
       };
 
       const newState = reducer(initialState, action);
 
       expect(newState.search.queryText).toBe('dashboard');
-    });
-
-    it('does not update filters', () => {
-      const initialState = createInitialState();
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_SEARCH_QUERY,
-        payload: 'dashboard',
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.filters).toEqual(DEFAULT_FILTERS);
-    });
-
-    it('preserves sort when setting search query', () => {
-      const initialState = createInitialState({
-        sort: { field: 'title', direction: 'asc' },
-      });
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_SEARCH_QUERY,
-        payload: 'test query',
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.sort).toEqual({ field: 'title', direction: 'asc' });
-    });
-  });
-
-  describe('SET_FILTERS', () => {
-    it('sets filters', () => {
-      const initialState = createInitialState();
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_FILTERS,
-        payload: { search: 'dashboard' },
-      };
-
-      const newState = reducer(initialState, action);
-
       expect(newState.filters).toEqual({ search: 'dashboard' });
     });
 
-    it('does not update search query text', () => {
-      const initialState = createInitialState({
-        search: { queryText: 'existing' },
-      });
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_FILTERS,
-        payload: { search: 'new filter' },
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.search.queryText).toBe('existing');
-    });
-
-    it('preserves sort when setting filters', () => {
-      const initialState = createInitialState({
-        sort: { field: 'title', direction: 'asc' },
-      });
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_FILTERS,
-        payload: { search: 'test' },
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.sort).toEqual({ field: 'title', direction: 'asc' });
-    });
-
-    it('resets page index to 0 when filters change', () => {
+    it('resets page index to 0 when search changes', () => {
       const initialState = createInitialState({ page: { index: 5, size: 20 } });
       const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_FILTERS,
-        payload: { search: 'dashboard' },
+        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
+        payload: { queryText: 'dashboard', filters: { search: 'dashboard' } },
       };
 
       const newState = reducer(initialState, action);
 
       expect(newState.page.index).toBe(0);
       expect(newState.page.size).toBe(20);
+    });
+
+    it('preserves sort when setting search', () => {
+      const initialState = createInitialState({
+        sort: { field: 'title', direction: 'asc' },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
+        payload: { queryText: 'test query', filters: { search: 'test query' } },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.sort).toEqual({ field: 'title', direction: 'asc' });
+    });
+
+    it('allows filters to differ from query text (e.g. tag syntax)', () => {
+      const initialState = createInitialState();
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
+        payload: { queryText: 'tag:prod my search', filters: { search: 'my search' } },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.search.queryText).toBe('tag:prod my search');
+      expect(newState.filters).toEqual({ search: 'my search' });
+    });
+
+    it('clears filters when search text is empty', () => {
+      const initialState = createInitialState({
+        search: { queryText: 'existing' },
+        filters: { search: 'existing' },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
+        payload: { queryText: '', filters: { search: undefined } },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.search.queryText).toBe('');
+      expect(newState.filters).toEqual({ search: undefined });
     });
   });
 
@@ -361,11 +337,11 @@ describe('state_reducer', () => {
       expect(initialState.filters).toBe(originalFilters);
     });
 
-    it('returns a new state object for SET_SEARCH_QUERY', () => {
+    it('returns a new state object for SET_SEARCH', () => {
       const initialState = createInitialState();
       const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_SEARCH_QUERY,
-        payload: 'test',
+        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
+        payload: { queryText: 'test', filters: { search: 'test' } },
       };
 
       const newState = reducer(initialState, action);
@@ -373,39 +349,17 @@ describe('state_reducer', () => {
       expect(newState).not.toBe(initialState);
     });
 
-    it('does not mutate the original search on SET_SEARCH_QUERY', () => {
+    it('does not mutate the original search or filters on SET_SEARCH', () => {
       const initialState = createInitialState();
       const originalSearch = initialState.search;
-
-      reducer(initialState, {
-        type: CONTENT_LIST_ACTIONS.SET_SEARCH_QUERY,
-        payload: 'test',
-      });
-
-      expect(initialState.search).toBe(originalSearch);
-    });
-
-    it('returns a new state object for SET_FILTERS', () => {
-      const initialState = createInitialState();
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_FILTERS,
-        payload: { search: 'test' },
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState).not.toBe(initialState);
-    });
-
-    it('does not mutate the original filters on SET_FILTERS', () => {
-      const initialState = createInitialState();
       const originalFilters = initialState.filters;
 
       reducer(initialState, {
-        type: CONTENT_LIST_ACTIONS.SET_FILTERS,
-        payload: { search: 'test' },
+        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
+        payload: { queryText: 'test', filters: { search: 'test' } },
       });
 
+      expect(initialState.search).toBe(originalSearch);
       expect(initialState.filters).toBe(originalFilters);
     });
 

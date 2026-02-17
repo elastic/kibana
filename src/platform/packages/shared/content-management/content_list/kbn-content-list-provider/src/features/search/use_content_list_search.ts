@@ -11,6 +11,7 @@ import { useCallback } from 'react';
 import { useContentListState } from '../../state/use_content_list_state';
 import { useContentListConfig } from '../../context';
 import { CONTENT_LIST_ACTIONS } from '../../state/types';
+import type { ActiveFilters } from '../../datasource';
 
 /**
  * Return type for the {@link useContentListSearch} hook.
@@ -18,8 +19,14 @@ import { CONTENT_LIST_ACTIONS } from '../../state/types';
 export interface UseContentListSearchReturn {
   /** Current search text (empty string when no search is active). */
   search: string;
-  /** Updates the search text. No-op if search is disabled. */
-  setSearch: (text: string) => void;
+  /**
+   * Atomically updates the query text and parsed filters in a single dispatch.
+   * No-op if search is disabled.
+   *
+   * @param queryText - The raw `EuiSearchBar` query text (may include filter syntax).
+   * @param filters - The parsed {@link ActiveFilters} derived from `queryText`.
+   */
+  setSearch: (queryText: string, filters: ActiveFilters) => void;
   /** Whether search is supported (enabled via features). */
   isSupported: boolean;
 }
@@ -27,15 +34,10 @@ export interface UseContentListSearchReturn {
 /**
  * Hook to access and control the search query text.
  *
- * Returns the raw `EuiSearchBar` query text (`search.queryText`) and a setter.
- * When search is disabled via `features.search: false`, `setSearch` becomes a no-op
- * and `isSupported` returns `false`.
- *
- * **Important**: `setSearch` only updates the displayed query text. It does
- * **not** update `filters` (which drives data fetching). Callers must also
- * dispatch `SET_FILTERS` so the query actually refetches. `ContentListToolbar`
- * handles this automatically — use this hook directly only when building a
- * custom search UI.
+ * Returns the raw `EuiSearchBar` query text (`search.queryText`) and a setter
+ * that atomically updates both the displayed query text and the parsed filters
+ * used for data fetching. When search is disabled via `features.search: false`,
+ * `setSearch` becomes a no-op and `isSupported` returns `false`.
  *
  * @throws Error if used outside `ContentListProvider`.
  * @returns Object containing `search` text, `setSearch` function, and `isSupported` flag.
@@ -44,18 +46,12 @@ export interface UseContentListSearchReturn {
  * ```tsx
  * const SearchInput = () => {
  *   const { search, setSearch, isSupported } = useContentListSearch();
- *   const { dispatch } = useContentListState();
  *
  *   if (!isSupported) return null;
  *
  *   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
  *     const text = e.target.value;
- *     setSearch(text);
- *     // Also update filters so the query refetches.
- *     dispatch({
- *       type: CONTENT_LIST_ACTIONS.SET_FILTERS,
- *       payload: { search: text.trim() || undefined },
- *     });
+ *     setSearch(text, { search: text.trim() || undefined });
  *   };
  *
  *   return (
@@ -73,11 +69,14 @@ export const useContentListSearch = (): UseContentListSearchReturn => {
   const { state, dispatch } = useContentListState();
 
   const setSearch = useCallback(
-    (text: string) => {
+    (queryText: string, filters: ActiveFilters) => {
       if (!supports.search) {
         return;
       }
-      dispatch({ type: CONTENT_LIST_ACTIONS.SET_SEARCH_QUERY, payload: text });
+      dispatch({
+        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
+        payload: { queryText, filters },
+      });
     },
     [dispatch, supports.search]
   );

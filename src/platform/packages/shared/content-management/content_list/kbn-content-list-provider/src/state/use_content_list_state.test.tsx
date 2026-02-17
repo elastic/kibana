@@ -75,33 +75,19 @@ describe('useContentListState', () => {
     expect(state).toHaveProperty('isFetching');
   });
 
-  it('dispatch updates search query text', () => {
+  it('dispatch updates search query text and filters atomically', () => {
     const { result } = renderHook(() => useContentListState(), {
       wrapper: createWrapper(),
     });
 
     act(() => {
       result.current.dispatch({
-        type: CONTENT_LIST_ACTIONS.SET_SEARCH_QUERY,
-        payload: 'test query',
+        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
+        payload: { queryText: 'test query', filters: { search: 'test query' } },
       });
     });
 
     expect(result.current.state.search.queryText).toBe('test query');
-  });
-
-  it('dispatch updates filters', () => {
-    const { result } = renderHook(() => useContentListState(), {
-      wrapper: createWrapper(),
-    });
-
-    act(() => {
-      result.current.dispatch({
-        type: CONTENT_LIST_ACTIONS.SET_FILTERS,
-        payload: { search: 'filtered' },
-      });
-    });
-
-    expect(result.current.state.filters).toEqual({ search: 'filtered' });
+    expect(result.current.state.filters).toEqual({ search: 'test query' });
   });
 });

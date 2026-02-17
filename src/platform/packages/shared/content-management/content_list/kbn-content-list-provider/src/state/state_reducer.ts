@@ -25,17 +25,12 @@ export const reducer = (
   action: ContentListAction
 ): ContentListClientState => {
   switch (action.type) {
-    case CONTENT_LIST_ACTIONS.SET_SEARCH_QUERY:
+    case CONTENT_LIST_ACTIONS.SET_SEARCH:
       return {
         ...state,
-        search: { queryText: action.payload },
-      };
-
-    case CONTENT_LIST_ACTIONS.SET_FILTERS:
-      return {
-        ...state,
-        filters: action.payload,
-        // Reset to first page when filters change to avoid stale page offsets.
+        search: { queryText: action.payload.queryText },
+        filters: action.payload.filters,
+        // Reset to first page when search changes to avoid stale page offsets.
         page: { ...state.page, index: 0 },
       };
 
