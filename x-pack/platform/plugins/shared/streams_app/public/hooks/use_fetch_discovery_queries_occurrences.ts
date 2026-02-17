@@ -14,7 +14,7 @@ import { useTimefilter } from './use_timefilter';
 import { useFetchErrorToast } from './use_fetch_error_toast';
 
 export interface DiscoveryQueriesOccurrencesFetchResult {
-  aggregated_occurrences: Array<{ x: number; y: number }>;
+  occurrences_histogram: Array<{ x: number; y: number }>;
   total_occurrences: number;
 }
 
@@ -76,7 +76,7 @@ export const useFetchDiscoveryQueriesOccurrences = (
     );
 
     return {
-      aggregated_occurrences: response.aggregated_occurrences.map(
+      occurrences_histogram: response.occurrences_histogram.map(
         (bucket: { x: string; y: number }) => ({
           x: new Date(bucket.x).getTime(),
           y: bucket.y,

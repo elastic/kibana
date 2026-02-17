@@ -82,14 +82,14 @@ export const upsertStreamQueryRequestSchema = z.object({
 
 export const isStreamQueryKql = createIsNarrowSchema(streamQuerySchema, streamQueryKqlSchema);
 
-export interface DiscoveryQueriesGetResponse {
+export interface QueriesGetResponse {
   queries: SignificantEventsResponse[];
   page: number;
   perPage: number;
   total: number;
 }
 
-export interface DiscoveryQueriesOccurrencesGetResponse {
-  aggregated_occurrences: Array<{ x: string; y: number }>;
+export interface QueriesOccurrencesGetResponse {
+  occurrences_histogram: Array<{ x: string; y: number }>;
   total_occurrences: number;
 }

@@ -82,8 +82,8 @@ export {
 export {
   type StreamQuery,
   type StreamQueryKql,
-  type DiscoveryQueriesGetResponse,
-  type DiscoveryQueriesOccurrencesGetResponse,
+  type QueriesGetResponse as DiscoveryQueriesGetResponse,
+  type QueriesOccurrencesGetResponse as DiscoveryQueriesOccurrencesGetResponse,
   upsertStreamQueryRequestSchema,
   streamQueryKqlSchema,
   streamQuerySchema,

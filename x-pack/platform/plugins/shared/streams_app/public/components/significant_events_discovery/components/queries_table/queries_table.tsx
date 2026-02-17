@@ -31,7 +31,7 @@ import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import {
   DISCOVERY_QUERIES_QUERY_KEY,
   useFetchDiscoveryQueries,
-  type SignificantEventItem,
+  type SignificantEventQueryRow,
 } from '../../../../hooks/use_fetch_discovery_queries';
 import {
   DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY,
@@ -139,17 +139,20 @@ export function QueriesTable() {
     }
   }, [promoteAll, queryClient, toasts]);
 
-  const onTableChange = useCallback(({ page }: CriteriaWithPagination<SignificantEventItem>) => {
-    if (!page) {
-      return;
-    }
+  const onTableChange = useCallback(
+    ({ page }: CriteriaWithPagination<SignificantEventQueryRow>) => {
+      if (!page) {
+        return;
+      }
 
-    setPagination(page);
-  }, []);
+      setPagination(page);
+    },
+    []
+  );
 
   const tableItems = queriesData?.queries ?? [];
 
-  const columns: Array<EuiBasicTableColumn<SignificantEventItem>> = useMemo(() => {
+  const columns: Array<EuiBasicTableColumn<SignificantEventQueryRow>> = useMemo(() => {
     const streamDefinitions = streamsData?.streams ?? [];
     const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
@@ -157,21 +160,21 @@ export function QueriesTable() {
       {
         field: 'query.title',
         name: TITLE_COLUMN,
-        render: (_: unknown, item: SignificantEventItem) => (
+        render: (_: unknown, item: SignificantEventQueryRow) => (
           <EuiLink onClick={() => {}}>{item.query.title}</EuiLink>
         ),
       },
       {
         field: 'query.severity_score',
         name: IMPACT_COLUMN,
-        render: (_: unknown, item: SignificantEventItem) => {
+        render: (_: unknown, item: SignificantEventQueryRow) => {
           return <SeverityBadge score={item.query.severity_score} />;
         },
       },
       {
         field: 'occurrences',
         name: LAST_OCCURRED_COLUMN,
-        render: (_: unknown, item: SignificantEventItem) => {
+        render: (_: unknown, item: SignificantEventQueryRow) => {
           const lastOccurrence = item.occurrences.findLast((occurrence) => occurrence.y !== 0);
           if (!lastOccurrence) {
             return '--';
@@ -196,7 +199,7 @@ export function QueriesTable() {
         name: OCCURRENCES_COLUMN,
         width: '160px',
         align: 'center',
-        render: (_: unknown, item: SignificantEventItem) => {
+        render: (_: unknown, item: SignificantEventQueryRow) => {
           return (
             <SparkPlot
               id={`sparkplot-${item.query.id}`}
@@ -214,14 +217,14 @@ export function QueriesTable() {
       {
         field: 'stream_name',
         name: STREAM_COLUMN,
-        render: (_: unknown, item: SignificantEventItem) => (
+        render: (_: unknown, item: SignificantEventQueryRow) => (
           <EuiBadge color="hollow">{item.stream_name}</EuiBadge>
         ),
       },
       {
         field: 'rule_backed',
         name: BACKED_STATUS_COLUMN,
-        render: (_: unknown, item: SignificantEventItem) => {
+        render: (_: unknown, item: SignificantEventQueryRow) => {
           return (
             <EuiToolTip
               content={item.rule_backed ? PROMOTED_TOOLTIP_CONTENT : NOT_PROMOTED_TOOLTIP_CONTENT}
@@ -266,7 +269,7 @@ export function QueriesTable() {
             color: 'primary',
             name: PROMOTE_QUERY_ACTION_TITLE,
             description: PROMOTE_QUERY_ACTION_DESCRIPTION,
-            render: (item: SignificantEventItem) => {
+            render: (item: SignificantEventQueryRow) => {
               return <PromoteAction item={item} />;
             },
           },
@@ -356,7 +359,7 @@ export function QueriesTable() {
                 id="aggregated-occurrences"
                 name={CHART_SERIES_NAME}
                 type="bar"
-                timeseries={occurrencesData?.aggregated_occurrences ?? []}
+                timeseries={occurrencesData?.occurrences_histogram ?? []}
                 annotations={[]}
                 height={180}
               />

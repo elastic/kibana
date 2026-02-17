@@ -17,7 +17,7 @@ import { useKibana } from './use_kibana';
 import { useTimefilter } from './use_timefilter';
 import { useFetchErrorToast } from './use_fetch_error_toast';
 
-export interface SignificantEventItem {
+export interface SignificantEventQueryRow {
   query: StreamQuery;
   stream_name: string;
   occurrences: Array<{ x: number; y: number }>;
@@ -25,8 +25,8 @@ export interface SignificantEventItem {
   rule_backed: boolean;
 }
 
-export interface DiscoveryQueriesTableFetchResult {
-  queries: SignificantEventItem[];
+export interface QueriesTableFetchResult {
+  queries: SignificantEventQueryRow[];
   page: number;
   perPage: number;
   total: number;
@@ -53,7 +53,7 @@ export const useFetchDiscoveryQueries = (
 
   const fetchDiscoveryQueries = async ({
     signal,
-  }: QueryFunctionContext): Promise<DiscoveryQueriesTableFetchResult | undefined> => {
+  }: QueryFunctionContext): Promise<QueriesTableFetchResult | undefined> => {
     const isoFrom = new Date(timeState.start).toISOString();
     const isoTo = new Date(timeState.end).toISOString();
 
@@ -113,7 +113,7 @@ export const useFetchDiscoveryQueries = (
     };
   };
 
-  return useQuery<DiscoveryQueriesTableFetchResult | undefined, Error>({
+  return useQuery<QueriesTableFetchResult | undefined, Error>({
     queryKey: [
       ...DISCOVERY_QUERIES_QUERY_KEY,
       name,

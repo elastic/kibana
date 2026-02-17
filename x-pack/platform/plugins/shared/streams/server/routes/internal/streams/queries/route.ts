@@ -210,7 +210,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
         { queryClient, scopedClusterClient }
       );
 
-    const aggregatedOccurrences = aggregatedOccurrenceBuckets.map((bucket) => ({
+    const occurrencesHistogram = aggregatedOccurrenceBuckets.map((bucket) => ({
       x: bucket.date,
       y: bucket.count,
     }));
@@ -220,7 +220,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
       0
     );
 
-    return { aggregated_occurrences: aggregatedOccurrences, total_occurrences: totalOccurrences };
+    return { occurrences_histogram: occurrencesHistogram, total_occurrences: totalOccurrences };
   },
 });
 
