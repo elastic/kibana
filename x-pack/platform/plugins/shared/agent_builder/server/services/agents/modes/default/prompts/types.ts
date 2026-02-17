@@ -6,7 +6,7 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
+import type { Plan, ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
 import type { ResolvedConfiguration } from '../../types';
@@ -27,6 +27,11 @@ export interface PromptFactoryParams {
   outputSchema?: Record<string, unknown>;
   conversationTimestamp: string;
   experimentalFeatures: ExperimentalFeatures;
+  /**
+   * Optional active plan to inject execution instructions into the agent prompt.
+   * Only present in agent mode when a plan exists.
+   */
+  plan?: Plan;
 }
 
 export interface ResearchAgentPromptRuntimeParams {

@@ -25,6 +25,7 @@ import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
 import { getStoreTools } from '../../../runner/store';
 import type { ProcessedConversation } from './prepare_conversation';
+import { builtinToolToExecutable } from './builtin_tool_to_executable';
 
 export const selectTools = async ({
   conversation,
@@ -146,43 +147,6 @@ const createVersionedAttachmentTools = ({
   return builtinTools.map((tool) => builtinToolToExecutable({ tool, runner }));
 };
 
-/**
- * Converts a builtin attachment tool to an executable tool that runs through the runner.
- */
-const builtinToolToExecutable = ({
-  tool,
-  runner,
-}: {
-  tool: BuiltinToolDefinition;
-  runner: ScopedRunner;
-}): ExecutableTool => {
-  return {
-    id: tool.id,
-    type: ToolType.builtin,
-    description: tool.description,
-    tags: tool.tags,
-    configuration: {},
-    readonly: true,
-    getSchema: () => tool.schema,
-    execute: async (params) => {
-      return runner.runInternalTool({
-        ...params,
-        tool: {
-          id: tool.id,
-          type: ToolType.builtin,
-          description: tool.description,
-          tags: tool.tags,
-          configuration: {},
-          readonly: true,
-          confirmation: { askUser: 'never' },
-          isAvailable: async () => ({ status: 'available' as const }),
-          getSchema: () => tool.schema,
-          getHandler: () => tool.handler,
-        },
-      });
-    },
-  };
-};
 
 const getVersionedAttachmentBoundTools = async ({
   attachmentStateManager,

@@ -14,6 +14,7 @@ import type {
   AgentCapabilities,
   AgentConfigurationOverrides,
   ConversationAction,
+  AgentMode,
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -62,6 +63,8 @@ export interface ExperimentalFeatures {
   filestore: boolean;
   /** Whether the skills feature is enabled */
   skills: boolean;
+  /** Whether the planning mode feature is enabled */
+  planning: boolean;
 }
 
 export interface AgentHandlerContext {
@@ -195,6 +198,11 @@ export interface AgentParams {
    * The action to perform: "regenerate" re-executes the last round with original input (requires conversation_id).
    */
   action?: ConversationAction;
+  /**
+   * Agent execution mode: 'agent' for standard execution, 'planning' for plan creation.
+   * Defaults to 'agent' when not specified.
+   */
+  agentMode?: AgentMode;
 }
 
 export interface AgentResponse {

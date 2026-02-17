@@ -254,6 +254,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     experimentalFeatures: {
       filestore: false,
       skills: false,
+      planning: false,
     },
   };
 };

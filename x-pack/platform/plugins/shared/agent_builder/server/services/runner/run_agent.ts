@@ -63,6 +63,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   const experimentalFeatures: ExperimentalFeatures = {
     filestore: experimentalFeaturesEnabled,
     skills: experimentalFeaturesEnabled,
+    planning: experimentalFeaturesEnabled,
   };
 
   return {

@@ -182,6 +182,14 @@ export function registerChatRoutes({
         },
       })
     ),
+    agent_mode: schema.maybe(
+      schema.oneOf([schema.literal('agent'), schema.literal('planning')], {
+        meta: {
+          description:
+            'Agent execution mode. "agent" (default) for standard execution, "planning" for plan creation and refinement.',
+        },
+      })
+    ),
   });
 
   const validateAttachments = async ({
@@ -254,6 +262,7 @@ export function registerChatRoutes({
       configuration_overrides: configurationOverrides,
       action,
       _execution_mode: executionMode,
+      agent_mode: agentMode,
     } = payload;
 
     const useTaskManager =
@@ -271,6 +280,7 @@ export function registerChatRoutes({
         browserApiTools,
         configurationOverrides,
         action,
+        agentMode,
         nextInput: {
           message: input,
           prompts,

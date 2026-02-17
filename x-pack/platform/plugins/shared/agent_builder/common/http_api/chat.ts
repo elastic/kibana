@@ -11,6 +11,7 @@ import type {
   AgentCapabilities,
   AssistantResponse,
   RuntimeAgentConfigurationOverrides,
+  AgentMode,
 } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
@@ -32,6 +33,8 @@ export interface ChatRequestBodyPayload {
   action?: ConversationAction;
   /** Force a specific execution mode. When omitted, the server auto-detects. */
   _execution_mode?: 'local' | 'task_manager';
+  /** Agent execution mode: 'agent' (default) for standard execution, 'planning' for plan creation. */
+  agent_mode?: AgentMode;
 }
 
 export type ChatResponse = Omit<

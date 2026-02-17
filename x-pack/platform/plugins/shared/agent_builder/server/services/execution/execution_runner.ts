@@ -88,6 +88,7 @@ export const handleAgentExecution = async ({
     browserApiTools,
     configurationOverrides,
     action,
+    agentMode,
   } = execution.agentParams;
 
   const { logger, agentService, trackingService, analyticsService } = deps;
@@ -129,6 +130,7 @@ export const handleAgentExecution = async ({
     browserApiTools,
     configurationOverrides,
     action,
+    agentMode,
   });
 
   // Generate title (for CREATE) or use existing title (for UPDATE)

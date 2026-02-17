@@ -160,6 +160,22 @@ export {
   isConversationUpdatedEvent,
   isToolProgressEvent,
   isPromptRequestEvent,
+  isPlanCreatedEvent,
+  isPlanUpdatedEvent,
+  isModeSuggestionEvent,
+  type PlanCreatedEvent,
+  type PlanCreatedEventData,
+  type PlanUpdatedEvent,
+  type PlanUpdatedEventData,
+  type ModeSuggestionEvent,
+  type ModeSuggestionEventData,
+  type AgentMode,
+  type PlanStatus,
+  type PlanSource,
+  type ActionItemStatus,
+  type PlanActionItem,
+  type Plan,
+  DEFAULT_AGENT_MODE,
 } from './chat';
 export * from './telemetry';
 export { getLatestVersion, type VersionedAttachment } from './attachments';

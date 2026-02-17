@@ -18,6 +18,12 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
+const flyoutBodyStyles = css`
+  .euiCodeBlock {
+    max-height: none !important;
+  }
+`;
+
 const toolResponseFlyoutTitle = i18n.translate(
   'xpack.agentBuilder.conversation.toolResponseFlyout.title',
   {
@@ -64,7 +70,7 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
           <p>{toolResponseFlyoutText}</p>
         </EuiText>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>{children}</EuiFlyoutBody>
+      <EuiFlyoutBody css={flyoutBodyStyles}>{children}</EuiFlyoutBody>
     </EuiFlyout>
   );
 };
