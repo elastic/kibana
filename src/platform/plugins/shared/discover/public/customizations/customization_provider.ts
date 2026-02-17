@@ -25,11 +25,8 @@ import { createTabPersistableStateObservable } from '../application/main/state_m
 import type { DiscoverServices } from '../build_services';
 import {
   fromSavedSearchToSavedObjectTab,
-  fromSavedObjectTabToSavedSearch,
-  fromTabStateToSavedObjectTab,
   internalStateActions,
-  selectTab,
-  selectTabRuntimeState,
+  selectTabSavedSearch,
 } from '../application/main/state_management/redux';
 
 const customizationContext = createContext(createCustomizationService());
@@ -88,19 +85,9 @@ export const getExtendedDiscoverStateContainer = (
       openDiscoverSession: internalStateActions.openDiscoverSession,
     },
     getSavedSearchFromCurrentTab: async () => {
-      const tabState = selectTab(stateContainer.internalState.getState(), tabId);
-      const tabRuntimeState = selectTabRuntimeState(stateContainer.runtimeStateManager, tabId);
-
-      const tab = fromTabStateToSavedObjectTab({
-        tab: tabState,
-        tabRuntimeState,
+      return await selectTabSavedSearch(stateContainer.internalState.getState(), tabId, {
         services,
-      });
-
-      return fromSavedObjectTabToSavedSearch({
-        tab,
-        discoverSession: stateContainer.internalState.getState().persistedDiscoverSession,
-        services,
+        runtimeStateManager: stateContainer.runtimeStateManager,
       });
     },
   };
