@@ -6,10 +6,11 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
 
-test.describe('Copy integration', { tag: ['@ess'] }, () => {
+test.describe('Copy integration', { tag: tags.stateful.classic }, () => {
   // This test can take a bit longer on ECH
   test.setTimeout(2 * 60 * 1000); // 2 minutes
   const testAgentPolicyName = 'Test Agent Policy for Copy';
