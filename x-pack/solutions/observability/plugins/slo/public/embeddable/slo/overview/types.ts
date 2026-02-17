@@ -55,8 +55,9 @@ export type SloOverviewApi = DefaultEmbeddableApi<SloOverviewEmbeddableState> &
   HasSupportedTriggers;
 
 export interface HasSloGroupOverviewConfig {
+  getOverviewConfig: () => SloOverviewState;
   getSloGroupOverviewConfig: () => GroupSloCustomInput;
-  updateSloGroupOverviewConfig: (next: GroupSloCustomInput) => void;
+  updateSloGroupOverviewConfig: (next: GroupSloCustomInput | SingleSloCustomInput) => void;
 }
 
 export const apiHasSloGroupOverviewConfig = (
@@ -64,6 +65,7 @@ export const apiHasSloGroupOverviewConfig = (
 ): api is HasSloGroupOverviewConfig => {
   return Boolean(
     api &&
+      typeof (api as HasSloGroupOverviewConfig).getOverviewConfig === 'function' &&
       typeof (api as HasSloGroupOverviewConfig).getSloGroupOverviewConfig === 'function' &&
       typeof (api as HasSloGroupOverviewConfig).updateSloGroupOverviewConfig === 'function'
   );
