@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { useOsqueryRowActions } from './row_actions';
-import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
+import type { OsqueryTimelinesStart } from '../types';
 
 describe('useOsqueryRowActions', () => {
   const mockStartServices = {
@@ -16,11 +16,11 @@ describe('useOsqueryRowActions', () => {
     theme: {},
   };
 
-  const mockTimelines: TimelinesUIStart = {
+  const mockTimelines: OsqueryTimelinesStart = {
     getHoverActions: jest.fn().mockReturnValue({
       getAddToTimelineButton: jest.fn().mockReturnValue(null),
     }),
-  } as unknown as TimelinesUIStart;
+  };
 
   it('should return empty array when timelines is undefined', () => {
     const { result } = renderHook(() =>
@@ -109,4 +109,3 @@ describe('useOsqueryRowActions', () => {
     expect(result.current).toBe(firstResult);
   });
 });
-

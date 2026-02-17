@@ -17,7 +17,6 @@ import type {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/public';
-import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type {
   getLazyLiveQueryField,
@@ -50,6 +49,25 @@ export interface OsqueryDataProvider {
   and: Omit<OsqueryDataProvider, 'and'>[];
 }
 
+/**
+ * Minimal TimelinesUIStart type for timeline integration within the osquery plugin.
+ * This is a local definition to avoid direct dependency on @kbn/timelines-plugin.
+ * Only includes the API surface actually used by osquery (getHoverActions).
+ *
+ * @internal
+ */
+export interface OsqueryTimelinesStart {
+  getHoverActions: () => {
+    getAddToTimelineButton: (props: {
+      dataProvider: unknown[];
+      field: string;
+      ownFocus: boolean;
+      showTooltip: boolean;
+      startServices: { analytics: unknown; i18n: unknown; theme: unknown };
+    }) => unknown;
+  };
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
 
@@ -76,7 +94,7 @@ export interface StartPlugins {
   security: SecurityPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesPublicStart;
-  timelines: TimelinesUIStart;
+  timelines?: OsqueryTimelinesStart;
   uiActions: UiActionsStart;
   appName?: string;
 }

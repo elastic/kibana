@@ -61,10 +61,7 @@ export function transformEdgesToRecords({
   }));
 }
 
-export function getRecordFieldValue(
-  record: DataTableRecord,
-  columnId: string
-): unknown {
+export function getRecordFieldValue(record: DataTableRecord, columnId: string): unknown {
   const value = record.flattened[columnId];
 
   if (value === undefined || value === null || value === '') {
@@ -73,5 +70,3 @@ export function getRecordFieldValue(
 
   return value;
 }
-
-

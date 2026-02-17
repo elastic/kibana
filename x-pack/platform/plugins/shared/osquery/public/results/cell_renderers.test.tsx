@@ -8,9 +8,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { getOsqueryCellRenderers } from './cell_renderers';
-import { DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 describe('cell_renderers', () => {
   const mockGetFleetAppUrl = jest.fn((agentId: string) => `/fleet/agents/${agentId}`);
@@ -176,4 +176,3 @@ describe('cell_renderers', () => {
     });
   });
 });
-

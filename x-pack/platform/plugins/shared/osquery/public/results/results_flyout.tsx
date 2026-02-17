@@ -82,5 +82,3 @@ export const OsqueryResultsFlyout: React.FC<OsqueryResultsFlyoutProps> = ({
 };
 
 OsqueryResultsFlyout.displayName = 'OsqueryResultsFlyout';
-
-

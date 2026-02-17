@@ -6,14 +6,14 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import type { RowControlColumn } from '@kbn/discover-utils';
-import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { RowControlColumn } from '@kbn/discover-utils';
+import type { OsqueryTimelinesStart } from '../types';
 
 import { SECURITY_APP_NAME } from '../timelines/add_to_timeline_button';
 
 interface RowActionsOptions {
-  timelines: TimelinesUIStart | undefined;
+  timelines: OsqueryTimelinesStart | undefined;
   appName: string;
   liveQueryActionId: string | undefined;
   agentIds: string[] | undefined;
@@ -24,10 +24,9 @@ interface RowActionsOptions {
   };
 }
 
-const ADD_TO_TIMELINE_LABEL = i18n.translate(
-  'xpack.osquery.resultsTable.rowAction.addToTimeline',
-  { defaultMessage: 'Add to Timeline' }
-);
+const ADD_TO_TIMELINE_LABEL = i18n.translate('xpack.osquery.resultsTable.rowAction.addToTimeline', {
+  defaultMessage: 'Add to Timeline',
+});
 
 export function useOsqueryRowActions({
   timelines,
@@ -91,5 +90,3 @@ export function useOsqueryRowActions({
     return columns;
   }, [appName, handleAddToTimeline, timelines]);
 }
-
-

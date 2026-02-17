@@ -16,7 +16,7 @@ export const allowedExperimentalValues = Object.freeze({
    *   and the kebab row-action menus in list tables.
    *   - others...
    */
-  queryHistoryRework: false,
+  queryHistoryRework: true,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };

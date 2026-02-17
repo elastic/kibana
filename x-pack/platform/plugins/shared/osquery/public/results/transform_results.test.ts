@@ -10,7 +10,7 @@ import {
   flattenOsqueryHit,
   getRecordFieldValue,
 } from './transform_results';
-import { ResultEdges } from '../../common/search_strategy';
+import type { ResultEdges } from '../../common/search_strategy';
 
 describe('transform_results', () => {
   describe('flattenOsqueryHit', () => {
@@ -245,4 +245,3 @@ describe('transform_results', () => {
     });
   });
 });
-
