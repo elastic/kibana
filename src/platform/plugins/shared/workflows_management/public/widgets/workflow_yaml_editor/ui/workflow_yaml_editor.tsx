@@ -18,7 +18,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import type YAML from 'yaml';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
+import { useQueryClient } from '@kbn/react-query';
 import { isTriggerType } from '@kbn/workflows';
+import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import type { z } from '@kbn/zod/v4';
 import { ActionsMenuButton } from './actions_menu_button';
@@ -63,8 +65,11 @@ import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/
 import { useKibana } from '../../../hooks/use_kibana';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
 import { interceptMonacoYamlProvider } from '../lib/autocomplete/intercept_monaco_yaml_provider';
-import { buildExecutionContext } from '../lib/execution_context/build_execution_context';
-import type { ExecutionContext } from '../lib/execution_context/build_execution_context';
+import {
+  buildExecutionContext,
+  type ExecutionContext,
+  type StepExecutionData,
+} from '../lib/execution_context/build_execution_context';
 import { interceptMonacoYamlHoverProvider } from '../lib/hover/intercept_monaco_yaml_hover_provider';
 import {
   ElasticsearchMonacoConnectorHandler,
@@ -147,6 +152,7 @@ export const WorkflowYAMLEditor = ({
 }: WorkflowYAMLEditorProps) => {
   const { euiTheme } = useEuiTheme();
   const { notifications, http } = useKibana().services;
+  const queryClient = useQueryClient();
 
   const saveYaml = useSaveYaml();
   const isSaving = useSelector(selectIsSavingYaml);
@@ -182,15 +188,76 @@ export const WorkflowYAMLEditor = ({
 
   const execution = useSelector(selectExecution);
   const executionContextRef = useRef<ExecutionContext | null>(null);
+  const executionIdRef = useRef<string | undefined>(execution?.id);
+  executionIdRef.current = execution?.id;
 
   // Build execution context when step executions are available
+  // Steps will have status/error/state but no I/O - those are lazy-loaded on hover
   useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('[ctx-debug] useEffect:', { isExecutionYaml, stepExecutions: stepExecutions?.length, context: !!execution?.context });
     if (isExecutionYaml && stepExecutions) {
       executionContextRef.current = buildExecutionContext(stepExecutions, execution?.context);
+      // eslint-disable-next-line no-console
+      console.log('[ctx-debug] built context:', executionContextRef.current ? Object.keys(executionContextRef.current) : 'null');
     } else {
       executionContextRef.current = null;
     }
   }, [isExecutionYaml, stepExecutions, execution?.context]);
+
+  // Lazily fetch a step's I/O data for template hover hints.
+  // Checks the React Query cache first (populated by the execution tab when clicking steps),
+  // and only makes an HTTP request if the data isn't already cached.
+  // Uses a ref so the hover provider (registered once at mount) always has the latest function.
+  const fetchStepExecutionDataRef = useRef<(stepId: string) => Promise<StepExecutionData | null>>(
+    async () => null
+  );
+  fetchStepExecutionDataRef.current = async (stepId: string): Promise<StepExecutionData | null> => {
+    const executionId = executionIdRef.current;
+    if (!executionId) {
+      return null;
+    }
+
+    // Map stepId (workflow definition name) to the step execution's document ID
+    const stepDocId = stepExecutionsRef.current?.find((s) => s.stepId === stepId)?.id;
+    if (!stepDocId) {
+      return null;
+    }
+
+    // Check React Query cache first (populated by the execution tab's useStepExecution)
+    const cached = queryClient.getQueryData<EsWorkflowStepExecution>([
+      'stepExecution',
+      executionId,
+      stepDocId,
+    ]);
+    if (cached) {
+      return {
+        output: cached.output,
+        error: cached.error,
+        input: cached.input,
+        status: cached.status,
+        state: cached.state as StepExecutionData['state'],
+      };
+    }
+
+    try {
+      const stepExecution = await http.get<EsWorkflowStepExecution>(
+        `/api/workflowExecutions/${executionId}/steps/${stepDocId}`
+      );
+      if (!stepExecution) {
+        return null;
+      }
+      return {
+        output: stepExecution.output,
+        error: stepExecution.error,
+        input: stepExecution.input,
+        status: stepExecution.status,
+        state: stepExecution.state as StepExecutionData['state'],
+      };
+    } catch {
+      return null;
+    }
+  };
 
   // Ref to track saving state for keyboard handlers
   const isSavingRef = useRef<boolean>(false);
@@ -361,6 +428,7 @@ export const WorkflowYAMLEditor = ({
         const providerConfig = {
           getYamlDocument: () => yamlDocumentRef.current || null,
           getExecutionContext: () => executionContextRef.current,
+          fetchStepExecutionData: (stepId: string) => fetchStepExecutionDataRef.current(stepId),
           options: {
             http,
             notifications,

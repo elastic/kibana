@@ -20,7 +20,10 @@ import { getMonacoConnectorHandler } from './provider_registry';
 import { getPathAtOffset } from '../../../../../common/lib/yaml';
 import { performComputation } from '../../../../entities/workflows/store/workflow_detail/utils/computation';
 import { isYamlValidationMarkerOwner } from '../../../../features/validate_workflow_yaml/model/types';
-import type { ExecutionContext } from '../execution_context/build_execution_context';
+import type {
+  ExecutionContext,
+  StepExecutionData,
+} from '../execution_context/build_execution_context';
 import { getInterceptedHover } from '../hover/get_intercepted_hover';
 import { evaluateExpression } from '../template_expression/evaluate_expression';
 import { parseTemplateAtPosition } from '../template_expression/parse_template_at_position';
@@ -37,10 +40,14 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
 
   private readonly getYamlDocument: () => YAML.Document | null;
   private readonly getExecutionContext?: () => ExecutionContext | null;
+  private readonly fetchStepExecutionData?: (stepId: string) => Promise<StepExecutionData | null>;
+  private fetchedStepIds: Set<string> = new Set();
+  private lastExecutionContext: ExecutionContext | null = null;
 
   constructor(config: ProviderConfig) {
     this.getYamlDocument = config.getYamlDocument;
     this.getExecutionContext = config.getExecutionContext;
+    this.fetchStepExecutionData = config.fetchStepExecutionData;
   }
 
   async provideHover(
@@ -62,9 +69,18 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     position: monaco.Position
   ): Promise<monaco.languages.Hover | null> {
     try {
-      // console.log('UnifiedHoverProvider: provideHover called at position', position);
+      // FIRST: Check if cursor is inside a template expression {{ }}
+      // Template expression hover (runtime values) takes priority over validation
+      // decorations and markers, so we check this before anything else.
+      const templateInfo = parseTemplateAtPosition(model, position);
+      if (templateInfo && templateInfo.isInsideTemplate) {
+        const result = await this.handleTemplateExpressionHover(model, position, templateInfo);
+        // eslint-disable-next-line no-console
+        console.log('[hover-debug] template hover result:', result ? 'has content' : 'null');
+        return result;
+      }
 
-      // FIRST: Check if there are validation errors at this position OR nearby
+      // Check if there are validation errors at this position OR nearby
       // If there are, let the validation-only hover provider handle it
       const markers = monaco.editor.getModelMarkers({ resource: model.uri });
       const validationMarkersNearby = markers.filter(
@@ -78,29 +94,15 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       );
 
       if (validationMarkersNearby.length > 0) {
-        // console.log('UnifiedHoverProvider: Found validation errors nearby, skipping to let validation provider handle');
-        // console.log('Nearby validation markers:', validationMarkersNearby.map(m => ({
-        //  message: m.message,
-        //  startCol: m.startColumn,
-        //  endCol: m.endColumn,
-        //  currentCol: position.column
-        // })));
         return null;
       }
 
-      // Second: check for decorations at this position, e.g. we don't want to show generic hover content over variables (valid or invalid)
+      // Check for decorations at this position, e.g. we don't want to show generic hover content over variables (valid or invalid)
       const decorations = model
         .getLineDecorations(position.lineNumber)
         .filter((decoration) => decoration.options.hoverMessage);
       if (decorations.length > 0) {
         return null;
-      }
-
-      // Third: Check if cursor is inside a template expression {{ }}
-      const templateInfo = parseTemplateAtPosition(model, position);
-      if (templateInfo && templateInfo.isInsideTemplate) {
-        // Handle template expression hover (only if execution context is available)
-        return this.handleTemplateExpressionHover(model, position, templateInfo);
       }
 
       // Get YAML document
@@ -355,23 +357,80 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
   }
 
   /**
+   * Extract the step ID from a template expression path (e.g., "steps.search.output.hits" -> "search")
+   */
+  private extractStepIdFromPath(pathSegments: string[]): string | null {
+    if (pathSegments.length >= 2 && pathSegments[0] === 'steps') {
+      return pathSegments[1];
+    }
+    return null;
+  }
+
+  /**
+   * Ensure step I/O data is available in the execution context, fetching on demand if needed.
+   * Returns true if the data was fetched or already available, false if fetch failed.
+   */
+  private async ensureStepData(
+    executionContext: ExecutionContext,
+    stepId: string
+  ): Promise<boolean> {
+    const stepData = executionContext.steps[stepId];
+    if (!stepData || !this.fetchStepExecutionData) {
+      return !!stepData;
+    }
+
+    // Already fetched or already has data - no need to fetch again
+    if (this.fetchedStepIds.has(stepId) || stepData.output !== undefined) {
+      return true;
+    }
+
+    // Fetch the full step data and merge into the context (cached for this execution)
+    this.fetchedStepIds.add(stepId);
+    const fullStepData = await this.fetchStepExecutionData(stepId);
+    if (fullStepData) {
+      // eslint-disable-next-line require-atomic-updates
+      executionContext.steps[stepId] = { ...stepData, ...fullStepData };
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * Handle hover for template expressions {{ }}
    */
-  private handleTemplateExpressionHover(
+  private async handleTemplateExpressionHover(
     model: monaco.editor.ITextModel,
     position: monaco.Position,
     templateInfo: ReturnType<typeof parseTemplateAtPosition>
-  ): monaco.languages.Hover | null {
+  ): Promise<monaco.languages.Hover | null> {
     if (!templateInfo || !this.getExecutionContext) {
+      // eslint-disable-next-line no-console
+      console.log('[hover-debug] early exit: templateInfo=', !!templateInfo, 'getExecutionContext=', !!this.getExecutionContext);
       return null;
     }
 
     const executionContext = this.getExecutionContext();
     if (!executionContext) {
+      // eslint-disable-next-line no-console
+      console.log('[hover-debug] executionContext is null');
       return null;
+    }
+    // eslint-disable-next-line no-console
+    console.log('[hover-debug] context keys:', Object.keys(executionContext), 'inputs:', executionContext.inputs);
+
+    // Clear fetched step cache when execution context changes (new execution selected)
+    if (executionContext !== this.lastExecutionContext) {
+      this.fetchedStepIds = new Set();
+      this.lastExecutionContext = executionContext;
     }
 
     try {
+      // Lazily fetch step I/O if the hovered expression references a step
+      const stepId = this.extractStepIdFromPath(templateInfo.pathSegments);
+      if (stepId) {
+        await this.ensureStepData(executionContext, stepId);
+      }
+
       // Determine what to evaluate
       let value: JsonValue | undefined;
       let evaluatedPath: string;
@@ -422,6 +481,8 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         contents: [hoverContent],
       };
     } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log('[hover-debug] error in handleTemplateExpressionHover:', error);
       return null;
     }
   }
