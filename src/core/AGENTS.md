@@ -31,5 +31,4 @@ If you (agent working in `src/core`) notice a discrepancy between this document 
 
 ## Related docs
 
-- `src/core/CORE_CONVENTIONS.md` — API design and mock patterns
-- `src/core/CONVENTIONS.md` — plugin structure conventions
+- `src/core/CONVENTIONS.md` — plugin structure, API design, and mock patterns
