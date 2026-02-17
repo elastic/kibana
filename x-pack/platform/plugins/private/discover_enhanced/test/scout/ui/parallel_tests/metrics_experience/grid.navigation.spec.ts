@@ -28,10 +28,7 @@ import {
 
 const { PAGE_SIZE, TOTAL_PAGES, LAST_PAGE_CARDS } = PAGINATION;
 
-const SEARCH_TERM = 'gauge_2';
-const EXPECTED_SEARCH_RESULTS = DEFAULT_CONFIG.metrics.filter((m) =>
-  m.name.includes(SEARCH_TERM)
-).length;
+const SEARCH_METRIC_NAME = DEFAULT_CONFIG.metrics[0].name;
 
 spaceTest.describe(
   'Metrics in Discover - Grid Navigation',
@@ -97,8 +94,8 @@ spaceTest.describe(
       await expect(metricsExperience.grid).toBeVisible();
 
       await spaceTest.step('search filters results across all pages', async () => {
-        await metricsExperience.searchMetric(SEARCH_TERM);
-        await expect(metricsExperience.cards).toHaveCount(EXPECTED_SEARCH_RESULTS);
+        await metricsExperience.searchMetric(SEARCH_METRIC_NAME);
+        await expect(metricsExperience.cards).toHaveCount(1);
       });
 
       await spaceTest.step('search for non-existent metric shows empty state', async () => {
