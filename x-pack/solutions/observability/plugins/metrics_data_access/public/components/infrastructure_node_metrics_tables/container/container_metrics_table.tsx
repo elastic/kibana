@@ -40,10 +40,8 @@ export interface ContainerMetricsTableProps {
     from: string;
     to: string;
   };
-  /** When true, use OpenTelemetry SemConv metrics (equivalent to schema === 'semconv'). */
   isOtel?: boolean;
   metricsIndices?: string;
-  /** When isOtel is true, used to choose correct unit for memory (e.g. % for k8s, MB for docker). */
   semconvRuntime?: ContainerSemconvRuntime;
 }
 
