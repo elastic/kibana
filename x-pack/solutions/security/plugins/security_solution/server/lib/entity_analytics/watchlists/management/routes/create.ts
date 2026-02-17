@@ -10,11 +10,8 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { CreateWatchlistResponse } from '../../../../../../common/api/entity_analytics';
 import { CreateWatchlistRequestBody } from '../../../../../../common/api/entity_analytics';
-import {
-  API_VERSIONS,
-  APP_ID,
-  WATCHLISTS_MANAGEMENT_URL,
-} from '../../../../../../common/constants';
+import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
+import { WATCHLISTS_URL } from '../../../../../../common/entity_analytics/watchlists/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../watchlist_config';
@@ -27,7 +24,7 @@ export const createWatchlistRoute = (
   router.versioned
     .post({
       access: 'public',
-      path: WATCHLISTS_MANAGEMENT_URL,
+      path: WATCHLISTS_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],

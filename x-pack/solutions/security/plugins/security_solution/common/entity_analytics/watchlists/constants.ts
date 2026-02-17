@@ -6,4 +6,3 @@
  */
 
 export const WATCHLISTS_URL = `/api/entity_analytics/watchlists` as const;
-export const WATCHLISTS_MANAGEMENT_URL = `${WATCHLISTS_URL}/management` as const;

@@ -6,7 +6,7 @@ info:
   version: "2026-01-28"
 
 paths:
-  /api/entity_analytics/watchlists/management:
+  /api/entity_analytics/watchlists:
     post:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
