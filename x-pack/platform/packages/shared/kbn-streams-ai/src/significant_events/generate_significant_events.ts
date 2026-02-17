@@ -13,7 +13,7 @@ import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
 import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import { conditionToQueryDsl } from '@kbn/streamlang';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import { fromKueryExpression, getKqlFieldNamesFromExpression } from '@kbn/es-query';
+import { dateRangeQuery, fromKueryExpression, getKqlFieldNamesFromExpression } from '@kbn/es-query';
 import { withSpan } from '@kbn/apm-utils';
 import { createGenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
@@ -117,6 +117,11 @@ export async function generateSignificantEvents({
     .fieldCaps({
       index: stream.name,
       fields: '*',
+      index_filter: {
+        bool: {
+          filter: dateRangeQuery(start, end),
+        },
+      },
     })
     .catch((error) => {
       throw new Error(

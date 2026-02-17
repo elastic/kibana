@@ -19,6 +19,7 @@ import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/
 import { tags } from '@kbn/scout';
 import type { EvaluatorParams } from '@kbn/evals/src/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import kbnDatemath from '@kbn/datemath';
 import { evaluate } from '../src/evaluate';
 import type { SignificantEventsEvaluationExample } from './significant_events_datasets';
 import { SIGNIFICANT_EVENTS_DATASETS } from './significant_events_datasets';
@@ -215,12 +216,11 @@ evaluate.describe(
                     const { queries } = await generateSignificantEvents({
                       stream,
                       esClient,
-                      start: Date.now() - 24 * 60 * 60 * 1000,
-                      end: Date.now(),
+                      start: kbnDatemath.parse('now-24h')!.valueOf(),
+                      end: kbnDatemath.parse('now')!.valueOf(),
                       inferenceClient,
                       logger,
                       signal: new AbortController().signal,
-                      sampleDocsSize: 20,
                       systemPrompt: significantEventsPrompt,
                       getFeatures: async () => example.input.features,
                     });
@@ -285,12 +285,11 @@ evaluate.describe(
               const { queries } = await generateSignificantEvents({
                 stream,
                 esClient,
-                start: Date.now() - 24 * 60 * 60 * 1000,
-                end: Date.now(),
+                start: kbnDatemath.parse('now-24h')!.valueOf(),
+                end: kbnDatemath.parse('now')!.valueOf(),
                 inferenceClient,
                 logger,
                 signal: new AbortController().signal,
-                sampleDocsSize: 20,
                 systemPrompt: significantEventsPrompt,
                 getFeatures: async () => [],
               });

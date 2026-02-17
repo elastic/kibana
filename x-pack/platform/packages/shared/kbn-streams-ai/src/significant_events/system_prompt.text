@@ -87,7 +87,7 @@ Dependencies describe **explicit relationships between components** — service-
 **Guidelines:**
 - Focus on features with confidence ≥ 70
 - Combine related features for comprehensive queries (e.g., Java + Spring Boot + Tomcat stack)
-- Validate inferred features (tagged `"inferred"`) against `dataset_analysis` features when available
+- Validate inferred features (tagged `"inferred"`) against `dataset_analysis` before use
 - Use version information to create vulnerability-specific queries
 - Only scope queries to a specific entity (via `service.name` or similar fields) when the dataset contains multiple entities — otherwise the scoping adds noise without value
 - For dependency features, prioritize monitoring the communication path (timeouts, connection errors) over generic error queries
