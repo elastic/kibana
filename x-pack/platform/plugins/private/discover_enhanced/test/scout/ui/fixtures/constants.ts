@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
+
 export const LOGSTASH_DEFAULT_START_TIME = '2015-09-19T06:31:44.000Z';
 export const LOGSTASH_DEFAULT_END_TIME = '2015-09-23T18:31:44.000Z';
 
@@ -69,3 +71,8 @@ export const KBN_ARCHIVES = {
   ECOMMERCE: 'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce.json',
   TSDB_LOGS: 'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_tsdb.json',
 };
+
+export const METRICS_EXPERIENCE_TAGS = [
+  ...tags.stateful.all,
+  ...tags.serverless.observability.complete,
+];

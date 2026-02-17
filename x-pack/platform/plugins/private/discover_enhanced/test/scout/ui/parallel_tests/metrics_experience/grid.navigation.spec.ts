@@ -13,14 +13,10 @@
  * require more metrics than the static TSDB_LOGS archive provides.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   spaceTest,
   testData,
-  createMetricsTestIndex,
-  cleanMetricsTestIndex,
-  insertMetricsDocuments,
   PAGINATION,
   DEFAULT_TIME_RANGE,
   DEFAULT_CONFIG,
@@ -33,18 +29,13 @@ const SEARCH_METRIC_NAME = DEFAULT_CONFIG.metrics[0].name;
 spaceTest.describe(
   'Metrics in Discover - Grid Navigation',
   {
-    tag: [...tags.stateful.all, ...tags.serverless.observability.complete],
+    tag: testData.METRICS_EXPERIENCE_TAGS,
   },
   () => {
-    spaceTest.beforeAll(async ({ esClient, scoutSpace }) => {
+    spaceTest.beforeAll(async ({ scoutSpace }) => {
       // Load TSDB_LOGS for the data view (required by selectTextBaseLang)
       await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.TSDB_LOGS);
       await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME.TSDB_LOGS);
-
-      await cleanMetricsTestIndex(esClient);
-      await createMetricsTestIndex(esClient);
-      await insertMetricsDocuments(esClient);
-
       await scoutSpace.uiSettings.setDefaultTime(DEFAULT_TIME_RANGE);
     });
 
@@ -53,8 +44,7 @@ spaceTest.describe(
       await pageObjects.discover.goto();
     });
 
-    spaceTest.afterAll(async ({ esClient, scoutSpace }) => {
-      await cleanMetricsTestIndex(esClient);
+    spaceTest.afterAll(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
       await scoutSpace.savedObjects.cleanStandardList();
     });

@@ -7,6 +7,7 @@
 
 import type { EsClient } from '@kbn/scout';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
+import { errors } from '@elastic/elasticsearch';
 import { METRICS_TEST_INDEX_NAME } from '../constants';
 
 export interface MetricDefinition {
@@ -173,6 +174,38 @@ export async function cleanMetricsTestIndex(
   indexName: string = DEFAULT_CONFIG.indexName
 ): Promise<void> {
   await esClient.indices.delete({ index: indexName, ignore_unavailable: true });
+}
+
+/**
+ * Creates the metrics test index and inserts documents only if the index does not already exist.
+ *
+ * Includes a defensive catch for `resource_already_exists_exception` to handle the race
+ * condition where parallel Playwright setup projects may attempt to create the same index
+ * concurrently.
+ *
+ */
+export async function createMetricsTestIndexIfNeeded(
+  esClient: EsClient,
+  config: MetricsIndexConfig = DEFAULT_CONFIG
+): Promise<boolean> {
+  const exists = await esClient.indices.exists({ index: config.indexName });
+  if (exists) {
+    return false;
+  }
+
+  try {
+    await createMetricsTestIndex(esClient, config);
+    await insertMetricsDocuments(esClient, config);
+    return true;
+  } catch (error) {
+    if (
+      error instanceof errors.ResponseError &&
+      error.body?.error?.type === 'resource_already_exists_exception'
+    ) {
+      return false;
+    }
+    throw error;
+  }
 }
 
 function buildDocument(

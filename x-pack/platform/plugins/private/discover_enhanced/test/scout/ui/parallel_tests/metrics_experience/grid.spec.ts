@@ -13,14 +13,13 @@
  * For pagination and search tests see grid.navigation.spec.ts.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../../fixtures';
 
 spaceTest.describe(
   'Metrics in Discover - Grid',
   {
-    tag: [...tags.stateful.all, ...tags.serverless.observability.complete],
+    tag: testData.METRICS_EXPERIENCE_TAGS,
   },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
