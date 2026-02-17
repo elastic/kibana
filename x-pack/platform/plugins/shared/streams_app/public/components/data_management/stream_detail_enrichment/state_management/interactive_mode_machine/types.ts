@@ -62,6 +62,8 @@ export interface InteractiveModeContext {
   streamName: string;
   // AI suggested pipeline suggestion, if any.
   suggestedPipeline?: StreamlangDSL;
+  // Absolute deadline (ms since epoch) after which suggestion polling stops
+  suggestionPollingDeadline?: number;
   // Currently selected condition for filtering steps
   selectedConditionId?: string;
   // Shared grok collection for pattern definitions

@@ -39,10 +39,13 @@ import { DocumentsColumn } from './documents_column';
 import { DataQualityColumn } from './data_quality_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
+import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { RetentionColumn } from './retention_column';
+import { SuggestionStatusColumn } from './suggestion_status_column';
 import { calculateDataQuality } from '../../util/calculate_data_quality';
+import { useKibana } from '../../hooks/use_kibana';
 import {
   NAME_COLUMN_HEADER,
   RETENTION_COLUMN_HEADER,
@@ -53,6 +56,8 @@ import {
   DATA_QUALITY_COLUMN_HEADER,
   DOCUMENTS_COLUMN_HEADER,
   FAILURE_STORE_PERMISSIONS_ERROR,
+  SUGGESTION_COLUMN_HEADER,
+  SUGGESTION_COLUMN_HEADER_ARIA_LABEL,
 } from './translations';
 import { DiscoverBadgeButton, QueryStreamBadge } from '../stream_badges';
 
@@ -78,6 +83,9 @@ export function StreamsTreeTable({
   const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
   const { getStepPropsByStepId } = useStreamsTour();
+  const {
+    streams: { streamsRepositoryClient },
+  } = useKibana().dependencies.start;
 
   const [searchQuery, setSearchQuery] = useState<Query | undefined>();
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
@@ -98,6 +106,15 @@ export function StreamsTreeTable({
   });
 
   const docCountsFetch = getStreamDocCounts();
+
+  const suggestionStatusResult = useStreamsAppFetch(
+    ({ signal }) =>
+      streamsRepositoryClient.fetch('GET /internal/streams/_pipeline_suggestion/_bulk_status', {
+        signal,
+      }),
+    [streamsRepositoryClient],
+    { disableToastOnError: true }
+  );
 
   const totalDocsResult = useAsync(() => docCountsFetch.docCount, [docCountsFetch]);
   const failedDocsResult = useAsync(() => docCountsFetch.failedDocCount, [docCountsFetch]);
@@ -155,6 +172,16 @@ export function StreamsTreeTable({
 
     return qualities;
   }, [docsByStream, degradedByStream, failedByStream]);
+
+  const suggestionStatusByStream = React.useMemo(() => {
+    if (!suggestionStatusResult.value) {
+      return {};
+    }
+    return suggestionStatusResult.value.reduce((acc, item) => {
+      acc[item.stream] = item;
+      return acc;
+    }, {} as Record<string, (typeof suggestionStatusResult.value)[number]>);
+  }, [suggestionStatusResult]);
 
   const docCountsLoaded = !!totalDocsResult.value;
   const qualityLoaded =
@@ -479,6 +506,23 @@ export function StreamsTreeTable({
             ) : (
               '-'
             ),
+        },
+        {
+          field: 'suggestion',
+          name: (
+            <span aria-label={SUGGESTION_COLUMN_HEADER_ARIA_LABEL}>{SUGGESTION_COLUMN_HEADER}</span>
+          ),
+          width: '130px',
+          sortable: false,
+          align: 'center',
+          render: (_: unknown, item: TableRow) =>
+            item.data_stream ? (
+              <SuggestionStatusColumn
+                streamName={item.stream.name}
+                status={suggestionStatusByStream[item.stream.name]}
+                isLoading={suggestionStatusResult.loading}
+              />
+            ) : null,
         },
         {
           field: 'retentionMs',

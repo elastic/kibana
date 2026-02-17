@@ -92,6 +92,51 @@ export class TaskClient<TaskType extends string> {
     };
   }
 
+  /**
+   * Gets statuses for all tasks of a given type.
+   * Optionally filters by task IDs.
+   * Returns a map of task ID to status (with stale detection for in-progress tasks).
+   */
+  public async getStatusesByType<TParams extends {} = {}, TPayload extends {} = {}>(
+    taskType: TaskType,
+    taskIds?: string[]
+  ): Promise<Map<string, TaskStatus>> {
+    const query: {
+      bool: { filter: Array<{ term: { type: TaskType } } | { terms: { id: string[] } }> };
+    } = {
+      bool: {
+        filter: [{ term: { type: taskType } }],
+      },
+    };
+
+    if (taskIds && taskIds.length > 0) {
+      query.bool.filter.push({ terms: { id: taskIds } });
+    }
+
+    const response = await this.storageClient.search({
+      size: 10_000,
+      track_total_hits: false,
+      query,
+    });
+
+    const results = new Map<string, TaskStatus>();
+
+    for (const hit of response.hits.hits) {
+      const task = hit._source as PersistedTask<TParams, TPayload>;
+      let status: TaskStatus;
+
+      if (task.status === TaskStatus.InProgress) {
+        status = isStale(task.created_at) ? TaskStatus.Stale : task.status;
+      } else {
+        status = task.status;
+      }
+
+      results.set(task.id, status);
+    }
+
+    return results;
+  }
+
   public async schedule<TParams extends {} = {}>({
     task,
     params,
