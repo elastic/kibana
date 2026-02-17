@@ -5,26 +5,19 @@
  * 2.0.
  */
 
+import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
 import { CPU_USAGE_LABEL } from '../../../shared/charts/constants';
-import type { SchemaBasedFormula } from '../../../shared/metrics/types';
 
-export const dockerContainerCpuUsage: SchemaBasedFormula = {
+export const dockerContainerCpuUsage: LensBaseLayer = {
   label: CPU_USAGE_LABEL,
-  value: {
-    ecs: 'average(docker.cpu.total.pct)',
-    semconv:
-      '1 - average(metrics.container.cpu.utilization, kql="state: idle") + average(metrics.container.cpu.utilization, kql="state: wait")',
-  },
+  value: 'average(docker.cpu.total.pct)',
   format: 'percent',
   decimals: 1,
 };
 
-export const k8sContainerCpuUsage: SchemaBasedFormula = {
+export const k8sContainerCpuUsage: LensBaseLayer = {
   label: CPU_USAGE_LABEL,
-  value: {
-    ecs: 'average(kubernetes.container.cpu.usage.limit.pct)',
-    semconv: 'average(metrics.k8s.container.cpu_limit_utilization)',
-  },
+  value: 'average(kubernetes.container.cpu.usage.limit.pct)',
   format: 'percent',
   decimals: 1,
 };

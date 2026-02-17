@@ -6,28 +6,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SchemaBasedFormula } from '../../../../shared/metrics/types';
+import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
 
-export const nodeDiskCapacity: SchemaBasedFormula = {
+export const nodeDiskCapacity: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.kubernetes.capacity', {
     defaultMessage: 'Capacity',
   }),
-  value: {
-    ecs: 'max(kubernetes.node.fs.capacity.bytes)',
-    semconv: 'max(metrics.k8s.node.filesystem.capacity)',
-  },
+  value: 'max(kubernetes.node.fs.capacity.bytes)',
   format: 'bytes',
   decimals: 1,
 };
 
-export const nodeDiskUsed: SchemaBasedFormula = {
+export const nodeDiskUsed: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.kubernetes.used', {
     defaultMessage: 'Used',
   }),
-  value: {
-    ecs: 'average(kubernetes.node.fs.used.bytes)',
-    semconv: 'average(metrics.k8s.node.filesystem.usage)',
-  },
+  value: 'average(kubernetes.node.fs.used.bytes)',
   format: 'bytes',
   decimals: 1,
 };
