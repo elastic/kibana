@@ -7,12 +7,12 @@
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { BodySchema } from './validator';
 import { ENTITY_STORE_ROUTES } from '../../../../common';
-import { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 
 export function registerInstall(router: EntityStorePluginRouter) {
   router.versioned
@@ -57,9 +57,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
           return res.ok({ body: { ok: true } });
         }
 
-        await Promise.all(
-          toInstall.map((type) => assetManager.initEntity(req, type, params))
-        );
+        await Promise.all(toInstall.map((type) => assetManager.initEntity(req, type, params)));
 
         return res.created({ body: { ok: true } });
       })

@@ -220,7 +220,7 @@ export class AssetManager {
     const sourceIndexPatterns = await this.logsExtractionClient.getIndexPatterns(
       additionalIndexPatterns
     );
-    
+
     const kibanaPrivileges = this.security.authz.actions.savedObject.get(
       EngineDescriptorTypeName,
       'create'
