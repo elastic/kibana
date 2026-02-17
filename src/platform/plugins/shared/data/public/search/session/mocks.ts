@@ -88,8 +88,6 @@ export const getPersistedSearchSessionSavedObjectAttributesMock = (
 export function getSearchSessionEBTManagerMock(): jest.Mocked<ISearchSessionEBTManager> {
   return {
     trackBgsStarted: jest.fn(),
-    trackBgsCompleted: jest.fn(),
-    trackBgsError: jest.fn(),
     trackBgsCancelled: jest.fn(),
     trackBgsOpened: jest.fn(),
     trackBgsListView: jest.fn(),
