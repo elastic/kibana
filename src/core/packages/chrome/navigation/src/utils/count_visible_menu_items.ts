@@ -15,13 +15,17 @@ import { MAX_MENU_ITEMS } from '../constants';
  * @param heights - The heights of the menu items.
  * @param gap - The gap between the menu items.
  * @param menuHeight - The height of the menu.
+ * @param hasExternalOverflow - Whether items from outside the responsive hook (e.g. hidden-by-user)
+ *   will always be in the "More" menu. When true the "More" button is always present
+ *   and its height must be reserved even if all passed items would otherwise fit.
  *
  * @returns The number of visible menu items.
  */
 export const countVisibleMenuItems = (
   heights: number[],
   gap: number,
-  menuHeight: number
+  menuHeight: number,
+  hasExternalOverflow: boolean = false
 ): number => {
   const countItemsToFit = (availableHeight: number, limit: number) => {
     let itemCount = 0;
@@ -45,8 +49,9 @@ export const countVisibleMenuItems = (
   // 1. Calculate how many items can fit without considering the "More" button
   const initialVisibleCount = countItemsToFit(menuHeight, MAX_MENU_ITEMS);
 
-  // 2. If not all items are visible, we need the "More" button
-  if (heights.length > initialVisibleCount) {
+  // 2. If not all items are visible, or the "More" button is always present
+  //    (e.g. due to hidden-by-user items), reserve space for the "More" button.
+  if (heights.length > initialVisibleCount || hasExternalOverflow) {
     const moreItemHeight = heights[0]; // Approximately the same height as any other item
     const availableHeight = menuHeight - moreItemHeight - gap;
 

@@ -15,6 +15,11 @@ import type { MenuItem } from '../../types';
  * Utility function to cache the heights of the menu items in a ref.
  * It assumes one initial render where all items are in the DOM.
  *
+ * The DOM may contain an extra child (the "More" button) when there are
+ * external overflow items (e.g. hidden-by-user items). In that case
+ * `children.length === items.length + 1` and we only cache the first
+ * `items.length` children (the actual menu items).
+ *
  * @param ref - The ref to the heights cache.
  * @param menu - The menu element.
  * @param items - The menu items.
@@ -27,9 +32,10 @@ export const cacheMenuItemHeights = (
   if (ref.current?.length !== items.length) {
     const children: Element[] = Array.from(menu.children);
 
-    // Only cache if the DOM has rendered all the items we expect
-    if (children.length === items.length) {
-      ref.current = children.map((child) => child.clientHeight);
+    // Cache if all items are rendered. The DOM may also contain the "More"
+    // button as an extra trailing child — only cache the first items.length.
+    if (children.length >= items.length && children.length <= items.length + 1) {
+      ref.current = children.slice(0, items.length).map((child) => child.clientHeight);
     }
   }
 };

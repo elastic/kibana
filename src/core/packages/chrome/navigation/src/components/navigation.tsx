@@ -118,21 +118,30 @@ export const Navigation = ({
 
   const [isAnyPopoverLocked, setIsAnyPopoverLocked] = useState(false);
 
+  // Separate hidden-by-user items before responsive calculation so the hook
+  // only measures items that are actually rendered in the DOM.
+  const nonHiddenPrimaryItems = useMemo(
+    () => items.primaryItems.filter((item) => !item.hiddenByUser),
+    [items.primaryItems]
+  );
+  const hiddenByUserItems = useMemo(
+    () => items.primaryItems.filter((item) => item.hiddenByUser),
+    [items.primaryItems]
+  );
+
+  const hasHiddenItems = hiddenByUserItems.length > 0;
+
   const {
     overflowMenuItems: responsiveOverflowItems,
     primaryMenuRef,
-    visibleMenuItems: responsiveVisibleItems,
-  } = useResponsiveMenu(isCollapsed, items.primaryItems);
+    visibleMenuItems,
+  } = useResponsiveMenu(isCollapsed, nonHiddenPrimaryItems, hasHiddenItems);
 
-  // Items hidden by user go to overflow menu
-  const visibleMenuItems = useMemo(
-    () => responsiveVisibleItems.filter((item) => !item.hiddenByUser),
-    [responsiveVisibleItems]
+  // Overflow = items that don't fit + items hidden by user
+  const overflowMenuItems = useMemo(
+    () => [...responsiveOverflowItems, ...hiddenByUserItems],
+    [responsiveOverflowItems, hiddenByUserItems]
   );
-  const overflowMenuItems = useMemo(() => {
-    const hiddenByUserItems = responsiveVisibleItems.filter((item) => item.hiddenByUser);
-    return [...hiddenByUserItems, ...responsiveOverflowItems];
-  }, [responsiveVisibleItems, responsiveOverflowItems]);
 
   const setSize = visibleMenuItems.length + (overflowMenuItems.length > 0 ? 1 : 0);
 
