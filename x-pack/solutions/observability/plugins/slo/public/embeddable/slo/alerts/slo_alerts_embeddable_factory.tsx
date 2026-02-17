@@ -10,7 +10,7 @@ import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { FetchContext } from '@kbn/presentation-publishing';
+import type { FetchContext, WithAllKeys } from '@kbn/presentation-publishing';
 import {
   fetch$,
   initializeStateManager,
@@ -23,11 +23,12 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import type { AlertsCustomState } from '../../../../common/embeddables/alerts/schema';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { SLO_ALERTS_EMBEDDABLE_ID } from './constants';
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
-import type { EmbeddableSloProps, SloAlertsApi, SloAlertsEmbeddableState } from './types';
+import type { EmbeddableSloProps, SloAlertsApi, SloAlertsEmbeddableState, SloItem } from './types';
 import { openSloConfiguration } from './slo_alerts_open_configuration';
 const queryClient = new QueryClient();
 
@@ -35,6 +36,11 @@ export const getAlertsPanelTitle = () =>
   i18n.translate('xpack.slo.sloAlertsEmbeddable.displayTitle', {
     defaultMessage: 'SLO Alerts',
   });
+
+const defaultAlertsEmbeddableState: WithAllKeys<AlertsCustomState> = {
+  slos: [],
+  show_all_group_by_instances: undefined,
+};
 
 export function getAlertsEmbeddableFactory({
   coreStart,
@@ -66,10 +72,37 @@ export function getAlertsEmbeddableFactory({
       }
 
       const titleManager = initializeTitleManager(initialState);
-      const sloAlertsStateManager = initializeStateManager<EmbeddableSloProps>(initialState, {
-        slos: [],
-        showAllGroupByInstances: false,
-      });
+      // Normalize initialState to snake_case format if it has camelCase fields
+      const normalizedInitialState: Partial<AlertsCustomState> = {
+        ...initialState,
+        ...(initialState.slos && Array.isArray(initialState.slos)
+          ? {
+              slos: initialState.slos.map((slo: any) => {
+                // Ensure group_by is always a string (it might come as an array from SLO data)
+                const groupByValue = slo.group_by ?? slo.groupBy;
+                const groupByString =
+                  typeof groupByValue === 'string'
+                    ? groupByValue
+                    : Array.isArray(groupByValue)
+                    ? groupByValue.join(',')
+                    : '';
+                return {
+                  id: slo.id ?? '',
+                  instance_id: slo.instance_id ?? slo.instanceId ?? '',
+                  name: slo.name ?? '',
+                  group_by: groupByString,
+                };
+              }),
+            }
+          : {}),
+        ...('showAllGroupByInstances' in initialState && !('show_all_group_by_instances' in initialState)
+          ? { show_all_group_by_instances: (initialState as any).showAllGroupByInstances }
+          : {}),
+      };
+      const sloAlertsStateManager = initializeStateManager<AlertsCustomState>(
+        normalizedInitialState,
+        defaultAlertsEmbeddableState
+      );
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getAlertsPanelTitle());
       const reload$ = new Subject<FetchContext>();
 
@@ -88,7 +121,7 @@ export function getAlertsEmbeddableFactory({
         getComparators: () => ({
           ...titleComparators,
           slos: 'referenceEquality',
-          showAllGroupByInstances: 'referenceEquality',
+          show_all_group_by_instances: 'referenceEquality',
         }),
         onReset: (lastSaved) => {
           titleManager.reinitializeState(lastSaved);
@@ -110,13 +143,49 @@ export function getAlertsEmbeddableFactory({
         },
         serializeState,
         getSloAlertsConfig: () => {
+          const storedState = sloAlertsStateManager.getLatestState();
+          // Convert from stored state (snake_case) to public API (camelCase)
           return {
-            slos: sloAlertsStateManager.api.slos$.getValue(),
-            showAllGroupByInstances: sloAlertsStateManager.api.showAllGroupByInstances$.getValue(),
+            slos: Array.isArray(storedState.slos)
+              ? storedState.slos.map((slo) => {
+                  // Ensure group_by is always a string (handle case where it might be an array)
+                  const groupByValue = slo.group_by ?? slo.groupBy;
+                  const groupByString =
+                    typeof groupByValue === 'string'
+                      ? groupByValue
+                      : Array.isArray(groupByValue)
+                      ? groupByValue.join(',')
+                      : '';
+                  return {
+                    id: slo.id ?? '',
+                    instanceId: slo.instance_id ?? slo.instanceId ?? '',
+                    name: slo.name ?? '',
+                    groupBy: groupByString,
+                  };
+                })
+              : [],
+            showAllGroupByInstances: storedState.show_all_group_by_instances,
           };
         },
         updateSloAlertsConfig: (update) => {
-          sloAlertsStateManager.api.setSlos(update.slos);
+          // Convert from public API (camelCase) to stored state (snake_case)
+          sloAlertsStateManager.api.setSlos(
+            update.slos.map((slo: SloItem) => {
+              // Ensure groupBy is always a string (it might come as an array from SLO data)
+              const groupByString =
+                typeof slo.groupBy === 'string'
+                  ? slo.groupBy
+                  : Array.isArray(slo.groupBy)
+                  ? slo.groupBy.join(',')
+                  : '';
+              return {
+                id: slo.id,
+                instance_id: slo.instanceId,
+                name: slo.name,
+                group_by: groupByString,
+              };
+            })
+          );
           sloAlertsStateManager.api.setShowAllGroupByInstances(update.showAllGroupByInstances);
         },
       });
@@ -130,10 +199,29 @@ export function getAlertsEmbeddableFactory({
       return {
         api,
         Component: () => {
-          const [slos, showAllGroupByInstances] = useBatchedPublishingSubjects(
+          const [storedSlos, showAllGroupByInstances] = useBatchedPublishingSubjects(
             sloAlertsStateManager.api.slos$,
             sloAlertsStateManager.api.showAllGroupByInstances$
           );
+          // Convert from stored state (snake_case) to public API (camelCase)
+          const slos: SloItem[] = Array.isArray(storedSlos)
+            ? storedSlos.map((slo) => {
+                // Ensure group_by is always a string (handle case where it might be an array)
+                const groupByValue = slo.group_by ?? slo.groupBy;
+                const groupByString =
+                  typeof groupByValue === 'string'
+                    ? groupByValue
+                    : Array.isArray(groupByValue)
+                    ? groupByValue.join(',')
+                    : '';
+                return {
+                  id: slo.id ?? '',
+                  instanceId: slo.instance_id ?? slo.instanceId ?? '',
+                  name: slo.name ?? '',
+                  groupBy: groupByString,
+                };
+              })
+            : [];
           const fetchContext = useFetchContext(api);
           const I18nContext = deps.i18n.Context;
 
