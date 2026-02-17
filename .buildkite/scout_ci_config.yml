@@ -3,6 +3,7 @@ plugins:
   enabled:
     - apm
     - console
+    - dashboard
     - discover_enhanced
     - index_management
     - infra
@@ -15,7 +16,6 @@ plugins:
     - spaces
     - streams_app
     - transform
-    - workflows_extensions
   disabled:
 
 packages:
