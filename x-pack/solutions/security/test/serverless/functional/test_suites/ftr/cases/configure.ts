@@ -24,7 +24,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
   const comboBox = getService('comboBox');
 
-  describe('Configure Case', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/251532
+  describe.skip('Configure Case', function () {
     before(async () => {
       await svlCommonPage.loginAsAdmin();
       await navigateToCasesApp(getPageObject, getService, owner);

@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { i18n as kbnI18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
 import type { EuiBasicTableColumn, UseEuiTheme } from '@elastic/eui';
@@ -19,9 +18,18 @@ import type {
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { EisCloudConnectPromoCallout, EisPromotionalCallout } from '@kbn/search-api-panels';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
-import * as i18n from '../../../common/translations';
+import {
+  ENDPOINT,
+  ENDPOINT_COPY_ID_ACTION_LABEL,
+  ENDPOINT_DELETE_ACTION_LABEL,
+  ENDPOINT_VIEW_ACTION_LABEL,
+  INFERENCE_ENDPOINTS_TABLE_CAPTION,
+  MODEL,
+  SERVICE_PROVIDER,
+} from '../../../common/translations';
 
 import { useTableData } from '../../hooks/use_table_data';
+import { useEndpointActions } from '../../hooks/use_endpoint_actions';
 import type { FilterOptions } from './types';
 import { INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES } from './types';
 
@@ -32,7 +40,6 @@ import { TableSearch } from './search/table_search';
 import { EndpointInfo } from './render_table_columns/render_endpoint/endpoint_info';
 import { Model } from './render_table_columns/render_model/model';
 import { ServiceProvider } from './render_table_columns/render_service_provider/service_provider';
-import { TaskType } from './render_table_columns/render_task_type/task_type';
 import { DeleteAction } from './render_table_columns/render_actions/actions/delete/delete_action';
 import { useKibana } from '../../hooks/use_kibana';
 import { getModelId } from '../../utils/get_model_id';
@@ -51,29 +58,21 @@ interface TabularPageProps {
 
 export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) => {
   const {
-    services: { notifications, cloud, application },
+    services: { cloud, application },
   } = useKibana();
-  const toasts = notifications?.toasts;
-  const [showDeleteAction, setShowDeleteAction] = useState(false);
-  const [showInferenceFlyout, setShowInferenceFlyout] = useState(false);
-  const [selectedInferenceEndpoint, setSelectedInferenceEndpoint] = useState<
-    InferenceInferenceEndpointInfo | undefined
-  >(undefined);
-  const [searchKey, setSearchKey] = React.useState('');
+  const [searchKey, setSearchKey] = useState('');
   const [filterOptions, setFilterOptions] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
 
-  const copyContent = useCallback(
-    (inferenceId: string) => {
-      const message = i18n.ENDPOINT_COPY_SUCCESS(inferenceId);
-      navigator.clipboard.writeText(inferenceId).then(() => {
-        toasts?.addSuccess({
-          title: message,
-          'aria-label': message,
-        });
-      });
-    },
-    [toasts]
-  );
+  const {
+    showDeleteAction,
+    showInferenceFlyout,
+    selectedInferenceEndpoint,
+    copyContent,
+    onCancelDeleteModal,
+    displayDeleteActionItem,
+    displayInferenceFlyout,
+    onCloseInferenceFlyout,
+  } = useEndpointActions();
 
   const uniqueProvidersAndTaskTypes = useMemo(() => {
     return inferenceEndpoints.reduce(
@@ -89,29 +88,6 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     );
   }, [inferenceEndpoints]);
 
-  const onCancelDeleteModal = useCallback(() => {
-    setSelectedInferenceEndpoint(undefined);
-    setShowDeleteAction(false);
-  }, []);
-
-  const displayDeleteActionitem = useCallback(
-    (selectedEndpoint: InferenceInferenceEndpointInfo) => {
-      setSelectedInferenceEndpoint(selectedEndpoint);
-      setShowDeleteAction(true);
-    },
-    []
-  );
-
-  const displayInferenceFlyout = useCallback((selectedEndpoint: InferenceInferenceEndpointInfo) => {
-    setSelectedInferenceEndpoint(selectedEndpoint);
-    setShowInferenceFlyout(true);
-  }, []);
-
-  const onCloseInferenceFlyout = useCallback(() => {
-    setShowInferenceFlyout(false);
-    setSelectedInferenceEndpoint(undefined);
-  }, []);
-
   const onFilterChangedCallback = useCallback((newFilterOptions: Partial<FilterOptions>) => {
     setFilterOptions((prev) => ({ ...prev, ...newFilterOptions }));
   }, []);
@@ -122,7 +98,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     () => [
       {
         field: 'inference_id',
-        name: i18n.ENDPOINT,
+        name: ENDPOINT,
         'data-test-subj': 'endpointCell',
 
         render: (
@@ -139,7 +115,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         width: '300px',
       },
       {
-        name: i18n.MODEL,
+        name: MODEL,
         'data-test-subj': 'modelCell',
         render: (endpointInfo: InferenceInferenceEndpointInfo) => {
           return <Model endpointInfo={endpointInfo} />;
@@ -149,7 +125,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
       },
       {
         field: 'service',
-        name: i18n.SERVICE_PROVIDER,
+        name: SERVICE_PROVIDER,
         'data-test-subj': 'providerCell',
         render: (service: ServiceProviderKeys, endpointInfo: InferenceInferenceEndpointInfo) => {
           if (service) {
@@ -162,44 +138,30 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         width: '285px',
       },
       {
-        field: 'task_type',
-        name: i18n.TASK_TYPE,
-        'data-test-subj': 'typeCell',
-        render: (taskType: InferenceTaskType) => {
-          if (taskType) {
-            return <TaskType type={taskType} />;
-          }
-
-          return null;
-        },
-        sortable: true,
-        width: '100px',
-      },
-      {
         actions: [
           {
-            name: i18n.ENDPOINT_VIEW_ACTION_LABEL,
-            description: i18n.ENDPOINT_VIEW_ACTION_LABEL,
+            name: ENDPOINT_VIEW_ACTION_LABEL,
+            description: ENDPOINT_VIEW_ACTION_LABEL,
             icon: 'eye',
             type: 'icon',
             onClick: (item) => displayInferenceFlyout(item),
             'data-test-subj': 'inference-endpoints-action-view-endpoint-label',
           },
           {
-            name: i18n.ENDPOINT_COPY_ID_ACTION_LABEL,
-            description: i18n.ENDPOINT_COPY_ID_ACTION_LABEL,
+            name: ENDPOINT_COPY_ID_ACTION_LABEL,
+            description: ENDPOINT_COPY_ID_ACTION_LABEL,
             icon: 'copyClipboard',
             type: 'icon',
             onClick: (item) => copyContent(item.inference_id),
             'data-test-subj': 'inference-endpoints-action-copy-id-label',
           },
           {
-            name: i18n.ENDPOINT_DELETE_ACTION_LABEL,
-            description: i18n.ENDPOINT_DELETE_ACTION_LABEL,
+            name: ENDPOINT_DELETE_ACTION_LABEL,
+            description: ENDPOINT_DELETE_ACTION_LABEL,
             icon: 'trash',
             type: 'icon',
             enabled: (item) => !isEndpointPreconfigured(item.inference_id),
-            onClick: (item) => displayDeleteActionitem(item),
+            onClick: (item) => displayDeleteActionItem(item),
             'data-test-subj': (item) =>
               isEndpointPreconfigured(item.inference_id)
                 ? 'inferenceUIDeleteAction-preconfigured'
@@ -209,7 +171,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         width: '165px',
       },
     ],
-    [copyContent, displayDeleteActionitem, displayInferenceFlyout]
+    [copyContent, displayDeleteActionItem, displayInferenceFlyout]
   );
 
   return (
@@ -253,44 +215,37 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           </EuiFlexItem>
         </EuiFlexGroup>
         <EndpointStats endpoints={tableData} />
-        <EuiFlexItem>
-          <EuiInMemoryTable
-            allowNeutralSort={false}
-            columns={tableColumns}
-            itemId="inference_id"
-            items={tableData}
-            pagination={{
-              pageSizeOptions: INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
-            }}
-            sorting={{
-              sort: {
-                field: 'inference_id',
-                direction: 'asc',
-              },
-            }}
-            data-test-subj="inferenceEndpointTable"
-            tableCaption={kbnI18n.translate(
-              'xpack.searchInferenceEndpoints.tabularPage.tableCaption',
-              {
-                defaultMessage: 'Inference endpoints list',
-              }
-            )}
-          />
-        </EuiFlexItem>
+        <EuiInMemoryTable
+          allowNeutralSort={false}
+          columns={tableColumns}
+          itemId="inference_id"
+          items={tableData}
+          pagination={{
+            pageSizeOptions: INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
+          }}
+          sorting={{
+            sort: {
+              field: 'inference_id',
+              direction: 'asc',
+            },
+          }}
+          data-test-subj="inferenceEndpointTable"
+          tableCaption={INFERENCE_ENDPOINTS_TABLE_CAPTION}
+        />
       </EuiFlexGroup>
-      {showDeleteAction && selectedInferenceEndpoint ? (
+      {showDeleteAction && selectedInferenceEndpoint && (
         <DeleteAction
           selectedEndpoint={selectedInferenceEndpoint}
           displayModal={showDeleteAction}
           onCancel={onCancelDeleteModal}
         />
-      ) : null}
-      {showInferenceFlyout && selectedInferenceEndpoint ? (
+      )}
+      {showInferenceFlyout && selectedInferenceEndpoint && (
         <EditInferenceFlyout
           onFlyoutClose={onCloseInferenceFlyout}
           selectedInferenceEndpoint={selectedInferenceEndpoint}
         />
-      ) : null}
+      )}
     </>
   );
 };

@@ -2895,4 +2895,228 @@ describe('getBinarySourceSettings', () => {
       });
     });
   });
+
+  describe('with auth', () => {
+    it('should return agent download config with plain text auth (username/password)', () => {
+      const downloadSourceWithAuth = {
+        ...downloadSource,
+        auth: {
+          username: 'user1',
+          password: 'pass1',
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithAuth, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        auth: {
+          username: 'user1',
+          password: 'pass1',
+        },
+      });
+    });
+
+    it('should return agent download config with plain text auth (api_key)', () => {
+      const downloadSourceWithApiKey = {
+        ...downloadSource,
+        auth: {
+          api_key: 'my-api-key',
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithApiKey, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        auth: {
+          api_key: 'my-api-key',
+        },
+      });
+    });
+
+    it('should return agent download config with secrets.auth.password', () => {
+      const downloadSourceWithSecretPassword = {
+        ...downloadSource,
+        auth: {
+          username: 'user1',
+        },
+        secrets: {
+          auth: {
+            password: { id: 'password-secret-id' },
+          },
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithSecretPassword, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        auth: {
+          username: 'user1',
+        },
+        secrets: {
+          auth: {
+            password: { id: 'password-secret-id' },
+          },
+        },
+      });
+    });
+
+    it('should return agent download config with secrets.auth.api_key', () => {
+      const downloadSourceWithSecretApiKey = {
+        ...downloadSource,
+        secrets: {
+          auth: {
+            api_key: { id: 'api-key-secret-id' },
+          },
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithSecretApiKey, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        secrets: {
+          auth: {
+            api_key: { id: 'api-key-secret-id' },
+          },
+        },
+      });
+    });
+
+    it('should use secret password over plain text password when both are present', () => {
+      const downloadSourceWithBoth = {
+        ...downloadSource,
+        auth: {
+          username: 'user1',
+          password: 'plain-text-password',
+        },
+        secrets: {
+          auth: {
+            password: { id: 'secret-password-id' },
+          },
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithBoth, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        auth: {
+          username: 'user1',
+          // password should NOT be included here since it's in secrets
+        },
+        secrets: {
+          auth: {
+            password: { id: 'secret-password-id' },
+          },
+        },
+      });
+    });
+
+    it('should use secret api_key over plain text api_key when both are present', () => {
+      const downloadSourceWithBoth = {
+        ...downloadSource,
+        auth: {
+          api_key: 'plain-text-api-key',
+        },
+        secrets: {
+          auth: {
+            api_key: { id: 'secret-api-key-id' },
+          },
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithBoth, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        // auth should NOT be included since api_key is in secrets
+        secrets: {
+          auth: {
+            api_key: { id: 'secret-api-key-id' },
+          },
+        },
+      });
+    });
+
+    it('should return config with both SSL and auth secrets', () => {
+      const downloadSourceWithAllSecrets = {
+        ...downloadSource,
+        auth: {
+          username: 'user1',
+        },
+        secrets: {
+          ssl: {
+            key: { id: 'ssl-key-id' },
+          },
+          auth: {
+            password: { id: 'password-secret-id' },
+          },
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithAllSecrets, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        auth: {
+          username: 'user1',
+        },
+        secrets: {
+          ssl: {
+            key: { id: 'ssl-key-id' },
+          },
+          auth: {
+            password: { id: 'password-secret-id' },
+          },
+        },
+      });
+    });
+
+    it('should return agent download config with auth headers', () => {
+      const downloadSourceWithHeaders = {
+        ...downloadSource,
+        auth: {
+          username: 'user1',
+          password: 'pass1',
+          headers: [
+            { key: 'X-Custom-Header', value: 'custom-value' },
+            { key: 'Authorization', value: 'Bearer token123' },
+          ],
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithHeaders, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        auth: {
+          username: 'user1',
+          password: 'pass1',
+          headers: [
+            { key: 'X-Custom-Header', value: 'custom-value' },
+            { key: 'Authorization', value: 'Bearer token123' },
+          ],
+        },
+      });
+    });
+
+    it('should filter out empty headers', () => {
+      const downloadSourceWithEmptyHeaders = {
+        ...downloadSource,
+        auth: {
+          api_key: 'my-api-key',
+          headers: [
+            { key: 'X-Valid-Header', value: 'valid-value' },
+            { key: '', value: '' },
+            { key: 'Another-Header', value: 'another-value' },
+          ],
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithEmptyHeaders, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        auth: {
+          api_key: 'my-api-key',
+          headers: [
+            { key: 'X-Valid-Header', value: 'valid-value' },
+            { key: 'Another-Header', value: 'another-value' },
+          ],
+        },
+      });
+    });
+
+    it('should not include headers in auth if all headers are empty', () => {
+      const downloadSourceWithOnlyEmptyHeaders = {
+        ...downloadSource,
+        auth: {
+          api_key: 'my-api-key',
+          headers: [{ key: '', value: '' }],
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithOnlyEmptyHeaders, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        auth: {
+          api_key: 'my-api-key',
+        },
+      });
+    });
+  });
 });
