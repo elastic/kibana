@@ -161,7 +161,7 @@ describe('getContextSchemaWithTemplateLocals', () => {
     expect(shape).toHaveProperty('y');
   });
 
-  it('returns base schema for block literal scalars', () => {
+  it('extends schema for block literal scalars', () => {
     const templateString = '{% assign z = 3 %}{{ z }}';
     const scalarStart = 10;
     mockGetScalarValueAtOffset.mockReturnValue({
@@ -175,10 +175,11 @@ describe('getContextSchemaWithTemplateLocals', () => {
       scalarStart + 30,
       DynamicStepContextSchema
     );
-    expect(result).toBe(DynamicStepContextSchema);
+    const shape = getShape(result);
+    expect(shape).toHaveProperty('z');
   });
 
-  it('returns base schema for block folded scalars', () => {
+  it('extends schema for block folded scalars', () => {
     const templateString = '{% assign w = 4 %}{{ w }}';
     const scalarStart = 10;
     mockGetScalarValueAtOffset.mockReturnValue({
@@ -192,7 +193,8 @@ describe('getContextSchemaWithTemplateLocals', () => {
       scalarStart + 30,
       DynamicStepContextSchema
     );
-    expect(result).toBe(DynamicStepContextSchema);
+    const shape = getShape(result);
+    expect(shape).toHaveProperty('w');
   });
 
   it('returns base schema when offsetInTemplate is out of bounds', () => {

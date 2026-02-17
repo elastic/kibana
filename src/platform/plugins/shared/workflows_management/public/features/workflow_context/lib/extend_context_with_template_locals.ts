@@ -150,22 +150,26 @@ export function getContextSchemaWithTemplateLocals(
     return baseSchema;
   }
 
-  // Block scalars (| and >) have complex offset mapping (indentation stripping,
-  // folding) that prevents reliable document-to-template offset conversion.
   const scalarType = scalarNode.type;
-  if (scalarType === 'BLOCK_LITERAL' || scalarType === 'BLOCK_FOLDED') {
-    return baseSchema;
-  }
-
   const templateString = scalarNode.value;
   const scalarStart = scalarNode.range[0];
 
-  // For quoted scalars, range[0] includes the opening quote character, but
-  // value does not. Adjust by 1 so that offsetInTemplate aligns with the
-  // value string positions rather than the raw YAML token positions.
-  const isQuoted = scalarType === 'QUOTE_DOUBLE' || scalarType === 'QUOTE_SINGLE';
-  const quoteAdjustment = isQuoted ? 1 : 0;
-  const offsetInTemplate = offset - scalarStart - quoteAdjustment;
+  let offsetInTemplate: number;
+  if (scalarType === 'BLOCK_LITERAL' || scalarType === 'BLOCK_FOLDED') {
+    // Block scalars (| and >) have indentation stripping, so the document
+    // offset doesn't map 1-to-1 to the value string. We use a best-effort
+    // estimate: offset - scalarStart slightly overestimates (because the |/>
+    // indicator line and per-line indentation are counted), which is safe —
+    // it means assigns/captures defined before the variable are always included.
+    offsetInTemplate = Math.min(offset - scalarStart, templateString.length);
+  } else {
+    // For quoted scalars, range[0] includes the opening quote character, but
+    // value does not. Adjust by 1 so that offsetInTemplate aligns with the
+    // value string positions rather than the raw YAML token positions.
+    const isQuoted = scalarType === 'QUOTE_DOUBLE' || scalarType === 'QUOTE_SINGLE';
+    const quoteAdjustment = isQuoted ? 1 : 0;
+    offsetInTemplate = offset - scalarStart - quoteAdjustment;
+  }
 
   if (offsetInTemplate < 0 || offsetInTemplate > templateString.length) {
     return baseSchema;
