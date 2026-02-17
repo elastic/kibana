@@ -359,9 +359,10 @@ export class WorkflowsManagementApi {
 
   public async getWorkflowExecution(
     workflowExecutionId: string,
-    spaceId: string
+    spaceId: string,
+    options?: { includeInput?: boolean; includeOutput?: boolean }
   ): Promise<WorkflowExecutionDto | null> {
-    return this.workflowsService.getWorkflowExecution(workflowExecutionId, spaceId);
+    return this.workflowsService.getWorkflowExecution(workflowExecutionId, spaceId, options);
   }
 
   public async getWorkflowExecutionLogs(params: {

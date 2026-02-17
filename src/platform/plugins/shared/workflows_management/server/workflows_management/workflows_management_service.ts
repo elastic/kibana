@@ -992,7 +992,8 @@ export class WorkflowsService {
   // Helper methods remain the same as they don't interact with SavedObjects
   public async getWorkflowExecution(
     executionId: string,
-    spaceId: string
+    spaceId: string,
+    options?: { includeInput?: boolean; includeOutput?: boolean }
   ): Promise<WorkflowExecutionDto | null> {
     return getWorkflowExecution({
       esClient: this.esClient,
@@ -1001,6 +1002,8 @@ export class WorkflowsService {
       stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       workflowExecutionId: executionId,
       spaceId,
+      includeInput: options?.includeInput,
+      includeOutput: options?.includeOutput,
     });
   }
 
