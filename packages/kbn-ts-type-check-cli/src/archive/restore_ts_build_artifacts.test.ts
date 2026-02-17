@@ -66,9 +66,7 @@ describe('restoreTSBuildArtifacts', () => {
     mockedResolveCurrentCommitSha.mockResolvedValue('');
     mockedReadRecentCommitShas.mockResolvedValue([]);
     mockedBuildCandidateShaList.mockReturnValue([]);
-    restoreSpy = jest
-      .spyOn(LocalFileSystem.prototype, 'restoreArchive')
-      .mockResolvedValue(undefined);
+    restoreSpy = jest.spyOn(LocalFileSystem.prototype, 'restoreArchive').mockResolvedValue(false);
   });
 
   afterEach(() => {

@@ -226,7 +226,10 @@ run(
                                   identify that none of the imports have changed (it uses creation/update
                                   times) but cleaning them prevents leaving garbage around the repo.
         --extended-diagnostics  Turn on extended diagnostics in the TypeScript compiler
-        --with-archive          Restore cached artifacts before running and archive results afterwards
+        --with-archive          Restore cached artifacts before running and archive results afterwards.
+                                  Locally, this will try to fetch from GCS first (requires gcloud auth login)
+                                  and fall back to the local cache. Downloaded archives are cached locally
+                                  for offline reuse.
       `,
     },
   }

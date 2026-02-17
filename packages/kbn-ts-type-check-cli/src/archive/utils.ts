@@ -54,6 +54,60 @@ export async function readRecentCommitShas(limit: number): Promise<string[]> {
     .filter((sha: string) => sha.length > 0);
 }
 
+/**
+ * Find the git remote name that points to the elastic/kibana repo.
+ * Engineers typically work on forks where `origin` is their personal fork,
+ * and the upstream elastic/kibana repo is configured under a different remote
+ * name (commonly `upstream` or `elastic`).
+ *
+ * Checks remote URLs for `elastic/kibana` (supports HTTPS and SSH patterns).
+ * Returns the remote name, or undefined if not found.
+ */
+export async function resolveUpstreamRemote(): Promise<string | undefined> {
+  try {
+    const { stdout } = await execa('git', ['remote', '-v'], { cwd: REPO_ROOT });
+
+    for (const line of stdout.split('\n')) {
+      const match = line.match(/^(\S+)\s+\S*elastic\/kibana(?:\.git)?\s/);
+      if (match) {
+        return match[1];
+      }
+    }
+
+    return undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Read recent commit SHAs from the upstream main branch.
+ * Finds the remote that points to elastic/kibana (could be `upstream`, `elastic`,
+ * `origin`, etc.) and reads commits from `<remote>/main`.
+ * These are the commits most likely to have archived artifacts in GCS.
+ * Returns an empty array if no suitable remote is found.
+ */
+export async function readMainBranchCommitShas(limit: number): Promise<string[]> {
+  const remote = await resolveUpstreamRemote();
+  if (!remote) {
+    return [];
+  }
+
+  try {
+    const { stdout } = await execa(
+      'git',
+      ['rev-list', '--max-count', String(limit), `${remote}/main`],
+      { cwd: REPO_ROOT }
+    );
+    return stdout
+      .split('\n')
+      .map((sha: string) => sha.trim())
+      .filter((sha: string) => sha.length > 0);
+  } catch {
+    return [];
+  }
+}
+
 export function isCiEnvironment() {
   return (process.env.CI ?? '').toLowerCase() === 'true';
 }
@@ -85,6 +139,32 @@ export async function withGcsAuth<TReturn>(
 
 export async function ensureLocalCacheRoot() {
   await Fs.promises.mkdir(LOCAL_CACHE_ROOT, { recursive: true });
+}
+
+/**
+ * Check if the gcloud CLI is installed and the user has active auth.
+ * Returns true only if both conditions are met. Never throws.
+ */
+export async function isGcloudAvailable(): Promise<boolean> {
+  return (await getGcloudAccessToken()) !== undefined;
+}
+
+/**
+ * Get a GCS access token from the gcloud CLI.
+ * This serves as both an availability check and token retrieval in a single
+ * gcloud invocation, avoiding the overhead of multiple CLI calls.
+ * Returns undefined if gcloud is not installed or has no active auth. Never throws.
+ */
+export async function getGcloudAccessToken(): Promise<string | undefined> {
+  try {
+    const { stdout } = await execa('gcloud', ['auth', 'print-access-token'], {
+      stderr: 'ignore',
+    });
+    const token = stdout.trim();
+    return token.length > 0 ? token : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export function buildCandidateShaList(currentSha: string | undefined, history: string[]): string[] {

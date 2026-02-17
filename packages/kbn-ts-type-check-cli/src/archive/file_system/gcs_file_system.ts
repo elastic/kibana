@@ -12,7 +12,7 @@ import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import execa from 'execa';
-import { GCS_BUCKET_URI } from '../constants';
+import { GCS_BUCKET_URI, GCS_COMMITS_PREFIX } from '../constants';
 import { getTarCreateArgs, getTarPlatformOptions, resolveTarEnvironment } from './utils';
 import { AbstractFileSystem } from './abstract_file_system';
 import type { ArchiveMetadata } from './types';
@@ -79,7 +79,9 @@ export class GcsFileSystem extends AbstractFileSystem {
 
     if (!catProcess.stdout || !tarProcess.stdin) {
       tarProcess.kill();
+
       catProcess.kill();
+
       throw new Error('Failed to establish stream between gcloud and tar.');
     }
 
@@ -95,13 +97,20 @@ export class GcsFileSystem extends AbstractFileSystem {
     ];
 
     for (const [cmd, args] of commands) {
+      const start = Date.now();
+
       try {
         await execa(cmd, args, {
           cwd: REPO_ROOT,
           stdio: 'ignore',
         });
+
+        this.log.verbose(`  hasArchive(${cmd}): found (${Date.now() - start}ms)`);
+
         return true;
       } catch (error) {
+        this.log.verbose(`  hasArchive(${cmd}): not found (${Date.now() - start}ms)`);
+
         continue;
       }
     }
@@ -116,13 +125,19 @@ export class GcsFileSystem extends AbstractFileSystem {
     ];
 
     for (const [cmd, args] of commands) {
+      const start = Date.now();
+
       try {
         const { stdout } = await execa(cmd, args, {
           cwd: REPO_ROOT,
           stderr: 'ignore',
         });
+
+        this.log.verbose(`  readMetadata(${cmd}): success (${Date.now() - start}ms)`);
+
         return JSON.parse(stdout) as ArchiveMetadata;
       } catch (error) {
+        this.log.verbose(`  readMetadata(${cmd}): failed (${Date.now() - start}ms)`);
         continue;
       }
     }
@@ -144,6 +159,42 @@ export class GcsFileSystem extends AbstractFileSystem {
       });
     } finally {
       await Fs.promises.rm(tempDir, { recursive: true, force: true });
+    }
+  }
+
+  /**
+   * List all commit SHAs that have archives in GCS in a single gcloud command.
+   * Returns a Set of SHAs for fast lookup.
+   */
+  async listAvailableCommitShas(): Promise<Set<string>> {
+    const prefix = `${GCS_COMMITS_PREFIX}/`;
+    const start = Date.now();
+
+    try {
+      const { stdout } = await execa('gcloud', ['storage', 'ls', prefix], {
+        cwd: REPO_ROOT,
+        stderr: 'ignore',
+      });
+
+      const shas = new Set<string>();
+      for (const line of stdout.split('\n')) {
+        const trimmed = line.trim();
+        if (!trimmed || !trimmed.startsWith(prefix)) {
+          continue;
+        }
+        // Lines look like: gs://ci-typescript-archives/ts_type_check/commits/<sha>/
+        const sha = trimmed.slice(prefix.length).replace(/\/$/, '');
+        if (sha.length > 0) {
+          shas.add(sha);
+        }
+      }
+
+      this.log.info(`Listed ${shas.size} available archive(s) from GCS (${Date.now() - start}ms)`);
+      return shas;
+    } catch (error) {
+      const details = error instanceof Error ? error.message : String(error);
+      this.log.verbose(`Failed to list GCS archives: ${details} (${Date.now() - start}ms)`);
+      return new Set();
     }
   }
 

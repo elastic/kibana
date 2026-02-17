@@ -62,7 +62,7 @@ export abstract class AbstractFileSystem {
     shas: string[];
     prNumber?: string;
     cacheInvalidationFiles?: string[];
-  }) {
+  }): Promise<boolean> {
     const prArchiveId = options.prNumber ? join(PULL_REQUESTS_PATH, options.prNumber) : undefined;
 
     const prArchiveMetadata = prArchiveId
@@ -77,10 +77,19 @@ export abstract class AbstractFileSystem {
         ? await calculateFileHashes(options.cacheInvalidationFiles)
         : undefined;
 
-    for (const sha of options.shas) {
+    const totalShas = options.shas.length;
+
+    this.log.info(`Searching ${totalShas} candidate commit(s) for cached artifacts...`);
+
+    for (let i = 0; i < totalShas; i++) {
+      const sha = options.shas[i];
+      const shortSha = sha.slice(0, 12);
       const archiveId = prSha && sha === prSha ? prArchiveId! : join(COMMITS_PATH, sha);
 
       const archivePath = this.getArchivePath(archiveId);
+
+      this.log.verbose(`[${i + 1}/${totalShas}] Checking ${shortSha}...`);
+
       const metadata = await this.readMetadata(this.getMetadataPath(archiveId));
       const storedFileHashes = metadata?.fileHashes;
 
@@ -89,22 +98,31 @@ export abstract class AbstractFileSystem {
           currentFileHashes,
           storedFileHashes,
         });
+
         if (!hashCheckResult.result) {
           this.log.warning(
-            `Cached TypeScript build artifacts for ${sha} found, but cache invalidation files have changed:\n ${hashCheckResult.message}`
+            `Cached TypeScript build artifacts for ${shortSha} found, but cache invalidation files have changed:\n ${hashCheckResult.message}`
           );
-          return undefined;
+          return false;
         }
 
         await cleanTypeCheckArtifacts(this.log);
-        this.log.info(`Extracting archive for ${sha}`);
-        return await this.extract(archivePath);
+
+        this.log.info(`Found archive for ${shortSha}, extracting...`);
+
+        await this.extract(archivePath);
+
+        return true;
       }
+
+      this.log.verbose(`[${i + 1}/${totalShas}] No archive for ${shortSha}`);
     }
 
-    this.log.info('No cached TypeScript build artifacts available to restore.');
+    this.log.info(
+      `No cached TypeScript build artifacts found after checking ${totalShas} commit(s).`
+    );
 
-    return undefined;
+    return false;
   }
 
   public async updateArchive(options: {
