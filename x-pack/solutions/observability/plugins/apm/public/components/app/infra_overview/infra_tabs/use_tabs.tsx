@@ -37,7 +37,7 @@ export function useTabs({
   containerIds: string[];
   podNames: string[];
   hostNames: string[];
-  agentName: string | undefined;
+  agentName?: string;
   start: string;
   end: string;
 }) {
