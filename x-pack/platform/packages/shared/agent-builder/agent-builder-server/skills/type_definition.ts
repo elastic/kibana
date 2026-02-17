@@ -102,6 +102,17 @@ export interface SkillDefinition<
    * Can be used to expose tools which are specific to the skill.
    */
   getInlineTools?: () => MaybePromise<SkillBoundedTool[]>;
+
+  /**
+   * Returns dynamic tool IDs that should be exposed when this skill is loaded.
+   *
+   * Unlike `getAllowedTools` (which only accepts statically-known builtin tool IDs),
+   * this allows referencing arbitrary tool IDs created at runtime (e.g. tools
+   * registered when a data source instance is connected).
+   *
+   * Max 25 dynamic tool IDs per skill.
+   */
+  getDynamicToolIds?: () => MaybePromise<string[]>;
 }
 
 export interface ReferencedContent {
@@ -193,6 +204,12 @@ export async function validateSkillDefinition<TName extends string, TPath extend
     throw new Error(
       'Max tool limit exceeded: a skill may define up to 7 tools. ' +
         'Split the skill into smaller ones or combine related operations into a single tool.'
+    );
+  }
+  const dynamicToolIds = await definition.getDynamicToolIds?.();
+  if ((dynamicToolIds?.length ?? 0) > 25) {
+    throw new Error(
+      'Max dynamic tool limit exceeded: a skill may reference up to 25 dynamic tools.'
     );
   }
   return definition;

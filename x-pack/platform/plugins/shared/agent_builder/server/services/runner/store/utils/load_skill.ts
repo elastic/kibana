@@ -40,10 +40,16 @@ export async function loadSkillTools({
       request,
     });
 
+    const dynamicToolIds = (await skill.getDynamicToolIds?.()) ?? [];
+    const dynamicExecutableTools =
+      dynamicToolIds.length > 0
+        ? await pickTools({ toolProvider, selection: [{ tool_ids: dynamicToolIds }], request })
+        : [];
+
     await toolManager.addTools(
       {
         type: ToolManagerToolType.executable,
-        tools: [...inlineExecutableTools, ...registryExecutableTools],
+        tools: [...inlineExecutableTools, ...registryExecutableTools, ...dynamicExecutableTools],
         logger,
       },
       {

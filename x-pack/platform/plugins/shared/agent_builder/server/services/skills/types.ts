@@ -17,4 +17,6 @@ export interface SkillServiceSetup {
 export interface SkillServiceStart {
   getSkillDefinition(skillId: string): SkillDefinition | undefined;
   listSkills(): SkillDefinition[];
+  registerSkill(skill: SkillDefinition): Promise<void>;
+  unregisterSkill(skillId: string): boolean;
 }
