@@ -59,6 +59,8 @@ import type {
   XYPersistedState,
 } from './persistence';
 import { LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS } from '../../user_messages_ids';
+import { KbnPalette } from '@kbn/palettes';
+import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 
 const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
 const exampleAnnotation: EventAnnotationConfig = {
@@ -4228,6 +4230,61 @@ describe('xy_visualization', () => {
       expect((newState.layers[1] as XYDataLayerConfig).seriesType).toEqual(newType);
       expect((newState.layers[2] as XYDataLayerConfig).seriesType).toEqual(newType);
     });
+
+    it('should auto-switch palette from default to line-optimized when switching to line', () => {
+      const state = exampleState();
+      (state.layers[0] as XYDataLayerConfig).seriesType = 'bar';
+      (state.layers[0] as XYDataLayerConfig).colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+      const newState = xyVisualization.switchVisualizationType!('line', state);
+      expect((newState.layers[0] as XYDataLayerConfig).colorMapping?.paletteId).toEqual(
+        KbnPalette.ElasticLineOptimized
+      );
+    });
+
+    it('should auto-switch palette from line-optimized to default when switching from line to bar', () => {
+      const state = exampleState();
+      (state.layers[0] as XYDataLayerConfig).seriesType = 'line';
+      (state.layers[0] as XYDataLayerConfig).colorMapping = {
+        ...DEFAULT_COLOR_MAPPING_CONFIG,
+        paletteId: KbnPalette.ElasticLineOptimized,
+      };
+      const newState = xyVisualization.switchVisualizationType!('bar', state);
+      expect((newState.layers[0] as XYDataLayerConfig).colorMapping?.paletteId).toEqual(
+        KbnPalette.Default
+      );
+    });
+
+    it('should retain user-chosen default palette when switching from line to bar', () => {
+      const state = exampleState();
+      (state.layers[0] as XYDataLayerConfig).seriesType = 'line';
+      (state.layers[0] as XYDataLayerConfig).colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+      const newState = xyVisualization.switchVisualizationType!('bar', state);
+      expect((newState.layers[0] as XYDataLayerConfig).colorMapping?.paletteId).toEqual(
+        KbnPalette.Default
+      );
+    });
+
+    it('should not override user-selected non-default palette when switching to line', () => {
+      const state = exampleState();
+      (state.layers[0] as XYDataLayerConfig).seriesType = 'bar';
+      (state.layers[0] as XYDataLayerConfig).colorMapping = {
+        ...DEFAULT_COLOR_MAPPING_CONFIG,
+        paletteId: 'status',
+      };
+      const newState = xyVisualization.switchVisualizationType!('line', state);
+      expect((newState.layers[0] as XYDataLayerConfig).colorMapping?.paletteId).toEqual('status');
+    });
+
+    it('should not change palette when base series type stays the same', () => {
+      const state = exampleState();
+      (state.layers[0] as XYDataLayerConfig).seriesType = 'bar';
+      (state.layers[0] as XYDataLayerConfig).colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+      const newState = xyVisualization.switchVisualizationType!('bar_stacked', state);
+      expect((newState.layers[0] as XYDataLayerConfig).colorMapping?.paletteId).toEqual(
+        KbnPalette.Default
+      );
+    });
+
     it('should switch only the second layer to the new visualization type if layerId is specified (chart switch case)', () => {
       const state = exampleState();
       state.layers[1] = { ...state.layers[0] };
