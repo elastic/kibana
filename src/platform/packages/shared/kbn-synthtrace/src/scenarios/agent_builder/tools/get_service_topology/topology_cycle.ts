@@ -58,9 +58,7 @@ export function generateCycleTopologyData({
   const serviceA = apm
     .service(CYCLE_SERVICE_A.serviceName, 'production', 'nodejs')
     .instance('a-01');
-  const serviceB = apm
-    .service(CYCLE_SERVICE_B.serviceName, 'production', 'java')
-    .instance('b-01');
+  const serviceB = apm.service(CYCLE_SERVICE_B.serviceName, 'production', 'java').instance('b-01');
 
   const data = range
     .interval('1m')
