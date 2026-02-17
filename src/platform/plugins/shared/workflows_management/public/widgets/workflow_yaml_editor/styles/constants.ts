@@ -14,4 +14,13 @@
  */
 export const FOCUSED_STEP_DECORATION_INSET_PX = 4;
 
+/**
+ * Approximate width (in pixels) of the vertical scrollbar area in the Monaco-based code editor.
+ *
+ * This value was empirically determined based on the default scrollbar rendering in supported
+ * browsers/operating systems and is used for layout/positioning calculations (e.g. keeping
+ * decorations and action buttons clear of the scrollbar).
+ *
+ * If scrollbar styling or supported environments change, this value may need adjustment.
+ */
 export const EDITOR_SCROLLBAR_WIDTH_PX = 14;

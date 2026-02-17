@@ -72,9 +72,18 @@ export const useFocusedStepDecoration = (editor: monaco.editor.IStandaloneCodeEd
         },
       },
     ]);
+  }, [editor, focusedStepInfo, blockClassName, decorationsCollection]);
+
+  // Cleanup effect: only clears decorations on unmount or when
+  // editor/decorationsCollection changes, avoiding unnecessary clears
+  // during normal focusedStepInfo or blockClassName updates.
+  useEffect(() => {
+    if (!decorationsCollection) {
+      return;
+    }
 
     return () => {
       decorationsCollection.clear();
     };
-  }, [editor, focusedStepInfo, blockClassName, decorationsCollection]);
+  }, [decorationsCollection]);
 };
