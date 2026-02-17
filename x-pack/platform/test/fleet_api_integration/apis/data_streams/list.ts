@@ -192,7 +192,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.data_streams.length).to.eql(2);
 
         body.data_streams.forEach((dataStream: any) => {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           const { index, size_in_bytes, size_in_bytes_formatted, last_activity_ms, ...coreFields } =
             dataStream;
           expect(expectedStreamsByDataset[coreFields.dataset]).not.to.eql(undefined);

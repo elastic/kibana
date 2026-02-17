@@ -8,7 +8,8 @@
  */
 
 import Fs from 'fs';
-import { PlaywrightTestConfig } from 'playwright/test';
+import path from 'path';
+import type { PlaywrightTestConfig } from 'playwright/test';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { ScoutTestOptions, VALID_CONFIG_MARKER } from '../types';
 import { loadConfigModule } from './config_loader';
@@ -43,5 +44,20 @@ export async function validatePlaywrightConfig(configPath: string) {
     throw createFlagError(
       `The config file at "${configPath}" must export a valid Playwright configuration with "testDir" property.`
     );
+  }
+
+  if (config.use?.runGlobalSetup) {
+    const configDir = path.dirname(configPath);
+    const testDir = path.resolve(configDir, config.testDir);
+    const globalSetupPath = path.join(testDir, 'global.setup.ts');
+    const hasGlobalSetupFile = Fs.existsSync(globalSetupPath);
+
+    if (!hasGlobalSetupFile) {
+      throw createFlagError(
+        `The config file at "${configPath}" has 'runGlobalSetup: true' but no global.setup.ts file found.\n` +
+          `Expected file at: ${globalSetupPath}\n\n` +
+          `Either create the file or set 'runGlobalSetup: false' in your config.`
+      );
+    }
   }
 }

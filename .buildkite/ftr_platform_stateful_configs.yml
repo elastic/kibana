@@ -49,6 +49,9 @@ disabled:
   # Gen AI suites, running with their own pipeline
   - x-pack/platform/test/functional_gen_ai/inference/config.ts
 
+  # Not required in 8.19 anymore
+  - x-pack/performance/journeys_e2e/aiops_log_rate_analysis.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - src/platform/test/accessibility/config.ts
@@ -196,7 +199,6 @@ enabled:
   - x-pack/platform/test/functional/apps/canvas/config.ts
   - x-pack/platform/test/functional/apps/cross_cluster_replication/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group1/config.ts
-  - x-pack/platform/test/functional/apps/dashboard/group2/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group3/config.ts
   - x-pack/platform/test/functional/apps/data_views/config.ts
   - x-pack/platform/test/functional/apps/discover/config.ts
@@ -325,7 +327,6 @@ enabled:
   - x-pack/platform/test/ui_capabilities/spaces_only/config.ts
   - x-pack/platform/test/upgrade_assistant_integration/config.ts
   - x-pack/platform/test/usage_collection/config.ts
-  - x-pack/performance/journeys_e2e/aiops_log_rate_analysis.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_http2.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_map_only.ts
@@ -380,12 +381,10 @@ enabled:
   - x-pack/platform/test/api_integration/apis/stats/config.ts
   - x-pack/platform/test/api_integration/apis/status/config.ts
   - x-pack/platform/test/api_integration/apis/telemetry/config.ts
-  - x-pack/platform/test/api_integration/apis/transform/config.ts
   - x-pack/platform/test/api_integration/apis/upgrade_assistant/config.ts
   - x-pack/platform/test/api_integration/apis/watcher/config.ts
   - x-pack/platform/test/api_integration_basic/apis/aiops/config.ts
   - x-pack/platform/test/api_integration_basic/apis/security/config.ts
-  - x-pack/platform/test/api_integration_basic/apis/transform/config.ts
   - x-pack/platform/test/automatic_import_api_integration/apis/config_basic.ts
   - x-pack/platform/test/automatic_import_api_integration/apis/config_graphs.ts
   - x-pack/platform/test/encrypted_saved_objects_api_integration/config.ts

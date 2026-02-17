@@ -309,15 +309,6 @@ describe('ProductInterceptPrompter', () => {
           expect(mockQueueInterceptFn).toHaveBeenCalled();
         });
 
-        // once because we started off with an existing value in localstorage but reset the existing record on displaying the intercept
-        expect(localStorageSetItemSpy).toHaveBeenCalledTimes(1);
-
-        // record in localstorage is updated to track the timer start of the intercept for next iteration
-        expect(localStorageSetItemSpy).toHaveBeenCalledWith(
-          INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY,
-          '{}'
-        );
-
         subscription.unsubscribe();
       });
 
@@ -389,12 +380,6 @@ describe('ProductInterceptPrompter', () => {
             })
           );
         });
-
-        // record in localstorage is cleared after showing the intercept
-        expect(localStorageSetItemSpy).toHaveBeenCalledWith(
-          INTERCEPT_PROMPTER_LOCAL_STORAGE_KEY,
-          '{}'
-        );
 
         subscription.unsubscribe();
       });

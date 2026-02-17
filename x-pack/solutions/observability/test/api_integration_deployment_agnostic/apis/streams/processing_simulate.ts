@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import expect from '@kbn/expect';
 import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import { StreamsRouteRepository } from '@kbn/streams-plugin/server';

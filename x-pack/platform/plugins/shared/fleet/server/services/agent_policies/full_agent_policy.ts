@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { load } from 'js-yaml';
 import deepMerge from 'deepmerge';
@@ -430,7 +428,6 @@ export function transformOutputToFullPolicyOutput(
       }
     };
 
-    /* eslint-enable @typescript-eslint/naming-convention */
     kafkaData = {
       client_id,
       version,
@@ -453,7 +450,7 @@ export function transformOutputToFullPolicyOutput(
     if (!isShipperDisabled) {
       shipperDiskQueueData = buildShipperQueueData(shipper);
     }
-    /* eslint-disable @typescript-eslint/naming-convention */
+
     const {
       loadbalance,
       compression_level,
@@ -461,7 +458,6 @@ export function transformOutputToFullPolicyOutput(
       max_batch_bytes,
       mem_queue_events,
     } = shipper;
-    /* eslint-enable @typescript-eslint/naming-convention */
 
     generalShipperData = {
       loadbalance,
@@ -637,7 +633,6 @@ function getOutputIdForAgentPolicy(output: Pick<Output, 'id' | 'is_default' | 't
   return output.id;
 }
 
-/* eslint-disable @typescript-eslint/naming-convention */
 function buildShipperQueueData(shipper: ShipperOutput) {
   const {
     disk_queue_enabled,
@@ -659,4 +654,3 @@ function buildShipperQueueData(shipper: ShipperOutput) {
     },
   };
 }
-/* eslint-enable @typescript-eslint/naming-convention */

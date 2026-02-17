@@ -284,7 +284,7 @@ function prettyPrintTypeParts(
 ): string | string[] {
   if (!isSchema(schema)) {
     if (schema === null) return 'null';
-    return `${schema ?? 'unknown'}${optional ? '?' : ''}`;
+    return `${String(schema ?? 'unknown')}${optional ? '?' : ''}`;
   }
 
   const isOptionalType = optional || schema._flags?.presence === 'optional';

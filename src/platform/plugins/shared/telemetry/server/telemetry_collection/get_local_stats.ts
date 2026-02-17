@@ -30,7 +30,6 @@ import { getDataTelemetry, DATA_TELEMETRY_ID, DataTelemetryPayload } from './get
  * @param context The context
  */
 export function handleLocalStats<ClusterStats extends estypes.ClusterStatsResponse>(
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   { cluster_name, cluster_uuid, version }: estypes.InfoResponse,
   { _nodes, cluster_name: clusterName, ...clusterStats }: ClusterStats,
   kibana: KibanaUsageStats | undefined,

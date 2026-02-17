@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Needed for Scout tests dependent on .peggy grammar files (`@kbn/tinymath`)
+import './peggy_setup';
+
 // Config and utilities
 export { createPlaywrightConfig } from './config';
 export { createLazyPageObject } from './page_objects/utils';
-export { expect } from './expect';
+
+// Matchers
+export { expect } from './matchers/ui';
 
 // Types for Playwright options
 export type { ScoutPlaywrightOptions, ScoutTestOptions } from './types';
